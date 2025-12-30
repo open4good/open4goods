@@ -12,7 +12,8 @@
         "features": "parallax/parallax-placeholder.svg",
         "blog": "parallax/parallax-placeholder.svg",
         "objections": "parallax/parallax-placeholder.svg",
-        "cta": "parallax/parallax-placeholder.svg"
+        "cta": "parallax/parallax-placeholder.svg",
+        "aplat": "parallax/parallax-aplats.svg"
       },
       "hero": {
         "eyebrow": "Responsible shopping",
@@ -133,7 +134,8 @@
         "features": "parallax/parallax-background-bastille-features.svg",
         "blog": "parallax/parallax-background-bastille-blog.svg",
         "objections": "parallax/parallax-background-bastille-objections.svg",
-        "cta": "parallax/parallax-background-bastille-cta.svg"
+        "cta": "parallax/parallax-background-bastille-cta.svg",
+        "aplat": "parallax/parallax-aplats.svg"
       }
     }
   },

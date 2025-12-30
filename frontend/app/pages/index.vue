@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
+import { useTheme } from 'vuetify'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type {
   AffiliationPartnerDto,
@@ -22,14 +23,19 @@ import type {
 } from '~/components/search/SearchSuggestField.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
+import { useEventPackI18n } from '~/composables/useEventPackI18n'
 import { useParallaxConfig } from '~/composables/useParallaxConfig'
 import { useSeasonalEventPack } from '~/composables/useSeasonalEventPack'
+import { resolveThemedAssetUrl, useThemeAsset } from '~/composables/useThemedAsset'
 import { useThemedParallaxBackgrounds } from '~/composables/useThemedParallaxBackgrounds'
 import {
   PARALLAX_SECTION_KEYS,
+  THEME_ASSETS_FALLBACK,
   type ParallaxLayerConfig,
   type ParallaxSectionKey,
 } from '~~/config/theme/assets'
+import { EVENT_PACK_I18N_BASE_KEY } from '~~/config/theme/event-packs'
+import { resolveThemeName } from '~~/shared/constants/theme'
 import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
 
 definePageMeta({
@@ -94,6 +100,9 @@ const heroPartnersCount = computed(() => {
 })
 
 const seasonalEventPack = useSeasonalEventPack()
+const packI18n = useEventPackI18n(seasonalEventPack)
+const theme = useTheme()
+const parallaxAplatFallback = useThemeAsset('parallaxAplat')
 
 const parallaxConfig = useParallaxConfig()
 const parallaxLayers = useThemedParallaxBackgrounds(seasonalEventPack)
@@ -102,7 +111,6 @@ type ParallaxSectionRenderConfig = {
   backgrounds: ParallaxLayerConfig[]
   overlayOpacity: number
   parallaxAmount: number
-  ariaLabel: string
   maxOffsetRatio: number | null
 }
 
@@ -118,13 +126,59 @@ const parallaxBackgrounds = computed<
         backgrounds: parallaxLayers.value[section] || [],
         overlayOpacity: parallaxConfig.value[section].overlay,
         parallaxAmount: parallaxConfig.value[section].parallaxAmount,
-        ariaLabel: parallaxConfig.value[section].ariaLabel,
         maxOffsetRatio: parallaxConfig.value[section].maxOffsetRatio,
       },
     }),
     {} as Record<ParallaxSectionKey, ParallaxSectionRenderConfig>
   )
 )
+
+const themeName = computed(() =>
+  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
+)
+
+const parallaxBackgroundKeys = computed<Record<ParallaxSectionKey, string>>(() =>
+  PARALLAX_SECTION_KEYS.reduce<Record<ParallaxSectionKey, string>>(
+    (acc, section) => ({
+      ...acc,
+      [section]: `${EVENT_PACK_I18N_BASE_KEY}.${seasonalEventPack.value}.parallax.${section}`,
+    }),
+    {} as Record<ParallaxSectionKey, string>
+  )
+)
+
+const parallaxAplatKey = computed(
+  () =>
+    `${EVENT_PACK_I18N_BASE_KEY}.${seasonalEventPack.value}.parallax.aplat`
+)
+
+const resolveAplatSource = (value?: string): string | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (trimmed.startsWith('/') || trimmed.startsWith('http')) {
+    return trimmed
+  }
+
+  return resolveThemedAssetUrl(
+    trimmed,
+    themeName.value,
+    seasonalEventPack.value
+  )
+}
+
+const parallaxAplat = computed(() => {
+  const packValue = packI18n.resolveString('parallax.aplat')
+  const resolved = resolveAplatSource(packValue)
+
+  return resolved ?? parallaxAplatFallback.value
+})
 
 type AnimatedSectionKey =
   | 'problems'
@@ -723,55 +777,60 @@ useHead(() => ({
         @select-product="handleProductSuggestion"
       />
       <div class="home-page__sections">
-        <section id="home-essentials" class="home-page__section-wrapper">
-          <ParallaxWidget
-            class="home-page__parallax"
-            reverse
-            :gapless="true"
-            :backgrounds="parallaxBackgrounds.essentials.backgrounds"
-            :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
-            :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
-            :aria-label="parallaxBackgrounds.essentials.ariaLabel"
-            :max-offset-ratio="parallaxBackgrounds.essentials.maxOffsetRatio"
-            :enable-aplats="true"
+        <ParallaxWidget
+          class="home-page__parallax"
+          reverse
+          :gapless="true"
+          :backgrounds="parallaxBackgrounds.essentials.backgrounds"
+          :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
+          :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
+          :aria-label="t('home.parallax.essentials.ariaLabel')"
+          :max-offset-ratio="parallaxBackgrounds.essentials.maxOffsetRatio"
+          :enable-aplats="true"
+          :aplat-svg="parallaxAplat"
+          :data-i18n-pack-key="parallaxBackgroundKeys.essentials"
+          :data-i18n-aplat-key="parallaxAplatKey"
+        >
+          <section
+            id="home-essentials"
+            class="home-page__section-wrapper home-page__stack"
           >
-            <div class="home-page__stack">
-              <div
-                v-intersect="createIntersectHandler('problems')"
-                class="home-page__section"
-              >
-                <v-slide-y-transition :disabled="shouldReduceMotion">
-                  <div v-show="animatedSections.problems">
-                    <HomeProblemsSection :items="problemItems" />
-                  </div>
-                </v-slide-y-transition>
-              </div>
-
-              <div
-                v-intersect="createIntersectHandler('solution')"
-                class="home-page__section"
-              >
-                <v-slide-y-reverse-transition :disabled="shouldReduceMotion">
-                  <div v-show="animatedSections.solution">
-                    <HomeSolutionSection :benefits="solutionBenefits" />
-                  </div>
-                </v-slide-y-reverse-transition>
-              </div>
+            <div
+              v-intersect="createIntersectHandler('problems')"
+              class="home-page__section"
+            >
+              <v-slide-y-transition :disabled="shouldReduceMotion">
+                <div v-show="animatedSections.problems">
+                  <HomeProblemsSection :items="problemItems" />
+                </div>
+              </v-slide-y-transition>
             </div>
-          </ParallaxWidget>
-        </section>
 
-        <section id="home-features" class="home-page__section-wrapper">
-          <ParallaxWidget
-            class="home-page__parallax home-page__parallax--centered"
-            reverse
-            :backgrounds="parallaxBackgrounds.features.backgrounds"
-            :overlay-opacity="parallaxBackgrounds.features.overlayOpacity"
-            :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
-            :aria-label="parallaxBackgrounds.features.ariaLabel"
-            :max-offset-ratio="parallaxBackgrounds.features.maxOffsetRatio"
-            content-align="center"
-          >
+            <div
+              v-intersect="createIntersectHandler('solution')"
+              class="home-page__section"
+            >
+              <v-slide-y-reverse-transition :disabled="shouldReduceMotion">
+                <div v-show="animatedSections.solution">
+                  <HomeSolutionSection :benefits="solutionBenefits" />
+                </div>
+              </v-slide-y-reverse-transition>
+            </div>
+          </section>
+        </ParallaxWidget>
+
+        <ParallaxWidget
+          class="home-page__parallax home-page__parallax--centered"
+          reverse
+          :backgrounds="parallaxBackgrounds.features.backgrounds"
+          :overlay-opacity="parallaxBackgrounds.features.overlayOpacity"
+          :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
+          :aria-label="t('home.parallax.features.ariaLabel')"
+          :max-offset-ratio="parallaxBackgrounds.features.maxOffsetRatio"
+          :data-i18n-pack-key="parallaxBackgroundKeys.features"
+          content-align="center"
+        >
+          <section id="home-features" class="home-page__section-wrapper">
             <div
               v-intersect="createIntersectHandler('features')"
               class="home-page__section"
@@ -782,187 +841,194 @@ useHead(() => ({
                 </div>
               </v-scale-transition>
             </div>
-          </ParallaxWidget>
-        </section>
+          </section>
+        </ParallaxWidget>
 
-        <section id="home-knowledge-blog" class="home-page__section-wrapper">
-          <ParallaxWidget
-            class="home-page__parallax"
-            reverse
-            :backgrounds="parallaxBackgrounds.blog.backgrounds"
-            :overlay-opacity="parallaxBackgrounds.blog.overlayOpacity"
-            :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
-            :aria-label="parallaxBackgrounds.blog.ariaLabel"
-            :max-offset-ratio="parallaxBackgrounds.blog.maxOffsetRatio"
-            :enable-aplats="true"
-          >
-            <div class="home-page__stack">
-              <div
-                v-intersect="createIntersectHandler('blog')"
-                class="home-page__section"
-              >
-                <v-slide-x-transition :disabled="shouldReduceMotion">
-                  <div v-show="animatedSections.blog">
-                    <HomeBlogSection
-                      :loading="blogLoading"
-                      :featured-item="featuredBlogItem"
-                      :secondary-items="secondaryBlogItems"
-                    />
-                  </div>
-                </v-slide-x-transition>
-              </div>
-            </div>
-          </ParallaxWidget>
-        </section>
-
-        <section
-          id="home-knowledge-objections"
-          class="home-page__section-wrapper"
+        <ParallaxWidget
+          class="home-page__parallax"
+          reverse
+          :backgrounds="parallaxBackgrounds.blog.backgrounds"
+          :overlay-opacity="parallaxBackgrounds.blog.overlayOpacity"
+          :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
+          :aria-label="t('home.parallax.knowledge.ariaLabel')"
+          :max-offset-ratio="parallaxBackgrounds.blog.maxOffsetRatio"
+          :enable-aplats="true"
+          :aplat-svg="parallaxAplat"
+          :data-i18n-pack-key="parallaxBackgroundKeys.blog"
+          :data-i18n-aplat-key="parallaxAplatKey"
         >
-          <ParallaxWidget
-            class="home-page__parallax"
-            reverse
-            :backgrounds="parallaxBackgrounds.objections.backgrounds"
-            :overlay-opacity="parallaxBackgrounds.objections.overlayOpacity"
-            :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
-            :aria-label="parallaxBackgrounds.objections.ariaLabel"
-            :max-offset-ratio="parallaxBackgrounds.objections.maxOffsetRatio"
-            :enable-aplats="true"
+          <section
+            id="home-knowledge-blog"
+            class="home-page__section-wrapper home-page__stack"
           >
-            <div class="home-page__stack">
-              <div
-                v-intersect="createIntersectHandler('objections')"
-                class="home-page__section"
-              >
-                <v-slide-x-reverse-transition :disabled="shouldReduceMotion">
-                  <div v-show="animatedSections.objections">
-                    <HomeObjectionsSection :items="objectionItems" />
-                  </div>
-                </v-slide-x-reverse-transition>
-              </div>
+            <div
+              v-intersect="createIntersectHandler('blog')"
+              class="home-page__section"
+            >
+              <v-slide-x-transition :disabled="shouldReduceMotion">
+                <div v-show="animatedSections.blog">
+                  <HomeBlogSection
+                    :loading="blogLoading"
+                    :featured-item="featuredBlogItem"
+                    :secondary-items="secondaryBlogItems"
+                  />
+                </div>
+              </v-slide-x-transition>
             </div>
-          </ParallaxWidget>
-        </section>
+          </section>
+        </ParallaxWidget>
 
-        <section id="home-cta" class="home-page__section-wrapper">
-          <ParallaxWidget
-            class="home-page__parallax home-page__parallax--centered"
-            reverse
-            :backgrounds="parallaxBackgrounds.cta.backgrounds"
-            :overlay-opacity="parallaxBackgrounds.cta.overlayOpacity"
-            :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
-            :aria-label="parallaxBackgrounds.cta.ariaLabel"
-            :max-offset-ratio="parallaxBackgrounds.cta.maxOffsetRatio"
-            content-align="center"
+        <ParallaxWidget
+          class="home-page__parallax"
+          reverse
+          :backgrounds="parallaxBackgrounds.objections.backgrounds"
+          :overlay-opacity="parallaxBackgrounds.objections.overlayOpacity"
+          :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
+          :aria-label="t('home.parallax.knowledge.ariaLabel')"
+          :max-offset-ratio="parallaxBackgrounds.objections.maxOffsetRatio"
+          :enable-aplats="true"
+          :aplat-svg="parallaxAplat"
+          :data-i18n-pack-key="parallaxBackgroundKeys.objections"
+          :data-i18n-aplat-key="parallaxAplatKey"
+        >
+          <section
+            id="home-knowledge-objections"
+            class="home-page__section-wrapper home-page__stack"
           >
-            <div class="home-page__stack home-page__stack--compact">
-              <div
-                v-intersect="createIntersectHandler('faq')"
-                class="home-page__section"
-              >
-                <v-fade-transition :disabled="shouldReduceMotion">
-                  <div v-show="animatedSections.faq">
-                    <HomeFaqSection :items="faqPanels" />
-                  </div>
-                </v-fade-transition>
-              </div>
+            <div
+              v-intersect="createIntersectHandler('objections')"
+              class="home-page__section"
+            >
+              <v-slide-x-reverse-transition :disabled="shouldReduceMotion">
+                <div v-show="animatedSections.objections">
+                  <HomeObjectionsSection :items="objectionItems" />
+                </div>
+              </v-slide-x-reverse-transition>
+            </div>
+          </section>
+        </ParallaxWidget>
 
-              <div
-                v-intersect="createIntersectHandler('contactRedirect')"
-                class="home-page__section"
-              >
-                <v-slide-y-transition :disabled="shouldReduceMotion">
-                  <div v-show="animatedSections.contactRedirect">
-                    <section
-                      class="home-contact-redirect"
-                      aria-labelledby="home-contact-redirect-heading"
+        <ParallaxWidget
+          class="home-page__parallax home-page__parallax--centered"
+          reverse
+          :backgrounds="parallaxBackgrounds.cta.backgrounds"
+          :overlay-opacity="parallaxBackgrounds.cta.overlayOpacity"
+          :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
+          :aria-label="t('home.parallax.cta.ariaLabel')"
+          :max-offset-ratio="parallaxBackgrounds.cta.maxOffsetRatio"
+          :data-i18n-pack-key="parallaxBackgroundKeys.cta"
+          content-align="center"
+        >
+          <section
+            id="home-cta"
+            class="home-page__section-wrapper home-page__stack home-page__stack--compact"
+          >
+            <div
+              v-intersect="createIntersectHandler('faq')"
+              class="home-page__section"
+            >
+              <v-fade-transition :disabled="shouldReduceMotion">
+                <div v-show="animatedSections.faq">
+                  <HomeFaqSection :items="faqPanels" />
+                </div>
+              </v-fade-transition>
+            </div>
+
+            <div
+              v-intersect="createIntersectHandler('contactRedirect')"
+              class="home-page__section"
+            >
+              <v-slide-y-transition :disabled="shouldReduceMotion">
+                <div v-show="animatedSections.contactRedirect">
+                  <section
+                    class="home-contact-redirect"
+                    aria-labelledby="home-contact-redirect-heading"
+                  >
+                    <v-card
+                      class="home-contact-redirect__card"
+                      elevation="10"
+                      rounded="xl"
+                      variant="flat"
+                      color="surface-primary-050"
                     >
-                      <v-card
-                        class="home-contact-redirect__card"
-                        elevation="10"
-                        rounded="xl"
-                        variant="flat"
-                        color="surface-primary-050"
-                      >
-                        <div class="home-contact-redirect__content">
-                          <div class="home-contact-redirect__texts">
-                            <p class="home-contact-redirect__eyebrow">
-                              {{ t('home.contactRedirect.eyebrow') }}
-                            </p>
-                            <h3
-                              id="home-contact-redirect-heading"
-                              class="home-contact-redirect__title"
-                            >
-                              {{ t('home.contactRedirect.title') }}
-                            </h3>
-                            <p class="home-contact-redirect__subtitle">
-                              {{ t('home.contactRedirect.subtitle') }}
-                            </p>
-                          </div>
-
-                          <v-form
-                            class="home-contact-redirect__form"
-                            @submit.prevent="handleContactRedirect"
+                      <div class="home-contact-redirect__content">
+                        <div class="home-contact-redirect__texts">
+                          <p class="home-contact-redirect__eyebrow">
+                            {{ t('home.contactRedirect.eyebrow') }}
+                          </p>
+                          <h3
+                            id="home-contact-redirect-heading"
+                            class="home-contact-redirect__title"
                           >
-                            <v-text-field
-                              v-model="contactRedirectMessage"
-                              :label="t('home.contactRedirect.inputLabel')"
-                              :placeholder="t('home.contactRedirect.placeholder')"
-                              :counter="CONTACT_REDIRECT_MAX_LENGTH"
-                              prepend-inner-icon="mdi-help-circle-outline"
-                              variant="outlined"
-                              hide-details="auto"
-                              clearable
-                              color="primary"
-                            />
-                            <div class="home-contact-redirect__actions">
-                              <v-btn
-                                type="submit"
-                                color="primary"
-                                size="large"
-                                prepend-icon="mdi-arrow-right"
-                              >
-                                {{ t('home.contactRedirect.cta') }}
-                              </v-btn>
-                              <v-btn
-                                :to="localePath({ name: 'contact' })"
-                                variant="text"
-                                color="primary"
-                              >
-                                {{ t('home.contactRedirect.secondaryCta') }}
-                              </v-btn>
-                            </div>
-                            <p class="home-contact-redirect__helper">
-                              {{ t('home.contactRedirect.helper') }}
-                            </p>
-                          </v-form>
+                            {{ t('home.contactRedirect.title') }}
+                          </h3>
+                          <p class="home-contact-redirect__subtitle">
+                            {{ t('home.contactRedirect.subtitle') }}
+                          </p>
                         </div>
-                      </v-card>
-                    </section>
-                  </div>
-                </v-slide-y-transition>
-              </div>
 
-              <div
-                v-intersect="createIntersectHandler('cta')"
-                class="home-page__section"
-              >
-                <v-slide-y-transition :disabled="shouldReduceMotion">
-                  <div v-show="animatedSections.cta">
-                    <HomeCtaSection
-                      v-model:search-query="searchQuery"
-                      :categories-landing-url="categoriesLandingUrl"
-                      :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-                      @submit="handleSearchSubmit"
-                      @select-category="handleCategorySuggestion"
-                      @select-product="handleProductSuggestion"
-                    />
-                  </div>
-                </v-slide-y-transition>
-              </div>
+                        <v-form
+                          class="home-contact-redirect__form"
+                          @submit.prevent="handleContactRedirect"
+                        >
+                          <v-text-field
+                            v-model="contactRedirectMessage"
+                            :label="t('home.contactRedirect.inputLabel')"
+                            :placeholder="t('home.contactRedirect.placeholder')"
+                            :counter="CONTACT_REDIRECT_MAX_LENGTH"
+                            prepend-inner-icon="mdi-help-circle-outline"
+                            variant="outlined"
+                            hide-details="auto"
+                            clearable
+                            color="primary"
+                          />
+                          <div class="home-contact-redirect__actions">
+                            <v-btn
+                              type="submit"
+                              color="primary"
+                              size="large"
+                              prepend-icon="mdi-arrow-right"
+                            >
+                              {{ t('home.contactRedirect.cta') }}
+                            </v-btn>
+                            <v-btn
+                              :to="localePath({ name: 'contact' })"
+                              variant="text"
+                              color="primary"
+                            >
+                              {{ t('home.contactRedirect.secondaryCta') }}
+                            </v-btn>
+                          </div>
+                          <p class="home-contact-redirect__helper">
+                            {{ t('home.contactRedirect.helper') }}
+                          </p>
+                        </v-form>
+                      </div>
+                    </v-card>
+                  </section>
+                </div>
+              </v-slide-y-transition>
             </div>
-          </ParallaxWidget>
-        </section>
+
+            <div
+              v-intersect="createIntersectHandler('cta')"
+              class="home-page__section"
+            >
+              <v-slide-y-transition :disabled="shouldReduceMotion">
+                <div v-show="animatedSections.cta">
+                  <HomeCtaSection
+                    v-model:search-query="searchQuery"
+                    :categories-landing-url="categoriesLandingUrl"
+                    :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+                    @submit="handleSearchSubmit"
+                    @select-category="handleCategorySuggestion"
+                    @select-product="handleProductSuggestion"
+                  />
+                </div>
+              </v-slide-y-transition>
+            </div>
+          </section>
+        </ParallaxWidget>
       </div>
     </div>
   </div>

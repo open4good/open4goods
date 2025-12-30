@@ -80,7 +80,8 @@
         "features": "parallax/parallax-background-christmas-features.svg",
         "blog": "parallax/parallax-background-christmas-blog.svg",
         "objections": "parallax/parallax-background-christmas-objections.svg",
-        "cta": "parallax/parallax-background-christmas-cta.svg"
+        "cta": "parallax/parallax-background-christmas-cta.svg",
+        "aplat": "parallax/parallax-aplats.svg"
       }
     },
     "default": {
@@ -104,7 +105,8 @@
         "features": "parallax/parallax-features.svg",
         "blog": "parallax/parallax-blog.svg",
         "objections": "parallax/parallax-objections.svg",
-        "cta": "parallax/parallax-cta.svg"
+        "cta": "parallax/parallax-cta.svg",
+        "aplat": "parallax/parallax-aplats.svg"
       },
       "hero": {
         "eyebrow": "Nudger, c'est :",
