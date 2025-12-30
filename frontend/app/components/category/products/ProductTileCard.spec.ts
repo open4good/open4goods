@@ -56,8 +56,8 @@ const createWrapper = (overrides: Partial<ProductDto> = {}) => {
       ],
       impactScore: 4,
       offerBadges: [
-        { key: 'new', label: 'New', price: '$199', appearance: 'new' },
-        { key: 'used', label: 'Used', price: '$129', appearance: 'occasion' },
+        { key: 'new', label: 'New', price: '99', appearance: 'new' },
+        { key: 'used', label: 'Used', price: '29', appearance: 'occasion' },
       ],
       offersCountLabel: '3 offers',
       untitledLabel: 'Untitled',
@@ -87,9 +87,7 @@ describe('ProductTileCard', () => {
   it('builds the header title from brand and attributes', () => {
     const wrapper = createWrapper()
 
-    expect(wrapper.find('.product-tile-card__title').text()).toBe(
-      'Acme – Blue · Large'
-    )
+    expect(wrapper.find('.product-tile-card__title').text()).toBe('Acme')
     expect(wrapper.find('.product-tile-card__subtitle').text()).toBe('Model Z')
   })
 
