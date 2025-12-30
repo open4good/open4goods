@@ -2769,6 +2769,12 @@
     "wizard": {
       "welcome": "🤘"
     },
+    "categories": {
+      "unknown": {
+        "title": "Autre chose ?",
+        "tooltip": "Votez pour la prochaine catégorie évaluée"
+      }
+    },
     "meta": {
       "matches": "{count} produits correspondent à vos choix"
     },

@@ -2717,6 +2717,12 @@
     "wizard": {
       "welcome": "Welcome!"
     },
+    "categories": {
+      "unknown": {
+        "title": "Something else?",
+        "tooltip": "Vote for the next category to be assessed"
+      }
+    },
     "meta": {
       "matches": "{count} products match your choices"
     },
