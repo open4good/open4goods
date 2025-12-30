@@ -469,6 +469,12 @@ useHead({
                         })
                       "
                       :min-chars="minSuggestionQueryLength"
+                      :enable-scan="true"
+                      :scan-mobile="true"
+                      :scan-desktop="false"
+                      :enable-voice="true"
+                      :voice-mobile="true"
+                      :voice-desktop="true"
                       @update:model-value="updateSearchQuery"
                       @submit="handleSubmit"
                       @select-category="handleCategorySelect"

@@ -36,6 +36,34 @@
         <template #append-inner>
           <slot v-if="$slots['append-inner']" name="append-inner" />
           <v-btn
+            v-if="shouldShowVoiceButton"
+            class="search-suggest-field__voice-button"
+            density="comfortable"
+            variant="text"
+            icon
+            :color="isVoiceListening ? 'primary' : undefined"
+            :title="
+              voiceError ||
+              (isVoiceListening
+                ? t('search.suggestions.voice.stopLabel')
+                : t('search.suggestions.voice.startLabel'))
+            "
+            :aria-label="
+              isVoiceListening
+                ? t('search.suggestions.voice.stopLabel')
+                : t('search.suggestions.voice.startLabel')
+            "
+            data-test="search-voice-button"
+            :disabled="!isVoiceSupported"
+            @click="toggleVoiceListening"
+          >
+            <v-icon
+              :icon="isVoiceListening ? 'mdi-microphone' : 'mdi-microphone-outline'"
+              size="20"
+              aria-hidden="true"
+            />
+          </v-btn>
+          <v-btn
             v-if="shouldShowScannerButton"
             class="search-suggest-field__scanner-button"
             density="comfortable"
@@ -263,9 +291,27 @@ const props = withDefaults(
     placeholder: string
     ariaLabel: string
     minChars?: number
+    enableScan?: boolean
+    enableSuggest?: boolean
+    enableVoice?: boolean
+    scanMobile?: boolean
+    scanDesktop?: boolean
+    suggestMobile?: boolean
+    suggestDesktop?: boolean
+    voiceMobile?: boolean
+    voiceDesktop?: boolean
   }>(),
   {
     minChars: 2,
+    enableScan: true,
+    enableSuggest: true,
+    enableVoice: true,
+    scanMobile: true,
+    scanDesktop: false,
+    suggestMobile: true,
+    suggestDesktop: true,
+    voiceMobile: true,
+    voiceDesktop: false,
   }
 )
 
@@ -276,11 +322,12 @@ const emit = defineEmits<{
   (event: 'select-product', value: ProductSuggestionItem): void
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const display = useDisplay()
 const router = useRouter()
+const isMobile = computed(() => display.smAndDown.value)
 
 const internalSearch = ref(props.modelValue ?? '')
 const lastCommittedValue = ref(internalSearch.value)
@@ -295,6 +342,10 @@ const isScannerDialogOpen = ref(false)
 const isScannerActive = ref(false)
 const isScannerComponentReady = ref(false)
 const isFieldFocused = ref(false)
+const isVoiceSupported = ref(false)
+const isVoiceListening = ref(false)
+const voiceError = ref<string | null>(null)
+const speechRecognition = ref<SpeechRecognition | null>(null)
 
 const minChars = computed(() => Math.max(props.minChars ?? 2, 1))
 
@@ -302,8 +353,17 @@ const hasMinimumLength = computed(
   () => internalSearch.value.trim().length >= minChars.value
 )
 
+const isSuggestEnabled = computed(() => {
+  const deviceAllowance = isMobile.value
+    ? props.suggestMobile
+    : props.suggestDesktop
+
+  return props.enableSuggest && Boolean(deviceAllowance)
+})
+
 const showEmptyState = computed(
   () =>
+    isSuggestEnabled.value &&
     !loading.value &&
     hasMinimumLength.value &&
     (hasError.value || (!categories.value.length && !products.value.length))
@@ -325,7 +385,16 @@ const suggestionItems = computed<SuggestionItem[]>(() => [
   ...products.value,
 ])
 
-const shouldShowScannerButton = computed(() => display.smAndDown.value)
+const shouldShowScannerButton = computed(
+  () =>
+    props.enableScan &&
+    Boolean(isMobile.value ? props.scanMobile : props.scanDesktop)
+)
+const shouldShowVoiceButton = computed(
+  () =>
+    props.enableVoice &&
+    Boolean(isMobile.value ? props.voiceMobile : props.voiceDesktop)
+)
 
 let cachedScannerComponent: Component | null = null
 let scannerLoadPromise: Promise<Component> | null = null
@@ -382,6 +451,42 @@ watch(isScannerDialogOpen, isOpen => {
     isScannerActive.value = false
   }
 })
+
+const initializeSpeechRecognition = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const SpeechRecognitionConstructor =
+    (globalThis as typeof globalThis & {
+      webkitSpeechRecognition?: typeof SpeechRecognition
+    }).SpeechRecognition ||
+    (globalThis as typeof globalThis & {
+      webkitSpeechRecognition?: typeof SpeechRecognition
+    }).webkitSpeechRecognition
+
+  if (!SpeechRecognitionConstructor) {
+    voiceError.value = t('search.suggestions.voice.unsupported')
+    return
+  }
+
+  const recognition = new SpeechRecognitionConstructor()
+  recognition.continuous = false
+  recognition.interimResults = false
+  recognition.maxAlternatives = 1
+  recognition.lang = locale.value
+  recognition.onresult = event => {
+    handleVoiceResult(event as unknown as SpeechRecognitionEvent)
+    stopVoiceListening()
+  }
+  recognition.onerror = handleVoiceError
+  recognition.onend = () => {
+    isVoiceListening.value = false
+  }
+
+  speechRecognition.value = recognition
+  isVoiceSupported.value = true
+}
 
 const staticServerBase = computed(() => {
   const configured = runtimeConfig.public?.staticServer
@@ -471,6 +576,10 @@ const resetSuggestions = () => {
 }
 
 const loadSuggestions = async (query: string) => {
+  if (!isSuggestEnabled.value) {
+    return
+  }
+
   const trimmed = query.trim()
 
   if (trimmed.length < minChars.value) {
@@ -528,6 +637,10 @@ const debouncedLoad = useDebounceFn((value: string) => {
     return
   }
 
+  if (!isSuggestEnabled.value) {
+    return
+  }
+
   return loadSuggestions(value)
 }, 300)
 
@@ -578,6 +691,31 @@ watch(
   { flush: 'post' }
 )
 
+watch(
+  isSuggestEnabled,
+  enabled => {
+    if (!enabled) {
+      debouncedLoad.cancel?.()
+      resetSuggestions()
+      hasError.value = false
+      return
+    }
+
+    debouncedLoad(internalSearch.value)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => shouldShowVoiceButton.value,
+  allowed => {
+    if (allowed) {
+      initializeSpeechRecognition()
+    }
+  },
+  { immediate: true }
+)
+
 const handleBlur = () => {
   isBlurring.value = true
   isFieldFocused.value = false
@@ -616,6 +754,49 @@ const handleSearchInput = (value: string) => {
 
 let submitTimeout: ReturnType<typeof setTimeout> | null = null
 
+const stopVoiceListening = () => {
+  isVoiceListening.value = false
+  speechRecognition.value?.stop()
+}
+
+const handleVoiceResult = (event: SpeechRecognitionEvent) => {
+  const transcript = event.results?.[0]?.[0]?.transcript?.trim()
+
+  if (!transcript) {
+    return
+  }
+
+  lastCommittedValue.value = transcript
+  internalSearch.value = transcript
+  emit('update:modelValue', transcript)
+}
+
+const handleVoiceError = () => {
+  voiceError.value = t('search.suggestions.voice.error')
+  stopVoiceListening()
+}
+
+const startVoiceListening = () => {
+  if (!speechRecognition.value) {
+    voiceError.value = t('search.suggestions.voice.unsupported')
+    return
+  }
+
+  voiceError.value = null
+  speechRecognition.value.lang = locale.value
+  speechRecognition.value.start()
+  isVoiceListening.value = true
+}
+
+const toggleVoiceListening = () => {
+  if (isVoiceListening.value) {
+    stopVoiceListening()
+    return
+  }
+
+  startVoiceListening()
+}
+
 const cancelPendingSubmit = () => {
   pendingSubmit.value = false
 
@@ -652,6 +833,8 @@ onBeforeUnmount(() => {
     clearTimeout(blurResetTimeout)
     blurResetTimeout = null
   }
+
+  stopVoiceListening()
 })
 
 const handleSelection = (item: SuggestionItem | null) => {
@@ -727,6 +910,7 @@ const handleScannerDecode = (rawValue: string | null) => {
     background-color: rgba(var(--v-theme-surface-default), 0.98)
     transform: translateY(-2px)
 
+.search-suggest-field__voice-button,
 .search-suggest-field__scanner-button
   min-width: auto
   margin-inline-start: 0.35rem

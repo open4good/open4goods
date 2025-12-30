@@ -1875,6 +1875,12 @@
         "loading": "Preparing the camera…",
         "helper": "Align the barcode within the frame to search automatically.",
         "error": "We couldn't access your camera. Please enter the GTIN manually."
+      },
+      "voice": {
+        "startLabel": "Start voice search",
+        "stopLabel": "Stop voice search",
+        "unsupported": "Voice search is not available on this device.",
+        "error": "We couldn't capture your voice. Try again or type your query."
       }
     },
     "groups": {
