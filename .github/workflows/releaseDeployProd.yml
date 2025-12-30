@@ -196,6 +196,15 @@ jobs:
           set -euo pipefail
           mvn -B -ntp -T 1C -DinstallAtEnd=true clean install
 
+      - name: 📚 Bundle markdown/prompt resources into JARs
+        uses: ./.github/actions/bundle-doc-resources
+        with:
+          jar-paths: |
+            admin/target/admin-0.0.1-SNAPSHOT.jar
+            api/target/api-0.0.1-SNAPSHOT.jar
+            ui/target/ui-0.0.1-SNAPSHOT.jar
+            front-api/target/front-api-0.0.1-SNAPSHOT.jar
+
       - name: 🌐 Generate Maven Site (stage)
         shell: bash
         run: |
