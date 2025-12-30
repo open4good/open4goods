@@ -76,12 +76,12 @@
         "partnersBackground": "placeholders/generated/partners.svg"
       },
       "parallax": {
-        "essentials": "parallax/parallax-background-christmas-essentials.svg",
-        "features": "parallax/parallax-background-christmas-features.svg",
-        "blog": "parallax/parallax-background-christmas-blog.svg",
-        "objections": "parallax/parallax-background-christmas-objections.svg",
-        "cta": "parallax/parallax-background-christmas-cta.svg",
-        "aplat": "parallax/parallax-aplats.svg"
+        "essentials": "parallax-background-christmas-essentials.svg",
+        "features": "parallax-background-christmas-features.svg",
+        "blog": "parallax-background-christmas-blog.svg",
+        "objections": "parallax-background-christmas-objections.svg",
+        "cta": "parallax-background-christmas-cta.svg",
+        "aplat": "parallax-aplats.svg"
       }
     },
     "default": {
@@ -101,12 +101,12 @@
         "partnersBackground": "placeholders/generated/partners.svg"
       },
       "parallax": {
-        "essentials": "parallax/parallax-essentials.svg",
-        "features": "parallax/parallax-features.svg",
-        "blog": "parallax/parallax-blog.svg",
-        "objections": "parallax/parallax-objections.svg",
-        "cta": "parallax/parallax-cta.svg",
-        "aplat": "parallax/parallax-aplats.svg"
+        "essentials": "parallax-essentials.svg",
+        "features": "parallax-features.svg",
+        "blog": "parallax-blog.svg",
+        "objections": "parallax-objections.svg",
+        "cta": "parallax-cta.svg",
+        "aplat": "parallax-aplats.svg"
       },
       "hero": {
         "eyebrow": "Nudger, c'est :",

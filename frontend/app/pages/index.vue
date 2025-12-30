@@ -166,8 +166,10 @@ const resolveAplatSource = (value?: string): string | undefined => {
     return trimmed
   }
 
+  const normalized = trimmed.includes('/') ? trimmed : `parallax/${trimmed}`
+
   return resolveThemedAssetUrl(
-    trimmed,
+    normalized,
     themeName.value,
     seasonalEventPack.value
   )
