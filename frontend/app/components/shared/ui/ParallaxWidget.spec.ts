@@ -170,11 +170,11 @@ describe('ParallaxWidget', () => {
   it('handles invalid input gracefully and ignores non-string sources', async () => {
     const wrapper = mountParallax({
       backgrounds: [
-        { src: 123 as any, speed: 0.5 }, // invalid src
+        { src: 123 as unknown, speed: 0.5 }, // invalid src
         { src: '/valid.svg', speed: 0.2 },
         '  ', // empty string
-        null as any,
-        undefined as any,
+        null as unknown,
+        undefined as unknown,
       ],
     })
 
