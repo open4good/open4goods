@@ -38,7 +38,7 @@
               <span v-if="productBrandName" class="product-hero__brand-name">{{
                 productBrandName
               }}</span>
-              <span v-if="productModelName" class="product-hero__model-name">{{
+              <span v-if="productModelName" class="product-hero__eyebrow">{{
                 productModelName
               }}</span>
             </div>

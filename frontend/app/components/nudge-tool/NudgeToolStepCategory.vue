@@ -57,6 +57,8 @@
                     'nudge-option-card--selected':
                       !isExternalCategory(category) && isSelected,
                     'nudge-option-card--disabled': isCategoryDisabled(category),
+                    'nudge-step-category__card--static':
+                      isStaticCategory(category),
                   }"
                   variant="flat"
                   rounded="xl"
@@ -78,13 +80,19 @@
                     >
                       <template #placeholder>
                         <div class="nudge-step-category__fallback">
-                          <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
+                          <v-icon
+                            :icon="category.mdiIcon ?? 'mdi-tag'"
+                            size="28"
+                          />
                         </div>
                       </template>
 
                       <template #error>
                         <div class="nudge-step-category__fallback">
-                          <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
+                          <v-icon
+                            :icon="category.mdiIcon ?? 'mdi-tag'"
+                            size="28"
+                          />
                         </div>
                       </template>
                     </v-img>
@@ -110,6 +118,7 @@
                 'nudge-option-card--selected':
                   !isExternalCategory(category) && isSelected,
                 'nudge-option-card--disabled': isCategoryDisabled(category),
+                'nudge-step-category__card--static': isStaticCategory(category),
               }"
               variant="flat"
               rounded="xl"
@@ -175,6 +184,9 @@ const isCategoryDisabled = (category: NudgeToolCategory) =>
 
 const isExternalCategory = (category: NudgeToolCategory) =>
   Boolean(category.externalLink)
+
+const isStaticCategory = (category: NudgeToolCategory) =>
+  category.id === 'static'
 
 const handleSelect = (category: NudgeToolCategory, toggle: () => void) => {
   if (isCategoryDisabled(category)) {
@@ -291,16 +303,27 @@ watch(
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-width: 160px;
+    min-width: 22%; /* Adjusted to ensure ~4 items fit on screen */
+    max-width: 250px;
     box-shadow: none;
     background: transparent !important;
     border: none !important;
+
+    @media (max-width: 960px) {
+      min-width: 160px; /* Fallback for smaller screens */
+    }
   }
 
   &__card-link {
     text-decoration: none;
     color: inherit;
     display: inline-flex;
+  }
+
+  &__card--static {
+    opacity: 0.8;
+    transform: scale(0.75);
+    transform-origin: center;
   }
 
   &__image {
@@ -326,6 +349,12 @@ watch(
   &__name {
     margin: 0;
     font-weight: 600;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
   &__card.nudge-option-card--disabled {

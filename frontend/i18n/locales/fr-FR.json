@@ -179,10 +179,10 @@
           "partnerLinkFallback": "nos partenaires"
         },
         "context": {
-          "cornerLabel": "Résumé impact",
+          "cornerLabel": "C'est tout chaud",
           "cornerTooltip": "Les points forts de la méthodologie Nudger",
           "title": "Le comparateur nouveau est arrivé !",
-          "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
+          "ariaLabel": "Nudger - évaluation environnementale"
         }
       }
     }
@@ -2502,9 +2502,9 @@
           "showMore": "Voir plus..."
         },
         "nudge": {
-          "title": "Envie d'un raccourci ?",
-          "description": "Répondez à quelques questions pour pré-filtrer cette catégorie automatiquement.",
-          "button": "Lancer l'outil Nudge"
+          "title": "Besoin d'un coup de pouce ?",
+          "description": "Vos critères écologiques, budgetaires, techniques. Simple comme un clic.",
+          "button": "Lancer l'assistant Nudger"
         },
         "cta": {
           "label": "Explorer toutes nos catégories"

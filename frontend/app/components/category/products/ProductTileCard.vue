@@ -9,7 +9,7 @@
     :rel="linkRel"
   >
     <div class="product-tile-card__layout">
-      <div class="product-tile-card__media">
+      <div>
         <v-img
           :src="imageSrc"
           :alt="headerTitle"
