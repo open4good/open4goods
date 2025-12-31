@@ -313,15 +313,15 @@ attributesConfig:
 ####################################################################################
 # Product classification from categories (samples, will be overridden post-generation)
 ####################################################################################
+ 
 matchingCategories:
-  all: []
+  all: 
+    - ELECTROMENAGER | FOUR
   darty.com:
     - "GROS ELECTROMENAGER / CUISSON / FOUR"
   boulanger.com:
     - "CUISSON / FOUR"
   cdiscount.com:
-    - "Electroménager / Cuisson / Four"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
   rueducommerce.fr:
-    - "Four"
-  Electrodepot - Guides et Comparateurs:
-    - "ELECTRO DEPOT | CUISSON | FOUR"
+    - "ELECTROMENAGER > CUISSON > FOUR"

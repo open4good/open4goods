@@ -317,14 +317,8 @@ attributesConfig:
 # Product classification from categories (samples, will be overridden post-generation)
 ####################################################################################
 matchingCategories:
-  all: []
-  darty.com:
-    - "GROS ELECTROMENAGER / CUISSON / Frigos"
-  boulanger.com:
-    - "CUISSON / frigo"
-  cdiscount.com:
-    - "Electroménager / Cuisson / Frigos"
-  rueducommerce.fr:
-    - "frigo"
-  Electrodepot - Guides et Comparateurs:
-    - "ELECTRO DEPOT | CUISSON | Frigos"
+  all: 
+    - "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR 1 PORTE | GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR 1 PORTE | REFRIGERATEUR | REFRIGERATEUR 1 PORTE"
+    - "REFRIGERATEUR CONGELATEUR A POSER | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > REFRIGERATEUR ET CONGELATEUR > REFRIGERATEUR CONGELATEUR > REFRIGERATEUR CONGELATEUR A POSER | CUISINE | GROS ELECTROMENAGER"
+    - "ELECTROMENAGER | REFRIGERATEUR"
+    - "REFRIGERATEUR"

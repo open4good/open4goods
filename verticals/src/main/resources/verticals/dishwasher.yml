@@ -315,15 +315,12 @@ attributesConfig:
 ####################################################################################
 # Product classification from categories (samples, will be overridden post-generation)
 ####################################################################################
+
 matchingCategories:
-  all: []
-  darty.com:
-    - "GROS ELECTROMENAGER / CUISSON / Laves vaisselle"
-  boulanger.com:
-    - "LAVAGE / LAVE VAISSELLE"
-  cdiscount.com:
-    - "Electroménager / Cuisson / Laves vaisselle"
-  rueducommerce.fr:
-    - "Lave vaisselle"
-  Electrodepot - Guides et Comparateurs:
-    - "ELECTRO DEPOT | CUISSON | Laves vaisselle"
+  all: 
+    - "GROS ELECTROMENAGER / LAVE-VAISSELLE / LAVE-VAISSELLE POSE LIBRE | GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE POSE LIBRE | LAVE-VAISSELLE | LAVE-VAISSELLE POSE LIBRE"
+    - "ELECTROMENAGER | LAVE-VAISSELLE"
+    - "GROS ELECTROMENAGER | LAVE-VAISSELLE"
+    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-VAISSELLE | LAVAGE-SECHAGE | LAVE-VAISSELLE"
+    - "372 | DISHWASHERS | LAVE-VAISSELLE"
+    - "LAVE-VAISSELLE"
