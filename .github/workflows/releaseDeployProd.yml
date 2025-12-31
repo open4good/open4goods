@@ -398,66 +398,6 @@ jobs:
 
           git worktree remove "${WT_DIR}" --force
 
-		  ############################################
-		  # Deploy JARs to Production Server
-		  # 2) Corrige: SOURCE absolus ("/...") => relatifs ("...")
-		  ############################################
-		  - name: 🚚 Deploy SBADMIN to Server
-		    if: env.MODE != 'test'
-		    uses: easingthemes/ssh-deploy@main
-		    env:
-		      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-		      ARGS: "-rltgoDzvO --delete"
-		      SOURCE: "admin/target/admin-0.0.1-SNAPSHOT.jar"
-		      REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-		      REMOTE_USER: ${{ secrets.REMOTE_USER }}
-		      TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"
-
-		  - name: 🚚 Deploy API to Server
-		    if: env.MODE != 'test'
-		    uses: easingthemes/ssh-deploy@main
-		    env:
-		      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-		      ARGS: "-rltgoDzvO --delete"
-		      SOURCE: "api/target/api-0.0.1-SNAPSHOT.jar"
-		      REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-		      REMOTE_USER: ${{ secrets.REMOTE_USER }}
-		      TARGET: "/opt/open4goods/bin/latest/api-latest.jar"
-
-		  - name: 🚚 Deploy UI (static server) to Production Server
-		    if: env.MODE != 'test'
-		    uses: easingthemes/ssh-deploy@main
-		    env:
-		      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-		      ARGS: "-rltgoDzvO --delete"
-		      SOURCE: "ui/target/ui-0.0.1-SNAPSHOT.jar"
-		      REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-		      REMOTE_USER: ${{ secrets.REMOTE_USER }}
-		      TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
-
-		  - name: 🚚 Deploy front-api to Qualification Server
-		    if: env.MODE != 'test'
-		    uses: easingthemes/ssh-deploy@main
-		    env:
-		      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-		      ARGS: "-rltgoDzvO --delete"
-		      SOURCE: "front-api/target/front-api-0.0.1-SNAPSHOT.jar"
-		      REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-		      REMOTE_USER: ${{ secrets.REMOTE_USER }}
-		      TARGET: "/opt/open4goods/bin/latest/front-api-latest.jar"
-
-		  ############################################
-		  # Restart Applications
-		  ############################################
-		  - name: 🔁 Start Applications
-		    if: env.MODE != 'test'
-		    uses: appleboy/ssh-action@v1.2.4
-		    with:
-		      host: ${{ secrets.REMOTE_HOST }}
-		      username: ${{ secrets.REMOTE_USER }}
-		      key: ${{ secrets.SSH_PRIVATE_KEY }}
-		      script: sh /opt/open4goods/bin/publish-jars.sh prod
-			  
       ############################################
       # Deploy (prod) — inchangé, seulement en release
       ############################################
