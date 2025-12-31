@@ -658,7 +658,7 @@ attributesConfig:
 
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
-  #  - MEUBLE
+    - MEUBLE
 
 matchingCategories:
   all: []

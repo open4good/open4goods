@@ -36,7 +36,7 @@ import jakarta.annotation.PreDestroy;
  * This service is in charge to provide the Verticals configurations.
  * Configurations are provided from the classpath AND from a git specific
  * project (fresh local clone on app startup)
- * 
+ *
  * @author goulven
  *
  */
@@ -180,18 +180,18 @@ public class VerticalsConfigService {
 			try {
 				VerticalConfig config = getConfig(r.getInputStream(), getDefaultConfig());
 				if (config.getImpactScoreConfig() == null) {
-					logger.warn("Vertical {} (from {}) has a NULL impact score configuration. It might not behave as expected.", 
+					logger.warn("Vertical {} (from {}) has a NULL impact score configuration. It might not behave as expected.",
 							config.getId(), r.getFilename());
 				}
-				
+
 				// Check if ID is unique in the current list
 				boolean exists = ret.stream().anyMatch(v -> v.getId().equals(config.getId()));
 				if (exists) {
-					logger.error("DUPLICATE VERTICAL ID DETECTED: '{}' is already defined in another file. Ignoring definition from '{}'.", 
+					logger.error("DUPLICATE VERTICAL ID DETECTED: '{}' is already defined in another file. Ignoring definition from '{}'.",
 							config.getId(), r.getFilename());
 					continue;
 				}
-				
+
 				ret.add(config);
 			} catch (Exception e) {
 				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
@@ -333,7 +333,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Instanciate a vertical config for a given categories bag
-	 * 
+	 *
 	 * @param inputStream
 	 * @param existing
 	 * @return
@@ -363,7 +363,7 @@ public class VerticalsConfigService {
 		}
 
 		// Looking for words exclusions in categories
-		if (null != vc) {
+		if (null != vc && null != vc.getExcludingTokensFromCategoriesMatching()) {
 			for (String token : vc.getExcludingTokensFromCategoriesMatching()) {
 				for (String category : productCategoriessByDatasource.values()) {
 					if (category.contains(token)) {
@@ -381,7 +381,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return the language for a vertical path, if any
-	 * 
+	 *
 	 * @param path
 	 * @return
 	 */
@@ -391,7 +391,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return the path for a vertical language, if any
-	 * 
+	 *
 	 * @param config
 	 * @param path
 	 * @return
@@ -405,7 +405,7 @@ public class VerticalsConfigService {
 	 * Splits the VerticalConfig objects into buckets of a specified size, limiting
 	 * the total number of buckets.
 	 * This is UI HELPER METHOD
-	 * 
+	 *
 	 * @param bucketSize the size of each bucket (number of VerticalConfig objects
 	 *                   per bucket).
 	 * @param maxBucket  the maximum number of buckets to return.
@@ -448,7 +448,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a config by it's icecat categoryId
-	 * 
+	 *
 	 * @param icecatCategoryId
 	 *                         TODO(p2,perf) : Maintain a map for key/val access
 	 * @return
@@ -460,7 +460,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a config by it's google taxonomy id
-	 * 
+	 *
 	 * @param icecatCategoryId
 	 * @return
 	 */
@@ -471,7 +471,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a vertical config for a given taxonomy id
-	 * 
+	 *
 	 * @param key
 	 * @return
 	 */
@@ -496,7 +496,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a config by it's Id, or the default one if not found
-	 * 
+	 *
 	 * @param vertical
 	 * @return
 	 */
