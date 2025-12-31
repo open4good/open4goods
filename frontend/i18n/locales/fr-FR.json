@@ -2699,10 +2699,10 @@
       "hero": {
         "eyebrow": "PWA",
         "title": "Votre compagnon éco sur mobile",
-        "subtitle": "Scanne, compare et nudger en quelques gestes. Pensé pour la décision rapide.",
+        "subtitle": "Scanner, comparer et nudger en quelques gestes. ",
         "meta": {
-          "title": "Nudger – Compagnon mobile de l'impact",
-          "description": "Découvrez Nudger en version mobile-first : scanner de codes-barres, assistant IA et partage d'éco-guides.",
+          "title": "Nudger - Application mobile",
+          "description": "Découvrez Nudger en version mobile : scanner de codes-barres, assistant de choix et toutes nos fonctionalités.",
           "imageAlt": "Vue mobile de Nudger avec actions rapides et scanner de code-barres."
         }
       },
@@ -2722,7 +2722,7 @@
           "badge": "Live"
         },
         "wizard": {
-          "title": "Assistant IA",
+          "title": "Laisse toi guider",
           "description": "Quelques questions pour des choix éco personnalisés.",
           "badge": "Nouveau"
         },

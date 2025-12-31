@@ -11,16 +11,8 @@
             border
           >
             <div class="pwa-landing__hero-content">
-              <v-chip
-                color="accent-supporting"
-                variant="flat"
-                class="font-weight-bold text-uppercase"
-                size="small"
-              >
-                {{ t('pwa.landing.hero.eyebrow') }}
-              </v-chip>
               <h1 class="pwa-landing__title">
-                {{ t('pwa.landing.hero.title') }}
+                {{ t('home.hero.title') }}
               </h1>
               <p class="pwa-landing__subtitle">
                 {{ t('pwa.landing.hero.subtitle') }}
@@ -35,18 +27,20 @@
                   {{ t('pwa.landing.search.title') }}
                 </v-card-title>
                 <v-card-text class="pt-0">
-                  <v-text-field
-                    v-model="searchQuery"
+                  <SearchSuggestField
+                    :model-value="searchQuery"
                     :label="t('pwa.landing.search.label')"
                     :placeholder="t('pwa.landing.search.placeholder')"
+                    :min-chars="minSuggestionQueryLength"
                     density="comfortable"
                     variant="outlined"
                     color="primary"
-                    prepend-inner-icon="mdi-magnify"
-                    hide-details
                     class="mb-3"
                     data-testid="pwa-search-input"
-                    @keyup.enter="handleSearch"
+                    @update:model-value="$emit('update:searchQuery', $event)"
+                    @submit="$emit('submit')"
+                    @select-category="$emit('select-category', $event)"
+                    @select-product="$emit('select-product', $event)"
                   />
                   <v-btn
                     block
@@ -56,7 +50,7 @@
                     class="font-weight-bold"
                     prepend-icon="mdi-arrow-right"
                     data-testid="pwa-search-submit"
-                    @click="handleSearch"
+                    @click="$emit('submit')"
                   >
                     {{ t('pwa.landing.search.cta') }}
                   </v-btn>
@@ -106,47 +100,6 @@
               <v-card-subtitle class="text-body-2 text-neutral-secondary px-0">
                 {{ action.description }}
               </v-card-subtitle>
-            </v-card-item>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <v-row class="justify-center mt-2">
-        <v-col cols="12" md="10" lg="8">
-          <v-card
-            class="pwa-landing__share"
-            rounded="xl"
-            color="surface-primary-100"
-            border
-          >
-            <v-card-item class="d-flex align-center ga-3">
-              <v-avatar size="56" color="surface-primary-120">
-                <v-icon
-                  icon="mdi-account-tie"
-                  size="30"
-                  color="accent-primary-highlight"
-                />
-              </v-avatar>
-              <div class="flex-1">
-                <v-card-title class="text-subtitle-1 font-weight-bold px-0">
-                  {{ t('pwa.landing.share.title') }}
-                </v-card-title>
-                <v-card-subtitle
-                  class="text-body-2 text-neutral-secondary px-0"
-                >
-                  {{ t('pwa.landing.share.description') }}
-                </v-card-subtitle>
-              </div>
-              <v-btn
-                color="accent-supporting"
-                variant="tonal"
-                class="text-none font-weight-bold"
-                prepend-icon="mdi-open-in-new"
-                data-testid="pwa-share-more"
-                @click="isShareDialogOpen = true"
-              >
-                {{ t('pwa.landing.share.cta') }}
-              </v-btn>
             </v-card-item>
           </v-card>
         </v-col>
@@ -210,65 +163,13 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-
-      <v-dialog
-        v-model="isShareDialogOpen"
-        max-width="520"
-        transition="dialog-bottom-transition"
-      >
-        <v-card rounded="xl" class="pwa-landing__dialog-card">
-          <v-card-title class="d-flex align-center justify-space-between">
-            <span class="text-h6 font-weight-bold">
-              {{ t('pwa.landing.share.modalTitle') }}
-            </span>
-            <v-btn
-              icon="mdi-close"
-              variant="text"
-              @click="isShareDialogOpen = false"
-            />
-          </v-card-title>
-          <v-card-text>
-            <div class="pwa-landing__share-preview">
-              <div class="pwa-landing__share-preview__header">
-                <v-icon
-                  icon="mdi-shield-star"
-                  size="26"
-                  color="accent-primary-highlight"
-                />
-                <span class="font-weight-bold">{{
-                  t('pwa.landing.share.preview.title')
-                }}</span>
-              </div>
-              <p class="text-body-2 text-neutral-secondary mt-2">
-                {{ t('pwa.landing.share.preview.description') }}
-              </p>
-              <div class="pwa-landing__share-preview__tags">
-                <v-chip
-                  v-for="tag in shareTags"
-                  :key="tag"
-                  size="small"
-                  color="surface-primary-120"
-                  variant="flat"
-                  class="font-weight-bold"
-                >
-                  {{ tag }}
-                </v-chip>
-              </div>
-            </div>
-            <p class="text-body-2 text-neutral-secondary mb-0 mt-3">
-              {{ t('pwa.landing.share.note') }}
-            </p>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
     </ClientOnly>
 
     <PwaMobileActionBar
       class="pwa-landing__action-bar"
       @scan="isScannerOpen = true"
       @wizard="isWizardOpen = true"
-      @search="handleSearch"
-      @share="isShareDialogOpen = true"
+      @search="$emit('submit')"
     />
 
     <v-snackbar v-model="scannerError" color="error" timeout="3000">
@@ -279,6 +180,10 @@
 
 <script setup lang="ts">
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import SearchSuggestField, {
+  type CategorySuggestionItem,
+  type ProductSuggestionItem,
+} from '~/components/search/SearchSuggestField.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import PwaBarcodeScanner from './PwaBarcodeScanner.vue'
 import PwaMobileActionBar from './PwaMobileActionBar.vue'
@@ -287,29 +192,30 @@ import { computed, ref } from 'vue'
 
 interface Props {
   verticals?: VerticalConfigDto[]
+  searchQuery?: string
+  minSuggestionQueryLength?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   verticals: () => [],
+  searchQuery: '',
+  minSuggestionQueryLength: 2,
 })
 
-const router = useRouter()
-const localePath = useLocalePath()
+const emit = defineEmits<{
+  'update:searchQuery': [value: string]
+  submit: []
+  'select-category': [payload: CategorySuggestionItem]
+  'select-product': [payload: ProductSuggestionItem]
+}>()
+
 const { t } = useI18n()
 const display = useDisplay()
 
-const searchQuery = ref('')
 const isScannerOpen = ref(false)
 const isWizardOpen = ref(false)
-const isShareDialogOpen = ref(false)
 const scannerError = ref(false)
 const scannerErrorMessage = ref('')
-
-const shareTags = computed(() => [
-  t('pwa.landing.share.preview.tags.impact'),
-  t('pwa.landing.share.preview.tags.feedback'),
-  t('pwa.landing.share.preview.tags.ecoGuide'),
-])
 
 const quickActions = computed(() => [
   {
@@ -333,36 +239,15 @@ const quickActions = computed(() => [
     icon: 'mdi-magnify',
     title: t('pwa.landing.actions.search.title'),
     description: t('pwa.landing.actions.search.description'),
-    onClick: () => handleSearch(),
+    onClick: () => emit('submit'),
     badge: null,
-  },
-  {
-    key: 'share',
-    icon: 'mdi-share-variant',
-    title: t('pwa.landing.actions.share.title'),
-    description: t('pwa.landing.actions.share.description'),
-    onClick: () => (isShareDialogOpen.value = true),
-    badge: t('pwa.landing.actions.share.badge'),
   },
 ])
 
-const navigateToSearch = (query?: string) => {
-  const trimmed = query?.trim() ?? ''
-  const path = localePath({
-    name: 'search',
-    query: trimmed ? { q: trimmed } : undefined,
-  })
-
-  router.push(path)
-}
-
-const handleSearch = () => {
-  navigateToSearch(searchQuery.value)
-}
-
 const handleScanDecode = (value: string) => {
   isScannerOpen.value = false
-  navigateToSearch(value)
+  emit('update:searchQuery', value)
+  emit('submit')
 }
 
 const handleScannerError = (message: string) => {
@@ -416,26 +301,7 @@ const verticals = computed(() => props.verticals)
     transform: translateY(-4px)
     box-shadow: 0 16px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
 
-.pwa-landing__share
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-080), 0.9), rgba(var(--v-theme-surface-primary-120), 0.9))
 
-.pwa-landing__share-preview
-  background: rgba(var(--v-theme-surface-default), 0.9)
-  border-radius: 16px
-  padding: 1rem
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5)
-
-.pwa-landing__share-preview__header
-  display: flex
-  align-items: center
-  gap: 0.5rem
-  color: rgb(var(--v-theme-text-neutral-strong))
-
-.pwa-landing__share-preview__tags
-  display: flex
-  flex-wrap: wrap
-  gap: 0.35rem
-  margin-top: 0.75rem
 
 .pwa-landing__dialog-card
   background: rgb(var(--v-theme-surface-default))

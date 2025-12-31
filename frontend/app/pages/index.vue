@@ -789,10 +789,19 @@ useHead(() => ({
 
 <template>
   <div>
-    <PwaMobileLanding class="d-md-none" :verticals="rawCategories" />
-    <div class="home-page d-none d-md-block">
+    <PwaMobileLanding
+      v-model:search-query="searchQuery"
+      class="d-md-none"
+      :verticals="rawCategories"
+      :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+      @submit="handleSearchSubmit"
+      @select-category="handleCategorySuggestion"
+      @select-product="handleProductSuggestion"
+    />
+    <div class="home-page">
       <HomeHeroSection
         v-model:search-query="searchQuery"
+        class="d-none d-md-block"
         :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
         :verticals="rawCategories"
         :partners-count="heroPartnersCount"
