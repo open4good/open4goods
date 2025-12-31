@@ -91,6 +91,12 @@
       <groupId>org.open4goods</groupId>
       <artifactId>github-feedback</artifactId>
       <version>${global.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.open4goods</groupId>
+          <artifactId>prompt</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

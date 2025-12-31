@@ -23,9 +23,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
+        <!-- TODO : To import bad lglobal TextService interface...)-->
         <dependency>
             <groupId>org.open4goods</groupId>
-            <artifactId>commons</artifactId>
+            <artifactId>model</artifactId>
             <version>${global.version}</version>
         </dependency>
 
