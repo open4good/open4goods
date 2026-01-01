@@ -56,12 +56,22 @@
             },
             {
               "icon": "🛡️",
-              "label": "Independent comparator, open-source software and open data",
+              "label": "100% independent. Over {millions}M products in open data and free software",
               "segments": [
-                { "text": "Independent comparator, " },
-                { "text": "open-source software", "to": "/opensource" },
-                { "text": " and " },
-                { "text": "open data", "to": "/opendata" }
+                {
+                  "text": "100% independent. Over {millions}M products in "
+                },
+                {
+                  "text": "open data",
+                  "to": "/opendata"
+                },
+                {
+                  "text": " and "
+                },
+                {
+                  "text": "free software",
+                  "to": "/opensource"
+                }
               ]
             }
           ],
@@ -2708,6 +2718,7 @@
   },
   "nudge-tool": {
     "actions": {
+      "advancedSearch": "Advanced search",
       "continue": "Continue",
       "seeAll": "See all recommendations",
       "previous": "Previous",

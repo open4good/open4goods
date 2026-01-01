@@ -42,7 +42,10 @@
                 {{ $t('agents.selector.restricted') }}
               </v-chip>
             </v-card-title>
-            <v-card-subtitle v-if="template.allowedRoles?.length" class="text-caption">
+            <v-card-subtitle
+              v-if="template.allowedRoles?.length"
+              class="text-caption"
+            >
               {{
                 $t('agents.selector.roles', {
                   roles: template.allowedRoles.join(', '),

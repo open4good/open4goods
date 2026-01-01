@@ -43,7 +43,10 @@ const impactScorePath = computed(() => localePath('/impact-score'))
             <v-expansion-panel-text class="home-faq__panel-text">
               <!-- eslint-disable-next-line vue/no-v-html -->
               <div class="home-faq__answer" v-html="panel.answer" />
-              <div v-if="panel.isImpactScore && panel.ctaLabel" class="home-faq__cta-wrapper">
+              <div
+                v-if="panel.isImpactScore && panel.ctaLabel"
+                class="home-faq__cta-wrapper"
+              >
                 <v-btn
                   class="home-faq__cta"
                   color="primary"

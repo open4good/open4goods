@@ -15,7 +15,12 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-type AnimationPreset = 'fade' | 'fade-up' | 'fade-down' | 'fade-scale' | 'fade-blur'
+type AnimationPreset =
+  | 'fade'
+  | 'fade-up'
+  | 'fade-down'
+  | 'fade-scale'
+  | 'fade-blur'
 
 type I18nValues = Record<string, string | number>
 
@@ -78,9 +83,12 @@ const reveal = () => {
     clearTimeout(timeoutId)
   }
 
-  timeoutId = setTimeout(() => {
-    isVisible.value = true
-  }, Math.max(props.delay ?? 0, 0))
+  timeoutId = setTimeout(
+    () => {
+      isVisible.value = true
+    },
+    Math.max(props.delay ?? 0, 0)
+  )
 }
 
 onMounted(() => {

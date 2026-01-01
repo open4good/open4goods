@@ -275,8 +275,7 @@ const subjectRules = computed(() => [
   (value: string) =>
     !!value?.trim() || t('contact.form.errors.subject.required'),
   (value: string) =>
-    (value?.trim().length ?? 0) >= 3 ||
-    t('contact.form.errors.subject.length'),
+    (value?.trim().length ?? 0) >= 3 || t('contact.form.errors.subject.length'),
 ])
 
 const messageRules = computed(() => [

@@ -28,16 +28,21 @@ const messages: Record<string, unknown> = {
   'packs.default.hero.search.helpers': [
     {
       icon: '🌿',
-      label: "L'impact Score : une évaluation écologique et environnementale unique",
+      label:
+        "L'impact Score : une évaluation écologique et environnementale unique",
       segments: [
         { text: "L'impact Score : une" },
-        { text: 'évaluation écologique et environnementale', to: '/impact-score' },
+        {
+          text: 'évaluation écologique et environnementale',
+          to: '/impact-score',
+        },
         { text: ' unique' },
       ],
     },
     {
       icon: '🏷️',
-      label: '100% indépendant, logiciel libre et {millions}+ produits en données ouvertes',
+      label:
+        '100% indépendant, logiciel libre et {millions}+ produits en données ouvertes',
       segments: [
         { text: '100% indépendant, logiciel libre et' },
         { text: '{millions}+ produits en données ouvertes' },

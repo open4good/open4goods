@@ -11,7 +11,11 @@
       v-if="hasMeta"
       class="d-flex flex-wrap align-center gap-2 px-6"
     >
-      <div v-if="hasTags" class="d-flex flex-wrap align-center gap-2" data-test="agent-tags">
+      <div
+        v-if="hasTags"
+        class="d-flex flex-wrap align-center gap-2"
+        data-test="agent-tags"
+      >
         <v-chip
           v-for="tag in tags"
           :key="tag"

@@ -14,7 +14,9 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
-mockNuxtImport('useRuntimeConfig', () => () => ({ public: { hcaptchaSiteKey: '' } }))
+mockNuxtImport('useRuntimeConfig', () => () => ({
+  public: { hcaptchaSiteKey: '' },
+}))
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key }))
 
 const VTextareaStub = defineComponent({
@@ -31,12 +33,16 @@ const VBtnStub = defineComponent({
   inheritAttrs: false,
   props: { disabled: { type: Boolean, default: false } },
   emits: ['click'],
-  template: '<button v-bind="$attrs" :disabled="disabled" @click="$emit(\'click\')"><slot /></button>',
+  template:
+    '<button v-bind="$attrs" :disabled="disabled" @click="$emit(\'click\')"><slot /></button>',
 })
 
 const baseStubs = {
   ClientOnly: { template: '<div><slot /></div>' },
-  VCard: { template: '<div><slot /><slot name="title" /><slot name="subtitle" /></div>' },
+  VCard: {
+    template:
+      '<div><slot /><slot name="title" /><slot name="subtitle" /></div>',
+  },
   VCardTitle: { template: '<div><slot /></div>' },
   VCardSubtitle: { template: '<div><slot /></div>' },
   VCardText: { template: '<div><slot /></div>' },

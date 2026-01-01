@@ -71,9 +71,9 @@ export const useCategories = () => {
   /**
    * Fetch categories from the backend proxy
    */
-  const fetchCategories = async (
-    options?: { forceRefresh?: boolean }
-  ): Promise<VerticalConfigDto[]> => {
+  const fetchCategories = async (options?: {
+    forceRefresh?: boolean
+  }): Promise<VerticalConfigDto[]> => {
     const forceRefresh = options?.forceRefresh ?? false
     const cacheKey = 'list-all'
     const cachedCategories = categoriesListCache.value[cacheKey]

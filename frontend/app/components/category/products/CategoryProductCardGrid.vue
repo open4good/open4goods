@@ -233,9 +233,7 @@ const variant = computed(() => props.variant ?? 'classic')
 const maxAttributes = computed(() => props.maxAttributes)
 const showAttributeIcons = computed(() => props.showAttributeIcons ?? true)
 const isDisabledCategory = computed(() => props.isCategoryDisabled ?? false)
-const linkRel = computed(() =>
-  props.nofollowLinks ? 'nofollow' : undefined
-)
+const linkRel = computed(() => (props.nofollowLinks ? 'nofollow' : undefined))
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -410,7 +408,7 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
       filter: grayscale(1)
       opacity: 0.6
 
-  
+
   &__card
     height: 100%
     display: flex

@@ -29,21 +29,21 @@
             },
             {
               "icon": "🛡️",
-              "label": "100% indépendant, logiciel libre et données ouvertes",
+              "label": "100% indépendant. Plus de {millions}M de produits en données ouvertes et logiciel libre",
               "segments": [
                 {
-                  "text": "100% indépendant, "
+                  "text": "100% indépendant. Plus de {millions}M de produits en "
                 },
                 {
-                  "text": "logiciel libre",
-                  "to": "/opensource"
+                  "text": "données ouvertes",
+                  "to": "/opendata"
                 },
                 {
                   "text": " et "
                 },
                 {
-                  "text": "données ouvertes",
-                  "to": "/opendata"
+                  "text": "logiciel libre",
+                  "to": "/opensource"
                 }
               ]
             },
@@ -264,21 +264,21 @@
           },
           {
             "icon": "🛡️",
-            "label": "100% indépendant, logiciel libre et données ouvertes",
+            "label": "100% indépendant. Plus de {millions}M de produits en données ouvertes et logiciel libre",
             "segments": [
               {
-                "text": "100% indépendant, "
+                "text": "100% indépendant. Plus de {millions}M de produits en "
               },
               {
-                "text": "logiciel libre",
-                "to": "/opensource"
+                "text": "données ouvertes",
+                "to": "/opendata"
               },
               {
                 "text": " et "
               },
               {
-                "text": "données ouvertes",
-                "to": "/opendata"
+                "text": "logiciel libre",
+                "to": "/opensource"
               }
             ]
           },
@@ -339,15 +339,15 @@
       "benefits": {
         "time": {
           "title": "Gagnez du temps",
-          "description": "On analyse pour vous."
+          "description": "On analyse pour vous. Avec un soupçon d'IA, pour tout savoir sur votre produit."
         },
         "savings": {
           "title": "Payez le juste prix",
-          "description": "Un produit qui consomme moins ou tombe moins en panne vous coutera moins cher à l'usage."
+          "description": "Un produit qui consomme moins ou tombe moins en panne vous coutera moins cher à l'usage. Et en plus, on a tout d'un grand comparateur de prix 💪"
         },
         "planet": {
           "title": "Consommez mieux",
-          "description": "Acheter en ligne ne sera jamais bon pour la planète. Mais cela peut quand même un acte politique. Repérez les produits les plus vertueux, comparez le coût d'usage."
+          "description": "Acheter en ligne ne sera jamais bon pour la planète. Mais on peut chercher à amoindrire l'imact, en achetant les produits les plus 'vertueux'"
         },
         "trust": {
           "title": "0 Données personnells collectées",
@@ -2760,6 +2760,7 @@
   },
   "nudge-tool": {
     "actions": {
+      "advancedSearch": "Recherche avancée",
       "continue": "Continuer",
       "seeAll": "Voir toutes les recommandations",
       "previous": "Précédent",

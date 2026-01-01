@@ -67,13 +67,12 @@
               </v-chip>
             </div>
           </div>
-          <p class="product-tile-card__subtitle text-truncate">{{ subtitle }}</p>
+          <p class="product-tile-card__subtitle text-truncate">
+            {{ subtitle }}
+          </p>
         </div>
 
-        <div
-          v-if="offerBadges.length"
-          class="product-tile-card__pricing-row"
-        >
+        <div v-if="offerBadges.length" class="product-tile-card__pricing-row">
           <v-img
             v-if="imageSrc"
             :src="imageSrc"
@@ -192,10 +191,11 @@ const props = withDefaults(
 const { t } = useI18n()
 const compareStore = useProductCompareStore()
 
-const productBrand = computed(() =>
-  props.product.identity?.brand ??
-  props.product.identity?.bestName ??
-  (props.product.gtin ? `#${props.product.gtin}` : props.untitledLabel)
+const productBrand = computed(
+  () =>
+    props.product.identity?.brand ??
+    props.product.identity?.bestName ??
+    (props.product.gtin ? `#${props.product.gtin}` : props.untitledLabel)
 )
 
 const subtitle = computed(

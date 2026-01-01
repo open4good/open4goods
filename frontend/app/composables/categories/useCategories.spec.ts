@@ -28,7 +28,6 @@ vi.mock('#app', () => ({
 }))
 
 describe('useCategories composable', () => {
-
   beforeEach(async () => {
     vi.resetModules()
     fetchMock.mockReset()
@@ -120,9 +119,7 @@ describe('useCategories composable', () => {
 
     const categoriesState = stateStore.get('categories-list')
     if (categoriesState) {
-      categoriesState.value = [
-        disabledCategory as unknown as VerticalConfigDto,
-      ]
+      categoriesState.value = [disabledCategory as unknown as VerticalConfigDto]
       expect(categoriesState.value).toEqual([
         disabledCategory as unknown as VerticalConfigDto,
       ])

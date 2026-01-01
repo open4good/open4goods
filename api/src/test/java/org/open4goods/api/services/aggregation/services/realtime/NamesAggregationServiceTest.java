@@ -141,4 +141,32 @@ class NamesAggregationServiceTest {
 		attributesConfig.setConfigs(java.util.List.of(diagonale));
 		return attributesConfig;
 	}
+	@Test
+	void generateUrl_shouldIncludeGtinInUrl() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		config.setId("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		// Ensure GTIN is present (id is used as GTIN in Product)
+		
+		org.open4goods.model.attribute.ProductAttribute attr = new org.open4goods.model.attribute.ProductAttribute();
+		attr.setName("DIAGONALE_POUCES");
+		attr.setValue("55");
+		product.getAttributes().getAll().put("DIAGONALE_POUCES", attr);
+		
+		// Setup URL prefix config
+		PrefixedAttrText urlConfig = new PrefixedAttrText();
+		urlConfig.setPrefix("TV");
+		urlConfig.setAttrs(java.util.List.of("DIAGONALE_POUCES"));
+		config.getI18n().get("fr").setUrl(urlConfig);
+
+		service.onProduct(product, config);
+
+		String generatedUrl = product.getNames().getUrl().get("fr");
+		assertThat(generatedUrl).startsWith("123456789-");
+		assertThat(generatedUrl).contains("tv-55");
+	}
 }

@@ -237,8 +237,13 @@ public class NamesAggregationService extends AbstractAggregationService {
 			urlSuffix = StringUtils.stripAccents(computePrefixedText(data, urlPrefix, "-"));
 		}
 
+		url += data.gtin();
+
 		if (StringUtils.isNotBlank(urlSuffix)) {
-			url += "-" + urlSuffix;
+			if (StringUtils.isNotBlank(url)) {
+				url += "-";
+			}
+			url += urlSuffix;
 		}
 
 		// Url sanitisation

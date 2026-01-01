@@ -16,15 +16,12 @@
       elevation="0"
       border
     >
-      <v-alert
-        v-if="!isAuthorized"
-        type="warning"
-        variant="tonal"
-        class="ma-4"
-      >
+      <v-alert v-if="!isAuthorized" type="warning" variant="tonal" class="ma-4">
         {{
           $t('agents.selector.notAuthorized', {
-            roles: template.allowedRoles?.join(', ') || $t('agents.selector.noRoles'),
+            roles:
+              template.allowedRoles?.join(', ') ||
+              $t('agents.selector.noRoles'),
           })
         }}
       </v-alert>
@@ -128,7 +125,8 @@ async function onSubmit({
       type: 'QUESTION' as unknown as AgentRequestDtoTypeEnum,
       promptUser: prompt,
       promptTemplateId: template.value.id,
-      promptVariantId: promptVariantId ?? template.value.promptTemplates?.[0]?.id ?? '',
+      promptVariantId:
+        promptVariantId ?? template.value.promptTemplates?.[0]?.id ?? '',
       promptVisibility: (isPrivate
         ? 'PRIVATE'
         : 'PUBLIC') as unknown as AgentRequestDtoPromptVisibilityEnum,

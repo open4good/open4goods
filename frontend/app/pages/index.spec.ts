@@ -24,7 +24,8 @@ const messages: Record<string, unknown> = {
     },
     {
       icon: '🏷️',
-      label: '100% independent, open-source, and {millions}+ open-data products',
+      label:
+        '100% independent, open-source, and {millions}+ open-data products',
       segments: [
         { text: '100% independent, open-source, and' },
         { text: '{millions}+ open-data products' },
@@ -74,7 +75,8 @@ const messages: Record<string, unknown> = {
     },
     {
       icon: '🏷️',
-      label: '100% independent, open-source, and {millions}+ open-data products',
+      label:
+        '100% independent, open-source, and {millions}+ open-data products',
       segments: [
         { text: '100% independent, open-source, and' },
         { text: '{millions}+ open-data products' },
@@ -185,7 +187,7 @@ const messages: Record<string, unknown> = {
   'home.faq.subtitle': 'Quick answers to the most common questions.',
   'home.faq.items.free.question': 'Is Nudger free?',
   'home.faq.items.free.answer':
-    'Yes, Nudger is completely free for you!<br/><br/>We earn money through affiliate partnerships. That means we receive a commission when you click Nudger offers and complete your purchase with our partner merchants.<br/><br/>It\'s the same model used by comparison sites and it never changes the price of the products you see on Nudger.',
+    "Yes, Nudger is completely free for you!<br/><br/>We earn money through affiliate partnerships. That means we receive a commission when you click Nudger offers and complete your purchase with our partner merchants.<br/><br/>It's the same model used by comparison sites and it never changes the price of the products you see on Nudger.",
   'home.faq.items.account.question': 'Do I need an account?',
   'home.faq.items.account.answer':
     "<b>Not at all!</b><br/>Every feature is available without creating an account on our platform.<br/>That's how we protect your privacy, too.",

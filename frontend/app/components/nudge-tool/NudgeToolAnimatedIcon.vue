@@ -92,9 +92,7 @@ const isPulseVariant = computed(() => props.variant === 'pulse')
 const variantClass = computed(
   () => `nudge-tool-animated-icon--${props.variant}`
 )
-const maxScale = computed(() =>
-  Math.max(props.maxScale, ZOOM_SCALE_MIN + 0.01)
-)
+const maxScale = computed(() => Math.max(props.maxScale, ZOOM_SCALE_MIN + 0.01))
 const normalizedFrequencyRange = computed(() =>
   normalizeRange(props.frequencyRange ?? [IDLE_MIN_FALLBACK, IDLE_MAX_FALLBACK])
 )
@@ -113,8 +111,7 @@ const easingForScale = (scaleValue: number) => {
   return `cubic-bezier(${x1.toFixed(3)}, ${y1.toFixed(3)}, ${x2.toFixed(3)}, ${y2.toFixed(3)})`
 }
 
-const randomBetween = (min: number, max: number) =>
-  min + rng() * (max - min)
+const randomBetween = (min: number, max: number) => min + rng() * (max - min)
 
 const randomInt = (min: number, max: number) =>
   Math.floor(randomBetween(min, max + 1))
@@ -187,7 +184,9 @@ const scheduleIdle = () => {
   }
 
   const [min, max] = normalizedFrequencyRange.value
-  const delay = props.randomizeOnMount ? randomInt(min, max) : resolveMidpoint(min, max)
+  const delay = props.randomizeOnMount
+    ? randomInt(min, max)
+    : resolveMidpoint(min, max)
   idleTimer = setTimeout(() => {
     startPulseSequence()
   }, delay)

@@ -43,7 +43,14 @@ const i18n = createI18n({
 
 const VDataTableStub = defineComponent({
   name: 'VDataTableStub',
-  props: ['headers', 'items', 'itemsPerPage', 'density', 'class', 'hideDefaultFooter'],
+  props: [
+    'headers',
+    'items',
+    'itemsPerPage',
+    'density',
+    'class',
+    'hideDefaultFooter',
+  ],
   setup(props, { slots }) {
     const items = computed(
       () => (props.items as Array<{ rowType?: string }> | undefined) ?? []
@@ -116,7 +123,11 @@ const ImpactCoefficientBadgeStub = defineComponent({
   props: ['value', 'tooltipParams'],
   setup(props) {
     return () =>
-      h('span', { class: 'impact-coefficient-stub' }, String(props.value ?? '—'))
+      h(
+        'span',
+        { class: 'impact-coefficient-stub' },
+        String(props.value ?? '—')
+      )
   },
 })
 
@@ -162,7 +173,11 @@ describe('ProductImpactDetailsTable', () => {
 
     const wrapper = mountComponent(scores)
     const vm = wrapper.vm as unknown as {
-      tableItems: Array<{ id: string; rowType: string; displayValue: number | null }>
+      tableItems: Array<{
+        id: string
+        rowType: string
+        displayValue: number | null
+      }>
       expandedGroups: Set<string>
     }
 
@@ -186,7 +201,12 @@ describe('ProductImpactDetailsTable', () => {
 
     const wrapper = mountComponent(scores)
     const vm = wrapper.vm as unknown as {
-      tableItems: Array<{ id: string; rowType: string; displayValue: number | null; parentId?: string }>
+      tableItems: Array<{
+        id: string
+        rowType: string
+        displayValue: number | null
+        parentId?: string
+      }>
       toggleGroup: (id: string) => void
     }
 

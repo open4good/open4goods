@@ -19,7 +19,10 @@ describe('AgentTemplateSelector', () => {
     VContainer: { template: '<div><slot /></div>' },
     VRow: { template: '<div><slot /></div>' },
     VCol: { template: '<div><slot /></div>' },
-    VCard: { template: '<div data-test="agent-template-card" @click="$emit(\'click\')"><slot /></div>' },
+    VCard: {
+      template:
+        '<div data-test="agent-template-card" @click="$emit(\'click\')"><slot /></div>',
+    },
     VCardItem: { template: '<div><slot /><slot name="prepend" /></div>' },
     VIcon: { template: '<span />' },
     VCardTitle: { template: '<div><slot /></div>' },

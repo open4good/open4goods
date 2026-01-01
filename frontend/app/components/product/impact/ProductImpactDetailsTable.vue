@@ -414,11 +414,7 @@ const tableItems = computed<TableRow[]>(() => {
 
   if (groupedScores.value.divers.length) {
     rows.push(
-      buildAggregateRow(
-        DIVERS_AGGREGATE_ID,
-        null,
-        groupedScores.value.divers
-      )
+      buildAggregateRow(DIVERS_AGGREGATE_ID, null, groupedScores.value.divers)
     )
 
     if (expanded.has(DIVERS_AGGREGATE_ID)) {

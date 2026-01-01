@@ -208,7 +208,10 @@
           </v-chip>
         </template>
       </v-data-table>
-      <p v-else class="product-attributes__empty product-attributes__empty--audit">
+      <p
+        v-else
+        class="product-attributes__empty product-attributes__empty--audit"
+      >
         {{
           $t(
             auditHasFilters
@@ -470,8 +473,8 @@ const normalizeSourcingSources = (
   }
 
   if (Array.isArray(sources)) {
-    return sources.filter(
-      (entry): entry is ProductSourcedAttributeDto => Boolean(entry)
+    return sources.filter((entry): entry is ProductSourcedAttributeDto =>
+      Boolean(entry)
     )
   }
 
@@ -795,9 +798,7 @@ const auditRows = computed<AuditAttributeRow[]>(() => {
       t('product.attributes.audit.noBestValue')
 
     const name =
-      config.name?.trim() ||
-      indexedAttribute?.name?.trim() ||
-      normalizedKey
+      config.name?.trim() || indexedAttribute?.name?.trim() || normalizedKey
 
     const synonyms = config.synonyms
     const synonymSources = buildSynonymSourcing(synonyms)

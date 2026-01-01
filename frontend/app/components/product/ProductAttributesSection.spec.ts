@@ -41,14 +41,7 @@ const VTableStub = defineComponent({
 
 const VDataTableStub = defineComponent({
   name: 'VDataTableStub',
-  props: [
-    'headers',
-    'items',
-    'itemsPerPage',
-    'itemClass',
-    'density',
-    'class',
-  ],
+  props: ['headers', 'items', 'itemsPerPage', 'itemClass', 'density', 'class'],
   setup(props, { slots }) {
     return () =>
       h(
@@ -60,16 +53,12 @@ const VDataTableStub = defineComponent({
               ? props.itemClass(item)
               : props.itemClass
 
-          return h(
-            'div',
-            { class: ['v-data-table-row-stub', rowClass] },
-            [
-              slots['item.attribute']?.({ item }),
-              slots['item.bestValue']?.({ item }),
-              slots['item.sources']?.({ item }),
-              slots['item.indexed']?.({ item }),
-            ]
-          )
+          return h('div', { class: ['v-data-table-row-stub', rowClass] }, [
+            slots['item.attribute']?.({ item }),
+            slots['item.bestValue']?.({ item }),
+            slots['item.sources']?.({ item }),
+            slots['item.indexed']?.({ item }),
+          ])
         })
       )
   },

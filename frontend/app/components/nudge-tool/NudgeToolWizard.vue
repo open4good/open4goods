@@ -111,6 +111,15 @@
         class="nudge-wizard__progress-bubbles"
         :style="footerOffsetStyle"
       >
+        <v-btn
+          v-if="activeStepKey !== 'category'"
+          variant="text"
+          class="px-2"
+          color="primary"
+          @click="navigateToCategoryResults"
+        >
+          {{ $t('nudge-tool.actions.advancedSearch') }}
+        </v-btn>
         <v-tooltip
           v-for="step in progressSteps"
           :key="step.key"
@@ -424,7 +433,7 @@ const steps = computed<WizardStep[]>(() => {
 
   sequence.push({
     key: 'category',
-      component: NudgeToolStepCategory,
+    component: NudgeToolStepCategory,
     title: t('nudge-tool.steps.category.title'),
     subtitle: t('nudge-tool.steps.category.subtitle'),
     props: {
