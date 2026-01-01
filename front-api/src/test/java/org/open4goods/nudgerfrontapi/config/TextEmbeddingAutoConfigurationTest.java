@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
 import ai.djl.repository.zoo.ZooModel;
+import ai.djl.translate.TranslateException;
 
 class TextEmbeddingAutoConfigurationTest
 {
@@ -59,7 +60,7 @@ class TextEmbeddingAutoConfigurationTest
     private static class StubImageFactory extends AbstractImageModelFactory
     {
         @Override
-        public ZooModel<Image, float[]> loadModel(String modelUrl, int imageSize) throws Exception
+        public ZooModel<Image, float[]> loadModel(String modelUrl, int imageSize) throws TranslateException
         {
             Predictor<Image, float[]> predictor = org.mockito.Mockito.mock(Predictor.class);
             org.mockito.Mockito.when(predictor.predict(org.mockito.ArgumentMatchers.any(Image.class)))

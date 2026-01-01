@@ -25,10 +25,7 @@ public class DjlEmbeddingProperties
     @NotBlank
     private String textModelUrl = "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small";
 
-    /**
-     * Remote identifier for the multimodal embedding model (text branch used for fallback).
-     */
-    private String multimodalModelUrl = "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1";
+
 
     /**
      * When true, startup fails if neither model can be loaded.
@@ -63,7 +60,7 @@ public class DjlEmbeddingProperties
      * Remote identifier for the image embedding (vision) model.
      */
     @NotBlank
-    private String visionModelUrl = "djl://ai.djl.pytorch/resnet/0.0.1?layers=18&dataset=imagenet";
+    private String visionModelUrl = "djl://ai.djl.pytorch/resnet18_embedding/0.0.1";
 
     public boolean isEnabled()
     {
@@ -85,15 +82,6 @@ public class DjlEmbeddingProperties
         this.textModelUrl = textModelUrl;
     }
 
-    public String getMultimodalModelUrl()
-    {
-        return multimodalModelUrl;
-    }
-
-    public void setMultimodalModelUrl(String multimodalModelUrl)
-    {
-        this.multimodalModelUrl = multimodalModelUrl;
-    }
 
     public boolean isFailOnMissingModel()
     {

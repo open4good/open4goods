@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import ai.djl.translate.TranslateException;
+
 /**
  * Test-only configuration supplying a lightweight {@link DjlTextEmbeddingService}
  * so integration tests do not depend on external DJL model downloads.
@@ -23,7 +25,7 @@ public class TestTextEmbeddingConfig
     {
         DjlEmbeddingProperties properties = new DjlEmbeddingProperties();
         properties.setTextModelUrl("test-text-model");
-        properties.setMultimodalModelUrl("test-multimodal-model");
+        properties.setVisionModelUrl("test-multimodal-model");
         properties.setFailOnMissingModel(true);
 
         AbstractTextModelFactory factory = new AbstractTextModelFactory()
@@ -49,7 +51,7 @@ public class TestTextEmbeddingConfig
 
     @Bean
     @Primary
-    DjlImageEmbeddingService testImageEmbeddingService()
+    DjlImageEmbeddingService testImageEmbeddingService() throws Exception
     {
         DjlEmbeddingProperties properties = new DjlEmbeddingProperties();
         properties.setVisionModelUrl("test-vision-model");
@@ -58,7 +60,7 @@ public class TestTextEmbeddingConfig
         AbstractImageModelFactory factory = new AbstractImageModelFactory()
         {
             @Override
-            public ai.djl.repository.zoo.ZooModel<ai.djl.modality.cv.Image, float[]> loadModel(String modelUrl, int imageSize)
+            public ai.djl.repository.zoo.ZooModel<ai.djl.modality.cv.Image, float[]> loadModel(String modelUrl, int imageSize) throws TranslateException
             {
                 ai.djl.inference.Predictor<ai.djl.modality.cv.Image, float[]> predictor =
                         Mockito.mock(ai.djl.inference.Predictor.class);

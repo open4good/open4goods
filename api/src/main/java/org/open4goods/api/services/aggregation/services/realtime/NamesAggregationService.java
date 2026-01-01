@@ -39,6 +39,8 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(NamesAggregationService.class);
 
+	private static final int TARGET_DIMS = 512;
+
 	/**
 	 * Kept for DI compatibility even if currently unused.
 	 */
@@ -201,7 +203,8 @@ public class NamesAggregationService extends AbstractAggregationService {
 				if (StringUtils.isNotBlank(textToEmbed)) {
 					final float[] embedding = embeddingService.embed(textToEmbed);
 					if (embedding != null) {
-						data.setEmbedding(embedding);
+						// Forcing to a 512 dims vector
+						data.setEmbedding(to512(embedding));
 					}
 				}
 			} catch (Exception ex) {
@@ -448,5 +451,22 @@ public class NamesAggregationService extends AbstractAggregationService {
 			return combined.substring(0, 1000);
 		}
 		return combined;
+	}
+
+	private float[] to512(float[] embedding) {
+	    if (embedding.length > TARGET_DIMS) {
+	        throw new IllegalArgumentException(
+	            "Embedding has more than 512 dims: " + embedding.length
+	        );
+	    }
+
+	    if (embedding.length == TARGET_DIMS) {
+	        return embedding;
+	    }
+
+	    float[] padded = new float[TARGET_DIMS];
+	    System.arraycopy(embedding, 0, padded, 0, embedding.length);
+	    // remaining values default to 0.0f
+	    return padded;
 	}
 }

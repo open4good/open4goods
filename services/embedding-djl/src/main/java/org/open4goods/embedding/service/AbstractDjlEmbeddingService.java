@@ -25,7 +25,7 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
     private ZooModel<String, float[]> textModel;
     private ZooModel<String, float[]> visionModel;
     private String resolvedTextModelLocation;
-    private String resolvedMultimodalModelLocation;
+    private String resolvedVisionModelLocation;
 
     protected AbstractDjlEmbeddingService(DjlEmbeddingProperties properties, AbstractTextModelFactory modelFactory)
     {
@@ -37,10 +37,10 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
     public void initialize()
     {
         resolvedTextModelLocation = properties.getTextModelUrl();
-        resolvedMultimodalModelLocation = properties.getMultimodalModelUrl();
+        resolvedVisionModelLocation = properties.getVisionModelUrl();
 
         textModel = tryLoad(resolvedTextModelLocation, "text");
-        visionModel = tryLoad(resolvedMultimodalModelLocation, "multimodal");
+        visionModel = tryLoad(resolvedVisionModelLocation, "multimodal");
 
         if (textModel == null && visionModel == null && properties.isFailOnMissingModel())
         {
@@ -77,7 +77,7 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
 
     public Optional<String> getMultimodalModelLocation()
     {
-        return Optional.ofNullable(resolvedMultimodalModelLocation);
+        return Optional.ofNullable(resolvedVisionModelLocation);
     }
 
     public boolean isTextModelLoaded()

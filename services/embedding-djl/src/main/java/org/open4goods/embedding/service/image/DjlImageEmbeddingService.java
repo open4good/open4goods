@@ -1,6 +1,5 @@
 package org.open4goods.embedding.service.image;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
@@ -8,11 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import ai.djl.MalformedModelException;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
-import ai.djl.repository.zoo.ModelNotFoundException;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.translate.TranslateException;
 import jakarta.annotation.PostConstruct;
@@ -38,13 +35,10 @@ public class DjlImageEmbeddingService
 
     /**
      * Initializes the DJL model once at startup.
-     *
-     * @throws IOException when the model cannot be loaded.
-     * @throws MalformedModelException when the model is malformed.
-     * @throws ModelNotFoundException when the model cannot be resolved.
+     * @throws Exception
      */
     @PostConstruct
-    public void initialize() throws IOException, MalformedModelException, ModelNotFoundException
+    public void initialize() throws Exception
     {
         String modelUrl = properties.getVisionModelUrl();
         int imageSize = properties.getImageInputSize();

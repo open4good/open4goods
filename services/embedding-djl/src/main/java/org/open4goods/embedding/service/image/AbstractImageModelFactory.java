@@ -5,6 +5,7 @@ import java.io.IOException;
 import ai.djl.MalformedModelException;
 import ai.djl.repository.zoo.ModelNotFoundException;
 import ai.djl.repository.zoo.ZooModel;
+import ai.djl.translate.TranslateException;
 import ai.djl.modality.cv.Image;
 
 /**
@@ -21,7 +22,9 @@ public abstract class AbstractImageModelFactory
      * @throws IOException when the model cannot be loaded.
      * @throws MalformedModelException when the model format is invalid.
      * @throws ModelNotFoundException when the model cannot be resolved.
+     * @throws TranslateException
+     * @throws Exception
      */
     public abstract ZooModel<Image, float[]> loadModel(String modelUrl, int imageSize)
-            throws IOException, MalformedModelException, ModelNotFoundException;
+            throws IOException, MalformedModelException, ModelNotFoundException, TranslateException, Exception;
 }

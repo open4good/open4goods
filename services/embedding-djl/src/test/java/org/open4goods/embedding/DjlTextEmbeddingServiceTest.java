@@ -34,7 +34,7 @@ class DjlTextEmbeddingServiceTest
     {
         DjlEmbeddingProperties properties = baseProperties();
         properties.setTextModelUrl("text-model");
-        properties.setMultimodalModelUrl("multi-model");
+        properties.setVisionModelUrl("multi-model");
 
         ZooModel<String, float[]> multimodalModel = stubModel(new float[] { 0.3f, 0.4f });
         AbstractTextModelFactory factory = new AbstractTextModelFactory()
@@ -81,7 +81,7 @@ class DjlTextEmbeddingServiceTest
     {
         DjlEmbeddingProperties properties = new DjlEmbeddingProperties();
         properties.setTextModelUrl("text-model");
-        properties.setMultimodalModelUrl("multimodal-model");
+        properties.setVisionModelUrl("multimodal-model");
         properties.setFailOnMissingModel(true);
         return properties;
     }
