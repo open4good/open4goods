@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.commons.model.dto.VerticalSearchRequest;
 import org.open4goods.commons.model.dto.VerticalSearchResponse;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -31,7 +32,7 @@ class SearchServiceTest
     private ProductRepository productRepository;
 
     @Mock
-    private TextEmbeddingService textEmbeddingService;
+    private DjlTextEmbeddingService textEmbeddingService;
 
     @Mock
     private SearchHits<Product> searchHits;

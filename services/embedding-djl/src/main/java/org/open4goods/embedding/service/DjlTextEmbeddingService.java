@@ -3,11 +3,11 @@ package org.open4goods.embedding.service;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 
 /**
- * DJL-backed {@link org.open4goods.commons.services.TextEmbeddingService} for text inputs.
+ * DJL-backed service for text embedding inputs.
  */
 public class DjlTextEmbeddingService extends AbstractDjlEmbeddingService
 {
-    public DjlTextEmbeddingService(DjlEmbeddingProperties properties, EmbeddingModelFactory modelFactory)
+    public DjlTextEmbeddingService(DjlEmbeddingProperties properties, AbstractTextModelFactory modelFactory)
     {
         super(properties, modelFactory);
     }

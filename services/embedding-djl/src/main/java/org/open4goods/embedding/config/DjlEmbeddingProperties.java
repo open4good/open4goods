@@ -20,36 +20,18 @@ public class DjlEmbeddingProperties
     private boolean enabled = true;
 
     /**
-     * Prefer loading models from the filesystem when a local path is provided.
-     */
-    private boolean preferLocalModels = true;
-
-    /**
-     * Local filesystem path to the text embedding model. When {@link #preferLocalModels}
-     * is enabled and the path exists, it will be used instead of {@link #textModelUrl}.
-     */
-    private String textModelPath = "/opt/open4goods/models/text-embedding";
-
-    /**
-     * Local filesystem path to the multimodal text embedding model.
-     */
-    private String multimodalModelPath = "/opt/open4goods/models/multimodal-embedding";
-
-    /**
      * Remote identifier for the text-only embedding model.
      */
     @NotBlank
-    private String textModelUrl = "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-base";
+    private String textModelUrl = "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small";
 
     /**
      * Remote identifier for the multimodal embedding model (text branch used for fallback).
      */
-    @NotBlank
     private String multimodalModelUrl = "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1";
 
     /**
-     * When true, startup fails if neither model can be loaded. If a local model is missing
-     * and remote fallback is available, the application will still start unless both models fail.
+     * When true, startup fails if neither model can be loaded.
      */
     private boolean failOnMissingModel = true;
 
@@ -60,21 +42,28 @@ public class DjlEmbeddingProperties
     private int embeddingDimension = 512;
 
     /**
+     * Input size (in pixels) used for vision models.
+     */
+    @Min(1)
+    private int imageInputSize = 224;
+
+    /**
      * Pooling strategy applied by DJL translator.
      */
     @NotBlank
     private String poolingMode = "mean";
 
     /**
-     * Whether to normalise the returned embedding vectors.
-     */
-    private boolean normalizeOutputs = true;
-
-    /**
      * Engine name supplied to DJL criteria.
      */
     @NotBlank
     private String engine = "PyTorch";
+
+    /**
+     * Remote identifier for the image embedding (vision) model.
+     */
+    @NotBlank
+    private String visionModelUrl = "djl://ai.djl.pytorch/resnet/0.0.1?layers=18&dataset=imagenet";
 
     public boolean isEnabled()
     {
@@ -84,36 +73,6 @@ public class DjlEmbeddingProperties
     public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
-    }
-
-    public boolean isPreferLocalModels()
-    {
-        return preferLocalModels;
-    }
-
-    public void setPreferLocalModels(boolean preferLocalModels)
-    {
-        this.preferLocalModels = preferLocalModels;
-    }
-
-    public String getTextModelPath()
-    {
-        return textModelPath;
-    }
-
-    public void setTextModelPath(String textModelPath)
-    {
-        this.textModelPath = textModelPath;
-    }
-
-    public String getMultimodalModelPath()
-    {
-        return multimodalModelPath;
-    }
-
-    public void setMultimodalModelPath(String multimodalModelPath)
-    {
-        this.multimodalModelPath = multimodalModelPath;
     }
 
     public String getTextModelUrl()
@@ -156,6 +115,16 @@ public class DjlEmbeddingProperties
         this.embeddingDimension = embeddingDimension;
     }
 
+    public int getImageInputSize()
+    {
+        return imageInputSize;
+    }
+
+    public void setImageInputSize(int imageInputSize)
+    {
+        this.imageInputSize = imageInputSize;
+    }
+
     public String getPoolingMode()
     {
         return poolingMode;
@@ -166,16 +135,6 @@ public class DjlEmbeddingProperties
         this.poolingMode = poolingMode;
     }
 
-    public boolean isNormalizeOutputs()
-    {
-        return normalizeOutputs;
-    }
-
-    public void setNormalizeOutputs(boolean normalizeOutputs)
-    {
-        this.normalizeOutputs = normalizeOutputs;
-    }
-
     public String getEngine()
     {
         return engine;
@@ -184,5 +143,15 @@ public class DjlEmbeddingProperties
     public void setEngine(String engine)
     {
         this.engine = engine;
+    }
+
+    public String getVisionModelUrl()
+    {
+        return visionModelUrl;
+    }
+
+    public void setVisionModelUrl(String visionModelUrl)
+    {
+        this.visionModelUrl = visionModelUrl;
     }
 }

@@ -1,6 +1,12 @@
-package org.open4goods.api.services.completion.image;
+package org.open4goods.embedding.service.image;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ai.djl.Model;
 import ai.djl.modality.cv.ImageFactory;
@@ -11,16 +17,14 @@ import ai.djl.ndarray.types.Shape;
 import ai.djl.nn.Block;
 import ai.djl.metric.Metrics;
 import ai.djl.translate.TranslatorContext;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
-class EmbeddingTranslatorTest {
+class EmbeddingTranslatorTest
+{
 
     @Test
     @Disabled("Requires downloading native PyTorch binaries which is unavailable in offline test runs")
-    void processInputProducesNormalizedCHWTensor() {
+    void processInputProducesNormalizedCHWTensor()
+    {
         EmbeddingTranslator translator = new EmbeddingTranslator(2);
 
         BufferedImage bufferedImage = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
@@ -31,7 +35,8 @@ class EmbeddingTranslatorTest {
 
         ai.djl.modality.cv.Image djlImage = ImageFactory.getInstance().fromImage(bufferedImage);
 
-        try (MockTranslatorContext context = new MockTranslatorContext()) {
+        try (MockTranslatorContext context = new MockTranslatorContext())
+        {
             NDList ndList = translator.processInput(context, djlImage);
             NDArray array = ndList.singletonOrThrow();
 
@@ -40,7 +45,7 @@ class EmbeddingTranslatorTest {
             float[] data = array.toFloatArray();
             assertThat(data).hasSize(12);
 
-            float[] expected = new float[]{
+            float[] expected = new float[] {
                     normalize(1f, 0.485f, 0.229f),
                     normalize(0f, 0.485f, 0.229f),
                     normalize(0f, 0.485f, 0.229f),
@@ -59,51 +64,60 @@ class EmbeddingTranslatorTest {
         }
     }
 
-    private static float normalize(float value, float mean, float std) {
+    private static float normalize(float value, float mean, float std)
+    {
         return (value - mean) / std;
     }
 
-    private static class MockTranslatorContext implements TranslatorContext {
-
+    private static class MockTranslatorContext implements TranslatorContext
+    {
         private final NDManager manager = NDManager.newBaseManager();
 
         @Override
-        public Model getModel() {
+        public Model getModel()
+        {
             return null;
         }
 
         @Override
-        public NDManager getNDManager() {
+        public NDManager getNDManager()
+        {
             return manager;
         }
 
         @Override
-        public NDManager getPredictorManager() {
+        public NDManager getPredictorManager()
+        {
             return manager;
         }
 
         @Override
-        public Block getBlock() {
+        public Block getBlock()
+        {
             return null;
         }
 
         @Override
-        public Metrics getMetrics() {
+        public Metrics getMetrics()
+        {
             return null;
         }
 
         @Override
-        public Object getAttachment(String key) {
+        public Object getAttachment(String key)
+        {
             return null;
         }
 
         @Override
-        public void setAttachment(String key, Object value) {
+        public void setAttachment(String key, Object value)
+        {
             // no-op
         }
 
         @Override
-        public void close() {
+        public void close()
+        {
             manager.close();
         }
     }

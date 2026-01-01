@@ -41,7 +41,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.commons.services.TextEmbeddingService;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,11 +136,11 @@ public class SearchService {
     private final VerticalsConfigService verticalsConfigService;
     private final ProductMappingService productMappingService;
     private final ApiProperties apiProperties;
-    private final TextEmbeddingService textEmbeddingService;
+    private final DjlTextEmbeddingService textEmbeddingService;
     private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
     public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
-            @Lazy ProductMappingService productMappingService, ApiProperties apiProperties, TextEmbeddingService textEmbeddingService) {
+            @Lazy ProductMappingService productMappingService, ApiProperties apiProperties, DjlTextEmbeddingService textEmbeddingService) {
         this.repository = repository;
         this.verticalsConfigService = verticalsConfigService;
         this.productMappingService = productMappingService;

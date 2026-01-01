@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
+import org.open4goods.embedding.service.AbstractTextModelFactory;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
-import org.open4goods.embedding.service.EmbeddingModelFactory;
 
 import ai.djl.inference.Predictor;
 import ai.djl.repository.zoo.ZooModel;
@@ -21,7 +21,7 @@ class DjlTextEmbeddingServiceTest
     {
         DjlEmbeddingProperties properties = baseProperties();
         ZooModel<String, float[]> textModel = stubModel(new float[] { 0.1f, 0.2f });
-        EmbeddingModelFactory factory = (location, pooling, normalize, engine) -> textModel;
+        AbstractTextModelFactory factory = new StubFactory(textModel);
 
         DjlTextEmbeddingService service = new DjlTextEmbeddingService(properties, factory);
         service.initialize();
@@ -37,12 +37,17 @@ class DjlTextEmbeddingServiceTest
         properties.setMultimodalModelUrl("multi-model");
 
         ZooModel<String, float[]> multimodalModel = stubModel(new float[] { 0.3f, 0.4f });
-        EmbeddingModelFactory factory = (location, pooling, normalize, engine) -> {
-            if ("text-model".equals(location))
+        AbstractTextModelFactory factory = new AbstractTextModelFactory()
+        {
+            @Override
+            public ZooModel<String, float[]> loadModel(String modelLocation, String poolingMode, String engine)
             {
-                throw new IllegalStateException("text model missing");
+                if ("text-model".equals(modelLocation))
+                {
+                    throw new IllegalStateException("text model missing");
+                }
+                return multimodalModel;
             }
-            return multimodalModel;
         };
 
         DjlTextEmbeddingService service = new DjlTextEmbeddingService(properties, factory);
@@ -57,8 +62,13 @@ class DjlTextEmbeddingServiceTest
         DjlEmbeddingProperties properties = baseProperties();
         properties.setFailOnMissingModel(true);
 
-        EmbeddingModelFactory factory = (location, pooling, normalize, engine) -> {
-            throw new IllegalStateException("unavailable");
+        AbstractTextModelFactory factory = new AbstractTextModelFactory()
+        {
+            @Override
+            public ZooModel<String, float[]> loadModel(String modelLocation, String poolingMode, String engine)
+            {
+                throw new IllegalStateException("unavailable");
+            }
         };
 
         DjlTextEmbeddingService service = new DjlTextEmbeddingService(properties, factory);
@@ -70,7 +80,6 @@ class DjlTextEmbeddingServiceTest
     private DjlEmbeddingProperties baseProperties()
     {
         DjlEmbeddingProperties properties = new DjlEmbeddingProperties();
-        properties.setPreferLocalModels(false);
         properties.setTextModelUrl("text-model");
         properties.setMultimodalModelUrl("multimodal-model");
         properties.setFailOnMissingModel(true);
@@ -86,5 +95,21 @@ class DjlTextEmbeddingServiceTest
         ZooModel<String, float[]> model = mock(ZooModel.class);
         when(model.newPredictor()).thenReturn(predictor);
         return model;
+    }
+
+    private static class StubFactory extends AbstractTextModelFactory
+    {
+        private final ZooModel<String, float[]> model;
+
+        private StubFactory(ZooModel<String, float[]> model)
+        {
+            this.model = model;
+        }
+
+        @Override
+        public ZooModel<String, float[]> loadModel(String modelLocation, String poolingMode, String engine)
+        {
+            return model;
+        }
     }
 }

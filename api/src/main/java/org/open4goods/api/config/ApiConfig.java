@@ -14,8 +14,7 @@ import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
-import org.open4goods.api.services.completion.image.DjlImageEmbeddingService;
-import org.open4goods.api.services.completion.image.ImageEmbeddingService;
+import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.brand.repository.BrandScoresRepository;
@@ -303,12 +302,8 @@ public class ApiConfig {
 
 
 	@Bean
-	ImageEmbeddingService imageEmbeddingService(ApiProperties apiProperties) {
-		return new DjlImageEmbeddingService(apiProperties);
-	}
-	@Bean
-	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties, ImageEmbeddingService imageEmbeddingService) {
-		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties,  imageEmbeddingService);
+	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties, DjlImageEmbeddingService imageEmbeddingService) {
+		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties, imageEmbeddingService);
 
 	}
 
