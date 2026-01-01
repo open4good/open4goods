@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useThemeAsset } from '~/composables/useThemedAsset'
+import HomePhotoInvitation from './HomePhotoInvitation.vue'
+import { useRandomHomepageImages } from '~/composables/useRandomHomepageImages'
 
 type SolutionBenefit = {
   emoji: string
@@ -13,10 +14,11 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { gainImage } = useRandomHomepageImages()
 
 const sectionTitle = computed(() => t('home.solution.title'))
 const sectionDescription = computed(() => t('home.solution.description'))
-const solutionImageAsset = useThemeAsset('solutionImage')
+const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
 </script>
 
 <template>
@@ -61,15 +63,10 @@ const solutionImageAsset = useThemeAsset('solutionImage')
         </v-col>
         <v-col cols="12" md="6" class="home-solution__visual">
           <div class="home-solution__image-wrapper">
-            <img
-              :src="solutionImageAsset || '/images/home/nudger-screaming.webp'"
-              :alt="sectionTitle"
-              class="home-solution__image"
-              sizes="(min-width: 960px) 306px, 60vw"
-              width="1024"
-              height="1536"
-              loading="lazy"
-              decoding="async"
+            <HomePhotoInvitation
+              class="home-solution__invitation"
+              :image-src="gainImage"
+              :image-alt="invitationImageAlt"
             />
           </div>
         </v-col>
@@ -111,12 +108,9 @@ const solutionImageAsset = useThemeAsset('solutionImage')
   justify-content: center
   align-items: center
 
-.home-solution__image
-  width: min(66%, 320px)
-  height: auto
-  display: block
-  transform: rotate(3deg)
-  filter: drop-shadow(0 20px 40px rgba(var(--v-theme-shadow-primary-600), 0.15))
+.home-solution__invitation
+  max-width: 360px
+  width: 100%
 
 .home-solution__list
   margin: 0

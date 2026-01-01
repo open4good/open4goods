@@ -307,6 +307,15 @@
         }
       }
     },
+    "photoInvitation": {
+      "title": "What if it were you?",
+      "ariaLabel": "Submit your photo for Nudger",
+      "imageAlt": "Smiling portrait invitation",
+      "contact": {
+        "subject": "Photo proposal for Nudger",
+        "message": "Hello,\n\nI would like to submit a photo to appear on Nudger. If it fits, I agree to grant the rights for use on Nudger only.\n\nThanks and have a great day."
+      }
+    },
     "features": {
       "title": "Key features",
       "subtitle": "See what Nudger puts at your fingertips.",
