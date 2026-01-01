@@ -1,4 +1,15 @@
 <template>
+
+        <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
+        <ProductImpactRadarChart
+          class="impact-ecoscore__analysis-radar-chart"
+          :axes="radarAxes"
+          :series="chartSeries"
+          :product-name="productName"
+        />
+      </div>
+
+      
   <article class="impact-details">
     <h3 class="impact-details__title">
       {{ $t('product.impact.detailsTitle') }}

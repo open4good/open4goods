@@ -166,7 +166,7 @@
               "label": "Sans se faire avoir sur les prix",
               "segments": [
                 {
-                  "text": "Sans se faire avoir sur les prix avec plus de "
+                  "text": "Sans se faire avoir sur les prix avec "
                 },
                 {
                   "text": "{partnersLink}",
@@ -175,7 +175,7 @@
               ]
             }
           ],
-          "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
+          "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount}+ partenaires",
           "partnerLinkFallback": "nos partenaires"
         },
         "context": {

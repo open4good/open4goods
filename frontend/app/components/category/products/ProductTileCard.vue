@@ -29,9 +29,6 @@
             :max="5"
             size="small"
           />
-          <span v-else class="product-tile-card__score-fallback">
-            {{ notRatedLabel }}
-          </span>
         </div>
       </div>
 
@@ -77,8 +74,8 @@
             v-if="imageSrc"
             :src="imageSrc"
             :alt="headerTitle"
-            width="52"
-            height="52"
+            width="150"
+            height="150"
             class="product-tile-card__thumbnail"
             contain
           >
