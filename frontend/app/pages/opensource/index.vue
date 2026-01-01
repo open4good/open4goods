@@ -5,9 +5,8 @@
       :title="t('opensource.hero.title')"
       :subtitle="t('opensource.hero.subtitle')"
       description-bloc-id="webpages:opensource:hero-description"
-      background="parallax"
-      :is-parallax="true"
-      :parallax-layers="parallaxLayers"
+      background="surface-variant"
+      surface-variant="halo"
       layout="2-columns"
       container="lg"
       :primary-cta="heroPrimaryCta"
@@ -148,22 +147,6 @@ import OpensourcePillarsSection from '~/components/domains/opensource/Opensource
 import OpensourceContributionSection from '~/components/domains/opensource/OpensourceContributionSection.vue'
 import OpensourceResourcesSection from '~/components/domains/opensource/OpensourceResourcesSection.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import { useThemedAsset } from '~/composables/useThemedAsset'
-
-const parallaxLayers = [
-  {
-    src: useThemedAsset('placeholders/generated/opensource_layer1.svg'),
-    speed: 0.2,
-  },
-  {
-    src: useThemedAsset('placeholders/generated/opensource_layer2.svg'),
-    speed: 0.5,
-  },
-  {
-    src: useThemedAsset('placeholders/generated/opensource_layer3.svg'),
-    speed: 1.0,
-  },
-]
 
 interface PillarCardDisplay {
   icon: string

@@ -4,7 +4,9 @@
       "hero": {
         "eyebrow": "Saison de Noël",
         "title": "Un hiver tout en douceur",
-        "titleSubtitle": ["Des cadeaux qui ont du sens."],
+        "titleSubtitle": [
+          "Des cadeaux qui ont du sens."
+        ],
         "subtitles": [
           "Des idées qui réchauffent le cœur.",
           "Petites attentions, grande joie.",
@@ -111,7 +113,9 @@
       "hero": {
         "eyebrow": "Nudger, c'est :",
         "title": "Acheter mieux. Sans dépenser plus.",
-        "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
+        "titleSubtitle": [
+          "Acheter mieux. Sans dépenser plus."
+        ],
         "subtitles": [
           "Gagne du temps. Choisis librement.",
           "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -125,7 +129,6 @@
           "placeholder": "Recherchez un produit ou une catégorie",
           "ariaLabel": "Rechercher un produit responsable",
           "cta": "NUDGER",
-
           "helpersTitle": "Offre avec intention. Compare avec impact.",
           "helpers": [
             {
@@ -231,7 +234,9 @@
     "hero": {
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
-      "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
+      "titleSubtitle": [
+        "Acheter mieux. Sans dépenser plus."
+      ],
       "subtitles": [
         "Gagne du temps. Choisis librement.",
         "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -287,7 +292,7 @@
             "label": "Sans se faire avoir sur les prix",
             "segments": [
               {
-                "text": "Sans se faire avoir sur les prix avec plus de "
+                "text": "Sans se faire avoir sur les prix avec "
               },
               {
                 "text": "{partnersLink}",
@@ -296,7 +301,6 @@
             ]
           }
         ],
-
         "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
         "partnerLinkFallback": "nos partenaires"
       },
@@ -335,11 +339,11 @@
     },
     "solution": {
       "title": "Acheter informé, simplement",
-      "description": "Nudger analyse les données écologiques, sociétales, techniques et les prix pour simplifier vos achats.",
+      "description": "Nudger analyse les données écologiques, sociétales, techniques et les prix pour simplifier les achats.",
       "benefits": {
         "time": {
           "title": "Gagnez du temps",
-          "description": "On analyse pour vous. Avec un soupçon d'IA, pour tout savoir sur votre produit."
+          "description": "On analyse pour toi l'impact, les prix, et les caracteristiques techniques. Tu peux peu même demander une synthèse IA si personne ne l'a encore fait."
         },
         "savings": {
           "title": "Payez le juste prix",
@@ -353,10 +357,11 @@
           "title": "0 Données personnells collectées",
           "description": "Transparent, sobres et indépendants. Données en open-data, code en open-source."
         }
-      }
+      },
+      "nextImage": "Afficher une autre illustration"
     },
     "photoInvitation": {
-      "title": "Et si c'était vous ?",
+      "title": "Toi aussi ?",
       "ariaLabel": "Proposer votre photo pour Nudger",
       "imageAlt": "Portrait souriant invitant à participer",
       "contact": {
@@ -598,8 +603,6 @@
   },
   "shared": {
     "roundedCard": {
-      "tooltipSelected": "Carte sélectionnée",
-      "tooltipIdle": "Marquer cette carte comme sélectionnée",
       "cornerSelected": "Sélectionné",
       "cornerIdle": "Disponible"
     }
@@ -626,10 +629,7 @@
         "breadcrumbAriaLabel": "Fil d'Ariane de la navigation par catégories",
         "childDescription": "Explorez les sous-catégories et les sélections associées aux {category}.",
         "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
-        "resultsSummary": {
-          "one": "{count} catégorie affichée",
-          "other": "{count} catégories affichées"
-        },
+        "resultsSummary": {},
         "rootBreadcrumb": "Toutes les catégories",
         "rootProductsTitle": "Les produits disponibles",
         "searchLabel": "Rechercher une catégorie",
@@ -829,7 +829,6 @@
     },
     "hero": {
       "breadcrumbAriaLabel": "Fil d'Ariane des catégories",
-      "breadcrumbDivider": "/",
       "missingBreadcrumbTitle": "Catégorie",
       "nudge": {
         "cta": "Trouver les bons produits",
@@ -931,7 +930,6 @@
   },
   "common": {
     "actions": {
-      "goHome": "Retour à l'accueil",
       "retry": "Réessayer"
     },
     "boolean": {
@@ -1896,10 +1894,7 @@
       "subtitle": "Entreprendre n'est jamais simple. Ces mentors partagent leur expérience avec bienveillance.",
       "title": "Ils nous aident"
     },
-    "seo": {
-      "description": "Découvrez les organisations, marketplaces et mentors qui aident Nudger à accélérer le commerce responsable.",
-      "title": "Nos partenaires et mentors"
-    }
+    "seo": {}
   },
   "search": {
     "hero": {
@@ -1928,10 +1923,7 @@
     },
     "results": {
       "summary": "Affichage de {countLabel} pour « {query} »",
-      "count": {
-        "one": "{count} résultat",
-        "other": "{count} résultats"
-      }
+      "count": {}
     },
     "notice": {
       "fallback": "Nous n'avons pas identifié de verticale précise, voici les produits les plus pertinents globalement."
@@ -1964,10 +1956,7 @@
       }
     },
     "groups": {
-      "count": {
-        "one": "{count} produit",
-        "other": "{count} produits"
-      },
+      "count": {},
       "unknownTitle": "Autres produits",
       "viewCategory": "Accéder à la catégorie",
       "viewCategoryAria": "Accéder à la catégorie {title}"
@@ -2000,7 +1989,6 @@
       "description": "Depuis les pages produits ou catégories, utilisez le bouton comparer pour bâtir votre tableau."
     },
     "sections": {
-      "overview": "Vue d’ensemble",
       "pricing": "Tarifs",
       "ecological": "Impact écologique",
       "technical": "Caractéristiques techniques",
@@ -2181,10 +2169,7 @@
       },
       "sourcing": {
         "bestValue": "Valeur retenue",
-        "sourceCount": {
-          "one": "{count} source",
-          "other": "{count} sources"
-        },
+        "sourceCount": {},
         "columns": {
           "source": "Source",
           "value": "Valeur"
@@ -2205,10 +2190,8 @@
       "navigationAria": "Liste des documents du produit",
       "pageCount": "{count} page | {count} pages",
       "previewUnavailable": "Aucun aperçu n’est disponible pour ce document. Utilisez le lien de téléchargement.",
-      "sidebarTitle": "Documents disponibles",
       "subtitle": "Consultez et téléchargez les documents officiels.",
       "title": "Documentation",
-      "untitled": "Document sans titre",
       "controls": {
         "rotate": "Pivoter le document",
         "rotateLabel": "Pivoter",
@@ -2354,7 +2337,7 @@
       "aggregateScores": {
         "DIVERS": "Divers"
       },
-      "showDetails": "Afficher les indicateurs détaillés",
+      "showDetails": "Afficher les infos détaillées",
       "hideDetails": "Masquer les indicateurs détaillés",
       "title": "Impact écologique"
     },
@@ -2396,7 +2379,6 @@
         "updated": "Mise à jour"
       },
       "newOffers": "Offres neuves",
-      "noOccasionHistory": "Pas d'historique pour les offres d'occasion.",
       "occasionOffers": "Offres d'occasion",
       "offerList": "Liste des offres",
       "metrics": {
@@ -2582,9 +2564,7 @@
         "darkAriaLabel": "Activer le thème sombre",
         "darkTooltip": "Passer au thème sombre",
         "lightAriaLabel": "Activer le thème clair",
-        "lightTooltip": "Passer au thème clair",
-        "nudgerAriaLabel": "Activer le thème signature Nudger",
-        "nudgerTooltip": "Basculer vers le thème signature Nudger"
+        "lightTooltip": "Passer au thème clair"
       },
       "zoom": {
         "label": "Mode accessible",
@@ -2612,7 +2592,6 @@
       "body": "Les notes de version proviennent directement de notre dépôt. Chaque fichier Markdown correspond à une version publiée.",
       "count": "Versions publiées",
       "countItem": "{count} versions publiées",
-      "eyebrow": "En un coup d'œil",
       "latestItem": "Dernière version : {name}",
       "latest": "Version la plus récente",
       "title": "Vue d'ensemble des versions"
@@ -2637,7 +2616,6 @@
       "title": "Notes de version Nudger"
     }
   },
-
   "team": {
     "callouts": {
       "contact": {
@@ -2661,31 +2639,25 @@
       "loadFailed": "Impossible de charger la liste de l'équipe. Merci de réessayer."
     },
     "hero": {
-      "eyebrow": "Notre collectif",
-      "subtitle": "Une équipe engagée qui mêle tech, environnement et impact social.",
-      "title": "Les femmes et les hommes derrière Nudger"
+      "subtitle": "Un collectif engagé qui mêle tech, environnement et impact social.",
+      "title": "On se présente !"
     },
     "loading": "Chargement des membres…",
     "sections": {
       "contributors": {
-        "eyebrow": "Communauté",
         "title": "Les contributeurs"
       },
       "core": {
-        "eyebrow": "Pilotage",
         "title": "La core-team"
       },
       "empty": "Les profils seront bientôt disponibles."
     },
-    "seo": {
-      "description": "Rencontrez les entrepreneuses, ingénieurs et bénévoles qui construisent l'assistant d'achat responsable Nudger.",
-      "title": "Découvrez l'équipe Nudger"
-    }
+    "seo": {}
   },
   "pwa": {
     "install": {
       "title": "Installer Nudger",
-      "description": "Ajoutez Nudger à votre écran d’accueil pour garder éco-scores et alertes prix sous la main.",
+      "description": "Ajoutez Nudger à votre écran d’accueil",
       "cta": "Installer l’app",
       "dismiss": "Plus tard",
       "updateTitle": "Mise à jour disponible",
@@ -2770,8 +2742,6 @@
   "nudge-tool": {
     "actions": {
       "advancedSearch": "Recherche avancée",
-      "continue": "Continuer",
-      "seeAll": "Voir toutes les recommandations",
       "previous": "Précédent",
       "next": "Suivant",
       "viewCategoryResults": "Ouvrir {category} avec vos filtres"
@@ -2785,22 +2755,18 @@
         "tooltip": "Votez pour la prochaine catégorie évaluée"
       }
     },
-    "meta": {
-      "matches": "{count} produits correspondent à vos choix"
-    },
+    "meta": {},
     "steps": {
       "category": {
         "title": "Nudger te guide, pas à pas.",
-        "subtitle": "Choisis une catégorie",
-        "step": "Étape {step}"
+        "subtitle": "Choisis une catégorie"
       },
       "condition": {
         "title": "Neuf ou occasion ?",
         "subtitle": "L'occasion est meilleur pour la planète. Et pour le porte-feuille !",
         "options": {
           "new": "Neuf",
-          "occasion": "Reconditionné",
-          "any": "Peu importe"
+          "occasion": "Reconditionné"
         }
       },
       "scores": {

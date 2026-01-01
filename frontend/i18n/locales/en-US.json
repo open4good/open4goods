@@ -18,7 +18,9 @@
       "hero": {
         "eyebrow": "Responsible shopping",
         "title": "Responsible choices aren't a luxury",
-        "titleSubtitle": ["Buy better. Spend smarter."],
+        "titleSubtitle": [
+          "Buy better. Spend smarter."
+        ],
         "subtitles": [
           "Save time, stay true to your values. Compare effortlessly, choose freely.",
           "Shop smarter without compromise. Nudger balances planet and price.",
@@ -43,15 +45,22 @@
                   "text": "A unique ecological assessment",
                   "to": "/impact-score"
                 },
-                { "text": " and environmental review" }
+                {
+                  "text": " and environmental review"
+                }
               ]
             },
             {
               "icon": "🏷️",
               "label": "The best prices on the market",
               "segments": [
-                { "text": "Stay smart on prices with" },
-                { "text": "{partnersLink}", "to": "/partners" }
+                {
+                  "text": "Stay smart on prices with"
+                },
+                {
+                  "text": "{partnersLink}",
+                  "to": "/partners"
+                }
               ]
             },
             {
@@ -103,7 +112,9 @@
       "hero": {
         "eyebrow": "Bastille Day special",
         "title": "Celebrate conscious choices on 14 July",
-        "titleSubtitle": ["Fireworks of fair prices and transparent impact."],
+        "titleSubtitle": [
+          "Fireworks of fair prices and transparent impact."
+        ],
         "subtitles": [
           "Shop with liberté, égalité, durabilité in mind.",
           "Switch to responsible picks while the skyline lights up."
@@ -118,7 +129,9 @@
             {
               "icon": "🎆",
               "segments": [
-                { "text": "Use the impact score to dodge wasteful picks." }
+                {
+                  "text": "Use the impact score to dodge wasteful picks."
+                }
               ]
             },
             {
@@ -194,7 +207,9 @@
     "hero": {
       "eyebrow": "Responsible shopping",
       "title": "Responsible choices aren't a luxury",
-      "titleSubtitle": ["Buy better. Spend smarter."],
+      "titleSubtitle": [
+        "Buy better. Spend smarter."
+      ],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -315,7 +330,8 @@
           "title": "Trustworthy",
           "description": "Open data, independent recommendations."
         }
-      }
+      },
+      "nextImage": "Show another illustration"
     },
     "photoInvitation": {
       "title": "What if it were you?",
@@ -560,8 +576,6 @@
   },
   "shared": {
     "roundedCard": {
-      "tooltipSelected": "Card selected",
-      "tooltipIdle": "Mark this card as selected",
       "cornerSelected": "Selected",
       "cornerIdle": "Available"
     }
@@ -588,10 +602,7 @@
         "breadcrumbAriaLabel": "Category navigation breadcrumb trail",
         "childDescription": "Explore the subcategories and curated selections inside {category}.",
         "description": "Discover every product family we analyse and jump directly to the most relevant section.",
-        "resultsSummary": {
-          "one": "{count} category visible",
-          "other": "{count} categories visible"
-        },
+        "resultsSummary": {},
         "rootBreadcrumb": "All categories",
         "rootProductsTitle": "Available products",
         "searchLabel": "Search categories",
@@ -791,7 +802,6 @@
     },
     "hero": {
       "breadcrumbAriaLabel": "Category navigation breadcrumb",
-      "breadcrumbDivider": "/",
       "missingBreadcrumbTitle": "Category",
       "nudge": {
         "cta": "Get tailored picks",
@@ -893,7 +903,6 @@
   },
   "common": {
     "actions": {
-      "goHome": "Back to homepage",
       "retry": "Retry"
     },
     "boolean": {
@@ -1858,10 +1867,7 @@
       "subtitle": "Entrepreneurship is never simple. These mentors share their experience with kindness.",
       "title": "They support us"
     },
-    "seo": {
-      "description": "Meet the organisations, marketplaces and mentors helping Nudger accelerate responsible commerce.",
-      "title": "Our partners and mentors"
-    }
+    "seo": {}
   },
   "search": {
     "hero": {
@@ -1890,10 +1896,7 @@
     },
     "results": {
       "summary": "Displaying {countLabel} for “{query}”",
-      "count": {
-        "one": "{count} result",
-        "other": "{count} results"
-      }
+      "count": {}
     },
     "notice": {
       "fallback": "We could not match a specific category, so we are showing the most relevant products overall."
@@ -1926,10 +1929,7 @@
       }
     },
     "groups": {
-      "count": {
-        "one": "{count} product",
-        "other": "{count} products"
-      },
+      "count": {},
       "unknownTitle": "Other products",
       "viewCategory": "Browse this category",
       "viewCategoryAria": "Browse the {title} category"
@@ -1962,7 +1962,6 @@
       "description": "Use the compare buttons on product or category pages to build your comparison table."
     },
     "sections": {
-      "overview": "Overview",
       "pricing": "Pricing",
       "ecological": "Ecological impact",
       "technical": "Technical attributes",
@@ -2143,10 +2142,7 @@
       },
       "sourcing": {
         "bestValue": "Best value",
-        "sourceCount": {
-          "one": "{count} source",
-          "other": "{count} sources"
-        },
+        "sourceCount": {},
         "columns": {
           "source": "Source",
           "value": "Value"
@@ -2167,10 +2163,8 @@
       "navigationAria": "Product documentation list",
       "pageCount": "{count} page | {count} pages",
       "previewUnavailable": "Preview unavailable for this document. Use the download link instead.",
-      "sidebarTitle": "Available documents",
       "subtitle": "Preview and download official documents.",
       "title": "Documentation",
-      "untitled": "Untitled document",
       "controls": {
         "rotate": "Rotate document",
         "rotateLabel": "Rotate",
@@ -2358,7 +2352,6 @@
         "updated": "Updated"
       },
       "newOffers": "New offers",
-      "noOccasionHistory": "No history for second-hand offers.",
       "occasionOffers": "Second-hand offers",
       "offerList": "Offer list",
       "metrics": {
@@ -2543,9 +2536,7 @@
         "darkAriaLabel": "Activate dark theme",
         "darkTooltip": "Switch to dark theme",
         "lightAriaLabel": "Activate light theme",
-        "lightTooltip": "Switch to light theme",
-        "nudgerAriaLabel": "Activate Nudger signature theme",
-        "nudgerTooltip": "Switch to the Nudger signature theme"
+        "lightTooltip": "Switch to light theme"
       },
       "zoom": {
         "label": "Toggle zoom",
@@ -2573,7 +2564,6 @@
       "body": "Release notes are sourced directly from our repository. Each Markdown file represents one published version.",
       "count": "Published releases",
       "countItem": "{count} published versions",
-      "eyebrow": "Snapshot",
       "latestItem": "Latest release: {name}",
       "latest": "Latest version",
       "title": "Release overview"
@@ -2621,7 +2611,6 @@
       "loadFailed": "We could not load the team roster. Please try again."
     },
     "hero": {
-      "eyebrow": "Our collective",
       "subtitle": "A passionate crew blending tech, sustainability and social impact.",
       "title": "The people behind Nudger"
     },
@@ -2635,10 +2624,7 @@
       },
       "empty": "The team roster will be published soon."
     },
-    "seo": {
-      "description": "Discover the collective of entrepreneurs, engineers and volunteers building the sustainable shopping assistant Nudger.",
-      "title": "Meet the Nudger team"
-    }
+    "seo": {}
   },
   "pwa": {
     "install": {
@@ -2728,8 +2714,6 @@
   "nudge-tool": {
     "actions": {
       "advancedSearch": "Advanced search",
-      "continue": "Continue",
-      "seeAll": "See all recommendations",
       "previous": "Previous",
       "next": "Next",
       "viewCategoryResults": "Open {category} with your filters"
@@ -2743,22 +2727,18 @@
         "tooltip": "Vote for the next category to be assessed"
       }
     },
-    "meta": {
-      "matches": "{count} products match your choices"
-    },
+    "meta": {},
     "steps": {
       "category": {
         "title": "Nudger guides you, step by step.",
-        "subtitle": "Choose a category",
-        "step": "Step {step}"
+        "subtitle": "Choose a category"
       },
       "condition": {
         "title": "Product condition",
         "subtitle": "Prefer new, refurbished, or both?",
         "options": {
           "new": "New",
-          "occasion": "Refurbished",
-          "any": "No preference"
+          "occasion": "Refurbished"
         }
       },
       "scores": {

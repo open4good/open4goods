@@ -14,11 +14,12 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const { gainImage } = useRandomHomepageImages()
+const { gainImage, pickGainImage } = useRandomHomepageImages()
 
 const sectionTitle = computed(() => t('home.solution.title'))
 const sectionDescription = computed(() => t('home.solution.description'))
 const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
+const nextImageLabel = computed(() => t('home.solution.nextImage'))
 </script>
 
 <template>
@@ -68,6 +69,15 @@ const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
               :image-src="gainImage"
               :image-alt="invitationImageAlt"
             />
+            <v-btn
+              icon="mdi-arrow-right"
+              variant="flat"
+              color="surface"
+              size="small"
+              class="home-solution__next-btn"
+              :aria-label="nextImageLabel"
+              @click="pickGainImage"
+            />
           </div>
         </v-col>
       </v-row>
@@ -107,10 +117,24 @@ const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
   display: flex
   justify-content: center
   align-items: center
+  position: relative
 
 .home-solution__invitation
   max-width: 360px
   width: 100%
+  transform: rotate(3deg)
+  filter: drop-shadow(0 20px 40px rgba(var(--v-theme-shadow-primary-600), 0.15))
+  transition: transform 0.3s ease
+
+  &:hover
+    transform: rotate(0deg) scale(1.02)
+
+.home-solution__next-btn
+  position: absolute
+  bottom: 0
+  right: 1rem
+  z-index: 2
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1)
 
 .home-solution__list
   margin: 0
@@ -154,6 +178,9 @@ const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
   .home-solution__visual
     order: -1
     margin-bottom: 1rem
+
+  .home-solution__next-btn
+    right: 0
 
 @media (max-width: 599px)
   .home-solution__item

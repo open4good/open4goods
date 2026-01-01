@@ -7,9 +7,8 @@
       :subtitle="t('opendata.hero.subtitle')"
       :description-bloc-id="'webpages:opendata:hero-overview'"
       layout="2-columns"
-      background="parallax"
-      :is-parallax="true"
-      :parallax-layers="parallaxLayers"
+      background="surface-variant"
+      surface-variant="halo"
       container="lg"
       show-media
       media-type="card"
@@ -123,22 +122,6 @@ import OpendataDatasetHighlights from '~/components/domains/opendata/OpendataDat
 import OpendataLicenseSection from '~/components/domains/opendata/OpendataLicenseSection.vue'
 import OpendataFaqSection from '~/components/domains/opendata/OpendataFaqSection.vue'
 import OpendataOpenSourceStrip from '~/components/domains/opendata/OpendataOpenSourceStrip.vue'
-import { useThemedAsset } from '~/composables/useThemedAsset'
-
-const parallaxLayers = [
-  {
-    src: useThemedAsset('placeholders/generated/opendata_layer1.svg'),
-    speed: 0.2,
-  },
-  {
-    src: useThemedAsset('placeholders/generated/opendata_layer2.svg'),
-    speed: 0.5,
-  },
-  {
-    src: useThemedAsset('placeholders/generated/opendata_layer3.svg'),
-    speed: 1.0,
-  },
-]
 
 definePageMeta({
   ssr: true,
