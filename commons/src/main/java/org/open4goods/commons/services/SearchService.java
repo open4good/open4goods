@@ -19,7 +19,7 @@ import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.SubsetCriteria;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.commons.services.TextEmbeddingService;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,9 +75,9 @@ public class SearchService {
 	public static final String MISSING_BUCKET = "ES-UNKNOWN";
 
         private final ProductRepository aggregatedDataRepository;
-        private final TextEmbeddingService embeddingService;
+        private final DjlTextEmbeddingService embeddingService;
 
-        public SearchService(ProductRepository aggregatedDataRepository, String logsFolder, TextEmbeddingService embeddingService) {
+        public SearchService(ProductRepository aggregatedDataRepository, String logsFolder, DjlTextEmbeddingService embeddingService) {
                 this.aggregatedDataRepository = aggregatedDataRepository;
                 this.embeddingService = embeddingService;
         }

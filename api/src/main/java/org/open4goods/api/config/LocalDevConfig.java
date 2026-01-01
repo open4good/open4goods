@@ -14,16 +14,15 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
-import org.open4goods.api.services.completion.image.ImageEmbeddingService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
+import org.open4goods.embedding.service.image.AbstractImageModelFactory;
+import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.brand.model.BrandScore;
-import org.open4goods.brand.repository.BrandScoresRepository;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
 import org.springframework.data.elasticsearch.core.mapping.SimpleElasticsearchMappingContext;
-import org.springframework.data.mapping.context.MappingContext;
 
 @Configuration
 @Profile("local")
@@ -107,10 +106,27 @@ public class LocalDevConfig {
 	
 	@Bean
 	@Primary
-	ImageEmbeddingService imageEmbeddingService() {
-		return new ImageEmbeddingService() {
+	DjlImageEmbeddingService imageEmbeddingService() {
+		DjlEmbeddingProperties properties = new DjlEmbeddingProperties();
+		AbstractImageModelFactory factory = new AbstractImageModelFactory()
+		{
 			@Override
-			public float[] embed(Path imagePath) {
+			public ai.djl.repository.zoo.ZooModel<ai.djl.modality.cv.Image, float[]> loadModel(String modelUrl, int imageSize) {
+				return null;
+			}
+		};
+
+		return new DjlImageEmbeddingService(properties, factory)
+		{
+			@Override
+			public void initialize()
+			{
+				// no-op for local profile
+			}
+
+			@Override
+			public float[] embed(Path imagePath)
+			{
 				return new float[0];
 			}
 		};

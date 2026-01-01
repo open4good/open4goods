@@ -88,6 +88,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>embedding-djl</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>

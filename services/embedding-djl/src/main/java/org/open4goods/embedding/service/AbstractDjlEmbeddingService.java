@@ -1,10 +1,7 @@
 package org.open4goods.embedding.service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 
-import org.open4goods.commons.services.TextEmbeddingService;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,19 +15,19 @@ import jakarta.annotation.PreDestroy;
 /**
  * Base class handling DJL model lifecycle and error reporting for embedding services.
  */
-public abstract class AbstractDjlEmbeddingService implements TextEmbeddingService, AutoCloseable
+public abstract class AbstractDjlEmbeddingService implements AutoCloseable
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDjlEmbeddingService.class);
 
     private final DjlEmbeddingProperties properties;
-    private final EmbeddingModelFactory modelFactory;
+    private final AbstractTextModelFactory modelFactory;
 
     private ZooModel<String, float[]> textModel;
     private ZooModel<String, float[]> visionModel;
     private String resolvedTextModelLocation;
     private String resolvedMultimodalModelLocation;
 
-    protected AbstractDjlEmbeddingService(DjlEmbeddingProperties properties, EmbeddingModelFactory modelFactory)
+    protected AbstractDjlEmbeddingService(DjlEmbeddingProperties properties, AbstractTextModelFactory modelFactory)
     {
         this.properties = properties;
         this.modelFactory = modelFactory;
@@ -39,9 +36,8 @@ public abstract class AbstractDjlEmbeddingService implements TextEmbeddingServic
     @PostConstruct
     public void initialize()
     {
-        resolvedTextModelLocation = resolveModelLocation(properties.getTextModelPath(), properties.getTextModelUrl(), "text");
-        resolvedMultimodalModelLocation = resolveModelLocation(properties.getMultimodalModelPath(),
-                properties.getMultimodalModelUrl(), "multimodal");
+        resolvedTextModelLocation = properties.getTextModelUrl();
+        resolvedMultimodalModelLocation = properties.getMultimodalModelUrl();
 
         textModel = tryLoad(resolvedTextModelLocation, "text");
         visionModel = tryLoad(resolvedMultimodalModelLocation, "multimodal");
@@ -54,7 +50,6 @@ public abstract class AbstractDjlEmbeddingService implements TextEmbeddingServic
                 textModel != null, visionModel != null, properties.getEmbeddingDimension());
     }
 
-    @Override
     public float[] embed(String text)
     {
         if (!StringUtils.hasText(text))
@@ -112,34 +107,13 @@ public abstract class AbstractDjlEmbeddingService implements TextEmbeddingServic
         }
         try
         {
-            return modelFactory.loadModel(modelLocation, properties.getPoolingMode(), properties.isNormalizeOutputs(),
-                    properties.getEngine());
+            return modelFactory.loadModel(modelLocation, properties.getPoolingMode(), properties.getEngine());
         }
         catch (Exception e)
         {
             LOGGER.error("Failed to initialize {} embedding model from {}", label, modelLocation, e);
             return null;
         }
-    }
-
-    private String resolveModelLocation(String localPath, String remoteUrl, String label)
-    {
-        if (properties.isPreferLocalModels() && StringUtils.hasText(localPath))
-        {
-            Path path = Path.of(localPath);
-            if (Files.exists(path))
-            {
-                LOGGER.info("Using local {} embedding model at {}", label, path.toAbsolutePath());
-                return path.toUri().toString();
-            }
-            String message = "Local " + label + " embedding model not found at " + path.toAbsolutePath();
-            if (properties.isFailOnMissingModel() && !StringUtils.hasText(remoteUrl))
-            {
-                throw new IllegalStateException(message + " and no remote URL configured");
-            }
-            LOGGER.warn("{}. Falling back to remote URL {}", message, remoteUrl);
-        }
-        return remoteUrl;
     }
 
     private float[] embedWithModel(ZooModel<String, float[]> model, String text, String label)

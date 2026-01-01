@@ -11,8 +11,7 @@ These embeddings are stored in ElasticSearch as `dense_vector` fields, enabling 
 
 Provided by the shared `embedding-djl` module in `org.open4goods.embedding.service` and auto-configured for API and front-api.
 
-- **Default models**: `intfloat/multilingual-e5-base` (text) with a multimodal CLIP fallback.
-- **Local assets**: Will use `/opt/open4goods/models/text-embedding` or `/opt/open4goods/models/multimodal-embedding` when present.
+- **Default models**: `intfloat/multilingual-e5-small` (text) with a multimodal CLIP fallback.
 - **Tokenizer**: Uses `ai.djl.huggingface:tokenizers`.
 - **Output**: Normalised embeddings (default dimension 512) with mean pooling.
 
@@ -33,15 +32,14 @@ The embedding is computed during the product aggregation phase (`onProduct`).
 
 Configure via `embedding.*` properties (see `embedding-djl` module):
 
-- `embedding.text-model-path` / `embedding.multimodal-model-path` to point to local assets under `/opt/open4goods`.
-- `embedding.text-model-url` / `embedding.multimodal-model-url` to choose remote identifiers when no local models are present.
+- `embedding.text-model-url` / `embedding.multimodal-model-url` to choose remote identifiers (primary + fallback).
 - `embedding.fail-on-missing-model=true` makes startup fail if neither model loads.
 - Health details are exposed by `DjlEmbeddingHealthIndicator` when Spring Boot Actuator is enabled.
 
 ## Deployment
 
 - **Dependencies**: Requires `ai.djl.huggingface:tokenizers` and the PyTorch engine.
-- **Resources**: First run downloads models unless local assets are present under `/opt/open4goods/models`.
+- **Resources**: First run downloads models from the configured DJL model URLs.
 - **Performance**: Computation is CPU-based. Latency per item is approx 10-50ms depending on CPU.
 
 ## Troubleshooting

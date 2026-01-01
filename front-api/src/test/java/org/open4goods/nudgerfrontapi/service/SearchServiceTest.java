@@ -33,7 +33,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.open4goods.commons.services.TextEmbeddingService;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
@@ -72,7 +72,7 @@ class SearchServiceTest {
     private ApiProperties apiProperties;
 
     @Mock
-    private TextEmbeddingService textEmbeddingService;
+    private DjlTextEmbeddingService textEmbeddingService;
 
     private SearchService searchService;
 

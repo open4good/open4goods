@@ -31,7 +31,7 @@ import org.apache.tika.language.detect.LanguageResult;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
 import org.open4goods.api.services.AbstractCompletionService;
-import org.open4goods.api.services.completion.image.ImageEmbeddingService;
+import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.exceptions.TechnicalException;
@@ -107,7 +107,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
     private final ApiProperties apiProperties;
     private final ImageMagickService imageService;
     private final ResourceService resourceService;
-    private final ImageEmbeddingService embeddingService;
+    private final DjlImageEmbeddingService embeddingService;
 
     private static final Tika tika = new Tika();
     private static final TikaConfig tikaConfig = TikaConfig.getDefaultConfig();
@@ -130,7 +130,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
                                      ResourceService resourceService,
                                      ProductRepository dataRepository,
                                      ApiProperties apiProperties,
-                                     ImageEmbeddingService embeddingService) {
+                                     DjlImageEmbeddingService embeddingService) {
 
         // Log level and log folder configured via ApiProperties
         super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
@@ -707,7 +707,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * <ul>
      *     <li>Basic image metadata (width, height, pixel count)</li>
      *     <li>Perceptive hash (pHash) for cheap similarity checks (legacy)</li>
-     *     <li>Embeddings via {@link ImageEmbeddingService} for modern, category-agnostic grouping</li>
+     *     <li>Embeddings via {@link DjlImageEmbeddingService} for modern, category-agnostic grouping</li>
      * </ul>
      *
      * @param resource resource to update
@@ -747,7 +747,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
             if (e.getMessage() != null && e.getMessage().contains("attention_mask")) {
                 logger.warn("Model compatibility issue detected. The configured model may not support image-only inference. " +
                            "Consider using a pure vision model (e.g., ResNet, EfficientNet) or a different CLIP export. " +
-                           "See ApiProperties.EmbeddingConfig.multimodalModelUrl documentation for alternatives.");
+                           "See the embedding.vision-model-url configuration for alternatives.");
             } else if (e.getMessage() != null && e.getMessage().contains("NDManager")) {
                 logger.warn("NDManager lifecycle issue detected. This may indicate a concurrency problem or resource leak.");
             }

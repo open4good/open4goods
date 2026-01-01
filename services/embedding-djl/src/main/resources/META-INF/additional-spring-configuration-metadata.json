@@ -7,28 +7,10 @@
       "defaultValue": true
     },
     {
-      "name": "embedding.prefer-local-models",
-      "type": "java.lang.Boolean",
-      "description": "Prefer local filesystem models when paths are configured.",
-      "defaultValue": true
-    },
-    {
-      "name": "embedding.text-model-path",
-      "type": "java.lang.String",
-      "description": "Filesystem path to the text embedding model.",
-      "defaultValue": "/opt/open4goods/models/text-embedding"
-    },
-    {
-      "name": "embedding.multimodal-model-path",
-      "type": "java.lang.String",
-      "description": "Filesystem path to the multimodal text embedding model.",
-      "defaultValue": "/opt/open4goods/models/multimodal-embedding"
-    },
-    {
       "name": "embedding.text-model-url",
       "type": "java.lang.String",
       "description": "Remote identifier or URL for the text embedding model.",
-      "defaultValue": "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-base"
+      "defaultValue": "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small"
     },
     {
       "name": "embedding.multimodal-model-url",
@@ -49,22 +31,28 @@
       "defaultValue": 512
     },
     {
+      "name": "embedding.image-input-size",
+      "type": "java.lang.Integer",
+      "description": "Target input size (pixels) for vision models.",
+      "defaultValue": 224
+    },
+    {
       "name": "embedding.pooling-mode",
       "type": "java.lang.String",
       "description": "Pooling strategy for the DJL text translator.",
       "defaultValue": "mean"
     },
     {
-      "name": "embedding.normalize-outputs",
-      "type": "java.lang.Boolean",
-      "description": "Normalise embedding vectors produced by DJL translator.",
-      "defaultValue": true
-    },
-    {
       "name": "embedding.engine",
       "type": "java.lang.String",
       "description": "Engine name supplied to DJL when loading models.",
       "defaultValue": "PyTorch"
+    },
+    {
+      "name": "embedding.vision-model-url",
+      "type": "java.lang.String",
+      "description": "Remote identifier or URL for the image embedding model.",
+      "defaultValue": "djl://ai.djl.pytorch/resnet/0.0.1?layers=18&dataset=imagenet"
     }
   ]
 }
