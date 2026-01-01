@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, defineComponent, h, nextTick, ref } from 'vue'
 
@@ -10,6 +11,7 @@ const displayWidth = ref(1280)
 
 const windowHeight = ref(1000)
 const elementHeight = ref(300)
+const zoomedState = ref(false)
 
 vi.mock('@vueuse/core', () => ({
   usePreferredReducedMotion: () => motionPreference,
@@ -26,6 +28,12 @@ vi.mock('@vueuse/core', () => ({
     y: ref(0),
     update: () => {},
   }),
+  useStorage: (_key: string, defaultValue: boolean) => {
+    if (zoomedState.value === undefined) {
+      zoomedState.value = defaultValue
+    }
+    return zoomedState
+  },
 }))
 
 vi.mock('vuetify', () => ({
@@ -56,6 +64,7 @@ const mountParallax = (props?: Record<string, unknown>) =>
     },
     global: {
       stubs,
+      plugins: [createPinia()],
     },
   })
 
@@ -66,6 +75,7 @@ describe('ParallaxWidget', () => {
     displayWidth.value = 1280
     windowHeight.value = 1000
     elementHeight.value = 300
+    zoomedState.value = false
 
     // Mock getBoundingClientRect to simulate element position at 350px top
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({

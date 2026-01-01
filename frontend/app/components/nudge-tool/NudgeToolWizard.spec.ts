@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import NudgeToolWizard from './NudgeToolWizard.vue'
 
@@ -45,11 +46,19 @@ vi.mock('~/utils/_nudge-tool-filters', () => ({
   buildNudgeFilterRequest: vi.fn().mockReturnValue({}),
   buildScoreFilters: vi.fn(),
 }))
+const zoomedState = ref(false)
+
 vi.mock('@vueuse/core', () => ({
   useDebounceFn: (fn: (...args: unknown[]) => unknown) => fn,
   useElementSize: () => ({ height: { value: 100 } }),
   useTransition: (source: unknown) => source,
   usePreferredReducedMotion: () => ({ value: false }),
+  useStorage: (_key: string, defaultValue: boolean) => {
+    if (zoomedState.value === undefined) {
+      zoomedState.value = defaultValue
+    }
+    return zoomedState
+  },
 }))
 
 describe('NudgeToolWizard', () => {
