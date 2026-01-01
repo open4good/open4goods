@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import HomePhotoInvitation from './HomePhotoInvitation.vue'
 import HomeSplitSection from './HomeSplitSection.vue'
-import { useThemeAsset } from '~/composables/useThemedAsset'
+import { useRandomHomepageImages } from '~/composables/useRandomHomepageImages'
 
 type ProblemItem = {
   icon: string
@@ -14,17 +15,11 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
+const { painImage } = useRandomHomepageImages()
+
 const sectionTitle = computed(() => t('home.problems.title'))
 const sectionDescription = computed(() => t('home.problems.description'))
-const problemImageAsset = useThemeAsset('problemImage')
-
-const visualImage = computed(() => ({
-  src: problemImageAsset.value || '/images/home/nudger-problem.webp',
-  alt: sectionTitle.value,
-  sizes: '(min-width: 960px) 360px, 70vw',
-  width: 1024,
-  height: 1536,
-}))
+const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
 </script>
 
 <template>
@@ -33,9 +28,14 @@ const visualImage = computed(() => ({
     class="home-problems"
     :title="sectionTitle"
     :description="sectionDescription"
-    :image="visualImage"
     visual-position="left"
   >
+    <template #visual>
+      <HomePhotoInvitation
+        :image-src="painImage"
+        :image-alt="invitationImageAlt"
+      />
+    </template>
     <v-row class="home-problems__list" dense>
       <v-col
         v-for="item in props.items"

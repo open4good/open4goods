@@ -355,6 +355,15 @@
         }
       }
     },
+    "photoInvitation": {
+      "title": "Et si c'était vous ?",
+      "ariaLabel": "Proposer votre photo pour Nudger",
+      "imageAlt": "Portrait souriant invitant à participer",
+      "contact": {
+        "subject": "Proposition de photo pour Nudger",
+        "message": "Bonjour,\n\nJe souhaite proposer une photo pour apparaître sur Nudger. Si elle vous convient, j'accepte de céder mes droits pour une utilisation sur Nudger uniquement.\n\nMerci et belle journée."
+      }
+    },
     "features": {
       "title": "Fonctionnalités clés",
       "subtitle": "Découvrez ce que Nudger met à votre service.",
