@@ -97,9 +97,9 @@ i18n:
     productMetaOpenGraphType: "product"
 
     # Vertical page elements
-    verticalHomeUrl: "refrigeratorss"
-    verticalHomeTitle: "Réfrigérateur"
-    verticalHomeDescription: "Comparez les réfrigérateurs (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
+    verticalHomeUrl: "refrigerators"
+    verticalHomeTitle: "Réfrigérateurs - Le coin des frigos."
+    verticalHomeDescription: "Comparez les réfrigérateurs"
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
   #    wikiPages:
