@@ -224,11 +224,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 		// Defensive: gtin can be null; original code would NPE.
 		String url = "";
-		if (StringUtils.isBlank(url)) {
-			// Fallback of last resort to keep function total (avoid returning empty -> downstream issues)
-			url = "product";
-			logger.warn("Null URL : ", data.gtin());
-		}
 
 		final String urlSuffix;
 		if (vConf == null || vConf.getId() == null) {

@@ -58,7 +58,7 @@ public class DjlImageEmbeddingService implements ImageEmbeddingService {
      */
     @PostConstruct
     public void init() throws IOException, MalformedModelException, ModelNotFoundException {
-        final String modelUrl = apiProperties.getEmbedding().getMultimodalModelUrl();
+        final String modelUrl = apiProperties.getEmbedding().getVisionModelUrl();
         final int imageSize = apiProperties.getEmbedding().getImageInputSize();
 
         logger.info("Initializing DJL image embedding model from: {}", modelUrl);

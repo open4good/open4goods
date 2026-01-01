@@ -26,7 +26,7 @@ public abstract class AbstractDjlEmbeddingService implements TextEmbeddingServic
     private final EmbeddingModelFactory modelFactory;
 
     private ZooModel<String, float[]> textModel;
-    private ZooModel<String, float[]> multimodalTextModel;
+    private ZooModel<String, float[]> visionModel;
     private String resolvedTextModelLocation;
     private String resolvedMultimodalModelLocation;
 
@@ -44,14 +44,14 @@ public abstract class AbstractDjlEmbeddingService implements TextEmbeddingServic
                 properties.getMultimodalModelUrl(), "multimodal");
 
         textModel = tryLoad(resolvedTextModelLocation, "text");
-        multimodalTextModel = tryLoad(resolvedMultimodalModelLocation, "multimodal");
+        visionModel = tryLoad(resolvedMultimodalModelLocation, "multimodal");
 
-        if (textModel == null && multimodalTextModel == null && properties.isFailOnMissingModel())
+        if (textModel == null && visionModel == null && properties.isFailOnMissingModel())
         {
             throw new IllegalStateException("Failed to load any DJL text embedding model (text or multimodal)");
         }
         LOGGER.info("DJL embedding initialised. textModelLoaded={}, multimodalLoaded={}, dimension={}.",
-                textModel != null, multimodalTextModel != null, properties.getEmbeddingDimension());
+                textModel != null, visionModel != null, properties.getEmbeddingDimension());
     }
 
     @Override
@@ -67,7 +67,7 @@ public abstract class AbstractDjlEmbeddingService implements TextEmbeddingServic
         {
             return vector;
         }
-        vector = embedWithModel(multimodalTextModel, text, "multimodal");
+        vector = embedWithModel(visionModel, text, "multimodal");
         if (vector != null)
         {
             return vector;
@@ -92,7 +92,7 @@ public abstract class AbstractDjlEmbeddingService implements TextEmbeddingServic
 
     public boolean isMultimodalTextModelLoaded()
     {
-        return multimodalTextModel != null;
+        return visionModel != null;
     }
 
     @PreDestroy
@@ -100,7 +100,7 @@ public abstract class AbstractDjlEmbeddingService implements TextEmbeddingServic
     public void close()
     {
         closeQuietly(textModel);
-        closeQuietly(multimodalTextModel);
+        closeQuietly(visionModel);
     }
 
     private ZooModel<String, float[]> tryLoad(String modelLocation, String label)

@@ -317,11 +317,9 @@ attributesConfig:
 matchingCategories:
   all: 
     - ELECTROMENAGER | FOUR
-  darty.com:
     - "GROS ELECTROMENAGER / CUISSON / FOUR"
-  boulanger.com:
     - "CUISSON / FOUR"
-  cdiscount.com:
     - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
-  rueducommerce.fr:
     - "ELECTROMENAGER > CUISSON > FOUR"
+    
+    
