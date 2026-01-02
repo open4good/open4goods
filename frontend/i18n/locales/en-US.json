@@ -2012,6 +2012,11 @@
       "cta": "Shop with Nudger",
       "ariaLabel": "Sticky banner promoting responsible shopping"
     },
+    "meta": {
+      "defaultDescription": "Compare {productTitle}{brandModel} on Nudger for pricing, environmental impact, and buying options.",
+      "defaultDescriptionWithVertical": "Compare {productTitle}{brandModel} on Nudger for pricing, environmental impact, and top options in {verticalTitle}.",
+      "gtinFallback": "GTIN {gtin}"
+    },
     "aiReview": {
       "empty": "Summary not requested yet.",
       "errors": {

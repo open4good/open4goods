@@ -46,9 +46,9 @@
         <span>{{ priceTrendLabel }}</span>
       </button>
 
-      <h2 class="product-hero__pricing-title">
+      <p class="product-hero__pricing-title">
         {{ $t('product.hero.bestPriceTitle') }}
-      </h2>
+      </p>
     </div>
     <div class="product-hero__price">
       <span class="product-hero__price-value" itemprop="lowPrice">

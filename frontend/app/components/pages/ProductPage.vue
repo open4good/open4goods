@@ -209,6 +209,7 @@ import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { buildCategoryHash } from '~/utils/_category-filter-state'
 import { resolveScoreNumericValue } from '~/utils/score-values'
+import { formatBrandModelTitle, humanizeSlug } from '~/utils/_product-title'
 
 const ProductImpactSection = defineAsyncComponent(
   () => import('~/components/product/ProductImpactSection.vue')
@@ -491,11 +492,21 @@ const scoreAggregations = async () => {
 await scoreAggregations()
 
 const productTitle = computed(() => {
+  const rawSlug = product.value?.slug ?? ''
+  const normalizedSlug = rawSlug.trim()
+  const slugFallback = normalizedSlug
+    ? humanizeSlug(normalizedSlug, locale.value) || normalizedSlug
+    : ''
+  const gtinValue = product.value?.gtin ?? gtin
+  const gtinFallback = gtinValue
+    ? t('product.meta.gtinFallback', { gtin: gtinValue })
+    : ''
+
   return (
     product.value?.names?.h1Title ??
     product.value?.identity?.bestName ??
-    product.value?.slug ??
-    `GTIN ${product.value?.gtin ?? gtin}`
+    slugFallback ??
+    gtinFallback
   )
 })
 
@@ -595,6 +606,14 @@ const productBrand = computed(() => {
 const productModel = computed(() => {
   const model = product.value?.identity?.model
   return typeof model === 'string' ? model.trim() : ''
+})
+
+const brandModelTitle = computed(() =>
+  formatBrandModelTitle(productBrand.value, productModel.value, locale.value)
+)
+
+const productMetaTitle = computed(() => {
+  return brandModelTitle.value.length ? brandModelTitle.value : productTitle.value
 })
 
 const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
@@ -702,16 +721,29 @@ const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   return resolvedCategories
 })
 
-const productSubtitle = computed(() => {
-  return productBrand.value.length ? productBrand.value : null
-})
-
 const productMetaDescription = computed(() => {
-  return (
-    product.value?.names?.metaDescription ??
-    productSubtitle.value ??
-    productTitle.value
-  )
+  const explicit = product.value?.names?.metaDescription?.trim()
+  if (explicit) {
+    return explicit
+  }
+
+  const brandModelSuffix =
+    brandModelTitle.value && brandModelTitle.value !== productMetaTitle.value
+      ? ` ${brandModelTitle.value}`
+      : ''
+
+  if (normalizedVerticalTitle.value) {
+    return t('product.meta.defaultDescriptionWithVertical', {
+      productTitle: productMetaTitle.value,
+      brandModel: brandModelSuffix,
+      verticalTitle: normalizedVerticalTitle.value,
+    })
+  }
+
+  return t('product.meta.defaultDescription', {
+    productTitle: productMetaTitle.value,
+    brandModel: brandModelSuffix,
+  })
 })
 
 const toAbsoluteUrl = (value?: string | null) => {
@@ -775,10 +807,30 @@ const ogImageUrl = computed(() => {
 
 const ogImageAlt = computed(() => productTitle.value)
 
+const internalProductImageSource = computed(() => {
+  const galleryImages = product.value?.resources?.images ?? []
+  const firstGalleryImage =
+    galleryImages.find(image => Boolean(image?.url))?.url ??
+    galleryImages.find(image => Boolean(image?.originalUrl))?.originalUrl
+
+  return (
+    product.value?.resources?.coverImagePath ??
+    product.value?.base?.coverImagePath ??
+    firstGalleryImage ??
+    null
+  )
+})
+
+const schemaImageUrl = computed(() =>
+  internalProductImageSource.value
+    ? toAbsoluteUrl(internalProductImageSource.value)
+    : undefined
+)
+
 useSeoMeta({
-  title: () => productTitle.value,
+  title: () => productMetaTitle.value,
   description: () => productMetaDescription.value,
-  ogTitle: () => product.value?.names?.ogTitle ?? productTitle.value,
+  ogTitle: () => product.value?.names?.ogTitle ?? productMetaTitle.value,
   ogDescription: () =>
     product.value?.names?.ogDescription ?? productMetaDescription.value,
   ogUrl: () => canonicalUrl.value,
@@ -1666,7 +1718,7 @@ const productStructuredData = computed(() => {
       : null
 
   const offers = structuredOffers.value
-  const imageUrl = ogImageUrl.value
+  const imageUrl = schemaImageUrl.value
 
   return {
     '@context': 'https://schema.org',
