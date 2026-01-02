@@ -199,85 +199,185 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 
         /**
-         * Extracts a model identifier from a product's offer titles based on the brand and existing model,
-         * using regex matching. The extracted model must contain at least one letter and one digit,
-	 * or consist only of digits.
-	 * <p>
-	 * If a matching model different from the current one is found, it will update the model using {@code forceModel}.
-	 * Additional variants are stored in {@code akaModels}.
-	 *
-	 * @param data the product from which to extract model information
-	 */
-	public void extractModelFromTitles(Product data) {
-	    // Retrieve current brand and model from the product.
-	    String brand = data.brand();
-	    String currentModel = data.model();
+         * Extracts a manufacturer-like model identifier from offer titles (brand/model agnostic).
+         *
+         * Heuristics (conservative to reduce false positives):
+         * - Candidate token must be mostly [A-Za-z0-9] with optional separators (- _ / .)
+         * - Must contain digits; and either:
+         *     (a) have >= 2 alpha<->digit transitions (e.g. HG32EJ690WE, TX25QUE), OR
+         *     (b) have enough letters/digits and length to look like a true model (e.g. AB1234)
+         * - Rejects common size/unit/resolution patterns (e.g. 42pouces, 55inch, 1920x1080, 144Hz, 1000W)
+         *
+         * If a best model is found, it updates data.forceModel(best) and stores alternates in akaModels.
+         *
+         * @param data the product from which to extract model information
+         */
+        public void extractModelFromTitles(Product data) {
+            if (data == null || data.getOfferNames() == null || data.getOfferNames().isEmpty()) {
+                dedicatedLogger.info("No offer titles available; cannot extract model.");
+                return;
+            }
 
-	    if (brand == null || currentModel == null || currentModel.isEmpty()) {
-	        dedicatedLogger.warn("Brand or model is null/empty; cannot extract model from titles.");
-	        return;
-	    }
+            // Broad token finder: "model-ish" chunks including separators, min length 5
+            // Examples matched: "HG32EJ690WE", "TX-25QUE", "AB1234", "SM-G991B"
+            java.util.regex.Pattern tokenPattern =
+                    java.util.regex.Pattern.compile("(?i)(?<![A-Z0-9])[A-Z0-9][A-Z0-9._/\\-]{3,}[A-Z0-9](?![A-Z0-9])");
 
-	    // Determine the model prefix: use the entire model if it's shorter than 3 characters.
-	    String modelPrefix = currentModel.length() < 3 ? currentModel : currentModel.substring(0, 3);
+            java.util.Map<String, Integer> freq = new java.util.HashMap<>();
+            java.util.Map<String, String> originalByNorm = new java.util.HashMap<>();
 
-	    // Construct a case-insensitive regex pattern to capture model-like substrings following the brand.
-	    String regex = "(?i).*"
-	                 + java.util.regex.Pattern.quote(brand)
-	                 + "[ .-]?"
-	                 + "("
-	                 + java.util.regex.Pattern.quote(modelPrefix)
-	                 + "[^\\s]*)"
-	                 + "(?:\\s|$).*";
+            for (String offerName : data.getOfferNames()) {
+                if (offerName == null || offerName.isBlank()) continue;
 
-	    dedicatedLogger.info("Compiled regex pattern: " + regex);
+                java.util.regex.Matcher m = tokenPattern.matcher(offerName);
+                while (m.find()) {
+                    String raw = m.group();
+                    String candidate = trimEdgePunct(raw);
+                    if (candidate.isEmpty()) continue;
 
-	    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
-	    List<String> extractedModels = new ArrayList<>();
+                    if (!isLikelyManufacturerModel(candidate)) continue;
 
-	    for (String offerName : data.getOfferNames()) {
-	        if (offerName == null) continue;
+                    String norm = candidate.toUpperCase();
+                    freq.put(norm, freq.getOrDefault(norm, 0) + 1);
+                    originalByNorm.putIfAbsent(norm, norm);
+                }
+            }
 
-	        java.util.regex.Matcher matcher = pattern.matcher(offerName);
-	        if (matcher.matches()) {
-	            String candidate = matcher.group(1);
-	            // Must contain at least one digit and one letter, or only digits
-	            if ((candidate.matches(".*\\d.*") && candidate.matches(".*[a-zA-Z].*")) ||
-	                candidate.matches("^\\d+$")) {
-	                extractedModels.add(candidate);
-	            }
-	        }
-	    }
+            if (freq.isEmpty()) {
+                dedicatedLogger.info("No manufacturer-like model found in offer titles.");
+                return;
+            }
 
-	    if (extractedModels.isEmpty()) {
-	        dedicatedLogger.info("No matching offer names found.");
-	        return;
-	    }
+            // Pick best: highest frequency, then shortest, then lexical
+            String best = null;
+            int bestCount = -1;
 
-	    // Find the shortest model candidate
-	    String shortestModel = extractedModels.get(0);
-	    for (String candidate : extractedModels) {
-	        if (candidate.length() < shortestModel.length()) {
-	            shortestModel = candidate;
-	        }
-	    }
+            for (java.util.Map.Entry<String, Integer> e : freq.entrySet()) {
+                String cand = e.getKey();
+                int count = e.getValue();
 
-	    String extractedModel = shortestModel.toUpperCase();
+                if (best == null) {
+                    best = cand;
+                    bestCount = count;
+                    continue;
+                }
 
-	    if (!extractedModel.equals(currentModel)) {
-	        data.forceModel(extractedModel);
-	        dedicatedLogger.info("Model updated from '" + currentModel + "' to '" + extractedModel + "'.");
-	    }
+                if (count > bestCount) {
+                    best = cand;
+                    bestCount = count;
+                } else if (count == bestCount) {
+                    int lenCand = stripSeparators(cand).length();
+                    int lenBest = stripSeparators(best).length();
+                    if (lenCand < lenBest || (lenCand == lenBest && cand.compareTo(best) < 0)) {
+                        best = cand;
+                    }
+                }
+            }
 
-	    // Add alternate models
-	    for (String candidate : extractedModels) {
-	        String candidateUpper = candidate.toUpperCase();
-	        if (!candidateUpper.equals(extractedModel) && !data.getAkaModels().contains(candidateUpper)) {
-	            data.getAkaModels().add(candidateUpper);
-	            dedicatedLogger.info("Added alternate model: " + candidateUpper);
-	        }
-	    }
-	}
+            String currentModel = data.model(); // can be null; we still update if best exists
+            if (currentModel == null || !best.equalsIgnoreCase(currentModel)) {
+                data.forceModel(best);
+                dedicatedLogger.info("Model updated from '" + currentModel + "' to '" + best + "'.");
+            }
+
+            // Store alternates (including other frequent candidates)
+            for (String cand : freq.keySet()) {
+                if (cand.equalsIgnoreCase(best)) continue;
+                if (!data.getAkaModels().contains(cand)) {
+                    data.getAkaModels().add(cand);
+                    dedicatedLogger.info("Added alternate model: " + cand);
+                }
+            }
+        }
+
+        /** Conservative validator for manufacturer-like models. */
+        private static boolean isLikelyManufacturerModel(String token) {
+            String up = token.toUpperCase();
+
+            // Quick rejects: resolutions like 1920x1080, 3840X2160, etc.
+            if (up.matches(".*\\d{3,4}[X]\\d{3,4}.*")) return false;
+
+            // Extract alnum-only for analysis
+            String alnum = up.replaceAll("[^A-Z0-9]", "");
+            if (alnum.length() < 5) return false;
+
+            int letters = 0;
+            int digits = 0;
+            for (int i = 0; i < alnum.length(); i++) {
+                char c = alnum.charAt(i);
+                if (c >= 'A' && c <= 'Z') letters++;
+                else if (c >= '0' && c <= '9') digits++;
+            }
+
+            // digits-only models allowed only if long enough (avoid years, sizes, etc.)
+            if (letters == 0) return digits >= 5;
+
+            // Must contain at least one digit
+            if (digits == 0) return false;
+
+            // Reject "size/unit" single-suffix patterns like 42POUCES / 55INCH / 1000W / 144HZ / 500GB etc.
+            if (looksLikeMeasureOrUnit(alnum)) return false;
+
+            boolean hasSeparator = up.matches(".*[._/\\-].*");
+            int transitions = countAlphaDigitTransitions(alnum);
+
+            // Strong signal: at least 2 transitions (letters->digits->letters or digits->letters->digits)
+            if (transitions >= 2) return true;
+
+            // Allow some common manufacturer formats with one transition if “dense enough”
+            // e.g. AB1234, E2100, RX7800XT (though RX7800XT has 2 transitions; AB1234 has 1)
+            if (letters >= 2 && digits >= 3 && alnum.length() >= 6) return true;
+
+            // If it has separators, be a bit more permissive (still requires some density)
+            if (hasSeparator && letters >= 2 && digits >= 2 && alnum.length() >= 5) return true;
+
+            return false;
+        }
+
+        private static boolean looksLikeMeasureOrUnit(String alnum) {
+            // Pattern: digits + unit word (single transition), e.g. 42POUCES, 55INCH, 144HZ, 1000W, 500GB
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("^(\\d{2,5})([A-Z]{1,10})$").matcher(alnum);
+            if (!m.matches()) return false;
+
+            String suffix = m.group(2);
+
+            // Common units/specs that often appear in titles and are NOT models
+            java.util.Set<String> badSuffixes = java.util.Set.of(
+                    "POUCE", "POUCES", "INCH", "INCHES", "CM", "MM",
+                    "HZ", "W", "KW", "V", "AH", "MAH",
+                    "GB", "TB", "MB",
+                    "MP", "FPS", "NITS", "LUMENS",
+                    "K" // catches 4K, 8K etc (we also avoid short length elsewhere)
+            );
+
+            if (badSuffixes.contains(suffix)) return true;
+
+            // Also reject plural-ish / common French/English variants
+            if (suffix.startsWith("POUC")) return true;
+            if (suffix.startsWith("INCH")) return true;
+
+            return false;
+        }
+
+        private static int countAlphaDigitTransitions(String alnum) {
+            int transitions = 0;
+            boolean prevIsDigit = Character.isDigit(alnum.charAt(0));
+            for (int i = 1; i < alnum.length(); i++) {
+                boolean isDigit = Character.isDigit(alnum.charAt(i));
+                if (isDigit != prevIsDigit) transitions++;
+                prevIsDigit = isDigit;
+            }
+            return transitions;
+        }
+
+        private static String stripSeparators(String s) {
+            return s.replaceAll("[._/\\-]", "");
+        }
+
+        private static String trimEdgePunct(String s) {
+            // trim common edge punctuation while keeping internal separators
+            return s.replaceAll("^[\\p{Punct}]+|[\\p{Punct}]+$", "");
+        }
 
 
 
