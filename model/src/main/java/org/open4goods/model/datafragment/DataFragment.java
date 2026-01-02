@@ -67,8 +67,8 @@ public class DataFragment implements Standardisable, Validable {
 
 	// If true, is a brand related score, will be discarded before indexation
 	private boolean brandFragment = false;
-	
-	
+
+
 	@NotNull
 	// TODO : Should remove, creation is computed at Product level
 	private Long creationDate;
@@ -322,14 +322,14 @@ public class DataFragment implements Standardisable, Validable {
 		if (null == fields) {
 			return;
 		}
-		
+
 
 		try {
 			this.validate();
 		} catch (final ValidationException e) {
 			ret.addAll(e.getResult());
 		}
-		
+
 		for (final String field : fields) {
 
 			switch (field.toLowerCase()) {
@@ -473,9 +473,9 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addReferentielAttribute(ReferentielKey key, String val) {
 		referentielAttributes.put(key, val);
-		
+
 	}
-	
+
 
 	public void addReferentielAttribute(final String key, final String value) {
 		if (StringUtils.isBlank(value)) {
@@ -512,20 +512,20 @@ public class DataFragment implements Standardisable, Validable {
 			if (NumberUtils.isDigits(val)) {
 				getReferentielAttributes().put(ReferentielKey.GTIN,val);
 			}else {
-				
+
 				// Searching for finishing by ".00", in a few providers
-				
+
 				int pos = val.indexOf(".");
 				if (pos != - 1) {
 					val = val.substring(0,pos);
 				}
-				
+
 				if (NumberUtils.isDigits(val)) {
 					getReferentielAttributes().put(ReferentielKey.GTIN,val);
-				} else {					
+				} else {
 					logger.info("Cannot add non numeric GTIN, for {} at {}",val, this);
 				}
-				
+
 			}
 			break;
 		default:
@@ -553,10 +553,10 @@ public class DataFragment implements Standardisable, Validable {
 		// Evicting too big values
 		// TODO(p3,conf) : From config
 		if (value.length() > 10000) {
-			logger.warn("Evicting a too big value for attribute {}:{}", name,value);
+			logger.warn("Evicting a too big value for attribute {}:{}", name,value.substring(0, 100) + "...");
 			return;
 		}
-		
+
 		final Attribute attr = new Attribute();
 
 		// Attributye name normalisation
@@ -566,15 +566,15 @@ public class DataFragment implements Standardisable, Validable {
 			sanitizedName = sanitizedName.substring(0, sanitizedName.length() -1).trim();
 		}
 
-		
+
 		attr.setName(sanitizedName);
 		attr.setLanguage(language);
 		attr.setRawValue(value);
-		
+
 		try {
 			if (null != categoryFeatureId) {
 				attr.setIcecatFeatureId(Integer.valueOf(  categoryFeatureId));
-				
+
 			}
 		} catch (NumberFormatException e) {
 			logger.error("Error while converting icecatFeatureID : {}",categoryFeatureId);
@@ -590,7 +590,7 @@ public class DataFragment implements Standardisable, Validable {
 		attr.normalize();
 
 		attributes.add(attr);
-	
+
 
 	}
 
@@ -724,7 +724,7 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void addResource(final Resource resource) throws ValidationException {
 
-		
+
 		if (null == resource) {
 			return;
 		}
@@ -733,13 +733,13 @@ public class DataFragment implements Standardisable, Validable {
 
 		// Smart update, time consuming but necessary.
 		// TODO : Involve on a map on the new model
-		
+
 			resources.remove(resource);
 			resources.add(resource);
-		
-//		
+
+//
 //		Resource existing = resources.stream().filter(e -> e.getUrl().equals(resource.getUrl()) ).findFirst().orElse(null);
-//		
+//
 //		if (null == existing) {
 //			logger.info("Adding new resource : {}",resource);
 //			resources.add(resource);
@@ -749,9 +749,9 @@ public class DataFragment implements Standardisable, Validable {
 //			existing.setTags(resource.getTags());
 //			existing.setHardTags(resource.getHardTags());
 //			existing.setDatasourceName(resource.getDatasourceName());
-//			
+//
 //		}
-		
+
 	}
 
 	public void addSubSeller(final String subSeller) throws ParseException {
@@ -1057,7 +1057,7 @@ public class DataFragment implements Standardisable, Validable {
 		merchantName = subSeller;
 	}
 
-	
+
 
 
 

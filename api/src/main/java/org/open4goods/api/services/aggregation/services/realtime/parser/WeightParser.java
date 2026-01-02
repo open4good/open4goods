@@ -16,65 +16,66 @@ import org.slf4j.LoggerFactory;
 public class WeightParser extends AttributeParser {
 
 	protected static final Logger logger = LoggerFactory.getLogger(WeightParser.class);
-	
+
 	@Override
 	public String parse(ProductAttribute attribute, AttributeConfig attributeConfig, VerticalConfig verticalConfig) throws ParseException {
-		
+
 		Double weightInGrams = null;
-		
+
 		for (SourcedAttribute e : attribute.getSource()){
 			Double actualWeightInGrams = getWeightInGrams(e, attributeConfig,verticalConfig);
-			
+
 			if (null == actualWeightInGrams) {
 				continue;
-			} 
-			
+			}
+
 			if (null == weightInGrams) {
 				weightInGrams = actualWeightInGrams;
 			}
-			
+
 			// Comparing
 			if (weightInGrams.doubleValue() != actualWeightInGrams.doubleValue()) {
 				// TODO(P1, design) : exclude, alarm, get an election mechanism...
-				logger.error("Conflict : {} <> {}", weightInGrams, e );
+				logger.warn("Conflict : {} <> {}", weightInGrams, e );
 			}
-			
-			
+
+
 		}
 		return String.valueOf(weightInGrams);
 	}
 
 	private Double getWeightInGrams(SourcedAttribute e, AttributeConfig attributeConfig, VerticalConfig verticalConfig) {
-		
+
 		String rawValue = e.getValue().replace(",", ".");
-		Double value = Double.valueOf(rawValue); 
-		
+		Double value = Double.valueOf(rawValue);
+
 		if (rawValue.contains(".")) {
 			// There is a coma / dot, this is so expressed in kg
 			return Double.valueOf(rawValue);
 		}
-		
+
 		// Looking on specific icecat id's, we know it's grams
 		// TODO : from conf
 		if (e.getIcecatTaxonomyId() != null && e.getIcecatTaxonomyId() == 94) {
 			return value / 1000;
 		}
-		
+
 		// Applying upper born
 		// TODO : from conf, could depend on the vertical
 		if (value > 200.0) {
 			return value / 1000;
 		}
-		
+
 		// Applying lower born
 		// TODO : from conf, could depend on the vertical
 		if (value < 50) {
 			return value ;
 		}
-		
-		
-		logger.warn("Uncertain weight type for {}", e);
-		
+
+
+		// TODO : Should discard ?
+		logger.info("Uncertain weight type for {}", e);
+
 		return value;
 	}
 
