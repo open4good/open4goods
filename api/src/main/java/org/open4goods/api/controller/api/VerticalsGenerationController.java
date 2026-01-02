@@ -159,6 +159,18 @@ public class VerticalsGenerationController {
 
 	}
 
+	@GetMapping(path="/{vertical}/impactscore-criterias/")
+	@Operation(summary="Generate the available impact score criterias yaml fragment for a given vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public String generateImpactScoreCriterias(
+			@PathVariable String vertical,
+			@RequestParam(defaultValue = "10") Integer minCoveragePercent) throws ResourceNotFoundException, IOException {
+
+		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+		return verticalsGenService.generateAvailableImpactScoreCriteriasFragment(vc, minCoveragePercent);
+	}
+
 
 
 

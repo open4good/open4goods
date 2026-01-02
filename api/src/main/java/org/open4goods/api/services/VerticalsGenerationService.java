@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -13,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +29,7 @@ import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
@@ -420,6 +423,100 @@ public class VerticalsGenerationService {
 		}
 		return ret.toString();
 
+	}
+
+	/**
+	 * Generate the available impact score criterias YAML fragment for a vertical.
+	 * Criteria candidates are collected from other verticals (including _default),
+	 * then filtered by coverage against products of the target vertical.
+	 *
+	 * @param verticalConfig the target vertical configuration
+	 * @param minCoveragePercent minimum coverage percentage required
+	 * @return YAML fragment with comments describing coverage
+	 */
+	public String generateAvailableImpactScoreCriteriasFragment(VerticalConfig verticalConfig, int minCoveragePercent) {
+		Objects.requireNonNull(verticalConfig, "verticalConfig is required");
+		String verticalId = verticalConfig.getId();
+		Set<String> candidates = collectImpactScoreCandidates(verticalId);
+		if (candidates.isEmpty()) {
+			LOGGER.info("No impact score candidates found for {}", verticalId);
+			return "availableImpactScoreCriterias:\n";
+		}
+
+		long total = repository.countMainIndexHavingVertical(verticalId);
+		if (total <= 0) {
+			LOGGER.info("No products found for vertical {}", verticalId);
+			return "availableImpactScoreCriterias:\n";
+		}
+
+		StringBuilder builder = new StringBuilder("availableImpactScoreCriterias:\n");
+		candidates.stream()
+			.filter(StringUtils::isNotBlank)
+			.sorted()
+			.forEach(scoreKey -> {
+				Long count = repository.countMainIndexHavingScore(scoreKey, verticalId);
+				long hits = count == null ? 0L : count;
+				int coveragePercent = Double.valueOf(hits / (double) total * 100.0).intValue();
+				if (coveragePercent >= minCoveragePercent) {
+					builder.append("  # coverage: ")
+						.append(coveragePercent)
+						.append("% (")
+						.append(hits)
+						.append("/")
+						.append(total)
+						.append(")\n");
+					builder.append("  - ").append(scoreKey).append("\n");
+				} else {
+					LOGGER.info("Skipping impact score criteria {} with coverage {}%", scoreKey, coveragePercent);
+				}
+			});
+
+		return builder.toString();
+	}
+
+	private Set<String> collectImpactScoreCandidates(String targetVerticalId) {
+		Set<String> candidates = new HashSet<>();
+		List<VerticalConfig> configs = new ArrayList<>(verticalConfigservice.getConfigsWithoutDefault());
+		VerticalConfig defaultConfig = verticalConfigservice.getDefaultConfig();
+		if (defaultConfig != null) {
+			configs.add(defaultConfig);
+		}
+
+		for (VerticalConfig config : configs) {
+			if (config == null) {
+				continue;
+			}
+			if (StringUtils.equals(targetVerticalId, config.getId())) {
+				continue;
+			}
+			addImpactScoreCandidatesFromConfig(config, candidates);
+		}
+
+		return candidates;
+	}
+
+	private void addImpactScoreCandidatesFromConfig(VerticalConfig config, Set<String> candidates) {
+		AttributesConfig attributesConfig = config.getAttributesConfig();
+		if (attributesConfig != null && attributesConfig.getConfigs() != null) {
+			attributesConfig.getConfigs().stream()
+				.filter(AttributeConfig::isAsScore)
+				.map(AttributeConfig::getKey)
+				.filter(StringUtils::isNotBlank)
+				.forEach(candidates::add);
+		}
+
+		if (config.getAvailableImpactScoreCriterias() != null) {
+			config.getAvailableImpactScoreCriterias().stream()
+				.filter(StringUtils::isNotBlank)
+				.forEach(candidates::add);
+		}
+
+		ImpactScoreConfig impactScoreConfig = config.getImpactScoreConfig();
+		if (impactScoreConfig != null && impactScoreConfig.getCriteriasPonderation() != null) {
+			impactScoreConfig.getCriteriasPonderation().keySet().stream()
+				.filter(StringUtils::isNotBlank)
+				.forEach(candidates::add);
+		}
 	}
 
 

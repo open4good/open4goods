@@ -762,6 +762,18 @@ public class ProductRepository {
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
+        /**
+         * Count recent products for a specific vertical.
+         *
+         * @param vertical vertical identifier
+         * @return count of recent products with offers for the vertical
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingVertical(String vertical) {
+                CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("vertical").is(vertical)));
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
         public Long countMainIndexHavingScore(String scoreName, String vertical) {
                 CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
