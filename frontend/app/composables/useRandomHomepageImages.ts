@@ -24,9 +24,8 @@ export const useRandomHomepageImages = () => {
   const painImage = useState<string>('home-pain-random-image', () =>
     pickRandomImage(painImages, '/images/home/nudger-problem.webp')
   )
-  const gainImage = useState<string>(
-    'home-gain-random-image',
-    () => '/images/home/nudger-problem.webp'
+  const gainImage = useState<string>('home-gain-random-image', () =>
+    pickRandomImage(gainImages, '/images/home/nudger-screaming.webp')
   )
 
   const pickGainImage = () => {

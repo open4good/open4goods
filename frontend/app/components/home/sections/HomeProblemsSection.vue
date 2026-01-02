@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import HomePhotoInvitation from './HomePhotoInvitation.vue'
 import HomeSplitSection from './HomeSplitSection.vue'
 import { useRandomHomepageImages } from '~/composables/useRandomHomepageImages'
 
@@ -19,7 +18,11 @@ const { painImage } = useRandomHomepageImages()
 
 const sectionTitle = computed(() => t('home.problems.title'))
 const sectionDescription = computed(() => t('home.problems.description'))
-const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
+const visualImage = computed(() => ({
+  src: painImage.value,
+  alt: sectionTitle.value,
+  sizes: '(min-width: 960px) 360px, 70vw',
+}))
 </script>
 
 <template>
@@ -28,14 +31,9 @@ const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
     class="home-problems"
     :title="sectionTitle"
     :description="sectionDescription"
+    :image="visualImage"
     visual-position="left"
   >
-    <template #visual>
-      <HomePhotoInvitation
-        :image-src="painImage"
-        :image-alt="invitationImageAlt"
-      />
-    </template>
     <v-row class="home-problems__list" dense>
       <v-col
         v-for="item in props.items"

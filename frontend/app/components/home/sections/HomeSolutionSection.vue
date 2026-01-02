@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import HomePhotoInvitation from './HomePhotoInvitation.vue'
 import { useRandomHomepageImages } from '~/composables/useRandomHomepageImages'
 
 type SolutionBenefit = {
@@ -64,10 +63,12 @@ const nextImageLabel = computed(() => t('home.solution.nextImage'))
         </v-col>
         <v-col cols="12" md="6" class="home-solution__visual">
           <div class="home-solution__image-wrapper">
-            <HomePhotoInvitation
-              class="home-solution__invitation"
-              :image-src="gainImage"
-              :image-alt="invitationImageAlt"
+            <img
+              :src="gainImage"
+              :alt="invitationImageAlt"
+              class="home-solution__image"
+              loading="lazy"
+              decoding="async"
             />
             <v-btn
               icon="mdi-arrow-right"
@@ -119,15 +120,11 @@ const nextImageLabel = computed(() => t('home.solution.nextImage'))
   align-items: center
   position: relative
 
-.home-solution__invitation
-  max-width: 360px
-  width: 100%
-  transform: rotate(3deg)
+.home-solution__image
+  width: min(66%, 320px)
+  height: auto
+  display: block
   filter: drop-shadow(0 20px 40px rgba(var(--v-theme-shadow-primary-600), 0.15))
-  transition: transform 0.3s ease
-
-  &:hover
-    transform: rotate(0deg) scale(1.02)
 
 .home-solution__next-btn
   position: absolute
