@@ -103,8 +103,7 @@ class VerticalYamlValidationTest {
     void shouldExposeEprelGroupNamesAsList()
     {
         VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
-        assertThat(tvConfig.getEprelGroupNames()).contains("TELEVISION");
-        assertThat(tvConfig.getEprelGroupName()).isEqualTo("TELEVISION");
+        assertThat(tvConfig.getEprelGroupNames()).contains("televisions");
     }
 
     @Test

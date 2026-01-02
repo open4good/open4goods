@@ -70,7 +70,7 @@ class EprelSearchServiceTest
 
         Query categoryFilter = query.bool().filter().getFirst();
         assertThat(categoryFilter.isTerms()).isTrue();
-        assertThat(categoryFilter.terms().field()).isEqualTo("eprelCategory");
+        assertThat(categoryFilter.terms().field()).isEqualTo("productGroup");
         assertThat(categoryFilter.terms().terms().value())
             .extracting(FieldValue::stringValue)
             .containsExactly("TV", "MONITOR");
