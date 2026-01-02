@@ -19,7 +19,38 @@
       :og-image="ogImageUrl"
     />
 
-    <v-container class="opensource-live" fluid>
+   
+
+    <OpensourcePillarsSection
+      :eyebrow="t('opensource.pillars.eyebrow')"
+      :title="t('opensource.pillars.title')"
+      description-bloc-id="webpages:opensource:pillars-intro"
+      :cards="pillarCards"
+      :feedback-callout="feedbackCallout"
+    />
+
+    <OpensourceContributionSection
+      :eyebrow="t('opensource.contribution.eyebrow')"
+      :title="t('opensource.contribution.title')"
+      description-bloc-id="webpages:opensource:contribute-intro"
+      :steps="contributionSteps"
+    />
+
+    <OpensourceResourcesSection
+      :eyebrow="t('opensource.resources.eyebrow')"
+      :title="t('opensource.resources.title')"
+      description-bloc-id="webpages:opensource:resources-intro"
+      :resources="resourceLinks"
+      :contact="contactCta"
+      :opendata-callout="opendataCallout"
+      :prompt-callout="promptCallout"
+    />
+
+
+
+
+
+ <v-container class="opensource-live" fluid>
       <v-row class="g-4" align="stretch">
         <v-col cols="12" md="4">
           <v-card class="opensource-version-card h-100" color="surface-glass">
@@ -112,30 +143,15 @@
       </v-row>
     </v-container>
 
-    <OpensourcePillarsSection
-      :eyebrow="t('opensource.pillars.eyebrow')"
-      :title="t('opensource.pillars.title')"
-      description-bloc-id="webpages:opensource:pillars-intro"
-      :cards="pillarCards"
-      :feedback-callout="feedbackCallout"
-    />
 
-    <OpensourceContributionSection
-      :eyebrow="t('opensource.contribution.eyebrow')"
-      :title="t('opensource.contribution.title')"
-      description-bloc-id="webpages:opensource:contribute-intro"
-      :steps="contributionSteps"
-    />
 
-    <OpensourceResourcesSection
-      :eyebrow="t('opensource.resources.eyebrow')"
-      :title="t('opensource.resources.title')"
-      description-bloc-id="webpages:opensource:resources-intro"
-      :resources="resourceLinks"
-      :contact="contactCta"
-      :opendata-callout="opendataCallout"
-      :prompt-callout="promptCallout"
-    />
+
+
+
+
+
+
+
   </div>
 </template>
 
