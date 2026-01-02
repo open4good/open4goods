@@ -6,11 +6,13 @@
       <div
         v-if="resolvedImage"
         class="product-hero-background__image"
+        :class="motionClass"
         :style="imageStyle"
       />
       <div
         v-else-if="fallbackBackgroundSrc"
         class="product-hero-background__image product-hero-background__image--fallback"
+        :class="motionClass"
         :style="fallbackStyle"
       />
     </transition>
@@ -27,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, onMounted, ref, type PropType } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import { useHeroBackgroundAsset } from '~/composables/useThemedAsset'
 
@@ -82,6 +84,15 @@ const imageStyle = computed(() => {
     backgroundImage: `url('${resolvedImage.value}')`,
   }
 })
+
+const motionClass = ref('product-hero-background__image--drift')
+
+onMounted(() => {
+  motionClass.value =
+    Math.random() > 0.5
+      ? 'product-hero-background__image--drift'
+      : 'product-hero-background__image--zoom'
+})
 </script>
 
 <style scoped>
@@ -128,14 +139,58 @@ const imageStyle = computed(() => {
   background-position: center;
   opacity: 0.25; /* "Transparent / Opacified" effect */
   filter: saturate(1.1) blur(3px); /* Shading effect */
-  transform: scale(1.05);
   background-attachment: scroll;
   transition: opacity 0.5s ease;
+  will-change: transform;
 }
 
 .product-hero-background__image--fallback {
   opacity: 0.35;
   filter: saturate(1.15) blur(2px);
+}
+
+.product-hero-background__image--drift {
+  animation: hero-drift 28s ease-in-out infinite alternate;
+}
+
+.product-hero-background__image--zoom {
+  animation: hero-zoom 32s ease-in-out infinite alternate;
+}
+
+@keyframes hero-drift {
+  0% {
+    transform: scale(1.04) translate3d(-1.5%, -1%, 0);
+  }
+  100% {
+    transform: scale(1.08) translate3d(1.5%, 1%, 0);
+  }
+}
+
+@keyframes hero-zoom {
+  0% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1.12);
+  }
+}
+
+@media (max-width: 960px) {
+  .product-hero-background__image--drift {
+    animation-duration: 40s;
+  }
+
+  .product-hero-background__image--zoom {
+    animation-duration: 44s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-hero-background__image--drift,
+  .product-hero-background__image--zoom {
+    animation: none;
+    transform: scale(1.02);
+  }
 }
 
 .product-hero-background__grid {
