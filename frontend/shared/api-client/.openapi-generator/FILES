@@ -49,7 +49,6 @@ models/BlogTagDto.ts
 models/CategoriesStatsDto.ts
 models/CategoryBreadcrumbItemDto.ts
 models/CategoryNavigationDto.ts
-models/CategoryNavigationDtoChildCategoriesInner.ts
 models/CommercialEvent.ts
 models/ContactDetails.ts
 models/ContactRequestDto.ts
