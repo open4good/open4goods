@@ -486,6 +486,16 @@ const router = useRouter()
 const { locale, t } = useI18n()
 const requestURL = useRequestURL()
 const { isLoggedIn, roles } = useAuth()
+const listComponents = [
+  'base',
+  'identity',
+  'names',
+  'attributes',
+  'resources',
+  'scores',
+  'offers',
+]
+const LISTING_COMPONENTS = listComponents.join(',')
 
 const isAdmin = computed(() => isLoggedIn.value && hasAdminAccess(roles.value))
 const ADMIN_EXCLUDED_FIELD = 'excludedCauses'
@@ -766,6 +776,7 @@ const { data: initialProductsData } = await useAsyncData(
 
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
+      query: { include: LISTING_COMPONENTS },
       body: {
         verticalId: verticalId.value,
         pageNumber: 0,
@@ -1778,6 +1789,7 @@ const fetchProducts = async () => {
       '/api/products/search',
       {
         method: 'POST',
+        query: { include: LISTING_COMPONENTS },
         body: {
           verticalId: verticalId.value,
           pageNumber: pageNumber.value,

@@ -241,6 +241,19 @@ const display = useDisplay()
 const { y: scrollY } = useWindowScroll()
 const { height: viewportHeight } = useWindowSize()
 
+const PRODUCT_COMPONENTS = [
+  'base',
+  'identity',
+  'names',
+  'attributes',
+  'resources',
+  'scores',
+  'aiReview',
+  'offers',
+  'timeline',
+  'eprel',
+].join(',')
+
 const stickyBannerThresholdRatio = 0.8
 const isStickyBannerOpen = ref(false)
 const isNudgeWizardOpen = ref(false)
@@ -277,7 +290,9 @@ const {
   async () => {
     productLoadError.value = null
     try {
-      return await $fetch<ProductDto>(`/api/products/${gtin}`)
+      return await $fetch<ProductDto>(`/api/products/${gtin}`, {
+        query: { include: PRODUCT_COMPONENTS },
+      })
     } catch (fetchError) {
       if (isBackendNotFoundError(fetchError)) {
         throw createError({

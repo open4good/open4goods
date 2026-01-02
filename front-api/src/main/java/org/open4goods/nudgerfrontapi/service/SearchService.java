@@ -185,7 +185,8 @@ public class SearchService {
         List<AggregationDescriptor> descriptors = new ArrayList<>();
         var nativeQueryBuilder = new org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder()
                 .withQuery(searchQuery)
-                .withPageable(pageable);
+                .withPageable(pageable)
+                .withSourceFilter(new org.springframework.data.elasticsearch.core.query.FetchSourceFilter(true, null, new String[] { "embedding" }));
 
         if (aggregationQuery != null && aggregationQuery.aggs() != null) {
             for (Agg agg : aggregationQuery.aggs()) {
@@ -875,7 +876,8 @@ public class SearchService {
         Query query = buildGlobalSearchQuery(sanitizedQuery, requireVertical, missingVertical, tokens);
         NativeQueryBuilder builder = new NativeQueryBuilder()
                 .withQuery(query)
-                .withPageable(PageRequest.of(0, GLOBAL_SEARCH_LIMIT));
+                .withPageable(PageRequest.of(0, GLOBAL_SEARCH_LIMIT))
+                .withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
 
         try {
             return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
@@ -973,7 +975,33 @@ public class SearchService {
                 .and(repository.getRecentPriceQuery());
 
         int knnLimit = Math.max(pageSize * (pageNumber + 1), pageSize);
-        SearchHits<Product> hits = repository.knnSearchByEmbedding(embedding, criteria, knnLimit);
+
+        List<Float> queryVector = new ArrayList<>(embedding.length);
+        for (float value : embedding) {
+            queryVector.add(value);
+        }
+
+        co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch.of(knn -> knn
+                .field("embedding")
+                .queryVector(queryVector)
+                .k(knnLimit)
+                .numCandidates(Math.max(knnLimit * 2, 50))
+        );
+
+        org.springframework.data.elasticsearch.client.elc.NativeQuery knnQuery = new org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder()
+                .withQuery(new org.springframework.data.elasticsearch.core.query.CriteriaQuery(criteria))
+                .withKnnSearches(knnSearch)
+                .withPageable(org.springframework.data.domain.PageRequest.of(0, knnLimit))
+                .withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }))
+                .build();
+
+        SearchHits<Product> hits;
+        try {
+            hits = repository.search(knnQuery, ProductRepository.MAIN_INDEX_NAME);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
 
         return hits.getSearchHits().stream()
                 .skip((long) pageNumber * pageSize)
@@ -1127,7 +1155,8 @@ public class SearchService {
 
         var builder = new NativeQueryBuilder()
                 .withQuery(query)
-                .withPageable(Pageable.unpaged());
+                .withPageable(Pageable.unpaged())
+                .withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
 
         List<AggregationDescriptor> descriptors = new ArrayList<>();
         for (Agg agg : aggregations) {
