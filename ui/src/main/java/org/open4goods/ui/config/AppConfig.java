@@ -265,10 +265,6 @@ public class AppConfig {
 		return firewall;
 	}
 
-	@Bean
-	TimedAspect timedAspect(MeterRegistry registry) {
-		return new TimedAspect(registry);
-	}
 
 
 

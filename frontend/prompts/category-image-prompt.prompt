@@ -1,10 +1,10 @@
-Generate a SVG transparent image for a {productEnglish}.
+Generate a png transparent image for a {productEnglish}.
 
 {
 "global_settings": {
 "aspect_ratio": "16:9",
 "resolution": "1024x576",
-"format": "svg"
+"format": "png"
 },
 
 "art_direction": {
