@@ -4,9 +4,7 @@
       "hero": {
         "eyebrow": "Saison de Noël",
         "title": "Un hiver tout en douceur",
-        "titleSubtitle": [
-          "Des cadeaux qui ont du sens."
-        ],
+        "titleSubtitle": ["Des cadeaux qui ont du sens."],
         "subtitles": [
           "Des idées qui réchauffent le cœur.",
           "Petites attentions, grande joie.",
@@ -113,9 +111,7 @@
       "hero": {
         "eyebrow": "Nudger, c'est :",
         "title": "Acheter mieux. Sans dépenser plus.",
-        "titleSubtitle": [
-          "Acheter mieux. Sans dépenser plus."
-        ],
+        "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
         "subtitles": [
           "Gagne du temps. Choisis librement.",
           "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -234,9 +230,7 @@
     "hero": {
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
-      "titleSubtitle": [
-        "Acheter mieux. Sans dépenser plus."
-      ],
+      "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
       "subtitles": [
         "Gagne du temps. Choisis librement.",
         "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -833,7 +827,7 @@
       "nudge": {
         "cta": "Trouver les bons produits",
         "subtitle": "Passez directement aux meilleures pistes de cette catégorie avec un accompagnement guidé.",
-        "eyebrow": "Assistant intelligent"
+        "eyebrow": "Un coup de pouce ?"
       }
     },
     "products": {
@@ -1763,7 +1757,7 @@
       },
       "title": "Des rapports de qualité toujours frais",
       "version": {
-        "description": "Dernière release taggée déployée sur nos environnements.",
+        "description": "Voir les release notes",
         "status": "En ligne",
         "subtitle": "Suivre la version déployée facilite les échanges communautaires et les rapports de bugs.",
         "title": "Version actuelle"
@@ -1796,7 +1790,7 @@
           "ariaLabel": "Aller vers la page contact",
           "label": "Contacter l'équipe"
         },
-        "title": "Envie d'un échange humain ?"
+        "title": "Envie de discuter ?"
       },
       "eyebrow": "Ressources",
       "feedback": {
@@ -1822,7 +1816,7 @@
       },
       "links": {
         "guide": {
-          "ariaLabel": "Ouvrir le guide de contribution Nudger sur GitHub dans un nouvel onglet",
+          "ariaLabel": "Ouvrir le README.md Nudger sur GitHub dans un nouvel onglet",
           "title": "Guide de contribution"
         },
         "issues": {
@@ -2477,7 +2471,7 @@
       "closeLabel": "Fermer le menu",
       "items": {
         "blog": "Blog",
-        "contact": "Communauté",
+        "contact": "Le coin des curieux",
         "impactScore": "Impact Score",
         "products": "Les produits"
       },

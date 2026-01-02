@@ -245,7 +245,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useAgent } from '@/composables/useAgent'
@@ -326,22 +326,48 @@ const mapTemplatesWithAccess = (
   }))
 
 // Data loading
-async function loadData() {
-  try {
-    const [tpls, acts] = await Promise.all([
-      listTemplates(currentLang),
-      listActivity(currentLang),
-    ])
-    templates.value = mapTemplatesWithAccess(tpls)
-    activity.value = acts
-  } catch (e) {
-    console.error('Failed to load agents', e)
-  } finally {
-    loadingTemplates.value = false
-  }
+// Data loading
+const {
+  data: initialData,
+  error: loadError,
+  status,
+} = await useAsyncData('agents-data', async () => {
+  const [tpls, acts] = await Promise.all([
+    listTemplates(currentLang),
+    listActivity(currentLang),
+  ])
+  return { tpls, acts }
+})
+
+if (initialData.value) {
+  templates.value = mapTemplatesWithAccess(initialData.value.tpls)
+  activity.value = initialData.value.acts
 }
 
-onMounted(loadData)
+watch(
+  initialData,
+  newData => {
+    if (newData) {
+      templates.value = mapTemplatesWithAccess(newData.tpls)
+      activity.value = newData.acts
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  status,
+  newStatus => {
+    loadingTemplates.value = newStatus === 'pending'
+  },
+  { immediate: true }
+)
+
+watch(loadError, error => {
+  if (error) {
+    console.error('Failed to load agents', error)
+  }
+})
 
 watch(
   roles,

@@ -251,7 +251,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
                 // 4.1 MD5 blacklist
                 .map(r -> {
                     if (vertical.getResourcesConfig().getMd5Exclusions().contains(r.getMd5())) {
-                        logger.warn("Excluded because of blacklisted MD5 : {}", r.getUrl());
+                        logger.info("Excluded because of blacklisted MD5 : {}", r.getUrl());
                         r.setStatus(ResourceStatus.MD5_EXCLUSION);
                         r.setEvicted(true);
                     }
@@ -260,7 +260,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
                 // 4.2 MD5 duplicates (exact binary duplicates)
                 .map(r -> {
                     if (md5s.contains(r.getMd5())) {
-                        logger.warn("Excluded because of duplicate MD5 : {}", r.getUrl());
+                        logger.info("Excluded because of duplicate MD5 : {}", r.getUrl());
                         r.setStatus(ResourceStatus.MD5_DUPLICATE);
                         r.setEvicted(true);
                     }
@@ -272,7 +272,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
                     if (r.getResourceType() == ResourceType.IMAGE &&
                             r.getImageInfo() != null &&
                             r.getImageInfo().pixels() < vertical.getResourcesConfig().getMinPixelsEvictionSize()) {
-                        logger.warn("Excluded because image is too small : {}", r.getUrl());
+                        logger.info("Excluded because image is too small : {}", r.getUrl());
                         r.setStatus(ResourceStatus.TOO_SMALL);
                         r.setEvicted(true);
                     }

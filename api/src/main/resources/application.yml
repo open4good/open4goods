@@ -13,6 +13,8 @@ server:
 # Logging configuration
 ########################
 logging: 
+    level:
+      org.apache.fontbox.ttf.PostScriptTable: ERROR
     file:   
       max-history: 5      
       max-size: 200MB      

@@ -19,8 +19,6 @@
       :og-image="ogImageUrl"
     />
 
-   
-
     <OpensourcePillarsSection
       :eyebrow="t('opensource.pillars.eyebrow')"
       :title="t('opensource.pillars.title')"
@@ -46,11 +44,7 @@
       :prompt-callout="promptCallout"
     />
 
-
-
-
-
- <v-container class="opensource-live" fluid>
+    <v-container class="opensource-live" fluid>
       <v-row class="g-4" align="stretch">
         <v-col cols="12" md="4">
           <v-card class="opensource-version-card h-100" color="surface-glass">
@@ -71,14 +65,19 @@
               </div>
               <v-divider class="my-4" />
               <div class="d-flex align-center ga-3">
-                <v-icon
-                  icon="mdi-source-repository"
+                <v-btn
+                  :to="localePath('releases')"
+                  variant="text"
                   color="primary"
-                  size="32"
-                />
-                <span class="text-body-2">
-                  {{ t('opensource.live.version.description') }}
-                </span>
+                  class="px-0 text-none"
+                >
+                  <template #prepend>
+                    <v-icon icon="mdi-source-repository" size="32" />
+                  </template>
+                  <span class="text-body-2">
+                    {{ t('opensource.live.version.description') }}
+                  </span>
+                </v-btn>
               </div>
             </v-card-text>
           </v-card>
@@ -142,16 +141,6 @@
         </v-col>
       </v-row>
     </v-container>
-
-
-
-
-
-
-
-
-
-
   </div>
 </template>
 

@@ -81,10 +81,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p frontend/public/reports/maven-site
-          mkdir -p frontend/public/reports/releases
-          mkdir -p frontend/public/reports/test-coverage/backend
-          mkdir -p frontend/public/reports/test-coverage/frontend
+          mkdir -p frontend/app/public/reports/maven-site
+          mkdir -p frontend/app/public/reports/releases
+          mkdir -p frontend/app/public/reports/test-coverage/backend
+          mkdir -p frontend/app/public/reports/test-coverage/frontend
 
 
 
@@ -158,14 +158,14 @@ jobs:
             echo ""
           } > RELEASE-NOTES.md
 
-      - name: 📌 Write release notes into frontend/public/reports/releases
+      - name: 📌 Write release notes into frontend/app/public/reports/releases
         shell: bash
         env:
           SAFE_VERSION: ${{ steps.meta.outputs.safe_version }}
         run: |
           set -euo pipefail
-          cp RELEASE-NOTES.md "frontend/public/reports/releases/${SAFE_VERSION}.md"
-          cp RELEASE-NOTES.md "frontend/public/reports/releases/latest.md"
+          cp RELEASE-NOTES.md "frontend/app/public/reports/releases/${SAFE_VERSION}.md"
+          cp RELEASE-NOTES.md "frontend/app/public/reports/releases/latest.md"
 
       ############################################
       # Java / Maven (build + site + jacoco aggregate)
@@ -211,7 +211,7 @@ jobs:
           set -euo pipefail
           mvn -B -ntp -T 1C -DskipTests site site:stage
 
-      - name: 🧾 Copy Maven site & JaCoCo aggregate into frontend/public/reports
+      - name: 🧾 Copy Maven site & JaCoCo aggregate into frontend/app/public/reports
         shell: bash
         run: |
           set -euo pipefail
@@ -225,13 +225,13 @@ jobs:
           fi
 
           if [[ -d "${MAVEN_SITE_SRC}" ]]; then
-            rsync -a --delete "${MAVEN_SITE_SRC}/" "frontend/public/reports/maven-site/"
+            rsync -a --delete "${MAVEN_SITE_SRC}/" "frontend/app/public/reports/maven-site/"
           else
             echo "No Maven site staging directory found; skipping."
           fi
 
           if [[ -d "${JACOCO_SRC}" ]]; then
-            rsync -a --delete "${JACOCO_SRC}/" "frontend/public/reports/test-coverage/backend/"
+            rsync -a --delete "${JACOCO_SRC}/" "frontend/app/public/reports/test-coverage/backend/"
           else
             echo "No JaCoCo report directory found; skipping."
           fi
@@ -264,13 +264,13 @@ jobs:
         working-directory: frontend
         run: pnpm test:coverage
 
-      - name: 🧾 Copy frontend coverage into frontend/public/reports
+      - name: 🧾 Copy frontend coverage into frontend/app/public/reports
         shell: bash
         run: |
           set -euo pipefail
           SRC="frontend/app/artifacts/coverage/lcov-report"
           if [[ -d "${SRC}" ]]; then
-            rsync -a --delete "${SRC}/" "frontend/public/reports/test-coverage/frontend/"
+            rsync -a --delete "${SRC}/" "frontend/app/public/reports/test-coverage/frontend/"
           else
             echo "No frontend coverage directory found at ${SRC}; skipping."
           fi
@@ -291,9 +291,9 @@ jobs:
           echo "=== Frontend coverage candidates ==="
           find frontend -maxdepth 8 -type d \( -name "lcov-report" -o -name "coverage" \) -print | head -n 200 || true
 
-          echo "=== What got copied into frontend/public/reports ==="
-          find frontend/public/reports -maxdepth 6 -type f -name "index.html" -print | head -n 200 || true
-          du -sh frontend/public/reports || true
+          echo "=== What got copied into frontend/app/public/reports ==="
+          find frontend/app/public/reports -maxdepth 6 -type f -name "index.html" -print | head -n 200 || true
+          du -sh frontend/app/public/reports || true
 
 
 
@@ -326,7 +326,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: reports-${{ steps.meta.outputs.safe_version }}
-          path: frontend/public/reports
+          path: frontend/app/public/reports
 
       ############################################
       # ✅ main: release notes only
@@ -347,11 +347,11 @@ jobs:
           MAIN_DIR="$(mktemp -d)"
           git worktree add "${MAIN_DIR}" "origin/${DEFAULT_BRANCH}"
 
-          mkdir -p "${MAIN_DIR}/frontend/public/reports/releases"
-          cp "frontend/public/reports/releases/${SAFE_VERSION}.md" "${MAIN_DIR}/frontend/public/reports/releases/${SAFE_VERSION}.md"
-          cp "frontend/public/reports/releases/latest.md" "${MAIN_DIR}/frontend/public/reports/releases/latest.md"
+          mkdir -p "${MAIN_DIR}/frontend/app/public/reports/releases"
+          cp "frontend/app/public/reports/releases/${SAFE_VERSION}.md" "${MAIN_DIR}/frontend/app/public/reports/releases/${SAFE_VERSION}.md"
+          cp "frontend/app/public/reports/releases/latest.md" "${MAIN_DIR}/frontend/app/public/reports/releases/latest.md"
 
-          git -C "${MAIN_DIR}" add -f "frontend/public/reports/releases/${SAFE_VERSION}.md" "frontend/public/reports/releases/latest.md"
+          git -C "${MAIN_DIR}" add -f "frontend/app/public/reports/releases/${SAFE_VERSION}.md" "frontend/app/public/reports/releases/latest.md"
           if git -C "${MAIN_DIR}" diff --cached --quiet; then
             echo "Release notes already up to date on ${DEFAULT_BRANCH}."
           else
@@ -385,10 +385,10 @@ jobs:
             git worktree add -b "${REPORTS_BRANCH}" "${WT_DIR}" HEAD
           fi
 
-          mkdir -p "${WT_DIR}/frontend/public/reports"
-          rsync -a --delete "frontend/public/reports/" "${WT_DIR}/frontend/public/reports/"
+          mkdir -p "${WT_DIR}/frontend/app/public/reports"
+          rsync -a --delete "frontend/app/public/reports/" "${WT_DIR}/frontend/app/public/reports/"
 
-          git -C "${WT_DIR}" add -f frontend/public/reports
+          git -C "${WT_DIR}" add -f frontend/app/public/reports
           if git -C "${WT_DIR}" diff --cached --quiet; then
             echo "Reports branch already up to date."
           else
@@ -478,7 +478,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "frontend/public/reports/"
+          SOURCE: "frontend/app/public/reports/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: "/opt/open4goods/bin/latest/frontend-ssr/.output/public/reports"
