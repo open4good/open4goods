@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,13 +16,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParserConfig;
+import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.NudgeToolConfig;
+import org.open4goods.model.vertical.NudgeToolScore;
+import org.open4goods.model.vertical.NudgeToolSubsetGroup;
 import org.open4goods.model.vertical.Order;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -248,7 +257,132 @@ public class VerticalsConfigService {
 		ObjectReader objectReader = serialisationService.getYamlMapper().readerForUpdating(copy);
 		VerticalConfig ret = objectReader.readValue(inputStream);
 		inputStream.close();
+		mergeDefaults(defaul, ret);
 		return resolveAttributeConfigs(ret);
+	}
+
+	private void mergeDefaults(VerticalConfig defaults, VerticalConfig config) {
+		if (defaults == null || config == null) {
+			return;
+		}
+
+		if (defaults.getI18n() != null) {
+			if (config.getI18n() == null) {
+				config.setI18n(new HashMap<>());
+			}
+			defaults.getI18n().forEach(config.getI18n()::putIfAbsent);
+		}
+
+		config.setAvailableImpactScoreCriterias(
+				mergeStringList(defaults.getAvailableImpactScoreCriterias(), config.getAvailableImpactScoreCriterias()));
+		config.setExcludingTokensFromCategoriesMatching(mergeStringSet(defaults.getExcludingTokensFromCategoriesMatching(),
+				config.getExcludingTokensFromCategoriesMatching()));
+		config.setGenerationExcludedFromCategoriesMatching(mergeStringSet(defaults.getGenerationExcludedFromCategoriesMatching(),
+				config.getGenerationExcludedFromCategoriesMatching()));
+		config.setGenerationExcludedFromAttributesMatching(mergeStringSet(defaults.getGenerationExcludedFromAttributesMatching(),
+				config.getGenerationExcludedFromAttributesMatching()));
+		config.setRequiredAttributes(
+				mergeStringSet(defaults.getRequiredAttributes(), config.getRequiredAttributes()));
+		config.setBrandsAlias(mergeMap(defaults.getBrandsAlias(), config.getBrandsAlias()));
+		config.setSubsets(mergeByKey(defaults.getSubsets(), config.getSubsets(), VerticalSubset::getId));
+
+		AttributesConfig attributesConfig = config.getAttributesConfig();
+		AttributesConfig defaultAttributesConfig = defaults.getAttributesConfig();
+		if (attributesConfig != null && defaultAttributesConfig != null) {
+			attributesConfig.setConfigs(mergeByKey(defaultAttributesConfig.getConfigs(), attributesConfig.getConfigs(),
+					AttributeConfig::getKey));
+			attributesConfig.setFeaturedValues(
+					mergeStringSet(defaultAttributesConfig.getFeaturedValues(), attributesConfig.getFeaturedValues()));
+			attributesConfig.setExclusions(
+					mergeStringSet(defaultAttributesConfig.getExclusions(), attributesConfig.getExclusions()));
+		}
+
+		NudgeToolConfig nudgeToolConfig = config.getNudgeToolConfig();
+		NudgeToolConfig defaultNudgeToolConfig = defaults.getNudgeToolConfig();
+		if (defaultNudgeToolConfig != null) {
+			if (nudgeToolConfig == null) {
+				nudgeToolConfig = new NudgeToolConfig();
+				config.setNudgeToolConfig(nudgeToolConfig);
+			}
+
+			nudgeToolConfig.setScores(mergeByKey(defaultNudgeToolConfig.getScores(), nudgeToolConfig.getScores(),
+					NudgeToolScore::getScoreName));
+			nudgeToolConfig.setSubsets(mergeByKey(defaultNudgeToolConfig.getSubsets(), nudgeToolConfig.getSubsets(),
+					VerticalSubset::getId));
+			nudgeToolConfig.setSubsetGroups(mergeByKey(defaultNudgeToolConfig.getSubsetGroups(),
+					nudgeToolConfig.getSubsetGroups(), NudgeToolSubsetGroup::getId));
+		}
+	}
+
+	private static <T> List<T> mergeByKey(List<T> defaults, List<T> overrides, Function<T, String> keyExtractor) {
+		if (defaults == null && overrides == null) {
+			return null;
+		}
+		LinkedHashMap<String, T> merged = new LinkedHashMap<>();
+		addToMerge(merged, defaults, keyExtractor);
+		addToMerge(merged, overrides, keyExtractor);
+		return new ArrayList<>(merged.values());
+	}
+
+	private static <T> void addToMerge(LinkedHashMap<String, T> merged, List<T> values, Function<T, String> keyExtractor) {
+		if (values == null) {
+			return;
+		}
+		int index = 0;
+		for (T value : values) {
+			if (value == null) {
+				index++;
+				continue;
+			}
+			String key = keyExtractor.apply(value);
+			if (key == null || key.isBlank()) {
+				key = "__index__" + merged.size() + "_" + index;
+			}
+			merged.put(key, value);
+			index++;
+		}
+	}
+
+	private static List<String> mergeStringList(List<String> defaults, List<String> overrides) {
+		if (defaults == null && overrides == null) {
+			return null;
+		}
+		LinkedHashSet<String> merged = new LinkedHashSet<>();
+		if (defaults != null) {
+			merged.addAll(defaults);
+		}
+		if (overrides != null) {
+			merged.addAll(overrides);
+		}
+		return new ArrayList<>(merged);
+	}
+
+	private static Set<String> mergeStringSet(Set<String> defaults, Set<String> overrides) {
+		if (defaults == null && overrides == null) {
+			return null;
+		}
+		LinkedHashSet<String> merged = new LinkedHashSet<>();
+		if (defaults != null) {
+			merged.addAll(defaults);
+		}
+		if (overrides != null) {
+			merged.addAll(overrides);
+		}
+		return merged;
+	}
+
+	private static <K, V> Map<K, V> mergeMap(Map<K, V> defaults, Map<K, V> overrides) {
+		if (defaults == null && overrides == null) {
+			return null;
+		}
+		LinkedHashMap<K, V> merged = new LinkedHashMap<>();
+		if (defaults != null) {
+			merged.putAll(defaults);
+		}
+		if (overrides != null) {
+			merged.putAll(overrides);
+		}
+		return merged;
 	}
 
 	private VerticalConfig resolveAttributeConfigs(VerticalConfig config) {

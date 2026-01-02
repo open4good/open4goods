@@ -100,6 +100,24 @@ class VerticalYamlValidationTest {
     }
 
     @Test
+    void shouldMergeDefaultAttributesAndImpactScoreCriterias() {
+        VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
+        assertThat(tvConfig).isNotNull();
+
+        assertThat(tvConfig.getAvailableImpactScoreCriterias())
+            .as("Default impact score criteria should be merged into the TV config")
+            .contains("ESG", "DATA_QUALITY");
+
+        List<String> attributeKeys = tvConfig.getAttributesConfig().getConfigs().stream()
+            .map(AttributeConfig::getKey)
+            .toList();
+
+        assertThat(attributeKeys)
+            .as("Default attributes should be merged into the TV config")
+            .contains("ESG", "DATA_QUALITY");
+    }
+
+    @Test
     void shouldExposeEprelGroupNamesAsList()
     {
         VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
