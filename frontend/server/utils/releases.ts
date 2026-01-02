@@ -16,12 +16,13 @@ const markdown = new MarkdownIt({
 const DOMPurify = createDOMPurify(new JSDOM('').window as unknown as DOMWindow)
 
 const PROJECT_ROOT = path.resolve(process.cwd())
-const RELEASES_DIRECTORY = path.join(
-  PROJECT_ROOT,
-  'public',
-  'reports',
-  'releases'
-)
+const RELEASES_DIRECTORY_CANDIDATES = [
+  path.join(PROJECT_ROOT, '.output', 'public', 'reports', 'releases'),
+  path.join(PROJECT_ROOT, 'app', 'public', 'reports', 'releases'),
+  path.join(PROJECT_ROOT, 'public', 'reports', 'releases'),
+]
+
+let cachedReleasesDirectory: string | null = null
 
 let cachedReleaseNotes: ReleaseNote[] | null = null
 
@@ -67,14 +68,39 @@ const getReleasePublishedAt = async (filePath: string): Promise<string> => {
   return fallbackDate.toISOString()
 }
 
+const resolveReleasesDirectory = async (): Promise<string> => {
+  if (cachedReleasesDirectory) {
+    return cachedReleasesDirectory
+  }
+
+  for (const candidate of RELEASES_DIRECTORY_CANDIDATES) {
+    try {
+      const stats = await fs.stat(candidate)
+      if (stats.isDirectory()) {
+        cachedReleasesDirectory = candidate
+        return cachedReleasesDirectory
+      }
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw error
+      }
+    }
+  }
+
+  cachedReleasesDirectory =
+    RELEASES_DIRECTORY_CANDIDATES.at(-1) ?? PROJECT_ROOT
+  return cachedReleasesDirectory
+}
+
 const buildReleaseNote = async (
+  releasesDirectory: string,
   fileName: string
 ): Promise<ReleaseNote | null> => {
   if (!fileName.toLowerCase().endsWith('.md')) {
     return null
   }
 
-  const fullPath = path.join(RELEASES_DIRECTORY, fileName)
+  const fullPath = path.join(releasesDirectory, fileName)
   const [rawContent, publishedAt] = await Promise.all([
     fs.readFile(fullPath, 'utf-8'),
     getReleasePublishedAt(fullPath),
@@ -96,10 +122,13 @@ export const getReleaseNotes = async (): Promise<ReleaseNote[]> => {
   }
 
   try {
-    const files = await fs.readdir(RELEASES_DIRECTORY)
-    const releases = (await Promise.all(files.map(buildReleaseNote))).filter(
-      Boolean
-    ) as ReleaseNote[]
+    const releasesDirectory = await resolveReleasesDirectory()
+    const files = await fs.readdir(releasesDirectory)
+    const releases = (
+      await Promise.all(
+        files.map(fileName => buildReleaseNote(releasesDirectory, fileName))
+      )
+    ).filter(Boolean) as ReleaseNote[]
 
     cachedReleaseNotes = releases.sort(
       (left, right) =>
@@ -117,6 +146,7 @@ export const getReleaseNotes = async (): Promise<ReleaseNote[]> => {
 
 export const warmReleaseCache = async (): Promise<ReleaseNote[]> => {
   cachedReleaseNotes = null
+  cachedReleasesDirectory = null
   return getReleaseNotes()
 }
 
