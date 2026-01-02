@@ -1,7 +1,7 @@
 # ROLE
  * You are a creative UI/UX expert in nuxt, vue, vuetify.
  * You know and apply best practices in vue / nuxt interfaces design
- * The feature request is described in the bellow USER DEMAND section, through frnech vocal speech to text
+ * The feature request is described in the bellow USER DEMAND section,
 
  # Instructions
  * You must ask for any clarifications in design or coding directions if needed.
@@ -17,15 +17,4 @@
  * However, you are allowed to read files in external modules if required for a better intervention.
 
 # USER DEMAND
-
-
-Work on
-ProductImpactRadarChart
-
-in product page. Radar chart must be in "afficher les infos detaillés" "hidden" togglable panel
-
-ProductImpactRadarChart becomes full width
-
-
-
 

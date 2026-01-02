@@ -1,9 +1,0 @@
-<nav aria-label="breadcrumb">
-     <ol class="text-black breadcrumb">
-         <li class="breadcrumb-item" aria-current="page"><a href="/">🏠</a></li>
-         <li  th:if="${parent != null}" class="breadcrumb-item"  aria-current="page">
-              <a th:href="#{'nav.'+${parent}+'.href'}" th:text="#{'nav.'+${parent}+'.text'}"></a>
-          </li>
-         <li th:if="${page != null}" class="breadcrumb-item active" aria-current="page" th:text="#{'nav.'+${page}+'.text'}"></li>
-    </ol>
-</nav>
