@@ -2335,7 +2335,11 @@
         "USE": "Usage du produit"
       },
       "aggregateScores": {
-        "DIVERS": "Divers"
+        "DIVERS": "Divers",
+        "ENERGY_CONSUMPTION": "Consommation énergétique",
+        "REPARABILITY": "Réparabilité",
+        "DURABILITY": "Durabilité",
+        "ESG": "Performance ESG"
       },
       "showDetails": "Afficher les infos détaillées",
       "hideDetails": "Masquer les indicateurs détaillés",
