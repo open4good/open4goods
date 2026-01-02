@@ -10,6 +10,8 @@
 
 <script setup lang="ts">
 import { usePreferredReducedMotion } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 const props = defineProps<{
   count: number
@@ -20,8 +22,11 @@ const { locale } = useI18n()
 
 const animatedCount = ref(Math.max(0, Math.round(props.count)))
 const reducedMotionPreference = usePreferredReducedMotion()
+const accessibilityStore = useAccessibilityStore()
+const { prefersReducedMotionOverride } = storeToRefs(accessibilityStore)
 const isReducedMotionPreferred = computed(
-  () => reducedMotionPreference.value === 'reduce'
+  () =>
+    prefersReducedMotionOverride.value || reducedMotionPreference.value === 'reduce'
 )
 const isMounted = ref(false)
 let animationFrameId: number | null = null

@@ -29,10 +29,19 @@ const currentRoute = reactive({ path: '/', fullPath: '/' })
 
 const themeName = ref<ThemeName>('light')
 const storedThemePreference = ref<ThemeName>('light')
+const zoomedState = ref(false)
 function createUseStorageMock(): MockInstance<
-  (key: string, defaultValue: ThemeName) => Ref<ThemeName>
+  (key: string, defaultValue: ThemeName | boolean) => Ref<ThemeName | boolean>
 > {
-  return vi.fn((_: string, defaultValue: ThemeName) => {
+  return vi.fn((_: string, defaultValue: ThemeName | boolean) => {
+    if (typeof defaultValue === 'boolean') {
+      if (zoomedState.value === undefined) {
+        zoomedState.value = defaultValue
+      }
+
+      return zoomedState
+    }
+
     if (!storedThemePreference.value) {
       storedThemePreference.value = defaultValue
     }

@@ -1,6 +1,6 @@
 import { useStorage } from '@vueuse/core'
 import { defineStore } from 'pinia'
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { applyAccessibilityLayout } from '~/utils/accessibilityLayout'
 
 export const useAccessibilityStore = defineStore('accessibility', () => {
@@ -14,6 +14,8 @@ export const useAccessibilityStore = defineStore('accessibility', () => {
     isZoomed.value = !isZoomed.value
   }
 
+  const prefersReducedMotionOverride = computed(() => isZoomed.value)
+
   watch(
     isZoomed,
     zoomed => {
@@ -22,5 +24,5 @@ export const useAccessibilityStore = defineStore('accessibility', () => {
     { immediate: true }
   )
 
-  return { isZoomed, setZoomed, toggleZoom }
+  return { isZoomed, prefersReducedMotionOverride, setZoomed, toggleZoom }
 })

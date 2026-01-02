@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
 import { useTheme } from 'vuetify'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type {
@@ -30,6 +31,7 @@ import {
   useThemeAsset,
 } from '~/composables/useThemedAsset'
 import { useThemedParallaxBackgrounds } from '~/composables/useThemedParallaxBackgrounds'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 import {
   PARALLAX_SECTION_KEYS,
   THEME_ASSETS_FALLBACK,
@@ -215,8 +217,10 @@ type AnimatedSectionKey =
   | 'cta'
 
 const prefersReducedMotion = usePreferredReducedMotion()
+const accessibilityStore = useAccessibilityStore()
+const { prefersReducedMotionOverride } = storeToRefs(accessibilityStore)
 const shouldReduceMotion = computed(
-  () => prefersReducedMotion.value === 'reduce'
+  () => prefersReducedMotionOverride.value || prefersReducedMotion.value === 'reduce'
 )
 
 const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({

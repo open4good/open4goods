@@ -6,7 +6,9 @@ import {
   useWindowScroll,
   useWindowSize,
 } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
 import { useDisplay, useTheme } from 'vuetify'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 type ParallaxLayerInput =
   | string
@@ -102,7 +104,13 @@ const layerInset = computed(() => `-${overscanPx.value}px`)
 
 const theme = useTheme()
 const prefersReducedMotion = usePreferredReducedMotion()
+const accessibilityStore = useAccessibilityStore()
+const { prefersReducedMotionOverride } = storeToRefs(accessibilityStore)
 const display = useDisplay()
+
+const shouldReduceMotion = computed(
+  () => prefersReducedMotionOverride.value || prefersReducedMotion.value === 'reduce'
+)
 
 const isMounted = ref(false)
 const isInView = ref(!props.revealOnView)
@@ -244,7 +252,7 @@ const parallaxEnabled = computed(
   () =>
     import.meta.client &&
     !isBelowBreakpoint.value &&
-    prefersReducedMotion.value === 'no-preference' &&
+    !shouldReduceMotion.value &&
     resolvedBackgrounds.value.some(background => background.speed > 0)
 )
 

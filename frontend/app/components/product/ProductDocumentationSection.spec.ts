@@ -1,13 +1,14 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import ProductDocumentationSection from './ProductDocumentationSection.vue'
 import type { ProductPdfDto } from '~~/shared/api-client'
 
 vi.mock('@vueuse/core', () => ({
   useEventListener: vi.fn(() => () => {}),
   useResizeObserver: vi.fn(() => ({ stop: vi.fn() })),
+  useStorage: (_key: string, defaultValue: boolean) => ref(defaultValue),
 }))
 
 vi.mock('vue-pdf-embed', () => ({

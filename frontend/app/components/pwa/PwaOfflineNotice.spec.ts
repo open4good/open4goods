@@ -17,6 +17,7 @@ const displayMock = { smAndDown: ref(false) }
 
 vi.mock('@vueuse/core', () => ({
   useOnline: () => onlineStatus,
+  useStorage: (_key: string, defaultValue: boolean) => ref(defaultValue),
 }))
 
 vi.mock('vuetify', () => ({

@@ -19,6 +19,8 @@
 
 <script setup lang="ts">
 import { usePreferredReducedMotion } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 type AnimatedIconVariant =
   | 'pulse'
@@ -81,6 +83,11 @@ const normalizeRange = (range: [number, number]) => {
 
 const isHovered = ref(false)
 const reducedMotion = usePreferredReducedMotion()
+const accessibilityStore = useAccessibilityStore()
+const { prefersReducedMotionOverride } = storeToRefs(accessibilityStore)
+const shouldReduceMotion = computed(
+  () => prefersReducedMotionOverride.value || reducedMotion.value === 'reduce'
+)
 const scale = ref(1)
 const easing = ref(EASE_IN_OUT)
 const animationDuration = ref(0)
@@ -158,7 +165,7 @@ const iconStyle = computed(() => {
     style.transition = `transform ${ZOOM_DURATION_MS}ms ${easing.value}`
   }
 
-  if (reducedMotion.value === 'reduce') {
+  if (shouldReduceMotion.value) {
     style.animation = 'none'
   }
 
@@ -178,7 +185,7 @@ const clearTimers = () => {
 
 const scheduleIdle = () => {
   clearTimers()
-  if (reducedMotion.value === 'reduce') {
+  if (shouldReduceMotion.value) {
     resetPulseState()
     return
   }
@@ -193,7 +200,7 @@ const scheduleIdle = () => {
 }
 
 const startPulseSequence = () => {
-  if (reducedMotion.value === 'reduce') {
+  if (shouldReduceMotion.value) {
     resetPulseState()
     return
   }
@@ -206,7 +213,7 @@ const startPulseSequence = () => {
 
 const runPulse = (remaining: number) => {
   // Guard clauses
-  if (isHovered.value || reducedMotion.value === 'reduce') {
+  if (isHovered.value || shouldReduceMotion.value) {
     resetPulseState()
     return
   }
@@ -248,20 +255,23 @@ onBeforeUnmount(() => {
 })
 
 // -- Watchers --
-watch([isHovered, reducedMotion, () => props.variant], ([hover, reduced]) => {
+watch(
+  [isHovered, shouldReduceMotion, () => props.variant],
+  ([hover, reduced]) => {
   if (!isPulseVariant.value) {
     clearTimers()
     resetPulseState()
     return
   }
 
-  if (hover || reduced === 'reduce') {
+  if (hover || reduced) {
     clearTimers()
     resetPulseState()
   } else {
     scheduleIdle()
   }
-})
+  }
+)
 
 watch(
   [
