@@ -33,7 +33,7 @@ eprelGroupNames:
 
 # If absolute (starting with http), will be fetched cached and transformed in webp by the nudger resource server
 # If relativ url (starting with /), will be handled as
-verticalImage: /images/verticals/tv.png
+verticalImage: /images/verticals/washing-machine.png
 
 # The mdi corresponding icon : https://pictogrammers.com/library/mdi/
 mdiIcon: mdi-television
