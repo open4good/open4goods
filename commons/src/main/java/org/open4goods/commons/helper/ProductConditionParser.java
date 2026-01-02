@@ -19,8 +19,8 @@ public class ProductConditionParser {
 			val = val.trim().toUpperCase();
 			return switch (val) {
 			    case "NEUF", "NEW", "PRODUIT NEUF", "NOUVEAU", "PRODUIT NEW", "HTTP://SCHEMA.ORG/NEWCONDITION" -> ProductCondition.NEW;
-			    case "PRODUIT RECONDITIONNÉ", "RECONDITIONNÉ", "DEPACKAGED", "USED", "OCCASION", "VERY GOOD", "COLLECTION", "REFURBISHED", "GOOD", "FAIR", "EXCELLENT", "BON ÉTAT", "EXCELLENT ÉTAT", "TRÈS BON ÉTAT" -> ProductCondition.OCCASION;
-			    default -> {   
+			    case "PRODUIT RECONDITIONNÉ", "RECONDITIONNÉ", "DEPACKAGED", "USED", "OCCASION", "REFURBUSHED", "VERY GOOD", "COLLECTION", "REFURBISHED", "GOOD", "FAIR", "EXCELLENT", "BON ÉTAT", "EXCELLENT ÉTAT", "TRÈS BON ÉTAT" -> ProductCondition.OCCASION;
+			    default -> {
                     logger.error("Unknown ProductCondition value : " + val);
 			    	throw new InvalidParameterException("Cannot parse ProductCondition value : " + val);
 			    }

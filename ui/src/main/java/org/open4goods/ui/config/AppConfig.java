@@ -25,7 +25,6 @@ import org.open4goods.services.remotefilecaching.service.RemoteFileCachingServic
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
-import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.verticals.GoogleTaxonomyService;
@@ -113,11 +112,6 @@ public class AppConfig {
 	@Bean
 	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService wikiService) {
 		return new SitemapGenerationService(repository, config, verticalConfigService, blogService, wikiService);
-	}
-
-	@Bean
-	GoogleIndexationService googleIndexationService(ProductRepository repository, VerticalsConfigService verticalConfigService) {
-		return new GoogleIndexationService(config.getGoogleApiJson(), config.getGoogleIndexationMarkerFile(), repository, verticalConfigService);
 	}
 
 	@Bean
