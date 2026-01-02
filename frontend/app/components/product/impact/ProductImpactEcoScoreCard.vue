@@ -21,7 +21,7 @@
     </header>
 
     <div class="impact-ecoscore__score">
-      <ImpactScore :score="normalizedScore" :max="5" size="large" show-value />
+      <ImpactScore :score="normalizedScore" :max="5" size="large" />
     </div>
 
     <div v-if="hasDetailContent" class="impact-ecoscore__analysis">

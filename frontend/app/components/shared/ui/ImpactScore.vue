@@ -43,18 +43,18 @@
         :aria-label="tooltipLabel"
         role="img"
       >
-        <v-chip
+        <div
           v-if="shouldDisplayScore"
           class="impact-score-badge"
-          :class="[`impact-score-badge--${size}`]"
-          rounded="pill"
-          variant="flat"
-          :color="badgeColor"
+          :class="[
+            `impact-score-badge--${size}`,
+            { 'impact-score-badge--flat': flat },
+          ]"
         >
           <span class="impact-score-badge__value">
             {{ formattedBadgeScore }}
           </span>
-        </v-chip>
+        </div>
 
         <div v-if="shouldDisplayStars" class="impact-score-combined__rating">
           <v-rating
@@ -76,21 +76,22 @@
       </div>
 
       <!-- Badge Mode -->
-      <v-chip
+      <div
         v-else
         class="impact-score-badge"
-        :class="[`impact-score-badge--${size}`]"
+        :class="[
+          `impact-score-badge--${size}`,
+          { 'impact-score-badge--flat': flat },
+        ]"
         v-bind="activatorProps"
         :aria-label="tooltipLabel"
         role="img"
-        rounded="pill"
-        variant="flat"
-        :color="badgeColor"
+        tabindex="0"
       >
         <span class="impact-score-badge__value">
           {{ formattedBadgeScore }}
         </span>
-      </v-chip>
+      </div>
     </template>
   </v-tooltip>
 </template>
@@ -110,7 +111,9 @@ const props = defineProps({
     default: 5,
   },
   size: {
-    type: String as PropType<'small' | 'medium' | 'large' | 'xlarge'>,
+    type: String as PropType<
+      'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge'
+    >,
     default: 'medium',
   },
   mode: {
@@ -141,6 +144,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  flat: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const { t, n } = useI18n()
@@ -170,21 +177,18 @@ const formattedBadgeScore = computed(
     `${n(scoreOutOf20.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / 20`
 )
 
-const badgeColor = computed(() => {
-  // Use a default color if none provided, or map specific ranges if needed.
-  return undefined // heavily rely on CSS class
-})
-
 const ratingSize = computed(() => {
   switch (props.size) {
     case 'small':
-      return 18
+      return 22
     case 'large':
-      return 32
+      return 40
     case 'xlarge':
-      return 48
+      return 56
+    case 'xxlarge':
+      return 64
     default:
-      return 24
+      return 28
   }
 })
 
@@ -242,6 +246,7 @@ const layout = computed(() => props.layout)
 const size = computed(() => props.size)
 const showValue = computed(() => props.showValue)
 const mode = computed(() => props.mode)
+const flat = computed(() => props.flat)
 </script>
 
 <style scoped>
@@ -249,7 +254,7 @@ const mode = computed(() => props.mode)
 .impact-score {
   --impact-score-gap: 0.5rem;
   --impact-score-rating-gap: 0.375rem;
-  --impact-score-value-font-size: 0.95rem;
+  --impact-score-value-font-size: 1rem;
   display: inline-flex;
   align-items: center;
   gap: var(--impact-score-gap);
@@ -265,13 +270,19 @@ const mode = computed(() => props.mode)
 .impact-score--large {
   --impact-score-gap: 0.625rem;
   --impact-score-rating-gap: 0.5rem;
-  --impact-score-value-font-size: 1.05rem;
+  --impact-score-value-font-size: 1.2rem;
 }
 
 .impact-score--xlarge {
   --impact-score-gap: 1rem;
   --impact-score-rating-gap: 0.8rem;
-  --impact-score-value-font-size: 1.6rem;
+  --impact-score-value-font-size: 1.5rem;
+}
+
+.impact-score--xxlarge {
+  --impact-score-gap: 1.1rem;
+  --impact-score-rating-gap: 0.9rem;
+  --impact-score-value-font-size: 1.75rem;
 }
 
 .impact-score__rating :deep(.v-rating__wrapper) {
@@ -290,26 +301,65 @@ const mode = computed(() => props.mode)
 
 /* Badge Style */
 .impact-score-badge {
-  background-color: rgba(var(--v-theme-surface-primary-080), 0.85) !important;
-  color: rgb(var(--v-theme-text-neutral-strong)) !important;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.95rem;
+  border-radius: 18px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.28);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.95);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.impact-score-badge::before {
+  content: '';
+  position: absolute;
+  top: -45%;
+  right: -35%;
+  width: 90%;
+  height: 120%;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-accent-primary-highlight), 0.45),
+    rgba(var(--v-theme-accent-supporting), 0.2)
+  );
+  transform: rotate(-10deg);
+  border-radius: 999px;
+  opacity: 0.8;
+  z-index: 0;
+}
+
+.impact-score-badge--flat {
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .impact-score-badge__value {
-  font-size: 0.95rem;
-}
-
-.impact-score-badge--small .impact-score-badge__value {
-  font-size: 0.85rem;
-}
-
-.impact-score-badge--large .impact-score-badge__value {
+  position: relative;
+  z-index: 1;
   font-size: 1.05rem;
 }
 
+.impact-score-badge--small .impact-score-badge__value {
+  font-size: 0.95rem;
+}
+
+.impact-score-badge--large .impact-score-badge__value {
+  font-size: 1.3rem;
+}
+
 .impact-score-badge--xlarge .impact-score-badge__value {
-  font-size: 1.2rem;
+  font-size: 1.55rem;
+}
+
+.impact-score-badge--xxlarge .impact-score-badge__value {
+  font-size: 1.85rem;
 }
 
 /* Combined Style */
@@ -319,7 +369,7 @@ const mode = computed(() => props.mode)
   --impact-score-combined-gap: 0.75rem;
   --impact-score-stack-gap: 0.6rem;
   --impact-score-rating-gap: 0.375rem;
-  --impact-score-value-font-size: 0.95rem;
+  --impact-score-value-font-size: 1rem;
   gap: var(--impact-score-combined-gap);
   color: rgb(var(--v-theme-text-neutral-strong));
 }
@@ -335,14 +385,21 @@ const mode = computed(() => props.mode)
   --impact-score-combined-gap: 1rem;
   --impact-score-stack-gap: 0.85rem;
   --impact-score-rating-gap: 0.5rem;
-  --impact-score-value-font-size: 1.05rem;
+  --impact-score-value-font-size: 1.2rem;
 }
 
 .impact-score-combined--xlarge {
   --impact-score-combined-gap: 1.25rem;
   --impact-score-stack-gap: 1rem;
   --impact-score-rating-gap: 0.6rem;
-  --impact-score-value-font-size: 1.2rem;
+  --impact-score-value-font-size: 1.4rem;
+}
+
+.impact-score-combined--xxlarge {
+  --impact-score-combined-gap: 1.4rem;
+  --impact-score-stack-gap: 1.2rem;
+  --impact-score-rating-gap: 0.7rem;
+  --impact-score-value-font-size: 1.6rem;
 }
 
 .impact-score-combined--vertical {

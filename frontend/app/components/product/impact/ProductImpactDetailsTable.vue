@@ -61,7 +61,12 @@
             'impact-details__cell--child': item.rowType === 'subscore',
           }"
         >
-          {{ item.attributeValue }}
+          <ProductAttributeSourcingLabel
+            v-if="item.attributeSourcing"
+            :sourcing="item.attributeSourcing"
+            :value="item.attributeValue"
+          />
+          <span v-else>{{ item.attributeValue }}</span>
         </span>
       </template>
       <template #[`item.displayValue`]="{ item }">
@@ -78,9 +83,6 @@
             size="x-small"
             :show-value="false"
           />
-          <span class="impact-details__value-text">{{
-            formatScoreLabel(item.displayValue)
-          }}</span>
         </div>
       </template>
       <template #[`item.coefficient`]="{ item }">
@@ -130,6 +132,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
+import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductImpactSubscoreRating from './ProductImpactSubscoreRating.vue'
 import type { ScoreView } from './impact-types'
 
@@ -153,6 +156,7 @@ type TableRow = {
   id: string
   label: string
   attributeValue: string
+  attributeSourcing: ScoreView['attributeSourcing']
   displayValue: number | null
   coefficient: number | null
   lifecycle: string[]
@@ -349,6 +353,7 @@ const buildTableRow = (
   id: score.id,
   label: score.label,
   attributeValue: formatAttributeValue(score),
+  attributeSourcing: score.attributeSourcing ?? null,
   displayValue: score.displayValue,
   coefficient: score.coefficient,
   lifecycle: score.participateInACV ?? [],
@@ -397,6 +402,7 @@ const buildAggregateRow = (
   id: aggregateId,
   label: resolveAggregateLabel(aggregateId, aggregateScore),
   attributeValue: '—',
+  attributeSourcing: null,
   displayValue: resolveAggregateDisplayValue(
     aggregateId,
     aggregateScore,
@@ -456,22 +462,6 @@ const toggleGroup = (groupId: string) => {
 
 const isGroupExpanded = (groupId: string) => expandedGroups.value.has(groupId)
 
-const formatScore = (value: number | null) => {
-  if (value == null || Number.isNaN(value)) {
-    return '—'
-  }
-
-  return value.toFixed(1)
-}
-
-const formatScoreLabel = (value: number | null) => {
-  const formatted = formatScore(value)
-  if (formatted === '—') {
-    return formatted
-  }
-
-  return t('product.impact.valueOutOf', { value: formatted, max: 5 })
-}
 </script>
 
 <style scoped>

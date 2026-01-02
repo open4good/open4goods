@@ -27,22 +27,6 @@ const VTooltipStub = defineComponent({
   },
 })
 
-const VChipStub = defineComponent({
-  name: 'VChip',
-  props: ['color', 'rounded', 'variant'],
-  setup(props, { slots }) {
-    return () =>
-      h(
-        'div',
-        {
-          class: ['v-chip-stub', props.color ? `bg-${props.color}` : ''],
-          'data-variant': props.variant,
-        },
-        slots.default?.()
-      )
-  },
-})
-
 const VRatingStub = defineComponent({
   name: 'VRating',
   props: ['modelValue', 'length'],
@@ -61,7 +45,6 @@ describe('ImpactScore', () => {
     plugins: [i18n],
     stubs: {
       'v-tooltip': VTooltipStub,
-      'v-chip': VChipStub,
       'v-rating': VRatingStub,
     },
   }
@@ -76,7 +59,7 @@ describe('ImpactScore', () => {
     })
 
     expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
-    expect(wrapper.findComponent(VChipStub).exists()).toBe(true)
+    expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
     expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
     expect(wrapper.text()).toContain('16 / 20') // (4/5)*20 = 16
 
@@ -98,7 +81,7 @@ describe('ImpactScore', () => {
 
     expect(wrapper.find('.impact-score').exists()).toBe(true)
     expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
-    expect(wrapper.findComponent(VChipStub).exists()).toBe(false)
+    expect(wrapper.find('.impact-score-badge').exists()).toBe(false)
   })
 
   it('calculates score out of 20 correctly', () => {
@@ -136,8 +119,8 @@ describe('ImpactScore', () => {
       global: globalOptions,
     })
 
-    const chip = wrapper.findComponent(VChipStub)
-    expect(chip.classes()).toContain('impact-score-badge--large')
+    const badge = wrapper.find('.impact-score-badge')
+    expect(badge.classes()).toContain('impact-score-badge--large')
   })
 
   it('renders combined mode correctly', () => {
@@ -151,7 +134,7 @@ describe('ImpactScore', () => {
     })
 
     expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
-    expect(wrapper.findComponent(VChipStub).exists()).toBe(true)
+    expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
     expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
     expect(wrapper.text()).toContain('16 / 20')
   })
@@ -171,7 +154,20 @@ describe('ImpactScore', () => {
 
     const combined = wrapper.find('.impact-score-combined')
     expect(combined.classes()).toContain('impact-score-combined--vertical')
-    expect(wrapper.findComponent(VChipStub).exists()).toBe(false)
+    expect(wrapper.find('.impact-score-badge').exists()).toBe(false)
     expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
+  })
+
+  it('supports flat styling on the badge', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 4,
+        flat: true,
+      },
+      global: globalOptions,
+    })
+
+    const badge = wrapper.find('.impact-score-badge')
+    expect(badge.classes()).toContain('impact-score-badge--flat')
   })
 })

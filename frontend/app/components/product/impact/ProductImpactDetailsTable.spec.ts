@@ -131,6 +131,19 @@ const ImpactCoefficientBadgeStub = defineComponent({
   },
 })
 
+const ProductAttributeSourcingLabelStub = defineComponent({
+  name: 'ProductAttributeSourcingLabelStub',
+  props: ['value', 'sourcing'],
+  setup(props) {
+    return () =>
+      h(
+        'span',
+        { class: 'product-attribute-sourcing-stub' },
+        String(props.value ?? '')
+      )
+  },
+})
+
 const mountComponent = (scores: ScoreView[]) =>
   mount(ProductImpactDetailsTable, {
     props: { scores },
@@ -143,6 +156,7 @@ const mountComponent = (scores: ScoreView[]) =>
         'v-chip': VChipStub,
         ProductImpactSubscoreRating: ProductImpactSubscoreRatingStub,
         ImpactCoefficientBadge: ImpactCoefficientBadgeStub,
+        ProductAttributeSourcingLabel: ProductAttributeSourcingLabelStub,
       },
     },
   })
