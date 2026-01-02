@@ -14,9 +14,8 @@ id: washing-machine
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 2549
 eprelGroupNames:
-  - "Household washing machines"
-  - "HOUSEHOLD_WASHING_MACHINE"
-  - "HOUSEHOLD_WASHING_MACHINE_2019"
+  - "washingmachines2019"
+  - "washingmachines"
 
 verticalImage: /images/verticals/washing-machines.png
 

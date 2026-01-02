@@ -17,9 +17,9 @@ icecatTaxonomyId: -1
 
 # EPREL group code
 eprelGroupNames: 
-  - PROFESSIONAL_REFRIGERATOR
-  - DIRECT_SALES_REFRIGERATION_APPLIANCE
-  - HOUSEHOLD_REFRIGERATING_APPLIANCE
+  - refrigeratingappliances
+  - refrigeratingappliances2019
+  - professionalrefrigeratedstoragecabinets
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
 verticalImage: /images/verticals/fridge.png

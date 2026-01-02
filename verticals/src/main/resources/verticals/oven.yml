@@ -15,8 +15,9 @@ googleTaxonomyId: 683
 #The icecat category id. Set -1 if unknown
 icecatTaxonomyId: 2286
 
-# EPREL group code
-eprelGroupName: DOMESTIC_OVEN
+# EPREL group code (correspond to url_code in /swagger-ui/index.html#/eprel-controller/eprel)
+eprelGroupNames: 
+ - ovens
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
 verticalImage: /images/verticals/ovens.png

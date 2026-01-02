@@ -17,8 +17,8 @@ icecatTaxonomyId: -1
 
 # EPREL group code
 eprelGroupNames:
-  - HOUSEHOLD_DISHWASHER
-  - HOUSEHOLD_DISHWASHER
+  - dishwashers2019
+  - dishwashers
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
 verticalImage: /images/verticals/dishwasher.png

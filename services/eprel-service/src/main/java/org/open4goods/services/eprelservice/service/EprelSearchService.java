@@ -359,7 +359,7 @@ public class EprelSearchService
             finalQuery = Query.of(q -> q.bool(b ->
             {
                 b.must(query);
-                b.filter(f -> f.terms(t -> t.field("eprelCategory").terms(v -> v.value(values))));
+                b.filter(f -> f.terms(t -> t.field("productGroup").terms(v -> v.value(values))));
                 return b;
             }));
         }
