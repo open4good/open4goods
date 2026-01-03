@@ -95,6 +95,17 @@ const stubs = {
       return () => h('div', { class: 'pricing-stub' }, 'pricing')
     },
   }),
+  RoundedCornerCard: defineComponent({
+    name: 'RoundedCornerCardStub',
+    setup(_, { slots, attrs }) {
+      return () =>
+        h(
+          'div',
+          { class: ['rounded-card-stub', attrs.class] },
+          [slots.corner?.(), slots.default?.()]
+        )
+    },
+  }),
   ProductAttributeSourcingLabel: defineComponent({
     name: 'ProductAttributeSourcingLabelStub',
     props: {
@@ -206,7 +217,7 @@ describe('ProductHero', () => {
       'Next-gen Orbit X1'
     )
     expect(wrapper.find('.product-hero__panel--pricing').exists()).toBe(true)
-    expect(wrapper.find('.product-hero__panel--details').exists()).toBe(true)
+    expect(wrapper.find('.product-hero__panel--composite').exists()).toBe(true)
 
     expect(
       wrapper.findComponent({ name: 'ProductHeroBackgroundStub' }).exists()

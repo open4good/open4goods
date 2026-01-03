@@ -15,60 +15,101 @@
       </header>
 
       <div class="product-hero__grid">
-        <div class="product-hero__panel product-hero__panel--gallery">
-          <ProductHeroGallery
-            class="product-hero__gallery"
-            :product="product"
-            :title="heroTitle"
-          />
-        </div>
-
-        <div class="product-hero__panel product-hero__panel--details">
-          <div
-            v-if="impactScore !== null"
-            class="product-hero__impact-overview"
-          >
+        <RoundedCornerCard
+          class="product-hero__panel product-hero__panel--composite"
+          surface="glass"
+          rounded="lg"
+          :selectable="false"
+          accent-corner="top-right"
+          corner-size="lg"
+          :corner-variant="impactScore !== null ? 'custom' : 'none'"
+        >
+          <template v-if="impactScore !== null" #corner>
             <ImpactScore
               :score="impactScore"
               :max="5"
-              size="xlarge"
+              size="large"
+              mode="badge"
+              :show-stars="false"
+              :show-score="true"
               :show-value="false"
+              flat
             />
-            <div v-if="hasBrandOrModel" class="product-hero__brand-line">
-              <span v-if="productBrandName" class="product-hero__brand-name">{{
-                productBrandName
-              }}</span>
-              <span v-if="productModelName" class="product-hero__eyebrow">{{
-                productModelName
-              }}</span>
-            </div>
-          </div>
+          </template>
 
-          <ul
-            v-if="heroAttributes.length"
-            class="product-hero__attributes"
-            role="list"
-          >
-            <li
-              v-for="attribute in heroAttributes"
-              :key="attribute.key"
-              class="product-hero__attribute"
-              role="listitem"
-            >
-              <template v-if="attribute.showLabel !== false">
-                <span class="product-hero__attribute-label">{{
-                  attribute.label
+          <div class="product-hero__composite">
+            <div class="product-hero__composite-gallery">
+              <ProductHeroGallery
+                class="product-hero__gallery"
+                :product="product"
+                :title="heroTitle"
+              />
+            </div>
+
+            <div class="product-hero__composite-details">
+              <div v-if="hasBrandOrModel" class="product-hero__brand-line">
+                <span v-if="productBrandName" class="product-hero__brand-name">{{
+                  productBrandName
                 }}</span>
-                <span
-                  class="product-hero__attribute-separator"
-                  aria-hidden="true"
-                  >:</span
+                <span v-if="productModelName" class="product-hero__eyebrow">{{
+                  productModelName
+                }}</span>
+              </div>
+
+              <ul
+                v-if="heroAttributes.length"
+                class="product-hero__attributes"
+                role="list"
+              >
+                <li
+                  v-for="attribute in heroAttributes"
+                  :key="attribute.key"
+                  class="product-hero__attribute"
+                  role="listitem"
                 >
-              </template>
-              <span class="product-hero__attribute-value">
-                <template v-if="attribute.tooltip">
-                  <v-tooltip location="bottom" :text="attribute.tooltip">
-                    <template #activator="{ props: tooltipProps }">
+                  <template v-if="attribute.showLabel !== false">
+                    <span class="product-hero__attribute-label">{{
+                      attribute.label
+                    }}</span>
+                    <span
+                      class="product-hero__attribute-separator"
+                      aria-hidden="true"
+                      >:</span
+                    >
+                  </template>
+                  <span class="product-hero__attribute-value">
+                    <template v-if="attribute.tooltip">
+                      <v-tooltip location="bottom" :text="attribute.tooltip">
+                        <template #activator="{ props: tooltipProps }">
+                          <ProductAttributeSourcingLabel
+                            class="product-hero__attribute-value-label"
+                            :sourcing="attribute.sourcing"
+                            :value="attribute.value"
+                            :enable-tooltip="attribute.enableTooltip !== false"
+                          >
+                            <template #default="{ displayValue, displayHtml }">
+                              <span
+                                class="product-hero__attribute-value-content"
+                                v-bind="tooltipProps"
+                              >
+                                <NuxtImg
+                                  v-if="attribute.flag"
+                                  :src="attribute.flag"
+                                  :alt="displayValue"
+                                  width="32"
+                                  height="24"
+                                  class="product-hero__flag"
+                                />
+                                <!-- eslint-disable-next-line vue/no-v-html -->
+                                <span v-if="displayHtml" v-html="displayHtml" />
+                                <span v-else>{{ displayValue }}</span>
+                              </span>
+                            </template>
+                          </ProductAttributeSourcingLabel>
+                        </template>
+                      </v-tooltip>
+                    </template>
+                    <template v-else>
                       <ProductAttributeSourcingLabel
                         class="product-hero__attribute-value-label"
                         :sourcing="attribute.sourcing"
@@ -76,10 +117,7 @@
                         :enable-tooltip="attribute.enableTooltip !== false"
                       >
                         <template #default="{ displayValue, displayHtml }">
-                          <span
-                            class="product-hero__attribute-value-content"
-                            v-bind="tooltipProps"
-                          >
+                          <span class="product-hero__attribute-value-content">
                             <NuxtImg
                               v-if="attribute.flag"
                               :src="attribute.flag"
@@ -95,63 +133,39 @@
                         </template>
                       </ProductAttributeSourcingLabel>
                     </template>
-                  </v-tooltip>
-                </template>
-                <template v-else>
-                  <ProductAttributeSourcingLabel
-                    class="product-hero__attribute-value-label"
-                    :sourcing="attribute.sourcing"
-                    :value="attribute.value"
-                    :enable-tooltip="attribute.enableTooltip !== false"
-                  >
-                    <template #default="{ displayValue, displayHtml }">
-                      <span class="product-hero__attribute-value-content">
-                        <NuxtImg
-                          v-if="attribute.flag"
-                          :src="attribute.flag"
-                          :alt="displayValue"
-                          width="32"
-                          height="24"
-                          class="product-hero__flag"
-                        />
-                        <!-- eslint-disable-next-line vue/no-v-html -->
-                        <span v-if="displayHtml" v-html="displayHtml" />
-                        <span v-else>{{ displayValue }}</span>
-                      </span>
-                    </template>
-                  </ProductAttributeSourcingLabel>
-                </template>
-              </span>
-            </li>
-          </ul>
+                  </span>
+                </li>
+              </ul>
 
-          <div class="product-hero__meta-group">
-            <div class="product-hero__meta-bottom">
-              <v-btn
-                class="product-hero__compare-button"
-                :class="{
-                  'product-hero__compare-button--active': isCompareSelected,
-                }"
-                color="primary"
-                variant="flat"
-                :aria-pressed="isCompareSelected"
-                :aria-label="compareButtonAriaLabel"
-                :title="compareButtonTitle"
-                :disabled="isCompareDisabled"
-                @click="toggleCompare"
-              >
-                <v-icon
-                  :icon="compareButtonIcon"
-                  size="20"
-                  class="product-hero__compare-icon"
-                />
-                <span class="product-hero__compare-label">{{
-                  compareButtonText
-                }}</span>
-              </v-btn>
+              <div class="product-hero__meta-group">
+                <div class="product-hero__meta-bottom">
+                  <v-btn
+                    class="product-hero__compare-button"
+                    :class="{
+                      'product-hero__compare-button--active': isCompareSelected,
+                    }"
+                    color="primary"
+                    variant="flat"
+                    :aria-pressed="isCompareSelected"
+                    :aria-label="compareButtonAriaLabel"
+                    :title="compareButtonTitle"
+                    :disabled="isCompareDisabled"
+                    @click="toggleCompare"
+                  >
+                    <v-icon
+                      :icon="compareButtonIcon"
+                      size="20"
+                      class="product-hero__compare-icon"
+                    />
+                    <span class="product-hero__compare-label">{{
+                      compareButtonText
+                    }}</span>
+                  </v-btn>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </RoundedCornerCard>
 
         <aside class="product-hero__panel product-hero__panel--pricing">
           <ProductHeroPricing :product="product" />
@@ -166,6 +180,7 @@ import { computed, defineAsyncComponent, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import {
   MAX_COMPARE_ITEMS,
@@ -571,71 +586,6 @@ const heroClasses = computed(() => [
   z-index: 0;
 }
 
-.product-hero__bg-gradient {
-  position: absolute;
-  inset: -20%;
-  background: radial-gradient(
-    circle at 50% 20%,
-    rgba(var(--v-theme-hero-overlay-strong), 0.08),
-    rgba(var(--v-theme-hero-gradient-mid), 0.06),
-    transparent 70%
-  );
-  transform: translateZ(0);
-}
-
-.product-hero__bg-image {
-  position: absolute;
-  inset: -10%;
-  background-size: cover;
-  background-position: center;
-  opacity: 0.35;
-  filter: saturate(1.15) blur(2px);
-  transform: translate3d(0, 0, 0) scale(1.05);
-  background-attachment: fixed;
-}
-
-.product-hero__bg-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(
-      rgba(var(--v-theme-border-primary-strong), 0.07) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(var(--v-theme-border-primary-strong), 0.07) 1px,
-      transparent 1px
-    );
-  background-size: 120px 120px;
-  mask-image: radial-gradient(
-    circle at 50% 30%,
-    rgba(0, 0, 0, 0.6),
-    transparent 70%
-  );
-}
-
-.product-hero__bg-glow {
-  position: absolute;
-  width: 480px;
-  height: 480px;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.5;
-}
-
-.product-hero__bg-glow--primary {
-  top: -80px;
-  left: -120px;
-  background: rgba(var(--v-theme-hero-gradient-start), 0.35);
-}
-
-.product-hero__bg-glow--accent {
-  bottom: -180px;
-  right: -140px;
-  background: rgba(var(--v-theme-hero-gradient-end), 0.38);
-}
-
 .product-hero__content {
   position: relative;
   display: flex;
@@ -696,7 +646,7 @@ const heroClasses = computed(() => [
 .product-hero__grid {
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.75rem);
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr);
   align-items: stretch;
 }
 
@@ -711,21 +661,12 @@ const heroClasses = computed(() => [
   backdrop-filter: blur(16px);
 }
 
-.product-hero__panel--gallery {
-  background: rgba(var(--v-theme-surface-glass), 0.7);
-}
-
-.product-hero__panel--details {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(var(--v-theme-hero-overlay-soft), 0.75),
-      rgba(var(--v-theme-surface-glass), 0.9)
-    ),
-    rgba(var(--v-theme-surface-default), 0.5);
+.product-hero__panel--composite {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .product-hero__panel--pricing {
@@ -745,12 +686,22 @@ const heroClasses = computed(() => [
   min-width: 0;
 }
 
-.product-hero__impact-overview {
+.product-hero__composite {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(1.2rem, 2.5vw, 2rem);
+  align-items: stretch;
+}
+
+.product-hero__composite-gallery {
+  min-width: 0;
+}
+
+.product-hero__composite-details {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.9rem;
-  color: rgb(var(--v-theme-text-neutral-strong));
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
 }
 
 .product-hero__brand-line {
@@ -909,11 +860,11 @@ const heroClasses = computed(() => [
 
 @media (max-width: 1400px) {
   .product-hero__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .product-hero__panel--pricing {
-    grid-column: span 2;
+    grid-column: auto;
   }
 }
 
@@ -930,8 +881,8 @@ const heroClasses = computed(() => [
     grid-column: auto;
   }
 
-  .product-hero__bg-image {
-    background-attachment: scroll;
+  .product-hero__composite {
+    grid-template-columns: 1fr;
   }
 }
 </style>
