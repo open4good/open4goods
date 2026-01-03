@@ -43,6 +43,18 @@
       "defaultValue": "mean"
     },
     {
+      "name": "embedding.query-prefix",
+      "type": "java.lang.String",
+      "description": "Prefix added to query text when generating embeddings.",
+      "defaultValue": "query:"
+    },
+    {
+      "name": "embedding.passage-prefix",
+      "type": "java.lang.String",
+      "description": "Prefix added to passage text when generating embeddings.",
+      "defaultValue": "passage:"
+    },
+    {
       "name": "embedding.engine",
       "type": "java.lang.String",
       "description": "Engine name supplied to DJL when loading models.",

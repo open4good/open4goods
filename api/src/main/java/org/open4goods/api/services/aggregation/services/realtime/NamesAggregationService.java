@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.util.EmbeddingVectorUtils;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.attribute.ReferentielKey;
@@ -50,17 +52,20 @@ public class NamesAggregationService extends AbstractAggregationService {
 	private final VerticalsConfigService verticalService;
 	private final BlablaService blablaService;
 	private final DjlTextEmbeddingService embeddingService;
+	private final DjlEmbeddingProperties embeddingProperties;
 
 	public NamesAggregationService(final Logger logger,
 			final VerticalsConfigService verticalService,
 			final EvaluationService evaluationService,
 			final BlablaService blablaService,
-			final DjlTextEmbeddingService embeddingService) {
+			final DjlTextEmbeddingService embeddingService,
+			final DjlEmbeddingProperties embeddingProperties) {
 		super(logger);
 		this.evaluationService = evaluationService;
 		this.verticalService = verticalService;
 		this.blablaService = blablaService;
 		this.embeddingService = embeddingService;
+		this.embeddingProperties = embeddingProperties;
 	}
 
 	/**
@@ -199,12 +204,14 @@ public class NamesAggregationService extends AbstractAggregationService {
 		if (StringUtils.isNotBlank(data.getVertical())) {
 			try {
 				String textToEmbed = buildEmbeddingText(data, resolvedVertical);
+				String prefixedText = applyEmbeddingPrefix(textToEmbed);
 
-				if (StringUtils.isNotBlank(textToEmbed)) {
-					final float[] embedding = embeddingService.embed(textToEmbed);
+				if (StringUtils.isNotBlank(prefixedText)) {
+					final float[] embedding = embeddingService.embed(prefixedText);
 					if (embedding != null) {
 						// Forcing to a 512 dims vector
-						data.setEmbedding(IdHelper.to512(embedding));
+						float[] padded = IdHelper.to512(embedding);
+						data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
 					}
 				}
 			} catch (Exception ex) {
@@ -386,6 +393,25 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 		final String trimmed = name.trim();
 		return trimmed.isEmpty() ? null : trimmed;
+	}
+
+	/**
+	 * Prefixes the provided text with the configured passage prefix.
+	 *
+	 * @param textToEmbed text describing the product
+	 * @return prefixed text suitable for embedding, or an empty string if no input is provided
+	 */
+	private String applyEmbeddingPrefix(final String textToEmbed) {
+		if (StringUtils.isBlank(textToEmbed)) {
+			return "";
+		}
+
+		final String prefix = embeddingProperties.getPassagePrefix();
+		if (StringUtils.isBlank(prefix)) {
+			return textToEmbed;
+		}
+
+		return prefix.trim() + " " + textToEmbed;
 	}
 
 	/**

@@ -51,6 +51,18 @@ public class DjlEmbeddingProperties
     private String poolingMode = "mean";
 
     /**
+     * Prefix added to query text when generating embeddings.
+     */
+    @NotBlank
+    private String queryPrefix = "query:";
+
+    /**
+     * Prefix added to passage text when generating embeddings.
+     */
+    @NotBlank
+    private String passagePrefix = "passage:";
+
+    /**
      * Engine name supplied to DJL criteria.
      */
     @NotBlank
@@ -121,6 +133,26 @@ public class DjlEmbeddingProperties
     public void setPoolingMode(String poolingMode)
     {
         this.poolingMode = poolingMode;
+    }
+
+    public String getQueryPrefix()
+    {
+        return queryPrefix;
+    }
+
+    public void setQueryPrefix(String queryPrefix)
+    {
+        this.queryPrefix = queryPrefix;
+    }
+
+    public String getPassagePrefix()
+    {
+        return passagePrefix;
+    }
+
+    public void setPassagePrefix(String passagePrefix)
+    {
+        this.passagePrefix = passagePrefix;
     }
 
     public String getEngine()
