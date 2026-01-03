@@ -10,9 +10,7 @@
       :aria-label="ariaLabel"
       :loading="loading"
       :menu-props="menuProps"
-      @mouseenter="isHovering = true"
       :hide-no-data="!showEmptyState"
-      @mouseleave="isHovering = false"
       :no-data-text="''"
       :elevation="getFieldElevation(isHovering)"
       menu-icon=""
@@ -22,10 +20,12 @@
       clearable
       hide-details
       return-object
+      @mouseenter="isHovering = true"
       :class="[
         'search-suggest-field',
         { 'search-suggest-field--active': isHovering || isFieldFocused },
       ]"
+      @mouseleave="isHovering = false"
       @update:model-value="handleSelection"
       @click:clear="handleClear"
       @keydown.enter="handleEnterKey"

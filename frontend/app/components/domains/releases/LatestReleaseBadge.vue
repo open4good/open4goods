@@ -12,7 +12,6 @@ const { t } = useI18n()
 const { data: latestRelease } = await useLatestRelease()
 
 const latestName = computed(() => latestRelease.value?.name ?? '')
-const badgeLabel = computed(() => t('releases.latest'))
 const badgeAriaLabel = computed(() =>
   t('releases.latestLabel', { name: latestName.value })
 )
@@ -43,7 +42,6 @@ const handleClick = (event: Event) => {
     @click="handleClick"
     @keydown.enter.prevent="handleClick"
   >
-    <span class="latest-release-badge__label">{{ badgeLabel }}</span>
     <span class="latest-release-badge__value">{{ latestName }}</span>
   </a>
 </template>
@@ -79,7 +77,6 @@ const handleClick = (event: Event) => {
     display: inline-flex
     align-items: center
     gap: 6px
-    padding: 6px 12px
     border-radius: 999px
     background: rgba(var(--v-theme-primary), 0.14)
     color: rgb(var(--v-theme-primary))
@@ -94,4 +91,5 @@ const handleClick = (event: Event) => {
     font-weight: 700
     letter-spacing: 0.01em
     padding-right: 6px
+    padding-left: 6px
 </style>

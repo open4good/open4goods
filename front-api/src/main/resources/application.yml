@@ -72,6 +72,16 @@ front:
           url: https://www.ademe.fr
           imageUrl: /images/ecosystem/ademe.png
 
+        - name: Icecat
+          blocId: 'pages:ecosystem:icecat'
+          url: https://www.icecat.biz
+          imageUrl: /images/ecosystem/icecat.png          
+
+        - name: Sustainalytics
+          blocId: 'pages:ecosystem:sustainalytics'
+          url: //https://www.sustainalytics.com/
+          imageUrl: /images/ecosystem/sustainanalytics.png          
+                    
     mentors:
       partners:
         - name: Moovance
@@ -147,11 +157,6 @@ team-config:
       linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
       imageUrl: /images/team/Candide.jpeg
 
-    - name: Yann Mingant
-      blocId: 'pages:team:yann-mingant:'
-      linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
-      imageUrl: /images/team/Yann.jpeg
-
     - name: Louis-Marie Toudoire
       blocId: 'pages:team:louis-marie-toudoire:'
       linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
@@ -187,6 +192,16 @@ team-config:
       blocId: 'pages:team:stephane-castrec:'
       linkedInUrl: https://www.linkedin.com/in/scastrec/
       imageUrl: /images/team/Stephane.jpeg
+      
+    - name: Yann Mingant
+      blocId: 'pages:team:yann-mingant:'
+      linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
+      imageUrl: /images/team/Yann.jpeg
+      
+    - name: Albert Le Jeune Vasseur
+      blocId: 'pages:team:albert-ljv:'
+      linkedInUrl: https://www.linkedin.com/in/albertljv/
+      imageUrl: /images/team/Albert.png      
 
 price-config:
   events:

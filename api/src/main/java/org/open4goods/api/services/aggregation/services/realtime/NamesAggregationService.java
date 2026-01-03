@@ -194,7 +194,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 			}
 		}
 
-		// ---- Embedding computation (DistilCamemBERT) ----
+		// ---- Embedding computation  ----
 		// Keep behavior: attempt computation whenever vertical is present and name is non-empty.
 		if (StringUtils.isNotBlank(data.getVertical())) {
 			try {

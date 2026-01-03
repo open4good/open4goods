@@ -1862,7 +1862,7 @@
     },
     "cta": {
       "ctaLabel": "Contacter l'équipe",
-      "description": "Nous recherchons des alliés qui souhaitent bâtir avec nous l'achat responsable.",
+      "description": "Nous recherchons des alliés qui souhaitent bâtir avec nous une consommation plus vertueuse.",
       "eyebrow": "Rejoignez l'aventure",
       "title": "Envie de devenir partenaire ?"
     },
@@ -1871,7 +1871,7 @@
       "empty": "Les partenaires de l'écosystème seront bientôt listés ici.",
       "fallbackDescription": "Le contenu de ce partenaire sera publié prochainement.",
       "linkLabel": "Découvrir l'initiative",
-      "subtitle": "Au travers d'échanges ou de partenartiats directs, ils contribuent à la trajectoire de Nudger",
+      "subtitle": "Au travers d'échanges ou de partenariats directs, ils contribuent à la trajectoire de Nudger",
       "title": "Nudger s'inscrit dans un écosystème dynamique"
     },
     "errors": {

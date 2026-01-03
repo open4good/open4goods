@@ -98,7 +98,7 @@ i18n:
 
     # Vertical page elements
     verticalHomeUrl: "refrigerators"
-    verticalHomeTitle: "Réfrigérateurs - Le coin des frigos."
+    verticalHomeTitle: "Réfrigérateurs"
     verticalHomeDescription: "Comparez les réfrigérateurs"
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)

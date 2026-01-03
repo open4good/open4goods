@@ -234,14 +234,14 @@ const footerLogo = useFooterLogoAsset()
           />
         </NuxtLink>
 
+        <p class="footer-meta mb-0 text-body-2">
+          {{ t('siteIdentity.footer.copyright', { year: currentYear }) }}
+        </p>
         <LatestReleaseBadge
           class="footer-latest-badge"
           dense
           :scroll-target="releasesPath"
         />
-        <p class="footer-meta mb-0 text-body-2">
-          {{ t('siteIdentity.footer.copyright', { year: currentYear }) }}
-        </p>
       </v-col>
     </v-row>
   </v-container>
