@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import jakarta.annotation.PostConstruct;
 
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.Currency;
@@ -975,6 +976,10 @@ public class SearchService {
                 .and(repository.getRecentPriceQuery());
 
         int knnLimit = Math.max(pageSize * (pageNumber + 1), pageSize);
+
+
+        // To 512 dims
+        embedding = IdHelper.to512(embedding);
 
         List<Float> queryVector = new ArrayList<>(embedding.length);
         for (float value : embedding) {
