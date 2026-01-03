@@ -53,7 +53,6 @@ const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const searchQuery = ref('')
-const contactRedirectMessage = ref('')
 
 const MIN_SUGGESTION_QUERY_LENGTH = 2
 
@@ -213,14 +212,16 @@ type AnimatedSectionKey =
   | 'blog'
   | 'objections'
   | 'faq'
-  | 'contactRedirect'
+  | 'faq'
   | 'cta'
 
 const prefersReducedMotion = usePreferredReducedMotion()
 const accessibilityStore = useAccessibilityStore()
 const { prefersReducedMotionOverride } = storeToRefs(accessibilityStore)
 const shouldReduceMotion = computed(
-  () => prefersReducedMotionOverride.value || prefersReducedMotion.value === 'reduce'
+  () =>
+    prefersReducedMotionOverride.value ||
+    prefersReducedMotion.value === 'reduce'
 )
 
 const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({
@@ -230,7 +231,6 @@ const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({
   blog: false,
   objections: false,
   faq: false,
-  contactRedirect: false,
   cta: false,
 })
 
@@ -295,11 +295,6 @@ const sanitizeBlogSummary = (value: unknown) =>
 
 const hasRenderableImage = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
-
-const contactRedirectSubject = computed(() =>
-  toTrimmedString(t('home.contactRedirect.prefilledSubject'))
-)
-const CONTACT_REDIRECT_MAX_LENGTH = 400
 
 useAsyncData(
   'home-heavy-data',
@@ -421,6 +416,11 @@ const faqItems = computed(() => [
   {
     question: String(t('home.faq.items.dataFreshness.question')),
     answer: String(t('home.faq.items.dataFreshness.answer')),
+  },
+  {
+    question: String(t('home.faq.items.contact.question')),
+    answer: '',
+    isContact: true,
   },
 ])
 
@@ -723,30 +723,6 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
   navigateToSearch(suggestion.title)
 }
 
-const handleContactRedirect = () => {
-  const sanitizedMessage = toTrimmedString(contactRedirectMessage.value).slice(
-    0,
-    CONTACT_REDIRECT_MAX_LENGTH
-  )
-
-  const query: Record<string, string> = {}
-
-  if (contactRedirectSubject.value) {
-    query.subject = contactRedirectSubject.value
-  }
-
-  if (sanitizedMessage) {
-    query.message = sanitizedMessage
-  }
-
-  router.push(
-    localePath({
-      name: 'contact',
-      query: Object.keys(query).length ? query : undefined,
-    })
-  )
-}
-
 const seoTitle = computed(() => String(t('home.seo.title')))
 
 const seoDescription = computed(() => String(t('home.seo.description')))
@@ -971,82 +947,6 @@ useHead(() => ({
                   <HomeFaqSection :items="faqPanels" />
                 </div>
               </v-fade-transition>
-            </div>
-
-            <div
-              v-intersect="createIntersectHandler('contactRedirect')"
-              class="home-page__section"
-            >
-              <v-slide-y-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.contactRedirect">
-                  <section
-                    class="home-contact-redirect"
-                    aria-labelledby="home-contact-redirect-heading"
-                  >
-                    <v-card
-                      class="home-contact-redirect__card"
-                      elevation="10"
-                      rounded="xl"
-                      variant="flat"
-                      color="surface-primary-050"
-                    >
-                      <div class="home-contact-redirect__content">
-                        <div class="home-contact-redirect__texts">
-                          <p class="home-contact-redirect__eyebrow">
-                            {{ t('home.contactRedirect.eyebrow') }}
-                          </p>
-                          <h3
-                            id="home-contact-redirect-heading"
-                            class="home-contact-redirect__title"
-                          >
-                            {{ t('home.contactRedirect.title') }}
-                          </h3>
-                          <p class="home-contact-redirect__subtitle">
-                            {{ t('home.contactRedirect.subtitle') }}
-                          </p>
-                        </div>
-
-                        <v-form
-                          class="home-contact-redirect__form"
-                          @submit.prevent="handleContactRedirect"
-                        >
-                          <v-text-field
-                            v-model="contactRedirectMessage"
-                            :label="t('home.contactRedirect.inputLabel')"
-                            :placeholder="t('home.contactRedirect.placeholder')"
-                            :counter="CONTACT_REDIRECT_MAX_LENGTH"
-                            prepend-inner-icon="mdi-help-circle-outline"
-                            variant="outlined"
-                            hide-details="auto"
-                            clearable
-                            color="primary"
-                          />
-                          <div class="home-contact-redirect__actions">
-                            <v-btn
-                              type="submit"
-                              color="primary"
-                              size="large"
-                              prepend-icon="mdi-arrow-right"
-                            >
-                              {{ t('home.contactRedirect.cta') }}
-                            </v-btn>
-                            <v-btn
-                              :to="localePath({ name: 'contact' })"
-                              variant="text"
-                              color="primary"
-                            >
-                              {{ t('home.contactRedirect.secondaryCta') }}
-                            </v-btn>
-                          </div>
-                          <p class="home-contact-redirect__helper">
-                            {{ t('home.contactRedirect.helper') }}
-                          </p>
-                        </v-form>
-                      </div>
-                    </v-card>
-                  </section>
-                </div>
-              </v-slide-y-transition>
             </div>
 
             <div

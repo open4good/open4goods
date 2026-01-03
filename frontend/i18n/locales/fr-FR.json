@@ -488,6 +488,9 @@
         "dataFreshness": {
           "question": "Les données sont-elles à jour ?",
           "answer": "Oui, nos données produits sont mises à jour <b>deux fois par jour</b> pour refléter au mieux les évolutions des offres."
+        },
+        "contact": {
+          "question": "J’ai une question !"
         }
       },
       "agent": {
@@ -519,7 +522,8 @@
       "cta": "Envoyer vers Contact",
       "secondaryCta": "Aller à la page Contact",
       "helper": "Nous pré-remplissons le formulaire de contact pour vous faire gagner du temps.",
-      "prefilledSubject": "Question depuis la FAQ"
+      "prefilledSubject": "Question depuis la FAQ",
+      "prefilledMessage": "Bonjour ! J’ai une question : "
     },
     "roundedCards": {
       "eyebrow": "Design system",

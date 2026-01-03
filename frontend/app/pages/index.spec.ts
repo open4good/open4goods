@@ -608,6 +608,7 @@ const mountHomePage = async () => {
         VIcon: VIconStub,
         VBtn: VBtnStub,
         VTextField: VTextFieldStub,
+        VTextarea: simpleStub('div'),
         SearchSuggestField: SearchSuggestFieldStub,
         AgentPromptInput: AgentPromptInputStub,
         VImg: VImgStub,
@@ -681,7 +682,7 @@ describe('Home page', () => {
       '@type': 'FAQPage',
     })
     expect(Array.isArray(json?.mainEntity)).toBe(true)
-    expect(json?.mainEntity).toHaveLength(4)
+    expect(json?.mainEntity).toHaveLength(5)
     expect(json?.mainEntity[0]).toMatchObject({
       '@type': 'Question',
       acceptedAnswer: { '@type': 'Answer' },

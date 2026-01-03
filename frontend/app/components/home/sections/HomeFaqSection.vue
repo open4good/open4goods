@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useLocalePath } from '#i18n'
+import HomeContactCard from '~/components/home/HomeContactCard.vue'
 
 type FaqItem = {
   question: string
   answer: string
   blocId: string
   isImpactScore?: boolean
+  isContact?: boolean
   ctaLabel?: string
   ctaAria?: string
 }
@@ -42,7 +44,12 @@ const impactScorePath = computed(() => localePath('/impact-score'))
             </v-expansion-panel-title>
             <v-expansion-panel-text class="home-faq__panel-text">
               <!-- eslint-disable-next-line vue/no-v-html -->
-              <div class="home-faq__answer" v-html="panel.answer" />
+              <div
+                v-if="!panel.isContact"
+                class="home-faq__answer"
+                v-html="panel.answer"
+              />
+              <HomeContactCard v-else />
               <div
                 v-if="panel.isImpactScore && panel.ctaLabel"
                 class="home-faq__cta-wrapper"
