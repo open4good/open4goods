@@ -775,28 +775,6 @@ const ogImageUrl = computed(() => {
 
 const ogImageAlt = computed(() => productTitle.value)
 
-useSeoMeta({
-  title: () => productTitle.value,
-  description: () => productMetaDescription.value,
-  ogTitle: () => product.value?.names?.ogTitle ?? productTitle.value,
-  ogDescription: () =>
-    product.value?.names?.ogDescription ?? productMetaDescription.value,
-  ogUrl: () => canonicalUrl.value,
-  ogType: 'product',
-  ogImage: () => ogImageUrl.value,
-  ogImageAlt: () => ogImageAlt.value,
-})
-
-useHead(() => ({
-  meta: productRobotsContent.value
-    ? [{ name: 'robots', content: productRobotsContent.value }]
-    : [],
-}))
-
-useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
-}))
-
 const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(
   () => {
     return (product.value?.scores?.scores ?? {}) as Record<
@@ -1705,6 +1683,46 @@ const productStructuredData = computed(() => {
       : undefined,
   }
 })
+
+const impactScoreOn20 = computed(() => {
+  const ecoScore = impactScores.value.find(
+    s => s.id?.toUpperCase() === 'ECOSCORE'
+  )
+  return ecoScore?.on20 != null ? Math.round(ecoScore.on20) : null
+})
+
+const metaTitle = computed(() => {
+  const title = productTitle.value
+  const score = impactScoreOn20.value
+
+  if (title.length < 35 && score != null) {
+    return `${title}${t('product.meta.impactScore', { score })}`
+  }
+
+  return title
+})
+
+useSeoMeta({
+  title: () => metaTitle.value,
+  description: () => productMetaDescription.value,
+  ogTitle: () => product.value?.names?.ogTitle ?? metaTitle.value,
+  ogDescription: () =>
+    product.value?.names?.ogDescription ?? productMetaDescription.value,
+  ogUrl: () => canonicalUrl.value,
+  ogType: 'product',
+  ogImage: () => ogImageUrl.value,
+  ogImageAlt: () => ogImageAlt.value,
+})
+
+useHead(() => ({
+  meta: productRobotsContent.value
+    ? [{ name: 'robots', content: productRobotsContent.value }]
+    : [],
+}))
+
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+}))
 
 useHead(() => {
   const scripts = [] as { type: string; key: string; children: string }[]

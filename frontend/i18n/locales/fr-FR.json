@@ -2022,6 +2022,9 @@
     }
   },
   "product": {
+    "meta": {
+      "impactScore": " | Impact Score : {score}/20"
+    },
     "admin": {
       "subtitle": "Outils réservés à l'équipe Nudger. Affichés uniquement après connexion.",
       "title": "Outils d'administration",
