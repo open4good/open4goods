@@ -20,11 +20,11 @@
       clearable
       hide-details
       return-object
-      @mouseenter="isHovering = true"
       :class="[
         'search-suggest-field',
         { 'search-suggest-field--active': isHovering || isFieldFocused },
       ]"
+      @mouseenter="isHovering = true"
       @mouseleave="isHovering = false"
       @update:model-value="handleSelection"
       @click:clear="handleClear"

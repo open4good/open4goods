@@ -613,7 +613,9 @@ const brandModelTitle = computed(() =>
 )
 
 const productMetaTitle = computed(() => {
-  return brandModelTitle.value.length ? brandModelTitle.value : productTitle.value
+  return brandModelTitle.value.length
+    ? brandModelTitle.value
+    : productTitle.value
 })
 
 const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
@@ -807,8 +809,6 @@ const ogImageUrl = computed(() => {
 
 const ogImageAlt = computed(() => productTitle.value)
 
-<<<<<<< HEAD
-=======
 const internalProductImageSource = computed(() => {
   const galleryImages = product.value?.resources?.images ?? []
   const firstGalleryImage =
@@ -850,8 +850,6 @@ useHead(() => ({
 useHead(() => ({
   link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
-
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(
   () => {
     return (product.value?.scores?.scores ?? {}) as Record<

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useLocalePath } from '#i18n'
+import DOMPurify from 'isomorphic-dompurify'
 import HomeContactCard from '~/components/home/HomeContactCard.vue'
 
 type FaqItem = {
@@ -20,6 +21,8 @@ const props = defineProps<{
 const hasPanels = computed(() => props.items.length > 0)
 const localePath = useLocalePath()
 const impactScorePath = computed(() => localePath('/impact-score'))
+
+const sanitize = (content: string) => DOMPurify.sanitize(content)
 </script>
 
 <template>
@@ -43,12 +46,13 @@ const impactScorePath = computed(() => localePath('/impact-score'))
               <h3 class="home-faq__panel-title">{{ panel.question }}</h3>
             </v-expansion-panel-title>
             <v-expansion-panel-text class="home-faq__panel-text">
-              <!-- eslint-disable-next-line vue/no-v-html -->
+              <!-- eslint-disable vue/no-v-html -->
               <div
                 v-if="!panel.isContact"
                 class="home-faq__answer"
-                v-html="panel.answer"
+                v-html="sanitize(panel.answer)"
               />
+              <!-- eslint-enable vue/no-v-html -->
               <HomeContactCard v-else />
               <div
                 v-if="panel.isImpactScore && panel.ctaLabel"
