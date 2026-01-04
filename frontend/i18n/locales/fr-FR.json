@@ -937,7 +937,9 @@
   },
   "components": {
     "impactScore": {
-      "tooltip": "Qualité de l'impact évalué à {value} sur {max}"
+      "tooltip": "Qualité de l'impact évalué à {value} sur {max}",
+      "tooltipBadge": "Qualité de l'impact évalué à {value} sur 20",
+      "outOf20": "/20"
     },
     "pageLoadingOverlay": {
       "label": "Chargement du contenu"

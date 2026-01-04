@@ -81,6 +81,8 @@
         class="impact-score-badge"
         :class="[
           `impact-score-badge--${size}`,
+          `impact-score-badge--${badgeLayout}`,
+          `impact-score-badge--${badgeVariant}`,
           { 'impact-score-badge--flat': flat },
         ]"
         v-bind="activatorProps"
@@ -88,7 +90,18 @@
         role="img"
         tabindex="0"
       >
-        <span class="impact-score-badge__value">
+        <div
+          v-if="badgeLayout === 'stacked'"
+          class="impact-score-badge__stack"
+        >
+          <span class="impact-score-badge__value-main">
+            {{ formattedBadgeValue }}
+          </span>
+          <span class="impact-score-badge__value-secondary">
+            {{ outOf20Label }}
+          </span>
+        </div>
+        <span v-else class="impact-score-badge__value">
           {{ formattedBadgeScore }}
         </span>
       </div>
@@ -148,6 +161,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  badgeLayout: {
+    type: String as PropType<'inline' | 'stacked'>,
+    default: 'inline',
+  },
+  badgeVariant: {
+    type: String as PropType<'default' | 'corner'>,
+    default: 'default',
+  },
 })
 
 const { t, n } = useI18n()
@@ -176,6 +197,12 @@ const formattedBadgeScore = computed(
   () =>
     `${n(scoreOutOf20.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / 20`
 )
+
+const formattedBadgeValue = computed(() =>
+  n(scoreOutOf20.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })
+)
+
+const outOf20Label = computed(() => t('components.impactScore.outOf20'))
 
 const ratingSize = computed(() => {
   switch (props.size) {
@@ -247,6 +274,8 @@ const size = computed(() => props.size)
 const showValue = computed(() => props.showValue)
 const mode = computed(() => props.mode)
 const flat = computed(() => props.flat)
+const badgeLayout = computed(() => props.badgeLayout)
+const badgeVariant = computed(() => props.badgeVariant)
 </script>
 
 <style scoped>
@@ -335,6 +364,32 @@ const flat = computed(() => props.flat)
   z-index: 0;
 }
 
+.impact-score-badge--corner {
+  background: rgba(var(--v-theme-surface-glass-strong), 0.92);
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.5);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+}
+
+.impact-score-badge--corner::before {
+  content: none;
+}
+
+.impact-score-badge--stacked {
+  padding: 0.5rem 0.6rem;
+}
+
+.impact-score-badge__stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  line-height: 1;
+}
+
+.impact-score-badge--corner.impact-score-badge--stacked .impact-score-badge__stack {
+  transform: rotate(-12deg);
+}
+
 .impact-score-badge--flat {
   border-color: transparent;
   box-shadow: none;
@@ -348,6 +403,26 @@ const flat = computed(() => props.flat)
 
 .impact-score-badge--small .impact-score-badge__value {
   font-size: 0.95rem;
+}
+
+.impact-score-badge__value-main {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.impact-score-badge__value-secondary {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+}
+
+.impact-score-badge--small .impact-score-badge__value-main {
+  font-size: 0.95rem;
+}
+
+.impact-score-badge--small .impact-score-badge__value-secondary {
+  font-size: 0.65rem;
 }
 
 .impact-score-badge--large .impact-score-badge__value {

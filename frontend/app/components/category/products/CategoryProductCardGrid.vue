@@ -45,21 +45,37 @@
           <CategoryProductCompareToggle :product="product" size="compact" />
         </div>
 
-        <v-img
-          :src="resolveImage(product)"
-          :alt="
-            product.identity?.bestName ??
-            product.identity?.model ??
-            $t('category.products.untitledProduct')
-          "
-          :aspect-ratio="4 / 3"
-          contain
-          class="category-product-card-grid__image"
-        >
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
+        <div class="category-product-card-grid__media">
+          <v-img
+            :src="resolveImage(product)"
+            :alt="
+              product.identity?.bestName ??
+              product.identity?.model ??
+              $t('category.products.untitledProduct')
+            "
+            :aspect-ratio="4 / 3"
+            contain
+            class="category-product-card-grid__image"
+          >
+            <template #placeholder>
+              <v-skeleton-loader type="image" class="h-100" />
+            </template>
+          </v-img>
+          <div class="category-product-card-grid__corner" role="presentation">
+            <ImpactScore
+              v-if="impactScoreValue(product) != null"
+              :score="impactScoreValue(product) ?? 0"
+              :max="5"
+              size="small"
+              mode="badge"
+              badge-layout="stacked"
+              badge-variant="corner"
+            />
+            <span v-else class="category-product-card-grid__corner-fallback">
+              {{ $t('category.products.notRated') }}
+            </span>
+          </div>
+        </div>
 
         <v-card-item class="category-product-card-grid__body">
           <div class="category-product-card-grid__header">
@@ -97,18 +113,6 @@
                 {{ attribute.value }}
               </span>
             </v-chip>
-          </div>
-
-          <div class="category-product-card-grid__score" role="presentation">
-            <ImpactScore
-              v-if="impactScoreValue(product) != null"
-              :score="impactScoreValue(product) ?? 0"
-              :max="5"
-              size="medium"
-            />
-            <span v-else class="category-product-card-grid__score-fallback">
-              {{ $t('category.products.notRated') }}
-            </span>
           </div>
 
           <template
@@ -439,6 +443,40 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
       mix-blend-mode: multiply
       background: #fff
 
+  &__media
+    position: relative
+    overflow: hidden
+    border-top-left-radius: inherit
+    border-top-right-radius: inherit
+
+  &__corner
+    position: absolute
+    top: 0
+    left: 0
+    width: 64px
+    height: 64px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    border-radius: 0 0 54% 0
+    background: rgba(var(--v-theme-surface-glass-strong), 0.92)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45)
+    color: rgb(var(--v-theme-text-neutral-strong))
+    box-shadow: 0 14px 26px rgba(15, 23, 42, 0.14)
+    backdrop-filter: blur(6px)
+    z-index: 2
+    pointer-events: none
+
+  &__corner-fallback
+    font-size: 0.72rem
+    font-weight: 700
+    letter-spacing: 0.08em
+    text-transform: uppercase
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+    text-align: center
+    line-height: 1.1
+    transform: rotate(-12deg)
+
   &__compare
     position: absolute
     right: 1.25rem
@@ -496,16 +534,6 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     gap: 0.25rem
 
   &__offers
-    font-size: 0.875rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
-
-  &__score
-    display: flex
-    align-items: center
-    justify-content: center
-    min-height: 1.75rem
-
-  &__score-fallback
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 
