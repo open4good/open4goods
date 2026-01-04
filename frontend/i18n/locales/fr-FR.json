@@ -6,11 +6,7 @@
         "title": "Un hiver tout en douceur",
         "titleSubtitle": ["Des cadeaux qui ont du sens."],
         "subtitles": [
-          "Des idées qui réchauffent le cœur.",
-          "Petites attentions, grande joie.",
-          "Offrez, partagez, savourez.",
-          "Le meilleur de la saison, en un clic.",
-          "Une touche de magie sur votre quotidien."
+          "Offrez, partagez, savourez."
         ],
         "search": {
           "helpers": [
@@ -626,19 +622,19 @@
       "hero": {
         "breadcrumbAriaLabel": "Fil d'Ariane de la navigation par catégories",
         "childDescription": "Explorez les sous-catégories et les sélections associées aux {category}.",
-        "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
+        "description": "Découvrez toutes les familles de produits analysées et laissez vous guider !",
         "resultsSummary": {},
-        "rootBreadcrumb": "Toutes les catégories",
-        "rootProductsTitle": "Les produits disponibles",
+        "rootBreadcrumb": "Toutes nos catégories",
+        "rootProductsTitle": "Les produits évalués",
         "searchLabel": "Rechercher une catégorie",
         "searchPlaceholder": "Tapez le nom d'une catégorie",
         "title": "Toutes les catégories de produits"
       },
       "loading": "Chargement de la navigation des catégories",
       "verticals": {
-        "eyebrow": "Guides mis en avant",
-        "openVertical": "Ouvrir le guide {category}",
-        "openVerticalCta": "Découvrir le guide",
+        "eyebrow": "Catégories évaluées",
+        "openVertical": "Ouvrir le comparateur {category}",
+        "openVerticalCta": "Découvrir notre eco-comparateur",
         "subtitle": "Des guides choisis pour rejoindre rapidement les familles les plus recherchées.",
         "title": "Catégories populaires",
         "viewPath": "Ouvrir le chemin taxonomique {category}",
@@ -955,21 +951,21 @@
           "title": "Rejoindre la communauté"
         },
         "partnerships": {
-          "cta": "Rencontrer l'équipe",
+          "cta": "Découvrir l'équipe",
           "ctaAria": "Ouvrir la page équipe de Nudger",
-          "description": "De la distribution aux ONG et collectivités, nous créons des passerelles pour accélérer la transition écologique.",
+          "description": "N'hésitez pas à nous rejoindre, Nudger est un projet ouvert :).",
           "title": "Co-construire des projets à impact"
         },
         "support": {
           "cta": "Nous écrire",
           "ctaAria": "Aller au formulaire de contact pour écrire à l'équipe Nudger",
-          "description": "Décrivez votre question dans le formulaire et donnez un maximum de contexte pour que nous puissions vous répondre concrètement.",
+          "description": "Décrivez votre question dans le formulaire. Donnez un maximum de contexte pour que nous puissions vous répondre concrètement :)",
           "title": "Besoin d'un coup de pouce ?"
         }
       },
       "eyebrow": "Rester en lien",
-      "subtitle": "Le collectif rassemble citoyennes, entreprises et territoires autour de la consommation responsable.",
-      "title": "Des passerelles pour collaborer"
+      "subtitle": "Le collectif est vaste et ouvert. N'hésitez pas.",
+      "title": "Nous contacter"
     },
     "form": {
       "actions": {
@@ -1023,7 +1019,7 @@
       },
       "privacy": "Vos coordonnées ne sont utilisées que pour répondre à votre message et ne sont jamais partagées.",
       "subtitle": "Remplissez les informations ci-dessous, nous reviendrons vers vous rapidement.",
-      "title": "Parlez-nous de vous"
+      "title": "Votre message"
     },
     "hero": {
       "channels": {
@@ -1899,8 +1895,8 @@
   "search": {
     "hero": {
       "eyebrow": "Explorer le catalogue",
-      "title": "Rechercher des produits responsables",
-      "subtitle": "Trouvez des produits, des marques et des références sélectionnés par Nudger dans chaque verticale."
+      "title": "Rechercher des produits",
+      "subtitle": "Trouvez des produits, des marques et des références disponibles sur Nudger ! "
     },
     "form": {
       "label": "Rechercher dans le catalogue",
@@ -2041,11 +2037,6 @@
       "message": "Soutenez une plateforme éthique !",
       "cta": "Achetez avec Nudger",
       "ariaLabel": "Bannière fixe pour promouvoir un achat responsable"
-    },
-    "meta": {
-      "defaultDescription": "Comparez {productTitle}{brandModel} sur Nudger : prix, impact environnemental et options d’achat.",
-      "defaultDescriptionWithVertical": "Comparez {productTitle}{brandModel} sur Nudger : prix, impact environnemental et meilleures options dans {verticalTitle}.",
-      "gtinFallback": "GTIN {gtin}"
     },
     "aiReview": {
       "empty": "Synthèse non encore demandée.",
