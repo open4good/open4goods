@@ -118,7 +118,7 @@ const backgroundAsset = useThemeAsset('categoriesBackground')
 .category-navigation-hero
   position: relative
   overflow: hidden
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+  color: rgb(var(--v-theme-text-neutral-strong))
 
 .category-navigation-hero__background
   position: absolute
@@ -148,17 +148,18 @@ const backgroundAsset = useThemeAsset('categoriesBackground')
   margin: 0
   font-size: clamp(2.4rem, 5vw, 3.5rem)
   line-height: 1.1
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
 
 
 .category-navigation-hero__subtitle
   margin: 0
   font-size: 1.15rem
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
 
 .category-navigation-hero__summary
   margin: 0
   font-size: 0.95rem
-  color: rgba(var(--v-theme-hero-overlay-soft), 0.9)
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
 .category-navigation-hero__search-card
   background: rgba(var(--v-theme-surface-glass), 0.18)

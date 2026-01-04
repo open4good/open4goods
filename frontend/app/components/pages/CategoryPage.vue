@@ -9,25 +9,33 @@
       :eyebrow="category.verticalMetaTitle"
       :show-image="isDesktop"
     >
+      <template #after-description>
+        <CategoryEcoscoreCard
+          v-if="category?.verticalHomeUrl"
+          class="category-page__ecoscore-card"
+          :vertical-home-url="category.verticalHomeUrl"
+          :category-name="categoryDisplayName"
+        />
+      </template>
       <template #actions>
         <div class="category-page__hero-actions">
-          <div class="category-page__hero-copy">
-            <p class="category-page__hero-eyebrow">
-              {{ $t('category.hero.nudge.eyebrow') }}
-            </p>
-            <p class="category-page__hero-helper">
-              {{ $t('category.hero.nudge.subtitle') }}
-            </p>
-          </div>
-          <v-btn
-            color="primary"
-            variant="flat"
-            prepend-icon="mdi-robot-love"
-            class="category-page__hero-cta"
-            @click="isNudgeWizardOpen = true"
-          >
-            {{ $t('category.hero.nudge.cta') }}
-          </v-btn>
+          <p class="category-page__hero-eyebrow">
+            {{ $t('category.hero.nudge.eyebrow') }}
+          </p>
+          <v-tooltip :text="$t('category.hero.nudge.subtitle')">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn
+                v-bind="tooltipProps"
+                color="primary"
+                variant="flat"
+                prepend-icon="mdi-robot-love"
+                class="category-page__hero-cta"
+                @click="isNudgeWizardOpen = true"
+              >
+                {{ $t('category.hero.nudge.cta') }}
+              </v-btn>
+            </template>
+          </v-tooltip>
         </div>
       </template>
     </CategoryHero>
@@ -128,8 +136,6 @@
                 :has-documentation="hasDocumentation"
                 :wiki-pages="category?.wikiPages ?? []"
                 :related-posts="category?.relatedPosts ?? []"
-                :vertical-home-url="category?.verticalHomeUrl ?? null"
-                :category-name="categoryDisplayName"
                 :show-admin-panel="showAdminFilters"
                 :admin-filter-fields="adminFilterFields"
                 @update:filters="onFiltersChange"
@@ -170,8 +176,6 @@
               :has-documentation="hasDocumentation"
               :wiki-pages="category?.wikiPages ?? []"
               :related-posts="category?.relatedPosts ?? []"
-              :vertical-home-url="category?.verticalHomeUrl ?? null"
-              :category-name="categoryDisplayName"
               :show-admin-panel="showAdminFilters"
               :admin-filter-fields="adminFilterFields"
               @update:filters="onFiltersChange"
@@ -450,6 +454,7 @@ import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.v
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
+import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryResultsCount from '~/components/category/CategoryResultsCount.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
@@ -835,7 +840,7 @@ const filterOptions = computed(() => filterOptionsData.value ?? null)
 const sortOptions = computed(() => sortOptionsData.value ?? null)
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
-const DEFAULT_FILTERS_COLLAPSED_STATE = true
+const DEFAULT_FILTERS_COLLAPSED_STATE = false
 
 const filtersVisibilityCookie = useCookie<string | null>(
   FILTERS_VISIBILITY_STORAGE_KEY,
@@ -2131,15 +2136,9 @@ const clearAllFilters = () => {
 
   &__hero-actions
     display: inline-flex
-    flex-wrap: wrap
-    align-items: center
-    gap: 0.75rem
-
-  &__hero-copy
-    display: flex
     flex-direction: column
-    gap: 0.25rem
-    color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+    align-items: flex-start
+    gap: 0.5rem
 
   &__hero-eyebrow
     margin: 0
@@ -2148,14 +2147,11 @@ const clearAllFilters = () => {
     text-transform: uppercase
     color: rgba(var(--v-theme-accent-supporting), 0.9)
 
-  &__hero-helper
-    margin: 0
-    font-size: 0.95rem
-    max-width: 36ch
-    color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
-
   &__hero-cta
     box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.18)
+
+  &__ecoscore-card
+    align-self: flex-start
 
   &__toolbar
     display: flex

@@ -32,13 +32,6 @@
       </v-btn>
     </div>
 
-    <CategoryEcoscoreCard
-      v-if="ecoscoreLinkAvailable"
-      class="category-page__ecoscore-entry mt-4"
-      :vertical-home-url="props.verticalHomeUrl ?? undefined"
-      :category-name="props.categoryName ?? undefined"
-    />
-
     <template v-if="hasDocumentation">
       <v-divider class="my-4" />
       <CategoryDocumentationRail
@@ -65,7 +58,6 @@ import type {
 
 import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
 import CategoryDocumentationRail from './CategoryDocumentationRail.vue'
-import CategoryEcoscoreCard from './CategoryEcoscoreCard.vue'
 import CategoryAdminFiltersPanel from './CategoryAdminFiltersPanel.vue'
 const props = withDefaults(
   defineProps<{
@@ -79,15 +71,11 @@ const props = withDefaults(
     hasDocumentation: boolean
     wikiPages: WikiPageConfig[]
     relatedPosts: BlogPostDto[]
-    verticalHomeUrl?: string | null
-    categoryName?: string | null
     showAdminPanel?: boolean
     adminFilterFields?: FieldMetadataDto[]
   }>(),
   {
     baselineAggregations: () => [],
-    verticalHomeUrl: null,
-    categoryName: null,
     showAdminPanel: false,
     adminFilterFields: () => [],
   }
@@ -107,7 +95,6 @@ const wikiPages = computed(() => props.wikiPages ?? [])
 const relatedPosts = computed(() => props.relatedPosts ?? [])
 const hasDocumentation = computed(() => props.hasDocumentation)
 const showMobileActions = computed(() => props.showMobileActions)
-const ecoscoreLinkAvailable = computed(() => Boolean(props.verticalHomeUrl))
 const adminFields = computed(() => props.adminFilterFields ?? [])
 const shouldShowAdminPanel = computed(
   () => props.showAdminPanel && adminFields.value.length > 0

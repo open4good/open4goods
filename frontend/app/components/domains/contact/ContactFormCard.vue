@@ -6,7 +6,7 @@
   >
     <v-container class="py-12">
       <v-row justify="center">
-        <v-col cols="12" md="8" lg="6">
+        <v-col cols="12" md="10" lg="8">
           <v-card class="contact-form__card" elevation="8" rounded="xl">
             <div class="contact-form__header">
               <p class="contact-form__eyebrow">

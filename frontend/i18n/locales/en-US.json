@@ -278,8 +278,8 @@
         "partnerLinkFallback": "our partners"
       },
       "agent": {
-        "title": "Any questions?",
-        "subtitle": "Ask your question to our expert AI agent Nudger."
+        "title": "Ask Nudger",
+        "subtitle": "Send your questions to our Nudger AI agent."
       },
       "context": {
         "cornerLabel": "Impact digest",
@@ -602,7 +602,10 @@
         "breadcrumbAriaLabel": "Category navigation breadcrumb trail",
         "childDescription": "Explore the subcategories and curated selections inside {category}.",
         "description": "Discover every product family we analyse and jump directly to the most relevant section.",
-        "resultsSummary": {},
+        "resultsSummary": {
+          "one": "{count} category available",
+          "other": "{count} categories available"
+        },
         "rootBreadcrumb": "All categories",
         "rootProductsTitle": "Available products",
         "searchLabel": "Search categories",
@@ -1746,11 +1749,6 @@
     },
     "pillars": {
       "cards": {
-        "community": {
-          "ariaLabel": "Navigate to the Nudger team page",
-          "cta": "Meet the team",
-          "title": "Inclusive community"
-        },
         "methodology": {
           "ariaLabel": "Navigate to the Impact Score page",
           "cta": "Understand the Impact Score",
@@ -1875,7 +1873,7 @@
     "hero": {
       "eyebrow": "Discover the catalogue",
       "title": "Search responsible products",
-      "subtitle": "Find products, brands and references curated by Nudger across every vertical."
+      "subtitle": "Find products, brands and references available on Nudger!<br><em>“TV OLED 55 inches”</em>, <em>“TCL 55P616”</em>, <em>“Sony large-capacity washer”</em>"
     },
     "form": {
       "label": "Search the catalogue",
@@ -2673,6 +2671,7 @@
       "search": {
         "title": "Quick search",
         "label": "Search a product",
+        "ariaLabel": "Search for a product on Nudger",
         "placeholder": "Type a brand or product name",
         "cta": "Search now"
       },

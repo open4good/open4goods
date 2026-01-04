@@ -299,8 +299,8 @@
         "partnerLinkFallback": "nos partenaires"
       },
       "agent": {
-        "title": "Une question ?",
-        "subtitle": "Posez votre question à notre agent IA expert Nudger."
+        "title": "Questionner",
+        "subtitle": "Posez vos questions à notre agent IA Nudger."
       },
       "context": {
         "cornerLabel": "Résumé impact",
@@ -627,7 +627,10 @@
         "breadcrumbAriaLabel": "Fil d'Ariane de la navigation par catégories",
         "childDescription": "Explorez les sous-catégories et les sélections associées aux {category}.",
         "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
-        "resultsSummary": {},
+        "resultsSummary": {
+          "one": "{count} catégorie disponible",
+          "other": "{count} catégories disponibles"
+        },
         "rootBreadcrumb": "Toutes les catégories",
         "rootProductsTitle": "Les produits disponibles",
         "searchLabel": "Rechercher une catégorie",
@@ -829,7 +832,7 @@
       "breadcrumbAriaLabel": "Fil d'Ariane des catégories",
       "missingBreadcrumbTitle": "Catégorie",
       "nudge": {
-        "cta": "Trouver les bons produits",
+        "cta": "Trouver les bon produits",
         "subtitle": "Passez directement aux meilleures pistes de cette catégorie avec un accompagnement guidé.",
         "eyebrow": "Un coup de pouce ?"
       }
@@ -1771,11 +1774,6 @@
     },
     "pillars": {
       "cards": {
-        "community": {
-          "ariaLabel": "Aller vers la page de l'équipe Nudger",
-          "cta": "Rencontrer l'équipe",
-          "title": "Communauté inclusive"
-        },
         "methodology": {
           "ariaLabel": "Aller vers la page Impact-score",
           "cta": "Comprendre l'Impact-score",
@@ -1900,7 +1898,7 @@
     "hero": {
       "eyebrow": "Explorer le catalogue",
       "title": "Rechercher des produits responsables",
-      "subtitle": "Trouvez des produits, des marques et des références sélectionnés par Nudger dans chaque verticale."
+      "subtitle": "Trouvez des produits, des marques et des références disponibles sur Nudger !<br><em>« TV OLED 55 pouces »</em>, <em>« TCL 55P616 »</em>, <em>« Lave linge sony grande capacité »</em>"
     },
     "form": {
       "label": "Rechercher dans le catalogue",
@@ -2702,6 +2700,7 @@
       "search": {
         "title": "Recherche rapide",
         "label": "Rechercher un produit",
+        "ariaLabel": "Rechercher un produit dans Nudger",
         "placeholder": "Tape une marque ou un produit",
         "cta": "Rechercher"
       },

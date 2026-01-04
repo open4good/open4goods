@@ -28,6 +28,7 @@ export const THEME_ASSET_KEYS = [
   'contactBackground',
   'blogBackground',
   'categoriesBackground',
+  'partnersBackground',
   'parallaxAplat',
 ] as const
 
@@ -75,6 +76,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'contact-background.svg',
     blogBackground: 'blog-background.svg',
     categoriesBackground: 'categories-background.svg',
+    partnersBackground: 'placeholders/generated/partners.svg',
     parallaxAplat: 'parallax/parallax-aplats.svg',
   },
   dark: {
@@ -87,6 +89,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'contact-background.svg',
     blogBackground: 'blog-background.svg',
     categoriesBackground: 'categories-background.svg',
+    partnersBackground: 'placeholders/generated/partners.svg',
     parallaxAplat: 'parallax/parallax-aplats.svg',
   },
   common: {
@@ -99,6 +102,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'placeholders/asset-missing.svg',
     blogBackground: 'placeholders/asset-missing.svg',
     categoriesBackground: 'placeholders/asset-missing.svg',
+    partnersBackground: 'placeholders/generated/partners.svg',
     parallaxAplat: 'parallax/parallax-aplats.svg',
   },
 }
