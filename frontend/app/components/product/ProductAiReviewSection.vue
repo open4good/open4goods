@@ -2,7 +2,7 @@
   <section :id="sectionId" class="product-ai-review">
     <header class="product-ai-review__header">
       <h2 class="product-ai-review__title">
-        {{ $t('product.aiReview.title') }}
+        {{ $t('product.aiReview.title', titleParams) }}
       </h2>
       <p class="product-ai-review__subtitle">
         {{ $t('product.aiReview.subtitle') }}
@@ -391,6 +391,10 @@ const props = defineProps({
   siteKey: {
     type: String,
     default: '',
+  },
+  titleParams: {
+    type: Object as PropType<Record<string, string> | undefined>,
+    default: undefined,
   },
 })
 

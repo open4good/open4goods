@@ -2,7 +2,7 @@
   <section :id="sectionId" class="product-price">
     <header class="product-price__header">
       <h2 id="price-history" class="product-price__title">
-        {{ $t('product.price.title') }}
+        {{ $t('product.price.title', titleParams) }}
       </h2>
       <p class="product-price__subtitle">
         {{ $t('product.price.subtitle') }}
@@ -521,6 +521,10 @@ const props = defineProps({
   commercialEvents: {
     type: Array as PropType<CommercialEvent[]>,
     default: () => [],
+  },
+  titleParams: {
+    type: Object as PropType<Record<string, string> | undefined>,
+    default: undefined,
   },
 })
 

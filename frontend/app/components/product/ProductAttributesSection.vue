@@ -2,7 +2,7 @@
   <section :id="sectionId" class="product-attributes">
     <header class="product-attributes__header">
       <h2 class="product-attributes__title">
-        {{ $t('product.attributes.title') }}
+        {{ $t('product.attributes.title', titleParams) }}
       </h2>
       <p class="product-attributes__subtitle">
         {{ $t('product.attributes.subtitle') }}
@@ -305,6 +305,10 @@ const props = defineProps({
   product: {
     type: Object as PropType<ProductDto | null>,
     default: null,
+  },
+  titleParams: {
+    type: Object as PropType<Record<string, string> | undefined>,
+    default: undefined,
   },
 })
 

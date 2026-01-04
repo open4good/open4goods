@@ -63,6 +63,7 @@
             :product-image="resolvedProductImageSource"
             :vertical-home-url="verticalHomeUrl"
             :vertical-title="normalizedVerticalTitle"
+            :subtitle-params="impactSubtitleParams"
           />
         </section>
 
@@ -81,6 +82,7 @@
             :initial-review="product.aiReview?.review ?? null"
             :review-created-at="product.aiReview?.createdMs ?? undefined"
             :site-key="hcaptchaSiteKey"
+            :title-params="aiTitleParams"
           />
         </section>
 
@@ -89,6 +91,7 @@
             v-if="product.offers"
             :offers="product.offers"
             :commercial-events="commercialEvents"
+            :title-params="priceTitleParams"
           />
         </section>
 
@@ -101,6 +104,7 @@
             :product="product"
             :vertical-id="categoryDetail?.id ?? ''"
             :popular-attributes="categoryDetail?.popularAttributes ?? []"
+            :subtitle-params="alternativesSubtitleParams"
           />
         </section>
 
@@ -112,6 +116,7 @@
           <ProductAttributesSection
             :product="product"
             :attribute-configs="categoryDetail?.attributesConfig?.configs ?? []"
+            :title-params="attributesTitleParams"
           />
         </section>
 
@@ -607,6 +612,116 @@ const productModel = computed(() => {
   const model = product.value?.identity?.model
   return typeof model === 'string' ? model.trim() : ''
 })
+
+const modelVariations = computed(() => {
+  const identity = product.value?.identity
+  const candidates: string[] = []
+
+  if (identity?.model) {
+    candidates.push(identity.model)
+  }
+
+  const akaModels = identity?.akaModels
+  if (akaModels instanceof Set) {
+    candidates.push(...Array.from(akaModels))
+  } else if (Array.isArray(akaModels)) {
+    candidates.push(...akaModels)
+  }
+
+  const deduped = new Map<string, string>()
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') {
+      continue
+    }
+
+    const normalized = candidate.trim()
+    if (!normalized.length) {
+      continue
+    }
+
+    const key = normalized.toLocaleLowerCase(locale.value)
+    if (!deduped.has(key)) {
+      deduped.set(key, normalized)
+    }
+  }
+
+  return Array.from(deduped.values()).sort(
+    (current, next) => current.length - next.length
+  )
+})
+
+const sectionModelVariationCycle = computed(() => {
+  const variations = modelVariations.value
+  if (!variations.length) {
+    return {}
+  }
+
+  const sectionOrder = [
+    'impactSubtitle',
+    'aiTitle',
+    'priceTitle',
+    'alternativesSubtitle',
+    'attributesTitle',
+  ] as const
+
+  const resolved: Record<(typeof sectionOrder)[number], string> = {
+    impactSubtitle: '',
+    aiTitle: '',
+    priceTitle: '',
+    alternativesSubtitle: '',
+    attributesTitle: '',
+  }
+
+  let index = 0
+  for (const key of sectionOrder) {
+    resolved[key] = variations[index] ?? ''
+    index = (index + 1) % variations.length
+  }
+
+  return resolved
+})
+
+const buildModelVariationParams = (options: {
+  key:
+    | 'impactSubtitle'
+    | 'aiTitle'
+    | 'priceTitle'
+    | 'alternativesSubtitle'
+    | 'attributesTitle'
+  requireBrand?: boolean
+}) => {
+  const modelVariation = sectionModelVariationCycle.value[options.key]
+  const brand = productBrand.value
+
+  if (!modelVariation) {
+    return undefined
+  }
+
+  if (options.requireBrand && !brand) {
+    return undefined
+  }
+
+  return {
+    brand,
+    modelVariation,
+  }
+}
+
+const impactSubtitleParams = computed(() =>
+  buildModelVariationParams({ key: 'impactSubtitle', requireBrand: true })
+)
+const aiTitleParams = computed(() =>
+  buildModelVariationParams({ key: 'aiTitle' })
+)
+const priceTitleParams = computed(() =>
+  buildModelVariationParams({ key: 'priceTitle', requireBrand: true })
+)
+const alternativesSubtitleParams = computed(() =>
+  buildModelVariationParams({ key: 'alternativesSubtitle', requireBrand: true })
+)
+const attributesTitleParams = computed(() =>
+  buildModelVariationParams({ key: 'attributesTitle' })
+)
 
 const brandModelTitle = computed(() =>
   formatBrandModelTitle(productBrand.value, productModel.value, locale.value)

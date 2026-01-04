@@ -2077,10 +2077,10 @@
         "success": "Synthèse disponible"
       },
       "subtitle": "Une synthèse rédigée par notre IA à partir de sources vérifiées.",
-      "title": "Synthèse des tests et avis"
+      "title": "Synthèse des tests et avis sur le {modelVariation}"
     },
     "attributes": {
-      "title": "Caractéristiques techniques",
+      "title": "Caractéristiques techniques de {modelVariation}",
       "subtitle": "Explorez toutes les caractéristiques et filtrez par mots-clés.",
       "searchPlaceholder": "Rechercher une caractéristique",
       "audit": {
@@ -2248,7 +2248,7 @@
     "impact": {
       "alternatives": {
         "title": "Alternatives plus vertes",
-        "subtitle": "Découvrez des produits similaires avec un meilleur score d'impact ou un prix plus accessible.",
+        "subtitle": "Découvrez des produits similaires au {brand} - {modelVariation} avec un meilleur score d'impact et un prix plus accessible.",
         "bestProduct": "Élu meilleur produit par rapport à vos critères !",
         "error": "Impossible de charger les alternatives pour le moment. Réessayez.",
         "retry": "Réessayer",
@@ -2327,7 +2327,7 @@
       "scoreRanking": "Classement du facteur",
       "scoreValue": "Score relatif",
       "valueOutOf": "{value} / {max}",
-      "subtitle": "Comparez les scores environnementaux et sociétaux de ce produit.",
+      "subtitle": "Comparez les scores environnementaux et sociétaux du {brand} - {modelVariation}.",
       "tableHeaders": {
         "scoreName": "Indicateur",
         "attributeValue": "Valeur brute",
@@ -2403,7 +2403,7 @@
       },
       "noHistory": "Pas assez de données pour afficher l'historique des prix.",
       "subtitle": "Suivez l’évolution des prix et comparez les offres.",
-      "title": "Prix et évolution",
+      "title": "Prix et évolution du {brand} - {modelVariation}",
       "trend": {
         "decrease": "Baisse de {amount}",
         "increase": "Hausse de {amount}",
