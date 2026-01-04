@@ -60,7 +60,6 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
-import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -1058,6 +1057,17 @@ public class SearchService {
                 .toList();
     }
 
+    /**
+     * Execute a semantic KNN search within a vertical using the same recency and offer guardrails
+     * as standard searches.
+     *
+     * @param verticalId     vertical identifier to scope results
+     * @param query          free-text query used to build the embedding
+     * @param domainLanguage localisation hint for result mapping
+     * @param pageNumber     zero-based page index
+     * @param pageSize       number of results per page
+     * @return list of mapped semantic hits
+     */
     public List<GlobalSearchHit> semanticSearch(String verticalId, String query, DomainLanguage domainLanguage, int pageNumber, int pageSize) {
         String sanitizedQuery = sanitize(query);
         String embeddingInput = buildQueryEmbeddingInput(sanitizedQuery);
@@ -1074,9 +1084,6 @@ public class SearchService {
             return List.of();
         }
 
-        Criteria criteria = new Criteria("vertical").is(verticalId)
-                .and(repository.getRecentPriceQuery());
-
         int knnLimit = Math.max(pageSize * (pageNumber + 1), pageSize);
 
 
@@ -1089,15 +1096,18 @@ public class SearchService {
             queryVector.add(value);
         }
 
+        Query filterQuery = buildProductSearchQuery(verticalId, null, null, true);
+
         co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch.of(knn -> knn
                 .field("embedding")
                 .queryVector(queryVector)
                 .k(knnLimit)
                 .numCandidates(Math.max(knnLimit * 2, 50))
+                .filter(filterQuery == null ? List.of() : List.of(filterQuery))
         );
 
         org.springframework.data.elasticsearch.client.elc.NativeQuery knnQuery = new org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder()
-                .withQuery(new org.springframework.data.elasticsearch.core.query.CriteriaQuery(criteria))
+                .withQuery(filterQuery)
                 .withKnnSearches(knnSearch)
                 .withPageable(org.springframework.data.domain.PageRequest.of(0, knnLimit))
                 .withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }))
@@ -1173,6 +1183,7 @@ public class SearchService {
                 .queryVector(queryVector)
                 .k(knnLimit)
                 .numCandidates(Math.max(knnLimit * 2, 50))
+                .filter(filterQuery == null ? List.of() : List.of(filterQuery))
         );
 
         NativeQueryBuilder builder = new NativeQueryBuilder()
