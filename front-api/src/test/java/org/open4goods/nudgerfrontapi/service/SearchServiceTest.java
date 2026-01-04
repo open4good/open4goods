@@ -34,6 +34,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
@@ -74,13 +75,17 @@ class SearchServiceTest {
     @Mock
     private DjlTextEmbeddingService textEmbeddingService;
 
+    private DjlEmbeddingProperties embeddingProperties;
+
     private SearchService searchService;
 
     @BeforeEach
     void setUp() {
         lenient().when(apiProperties.getResourceRootPath()).thenReturn("https://assets.nudger.test");
         lenient().when(repository.expirationClause()).thenReturn(0L);
-        searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties, textEmbeddingService);
+        embeddingProperties = new DjlEmbeddingProperties();
+        searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties, textEmbeddingService,
+                embeddingProperties);
     }
 
     @Test

@@ -28,6 +28,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
@@ -43,6 +44,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.util.EmbeddingVectorUtils;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,15 +140,18 @@ public class SearchService {
     private final ProductMappingService productMappingService;
     private final ApiProperties apiProperties;
     private final DjlTextEmbeddingService textEmbeddingService;
+    private final DjlEmbeddingProperties embeddingProperties;
     private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
     public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
-            @Lazy ProductMappingService productMappingService, ApiProperties apiProperties, DjlTextEmbeddingService textEmbeddingService) {
+            @Lazy ProductMappingService productMappingService, ApiProperties apiProperties, DjlTextEmbeddingService textEmbeddingService,
+            DjlEmbeddingProperties embeddingProperties) {
         this.repository = repository;
         this.verticalsConfigService = verticalsConfigService;
         this.productMappingService = productMappingService;
         this.apiProperties = apiProperties;
         this.textEmbeddingService = textEmbeddingService;
+        this.embeddingProperties = embeddingProperties;
     }
 
     @PostConstruct
@@ -959,9 +964,10 @@ public class SearchService {
 
     public List<GlobalSearchHit> semanticSearch(String verticalId, String query, DomainLanguage domainLanguage, int pageNumber, int pageSize) {
         String sanitizedQuery = sanitize(query);
+        String embeddingInput = buildQueryEmbeddingInput(sanitizedQuery);
         float[] embedding;
         try {
-            embedding = textEmbeddingService.embed(sanitizedQuery);
+            embedding = textEmbeddingService.embed(embeddingInput);
         } catch (IllegalStateException ex) {
             LOGGER.warn("Semantic search unavailable because no embedding model is loaded: {}", ex.getMessage());
             return List.of();
@@ -980,6 +986,7 @@ public class SearchService {
 
         // To 512 dims
         embedding = IdHelper.to512(embedding);
+        EmbeddingVectorUtils.normalizeL2(embedding);
 
         List<Float> queryVector = new ArrayList<>(embedding.length);
         for (float value : embedding) {
@@ -1208,6 +1215,28 @@ public class SearchService {
         String sanitized = value.replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}\\s]", " ");
         sanitized = sanitized.replaceAll("\\s+", " ").trim();
         return sanitized;
+    }
+
+    /**
+     * Builds the text input sent to the embedding model for search queries.
+     *
+     * @param sanitizedQuery sanitized query string or {@code null}
+     * @return prefixed query string, or {@code null} when no query is supplied
+     */
+    private String buildQueryEmbeddingInput(String sanitizedQuery)
+    {
+        if (!StringUtils.hasText(sanitizedQuery))
+        {
+            return null;
+        }
+
+        String prefix = embeddingProperties.getQueryPrefix();
+        if (!StringUtils.hasText(prefix))
+        {
+            return sanitizedQuery;
+        }
+
+        return prefix.trim() + " " + sanitizedQuery;
     }
 
     /**

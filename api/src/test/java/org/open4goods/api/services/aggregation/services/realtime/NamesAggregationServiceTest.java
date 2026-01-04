@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.exceptions.InvalidParameterException;
@@ -44,16 +45,20 @@ class NamesAggregationServiceTest {
 	@Mock
 	private DjlTextEmbeddingService embeddingService;
 
+	private DjlEmbeddingProperties embeddingProperties;
+
 	private NamesAggregationService service;
 
 	@BeforeEach
 	void setUp() {
+		embeddingProperties = new DjlEmbeddingProperties();
 		service = new NamesAggregationService(
 				LoggerFactory.getLogger(NamesAggregationService.class),
 				verticalsConfigService,
 				evaluationService,
 				blablaService,
-				embeddingService);
+				embeddingService,
+				embeddingProperties);
 	}
 
 	@Test
