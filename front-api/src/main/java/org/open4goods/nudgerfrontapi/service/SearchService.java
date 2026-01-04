@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.text.Normalizer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1204,14 +1205,12 @@ public class SearchService {
         int end = Math.min(start + pageable.getPageSize(), hits.getSearchHits().size());
         if (start >= hits.getSearchHits().size()) {
             return new SearchHitsImpl<>(hits.getTotalHits(), hits.getTotalHitsRelation(), hits.getMaxScore(),
-                    hits.getTook(), hits.getScrollId(), hits.getPointInTimeId(), List.of(), hits.getAggregations(),
-                    hits.getSuggest(), hits.getSearchHitsIterator());
+                    Duration.ZERO, null, null, List.of(), hits.getAggregations(), hits.getSuggest(), null);
         }
 
         List<SearchHit<Product>> sliced = hits.getSearchHits().subList(start, end);
         return new SearchHitsImpl<>(hits.getTotalHits(), hits.getTotalHitsRelation(), hits.getMaxScore(),
-                hits.getTook(), hits.getScrollId(), hits.getPointInTimeId(), sliced, hits.getAggregations(),
-                hits.getSuggest(), hits.getSearchHitsIterator());
+                Duration.ZERO, null, null, sliced, hits.getAggregations(), hits.getSuggest(), null);
     }
 
     /**
