@@ -2039,6 +2039,11 @@
       "cta": "Achetez avec Nudger",
       "ariaLabel": "Bannière fixe pour promouvoir un achat responsable"
     },
+    "meta": {
+      "defaultDescription": "Comparez {productTitle}{brandModel} sur Nudger : prix, impact environnemental et options d’achat.",
+      "defaultDescriptionWithVertical": "Comparez {productTitle}{brandModel} sur Nudger : prix, impact environnemental et meilleures options dans {verticalTitle}.",
+      "gtinFallback": "GTIN {gtin}"
+    },
     "aiReview": {
       "empty": "Synthèse non encore demandée.",
       "errors": {

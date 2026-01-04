@@ -178,6 +178,7 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { humanizeSlug } from '~/utils/_product-title'
 
 import type {
   AttributeConfigDto,
@@ -216,7 +217,7 @@ const props = defineProps({
   },
 })
 
-const { t, te, n } = useI18n()
+const { t, te, n, locale } = useI18n()
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''
@@ -225,8 +226,14 @@ const fallbackTitle = computed(() => {
   const medium = normalizeString(props.product.names?.h1Title)
   const identity = normalizeString(props.product.identity?.bestName)
   const base = normalizeString(props.product.base?.bestName)
+  const slug = normalizeString(props.product.slug)
+  const gtin = normalizeString(props.product.gtin?.toString())
+  const normalizedSlug = slug ? humanizeSlug(slug, locale.value) : ''
+  const gtinLabel = gtin
+    ? t('product.meta.gtinFallback', { gtin })
+    : ''
 
-  return medium || identity || base || ''
+  return medium || identity || base || normalizedSlug || gtinLabel || ''
 })
 
 const bestName = computed(() => {
