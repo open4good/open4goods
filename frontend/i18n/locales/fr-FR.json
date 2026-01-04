@@ -937,7 +937,9 @@
   },
   "components": {
     "impactScore": {
-      "tooltip": "Qualité de l'impact évalué à {value} sur {max}"
+      "tooltip": "Qualité de l'impact évalué à {value} sur {max}",
+      "tooltipBadge": "Qualité de l'impact évalué à {value} sur 20",
+      "outOf20": "/20"
     },
     "pageLoadingOverlay": {
       "label": "Chargement du contenu"
@@ -2039,6 +2041,11 @@
       "message": "Soutenez une plateforme éthique !",
       "cta": "Achetez avec Nudger",
       "ariaLabel": "Bannière fixe pour promouvoir un achat responsable"
+    },
+    "meta": {
+      "defaultDescription": "Comparez {productTitle}{brandModel} sur Nudger : prix, impact environnemental et options d’achat.",
+      "defaultDescriptionWithVertical": "Comparez {productTitle}{brandModel} sur Nudger : prix, impact environnemental et meilleures options dans {verticalTitle}.",
+      "gtinFallback": "GTIN {gtin}"
     },
     "aiReview": {
       "empty": "Synthèse non encore demandée.",

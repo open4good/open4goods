@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,8 +22,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
@@ -31,6 +34,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
@@ -212,6 +216,61 @@ class SearchServiceTest {
                 .anyMatch(filter -> isTermWithValue(filter, EXCLUDED_FIELD, false));
         assertThat(extractFilters(executed.get(1).getQuery()))
                 .noneMatch(filter -> isTermWithValue(filter, EXCLUDED_FIELD, false));
+    }
+
+    @Test
+    void searchFallsBackToSemanticWhenNoHits() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(verticalsConfigService.getConfigById("electronics")).thenReturn(new VerticalConfig());
+        when(textEmbeddingService.embed(any())).thenReturn(new float[] { 0.1f, 0.2f });
+
+        SearchHits<Product> emptyHits = buildSearchHits(List.of());
+        SearchHits<Product> semanticHits = buildSearchHits(List.of(new Product(42L)));
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(emptyHits, semanticHits);
+
+        SearchService.SearchResult result = searchService.search(pageable, "electronics", "eco", null, null);
+
+        assertThat(result.hits().getSearchHits()).hasSize(1);
+        assertThat(result.aggregations()).isEmpty();
+        verify(repository, times(2)).search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME));
+    }
+
+    @Test
+    void globalSearchFallsBackToSemanticAfterTextFallback() {
+        VerticalConfig config = new VerticalConfig();
+        config.setId("smartphones");
+        ProductI18nElements elements = new ProductI18nElements();
+        elements.setVerticalHomeTitle("Smartphones");
+        elements.setVerticalHomeUrl("/smartphones");
+        Map<String, ProductI18nElements> i18n = new HashMap<>();
+        i18n.put("fr", elements);
+        config.setI18n(i18n);
+
+        when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(config));
+        searchService.initializeSuggestIndex();
+
+        when(textEmbeddingService.embed(any())).thenReturn(new float[] { 0.1f, 0.2f });
+
+        Product semanticProduct = new Product(12L);
+        semanticProduct.setVertical("smartphones");
+        SearchHits<Product> emptyHits = buildSearchHits(List.of());
+        SearchHits<Product> semanticHits = buildSearchHits(List.of(semanticProduct));
+
+        when(repository.search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(emptyHits, emptyHits, semanticHits);
+
+        ProductDto productDto = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        when(productMappingService.mapProduct(eq(semanticProduct), any(), any(), eq(DomainLanguage.fr), eq(false)))
+                .thenReturn(productDto);
+
+        SearchService.GlobalSearchResult result = searchService.globalSearch("smartphone", DomainLanguage.fr);
+
+        assertThat(result.fallbackTriggered()).isTrue();
+        assertThat(result.verticalGroups()).isEmpty();
+        assertThat(result.fallbackResults()).hasSize(1);
+        verify(repository, times(3)).search(any(NativeQuery.class), eq(ProductRepository.MAIN_INDEX_NAME));
     }
 
     private List<Query> extractFilters(Query query) {

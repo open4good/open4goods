@@ -11,6 +11,7 @@ const i18n = createI18n({
     en: {
       'components.impactScore.tooltip': 'Score: {value} / {max}',
       'components.impactScore.tooltipBadge': 'Score: {value} / 20',
+      'components.impactScore.outOf20': '/20',
     },
   },
 })
@@ -169,5 +170,23 @@ describe('ImpactScore', () => {
 
     const badge = wrapper.find('.impact-score-badge')
     expect(badge.classes()).toContain('impact-score-badge--flat')
+  })
+
+  it('renders stacked badge layout for corner variant', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 4,
+        mode: 'badge',
+        badgeLayout: 'stacked',
+        badgeVariant: 'corner',
+      },
+      global: globalOptions,
+    })
+
+    const badge = wrapper.find('.impact-score-badge')
+    expect(badge.classes()).toContain('impact-score-badge--stacked')
+    expect(badge.classes()).toContain('impact-score-badge--corner')
+    expect(wrapper.text()).toContain('16')
+    expect(wrapper.text()).toContain('/20')
   })
 })

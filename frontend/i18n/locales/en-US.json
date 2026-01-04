@@ -912,7 +912,9 @@
   },
   "components": {
     "impactScore": {
-      "tooltip": "Impact quality rated at {value} out of {max}"
+      "tooltip": "Impact quality rated at {value} out of {max}",
+      "tooltipBadge": "Impact quality rated at {value} out of 20",
+      "outOf20": "/20"
     },
     "pageLoadingOverlay": {
       "label": "Loading page content"
@@ -2011,6 +2013,11 @@
       "message": "Support an ethical platform!",
       "cta": "Shop with Nudger",
       "ariaLabel": "Sticky banner promoting responsible shopping"
+    },
+    "meta": {
+      "defaultDescription": "Compare {productTitle}{brandModel} on Nudger for pricing, environmental impact, and buying options.",
+      "defaultDescriptionWithVertical": "Compare {productTitle}{brandModel} on Nudger for pricing, environmental impact, and top options in {verticalTitle}.",
+      "gtinFallback": "GTIN {gtin}"
     },
     "aiReview": {
       "empty": "Summary not requested yet.",

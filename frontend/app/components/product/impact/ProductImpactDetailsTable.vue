@@ -11,9 +11,9 @@
 
       
   <article class="impact-details">
-    <h3 class="impact-details__title">
+    <h4 class="impact-details__title">
       {{ $t('product.impact.detailsTitle') }}
-    </h3>
+    </h4>
     <v-data-table
       v-if="hasRows"
       :headers="headers"
