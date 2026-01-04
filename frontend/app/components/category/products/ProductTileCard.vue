@@ -9,7 +9,7 @@
     :rel="linkRel"
   >
     <div class="product-tile-card__layout">
-      <div>
+      <div class="product-tile-card__media">
         <v-img
           :src="imageSrc"
           :alt="headerTitle"
@@ -22,13 +22,19 @@
           </template>
         </v-img>
 
-        <div class="product-tile-card__score">
+        <div class="product-tile-card__corner" role="presentation">
           <ImpactScore
             v-if="impactScore != null"
             :score="impactScore"
             :max="5"
             size="small"
+            mode="badge"
+            badge-layout="stacked"
+            badge-variant="corner"
           />
+          <span v-else class="product-tile-card__corner-fallback">
+            {{ notRatedLabel }}
+          </span>
         </div>
       </div>
 
@@ -259,23 +265,34 @@ const toggleCompare = () => {
     }
   }
 
-  &__score {
+  &__corner {
     position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
+    top: 0;
+    left: 0;
+    width: 64px;
+    height: 64px;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.6rem;
-    border-radius: 999px;
-    background: rgba(var(--v-theme-surface-default), 0.95);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    justify-content: center;
+    border-radius: 0 0 54% 0;
+    background: rgba(var(--v-theme-surface-glass-strong), 0.92);
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
+    color: rgb(var(--v-theme-text-neutral-strong));
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
+    backdrop-filter: blur(6px);
+    z-index: 2;
+    pointer-events: none;
   }
 
-  &__score-fallback {
-    font-size: 0.75rem;
-    color: rgb(var(--v-theme-text-neutral-secondary));
-    font-weight: 600;
+  &__corner-fallback {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+    text-align: center;
+    line-height: 1.1;
+    transform: rotate(-12deg);
   }
 
   &__content {
