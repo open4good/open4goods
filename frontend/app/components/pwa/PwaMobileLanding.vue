@@ -31,6 +31,7 @@
                     :model-value="searchQuery"
                     :label="t('pwa.landing.search.label')"
                     :placeholder="t('pwa.landing.search.placeholder')"
+                    :aria-label="t('pwa.landing.search.ariaLabel')"
                     :min-chars="minSuggestionQueryLength"
                     density="comfortable"
                     variant="outlined"

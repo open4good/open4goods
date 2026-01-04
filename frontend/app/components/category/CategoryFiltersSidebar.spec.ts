@@ -5,7 +5,6 @@ import { createVuetify } from 'vuetify'
 import { defineComponent, h } from 'vue'
 
 import CategoryFiltersSidebar from './CategoryFiltersSidebar.vue'
-import CategoryEcoscoreCard from './CategoryEcoscoreCard.vue'
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -55,7 +54,6 @@ describe('CategoryFiltersSidebar', () => {
     hasDocumentation: true,
     wikiPages: [],
     relatedPosts: [],
-    verticalHomeUrl: 'https://open4goods.example/maison',
   }
 
   const mountComponent = (overrides: Partial<typeof baseProps> = {}) =>
@@ -80,21 +78,8 @@ describe('CategoryFiltersSidebar', () => {
       },
     })
 
-  it('renders the Eco-score card when a vertical home URL is provided', () => {
+  it('renders the filters sidebar without the Eco-score card', () => {
     const wrapper = mountComponent()
-
-    const cardComponent = wrapper.findComponent(CategoryEcoscoreCard)
-    expect(cardComponent.exists()).toBe(true)
-    expect(cardComponent.props('verticalHomeUrl')).toBe(
-      'https://open4goods.example/maison'
-    )
-
-    const card = wrapper.get('[data-test="category-ecoscore-card"]')
-    expect(card.text()).toContain('Découvrir')
-  })
-
-  it('hides the Eco-score card when no vertical home URL is available', () => {
-    const wrapper = mountComponent({ verticalHomeUrl: null })
 
     expect(wrapper.find('[data-test="category-ecoscore-card"]').exists()).toBe(
       false

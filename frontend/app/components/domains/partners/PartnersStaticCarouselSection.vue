@@ -73,7 +73,8 @@
                       target="_blank"
                       rel="noopener nofollow"
                       color="primary"
-                      variant="tonal"
+                      variant="flat"
+                      size="small"
                       class="partners-static__cta"
                     >
                       {{ linkLabel }}

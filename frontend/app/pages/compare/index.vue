@@ -1823,10 +1823,10 @@ const productInitials = (title: string) => {
   font-size: clamp(2rem, 3vw, 2.75rem)
   font-weight: 700
   margin-bottom: 0.75rem
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.98)
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
 
 .compare-page__subtitle
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.85)
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
   max-width: 720px
   margin: 0 auto
 

@@ -282,16 +282,6 @@ const pillarCards = computed<PillarCardDisplay[]>(() => [
       href: localePath('impact-score'),
     },
   },
-  {
-    icon: 'mdi-account-group-outline',
-    title: String(t('opensource.pillars.cards.community.title')),
-    descriptionBlocId: 'webpages:opensource:pillars-community',
-    action: {
-      label: String(t('opensource.pillars.cards.community.cta')),
-      ariaLabel: `${String(t('opensource.pillars.cards.community.cta'))} : ${String(t('opensource.pillars.cards.community.ariaLabel'))}`,
-      href: localePath('team'),
-    },
-  },
 ])
 
 const contributionSteps = computed<ContributionStepDisplay[]>(() => [

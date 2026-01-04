@@ -36,7 +36,7 @@
       <template #append-inner>
         <slot v-if="$slots['append-inner']" name="append-inner" />
         <v-btn
-          v-if="shouldShowVoiceButton"
+          v-if="shouldShowVoiceButton && isHydrated"
           class="search-suggest-field__voice-button"
           density="comfortable"
           variant="text"
@@ -232,6 +232,7 @@ import {
   computed,
   defineAsyncComponent,
   nextTick,
+  onMounted,
   onBeforeUnmount,
   reactive,
   ref,
@@ -342,6 +343,11 @@ const isVoiceSupported = ref(false)
 const isVoiceListening = ref(false)
 const voiceError = ref<string | null>(null)
 const speechRecognition = ref<SpeechRecognition | null>(null)
+const isHydrated = ref(false)
+
+onMounted(() => {
+  isHydrated.value = true
+})
 
 const minChars = computed(() => Math.max(props.minChars ?? 2, 1))
 
