@@ -2049,10 +2049,10 @@
         "success": "Summary available"
       },
       "subtitle": "An AI-written synthesis built from verified sources.",
-      "title": "Test & review summary"
+      "title": "Test & review summary for the {modelVariation}"
     },
     "attributes": {
-      "title": "Technical specifications",
+      "title": "Technical specifications for the {modelVariation}",
       "subtitle": "Browse every specification and filter with keywords.",
       "searchPlaceholder": "Search a specification",
       "audit": {
@@ -2220,7 +2220,7 @@
     "impact": {
       "alternatives": {
         "title": "Greener alternatives",
-        "subtitle": "Discover similar products with a better impact score or price.",
+        "subtitle": "Discover products similar to the {brand} - {modelVariation} with a better impact score and a more accessible price.",
         "bestProduct": "Voted best product for your criteria!",
         "error": "We couldn't load alternative products. Please try again.",
         "retry": "Retry",
@@ -2299,7 +2299,7 @@
       "scoreRanking": "Factor ranking",
       "scoreValue": "Relative score",
       "valueOutOf": "{value} / {max}",
-      "subtitle": "Explore how this product scores across ecological and social criteria.",
+      "subtitle": "Compare the ecological and social scores of the {brand} - {modelVariation}.",
       "tableHeaders": {
         "scoreName": "Indicator",
         "attributeValue": "Attribute value",
@@ -2375,7 +2375,7 @@
       },
       "noHistory": "Price history is not yet available for this product.",
       "subtitle": "Track price evolution and compare offers.",
-      "title": "Prices and trends",
+      "title": "Prices and trends for the {brand} - {modelVariation}",
       "trend": {
         "decrease": "Price drop of {amount}",
         "increase": "Price increase of {amount}",

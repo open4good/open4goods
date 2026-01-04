@@ -5,7 +5,7 @@
         {{ t('product.impact.alternatives.title') }}
       </h3>
       <p class="product-alternatives__subtitle">
-        {{ t('product.impact.alternatives.subtitle') }}
+        {{ t('product.impact.alternatives.subtitle', subtitleParams) }}
       </p>
     </header>
 
@@ -124,6 +124,10 @@ const props = defineProps({
   maxResults: {
     type: Number,
     default: 5,
+  },
+  subtitleParams: {
+    type: Object as PropType<Record<string, string> | undefined>,
+    default: undefined,
   },
 })
 
