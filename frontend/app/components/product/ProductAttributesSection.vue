@@ -2,7 +2,7 @@
   <section :id="sectionId" class="product-attributes">
     <header class="product-attributes__header">
       <h2 class="product-attributes__title">
-        {{ $t('product.attributes.title') }}
+        {{ sectionTitle }}
       </h2>
       <p class="product-attributes__subtitle">
         {{ $t('product.attributes.subtitle') }}
@@ -306,11 +306,34 @@ const props = defineProps({
     type: Object as PropType<ProductDto | null>,
     default: null,
   },
+  productBrand: {
+    type: String,
+    default: '',
+  },
+  modelVariation: {
+    type: String,
+    default: '',
+  },
 })
 
 const { t, n, locale } = useI18n()
 const runtimeConfig = useRuntimeConfig()
 const { isLoggedIn } = useAuth()
+
+const sectionTitle = computed(() => {
+  const brand = props.productBrand.trim()
+  const modelVariation = props.modelVariation.trim()
+
+  if (modelVariation.length) {
+    return t('product.attributes.titleWithModel', { modelVariation })
+  }
+
+  if (brand.length) {
+    return t('product.attributes.titleWithBrand', { brand })
+  }
+
+  return t('product.attributes.title')
+})
 
 const searchTerm = ref('')
 const hasSearchTerm = computed(() => searchTerm.value.trim().length > 0)

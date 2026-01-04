@@ -2042,10 +2042,14 @@
         "success": "Summary available"
       },
       "subtitle": "An AI-written synthesis built from verified sources.",
-      "title": "Test & review summary"
+      "title": "Test & review summary",
+      "titleWithBrand": "Test & review summary for {brand}",
+      "titleWithModel": "Test & review summary for {modelVariation}"
     },
     "attributes": {
       "title": "Technical specifications",
+      "titleWithBrand": "Technical specifications for {brand}",
+      "titleWithModel": "Technical specifications for {modelVariation}",
       "subtitle": "Browse every specification and filter with keywords.",
       "searchPlaceholder": "Search a specification",
       "audit": {
@@ -2214,6 +2218,8 @@
       "alternatives": {
         "title": "Greener alternatives",
         "subtitle": "Discover similar products with a better impact score or price.",
+        "subtitleWithBrand": "Discover similar products to {brand} with a better impact score and a more accessible price.",
+        "subtitleWithModel": "Discover similar products to {brand} - {modelVariation} with a better impact score and a more accessible price.",
         "bestProduct": "Voted best product for your criteria!",
         "error": "We couldn't load alternative products. Please try again.",
         "retry": "Retry",
@@ -2293,6 +2299,8 @@
       "scoreValue": "Relative score",
       "valueOutOf": "{value} / {max}",
       "subtitle": "Explore how this product scores across ecological and social criteria.",
+      "subtitleWithBrand": "Compare environmental and social scores for {brand}.",
+      "subtitleWithModel": "Compare environmental and social scores for {brand} - {modelVariation}.",
       "tableHeaders": {
         "scoreName": "Indicator",
         "attributeValue": "Attribute value",
@@ -2369,6 +2377,8 @@
       "noHistory": "Price history is not yet available for this product.",
       "subtitle": "Track price evolution and compare offers.",
       "title": "Prices and trends",
+      "titleWithBrand": "Prices and trends for {brand}",
+      "titleWithModel": "Prices and trends for {brand} - {modelVariation}",
       "trend": {
         "decrease": "Price drop of {amount}",
         "increase": "Price increase of {amount}",

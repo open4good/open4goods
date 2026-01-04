@@ -5,7 +5,7 @@
         {{ t('product.impact.alternatives.title') }}
       </h3>
       <p class="product-alternatives__subtitle">
-        {{ t('product.impact.alternatives.subtitle') }}
+        {{ subtitle }}
       </p>
     </header>
 
@@ -125,9 +125,34 @@ const props = defineProps({
     type: Number,
     default: 5,
   },
+  productBrand: {
+    type: String,
+    default: '',
+  },
+  modelVariation: {
+    type: String,
+    default: '',
+  },
 })
 
 const { t, n } = useI18n()
+const subtitle = computed(() => {
+  const brand = props.productBrand.trim()
+  const modelVariation = props.modelVariation.trim()
+
+  if (modelVariation.length) {
+    return t('product.impact.alternatives.subtitleWithModel', {
+      brand,
+      modelVariation,
+    })
+  }
+
+  if (brand.length) {
+    return t('product.impact.alternatives.subtitleWithBrand', { brand })
+  }
+
+  return t('product.impact.alternatives.subtitle')
+})
 
 const alternatives = ref<ProductDto[]>([])
 const loading = ref(false)

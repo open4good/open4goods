@@ -2,7 +2,7 @@
   <section :id="sectionId" class="product-price">
     <header class="product-price__header">
       <h2 id="price-history" class="product-price__title">
-        {{ $t('product.price.title') }}
+        {{ sectionTitle }}
       </h2>
       <p class="product-price__subtitle">
         {{ $t('product.price.subtitle') }}
@@ -522,11 +522,37 @@ const props = defineProps({
     type: Array as PropType<CommercialEvent[]>,
     default: () => [],
   },
+  productBrand: {
+    type: String,
+    default: '',
+  },
+  modelVariation: {
+    type: String,
+    default: '',
+  },
 })
 
 const { locale, n, t } = useI18n()
 const { trackProductRedirect, extractTokenFromLink, isClientContribLink } =
   useAnalytics()
+
+const sectionTitle = computed(() => {
+  const brand = props.productBrand.trim()
+  const modelVariation = props.modelVariation.trim()
+
+  if (modelVariation.length) {
+    return t('product.price.titleWithModel', {
+      brand,
+      modelVariation,
+    })
+  }
+
+  if (brand.length) {
+    return t('product.price.titleWithBrand', { brand })
+  }
+
+  return t('product.price.title')
+})
 
 type HistoryEntry = { timestamp: number; price: number }
 

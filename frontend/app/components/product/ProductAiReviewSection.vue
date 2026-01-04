@@ -2,7 +2,7 @@
   <section :id="sectionId" class="product-ai-review">
     <header class="product-ai-review__header">
       <h2 class="product-ai-review__title">
-        {{ $t('product.aiReview.title') }}
+        {{ sectionTitle }}
       </h2>
       <p class="product-ai-review__subtitle">
         {{ $t('product.aiReview.subtitle') }}
@@ -392,6 +392,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  productBrand: {
+    type: String,
+    default: '',
+  },
+  modelVariation: {
+    type: String,
+    default: '',
+  },
 })
 
 const { locale, t } = useI18n()
@@ -410,6 +418,20 @@ const showCaptcha = ref(false)
 const captchaToken = ref<string | null>(null)
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 const descriptionRef = ref<HTMLElement | null>(null)
+const sectionTitle = computed(() => {
+  const brand = props.productBrand.trim()
+  const modelVariation = props.modelVariation.trim()
+
+  if (modelVariation.length) {
+    return t('product.aiReview.titleWithModel', { modelVariation })
+  }
+
+  if (brand.length) {
+    return t('product.aiReview.titleWithBrand', { brand })
+  }
+
+  return t('product.aiReview.title')
+})
 
 watch(
   () => props.initialReview,

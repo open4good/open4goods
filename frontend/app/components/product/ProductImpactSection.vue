@@ -5,7 +5,7 @@
         {{ $t('product.impact.title') }}
       </h2>
       <p class="product-impact__subtitle">
-        {{ $t('product.impact.subtitle') }}
+        {{ subtitle }}
       </p>
     </header>
 
@@ -88,6 +88,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  modelVariation: {
+    type: String,
+    default: '',
+  },
   productImage: {
     type: String,
     default: '',
@@ -124,6 +128,23 @@ const radarAxes = computed<RadarAxisEntry[]>(() => radarData.value.axes ?? [])
 const availableSeries = computed<RadarSeriesEntry[]>(
   () => radarData.value.series ?? []
 )
+const subtitle = computed(() => {
+  const brand = props.productBrand.trim()
+  const modelVariation = props.modelVariation.trim()
+
+  if (modelVariation.length) {
+    return t('product.impact.subtitleWithModel', {
+      brand,
+      modelVariation,
+    })
+  }
+
+  if (brand.length) {
+    return t('product.impact.subtitleWithBrand', { brand })
+  }
+
+  return t('product.impact.subtitle')
+})
 
 const radarSeriesStyles: Record<
   RadarSeriesKey,

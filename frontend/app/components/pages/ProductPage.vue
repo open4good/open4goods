@@ -60,6 +60,7 @@
             :product-name="productTitle"
             :product-brand="productBrand"
             :product-model="productModel"
+            :model-variation="modelVariationBySection.impact"
             :product-image="resolvedProductImageSource"
             :vertical-home-url="verticalHomeUrl"
             :vertical-title="normalizedVerticalTitle"
@@ -81,6 +82,8 @@
             :initial-review="product.aiReview?.review ?? null"
             :review-created-at="product.aiReview?.createdMs ?? undefined"
             :site-key="hcaptchaSiteKey"
+            :product-brand="productBrand"
+            :model-variation="modelVariationBySection.ai"
           />
         </section>
 
@@ -89,6 +92,8 @@
             v-if="product.offers"
             :offers="product.offers"
             :commercial-events="commercialEvents"
+            :product-brand="productBrand"
+            :model-variation="modelVariationBySection.price"
           />
         </section>
 
@@ -101,6 +106,8 @@
             :product="product"
             :vertical-id="categoryDetail?.id ?? ''"
             :popular-attributes="categoryDetail?.popularAttributes ?? []"
+            :product-brand="productBrand"
+            :model-variation="modelVariationBySection.alternatives"
           />
         </section>
 
@@ -112,6 +119,8 @@
           <ProductAttributesSection
             :product="product"
             :attribute-configs="categoryDetail?.attributesConfig?.configs ?? []"
+            :product-brand="productBrand"
+            :model-variation="modelVariationBySection.attributes"
           />
         </section>
 
@@ -596,6 +605,73 @@ const productModel = computed(() => {
   const model = product.value?.identity?.model
   return typeof model === 'string' ? model.trim() : ''
 })
+
+const modelVariations = computed(() => {
+  const identity = product.value?.identity
+  const candidates: string[] = []
+
+  if (typeof identity?.model === 'string') {
+    const trimmed = identity.model.trim()
+    if (trimmed.length) {
+      candidates.push(trimmed)
+    }
+  }
+
+  const akaModels = identity?.akaModels
+  if (akaModels instanceof Set) {
+    for (const entry of akaModels) {
+      if (typeof entry === 'string') {
+        const trimmed = entry.trim()
+        if (trimmed.length) {
+          candidates.push(trimmed)
+        }
+      }
+    }
+  } else if (Array.isArray(akaModels)) {
+    for (const entry of akaModels) {
+      if (typeof entry === 'string') {
+        const trimmed = entry.trim()
+        if (trimmed.length) {
+          candidates.push(trimmed)
+        }
+      }
+    }
+  }
+
+  const uniqueValues = new Map<string, string>()
+  for (const candidate of candidates) {
+    const key = candidate.toLocaleLowerCase(locale.value)
+    if (!uniqueValues.has(key)) {
+      uniqueValues.set(key, candidate)
+    }
+  }
+
+  return Array.from(uniqueValues.values()).sort((a, b) => {
+    const lengthDiff = a.length - b.length
+    if (lengthDiff !== 0) {
+      return lengthDiff
+    }
+
+    return a.localeCompare(b, locale.value, { sensitivity: 'base' })
+  })
+})
+
+const resolveModelVariation = (index: number) => {
+  const variations = modelVariations.value
+  if (!variations.length) {
+    return ''
+  }
+
+  return variations[index % variations.length]
+}
+
+const modelVariationBySection = computed(() => ({
+  impact: resolveModelVariation(0),
+  ai: resolveModelVariation(1),
+  price: resolveModelVariation(2),
+  alternatives: resolveModelVariation(3),
+  attributes: resolveModelVariation(4),
+}))
 
 const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
   const brand = productBrand.value
