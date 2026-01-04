@@ -64,7 +64,8 @@ public class SearchController {
     @Operation(
             summary = "Execute a global search",
             description = "Runs a two-pass search. Results are first grouped by vertical when matches exist, "
-                    + "otherwise a fallback search on non verticalised products is executed.",
+                    + "otherwise a fallback search on non verticalised products is executed. "
+                    + "If both passes return no results, a semantic (vector) fallback is triggered.",
             parameters = {
                     @Parameter(name = "query", in = ParameterIn.QUERY, required = true,
                             description = "Free-text query used to search across products",

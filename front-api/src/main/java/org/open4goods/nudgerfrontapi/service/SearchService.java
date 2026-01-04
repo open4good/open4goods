@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.text.Normalizer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,6 +58,7 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregatio
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.stereotype.Service;
@@ -100,6 +102,7 @@ public class SearchService {
     private static final int DEFAULT_TERMS_SIZE = 50;
     private static final int GLOBAL_SEARCH_LIMIT = 100;
     private static final int SUGGEST_RESULT_LIMIT = 5;
+    private static final int SEMANTIC_GLOBAL_FALLBACK_LIMIT = 10;
     private static final String[] SUGGEST_SOURCE_INCLUDES = {
             "attributes.referentielAttributes.MODEL",
             "attributes.referentielAttributes.BRAND",
@@ -214,6 +217,13 @@ public class SearchService {
             elasticLog(e);
             throw e;
         }
+        if (shouldFallbackToSemantic(hits, sanitizedQuery, normalizedVerticalId)) {
+            SearchHits<Product> semanticHits = executeSemanticFallback(pageable, normalizedVerticalId, sanitizedQuery,
+                    normalizedFilters, applyDefaultExclusion);
+            if (semanticHits != null && !semanticHits.isEmpty()) {
+                return new SearchResult(semanticHits, List.of());
+            }
+        }
         List<AggregationResponseDto> aggregations = extractAggregationResults(hits, descriptors);
         if (requiresAdminExcludedAggregation) {
             List<AggregationResponseDto> overrides = computeExcludedAggregations(adminAggregationQuery,
@@ -278,7 +288,12 @@ public class SearchService {
 
         SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
         List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
-        return new GlobalSearchResult(List.of(), fallback, true);
+        if (fallback != null && !fallback.isEmpty()) {
+            return new GlobalSearchResult(List.of(), fallback, true);
+        }
+
+        List<GlobalSearchHit> semanticFallback = executeSemanticGlobalFallback(sanitizedQuery, domainLanguage);
+        return new GlobalSearchResult(List.of(), semanticFallback, true);
     }
 
     /**
@@ -962,6 +977,87 @@ public class SearchService {
                 .toList();
     }
 
+    /**
+     * Determines whether semantic fallback should be executed based on current search hits.
+     *
+     * @param hits                 primary search hits
+     * @param sanitizedQuery       sanitized query string
+     * @param normalizedVerticalId normalized vertical identifier (or {@code null})
+     * @return {@code true} when fallback should be triggered
+     */
+    private boolean shouldFallbackToSemantic(SearchHits<Product> hits, String sanitizedQuery,
+            String normalizedVerticalId) {
+        if (!StringUtils.hasText(sanitizedQuery)) {
+            return false;
+        }
+        if ("__unknown__".equals(normalizedVerticalId)) {
+            return false;
+        }
+        return hits == null || hits.isEmpty();
+    }
+
+    /**
+     * Executes a semantic fallback search for paginated requests.
+     *
+     * @param pageable              target page to return
+     * @param normalizedVerticalId  vertical scope, or {@code null} for all
+     * @param sanitizedQuery        sanitized query string
+     * @param filters               normalized filters to apply
+     * @param applyDefaultExclusion whether default exclusion filters should be applied
+     * @return semantic search hits, or {@code null} when embedding is unavailable
+     */
+    private SearchHits<Product> executeSemanticFallback(Pageable pageable, String normalizedVerticalId,
+            String sanitizedQuery, FilterRequestDto filters, boolean applyDefaultExclusion) {
+        float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
+        if (embedding == null) {
+            return null;
+        }
+
+        SearchHits<Product> hits = executeSemanticSearch(normalizedVerticalId, embedding, filters, applyDefaultExclusion,
+                pageable);
+        if (hits == null || hits.isEmpty()) {
+            return hits;
+        }
+        return sliceSearchHits(hits, pageable);
+    }
+
+    /**
+     * Executes semantic fallback for global search, using a two-step strategy:
+     * <ol>
+     *     <li>Resolve candidate verticals based on the query text</li>
+     *     <li>Run vector search within each candidate vertical</li>
+     * </ol>
+     *
+     * @param sanitizedQuery sanitized query string
+     * @param domainLanguage localisation hint
+     * @return list of semantic hits, sorted by score
+     */
+    private List<GlobalSearchHit> executeSemanticGlobalFallback(String sanitizedQuery, DomainLanguage domainLanguage) {
+        float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
+        if (embedding == null) {
+            return List.of();
+        }
+
+        List<String> candidateVerticals = resolveSemanticVerticalCandidates(sanitizedQuery, domainLanguage);
+        if (candidateVerticals.isEmpty()) {
+            return List.of();
+        }
+
+        int perVerticalLimit = Math.max(1, GLOBAL_SEARCH_LIMIT / Math.max(1, candidateVerticals.size()));
+        Pageable pageable = PageRequest.of(0, perVerticalLimit);
+
+        List<GlobalSearchHit> combined = new ArrayList<>();
+        for (String verticalId : candidateVerticals) {
+            SearchHits<Product> hits = executeSemanticSearch(verticalId, embedding, null, true, pageable);
+            combined.addAll(mapHits(hits, domainLanguage));
+        }
+
+        return combined.stream()
+                .sorted(Comparator.comparing(GlobalSearchHit::score).reversed())
+                .limit(GLOBAL_SEARCH_LIMIT)
+                .toList();
+    }
+
     public List<GlobalSearchHit> semanticSearch(String verticalId, String query, DomainLanguage domainLanguage, int pageNumber, int pageSize) {
         String sanitizedQuery = sanitize(query);
         String embeddingInput = buildQueryEmbeddingInput(sanitizedQuery);
@@ -1046,6 +1142,136 @@ public class SearchService {
         }
         double score = hit.getScore();
         return new GlobalSearchHit(product.getVertical(), productDto, score);
+    }
+
+    /**
+     * Executes a semantic search using the provided embedding vector.
+     *
+     * @param verticalId           optional vertical scope
+     * @param embedding            normalized embedding vector
+     * @param filters              filters to apply
+     * @param applyDefaultExclusion whether the default exclusion filter should be applied
+     * @param pageable             requested page information
+     * @return search hits from the semantic query
+     */
+    private SearchHits<Product> executeSemanticSearch(String verticalId, float[] embedding, FilterRequestDto filters,
+            boolean applyDefaultExclusion, Pageable pageable) {
+        if (embedding == null || embedding.length == 0) {
+            return null;
+        }
+
+        Query filterQuery = buildProductSearchQuery(verticalId, null, filters, applyDefaultExclusion);
+
+        int knnLimit = Math.max(pageable.getPageSize() * (pageable.getPageNumber() + 1), pageable.getPageSize());
+        List<Float> queryVector = new ArrayList<>(embedding.length);
+        for (float value : embedding) {
+            queryVector.add(value);
+        }
+
+        co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch.of(knn -> knn
+                .field("embedding")
+                .queryVector(queryVector)
+                .k(knnLimit)
+                .numCandidates(Math.max(knnLimit * 2, 50))
+        );
+
+        NativeQueryBuilder builder = new NativeQueryBuilder()
+                .withQuery(filterQuery)
+                .withKnnSearches(knnSearch)
+                .withPageable(PageRequest.of(0, knnLimit))
+                .withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+
+        try {
+            return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
+    }
+
+    /**
+     * Slice search hits according to the requested page.
+     *
+     * @param hits     raw semantic hits
+     * @param pageable requested page
+     * @return sliced hits respecting pagination offsets
+     */
+    private SearchHits<Product> sliceSearchHits(SearchHits<Product> hits, Pageable pageable) {
+        if (hits == null || hits.isEmpty()) {
+            return hits;
+        }
+
+        int start = Math.toIntExact(pageable.getOffset());
+        int end = Math.min(start + pageable.getPageSize(), hits.getSearchHits().size());
+        if (start >= hits.getSearchHits().size()) {
+            return new SearchHitsImpl<>(hits.getTotalHits(), hits.getTotalHitsRelation(), hits.getMaxScore(),
+                    Duration.ZERO, null, null, List.of(), hits.getAggregations(), hits.getSuggest(), null);
+        }
+
+        List<SearchHit<Product>> sliced = hits.getSearchHits().subList(start, end);
+        return new SearchHitsImpl<>(hits.getTotalHits(), hits.getTotalHitsRelation(), hits.getMaxScore(),
+                Duration.ZERO, null, null, sliced, hits.getAggregations(), hits.getSuggest(), null);
+    }
+
+    /**
+     * Resolve candidate vertical identifiers for semantic fallback.
+     *
+     * @param sanitizedQuery sanitized query string
+     * @param domainLanguage localisation hint
+     * @return list of distinct vertical identifiers to query
+     */
+    private List<String> resolveSemanticVerticalCandidates(String sanitizedQuery, DomainLanguage domainLanguage) {
+        if (!StringUtils.hasText(sanitizedQuery)) {
+            return List.of();
+        }
+
+        List<String> tokens = normalizedTokens(normalizeForComparison(sanitizedQuery));
+        if (tokens.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> matched = findCategoryMatches(tokens, domainLanguage).stream()
+                .map(CategorySuggestion::verticalId)
+                .distinct()
+                .toList();
+        if (!matched.isEmpty()) {
+            return matched;
+        }
+
+        return verticalSuggestions.stream()
+                .map(VerticalSuggestionEntry::verticalId)
+                .distinct()
+                .limit(SEMANTIC_GLOBAL_FALLBACK_LIMIT)
+                .toList();
+    }
+
+    /**
+     * Builds and normalizes the embedding vector for a query.
+     *
+     * @param sanitizedQuery sanitized query string
+     * @return normalized embedding vector, or {@code null} if unavailable
+     */
+    private float[] buildNormalizedEmbedding(String sanitizedQuery) {
+        if (!StringUtils.hasText(sanitizedQuery)) {
+            return null;
+        }
+        String embeddingInput = buildQueryEmbeddingInput(sanitizedQuery);
+        float[] embedding;
+        try {
+            embedding = textEmbeddingService.embed(embeddingInput);
+        } catch (IllegalStateException ex) {
+            LOGGER.warn("Semantic search unavailable because no embedding model is loaded: {}", ex.getMessage());
+            return null;
+        }
+
+        if (embedding == null || embedding.length == 0) {
+            LOGGER.info("Skipping semantic search because embedding is missing for query '{}'", sanitizedQuery);
+            return null;
+        }
+
+        embedding = IdHelper.to512(embedding);
+        EmbeddingVectorUtils.normalizeL2(embedding);
+        return embedding;
     }
 
     private Locale resolveLocale(DomainLanguage domainLanguage) {
