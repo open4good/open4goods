@@ -27,14 +27,26 @@
               :placeholder="t('search.form.placeholder')"
               :aria-label="t('search.form.ariaLabel')"
               :min-chars="MIN_QUERY_LENGTH"
+              :enable-voice="true"
+              :voice-mobile="true"
+              :voice-desktop="true"
               @clear="handleClear"
               @select-category="handleCategorySuggestion"
               @select-product="handleProductSuggestion"
               @submit="handleSearchSubmit"
-            />
-            <v-btn class="search-hero__submit" type="submit" size="large">
-              {{ t('search.form.submit') }}
-            </v-btn>
+            >
+              <template #append-inner>
+                <v-btn
+                  class="search-hero__submit-icon"
+                  icon="mdi-arrow-right"
+                  variant="flat"
+                  color="primary"
+                  size="small"
+                  type="submit"
+                  :aria-label="t('search.form.submit')"
+                />
+              </template>
+            </SearchSuggestField>
           </form>
 
           <p v-if="showInitialState" class="search-hero__helper">
@@ -654,6 +666,9 @@ function formatFallbackVerticalTitle(verticalId: string): string {
 
       &:focus-visible
         box-shadow: 0 0 0 3px rgba(var(--v-theme-hero-overlay-soft), 0.35)
+
+  &__submit-icon
+    border-radius: 50% !important
 
   &__helper
     margin: 0

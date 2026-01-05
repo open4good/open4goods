@@ -707,7 +707,9 @@ const buildModelVariationParams = (options: {
 }) => {
   const variation = sectionModelVariationCycle.value[options.key]
   const fallbackBrand = productBrand.value
-  const resolvedVariation = variation ? formatModelVariationLabel(variation) : ''
+  const resolvedVariation = variation
+    ? formatModelVariationLabel(variation)
+    : ''
   const modelVariation = resolvedVariation || fallbackBrand
 
   if (!modelVariation) {
@@ -1967,7 +1969,7 @@ useHead(() => {
   position: sticky;
   top: 50%;
   transform: translateY(-50%);
-  align-self: center;
+  align-self: start;
   height: fit-content;
 }
 

@@ -172,10 +172,6 @@ const heroHighlights = computed<HeroHighlight[]>(() => [
     text: String(t('contact.hero.highlights.commitment')),
   },
   {
-    icon: 'mdi-lightbulb-on-outline',
-    text: String(t('contact.hero.highlights.expertise')),
-  },
-  {
     icon: 'mdi-leaf-circle-outline',
     text: String(t('contact.hero.highlights.impact')),
   },

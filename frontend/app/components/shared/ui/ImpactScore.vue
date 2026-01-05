@@ -353,11 +353,7 @@ const badgeVariant = computed(() => props.badgeVariant)
   right: -35%;
   width: 90%;
   height: 120%;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-accent-primary-highlight), 0.45),
-    rgba(var(--v-theme-accent-supporting), 0.2)
-  );
+
   transform: rotate(-10deg);
   border-radius: 999px;
   opacity: 0.8;

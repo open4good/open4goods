@@ -178,7 +178,7 @@ const backgroundAsset = useThemeAsset('categoriesBackground')
   font-size: 0.85rem
   letter-spacing: 0.08em
   text-transform: uppercase
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.9)
+  color: rgba(var(--v-theme-text-neutral-strong), 0.9)
 
 /* --- Correctif contraste (light & dark) --- */
 /* On force le champ à utiliser des tokens "surface/text" neutres,

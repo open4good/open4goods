@@ -23,7 +23,7 @@
           :hide-delimiter-background="true"
           :show-arrows="shouldShowControls"
           :aria-label="carouselAriaLabel"
-          :height="display.mdAndUp.value ? 420 : 460"
+          height="auto"
         >
           <v-carousel-item
             v-for="(slide, slideIndex) in slides"

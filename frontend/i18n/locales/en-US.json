@@ -18,9 +18,7 @@
       "hero": {
         "eyebrow": "Responsible shopping",
         "title": "Responsible choices aren't a luxury",
-        "titleSubtitle": [
-          "Buy better. Spend smarter."
-        ],
+        "titleSubtitle": ["Buy better. Spend smarter."],
         "subtitles": [
           "Save time, stay true to your values. Compare effortlessly, choose freely.",
           "Shop smarter without compromise. Nudger balances planet and price.",
@@ -112,9 +110,7 @@
       "hero": {
         "eyebrow": "Bastille Day special",
         "title": "Celebrate conscious choices on 14 July",
-        "titleSubtitle": [
-          "Fireworks of fair prices and transparent impact."
-        ],
+        "titleSubtitle": ["Fireworks of fair prices and transparent impact."],
         "subtitles": [
           "Shop with liberté, égalité, durabilité in mind.",
           "Switch to responsible picks while the skyline lights up."
@@ -207,9 +203,7 @@
     "hero": {
       "eyebrow": "Responsible shopping",
       "title": "Responsible choices aren't a luxury",
-      "titleSubtitle": [
-        "Buy better. Spend smarter."
-      ],
+      "titleSubtitle": ["Buy better. Spend smarter."],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -1896,7 +1890,11 @@
     },
     "results": {
       "summary": "Displaying {countLabel} for “{query}”",
-      "count": {}
+      "count": {
+        "zero": "No results",
+        "one": "1 result",
+        "other": "{count} results"
+      }
     },
     "notice": {
       "fallback": "We could not match a specific category, so we are showing the most relevant products overall."

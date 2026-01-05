@@ -3,7 +3,6 @@
     <PageHeader
       variant="section-header"
       :title="t('impactScorePage.hero.title')"
-      description-bloc-id="ECOSCORE:1:"
       background="image"
       background-image-asset-key="impactScoreBackground"
       surface-variant="mesh"

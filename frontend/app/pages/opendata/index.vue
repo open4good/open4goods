@@ -5,7 +5,6 @@
       :eyebrow="t('opendata.hero.eyebrow')"
       :title="t('opendata.hero.title')"
       :subtitle="t('opendata.hero.subtitle')"
-      :description-bloc-id="'webpages:opendata:hero-overview'"
       layout="2-columns"
       background="surface-variant"
       surface-variant="halo"

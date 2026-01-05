@@ -606,7 +606,7 @@ const heroStats = computed(() => ({
       label: String(t('feedback.hero.stats.items.votes')),
     },
     {
-      icon: 'mdi-database-eye-outline',
+      icon: 'mdi-eye-plus-outline',
       label: String(t('feedback.hero.stats.items.transparency')),
     },
   ],

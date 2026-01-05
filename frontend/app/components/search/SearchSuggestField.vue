@@ -798,6 +798,11 @@ const handleSearchInput = (value: string) => {
     return
   }
 
+  // Prevent Vuetify from clearing the search input on mount when it's not focused
+  if (!isFieldFocused.value && !value && props.modelValue) {
+    return
+  }
+
   internalSearch.value = value
 }
 

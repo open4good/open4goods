@@ -5,9 +5,7 @@
         "eyebrow": "Saison de Noël",
         "title": "Un hiver tout en douceur",
         "titleSubtitle": ["Des cadeaux qui ont du sens."],
-        "subtitles": [
-          "Offrez, partagez, savourez."
-        ],
+        "subtitles": ["Offrez, partagez, savourez."],
         "search": {
           "helpers": [
             {
@@ -117,8 +115,8 @@
         "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d'impact.",
         "background": "hero-background.webp",
         "search": {
-          "label": "Une marque ou un modèle précis en tête ?",
-          "placeholder": "Recherchez un produit ou une catégorie",
+          "label": "Recherchez un produit ou une catégorie",
+          "placeholder": "Exemples : TOSHISUNG-KLED65C, Un grande TV OLED, lave linge top 7 kg, ...  ",
           "ariaLabel": "Rechercher un produit responsable",
           "cta": "NUDGER",
           "helpersTitle": "Offre avec intention. Compare avec impact.",
@@ -622,10 +620,12 @@
       "hero": {
         "breadcrumbAriaLabel": "Fil d'Ariane de la navigation par catégories",
         "childDescription": "Explorez les sous-catégories et les sélections associées aux {category}.",
-        "rootBreadcrumb": "Toutes les catégories",
-        "rootProductsTitle": "Les produits disponibles",
+
         "description": "Découvrez toutes les familles de produits analysées et laissez vous guider !",
-        "resultsSummary": {},
+        "resultsSummary": {
+          "one": "{count} catégorie",
+          "other": "{count} catégories"
+        },
         "rootBreadcrumb": "Toutes nos catégories",
         "rootProductsTitle": "Les produits évalués",
         "searchLabel": "Rechercher une catégorie",
@@ -636,8 +636,8 @@
       "verticals": {
         "eyebrow": "Catégories évaluées",
         "openVertical": "Ouvrir le comparateur {category}",
-        "openVerticalCta": "Découvrir notre eco-comparateur",
-        "subtitle": "Des guides choisis pour rejoindre rapidement les familles les plus recherchées.",
+        "openVerticalCta": "Parcourir ce",
+        "subtitle": "Des outils puissants pour trouver facilement les produits les plus vertueux.",
         "title": "Catégories populaires",
         "viewPath": "Ouvrir le chemin taxonomique {category}",
         "viewPathCta": "Parcourir la taxonomie"
@@ -1043,8 +1043,7 @@
       "description": "Parlez-nous de votre projet, de votre organisation ou de votre usage de Nudger afin que nous vous orientions vers la bonne personne.",
       "eyebrow": "Entrons en contact",
       "highlights": {
-        "commitment": "Une réponse sous deux jours ouvrés pour la plupart des demandes.",
-        "expertise": "Des expertes et experts produit, data et impact engagés pour un commerce responsable.",
+        "commitment": "Une réponse rapide pour la plupart des demandes.",
         "impact": "Chaque message nous aide à construire un marché plus juste et durable."
       },
       "subtitle": "Partenariat, question produit ou retour d'expérience ?",
@@ -1916,7 +1915,11 @@
     },
     "results": {
       "summary": "Affichage de {countLabel} pour « {query} »",
-      "count": {}
+      "count": {
+        "zero": "Aucun résultat",
+        "one": "1 résultat",
+        "other": "{count} résultats"
+      }
     },
     "notice": {
       "fallback": "Nous n'avons pas identifié de verticale précise, voici les produits les plus pertinents globalement."
@@ -1949,7 +1952,10 @@
       }
     },
     "groups": {
-      "count": {},
+      "count": {
+        "one": "{count} produit",
+        "other": "{count} produits"
+      },
       "unknownTitle": "Autres produits",
       "viewCategory": "Accéder à la catégorie",
       "viewCategoryAria": "Accéder à la catégorie {title}"
@@ -2473,7 +2479,7 @@
       "closeLabel": "Fermer le menu",
       "items": {
         "blog": "Blog",
-        "contact": "Le coin des curieux",
+        "contact": "Plus",
         "impactScore": "Impact Score",
         "products": "Les produits"
       },

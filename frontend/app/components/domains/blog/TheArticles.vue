@@ -12,7 +12,6 @@ const {
   error,
   pagination,
   fetchArticles,
-  resetPagination,
   tags,
   selectedTag,
   fetchTags,
@@ -474,8 +473,6 @@ defineExpose({
   primaryArticleImage,
   structuredData,
 })
-
-resetPagination()
 
 await useAsyncData('blog-ssr-init', async () => {
   await Promise.all([ensureTagsLoaded(), loadArticlesFromRoute()])
