@@ -283,6 +283,7 @@ const createMockBlogComposable = (config: MockBlogConfig = {}) => {
     tags,
     selectedTag,
     fetchTags,
+    resetPagination: vi.fn(),
   }
 }
 
