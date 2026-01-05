@@ -76,7 +76,11 @@
           {{ $t('product.uncategorized.noScore') }}
         </v-alert>
 
-        <section :id="sectionIds.ai" class="product-page__section">
+        <section
+          v-if="showAiReviewSection"
+          :id="sectionIds.ai"
+          class="product-page__section"
+        >
           <ProductAiReviewSection
             :gtin="product.gtin ?? gtin"
             :initial-review="product.aiReview?.review ?? null"
@@ -1503,6 +1507,7 @@ const showAttributesSection = computed(() => {
 const showAlternativesSection = computed(() =>
   Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0)
 )
+const showAiReviewSection = computed(() => Boolean(categoryDetail.value))
 
 const sectionIds = {
   hero: 'hero',
@@ -1536,7 +1541,7 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
     id: sectionIds.ai,
     label: t('product.navigation.ai'),
     icon: 'mdi-robot-outline',
-    condition: true,
+    condition: showAiReviewSection.value,
   },
   {
     id: sectionIds.price,
