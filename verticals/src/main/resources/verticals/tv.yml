@@ -27,6 +27,7 @@ icecatTaxonomyId: 1584
 # See /open4goods/docs/eprel_codes.md
 eprelGroupNames:
   - televisions
+  - Televisions
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
 # Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG
