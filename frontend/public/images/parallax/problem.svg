@@ -1,0 +1,52 @@
+<svg width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad_456" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFCD90;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FF8479;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E06055;stop-opacity:1" />
+    </linearGradient>
+    <filter id="blur_soft">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" />
+    </filter>
+    <filter id="blur_heavy">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18" />
+    </filter>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#grad_456)" />
+
+  <g id="parallax-back" transform="translate(0,0)">
+    <circle cx="954" cy="835" r="299" fill="#FF8479" fill-opacity="0.2" filter="url(#blur_heavy)" />
+    <circle cx="-38" cy="334" r="325" fill="#FF8479" fill-opacity="0.2" filter="url(#blur_heavy)" />
+    <circle cx="-57" cy="490" r="378" fill="#FF8479" fill-opacity="0.2" filter="url(#blur_heavy)" />
+  </g>
+  <g id="parallax-mid" transform="translate(0,0)">
+    <circle cx="86" cy="763" r="69" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="12" />
+    <circle cx="1484" cy="748" r="99" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="18" />
+    <circle cx="695" cy="739" r="123" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="18" />
+    <circle cx="85" cy="705" r="142" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="14" />
+    <circle cx="410" cy="775" r="66" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="13" />
+  </g>
+  <g id="parallax-front" transform="translate(0,0)">
+    <circle cx="276" cy="794" r="20" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="60" cy="800" r="19" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="1661" cy="704" r="22" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="102" cy="501" r="27" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="1287" cy="709" r="24" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="1591" cy="558" r="13" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="1487" cy="494" r="16" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="1269" cy="82" r="14" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="1425" cy="-14" r="27" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="1448" cy="276" r="28" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="949" cy="84" r="30" fill="#FFCD90" fill-opacity="0.2" />
+    <circle cx="1364" cy="45" r="10" fill="#FFCD90" fill-opacity="0.2" />
+    <rect x="40" y="294" width="7" height="7" transform="rotate(45 40 294)" fill="#FFFFFF" fill-opacity="0.3" />
+    <rect x="1523" y="355" width="6" height="6" transform="rotate(45 1523 355)" fill="#FFFFFF" fill-opacity="0.3" />
+    <rect x="152" y="395" width="8" height="8" transform="rotate(45 152 395)" fill="#FFFFFF" fill-opacity="0.3" />
+    <rect x="479" y="28" width="6" height="6" transform="rotate(45 479 28)" fill="#FFFFFF" fill-opacity="0.3" />
+    <rect x="-61" y="426" width="11" height="11" transform="rotate(45 -61 426)" fill="#FFFFFF" fill-opacity="0.3" />
+    <rect x="139" y="693" width="5" height="5" transform="rotate(45 139 693)" fill="#FFFFFF" fill-opacity="0.3" />
+    <rect x="8" y="378" width="7" height="7" transform="rotate(45 8 378)" fill="#FFFFFF" fill-opacity="0.3" />
+    <rect x="44" y="837" width="9" height="9" transform="rotate(45 44 837)" fill="#FFFFFF" fill-opacity="0.3" />
+  </g>
+</svg>

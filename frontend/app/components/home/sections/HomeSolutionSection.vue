@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRandomHomepageImages } from '~/composables/useRandomHomepageImages'
+import HomeParallaxVisual from '../HomeParallaxVisual.vue'
 
 type SolutionBenefit = {
   emoji: string
@@ -13,12 +13,9 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const { gainImage, pickGainImage } = useRandomHomepageImages()
 
 const sectionTitle = computed(() => t('home.solution.title'))
 const sectionDescription = computed(() => t('home.solution.description'))
-const invitationImageAlt = computed(() => t('home.photoInvitation.imageAlt'))
-const nextImageLabel = computed(() => t('home.solution.nextImage'))
 </script>
 
 <template>
@@ -63,21 +60,9 @@ const nextImageLabel = computed(() => t('home.solution.nextImage'))
         </v-col>
         <v-col cols="12" md="6" class="home-solution__visual">
           <div class="home-solution__image-wrapper">
-            <img
-              :src="gainImage"
-              :alt="invitationImageAlt"
-              class="home-solution__image"
-              loading="lazy"
-              decoding="async"
-            />
-            <v-btn
-              icon="mdi-arrow-right"
-              variant="flat"
-              color="surface"
-              size="small"
-              class="home-solution__next-btn"
-              :aria-label="nextImageLabel"
-              @click="pickGainImage"
+            <HomeParallaxVisual
+              src="/images/parallax/solution.svg"
+              :alt="sectionTitle"
             />
           </div>
         </v-col>
