@@ -43,8 +43,71 @@
             :text="category.tooltip"
           >
             <template #activator="{ props: tooltipProps }">
+              <ClientOnly v-if="isStaticCategory(category)">
+                <component
+                  :is="category.externalLink ? 'a' : 'div'"
+                  class="nudge-step-category__card-link"
+                  :href="category.externalLink"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  v-bind="tooltipProps"
+                >
+                  <v-card
+                    class="nudge-step-category__card nudge-option-card"
+                    :class="{
+                      'nudge-option-card--selected':
+                        !isExternalCategory(category) && isSelected,
+                      'nudge-option-card--disabled':
+                        isCategoryDisabled(category),
+                      'nudge-step-category__card--static':
+                        isStaticCategory(category),
+                    }"
+                    variant="flat"
+                    rounded="xl"
+                    :role="category.externalLink ? 'link' : 'button'"
+                    :aria-pressed="
+                      (!isExternalCategory(category) && isSelected).toString()
+                    "
+                    :ripple="!isCategoryDisabled(category)"
+                    :tabindex="isCategoryDisabled(category) ? -1 : 0"
+                    @click="() => handleSelect(category, toggle)"
+                  >
+                    <div class="nudge-step-category__image">
+                      <v-img
+                        :src="category.imageMedium || category.imageSmall"
+                        :alt="category.verticalHomeTitle ?? category.id ?? ''"
+                        aspect-ratio="1"
+                        class="nudge-step-category__img"
+                        cover
+                      >
+                        <template #placeholder>
+                          <div class="nudge-step-category__fallback">
+                            <v-icon
+                              :icon="category.mdiIcon ?? 'mdi-tag'"
+                              size="28"
+                            />
+                          </div>
+                        </template>
+
+                        <template #error>
+                          <div class="nudge-step-category__fallback">
+                            <v-icon
+                              :icon="category.mdiIcon ?? 'mdi-tag'"
+                              size="28"
+                            />
+                          </div>
+                        </template>
+                      </v-img>
+                    </div>
+                    <p class="nudge-step-category__name">
+                      {{ category.verticalHomeTitle ?? category.id }}
+                    </p>
+                  </v-card>
+                </component>
+              </ClientOnly>
               <component
                 :is="category.externalLink ? 'a' : 'div'"
+                v-else
                 class="nudge-step-category__card-link"
                 :href="category.externalLink"
                 target="_blank"
@@ -56,7 +119,8 @@
                   :class="{
                     'nudge-option-card--selected':
                       !isExternalCategory(category) && isSelected,
-                    'nudge-option-card--disabled': isCategoryDisabled(category),
+                    'nudge-option-card--disabled':
+                      isCategoryDisabled(category),
                     'nudge-step-category__card--static':
                       isStaticCategory(category),
                   }"
@@ -104,6 +168,60 @@
               </component>
             </template>
           </v-tooltip>
+          <ClientOnly v-else-if="isStaticCategory(category)">
+            <component
+              :is="category.externalLink ? 'a' : 'div'"
+              class="nudge-step-category__card-link"
+              :href="category.externalLink"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+              <v-card
+                class="nudge-step-category__card nudge-option-card"
+                :class="{
+                  'nudge-option-card--selected':
+                    !isExternalCategory(category) && isSelected,
+                  'nudge-option-card--disabled': isCategoryDisabled(category),
+                  'nudge-step-category__card--static':
+                    isStaticCategory(category),
+                }"
+                variant="flat"
+                rounded="xl"
+                :role="category.externalLink ? 'link' : 'button'"
+                :aria-pressed="
+                  (!isExternalCategory(category) && isSelected).toString()
+                "
+                :ripple="!isCategoryDisabled(category)"
+                :tabindex="isCategoryDisabled(category) ? -1 : 0"
+                @click="() => handleSelect(category, toggle)"
+              >
+                <div class="nudge-step-category__image">
+                  <v-img
+                    :src="category.imageMedium || category.imageSmall"
+                    :alt="category.verticalHomeTitle ?? category.id ?? ''"
+                    aspect-ratio="1"
+                    class="nudge-step-category__img"
+                    cover
+                  >
+                    <template #placeholder>
+                      <div class="nudge-step-category__fallback">
+                        <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
+                      </div>
+                    </template>
+
+                    <template #error>
+                      <div class="nudge-step-category__fallback">
+                        <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
+                      </div>
+                    </template>
+                  </v-img>
+                </div>
+                <p class="nudge-step-category__name">
+                  {{ category.verticalHomeTitle ?? category.id }}
+                </p>
+              </v-card>
+            </component>
+          </ClientOnly>
           <component
             :is="category.externalLink ? 'a' : 'div'"
             v-else
