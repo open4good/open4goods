@@ -1,8 +1,11 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,10 +38,13 @@ import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
+import org.open4goods.commons.services.IpQuotaService;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -62,6 +68,8 @@ class ProductMappingServiceTest {
     private ReviewGenerationClient reviewGenerationClient;
     private HcaptchaService hcaptchaService;
     private ProductTimelineService productTimelineService;
+    private ReviewGenerationProperties reviewGenerationProperties;
+    private IpQuotaService ipQuotaService;
     private HttpServletRequest httpServletRequest;
 
     @BeforeEach
@@ -78,13 +86,18 @@ class ProductMappingServiceTest {
         reviewGenerationClient = mock(ReviewGenerationClient.class);
         hcaptchaService = mock(HcaptchaService.class);
         productTimelineService = new ProductTimelineService();
+        reviewGenerationProperties = new ReviewGenerationProperties();
+        reviewGenerationProperties.setApiBaseUrl("https://review.example");
+        reviewGenerationProperties.setApiKey("review-key");
+        ipQuotaService = mock(IpQuotaService.class);
         httpServletRequest = mock(HttpServletRequest.class);
         CaffeineCache referenceCache = new CaffeineCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
                 Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
-                reviewGenerationClient, hcaptchaService, productTimelineService);
+                reviewGenerationClient, hcaptchaService, productTimelineService, reviewGenerationProperties,
+                ipQuotaService);
     }
 
     @Test
@@ -318,6 +331,10 @@ class ProductMappingServiceTest {
         when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
         when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
         when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(ipQuotaService.isAllowed(eq("REVIEW_GENERATION"), eq("127.0.0.1"), eq(3),
+                eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(true);
+        when(ipQuotaService.increment(eq("REVIEW_GENERATION"), eq("127.0.0.1"),
+                eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(1);
         Product product = new Product(gtin);
         when(repository.getById(gtin)).thenReturn(product);
         when(reviewGenerationClient.triggerGeneration(gtin)).thenReturn(gtin);
@@ -325,9 +342,32 @@ class ProductMappingServiceTest {
         long scheduled = service.createReview(gtin, "token", httpServletRequest);
 
         verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
+        verify(ipQuotaService).isAllowed(eq("REVIEW_GENERATION"), eq("127.0.0.1"), eq(3),
+                eq(reviewGenerationProperties.getQuota().getWindow()));
+        verify(ipQuotaService).increment(eq("REVIEW_GENERATION"), eq("127.0.0.1"),
+                eq(reviewGenerationProperties.getQuota().getWindow()));
         verify(repository).getById(gtin);
         verify(reviewGenerationClient).triggerGeneration(gtin);
         assertThat(scheduled).isEqualTo(gtin);
+    }
+
+    @Test
+    void createReviewThrowsWhenQuotaExceeded() throws Exception {
+        long gtin = 42L;
+        when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
+        when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(ipQuotaService.isAllowed(eq("REVIEW_GENERATION"), eq("127.0.0.1"), eq(3),
+                eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(false);
+
+        assertThatThrownBy(() -> service.createReview(gtin, "token", httpServletRequest))
+                .isInstanceOf(ReviewGenerationLimitExceededException.class)
+                .hasMessageContaining("Maximum 3 review generations");
+
+        verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
+        verify(ipQuotaService, never()).increment(eq("REVIEW_GENERATION"), eq("127.0.0.1"),
+                eq(reviewGenerationProperties.getQuota().getWindow()));
+        verify(reviewGenerationClient, never()).triggerGeneration(gtin);
     }
 
     @Test

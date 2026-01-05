@@ -60,6 +60,14 @@ front:
     anonymous: 100
     authenticated: 1000
 
+  review-generation:
+    api-base-url: ${FRONT_REVIEW_GENERATION_API_BASE_URL:https://api.open4goods.org}
+    api-key: ${FRONT_REVIEW_GENERATION_API_KEY:CHANGE_ME_REVIEW_KEY}
+    review-path: ${FRONT_REVIEW_GENERATION_REVIEW_PATH:/review}
+    quota:
+      max-per-ip: ${FRONT_REVIEW_GENERATION_MAX_PER_IP:3}
+      window: ${FRONT_REVIEW_GENERATION_WINDOW:24h}
+
   partners:
     ecosystem:
       partners:
