@@ -12,6 +12,7 @@ const contactRedirectMessage = ref(
 const contactRedirectSubject = computed(() =>
   t('home.contactRedirect.prefilledSubject').trim()
 )
+const contactRedirectTitleKey = 'contact.prefill.title.question'
 
 const CONTACT_REDIRECT_MAX_LENGTH = 400
 
@@ -29,6 +30,8 @@ const handleContactRedirect = () => {
   if (sanitizedMessage) {
     query.message = sanitizedMessage
   }
+
+  query.titleKey = contactRedirectTitleKey
 
   router.push(
     localePath({

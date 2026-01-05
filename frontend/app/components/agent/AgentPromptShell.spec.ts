@@ -17,6 +17,20 @@ vi.mock('vue-i18n', () => ({
 mockNuxtImport('useRuntimeConfig', () => () => ({
   public: { hcaptchaSiteKey: '' },
 }))
+mockNuxtImport(
+  'useLocalePath',
+  () =>
+    () =>
+    (input: { name: string; query?: Record<string, string> } | string) => {
+  if (typeof input === 'string') {
+    return input
+  }
+  const query = input?.query
+    ? new URLSearchParams(input.query).toString()
+    : ''
+  return query ? `/${input.name}?${query}` : `/${input.name}`
+}
+)
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key }))
 
 const VTextareaStub = defineComponent({
@@ -141,5 +155,24 @@ describe('AgentPromptShell', () => {
     const submission = wrapper.emitted('submit')?.[0]?.[0]
     expect(submission).toBeDefined()
     expect(submission.prompt).toBe('Create Demo for release notes')
+  })
+
+  it('renders a contact form link when a prompt is provided', async () => {
+    const wrapper = mount(AgentPromptShell, {
+      props: {
+        title: 'Test agent',
+        promptTemplates: [],
+        allowTemplateEditing: true,
+        fallbackMailto: 'mailto:test@example.com',
+      },
+      global: globalConfig,
+    })
+
+    await wrapper.get('[data-test="agent-prompt"]').setValue('Need help')
+
+    const link = wrapper.get('[data-test="agent-contact-link"]')
+    expect(link.attributes('to')).toContain('titleKey=contact.prefill.title.question')
+    expect(link.attributes('to')).toContain('subject=agents.promptInput.contactSubject')
+    expect(link.attributes('to')).toContain('message=Need+help')
   })
 })

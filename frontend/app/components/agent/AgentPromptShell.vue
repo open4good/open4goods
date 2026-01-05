@@ -181,6 +181,17 @@
         >
           {{ $t('agents.promptInput.openEmail') }}
         </v-btn>
+        <v-btn
+          variant="text"
+          size="small"
+          color="primary"
+          class="ml-2"
+          :to="contactFormLink || undefined"
+          :disabled="!isAuthorized || !contactFormLink"
+          data-test="agent-contact-link"
+        >
+          {{ $t('agents.promptInput.openContactForm') }}
+        </v-btn>
       </div>
     </v-card-text>
     <v-divider></v-divider>
@@ -278,6 +289,10 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const runtimeConfig = useRuntimeConfig()
 const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
+const localePath = useLocalePath()
+
+const CONTACT_PREFILL_TITLE_KEY = 'contact.prefill.title.question'
+const CONTACT_PREFILL_MESSAGE_MAX_LENGTH = 1200
 
 const promptTemplates = computed(() => props.promptTemplates ?? [])
 const selectedPromptTemplateId = ref(
@@ -427,6 +442,38 @@ const renderedPrompt = computed(() => {
     const defaultValue = defaultParts.join('=').trim()
     const provided = templateVariableValues.value[id]
     return (provided && provided.trim()) || defaultValue || ''
+  })
+})
+
+const normalizePrefillValue = (value: string, maxLength: number) =>
+  value.trim().slice(0, maxLength)
+
+const contactFormQuery = computed(() => {
+  const message = normalizePrefillValue(
+    renderedPrompt.value,
+    CONTACT_PREFILL_MESSAGE_MAX_LENGTH
+  )
+  if (!message) {
+    return null
+  }
+  const subject = t('agents.promptInput.contactSubject').trim()
+  const query: Record<string, string> = {
+    message,
+    titleKey: CONTACT_PREFILL_TITLE_KEY,
+  }
+  if (subject) {
+    query.subject = subject
+  }
+  return query
+})
+
+const contactFormLink = computed(() => {
+  if (!contactFormQuery.value) {
+    return ''
+  }
+  return localePath({
+    name: 'contact',
+    query: contactFormQuery.value,
   })
 })
 

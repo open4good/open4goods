@@ -950,6 +950,11 @@
     }
   },
   "contact": {
+    "prefill": {
+      "title": {
+        "question": "Une question ?"
+      }
+    },
     "details": {
       "cards": {
         "community": {
@@ -2884,6 +2889,8 @@
       "email": "Vous êtes timides ?",
       "emailDescription": "Nous envoyons votre demande au Contact Service avec un email prérempli.",
       "openEmail": "Envoyer via Contact Service",
+      "openContactForm": "Ouvrir le formulaire de contact",
+      "contactSubject": "Question depuis l'agent IA",
       "details": "Détails supplémentaires",
       "noAttributes": "Aucune information complémentaire fournie.",
       "anonymousName": "Utilisateur Nudger",

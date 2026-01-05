@@ -918,6 +918,11 @@
     }
   },
   "contact": {
+    "prefill": {
+      "title": {
+        "question": "A question?"
+      }
+    },
     "details": {
       "cards": {
         "community": {
@@ -2851,6 +2856,8 @@
       "email": "Prefer something quieter?",
       "emailDescription": "We will send your request through the Contact Service with a prefilled email.",
       "openEmail": "Send via Contact Service",
+      "openContactForm": "Open the contact form",
+      "contactSubject": "Question from the AI agent",
       "details": "Additional Details",
       "noAttributes": "No additional information provided.",
       "anonymousName": "Nudger User",
