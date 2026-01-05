@@ -84,6 +84,7 @@
         "heroBackground": "hero-background.webp",
         "problemImage": "placeholders/problem.webp",
         "solutionImage": "placeholders/solution.webp",
+
         "productBackground": "backgrounds/product.svg",
         "contactBackground": "backgrounds/contact.svg",
         "blogBackground": "backgrounds/blog.svg",
