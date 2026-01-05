@@ -1,12 +1,16 @@
 import type {
   AggregationRequestDto,
   FilterRequestDto,
+  GlobalSearchResponseDto,
   ProductSearchRequestDto,
   ProductSearchResponseDto,
   SortRequestDto,
   ProductsIncludeEnum,
 } from '~~/shared/api-client'
-import { useProductService } from '~~/shared/api-client/services/products.services'
+import {
+  useProductService,
+  type GlobalSearchType,
+} from '~~/shared/api-client/services/products.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
@@ -24,8 +28,18 @@ interface ProductsSearchPayload {
   include?: ProductsIncludeEnum[]
 }
 
+interface GlobalSearchPayload {
+  query?: string
+  searchType?: GlobalSearchType
+}
+
+const isGlobalSearchPayload = (
+  payload: ProductsSearchPayload | GlobalSearchPayload
+): payload is GlobalSearchPayload =>
+  typeof payload === 'object' && payload !== null && 'searchType' in payload
+
 export default defineEventHandler(
-  async (event): Promise<ProductSearchResponseDto> => {
+  async (event): Promise<ProductSearchResponseDto | GlobalSearchResponseDto> => {
     setDomainLanguageCacheHeaders(event, 'private, no-store')
 
     const payload = await readBody<ProductsSearchPayload | null>(event)
@@ -42,6 +56,28 @@ export default defineEventHandler(
     const { domainLanguage } = resolveDomainLanguage(rawHost)
 
     const productService = useProductService(domainLanguage)
+
+    if (isGlobalSearchPayload(payload)) {
+      try {
+        return await productService.searchGlobalProducts(
+          payload.query ?? '',
+          payload.searchType ?? 'auto'
+        )
+      } catch (error) {
+        const backendError = await extractBackendErrorDetails(error)
+        console.error(
+          'Error executing global search:',
+          backendError.logMessage,
+          backendError
+        )
+
+        throw createError({
+          statusCode: backendError.statusCode,
+          statusMessage: backendError.statusMessage,
+          cause: error,
+        })
+      }
+    }
 
     const buildSearchBody = (
       input: ProductsSearchPayload

@@ -121,6 +121,7 @@ export * from './RecommandationsConfig';
 export * from './ResourcesAggregationConfig';
 export * from './ReviewGenerationStatus';
 export * from './ScoringAggregationConfig';
+export * from './SearchMode';
 export * from './SearchSuggestCategoryDto';
 export * from './SearchSuggestProductDto';
 export * from './SearchSuggestResponseDto';

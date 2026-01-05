@@ -653,7 +653,7 @@ const loadSuggestions = async (query: string) => {
 
   try {
     const response = await $fetch<SearchSuggestResponseDto>(
-      '/api/search/suggest',
+      '/api/products/suggest',
       {
         params: { query: trimmed },
       }

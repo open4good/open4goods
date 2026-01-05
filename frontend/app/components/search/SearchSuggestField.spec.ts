@@ -286,7 +286,7 @@ describe('SearchSuggestField', () => {
     vi.advanceTimersByTime(350)
     await flushPromises()
 
-    expect(globalThis.$fetch).toHaveBeenCalledWith('/api/search/suggest', {
+    expect(globalThis.$fetch).toHaveBeenCalledWith('/api/products/suggest', {
       params: { query: 'tv' },
     })
   })

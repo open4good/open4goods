@@ -3,6 +3,9 @@
     <header class="search-result-group__header">
       <div class="search-result-group__headline">
         <h2 class="search-result-group__title">{{ title }}</h2>
+        <p v-if="searchModeLabel" class="search-result-group__mode">
+          {{ searchModeLabel }}
+        </p>
         <NuxtLink
           v-if="verticalHomeUrl"
           :to="verticalHomeUrl"
@@ -39,6 +42,7 @@ withDefaults(
     countLabel?: string | null
     popularAttributes?: AttributeConfigDto[]
     verticalHomeUrl?: string | null
+    searchModeLabel?: string | null
     categoryLinkLabel?: string | null
     categoryLinkAria?: string | null
   }>(),
@@ -46,6 +50,7 @@ withDefaults(
     countLabel: null,
     popularAttributes: () => [],
     verticalHomeUrl: null,
+    searchModeLabel: null,
     categoryLinkLabel: '',
     categoryLinkAria: null,
   }
@@ -83,6 +88,12 @@ withDefaults(
     font-size: clamp(1.5rem, 1.1rem + 0.9vw, 2rem)
     font-weight: 600
     color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__mode
+    margin: 0
+    font-size: 0.9rem
+    font-weight: 500
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
 
   &__link
     display: inline-flex

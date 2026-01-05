@@ -20,6 +20,7 @@ import {
     GlobalSearchResultDtoToJSON,
     GlobalSearchResultDtoToJSONTyped,
 } from './GlobalSearchResultDto';
+import type { SearchMode } from './SearchMode';
 
 /**
  * 
@@ -33,6 +34,12 @@ export interface GlobalSearchVerticalGroupDto {
      * @memberof GlobalSearchVerticalGroupDto
      */
     verticalId?: string;
+    /**
+     * Effective search mode that produced the group
+     * @type {SearchMode}
+     * @memberof GlobalSearchVerticalGroupDto
+     */
+    searchMode?: SearchMode;
     /**
      * Ordered results belonging to the vertical
      * @type {Array<GlobalSearchResultDto>}
@@ -59,6 +66,7 @@ export function GlobalSearchVerticalGroupDtoFromJSONTyped(json: any, ignoreDiscr
     return {
         
         'verticalId': json['verticalId'] == null ? undefined : json['verticalId'],
+        'searchMode': json['searchMode'] == null ? undefined : json['searchMode'],
         'results': json['results'] == null ? undefined : ((json['results'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
     };
 }
@@ -75,7 +83,7 @@ export function GlobalSearchVerticalGroupDtoToJSONTyped(value?: GlobalSearchVert
     return {
         
         'verticalId': value['verticalId'],
+        'searchMode': value['searchMode'],
         'results': value['results'] == null ? undefined : ((value['results'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
     };
 }
-
