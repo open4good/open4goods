@@ -652,9 +652,6 @@ const modelVariations = computed(() => {
 
 const sectionModelVariationCycle = computed(() => {
   const variations = modelVariations.value
-  if (!variations.length) {
-    return {}
-  }
 
   const sectionOrder = [
     'impactSubtitle',
@@ -672,6 +669,10 @@ const sectionModelVariationCycle = computed(() => {
     attributesTitle: '',
   }
 
+  if (!variations.length) {
+    return resolved
+  }
+
   let index = 0
   for (const key of sectionOrder) {
     resolved[key] = variations[index] ?? ''
@@ -681,6 +682,17 @@ const sectionModelVariationCycle = computed(() => {
   return resolved
 })
 
+const formatModelVariationLabel = (variation: string) => {
+  const trimmedVariation = variation.trim()
+  const brand = productBrand.value
+
+  if (brand && trimmedVariation) {
+    return `${brand} - ${trimmedVariation}`
+  }
+
+  return trimmedVariation || brand
+}
+
 const buildModelVariationParams = (options: {
   key:
     | 'impactSubtitle'
@@ -688,36 +700,32 @@ const buildModelVariationParams = (options: {
     | 'priceTitle'
     | 'alternativesSubtitle'
     | 'attributesTitle'
-  requireBrand?: boolean
 }) => {
-  const modelVariation = sectionModelVariationCycle.value[options.key]
-  const brand = productBrand.value
+  const variation = sectionModelVariationCycle.value[options.key]
+  const fallbackBrand = productBrand.value
+  const resolvedVariation = variation ? formatModelVariationLabel(variation) : ''
+  const modelVariation = resolvedVariation || fallbackBrand
 
   if (!modelVariation) {
     return undefined
   }
 
-  if (options.requireBrand && !brand) {
-    return undefined
-  }
-
   return {
-    brand,
     modelVariation,
   }
 }
 
 const impactSubtitleParams = computed(() =>
-  buildModelVariationParams({ key: 'impactSubtitle', requireBrand: true })
+  buildModelVariationParams({ key: 'impactSubtitle' })
 )
 const aiTitleParams = computed(() =>
   buildModelVariationParams({ key: 'aiTitle' })
 )
 const priceTitleParams = computed(() =>
-  buildModelVariationParams({ key: 'priceTitle', requireBrand: true })
+  buildModelVariationParams({ key: 'priceTitle' })
 )
 const alternativesSubtitleParams = computed(() =>
-  buildModelVariationParams({ key: 'alternativesSubtitle', requireBrand: true })
+  buildModelVariationParams({ key: 'alternativesSubtitle' })
 )
 const attributesTitleParams = computed(() =>
   buildModelVariationParams({ key: 'attributesTitle' })

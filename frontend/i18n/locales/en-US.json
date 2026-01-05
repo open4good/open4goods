@@ -2218,7 +2218,7 @@
     "impact": {
       "alternatives": {
         "title": "Greener alternatives",
-        "subtitle": "Discover products similar to the {brand} - {modelVariation} with a better impact score and a more accessible price.",
+        "subtitle": "Discover products similar to the {modelVariation} with a better impact score and a more accessible price.",
         "bestProduct": "Voted best product for your criteria!",
         "error": "We couldn't load alternative products. Please try again.",
         "retry": "Retry",
@@ -2297,7 +2297,7 @@
       "scoreRanking": "Factor ranking",
       "scoreValue": "Relative score",
       "valueOutOf": "{value} / {max}",
-      "subtitle": "Compare the ecological and social scores of the {brand} - {modelVariation}.",
+      "subtitle": "Compare the ecological and social scores of the {modelVariation}.",
       "tableHeaders": {
         "scoreName": "Indicator",
         "attributeValue": "Attribute value",
@@ -2373,7 +2373,7 @@
       },
       "noHistory": "Price history is not yet available for this product.",
       "subtitle": "Track price evolution and compare offers.",
-      "title": "Prices and trends for the {brand} - {modelVariation}",
+      "title": "Prices and trends for the {modelVariation}",
       "trend": {
         "decrease": "Price drop of {amount}",
         "increase": "Price increase of {amount}",

@@ -2236,7 +2236,7 @@
     "impact": {
       "alternatives": {
         "title": "Alternatives plus vertes",
-        "subtitle": "Découvrez des produits similaires au {brand} - {modelVariation} avec un meilleur score d'impact et un prix plus accessible.",
+        "subtitle": "Découvrez des produits similaires au {modelVariation} avec un meilleur score d'impact et un prix plus accessible.",
         "bestProduct": "Élu meilleur produit par rapport à vos critères !",
         "error": "Impossible de charger les alternatives pour le moment. Réessayez.",
         "retry": "Réessayer",
@@ -2315,7 +2315,7 @@
       "scoreRanking": "Classement du facteur",
       "scoreValue": "Score relatif",
       "valueOutOf": "{value} / {max}",
-      "subtitle": "Comparez les scores environnementaux et sociétaux du {brand} - {modelVariation}.",
+      "subtitle": "Comparez les scores environnementaux et sociétaux du {modelVariation}.",
       "tableHeaders": {
         "scoreName": "Indicateur",
         "attributeValue": "Valeur brute",
@@ -2391,7 +2391,7 @@
       },
       "noHistory": "Pas assez de données pour afficher l'historique des prix.",
       "subtitle": "Suivez l’évolution des prix et comparez les offres.",
-      "title": "Prix et évolution du {brand} - {modelVariation}",
+      "title": "Prix et évolution du {modelVariation}",
       "trend": {
         "decrease": "Baisse de {amount}",
         "increase": "Hausse de {amount}",
