@@ -88,7 +88,24 @@
         data-test="agent-template-content"
       />
 
+      <div v-if="templateVariables.length > 0" class="mb-6">
+        <v-text-field
+          v-for="variable in templateVariables"
+          :key="variable.id"
+          v-model="templateVariableValues[variable.id]"
+          :label="variable.label"
+          :placeholder="variable.defaultValue || undefined"
+          variant="outlined"
+          density="comfortable"
+          class="mb-3"
+          :rules="variable.required ? [v => !!v || $t('agents.promptInput.required')] : []"
+          :disabled="!isAuthorized"
+          :data-test="`agent-template-variable-${variable.id}`"
+        />
+      </div>
+
       <v-textarea
+        v-else
         v-model="prompt"
         :label="$t('agents.promptInput.label')"
         :placeholder="$t('agents.promptInput.placeholder')"
@@ -300,7 +317,15 @@ watch(
   { immediate: true }
 )
 
+type TemplateVariable = {
+  id: string
+  label: string
+  defaultValue: string
+  required: boolean
+}
+
 const prompt = ref('')
+const templateVariableValues = ref<Record<string, string>>({})
 const isPrivate = ref(props.defaultPublic === false)
 const attributeValues = ref<Record<string, unknown>>({})
 const captchaToken = ref<string | null>(null)
@@ -344,8 +369,69 @@ const onCaptchaExpired = () => {
   captchaToken.value = null
 }
 
+const templateVariables = computed(() => {
+  if (!promptTemplateContent.value) {
+    return [] as TemplateVariable[]
+  }
+  const variableRegex = /\{\{\s*([^{}]+?)\s*\}\}/g
+  const seen = new Set<string>()
+  const variables: TemplateVariable[] = []
+  let match: RegExpExecArray | null
+  while ((match = variableRegex.exec(promptTemplateContent.value))) {
+    const raw = match[1].trim()
+    if (!raw) continue
+    const [namePart, ...defaultParts] = raw.split('=')
+    const id = namePart.trim()
+    if (!id || seen.has(id)) continue
+    const defaultValue = defaultParts.join('=').trim()
+    variables.push({
+      id,
+      label: id,
+      defaultValue,
+      required: defaultValue.length === 0,
+    })
+    seen.add(id)
+  }
+  return variables
+})
+
+watch(
+  templateVariables,
+  variables => {
+    const nextValues: Record<string, string> = {}
+    variables.forEach(variable => {
+      const existing = templateVariableValues.value[variable.id]
+      if (existing && existing.trim()) {
+        nextValues[variable.id] = existing
+      } else if (variable.defaultValue) {
+        nextValues[variable.id] = variable.defaultValue
+      } else {
+        nextValues[variable.id] = ''
+      }
+    })
+    templateVariableValues.value = nextValues
+  },
+  { immediate: true }
+)
+
+const renderedPrompt = computed(() => {
+  if (templateVariables.value.length === 0) {
+    return prompt.value
+  }
+  const template = promptTemplateContent.value ?? ''
+  const variableRegex = /\{\{\s*([^{}]+?)\s*\}\}/g
+  return template.replace(variableRegex, (_match, rawValue) => {
+    const raw = String(rawValue).trim()
+    const [namePart, ...defaultParts] = raw.split('=')
+    const id = namePart.trim()
+    const defaultValue = defaultParts.join('=').trim()
+    const provided = templateVariableValues.value[id]
+    return (provided && provided.trim()) || defaultValue || ''
+  })
+})
+
 const isValid = computed(() => {
-  const hasPrompt = !!prompt.value.trim()
+  const hasPrompt = !!renderedPrompt.value.trim()
   const hasTemplate = !!selectedPromptTemplateId.value
   const hasCaptcha = siteKey.value ? !!captchaToken.value : true
   return hasPrompt && hasTemplate && hasCaptcha && isAuthorized.value
@@ -358,7 +444,7 @@ const submitDisabled = computed(
 function submit() {
   if (!isValid.value) return
   emit('submit', {
-    prompt: prompt.value,
+    prompt: renderedPrompt.value,
     promptVariantId: selectedPromptTemplateId.value,
     isPrivate: isPrivate.value,
     attributeValues: attributeValues.value,
@@ -367,11 +453,11 @@ function submit() {
 }
 
 function emitFallbackContact() {
-  if (!prompt.value.trim()) {
+  if (!renderedPrompt.value.trim()) {
     return
   }
   emit('fallback-contact', {
-    prompt: prompt.value,
+    prompt: renderedPrompt.value,
     attributeValues: attributeValues.value,
     captchaToken: siteKey.value ? captchaToken.value || undefined : undefined,
   })

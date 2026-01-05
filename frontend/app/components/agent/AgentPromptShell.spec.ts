@@ -28,6 +28,15 @@ const VTextareaStub = defineComponent({
     '<textarea v-bind="$attrs" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)"></textarea>',
 })
 
+const VTextFieldStub = defineComponent({
+  name: 'VTextFieldStub',
+  inheritAttrs: false,
+  props: { modelValue: { type: String, default: '' } },
+  emits: ['update:modelValue'],
+  template:
+    '<input v-bind="$attrs" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+})
+
 const VBtnStub = defineComponent({
   name: 'VBtnStub',
   inheritAttrs: false,
@@ -49,6 +58,7 @@ const baseStubs = {
   VAlert: { template: '<div><slot /></div>' },
   VSelect: { template: '<select><slot /></select>' },
   VTextarea: VTextareaStub,
+  VTextField: VTextFieldStub,
   VCheckbox: { template: '<input type="checkbox" />' },
   VBtn: VBtnStub,
   VIcon: { template: '<span />' },
@@ -86,13 +96,17 @@ describe('AgentPromptShell', () => {
     const wrapper = mount(AgentPromptShell, {
       props: {
         title: 'Test agent',
-        promptTemplates: [{ id: 'p1', title: 'Prompt', content: 'content' }],
+        promptTemplates: [
+          { id: 'p1', title: 'Prompt', content: '{{prompt}}' },
+        ],
         allowTemplateEditing: true,
       },
       global: globalConfig,
     })
 
-    const promptField = wrapper.get('[data-test="agent-prompt"]')
+    const promptField = wrapper.get(
+      '[data-test="agent-template-variable-prompt"]'
+    )
     await promptField.setValue('Hello world')
     await wrapper.get('[data-test="agent-submit"]').trigger('click')
 
@@ -100,5 +114,32 @@ describe('AgentPromptShell', () => {
     expect(submission).toBeDefined()
     expect(submission.prompt).toBe('Hello world')
     expect(submission.promptVariantId).toBe('p1')
+  })
+
+  it('uses default values in template variables', async () => {
+    const wrapper = mount(AgentPromptShell, {
+      props: {
+        title: 'Test agent',
+        promptTemplates: [
+          {
+            id: 'p1',
+            title: 'Prompt',
+            content: 'Create {{title=Demo}} for {{prompt}}',
+          },
+        ],
+        allowTemplateEditing: true,
+      },
+      global: globalConfig,
+    })
+
+    const promptField = wrapper.get(
+      '[data-test="agent-template-variable-prompt"]'
+    )
+    await promptField.setValue('release notes')
+    await wrapper.get('[data-test="agent-submit"]').trigger('click')
+
+    const submission = wrapper.emitted('submit')?.[0]?.[0]
+    expect(submission).toBeDefined()
+    expect(submission.prompt).toBe('Create Demo for release notes')
   })
 })
