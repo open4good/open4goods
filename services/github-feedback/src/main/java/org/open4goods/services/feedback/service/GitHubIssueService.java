@@ -135,6 +135,12 @@ public class GitHubIssueService implements IssueService {
                 issue.getCommentsCount()
         );
     }
+
+    @Override
+    public GHIssueComment createIssueComment(int issueNumber, String commentBody) throws IOException {
+        return repository.getIssue(issueNumber).comment(commentBody);
+    }
+
     @Override
     public List<GHIssueComment> listIssueComments(int issueNumber) throws IOException {
         return repository.getIssue(issueNumber).getComments();

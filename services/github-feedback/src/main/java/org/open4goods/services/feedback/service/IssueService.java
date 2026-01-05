@@ -49,6 +49,15 @@ public interface IssueService {
     IssueDto createIssue(String title, String description, String author, Set<String> labels) throws IOException;
 
     /**
+     * Add a comment to an existing GitHub issue.
+     * @param issueNumber GitHub issue number
+     * @param commentBody Body of the comment
+     * @return the created comment
+     * @throws IOException if GitHub communication fails
+     */
+    GHIssueComment createIssueComment(int issueNumber, String commentBody) throws IOException;
+
+    /**
      * Retrieve all comments for a given issue number ordered by GitHub.
      * @param issueNumber GitHub issue number
      * @return list of comments
