@@ -84,10 +84,12 @@ describe('ProductTileCard', () => {
     setActivePinia(pinia)
   })
 
-  it('builds the header title from brand and attributes', () => {
+  it('builds the header title from the best available name', () => {
     const wrapper = createWrapper()
 
-    expect(wrapper.find('.product-tile-card__title').text()).toBe('Acme')
+    expect(wrapper.find('.product-tile-card__title').text()).toBe(
+      'Acme Model Z'
+    )
     expect(wrapper.find('.product-tile-card__subtitle').text()).toBe('Model Z')
   })
 

@@ -1,7 +1,10 @@
 <template>
   <v-card
     class="product-tile-card"
-    :class="{ 'product-tile-card--disabled': disabled }"
+    :class="[
+      `product-tile-card--${layout}`,
+      { 'product-tile-card--disabled': disabled },
+    ]"
     rounded="xl"
     elevation="2"
     hover
@@ -9,138 +12,262 @@
     :rel="linkRel"
   >
     <div class="product-tile-card__layout">
-      <div class="product-tile-card__media">
-        <v-img
-          :src="imageSrc"
-          :alt="headerTitle"
-          aspect-ratio="4 / 3"
-          class="product-tile-card__image"
-          cover
-        >
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
-
-        <div class="product-tile-card__corner" role="presentation">
-          <ImpactScore
-            v-if="impactScore != null"
-            :score="impactScore"
-            :max="5"
-            size="small"
-            mode="badge"
-            badge-layout="stacked"
-            badge-variant="corner"
-          />
-          <span v-else class="product-tile-card__corner-fallback">
-            {{ notRatedLabel }}
-          </span>
-        </div>
-      </div>
-
-      <div class="product-tile-card__content">
-        <div class="product-tile-card__header">
-          <div class="product-tile-card__header-top">
-            <h3 class="product-tile-card__title text-truncate">
-              {{ headerTitle }}
-            </h3>
-            <div
-              v-if="hasAttributes"
-              class="product-tile-card__attributes"
-              role="list"
-            >
-              <v-chip
-                v-for="attribute in attributes"
-                :key="attribute.key"
-                class="product-tile-card__attribute"
-                variant="tonal"
-                size="small"
-                color="surface-primary-080"
-                role="listitem"
-              >
-                <v-icon
-                  v-if="attribute.icon"
-                  :icon="attribute.icon"
-                  size="16"
-                  class="me-1"
-                />
-                <span class="product-tile-card__attribute-value">{{
-                  attribute.value
-                }}</span>
-              </v-chip>
-            </div>
-          </div>
-          <p class="product-tile-card__subtitle text-truncate">
-            {{ subtitle }}
-          </p>
-        </div>
-
-        <div v-if="offerBadges.length" class="product-tile-card__pricing-row">
+      <template v-if="layout === 'horizontal'">
+        <div class="product-tile-card__media">
           <v-img
-            v-if="imageSrc"
             :src="imageSrc"
             :alt="headerTitle"
-            width="150"
-            height="150"
-            class="product-tile-card__thumbnail"
-            contain
+            aspect-ratio="4 / 3"
+            class="product-tile-card__image"
+            cover
           >
             <template #placeholder>
               <v-skeleton-loader type="image" class="h-100" />
             </template>
           </v-img>
-          <div
-            class="product-tile-card__pricing"
-            :class="{
-              'product-tile-card__pricing--stacked': offerBadges.length > 1,
-            }"
-            role="list"
-          >
-            <div
-              v-for="badge in offerBadges"
-              :key="badge.key"
-              class="product-tile-card__price-badge"
-              :class="`product-tile-card__price-badge--${badge.appearance}`"
-              role="listitem"
-            >
-              <span class="product-tile-card__price-badge-label">{{
-                badge.label
-              }}</span>
-              <span class="product-tile-card__price-badge-price">{{
-                badge.price
-              }}</span>
-            </div>
+
+          <div class="product-tile-card__corner" role="presentation">
+            <ImpactScore
+              v-if="impactScore != null"
+              :score="impactScore"
+              :max="20"
+              size="small"
+              mode="badge"
+              badge-layout="stacked"
+              badge-variant="corner"
+            />
+            <span v-else class="product-tile-card__corner-fallback">
+              {{ notRatedLabel }}
+            </span>
           </div>
         </div>
 
-        <v-row class="product-tile-card__meta">
-          <div class="product-tile-card__offers">
-            <v-icon icon="mdi-store" size="16" class="me-1" />
-            <span>{{ offersCountLabel }}</span>
+        <div class="product-tile-card__content">
+          <div class="product-tile-card__header">
+            <div class="product-tile-card__header-top">
+              <h3 class="product-tile-card__title text-truncate">
+                {{ headerTitle }}
+              </h3>
+              <div
+                v-if="hasAttributes"
+                class="product-tile-card__attributes"
+                role="list"
+              >
+                <v-chip
+                  v-for="attribute in attributes"
+                  :key="attribute.key"
+                  class="product-tile-card__attribute"
+                  variant="tonal"
+                  size="small"
+                  color="surface-primary-080"
+                  role="listitem"
+                >
+                  <v-icon
+                    v-if="attribute.icon"
+                    :icon="attribute.icon"
+                    size="16"
+                    class="me-1"
+                  />
+                  <span class="product-tile-card__attribute-value">{{
+                    attribute.value
+                  }}</span>
+                </v-chip>
+              </div>
+            </div>
+            <p class="product-tile-card__subtitle text-truncate">
+              {{ subtitle }}
+            </p>
           </div>
 
-          <v-btn
-            data-test="product-tile-compare"
-            variant="tonal"
-            size="small"
-            class="text-none"
-            density="comfortable"
-            :color="isCompared ? 'primary' : 'surface-primary-100'"
-            @click.prevent.stop="toggleCompare"
-          >
-            <v-icon
-              :icon="isCompared ? 'mdi-check' : 'mdi-plus'"
-              start
-              size="16"
-            />
-            {{
-              isCompared
-                ? t('category.products.compare.added')
-                : t('category.products.compare.buttonLabel')
-            }}
-          </v-btn>
-        </v-row>
-      </div>
+          <div v-if="offerBadges.length" class="product-tile-card__pricing-row">
+            <v-img
+              v-if="imageSrc"
+              :src="imageSrc"
+              :alt="headerTitle"
+              width="150"
+              height="150"
+              class="product-tile-card__thumbnail"
+              contain
+            >
+              <template #placeholder>
+                <v-skeleton-loader type="image" class="h-100" />
+              </template>
+            </v-img>
+            <div
+              class="product-tile-card__pricing"
+              :class="{
+                'product-tile-card__pricing--stacked': offerBadges.length > 1,
+              }"
+              role="list"
+            >
+              <div
+                v-for="badge in offerBadges"
+                :key="badge.key"
+                class="product-tile-card__price-badge"
+                :class="`product-tile-card__price-badge--${badge.appearance}`"
+                role="listitem"
+              >
+                <span class="product-tile-card__price-badge-label">{{
+                  badge.label
+                }}</span>
+                <span class="product-tile-card__price-badge-price">{{
+                  badge.price
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <v-row class="product-tile-card__meta">
+            <div class="product-tile-card__offers">
+              <v-icon icon="mdi-store" size="16" class="me-1" />
+              <span>{{ offersCountLabel }}</span>
+            </div>
+
+            <v-btn
+              data-test="product-tile-compare"
+              variant="tonal"
+              size="small"
+              class="text-none"
+              density="comfortable"
+              :color="isCompared ? 'primary' : 'surface-primary-100'"
+              @click.prevent.stop="toggleCompare"
+            >
+              <v-icon
+                :icon="isCompared ? 'mdi-check' : 'mdi-plus'"
+                start
+                size="16"
+              />
+              {{
+                isCompared
+                  ? t('category.products.compare.added')
+                  : t('category.products.compare.buttonLabel')
+              }}
+            </v-btn>
+          </v-row>
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="product-tile-card__content product-tile-card__content--stacked">
+          <div class="product-tile-card__header">
+            <div class="product-tile-card__header-top">
+              <h3 class="product-tile-card__title">
+                {{ verticalTitle }}
+              </h3>
+              <div
+                v-if="hasAttributes"
+                class="product-tile-card__attributes"
+                role="list"
+              >
+                <v-chip
+                  v-for="attribute in attributes"
+                  :key="attribute.key"
+                  class="product-tile-card__attribute"
+                  variant="tonal"
+                  size="small"
+                  color="surface-primary-080"
+                  role="listitem"
+                >
+                  <v-icon
+                    v-if="attribute.icon"
+                    :icon="attribute.icon"
+                    size="16"
+                    class="me-1"
+                  />
+                  <span class="product-tile-card__attribute-value">{{
+                    attribute.value
+                  }}</span>
+                </v-chip>
+              </div>
+            </div>
+            <p class="product-tile-card__subtitle">
+              {{ subtitle }}
+            </p>
+          </div>
+
+          <div class="product-tile-card__media product-tile-card__media--stacked">
+            <v-img
+              :src="imageSrc"
+              :alt="verticalTitle"
+              aspect-ratio="4 / 3"
+              class="product-tile-card__image"
+              cover
+            >
+              <template #placeholder>
+                <v-skeleton-loader type="image" class="h-100" />
+              </template>
+            </v-img>
+
+            <div class="product-tile-card__corner" role="presentation">
+              <ImpactScore
+                v-if="impactScore != null"
+                :score="impactScore"
+                :max="20"
+                size="small"
+                mode="badge"
+                badge-layout="stacked"
+                badge-variant="corner"
+              />
+              <span v-else class="product-tile-card__corner-fallback">
+                {{ notRatedLabel }}
+              </span>
+            </div>
+          </div>
+
+          <div v-if="offerBadges.length" class="product-tile-card__pricing-row">
+            <div
+              class="product-tile-card__pricing"
+              :class="{
+                'product-tile-card__pricing--stacked': offerBadges.length > 1,
+              }"
+              role="list"
+            >
+              <div
+                v-for="badge in offerBadges"
+                :key="badge.key"
+                class="product-tile-card__price-badge"
+                :class="`product-tile-card__price-badge--${badge.appearance}`"
+                role="listitem"
+              >
+                <span class="product-tile-card__price-badge-label">{{
+                  badge.label
+                }}</span>
+                <span class="product-tile-card__price-badge-price">{{
+                  badge.price
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <v-row class="product-tile-card__meta product-tile-card__meta--stacked">
+            <div class="product-tile-card__offers">
+              <v-icon icon="mdi-store" size="16" class="me-1" />
+              <span>{{ offersCountLabel }}</span>
+            </div>
+
+            <v-btn
+              data-test="product-tile-compare"
+              variant="tonal"
+              size="small"
+              class="text-none"
+              density="comfortable"
+              :color="isCompared ? 'primary' : 'surface-primary-100'"
+              @click.prevent.stop="toggleCompare"
+            >
+              <v-icon
+                :icon="isCompared ? 'mdi-check' : 'mdi-plus'"
+                start
+                size="16"
+              />
+              {{
+                isCompared
+                  ? t('category.products.compare.added')
+                  : t('category.products.compare.buttonLabel')
+              }}
+            </v-btn>
+          </v-row>
+        </div>
+      </template>
     </div>
   </v-card>
 </template>
@@ -150,6 +277,7 @@ import { computed } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import { useProductCompareStore } from '~/stores/useProductCompareStore'
+import { resolveProductDisplayName } from '~/utils/_product-title'
 import { useI18n } from 'vue-i18n'
 
 export type ProductTileAttribute = {
@@ -177,6 +305,7 @@ const props = withDefaults(
     offersCountLabel: string
     untitledLabel: string
     notRatedLabel: string
+    layout?: 'horizontal' | 'vertical'
     disabled?: boolean
     linkRel?: string
   }>(),
@@ -186,6 +315,7 @@ const props = withDefaults(
     offerBadges: () => [],
     imageSrc: undefined,
     productLink: undefined,
+    layout: 'vertical',
     disabled: false,
     linkRel: undefined,
   }
@@ -211,6 +341,13 @@ const subtitle = computed(
 const hasAttributes = computed(() => props.attributes.length > 0)
 
 const headerTitle = computed(() => productBrand.value)
+
+const verticalTitle = computed(() =>
+  resolveProductDisplayName(props.product, {
+    fallbackLabel: props.untitledLabel,
+    preferPrettyName: true,
+  })
+)
 
 const isCompared = computed(() => compareStore.hasProduct(props.product))
 
@@ -244,6 +381,11 @@ const toggleCompare = () => {
       grid-template-columns: auto 1fr;
       align-items: stretch;
     }
+  }
+
+  &--vertical &__layout {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
   &__media {
@@ -302,6 +444,10 @@ const toggleCompare = () => {
     min-width: 0;
   }
 
+  &__content--stacked {
+    gap: 0.75rem;
+  }
+
   &__header {
     display: flex;
     flex-direction: column;
@@ -339,6 +485,10 @@ const toggleCompare = () => {
     flex: 1;
   }
 
+  &--vertical &__attributes {
+    justify-content: flex-start;
+  }
+
   &__attribute {
     font-weight: 600;
     color: rgb(var(--v-theme-text-neutral-strong));
@@ -355,6 +505,10 @@ const toggleCompare = () => {
     grid-template-columns: auto 1fr;
     gap: 0.6rem;
     align-items: center;
+  }
+
+  &--vertical &__pricing-row {
+    grid-template-columns: 1fr;
   }
 
   &__thumbnail {
@@ -412,6 +566,14 @@ const toggleCompare = () => {
     margin-top: auto;
     gap: 0.75rem;
     padding-top: 0.25rem;
+  }
+
+  &__meta--stacked {
+    margin-top: 0;
+  }
+
+  &__media--stacked {
+    min-height: 160px;
   }
 
   &__offers {

@@ -21,27 +21,30 @@
             :product="product"
             :title="heroTitle"
           />
+          <div class="product-hero__corner" role="presentation">
+            <ImpactScore
+              v-if="impactScoreOn20 !== null"
+              :score="impactScoreOn20"
+              :max="20"
+              size="small"
+              mode="badge"
+              badge-layout="stacked"
+              badge-variant="corner"
+            />
+            <span v-else class="product-hero__corner-fallback">
+              {{ t('category.products.notRated') }}
+            </span>
+          </div>
         </div>
 
         <div class="product-hero__panel product-hero__panel--details">
-          <div
-            v-if="impactScore !== null"
-            class="product-hero__impact-overview"
-          >
-            <ImpactScore
-              :score="impactScore"
-              :max="5"
-              size="xlarge"
-              :show-value="false"
-            />
-            <div v-if="hasBrandOrModel" class="product-hero__brand-line">
-              <span v-if="productBrandName" class="product-hero__brand-name">{{
-                productBrandName
-              }}</span>
-              <span v-if="productModelName" class="product-hero__eyebrow">{{
-                productModelName
-              }}</span>
-            </div>
+          <div v-if="hasBrandOrModel" class="product-hero__brand-line">
+            <span v-if="productBrandName" class="product-hero__brand-name">{{
+              productBrandName
+            }}</span>
+            <span v-if="productModelName" class="product-hero__eyebrow">{{
+              productModelName
+            }}</span>
           </div>
 
           <ul
@@ -177,7 +180,7 @@ import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
-import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { resolvePrimaryImpactScoreOn20 } from '~/utils/_product-scores'
 import { humanizeSlug } from '~/utils/_product-title'
 
 import type {
@@ -532,7 +535,9 @@ const gtinCountry = computed(() => {
   }
 })
 
-const impactScore = computed(() => resolvePrimaryImpactScore(props.product))
+const impactScoreOn20 = computed(() =>
+  resolvePrimaryImpactScoreOn20(props.product)
+)
 
 const heroVariant = computed(() =>
   props.variant === 'classic' ? 'classic' : 'orbital'
@@ -752,12 +757,34 @@ const heroClasses = computed(() => [
   min-width: 0;
 }
 
-.product-hero__impact-overview {
-  display: flex;
-  flex-wrap: wrap;
+.product-hero__corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 64px;
+  display: inline-flex;
   align-items: center;
-  gap: 0.9rem;
+  justify-content: center;
+  border-radius: 0 0 54% 0;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.92);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
   color: rgb(var(--v-theme-text-neutral-strong));
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(6px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.product-hero__corner-fallback {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  text-align: center;
+  line-height: 1.1;
+  transform: rotate(-12deg);
 }
 
 .product-hero__brand-line {
