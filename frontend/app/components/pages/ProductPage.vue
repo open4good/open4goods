@@ -1960,13 +1960,17 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 96px;
-  align-self: start;
+  top: 50%;
+  transform: translateY(-50%);
+  align-self: center;
   height: fit-content;
 }
 
 .product-page__nav--mobile {
   position: static;
+  top: auto;
+  transform: none;
+  align-self: stretch;
 }
 
 .product-page__content {
@@ -2000,6 +2004,8 @@ useHead(() => {
     position: sticky;
     top: 0;
     z-index: 20;
+    transform: none;
+    align-self: stretch;
   }
 
   .product-page__section {

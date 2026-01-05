@@ -34,7 +34,6 @@
       @focus="handleFocus"
     >
       <template #append-inner>
-        <slot v-if="$slots['append-inner']" name="append-inner" />
         <v-btn
           v-if="shouldShowVoiceButton && isHydrated"
           class="search-suggest-field__voice-button"
@@ -77,6 +76,7 @@
         >
           <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
         </v-btn>
+        <slot v-if="$slots['append-inner']" name="append-inner" />
       </template>
       <template #item="{ item, props: itemProps, index }">
         <div class="search-suggest-field__entry" :data-section="item.raw.type">
