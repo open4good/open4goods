@@ -27,6 +27,7 @@
         :untitled-label="$t('category.products.untitledProduct')"
         :not-rated-label="$t('category.products.notRated')"
         :disabled="isDisabledCategory"
+        layout="vertical"
         :link-rel="linkRel"
       />
       <v-card
@@ -65,7 +66,7 @@
             <ImpactScore
               v-if="impactScoreValue(product) != null"
               :score="impactScoreValue(product) ?? 0"
-              :max="5"
+              :max="20"
               size="small"
               mode="badge"
               badge-layout="stacked"
@@ -177,7 +178,7 @@ import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
-import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { resolvePrimaryImpactScoreOn20 } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 
 const props = defineProps<{
@@ -253,7 +254,7 @@ const productLink = (product: ProductDto) => {
 }
 
 const impactScoreValue = (product: ProductDto) =>
-  resolvePrimaryImpactScore(product)
+  resolvePrimaryImpactScoreOn20(product)
 
 const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
 
