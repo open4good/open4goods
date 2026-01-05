@@ -6,7 +6,8 @@
       :title="t('opendata.hero.title')"
       :subtitle="t('opendata.hero.subtitle')"
       layout="2-columns"
-      background="surface-variant"
+      background="image"
+      background-image-asset-key="openDataBackground"
       surface-variant="halo"
       container="lg"
       show-media

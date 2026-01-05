@@ -1,66 +1,58 @@
 <template>
   <div class="search-page">
-    <section class="search-hero" aria-labelledby="search-hero-heading">
-      <v-container
-        class="search-hero__container py-0 px-4 mx-auto"
-        max-width="xl"
-      >
-        <div class="search-hero__content">
-          <p class="search-hero__eyebrow">{{ t('search.hero.eyebrow') }}</p>
-          <div class="search-hero__copy">
-            <h1 id="search-hero-heading" class="search-hero__title">
-              {{ t('search.hero.title') }}
-            </h1>
-            <!-- eslint-disable vue/no-v-html -->
-            <p
-              class="search-hero__subtitle subtitle-text"
-              v-html="t('search.hero.subtitle')"
+    <PageHeader
+      :eyebrow="t('search.hero.eyebrow')"
+      :title="t('search.hero.title')"
+      :description-html="t('search.hero.subtitle')"
+      layout="single-column"
+      container="lg"
+      background="image"
+      background-image-asset-key="searchBackground"
+      class="mb-8"
+    >
+      <form class="search-hero__form mt-6" @submit.prevent="handleSearchSubmit">
+        <SearchSuggestField
+          v-model="searchInput"
+          class="search-hero__field"
+          :label="t('search.form.label')"
+          :placeholder="t('search.form.placeholder')"
+          :aria-label="t('search.form.ariaLabel')"
+          :min-chars="MIN_QUERY_LENGTH"
+          :enable-voice="true"
+          :voice-mobile="true"
+          :voice-desktop="true"
+          @clear="handleClear"
+          @select-category="handleCategorySuggestion"
+          @select-product="handleProductSuggestion"
+          @submit="handleSearchSubmit"
+        >
+          <template #append-inner>
+            <v-btn
+              class="search-hero__submit-icon"
+              icon="mdi-arrow-right"
+              variant="flat"
+              color="primary"
+              size="small"
+              type="submit"
+              :aria-label="t('search.form.submit')"
             />
-            <!-- eslint-enable vue/no-v-html -->
-          </div>
+          </template>
+        </SearchSuggestField>
+      </form>
 
-          <form class="search-hero__form" @submit.prevent="handleSearchSubmit">
-            <SearchSuggestField
-              v-model="searchInput"
-              class="search-hero__field"
-              :label="t('search.form.label')"
-              :placeholder="t('search.form.placeholder')"
-              :aria-label="t('search.form.ariaLabel')"
-              :min-chars="MIN_QUERY_LENGTH"
-              :enable-voice="true"
-              :voice-mobile="true"
-              :voice-desktop="true"
-              @clear="handleClear"
-              @select-category="handleCategorySuggestion"
-              @select-product="handleProductSuggestion"
-              @submit="handleSearchSubmit"
-            >
-              <template #append-inner>
-                <v-btn
-                  class="search-hero__submit-icon"
-                  icon="mdi-arrow-right"
-                  variant="flat"
-                  color="primary"
-                  size="small"
-                  type="submit"
-                  :aria-label="t('search.form.submit')"
-                />
-              </template>
-            </SearchSuggestField>
-          </form>
-
-          <p v-if="showInitialState" class="search-hero__helper">
-            {{ t('search.states.initial') }}
-          </p>
-          <p
-            v-else-if="showMinimumNotice"
-            class="search-hero__helper search-hero__helper--warning"
-          >
-            {{ t('search.states.minimum', { min: MIN_QUERY_LENGTH }) }}
-          </p>
-        </div>
-      </v-container>
-    </section>
+      <p
+        v-if="showInitialState"
+        class="search-hero__helper mt-4 text-medium-emphasis"
+      >
+        {{ t('search.states.initial') }}
+      </p>
+      <p
+        v-else-if="showMinimumNotice"
+        class="search-hero__helper search-hero__helper--warning mt-4 text-warning"
+      >
+        {{ t('search.states.minimum', { min: MIN_QUERY_LENGTH }) }}
+      </p>
+    </PageHeader>
 
     <v-progress-linear
       v-if="pending"
@@ -177,6 +169,7 @@ import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { useAnalytics } from '~/composables/useAnalytics'
@@ -200,9 +193,9 @@ const routeQuery = computed(() =>
   typeof route.query.q === 'string' ? route.query.q : ''
 )
 const searchInput = ref(routeQuery.value)
-const requestedSearchType = ref<'auto' | 'exact_vertical' | 'global' | 'semantic'>(
-  'auto'
-)
+const requestedSearchType = ref<
+  'auto' | 'exact_vertical' | 'global' | 'semantic'
+>('auto')
 
 watch(routeQuery, value => {
   searchInput.value = value

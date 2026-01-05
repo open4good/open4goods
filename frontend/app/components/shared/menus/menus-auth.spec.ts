@@ -12,6 +12,7 @@ import {
   vi,
   type MockInstance,
 } from 'vitest'
+import { useNuxtApp } from '#imports'
 
 import type { ThemeName } from '~~/shared/constants/theme'
 
@@ -469,6 +470,7 @@ describe('Shared menu authentication controls', () => {
     fetchMock.mockResolvedValue({ success: true })
 
     const wrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
+    useNuxtApp().$fetch = fetchMock
 
     const clearItem = wrapper.get('[data-testid="hero-clear-cache"]')
     await clearItem.trigger('click')
@@ -488,6 +490,7 @@ describe('Shared menu authentication controls', () => {
     fetchMock.mockResolvedValue({ success: true })
 
     const wrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
+    useNuxtApp().$fetch = fetchMock
     const clearCacheItem = wrapper.get('[data-testid="mobile-clear-cache"]')
 
     await clearCacheItem.trigger('click')

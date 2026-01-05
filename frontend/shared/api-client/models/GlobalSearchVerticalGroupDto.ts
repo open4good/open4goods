@@ -20,7 +20,6 @@ import {
     GlobalSearchResultDtoToJSON,
     GlobalSearchResultDtoToJSONTyped,
 } from './GlobalSearchResultDto';
-import type { SearchMode } from './SearchMode';
 
 /**
  * 
@@ -36,10 +35,10 @@ export interface GlobalSearchVerticalGroupDto {
     verticalId?: string;
     /**
      * Effective search mode that produced the group
-     * @type {SearchMode}
+     * @type {string}
      * @memberof GlobalSearchVerticalGroupDto
      */
-    searchMode?: SearchMode;
+    searchMode?: GlobalSearchVerticalGroupDtoSearchModeEnum;
     /**
      * Ordered results belonging to the vertical
      * @type {Array<GlobalSearchResultDto>}
@@ -47,6 +46,18 @@ export interface GlobalSearchVerticalGroupDto {
      */
     results?: Array<GlobalSearchResultDto>;
 }
+
+
+/**
+ * @export
+ */
+export const GlobalSearchVerticalGroupDtoSearchModeEnum = {
+    ExactVertical: 'exact_vertical',
+    Global: 'global',
+    Semantic: 'semantic'
+} as const;
+export type GlobalSearchVerticalGroupDtoSearchModeEnum = typeof GlobalSearchVerticalGroupDtoSearchModeEnum[keyof typeof GlobalSearchVerticalGroupDtoSearchModeEnum];
+
 
 /**
  * Check if a given object implements the GlobalSearchVerticalGroupDto interface.
@@ -87,3 +98,4 @@ export function GlobalSearchVerticalGroupDtoToJSONTyped(value?: GlobalSearchVert
         'results': value['results'] == null ? undefined : ((value['results'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
     };
 }
+

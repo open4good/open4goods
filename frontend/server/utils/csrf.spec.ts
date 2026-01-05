@@ -1,10 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 
-import {
-  assertCsrfToken,
-  assertSameOrigin,
-  ensureCsrfCookie,
-} from './csrf'
+import { assertCsrfToken, assertSameOrigin, ensureCsrfCookie } from './csrf'
 import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '~~/shared/utils/csrf'
 
 const getCookieMock = vi.hoisted(() => vi.fn())
@@ -14,6 +10,9 @@ const createErrorMock = vi.hoisted(() => vi.fn())
 
 vi.mock('node:crypto', () => ({
   randomUUID: () => 'csrf-token-123',
+  default: {
+    randomUUID: () => 'csrf-token-123',
+  },
 }))
 
 vi.mock('h3', async importOriginal => ({

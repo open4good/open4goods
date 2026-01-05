@@ -123,11 +123,13 @@ mockNuxtImport('useI18n', () => () => ({
     return new Intl.NumberFormat(localeRef.value, options).format(numericValue)
   },
   locale: localeRef,
+  te: (key: string) => messages[key] !== undefined,
+  tm: (key: string) => messages[key] ?? key,
 }))
 
 mockNuxtImport('useId', () => () => 'compare-hero')
 
-const route = reactive({ hash: '#compare=1234567890123' })
+const route = reactive({ hash: '#compare=1234567890123', query: {} })
 const routerReplace = vi.fn()
 
 mockNuxtImport('useRoute', () => () => route)
@@ -327,16 +329,16 @@ describe('Compare page hero', () => {
     await flushPromises()
     await flushPromises()
 
-    expect(wrapper.get('.compare-page__title').text()).toBe(
+    expect(wrapper.get('.page-header__title').text()).toBe(
       'Comparateur de lave-vaisselle'
     )
-    expect(wrapper.get('.compare-page__subtitle').text()).toBe(
+    expect(wrapper.get('.page-header__subtitle').text()).toBe(
       'Analysez les fiches techniques, les prix et les indicateurs écologiques des lave-vaisselle sélectionnés.'
     )
 
     const backLink = wrapper.get('.compare-page__hero-back')
     expect(backLink.text()).toContain('Retour aux lave-vaisselle')
-    expect(backLink.attributes('href')).toBe('/electromenager/lave-vaisselle')
+    expect(backLink.attributes('to')).toBe('/electromenager/lave-vaisselle')
   })
 
   it('falls back to generic hero copy when the vertical configuration is unavailable', async () => {
@@ -346,10 +348,10 @@ describe('Compare page hero', () => {
     const wrapper = await mountPage()
     await flushPromises()
 
-    expect(wrapper.get('.compare-page__title').text()).toBe(
+    expect(wrapper.get('.page-header__title').text()).toBe(
       'Comparateur de produits'
     )
-    expect(wrapper.get('.compare-page__subtitle').text()).toBe(
+    expect(wrapper.get('.page-header__subtitle').text()).toBe(
       'Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.'
     )
     expect(wrapper.find('.compare-page__hero-back').exists()).toBe(false)

@@ -12,7 +12,6 @@ apis/FeedbackApi.ts
 apis/OpenDataApi.ts
 apis/PartnerApi.ts
 apis/ProductApi.ts
-apis/SearchApi.ts
 apis/ShareApi.ts
 apis/StatsApi.ts
 apis/TeamApi.ts
@@ -72,6 +71,7 @@ models/Filter.ts
 models/FilterGroup.ts
 models/FilterRequestDto.ts
 models/FullPageDto.ts
+models/GlobalSearchRequestDto.ts
 models/GlobalSearchResponseDto.ts
 models/GlobalSearchResultDto.ts
 models/GlobalSearchVerticalGroupDto.ts

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.kohsuke.github.GHIssueComment;
 import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.services.feedback.service.IssueService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -64,6 +65,12 @@ public class LocalMockConfig {
             public java.util.List<org.kohsuke.github.GHIssueComment> listIssueComments(int issueNumber) {
                 return Collections.emptyList();
             }
+
+			@Override
+			public GHIssueComment createIssueComment(int issueNumber, String commentBody) throws IOException {
+				// TODO Auto-generated method stub
+				return null;
+			}
         };
     }
 }

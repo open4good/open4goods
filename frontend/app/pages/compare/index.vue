@@ -1,32 +1,40 @@
 <template>
   <div class="compare-page">
-    <section class="compare-page__hero" :aria-labelledby="heroId">
-      <div class="compare-page__hero-surface">
-        <v-container class="compare-page__hero-container">
-          <div class="compare-page__hero-content">
-            <NuxtLink
-              v-if="heroBackLink"
-              :to="heroBackLink"
-              class="compare-page__hero-back"
-              :aria-label="heroBackAriaLabel"
-            >
-              <v-icon icon="mdi-arrow-left" size="18" aria-hidden="true" />
-              <span>{{ heroBackLabel }}</span>
-            </NuxtLink>
-            <h1 :id="heroId" class="compare-page__title">{{ heroTitle }}</h1>
-            <p class="compare-page__subtitle">{{ heroSubtitle }}</p>
-            <p v-if="productCount" class="compare-page__hero-meta">
-              <v-icon
-                icon="mdi-package-variant-closed"
-                size="18"
-                aria-hidden="true"
-              />
-              <span>{{ compareSummary }}</span>
-            </p>
-          </div>
-        </v-container>
-      </div>
-    </section>
+    <PageHeader
+      :title="heroTitle"
+      :eyebrow="t('compare.hero.eyebrow')"
+      layout="single-column"
+      container="lg"
+      background="image"
+      background-image-asset-key="compareBackground"
+      class="mb-8"
+    >
+      <template #subtitle>
+        <p class="page-header__subtitle">{{ heroSubtitle }}</p>
+        <p
+          v-if="productCount"
+          class="d-flex align-center justify-center gap-2 mt-2 text-medium-emphasis"
+        >
+          <v-icon
+            icon="mdi-package-variant-closed"
+            size="18"
+            aria-hidden="true"
+          />
+          <span>{{ compareSummary }}</span>
+        </p>
+      </template>
+
+      <template v-if="heroBackLink" #actions>
+        <v-btn
+          :to="heroBackLink"
+          variant="text"
+          prepend-icon="mdi-arrow-left"
+          class="mb-4 compare-page__hero-back"
+        >
+          {{ heroBackLabel }}
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <v-alert
       v-if="loadError"
@@ -1025,7 +1033,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useId } from '#imports'
+
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import {
   createCompareService,
@@ -1079,7 +1088,7 @@ const { t, locale, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 const router = useRouter()
 const route = useRoute()
-const heroId = useId()
+// const heroId = useId()
 
 const canonicalUrl = useCanonicalUrl()
 
@@ -1186,16 +1195,6 @@ const heroBackLabel = computed(() => {
   }
 
   return t('compare.hero.backFallback')
-})
-
-const heroBackAriaLabel = computed(() => {
-  if (normalizedVerticalTitle.value) {
-    return t('compare.hero.backAria', {
-      verticalTitle: normalizedVerticalTitle.value,
-    })
-  }
-
-  return t('compare.hero.backAriaFallback')
 })
 
 const highlightIcon = 'mdi-crown'

@@ -7,8 +7,6 @@ import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.model.CacheKeyGenerator;
 import org.open4goods.services.productrepository.repository.ElasticProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.open4goods.ui.repository.CheckedUrlRepository;
-import org.open4goods.ui.repository.UserSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +29,7 @@ import jakarta.annotation.PreDestroy;
 @EnableCaching
 @Configuration
 @ConfigurationPropertiesScan
-@EnableElasticsearchRepositories(basePackageClasses = {CheckedUrlRepository.class, UserSearchRepository.class, ElasticProductRepository.class, BrandScoresRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, BrandScoresRepository.class})
 //@EnableRedisRepositories(basePackageClasses = RedisProductRepository.class)
 public class Ui {
 

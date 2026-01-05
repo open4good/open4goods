@@ -1,13 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import type { H3Event } from 'h3'
-import {
-  createError,
-  getCookie,
-  getRequestHeader,
-  getRequestMethod,
-  setCookie,
-} from 'h3'
+import { createError, getCookie, getRequestHeader, setCookie } from 'h3'
 
 import {
   CSRF_COOKIE_NAME,
@@ -20,8 +14,7 @@ const CSRF_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24
 const isProduction = () => process.env.NODE_ENV === 'production'
 
 const getRequestHost = (event: H3Event) =>
-  getRequestHeader(event, 'x-forwarded-host') ||
-  getRequestHeader(event, 'host')
+  getRequestHeader(event, 'x-forwarded-host') || getRequestHeader(event, 'host')
 
 const normaliseHost = (host?: string | null) => host?.toLowerCase()
 
@@ -118,5 +111,5 @@ export const assertCsrfToken = (event: H3Event) => {
 }
 
 export const shouldValidateCsrf = (event: H3Event) => {
-  return !isSafeMethod(getRequestMethod(event))
+  return !isSafeMethod(event.method)
 }

@@ -14,7 +14,6 @@
 
 import { mapValues } from '../runtime';
 import type { ProductDto } from './ProductDto';
-import type { SearchMode } from './SearchMode';
 import {
     ProductDtoFromJSON,
     ProductDtoFromJSONTyped,
@@ -42,11 +41,23 @@ export interface GlobalSearchResultDto {
     score?: number;
     /**
      * Effective search mode that produced the result
-     * @type {SearchMode}
+     * @type {string}
      * @memberof GlobalSearchResultDto
      */
-    searchMode?: SearchMode;
+    searchMode?: GlobalSearchResultDtoSearchModeEnum;
 }
+
+
+/**
+ * @export
+ */
+export const GlobalSearchResultDtoSearchModeEnum = {
+    ExactVertical: 'exact_vertical',
+    Global: 'global',
+    Semantic: 'semantic'
+} as const;
+export type GlobalSearchResultDtoSearchModeEnum = typeof GlobalSearchResultDtoSearchModeEnum[keyof typeof GlobalSearchResultDtoSearchModeEnum];
+
 
 /**
  * Check if a given object implements the GlobalSearchResultDto interface.
@@ -87,3 +98,4 @@ export function GlobalSearchResultDtoToJSONTyped(value?: GlobalSearchResultDto |
         'searchMode': value['searchMode'],
     };
 }
+

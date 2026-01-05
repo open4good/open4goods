@@ -3,6 +3,8 @@
     <PageHeader
       :eyebrow="t('releases.hero.eyebrow')"
       :title="t('releases.hero.title')"
+      background="image"
+      background-image-asset-key="releasesBackground"
       layout="2-columns-right-media"
       container="fluid"
       show-media
