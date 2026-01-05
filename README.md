@@ -4,6 +4,11 @@
 
 [![GitHub release](https://img.shields.io/github/v/release/open4good/open4goods?logo=github)](https://github.com/open4good/open4goods/releases)
 
+![Lighthouse Performance](lighthouse/badges/performance.svg)
+![Lighthouse Accessibility](lighthouse/badges/accessibility.svg)
+![Lighthouse Best Practices](lighthouse/badges/best-practices.svg)
+![Lighthouse SEO](lighthouse/badges/seo.svg)
+
 An open source online comparator that operates ecological scoring, following a common good mindset.
 
 - provide products datasets in [open data](https://www.data.gouv.fr/fr/datasets/base-de-codes-barres-noms-et-categories-produits/)
