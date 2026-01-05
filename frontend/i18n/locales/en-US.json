@@ -1890,11 +1890,22 @@
     },
     "results": {
       "summary": "Displaying {countLabel} for “{query}”",
+<<<<<<< HEAD
       "count": {
         "zero": "No results",
         "one": "1 result",
         "other": "{count} results"
       }
+=======
+      "modeLabel": "Search mode: {mode}",
+      "nextMode": "Search in {mode} mode",
+      "count": {}
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
+    },
+    "modes": {
+      "exact_vertical": "Exact (category)",
+      "global": "Global",
+      "semantic": "Semantic"
     },
     "notice": {
       "fallback": "We could not match a specific category, so we are showing the most relevant products overall."

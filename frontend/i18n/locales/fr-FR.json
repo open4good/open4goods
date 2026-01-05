@@ -1915,11 +1915,22 @@
     },
     "results": {
       "summary": "Affichage de {countLabel} pour « {query} »",
+<<<<<<< HEAD
       "count": {
         "zero": "Aucun résultat",
         "one": "1 résultat",
         "other": "{count} résultats"
       }
+=======
+      "modeLabel": "Mode de recherche : {mode}",
+      "nextMode": "Rechercher en mode {mode}",
+      "count": {}
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
+    },
+    "modes": {
+      "exact_vertical": "Exact (catégories)",
+      "global": "Global",
+      "semantic": "Sémantique"
     },
     "notice": {
       "fallback": "Nous n'avons pas identifié de verticale précise, voici les produits les plus pertinents globalement."

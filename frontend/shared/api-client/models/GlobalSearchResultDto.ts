@@ -14,6 +14,7 @@
 
 import { mapValues } from '../runtime';
 import type { ProductDto } from './ProductDto';
+import type { SearchMode } from './SearchMode';
 import {
     ProductDtoFromJSON,
     ProductDtoFromJSONTyped,
@@ -39,6 +40,12 @@ export interface GlobalSearchResultDto {
      * @memberof GlobalSearchResultDto
      */
     score?: number;
+    /**
+     * Effective search mode that produced the result
+     * @type {SearchMode}
+     * @memberof GlobalSearchResultDto
+     */
+    searchMode?: SearchMode;
 }
 
 /**
@@ -60,6 +67,7 @@ export function GlobalSearchResultDtoFromJSONTyped(json: any, ignoreDiscriminato
         
         'product': json['product'] == null ? undefined : ProductDtoFromJSON(json['product']),
         'score': json['score'] == null ? undefined : json['score'],
+        'searchMode': json['searchMode'] == null ? undefined : json['searchMode'],
     };
 }
 
@@ -76,6 +84,6 @@ export function GlobalSearchResultDtoToJSONTyped(value?: GlobalSearchResultDto |
         
         'product': ProductDtoToJSON(value['product']),
         'score': value['score'],
+        'searchMode': value['searchMode'],
     };
 }
-

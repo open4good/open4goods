@@ -1967,9 +1967,12 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 50%;
+  top: 50vh;
   transform: translateY(-50%);
+<<<<<<< HEAD
   align-self: start;
+=======
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
   height: fit-content;
 }
 

@@ -43,6 +43,8 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
+import org.open4goods.nudgerfrontapi.dto.search.SearchMode;
+import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.embedding.util.EmbeddingVectorUtils;
@@ -132,6 +134,10 @@ public class SearchService {
             if (density <= 0) { return _score; }
             return _score * (1.0 + density);
             """;
+    private static final List<SearchMode> GLOBAL_SEARCH_SEQUENCE = List.of(
+            SearchMode.exact_vertical,
+            SearchMode.global,
+            SearchMode.semantic);
 
     private static final String EXCLUDED_FIELD = "excluded";
     private static final String EXCLUDED_CAUSES_FIELD = FilterField.excludedCauses.fieldPath();
@@ -169,11 +175,12 @@ public class SearchService {
      * @param query            optional free text query applied on offer names
      * @param aggregationQuery optional aggregation definition mirroring the Nuxt contract
      * @param filters          optional structured filters applied on the search query
+     * @param allowSemanticFallback whether semantic fallback is allowed when no hits are found
      * @return a {@link SearchResult} bundling {@link SearchHits} and aggregation metadata
      */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public SearchResult search(Pageable pageable, String verticalId, String query, AggregationRequestDto aggregationQuery,
-            FilterRequestDto filters) {
+            FilterRequestDto filters, boolean allowSemanticFallback) {
         String sanitizedQuery = sanitize(query);
         String normalizedVerticalId = normalizeVerticalId(verticalId);
 
@@ -216,7 +223,7 @@ public class SearchService {
             elasticLog(e);
             throw e;
         }
-        if (shouldFallbackToSemantic(hits, sanitizedQuery, normalizedVerticalId)) {
+        if (allowSemanticFallback && shouldFallbackToSemantic(hits, sanitizedQuery, normalizedVerticalId)) {
             SearchHits<Product> semanticHits = executeSemanticFallback(pageable, normalizedVerticalId, sanitizedQuery,
                     normalizedFilters, applyDefaultExclusion);
             if (semanticHits != null && !semanticHits.isEmpty()) {
@@ -270,29 +277,63 @@ public class SearchService {
      *
      * @param query          raw user query
      * @param domainLanguage localisation hint (currently unused but kept for future enhancements)
+     * @param searchType     requested search type controlling the starting mode
      * @return grouped search results and fallback hits when necessary
      */
-    public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage) {
+    public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage, SearchType searchType) {
 
         String sanitizedQuery = sanitize(query);
         if (!StringUtils.hasText(sanitizedQuery)) {
-            return new GlobalSearchResult(List.of(), List.of(), false);
+            return new GlobalSearchResult(List.of(), List.of(), SearchMode.exact_vertical, false);
         }
 
-        SearchHits<Product> firstPassHits = executeGlobalSearch(sanitizedQuery, true, false);
-        if (firstPassHits != null && !firstPassHits.isEmpty()) {
-            List<GlobalSearchVerticalGroup> groups = groupByVertical(firstPassHits, domainLanguage);
-            return new GlobalSearchResult(groups, List.of(), false);
+        SearchMode startMode = resolveStartMode(searchType);
+        int startIndex = GLOBAL_SEARCH_SEQUENCE.indexOf(startMode);
+        if (startIndex < 0) {
+            startIndex = 0;
         }
 
-        SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
-        List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
-        if (fallback != null && !fallback.isEmpty()) {
-            return new GlobalSearchResult(List.of(), fallback, true);
+        for (int index = startIndex; index < GLOBAL_SEARCH_SEQUENCE.size(); index++) {
+            SearchMode mode = GLOBAL_SEARCH_SEQUENCE.get(index);
+            boolean fallbackTriggered = index > startIndex;
+
+            if (mode == SearchMode.exact_vertical) {
+                SearchHits<Product> firstPassHits = executeGlobalSearch(sanitizedQuery, true, false);
+                if (firstPassHits != null && !firstPassHits.isEmpty()) {
+                    List<GlobalSearchVerticalGroup> groups = groupByVertical(firstPassHits, domainLanguage);
+                    return new GlobalSearchResult(groups, List.of(), mode, fallbackTriggered);
+                }
+            } else if (mode == SearchMode.global) {
+                SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
+                List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
+                if (fallback != null && !fallback.isEmpty()) {
+                    return new GlobalSearchResult(List.of(), fallback, mode, fallbackTriggered);
+                }
+            } else if (mode == SearchMode.semantic) {
+                List<GlobalSearchHit> semanticFallback = executeSemanticGlobalFallback(sanitizedQuery, domainLanguage);
+                return new GlobalSearchResult(List.of(), semanticFallback, mode, fallbackTriggered);
+            }
         }
 
-        List<GlobalSearchHit> semanticFallback = executeSemanticGlobalFallback(sanitizedQuery, domainLanguage);
-        return new GlobalSearchResult(List.of(), semanticFallback, true);
+        return new GlobalSearchResult(List.of(), List.of(), startMode, false);
+    }
+
+    /**
+     * Resolve the initial search mode based on the requested type.
+     *
+     * @param searchType requested search type
+     * @return starting {@link SearchMode}
+     */
+    private SearchMode resolveStartMode(SearchType searchType) {
+        if (searchType == null || searchType == SearchType.auto) {
+            return SearchMode.exact_vertical;
+        }
+        return switch (searchType) {
+        case exact_vertical -> SearchMode.exact_vertical;
+        case global -> SearchMode.global;
+        case semantic -> SearchMode.semantic;
+        case auto -> SearchMode.exact_vertical;
+        };
     }
 
     /**
@@ -1477,10 +1518,10 @@ public class SearchService {
     }
 
     /**
-     * Global search result including grouped hits and optional fallback.
+     * Global search result including grouped hits, effective search mode and optional fallback.
      */
     public record GlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
-            List<GlobalSearchHit> fallbackResults, boolean fallbackTriggered) {
+            List<GlobalSearchHit> fallbackResults, SearchMode searchMode, boolean fallbackTriggered) {
 
         public GlobalSearchResult {
             verticalGroups = List.copyOf(verticalGroups);

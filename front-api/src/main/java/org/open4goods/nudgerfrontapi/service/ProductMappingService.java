@@ -913,7 +913,7 @@ public class ProductMappingService {
             AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query,
             FilterRequestDto filters) {
 
-        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation, filters);
+        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation, filters, false);
         SearchHits<Product> hits = result.hits();
 
         List<ProductDto> items = hits.getSearchHits().stream()
