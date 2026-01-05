@@ -84,7 +84,9 @@
             :score="impactScoreValue(product) ?? 0"
             :max="5"
             size="large"
-            :show-value="true"
+            mode="badge"
+            badge-variant="corner"
+            badge-layout="stacked"
           />
           <span v-else class="category-product-list__score-fallback">
             {{ $t('category.products.notRated') }}
