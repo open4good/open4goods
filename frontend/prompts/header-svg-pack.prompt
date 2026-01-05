@@ -1,0 +1,281 @@
+Tu vas génrer un pack de SVG pour les pages suivantes
+
+
+        "productBackground": "backgrounds/product.svg",
+        "contactBackground": "backgrounds/contact.svg",
+        "blogBackground": "backgrounds/blog.svg",
+        "categoriesBackground": "backgrounds/categories.svg",
+        "openSourceBackground": "backgrounds/opensource.svg",
+        "openDataBackground": "backgrounds/opendata.svg",
+        "teamBackground": "backgrounds/team.svg",
+        "impactScoreBackground": "backgrounds/impact-score.svg",
+        "partnersBackground": "backgrounds/partners.svg",
+        "compareBackground": "backgrounds/compare.svg",
+        "searchBackground": "backgrounds/search.svg",
+        "feedbackBackground": "backgrounds/feedback.svg",
+        "promptBackground": "backgrounds/prompt.svg",
+        "releasesBackground": "backgrounds/releases.svg"
+
+Depuis la sémantique et les iconographies à utiliser en fonction du nom de la page.
+
+Génere un repertoire "light", avec background en gradient, un variant "dark", avec background transparent, ou ajusté
+
+Fournis le resultat au format ZIP
+
+Voici le prompt à utiliser pour la génération des images
+
+-----------------
+
+We will generate a SVG code source for a hero background section
+
+For background, you will use those colors :
+.hero-surface--mesh {
+    background-image: linear-gradient(125deg, rgba(var(--v-theme-hero-gradient-start), 0.88),
+     rgba(var(--v-theme-hero-gradient-mid), 0.82)),
+     radial-gradient(circle at 80% 20%, rgba(var(--v-theme-hero-gradient-end), 0.45),
+      transparent 70%);
+}
+
+You can vary transparency, opacity, gradients, but keep the background color set
+Background: single linear gradient
+brand.primary (#00DE9F) → brand.primary.alt (#00A1C2)
+
+
+As Elements, you should add some light and modern effects / elements representing the semanticof the page.
+Keep the center clear, locate them to first and last 1/5 of the width
+
+
+As vectorial elements, you may want to include or inspire elements from the website logo :
+
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_2"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="-15 -15 335.17 335.17">
+
+  <defs>
+    <style>
+      .cls-1 { fill: url(#Dégradé_sans_nom_538); }
+      .cls-2 { fill: #fff; }
+    </style>
+
+    <linearGradient id="Dégradé_sans_nom_538"
+      x1="5.84" y1="5.84" x2="375.32" y2="375.32"
+      gradientUnits="userSpaceOnUse">
+      <stop offset=".03" stop-color="#00de9f"/>
+      <stop offset=".27" stop-color="#00daa1"/>
+      <stop offset=".5" stop-color="#00cea8"/>
+      <stop offset=".74" stop-color="#00bab3"/>
+      <stop offset=".96" stop-color="#00a1c2"/>
+    </linearGradient>
+  </defs>
+
+  <g id="textes">
+
+    <!-- 🔁 MIRRORED LEAF ONLY -->
+    <g transform="translate(305.17, 0) scale(-1, 1)">
+      <path class="cls-1"
+        d="M179.59,270.39h-26.27c-65.47,0-118.55-53.08-118.55-118.55V34.78h117.07
+           c65.47,0,118.55,53.08,118.55,118.55v88.33l-36.6-36.6v-52.08
+           c0-45.06-36.53-81.59-81.59-81.59h-80.82v80.34
+           c0,11.02,8.57,20.41,19.58,20.8
+           c11.56.41,21.06-8.84,21.06-20.31v-40.18h40.18
+           c22.61,0,40.94,18.33,40.94,40.94v60.55
+           c0,5.36,2.13,10.49,5.91,14.28l72.73,72.73
+           c2.87,2.87,7.17,3.81,10.97,2.37
+           c13.1-4.99,22.41-17.66,22.41-32.51v-115.52
+           c0-41.43-16.08-81.47-45.55-110.6
+           C230.74,15.71,192.5,0,151.85,0H34.78
+           C15.57,0,0,15.57,0,34.78v115.52
+           c0,41.43,16.08,81.48,45.55,110.6
+           c28.89,28.56,67.12,44.27,107.78,44.27h58.03
+           c5.04,0,7.56-6.09,4-9.65l-17.61-17.61
+           c-4.81-4.81-11.34-7.52-18.15-7.52Z"/>
+    </g>
+
+    <!-- LOGO ONLY -->
+
+  </g>
+</svg>
+
+
+Or from its contrasted variant :
+
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 300 300">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Dégradé_sans_nom_384);
+      }
+    </style>
+    <linearGradient id="Dégradé_sans_nom_384" data-name="Dégradé sans nom 384" x1="-4928.82" y1="-2721.08" x2="-4565.61" y2="-2357.87" gradientTransform="translate(4934.57 2726.82)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffcd90"/>
+      <stop offset=".23" stop-color="#ffc98e"/>
+      <stop offset=".42" stop-color="#ffbf8b"/>
+      <stop offset=".6" stop-color="#ffad86"/>
+      <stop offset=".77" stop-color="#ff957e"/>
+      <stop offset=".87" stop-color="#ff8479"/>
+    </linearGradient>
+  </defs>
+  <g id="couleurs">
+    <path class="cls-1" d="M176.55,265.81h-25.82c-64.36,0-116.54-52.18-116.54-116.54V34.19h115.08c64.36,0,116.54,52.18,116.54,116.54v86.83s-35.98-35.98-35.98-35.98v-51.2c0-44.3-35.91-80.2-80.2-80.2h-79.45s0,78.97,0,78.97c0,10.83,8.42,20.06,19.25,20.45,11.37.4,20.71-8.69,20.71-19.97v-39.49h39.49c22.23,0,40.25,18.02,40.25,40.25v59.53c0,5.27,2.09,10.31,5.81,14.04l71.5,71.5c2.83,2.83,7.05,3.75,10.79,2.33,12.88-4.9,22.03-17.36,22.03-31.96v-113.56c0-40.73-15.81-80.09-44.78-108.73C226.83,15.45,189.24,0,149.27,0H34.19C15.31,0,0,15.31,0,34.19v113.56c0,40.73,15.81,80.09,44.78,108.73,28.4,28.07,65.99,43.52,105.95,43.52h57.05c4.95,0,7.43-5.99,3.93-9.49l-17.31-17.31c-4.73-4.73-11.15-7.39-17.84-7.39Z"/>
+  </g>
+</svg>
+
+
+
+You can also add simple shapes, meaning full with the page semantic
+
+The global website UX color brief is
+
+# UX Color Theme Brief & Engineering Guidelines
+
+## Theme Name
+
+**Fresh Tech / Calm Energy**
+
+A modern, friendly, and trustworthy color system built around teal–green foundations, balanced with warm accents and clear functional contrasts. Designed for data-heavy, productivity, or wellbeing-oriented digital products.
+
+---
+
+## Core Principles
+
+- **Clarity first**: Colors must reinforce hierarchy, affordance, and readability.
+- **Emotional balance**: Cool tones for stability and trust, warm tones for attention and feedback.
+- **Scalability**: Palette supports light/dark UI, states, charts, and brand surfaces.
+- **Accessibility-aware**: Contrast ratios must be validated (WCAG 2.1 AA minimum).
+
+---
+
+## Color Palette & Semantic Roles
+
+### 1. Primary Brand Colors
+
+| Token               | Hex       | Usage                                                         |
+| ------------------- | --------- | ------------------------------------------------------------- |
+| `brand.primary`     | `#00DE9F` | Primary brand color, main CTAs, highlights, hero accents      |
+| `brand.primary.alt` | `#00A1C2` | Secondary brand tone, navigation bars, headers, active states |
+
+**Guideline**
+
+- Use gradients between `#00DE9F → #00A1C2` for large surfaces or hero sections.
+- Avoid overusing primary color for text; prefer neutral text on primary backgrounds.
+
+---
+
+### 2. Supporting Greens (Success & Growth)
+
+| Token                  | Hex       | Usage                                              |
+| ---------------------- | --------- | -------------------------------------------------- |
+| `status.success.dark`  | `#008879` | Success states, confirmations, positive indicators |
+| `status.success.light` | `#5BDB3B` | Growth metrics, positive trends, progress visuals  |
+| `accent.green.cool`    | `#00D19F` | Secondary accents, toggles, icons                  |
+| `accent.green.warm`    | `#A6E242` | Highlights, badges, secondary emphasis             |
+
+**Guideline**
+
+- Dark green (`#008879`) for text/icons on light backgrounds.
+- Light greens (`#5BDB3B`, `#A6E242`) for charts, progress bars, and decorative emphasis.
+
+---
+
+### 3. Informational & Neutral Accents
+
+| Token              | Hex       | Usage                                                  |
+| ------------------ | --------- | ------------------------------------------------------ |
+| `accent.info.warm` | `#FFCD90` | Tips, onboarding hints, soft warnings                  |
+| `accent.info.cool` | `#00D1CE` | Informational messages, helper UI, links (non-primary) |
+
+**Guideline**
+
+- Use warm info for human-facing guidance.
+- Use cool info for system-driven or data-driven information.
+
+---
+
+### 4. Feedback & Attention Colors
+
+| Token           | Hex       | Usage                                      |
+| --------------- | --------- | ------------------------------------------ |
+| `status.error`  | `#FF8479` | Errors, destructive actions, alerts        |
+| `status.action` | `#0088D6` | Focus states, active links, system actions |
+
+**Guideline**
+
+- Never use error color without an icon or text explanation.
+- Blue action color should be reserved for interactive emphasis, not decoration.
+
+---
+
+## Interaction States
+
+| State    | Color Rule                                     |
+| -------- | ---------------------------------------------- |
+| Hover    | Increase brightness or saturation by ~8–12%    |
+| Active   | Shift toward darker variant                    |
+| Disabled | Reduce opacity to 40–50% and remove saturation |
+| Focus    | Use `#0088D6` outline or glow (2px min)        |
+
+---
+
+## Typography & Contrast Rules
+
+- Body text: Neutral dark gray or near-black (not pure black).
+- Text on primary backgrounds: White or off-white with contrast ≥ 4.5:1.
+- Avoid green-on-green text combinations.
+- Charts must not rely on color alone—use labels or patterns.
+
+---
+
+## Charting & Data Visualization
+
+Recommended mapping:
+
+- Positive trend → `#5BDB3B`
+- Neutral trend → `#00D1CE`
+- Warning → `#FFCD90`
+- Negative trend → `#FF8479`
+- Baseline / reference → `#0088D6`
+
+---
+
+## Do / Don’t Summary
+
+**Do**
+
+- Use teal/green as the emotional backbone.
+- Keep warm colors rare and meaningful.
+- Validate contrast in every new component.
+
+**Don’t**
+
+- Use all colors in a single screen.
+- Use error color as decorative accent.
+- Stack saturated greens next to each other without separation.
+
+---
+
+## UX Dev Engineer Notes
+
+- Define colors as **design tokens** (CSS variables / theme objects).
+- Support theming (light/dark) by adjusting luminance, not hue.
+- Ensure system states (error, success, info) are globally consistent.
+- Pair colors with icons and microcopy for clarity.
+
+---
+
+## Agent / Machine Prompt (for UI Generation)
+
+> You are a UX/UI generation agent.
+> Use a teal–green primary color system centered on #00DE9F and #00A1C2.
+> Apply greens for success and growth, blues for actions, warm peach for warnings, and coral for errors.
+> Maintain clear hierarchy, accessible contrast, and restrained use of warm colors.
+> Prioritize clarity, calmness, and trust.
+> Never rely on color alone to communicate meaning.
+
+---
+
+
+
+Ask for any questions if required
