@@ -1890,17 +1890,13 @@
     },
     "results": {
       "summary": "Displaying {countLabel} for “{query}”",
-<<<<<<< HEAD
+      "modeLabel": "Search mode: {mode}",
+      "nextMode": "Search in {mode} mode",
       "count": {
         "zero": "No results",
         "one": "1 result",
         "other": "{count} results"
       }
-=======
-      "modeLabel": "Search mode: {mode}",
-      "nextMode": "Search in {mode} mode",
-      "count": {}
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     },
     "modes": {
       "exact_vertical": "Exact (category)",

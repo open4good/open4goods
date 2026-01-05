@@ -346,7 +346,7 @@ public class ProductController {
                         .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field), null))
                         .toList()
                 : Arrays.stream(AllowedGlobalFilters.values())
-                        .map(field -> new FieldMetadataDto(field.fieldPath(), null, null, field.valueType(), null))
+                        .map(field -> new FieldMetadataDto(field.fieldPath(), null, null, determineGlobalFilterValueType(field), null))
                         .toList();
 
         SearchCapabilities capabilities = buildSearchCapabilities(normalizedVerticalId, domainLanguage, filterableGlobal);
@@ -1200,6 +1200,11 @@ public class ProductController {
         case NUMERIC -> VALUE_TYPE_NUMERIC;
         case BOOLEAN, TEXT -> VALUE_TYPE_TEXT;
         };
+    }
+
+    private String determineGlobalFilterValueType(AllowedGlobalFilters field) {
+        LOGGER.info("Entering determineGlobalFilterValueType(field={})", field);
+        return field.valueType() == FilterValueType.numeric ? VALUE_TYPE_NUMERIC : VALUE_TYPE_TEXT;
     }
 
     private String determineSortableValueType(ProductDtoSortableFields field) {

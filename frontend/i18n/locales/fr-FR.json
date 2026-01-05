@@ -85,13 +85,13 @@
         "problemImage": "placeholders/problem.webp",
         "solutionImage": "placeholders/solution.webp",
         "productBackground": "placeholders/generated/product.svg",
-        "contactBackground": "placeholders/generated/contact.svg",
+        "contactBackground": "placeholders/contact.svg",
         "blogBackground": "placeholders/generated/blog.svg",
         "categoriesBackground": "placeholders/generated/categories.svg",
         "openSourceBackground": "placeholders/generated/opensource.svg",
         "openDataBackground": "placeholders/generated/opendata.svg",
         "teamBackground": "placeholders/generated/team.svg",
-        "impactScoreBackground": "placeholders/generated/impact-score.svg",
+        "impactScoreBackground": "backgrounds/contact.svg",
         "partnersBackground": "placeholders/generated/partners.svg"
       },
       "parallax": {
@@ -1915,17 +1915,13 @@
     },
     "results": {
       "summary": "Affichage de {countLabel} pour « {query} »",
-<<<<<<< HEAD
+      "modeLabel": "Mode de recherche : {mode}",
+      "nextMode": "Rechercher en mode {mode}",
       "count": {
         "zero": "Aucun résultat",
         "one": "1 résultat",
         "other": "{count} résultats"
       }
-=======
-      "modeLabel": "Mode de recherche : {mode}",
-      "nextMode": "Rechercher en mode {mode}",
-      "count": {}
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     },
     "modes": {
       "exact_vertical": "Exact (catégories)",

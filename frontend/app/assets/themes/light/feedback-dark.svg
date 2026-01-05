@@ -1,0 +1,157 @@
+<!--?xml version="1.0" encoding="UTF-8"?-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 480" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <!-- Base gradients (keep your hero color set via CSS vars) -->
+    <linearGradient id="bgLinear" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgb(var(--v-theme-hero-gradient-start))" stop-opacity="0.88"></stop>
+      <stop offset="55%" stop-color="rgb(var(--v-theme-hero-gradient-mid))" stop-opacity="0.82"></stop>
+      <stop offset="100%" stop-color="rgb(var(--v-theme-hero-gradient-end))" stop-opacity="0.55"></stop>
+    </linearGradient>
+
+    <radialGradient id="bgRadial" cx="80%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="rgb(var(--v-theme-hero-gradient-end))" stop-opacity="0.45"></stop>
+      <stop offset="55%" stop-color="rgb(var(--v-theme-hero-gradient-end))" stop-opacity="0.00"></stop>
+      <stop offset="100%" stop-color="rgb(var(--v-theme-hero-gradient-end))" stop-opacity="0.00"></stop>
+    </radialGradient>
+
+    <!-- Brand-ish gradients for accents -->
+    <linearGradient id="brandTeal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00DE9F" stop-opacity="0.95"></stop>
+      <stop offset="100%" stop-color="#00A1C2" stop-opacity="0.95"></stop>
+    </linearGradient>
+
+    <linearGradient id="warmAccent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFCD90" stop-opacity="0.85"></stop>
+      <stop offset="100%" stop-color="#FF8479" stop-opacity="0.65"></stop>
+    </linearGradient>
+
+    <!-- Soft glow / blur -->
+    <filter id="blur24" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24"></feGaussianBlur>
+    </filter>
+
+    <filter id="blur10" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+    </filter>
+
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#001B1A" flood-opacity="0.18"></feDropShadow>
+    </filter>
+
+    <!-- Subtle noise (vector-friendly) -->
+    <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"></feTurbulence>
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 0.06 0"></feColorMatrix>
+    </filter>
+
+    <!-- A “speech bubble” symbol (feedback semantic) -->
+    <symbol id="bubble" viewBox="0 0 120 90">
+      <path d="M22 14c-8.8 0-16 7.2-16 16v28c0 8.8 7.2 16 16 16h36l16 12c2.2 1.7 5.3.1 5.3-2.7V74h19c8.8 0 16-7.2 16-16V30c0-8.8-7.2-16-16-16H22z" fill="currentColor"></path>
+      <!-- “text lines” -->
+      <rect x="22" y="32" width="62" height="7" rx="3.5" fill="#FFFFFF" opacity="0.80"></rect>
+      <rect x="22" y="46" width="48" height="7" rx="3.5" fill="#FFFFFF" opacity="0.62"></rect>
+    </symbol>
+
+    <!-- A leaf-like motif inspired by your logo silhouette (abstracted) -->
+    <symbol id="leafMark" viewBox="0 0 220 220">
+      <path d="M122 206h-16c-40 0-72-32-72-72V64h71c40 0 72 32 72 72v53l-22-22v-31c0-27-22-49-49-49H57v48c0 7 5.5 13 12.5 13.2 7.4.3 13.5-5.6 13.5-13v-24h24c13.6 0 24.6 11 24.6 24.6V173c0 3.2 1.3 6.4 3.6 8.7l43.5 43.5c1.7 1.7 4.3 2.3 6.6 1.4 7.8-3 13.4-10.6 13.4-19.5v-69c0-25-9.7-49-27.2-66.6C157.5 9.5 134.4 0 109.7 0H34C22 0 12 10 12 22v69c0 25 9.7 49 27.2 66.6C56.7 196.6 79.9 206 104.6 206h35.2c3 0 4.5-3.6 2.4-5.7l-10.6-10.6c-2.9-2.9-6.9-4.6-10.9-4.6z" fill="currentColor"></path>
+    </symbol>
+
+    <style>
+      /* Optional: keeps things crisp at any size */
+      .thin { opacity: 0.22; }
+      .mid  { opacity: 0.35; }
+      .hi   { opacity: 0.55; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1440" height="480" fill="url(#bgLinear)"></rect>
+  <rect width="1440" height="480" fill="url(#bgRadial)"></rect>
+  <rect width="1440" height="480" filter="url(#grain)" opacity="0.55"></rect>
+
+  <!-- Keep center clear: all elements constrained to first/last ~20% width -->
+  <!-- LEFT ZONE (0–288) -->
+  <g transform="translate(0,0)">
+    <!-- Soft blobs -->
+    <circle cx="120" cy="110" r="95" fill="url(#brandTeal)" opacity="0.18" filter="url(#blur24)"></circle>
+    <circle cx="210" cy="210" r="70" fill="#00D1CE" opacity="0.16" filter="url(#blur24)"></circle>
+    <circle cx="85" cy="320" r="65" fill="#A6E242" opacity="0.14" filter="url(#blur24)"></circle>
+
+    <!-- Leaf mark (logo-inspired) -->
+    <g transform="translate(20,170) rotate(-10)">
+      <use href="#leafMark" x="0" y="0" width="180" height="180" color="url(#brandTeal)" opacity="0.22" filter="url(#blur10)"></use>
+      <use href="#leafMark" x="0" y="0" width="180" height="180" color="url(#brandTeal)" opacity="0.18"></use>
+    </g>
+
+    <!-- Feedback bubble cluster -->
+    <g transform="translate(36,52) rotate(-6)" filter="url(#softShadow)">
+      <use href="#bubble" width="140" height="105" color="#FFFFFF" opacity="0.20"></use>
+      <use href="#bubble" x="26" y="52" width="110" height="83" color="url(#brandTeal)" opacity="0.22"></use>
+    </g>
+
+    <!-- Tiny “sparkles” -->
+    <g opacity="0.30">
+      <path d="M220 80l6 14 14 6-14 6-6 14-6-14-14-6 14-6z" fill="#FFFFFF" opacity="0.55"></path>
+      <path d="M70 70l4 9 9 4-9 4-4 9-4-9-9-4 9-4z" fill="#FFFFFF" opacity="0.45"></path>
+      <circle cx="240" cy="290" r="3.5" fill="#FFFFFF" opacity="0.55"></circle>
+      <circle cx="205" cy="320" r="2.5" fill="#FFFFFF" opacity="0.40"></circle>
+    </g>
+
+    <!-- Thin contour arcs -->
+    <path d="M-30 420c120-80 210-65 330-10" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="2"></path>
+    <path d="M-10 448c140-85 235-70 360-14" fill="none" stroke="#00D1CE" stroke-opacity="0.18" stroke-width="2"></path>
+  </g>
+
+  <!-- RIGHT ZONE (1152–1440) -->
+  <g transform="translate(0,0)">
+    <!-- Soft blobs -->
+    <circle cx="1320" cy="120" r="95" fill="url(#warmAccent)" opacity="0.16" filter="url(#blur24)"></circle>
+    <circle cx="1240" cy="250" r="75" fill="url(#brandTeal)" opacity="0.14" filter="url(#blur24)"></circle>
+    <circle cx="1385" cy="330" r="70" fill="#0088D6" opacity="0.10" filter="url(#blur24)"></circle>
+
+    <!-- “Rating / feedback” motif: dots + lines -->
+    <g transform="translate(1180,80)" opacity="0.34">
+      <rect x="0" y="0" width="240" height="160" rx="22" fill="#FFFFFF" opacity="0.10" filter="url(#softShadow)"></rect>
+      <g transform="translate(26,34)">
+        <circle cx="18" cy="20" r="8" fill="#FFFFFF" opacity="0.70"></circle>
+        <circle cx="46" cy="20" r="8" fill="#FFFFFF" opacity="0.55"></circle>
+        <circle cx="74" cy="20" r="8" fill="#FFFFFF" opacity="0.40"></circle>
+        <circle cx="102" cy="20" r="8" fill="#FFFFFF" opacity="0.28"></circle>
+        <circle cx="130" cy="20" r="8" fill="#FFFFFF" opacity="0.18"></circle>
+        <rect x="0" y="52" width="160" height="8" rx="4" fill="#FFFFFF" opacity="0.55"></rect>
+        <rect x="0" y="72" width="132" height="8" rx="4" fill="#FFFFFF" opacity="0.38"></rect>
+        <rect x="0" y="92" width="108" height="8" rx="4" fill="#FFFFFF" opacity="0.26"></rect>
+      </g>
+    </g>
+
+    <!-- Bubble echo -->
+    <g transform="translate(1288,268) rotate(8)">
+      <use href="#bubble" width="130" height="98" color="#FFFFFF" opacity="0.14"></use>
+      <use href="#bubble" x="-52" y="-38" width="98" height="74" color="url(#brandTeal)" opacity="0.16"></use>
+    </g>
+
+    <!-- Logo-inspired leaf (smaller) -->
+    <g transform="translate(1280,18) rotate(12)">
+      <use href="#leafMark" width="120" height="120" color="url(#brandTeal)" opacity="0.14"></use>
+    </g>
+
+    <!-- Sparkles -->
+    <g opacity="0.28">
+      <path d="M1365 88l5 12 12 5-12 5-5 12-5-12-12-5 12-5z" fill="#FFFFFF" opacity="0.50"></path>
+      <circle cx="1205" cy="420" r="3.2" fill="#FFFFFF" opacity="0.50"></circle>
+      <circle cx="1265" cy="400" r="2.4" fill="#FFFFFF" opacity="0.35"></circle>
+    </g>
+
+    <!-- Thin contour arcs -->
+    <path d="M1110 36c120 70 210 62 360 8" fill="none" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="2"></path>
+    <path d="M1100 70c150 78 245 68 390 10" fill="none" stroke="#FFCD90" stroke-opacity="0.14" stroke-width="2"></path>
+  </g>
+
+  <!-- Subtle vignette to keep center readable (no center clutter) -->
+  <rect x="288" y="0" width="864" height="480" fill="#000" opacity="0.05"></rect>
+</svg>
