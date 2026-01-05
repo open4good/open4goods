@@ -1926,8 +1926,8 @@
         "categories": "Catégories",
         "products": "Produits"
       },
-      "empty": "Aucune suggestion pour le moment. Continuez à saisir votre recherche.",
-      "error": "Impossible de charger les suggestions. Réessayez.",
+      "empty": "Aucune suggestion..",
+      "error": "Impossible de charger les suggestions.",
       "minimum": "Saisissez au moins {min} caractères pour afficher des suggestions.",
       "unknownCategory": "Catégorie",
       "unknownProduct": "Produit",
@@ -1956,7 +1956,7 @@
     },
     "seo": {
       "title": "Recherche de produits",
-      "description": "Recherchez dans le catalogue de consommation responsable de Nudger pour découvrir produits, marques et verticales.",
+      "description": "Recherchez les produits évalués dans le catalogue de Nudger.",
       "imageAlt": "Illustration de l'expérience de recherche Nudger"
     }
   },
