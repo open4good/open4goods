@@ -1965,9 +1965,8 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 50%;
+  top: 50vh;
   transform: translateY(-50%);
-  align-self: center;
   height: fit-content;
 }
 
