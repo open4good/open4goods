@@ -34,6 +34,7 @@ import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
+import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1123,21 +1124,33 @@ public class ProductController {
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
                     @ApiResponse(responseCode = "404", description = "Product not found"),
+                    @ApiResponse(responseCode = "429", description = "Review generation quota exceeded",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    public ResponseEntity<Long> triggerReview(@PathVariable Long gtin,
-                                              @RequestParam(name = "hcaptchaResponse") String hcaptchaResponse,
-                                              @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
-                                              HttpServletRequest request)
+    public ResponseEntity<?> triggerReview(@PathVariable Long gtin,
+                                           @RequestParam(name = "hcaptchaResponse") String hcaptchaResponse,
+                                           @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+                                           HttpServletRequest request)
             throws ResourceNotFoundException {
         LOGGER.info("Entering triggerReview(gtin={}, domainLanguage={}, hasHcaptchaResponse={}, remoteAddr={})", gtin,
                 domainLanguage, StringUtils.hasText(hcaptchaResponse), request != null ? request.getRemoteAddr() : null);
-        long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noCache())
-                .header("X-Locale", domainLanguage.languageTag())
-                .body(scheduledUpc);
+        try {
+            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request);
+            return ResponseEntity.ok()
+                    .cacheControl(CacheControl.noCache())
+                    .header("X-Locale", domainLanguage.languageTag())
+                    .body(scheduledUpc);
+        } catch (ReviewGenerationLimitExceededException ex) {
+            LOGGER.warn("Review generation limit reached for remote IP {}", request.getRemoteAddr());
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .cacheControl(CacheControl.noCache())
+                    .header("X-Locale", domainLanguage.languageTag())
+                    .body(detail);
+        }
     }
 
     /**

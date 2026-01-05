@@ -24,3 +24,7 @@ front:
   review-generation:
     api-base-url: "https://mock.generated-reviews.com"
     api-key: "mock-key"
+    review-path: "/review"
+    quota:
+      max-per-ip: 3
+      window: 24h

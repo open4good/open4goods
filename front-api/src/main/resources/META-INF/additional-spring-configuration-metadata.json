@@ -11,6 +11,35 @@
       "type": "java.lang.Boolean",
       "description": "Allow anonymous access to exposed docs endpoints when security is enabled.",
       "defaultValue": true
+    },
+    {
+      "name": "front.review-generation.api-base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the back-office API exposing review generation endpoints.",
+      "defaultValue": "https://api.open4goods.org"
+    },
+    {
+      "name": "front.review-generation.api-key",
+      "type": "java.lang.String",
+      "description": "API key forwarded to authenticate against the back-office API."
+    },
+    {
+      "name": "front.review-generation.review-path",
+      "type": "java.lang.String",
+      "description": "Path appended to the base URL when triggering or polling review generation.",
+      "defaultValue": "/review"
+    },
+    {
+      "name": "front.review-generation.quota.max-per-ip",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of review generations allowed per IP during the quota window.",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.review-generation.quota.window",
+      "type": "java.time.Duration",
+      "description": "Duration of the quota window used to count review generations per IP.",
+      "defaultValue": "24h"
     }
   ]
 }

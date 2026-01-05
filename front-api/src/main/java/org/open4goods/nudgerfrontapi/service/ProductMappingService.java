@@ -48,6 +48,7 @@ import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -91,7 +92,9 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;
+import org.open4goods.commons.services.IpQuotaService;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -133,6 +136,7 @@ public class ProductMappingService {
     private static final String FAVICON_ENDPOINT = "/favicon?url=";
     private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
     private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
+    private static final String REVIEW_GENERATION_QUOTA_ACTION = "REVIEW_GENERATION";
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -145,6 +149,8 @@ public class ProductMappingService {
     private final ReviewGenerationClient reviewGenerationClient;
     private final HcaptchaService hcaptchaService;
     private final ProductTimelineService productTimelineService;
+    private final ReviewGenerationProperties reviewGenerationProperties;
+    private final IpQuotaService ipQuotaService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -156,7 +162,9 @@ public class ProductMappingService {
             CacheManager cacheManager,
             ReviewGenerationClient reviewGenerationClient,
             HcaptchaService hcaptchaService,
-            ProductTimelineService productTimelineService) {
+            ProductTimelineService productTimelineService,
+            ReviewGenerationProperties reviewGenerationProperties,
+            IpQuotaService ipQuotaService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
@@ -168,6 +176,8 @@ public class ProductMappingService {
         this.reviewGenerationClient = reviewGenerationClient;
         this.hcaptchaService = hcaptchaService;
         this.productTimelineService = productTimelineService;
+        this.reviewGenerationProperties = reviewGenerationProperties;
+        this.ipQuotaService = ipQuotaService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -937,14 +947,24 @@ public class ProductMappingService {
      * @return UPC echoed back by the back-office API once the job is scheduled
      * @throws ResourceNotFoundException when the product cannot be found locally
      * @throws SecurityException         when captcha verification fails
+     * @throws ReviewGenerationLimitExceededException when the IP exceeds the configured quota
      */
     public long createReview(long gtin, String captchaResponse, HttpServletRequest request)
             throws ResourceNotFoundException, SecurityException {
         String clientIp = IpUtils.getIp(request);
         hcaptchaService.verifyRecaptcha(clientIp, captchaResponse);
+        ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
+        int maxPerIp = quota.getMaxPerIp();
+        if (!ipQuotaService.isAllowed(REVIEW_GENERATION_QUOTA_ACTION, clientIp, maxPerIp, quota.getWindow())) {
+            logger.warn("IP {} reached review generation limit ({})", clientIp, maxPerIp);
+            throw new ReviewGenerationLimitExceededException(
+                    "Maximum " + maxPerIp + " review generations reached for this period");
+        }
+        int newUsage = ipQuotaService.increment(REVIEW_GENERATION_QUOTA_ACTION, clientIp, quota.getWindow());
         Product product = repository.getById(gtin);
         long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId());
-        logger.info("AI review generation requested for product {}", gtin);
+        int remaining = Math.max(0, maxPerIp - newUsage);
+        logger.info("AI review generation requested for product {} (remaining quota: {})", gtin, remaining);
         return scheduledUpc;
     }
 
