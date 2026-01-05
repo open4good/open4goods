@@ -1896,7 +1896,14 @@
     },
     "results": {
       "summary": "Displaying {countLabel} for “{query}”",
+      "modeLabel": "Search mode: {mode}",
+      "nextMode": "Search in {mode} mode",
       "count": {}
+    },
+    "modes": {
+      "exact_vertical": "Exact (category)",
+      "global": "Global",
+      "semantic": "Semantic"
     },
     "notice": {
       "fallback": "We could not match a specific category, so we are showing the most relevant products overall."

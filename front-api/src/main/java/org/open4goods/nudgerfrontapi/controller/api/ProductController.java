@@ -23,16 +23,29 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoFilterFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
+import org.open4goods.nudgerfrontapi.dto.search.AllowedGlobalAggregations;
+import org.open4goods.nudgerfrontapi.dto.search.AllowedGlobalFilters;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
+import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchRequestDto;
+import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResponseDto;
+import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResultDto;
+import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchVerticalGroupDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
+import org.open4goods.nudgerfrontapi.dto.search.SearchMode;
+import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestCategoryDto;
+import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestProductDto;
+import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestResponseDto;
+import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.nudgerfrontapi.service.SearchService;
+import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -88,6 +101,7 @@ public class ProductController {
 
     private final ProductMappingService service;
     private final VerticalsConfigService verticalsConfigService;
+    private final SearchService searchService;
 
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
@@ -100,9 +114,11 @@ public class ProductController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
 
     public ProductController(ProductMappingService service,
-                             VerticalsConfigService verticalsConfigService) {
+                             VerticalsConfigService verticalsConfigService,
+                             SearchService searchService) {
         this.service = service;
         this.verticalsConfigService = verticalsConfigService;
+        this.searchService = searchService;
     }
 
     /**
@@ -213,8 +229,8 @@ public class ProductController {
     public ResponseEntity<List<String>> filterableFields(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
         LOGGER.info("Entering filterableFields(domainLanguage={})", domainLanguage);
-        List<String> body = Arrays.stream(ProductDtoFilterFields.values())
-                .map(ProductDtoFilterFields::getText)
+        List<String> body = Arrays.stream(AllowedGlobalFilters.values())
+                .map(AllowedGlobalFilters::fieldPath)
                 .toList();
         return ResponseEntity.ok(body);
     }
@@ -325,9 +341,13 @@ public class ProductController {
 
         String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
 
-        List<FieldMetadataDto> filterableGlobal = Arrays.stream(ProductDtoFilterFields.values())
-                .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field), null))
-                .toList();
+        List<FieldMetadataDto> filterableGlobal = StringUtils.hasText(normalizedVerticalId)
+                ? Arrays.stream(ProductDtoFilterFields.values())
+                        .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field), null))
+                        .toList()
+                : Arrays.stream(AllowedGlobalFilters.values())
+                        .map(field -> new FieldMetadataDto(field.fieldPath(), null, null, field.valueType(), null))
+                        .toList();
 
         SearchCapabilities capabilities = buildSearchCapabilities(normalizedVerticalId, domainLanguage, filterableGlobal);
         Set<String> allowedSortMappings = capabilities.allowedSorts();
@@ -376,6 +396,120 @@ public class ProductController {
                 domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
+    }
+
+    /**
+     * Execute a global search based on the requested search type.
+     *
+     * <p>Error codes:</p>
+     * <ul>
+     *   <li><b>UNAUTHORIZED</b> – 401</li>
+     *   <li><b>FORBIDDEN</b> – 403</li>
+     *   <li><b>INTERNAL_ERROR</b> – 500</li>
+     * </ul>
+     */
+    @PostMapping("/search")
+    @Operation(
+            summary = "Execute a global search",
+            description = "Runs a multi-step search strategy. Results are first attempted in the requested search type and "
+                    + "fall back to subsequent modes (global, semantic) when no results are found.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
+            parameters = {
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language hint used to resolve locale specific data.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Global search payload containing the query and search type.",
+                    required = true,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalSearchRequestDto.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Search executed successfully",
+                            headers = {
+                                    @Header(name = "X-Locale", description = "Resolved locale for the response",
+                                            schema = @Schema(type = "string", example = "fr"))
+                            },
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = GlobalSearchResponseDto.class))),
+                    @ApiResponse(responseCode = "401", description = "Authentication required"),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<GlobalSearchResponseDto> globalSearch(
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+            @RequestBody GlobalSearchRequestDto request) {
+        LOGGER.info("Entering globalSearch(domainLanguage={}, request={})", domainLanguage, request);
+        String query = request != null ? request.query() : null;
+        SearchType searchType = request != null ? request.searchType() : SearchType.auto;
+        SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, searchType);
+
+        List<GlobalSearchVerticalGroupDto> groups = result.verticalGroups().stream()
+                .map(group -> new GlobalSearchVerticalGroupDto(
+                        group.verticalId(),
+                        result.searchMode(),
+                        group.results().stream().map(hit -> toDto(hit, result.searchMode())).toList()))
+                .toList();
+        List<GlobalSearchResultDto> fallback = result.fallbackResults().stream()
+                .map(hit -> toDto(hit, result.searchMode()))
+                .toList();
+
+        GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups, fallback, result.fallbackTriggered());
+        return ResponseEntity.ok()
+                .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
+                .header("X-Locale", domainLanguage.languageTag())
+                .body(body);
+    }
+
+    /**
+     * Provide typeahead suggestions mixing vertical matches and product hits.
+     *
+     * @param query          free text value entered by the end user
+     * @param domainLanguage localisation hint used for category lookup
+     * @return category and product matches tailored for suggest usage
+     */
+    @GetMapping("/suggest")
+    @Operation(
+            summary = "Retrieve search suggestions",
+            description = "Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.",
+            parameters = {
+                    @Parameter(name = "query", in = ParameterIn.QUERY, required = true,
+                            description = "Free-text fragment typed by the user.",
+                            schema = @Schema(type = "string", example = "télév")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language hint to resolve localised category metadata.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Suggestions generated successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = SearchSuggestResponseDto.class)),
+                            headers = {
+                                    @Header(name = "X-Locale", description = "Resolved locale for the response",
+                                            schema = @Schema(type = "string", example = "fr"))
+                            })
+            }
+    )
+    public ResponseEntity<SearchSuggestResponseDto> suggest(
+            @RequestParam(name = "query") String query,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        LOGGER.info("Entering suggest(query='{}', domainLanguage={})", query, domainLanguage);
+        SearchService.SuggestResult result = searchService.suggest(query, domainLanguage);
+
+        List<SearchSuggestCategoryDto> categoryMatches = result.categoryMatches().stream()
+                .map(this::toCategoryDto)
+                .toList();
+        List<SearchSuggestProductDto> productMatches = result.productMatches().stream()
+                .map(this::toProductDto)
+                .toList();
+
+        SearchSuggestResponseDto body = new SearchSuggestResponseDto(categoryMatches, productMatches);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
+                .header("X-Locale", domainLanguage.languageTag())
+                .body(body);
     }
 
     private ResponseEntity<ProductSearchResponseDto> badRequest(String title, String detail) {
@@ -549,6 +683,11 @@ public class ProductController {
                 allowedFilterMappings != null ? allowedFilterMappings.size() : 0, config);
         Set<String> allowed = new HashSet<>(allowedFilterMappings);
         if (config == null || config.getAggregationConfiguration() == null) {
+            if (config == null) {
+                Arrays.stream(AllowedGlobalAggregations.values())
+                        .map(AllowedGlobalAggregations::fieldPath)
+                        .forEach(allowed::add);
+            }
             return allowed;
         }
         config.getAggregationConfiguration().keySet()
@@ -1076,6 +1215,39 @@ public class ProductController {
         LOGGER.info("Entering determineFilterValueType(field={})", field);
         FilterValueType delegateType = field.getDelegate().valueType();
         return delegateType == FilterValueType.numeric ? VALUE_TYPE_NUMERIC : VALUE_TYPE_TEXT;
+    }
+
+    /**
+     * Map a global search hit to the API DTO.
+     *
+     * @param hit        hit returned by the search service
+     * @param searchMode search mode used to generate the hit
+     * @return mapped global search result DTO
+     */
+    private GlobalSearchResultDto toDto(GlobalSearchHit hit, SearchMode searchMode) {
+        return new GlobalSearchResultDto(hit.product(), hit.score(), searchMode);
+    }
+
+    /**
+     * Map a category suggestion to its DTO representation.
+     *
+     * @param suggestion suggestion returned by the search service
+     * @return mapped category suggestion DTO
+     */
+    private SearchSuggestCategoryDto toCategoryDto(SearchService.CategorySuggestion suggestion) {
+        return new SearchSuggestCategoryDto(suggestion.verticalId(), suggestion.imageSmall(),
+                suggestion.verticalHomeTitle(), suggestion.verticalHomeUrl());
+    }
+
+    /**
+     * Map a product suggestion hit to its DTO representation.
+     *
+     * @param hit suggestion hit returned by the search service
+     * @return mapped product suggestion DTO
+     */
+    private SearchSuggestProductDto toProductDto(SearchService.ProductSuggestHit hit) {
+        return new SearchSuggestProductDto(hit.model(), hit.brand(), hit.gtin(), hit.coverImagePath(), hit.verticalId(),
+                hit.ecoscoreValue(), hit.bestPrice(), hit.bestPriceCurrency(), hit.score());
     }
 
     /**

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 type SuggestRouteHandler = (typeof import('./suggest.get'))['default']
 
 const fetchSearchSuggestionsMock = vi.hoisted(() => vi.fn())
-const useSearchServiceMock = vi.hoisted(() =>
+const useProductServiceMock = vi.hoisted(() =>
   vi.fn(() => ({ fetchSearchSuggestions: fetchSearchSuggestionsMock }))
 )
 const resolveDomainLanguageMock = vi.hoisted(() =>
@@ -31,8 +31,8 @@ vi.mock('h3', () => ({
   createError: createErrorMock,
 }))
 
-vi.mock('~~/shared/api-client/services/search.services', () => ({
-  useSearchService: useSearchServiceMock,
+vi.mock('~~/shared/api-client/services/products.services', () => ({
+  useProductService: useProductServiceMock,
 }))
 
 vi.mock('~~/shared/utils/domain-language', () => ({
@@ -47,7 +47,7 @@ vi.mock('../../utils/cache-headers', () => ({
   setDomainLanguageCacheHeaders: setDomainLanguageCacheHeadersMock,
 }))
 
-describe('server/api/search/suggest.get', () => {
+describe('server/api/products/suggest.get', () => {
   let handler: SuggestRouteHandler
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
@@ -55,7 +55,7 @@ describe('server/api/search/suggest.get', () => {
     vi.resetModules()
 
     fetchSearchSuggestionsMock.mockReset()
-    useSearchServiceMock.mockReturnValue({
+    useProductServiceMock.mockReturnValue({
       fetchSearchSuggestions: fetchSearchSuggestionsMock,
     })
     resolveDomainLanguageMock.mockReturnValue({ domainLanguage: 'en' })
@@ -106,7 +106,7 @@ describe('server/api/search/suggest.get', () => {
     expect(fetchSearchSuggestionsMock).toHaveBeenCalledWith('apple')
     expect(extractBackendErrorDetailsMock).toHaveBeenCalledWith(backendFailure)
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Search suggestion proxy failed',
+      'Search suggest proxy failed',
       'HTTP 503 - Service Unavailable',
       expect.objectContaining({ statusCode: 503 })
     )

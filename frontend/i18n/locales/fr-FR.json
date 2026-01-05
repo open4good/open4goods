@@ -1916,7 +1916,14 @@
     },
     "results": {
       "summary": "Affichage de {countLabel} pour « {query} »",
+      "modeLabel": "Mode de recherche : {mode}",
+      "nextMode": "Rechercher en mode {mode}",
       "count": {}
+    },
+    "modes": {
+      "exact_vertical": "Exact (catégories)",
+      "global": "Global",
+      "semantic": "Sémantique"
     },
     "notice": {
       "fallback": "Nous n'avons pas identifié de verticale précise, voici les produits les plus pertinents globalement."
