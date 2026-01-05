@@ -47,6 +47,18 @@ i18n:
           - BRAND
           - MODEL
           - YEAR
+      # Singular product name (same structure as prettyName)
+      singular:
+        prefix: "[(${singularPrefix})]"
+        attrs:
+          - BRAND
+          - MODEL
+      # Singular designation (grammatical designation of the product)
+      singularDesignation:
+        prefix: "[(${singularDesignationPrefix})]"
+        attrs:
+          - BRAND
+          - MODEL
         
       ##################################
       # Vertical page elements 
@@ -131,7 +143,6 @@ attributesConfig:
   ##################################################################################################################      
   configs: [] 
   
-
 
 
 

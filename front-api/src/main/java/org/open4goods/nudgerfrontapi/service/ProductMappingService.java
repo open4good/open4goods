@@ -540,6 +540,8 @@ public class ProductMappingService {
         return new ProductNamesDto(
                 resolveLocalisedString(product.getNames().getH1Title(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getPrettyName(), domainLanguage, locale),
+                resolveLocalisedString(product.getNames().getSingular(), domainLanguage, locale),
+                resolveLocalisedString(product.getNames().getSingularDesignation(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale),

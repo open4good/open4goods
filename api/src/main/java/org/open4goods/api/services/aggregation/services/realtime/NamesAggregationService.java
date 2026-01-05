@@ -186,6 +186,32 @@ public class NamesAggregationService extends AbstractAggregationService {
 						}
 					}
 
+					// ---- Singular ----
+					final boolean singularMissing =
+							data.getNames() == null
+							|| data.getNames().getSingular() == null
+							|| data.getNames().getSingular().get(lang) == null;
+
+					if ((vConf != null && vConf.isForceNameGeneration()) || singularMissing) {
+						if (data.getNames() != null && data.getNames().getSingular() != null) {
+							data.getNames().getSingular().put(lang,
+									computePrettyName(data, tConf.getSingular(), vConf, lang, " "));
+						}
+					}
+
+					// ---- Singular Designation ----
+					final boolean singularDesignationMissing =
+							data.getNames() == null
+							|| data.getNames().getSingularDesignation() == null
+							|| data.getNames().getSingularDesignation().get(lang) == null;
+
+					if ((vConf != null && vConf.isForceNameGeneration()) || singularDesignationMissing) {
+						if (data.getNames() != null && data.getNames().getSingularDesignation() != null) {
+							data.getNames().getSingularDesignation().put(lang,
+									computePrettyName(data, tConf.getSingularDesignation(), vConf, lang, " "));
+						}
+					}
+
 					// SEO meta generation intentionally left commented-out (as in original),
 					// because of previous disk-space / stack-trace issues and template evaluation failures.
 					// Keeping behavior unchanged.

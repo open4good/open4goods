@@ -12,6 +12,10 @@ public class ProductI18nElements {
 	private PrefixedAttrText h1Title = new PrefixedAttrText();
 	@JsonMerge
 	private PrefixedAttrText prettyName = new PrefixedAttrText();
+	@JsonMerge
+	private PrefixedAttrText singular = new PrefixedAttrText();
+	@JsonMerge
+	private PrefixedAttrText singularDesignation = new PrefixedAttrText();
 
 
 
@@ -92,6 +96,27 @@ public class ProductI18nElements {
 		this.prettyName = prettyName;
 	}
 
+	/**
+	 * Return the singular form configured for product naming.
+	 */
+	public PrefixedAttrText getSingular() {
+		return singular;
+	}
+
+	public void setSingular(PrefixedAttrText singular) {
+		this.singular = singular;
+	}
+
+	/**
+	 * Return the singular designation configured for product naming.
+	 */
+	public PrefixedAttrText getSingularDesignation() {
+		return singularDesignation;
+	}
+
+	public void setSingularDesignation(PrefixedAttrText singularDesignation) {
+		this.singularDesignation = singularDesignation;
+	}
 
 	public String getVerticalHomeUrl() {
 		return verticalHomeUrl;
