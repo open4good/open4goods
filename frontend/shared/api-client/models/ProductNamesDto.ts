@@ -32,6 +32,18 @@ export interface ProductNamesDto {
      */
     prettyName?: string;
     /**
+     * Singular product name for the requested language
+     * @type {string}
+     * @memberof ProductNamesDto
+     */
+    singular?: string;
+    /**
+     * Singular designation for the requested language
+     * @type {string}
+     * @memberof ProductNamesDto
+     */
+    singularDesignation?: string;
+    /**
      * Meta description aligned with the requested language
      * @type {string}
      * @memberof ProductNamesDto
@@ -88,6 +100,8 @@ export function ProductNamesDtoFromJSONTyped(json: any, ignoreDiscriminator: boo
         
         'h1Title': json['h1Title'] == null ? undefined : json['h1Title'],
         'prettyName': json['prettyName'] == null ? undefined : json['prettyName'],
+        'singular': json['singular'] == null ? undefined : json['singular'],
+        'singularDesignation': json['singularDesignation'] == null ? undefined : json['singularDesignation'],
         'metaDescription': json['metaDescription'] == null ? undefined : json['metaDescription'],
         'ogTitle': json['ogTitle'] == null ? undefined : json['ogTitle'],
         'ogDescription': json['ogDescription'] == null ? undefined : json['ogDescription'],
@@ -110,6 +124,8 @@ export function ProductNamesDtoToJSONTyped(value?: ProductNamesDto | null, ignor
         
         'h1Title': value['h1Title'],
         'prettyName': value['prettyName'],
+        'singular': value['singular'],
+        'singularDesignation': value['singularDesignation'],
         'metaDescription': value['metaDescription'],
         'ogTitle': value['ogTitle'],
         'ogDescription': value['ogDescription'],
@@ -118,4 +134,3 @@ export function ProductNamesDtoToJSONTyped(value?: ProductNamesDto | null, ignor
         'shortestOfferName': value['shortestOfferName'],
     };
 }
-

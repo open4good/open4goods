@@ -9,6 +9,10 @@ public class ProductTexts {
 	private Localisable<String,String> h1Title = new Localisable<>();
 
 	private Localisable<String,String> prettyName = new Localisable<>();
+
+	private Localisable<String,String> singular = new Localisable<>();
+
+	private Localisable<String,String> singularDesignation = new Localisable<>();
 	
 	private Localisable<String,String> metaDescription = new Localisable<>();
 	
@@ -43,6 +47,22 @@ public class ProductTexts {
 
 	public void setPrettyName(Localisable<String, String> prettyName) {
 		this.prettyName = prettyName;
+	}
+
+	public Localisable<String, String> getSingular() {
+		return singular;
+	}
+
+	public void setSingular(Localisable<String, String> singular) {
+		this.singular = singular;
+	}
+
+	public Localisable<String, String> getSingularDesignation() {
+		return singularDesignation;
+	}
+
+	public void setSingularDesignation(Localisable<String, String> singularDesignation) {
+		this.singularDesignation = singularDesignation;
 	}
 
 	public Localisable<String, String> getMetaDescription() {

@@ -134,6 +134,14 @@ i18n:
         - BRAND
         - MODEL
 
+    singular:
+      prefix: ""
+      attrs: []
+
+    singularDesignation:
+      prefix: ""
+      attrs: []
+
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
     productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
     productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]. Venez nudger ce téléviseur au meilleur prix, et reversez gratuitement [(${p.compensation()})]"

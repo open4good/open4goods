@@ -152,6 +152,12 @@ i18n:
         - BRAND
         - DIAGONALE_POUCES
         - DISPLAY_TECHNOLOGY
+    singular:
+      prefix: "|| tv | télévision | téléviseur ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| du téléviseur | de cette télévision | de la télévision ||"
+      attrs: []
     # TODO : Generate short title (for cards restitution, with popular attributes)
 
     ##################################
@@ -203,6 +209,12 @@ i18n:
         - BRAND
         - DIAGONALE_POUCES
         - DISPLAY_TECHNOLOGY
+    singular:
+      prefix: "|| tv | television ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| of the television | of this television ||"
+      attrs: []
 
     ##################################
     # Vertical page elements
