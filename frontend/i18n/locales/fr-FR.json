@@ -1410,8 +1410,9 @@
                 "intro": "Les règles de calcul de l’ecoscore sont détaillées sur chaque produit (section « bilan écologique »). Chaque catégorie de produit possède ses propres critères et pondérations. Voici les catégories couvertes :",
                 "title": "Comment est calculé l'Impact Score ?",
                 "verticalCarouselAria": "Parcourir le carrousel des catégories ecoscore",
-                "verticalCardAria": "Accéder à l’Impact Score détaillé de la catégorie {vertical}",
+                "verticalCardAria": "Accéder à la catégorie {vertical}",
                 "verticalCta": "Découvrir l’impact détaillé",
+                "verticalCtaAria": "Découvrir l’impact détaillé de la catégorie {vertical}",
                 "verticalImageAlt": "Illustration de la catégorie {vertical}",
                 "verticalLabel": "Catégorie"
             },

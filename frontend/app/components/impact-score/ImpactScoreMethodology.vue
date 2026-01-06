@@ -20,27 +20,75 @@
       <span class="impact-score-methodology__label">
         {{ t('impactScorePage.sections.methodology.verticalLabel') }}
       </span>
-      <div class="impact-score-methodology__capsules-list">
-        <v-chip
-          v-for="vertical in verticalCapsules"
-          :key="vertical.key"
-          class="impact-score-methodology__chip"
-          variant="tonal"
-          rounded="pill"
-          :to="vertical.link"
-          link
-          :aria-label="
-            t('impactScorePage.sections.methodology.verticalCardAria', {
-              vertical: vertical.label,
-            })
-          "
-        >
-          <span class="impact-score-methodology__chip-text">
-            {{ vertical.label }}
-          </span>
-          <v-icon icon="mdi-arrow-top-right" size="16" />
-        </v-chip>
-      </div>
+      <ResponsiveCarousel
+        :items="verticalCapsules"
+        :aria-label="t('impactScorePage.sections.methodology.verticalCarouselAria')"
+        :breakpoints="{ xs: 1, sm: 2, md: 3, lg: 3, xl: 3 }"
+      >
+        <template #item="{ item }">
+          <v-card
+            class="impact-score-methodology__card"
+            elevation="0"
+            rounded="xl"
+            border
+            role="link"
+            tabindex="0"
+            :aria-label="
+              t('impactScorePage.sections.methodology.verticalCardAria', {
+                vertical: item.label,
+              })
+            "
+            @click="navigateToCategory(item.categoryLink)"
+            @keydown.enter.prevent="navigateToCategory(item.categoryLink)"
+            @keydown.space.prevent="navigateToCategory(item.categoryLink)"
+          >
+            <div class="impact-score-methodology__card-media">
+              <v-img
+                v-if="item.image"
+                :src="item.image"
+                :alt="
+                  t('impactScorePage.sections.methodology.verticalImageAlt', {
+                    vertical: item.label,
+                  })
+                "
+                cover
+                class="impact-score-methodology__card-image"
+              />
+              <div
+                v-else
+                class="impact-score-methodology__card-image impact-score-methodology__card-image--empty"
+                aria-hidden="true"
+              >
+                <v-icon icon="mdi-image-outline" size="40" />
+              </div>
+            </div>
+
+            <div class="impact-score-methodology__card-body">
+              <p class="impact-score-methodology__card-label">
+                {{ t('impactScorePage.sections.methodology.verticalLabel') }}
+              </p>
+              <h3 class="impact-score-methodology__card-title">
+                {{ item.label }}
+              </h3>
+              <NuxtLink
+                class="impact-score-methodology__card-cta"
+                :to="item.ecoscoreLink"
+                :aria-label="
+                  t('impactScorePage.sections.methodology.verticalCtaAria', {
+                    vertical: item.label,
+                  })
+                "
+                @click.stop
+              >
+                <span>{{
+                  t('impactScorePage.sections.methodology.verticalCta')
+                }}</span>
+                <v-icon icon="mdi-arrow-top-right" size="16" />
+              </NuxtLink>
+            </div>
+          </v-card>
+        </template>
+      </ResponsiveCarousel>
     </div>
     <p v-else class="impact-score-methodology__empty">
       {{ t('impactScorePage.sections.methodology.empty') }}
@@ -50,6 +98,7 @@
 
 <script setup lang="ts">
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import ResponsiveCarousel from '~/components/shared/ui/ResponsiveCarousel.vue'
 
 const props = defineProps<{
   verticals: VerticalConfigDto[]
@@ -57,8 +106,9 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+const router = useRouter()
 
-const normalizeVerticalLink = (vertical: VerticalConfigDto): string | null => {
+const normalizeVerticalBase = (vertical: VerticalConfigDto): string | null => {
   if (!vertical.verticalHomeUrl) {
     return null
   }
@@ -74,7 +124,7 @@ const normalizeVerticalLink = (vertical: VerticalConfigDto): string | null => {
     ? withSlash.slice(0, -1)
     : withSlash
 
-  return localePath(`${normalized}/ecoscore`)
+  return localePath(normalized)
 }
 
 const verticalCapsules = computed(() =>
@@ -84,18 +134,39 @@ const verticalCapsules = computed(() =>
       key: vertical.id ?? vertical.verticalHomeUrl ?? vertical.verticalHomeTitle,
       label: vertical.verticalHomeTitle?.trim() ?? '',
       order: vertical.order ?? Number.MAX_SAFE_INTEGER,
-      link: normalizeVerticalLink(vertical),
+      categoryLink: normalizeVerticalBase(vertical),
+      ecoscoreLink: (() => {
+        const base = normalizeVerticalBase(vertical)
+        return base ? `${base}/ecoscore` : null
+      })(),
+      image:
+        vertical.imageMedium ??
+        vertical.imageLarge ??
+        vertical.imageSmall ??
+        null,
     }))
     .filter(
       (vertical): vertical is {
         key: string
         label: string
         order: number
-        link: string
-      } => Boolean(vertical.key && vertical.label && vertical.link)
+        categoryLink: string
+        ecoscoreLink: string
+        image: string | null
+      } =>
+        Boolean(
+          vertical.key &&
+            vertical.label &&
+            vertical.categoryLink &&
+            vertical.ecoscoreLink
+        )
     )
     .sort((a, b) => a.order - b.order)
 )
+
+const navigateToCategory = (link: string) => {
+  router.push(link)
+}
 </script>
 
 <style scoped>
@@ -140,26 +211,76 @@ const verticalCapsules = computed(() =>
   color: rgb(var(--v-theme-text-neutral-secondary));
 }
 
-.impact-score-methodology__capsules-list {
+.impact-score-methodology__card {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(var(--v-theme-surface-default), 0.98);
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.6);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
 }
 
-.impact-score-methodology__chip {
-  background: rgba(var(--v-theme-surface-primary-080), 0.85);
+.impact-score-methodology__card:focus-visible {
+  outline: 2px solid rgba(var(--v-theme-accent-primary-highlight), 0.8);
+  outline-offset: 4px;
+}
+
+.impact-score-methodology__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px -24px rgba(var(--v-theme-shadow-primary-600), 0.4);
+}
+
+.impact-score-methodology__card-media {
+  padding: 1.25rem 1.25rem 0;
+}
+
+.impact-score-methodology__card-image {
+  height: 180px;
+  border-radius: 18px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.7);
+}
+
+.impact-score-methodology__card-image--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--v-theme-text-neutral-soft));
+}
+
+.impact-score-methodology__card-body {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.25rem;
+}
+
+.impact-score-methodology__card-label {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgb(var(--v-theme-text-neutral-secondary));
+}
+
+.impact-score-methodology__card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: rgb(var(--v-theme-text-neutral-strong));
-  font-weight: 600;
 }
 
-.impact-score-methodology__chip :deep(.v-icon) {
-  margin-left: 0.35rem;
-}
-
-.impact-score-methodology__chip-text {
+.impact-score-methodology__card-cta {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-primary));
+  text-decoration: none;
+}
+
+.impact-score-methodology__card-cta :deep(.v-icon) {
+  margin-left: 0.15rem;
 }
 
 .impact-score-methodology__empty {

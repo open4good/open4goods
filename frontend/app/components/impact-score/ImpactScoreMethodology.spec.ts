@@ -6,6 +6,7 @@ import ImpactScoreMethodology from './ImpactScoreMethodology.vue'
 
 mockNuxtImport('useLocalePath', () => () => (input: string) => input)
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key }))
+mockNuxtImport('useRouter', () => () => ({ push: () => {} }))
 
 const VChipStub = defineComponent({
   name: 'VChip',
@@ -13,15 +14,49 @@ const VChipStub = defineComponent({
   template: '<a v-bind="$attrs"><slot /></a>',
 })
 
+const VCardStub = defineComponent({
+  name: 'VCard',
+  inheritAttrs: false,
+  template: '<div v-bind="$attrs"><slot /></div>',
+})
+
+const VImgStub = defineComponent({
+  name: 'VImg',
+  inheritAttrs: false,
+  template: '<img v-bind="$attrs" />',
+})
+
 const VIconStub = defineComponent({
   name: 'VIcon',
   template: '<span />',
 })
 
+const ResponsiveCarouselStub = defineComponent({
+  name: 'ResponsiveCarousel',
+  props: {
+    items: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  template:
+    '<div><slot name="item" v-for="(item, index) in items" :item="item" :index="index" /></div>',
+})
+
+const NuxtLinkStub = defineComponent({
+  name: 'NuxtLink',
+  inheritAttrs: false,
+  template: '<a v-bind="$attrs"><slot /></a>',
+})
+
 const globalConfig = {
   stubs: {
     VChip: VChipStub,
+    VCard: VCardStub,
+    VImg: VImgStub,
     VIcon: VIconStub,
+    ResponsiveCarousel: ResponsiveCarouselStub,
+    NuxtLink: NuxtLinkStub,
   },
 }
 
@@ -47,10 +82,15 @@ describe('ImpactScoreMethodology', () => {
       global: globalConfig,
     })
 
-    const chips = wrapper.findAll('.impact-score-methodology__chip')
-    expect(chips).toHaveLength(2)
-    expect(chips[0].text()).toContain('Lave-linge')
-    expect(chips[1].text()).toContain('Téléviseurs')
+    const cards = wrapper.findAll('.impact-score-methodology__card')
+    expect(cards).toHaveLength(2)
+    expect(cards[0].text()).toContain('Lave-linge')
+    expect(cards[1].text()).toContain('Téléviseurs')
+    expect(
+      cards[0]
+        .find('.impact-score-methodology__card-cta')
+        .attributes('to')
+    ).toBe('/lave-linge/ecoscore')
   })
 
   it('shows an empty state when no verticals are available', () => {
