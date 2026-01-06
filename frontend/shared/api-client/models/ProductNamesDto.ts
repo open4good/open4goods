@@ -134,3 +134,4 @@ export function ProductNamesDtoToJSONTyped(value?: ProductNamesDto | null, ignor
         'shortestOfferName': value['shortestOfferName'],
     };
 }
+
