@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
-import TextContent from '~/components/domains/content/TextContent.vue'
 import TeamMemberCard from './TeamMemberCard.vue'
 import type { Member } from '~~/shared/api-client'
 
@@ -43,10 +42,6 @@ const { t } = useI18n()
         <h2 :id="headingId" class="team-members-section__title">
           {{ props.title }}
         </h2>
-
-        <div v-if="props.descriptionBlocId" class="team-members-section__intro">
-          <TextContent :bloc-id="props.descriptionBlocId" :ipsum-length="100" />
-        </div>
       </div>
 
       <v-row

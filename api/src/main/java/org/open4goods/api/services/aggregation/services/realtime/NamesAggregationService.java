@@ -1,6 +1,5 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.api.services.completion.text.DjlTextEmbeddingService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.util.EmbeddingVectorUtils;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.attribute.ReferentielKey;
@@ -17,6 +18,7 @@ import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -39,6 +41,8 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(NamesAggregationService.class);
 
+
+
 	/**
 	 * Kept for DI compatibility even if currently unused.
 	 */
@@ -48,17 +52,20 @@ public class NamesAggregationService extends AbstractAggregationService {
 	private final VerticalsConfigService verticalService;
 	private final BlablaService blablaService;
 	private final DjlTextEmbeddingService embeddingService;
+	private final DjlEmbeddingProperties embeddingProperties;
 
 	public NamesAggregationService(final Logger logger,
 			final VerticalsConfigService verticalService,
 			final EvaluationService evaluationService,
 			final BlablaService blablaService,
-			final DjlTextEmbeddingService embeddingService) {
+			final DjlTextEmbeddingService embeddingService,
+			final DjlEmbeddingProperties embeddingProperties) {
 		super(logger);
 		this.evaluationService = evaluationService;
 		this.verticalService = verticalService;
 		this.blablaService = blablaService;
 		this.embeddingService = embeddingService;
+		this.embeddingProperties = embeddingProperties;
 	}
 
 	/**
@@ -166,6 +173,45 @@ public class NamesAggregationService extends AbstractAggregationService {
 						}
 					}
 
+					// ---- Pretty Name ----
+					final boolean prettyMissing =
+							data.getNames() == null
+							|| data.getNames().getPrettyName() == null
+							|| data.getNames().getPrettyName().get(lang) == null;
+
+					if ((vConf != null && vConf.isForceNameGeneration()) || prettyMissing) {
+						if (data.getNames() != null && data.getNames().getPrettyName() != null) {
+							data.getNames().getPrettyName().put(lang,
+									computePrettyName(data, tConf.getPrettyName(), vConf, lang, " "));
+						}
+					}
+
+					// ---- Singular ----
+					final boolean singularMissing =
+							data.getNames() == null
+							|| data.getNames().getSingular() == null
+							|| data.getNames().getSingular().get(lang) == null;
+
+					if ((vConf != null && vConf.isForceNameGeneration()) || singularMissing) {
+						if (data.getNames() != null && data.getNames().getSingular() != null) {
+							data.getNames().getSingular().put(lang,
+									computePrettyName(data, tConf.getSingular(), vConf, lang, " "));
+						}
+					}
+
+					// ---- Singular Designation ----
+					final boolean singularDesignationMissing =
+							data.getNames() == null
+							|| data.getNames().getSingularDesignation() == null
+							|| data.getNames().getSingularDesignation().get(lang) == null;
+
+					if ((vConf != null && vConf.isForceNameGeneration()) || singularDesignationMissing) {
+						if (data.getNames() != null && data.getNames().getSingularDesignation() != null) {
+							data.getNames().getSingularDesignation().put(lang,
+									computePrettyName(data, tConf.getSingularDesignation(), vConf, lang, " "));
+						}
+					}
+
 					// SEO meta generation intentionally left commented-out (as in original),
 					// because of previous disk-space / stack-trace issues and template evaluation failures.
 					// Keeping behavior unchanged.
@@ -179,16 +225,19 @@ public class NamesAggregationService extends AbstractAggregationService {
 			}
 		}
 
-		// ---- Embedding computation (DistilCamemBERT) ----
+		// ---- Embedding computation  ----
 		// Keep behavior: attempt computation whenever vertical is present and name is non-empty.
 		if (StringUtils.isNotBlank(data.getVertical())) {
 			try {
 				String textToEmbed = buildEmbeddingText(data, resolvedVertical);
+				String prefixedText = applyEmbeddingPrefix(textToEmbed);
 
-				if (StringUtils.isNotBlank(textToEmbed)) {
-					final float[] embedding = embeddingService.embed(textToEmbed);
+				if (StringUtils.isNotBlank(prefixedText)) {
+					final float[] embedding = embeddingService.embed(prefixedText);
 					if (embedding != null) {
-						data.setEmbedding(embedding);
+						// Forcing to a 512 dims vector
+						float[] padded = IdHelper.to512(embedding);
+						data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
 					}
 				}
 			} catch (Exception ex) {
@@ -211,11 +260,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 		// Defensive: gtin can be null; original code would NPE.
 		String url = "";
-		if (StringUtils.isBlank(url)) {
-			// Fallback of last resort to keep function total (avoid returning empty -> downstream issues)
-			url = "product";
-			logger.warn("Null URL : ", data.gtin());
-		}
 
 		final String urlSuffix;
 		if (vConf == null || vConf.getId() == null) {
@@ -226,8 +270,13 @@ public class NamesAggregationService extends AbstractAggregationService {
 			urlSuffix = StringUtils.stripAccents(computePrefixedText(data, urlPrefix, "-"));
 		}
 
+		url += data.gtin();
+
 		if (StringUtils.isNotBlank(urlSuffix)) {
-			url += "-" + urlSuffix;
+			if (StringUtils.isNotBlank(url)) {
+				url += "-";
+			}
+			url += urlSuffix;
 		}
 
 		// Url sanitisation
@@ -295,6 +344,70 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	/**
+	 * Computes a pretty name made of an optional prefix and a list of attributes,
+	 * appending attribute suffixes when configured in the vertical catalog.
+	 *
+	 * @param data product
+	 * @param config configuration (prefix + list of attributes)
+	 * @param vConf vertical configuration used to resolve attribute suffixes
+	 * @param lang current language key
+	 * @param separator separator between chunks (e.g. " ")
+	 * @return computed pretty name
+	 * @throws InvalidParameterException if template evaluation fails
+	 */
+	private String computePrettyName(final Product data, final PrefixedAttrText config, final VerticalConfig vConf,
+			final String lang, final String separator) throws InvalidParameterException {
+
+		if (data == null || config == null) {
+			return "";
+		}
+
+		final StringBuilder sb = new StringBuilder();
+
+		final String p = config.getPrefix();
+		if (StringUtils.isNotBlank(p)) {
+			final String prefix = blablaService.generateBlabla(p, data);
+			if (StringUtils.isNotBlank(prefix)) {
+				sb.append(prefix);
+			}
+		}
+
+		if (config.getAttrs() != null) {
+			for (String attr : config.getAttrs()) {
+				if (StringUtils.isBlank(attr) || data.getAttributes() == null) {
+					continue;
+				}
+				final String refVal = data.getAttributes().val(attr);
+				if (refVal != null) {
+					if (sb.length() > 0) {
+						sb.append(separator);
+					}
+					sb.append(IdHelper.azCharAndDigits(refVal).toLowerCase());
+
+					String suffix = resolveAttributeSuffix(vConf, attr, lang);
+					if (StringUtils.isNotBlank(suffix)) {
+						sb.append(" ").append(suffix);
+					}
+				}
+			}
+		}
+
+		return StringUtils.normalizeSpace(sb.toString());
+	}
+
+	private String resolveAttributeSuffix(final VerticalConfig vConf, final String attr, final String lang) {
+		if (vConf == null || vConf.getAttributesConfig() == null) {
+			return "";
+		}
+		AttributeConfig attributeConfig = vConf.getAttributesConfig().getAttributeConfigByKey(attr);
+		if (attributeConfig == null || attributeConfig.getSuffix() == null) {
+			return "";
+		}
+		String suffix = attributeConfig.getSuffix().i18n(lang);
+		return StringUtils.defaultString(suffix);
+	}
+
+	/**
 	 * Normalizes a raw offer name.
 	 *
 	 * @param name raw name
@@ -306,6 +419,25 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 		final String trimmed = name.trim();
 		return trimmed.isEmpty() ? null : trimmed;
+	}
+
+	/**
+	 * Prefixes the provided text with the configured passage prefix.
+	 *
+	 * @param textToEmbed text describing the product
+	 * @return prefixed text suitable for embedding, or an empty string if no input is provided
+	 */
+	private String applyEmbeddingPrefix(final String textToEmbed) {
+		if (StringUtils.isBlank(textToEmbed)) {
+			return "";
+		}
+
+		final String prefix = embeddingProperties.getPassagePrefix();
+		if (StringUtils.isBlank(prefix)) {
+			return textToEmbed;
+		}
+
+		return prefix.trim() + " " + textToEmbed;
 	}
 
 	/**
@@ -377,4 +509,5 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 		return combined;
 	}
+
 }

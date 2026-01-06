@@ -31,6 +31,18 @@ export interface CategoriesStatsDto {
      * @memberof CategoriesStatsDto
      */
     affiliationPartnersCount?: number;
+    /**
+     * Total number of GTIN items available in the OpenData exports.
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    gtinOpenDataItemsCount?: number;
+    /**
+     * Total number of ISBN items available in the OpenData exports.
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    isbnOpenDataItemsCount?: number;
 }
 
 /**
@@ -52,6 +64,8 @@ export function CategoriesStatsDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         
         'enabledVerticalConfigs': json['enabledVerticalConfigs'] == null ? undefined : json['enabledVerticalConfigs'],
         'affiliationPartnersCount': json['affiliationPartnersCount'] == null ? undefined : json['affiliationPartnersCount'],
+        'gtinOpenDataItemsCount': json['gtinOpenDataItemsCount'] == null ? undefined : json['gtinOpenDataItemsCount'],
+        'isbnOpenDataItemsCount': json['isbnOpenDataItemsCount'] == null ? undefined : json['isbnOpenDataItemsCount'],
     };
 }
 
@@ -68,6 +82,8 @@ export function CategoriesStatsDtoToJSONTyped(value?: CategoriesStatsDto | null,
         
         'enabledVerticalConfigs': value['enabledVerticalConfigs'],
         'affiliationPartnersCount': value['affiliationPartnersCount'],
+        'gtinOpenDataItemsCount': value['gtinOpenDataItemsCount'],
+        'isbnOpenDataItemsCount': value['isbnOpenDataItemsCount'],
     };
 }
 

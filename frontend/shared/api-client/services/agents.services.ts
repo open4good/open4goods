@@ -56,6 +56,7 @@ export interface AgentRequestDto {
   userHandle?: string
   attributeValues?: Record<string, unknown>
   captchaToken?: string
+  tags?: string[]
 }
 
 export interface AgentRequestResponseDto {
@@ -172,7 +173,10 @@ class AgentService {
     )
   }
 
-  async getIssue(issueId: string, domainLanguage: string): Promise<AgentIssueDto> {
+  async getIssue(
+    issueId: string,
+    domainLanguage: string
+  ): Promise<AgentIssueDto> {
     return this.fetch<AgentIssueDto>(
       `/agents/${issueId}?domainLanguage=${domainLanguage}`
     )

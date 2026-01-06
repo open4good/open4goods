@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,13 +16,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParserConfig;
+import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.NudgeToolConfig;
+import org.open4goods.model.vertical.NudgeToolScore;
+import org.open4goods.model.vertical.NudgeToolSubsetGroup;
 import org.open4goods.model.vertical.Order;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -36,7 +45,7 @@ import jakarta.annotation.PreDestroy;
  * This service is in charge to provide the Verticals configurations.
  * Configurations are provided from the classpath AND from a git specific
  * project (fresh local clone on app startup)
- * 
+ *
  * @author goulven
  *
  */
@@ -178,7 +187,21 @@ public class VerticalsConfigService {
 				continue;
 			}
 			try {
-				ret.add(getConfig(r.getInputStream(), getDefaultConfig()));
+				VerticalConfig config = getConfig(r.getInputStream(), getDefaultConfig());
+				if (config.getImpactScoreConfig() == null) {
+					logger.warn("Vertical {} (from {}) has a NULL impact score configuration. It might not behave as expected.",
+							config.getId(), r.getFilename());
+				}
+
+				// Check if ID is unique in the current list
+				boolean exists = ret.stream().anyMatch(v -> v.getId().equals(config.getId()));
+				if (exists) {
+					logger.error("DUPLICATE VERTICAL ID DETECTED: '{}' is already defined in another file. Ignoring definition from '{}'.",
+							config.getId(), r.getFilename());
+					continue;
+				}
+
+				ret.add(config);
 			} catch (Exception e) {
 				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
 			}
@@ -234,7 +257,132 @@ public class VerticalsConfigService {
 		ObjectReader objectReader = serialisationService.getYamlMapper().readerForUpdating(copy);
 		VerticalConfig ret = objectReader.readValue(inputStream);
 		inputStream.close();
+		mergeDefaults(defaul, ret);
 		return resolveAttributeConfigs(ret);
+	}
+
+	private void mergeDefaults(VerticalConfig defaults, VerticalConfig config) {
+		if (defaults == null || config == null) {
+			return;
+		}
+
+		if (defaults.getI18n() != null) {
+			if (config.getI18n() == null) {
+				config.setI18n(new HashMap<>());
+			}
+			defaults.getI18n().forEach(config.getI18n()::putIfAbsent);
+		}
+
+		config.setAvailableImpactScoreCriterias(
+				mergeStringList(defaults.getAvailableImpactScoreCriterias(), config.getAvailableImpactScoreCriterias()));
+		config.setExcludingTokensFromCategoriesMatching(mergeStringSet(defaults.getExcludingTokensFromCategoriesMatching(),
+				config.getExcludingTokensFromCategoriesMatching()));
+		config.setGenerationExcludedFromCategoriesMatching(mergeStringSet(defaults.getGenerationExcludedFromCategoriesMatching(),
+				config.getGenerationExcludedFromCategoriesMatching()));
+		config.setGenerationExcludedFromAttributesMatching(mergeStringSet(defaults.getGenerationExcludedFromAttributesMatching(),
+				config.getGenerationExcludedFromAttributesMatching()));
+		config.setRequiredAttributes(
+				mergeStringSet(defaults.getRequiredAttributes(), config.getRequiredAttributes()));
+		config.setBrandsAlias(mergeMap(defaults.getBrandsAlias(), config.getBrandsAlias()));
+		config.setSubsets(mergeByKey(defaults.getSubsets(), config.getSubsets(), VerticalSubset::getId));
+
+		AttributesConfig attributesConfig = config.getAttributesConfig();
+		AttributesConfig defaultAttributesConfig = defaults.getAttributesConfig();
+		if (attributesConfig != null && defaultAttributesConfig != null) {
+			attributesConfig.setConfigs(mergeByKey(defaultAttributesConfig.getConfigs(), attributesConfig.getConfigs(),
+					AttributeConfig::getKey));
+			attributesConfig.setFeaturedValues(
+					mergeStringSet(defaultAttributesConfig.getFeaturedValues(), attributesConfig.getFeaturedValues()));
+			attributesConfig.setExclusions(
+					mergeStringSet(defaultAttributesConfig.getExclusions(), attributesConfig.getExclusions()));
+		}
+
+		NudgeToolConfig nudgeToolConfig = config.getNudgeToolConfig();
+		NudgeToolConfig defaultNudgeToolConfig = defaults.getNudgeToolConfig();
+		if (defaultNudgeToolConfig != null) {
+			if (nudgeToolConfig == null) {
+				nudgeToolConfig = new NudgeToolConfig();
+				config.setNudgeToolConfig(nudgeToolConfig);
+			}
+
+			nudgeToolConfig.setScores(mergeByKey(defaultNudgeToolConfig.getScores(), nudgeToolConfig.getScores(),
+					NudgeToolScore::getScoreName));
+			nudgeToolConfig.setSubsets(mergeByKey(defaultNudgeToolConfig.getSubsets(), nudgeToolConfig.getSubsets(),
+					VerticalSubset::getId));
+			nudgeToolConfig.setSubsetGroups(mergeByKey(defaultNudgeToolConfig.getSubsetGroups(),
+					nudgeToolConfig.getSubsetGroups(), NudgeToolSubsetGroup::getId));
+		}
+	}
+
+	private static <T> List<T> mergeByKey(List<T> defaults, List<T> overrides, Function<T, String> keyExtractor) {
+		if (defaults == null && overrides == null) {
+			return null;
+		}
+		LinkedHashMap<String, T> merged = new LinkedHashMap<>();
+		addToMerge(merged, defaults, keyExtractor);
+		addToMerge(merged, overrides, keyExtractor);
+		return new ArrayList<>(merged.values());
+	}
+
+	private static <T> void addToMerge(LinkedHashMap<String, T> merged, List<T> values, Function<T, String> keyExtractor) {
+		if (values == null) {
+			return;
+		}
+		int index = 0;
+		for (T value : values) {
+			if (value == null) {
+				index++;
+				continue;
+			}
+			String key = keyExtractor.apply(value);
+			if (key == null || key.isBlank()) {
+				key = "__index__" + merged.size() + "_" + index;
+			}
+			merged.put(key, value);
+			index++;
+		}
+	}
+
+	private static List<String> mergeStringList(List<String> defaults, List<String> overrides) {
+		if (defaults == null && overrides == null) {
+			return null;
+		}
+		LinkedHashSet<String> merged = new LinkedHashSet<>();
+		if (defaults != null) {
+			merged.addAll(defaults);
+		}
+		if (overrides != null) {
+			merged.addAll(overrides);
+		}
+		return new ArrayList<>(merged);
+	}
+
+	private static Set<String> mergeStringSet(Set<String> defaults, Set<String> overrides) {
+		if (defaults == null && overrides == null) {
+			return null;
+		}
+		LinkedHashSet<String> merged = new LinkedHashSet<>();
+		if (defaults != null) {
+			merged.addAll(defaults);
+		}
+		if (overrides != null) {
+			merged.addAll(overrides);
+		}
+		return merged;
+	}
+
+	private static <K, V> Map<K, V> mergeMap(Map<K, V> defaults, Map<K, V> overrides) {
+		if (defaults == null && overrides == null) {
+			return null;
+		}
+		LinkedHashMap<K, V> merged = new LinkedHashMap<>();
+		if (defaults != null) {
+			merged.putAll(defaults);
+		}
+		if (overrides != null) {
+			merged.putAll(overrides);
+		}
+		return merged;
 	}
 
 	private VerticalConfig resolveAttributeConfigs(VerticalConfig config) {
@@ -319,7 +467,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Instanciate a vertical config for a given categories bag
-	 * 
+	 *
 	 * @param inputStream
 	 * @param existing
 	 * @return
@@ -349,7 +497,7 @@ public class VerticalsConfigService {
 		}
 
 		// Looking for words exclusions in categories
-		if (null != vc) {
+		if (null != vc && null != vc.getExcludingTokensFromCategoriesMatching()) {
 			for (String token : vc.getExcludingTokensFromCategoriesMatching()) {
 				for (String category : productCategoriessByDatasource.values()) {
 					if (category.contains(token)) {
@@ -367,7 +515,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return the language for a vertical path, if any
-	 * 
+	 *
 	 * @param path
 	 * @return
 	 */
@@ -377,7 +525,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return the path for a vertical language, if any
-	 * 
+	 *
 	 * @param config
 	 * @param path
 	 * @return
@@ -391,7 +539,7 @@ public class VerticalsConfigService {
 	 * Splits the VerticalConfig objects into buckets of a specified size, limiting
 	 * the total number of buckets.
 	 * This is UI HELPER METHOD
-	 * 
+	 *
 	 * @param bucketSize the size of each bucket (number of VerticalConfig objects
 	 *                   per bucket).
 	 * @param maxBucket  the maximum number of buckets to return.
@@ -434,7 +582,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a config by it's icecat categoryId
-	 * 
+	 *
 	 * @param icecatCategoryId
 	 *                         TODO(p2,perf) : Maintain a map for key/val access
 	 * @return
@@ -446,7 +594,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a config by it's google taxonomy id
-	 * 
+	 *
 	 * @param icecatCategoryId
 	 * @return
 	 */
@@ -457,7 +605,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a vertical config for a given taxonomy id
-	 * 
+	 *
 	 * @param key
 	 * @return
 	 */
@@ -482,7 +630,7 @@ public class VerticalsConfigService {
 
 	/**
 	 * Return a config by it's Id, or the default one if not found
-	 * 
+	 *
 	 * @param vertical
 	 * @return
 	 */

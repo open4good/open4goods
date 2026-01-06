@@ -1,0 +1,70 @@
+{
+  "properties": [
+    {
+      "name": "embedding.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the DJL text embedding auto-configuration.",
+      "defaultValue": true
+    },
+    {
+      "name": "embedding.text-model-url",
+      "type": "java.lang.String",
+      "description": "Remote identifier or URL for the text embedding model.",
+      "defaultValue": "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small"
+    },
+    {
+      "name": "embedding.multimodal-model-url",
+      "type": "java.lang.String",
+      "description": "Remote identifier or URL for the multimodal embedding model.",
+      "defaultValue": "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1"
+    },
+    {
+      "name": "embedding.fail-on-missing-model",
+      "type": "java.lang.Boolean",
+      "description": "Fail application startup when no embedding model can be loaded.",
+      "defaultValue": true
+    },
+    {
+      "name": "embedding.embedding-dimension",
+      "type": "java.lang.Integer",
+      "description": "Expected embedding dimension for diagnostic logging.",
+      "defaultValue": 512
+    },
+    {
+      "name": "embedding.image-input-size",
+      "type": "java.lang.Integer",
+      "description": "Target input size (pixels) for vision models.",
+      "defaultValue": 224
+    },
+    {
+      "name": "embedding.pooling-mode",
+      "type": "java.lang.String",
+      "description": "Pooling strategy for the DJL text translator.",
+      "defaultValue": "mean"
+    },
+    {
+      "name": "embedding.query-prefix",
+      "type": "java.lang.String",
+      "description": "Prefix added to query text when generating embeddings.",
+      "defaultValue": "query:"
+    },
+    {
+      "name": "embedding.passage-prefix",
+      "type": "java.lang.String",
+      "description": "Prefix added to passage text when generating embeddings.",
+      "defaultValue": "passage:"
+    },
+    {
+      "name": "embedding.engine",
+      "type": "java.lang.String",
+      "description": "Engine name supplied to DJL when loading models.",
+      "defaultValue": "PyTorch"
+    },
+    {
+      "name": "embedding.vision-model-url",
+      "type": "java.lang.String",
+      "description": "Remote identifier or URL for the image embedding model.",
+      "defaultValue": "djl://ai.djl.pytorch/resnet/0.0.1?layers=18&dataset=imagenet"
+    }
+  ]
+}

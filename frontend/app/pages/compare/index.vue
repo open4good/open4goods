@@ -1,32 +1,40 @@
 <template>
   <div class="compare-page">
-    <section class="compare-page__hero" :aria-labelledby="heroId">
-      <div class="compare-page__hero-surface">
-        <v-container class="compare-page__hero-container">
-          <div class="compare-page__hero-content">
-            <NuxtLink
-              v-if="heroBackLink"
-              :to="heroBackLink"
-              class="compare-page__hero-back"
-              :aria-label="heroBackAriaLabel"
-            >
-              <v-icon icon="mdi-arrow-left" size="18" aria-hidden="true" />
-              <span>{{ heroBackLabel }}</span>
-            </NuxtLink>
-            <h1 :id="heroId" class="compare-page__title">{{ heroTitle }}</h1>
-            <p class="compare-page__subtitle">{{ heroSubtitle }}</p>
-            <p v-if="productCount" class="compare-page__hero-meta">
-              <v-icon
-                icon="mdi-package-variant-closed"
-                size="18"
-                aria-hidden="true"
-              />
-              <span>{{ compareSummary }}</span>
-            </p>
-          </div>
-        </v-container>
-      </div>
-    </section>
+    <PageHeader
+      :title="heroTitle"
+      :eyebrow="t('compare.hero.eyebrow')"
+      layout="single-column"
+      container="lg"
+      background="image"
+      background-image-asset-key="compareBackground"
+      class="mb-8"
+    >
+      <template #subtitle>
+        <p class="page-header__subtitle">{{ heroSubtitle }}</p>
+        <p
+          v-if="productCount"
+          class="d-flex align-center justify-center gap-2 mt-2 text-medium-emphasis"
+        >
+          <v-icon
+            icon="mdi-package-variant-closed"
+            size="18"
+            aria-hidden="true"
+          />
+          <span>{{ compareSummary }}</span>
+        </p>
+      </template>
+
+      <template v-if="heroBackLink" #actions>
+        <v-btn
+          :to="heroBackLink"
+          variant="text"
+          prepend-icon="mdi-arrow-left"
+          class="mb-4 compare-page__hero-back"
+        >
+          {{ heroBackLabel }}
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <v-alert
       v-if="loadError"
@@ -72,261 +80,267 @@
 
     <div v-else class="compare-page__content">
       <section class="compare-section">
-        <div class="compare-grid" role="table">
-          <div class="compare-grid__media" role="row" aria-hidden="true">
-            <div
-              class="compare-grid__feature compare-grid__feature--media"
-              role="presentation"
-            >
-              <span class="sr-only">{{ t('compare.a11y.featureColumn') }}</span>
-            </div>
-            <div class="compare-grid__products" role="presentation">
+        <v-container fluid class="pa-0" max-width="xxl">
+          <div class="compare-grid" role="table">
+            <div class="compare-grid__media" role="row" aria-hidden="true">
               <div
-                v-for="product in products"
-                :key="`media-${product.gtin}`"
-                class="compare-grid__product-media"
+                class="compare-grid__feature compare-grid__feature--media"
+                role="presentation"
               >
-                <NuxtLink
-                  v-if="productLink(product)"
-                  :to="productLink(product)"
-                  class="compare-grid__product-link"
-                  :aria-label="
-                    t('compare.a11y.viewProduct', { name: product.title })
-                  "
+                <span class="sr-only">{{
+                  t('compare.a11y.featureColumn')
+                }}</span>
+              </div>
+              <div class="compare-grid__products" role="presentation">
+                <div
+                  v-for="product in products"
+                  :key="`media-${product.gtin}`"
+                  class="compare-grid__product-media"
                 >
-                  <NuxtImg
-                    v-if="product.coverImage"
-                    :src="product.coverImage"
-                    :alt="product.title"
-                    width="180"
-                    height="180"
-                    format="webp"
-                    class="compare-grid__product-image"
-                  />
-                  <div
-                    v-else
-                    class="compare-grid__product-placeholder"
-                    aria-hidden="true"
+                  <NuxtLink
+                    v-if="productLink(product)"
+                    :to="productLink(product)"
+                    class="compare-grid__product-link"
+                    :aria-label="
+                      t('compare.a11y.viewProduct', { name: product.title })
+                    "
                   >
-                    {{ productInitials(product.title) }}
-                  </div>
-                </NuxtLink>
-                <template v-else>
-                  <NuxtImg
-                    v-if="product.coverImage"
-                    :src="product.coverImage"
-                    :alt="product.title"
-                    width="180"
-                    height="180"
-                    format="webp"
-                    class="compare-grid__product-image"
-                  />
-                  <div
-                    v-else
-                    class="compare-grid__product-placeholder"
-                    aria-hidden="true"
-                  >
-                    {{ productInitials(product.title) }}
-                  </div>
-                </template>
+                    <NuxtImg
+                      v-if="product.coverImage"
+                      :src="product.coverImage"
+                      :alt="product.title"
+                      width="180"
+                      height="180"
+                      format="webp"
+                      class="compare-grid__product-image"
+                    />
+                    <div
+                      v-else
+                      class="compare-grid__product-placeholder"
+                      aria-hidden="true"
+                    >
+                      {{ productInitials(product.title) }}
+                    </div>
+                  </NuxtLink>
+                  <template v-else>
+                    <NuxtImg
+                      v-if="product.coverImage"
+                      :src="product.coverImage"
+                      :alt="product.title"
+                      width="180"
+                      height="180"
+                      format="webp"
+                      class="compare-grid__product-image"
+                    />
+                    <div
+                      v-else
+                      class="compare-grid__product-placeholder"
+                      aria-hidden="true"
+                    >
+                      {{ productInitials(product.title) }}
+                    </div>
+                  </template>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="compare-grid__header" role="row">
-            <div
-              class="compare-grid__feature compare-grid__feature--header"
-              role="columnheader"
-            >
-              <span class="sr-only">{{ t('compare.a11y.featureColumn') }}</span>
-            </div>
-            <div class="compare-grid__products" role="rowgroup">
-              <article
-                v-for="product in products"
-                :key="product.gtin"
-                class="compare-grid__product"
+            <div class="compare-grid__header" role="row">
+              <div
+                class="compare-grid__feature compare-grid__feature--header"
                 role="columnheader"
               >
-                <ImpactScore
-                  v-if="product.impactScore !== null"
-                  :score="product.impactScore"
-                  :max="5"
-                  size="medium"
-                  class="compare-grid__product-impact"
+                <span class="sr-only">{{
+                  t('compare.a11y.featureColumn')
+                }}</span>
+              </div>
+              <div class="compare-grid__products" role="rowgroup">
+                <article
+                  v-for="product in products"
+                  :key="product.gtin"
+                  class="compare-grid__product"
+                  role="columnheader"
+                >
+                  <ImpactScore
+                    v-if="product.impactScore !== null"
+                    :score="product.impactScore"
+                    :max="5"
+                    size="medium"
+                    class="compare-grid__product-impact"
+                  />
+                  <NuxtLink
+                    v-if="productLink(product)"
+                    :to="productLink(product)"
+                    class="compare-grid__product-model compare-grid__product-model--link"
+                    :aria-label="
+                      t('compare.a11y.viewProduct', { name: product.title })
+                    "
+                  >
+                    {{ productModelLabel(product) }}
+                  </NuxtLink>
+                  <p v-else class="compare-grid__product-model">
+                    {{ productModelLabel(product) }}
+                  </p>
+                  <p class="compare-grid__product-brand">
+                    {{ product.brand ?? '—' }}
+                  </p>
+                  <div
+                    v-if="product.country"
+                    class="compare-grid__product-country"
+                  >
+                    <v-tooltip :text="product.country.name" location="bottom">
+                      <template #activator="{ props: tooltipProps }">
+                        <span
+                          class="compare-grid__product-country-flag"
+                          v-bind="tooltipProps"
+                        >
+                          <NuxtImg
+                            v-if="product.country.flag"
+                            :src="product.country.flag"
+                            :alt="product.country.name"
+                            width="24"
+                            height="16"
+                            class="compare-grid__flag"
+                          />
+                          <span class="compare-grid__country-label">{{
+                            product.country.name
+                          }}</span>
+                        </span>
+                      </template>
+                    </v-tooltip>
+                  </div>
+                  <v-btn
+                    variant="text"
+                    size="small"
+                    color="error"
+                    class="compare-grid__product-remove"
+                    :aria-label="
+                      t('compare.actions.remove', { name: product.title })
+                    "
+                    @click="handleRemove(product.gtin)"
+                  >
+                    {{ t('compare.actions.removeShort') }}
+                  </v-btn>
+                </article>
+              </div>
+            </div>
+
+            <div
+              v-for="row in textualRows"
+              :key="row.key"
+              class="compare-grid__row"
+              role="row"
+            >
+              <div class="compare-grid__feature" role="rowheader">
+                <v-icon
+                  :icon="row.icon"
+                  size="20"
+                  class="compare-grid__feature-icon"
                 />
-                <NuxtLink
-                  v-if="productLink(product)"
-                  :to="productLink(product)"
-                  class="compare-grid__product-model compare-grid__product-model--link"
-                  :aria-label="
-                    t('compare.a11y.viewProduct', { name: product.title })
-                  "
-                >
-                  {{ productModelLabel(product) }}
-                </NuxtLink>
-                <p v-else class="compare-grid__product-model">
-                  {{ productModelLabel(product) }}
-                </p>
-                <p class="compare-grid__product-brand">
-                  {{ product.brand ?? '—' }}
-                </p>
+                <span class="compare-grid__feature-label">{{ row.label }}</span>
+              </div>
+              <div class="compare-grid__values" role="cell">
                 <div
-                  v-if="product.country"
-                  class="compare-grid__product-country"
+                  v-for="(product, columnIndex) in products"
+                  :key="`${row.key}-${product.gtin}`"
+                  :class="[
+                    'compare-grid__value',
+                    { 'compare-grid__value--has-list': row.type === 'list' },
+                  ]"
                 >
-                  <v-tooltip :text="product.country.name" location="bottom">
-                    <template #activator="{ props: tooltipProps }">
-                      <span
-                        class="compare-grid__product-country-flag"
-                        v-bind="tooltipProps"
+                  <div v-if="product" class="compare-grid__value-mobile">
+                    <ClientOnly>
+                      <NuxtLink
+                        v-if="productLink(product)"
+                        :to="productLink(product)"
+                        class="compare-grid__value-mobile-media compare-grid__value-mobile-media--link"
+                        :aria-label="
+                          t('compare.a11y.viewProduct', { name: product.title })
+                        "
                       >
                         <NuxtImg
-                          v-if="product.country.flag"
-                          :src="product.country.flag"
-                          :alt="product.country.name"
-                          width="24"
-                          height="16"
-                          class="compare-grid__flag"
+                          v-if="product.coverImage"
+                          :src="product.coverImage"
+                          :alt="product.title"
+                          width="88"
+                          height="88"
+                          format="webp"
+                          class="compare-grid__value-mobile-image"
                         />
-                        <span class="compare-grid__country-label">{{
-                          product.country.name
-                        }}</span>
-                      </span>
-                    </template>
-                  </v-tooltip>
-                </div>
-                <v-btn
-                  variant="text"
-                  size="small"
-                  color="error"
-                  class="compare-grid__product-remove"
-                  :aria-label="
-                    t('compare.actions.remove', { name: product.title })
-                  "
-                  @click="handleRemove(product.gtin)"
-                >
-                  {{ t('compare.actions.removeShort') }}
-                </v-btn>
-              </article>
-            </div>
-          </div>
-
-          <div
-            v-for="row in textualRows"
-            :key="row.key"
-            class="compare-grid__row"
-            role="row"
-          >
-            <div class="compare-grid__feature" role="rowheader">
-              <v-icon
-                :icon="row.icon"
-                size="20"
-                class="compare-grid__feature-icon"
-              />
-              <span class="compare-grid__feature-label">{{ row.label }}</span>
-            </div>
-            <div class="compare-grid__values" role="cell">
-              <div
-                v-for="(product, columnIndex) in products"
-                :key="`${row.key}-${product.gtin}`"
-                :class="[
-                  'compare-grid__value',
-                  { 'compare-grid__value--has-list': row.type === 'list' },
-                ]"
-              >
-                <div v-if="product" class="compare-grid__value-mobile">
-                  <ClientOnly>
-                    <NuxtLink
-                      v-if="productLink(product)"
-                      :to="productLink(product)"
-                      class="compare-grid__value-mobile-media compare-grid__value-mobile-media--link"
-                      :aria-label="
-                        t('compare.a11y.viewProduct', { name: product.title })
-                      "
-                    >
-                      <NuxtImg
-                        v-if="product.coverImage"
-                        :src="product.coverImage"
-                        :alt="product.title"
-                        width="88"
-                        height="88"
-                        format="webp"
-                        class="compare-grid__value-mobile-image"
-                      />
-                      <div
-                        v-else
-                        class="compare-grid__value-mobile-placeholder"
-                        aria-hidden="true"
-                      >
-                        {{ productInitials(product.title) }}
+                        <div
+                          v-else
+                          class="compare-grid__value-mobile-placeholder"
+                          aria-hidden="true"
+                        >
+                          {{ productInitials(product.title) }}
+                        </div>
+                      </NuxtLink>
+                      <div v-else class="compare-grid__value-mobile-media">
+                        <NuxtImg
+                          v-if="product.coverImage"
+                          :src="product.coverImage"
+                          :alt="product.title"
+                          width="88"
+                          height="88"
+                          format="webp"
+                          class="compare-grid__value-mobile-image"
+                        />
+                        <div
+                          v-else
+                          class="compare-grid__value-mobile-placeholder"
+                          aria-hidden="true"
+                        >
+                          {{ productInitials(product.title) }}
+                        </div>
                       </div>
-                    </NuxtLink>
-                    <div v-else class="compare-grid__value-mobile-media">
-                      <NuxtImg
-                        v-if="product.coverImage"
-                        :src="product.coverImage"
-                        :alt="product.title"
-                        width="88"
-                        height="88"
-                        format="webp"
-                        class="compare-grid__value-mobile-image"
-                      />
-                      <div
-                        v-else
-                        class="compare-grid__value-mobile-placeholder"
-                        aria-hidden="true"
-                      >
-                        {{ productInitials(product.title) }}
-                      </div>
+                    </ClientOnly>
+                    <div class="compare-grid__value-mobile-details">
+                      <p class="compare-grid__value-mobile-brand">
+                        {{ product.brand ?? '—' }}
+                      </p>
+                      <p class="compare-grid__value-mobile-model">
+                        {{ productModelLabel(product) }}
+                      </p>
                     </div>
-                  </ClientOnly>
-                  <div class="compare-grid__value-mobile-details">
-                    <p class="compare-grid__value-mobile-brand">
-                      {{ product.brand ?? '—' }}
-                    </p>
-                    <p class="compare-grid__value-mobile-model">
-                      {{ productModelLabel(product) }}
-                    </p>
                   </div>
-                </div>
 
-                <div class="compare-grid__value-content">
-                  <template v-if="row.type === 'text'">
-                    <!-- eslint-disable vue/no-v-html -->
-                    <p
-                      v-if="row.values[columnIndex]"
-                      class="compare-grid__value-text"
-                      v-html="row.values[columnIndex]"
-                    />
-                    <!-- eslint-enable vue/no-v-html -->
-                    <p v-else class="compare-grid__value-text">
-                      {{ t('compare.textual.empty') }}
-                    </p>
-                  </template>
-                  <template v-else>
-                    <!-- eslint-disable vue/no-v-html -->
-                    <ul
-                      v-if="hasListValues(row.values[columnIndex])"
-                      class="compare-grid__list compare-grid__list--pros-cons"
-                      role="list"
-                    >
-                      <li
-                        v-for="item in getListValues(row.values[columnIndex])"
-                        :key="item"
-                        class="compare-grid__list-item"
-                        role="listitem"
-                        v-html="item"
+                  <div class="compare-grid__value-content">
+                    <template v-if="row.type === 'text'">
+                      <!-- eslint-disable vue/no-v-html -->
+                      <p
+                        v-if="row.values[columnIndex]"
+                        class="compare-grid__value-text"
+                        v-html="row.values[columnIndex]"
                       />
-                    </ul>
-                    <!-- eslint-enable vue/no-v-html -->
-                    <p v-else class="compare-grid__value-text">
-                      {{ t('compare.textual.empty') }}
-                    </p>
-                  </template>
+                      <!-- eslint-enable vue/no-v-html -->
+                      <p v-else class="compare-grid__value-text">
+                        {{ t('compare.textual.empty') }}
+                      </p>
+                    </template>
+                    <template v-else>
+                      <!-- eslint-disable vue/no-v-html -->
+                      <ul
+                        v-if="hasListValues(row.values[columnIndex])"
+                        class="compare-grid__list compare-grid__list--pros-cons"
+                        role="list"
+                      >
+                        <li
+                          v-for="item in getListValues(row.values[columnIndex])"
+                          :key="item"
+                          class="compare-grid__list-item"
+                          role="listitem"
+                          v-html="item"
+                        />
+                      </ul>
+                      <!-- eslint-enable vue/no-v-html -->
+                      <p v-else class="compare-grid__value-text">
+                        {{ t('compare.textual.empty') }}
+                      </p>
+                    </template>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </v-container>
       </section>
 
       <section class="compare-section">
@@ -1019,7 +1033,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useId } from '#imports'
+
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import {
   createCompareService,
@@ -1073,7 +1088,7 @@ const { t, locale, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 const router = useRouter()
 const route = useRoute()
-const heroId = useId()
+// const heroId = useId()
 
 const canonicalUrl = useCanonicalUrl()
 
@@ -1180,16 +1195,6 @@ const heroBackLabel = computed(() => {
   }
 
   return t('compare.hero.backFallback')
-})
-
-const heroBackAriaLabel = computed(() => {
-  if (normalizedVerticalTitle.value) {
-    return t('compare.hero.backAria', {
-      verticalTitle: normalizedVerticalTitle.value,
-    })
-  }
-
-  return t('compare.hero.backAriaFallback')
 })
 
 const highlightIcon = 'mdi-crown'
@@ -1795,7 +1800,7 @@ const productInitials = (title: string) => {
   padding: 0.4rem 0.95rem
   border-radius: 999px
   background: rgba(var(--v-theme-hero-overlay-soft), 0.18)
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.96)
+  color: rgba(var(--v-theme-text-neutral-strong), 0.96)
   font-weight: 600
   text-decoration: none
   transition: background 0.2s ease, transform 0.2s ease
@@ -1816,17 +1821,17 @@ const productInitials = (title: string) => {
   padding: 0.5rem 0.75rem
   border-radius: 999px
   background: rgba(var(--v-theme-hero-overlay-soft), 0.18)
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.95)
+  color: rgba(var(--v-theme-text-neutral-strong), 0.95)
   font-weight: 500
 
 .compare-page__title
   font-size: clamp(2rem, 3vw, 2.75rem)
   font-weight: 700
   margin-bottom: 0.75rem
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.98)
+  color: rgba(var(--v-theme-text-neutral-strong), 1)
 
 .compare-page__subtitle
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.85)
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
   max-width: 720px
   margin: 0 auto
 

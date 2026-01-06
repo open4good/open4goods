@@ -1,0 +1,362 @@
+resourcesConfig:
+  overrideResources: true
+
+# Unique identifier for this vertical.
+# MUST contains only charracters
+# SHOULD be equal to the configuration file name, without the extension
+id: oven
+
+order: 2
+
+# The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
+# SHOULD be set, it will then force this taxonomy for all products in this vertical
+googleTaxonomyId: 683
+
+#The icecat category id. Set -1 if unknown
+icecatTaxonomyId: 2286
+
+# EPREL group code (correspond to url_code in /swagger-ui/index.html#/eprel-controller/eprel)
+eprelGroupNames: 
+ - ovens
+
+# Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
+verticalImage: /images/verticals/ovens.png
+
+mdiIcon: mdi-stove
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: true
+
+popular: true
+
+# The mainly presented attributes for this category
+popularAttributes:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation
+  enabled: false
+
+#####################################################################################################################################
+# ImpacScore configuration.
+# Must stay structurally present; content will be auto-generated later.
+#####################################################################################################################################
+impactScoreConfig:
+  criteriasPonderation:
+    CLASSE_ENERGY: 0.4
+    POWER_CONSUMPTION_TYPICAL: 0.3
+    WEIGHT: 0.2
+    WARRANTY: 0.1
+  texts:
+    fr:
+      purpose: "Mock purpose for ovens"
+      availlableDatas: "Mock data availability"
+      criticalReview: "Mock critical review"
+      criteriasAnalysis:
+        CLASSE_ENERGY: "Analysis for CLASSE_ENERGY"
+        POWER_CONSUMPTION_TYPICAL: "Analysis for POWER_CONSUMPTION_TYPICAL"
+        WEIGHT: "Analysis for WEIGHT"
+        WARRANTY: "Analysis for WARRANTY"
+
+# The scores that are available to build the impact score. They come from scored attributes.
+# Scores from _default.yml are merged
+availableImpactScoreCriterias:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+  - WEIGHT
+  - WARRANTY
+
+#####################################################################################################################################
+# I18N CONFIGURATION
+######################################################################################################################################
+i18n:
+  fr:
+    # Product URL & H1
+    url:
+      prefix: "|| four | fours ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "|| Four | Fours ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    # Product metas (generic templates reused)
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphType: "product"
+
+    # Vertical page elements
+    verticalHomeUrl: "fours"
+    verticalHomeTitle: "Fours"
+    verticalHomeDescription: "Comparez les fours (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
+
+    # A mapping beetween custom page names behind this vertical and wiki pages (sample)
+  #    wikiPages:
+  #      - wikiUrl: verticals:ovens:guide-achat-fours:WebHome
+  #        verticalUrl: "guide-achat-four-encastrable"
+  #        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
+  #        faIcon: "mdi-star"
+
+  en:
+    url:
+      prefix: "|| oven | ovens ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "Oven"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphType: "product"
+
+    verticalHomeUrl: "ovens"
+    verticalHomeTitle: "Ovens"
+    verticalHomeDescription: "Compare ovens (built-in, convection, self-cleaning…) by eco-score and price."
+
+#####################################################################################################################################
+# NUDGE TOOL CONFIGURATION
+#####################################################################################################################################
+nudgeToolConfig:
+  scores:
+    - scoreName: "ENERGY_CONSUMPTION"
+      scoreMinValue: 3
+      mdiIcon: "mdi-lightning-bolt"
+      title:
+        en: "Energy consumption"
+        fr: "Consommation énergétique"
+      description:
+        en: "Ovens with a low energy consumption"
+        fr: "Fours avec une faible consommation énergétique"
+
+    - scoreName: "DURABILITY"
+      scoreMinValue: 3
+      mdiIcon: "mdi-archive-outline"
+      title:
+        en: "Durability"
+        fr: "Durabilité"
+      description:
+        en: "Ovens with a good durability"
+        fr: "Fours avec une bonne durabilité"
+
+    - scoreName: "REPARABILITY"
+      scoreMinValue: 3
+      mdiIcon: "mdi-tools"
+      title:
+        en: "Reparability"
+        fr: "Réparabilité"
+      description:
+        en: "Ovens with a good reparability"
+        fr: "Fours avec une bonne réparabilité"
+
+    - scoreName: "BRAND_SUSTAINABILITY"
+      scoreMinValue: 4
+      mdiIcon: "mdi-scale-balance"
+      title:
+        en: "ESG criterias"
+        fr: "Critères ESG"
+      description:
+        en: "Models with a brand having good ESG rating"
+        fr: "Modèles dont la marque dispose d'un bon indice ESG"
+
+  subsetGroups:
+    - id: "price"
+      mdiIcon: "mdi-currency-eur"
+      layout: "grid"
+      title:
+        en: "Budget"
+        fr: "Budget"
+      description:
+        en: "Pick a price comfort zone."
+        fr: "Votre budget"
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+
+  subsets:
+    - id: "price_lower_400"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "400"
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "0"
+      image: "example-image.png"
+      url:
+        en: "low-price"
+        fr: "petits-prix"
+      caption:
+        en: "< 400 €"
+        fr: "< 400 €"
+      title:
+        en: "Affordable ovens"
+        fr: "Fours pas chers"
+      description:
+        en: "Ovens priced under €400."
+        fr: "Les fours dont le prix est inférieur à 400€."
+
+    - id: "price_400_800"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "400"
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "800"
+      image: "example-image.png"
+      url:
+        en: "oven-400-800-euros"
+        fr: "four-400-800-euros"
+      caption:
+        en: "400 - 800 €"
+        fr: "400 - 800 €"
+      title:
+        en: "Mid-range ovens"
+        fr: "Fours milieu de gamme"
+      description:
+        en: "Ovens priced between €400 and €800."
+        fr: "Les fours dont le prix est compris entre 400€ et 800€."
+
+    - id: "price_greater_800"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "800"
+      image: "example-image.png"
+      url:
+        en: "premium-price"
+        fr: "haut-de-gamme"
+      caption:
+        en: "> 800 €"
+        fr: "> 800 €"
+      title:
+        en: "Premium ovens"
+        fr: "Fours haut de gamme"
+      description:
+        en: "Ovens priced over €800."
+        fr: "Les fours dont le prix est supérieur à 800€."
+
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 5
+    buckets: 20
+  "scores.POWER_CONSUMPTION_TYPICAL.value":
+    interval: 250
+    buckets: 12
+  "scores.WEIGHT.value":
+    interval: 2
+    buckets: 12
+  "scores.BRAND_SUSTAINABILITY.value":
+    interval: 1
+    buckets: 5
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
+  "scores.DATA_QUALITY.value":
+    interval: 1
+    buckets: 5
+  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
+    interval: 250
+    buckets: 12
+  "attributes.indexed.WEIGHT":
+    interval: 2
+    buckets: 12
+  "price.minPrice.price":
+    interval: 50
+    buckets: 30
+
+ecoFilters:
+  - "CLASSE_ENERGY"
+
+technicalFilters:
+  - "POWER_CONSUMPTION_TYPICAL"
+  - "WEIGHT"
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+attributesConfig:
+  configs:
+    - key: "CLASSE_ENERGY"
+    - key: "POWER_CONSUMPTION_TYPICAL"
+    - key: "WEIGHT"
+    - key: "WARRANTY"
+    - key: "YEAR"
+    - key: "COLOR"
+    - key: "FEATURES"
+    - key: "BRAND_SUSTAINABILITY"
+    - key: "DATA_QUALITY"
+
+####################################################################################
+# Product classification from categories (samples, will be overridden post-generation)
+####################################################################################
+
+matchingCategories:
+  Electrodepot - Guides et Comparateurs:
+  - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+  rueducommerce.fr:
+  - "MINI-FOUR"
+  - "FOUR"
+  rakuten.com-csv.yml:
+  - "ELECTROMENAGER | FOUR"
+  - "ELECTROMENAGER"
+  E.Leclerc FR:
+  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"
+  darty.com:
+  - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
+  JPG - Flux Produits:
+  - "PETIT ELECTROMENAGER | FOURNITURES DE RESTAURATION"
+  Cdiscount FR:
+  - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
+  RueDuCommerce FR:
+  - "MINI-FOUR"
+  - "FOUR"
+  - "ELECTROMENAGER > CUISSON > MINI-FOUR"
+  - "ELECTROMENAGER > CUISSON > FOUR"
+  ManoMano FR:
+  - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR GRILL | MINI FOUR GRILL"
+  - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"
+  - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > MATERIEL PROFESSIONNEL DE CUISINE > APPAREILS DE CUISSON > FOUR MIXTE VAPEUR | FOUR MIXTE VAPEUR"
+  - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR TRADITIONNEL | FOUR TRADITIONNEL"
+  - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR VAPEUR | FOUR VAPEUR"
+  - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR CHALEUR TOURNANTE | MINI FOUR CHALEUR TOURNANTE"
+  cdiscount.com:
+  - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
+  - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
+  Référentiel produits Electro Depot:
+  - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+  Castorama FR:
+  - "FOUR ENCASTRABLE | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > FOUR ET MICRO-ONDES > FOUR ENCASTRABLE | CUISINE | GROS ELECTROMENAGER"
+  UNDERDOG FR:
+  - "367 | COOKERS & OVENS | FOUR"
+  R&eacute;f&eacute;rentiel produits - Darty Pro:
+  - "GROS ELECTROMENAGER | FOUR"
+  Darty FR:
+  - "PETIT ELECTROMENAGER CUISINE / MINI-FOUR / RECHAUD / FOUR POSABLE / MINI FOUR / FOUR POSABLE | PETIT ELECTROMENAGER CUISINE>MINI-FOUR / RECHAUD / FOUR POSABLE>MINI FOUR / FOUR POSABLE | MINI-FOUR / RECHAUD / FOUR POSABLE | MINI FOUR / FOUR POSABLE"
+  - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
+  manomano.fr:
+  - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"

@@ -57,10 +57,10 @@ public class VerticalConfig {
 	 */
 	private Integer icecatTaxonomyId;
 
-	/**
-	 * The corresponding eprel taxonomy ID
-	 */
-	private String eprelGroupName;
+        /**
+         * The corresponding EPREL taxonomy IDs.
+         */
+        private List<String> eprelGroupNames = new ArrayList<>();
 
 	/**
 	 * If true, then the vertical is handled through batch processing, but is not
@@ -208,7 +208,8 @@ public class VerticalConfig {
          * Titles and descriptions were previously embedded here but are now resolved elsewhere to keep the
          * configuration lightweight and focused on selectable criteria identifiers.
          */
-        private List<String> availableImpactScoreCriterias = new ArrayList<>();
+	@JsonMerge
+    private List<String> availableImpactScoreCriterias = new ArrayList<>();
 
 	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName
@@ -975,12 +976,49 @@ public class VerticalConfig {
 		this.cacheTokenNames = cacheTokenNames;
 	}
 
-	public String getEprelGroupName() {
-		return eprelGroupName;
-	}
+        public List<String> getEprelGroupNames() {
+                return eprelGroupNames;
+        }
 
-	public void setEprelGroupName(String eprelGroupName) {
-		this.eprelGroupName = eprelGroupName;
-	}
+        public void setEprelGroupNames(List<String> eprelGroupNames) {
+                if (eprelGroupNames == null) {
+                        this.eprelGroupNames = new ArrayList<>();
+                        return;
+                }
+
+                List<String> sanitizedNames = eprelGroupNames.stream()
+                                .filter(Objects::nonNull)
+                                .map(String::trim)
+                                .filter(name -> !name.isEmpty())
+                                .distinct()
+                                .toList();
+
+                this.eprelGroupNames = new ArrayList<>(sanitizedNames);
+        }
+
+        /**
+         * @deprecated Use {@link #getEprelGroupNames()} instead.
+         */
+        @Deprecated
+        public String getEprelGroupName() {
+                return eprelGroupNames.isEmpty() ? null : eprelGroupNames.getFirst();
+        }
+
+        /**
+         * Accepts both legacy scalar EPREL group names and the new list-based format.
+         *
+         * @param eprelGroupName single EPREL category name
+         * @deprecated use {@link #setEprelGroupNames(List)}
+         */
+        @Deprecated
+        @com.fasterxml.jackson.annotation.JsonSetter("eprelGroupName")
+        public void setEprelGroupName(String eprelGroupName) {
+                setEprelGroupNames(eprelGroupName == null ? null : List.of(eprelGroupName));
+        }
+
+        @com.fasterxml.jackson.annotation.JsonSetter("eprelGroupNames")
+        public void setEprelGroupNamesFromYaml(List<String> eprelGroupNames) {
+                setEprelGroupNames(eprelGroupNames);
+        }
 
 }

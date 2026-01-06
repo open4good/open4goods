@@ -14,9 +14,9 @@ import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
-import org.open4goods.api.services.completion.image.DjlImageEmbeddingService;
-import org.open4goods.api.services.completion.image.ImageEmbeddingService;
-import org.open4goods.api.services.completion.text.DjlTextEmbeddingService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
+import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.brand.service.BrandScoreService;
@@ -277,9 +277,10 @@ public class ApiConfig {
 
 
 	@Bean
-	SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder) {
-		return new SearchService(aggregatedDataRepository, logsFolder);
-	}
+    SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder,
+                    @Autowired DjlTextEmbeddingService textEmbeddingService) {
+            return new SearchService(aggregatedDataRepository, logsFolder, textEmbeddingService);
+    }
 
 	@Bean
         BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired SerialisationService serialisationService) throws Exception {
@@ -302,12 +303,8 @@ public class ApiConfig {
 
 
 	@Bean
-	ImageEmbeddingService imageEmbeddingService(ApiProperties apiProperties) {
-		return new DjlImageEmbeddingService(apiProperties);
-	}
-	@Bean
-	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties, ImageEmbeddingService imageEmbeddingService) {
-		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties,  imageEmbeddingService);
+	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties, DjlImageEmbeddingService imageEmbeddingService) {
+		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties, imageEmbeddingService);
 
 	}
 
@@ -330,9 +327,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
-			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, DjlTextEmbeddingService embeddingService) {
+			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, DjlTextEmbeddingService embeddingService,
+			DjlEmbeddingProperties embeddingProperties) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
-				serialisationService, brandScoreService, embeddingService);
+				serialisationService, brandScoreService, embeddingService, embeddingProperties);
 	}
 
 	//////////////////////////////////////////////////////////

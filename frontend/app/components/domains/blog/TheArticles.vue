@@ -3,6 +3,7 @@ import { useRoute, useRouter } from '#app'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import { useI18n } from 'vue-i18n'
 import type { BlogTagDto } from '~~/shared/api-client'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 
 import { useBlog } from '~/composables/blog/useBlog'
 const {
@@ -467,19 +468,15 @@ await useAsyncData('blog-ssr-init', async () => {
 </script>
 
 <template>
-  <section class="blog-hero" aria-labelledby="blog-hero-heading">
-    <v-container class="py-0 px-4 mx-auto blog-hero__container" max-width="xl">
-      <div class="blog-hero__content">
-        <p class="blog-hero__eyebrow">{{ t('blog.hero.eyebrow') }}</p>
-        <div class="blog-hero__copy">
-          <h1 id="blog-hero-heading" class="blog-hero__title">
-            {{ t('blog.hero.title') }}
-          </h1>
-          <p class="blog-hero__subtitle">{{ t('blog.hero.subtitle') }}</p>
-        </div>
-      </div>
-    </v-container>
-  </section>
+  <PageHeader
+    :eyebrow="t('blog.hero.eyebrow')"
+    :title="t('blog.hero.title')"
+    :subtitle="t('blog.hero.subtitle')"
+    layout="single-column"
+    container="xl"
+    background="image"
+    background-image-asset-key="blogBackground"
+  />
 
   <v-container class="py-6 px-4 mx-auto" max-width="xl">
     <v-sheet

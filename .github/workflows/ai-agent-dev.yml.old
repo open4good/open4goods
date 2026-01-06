@@ -1,0 +1,215 @@
+name: "🤖 Agent Dev Checks"
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions: {}
+
+jobs:
+  checks:
+    name: Run fork-safe checks
+    if: >-
+      github.event.pull_request.base.ref == github.event.repository.default_branch
+      && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout PR head (no credentials)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Temurin JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run agent dev checks
+        id: run-checks
+        run: |
+          set +e
+          mkdir -p artifacts/agent-dev
+          results_file="artifacts/agent-dev/results.txt"
+          : > "$results_file"
+
+          run_cmd() {
+            local name="$1"; shift
+            local safe_name
+            safe_name=$(echo "$name" | tr ' /' '__' | tr -cd '[:alnum:]_-')
+            local log_path="artifacts/agent-dev/${safe_name}.log"
+            echo "Running $name"
+            "$@" > "$log_path" 2>&1
+            local status=$?
+            local label="success"
+            if [ $status -ne 0 ]; then
+              label="failure"
+            fi
+            echo "${name}|${label}|${log_path}" >> "$results_file"
+          }
+
+          run_cmd "Maven test suite" mvn -B -ntp test
+          run_cmd "Frontend lint" bash -lc "cd frontend && pnpm lint"
+          run_cmd "Frontend unit tests" bash -lc "cd frontend && pnpm test --run"
+
+          failures=$(grep -c "|failure|" "$results_file" || true)
+          echo "failures=${failures}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload dev artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-dev-logs
+          path: artifacts/agent-dev
+          if-no-files-found: warn
+
+  report:
+    name: Publish results
+    needs: checks
+    if: >-
+      always() && github.event.pull_request.base.ref == github.event.repository.default_branch
+      && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: agent-dev-logs
+          path: agent-dev-artifacts
+
+      - name: Summarize results
+        id: summary
+        run: |
+          results_file="agent-dev-artifacts/results.txt"
+          if [ ! -f "$results_file" ]; then
+            echo "results=[]" >> "$GITHUB_OUTPUT"
+            echo "has_failures=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          results_file = Path('agent-dev-artifacts/results.txt')
+          results = []
+          for line in results_file.read_text().splitlines():
+              parts = line.split('|', 2)
+              if len(parts) != 3:
+                  continue
+              name, status, log_path = parts
+              results.append({'name': name, 'status': status, 'log': log_path})
+
+          has_failures = any(item.get('status') != 'success' for item in results)
+          summary_lines = []
+          for item in results:
+              emoji = '✅' if item['status'] == 'success' else '❌'
+              summary_lines.append(f"{emoji} {item['name']}")
+
+          summary_path = Path('agent-dev-artifacts/summary.md')
+          summary_path.write_text('\n'.join(summary_lines))
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f"results={json.dumps(results)}\n")
+              fh.write(f"has_failures={'true' if has_failures else 'false'}\n")
+              fh.write(f"summary_file={summary_path}\n")
+          PY
+
+      - name: Post PR comment and labels
+        uses: actions/github-script@v8
+        env:
+          RESULTS_JSON: ${{ steps.summary.outputs.results }}
+          SUMMARY_FILE: ${{ steps.summary.outputs.summary_file }}
+          HAS_FAILURES: ${{ steps.summary.outputs.has_failures }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const core = require('@actions/core')
+            const fs = require('fs')
+            const results = JSON.parse(process.env.RESULTS_JSON || '[]')
+            const summaryFile = process.env.SUMMARY_FILE
+            const hasFailures = (process.env.HAS_FAILURES || 'false') === 'true'
+
+            const body = []
+            body.push('## 🤖 Agent dev checks')
+            body.push('')
+
+            if (results.length === 0) {
+              body.push(':warning: No results were produced for this run.')
+            } else {
+              const table = ['| Check | Status | Log |', '| --- | --- | --- |']
+              for (const item of results) {
+                const status = item.status === 'success' ? '✅ Passed' : '❌ Failed'
+                const logLink = item.log ? `[log](${item.log})` : 'N/A'
+                table.push(`| ${item.name} | ${status} | ${logLink} |`)
+              }
+              body.push(...table)
+            }
+
+            if (summaryFile && fs.existsSync(summaryFile)) {
+              const summary = fs.readFileSync(summaryFile, 'utf8')
+              if (summary.trim().length > 0) {
+                body.push('\n<details><summary>Condensed summary</summary>')
+                body.push('')
+                body.push(summary)
+                body.push('</details>')
+              }
+            }
+
+            const issue_number = context.payload.pull_request.number
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number,
+              body: body.join('\n'),
+            })
+
+            const desiredLabel = hasFailures ? 'agent:needs_human' : 'agent:DEV_CHECKS'
+            const obsoleteLabel = hasFailures ? 'agent:DEV_CHECKS' : 'agent:needs_human'
+
+            await github.rest.issues.addLabels({
+              ...context.repo,
+              issue_number,
+              labels: [desiredLabel],
+            })
+
+            try {
+              await github.rest.issues.removeLabel({
+                ...context.repo,
+                issue_number,
+                name: obsoleteLabel,
+              })
+            } catch (error) {
+              core.info(`Label ${obsoleteLabel} was not present`)
+            }

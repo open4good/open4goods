@@ -1,0 +1,36 @@
+Generate a png transparent image for a {productEnglish}.
+
+{
+"global_settings": {
+"aspect_ratio": "16:9",
+"resolution": "1024x576",
+"format": "png"
+},
+
+"art_direction": {
+"style": "Premium 3D Render",
+"vibe": "Minimalist, Clean, Tech-forward, Soft",
+"material_finish": "Matte finish with glossy accents",
+"composition": "Centered isometric view or slightly floating product"
+},
+
+"color_palette": {
+"background_type": "Solid or Soft Gradient",
+"primary_background_hex": "#00DE9F",
+"secondary_background_hex": "#00A1C2",
+"lighting_color": "Neutral White (5500K)",
+"accent_color_concept": "Soft Blue or Brand Color reflection"
+},
+
+"lighting_setup": {
+"type": "Studio Lighting",
+"shadows": "Soft, diffused drop shadows (no harsh blacks)",
+"source": "Three-point softbox lighting"
+},
+
+    "master_prompt": "A professional face rendering of a realistic {productEnglish}, isometric view, centered composition, minimalist design. High-end product representation style. Clean smooth matte materials. The background is transparent. Soft studio lighting, soft shadows, 4k resolution, highly detailed, sleek aesthetics.",
+
+    "negative_prompt": "text, watermark, label, logo, human, hands, cluttered background, distorted, blurry, low resolution, sketch, cartoon, vibrant colors, messy, dark background, complex details, noise"
+
+},
+}

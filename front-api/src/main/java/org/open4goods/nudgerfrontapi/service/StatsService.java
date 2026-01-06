@@ -11,6 +11,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.model.stats.AffiliationPartnersStats;
+import org.open4goods.services.opendata.service.OpenDataService;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.Resource;
@@ -36,25 +37,30 @@ public class StatsService {
     private final SerialisationService serialisationService;
     private final ResourcePatternResolver resourceResolver;
     private final AffiliationPartnerService affiliationPartnerService;
+    private final OpenDataService openDataService;
 
     public StatsService(SerialisationService serialisationService,
                         ResourcePatternResolver resourceResolver,
-                        AffiliationPartnerService affiliationPartnerService) {
+                        AffiliationPartnerService affiliationPartnerService,
+                        OpenDataService openDataService) {
         this.serialisationService = serialisationService;
         this.resourceResolver = resourceResolver;
         this.affiliationPartnerService = affiliationPartnerService;
+        this.openDataService = openDataService;
     }
 
     /**
      * Compute statistics about categories mappings.
      *
      * @param domainLanguage currently unused but retained for future localisation of statistics labels
-     * @return DTO describing the category statistics used by the frontend.
+     * @return DTO describing the category statistics used by the frontend including affiliation partners and OpenData counts.
      */
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
         VerticalConfig defaultConfig = loadDefaultConfig();
         Resource[] resources = loadVerticalResources();
         AffiliationPartnersStats partnersStats = computeAffiliationPartnersStats();
+        long gtinItemsCount = openDataService.totalItemsGTIN();
+        long isbnItemsCount = openDataService.totalItemsISBN();
 
         long enabledCount = Arrays.stream(resources)
                 .filter(resource -> !Objects.equals(resource.getFilename(), DEFAULT_CONFIG_FILENAME))
@@ -64,7 +70,7 @@ public class StatsService {
                 .filter(VerticalConfig::isEnabled)
                 .count();
 
-        return new CategoriesStatsDto(Math.toIntExact(enabledCount), partnersStats.count());
+        return new CategoriesStatsDto(Math.toIntExact(enabledCount), partnersStats.count(), gtinItemsCount, isbnItemsCount);
     }
 
     /**

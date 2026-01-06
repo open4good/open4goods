@@ -17,7 +17,7 @@ public class InStockParser {
 	// TODO : Path from conf
 	private static final Logger logger = GenericFileLogger.initLogger("product-stock-parser", Level.INFO, "/opt/open4goods/logs/");
 
-	
+
 	public static InStock parse(String val) throws InvalidParameterException {
 
 		if (StringUtils.isEmpty(val)) {
@@ -31,7 +31,7 @@ public class InStockParser {
 		}
 
         return switch (val) {
-            case "1", "TRUE", "INSTOCK","IN_STOCK", "AVAILABLE", "EN STOCK", "HTTP://SCHEMA.ORG/INSTOCK", "IN STOCK", "HTTPS://SCHEMA.ORG/INSTOCK" -> InStock.INSTOCK;
+            case "1", "TRUE", "INSTOCK","IN_STOCK", "OUI", "AVAILABLE", "EN STOCK", "HTTP://SCHEMA.ORG/INSTOCK", "IN STOCK", "HTTPS://SCHEMA.ORG/INSTOCK" -> InStock.INSTOCK;
             case "0", "FALSE", "NON DISPONIBLE","OUT OF STOCK","OUT_OF_STOCK","OUTOFSTOCK", "HTTP://SCHEMA.ORG/OUTOFSTOCK", "HTTP://SCHEMA.ORG/PREORDER", "HTTP://SCHEMA.ORG/DISCONTINUED" ->
                     InStock.OUTOFSTOCK;
             case "UNKNOWN" -> InStock.UNKNOWN;

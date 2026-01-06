@@ -31,7 +31,7 @@ import org.apache.tika.language.detect.LanguageResult;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
 import org.open4goods.api.services.AbstractCompletionService;
-import org.open4goods.api.services.completion.image.ImageEmbeddingService;
+import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.exceptions.TechnicalException;
@@ -107,7 +107,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
     private final ApiProperties apiProperties;
     private final ImageMagickService imageService;
     private final ResourceService resourceService;
-    private final ImageEmbeddingService embeddingService;
+    private final DjlImageEmbeddingService embeddingService;
 
     private static final Tika tika = new Tika();
     private static final TikaConfig tikaConfig = TikaConfig.getDefaultConfig();
@@ -130,7 +130,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
                                      ResourceService resourceService,
                                      ProductRepository dataRepository,
                                      ApiProperties apiProperties,
-                                     ImageEmbeddingService embeddingService) {
+                                     DjlImageEmbeddingService embeddingService) {
 
         // Log level and log folder configured via ApiProperties
         super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
@@ -251,7 +251,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
                 // 4.1 MD5 blacklist
                 .map(r -> {
                     if (vertical.getResourcesConfig().getMd5Exclusions().contains(r.getMd5())) {
-                        logger.warn("Excluded because of blacklisted MD5 : {}", r.getUrl());
+                        logger.info("Excluded because of blacklisted MD5 : {}", r.getUrl());
                         r.setStatus(ResourceStatus.MD5_EXCLUSION);
                         r.setEvicted(true);
                     }
@@ -260,7 +260,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
                 // 4.2 MD5 duplicates (exact binary duplicates)
                 .map(r -> {
                     if (md5s.contains(r.getMd5())) {
-                        logger.warn("Excluded because of duplicate MD5 : {}", r.getUrl());
+                        logger.info("Excluded because of duplicate MD5 : {}", r.getUrl());
                         r.setStatus(ResourceStatus.MD5_DUPLICATE);
                         r.setEvicted(true);
                     }
@@ -272,7 +272,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
                     if (r.getResourceType() == ResourceType.IMAGE &&
                             r.getImageInfo() != null &&
                             r.getImageInfo().pixels() < vertical.getResourcesConfig().getMinPixelsEvictionSize()) {
-                        logger.warn("Excluded because image is too small : {}", r.getUrl());
+                        logger.info("Excluded because image is too small : {}", r.getUrl());
                         r.setStatus(ResourceStatus.TOO_SMALL);
                         r.setEvicted(true);
                     }
@@ -707,7 +707,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * <ul>
      *     <li>Basic image metadata (width, height, pixel count)</li>
      *     <li>Perceptive hash (pHash) for cheap similarity checks (legacy)</li>
-     *     <li>Embeddings via {@link ImageEmbeddingService} for modern, category-agnostic grouping</li>
+     *     <li>Embeddings via {@link DjlImageEmbeddingService} for modern, category-agnostic grouping</li>
      * </ul>
      *
      * @param resource resource to update
@@ -741,7 +741,17 @@ public class ResourceCompletionService extends AbstractCompletionService {
             float[] embedding = embeddingService.embed(src.toPath());
             imageInfo.setEmbedding(embedding);
         } catch (Exception e) {
-            logger.error("Cannot compute embedding ({}) : {}", e.getMessage(), resource.getUrl(), e);
+            logger.error("Cannot compute embedding ({}) : {}", e.getMessage(), resource.getUrl());
+
+            // Provide helpful hint for common issues
+            if (e.getMessage() != null && e.getMessage().contains("attention_mask")) {
+                logger.warn("Model compatibility issue detected. The configured model may not support image-only inference. " +
+                           "Consider using a pure vision model (e.g., ResNet, EfficientNet) or a different CLIP export. " +
+                           "See the embedding.vision-model-url configuration for alternatives.");
+            } else if (e.getMessage() != null && e.getMessage().contains("NDManager")) {
+                logger.warn("NDManager lifecycle issue detected. This may indicate a concurrency problem or resource leak.");
+            }
+
             // Decide policy: for now we keep the image even without embedding, but
             // it will be treated as its own singleton cluster later.
         }

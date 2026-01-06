@@ -96,14 +96,14 @@ public class CategoriesController {
     @GetMapping
     @Operation(
             summary = "List categories",
-            description = "Return vertical configurations optionally filtered by their enabled status.",
+            description = "Return vertical configurations. The enabled flag is exposed but not filtered server-side.",
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
                             description = "Language driving localisation of textual fields (future use).",
                             schema = @Schema(implementation = DomainLanguage.class)),
                     @Parameter(name = "onlyEnabled", in = ParameterIn.QUERY, required = false,
-                            description = "When true, only return verticals flagged as enabled.",
-                            schema = @Schema(type = "boolean", defaultValue = "true"))
+                            description = "Deprecated: retained for backward compatibility. All verticals are returned regardless of this flag.",
+                            schema = @Schema(type = "boolean", defaultValue = "false"))
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Categories returned",
@@ -116,8 +116,8 @@ public class CategoriesController {
     @Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ResponseEntity<List<VerticalConfigDto>> categories(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
-            @RequestParam(name = "onlyEnabled", defaultValue = "true") boolean onlyEnabled) {
-        List<VerticalConfigDto> body = verticalsConfigService.getConfigsWithoutDefault(onlyEnabled).stream()
+            @RequestParam(name = "onlyEnabled", defaultValue = "false") boolean onlyEnabled) {
+        List<VerticalConfigDto> body = verticalsConfigService.getConfigsWithoutDefault().stream()
                 .map(config -> categoryMappingService.toVerticalConfigDto(config, domainLanguage))
                 .filter(Objects::nonNull)
                 .toList();
@@ -234,7 +234,7 @@ public class CategoriesController {
         Pageable pageable = PageRequest.of(0, TOP_PRODUCTS_LIMIT,
                 Sort.by(Sort.Order.desc(SORT_FIELD_IMPACT_SCORE)));
 
-        SearchService.SearchResult result = searchService.search(pageable, null, null, null, filters);
+        SearchService.SearchResult result = searchService.search(pageable, null, null, null, filters, false);
         Locale locale = resolveLocale(domainLanguage);
 
         Map<Long, ProductDto> uniqueProducts = new LinkedHashMap<>();

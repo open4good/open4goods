@@ -20,6 +20,7 @@ import {
     IssueCommentDtoToJSON,
     IssueCommentDtoToJSONTyped,
 } from './IssueCommentDto';
+
 /**
  * Detailed view of an agent-created issue
  * @export
@@ -160,3 +161,4 @@ export function AgentIssueDtoToJSONTyped(value?: AgentIssueDto | null, ignoreDis
         'comments': value['comments'] == null ? undefined : ((value['comments'] as Array<any>).map(IssueCommentDtoToJSON)),
     };
 }
+

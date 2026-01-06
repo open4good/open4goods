@@ -1,0 +1,379 @@
+resourcesConfig:
+  overrideResources: true
+
+# Unique identifier for this vertical.
+# MUST contains only charracters
+# SHOULD be equal to the configuration file name, without the extension
+id: refrigerator
+
+order: 8
+
+# The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
+# SHOULD be set, it will then force this taxonomy for all products in this vertical
+googleTaxonomyId: 686
+
+#The icecat category id. Set -1 if unknown
+icecatTaxonomyId: -1
+
+# EPREL group code
+eprelGroupNames: 
+  - refrigeratingappliances
+  - refrigeratingappliances2019
+  - professionalrefrigeratedstoragecabinets
+
+# Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
+verticalImage: /images/verticals/fridge.png
+
+mdiIcon: mdi-fridge-outline
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: true
+
+popular: true
+
+# The mainly presented attributes for this category
+popularAttributes:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation
+  enabled: false
+
+#####################################################################################################################################
+# ImpacScore configuration.
+# Must stay structurally present; content will be auto-generated later.
+#####################################################################################################################################
+impactScoreConfig:
+  criteriasPonderation:
+    CLASSE_ENERGY: 0.4
+    POWER_CONSUMPTION_TYPICAL: 0.3
+    WEIGHT: 0.2
+    WARRANTY: 0.1
+  texts:
+    fr:
+      purpose: "Mock purpose for refrigerators"
+      availlableDatas: "Mock data availability"
+      criticalReview: "Mock critical review"
+      criteriasAnalysis:
+        CLASSE_ENERGY: "Analysis for CLASSE_ENERGY"
+        POWER_CONSUMPTION_TYPICAL: "Analysis for POWER_CONSUMPTION_TYPICAL"
+        WEIGHT: "Analysis for WEIGHT"
+        WARRANTY: "Analysis for WARRANTY"
+
+# The scores that are available to build the impact score. They come from scored attributes.
+# Scores from _default.yml are merged
+availableImpactScoreCriterias:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+  - WEIGHT
+  - WARRANTY
+
+#####################################################################################################################################
+# I18N CONFIGURATION
+######################################################################################################################################
+i18n:
+  fr:
+    # Product URL & H1
+    url:
+      prefix: "|| réfrigerateur | refrigerateur | frigo  | frigidaire ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "Réfrigérateur"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    # Product metas (generic templates reused)
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphType: "product"
+
+    # Vertical page elements
+    verticalHomeUrl: "refrigerators"
+    verticalHomeTitle: "Réfrigérateurs"
+    verticalHomeDescription: "Comparez les réfrigérateurs"
+
+    # A mapping beetween custom page names behind this vertical and wiki pages (sample)
+  #    wikiPages:
+  #      - wikiUrl: verticals:refrigerators:guide-achat-frigos:WebHome
+  #        verticalUrl: "guide-achat-frigo-encastrable"
+  #        title: "Frigo : comment choisir (pyrolyse, chaleur tournante, volume…)"
+  #        faIcon: "mdi-star"
+
+  en:
+    url:
+      prefix: "|| refrigerators | fridges ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "|| fridge | refrigerators | Built-in fridge | Electric fridge ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphType: "product"
+
+    verticalHomeUrl: "refrigerators"
+    verticalHomeTitle: "refrigerators"
+    verticalHomeDescription: "Compare refrigerators (built-in, convection, self-cleaning…) by eco-score and price."
+
+#####################################################################################################################################
+# NUDGE TOOL CONFIGURATION
+#####################################################################################################################################
+nudgeToolConfig:
+  scores:
+    - scoreName: "ENERGY_CONSUMPTION"
+      scoreMinValue: 3
+      mdiIcon: "mdi-lightning-bolt"
+      title:
+        en: "Energy consumption"
+        fr: "Consommation énergétique"
+      description:
+        en: "refrigerators with a low energy consumption"
+        fr: "Frigos avec une faible consommation énergétique"
+
+    - scoreName: "DURABILITY"
+      scoreMinValue: 3
+      mdiIcon: "mdi-archive-outline"
+      title:
+        en: "Durability"
+        fr: "Durabilité"
+      description:
+        en: "refrigerators with a good durability"
+        fr: "Frigos avec une bonne durabilité"
+
+    - scoreName: "REPARABILITY"
+      scoreMinValue: 3
+      mdiIcon: "mdi-tools"
+      title:
+        en: "Reparability"
+        fr: "Réparabilité"
+      description:
+        en: "refrigerators with a good reparability"
+        fr: "Frigos avec une bonne réparabilité"
+
+    - scoreName: "BRAND_SUSTAINABILITY"
+      scoreMinValue: 4
+      mdiIcon: "mdi-scale-balance"
+      title:
+        en: "ESG criterias"
+        fr: "Critères ESG"
+      description:
+        en: "Models with a brand having good ESG rating"
+        fr: "Modèles dont la marque dispose d'un bon indice ESG"
+
+  subsetGroups:
+    - id: "price"
+      mdiIcon: "mdi-currency-eur"
+      layout: "grid"
+      title:
+        en: "Budget"
+        fr: "Budget"
+      description:
+        en: "Pick a price comfort zone."
+        fr: "Votre budget"
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+
+  subsets:
+    - id: "price_lower_400"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "400"
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "0"
+      image: "example-image.png"
+      url:
+        en: "low-price"
+        fr: "petits-prix"
+      caption:
+        en: "< 400 €"
+        fr: "< 400 €"
+      title:
+        en: "Affordable refrigerators"
+        fr: "Frigos pas chers"
+      description:
+        en: "refrigerators priced under €400."
+        fr: "Les réfrigérateurs dont le prix est inférieur à 400€."
+
+    - id: "price_400_800"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "400"
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "800"
+      image: "example-image.png"
+      url:
+        en: "fridge-400-800-euros"
+        fr: "frigo-400-800-euros"
+      caption:
+        en: "400 - 800 €"
+        fr: "400 - 800 €"
+      title:
+        en: "Mid-range refrigerators"
+        fr: "Réfrigérateurs milieu de gamme"
+      description:
+        en: "refrigerators priced between €400 and €800."
+        fr: "Les réfrigerateurss dont le prix est compris entre 400€ et 800€."
+
+    - id: "price_greater_800"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "800"
+      image: "example-image.png"
+      url:
+        en: "premium-price"
+        fr: "haut-de-gamme"
+      caption:
+        en: "> 800 €"
+        fr: "> 800 €"
+      title:
+        en: "Premium refrigerators"
+        fr: "Frigidaires haut de gamme"
+      description:
+        en: "refrigerators priced over €800."
+        fr: "Les frigos dont le prix est supérieur à 800€."
+
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 5
+    buckets: 20
+  "scores.POWER_CONSUMPTION_TYPICAL.value":
+    interval: 250
+    buckets: 12
+  "scores.WEIGHT.value":
+    interval: 2
+    buckets: 12
+  "scores.BRAND_SUSTAINABILITY.value":
+    interval: 1
+    buckets: 5
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
+  "scores.DATA_QUALITY.value":
+    interval: 1
+    buckets: 5
+  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
+    interval: 250
+    buckets: 12
+  "attributes.indexed.WEIGHT":
+    interval: 2
+    buckets: 12
+  "price.minPrice.price":
+    interval: 50
+    buckets: 30
+
+ecoFilters:
+  - "CLASSE_ENERGY"
+
+technicalFilters:
+  - "POWER_CONSUMPTION_TYPICAL"
+  - "WEIGHT"
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+attributesConfig:
+  configs:
+    - key: "CLASSE_ENERGY"
+    - key: "POWER_CONSUMPTION_TYPICAL"
+    - key: "WEIGHT"
+    - key: "WARRANTY"
+    - key: "YEAR"
+    - key: "COLOR"
+    - key: "FEATURES"
+    - key: "BRAND_SUSTAINABILITY"
+    - key: "DATA_QUALITY"
+
+####################################################################################
+# Product classification from categories (samples, will be overridden post-generation)
+####################################################################################
+
+matchingCategories:
+  rueducommerce.fr:
+  - "REFRIGERATEUR AMERICAIN"
+  - "REFRIGERATEUR"
+  rakuten.com-csv.yml:
+  - "ELECTROMENAGER | REFRIGERATEUR"
+  darty.com:
+  - "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR TOP | GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR TOP | REFRIGERATEUR | REFRIGERATEUR TOP"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR CONGELATEUR EN BAS | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN BAS | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR CONGELATEUR EN BAS"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR AMERICAIN | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR AMERICAIN | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR AMERICAIN"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR MULTI-PORTES | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR MULTI-PORTES | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR MULTI-PORTES"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR 1 PORTE | GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR 1 PORTE | REFRIGERATEUR | REFRIGERATEUR 1 PORTE"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR CONGELATEUR EN HAUT | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN HAUT | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR CONGELATEUR EN HAUT"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR BAR | GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR BAR | REFRIGERATEUR | REFRIGERATEUR BAR"
+  E.Leclerc FR:
+  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>REFRIGERATEUR | GROS ELECTROMENAGER | REFRIGERATEUR"
+  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR AMERICAIN | GROS ELECTROMENAGER | REFRIGERATEUR"
+  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR CONGELATEUR | GROS ELECTROMENAGER | REFRIGERATEUR"
+  - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR 1 PORTE | GROS ELECTROMENAGER | REFRIGERATEUR"
+  RueDuCommerce FR:
+  - "REFRIGERATEUR AMERICAIN"
+  - "ELECTROMENAGER > FROID > REFRIGERATEUR AMERICAIN"
+  - "REFRIGERATEUR"
+  - "ELECTROMENAGER > FROID > REFRIGERATEUR"
+  Cdiscount FR:
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR CLASSIQUE | FROID | REFRIGERATEUR CLASSIQUE"
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR AMERICAIN | FROID | REFRIGERATEUR AMERICAIN"
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR COMBINE | FROID | REFRIGERATEUR COMBINE"
+  ManoMano FR:
+  - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > REFRIGERATEUR | REFRIGERATEUR"
+  cdiscount.com:
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR CLASSIQUE | FROID | REFRIGERATEUR CLASSIQUE"
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > MINI-BAR – MINI FRIGO POUR BOISSON – FRIGO USB | FROID | MINI-BAR – MINI FRIGO POUR BOISSON – FRIGO USB"
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR AMERICAIN | FROID | REFRIGERATEUR AMERICAIN"
+  - "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR COMBINE | FROID | REFRIGERATEUR COMBINE"
+  Joom FR:
+  - "HOME APPLIANCES > KITCHEN APPLIANCES > REFRIGERATORS"
+  icecat.biz.yml:
+  - "REFRIGERATEURS-CONGELATEURS"
+  - "FRIGOS AMERICAINS"
+  Castorama FR:
+  - "REFRIGERATEUR A POSER | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > REFRIGERATEUR ET CONGELATEUR > REFRIGERATEUR > REFRIGERATEUR A POSER | CUISINE | GROS ELECTROMENAGER"
+  - "REFRIGERATEUR CONGELATEUR A POSER | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > REFRIGERATEUR ET CONGELATEUR > REFRIGERATEUR CONGELATEUR > REFRIGERATEUR CONGELATEUR A POSER | CUISINE | GROS ELECTROMENAGER"
+  - "MINI FRIGO | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > REFRIGERATEUR ET CONGELATEUR > REFRIGERATEUR > MINI FRIGO | CUISINE | GROS ELECTROMENAGER"
+  - "REFRIGERATEUR ENCASTRABLE | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > REFRIGERATEUR ET CONGELATEUR > REFRIGERATEUR > REFRIGERATEUR ENCASTRABLE | CUISINE | GROS ELECTROMENAGER"
+  UNDERDOG FR:
+  - "380 | FRIDGE FREEZERS | REFRIGERATEUR"
+  R&eacute;f&eacute;rentiel produits - Darty Pro:
+  - "GROS ELECTROMENAGER | REFRIGERATEUR"
+  - "GROS ELECTROMENAGER | REFRIGERATEUR CONGELATEUR"
+  Darty FR:
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR CONGELATEUR EN BAS | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN BAS | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR CONGELATEUR EN BAS"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR CONGELATEUR EN HAUT | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR CONGELATEUR EN HAUT | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR CONGELATEUR EN HAUT"
+  - "GROS ELECTROMENAGER / FROID CHR / ARMOIRE REFRIGEREE PRO | GROS ELECTROMENAGER>FROID CHR>ARMOIRE REFRIGEREE PRO | FROID CHR | ARMOIRE REFRIGEREE PRO"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR TOP | GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR TOP | REFRIGERATEUR | REFRIGERATEUR TOP"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR AMERICAIN | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR AMERICAIN | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR AMERICAIN"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR CONGELATEUR / REFRIGERATEUR MULTI-PORTES | GROS ELECTROMENAGER>REFRIGERATEUR CONGELATEUR>REFRIGERATEUR MULTI-PORTES | REFRIGERATEUR CONGELATEUR | REFRIGERATEUR MULTI-PORTES"
+  - "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR 1 PORTE | GROS ELECTROMENAGER>REFRIGERATEUR>REFRIGERATEUR 1 PORTE | REFRIGERATEUR | REFRIGERATEUR 1 PORTE"
+  manomano.fr:
+  - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > REFRIGERATEUR | REFRIGERATEUR"

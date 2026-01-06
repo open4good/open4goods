@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-labelledby="title desc">
-  <title id="title">Light logo placeholder</title>
-  <desc id="desc">Displayed when no light logo is provided.</desc>
-  <rect width="320" height="120" rx="18" fill="#FFFFFF" stroke="#FF6F61" stroke-width="8" stroke-dasharray="14 12" />
-  <text x="160" y="70" fill="#FF6F61" font-size="32" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="800" text-anchor="middle">LOGO ⚠️</text>
-  <text x="160" y="95" fill="#FF6F61" font-size="16" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="600" text-anchor="middle">missing light asset</text>
-</svg>

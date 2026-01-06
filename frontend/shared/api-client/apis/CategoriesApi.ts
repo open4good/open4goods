@@ -50,7 +50,7 @@ export interface NavigationRequest {
 export class CategoriesApi extends runtime.BaseAPI {
 
     /**
-     * Return vertical configurations optionally filtered by their enabled status.
+     * Return vertical configurations. The enabled flag is exposed but not filtered server-side.
      * List categories
      */
     async categories1Raw(requestParameters: Categories1Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<VerticalConfigDto>>> {
@@ -95,7 +95,7 @@ export class CategoriesApi extends runtime.BaseAPI {
     }
 
     /**
-     * Return vertical configurations optionally filtered by their enabled status.
+     * Return vertical configurations. The enabled flag is exposed but not filtered server-side.
      * List categories
      */
     async categories1(requestParameters: Categories1Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<VerticalConfigDto>> {

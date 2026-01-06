@@ -26,7 +26,7 @@ export type PageHeaderContentAlign = 'start' | 'center'
 /**
  * Container size options (Vuetify)
  */
-export type PageHeaderContainer = 'fluid' | 'lg' | 'xl' | 'xxl'
+export type PageHeaderContainer = 'fluid' | 'lg' | 'xl' | 'xxl' | 'semi-fluid'
 
 /**
  * Background type options
@@ -179,6 +179,8 @@ export interface PageHeaderProps {
   surfaceVariant?: HeroSurfaceVariant
   /** Background image source */
   backgroundImage?: string | { light: string; dark: string }
+  /** Background image i18n asset key (e.g. 'heroBackground') */
+  backgroundImageAssetKey?: string
   /** Overlay opacity (0-1) */
   overlayOpacity?: number
   /** Custom background color */

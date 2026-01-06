@@ -1,36 +1,42 @@
 ####################################################################################################################################################################
 #
 # This is the configuration for the TV vertical. All the configs items are inherited from the "_default.yml" configuration
-# 
+#
 # This "TV" vertical aims to be the demonstration one. Please use the below doc as a reference, and copy/paste/adapt to setup other verticals.
 # @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
 ###################################################################################################################################################################
 
 resourcesConfig:
   overrideResources: true
-        
-# Unique identifier for this vertical. 
+
+# Unique identifier for this vertical.
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
 id: tv
 
 order: 1
-# The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
+
+# The associated google taxonomyID. (Ex : FR - https://ww.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 404
 
-
+#The icecat category id. Set -1 if unknown
 icecatTaxonomyId: 1584
 
-eprelGroupName: TELEVISION
 
-# Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures). 
+# See /open4goods/docs/eprel_codes.md
+eprelGroupNames:
+  - televisions
+  - Televisions
+
+# Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
 # Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG
 
 # If absolute (starting with http), will be fetched cached and transformed in webp by the nudger resource server
-# If relativ url (starting with /), will be handled as 
+# If relativ url (starting with /), will be handled as
 verticalImage: /images/verticals/tv.png
 
+# The mdi corresponding icon : https://pictogrammers.com/library/mdi/
 mdiIcon: mdi-television
 
 # Indicates if the vertical must be UI / sitemap / search rendered
@@ -38,26 +44,20 @@ enabled: true
 
 popular: true
 
+# The mainly presented attributes for this category
 popularAttributes:
   - DIAGONALE_POUCES
   - DISPLAY_TECHNOLOGY
 
 # GenAiConfig for this vertical
 genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
+  # If false, will bypass the generativ ia texts generation
   enabled: false
-
-
 
 #####################################################################################################################################
 # ImpacScore configuration.
+# Auto generated, see /prompts/impactscore-generation.yml
 #####################################################################################################################################
-
-
-
-
-
-
 
 impactScoreConfig:
   criteriasPonderation:
@@ -98,22 +98,15 @@ impactScoreConfig:
   yamlPrompt: "\nkey: \"impactscore-generation\"\naiService: \"OPEN_AI\"\nuserPrompt: \"\\n\\n##\\_Ton rôle\\nTu es un agent expert en évaluation environnementale des produits électriques et electroniques.\\nAdopte une démarche d’expert en analyse du cycle de vie des produits. \\nNous allons travailler sur des Téléviseurs\\nNe fournir en réponse que du JSON, conformément à la structure indiquée, sans commentaire, ni texte supplémentaire\\n\\n### Création d'un eco-score pour les Téléviseurs \\n\\nTu vas créer un score d'impact environnemental, qui prend en compte les impacts écologiques et sociétaux pour les Téléviseurs.\\n\\nCet Impact Score est une composition de différents facteurs coefficientés. Les facteurs disponibles sont : \\n  MINAVAILABILITYSPAREPARTSYEARS : Durée minimale de disponibilité des pièces détachées\\n  POWER_CONSUMPTION_HDR : La consommation électrique du téléviseur en mode HDR (haute définition)\\n  MINAVAILABILITYSOFTWAREUPDATESYEARS : Durée minimale de disponibilité des mises à jour logicielles\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  BRAND_SUSTAINABILITY : BRAND_SUSTAINABILITY\\n  DATA_QUALITY : DATA_QUALITY\\n  MINGUARANTEEDSUPPORTYEARS : Durée minimale du support garanti\\n  CLASSE_ENERGY_SDR : La classe énergétique du téléviseur en mode SDR\\n  WARRANTY : Durée de garantie du produit\\n  POWER_CONSUMPTION_STANDBY_NETWORKD : La consommation électrique de l&#39;appareil en mode veille ou réseau\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  CLASSE_ENERGY_HDR : La classe énergétique du téléviseur en mode HDR\\n  DIAGONALE_POUCES : DIAGONALE_POUCES\\n  POWER_CONSUMPTION_SDR : La consommation électrique du téléviseur en mode SDR (basse définition)\\n\\n\\n### Principe de fonctionnement de l'eco-score\\n   \\nLes principes de fonctionnement que tu dois prendre en compte\\n   principe de relativisation des facteurs : Chacun des facteurs est représenté de manière relative, sous forme de classement. Le produit de la catégorie ayant le meilleur facteur pour l'environnement obtient 100/100, le produit ayant le moins bon score obtient 0/100' \\n   principe de virtualisation des scores manquants : si un des facteurs est absent, nous appliquons pour ce facteur la valeur moyenne de ce facteur pour l'ensemble des produits. Cet indicateur DATA_QUALITY est permet donc d'avantager les produits pour lequel toute l'info est disponible, sans pour autant pénaliser outre mesure les produits pour lesquels l'information est absente.\\n   la somme des différents facteurs coefficientés doit être égale à 1\\n   \\nTu vas travailler à partir des facteurs disponibles, pour élaborer un score d'impact environnemental pertinent pour des Téléviseurs.\\n\\n### Format de réponse attendu : JSON \\n    \\n Tout écart par rapport à la structure JSON fournie est inacceptable.\\n Aucune information supplémentaire ne doit être fournie en dehors du JSON (pas de phrases avant ou après).\\n Conserve l’ordre des clés et leur orthographe. Les clés doivent correspondre exactement à celles indiquées. Si un champ est nul ou non applicable, omets-le de la réponse.\\n Fournis une réponse JSON respectant strictement la structure suivante :\\n\\n {\\n    criteriasPonderation : {\\n      \\\"FACTEUR_1\\\" : PONDERATION_1,\\n      \\\"FACTEUR_2\\\" : PONDERATION_2,\\n      ...                        \\n    },\\n    texts: {\\n        fr: {\\n           \\\"purpose\\\": \\\"Décris la démarche et la méthodologie\\\",\\n           \\\"availlableDatas\\\": \\\"Analyse de façon générale les données disponibles et leur pertinence pour la réalisation de cet eco-score\\\",\\n           \\\"criticalReview\\\": \\\"Revue critique et retour constructif sur la démarche et la méthodologie, en évaluant les facteurs absents ou inutiles\\\",\\n           \\\"criteriasAnalysis\\\": {\\n                \\\"FACTEUR_1\\\" : \\\"Détail et analyse de l'importance du FACTEUR_1 dans l'analyse environnemental des Téléviseurs. Explique et justifie la pondération retenue pour le FACTEUR_1\\\",\\n                \\\"FACTEUR_2\\\" : \\\"Détail et analyse de l'importance du FACTEUR_2 dans l'analyse environnemental des Téléviseurs. Explique et justifie la pondération retenue pour le FACTEUR_2\\\",\\n                ...                                    \\n           }\\n        }    \\n     }\\n }\\n\"\noptions:\n  streamUsage: false\n  model: \"gpt-5.1\"\n  temperature: 1.0\n"
   aiJsonResponse: "{\n  \"criteriasPonderation\" : {\n    \"POWER_CONSUMPTION_SDR\" : 0.18,\n    \"POWER_CONSUMPTION_HDR\" : 0.12,\n    \"CLASSE_ENERGY_SDR\" : 0.06,\n    \"CLASSE_ENERGY_HDR\" : 0.04,\n    \"POWER_CONSUMPTION_STANDBY_NETWORKD\" : 0.05,\n    \"POWER_CONSUMPTION_OFF\" : 0.03,\n    \"DIAGONALE_POUCES\" : 0.06,\n    \"REPAIRABILITY_INDEX\" : 0.15,\n    \"MINAVAILABILITYSPAREPARTSYEARS\" : 0.08,\n    \"MINAVAILABILITYSOFTWAREUPDATESYEARS\" : 0.06,\n    \"MINGUARANTEEDSUPPORTYEARS\" : 0.04,\n    \"WARRANTY\" : 0.04,\n    \"BRAND_SUSTAINABILITY\" : 0.06,\n    \"DATA_QUALITY\" : 0.03\n  },\n  \"texts\" : {\n    \"fr\" : {\n      \"purpose\" : \"La démarche consiste à construire un éco-score spécifique aux téléviseurs, en s’appuyant sur une approche d’analyse de cycle de vie (ACV) simplifiée et opérationnelle à partir des données disponibles. L’objectif est de combiner des facteurs techniques (consommation d’énergie, taille, réparabilité, durées de garantie et de support) et des facteurs plus systémiques (pratiques de la marque, qualité des données), pour produire un score agrégé compris entre 0 et 100. Chaque facteur est d’abord normalisé de manière relative au sein d’un ensemble de produits comparables : le meilleur produit observé pour l’environnement obtient 100/100 sur ce facteur, le moins bon obtient 0/100. Les autres sont interpolés entre ces deux extrêmes. L’éco-score final est ensuite obtenu comme une somme pondérée de ces sous-scores, les pondérations reflétant le poids environnemental réel attendu des postes (énergie en phase d’usage, allongement de la durée de vie, réparabilité, responsabilités sociétales). La méthodologie intègre un principe de virtualisation des scores manquants, en utilisant la valeur moyenne de la base de produits lorsque l’information est absente, et un facteur DATA_QUALITY pour reconnaître et encourager la transparence des fabricants. Les pondérations sont calibrées pour que la phase d’usage (énergie) domine, tout en laissant une place importante à la réparabilité et à la durée de vie, qui conditionnent le nombre de téléviseurs produits et donc l’empreinte globale en ressources, en fabrication et en déchets électroniques.\",\n      \"availlableDatas\" : \"Les données disponibles couvrent trois grandes dimensions pertinentes pour les téléviseurs : 1) la performance énergétique et la taille (POWER_CONSUMPTION_SDR, POWER_CONSUMPTION_HDR, CLASSE_ENERGY_SDR, CLASSE_ENERGY_HDR, POWER_CONSUMPTION_STANDBY_NETWORKD, POWER_CONSUMPTION_OFF, DIAGONALE_POUCES) ; 2) la durabilité et la réparabilité (REPAIRABILITY_INDEX, MINAVAILABILITYSPAREPARTSYEARS, MINAVAILABILITYSOFTWAREUPDATESYEARS, MINGUARANTEEDSUPPORTYEARS, WARRANTY) ; 3) la responsabilité de la marque et la qualité de la donnée (BRAND_SUSTAINABILITY, DATA_QUALITY). Pour des téléviseurs, l’impact prépondérant sur le cycle de vie provient de la consommation d’électricité en phase d’usage, fortement corrélée à la puissance en SDR/HDR, au temps d’utilisation et à la taille de l’écran. Les indicateurs de consommation instantanée (en SDR, HDR, veille réseau, arrêt) sont donc très pertinents : ils permettent de différencier finement les modèles à surface équivalente. Les classes énergétiques (SDR, HDR) apportent une information déjà agrégée mais moins granulaire ; elles complètent utilement les consommations chiffrées, notamment si ces dernières sont absentes ou incomplètes. La diagonale de l’écran est un proxy de la quantité de matériaux et de la consommation d’usage : à performance et technologies comparables, un grand écran consomme et pèse plus. Côté durabilité, la disponibilité des pièces détachées, l’indice de réparabilité, la disponibilité des mises à jour logicielles et du support garantis, ainsi que la durée de garantie sont des signaux pertinents de la longévité effective du produit et de sa capacité à rester fonctionnel et sécurisé. Ces indicateurs couvrent à la fois la réparabilité matérielle (pièces, réparabilité) et la durabilité logicielle (mises à jour, support). Enfin, BRAND_SUSTAINABILITY et DATA_QUALITY permettent d’intégrer des dimensions transverses : politique climat, circularité, gestion des déchets, mais aussi transparence et fiabilité de l’information, ce qui est clé dans tout système d’éco-score déclaratif. L’ensemble forme un jeu de données relativement complet pour capter les principaux déterminants de l’empreinte des téléviseurs, même si certains postes d’impact (fabrication détaillée, logistique, fin de vie réelle) ne sont pas explicitement renseignés.\",\n      \"criticalReview\" : \"La méthodologie proposée est cohérente avec une approche ACV simplifiée adaptée au contexte de données partielles. La pondération forte accordée à la phase d’usage (consommations SDR/HDR et veilles) est justifiée par de nombreuses études montrant que, pour un téléviseur, l’énergie consommée pendant plusieurs années de fonctionnement domine souvent les impacts de fabrication, surtout pour les grands écrans très utilisés. La prise en compte explicite de la taille (DIAGONALE_POUCES) permet d’éviter de survaloriser de grands téléviseurs sobres par rapport à des modèles plus petits, en rappelant que la réduction de la taille reste un levier d’impact important. L’intégration d’indicateurs de réparabilité et de durabilité (indice de réparabilité, disponibilité de pièces et de mises à jour, garanties et support) va dans le sens des politiques publiques et des bonnes pratiques de circularité : allonger la durée de vie et la maintenabilité réduit le nombre d’appareils fabriqués et la quantité de déchets électroniques. Le recours à un indicateur de durabilité logicielle (MINAVAILABILITYSOFTWAREUPDATESYEARS, MINGUARANTEEDSUPPORTYEARS) est particulièrement pertinent pour les téléviseurs « smart » : l’obsolescence logicielle peut rendre un appareil inutilisable bien avant la fin de vie matérielle. BRAND_SUSTAINABILITY est un indicateur global utile pour internaliser certaines dimensions non couvertes par les données produit (décarbonation de la production, usage de matières recyclées, politique de reprise, etc.), mais il doit rester modérément pondéré pour ne pas masquer les performances spécifiques du modèle. DATA_QUALITY, de son côté, est une innovation intéressante pour éviter de sur-pénaliser les produits sans données : la virtualisation par la moyenne permet une comparaison équitable, tout en attribuant un léger bonus aux produits documentés. En critique, l’absence de données explicites sur la fabrication (poids du produit, type de technologie d’écran, contenu recyclé, lieux de production) et sur la fin de vie (taux de collecte, recyclabilité effective) limite la granularité ACV. Certains facteurs disponibles, comme les classes énergétiques, sont partiellement redondants avec les consommations chiffrées, mais restent utiles en secours lorsque les valeurs précises manquent. La méthodologie relative (0–100 basé sur les extrêmes du marché) est adaptée à un outil de comparaison, mais elle dépend fortement du périmètre de la base de produits ; un changement du panel peut déplacer les références. Il sera donc important de maintenir et recalibrer périodiquement les bornes, et, si possible, de confronter ce score à des ACV détaillées de quelques cas types pour valider les pondérations et corriger d’éventuels biais.\",\n      \"criteriasAnalysis\" : {\n        \"POWER_CONSUMPTION_SDR\" : \"La consommation en mode SDR (basse définition / usage courant) représente la majeure partie du temps d’utilisation réel pour de nombreux foyers, notamment pour les contenus TV traditionnels, la VOD en HD/Full HD ou les usages quotidiens. Elle est donc un proxy direct de l’énergie consommée sur l’ensemble de la durée de vie. Pour un téléviseur, la phase d’usage est souvent le premier poste d’impact (GES, ressources énergétiques, pollution atmosphérique), ce qui justifie une pondération élevée de 18 %. L’analyse ACV montre que, à diagonale équivalente, un modèle plus efficient en SDR réduit significativement l’empreinte cumulative sur 5 à 10 ans. On favorise donc fortement les téléviseurs capables de délivrer une luminosité confortable en limitant la puissance absorbée en SDR. La pondération reflète aussi le fait que la plupart des contenus consommés ne sont pas encore en HDR pour tous les utilisateurs, ce qui renforce la centralité du SDR dans l’impact global. Dans le système de score, on classera les produits en fonction de leur consommation normalisée (par exemple en W ou kWh/1000h) et on valorisera particulièrement les appareils qui combinent grande taille et sobriété, sans pour autant négliger l’effet taille capté par ailleurs par la diagonale.\",\n        \"POWER_CONSUMPTION_HDR\" : \"Le mode HDR implique généralement des pics de luminosité plus élevés et une consommation supérieure. Avec la multiplication des contenus 4K HDR (streaming, consoles, Blu-Ray), sa part dans l’usage réel augmente et peut devenir significative, notamment chez les gros consommateurs de contenus premium. La consommation HDR est donc un facteur important pour l’impact énergétique, même s’il reste secondaire par rapport au SDR pour une partie des usagers. Une pondération de 12 % reflète cette importance croissante, tout en reconnaissant que tous les foyers n’utilisent pas encore massivement le HDR. Le score encourage les fabricants à optimiser les algorithmes de gestion du rétroéclairage ou des pixels (local dimming, contrôle de la luminance, technologies d’affichage moins énergivores) afin de proposer une bonne expérience HDR sans explosion de la consommation. En combinant POWER_CONSUMPTION_SDR et POWER_CONSUMPTION_HDR, l’éco-score capture la performance énergétique sur la plupart des scénarios d’usage actuels et à venir.\",\n        \"CLASSE_ENERGY_SDR\" : \"La classe énergétique SDR synthétise déjà différents paramètres (consommation, surface d’écran, protocole de test) de manière normalisée au niveau réglementaire. Elle est utile comme indicateur secondaire, notamment lorsque les données de consommation chiffrée sont absentes, incohérentes ou partielles. Une pondération de 6 % permet de valoriser les modèles bien classés tout en évitant de compter deux fois la même information de façon excessive, puisque POWER_CONSUMPTION_SDR porte déjà la majeure partie du signal énergétique. En pratique, la classe énergétique intervient comme un filet de sécurité méthodologique : si la puissance en SDR n’est pas renseignée, la classe permet de positionner le produit de façon relative. Elle est aussi plus facilement lisible par le grand public et peut donc servir de pont entre un étiquetage réglementaire et l’éco-score proposé.\",\n        \"CLASSE_ENERGY_HDR\" : \"La classe énergétique HDR, plus récente et parfois moins uniformément disponible, apporte une vision normalisée de la performance énergétique en usage HDR. Comme pour le SDR, elle consolide plusieurs paramètres techniques en une échelle unique, mais elle reste redondante avec POWER_CONSUMPTION_HDR lorsque cette dernière est disponible. On lui attribue donc une pondération plus faible de 4 %, pour en faire un indicateur d’appoint. Elle renforce la granularité de l’analyse pour les modèles où la consommation HDR précise est manquante ou peu fiable, et elle permet de distinguer des produits optimisés spécifiquement pour les contenus HDR. Dans l’agrégation, CLASSE_ENERGY_HDR garantit que les téléviseurs mal classés au niveau réglementaire ne soient pas survalorisés du seul fait de bonnes performances déclarées partielles.\",\n        \"POWER_CONSUMPTION_STANDBY_NETWORKD\" : \"La consommation en veille réseau est souvent sous-estimée par les utilisateurs, mais elle représente un usage quasi permanent (24/7), notamment pour les téléviseurs connectés, assistants vocaux intégrés, mises à jour automatiques, etc. Sur une année, quelques watts continus se traduisent par des kWh non négligeables et une contribution significative aux émissions de GES. La pondération de 5 % reflète ce caractère structurel : même si l’énergie absolue reste inférieure à celle de l’usage actif, son aspect continu et souvent évitable (optimisation des modes réseau, options d’extinction totale) en fait un levier intéressant. Le score incite à privilégier les modèles de téléviseurs qui limitent la consommation en veille tout en restant fonctionnels, et encourage les fabricants à proposer des modes de veille profonde ou des options de désactivation réseau claires.\",\n        \"POWER_CONSUMPTION_OFF\" : \"La consommation à l’arrêt ou en veille simple traduit la capacité du téléviseur à réellement se couper de l’alimentation lorsqu’il est supposé éteint. Dans l’idéal, cette consommation devrait être proche de 0 W. Bien qu’elle soit généralement plus faible que celle en veille réseau, son impact se cumule dans le temps, surtout dans des foyers où le téléviseur reste branché en permanence. Une pondération de 3 % est suffisante pour signaler l’importance de limiter les pertes en mode off, sans surévaluer ce poste par rapport aux consommations en fonctionnement. En pratique, cet indicateur agit comme un critère d’exigence minimale : les produits ayant une consommation off anormalement élevée sont clairement pénalisés, tandis que les produits très sobres en mode off bénéficient d’un petit avantage, renforçant ainsi le message d’éco-conception énergétique globale.\",\n        \"DIAGONALE_POUCES\" : \"La diagonale de l’écran est un facteur déterminant pour l’empreinte environnementale d’un téléviseur : plus l’écran est grand, plus il nécessite de matériaux (verre, plastiques, métaux, électronique) et plus sa consommation énergétique augmente pour un niveau de luminance donné. D’un point de vue ACV, la taille influence à la fois la phase de fabrication (masse du produit, complexité) et la phase d’usage. On lui attribue une pondération de 6 % pour refléter ce double effet, tout en évitant de sur-pénaliser les grands téléviseurs si leur efficacité énergétique est excellente. Dans le score, on interprète généralement un écran plus petit comme plus favorable, toutes choses égales par ailleurs. Cela permet de rappeler un message important : au-delà de l’efficacité, la sobriété par la réduction de la taille est un levier puissant de réduction d’impact. Cette pondération modérée laisse cependant le champ aux autres facteurs (efficacité énergétique, réparabilité) pour valoriser les grands téléviseurs bien conçus.\",\n        \"REPAIRABILITY_INDEX\" : \"L’indice de réparabilité synthétise de multiples dimensions : disponibilité et prix des pièces, documentation technique, facilité de démontage, catégorisation des types de pannes, etc. Il est directement lié à la capacité réelle du téléviseur à être réparé plutôt que remplacé en cas de dysfonctionnement. Dans une perspective ACV, la réparabilité est un levier majeur de prolongation de la durée de vie et de réduction du nombre de produits fabriqués pour un même service rendu. C’est pourquoi cet indicateur est fortement pondéré à 15 %. Les téléviseurs avec un bon indice de réparabilité sont favorisés, car ils réduisent l’empreinte liée à la production de nouveaux appareils, à l’extraction de ressources et à la gestion des déchets électroniques. L’indice permet aussi de distinguer les démarches de conception plus vertueuses (modularité, standardisation de composants, facilité d’accès) qui ne se voient pas dans les seuls chiffres de consommation électrique, mais qui ont un impact structurel sur la soutenabilité du parc.\",\n        \"MINAVAILABILITYSPAREPARTSYEARS\" : \"La durée minimale de disponibilité des pièces détachées complète l’indice de réparabilité en ajoutant une dimension temporelle : même si un téléviseur est théoriquement réparable, cette réparabilité s’évanouit rapidement si les pièces ne sont plus fabriquées ou distribuées. Une disponibilité longue des pièces permet de maintenir le produit en service sur une période significativement supérieure à la seule période de garantie. Cela limite le renouvellement prématuré et favorise une logique de maintenance. Une pondération de 8 % reflète cette importance : ce facteur est légèrement moins structurant que l’indice de réparabilité global (qui agrège plusieurs dimensions), mais il est décisif pour la durabilité opérationnelle. Il incite également les marques à s’engager sur des durées de support matériel ambitieuses, en phase avec les objectifs de lutte contre l’obsolescence programmée.\",\n        \"MINAVAILABILITYSOFTWAREUPDATESYEARS\" : \"Pour les téléviseurs connectés, la dimension logicielle est devenue aussi critique que la dimension matérielle. L’absence de mises à jour de sécurité, de compatibilité ou de performances peut rendre un téléviseur obsolète bien avant la fin de sa durée de vie matérielle (applications qui ne fonctionnent plus, services non supportés, risques de cybersécurité). En ACV, cette obsolescence logicielle forcée est une source importante d’impacts cachés, car elle pousse au remplacement prématuré. La durée de disponibilité des mises à jour logicielles est donc un levier clé pour prolonger l’usage réel du produit. Une pondération de 6 % a été retenue pour reconnaître cette importance tout en restant cohérent avec le poids plus global de la réparabilité et de la disponibilité des pièces. Ce facteur valorise les téléviseurs dont les fabricants s’engagent à maintenir des mises à jour régulières pendant plusieurs années, ce qui aligne la durée de vie logicielle sur la durée de vie matérielle.\",\n        \"MINGUARANTEEDSUPPORTYEARS\" : \"La durée de support garanti regroupe les engagements du fabricant en matière d’assistance (technique, logicielle) et parfois de mises à jour critiques. Elle est un indicateur complémentaire à la durée des mises à jour logicielles et à la disponibilité des pièces, traduisant la volonté de la marque de suivre le produit dans le temps. Une période de support longue réduit les risques d’abandon prématuré du produit pour des raisons de compatibilité, de sécurité ou d’absence d’aide en cas de problème. On lui attribue une pondération de 4 %, car son effet est partiellement recouvert par les indicateurs plus ciblés (mises à jour, pièces) mais reste pertinent pour jauger la politique globale de la marque sur ce modèle. Dans le score, ce critère permet de valoriser les constructeurs qui alignent leurs engagements de support avec des durées de vie réalistes, plutôt que de considérer leurs téléviseurs comme des produits jetables à faible horizon temporel.\",\n        \"WARRANTY\" : \"La durée de garantie légale ou commerciale a un impact indirect mais important sur l’empreinte environnementale. Une garantie plus longue incite le fabricant à concevoir des produits plus fiables, car les pannes précoces sont à sa charge, et sécurise le consommateur pour des réparations ou remplacements pendant plusieurs années. Elle réduit aussi le risque de mise au rebut anticipée pour des raisons économiques (coût de réparation proche du prix d’un nouveau produit). Une pondération de 4 % reflète ce rôle d’incitation à la fiabilité et à la durabilité, en complément des indicateurs plus techniques de réparabilité. Ce facteur valorise les téléviseurs assortis de garanties étendues d’origine (sans surcoût), en cohérence avec une démarche de qualité et de responsabilité du fabricant vis-à-vis de la longévité de ses produits.\",\n        \"BRAND_SUSTAINABILITY\" : \"BRAND_SUSTAINABILITY regroupe des éléments liés aux politiques globales de la marque : trajectoire de décarbonation, usage de matériaux recyclés, gestion des déchets électroniques et des filières de reprise, conditions sociales dans la chaîne d’approvisionnement, transparence, certifications, etc. Même si cet indicateur est moins spécifique à un modèle donné, il permet de refléter des impacts et des efforts qui ne sont pas visibles dans les données techniques du produit (optimisation de la fabrication, logistique, taux de recyclage, etc.). Une pondération de 6 % est choisie pour donner un poids réel aux entreprises engagées, sans pour autant occulter les qualités ou défauts propres au modèle. Ce facteur crée un signal incitatif à l’échelle du portefeuille de produits : les marques qui améliorent leurs pratiques globales sont valorisées sur l’ensemble de leurs téléviseurs. Il est toutefois important d’assurer la robustesse de la méthodologie d’évaluation de BRAND_SUSTAINABILITY pour limiter les risques de greenwashing.\",\n        \"DATA_QUALITY\" : \"DATA_QUALITY mesure la complétude, la cohérence et la fiabilité des données fournies pour le calcul de l’éco-score. Dans un système où les valeurs manquantes sont virtualisées par la moyenne, ce facteur joue un rôle d’ajustement : il permet de récompenser les produits pour lesquels le fabricant fournit une information détaillée et transparente, sans pénaliser de façon excessive ceux dépourvus de certaines données. Une pondération de 3 % est suffisante pour envoyer un signal clair en faveur de la transparence, sans détourner le score de sa vocation principale qui est de refléter les impacts environnementaux réels. Un produit entièrement renseigné obtiendra un léger bonus, tandis qu’un produit avec peu d’informations ne sera pas massivement pénalisé mais ne bénéficiera pas de ce bonus. Ce critère contribue aussi à améliorer, sur la durée, la qualité de la base de données et donc la robustesse globale de l’éco-score, en incitant les marques à enrichir progressivement leurs déclarations environnementales.\"\n      }\n    }\n  }\n}"
 
-
-
-
-
-
-
-# The scores that are available to build the impact score
+# The scores that are available to build the impact score. They come from scored attributes.
+# Scores from _default.yml are merged
 availableImpactScoreCriterias:
   - DIAGONALE_POUCES
-#  - CLASSE_ENERGY
-#  - WEIGHT
-#  - POWER_CONSUMPTION_TYPICAL
-  - ESG
+  #  - CLASSE_ENERGY
+  #  - WEIGHT
+  #  - POWER_CONSUMPTION_TYPICAL
   - CLASSE_ENERGY_HDR
   - CLASSE_ENERGY_SDR
-  - DATA_QUALITY
   - DIAGONALE_POUCES
   - MINGUARANTEEDSUPPORTYEARS
   - MINAVAILABILITYSPAREPARTSYEARS
@@ -128,94 +121,113 @@ availableImpactScoreCriterias:
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
-# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts 
+# Use a micro templated language, that allows to introduce variables and "if condition", which allows to generate dynamic texts
 ######################################################################################################################################
 i18n:
   fr:
-      # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
-      url: 
-        # We can add a custom prefix (with our conditional templating language if we want)
-        prefix: "|| tv | television | televiseur ||"
-        # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
-        attrs:
-          - TV_TYPE
-          - BRAND
-          - MODEL
-          - YEAR
-      ##################################
-      # Product page meta and h1 title 
-      ##################################
-      # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
-      h1Title:  
-        prefix: "|| TV | Télévision | Téléviseur ||"
-        attrs:
-          - TV_TYPE
-          - BRAND
-          - MODEL
-          - YEAR
-        
+    # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
+    url:
+      # We can add a custom prefix (with our conditional templating language if we want)
+      prefix: "|| tv | television | televiseur ||"
+      # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
+      attrs:
+        - TV_TYPE
+        - BRAND
+        - MODEL
+        - YEAR
+    ##################################
+    # Product page meta and h1 title
+    ##################################
+    # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
+    h1Title:
+      prefix: "|| TV | Télévision | Téléviseur ||"
+      attrs:
+        - TV_TYPE
+        - BRAND
+        - MODEL
+        - YEAR
+    prettyName:
+      prefix: "|| TV | Télévision | Téléviseur ||"
+      attrs:
+        - BRAND
+        - DIAGONALE_POUCES
+        - DISPLAY_TECHNOLOGY
+    singular:
+      prefix: "|| tv | télévision | téléviseur ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| du téléviseur | de cette télévision | de la télévision ||"
+      attrs: []
+    # TODO : Generate short title (for cards restitution, with popular attributes)
 
+    ##################################
+    # Vertical page elements
+    ##################################
 
-      ##################################
-      # Vertical page elements 
-      ##################################
-      
-      # url for vertical (appened to baseUrl). No templating here 
-      verticalHomeUrl: "televiseurs"
-      # Text displaid as title for the vertical
-      # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
-      verticalHomeTitle: "Téléviseurs"
-      # Text displaid as title for the vertical
-      verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi-nécessaires, nos TV's ne sont malheureusement pas neutres pour l'environnement! Heureusement, Nudger est là pour vous informer et vous aider à choisir la TV la plus écologique et la plus adaptée à votre besoin."
-      # The image used as a logo
+    # url for vertical (appened to baseUrl). No templating here
+    verticalHomeUrl: "televiseurs"
+    # Text displaid as title for the vertical
+    # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
+    verticalHomeTitle: "Téléviseurs"
+    # Text displaid as title for the vertical
+    verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi-nécessaires, nos TV's ne sont malheureusement pas neutres pour l'environnement! Heureusement, Nudger est là pour vous informer et vous aider à choisir la TV la plus écologique et la plus adaptée à votre besoin."
+    # The image used as a logo
 
-
-     # A mapping beetween custom page names behind this vertical and wiki pages
-     # Copy and paste the wiki wiew url, without the "bin/view" prefix
-      wikiPages:
-        - wikiUrl: verticals:tv:technologies-tv:WebHome
-          verticalUrl: "oled-qled-lcd-que-choisir"
-          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
-          faIcon: "mdi-star"
+    # A mapping beetween custom page names behind this vertical and wiki pages
+    # Copy and paste the wiki wiew url, without the "bin/view" prefix
+    wikiPages:
+      - wikiUrl: verticals:tv:technologies-tv:WebHome
+        verticalUrl: "oled-qled-lcd-que-choisir"
+        title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
+        faIcon: "mdi-star"
 
   en:
-   # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
-   url: 
-     # We can add a custom prefix (with our conditional templating language if we want)
-     prefix: "|| tv | television ||"
-     # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
-     attrs:
-       - TV_TYPE
-       - BRAND
-       - MODEL
-       - YEAR
-   ##################################
-   # Product page meta and h1 title 
-   ##################################
-   # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
-   h1Title:  
-     prefix: "|| TV | Television ||"
-     attrs:
-       - TV_TYPE
-       - BRAND
-       - MODEL
-       - YEAR
-     
+    # The layout a product url will have. Ex : 81234555-tv-led-samsung-QL659P 2023
+    url:
+      # We can add a custom prefix (with our conditional templating language if we want)
+      prefix: "|| tv | television ||"
+      # Then we add some attributes values with hyphens if present (ex : led-samsung-QL659P-2023)
+      attrs:
+        - TV_TYPE
+        - BRAND
+        - MODEL
+        - YEAR
+    ##################################
+    # Product page meta and h1 title
+    ##################################
+    # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
+    h1Title:
+      prefix: "|| TV | Television ||"
+      attrs:
+        - TV_TYPE
+        - BRAND
+        - MODEL
+        - YEAR
+    prettyName:
+      prefix: "|| TV | Television ||"
+      attrs:
+        - BRAND
+        - DIAGONALE_POUCES
+        - DISPLAY_TECHNOLOGY
+    singular:
+      prefix: "|| tv | television ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| of the television | of this television ||"
+      attrs: []
 
+    ##################################
+    # Vertical page elements
+    ##################################
 
-   ##################################
-   # Vertical page elements 
-   ##################################
-   
-   # url for vertical (appened to baseUrl). No templating here 
-   verticalHomeUrl: "tvs"
-   # Text displaid as title for the vertical
-   # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
-   verticalHomeTitle: "Tv's"
-   # Text displaid as title for the vertical
-   verticalHomeDescription: "Welcome in our TV's'."  
-   # The image used as a logo
-
+    # url for vertical (appened to baseUrl). No templating here
+    verticalHomeUrl: "tvs"
+    # Text displaid as title for the vertical
+    # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
+    verticalHomeTitle: "Tv's"
+    # Text displaid as title for the vertical
+    verticalHomeDescription: "Welcome in our TV's'."
+    # The image used as a logo
 
 nudgeToolConfig:
   scores:
@@ -237,7 +249,7 @@ nudgeToolConfig:
       description:
         en: "Televisions with a good durability"
         fr: "Téléviseurs avec une bonne durabilité"
-                
+
     - scoreName: "REPARABILITY"
       scoreMinValue: 3
       mdiIcon: "mdi-tools"
@@ -282,297 +294,281 @@ nudgeToolConfig:
         en: "Continue"
         fr: "Continuer"
   subsets:
-################
-# Price
-################
-   - id: "price_lower_500"  # Unique identifier for the subset
-     group: "price"
-     criterias:
-       - field: "price.minPrice.price"
-         operator: "LOWER_THAN"
-         value: "500"
-       - field: "price.minPrice.price"
-         operator: "GREATER_THAN"
-         value: "0"
-     image: "example-image.png"
-     url:
-       en: "low-price"
-       fr: "petits-prix"
-     caption:
-       en: "< 500 €"
-       fr: "< 500 €"
-     title:
-       en: "Affordable TVs"
-       fr: "TV pas chères"
-     description:
-       en: "TVs priced under €500."
-       fr: "Les TV dont le prix est inférieur à 500€."
+    ################
+    # Price
+    ################
+    - id: "price_lower_500" # Unique identifier for the subset
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "500"
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "0"
+      image: "example-image.png"
+      url:
+        en: "low-price"
+        fr: "petits-prix"
+      caption:
+        en: "< 500 €"
+        fr: "< 500 €"
+      title:
+        en: "Affordable TVs"
+        fr: "TV pas chères"
+      description:
+        en: "TVs priced under €500."
+        fr: "Les TV dont le prix est inférieur à 500€."
 
-   - id: "price_500_1000"
-     group: "price"
-     criterias:
-       - field: "price.minPrice.price"
-         operator: "GREATER_THAN"
-         value: "500"
-       - field: "price.minPrice.price"
-         operator: "LOWER_THAN"
-         value: "1000"
-     image: "example-image.png"
-     url:
-       en: "tv-500-1000-euros"
-       fr: "tv-500-1000-euros"
-     caption:
-       en: "500 - 1000 €"
-       fr: "500 - 1000 €"
-     title:
-       en: "Mid-range TVs"
-       fr: "TV milieu de gamme"
-     description:
-       en: "TVs priced between €500 and €1000."
-       fr: "Les TV dont le prix est compris entre 500€ et 1000€."
+    - id: "price_500_1000"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "500"
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "1000"
+      image: "example-image.png"
+      url:
+        en: "tv-500-1000-euros"
+        fr: "tv-500-1000-euros"
+      caption:
+        en: "500 - 1000 €"
+        fr: "500 - 1000 €"
+      title:
+        en: "Mid-range TVs"
+        fr: "TV milieu de gamme"
+      description:
+        en: "TVs priced between €500 and €1000."
+        fr: "Les TV dont le prix est compris entre 500€ et 1000€."
 
-   - id: "price_greater_1000"
-     group: "price"
-     criterias:
-       - field: "price.minPrice.price"
-         operator: "GREATER_THAN"
-         value: "1000"
-     image: "example-image.png"
-     url:
-       en: "premium-price"
-       fr: "haut-de-gamme"
-     caption:
-       en: "> 1000 €"
-       fr: "> 1000 €"
-     title:
-       en: "Premium TVs"
-       fr: "TV haut de gamme"
-     description:
-       en: "TVs priced over €1000."
-       fr: "Les TV dont le prix est supérieur à 1000€."
+    - id: "price_greater_1000"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "1000"
+      image: "example-image.png"
+      url:
+        en: "premium-price"
+        fr: "haut-de-gamme"
+      caption:
+        en: "> 1000 €"
+        fr: "> 1000 €"
+      title:
+        en: "Premium TVs"
+        fr: "TV haut de gamme"
+      description:
+        en: "TVs priced over €1000."
+        fr: "Les TV dont le prix est supérieur à 1000€."
 
-################
-# Screen Size
-################
-   - id: "small_screens"
-     group: "screen_size"
-     criterias:
-       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-         operator: "LOWER_THAN"
-         value: "32"
-     image: "small-screen.png"
-     url:
-       en: "small-screens"
-       fr: "petits-ecrans"
-     caption:
-       en: "Small screens (< 32\")"
-       fr: "Petits écrans (< 32\")"
-     title:
-       en: "Small Screen TVs"
-       fr: "Petits écrans"
-     description:
-       en: "TVs with a screen size smaller than 32 inches."
-       fr: "Les TV avec une taille d'écran inférieure à 32 pouces."
+    ################
+    # Screen Size
+    ################
+    - id: "small_screens"
+      group: "screen_size"
+      criterias:
+        - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+          operator: "LOWER_THAN"
+          value: "32"
+      image: "small-screen.png"
+      url:
+        en: "small-screens"
+        fr: "petits-ecrans"
+      caption:
+        en: 'Small screens (< 32")'
+        fr: 'Petits écrans (< 32")'
+      title:
+        en: "Small Screen TVs"
+        fr: "Petits écrans"
+      description:
+        en: "TVs with a screen size smaller than 32 inches."
+        fr: "Les TV avec une taille d'écran inférieure à 32 pouces."
 
-   - id: "medium_screens"
-     group: "screen_size"
-     criterias:
-       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-         operator: "GREATER_THAN"
-         value: "32"
-       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-         operator: "LOWER_THAN"
-         value: "55"
-     image: "medium-screen.png"
-     url:
-       en: "medium-screens"
-       fr: "ecrans-moyens"
-     caption:
-       en: "Medium screens (32\" - 55\")"
-       fr: "Écrans moyens (32\" - 55\")"
-     title:
-       en: "Medium Screen TVs"
-       fr: "Écrans moyens"
-     description:
-       en: "TVs with a screen size between 32 and 55 inches."
-       fr: "Les TV avec une taille d'écran comprise entre 32 et 55 pouces."
+    - id: "medium_screens"
+      group: "screen_size"
+      criterias:
+        - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+          operator: "GREATER_THAN"
+          value: "32"
+        - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+          operator: "LOWER_THAN"
+          value: "55"
+      image: "medium-screen.png"
+      url:
+        en: "medium-screens"
+        fr: "ecrans-moyens"
+      caption:
+        en: 'Medium screens (32" - 55")'
+        fr: 'Écrans moyens (32" - 55")'
+      title:
+        en: "Medium Screen TVs"
+        fr: "Écrans moyens"
+      description:
+        en: "TVs with a screen size between 32 and 55 inches."
+        fr: "Les TV avec une taille d'écran comprise entre 32 et 55 pouces."
 
-   - id: "large_screens"
-     group: "screen_size"
-     criterias:
-       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-         operator: "GREATER_THAN"
-         value: "55"
-     image: "large-screen.png"
-     url:
-       en: "large-screens"
-       fr: "grands-ecrans"
-     caption:
-       en: "Large screens (> 55\")"
-       fr: "Grands écrans (> 55\")"
-     title:
-       en: "Large Screen TVs"
-       fr: "Grands écrans"
-     description:
-       en: "TVs with a screen size greater than 55 inches."
-       fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
-
-
-
-
-
-
-
-
-
-
-
-
+    - id: "large_screens"
+      group: "screen_size"
+      criterias:
+        - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+          operator: "GREATER_THAN"
+          value: "55"
+      image: "large-screen.png"
+      url:
+        en: "large-screens"
+        fr: "grands-ecrans"
+      caption:
+        en: 'Large screens (> 55")'
+        fr: 'Grands écrans (> 55")'
+      title:
+        en: "Large Screen TVs"
+        fr: "Grands écrans"
+      description:
+        en: "TVs with a screen size greater than 55 inches."
+        fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
 
 subsets:
-################
-# Price
-################
-   - id: "price_lower_500"  # Unique identifier for the subset
-     group: "price"
-     criterias:
-       - field: "price.minPrice.price"
-         operator: "LOWER_THAN"
-         value: "500"
-       - field: "price.minPrice.price"
-         operator: "GREATER_THAN"
-         value: "0"
-     image: "example-image.png"
-     url:
-       en: "low-price"
-       fr: "petits-prix"
-     caption:
-       en: "< 500 €"
-       fr: "< 500 €"
-     title:
-       en: "Affordable TVs"
-       fr: "TV pas chères"
-     description:
-       en: "TVs priced under €500."
-       fr: "Les TV dont le prix est inférieur à 500€."
+  ################
+  # Price
+  ################
+  - id: "price_lower_500" # Unique identifier for the subset
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "LOWER_THAN"
+        value: "500"
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "0"
+    image: "example-image.png"
+    url:
+      en: "low-price"
+      fr: "petits-prix"
+    caption:
+      en: "< 500 €"
+      fr: "< 500 €"
+    title:
+      en: "Affordable TVs"
+      fr: "TV pas chères"
+    description:
+      en: "TVs priced under €500."
+      fr: "Les TV dont le prix est inférieur à 500€."
 
-   - id: "price_500_1000"
-     group: "price"
-     criterias:
-       - field: "price.minPrice.price"
-         operator: "GREATER_THAN"
-         value: "500"
-       - field: "price.minPrice.price"
-         operator: "LOWER_THAN"
-         value: "1000"
-     image: "example-image.png"
-     url:
-       en: "tv-500-1000-euros"
-       fr: "tv-500-1000-euros"
-     caption:
-       en: "500 - 1000 €"
-       fr: "500 - 1000 €"
-     title:
-       en: "Mid-range TVs"
-       fr: "TV milieu de gamme"
-     description:
-       en: "TVs priced between €500 and €1000."
-       fr: "Les TV dont le prix est compris entre 500€ et 1000€."
+  - id: "price_500_1000"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "500"
+      - field: "price.minPrice.price"
+        operator: "LOWER_THAN"
+        value: "1000"
+    image: "example-image.png"
+    url:
+      en: "tv-500-1000-euros"
+      fr: "tv-500-1000-euros"
+    caption:
+      en: "500 - 1000 €"
+      fr: "500 - 1000 €"
+    title:
+      en: "Mid-range TVs"
+      fr: "TV milieu de gamme"
+    description:
+      en: "TVs priced between €500 and €1000."
+      fr: "Les TV dont le prix est compris entre 500€ et 1000€."
 
-   - id: "price_greater_1000"
-     group: "price"
-     criterias:
-       - field: "price.minPrice.price"
-         operator: "GREATER_THAN"
-         value: "1000"
-     image: "example-image.png"
-     url:
-       en: "premium-price"
-       fr: "haut-de-gamme"
-     caption:
-       en: "> 1000 €"
-       fr: "> 1000 €"
-     title:
-       en: "Premium TVs"
-       fr: "TV haut de gamme"
-     description:
-       en: "TVs priced over €1000."
-       fr: "Les TV dont le prix est supérieur à 1000€."
+  - id: "price_greater_1000"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "1000"
+    image: "example-image.png"
+    url:
+      en: "premium-price"
+      fr: "haut-de-gamme"
+    caption:
+      en: "> 1000 €"
+      fr: "> 1000 €"
+    title:
+      en: "Premium TVs"
+      fr: "TV haut de gamme"
+    description:
+      en: "TVs priced over €1000."
+      fr: "Les TV dont le prix est supérieur à 1000€."
 
-################
-# Screen Size
-################
-   - id: "small_screens"
-     group: "screen_size"
-     criterias:
-       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-         operator: "LOWER_THAN"
-         value: "32"
-     image: "small-screen.png"
-     url:
-       en: "small-screens"
-       fr: "petits-ecrans"
-     caption:
-       en: "Small screens (< 32\")"
-       fr: "Petits écrans (< 32\")"
-     title:
-       en: "Small Screen TVs"
-       fr: "Petits écrans"
-     description:
-       en: "TVs with a screen size smaller than 32 inches."
-       fr: "Les TV avec une taille d'écran inférieure à 32 pouces."
+  ################
+  # Screen Size
+  ################
+  - id: "small_screens"
+    group: "screen_size"
+    criterias:
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "LOWER_THAN"
+        value: "32"
+    image: "small-screen.png"
+    url:
+      en: "small-screens"
+      fr: "petits-ecrans"
+    caption:
+      en: 'Small screens (< 32")'
+      fr: 'Petits écrans (< 32")'
+    title:
+      en: "Small Screen TVs"
+      fr: "Petits écrans"
+    description:
+      en: "TVs with a screen size smaller than 32 inches."
+      fr: "Les TV avec une taille d'écran inférieure à 32 pouces."
 
-   - id: "medium_screens"
-     group: "screen_size"
-     criterias:
-       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-         operator: "GREATER_THAN"
-         value: "32"
-       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-         operator: "LOWER_THAN"
-         value: "55"
-     image: "medium-screen.png"
-     url:
-       en: "medium-screens"
-       fr: "ecrans-moyens"
-     caption:
-       en: "Medium screens (32\" - 55\")"
-       fr: "Écrans moyens (32\" - 55\")"
-     title:
-       en: "Medium Screen TVs"
-       fr: "Écrans moyens"
-     description:
-       en: "TVs with a screen size between 32 and 55 inches."
-       fr: "Les TV avec une taille d'écran comprise entre 32 et 55 pouces."
+  - id: "medium_screens"
+    group: "screen_size"
+    criterias:
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "GREATER_THAN"
+        value: "32"
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "LOWER_THAN"
+        value: "55"
+    image: "medium-screen.png"
+    url:
+      en: "medium-screens"
+      fr: "ecrans-moyens"
+    caption:
+      en: 'Medium screens (32" - 55")'
+      fr: 'Écrans moyens (32" - 55")'
+    title:
+      en: "Medium Screen TVs"
+      fr: "Écrans moyens"
+    description:
+      en: "TVs with a screen size between 32 and 55 inches."
+      fr: "Les TV avec une taille d'écran comprise entre 32 et 55 pouces."
 
-   - id: "large_screens"
-     group: "screen_size"
-     criterias:
-       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-         operator: "GREATER_THAN"
-         value: "55"
-     image: "large-screen.png"
-     url:
-       en: "large-screens"
-       fr: "grands-ecrans"
-     caption:
-       en: "Large screens (> 55\")"
-       fr: "Grands écrans (> 55\")"
-     title:
-       en: "Large Screen TVs"
-       fr: "Grands écrans"
-     description:
-       en: "TVs with a screen size larger than 55 inches."
-       fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
+  - id: "large_screens"
+    group: "screen_size"
+    criterias:
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "GREATER_THAN"
+        value: "55"
+    image: "large-screen.png"
+    url:
+      en: "large-screens"
+      fr: "grands-ecrans"
+    caption:
+      en: 'Large screens (> 55")'
+      fr: 'Grands écrans (> 55")'
+    title:
+      en: "Large Screen TVs"
+      fr: "Grands écrans"
+    description:
+      en: "TVs with a screen size larger than 55 inches."
+      fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
 
-                 
 ##############################################################################
 # Custom search filters : the following filters
 # will also be availlable in search for this vertical (must be an attribute or a score)
 ##############################################################################
-
-
-
 
 aggregationConfiguration:
   "scores.ECOSCORE.value":
@@ -625,19 +621,19 @@ aggregationConfiguration:
     buckets: 20
 
 ecoFilters:
-    - "REPAIRABILITY_INDEX" 
-    - "CLASSE_ENERGY"   
+  - "REPAIRABILITY_INDEX"
+  - "CLASSE_ENERGY"
 
 technicalFilters:
-    - "DIAGONALE_POUCES"
-    - "DISPLAY_TECHNOLOGY"
-    - "HDMI_PORTS_QUANTITY"
-  
+  - "DIAGONALE_POUCES"
+  - "DISPLAY_TECHNOLOGY"
+  - "HDMI_PORTS_QUANTITY"
+
 #  - "PARTS_AVAILLABILITY"
-#  - "DATA_QUALITY"  
+#  - "DATA_QUALITY"
 #  - "BRAND-SUSTAINABILITY"
 
-# If thos attributes are not present, the product will be defined as excluded 
+# If thos attributes are not present, the product will be defined as excluded
 requiredAttributes:
   - DIAGONALE_POUCES
 
@@ -645,17 +641,15 @@ requiredAttributes:
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
 attributesConfig:
-   
   ###################################################################################################################
   # ATTRIBUTES DEFINITIONS
   # Those attributes will be availlable for all products if one is found.
-  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes 
-  ##################################################################################################################      
+  # The line after configs: will be updated with the attribtes suggestion API, with commented attributes
+  ##################################################################################################################
   configs:
     - key: "MINAVAILABILITYSPAREPARTSYEARS"
     - key: "MINGUARANTEEDSUPPORTYEARS"
     - key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
-    - key: "WARRANTY"
     - key: "DIAGONALE_POUCES"
     - key: "DISPLAY_TECHNOLOGY"
     - key: "FREQUENCY_RATE"
@@ -665,140 +659,65 @@ attributesConfig:
     - key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
     - key: "POWER_CONSUMPTION_SDR"
     - key: "POWER_CONSUMPTION_HDR"
-    - key: "ESG"
     - key: "CLASSE_ENERGY_HDR"
     - key: "CLASSE_ENERGY_SDR"
-##############################################################################
-# Custom search filters : the following filters
-# will also be availlable in search for this vertical (must be an attribute or a score)
-##############################################################################
+  ##############################################################################
+  # Custom search filters : the following filters
+  # will also be availlable in search for this vertical (must be an attribute or a score)
+  ##############################################################################
 
-
-
-
-  aggregationConfiguration:
-      "scores.ECOSCORE.value":
-        interval: 5
-        buckets: 20
-      "scores.REPAIRABILITY_INDEX.value":
-        interval: 1
-        buckets: 10
-      "scores.POWER_CONSUMPTION_TYPICAL.value":
-        interval: 25
-        buckets: 12
-      "scores.POWER_CONSUMPTION_OFF.value":
-        interval: 0.1
-        buckets: 10
-      "scores.WEIGHT.value":
-        interval: 1
-        buckets: 5
-      "scores.BRAND_SUSTAINABILITY.value":
-        interval: 1
-        buckets: 5
-      "scores.CLASSE_ENERGY.value":
-        interval: 1
-        buckets: 5
-      "scores.DATA_QUALITY.value":
-        interval: 1
-        buckets: 5
-      "attributes.indexed.REPAIRABILITY_INDEX":
-        interval: 1
-        buckets: 10
-      "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
-        interval: 25
-        buckets: 12
-      "attributes.indexed.POWER_CONSUMPTION_OFF":
-        interval: 0.1
-        buckets: 10
-      "attributes.indexed.WEIGHT":
-        interval: 2
-        buckets: 12
-      "attributes.indexed.ENERGY_CONSUMPTION_1000_HOURS":
-        interval: 20
-        buckets: 12
-      "attributes.indexed.DIAGONALE_POUCES":
-        interval: 5
-        buckets: 12
-      "attributes.indexed.HDMI_PORTS_QUANTITY":
-        interval: 1
-        buckets: 6
-      "price.minPrice.price":
-        interval: 100
-        buckets: 20
-
-  ecoFilters:
-    - "REPAIRABILITY_INDEX" 
-    - "CLASSE_ENERGY"   
-
-  technicalFilters:
-    - "DIAGONALE_POUCES"
-    - "DISPLAY_TECHNOLOGY"
-    - "HDMI_PORTS_QUANTITY"
-  
-#  - "PARTS_AVAILLABILITY"
-#  - "DATA_QUALITY"  
-#  - "BRAND-SUSTAINABILITY"
-
-# If thos attributes are not present, the product will be defined as excluded 
-  requiredAttributes:
-    - DIAGONALE_POUCES
-
-
-      
 ##############################################################################
 # Product classification from categories
 ##############################################################################
-# Will associate to this vertical if one of the following categorie is present for the product  
+# Will associate to this vertical if one of the following categorie is present for the product
 
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
-  - MEUBLE
-  
+    - MEUBLE
+
 matchingCategories:
-     all: []
-     Darty Pro - Cashback:
-     - "TV, VIDEO, HOME CINEMA | TELEVISEUR"
-     Electrodepot - Guides et Comparateurs:
-     - "ELECTRO DEPOT | TELEVISION | TV DE 147 A 178 CM"
-     - "ELECTRO DEPOT | TELEVISION | TV DE 108 A 146 CM"
-     - "ELECTRO DEPOT | TELEVISION | TV < 108 CM"
-     - "ELECTRO DEPOT | TELEVISION | TV DE PLUS DE 179 CM"
-     rueducommerce.fr:
-     - "TV"
-     backmarket.fr:
-     - "ELECTRONICS > VIDEO > TELEVISIONS"
-     darty.com:
-     - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV OLED"
-     - "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV, VIDEO, HOME CINEMA"
-     - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV LED"
-     - "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV, VIDEO, HOME CINEMA"
-     cdiscount.com:
-     - "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LCD | TELEVISEUR | TELEVISEUR LCD"
-     - "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | TELEVISEUR | TELEVISEUR LED"
-     icecat.biz.yml:
-     - "TV"
-     alternate FR:
-     - "9 | TELEVISIONS | TV & MONITEUR > TV"
-     grosbill.com:
-     - "TV > STRONG"
-     UNDERDOG FR:
-     - "9 | TELEVISIONS | TELEVISEUR"
-     Inmac - Cashbackeurs:
-     - "IT | MONITEURS | TV GRAND PUBLIC"
-     - "IT | MONITEURS | TV HOTEL"
-     manomano.fr:
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV HISENSE | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV PHILIPS | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV TCL | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV SONY | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV PHILIPS | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV SONY | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV SCHNEIDER | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV HD | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV PANASONIC | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-     - "HIGH-TECH | HIGH-TECH>MARQUES HIGH-TECH>TCL>TV MINI LED TCL>TV MINI LED 4K TCL | MARQUES HIGH-TECH | TCL"
-     - "HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-
-
+  all: []
+  Darty Pro - Cashback:
+    - "TV, VIDEO, HOME CINEMA | TELEVISEUR"
+  Electrodepot - Guides et Comparateurs:
+    - "ELECTRO DEPOT | TELEVISION | TV DE 147 A 178 CM"
+    - "ELECTRO DEPOT | TELEVISION | TV DE 108 A 146 CM"
+    - "ELECTRO DEPOT | TELEVISION | TV < 108 CM"
+    - "ELECTRO DEPOT | TELEVISION | TV DE PLUS DE 179 CM"
+  rueducommerce.fr:
+    - "TV"
+  backmarket.fr:
+    - "ELECTRONICS > VIDEO > TELEVISIONS"
+  darty.com:
+    - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV OLED"
+    - "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV, VIDEO, HOME CINEMA"
+    - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV LED"
+    - "TV, VIDEO, HOME CINEMA | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV, VIDEO, HOME CINEMA"
+  cdiscount.com:
+    - "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LCD | TELEVISEUR | TELEVISEUR LCD"
+    - "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | TELEVISEUR | TELEVISEUR LED"
+  icecat.biz.yml:
+    - "TV"
+  alternate FR:
+    - "9 | TELEVISIONS | TV & MONITEUR > TV"
+  grosbill.com:
+    - "TV > STRONG"
+  UNDERDOG FR:
+    - "9 | TELEVISIONS | TELEVISEUR"
+  Inmac - Cashbackeurs:
+    - "IT | MONITEURS | TV GRAND PUBLIC"
+    - "IT | MONITEURS | TV HOTEL"
+  manomano.fr:
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV HISENSE | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV PHILIPS | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV TCL | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV SONY | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV PHILIPS | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV SONY | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV SCHNEIDER | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV HD | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV PANASONIC | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+    - "HIGH-TECH | HIGH-TECH>MARQUES HIGH-TECH>TCL>TV MINI LED TCL>TV MINI LED 4K TCL | MARQUES HIGH-TECH | TCL"
+    - "HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"

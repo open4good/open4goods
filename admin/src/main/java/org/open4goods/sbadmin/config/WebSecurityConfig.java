@@ -101,7 +101,7 @@ public class WebSecurityConfig {
 
 	private CaffeineCache buildCache(final String name, final Ticker ticker, final int minutesToExpire) {
 		return new CaffeineCache(name,
-				Caffeine.newBuilder().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES).ticker(ticker).build());
+				Caffeine.newBuilder().recordStats().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES).ticker(ticker).build());
 	}
 
 	@Bean

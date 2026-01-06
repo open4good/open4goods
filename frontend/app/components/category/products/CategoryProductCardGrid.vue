@@ -1,7 +1,11 @@
 <template>
   <v-row
     class="category-product-card-grid"
-    :class="[`category-product-card-grid--size-${cardSize}`]"
+    :class="[
+      `category-product-card-grid--size-${cardSize}`,
+      `category-product-card-grid--variant-${variant}`,
+      { 'category-product-card-grid--disabled': isDisabledCategory },
+    ]"
     dense
   >
     <v-col
@@ -11,32 +15,68 @@
       sm="6"
       lg="4"
     >
+      <ProductTileCard
+        v-if="variant === 'compact-tile'"
+        :product="product"
+        :product-link="productLink(product)"
+        :image-src="resolveImage(product)"
+        :attributes="popularAttributesByProduct(product)"
+        :impact-score="impactScoreValue(product)"
+        :offer-badges="offerBadges(product)"
+        :offers-count-label="offersCountLabel(product)"
+        :untitled-label="$t('category.products.untitledProduct')"
+        :not-rated-label="$t('category.products.notRated')"
+        :disabled="isDisabledCategory"
+        layout="vertical"
+        :link-rel="linkRel"
+      />
       <v-card
+        v-else
         class="category-product-card-grid__card"
+        :class="{
+          'category-product-card-grid__card--disabled': isDisabledCategory,
+        }"
         rounded="xl"
         elevation="2"
         hover
         :to="productLink(product)"
+        :rel="linkRel"
       >
         <div class="category-product-card-grid__compare">
           <CategoryProductCompareToggle :product="product" size="compact" />
         </div>
 
-        <v-img
-          :src="resolveImage(product)"
-          :alt="
-            product.identity?.bestName ??
-            product.identity?.model ??
-            $t('category.products.untitledProduct')
-          "
-          :aspect-ratio="4 / 3"
-          contain
-          class="category-product-card-grid__image"
-        >
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
+        <div class="category-product-card-grid__media">
+          <v-img
+            :src="resolveImage(product)"
+            :alt="
+              product.identity?.bestName ??
+              product.identity?.model ??
+              $t('category.products.untitledProduct')
+            "
+            :aspect-ratio="4 / 3"
+            contain
+            class="category-product-card-grid__image"
+          >
+            <template #placeholder>
+              <v-skeleton-loader type="image" class="h-100" />
+            </template>
+          </v-img>
+          <div class="category-product-card-grid__corner" role="presentation">
+            <ImpactScore
+              v-if="impactScoreValue(product) != null"
+              :score="impactScoreValue(product) ?? 0"
+              :max="20"
+              size="small"
+              mode="badge"
+              badge-layout="stacked"
+              badge-variant="corner"
+            />
+            <span v-else class="category-product-card-grid__corner-fallback">
+              {{ $t('category.products.notRated') }}
+            </span>
+          </div>
+        </div>
 
         <v-card-item class="category-product-card-grid__body">
           <div class="category-product-card-grid__header">
@@ -74,18 +114,6 @@
                 {{ attribute.value }}
               </span>
             </v-chip>
-          </div>
-
-          <div class="category-product-card-grid__score" role="presentation">
-            <ImpactScore
-              v-if="impactScoreValue(product) != null"
-              :score="impactScoreValue(product) ?? 0"
-              :max="5"
-              size="medium"
-            />
-            <span v-else class="category-product-card-grid__score-fallback">
-              {{ $t('category.products.notRated') }}
-            </span>
           </div>
 
           <template
@@ -144,18 +172,24 @@ import type {
   ProductDto,
 } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
 import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
-import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { resolvePrimaryImpactScoreOn20 } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 
 const props = defineProps<{
   products: ProductDto[]
   popularAttributes?: AttributeConfigDto[]
   size?: 'compact' | 'comfortable'
+  variant?: 'classic' | 'compact-tile'
+  maxAttributes?: number
+  showAttributeIcons?: boolean
+  isCategoryDisabled?: boolean
+  nofollowLinks?: boolean
 }>()
 
 const { t, n } = useI18n()
@@ -200,6 +234,11 @@ const resolveCurrencySymbol = (currency?: string | null): string | null => {
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 const cardSize = computed(() => props.size ?? 'comfortable')
+const variant = computed(() => props.variant ?? 'classic')
+const maxAttributes = computed(() => props.maxAttributes)
+const showAttributeIcons = computed(() => props.showAttributeIcons ?? true)
+const isDisabledCategory = computed(() => props.isCategoryDisabled ?? false)
+const linkRel = computed(() => (props.nofollowLinks ? 'nofollow' : undefined))
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -215,7 +254,7 @@ const productLink = (product: ProductDto) => {
 }
 
 const impactScoreValue = (product: ProductDto) =>
-  resolvePrimaryImpactScore(product)
+  resolvePrimaryImpactScoreOn20(product)
 
 const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
 
@@ -249,9 +288,13 @@ const popularAttributesByProduct = (
       key: attribute.key,
       label: attribute.label,
       value,
-      icon: attribute.icon ?? null,
+      icon: showAttributeIcons.value ? (attribute.icon ?? null) : null,
     })
   })
+
+  if (maxAttributes.value != null) {
+    return entries.slice(0, maxAttributes.value)
+  }
 
   return entries
 }
@@ -364,6 +407,13 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
 .category-product-card-grid
   margin: 0
 
+  &--disabled
+    .category-product-card-grid__card,
+    .product-tile-card
+      filter: grayscale(1)
+      opacity: 0.6
+
+
   &__card
     height: 100%
     display: flex
@@ -375,6 +425,10 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     &:hover
       transform: translateY(-4px)
       box-shadow: 0 16px 30px rgba(21, 46, 73, 0.08)
+
+    &--disabled
+      filter: grayscale(1)
+      opacity: 0.6
 
   &__image
     border-top-left-radius: inherit
@@ -389,6 +443,40 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
       object-fit: contain
       mix-blend-mode: multiply
       background: #fff
+
+  &__media
+    position: relative
+    overflow: hidden
+    border-top-left-radius: inherit
+    border-top-right-radius: inherit
+
+  &__corner
+    position: absolute
+    top: 0
+    left: 0
+    width: 64px
+    height: 64px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    border-radius: 0 0 54% 0
+    background: rgba(var(--v-theme-surface-glass-strong), 0.92)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45)
+    color: rgb(var(--v-theme-text-neutral-strong))
+    box-shadow: 0 14px 26px rgba(15, 23, 42, 0.14)
+    backdrop-filter: blur(6px)
+    z-index: 2
+    pointer-events: none
+
+  &__corner-fallback
+    font-size: 0.72rem
+    font-weight: 700
+    letter-spacing: 0.08em
+    text-transform: uppercase
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+    text-align: center
+    line-height: 1.1
+    transform: rotate(-12deg)
 
   &__compare
     position: absolute
@@ -447,16 +535,6 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     gap: 0.25rem
 
   &__offers
-    font-size: 0.875rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
-
-  &__score
-    display: flex
-    align-items: center
-    justify-content: center
-    min-height: 1.75rem
-
-  &__score-fallback
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 

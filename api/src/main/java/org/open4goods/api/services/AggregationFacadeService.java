@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.api.services.completion.text.DjlTextEmbeddingService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
@@ -87,6 +88,7 @@ public class AggregationFacadeService {
 	private IcecatService icecatFeatureService;
 	
 	private DjlTextEmbeddingService embeddingService;
+	private DjlEmbeddingProperties embeddingProperties;
 
 	private SerialisationService serialisationService;
 
@@ -102,7 +104,8 @@ public class AggregationFacadeService {
 			IcecatService icecatFeatureService,
 			SerialisationService serialisationService,
 			BrandScoreService brandScoreService,
-			DjlTextEmbeddingService embeddingService
+			DjlTextEmbeddingService embeddingService,
+			DjlEmbeddingProperties embeddingProperties
 			) {
 		super();
 		this.evaluationService = evaluationService;
@@ -119,6 +122,7 @@ public class AggregationFacadeService {
 		this.blablaService = blablaService;
 		this.icecatFeatureService = icecatFeatureService;
 		this.embeddingService = embeddingService;
+		this.embeddingProperties = embeddingProperties;
 		this.realtimeAggregator = getStandardAggregator("realtime");
 		this.serialisationService = serialisationService;
 		this.brandScoreService = brandScoreService;
@@ -353,7 +357,8 @@ public class AggregationFacadeService {
 		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
 		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger,icecatFeatureService));
-		services.add(new NamesAggregationService( logger, verticalConfigService, evaluationService, blablaService, embeddingService));
+		services.add(new NamesAggregationService( logger, verticalConfigService, evaluationService, blablaService, embeddingService,
+				embeddingProperties));
 		//		services.add(new CategoryService( taxonomyService));
 		//		services.add(new UrlsAggregationService(evaluationService,
 		//				config.getNamings().getProductUrlTemplates()));

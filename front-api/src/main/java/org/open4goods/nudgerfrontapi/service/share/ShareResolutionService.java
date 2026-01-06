@@ -30,6 +30,7 @@ import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
+import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.nudgerfrontapi.service.exception.InvalidAffiliationTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -218,7 +219,7 @@ public class ShareResolutionService {
      * @return ordered list of candidates
      */
     private List<ShareCandidateDto> searchByQuery(String query, DomainLanguage domainLanguage) {
-        GlobalSearchResult searchResult = searchService.globalSearch(query, domainLanguage);
+        GlobalSearchResult searchResult = searchService.globalSearch(query, domainLanguage, SearchType.auto);
         List<ShareCandidateDto> mapped = new ArrayList<>();
 
         searchResult.verticalGroups().forEach(group -> group.results().stream()

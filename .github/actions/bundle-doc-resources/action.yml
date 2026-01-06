@@ -1,0 +1,28 @@
+name: "Bundle markdown & prompt resources into JARs"
+description: "Stages repository .md/.prompt files and embeds them into provided JARs"
+inputs:
+  jar-paths:
+    description: "Newline-separated list of JAR paths to update"
+    required: false
+    default: ""
+  root-dir:
+    description: "Repository root to scan"
+    required: false
+    default: "."
+  staging-dir:
+    description: "Directory used to stage doc resources before embedding"
+    required: false
+    default: "target/classpath-docs"
+runs:
+  using: "composite"
+  steps:
+    - name: Stage .md and .prompt resources and embed in JARs
+      shell: bash
+      env:
+        JAR_PATHS: ${{ inputs.jar-paths }}
+        ROOT_DIR: ${{ inputs.root-dir }}
+        STAGING_DIR: ${{ inputs.staging-dir }}
+      run: |
+        set -euo pipefail
+        mapfile -t jar_paths_array < <(printf '%s\n' "${JAR_PATHS}" | sed '/^$/d')
+        bash scripts/bundle-doc-resources.sh "${ROOT_DIR}" "${STAGING_DIR}" "${jar_paths_array[@]}"

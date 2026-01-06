@@ -3,25 +3,32 @@ import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { defineComponent, h, ref, computed } from 'vue'
 
 const messages: Record<string, unknown> = {
-  'home.events.default.hero.search.label': 'Search for a product',
-  'home.events.default.hero.search.placeholder': 'Search a product',
-  'home.events.default.hero.search.ariaLabel': 'Search input',
-  'home.events.default.hero.search.cta': 'NUDGER',
-  'home.events.default.hero.search.helper': '50M references',
-  'home.events.default.hero.search.helpersTitle':
+  'packs.default.hero.search.label': 'Search for a product',
+  'packs.default.hero.search.placeholder': 'Search a product',
+  'packs.default.hero.search.ariaLabel': 'Search input',
+  'packs.default.hero.search.cta': 'NUDGER',
+  'packs.default.hero.search.helper': '50M references',
+  'packs.default.hero.search.helpersTitle':
     'Shop with intention. Compare for impact.',
-  'home.events.default.hero.search.helpers': [
+  'packs.default.hero.search.helpers': [
     {
       icon: '🌿',
-      label: 'A unique eco assessment',
-      segments: [{ text: 'A unique eco assessment' }],
+      label: 'Impact Score: a unique ecological and environmental assessment',
+      segments: [
+        { text: 'Impact Score: a' },
+        {
+          text: 'unique ecological and environmental assessment',
+          to: '/impact-score',
+        },
+      ],
     },
     {
       icon: '🏷️',
-      label: 'Best prices',
+      label:
+        '100% independent, open-source, and {millions}+ open-data products',
       segments: [
-        { text: 'Pay the right price with' },
-        { text: '{partnersLink}', to: '/partners' },
+        { text: '100% independent, open-source, and' },
+        { text: '{millions}+ open-data products' },
       ],
     },
     {
@@ -35,19 +42,19 @@ const messages: Record<string, unknown> = {
       segments: [{ text: '50M references' }],
     },
   ],
-  'home.events.default.hero.search.partnerLinkLabel':
+  'packs.default.hero.search.partnerLinkLabel':
     '{formattedCount} partner | {formattedCount} partners',
-  'home.events.default.hero.search.partnerLinkFallback': 'our partners',
-  'home.events.default.hero.eyebrow': 'Responsible shopping',
-  'home.events.default.hero.title': 'Responsible choices are not a luxury',
-  'home.events.default.hero.subtitles': [
+  'packs.default.hero.search.partnerLinkFallback': 'our partners',
+  'packs.default.hero.eyebrow': 'Responsible shopping',
+  'packs.default.hero.title': 'Responsible choices are not a luxury',
+  'packs.default.hero.subtitles': [
     'Save time, stay true to your values.',
     'Shop smarter without compromise.',
   ],
-  'home.events.default.hero.titleSubtitle': ['Buy better. Spend smarter.'],
-  'home.events.default.hero.imageAlt': 'Hero illustration',
-  'home.events.default.hero.iconAlt': 'Hero icon',
-  'home.events.default.hero.context.ariaLabel':
+  'packs.default.hero.titleSubtitle': ['Buy better. Spend smarter.'],
+  'packs.default.hero.imageAlt': 'Hero illustration',
+  'packs.default.hero.iconAlt': 'Hero icon',
+  'packs.default.hero.context.ariaLabel':
     'Hero context card summarising Nudger’s promise',
   'home.hero.search.label': 'Search for a product',
   'home.hero.search.placeholder': 'Search a product',
@@ -57,15 +64,22 @@ const messages: Record<string, unknown> = {
   'home.hero.search.helpers': [
     {
       icon: '🌿',
-      label: 'A unique eco assessment',
-      segments: [{ text: 'A unique eco assessment' }],
+      label: 'Impact Score: a unique ecological and environmental assessment',
+      segments: [
+        { text: 'Impact Score: a' },
+        {
+          text: 'unique ecological and environmental assessment',
+          to: '/impact-score',
+        },
+      ],
     },
     {
       icon: '🏷️',
-      label: 'Best prices',
+      label:
+        '100% independent, open-source, and {millions}+ open-data products',
       segments: [
-        { text: 'Pay the right price with' },
-        { text: '{partnersLink}', to: '/partners' },
+        { text: '100% independent, open-source, and' },
+        { text: '{millions}+ open-data products' },
       ],
     },
     {
@@ -172,21 +186,20 @@ const messages: Record<string, unknown> = {
   'home.faq.title': 'FAQ',
   'home.faq.subtitle': 'Quick answers to the most common questions.',
   'home.faq.items.free.question': 'Is Nudger free?',
-  'home.faq.items.free.answer': 'Yes, searching is free to use.',
+  'home.faq.items.free.answer':
+    "Yes, Nudger is completely free for you!<br/><br/>We earn money through affiliate partnerships. That means we receive a commission when you click Nudger offers and complete your purchase with our partner merchants.<br/><br/>It's the same model used by comparison sites and it never changes the price of the products you see on Nudger.",
   'home.faq.items.account.question': 'Do I need an account?',
-  'home.faq.items.account.answer': 'No for searching; an account is optional.',
-  'home.faq.items.categories.question': 'Which categories are covered?',
-  'home.faq.items.categories.answer':
-    'Electronics & Appliances today, more to come.',
+  'home.faq.items.account.answer':
+    "<b>Not at all!</b><br/>Every feature is available without creating an account on our platform.<br/>That's how we protect your privacy, too.",
   'home.faq.items.impactScore.question':
     'How do you calculate the Impact Score?',
   'home.faq.items.impactScore.answer':
-    'Five weighted criteria + lean AI, fully open methodology.',
+    'This is where Nudger shines.<br/><br/>We aim to guide you through the realm of possibilities rather than provide absolute judgments.<br/><ul><li>We analyse every data point we have related to ecological and societal impact.</li><li>We compare products against each other using our Impact Score.</li><li>Advanced AI systems adjust how each criterion is weighted.</li></ul>And the whole process stays fully transparent.',
+  'home.faq.items.impactScore.cta': 'Learn more',
+  'home.faq.items.impactScore.ctaAria': 'Open the detailed Impact Score page',
   'home.faq.items.dataFreshness.question': 'Are the data kept up to date?',
   'home.faq.items.dataFreshness.answer':
-    'Yes, refreshed regularly with quality checks.',
-  'home.faq.items.suggestProduct.question': 'How can I suggest a product?',
-  'home.faq.items.suggestProduct.answer': 'Use our dedicated contact form.',
+    'Yes, our product data is refreshed <b>twice a day</b> to track offer changes as closely as possible.',
   'home.faq.agent.eyebrow': 'Your AI result here',
   'home.faq.agent.title': 'Ask your question, we’ll pin it to the FAQ',
   'home.faq.agent.subtitle': 'Your question and the AI result will show below.',
@@ -195,7 +208,8 @@ const messages: Record<string, unknown> = {
   'home.faq.agent.dynamicAnswerPending': 'Thanks! Your question is in queue.',
   'home.faq.agent.preview.eyebrow': 'Live AI feed',
   'home.faq.agent.preview.title': 'Latest AI answer',
-  'home.faq.agent.preview.subtitle': 'The freshest public question appears here.',
+  'home.faq.agent.preview.subtitle':
+    'The freshest public question appears here.',
   'home.faq.agent.preview.label': 'Latest question',
   'home.faq.agent.preview.status': 'Status: {status}',
   'home.faq.agent.preview.statusPending': 'Status pending',
@@ -404,8 +418,14 @@ const fetchSpy = vi.fn((url: string) => {
       {
         id: 'question',
         name: 'Question',
+        description: 'Test agent',
+        icon: 'mdi-robot',
+        promptTemplates: [],
+        tags: [],
+        allowedRoles: [],
         attributes: [],
         publicPromptHistory: true,
+        allowTemplateEditing: true,
       },
     ])
   }
@@ -573,16 +593,6 @@ const HomeBlogCarouselStub = defineComponent({
   },
 })
 
-const TextContentStub = defineComponent({
-  name: 'TextContentStub',
-  props: {
-    fallbackText: { type: String, default: '' },
-  },
-  setup(props) {
-    return () => h('div', { class: 'text-content-stub' }, props.fallbackText)
-  },
-})
-
 const mountHomePage = async () => {
   const component = (await import('./index.vue')).default
   return mountSuspended(component, {
@@ -598,6 +608,7 @@ const mountHomePage = async () => {
         VIcon: VIconStub,
         VBtn: VBtnStub,
         VTextField: VTextFieldStub,
+        VTextarea: simpleStub('div'),
         SearchSuggestField: SearchSuggestFieldStub,
         AgentPromptInput: AgentPromptInputStub,
         VImg: VImgStub,
@@ -608,7 +619,6 @@ const mountHomePage = async () => {
         VExpansionPanelText: simpleStub('div'),
         NuxtLink: NuxtLinkStub,
         HomeBlogCarousel: HomeBlogCarouselStub,
-        TextContent: TextContentStub,
       },
     },
   })
@@ -672,7 +682,7 @@ describe('Home page', () => {
       '@type': 'FAQPage',
     })
     expect(Array.isArray(json?.mainEntity)).toBe(true)
-    expect(json?.mainEntity).toHaveLength(6)
+    expect(json?.mainEntity).toHaveLength(5)
     expect(json?.mainEntity[0]).toMatchObject({
       '@type': 'Question',
       acceptedAnswer: { '@type': 'Answer' },

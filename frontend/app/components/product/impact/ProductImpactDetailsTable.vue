@@ -1,8 +1,19 @@
 <template>
+
+        <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
+        <ProductImpactRadarChart
+          class="impact-ecoscore__analysis-radar-chart"
+          :axes="radarAxes"
+          :series="chartSeries"
+          :product-name="productName"
+        />
+      </div>
+
+      
   <article class="impact-details">
-    <h3 class="impact-details__title">
+    <h4 class="impact-details__title">
       {{ $t('product.impact.detailsTitle') }}
-    </h3>
+    </h4>
     <v-data-table
       v-if="hasRows"
       :headers="headers"
@@ -50,7 +61,12 @@
             'impact-details__cell--child': item.rowType === 'subscore',
           }"
         >
-          {{ item.attributeValue }}
+          <ProductAttributeSourcingLabel
+            v-if="item.attributeSourcing"
+            :sourcing="item.attributeSourcing"
+            :value="item.attributeValue"
+          />
+          <span v-else>{{ item.attributeValue }}</span>
         </span>
       </template>
       <template #[`item.displayValue`]="{ item }">
@@ -67,9 +83,6 @@
             size="x-small"
             :show-value="false"
           />
-          <span class="impact-details__value-text">{{
-            formatScoreLabel(item.displayValue)
-          }}</span>
         </div>
       </template>
       <template #[`item.coefficient`]="{ item }">
@@ -119,6 +132,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
+import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductImpactSubscoreRating from './ProductImpactSubscoreRating.vue'
 import type { ScoreView } from './impact-types'
 
@@ -136,12 +150,13 @@ type GroupedRows = {
     aggregate: DetailedScore | null
     subscores: DetailedScore[]
   }>
-  standalone: DetailedScore[]
+  divers: DetailedScore[]
 }
 type TableRow = {
   id: string
   label: string
   attributeValue: string
+  attributeSourcing: ScoreView['attributeSourcing']
   displayValue: number | null
   coefficient: number | null
   lifecycle: string[]
@@ -197,6 +212,17 @@ const lifecycleColors: Record<string, string> = {
   TRANSPORTATION: 'info',
   USE: 'primary',
   END_OF_LIFE: 'success',
+}
+
+const DIVERS_AGGREGATE_ID = 'DIVERS'
+
+const toFiniteNumber = (value: number | null | undefined): number | null => {
+  if (value == null) {
+    return null
+  }
+
+  const parsed = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(parsed) ? parsed : null
 }
 
 const normalizeParticipations = (participations?: string[] | null): string[] =>
@@ -288,7 +314,7 @@ const groupedScores = computed<GroupedRows>(() => {
     return normalizedId && !aggregateSet.has(normalizedId)
   })
 
-  return { groups, standalone: filteredStandalone }
+  return { groups, divers: filteredStandalone }
 })
 
 const headers = computed(() => [
@@ -327,6 +353,7 @@ const buildTableRow = (
   id: score.id,
   label: score.label,
   attributeValue: formatAttributeValue(score),
+  attributeSourcing: score.attributeSourcing ?? null,
   displayValue: score.displayValue,
   coefficient: score.coefficient,
   lifecycle: score.participateInACV ?? [],
@@ -334,14 +361,53 @@ const buildTableRow = (
   parentId,
 })
 
+const resolveAverage = (values: number[]) =>
+  values.reduce((sum, value) => sum + value, 0) / values.length
+
+const resolveAggregateDisplayValue = (
+  aggregateId: string,
+  aggregateScore: DetailedScore | null,
+  subscores: DetailedScore[]
+): number | null => {
+  const directValue = resolveScoreValue(aggregateScore)
+  if (directValue != null) {
+    return directValue
+  }
+
+  const aggregateValues = subscores
+    .map(score => score.aggregates?.[aggregateId])
+    .map(toFiniteNumber)
+    .filter((value): value is number => value != null)
+
+  if (aggregateValues.length) {
+    return resolveAverage(aggregateValues)
+  }
+
+  const childValues = subscores
+    .map(score => score.displayValue)
+    .filter((value): value is number => value != null)
+
+  if (childValues.length) {
+    return resolveAverage(childValues)
+  }
+
+  return null
+}
+
 const buildAggregateRow = (
   aggregateId: string,
-  aggregateScore: DetailedScore | null
+  aggregateScore: DetailedScore | null,
+  subscores: DetailedScore[]
 ): TableRow => ({
   id: aggregateId,
   label: resolveAggregateLabel(aggregateId, aggregateScore),
   attributeValue: '—',
-  displayValue: resolveScoreValue(aggregateScore),
+  attributeSourcing: null,
+  displayValue: resolveAggregateDisplayValue(
+    aggregateId,
+    aggregateScore,
+    subscores
+  ),
   coefficient: aggregateScore?.coefficient ?? null,
   lifecycle: aggregateScore?.participateInACV ?? [],
   rowType: 'aggregate',
@@ -352,7 +418,7 @@ const tableItems = computed<TableRow[]>(() => {
   const expanded = new Set(expandedGroups.value)
 
   groupedScores.value.groups.forEach(group => {
-    rows.push(buildAggregateRow(group.id, group.aggregate))
+    rows.push(buildAggregateRow(group.id, group.aggregate, group.subscores))
 
     if (expanded.has(group.id)) {
       rows.push(
@@ -363,11 +429,19 @@ const tableItems = computed<TableRow[]>(() => {
     }
   })
 
-  rows.push(
-    ...groupedScores.value.standalone.map(score =>
-      buildTableRow(score, 'standalone')
+  if (groupedScores.value.divers.length) {
+    rows.push(
+      buildAggregateRow(DIVERS_AGGREGATE_ID, null, groupedScores.value.divers)
     )
-  )
+
+    if (expanded.has(DIVERS_AGGREGATE_ID)) {
+      rows.push(
+        ...groupedScores.value.divers.map(score =>
+          buildTableRow(score, 'subscore', DIVERS_AGGREGATE_ID)
+        )
+      )
+    }
+  }
 
   return rows
 })
@@ -388,22 +462,6 @@ const toggleGroup = (groupId: string) => {
 
 const isGroupExpanded = (groupId: string) => expandedGroups.value.has(groupId)
 
-const formatScore = (value: number | null) => {
-  if (value == null || Number.isNaN(value)) {
-    return '—'
-  }
-
-  return value.toFixed(1)
-}
-
-const formatScoreLabel = (value: number | null) => {
-  const formatted = formatScore(value)
-  if (formatted === '—') {
-    return formatted
-  }
-
-  return t('product.impact.valueOutOf', { value: formatted, max: 5 })
-}
 </script>
 
 <style scoped>

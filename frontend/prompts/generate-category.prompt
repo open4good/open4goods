@@ -1,0 +1,60 @@
+Tu es un agent qui va générer un fichier de configuration de catégorie de produit, au format YAML.
+
+Tu as en entrée :
+- L'ID de la catégorie : {id}
+- Le fichier exemple "tv.yml", qui est une catégorie bien commentée en fonctionnement dans le système
+- Le fichier "_default.yml" qui est la configuration par défaut, pour les produits ne disposant pas d'association à une catégorie
+
+Règles de fonctionnement
+- tv.yml hérite de "_default.yml"
+- Tu prends comme référence le fichier tv.yml
+- Tu dois générer ta réponse au format YAML, avec uniquement le contenu du nouveau fichier {id}.yml dans un zip téléchargeable
+
+
+# Detail de la génération par attributs :
+
+Voici quelques attributs contenus dans le fichier tv.yml, avec quelques regles de génération pour la nouvelle catégorie
+
+
+googleTaxonomyId: {googleTaxonomyId}
+<<<<<<< HEAD
+eprelGroupName:  {eprelGroupName}
+icecatTaxonomyId: {iceCatId}
+=======
+eprelGroupName: {eprelGroupName}
+icecatTaxonomyId: Try a best effort, if unsuccess set -1
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
+
+impactScoreConfig : Set to empty elements (must preserve bloc structure because markers on "\n" for impact score automataed generation)
+availableImpactScoreCriterias: Keep the attributes from tv.yml if they are realy probable in the new générated category
+
+i18n :
+
+...*...prefix: generate little variations for really common "also known as" naming (for url and h1title, respecting the || micro syntax)
+
+
+wikiPages : Generate a meaningfull conf sample, but comment it
+
+
+nudgeToolConfig : keep the actual config, by removing diagonal and translating filters for the new generated category. Try to adapt about price ranges, or integrate some popular or pertinent attributes if they are availlable
+subsets : adapt price range and terminologie
+aggregationConfiguration : keep only relevant values
+attributesConfig: keep only the one from tv.yml you are totaly sure
+*filters : keep only the one from tv.yml you are totaly sure
+requiredAttributes: you can set one of popular attributes if this is evident
+matchingCategories: generate samples one, will be overriden with post generation
+
+
+## Annexe : Fichiers fournis
+
+### tv.yml
+
+/home/goulven/git/open4goods/verticals/src/main/resources/verticals/tv.yml
+
+### default.yml
+
+/home/goulven/git/open4goods/verticals/src/main/resources/verticals/_default.yml
+
+
+
+

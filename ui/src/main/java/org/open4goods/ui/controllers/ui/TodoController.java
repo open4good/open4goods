@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This controller renders the /todos page
- * 
+ *
  */
 
 @Controller
@@ -24,7 +24,7 @@ public class TodoController {
 
 	private @Autowired TodoService todoService;
 	private @Autowired UiService uiService;
-	
+
 	public TodoController() {
 		super();
 	}

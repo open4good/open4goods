@@ -4,35 +4,30 @@ import { useTheme } from 'vuetify'
 import {
   PARALLAX_SECTION_KEYS,
   THEME_ASSETS_FALLBACK,
-  DEFAULT_EVENT_PACK,
-  eventParallaxPacks,
-  type ParallaxPackConfig,
   type ParallaxLayerConfig,
   type ParallaxLayerSource,
   type ParallaxSectionKey,
-  type EventPackName,
+  type ParallaxPackConfig,
 } from '~~/config/theme/assets'
+import {
+  EVENT_PACK_I18N_BASE_KEY,
+  type EventPackName,
+} from '~~/config/theme/event-packs'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 import { resolveThemedAssetUrl } from './useThemedAsset'
 
-const resolvePackForTheme = (
-  packName: EventPackName,
-  themeName: ThemeName,
-  fallbackPackName: EventPackName = DEFAULT_EVENT_PACK
-): ParallaxPackConfig => {
-  const themePack = eventParallaxPacks[themeName]?.[packName]
-  const commonPack = eventParallaxPacks.common?.[packName]
-  const fallbackPack = eventParallaxPacks[THEME_ASSETS_FALLBACK]?.[packName]
+const normalizeParallaxAsset = (value: string): string => {
+  const trimmed = value.trim()
 
-  if (themePack || commonPack || fallbackPack) {
-    return themePack ?? commonPack ?? fallbackPack ?? {}
+  if (!trimmed || trimmed.startsWith('/') || trimmed.startsWith('http')) {
+    return trimmed
   }
 
-  if (fallbackPackName !== packName) {
-    return resolvePackForTheme(fallbackPackName, themeName, fallbackPackName)
+  if (trimmed.includes('/')) {
+    return trimmed
   }
 
-  return {}
+  return `parallax/${trimmed}`
 }
 
 const resolveParallaxLayers = (
@@ -46,7 +41,12 @@ const resolveParallaxLayers = (
   return assets
     .map(asset => {
       const source = typeof asset === 'string' ? asset : asset.src
-      const resolved = resolveThemedAssetUrl(source, themeName)
+      const normalized = normalizeParallaxAsset(source)
+      if (!normalized) {
+        return null
+      }
+
+      const resolved = resolveThemedAssetUrl(normalized, themeName)
 
       if (!resolved) {
         return null
@@ -81,7 +81,7 @@ export const useThemedParallaxBackgrounds = (
   )
 
   const resolveI18nPack = (eventPack: EventPackName): ParallaxPackConfig => {
-    const i18nKey = `home.events.${eventPack}.parallax`
+    const i18nKey = `${EVENT_PACK_I18N_BASE_KEY}.${eventPack}.parallax`
     const entries = tm(i18nKey) as Record<string, string> | undefined
 
     if (!entries) {
@@ -97,25 +97,14 @@ export const useThemedParallaxBackgrounds = (
     const activePackName = unref(packName)
     const overrides = unref(dynamicOverrides)
 
-    // 1. Static config resolution
-    const packConfig = resolvePackForTheme(activePackName, themeName.value)
-    const fallbackPack =
-      activePackName === DEFAULT_EVENT_PACK
-        ? packConfig
-        : resolvePackForTheme(DEFAULT_EVENT_PACK, themeName.value)
-
-    // 2. i18n resolution (takes precedence if present for specific sections)
+    // i18n resolution
     const i18nPack = resolveI18nPack(activePackName)
 
     return PARALLAX_SECTION_KEYS.reduce<
       Record<ParallaxSectionKey, ParallaxLayerConfig[]>
     >(
       (acc, section) => {
-        const assets =
-          overrides?.[section] ??
-          i18nPack[section] ??
-          packConfig[section] ??
-          fallbackPack[section]
+        const assets = overrides?.[section] ?? i18nPack[section] ?? []
 
         return {
           ...acc,

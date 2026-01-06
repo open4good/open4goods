@@ -3,13 +3,10 @@
     <v-container class="py-12 px-4" max-width="xl">
       <header class="category-navigation-verticals__header">
         <div>
-          <p class="text-overline text-uppercase text-neutral-soft mb-2">
-            {{ t('categories.navigation.verticals.eyebrow') }}
-          </p>
-          <h2 class="text-h4 text-md-h3 font-weight-bold mb-2">
+          <h2 class="text-h4 text-md-h3 font-weight-bold mb-2 text-center">
             {{ t('categories.navigation.verticals.title') }}
           </h2>
-          <p class="text-body-2 text-neutral-secondary mb-0">
+          <p class="text-body-2 text-neutral-secondary mb-0 text-center">
             {{ t('categories.navigation.verticals.subtitle') }}
           </p>
         </div>
@@ -29,9 +26,14 @@
         >
           <article class="category-navigation-verticals__card">
             <v-sheet
-              class="category-navigation-verticals__sheet"
+              v-if="verticalCategory.vertical?.verticalHomeUrl"
+              class="category-navigation-verticals__sheet cursor-pointer"
               rounded="xl"
               elevation="8"
+              role="link"
+              @click="
+                navigateToCategory(verticalCategory.vertical.verticalHomeUrl)
+              "
             >
               <div class="category-navigation-verticals__media">
                 <v-img
@@ -59,35 +61,6 @@
                     verticalCategory.title
                   }}
                 </h3>
-                <div class="category-navigation-verticals__actions">
-                  <NuxtLink
-                    v-if="verticalCategory.vertical?.verticalHomeUrl"
-                    :to="`/${verticalCategory.vertical.verticalHomeUrl}`"
-                    class="category-navigation-verticals__cta"
-                    :aria-label="
-                      t('categories.navigation.verticals.openVertical', {
-                        category: verticalCategory.title,
-                      })
-                    "
-                  >
-                    <span>{{
-                      t('categories.navigation.verticals.openVerticalCta')
-                    }}</span>
-                    <v-icon icon="mdi-arrow-right" size="small" />
-                  </NuxtLink>
-                  <NuxtLink
-                    v-if="verticalCategory.path"
-                    :to="`/categories/${verticalCategory.path}`"
-                    class="category-navigation-verticals__secondary"
-                    :aria-label="
-                      t('categories.navigation.verticals.viewPath', {
-                        category: verticalCategory.title,
-                      })
-                    "
-                  >
-                    {{ t('categories.navigation.verticals.viewPathCta') }}
-                  </NuxtLink>
-                </div>
               </div>
             </v-sheet>
           </article>
@@ -109,6 +82,11 @@ const { verticals } = defineProps<{
 const { t } = useI18n()
 
 const limitedVerticals = computed(() => verticals.slice(0, 6))
+
+const router = useRouter()
+const navigateToCategory = (url: string) => {
+  router.push(`/${url}`)
+}
 </script>
 
 <style scoped>

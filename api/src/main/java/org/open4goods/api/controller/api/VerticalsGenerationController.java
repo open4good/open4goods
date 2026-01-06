@@ -159,6 +159,18 @@ public class VerticalsGenerationController {
 
 	}
 
+	@GetMapping(path="/{vertical}/impactscore-criterias/")
+	@Operation(summary="Generate the available impact score criterias yaml fragment for a given vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public String generateImpactScoreCriterias(
+			@PathVariable String vertical,
+			@RequestParam(defaultValue = "10") Integer minCoveragePercent) throws ResourceNotFoundException, IOException {
+
+		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+		return verticalsGenService.generateAvailableImpactScoreCriteriasFragment(vc, minCoveragePercent);
+	}
+
 
 
 
@@ -179,13 +191,13 @@ public class VerticalsGenerationController {
 	@GetMapping(path="/update/{vertical}")
 	@Operation(summary="Update the vertical with attributes, mappings and ecoscore directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalWithAll(
+	public String updateVerticalWithAll(
 			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
 
 		// TODO(p2,conf) : from conf
 		verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml");
 		verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml", 3, null);
-		verticalsGenService.updateVerticalFileWithCategories(2, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
+		return verticalsGenService.updateVerticalFileWithCategories(2, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
 
 
 	}
@@ -193,11 +205,11 @@ public class VerticalsGenerationController {
 	@GetMapping(path="/update/{vertical}/impactscore/")
 	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalWithImpactScore(
+	public String updateVerticalWithImpactScore(
 			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
 
 		//TODO(p2,conf) : from conf
- 		  verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
+ 		  return verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
 
 	}
 
@@ -205,26 +217,26 @@ public class VerticalsGenerationController {
 	@GetMapping(path="/update/{vertical}/categories/")
 	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalWithMappings(
+	public String updateVerticalWithMappings(
 			@PathVariable															 String vertical,
 			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
 
 		//TODO(p2,conf) : from conf
- 		  verticalsGenService.updateVerticalFileWithCategories(minOffers, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
+ 		  return verticalsGenService.updateVerticalFileWithCategories(minOffers, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
 
 	}
 
 	@GetMapping(path="/update/{vertical}/attributes/")
 	@Operation(summary="Update the suggested attributes for a given vertical directly in the file !")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void updateVerticalWithAttributes(
+	public String updateVerticalWithAttributes(
 			@PathVariable										 String vertical,
 			@RequestParam	(defaultValue = "10")									 Integer minCoverage,
 			@RequestParam	(defaultValue = "")									 String containing
 			) throws ResourceNotFoundException, IOException {
 
 		//TODO(p2,conf) : from conf
- 		  verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml", minCoverage, containing);
+ 		  return verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml", minCoverage, containing);
 
 	}
 

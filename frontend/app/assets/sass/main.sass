@@ -3,14 +3,8 @@
 @use 'base/variables' as *
 @use 'base/mixins' as *
 @use 'base/fonts'
-@use 'base/reset'
-@use 'components/buttons'
-@use 'components/cards'
 @use 'components/hero-surfaces'
 @use 'components/subtitles'
-@use 'layouts/headers'
-@use 'layouts/footers'
-@use 'pages/blog'
 
 // custom pour element nudger
 
@@ -93,6 +87,15 @@
             max-width: calc(100% - (var(--accessibility-wide-gap) * 2))
             width: 100%
             margin-inline: auto
+
+:root.accessibility-reduced-motion
+    *,
+    *::before,
+    *::after
+        animation-duration: 0.01ms !important
+        animation-iteration-count: 1 !important
+        transition-duration: 0.01ms !important
+        scroll-behavior: auto !important
             padding-inline: var(--accessibility-wide-gap)
 
         :is(

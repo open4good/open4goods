@@ -23,6 +23,15 @@ export const useBlog = () => {
     totalElements: 0,
     totalPages: 0,
   }))
+  const resetPagination = () => {
+    pagination.value = {
+      page: 1,
+      size: DEFAULT_PAGE_SIZE,
+      totalElements: 0,
+      totalPages: 0,
+    }
+    articles.value = []
+  }
 
   /**
    * Fetch blog articles for a specific page from the backend proxy
@@ -180,6 +189,7 @@ export const useBlog = () => {
     // Actions
     fetchArticles,
     changePage,
+    resetPagination,
     fetchTags,
     selectTag,
     fetchArticle,

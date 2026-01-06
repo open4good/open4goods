@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "comment_markdown": {
+      "type": "string"
+    },
+    "labels_add": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "additionalItems": false
+    },
+    "labels_remove": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "additionalItems": false
+    },
+    "next_state": {
+      "type": "string",
+      "enum": [
+        "UNDERSTANDING",
+        "PLANNING",
+        "READY_TO_CODE"
+      ]
+    },
+    "needs_human": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "comment_markdown",
+    "labels_add",
+    "labels_remove",
+    "next_state",
+    "needs_human"
+  ]
+}

@@ -7,11 +7,26 @@
       <v-skeleton-loader type="image, article" />
     </div>
     <div v-else>
+      <div v-if="categoryLink" class="nudge-step-recos__link">
+        <v-btn
+          class="text-none"
+          variant="tonal"
+          size="small"
+          rounded="pill"
+          color="primary"
+          :to="categoryLink"
+          :aria-label="categoryLinkLabel"
+        >
+          {{ categoryLinkLabel }}
+        </v-btn>
+      </div>
       <CategoryProductCardGrid
         v-if="hasProducts"
         :products="products"
         :popular-attributes="popularAttributes"
         size="compact"
+        variant="compact-tile"
+        :max-attributes="4"
       />
       <p v-else class="nudge-step-recos__empty">
         {{ $t('nudge-tool.steps.recommendations.empty') }}
@@ -39,12 +54,16 @@ const props = withDefaults(
     popularAttributes?: AttributeConfigDto[]
     totalCount?: number
     loading?: boolean
+    categoryLink?: string | null
+    categoryLinkLabel?: string
   }>(),
   {
     products: () => [],
     popularAttributes: () => [],
     totalCount: 0,
     loading: false,
+    categoryLink: null,
+    categoryLinkLabel: '',
   }
 )
 
@@ -52,6 +71,8 @@ const products = computed(() => props.products)
 const popularAttributes = computed(() => props.popularAttributes)
 const totalCount = computed(() => props.totalCount)
 const loading = computed(() => props.loading)
+const categoryLink = computed(() => props.categoryLink)
+const categoryLinkLabel = computed(() => props.categoryLinkLabel)
 
 const hasProducts = computed(() => products.value.length > 0)
 </script>
@@ -81,6 +102,12 @@ const hasProducts = computed(() => products.value.length > 0)
   &__empty {
     margin: 16px 0;
     color: rgb(var(--v-theme-text-neutral-secondary));
+  }
+
+  &__link {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
   }
 
   &__footnote {

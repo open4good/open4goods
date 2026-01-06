@@ -8,10 +8,19 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
-import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
+import AnimatedSubtitle from '~/components/shared/ui/AnimatedSubtitle.vue'
+import {
+  resolveThemedAssetUrl,
+  useHeroBackgroundAsset,
+} from '~~/app/composables/useThemedAsset'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
-import { DEFAULT_EVENT_PACK } from '~~/config/theme/assets'
+import {
+  DEFAULT_EVENT_PACK,
+  EVENT_PACK_I18N_BASE_KEY,
+} from '~~/config/theme/event-packs'
 import { useEventPackI18n } from '~/composables/useEventPackI18n'
+import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'
+import { resolveThemeName } from '~~/shared/constants/theme'
 
 type HeroHelperSegment = {
   text: string
@@ -33,6 +42,8 @@ const props = defineProps<{
   heroImageLight?: string
   heroImageDark?: string
   partnersCount?: number
+  openDataMillions?: number
+  heroBackgroundI18nKey?: string
 }>()
 
 const emit = defineEmits<{
@@ -42,13 +53,17 @@ const emit = defineEmits<{
   'select-product': [payload: ProductSuggestionItem]
 }>()
 
-const { t, te, locale } = useI18n()
+const { t, te, tm, locale } = useI18n()
 const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
 const activeEventPack = useSeasonalEventPack()
 const packI18n = useEventPackI18n(activeEventPack)
+const themeName = computed(() =>
+  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
+)
 
 const partnersLinkPlaceholder = '{partnersLink}'
+const openDataMillionsPlaceholder = '{millions}'
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -128,51 +143,49 @@ const normalizeHelperItems = (items: unknown): HeroHelperItem[] => {
 }
 
 const heroHelperItems = computed<HeroHelperItem[]>(() => {
-  const translatedItems = normalizeHelperItems(
-    packI18n.resolveList('hero.search.helpers', {
-      fallbackKeys: ['home.hero.search.helpers'],
-    })
-  )
+  const packItems = packI18n.resolveList('hero.search.helpers', {
+    fallbackKeys: ['home.hero.search.helpers'],
+  })
+
+  // Robust check for array/object
+  const itemsToNormalize = Array.isArray(packItems)
+    ? packItems
+    : Object.values(packItems ?? {})
+
+  const translatedItems = normalizeHelperItems(itemsToNormalize)
 
   if (translatedItems.length > 0) {
-    return applyPartnerLinkPlaceholder(translatedItems)
+    return applyOpenDataMillionsPlaceholder(
+      applyPartnerLinkPlaceholder(translatedItems)
+    )
   }
 
-  const fallback =
-    packI18n.resolveString('hero.search.helper', {
-      fallbackKeys: ['home.hero.search.helper'],
-    }) ?? ''
-  const trimmedFallback = fallback.trim()
-
-  if (!trimmedFallback || trimmedFallback === 'home.hero.search.helper') {
-    return []
+  // Fallback to direct translation if pack resolution failed slightly
+  const tmItems = tm('home.hero.search.helpers')
+  if (Array.isArray(tmItems) && tmItems.length > 0) {
+    const directTranslated = normalizeHelperItems(tmItems)
+    if (directTranslated.length > 0) {
+      return applyOpenDataMillionsPlaceholder(
+        applyPartnerLinkPlaceholder(directTranslated)
+      )
+    }
   }
 
-  return applyPartnerLinkPlaceholder([
-    {
-      icon: '⚡',
-      segments: [
-        {
-          text: trimmedFallback,
-        },
-      ],
-    },
-  ])
+  return []
 })
-
-const heroSubtitle = computed(
-  () =>
-    packI18n.resolveStringVariant('hero.subtitles', {
-      fallbackKeys: ['home.hero.subtitles', 'home.hero.subtitle'],
-      stateKey: 'home-hero-subtitles',
-    }) ?? ''
-)
 
 const heroTitleSubtitle = computed(
   () =>
     packI18n.resolveStringVariant('hero.titleSubtitle', {
       fallbackKeys: ['home.hero.titleSubtitle'],
       stateKey: 'home-hero-title-subtitle',
+    }) ?? ''
+)
+
+const heroContextTitle = computed(
+  () =>
+    packI18n.resolveString('hero.context.title', {
+      fallbackKeys: ['home.hero.context.title'],
     }) ?? ''
 )
 
@@ -228,8 +241,8 @@ const heroPartnersLinkText = computed(() => {
     return normalized && normalized !== key ? normalized : ''
   }
 
-  const packKey = `home.events.${activeEventPack.value}.hero.search.partnerLinkLabel`
-  const defaultKey = `home.events.${DEFAULT_EVENT_PACK}.hero.search.partnerLinkLabel`
+  const packKey = `${EVENT_PACK_I18N_BASE_KEY}.${activeEventPack.value}.hero.search.partnerLinkLabel`
+  const defaultKey = `${EVENT_PACK_I18N_BASE_KEY}.${DEFAULT_EVENT_PACK}.hero.search.partnerLinkLabel`
 
   const translated =
     translateKey(packKey) ||
@@ -253,6 +266,20 @@ const heroPartnersLinkText = computed(() => {
   }
 
   return `${formattedCount} ${fallbackLabel}`
+})
+
+const formattedOpenDataMillions = computed(() => {
+  const value = props.openDataMillions
+
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    return null
+  }
+
+  try {
+    return new Intl.NumberFormat(locale.value).format(value)
+  } catch {
+    return String(value)
+  }
 })
 
 const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
@@ -297,6 +324,48 @@ const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
   })
 }
 
+const applyOpenDataMillionsPlaceholder = (items: HeroHelperItem[]) => {
+  const millionsLabel = formattedOpenDataMillions.value
+
+  if (!millionsLabel) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithOpenDataMillions = item.segments
+      .map(segment => {
+        if (!segment.text.includes(openDataMillionsPlaceholder)) {
+          return segment
+        }
+
+        const replacedText = segment.text.replaceAll(
+          openDataMillionsPlaceholder,
+          millionsLabel
+        )
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHelperSegment => segment != null)
+
+    return {
+      ...item,
+      segments:
+        segmentsWithOpenDataMillions.length > 0
+          ? segmentsWithOpenDataMillions
+          : item.segments,
+    }
+  })
+}
+
 const heroIconAlt = computed(
   () =>
     packI18n.resolveString('hero.iconAlt', {
@@ -313,11 +382,46 @@ const heroIconAnimation = ref(heroIconAnimationOptions[0])
 const showHeroIcon = computed(() => Boolean(heroIconAlt.value))
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
+const heroBackgroundI18nKey = computed(
+  () => props.heroBackgroundI18nKey?.trim() || 'hero.background'
+)
+const heroBackgroundI18nValue = computed(
+  () =>
+    packI18n.resolveString(heroBackgroundI18nKey.value, {
+      fallbackKeys: ['home.hero.background'],
+    }) ?? ''
+)
+
+const resolveHeroBackgroundSource = (value?: string): string | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (trimmed.startsWith('/') || trimmed.startsWith('http')) {
+    return trimmed
+  }
+
+  return resolveThemedAssetUrl(trimmed, themeName.value, activeEventPack.value)
+}
+
+const heroBackgroundOverride = computed(() =>
+  resolveHeroBackgroundSource(heroBackgroundI18nValue.value)
+)
 const heroBackgroundSrc = computed(() => {
-  const themedAsset = heroBackgroundAsset.value?.trim()
+  const themedAsset = heroBackgroundOverride.value?.trim()
 
   if (themedAsset) {
     return themedAsset
+  }
+
+  const fallbackAsset = heroBackgroundAsset.value?.trim()
+  if (fallbackAsset) {
+    return fallbackAsset
   }
 
   /* Hydration mismatch fix: Ensure server and client initial render match. */
@@ -332,24 +436,10 @@ const heroBackgroundSrc = computed(() => {
   return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')
 })
 
-const heroEyebrow = computed(
-  () =>
-    packI18n.resolveString('hero.eyebrow', {
-      fallbackKeys: ['home.hero.eyebrow'],
-    }) ?? ''
-)
-
 const heroTitle = computed(
   () =>
     packI18n.resolveString('hero.title', {
       fallbackKeys: ['home.hero.title'],
-    }) ?? ''
-)
-
-const heroDescriptionTitle = computed(
-  () =>
-    packI18n.resolveString('hero.search.helpersTitle', {
-      fallbackKeys: ['home.hero.search.helpersTitle'],
     }) ?? ''
 )
 
@@ -398,7 +488,7 @@ useHead({
     tag="section"
     class="home-hero"
     aria-labelledby="home-hero-title"
-    variant="aurora"
+    variant="none"
     :bleed="true"
   >
     <div class="home-hero__background" aria-hidden="true">
@@ -430,6 +520,13 @@ useHead({
             <p v-if="heroTitleSubtitle" class="home-hero__title-subtitle">
               {{ heroTitleSubtitle }}
             </p>
+            <AnimatedSubtitle
+              class="home-hero__title-animated-subtitle"
+              i18n-key="home.hero.subtitle"
+              animation="fade"
+              :delay="600"
+              :duration-ms="420"
+            />
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -464,6 +561,12 @@ useHead({
                         })
                       "
                       :min-chars="minSuggestionQueryLength"
+                      :enable-scan="true"
+                      :scan-mobile="true"
+                      :scan-desktop="false"
+                      :enable-voice="true"
+                      :voice-mobile="true"
+                      :voice-desktop="true"
                       @update:model-value="updateSearchQuery"
                       @submit="handleSubmit"
                       @select-category="handleCategorySelect"
@@ -503,20 +606,15 @@ useHead({
                     "
                   >
                     <div class="home-hero__context">
-                      <p class="home-hero__subtitle">
-                        {{ heroSubtitle }}
+                      <p class="home-hero__subtitle text-center">
+                        {{ heroContextTitle }}
                       </p>
-                      <p
-                        v-if="heroDescriptionTitle"
-                        class="home-hero__helpers-title"
-                      >
-                        {{ heroDescriptionTitle }}
-                      </p>
-                      <div class="home-hero__helper-row">
-                        <div class="home-hero__eyebrow-block">
-                          <p v-if="heroEyebrow" class="home-hero__eyebrow">
-                            {{ heroEyebrow }}
-                          </p>
+
+                      <v-row class="home-hero__helper-row">
+                        <v-col
+                          cols="4"
+                          class="align-center home-hero__eyebrow-block"
+                        >
                           <div
                             v-if="showHeroIcon"
                             class="home-hero__icon-wrapper"
@@ -528,49 +626,54 @@ useHead({
                               loading="lazy"
                             />
                           </div>
-                        </div>
-                        <ul
+                        </v-col>
+                        <v-col
                           v-if="heroHelperItems.length"
-                          class="home-hero__helpers"
+                          cols="6"
+                          class="home-hero__helpers-wrapper"
                         >
-                          <li
-                            v-for="(item, index) in heroHelperItems"
-                            :key="`hero-helper-${index}`"
-                            class="home-hero__helper"
-                          >
-                            <span
-                              class="home-hero__helper-icon"
-                              aria-hidden="true"
-                              >{{ item.icon }}</span
+                          <ul class="home-hero__helpers">
+                            <li
+                              v-for="(item, index) in heroHelperItems"
+                              :key="`hero-helper-${index}`"
+                              class="home-hero__helper"
                             >
-                            <span class="home-hero__helper-text">
-                              <template
-                                v-for="(segment, segmentIndex) in item.segments"
-                                :key="`hero-helper-segment-${index}-${segmentIndex}`"
+                              <span
+                                class="home-hero__helper-icon"
+                                aria-hidden="true"
+                                >{{ item.icon }}</span
                               >
-                                <NuxtLink
-                                  v-if="segment.to"
-                                  class="home-hero__helper-link"
-                                  :to="segment.to"
+                              <span class="home-hero__helper-text">
+                                <template
+                                  v-for="(
+                                    segment, segmentIndex
+                                  ) in item.segments"
+                                  :key="`hero-helper-segment-${index}-${segmentIndex}`"
                                 >
-                                  {{
-                                    segmentIndex > 0
-                                      ? ` ${segment.text}`
-                                      : segment.text
-                                  }}
-                                </NuxtLink>
-                                <span v-else>
-                                  {{
-                                    segmentIndex > 0
-                                      ? ` ${segment.text}`
-                                      : segment.text
-                                  }}
-                                </span>
-                              </template>
-                            </span>
-                          </li>
-                        </ul>
-                      </div>
+                                  <NuxtLink
+                                    v-if="segment.to"
+                                    class="home-hero__helper-link"
+                                    :to="segment.to"
+                                  >
+                                    {{
+                                      segmentIndex > 0
+                                        ? ` ${segment.text}`
+                                        : segment.text
+                                    }}
+                                  </NuxtLink>
+                                  <span v-else>
+                                    {{
+                                      segmentIndex > 0
+                                        ? ` ${segment.text}`
+                                        : segment.text
+                                    }}
+                                  </span>
+                                </template>
+                              </span>
+                            </li>
+                          </ul>
+                        </v-col>
+                      </v-row>
                     </div>
                   </RoundedCornerCard>
                 </div>
@@ -589,7 +692,7 @@ useHead({
   overflow: hidden
   min-height: 100dvh
   box-sizing: border-box
-  --home-hero-padding: clamp(2.5rem, 7vw, 4.75rem)
+  --home-hero-padding: clamp(2.5rem, 7vw, 1.75rem)
   padding-block: var(--home-hero-padding)
   padding-top: calc(var(--home-hero-padding) + env(safe-area-inset-top))
   padding-bottom: calc(var(--home-hero-padding) + env(safe-area-inset-bottom))
@@ -656,7 +759,6 @@ useHead({
   display: flex
   flex-direction: column
   justify-content: center
-  gap: clamp(1.75rem, 4vw, 2.75rem)
 
 .home-hero__layout
   --v-gutter-x: clamp(2rem, 5vw, 3.5rem)
@@ -684,8 +786,8 @@ useHead({
   margin: 0
 
 .home-hero__icon-wrapper
-  width: clamp(3.9rem, 14vw, 6rem)
-  height: clamp(3.9rem, 14vw, 6rem)
+  width: clamp(4.5rem, 16vw, 7.5rem)
+  height: clamp(4.5rem, 16vw, 7.5rem)
   box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
   backdrop-filter: blur(8px)
   border-radius: 50%
@@ -717,7 +819,7 @@ useHead({
   line-height: 1.05
   margin: 0
   color: #ffffff
-  text-shadow: rgb(var(--v-theme-primary)) 1px 0 10px
+  text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px
 
 .home-hero__title-subtitle
   margin: clamp(0.65rem, 1.8vw, 1rem) auto 0
@@ -725,6 +827,12 @@ useHead({
   color: rgba(var(--v-theme-surface-default), 0.94)
   font-size: clamp(1rem, 2.4vw, 1.4rem)
   line-height: 1.4
+
+.home-hero__title-animated-subtitle
+  font-size: clamp(0.95rem, 2.2vw, 1.2rem)
+  color: rgba(var(--v-theme-surface-default), 0.9)
+  font-size: clamp(1.2rem, 5vw, 1.8rem)
+  text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px
 
 .home-hero__search
   display: flex
@@ -760,19 +868,15 @@ useHead({
   gap: clamp(1.25rem, 2vw, 1.75rem)
 
 .home-hero__context
-  display: flex
   flex-direction: column
   gap: 0.75rem
-  text-align: left
 
 .home-hero__context-card
   height: 100%
 
 .home-hero__helper-row
-  display: grid
-  gap: clamp(0.9rem, 2vw, 1.4rem)
-  column-gap: clamp(1.1rem, 3vw, 1.75rem)
-  grid-template-columns: auto 1fr
+  display: flex
+  flex-wrap: wrap
   align-items: center
 
 .home-hero__helpers
@@ -803,14 +907,24 @@ useHead({
   text-decoration-thickness: 0.08em
   text-underline-offset: 0.1em
 
+.home-hero__context
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
 .home-hero__subtitle
   margin: 0
   color: rgb(var(--v-theme-text-neutral-strong))
+  text-align: center
+  width: 100%
+
 
 .home-hero__helpers-title
-  margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: 0.875rem
   font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  margin-bottom: 0.5rem
+  display: block
   letter-spacing: 0.01em
 
 .home-hero__wizard

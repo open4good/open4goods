@@ -2,19 +2,18 @@
 
 ## Overview
 
-This feature integrates semantic search capabilities by computing text embeddings for products using the **DistilCamemBERT** model via DJL (Deep Java Library).
+This feature integrates semantic search capabilities by computing text embeddings for products using DJL (Deep Java Library).
 These embeddings are stored in ElasticSearch as `dense_vector` fields, enabling semantic similarity queries.
 
 ## Components
 
 ### 1. DjlTextEmbeddingService
 
-A Spring Service located in `org.open4goods.api.services.completion.text`.
+Provided by the shared `embedding-djl` module in `org.open4goods.embedding.service` and auto-configured for API and front-api.
 
-- **Model**: Loading `cmarkea/distilcamembert-base` via HuggingFace hub (or local cache).
+- **Default models**: `intfloat/multilingual-e5-small` (text) with a multimodal CLIP fallback.
 - **Tokenizer**: Uses `ai.djl.huggingface:tokenizers`.
-- **Output**: 768-dimensional float vector.
-- **Pooling**: Mean pooling is applied to sentence tokens to produce a single vector.
+- **Output**: Normalised embeddings (default dimension 512) with mean pooling.
 
 ### 2. NamesAggregationService Integration
 
@@ -31,17 +30,20 @@ The embedding is computed during the product aggregation phase (`onProduct`).
 
 ## Configuration
 
-The model is currently hardcoded as `cmarkea/distilcamembert-base`.
-The cache directory for models is handled by DJL (default `~/.djl/cache`).
+Configure via `embedding.*` properties (see `embedding-djl` module):
+
+- `embedding.text-model-url` / `embedding.multimodal-model-url` to choose remote identifiers (primary + fallback).
+- `embedding.fail-on-missing-model=true` makes startup fail if neither model loads.
+- Health details are exposed by `DjlEmbeddingHealthIndicator` when Spring Boot Actuator is enabled.
 
 ## Deployment
 
-- **Dependencies**: Requires `ai.djl.huggingface:tokenizers` and an Engine (PyTorch or OnnxRuntime).
-- **Resources**: First run will download the model (~260MB). Ensure the server has internet access or pre-populate the cache.
+- **Dependencies**: Requires `ai.djl.huggingface:tokenizers` and the PyTorch engine.
+- **Resources**: First run downloads models from the configured DJL model URLs.
 - **Performance**: Computation is CPU-based. Latency per item is approx 10-50ms depending on CPU.
 
 ## Troubleshooting
 
 - **Missing Tokenizer**: Ensure `ai.djl.huggingface:tokenizers` is in the classpath.
 - **Memory**: Vectors are large. ElasticSearch storage size will increase.
-- **Logs**: Check `DjlTextEmbeddingService` logs for initialization errors.
+- **Logs**: Check `DjlTextEmbeddingService` logs for initialization errors and health indicator output.

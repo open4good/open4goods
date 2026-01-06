@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, defineComponent, h, nextTick, ref } from 'vue'
 
@@ -10,6 +11,7 @@ const displayWidth = ref(1280)
 
 const windowHeight = ref(1000)
 const elementHeight = ref(300)
+const zoomedState = ref(false)
 
 vi.mock('@vueuse/core', () => ({
   usePreferredReducedMotion: () => motionPreference,
@@ -26,6 +28,12 @@ vi.mock('@vueuse/core', () => ({
     y: ref(0),
     update: () => {},
   }),
+  useStorage: (_key: string, defaultValue: boolean) => {
+    if (zoomedState.value === undefined) {
+      zoomedState.value = defaultValue
+    }
+    return zoomedState
+  },
 }))
 
 vi.mock('vuetify', () => ({
@@ -56,6 +64,7 @@ const mountParallax = (props?: Record<string, unknown>) =>
     },
     global: {
       stubs,
+      plugins: [createPinia()],
     },
   })
 
@@ -66,6 +75,20 @@ describe('ParallaxWidget', () => {
     displayWidth.value = 1280
     windowHeight.value = 1000
     elementHeight.value = 300
+    zoomedState.value = false
+
+    // Mock getBoundingClientRect to simulate element position at 350px top
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      top: 350,
+      left: 0,
+      width: 1000,
+      height: 300,
+      bottom: 650,
+      right: 1000,
+      x: 0,
+      y: 350,
+      toJSON: () => {},
+    } as DOMRect)
   })
 
   it('applies per-layer speeds and blend modes', async () => {
@@ -101,7 +124,6 @@ describe('ParallaxWidget', () => {
     const layer = wrapper.get('.parallax-widget__layer')
     expect(layer.element.style.transform).toBe('translate3d(0, 150px, 0)')
   })
-
 
   it('halts parallax when reduced motion is preferred', async () => {
     motionPreference.value = 'reduce'
@@ -153,5 +175,24 @@ describe('ParallaxWidget', () => {
     expect(layer.element.style.transform).toBe('translate3d(0, -100px, 0)')
 
     innerHeightSpy.mockRestore()
+  })
+
+  it('handles invalid input gracefully and ignores non-string sources', async () => {
+    const wrapper = mountParallax({
+      backgrounds: [
+        { src: 123 as unknown, speed: 0.5 }, // invalid src
+        { src: '/valid.svg', speed: 0.2 },
+        '  ', // empty string
+        null as unknown,
+        undefined as unknown,
+      ],
+    })
+
+    await nextTick()
+
+    const layers = wrapper.findAll('.parallax-widget__layer')
+    // Should only have 1 valid layer
+    expect(layers).toHaveLength(1)
+    expect(layers[0].element.style.backgroundImage).toContain('/valid.svg')
   })
 })

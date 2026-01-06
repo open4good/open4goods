@@ -129,3 +129,4 @@ export function AgentRequestResponseDtoToJSONTyped(value?: AgentRequestResponseD
         'promptVariantId': value['promptVariantId'],
     };
 }
+

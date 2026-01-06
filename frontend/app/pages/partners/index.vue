@@ -5,10 +5,9 @@
       :eyebrow="t('partners.hero.eyebrow')"
       :title="t('partners.hero.title')"
       :subtitle="t('partners.hero.subtitle')"
-      :description-html="t('partners.hero.description')"
-      description-bloc-id="webpages:partners:hero-overview"
-      background="surface-variant"
-      surface-variant="orbit"
+      background="image"
+      background-image-asset-key="partnersBackground"
+      surface-variant="halo"
       layout="2-columns"
       container="lg"
       show-media

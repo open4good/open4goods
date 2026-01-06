@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import HomeParallaxVisual from '../HomeParallaxVisual.vue'
 
 type SolutionBenefit = {
   emoji: string
@@ -59,15 +60,9 @@ const sectionDescription = computed(() => t('home.solution.description'))
         </v-col>
         <v-col cols="12" md="6" class="home-solution__visual">
           <div class="home-solution__image-wrapper">
-            <img
-              src="/images/home/nudger-screaming.webp"
+            <HomeParallaxVisual
+              src="/images/parallax/solution.svg"
               :alt="sectionTitle"
-              class="home-solution__image"
-              sizes="(min-width: 960px) 306px, 60vw"
-              width="1024"
-              height="1536"
-              loading="lazy"
-              decoding="async"
             />
           </div>
         </v-col>
@@ -108,13 +103,20 @@ const sectionDescription = computed(() => t('home.solution.description'))
   display: flex
   justify-content: center
   align-items: center
+  position: relative
 
 .home-solution__image
   width: min(66%, 320px)
   height: auto
   display: block
-  transform: rotate(3deg)
   filter: drop-shadow(0 20px 40px rgba(var(--v-theme-shadow-primary-600), 0.15))
+
+.home-solution__next-btn
+  position: absolute
+  bottom: 0
+  right: 1rem
+  z-index: 2
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1)
 
 .home-solution__list
   margin: 0
@@ -158,6 +160,9 @@ const sectionDescription = computed(() => t('home.solution.description'))
   .home-solution__visual
     order: -1
     margin-bottom: 1rem
+
+  .home-solution__next-btn
+    right: 0
 
 @media (max-width: 599px)
   .home-solution__item

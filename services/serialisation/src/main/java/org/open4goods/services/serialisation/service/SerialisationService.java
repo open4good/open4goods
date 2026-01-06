@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -59,7 +61,8 @@ public class SerialisationService {
         this.yamlMapper =  new ObjectMapper(yamlFactory)
         	    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         	    .setSerializationInclusion(Include.NON_EMPTY)
-        	    .enable(SerializationFeature.INDENT_OUTPUT);
+        	    .enable(SerializationFeature.INDENT_OUTPUT)
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         	
         	
         // Low level yaml for literals rendering

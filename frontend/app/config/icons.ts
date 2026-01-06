@@ -191,7 +191,7 @@ import {
   mdiVuejs,
   mdiWeatherNight,
   mdiWhiteBalanceSunny,
-  mdiWifiOff
+  mdiWifiOff,
 } from '@mdi/js'
 
 export const icons: Record<string, string> = {

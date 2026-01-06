@@ -83,7 +83,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 		models.add(data.model());
 		models.addAll(data.getAkaModels());
 
-		List<EprelProduct> results = eprelSearchService.search(data.gtin(), models, vertical.getEprelGroupName());
+                List<EprelProduct> results = eprelSearchService.search(data.gtin(), models, vertical.getEprelGroupNames());
 
 		if (null == results || results.size() == 0) {
 			logger.warn("No EPREL results when completing {}-{}", data.brand(), data.model());

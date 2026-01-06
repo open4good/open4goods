@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import NudgeToolWizard from './NudgeToolWizard.vue'
 
@@ -15,6 +16,9 @@ vi.mock('vuetify', () => ({
 }))
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: () => ({ fetchCategories: vi.fn().mockResolvedValue([]) }),
+}))
+vi.mock('~/composables/useAuth', () => ({
+  useAuth: () => ({ isLoggedIn: { value: false } }),
 }))
 vi.mock('~/components/nudge-tool/NudgeWizardHeader.vue', () => ({
   default: { template: '<div class="header-stub"></div>' },
@@ -42,11 +46,19 @@ vi.mock('~/utils/_nudge-tool-filters', () => ({
   buildNudgeFilterRequest: vi.fn().mockReturnValue({}),
   buildScoreFilters: vi.fn(),
 }))
+const zoomedState = ref(false)
+
 vi.mock('@vueuse/core', () => ({
   useDebounceFn: (fn: (...args: unknown[]) => unknown) => fn,
   useElementSize: () => ({ height: { value: 100 } }),
   useTransition: (source: unknown) => source,
   usePreferredReducedMotion: () => ({ value: false }),
+  useStorage: (_key: string, defaultValue: boolean) => {
+    if (zoomedState.value === undefined) {
+      zoomedState.value = defaultValue
+    }
+    return zoomedState
+  },
 }))
 
 describe('NudgeToolWizard', () => {
@@ -72,6 +84,11 @@ describe('NudgeToolWizard', () => {
           VWindow: { template: '<div><slot /></div>' },
           VWindowItem: { template: '<div><slot /></div>', props: ['value'] },
           VSpacer: true,
+          VTooltip: {
+            props: ['text', 'location'],
+            template:
+              '<div class="v-tooltip-stub"><slot name="activator" :props="{}" /><slot /></div>',
+          },
           // We keep VStepper stubbed but check its props if possible,
           // or we can use a component that renders keys
           VStepper: {

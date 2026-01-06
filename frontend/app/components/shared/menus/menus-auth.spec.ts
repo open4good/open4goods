@@ -12,6 +12,7 @@ import {
   vi,
   type MockInstance,
 } from 'vitest'
+import { useNuxtApp } from '#imports'
 
 import type { ThemeName } from '~~/shared/constants/theme'
 
@@ -29,10 +30,19 @@ const currentRoute = reactive({ path: '/', fullPath: '/' })
 
 const themeName = ref<ThemeName>('light')
 const storedThemePreference = ref<ThemeName>('light')
+const zoomedState = ref(false)
 function createUseStorageMock(): MockInstance<
-  (key: string, defaultValue: ThemeName) => Ref<ThemeName>
+  (key: string, defaultValue: ThemeName | boolean) => Ref<ThemeName | boolean>
 > {
-  return vi.fn((_: string, defaultValue: ThemeName) => {
+  return vi.fn((_: string, defaultValue: ThemeName | boolean) => {
+    if (typeof defaultValue === 'boolean') {
+      if (zoomedState.value === undefined) {
+        zoomedState.value = defaultValue
+      }
+
+      return zoomedState
+    }
+
     if (!storedThemePreference.value) {
       storedThemePreference.value = defaultValue
     }
@@ -460,6 +470,7 @@ describe('Shared menu authentication controls', () => {
     fetchMock.mockResolvedValue({ success: true })
 
     const wrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
+    useNuxtApp().$fetch = fetchMock
 
     const clearItem = wrapper.get('[data-testid="hero-clear-cache"]')
     await clearItem.trigger('click')
@@ -479,6 +490,7 @@ describe('Shared menu authentication controls', () => {
     fetchMock.mockResolvedValue({ success: true })
 
     const wrapper = await mountSuspended(TheMobileMenu, mobileMountOptions)
+    useNuxtApp().$fetch = fetchMock
     const clearCacheItem = wrapper.get('[data-testid="mobile-clear-cache"]')
 
     await clearCacheItem.trigger('click')

@@ -36,10 +36,24 @@
           <p v-if="description" class="category-hero__description">
             {{ description }}
           </p>
+          <v-row dense class="category-hero__actions-row">
+            <v-col cols="12" md="auto">
+              <div
+                v-if="$slots['after-description']"
+                class="category-hero__after-description"
+              >
+                <slot name="after-description" />
+              </div>
+            </v-col>
 
-          <div v-if="$slots.actions" class="category-hero__actions">
-            <slot name="actions" />
-          </div>
+            <v-spacer />
+
+            <v-col cols="12" md="auto">
+              <div v-if="$slots.actions" class="category-hero__actions">
+                <slot name="actions" />
+              </div>
+            </v-col>
+          </v-row>
         </div>
       </div>
     </v-sheet>
@@ -189,6 +203,12 @@ defineExpose({ headingId, t })
     font-size: 1.05rem
     line-height: 1.6
     color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+  &__after-description
+    display: flex
+    flex-direction: column
+    align-items: flex-start
+    gap: 0.75rem
 
   &__actions
     display: flex

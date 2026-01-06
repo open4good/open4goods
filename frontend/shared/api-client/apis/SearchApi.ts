@@ -16,11 +16,14 @@
 import * as runtime from '../runtime';
 import type {
   GlobalSearchResponseDto,
+  GlobalSearchResultDto,
   SearchSuggestResponseDto,
 } from '../models/index';
 import {
     GlobalSearchResponseDtoFromJSON,
     GlobalSearchResponseDtoToJSON,
+    GlobalSearchResultDtoFromJSON,
+    GlobalSearchResultDtoToJSON,
     SearchSuggestResponseDtoFromJSON,
     SearchSuggestResponseDtoToJSON,
 } from '../models/index';
@@ -28,6 +31,14 @@ import {
 export interface GlobalSearchRequest {
     query: string;
     domainLanguage: GlobalSearchDomainLanguageEnum;
+}
+
+export interface SemanticSearchRequest {
+    verticalId: string;
+    query: string;
+    domainLanguage: SemanticSearchDomainLanguageEnum;
+    pageNumber?: number;
+    pageSize?: number;
 }
 
 export interface SuggestRequest {
@@ -102,6 +113,86 @@ export class SearchApi extends runtime.BaseAPI {
     }
 
     /**
+     * Runs a vector-based search on product embeddings scoped to a given vertical and filtered using standard guardrails.
+     * Execute a semantic search within a vertical
+     */
+    async semanticSearchRaw(requestParameters: SemanticSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GlobalSearchResultDto<any>>> {
+        if (requestParameters['verticalId'] == null) {
+            throw new runtime.RequiredError(
+                'verticalId',
+                'Required parameter "verticalId" was null or undefined when calling semanticSearch().'
+            );
+        }
+
+        if (requestParameters['query'] == null) {
+            throw new runtime.RequiredError(
+                'query',
+                'Required parameter "query" was null or undefined when calling semanticSearch().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling semanticSearch().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['verticalId'] != null) {
+            queryParameters['verticalId'] = requestParameters['verticalId'];
+        }
+
+        if (requestParameters['query'] != null) {
+            queryParameters['query'] = requestParameters['query'];
+        }
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        if (requestParameters['pageNumber'] != null) {
+            queryParameters['page[number]'] = requestParameters['pageNumber'];
+        }
+
+        if (requestParameters['pageSize'] != null) {
+            queryParameters['page[size]'] = requestParameters['pageSize'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/search/semantic`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse<any>(response);
+    }
+
+    /**
+     * Runs a vector-based search on product embeddings scoped to a given vertical and filtered using standard guardrails.
+     * Execute a semantic search within a vertical
+     */
+    async semanticSearch(requestParameters: SemanticSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GlobalSearchResultDto<any>> {
+        const response = await this.semanticSearchRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
      * Retrieve search suggestions
      */
@@ -172,6 +263,14 @@ export const GlobalSearchDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type GlobalSearchDomainLanguageEnum = typeof GlobalSearchDomainLanguageEnum[keyof typeof GlobalSearchDomainLanguageEnum];
+/**
+ * @export
+ */
+export const SemanticSearchDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type SemanticSearchDomainLanguageEnum = typeof SemanticSearchDomainLanguageEnum[keyof typeof SemanticSearchDomainLanguageEnum];
 /**
  * @export
  */

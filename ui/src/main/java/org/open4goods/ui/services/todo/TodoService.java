@@ -17,9 +17,6 @@ import org.open4goods.commons.helper.XpathHelper;
 import org.open4goods.ui.model.Todo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.Health.Builder;
-import org.springframework.boot.actuate.health.HealthIndicator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 

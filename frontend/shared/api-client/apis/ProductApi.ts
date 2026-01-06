@@ -15,14 +15,21 @@
 
 import * as runtime from '../runtime';
 import type {
+  GlobalSearchRequestDto,
+  GlobalSearchResponseDto,
   ProblemDetail,
   ProductDto,
   ProductFieldOptionsResponse,
   ProductSearchRequestDto,
   ProductSearchResponseDto,
   ReviewGenerationStatus,
+  SearchSuggestResponseDto,
 } from '../models/index';
 import {
+    GlobalSearchRequestDtoFromJSON,
+    GlobalSearchRequestDtoToJSON,
+    GlobalSearchResponseDtoFromJSON,
+    GlobalSearchResponseDtoToJSON,
     ProblemDetailFromJSON,
     ProblemDetailToJSON,
     ProductDtoFromJSON,
@@ -35,6 +42,8 @@ import {
     ProductSearchResponseDtoToJSON,
     ReviewGenerationStatusFromJSON,
     ReviewGenerationStatusToJSON,
+    SearchSuggestResponseDtoFromJSON,
+    SearchSuggestResponseDtoToJSON,
 } from '../models/index';
 
 export interface ComponentsRequest {
@@ -48,6 +57,11 @@ export interface FilterableFieldsRequest {
 export interface FilterableFieldsForVerticalRequest {
     verticalId: string;
     domainLanguage: FilterableFieldsForVerticalDomainLanguageEnum;
+}
+
+export interface GlobalSearchRequest {
+    domainLanguage: GlobalSearchDomainLanguageEnum;
+    globalSearchRequestDto: GlobalSearchRequestDto;
 }
 
 export interface ProductRequest {
@@ -78,6 +92,11 @@ export interface SortableFieldsRequest {
 export interface SortableFieldsForVerticalRequest {
     verticalId: string;
     domainLanguage: SortableFieldsForVerticalDomainLanguageEnum;
+}
+
+export interface SuggestRequest {
+    query: string;
+    domainLanguage: SuggestDomainLanguageEnum;
 }
 
 export interface TriggerReviewRequest {
@@ -246,6 +265,66 @@ export class ProductApi extends runtime.BaseAPI {
      */
     async filterableFieldsForVertical(requestParameters: FilterableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductFieldOptionsResponse> {
         const response = await this.filterableFieldsForVerticalRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Runs a multi-step search strategy. Results are first attempted in the requested search type and fall back to subsequent modes (global, semantic) when no results are found.
+     * Execute a global search
+     */
+    async globalSearchRaw(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GlobalSearchResponseDto>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling globalSearch().'
+            );
+        }
+
+        if (requestParameters['globalSearchRequestDto'] == null) {
+            throw new runtime.RequiredError(
+                'globalSearchRequestDto',
+                'Required parameter "globalSearchRequestDto" was null or undefined when calling globalSearch().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/products/search`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: GlobalSearchRequestDtoToJSON(requestParameters['globalSearchRequestDto']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => GlobalSearchResponseDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Runs a multi-step search strategy. Results are first attempted in the requested search type and fall back to subsequent modes (global, semantic) when no results are found.
+     * Execute a global search
+     */
+    async globalSearch(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GlobalSearchResponseDto> {
+        const response = await this.globalSearchRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -551,6 +630,67 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
+     * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
+     * Retrieve search suggestions
+     */
+    async suggestRaw(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SearchSuggestResponseDto>> {
+        if (requestParameters['query'] == null) {
+            throw new runtime.RequiredError(
+                'query',
+                'Required parameter "query" was null or undefined when calling suggest().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling suggest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['query'] != null) {
+            queryParameters['query'] = requestParameters['query'];
+        }
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/products/suggest`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => SearchSuggestResponseDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
+     * Retrieve search suggestions
+     */
+    async suggest(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SearchSuggestResponseDto> {
+        const response = await this.suggestRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Validate the provided hCaptcha token and forward the request to the back-office API.
      * Trigger AI review generation
      */
@@ -652,6 +792,14 @@ export type FilterableFieldsForVerticalDomainLanguageEnum = typeof FilterableFie
 /**
  * @export
  */
+export const GlobalSearchDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type GlobalSearchDomainLanguageEnum = typeof GlobalSearchDomainLanguageEnum[keyof typeof GlobalSearchDomainLanguageEnum];
+/**
+ * @export
+ */
 export const ProductDomainLanguageEnum = {
     Fr: 'fr',
     En: 'en'
@@ -725,6 +873,14 @@ export const SortableFieldsForVerticalDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type SortableFieldsForVerticalDomainLanguageEnum = typeof SortableFieldsForVerticalDomainLanguageEnum[keyof typeof SortableFieldsForVerticalDomainLanguageEnum];
+/**
+ * @export
+ */
+export const SuggestDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type SuggestDomainLanguageEnum = typeof SuggestDomainLanguageEnum[keyof typeof SuggestDomainLanguageEnum];
 /**
  * @export
  */

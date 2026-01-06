@@ -26,6 +26,10 @@ vi.mock('vue-i18n', () => ({
           'Align the barcode within the frame.',
         'search.suggestions.scanner.loading': 'Preparing camera…',
         'search.suggestions.scanner.error': 'Camera unavailable.',
+        'search.suggestions.voice.startLabel': 'Start voice search',
+        'search.suggestions.voice.stopLabel': 'Stop voice search',
+        'search.suggestions.voice.unsupported': 'Voice unavailable',
+        'search.suggestions.voice.error': 'Voice error',
       }
 
       const template = messages[key] ?? key
@@ -227,6 +231,50 @@ describe('SearchSuggestField', () => {
     vi.unstubAllGlobals()
   })
 
+  it('does not fetch suggestions when disabled', async () => {
+    const wrapper = await mount(SearchSuggestField, {
+      props: {
+        modelValue: '',
+        label: 'Search',
+        placeholder: 'Search products',
+        ariaLabel: 'Search products',
+        minChars: 2,
+        enableSuggest: false,
+      },
+      global: {
+        stubs: {
+          VHover: VHoverStub,
+          VAutocomplete: VAutocompleteStub,
+          VListItem: createStub('div'),
+          VAvatar: createStub('div'),
+          VImg: createStub('img'),
+          VIcon: createStub('span'),
+          VBtn: createStub('button'),
+          VCard: createStub('div'),
+          VDialog: VDialogStub,
+          ImpactScore: createStub('div'),
+          PwaBarcodeScanner: PwaBarcodeScannerStub,
+        },
+        components: {
+          ClientOnly: defineComponent({
+            name: 'ClientOnlyStub',
+            setup(_, { slots }) {
+              return () => (slots.default ? slots.default() : [])
+            },
+          }),
+        },
+      },
+    })
+
+    const autocomplete = wrapper.getComponent(VAutocompleteStub)
+    autocomplete.vm.$emit('update:search', 'tv')
+    await wrapper.vm.$nextTick()
+    vi.advanceTimersByTime(350)
+    await flushPromises()
+
+    expect(globalThis.$fetch).not.toHaveBeenCalled()
+  })
+
   it('fetches suggestions when the value meets the minimum length', async () => {
     const wrapper = await mountField()
     const autocomplete = wrapper.getComponent(VAutocompleteStub)
@@ -238,7 +286,7 @@ describe('SearchSuggestField', () => {
     vi.advanceTimersByTime(350)
     await flushPromises()
 
-    expect(globalThis.$fetch).toHaveBeenCalledWith('/api/search/suggest', {
+    expect(globalThis.$fetch).toHaveBeenCalledWith('/api/products/suggest', {
       params: { query: 'tv' },
     })
   })
@@ -370,6 +418,15 @@ describe('SearchSuggestField', () => {
     const wrapper = await mountField()
 
     expect(wrapper.find('[data-test="search-scanner-button"]').exists()).toBe(
+      true
+    )
+  })
+
+  it('renders the voice button on mobile when enabled', async () => {
+    displayMock.smAndDown.value = true
+    const wrapper = await mountField()
+
+    expect(wrapper.find('[data-test="search-voice-button"]').exists()).toBe(
       true
     )
   })

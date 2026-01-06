@@ -5,8 +5,9 @@
       :title="t('opensource.hero.title')"
       :subtitle="t('opensource.hero.subtitle')"
       description-bloc-id="webpages:opensource:hero-description"
-      background="surface-variant"
-      surface-variant="prism"
+      background="image"
+      background-image-asset-key="openSourceBackground"
+      surface-variant="halo"
       layout="2-columns"
       container="lg"
       :primary-cta="heroPrimaryCta"
@@ -17,6 +18,31 @@
       heading-level="h1"
       schema-type="AboutPage"
       :og-image="ogImageUrl"
+    />
+
+    <OpensourcePillarsSection
+      :eyebrow="t('opensource.pillars.eyebrow')"
+      :title="t('opensource.pillars.title')"
+      description-bloc-id="webpages:opensource:pillars-intro"
+      :cards="pillarCards"
+      :feedback-callout="feedbackCallout"
+    />
+
+    <OpensourceContributionSection
+      :eyebrow="t('opensource.contribution.eyebrow')"
+      :title="t('opensource.contribution.title')"
+      description-bloc-id="webpages:opensource:contribute-intro"
+      :steps="contributionSteps"
+    />
+
+    <OpensourceResourcesSection
+      :eyebrow="t('opensource.resources.eyebrow')"
+      :title="t('opensource.resources.title')"
+      description-bloc-id="webpages:opensource:resources-intro"
+      :resources="resourceLinks"
+      :contact="contactCta"
+      :opendata-callout="opendataCallout"
+      :prompt-callout="promptCallout"
     />
 
     <v-container class="opensource-live" fluid>
@@ -40,14 +66,19 @@
               </div>
               <v-divider class="my-4" />
               <div class="d-flex align-center ga-3">
-                <v-icon
-                  icon="mdi-source-repository"
+                <v-btn
+                  :to="localePath('releases')"
+                  variant="text"
                   color="primary"
-                  size="32"
-                />
-                <span class="text-body-2">
-                  {{ t('opensource.live.version.description') }}
-                </span>
+                  class="px-0 text-none"
+                >
+                  <template #prepend>
+                    <v-icon icon="mdi-source-repository" size="32" />
+                  </template>
+                  <span class="text-body-2">
+                    {{ t('opensource.live.version.description') }}
+                  </span>
+                </v-btn>
               </div>
             </v-card-text>
           </v-card>
@@ -111,31 +142,6 @@
         </v-col>
       </v-row>
     </v-container>
-
-    <OpensourcePillarsSection
-      :eyebrow="t('opensource.pillars.eyebrow')"
-      :title="t('opensource.pillars.title')"
-      description-bloc-id="webpages:opensource:pillars-intro"
-      :cards="pillarCards"
-      :feedback-callout="feedbackCallout"
-    />
-
-    <OpensourceContributionSection
-      :eyebrow="t('opensource.contribution.eyebrow')"
-      :title="t('opensource.contribution.title')"
-      description-bloc-id="webpages:opensource:contribute-intro"
-      :steps="contributionSteps"
-    />
-
-    <OpensourceResourcesSection
-      :eyebrow="t('opensource.resources.eyebrow')"
-      :title="t('opensource.resources.title')"
-      description-bloc-id="webpages:opensource:resources-intro"
-      :resources="resourceLinks"
-      :contact="contactCta"
-      :opendata-callout="opendataCallout"
-      :prompt-callout="promptCallout"
-    />
   </div>
 </template>
 
@@ -275,16 +281,6 @@ const pillarCards = computed<PillarCardDisplay[]>(() => [
       label: String(t('opensource.pillars.cards.methodology.cta')),
       ariaLabel: `${String(t('opensource.pillars.cards.methodology.cta'))} : ${String(t('opensource.pillars.cards.methodology.ariaLabel'))}`,
       href: localePath('impact-score'),
-    },
-  },
-  {
-    icon: 'mdi-account-group-outline',
-    title: String(t('opensource.pillars.cards.community.title')),
-    descriptionBlocId: 'webpages:opensource:pillars-community',
-    action: {
-      label: String(t('opensource.pillars.cards.community.cta')),
-      ariaLabel: `${String(t('opensource.pillars.cards.community.cta'))} : ${String(t('opensource.pillars.cards.community.ariaLabel'))}`,
-      href: localePath('team'),
     },
   },
 ])

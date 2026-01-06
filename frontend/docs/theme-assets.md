@@ -12,13 +12,24 @@ This page summarises how themed assets are resolved, how seasonal packs are sche
   4. The fallback theme configured by `THEME_ASSETS_FALLBACK` (light by default).
 - Use the composables `useThemeAsset` or `useThemedAsset` instead of importing files directly so this cascade remains consistent.
 
+### Conventions
+
+- **Filenames**: Use `kebab-case` for all asset filenames (e.g., `hero-background.svg`).
+- **Logos**: `logo`, `footerLogo`, and `favicon` are considered **Application Identity** assets.
+  - They should be defined in `config/theme/assets.ts` for `light` and `dark` themes.
+  - They should **NOT** be overridden by Event Packs (do not add them to `packs.<name>.assets` in i18n files) unless a complete rebrand is intended.
+
 ### Adding seasonal overrides
 
 - Declare the file names you intend to override in `seasonalThemeAssets` inside `config/theme/assets.ts`.
 - Place the files under `app/assets/themes/<theme>/<pack>/` (or `common/<pack>/`) using the same filenames as their non-seasonal counterparts.
 - Missing files automatically fall back to the non-seasonal theme/common assets thanks to the ordered resolution above.
 
+> [!NOTE]
+> A default theme kit must include not only standard page backgrounds but also the **5 parallax layers** used on the homepage (essentials, features, blog, objections, cta).
+
 ## Event packs and scheduling
+
 - Available packs: `default`, `sdg`, `bastille-day`, and `hold` (see `EVENT_PACK_NAMES`).
 
 - Date windows are defined in `config/theme/seasons.ts` and evaluated in UTC. If no window matches, the `default` pack is used.

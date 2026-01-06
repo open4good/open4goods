@@ -5,7 +5,20 @@ import { getPublicSitemapUrlsForDomainLanguage } from '~~/server/utils/sitemap-l
 
 export default (nitroApp: import('nitro/app').NitroApp) => {
   nitroApp.hooks.hook('sitemap:index-resolved', ctx => {
-    const requestURL = getRequestURL(ctx.event)
+    let requestURL = getRequestURL(ctx.event)
+
+    // Fallback for static generation where requestURL might be localhost (NODE_ENV is 'prerender' during generation)
+    if (
+      (process.env.NODE_ENV === 'production' ||
+        process.env.NODE_ENV === 'prerender') &&
+      (requestURL.hostname === 'localhost' ||
+        requestURL.hostname === '127.0.0.1')
+    ) {
+      // Default to main production domain if we can't determine otherwise during generation
+      // ideally this should be driven by NUXT_PUBLIC_SITE_URL or similar but for now we fallback to default
+      requestURL = new URL('https://nudger.fr')
+    }
+
     const { domainLanguage } = getDomainLanguageFromHostname(
       requestURL.hostname
     )

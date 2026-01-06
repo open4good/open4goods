@@ -32,7 +32,7 @@ export interface CategoriesRequest {
 export class StatsApi extends runtime.BaseAPI {
 
     /**
-     * Return aggregated statistics about vertical category mappings and affiliation partners.
+     * Return aggregated statistics about vertical category mappings, affiliation partners and available OpenData items.
      * Get categories statistics
      */
     async categoriesRaw(requestParameters: CategoriesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoriesStatsDto>> {
@@ -73,7 +73,7 @@ export class StatsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Return aggregated statistics about vertical category mappings and affiliation partners.
+     * Return aggregated statistics about vertical category mappings, affiliation partners and available OpenData items.
      * Get categories statistics
      */
     async categories(requestParameters: CategoriesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoriesStatsDto> {

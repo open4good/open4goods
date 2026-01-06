@@ -16,6 +16,9 @@ public record OpenDataDatasetDto(
         @Schema(description = "Number of rows in the dataset formatted using the requested locale.", example = "150\u00a0000")
         String recordCount,
 
+        @Schema(description = "Raw number of rows in the dataset.", example = "1500000")
+        long recordCountValue,
+
         @Schema(description = "Last update timestamp formatted using the requested locale.",
                 example = "12 mars 2024, 10:15:42", nullable = true)
         String lastUpdated,

@@ -1,8 +1,6 @@
 import { computed, toValue, type MaybeRef } from 'vue'
 
-import { DEFAULT_EVENT_PACK, type EventPackName } from '~~/config/theme/assets'
-
-const BASE_KEY = 'home.events'
+import { EVENT_PACK_I18N_BASE_KEY } from '~~/config/theme/event-packs'
 
 type ResolveOptions = {
   fallbackKeys?: string[]
@@ -26,6 +24,22 @@ const toStringArray = (value: unknown): string[] => {
     .filter(Boolean)
 }
 
+/**
+ * Composable pour résoudre les ressources i18n d'un pack événementiel.
+ *
+ * Chaîne de résolution :
+ * 1. packs.{packActuel}.{path}
+ * 2. fallbackKeys (si fournis)
+ *
+ * @example
+ * ```ts
+ * const activeEventPack = useSeasonalEventPack()
+ * const packI18n = useEventPackI18n(activeEventPack)
+ *
+ * const title = packI18n.resolveString('hero.title')
+ * const subtitles = packI18n.resolveList('hero.subtitles')
+ * ```
+ */
 export const useEventPackI18n = (packName: MaybeRef<EventPackName>) => {
   const { tm, te } = useI18n()
 
@@ -35,7 +49,7 @@ export const useEventPackI18n = (packName: MaybeRef<EventPackName>) => {
   )
 
   const buildKey = (path: string, pack: EventPackName) =>
-    `${BASE_KEY}.${pack}.${path}`
+    `${EVENT_PACK_I18N_BASE_KEY}.${pack}.${path}`
 
   const resolveRaw = (path: string | string[], options?: ResolveOptions) => {
     const normalizedPath = toFlatPath(path)
@@ -45,12 +59,6 @@ export const useEventPackI18n = (packName: MaybeRef<EventPackName>) => {
 
     if (te(packKey)) {
       return tm(packKey)
-    }
-
-    const defaultKey = buildKey(normalizedPath, DEFAULT_EVENT_PACK)
-
-    if (te(defaultKey)) {
-      return tm(defaultKey)
     }
 
     for (const key of options?.fallbackKeys ?? []) {

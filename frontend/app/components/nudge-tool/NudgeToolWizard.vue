@@ -15,18 +15,21 @@
       <div
         class="nudge-wizard__corner-content"
         :class="{
-          'nudge-wizard__corner-content--clickable': shouldShowMatches,
           'nudge-wizard__corner-content--expanded': isContentMode,
         }"
-        @click="handleCornerClick"
       >
-        <NudgeToolWelcomeIcon v-if="activeStepKey === 'category'" />
-        <div
+        <NudgeToolAnimatedIcon v-if="activeStepKey === 'category'" />
+        <v-btn
           v-else-if="categorySummary"
-          class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-2 pb-2"
+          class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-1 pb-1"
+          variant="text"
+          color="white"
+          :aria-label="cornerSummaryLabel"
+          :ripple="false"
+          @click="navigateToCategoryResults"
         >
           <div
-            class="nudge-wizard__corner-visual d-flex align-center justify-center mb-1"
+            class="nudge-wizard__corner-visual d-flex align-center justify-center"
           >
             <div
               class="nudge-wizard__corner-icon"
@@ -45,14 +48,11 @@
           <div
             class="nudge-wizard__corner-text text-white text-center d-flex flex-column align-center"
           >
-            <div class="nudge-wizard__corner-count font-weight-black lh-1 mb-1">
+            <div class="nudge-wizard__corner-count font-weight-black lh-1">
               {{ animatedMatches }}
             </div>
-            <div class="text-caption font-weight-bold lh-1 opacity-90">
-              {{ categorySummary.label }}
-            </div>
           </div>
-        </div>
+        </v-btn>
       </div>
     </template>
     <div ref="headerRef">
@@ -107,24 +107,47 @@
     </div>
     <div ref="footerRef" class="nudge-wizard__footer">
       <div
-        v-if="progressSteps.length"
+        v-if="progressSteps.length > 1"
         class="nudge-wizard__progress-bubbles"
         :style="footerOffsetStyle"
       >
         <v-btn
+          v-if="activeStepKey !== 'category'"
+          variant="text"
+          class="px-2"
+          color="primary"
+          @click="navigateToCategoryResults"
+        >
+          {{ $t('nudge-tool.actions.advancedSearch') }}
+        </v-btn>
+        <v-tooltip
           v-for="step in progressSteps"
           :key="step.key"
-          class="nudge-wizard__progress-bubble"
-          :variant="step.key === activeStepKey ? 'flat' : 'text'"
-          :color="step.key === activeStepKey ? 'primary' : undefined"
-          :aria-label="step.title"
-          :disabled="!canAccessStep(step.key)"
-          icon
-          size="44"
-          @click="() => handleProgressClick(step.key)"
+          location="top"
+          :text="step.key === 'category' ? step.subtitle : step.title"
         >
-          <span class="nudge-wizard__progress-index">{{ step.index }}</span>
-        </v-btn>
+          <template #activator="{ props: tooltipProps }">
+            <span
+              class="nudge-wizard__progress-bubble-wrapper"
+              v-bind="tooltipProps"
+            >
+              <v-btn
+                class="nudge-wizard__progress-bubble"
+                :variant="step.key === activeStepKey ? 'flat' : 'text'"
+                :color="step.key === activeStepKey ? 'primary' : undefined"
+                :aria-label="step.title"
+                :disabled="!canAccessStep(step.key)"
+                icon
+                size="44"
+                @click="() => handleProgressClick(step.key)"
+              >
+                <span class="nudge-wizard__progress-index">{{
+                  step.index
+                }}</span>
+              </v-btn>
+            </span>
+          </template>
+        </v-tooltip>
       </div>
       <div class="nudge-wizard__footer-actions">
         <v-btn
@@ -157,8 +180,9 @@
 <script setup lang="ts">
 import { useDebounceFn, useElementSize } from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
+import { useAuth } from '~/composables/useAuth'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
-import NudgeToolWelcomeIcon from '~/components/nudge-tool/NudgeToolWelcomeIcon.vue'
+import NudgeToolAnimatedIcon from '~/components/nudge-tool/NudgeToolAnimatedIcon.vue'
 import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
 import {
   NudgeToolStepCategory,
@@ -169,7 +193,6 @@ import {
   RoundedCornerCard,
 } from '#components'
 import type {
-  CategoryHashState,
   Filter,
   FilterRequestDto,
   NudgeToolSubsetGroupDto,
@@ -180,7 +203,11 @@ import type {
   VerticalConfigDto,
   VerticalSubsetDto,
 } from '~/shared/api-client'
+import type { NudgeToolCategory } from '~/types/nudge-tool'
+import unknownCategoryIcon from '~/assets/nudge-tool/unknown-category.svg?url'
+
 import { buildCategoryHash } from '~/utils/_category-filter-state'
+
 import {
   buildConditionFilter,
   buildNudgeFilterRequest,
@@ -195,6 +222,8 @@ const props = defineProps<{
   initialSubsets?: string[]
 }>()
 
+const emit = defineEmits<{ (event: 'navigate', target: string): void }>()
+
 const accentCornerOffsets: Record<CornerSize, string> = {
   sm: '46px',
   md: '58px',
@@ -202,12 +231,10 @@ const accentCornerOffsets: Record<CornerSize, string> = {
   xl: '120px',
 }
 
-const emit = defineEmits<{
-  (e: 'navigate', payload: { hash: string; categorySlug: string }): void
-}>()
-
 const { t } = useI18n()
+const { isLoggedIn } = useAuth()
 const router = useRouter()
+
 const { fetchCategories } = useCategories()
 
 const categories = useState<VerticalCategoryDto[]>('nudge-categories', () => [])
@@ -240,6 +267,20 @@ const categoryIcon = computed(
 )
 
 const nudgeConfig = computed(() => selectedCategory.value?.nudgeToolConfig)
+
+const unknownCategory = computed<NudgeToolCategory>(() => ({
+  id: 'unknown-category',
+  verticalHomeTitle: t('nudge-tool.categories.unknown.title'),
+  imageSmall: unknownCategoryIcon,
+  imageMedium: unknownCategoryIcon,
+  tooltip: t('nudge-tool.categories.unknown.tooltip'),
+  externalLink: 'https://www.linkedin.com/company/105517334/',
+}))
+
+const displayCategories = computed<NudgeToolCategory[]>(() => [
+  ...categories.value,
+  unknownCategory.value,
+])
 
 const subsetGroups = computed<NudgeToolSubsetGroupDto[]>(() => {
   const explicit = nudgeConfig.value?.subsetGroups ?? []
@@ -300,14 +341,82 @@ const filterRequest = computed<FilterRequestDto>(() => {
   )
 })
 
-const hashState = computed<CategoryHashState>(() => ({
-  filters:
-    filterRequest.value.filters?.length ||
-    filterRequest.value.filterGroups?.length
-      ? filterRequest.value
+const isCategoryStep = computed(() => activeStepKey.value === 'category')
+
+const windowTransition = computed(() => undefined)
+
+const windowReverseTransition = computed(() => undefined)
+
+const categorySummary = computed(() => {
+  if (!selectedCategory.value || activeStepKey.value === 'category') {
+    return null
+  }
+
+  return {
+    label:
+      selectedCategory.value.verticalHomeTitle ??
+      selectedCategory.value.id ??
+      '',
+    image: selectedCategory.value.imageSmall,
+    icon: categoryIcon.value,
+    alt:
+      selectedCategory.value.verticalHomeTitle ??
+      selectedCategory.value.id ??
+      '',
+  }
+})
+
+const shouldEnlargeCornerIcon = computed(
+  () => isCategoryStep.value || Boolean(categorySummary.value)
+)
+
+const categorySlug = computed(() => {
+  if (!selectedCategory.value) {
+    return null
+  }
+
+  const slug =
+    selectedCategory.value.verticalHomeUrl?.replace(/^\/+/, '') ??
+    selectedCategory.value.id ??
+    null
+
+  return slug && slug.trim().length > 0 ? slug : null
+})
+
+const categoryHash = computed(() => {
+  if (!selectedCategoryId.value) {
+    return ''
+  }
+
+  const hash = buildCategoryHash({
+    filters: filterRequest.value,
+    activeSubsets: activeSubsetIds.value.length
+      ? activeSubsetIds.value
       : undefined,
-  activeSubsets: activeSubsetIds.value,
-}))
+  })
+
+  return hash ?? ''
+})
+
+const categoryNavigationTarget = computed(() => {
+  if (!categorySlug.value) {
+    return null
+  }
+
+  return categoryHash.value
+    ? `/${categorySlug.value}${categoryHash.value}`
+    : `/${categorySlug.value}`
+})
+
+const cornerSummaryLabel = computed(() => {
+  if (!categorySummary.value) {
+    return ''
+  }
+
+  return t('nudge-tool.actions.viewCategoryResults', {
+    category: categorySummary.value.label,
+  })
+})
 
 type WizardStep = {
   key: string
@@ -328,8 +437,9 @@ const steps = computed<WizardStep[]>(() => {
     title: t('nudge-tool.steps.category.title'),
     subtitle: t('nudge-tool.steps.category.subtitle'),
     props: {
-      categories: categories.value,
+      categories: displayCategories.value,
       selectedCategoryId: selectedCategoryId.value,
+      isAuthenticated: isLoggedIn.value,
     },
   })
 
@@ -339,6 +449,7 @@ const steps = computed<WizardStep[]>(() => {
       component: NudgeToolStepScores,
       title: t('nudge-tool.steps.scores.title'),
       subtitle: t('nudge-tool.steps.scores.subtitle'),
+      icon: 'mdi-earth',
       props: {
         modelValue: selectedScores.value,
         scores: nudgeConfig.value?.scores ?? [],
@@ -352,6 +463,7 @@ const steps = computed<WizardStep[]>(() => {
     component: NudgeToolStepCondition,
     title: t('nudge-tool.steps.condition.title'),
     subtitle: t('nudge-tool.steps.condition.subtitle'),
+    icon: 'mdi-compare-horizontal',
     props: { modelValue: condition.value },
     onUpdate: (value: ProductConditionSelection) => {
       condition.value = value
@@ -394,11 +506,14 @@ const steps = computed<WizardStep[]>(() => {
     component: NudgeToolStepRecommendations,
     title: t('nudge-tool.steps.recommendations.title'),
     subtitle: t('nudge-tool.steps.recommendations.subtitle'),
+    icon: 'mdi-lightbulb-on',
     props: {
       products: recommendations.value,
       popularAttributes: selectedCategory.value?.attributesConfig?.configs,
       totalCount: totalMatches.value,
       loading: loading.value,
+      categoryLink: categoryNavigationTarget.value,
+      categoryLinkLabel: cornerSummaryLabel.value,
     },
   })
 
@@ -460,6 +575,15 @@ const goToPrevious = () => {
       activeStepKey.value = previousStep.key
     }
   }
+}
+
+const navigateToCategoryResults = () => {
+  if (!categoryNavigationTarget.value) {
+    return
+  }
+
+  emit('navigate', categoryNavigationTarget.value)
+  void router.push(categoryNavigationTarget.value)
 }
 
 const getFirstContentStepKey = () =>
@@ -559,30 +683,8 @@ const hydrateCategories = async () => {
     return
   }
 
-  const result = await fetchCategories(true)
+  const result = await fetchCategories()
   categories.value = result
-}
-
-const navigateToCategoryPage = () => {
-  if (!selectedCategory.value) {
-    return
-  }
-
-  const slug =
-    selectedCategory.value.verticalHomeUrl?.replace(/^\//u, '') ??
-    selectedCategory.value.id ??
-    ''
-  const hash = buildCategoryHash(hashState.value)
-
-  emit('navigate', { hash, categorySlug: slug })
-
-  void router.push({ path: `/${slug}`, hash })
-}
-
-const handleCornerClick = () => {
-  if (shouldShowMatches.value) {
-    navigateToCategoryPage()
-  }
 }
 
 const hasPreviousStep = computed(() => {
@@ -610,20 +712,16 @@ const isNextDisabled = computed(() => {
 const canAccessStep = (stepKey: string) =>
   visitedStepKeys.value.includes(stepKey)
 
-const progressSteps = computed(() => {
-  if (activeStepKey.value === 'category') {
-    return []
-  }
-
-  return steps.value
-    .filter(step => step.key !== 'category')
-    .filter(step => visitedStepKeys.value.includes(step.key))
+const progressSteps = computed(() =>
+  steps.value
     .map((step, index) => ({
       key: step.key,
       title: step.title,
+      subtitle: step.subtitle ?? '',
       index: index + 1,
     }))
-})
+    .filter(step => visitedStepKeys.value.includes(step.key))
+)
 
 const handleProgressClick = (stepKey: string) => {
   if (!canAccessStep(stepKey)) {
@@ -632,39 +730,6 @@ const handleProgressClick = (stepKey: string) => {
 
   activeStepKey.value = stepKey
 }
-
-const shouldShowMatches = computed(
-  () => Boolean(selectedCategory.value) && activeStepKey.value !== 'category'
-)
-
-const isCategoryStep = computed(() => activeStepKey.value === 'category')
-
-const windowTransition = computed(() => undefined)
-
-const windowReverseTransition = computed(() => undefined)
-
-const categorySummary = computed(() => {
-  if (!selectedCategory.value || activeStepKey.value === 'category') {
-    return null
-  }
-
-  return {
-    label:
-      selectedCategory.value.verticalHomeTitle ??
-      selectedCategory.value.id ??
-      '',
-    image: selectedCategory.value.imageSmall,
-    icon: categoryIcon.value,
-    alt:
-      selectedCategory.value.verticalHomeTitle ??
-      selectedCategory.value.id ??
-      '',
-  }
-})
-
-const shouldEnlargeCornerIcon = computed(
-  () => isCategoryStep.value || Boolean(categorySummary.value)
-)
 
 const windowTransitionDurationMs = 0
 
@@ -818,10 +883,10 @@ const footerOffsetStyle = computed(() => ({
   paddingLeft: accentCornerOffsets[resolvedCornerSize.value],
 }))
 
-const cornerIconScaleFactor = 1.5
-const baseCornerIconSize = 32
-const contentCornerIconSize = 38
-const cornerIconWrapperSize = 46
+const cornerIconScaleFactor = 1.3
+const baseCornerIconSize = 26
+const contentCornerIconSize = 30
+const cornerIconWrapperSize = 40
 
 const cornerIconSize = computed(() => {
   if (shouldEnlargeCornerIcon.value) {
@@ -869,21 +934,29 @@ const cornerIconDimensions = computed(() => {
       transform 300ms ease,
       opacity 260ms ease;
 
-    &--clickable {
-      cursor: pointer;
-
-      &:hover {
-        opacity: 0.8;
-      }
-    }
-
     &--expanded {
       transform: translateY(2px) scale(1.04);
     }
   }
 
   &__corner-summary {
-    gap: 10px;
+    gap: 2px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding-inline: 4px;
+    text-transform: none;
+
+    :deep(.v-btn__content) {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    :deep(.v-btn__overlay) {
+      display: none;
+    }
   }
 
   &__corner-visual {
@@ -896,16 +969,16 @@ const cornerIconDimensions = computed(() => {
   }
 
   &__corner-icon {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
     display: grid;
     place-items: center;
-    border-radius: 14px;
-    background: rgba(var(--v-theme-hero-gradient-mid), 0.22);
-    box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4);
+    /* Removed background and border as per new design */
+    /* background: rgba(var(--v-theme-hero-gradient-mid), 0.22); */
+    /* box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.4); */
 
     &--enlarged {
-      border-radius: 20px;
+      /* border-radius: 20px; */
     }
   }
 
@@ -914,7 +987,7 @@ const cornerIconDimensions = computed(() => {
   }
 
   &__corner-count {
-    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
     line-height: 1;
     text-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   }
@@ -977,6 +1050,10 @@ const cornerIconDimensions = computed(() => {
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
+  }
+
+  &__progress-bubble-wrapper {
+    display: inline-flex;
   }
 
   &__progress-bubble {

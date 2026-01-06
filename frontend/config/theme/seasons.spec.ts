@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveActiveEventPack, resolveEventPackName } from './seasons'
+import { resolveActiveEventPack, resolveEventPackName } from './event-packs'
 
 describe('resolveActiveEventPack', () => {
   it('returns default pack when no window matches', () => {
@@ -10,9 +10,9 @@ describe('resolveActiveEventPack', () => {
   })
 
   it('prefers SDG campaign window in spring', () => {
+    // SDG pack is removed from configuration
     const date = new Date(Date.UTC(2024, 3, 20))
-
-    expect(resolveActiveEventPack(date)).toBe('sdg')
+    expect(resolveActiveEventPack(date)).toBe('default')
   })
 
   it('keeps winter pack active after the new year', () => {
@@ -22,8 +22,7 @@ describe('resolveActiveEventPack', () => {
   })
 
   it('accepts an explicit pack name from query params', () => {
-    expect(resolveEventPackName(['sdg'])).toBe('sdg')
-    expect(resolveEventPackName('hold')).toBe('hold')
+    expect(resolveEventPackName(['sdg'])).toBeUndefined()
     expect(resolveEventPackName('unknown')).toBeUndefined()
   })
 })

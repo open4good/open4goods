@@ -71,7 +71,7 @@
 			<plugin>
 				<groupId>org.jreleaser</groupId>
 				<artifactId>jreleaser-maven-plugin</artifactId>
-				<version>1.21.0</version>
+				<version>1.22.0</version>
 				<configuration>
 					<gitRootSearch>true</gitRootSearch>
 					<jreleaser>
@@ -145,7 +145,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.21.2</version>
+			<version>1.22.1</version>
 		</dependency>
 
 		<dependency>
@@ -159,13 +159,13 @@
 		<dependency>
 			<groupId>org.xwiki.platform</groupId>
 			<artifactId>xwiki-platform-rest-model</artifactId>
-			<version>17.10.1</version>
+			<version>17.10.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xwiki.commons</groupId>
 			<artifactId>xwiki-commons-component-default</artifactId>
-		    <version>17.10.1</version>
+		    <version>17.10.2</version>
 		</dependency>
 
         <dependency>
@@ -176,7 +176,7 @@
 		<dependency>
 			<groupId>org.xwiki.rendering</groupId>
 			<artifactId>xwiki-rendering-api</artifactId>
-		    <version>17.10.1</version>
+		    <version>17.10.2</version>
 		</dependency>
 
 

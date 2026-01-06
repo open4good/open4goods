@@ -21,13 +21,7 @@
       </template>
     </ClientOnly>
 
-    <ClientOnly>
-      <template #fallback>
-        <div class="pre-hydration-app-bar-spacer" aria-hidden="true" />
-      </template>
-    </ClientOnly>
-
-    <v-main>
+    <v-main class="app-main-adjust">
       <slot />
     </v-main>
 
@@ -80,11 +74,13 @@ watch(
 </script>
 
 <style scoped lang="sass">
-.pre-hydration-app-bar-spacer
-  height: 64px
+
+
+.app-main-adjust
+  padding-top: 64px !important
 
   @media (max-width: 959px)
-    height: 56px
+    padding-top: 56px !important
 
 .mobile-menu-drawer
   padding-top: calc(env(safe-area-inset-top) + 8px)

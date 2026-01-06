@@ -38,6 +38,9 @@ front:
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082,http://localhost:3000"}
     jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
     shared-token: ${FRONT_SECURITY_SHARED_TOKEN:CHANGE_ME_SHARED_TOKEN}
+  exposed-docs:
+    base-url: ${FRONT_EXPOSED_DOCS_BASE_URL:http://localhost:8086}
+    public-access: ${FRONT_EXPOSED_DOCS_PUBLIC_ACCESS:true}
 
   affiliation-partners:
     api-base-url: ${FRONT_AFFILIATION_PARTNERS_API_BASE_URL:https://api.open4goods.org}
@@ -57,6 +60,14 @@ front:
     anonymous: 100
     authenticated: 1000
 
+  review-generation:
+    api-base-url: ${FRONT_REVIEW_GENERATION_API_BASE_URL:https://api.open4goods.org}
+    api-key: ${FRONT_REVIEW_GENERATION_API_KEY:CHANGE_ME_REVIEW_KEY}
+    review-path: ${FRONT_REVIEW_GENERATION_REVIEW_PATH:/review}
+    quota:
+      max-per-ip: ${FRONT_REVIEW_GENERATION_MAX_PER_IP:3}
+      window: ${FRONT_REVIEW_GENERATION_WINDOW:24h}
+
   partners:
     ecosystem:
       partners:
@@ -69,6 +80,16 @@ front:
           url: https://www.ademe.fr
           imageUrl: /images/ecosystem/ademe.png
 
+        - name: Icecat
+          blocId: 'pages:ecosystem:icecat'
+          url: https://www.icecat.biz
+          imageUrl: /images/ecosystem/icecat.png          
+
+        - name: Sustainalytics
+          blocId: 'pages:ecosystem:sustainalytics'
+          url: //https://www.sustainalytics.com/
+          imageUrl: /images/ecosystem/sustainanalytics.png          
+                    
     mentors:
       partners:
         - name: Moovance
@@ -144,11 +165,6 @@ team-config:
       linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
       imageUrl: /images/team/Candide.jpeg
 
-    - name: Yann Mingant
-      blocId: 'pages:team:yann-mingant:'
-      linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
-      imageUrl: /images/team/Yann.jpeg
-
     - name: Louis-Marie Toudoire
       blocId: 'pages:team:louis-marie-toudoire:'
       linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
@@ -184,6 +200,16 @@ team-config:
       blocId: 'pages:team:stephane-castrec:'
       linkedInUrl: https://www.linkedin.com/in/scastrec/
       imageUrl: /images/team/Stephane.jpeg
+      
+    - name: Yann Mingant
+      blocId: 'pages:team:yann-mingant:'
+      linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
+      imageUrl: /images/team/Yann.jpeg
+      
+    - name: Albert Le Jeune Vasseur
+      blocId: 'pages:team:albert-ljv:'
+      linkedInUrl: https://www.linkedin.com/in/albertljv/
+      imageUrl: /images/team/Albert.png      
 
 price-config:
   events:

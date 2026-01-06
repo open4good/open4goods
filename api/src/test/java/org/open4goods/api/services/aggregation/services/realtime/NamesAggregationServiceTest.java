@@ -13,12 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.api.services.completion.text.DjlTextEmbeddingService;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -41,16 +45,20 @@ class NamesAggregationServiceTest {
 	@Mock
 	private DjlTextEmbeddingService embeddingService;
 
+	private DjlEmbeddingProperties embeddingProperties;
+
 	private NamesAggregationService service;
 
 	@BeforeEach
 	void setUp() {
+		embeddingProperties = new DjlEmbeddingProperties();
 		service = new NamesAggregationService(
 				LoggerFactory.getLogger(NamesAggregationService.class),
 				verticalsConfigService,
 				evaluationService,
 				blablaService,
-				embeddingService);
+				embeddingService,
+				embeddingProperties);
 	}
 
 	@Test
@@ -90,16 +98,102 @@ class NamesAggregationServiceTest {
 		assertNotNull(product.getEmbedding());
 	}
 
+	@Test
+	void onProduct_shouldComputePrettyNameWithSuffix() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(9L);
+		product.setVertical("tv");
+		org.open4goods.model.attribute.ProductAttribute attr = new org.open4goods.model.attribute.ProductAttribute();
+		attr.setName("DIAGONALE_POUCES");
+		attr.setValue("55");
+		product.getAttributes().getAll().put("DIAGONALE_POUCES", attr);
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getPrettyName().get("fr"))
+				.isEqualTo("TV 55 \"");
+	}
+
+	@Test
+	void onProduct_shouldComputeSingularAndDesignation() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any()))
+				.thenAnswer(invocation -> invocation.getArgument(0, String.class));
+
+		Product product = new Product(11L);
+		product.setVertical("tv");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getSingular().get("fr")).isEqualTo("Singular");
+		assertThat(product.getNames().getSingularDesignation().get("fr")).isEqualTo("Designation");
+	}
+
 	private VerticalConfig buildVerticalConfig() {
 		VerticalConfig config = new VerticalConfig();
 		ProductI18nElements productI18nElements = new ProductI18nElements();
 		PrefixedAttrText h1 = new PrefixedAttrText();
 		h1.setPrefix("Cuisine");
 		productI18nElements.setH1Title(h1);
+		PrefixedAttrText pretty = new PrefixedAttrText();
+		pretty.setPrefix("Cuisine");
+		pretty.setAttrs(java.util.List.of("DIAGONALE_POUCES"));
+		productI18nElements.setPrettyName(pretty);
+		PrefixedAttrText singular = new PrefixedAttrText();
+		singular.setPrefix("Singular");
+		productI18nElements.setSingular(singular);
+		PrefixedAttrText singularDesignation = new PrefixedAttrText();
+		singularDesignation.setPrefix("Designation");
+		productI18nElements.setSingularDesignation(singularDesignation);
 
 		HashMap<String, ProductI18nElements> i18n = new HashMap<>();
 		i18n.put("fr", productI18nElements);
 		config.setI18n(i18n);
+		config.setAttributesConfig(buildAttributesConfig());
 		return config;
+	}
+
+	private AttributesConfig buildAttributesConfig() {
+		AttributeConfig diagonale = new AttributeConfig();
+		diagonale.setKey("DIAGONALE_POUCES");
+		Localisable<String, String> suffix = new Localisable<>();
+		suffix.put("default", "\"");
+		suffix.put("fr", "\"");
+		diagonale.setSuffix(suffix);
+		AttributesConfig attributesConfig = new AttributesConfig();
+		attributesConfig.setConfigs(java.util.List.of(diagonale));
+		return attributesConfig;
+	}
+	@Test
+	void generateUrl_shouldIncludeGtinInUrl() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		config.setId("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		// Ensure GTIN is present (id is used as GTIN in Product)
+		
+		org.open4goods.model.attribute.ProductAttribute attr = new org.open4goods.model.attribute.ProductAttribute();
+		attr.setName("DIAGONALE_POUCES");
+		attr.setValue("55");
+		product.getAttributes().getAll().put("DIAGONALE_POUCES", attr);
+		
+		// Setup URL prefix config
+		PrefixedAttrText urlConfig = new PrefixedAttrText();
+		urlConfig.setPrefix("TV");
+		urlConfig.setAttrs(java.util.List.of("DIAGONALE_POUCES"));
+		config.getI18n().get("fr").setUrl(urlConfig);
+
+		service.onProduct(product, config);
+
+		String generatedUrl = product.getNames().getUrl().get("fr");
+		assertThat(generatedUrl).startsWith("123456789-");
+		assertThat(generatedUrl).contains("tv-55");
 	}
 }

@@ -60,9 +60,21 @@ jobs:
 
       ############################################
       # 5. Build and Test with Maven
-      ############################################    
+      ############################################
       - name: Build and Test with Maven
         run: mvn --batch-mode --update-snapshots install
+
+      ############################################
+      # 5b. Bundle markdown/prompt resources into classpath JARs
+      ############################################
+      - name: Bundle markdown/prompt resources
+        uses: ./.github/actions/bundle-doc-resources
+        with:
+          jar-paths: |
+            admin/target/admin-0.0.1-SNAPSHOT.jar
+            api/target/api-0.0.1-SNAPSHOT.jar
+            ui/target/ui-0.0.1-SNAPSHOT.jar
+            front-api/target/front-api-0.0.1-SNAPSHOT.jar
 
       ############################################
       # 6. Deploy JAR Files to Qualification Environment

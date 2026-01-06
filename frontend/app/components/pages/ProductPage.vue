@@ -63,6 +63,7 @@
             :product-image="resolvedProductImageSource"
             :vertical-home-url="verticalHomeUrl"
             :vertical-title="normalizedVerticalTitle"
+            :subtitle-params="impactSubtitleParams"
           />
         </section>
 
@@ -75,12 +76,17 @@
           {{ $t('product.uncategorized.noScore') }}
         </v-alert>
 
-        <section :id="sectionIds.ai" class="product-page__section">
+        <section
+          v-if="showAiReviewSection"
+          :id="sectionIds.ai"
+          class="product-page__section"
+        >
           <ProductAiReviewSection
             :gtin="product.gtin ?? gtin"
             :initial-review="product.aiReview?.review ?? null"
             :review-created-at="product.aiReview?.createdMs ?? undefined"
             :site-key="hcaptchaSiteKey"
+            :title-params="aiTitleParams"
           />
         </section>
 
@@ -89,6 +95,7 @@
             v-if="product.offers"
             :offers="product.offers"
             :commercial-events="commercialEvents"
+            :title-params="priceTitleParams"
           />
         </section>
 
@@ -101,6 +108,7 @@
             :product="product"
             :vertical-id="categoryDetail?.id ?? ''"
             :popular-attributes="categoryDetail?.popularAttributes ?? []"
+            :subtitle-params="alternativesSubtitleParams"
           />
         </section>
 
@@ -109,7 +117,11 @@
           :id="sectionIds.attributes"
           class="product-page__section"
         >
-          <ProductAttributesSection :product="product" />
+          <ProductAttributesSection
+            :product="product"
+            :attribute-configs="categoryDetail?.attributesConfig?.configs ?? []"
+            :title-params="attributesTitleParams"
+          />
         </section>
 
         <section
@@ -206,6 +218,7 @@ import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { buildCategoryHash } from '~/utils/_category-filter-state'
 import { resolveScoreNumericValue } from '~/utils/score-values'
+import { formatBrandModelTitle, humanizeSlug } from '~/utils/_product-title'
 
 const ProductImpactSection = defineAsyncComponent(
   () => import('~/components/product/ProductImpactSection.vue')
@@ -237,6 +250,19 @@ const { isLoggedIn } = useAuth()
 const display = useDisplay()
 const { y: scrollY } = useWindowScroll()
 const { height: viewportHeight } = useWindowSize()
+
+const PRODUCT_COMPONENTS = [
+  'base',
+  'identity',
+  'names',
+  'attributes',
+  'resources',
+  'scores',
+  'aiReview',
+  'offers',
+  'timeline',
+  'eprel',
+].join(',')
 
 const stickyBannerThresholdRatio = 0.8
 const isStickyBannerOpen = ref(false)
@@ -274,7 +300,9 @@ const {
   async () => {
     productLoadError.value = null
     try {
-      return await $fetch<ProductDto>(`/api/products/${gtin}`)
+      return await $fetch<ProductDto>(`/api/products/${gtin}`, {
+        query: { include: PRODUCT_COMPONENTS },
+      })
     } catch (fetchError) {
       if (isBackendNotFoundError(fetchError)) {
         throw createError({
@@ -473,11 +501,21 @@ const scoreAggregations = async () => {
 await scoreAggregations()
 
 const productTitle = computed(() => {
+  const rawSlug = product.value?.slug ?? ''
+  const normalizedSlug = rawSlug.trim()
+  const slugFallback = normalizedSlug
+    ? humanizeSlug(normalizedSlug, locale.value) || normalizedSlug
+    : ''
+  const gtinValue = product.value?.gtin ?? gtin
+  const gtinFallback = gtinValue
+    ? t('product.meta.gtinFallback', { gtin: gtinValue })
+    : ''
+
   return (
     product.value?.names?.h1Title ??
     product.value?.identity?.bestName ??
-    product.value?.slug ??
-    `GTIN ${product.value?.gtin ?? gtin}`
+    slugFallback ??
+    gtinFallback
   )
 })
 
@@ -577,6 +615,136 @@ const productBrand = computed(() => {
 const productModel = computed(() => {
   const model = product.value?.identity?.model
   return typeof model === 'string' ? model.trim() : ''
+})
+
+const modelVariations = computed(() => {
+  const identity = product.value?.identity
+  const candidates: string[] = []
+
+  if (identity?.model) {
+    candidates.push(identity.model)
+  }
+
+  const akaModels = identity?.akaModels
+  if (akaModels instanceof Set) {
+    candidates.push(...Array.from(akaModels))
+  } else if (Array.isArray(akaModels)) {
+    candidates.push(...akaModels)
+  }
+
+  const deduped = new Map<string, string>()
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') {
+      continue
+    }
+
+    const normalized = candidate.trim()
+    if (!normalized.length) {
+      continue
+    }
+
+    const key = normalized.toLocaleLowerCase(locale.value)
+    if (!deduped.has(key)) {
+      deduped.set(key, normalized)
+    }
+  }
+
+  return Array.from(deduped.values()).sort(
+    (current, next) => current.length - next.length
+  )
+})
+
+const sectionModelVariationCycle = computed(() => {
+  const variations = modelVariations.value
+
+  const sectionOrder = [
+    'impactSubtitle',
+    'aiTitle',
+    'priceTitle',
+    'alternativesSubtitle',
+    'attributesTitle',
+  ] as const
+
+  const resolved: Record<(typeof sectionOrder)[number], string> = {
+    impactSubtitle: '',
+    aiTitle: '',
+    priceTitle: '',
+    alternativesSubtitle: '',
+    attributesTitle: '',
+  }
+
+  if (!variations.length) {
+    return resolved
+  }
+
+  let index = 0
+  for (const key of sectionOrder) {
+    resolved[key] = variations[index] ?? ''
+    index = (index + 1) % variations.length
+  }
+
+  return resolved
+})
+
+const formatModelVariationLabel = (variation: string) => {
+  const trimmedVariation = variation.trim()
+  const brand = productBrand.value
+
+  if (brand && trimmedVariation) {
+    return `${brand} - ${trimmedVariation}`
+  }
+
+  return trimmedVariation || brand
+}
+
+const buildModelVariationParams = (options: {
+  key:
+    | 'impactSubtitle'
+    | 'aiTitle'
+    | 'priceTitle'
+    | 'alternativesSubtitle'
+    | 'attributesTitle'
+}) => {
+  const variation = sectionModelVariationCycle.value[options.key]
+  const fallbackBrand = productBrand.value
+  const resolvedVariation = variation
+    ? formatModelVariationLabel(variation)
+    : ''
+  const modelVariation = resolvedVariation || fallbackBrand
+
+  if (!modelVariation) {
+    return undefined
+  }
+
+  return {
+    modelVariation,
+  }
+}
+
+const impactSubtitleParams = computed(() =>
+  buildModelVariationParams({ key: 'impactSubtitle' })
+)
+const aiTitleParams = computed(() =>
+  buildModelVariationParams({ key: 'aiTitle' })
+)
+const priceTitleParams = computed(() =>
+  buildModelVariationParams({ key: 'priceTitle' })
+)
+const alternativesSubtitleParams = computed(() =>
+  buildModelVariationParams({ key: 'alternativesSubtitle' })
+)
+const attributesTitleParams = computed(() =>
+  buildModelVariationParams({ key: 'attributesTitle' })
+)
+
+const brandModelTitle = computed(() =>
+  formatBrandModelTitle(productBrand.value, productModel.value, locale.value)
+)
+
+const productMetaTitle = computed(() => {
+  return brandModelTitle.value.length
+    ? brandModelTitle.value
+    : productTitle.value
 })
 
 const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
@@ -684,16 +852,29 @@ const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   return resolvedCategories
 })
 
-const productSubtitle = computed(() => {
-  return productBrand.value.length ? productBrand.value : null
-})
-
 const productMetaDescription = computed(() => {
-  return (
-    product.value?.names?.metaDescription ??
-    productSubtitle.value ??
-    productTitle.value
-  )
+  const explicit = product.value?.names?.metaDescription?.trim()
+  if (explicit) {
+    return explicit
+  }
+
+  const brandModelSuffix =
+    brandModelTitle.value && brandModelTitle.value !== productMetaTitle.value
+      ? ` ${brandModelTitle.value}`
+      : ''
+
+  if (normalizedVerticalTitle.value) {
+    return t('product.meta.defaultDescriptionWithVertical', {
+      productTitle: productMetaTitle.value,
+      brandModel: brandModelSuffix,
+      verticalTitle: normalizedVerticalTitle.value,
+    })
+  }
+
+  return t('product.meta.defaultDescription', {
+    productTitle: productMetaTitle.value,
+    brandModel: brandModelSuffix,
+  })
 })
 
 const toAbsoluteUrl = (value?: string | null) => {
@@ -731,6 +912,9 @@ const canonicalPath = computed(() => {
 const canonicalUrl = computed(() =>
   new URL(canonicalPath.value, requestURL.origin).toString()
 )
+const productRobotsContent = computed(() =>
+  categoryDetail.value?.enabled === false ? 'noindex, nofollow' : undefined
+)
 
 const resolvedProductImageSource = computed(() => {
   const galleryImages = product.value?.resources?.images ?? []
@@ -754,10 +938,30 @@ const ogImageUrl = computed(() => {
 
 const ogImageAlt = computed(() => productTitle.value)
 
+const internalProductImageSource = computed(() => {
+  const galleryImages = product.value?.resources?.images ?? []
+  const firstGalleryImage =
+    galleryImages.find(image => Boolean(image?.url))?.url ??
+    galleryImages.find(image => Boolean(image?.originalUrl))?.originalUrl
+
+  return (
+    product.value?.resources?.coverImagePath ??
+    product.value?.base?.coverImagePath ??
+    firstGalleryImage ??
+    null
+  )
+})
+
+const schemaImageUrl = computed(() =>
+  internalProductImageSource.value
+    ? toAbsoluteUrl(internalProductImageSource.value)
+    : undefined
+)
+
 useSeoMeta({
-  title: () => productTitle.value,
+  title: () => productMetaTitle.value,
   description: () => productMetaDescription.value,
-  ogTitle: () => product.value?.names?.ogTitle ?? productTitle.value,
+  ogTitle: () => product.value?.names?.ogTitle ?? productMetaTitle.value,
   ogDescription: () =>
     product.value?.names?.ogDescription ?? productMetaDescription.value,
   ogUrl: () => canonicalUrl.value,
@@ -767,9 +971,14 @@ useSeoMeta({
 })
 
 useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  meta: productRobotsContent.value
+    ? [{ name: 'robots', content: productRobotsContent.value }]
+    : [],
 }))
 
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+}))
 const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(
   () => {
     return (product.value?.scores?.scores ?? {}) as Record<
@@ -1300,6 +1509,7 @@ const showAttributesSection = computed(() => {
 const showAlternativesSection = computed(() =>
   Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0)
 )
+const showAiReviewSection = computed(() => Boolean(categoryDetail.value))
 
 const sectionIds = {
   hero: 'hero',
@@ -1333,7 +1543,7 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
     id: sectionIds.ai,
     label: t('product.navigation.ai'),
     icon: 'mdi-robot-outline',
-    condition: true,
+    condition: showAiReviewSection.value,
   },
   {
     id: sectionIds.price,
@@ -1639,7 +1849,7 @@ const productStructuredData = computed(() => {
       : null
 
   const offers = structuredOffers.value
-  const imageUrl = ogImageUrl.value
+  const imageUrl = schemaImageUrl.value
 
   return {
     '@context': 'https://schema.org',
@@ -1679,6 +1889,46 @@ const productStructuredData = computed(() => {
   }
 })
 
+const impactScoreOn20 = computed(() => {
+  const ecoScore = impactScores.value.find(
+    s => s.id?.toUpperCase() === 'ECOSCORE'
+  )
+  return ecoScore?.on20 != null ? Math.round(ecoScore.on20) : null
+})
+
+const metaTitle = computed(() => {
+  const title = productTitle.value
+  const score = impactScoreOn20.value
+
+  if (title.length < 35 && score != null) {
+    return `${title}${t('product.meta.impactScore', { score })}`
+  }
+
+  return title
+})
+
+useSeoMeta({
+  title: () => metaTitle.value,
+  description: () => productMetaDescription.value,
+  ogTitle: () => product.value?.names?.ogTitle ?? metaTitle.value,
+  ogDescription: () =>
+    product.value?.names?.ogDescription ?? productMetaDescription.value,
+  ogUrl: () => canonicalUrl.value,
+  ogType: 'product',
+  ogImage: () => ogImageUrl.value,
+  ogImageAlt: () => ogImageAlt.value,
+})
+
+useHead(() => ({
+  meta: productRobotsContent.value
+    ? [{ name: 'robots', content: productRobotsContent.value }]
+    : [],
+}))
+
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+}))
+
 useHead(() => {
   const scripts = [] as { type: string; key: string; children: string }[]
 
@@ -1717,13 +1967,17 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 96px;
+  top: 50vh;
+  transform: translateY(-50%);
   align-self: start;
   height: fit-content;
 }
 
 .product-page__nav--mobile {
   position: static;
+  top: auto;
+  transform: none;
+  align-self: stretch;
 }
 
 .product-page__content {
@@ -1757,6 +2011,8 @@ useHead(() => {
     position: sticky;
     top: 0;
     z-index: 20;
+    transform: none;
+    align-self: stretch;
   }
 
   .product-page__section {

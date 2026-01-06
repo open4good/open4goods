@@ -5,7 +5,7 @@
         {{ $t('product.impact.title') }}
       </h2>
       <p class="product-impact__subtitle">
-        {{ $t('product.impact.subtitle') }}
+        {{ $t('product.impact.subtitle', subtitleParams) }}
       </p>
     </header>
 
@@ -104,6 +104,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  subtitleParams: {
+    type: Object as PropType<Record<string, string> | undefined>,
+    default: undefined,
+  },
 })
 
 const radarData = toRef(props, 'radarData')
@@ -113,6 +117,7 @@ const productModel = toRef(props, 'productModel')
 const productImage = toRef(props, 'productImage')
 const verticalHomeUrl = toRef(props, 'verticalHomeUrl')
 const verticalTitle = toRef(props, 'verticalTitle')
+const subtitleParams = toRef(props, 'subtitleParams')
 const { t } = useI18n()
 
 const primaryScore = computed(() => props.scores[0] ?? null)

@@ -21,7 +21,12 @@ export default defineEventHandler(
     const body = await readBody<Partial<AgentRequestDto>>(event)
 
     // Basic validation
-    if (!body || !body.promptUser || !body.promptTemplateId || !body.promptVariantId) {
+    if (
+      !body ||
+      !body.promptUser ||
+      !body.promptTemplateId ||
+      !body.promptVariantId
+    ) {
       throw createError({
         statusCode: 400,
         statusMessage: 'Missing required fields',
@@ -42,6 +47,7 @@ export default defineEventHandler(
           userHandle: body.userHandle,
           attributeValues: body.attributeValues,
           captchaToken: body.captchaToken,
+          tags: body.tags,
         },
         domainLanguage
       )

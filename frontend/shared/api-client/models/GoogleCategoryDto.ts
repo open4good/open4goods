@@ -77,10 +77,10 @@ export interface GoogleCategoryDto {
     vertical?: VerticalConfigDto;
     /**
      * Direct children of the category limited to the requested depth.
-     * @type {Array<any>}
+     * @type {Array<GoogleCategoryDto>}
      * @memberof GoogleCategoryDto
      */
-    children?: Array<any>;
+    children?: Array<GoogleCategoryDto>;
 }
 
 /**
@@ -108,7 +108,7 @@ export function GoogleCategoryDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'hasVertical': json['hasVertical'] == null ? undefined : json['hasVertical'],
         'hasVerticals': json['hasVerticals'] == null ? undefined : json['hasVerticals'],
         'vertical': json['vertical'] == null ? undefined : VerticalConfigDtoFromJSON(json['vertical']),
-        'children': json['children'] == null ? undefined : json['children'],
+        'children': json['children'] == null ? undefined : ((json['children'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
     };
 }
 
@@ -131,7 +131,7 @@ export function GoogleCategoryDtoToJSONTyped(value?: GoogleCategoryDto | null, i
         'hasVertical': value['hasVertical'],
         'hasVerticals': value['hasVerticals'],
         'vertical': VerticalConfigDtoToJSON(value['vertical']),
-        'children': value['children'],
+        'children': value['children'] == null ? undefined : ((value['children'] as Array<any>).map(GoogleCategoryDtoToJSON)),
     };
 }
 

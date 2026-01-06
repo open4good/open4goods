@@ -89,8 +89,8 @@ export function IssueCommentDtoToJSONTyped(value?: IssueCommentDto | null, ignor
         
         'id': value['id'],
         'author': value['author'],
-        'createdAt': value['createdAt']?.toISOString(),
-        'updatedAt': value['updatedAt']?.toISOString(),
+        'createdAt': value['createdAt'] == null ? value['createdAt'] : value['createdAt'].toISOString(),
+        'updatedAt': value['updatedAt'] == null ? value['updatedAt'] : value['updatedAt'].toISOString(),
         'body': value['body'],
     };
 }

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bubbleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(33,150,243,0.28)" />
+      <stop offset="100%" stop-color="rgba(34,197,94,0.18)" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.35)" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="none" />
+  <g opacity="0.62">
+    <circle cx="900" cy="550" r="260" fill="url(#bubbleGradient)" />
+    <circle cx="600" cy="250" r="180" fill="url(#bubbleGradient)" />
+    <circle cx="200" cy="400" r="220" fill="url(#bubbleGradient)" />
+  </g>
+  <g opacity="0.45">
+     <circle cx="900" cy="550" r="170" fill="url(#glow)" />
+     <circle cx="600" cy="250" r="110" fill="url(#glow)" />
+     <circle cx="200" cy="400" r="130" fill="url(#glow)" />
+  </g>
+  <g stroke="rgba(255,255,255,0.4)" stroke-width="4" fill="none" opacity="0.5">
+    <path d="M860 450 C 940 510 1040 510 1100 450" />
+    <path d="M560 210 C 620 270 700 280 760 230" />
+    <path d="M160 360 C 240 420 360 440 460 380" />
+  </g>
+</svg>

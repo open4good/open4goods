@@ -36,7 +36,7 @@ export interface SubmitRequest {
 export class ContactApi extends runtime.BaseAPI {
 
     /**
-     * Verify captcha token and forward the message to the support mailbox.
+     * Verify captcha token and forward the message to the support mailbox. Supports optional template identifiers to prefill the subject and body.
      * Submit a contact message
      */
     async submitRaw(requestParameters: SubmitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ContactResponseDto>> {
@@ -87,7 +87,7 @@ export class ContactApi extends runtime.BaseAPI {
     }
 
     /**
-     * Verify captcha token and forward the message to the support mailbox.
+     * Verify captcha token and forward the message to the support mailbox. Supports optional template identifiers to prefill the subject and body.
      * Submit a contact message
      */
     async submit(requestParameters: SubmitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ContactResponseDto> {

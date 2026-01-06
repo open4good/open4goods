@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" role="img" aria-labelledby="title desc">
-  <title id="title">Dark footer logo placeholder</title>
-  <desc id="desc">Displayed when no footer logo is configured for the dark theme.</desc>
-  <rect width="360" height="120" rx="18" fill="#0B1220" stroke="#FFB020" stroke-width="8" stroke-dasharray="14 12" />
-  <text x="180" y="68" fill="#FFB020" font-size="30" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="800" text-anchor="middle">FOOTER LOGO ⚠️</text>
-  <text x="180" y="92" fill="#FFB020" font-size="16" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="600" text-anchor="middle">dark placeholder</text>
-</svg>

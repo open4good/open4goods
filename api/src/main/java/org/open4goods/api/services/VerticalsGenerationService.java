@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -13,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +29,7 @@ import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
@@ -253,13 +256,14 @@ public class VerticalsGenerationService {
 	 * Update a vertical file with  categorys from predicted ones in the vertical yaml files
 	 * @param minOffers
 	 * @param fileName
+	 * @return The new content of the file
 	 */
-	public void updateVerticalFileWithCategories(Integer minOffers, String fileName) {
+	public String updateVerticalFileWithCategories(Integer minOffers, String fileName) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
 			LOGGER.warn("Will update {}",file.getName());
-			String originalContent = FileUtils.readFileToString(file);
+			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
 
 			int startIndex = originalContent.indexOf("matchingCategories:");
 			int endIndex = originalContent.indexOf("\n\n", startIndex);
@@ -269,20 +273,22 @@ public class VerticalsGenerationService {
 			newContent += originalContent.substring(endIndex);
 
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			return newContent;
 
 		} catch (IOException e1) {
 			LOGGER.error("Error while updaing vertical file {}",file,e1);
+			return "Error: " + e1.getMessage();
 		}
 	}
 
 
 
-	public void updateVerticalFileWithImpactScore(String fileName) {
+	public String updateVerticalFileWithImpactScore(String fileName) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
 			LOGGER.warn("Will update {} with impactscore",file.getName());
-			String originalContent = FileUtils.readFileToString(file);
+			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
 
 			int startIndex = originalContent.indexOf("impactScoreConfig:");
 			int endIndex = originalContent.indexOf("\n\n", startIndex);
@@ -302,9 +308,11 @@ public class VerticalsGenerationService {
 			newContent += originalContent.substring(endIndex);
 
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			return newContent;
 
 		} catch (IOException e1) {
 			LOGGER.error("Error while updaing vertical file {}",file,e1);
+			return "Error: " + e1.getMessage();
 		}
 
 	}
@@ -317,13 +325,14 @@ public class VerticalsGenerationService {
 	 * @param fileName
 	 * @param minCoverage
 	 * @param containing
+	 * @return The new content of the file
 	 */
-	public void updateVerticalFileWithAttributes(String fileName, int minCoverage, String containing) {
+	public String updateVerticalFileWithAttributes(String fileName, int minCoverage, String containing) {
 		File file = new File(fileName);
 		try {
 			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
 			LOGGER.warn("Will update {} for attributes",file.getName());
-			String originalContent = FileUtils.readFileToString(file);
+			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
 
 			int startIndex = originalContent.indexOf("  configs:");
 			int endIndex = startIndex + "  configs:".length();
@@ -334,9 +343,11 @@ public class VerticalsGenerationService {
 			newContent += originalContent.substring(endIndex);
 
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
+			return newContent;
 
 		} catch (IOException e1) {
 			LOGGER.error("Error while updaing vertical file {}",file,e1);
+			return "Error: " + e1.getMessage();
 		}
 	}
 
@@ -347,6 +358,29 @@ public class VerticalsGenerationService {
 	 * @param vertical
 	 * @return
 	 */
+	/**
+	 * Retrieve a set of attribute keys (and their synonyms) that are already defined in other verticals.
+	 * This helps in standardizing attributes across verticals.
+	 * @param currentVerticalId The ID of the vertical currently being processed (to exclude it).
+	 * @return A set of strings representing known attribute keys and synonyms.
+	 */
+	private Set<String> getKnownAttributesFromOtherVerticals(String currentVerticalId) {
+		Set<String> knownAttributes = new HashSet<>();
+		verticalConfigservice.getConfigsWithoutDefault().stream()
+			.filter(vc -> !vc.getId().equals(currentVerticalId)) // Exclude current vertical
+			.forEach(vc -> {
+				if (vc.getAttributesConfig() != null && vc.getAttributesConfig().getConfigs() != null) {
+					vc.getAttributesConfig().getConfigs().forEach(attr -> {
+						knownAttributes.add(attr.getKey());
+						if (attr.getSynonyms() != null) {
+							attr.getSynonyms().values().forEach(syns -> knownAttributes.addAll(syns));
+						}
+					});
+				}
+			});
+		return knownAttributes;
+	}
+
 	public String generateAttributesMapping(VerticalConfig verticalConfig, int minCoverage, String containing) {
 		LOGGER.info("Generating attributes mapping for {}", verticalConfig);
 		VerticalAttributesStats stats = attributesStats(verticalConfig.getId());
@@ -365,27 +399,124 @@ public class VerticalsGenerationService {
 			});
 		});
 
-
+		Set<String> knownAttributes = getKnownAttributesFromOtherVerticals(verticalConfig.getId());
 
 		int totalItems = stats.getTotalItems();
 
-		String ret = "";
+		StringBuilder ret = new StringBuilder();
 		for (Entry<String, AttributesStats> cat : stats.getStats().entrySet()) {
 
 			if (!exclusions.contains(cat.getKey())) {
-				if (Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue() > minCoverage) {
-					LOGGER.info("Generating template for attribute : {}", cat.getKey());
+				boolean isKnown = knownAttributes.contains(cat.getKey());
+				int coveragePercent = Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue();
+				
+				if (isKnown || coveragePercent > minCoverage) {
+					LOGGER.info("Generating template for attribute : {} (Known: {}, Coverage: {}%)", cat.getKey(), isKnown, coveragePercent);
 					// TODO(conf,p2) : numberofsamples from conf
 					if (StringUtils.isEmpty(containing) || cat.getKey().toLowerCase().contains(containing.toLowerCase())) {
-						ret += attributeConfigTemplate(cat, totalItems,10);
+						ret.append(attributeConfigTemplate(cat, totalItems,10));
 					}
 				} else {
 					LOGGER.info("Skipping {}, not enough coverage", cat.getKey());
 				}
 			}
 		}
-		return ret;
+		return ret.toString();
 
+	}
+
+	/**
+	 * Generate the available impact score criterias YAML fragment for a vertical.
+	 * Criteria candidates are collected from other verticals (including _default),
+	 * then filtered by coverage against products of the target vertical.
+	 *
+	 * @param verticalConfig the target vertical configuration
+	 * @param minCoveragePercent minimum coverage percentage required
+	 * @return YAML fragment with comments describing coverage
+	 */
+	public String generateAvailableImpactScoreCriteriasFragment(VerticalConfig verticalConfig, int minCoveragePercent) {
+		Objects.requireNonNull(verticalConfig, "verticalConfig is required");
+		String verticalId = verticalConfig.getId();
+		Set<String> candidates = collectImpactScoreCandidates(verticalId);
+		if (candidates.isEmpty()) {
+			LOGGER.info("No impact score candidates found for {}", verticalId);
+			return "availableImpactScoreCriterias:\n";
+		}
+
+		long total = repository.countMainIndexHavingVertical(verticalId);
+		if (total <= 0) {
+			LOGGER.info("No products found for vertical {}", verticalId);
+			return "availableImpactScoreCriterias:\n";
+		}
+
+		StringBuilder builder = new StringBuilder("availableImpactScoreCriterias:\n");
+		candidates.stream()
+			.filter(StringUtils::isNotBlank)
+			.sorted()
+			.forEach(scoreKey -> {
+				Long count = repository.countMainIndexHavingScore(scoreKey, verticalId);
+				long hits = count == null ? 0L : count;
+				int coveragePercent = Double.valueOf(hits / (double) total * 100.0).intValue();
+				if (coveragePercent >= minCoveragePercent) {
+					builder.append("  # coverage: ")
+						.append(coveragePercent)
+						.append("% (")
+						.append(hits)
+						.append("/")
+						.append(total)
+						.append(")\n");
+					builder.append("  - ").append(scoreKey).append("\n");
+				} else {
+					LOGGER.info("Skipping impact score criteria {} with coverage {}%", scoreKey, coveragePercent);
+				}
+			});
+
+		return builder.toString();
+	}
+
+	private Set<String> collectImpactScoreCandidates(String targetVerticalId) {
+		Set<String> candidates = new HashSet<>();
+		List<VerticalConfig> configs = new ArrayList<>(verticalConfigservice.getConfigsWithoutDefault());
+		VerticalConfig defaultConfig = verticalConfigservice.getDefaultConfig();
+		if (defaultConfig != null) {
+			configs.add(defaultConfig);
+		}
+
+		for (VerticalConfig config : configs) {
+			if (config == null) {
+				continue;
+			}
+			if (StringUtils.equals(targetVerticalId, config.getId())) {
+				continue;
+			}
+			addImpactScoreCandidatesFromConfig(config, candidates);
+		}
+
+		return candidates;
+	}
+
+	private void addImpactScoreCandidatesFromConfig(VerticalConfig config, Set<String> candidates) {
+		AttributesConfig attributesConfig = config.getAttributesConfig();
+		if (attributesConfig != null && attributesConfig.getConfigs() != null) {
+			attributesConfig.getConfigs().stream()
+				.filter(AttributeConfig::isAsScore)
+				.map(AttributeConfig::getKey)
+				.filter(StringUtils::isNotBlank)
+				.forEach(candidates::add);
+		}
+
+		if (config.getAvailableImpactScoreCriterias() != null) {
+			config.getAvailableImpactScoreCriterias().stream()
+				.filter(StringUtils::isNotBlank)
+				.forEach(candidates::add);
+		}
+
+		ImpactScoreConfig impactScoreConfig = config.getImpactScoreConfig();
+		if (impactScoreConfig != null && impactScoreConfig.getCriteriasPonderation() != null) {
+			impactScoreConfig.getCriteriasPonderation().keySet().stream()
+				.filter(StringUtils::isNotBlank)
+				.forEach(candidates::add);
+		}
 	}
 
 

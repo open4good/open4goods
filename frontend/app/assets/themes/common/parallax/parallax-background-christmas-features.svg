@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox" gradientTransform="rotate(25 0.5 0.5)">
+      <stop offset="0" stop-color="#00DE9F"/>
+      <stop offset="0.52" stop-color="#00A1C2"/>
+      <stop offset="1" stop-color="#0088D6"/>
+    </linearGradient>
+
+    <radialGradient id="glow-soft" cx="50%" cy="50%" r="60%">
+      <stop offset="0" stop-color="#F4F4F4" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#F4F4F4" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="orb-red" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#F4F4F4" stop-opacity="0.55"/>
+      <stop offset="0.22" stop-color="#FF8479" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#FF8479" stop-opacity="0.10"/>
+    </radialGradient>
+
+    <radialGradient id="orb-green" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#F4F4F4" stop-opacity="0.55"/>
+      <stop offset="0.22" stop-color="#5BDB3B" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#5BDB3B" stop-opacity="0.10"/>
+    </radialGradient>
+
+    <filter id="blur16" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="blur10" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="800" fill="url(#bg)"/>
+  <!-- parallax-background-christmas-features -->
+  <g id="parallax-back">
+    <circle cx="171" cy="400" r="249.0" fill="url(#glow-soft)" opacity="0.18" filter="url(#blur16)"/>
+    <circle cx="1471" cy="136" r="258.5" fill="url(#glow-soft)" opacity="0.16" filter="url(#blur16)"/>
+    <ellipse cx="743" cy="760" rx="390.0" ry="180.0" fill="url(#glow-soft)" opacity="0.12" filter="url(#blur16)"/>
+    <path d="M 80 820 C 30 620 70 480 120 340 C 180 170 120 60 60 -40" fill="none" stroke="#F4F4F4" stroke-opacity="0.10" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="40" cy="40" r="220" fill="url(#glow-soft)" opacity="0.18" filter="url(#blur10)"/>
+    <circle cx="1560" cy="760" r="240" fill="url(#glow-soft)" opacity="0.16" filter="url(#blur10)"/>
+  </g>
+  <g id="parallax-mid">
+    <circle cx="1404" cy="126" r="120" fill="none" stroke="#FF8479" stroke-opacity="0.12" stroke-width="1.25"/>
+    <circle cx="1415" cy="144" r="175" fill="none" stroke="#FF8479" stroke-opacity="0.12" stroke-width="1.25"/>
+    <circle cx="1435" cy="122" r="230" fill="none" stroke="#FF8479" stroke-opacity="0.12" stroke-width="1.25"/>
+    <circle cx="1379" cy="138" r="285" fill="none" stroke="#FF8479" stroke-opacity="0.12" stroke-width="1.25"/>
+    <circle cx="196" cy="670" r="90" fill="none" stroke="#5BDB3B" stroke-opacity="0.1" stroke-width="1.25"/>
+    <circle cx="195" cy="699" r="150" fill="none" stroke="#5BDB3B" stroke-opacity="0.1" stroke-width="1.25"/>
+    <circle cx="228" cy="676" r="210" fill="none" stroke="#5BDB3B" stroke-opacity="0.1" stroke-width="1.25"/>
+    <path d="M150 70 l18 0 m-9 -9 l0 18 m-14 -14 l14 14 m0 -14 l-14 14" stroke="#F4F4F4" stroke-opacity="0.18" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M1450 730 l20 0 m-10 -10 l0 20 m-16 -16 l16 16 m0 -16 l-16 16" stroke="#F4F4F4" stroke-opacity="0.16" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="90" cy="110" r="56" fill="url(#orb-red)" opacity="0.85"/>
+    <circle cx="76.0" cy="96.0" r="10.1" fill="#F4F4F4" opacity="0.35"/>
+    <circle cx="1510" cy="710" r="72" fill="url(#orb-green)" opacity="0.8"/>
+    <circle cx="1492.0" cy="692.0" r="13.0" fill="#F4F4F4" opacity="0.35"/>
+    <circle cx="1530" cy="90" r="38" fill="url(#orb-red)" opacity="0.75"/>
+    <circle cx="1520.5" cy="80.5" r="6.8" fill="#F4F4F4" opacity="0.35"/>
+    <rect x="60" y="640" width="130" height="90" rx="18" fill="#F4F4F4" opacity="0.18"/>
+    <rect x="119.8" y="640" width="10.4" height="90" fill="#FF8479" opacity="0.22"/>
+    <rect x="60" y="679.6" width="130" height="10.8" fill="#5BDB3B" opacity="0.18"/>
+    <rect x="1410" y="520" width="150" height="100" rx="18" fill="#F4F4F4" opacity="0.18"/>
+    <rect x="1479.0" y="520" width="12.0" height="100" fill="#FF8479" opacity="0.22"/>
+    <rect x="1410" y="564.0" width="150" height="12.0" fill="#5BDB3B" opacity="0.18"/>
+  </g>
+  <g id="parallax-front">
+    <circle cx="1290" cy="718" r="4.9" fill="#F4F4F4" opacity="0.14840240010665004"/>
+    <circle cx="380" cy="46" r="4.0" fill="#F4F4F4" opacity="0.1884189470229801"/>
+    <circle cx="1503" cy="693" r="4.6" fill="#F4F4F4" opacity="0.12859462292906887"/>
+    <circle cx="206" cy="221" r="5.0" fill="#F4F4F4" opacity="0.18448133311083945"/>
+    <circle cx="1508" cy="29" r="3.8" fill="#F4F4F4" opacity="0.12254916638289937"/>
+    <circle cx="1473" cy="244" r="3.0" fill="#F4F4F4" opacity="0.17571524076159878"/>
+    <circle cx="215" cy="230" r="4.5" fill="#F4F4F4" opacity="0.1503318547593922"/>
+    <circle cx="1514" cy="563" r="4.7" fill="#F4F4F4" opacity="0.15457159353848057"/>
+    <circle cx="1150" cy="85" r="3.8" fill="#F4F4F4" opacity="0.164121520589822"/>
+    <circle cx="1386" cy="99" r="3.8" fill="#F4F4F4" opacity="0.13623969465095515"/>
+    <circle cx="200" cy="227" r="2.6" fill="#F4F4F4" opacity="0.17137155625864403"/>
+    <circle cx="1438" cy="89" r="4.2" fill="#F4F4F4" opacity="0.18428050038724136"/>
+    <circle cx="86" cy="315" r="3.9" fill="#F4F4F4" opacity="0.1764891187385122"/>
+    <circle cx="188" cy="564" r="3.5" fill="#F4F4F4" opacity="0.11006970076158659"/>
+    <circle cx="1320" cy="760" r="5.0" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1344" cy="763" r="3.4" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1366" cy="773" r="3.5" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1390" cy="754" r="4.8" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1421" cy="774" r="5.9" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1445" cy="770" r="5.9" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1461" cy="767" r="3.2" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1484" cy="752" r="6.0" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1511" cy="750" r="5.6" fill="#5BDB3B" opacity="0.10"/>
+    <circle cx="1532" cy="772" r="3.6" fill="#5BDB3B" opacity="0.10"/>
+  </g>
+
+</svg>

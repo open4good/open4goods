@@ -32,15 +32,15 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 
 ### 1.1 Composants Header/Hero Identifiés
 
-| Composant | Emplacement | Utilisation | Pattern | Complexité |
-|-----------|-------------|-------------|---------|------------|
-| `HeroSurface.vue` | `shared/hero/` | Wrapper générique avec variantes | Base | ⭐ Simple |
-| `HeroEducationCard.vue` | `shared/ui/` | Carte décorative dans hero | Accessoire | ⭐ Simple |
-| `HomeHeroSection.vue` | `home/sections/` | Homepage full-screen | Hero Fullscreen | ⭐⭐⭐ Complexe |
-| `OpensourceHero.vue` | `domains/opensource/` | Page opensource | Hero Standard | ⭐⭐ Moyen |
-| `TeamHero.vue` | `domains/team/` | Page team | Hero Minimal | ⭐ Simple |
-| `PartnersHero.vue` | `domains/partners/` | Page partners | Hero Standard | ⭐⭐ Moyen |
-| `ParallaxWidget.vue` | `shared/ui/` | Background parallax | Technique | ⭐⭐⭐ Complexe |
+| Composant               | Emplacement           | Utilisation                      | Pattern         | Complexité      |
+| ----------------------- | --------------------- | -------------------------------- | --------------- | --------------- |
+| `HeroSurface.vue`       | `shared/hero/`        | Wrapper générique avec variantes | Base            | ⭐ Simple       |
+| `HeroEducationCard.vue` | `shared/ui/`          | Carte décorative dans hero       | Accessoire      | ⭐ Simple       |
+| `HomeHeroSection.vue`   | `home/sections/`      | Homepage full-screen             | Hero Fullscreen | ⭐⭐⭐ Complexe |
+| `OpensourceHero.vue`    | `domains/opensource/` | Page opensource                  | Hero Standard   | ⭐⭐ Moyen      |
+| `TeamHero.vue`          | `domains/team/`       | Page team                        | Hero Minimal    | ⭐ Simple       |
+| `PartnersHero.vue`      | `domains/partners/`   | Page partners                    | Hero Standard   | ⭐⭐ Moyen      |
+| `ParallaxWidget.vue`    | `shared/ui/`          | Background parallax              | Technique       | ⭐⭐⭐ Complexe |
 
 ### 1.2 Pages Analysées (27 pages)
 
@@ -65,6 +65,7 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 #### 🎯 Pattern 1 : **Hero Fullscreen** (Homepage)
 
 **Caractéristiques** :
+
 - Hauteur : `100dvh` ou `min-height: 100dvh`
 - Background : Image + overlay complexe (radial gradients)
 - Contenu : Titre + Subtitle + Search + Widget/Wizard
@@ -88,6 +89,7 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 ```
 
 **Utilisations** :
+
 - Homepage (`/`)
 
 ---
@@ -95,6 +97,7 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 #### 🎯 Pattern 2 : **Hero Standard** (Pages Internes)
 
 **Caractéristiques** :
+
 - Hauteur : Auto (padding vertical contrôlé)
 - Background : Gradient linéaire ou `HeroSurface` variant
 - Contenu : Eyebrow + Titre + Subtitle + Description + CTA(s) + Media (optionnelle)
@@ -126,6 +129,7 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 ```
 
 **Utilisations** :
+
 - `/opensource`, `/partners`, `/team`
 
 ---
@@ -133,6 +137,7 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 #### 🎯 Pattern 3 : **Section Header** (Dans les pages)
 
 **Caractéristiques** :
+
 - Hauteur : Auto (compact)
 - Background : Gradient background + pseudo-elements pour effets
 - Contenu : Titre + Description
@@ -164,17 +169,18 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 ```
 
 **Utilisations** :
+
 - `/impact-score`, sections internes de pages
 
 ---
 
 ### 2.2 Composants Techniques Réutilisables
 
-| Composant | Fonction | Props Clés |
-|-----------|----------|------------|
-| `HeroSurface` | Wrapper avec variantes design (aurora, prism, orbit, halo, mesh, pulse) | `variant`, `tag`, `bleed` |
-| `ParallaxWidget` | Gestion parallax avec layers multiples | `backgrounds`, `parallaxAmount`, `overlayOpacity`, `enableAplats`, `maxOffsetRatio` |
-| `HeroEducationCard` | Carte info décorative | `icon`, `title`, `bodyHtml`, `items[]` |
+| Composant           | Fonction                                                                | Props Clés                                                                          |
+| ------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `HeroSurface`       | Wrapper avec variantes design (aurora, prism, orbit, halo, mesh, pulse) | `variant`, `tag`, `bleed`                                                           |
+| `ParallaxWidget`    | Gestion parallax avec layers multiples                                  | `backgrounds`, `parallaxAmount`, `overlayOpacity`, `enableAplats`, `maxOffsetRatio` |
+| `HeroEducationCard` | Carte info décorative                                                   | `icon`, `title`, `bodyHtml`, `items[]`                                              |
 
 ---
 
@@ -184,27 +190,21 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 
 ```scss
 // Hero Gradients
---v-theme-hero-gradient-start: #00DE9F (light) / #1E3A8A (dark)
---v-theme-hero-gradient-mid: #00A1C2 (light) / #1D4ED8 (dark)
---v-theme-hero-gradient-end: #0088D6 (light) / #166534 (dark)
---v-theme-hero-overlay-strong: #FFFFFF (both)
---v-theme-hero-pill-on-dark: #FFFFFF (both)
-
-// Surfaces
---v-theme-surface-default: #F4F4F4 (light) / #0F172A (dark)
---v-theme-surface-muted: #F4F4F4 (light) / #111827 (dark)
---v-theme-surface-glass: #FFFFFF (light) / #1E293B (dark)
---v-theme-surface-primary-080: #F4F4F4 (light) / #13213B (dark)
-
-// Texte
---v-theme-text-neutral-strong: #004A63 (light) / #F8FAFC (dark)
---v-theme-text-neutral-secondary: #004A63 (light) / #CBD5F5 (dark)
-
-// Accents
---v-theme-accent-primary-highlight: #00A1C2 (light) / #38BDF8 (dark)
---v-theme-accent-supporting: #00DE9F (light) / #22C55E (dark)
---v-theme-border-primary-strong: #00A1C2 (light) / #1E40AF (dark)
---v-theme-shadow-primary-600: #00A1C2 (light) / #3B82F6 (dark)
+--v-theme-hero-gradient-start: #00de9f (light) / #1e3a8a (dark)
+  --v-theme-hero-gradient-mid: #00a1c2 (light) / #1d4ed8 (dark)
+  --v-theme-hero-gradient-end: #0088d6 (light) / #166534 (dark)
+  --v-theme-hero-overlay-strong: #ffffff (both)
+  --v-theme-hero-pill-on-dark: #ffffff (both) // Surfaces
+  --v-theme-surface-default: #f4f4f4 (light) / #0f172a (dark)
+  --v-theme-surface-muted: #f4f4f4 (light) / #111827 (dark)
+  --v-theme-surface-glass: #ffffff (light) / #1e293b (dark)
+  --v-theme-surface-primary-080: #f4f4f4 (light) / #13213b (dark) // Texte
+  --v-theme-text-neutral-strong: #004a63 (light) / #f8fafc (dark)
+  --v-theme-text-neutral-secondary: #004a63 (light) / #cbd5f5 (dark) // Accents
+  --v-theme-accent-primary-highlight: #00a1c2 (light) / #38bdf8 (dark)
+  --v-theme-accent-supporting: #00de9f (light) / #22c55e (dark)
+  --v-theme-border-primary-strong: #00a1c2 (light) / #1e40af (dark)
+  --v-theme-shadow-primary-600: #00a1c2 (light) / #3b82f6 (dark);
 ```
 
 ### 3.2 Espacements Recommandés
@@ -212,12 +212,10 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 ```scss
 // Padding vertical hero
 --hero-padding-fullscreen: clamp(2.5rem, 7vw, 4.75rem)
---hero-padding-standard: clamp(3rem, 8vw, 5.5rem)
---hero-padding-compact: clamp(2rem, 5vw, 3.5rem)
-
-// Conteneur
---container-padding: clamp(1.5rem, 5vw, 4rem)
---content-max-width: min(1180px, 92vw)
+  --hero-padding-standard: clamp(3rem, 8vw, 5.5rem)
+  --hero-padding-compact: clamp(2rem, 5vw, 3.5rem) // Conteneur
+  --container-padding: clamp(1.5rem, 5vw, 4rem)
+  --content-max-width: min(1180px, 92vw);
 ```
 
 ### 3.3 Typographie
@@ -225,9 +223,9 @@ Cet audit identifie **7 composants header/hero distincts** et **3 patterns princ
 ```scss
 // Titres hero
 --hero-title-fullscreen: clamp(2.2rem, 5vw, 3.8rem)
---hero-title-standard: clamp(2.5rem, 5vw, 3.5rem)
---hero-subtitle: clamp(1rem, 2.4vw, 1.4rem)
---hero-eyebrow: 0.82rem (uppercase, letter-spacing: 0.1em)
+  --hero-title-standard: clamp(2.5rem, 5vw, 3.5rem)
+  --hero-subtitle: clamp(1rem, 2.4vw, 1.4rem) --hero-eyebrow: 0.82rem
+  (uppercase, letter-spacing: 0.1em);
 ```
 
 ---
@@ -274,7 +272,7 @@ interface PageHeaderProps {
   title: string
   subtitle?: string
   descriptionBlocId?: string // Pour TextContent CMS
-  descriptionHtml?: string   // Fallback HTML
+  descriptionHtml?: string // Fallback HTML
 
   // === Background & Style ===
   background?: 'gradient' | 'image' | 'parallax' | 'solid' | 'surface-variant'
@@ -292,7 +290,7 @@ interface PageHeaderProps {
 
   // === Hauteur ===
   minHeight?: string | null // ex: '100dvh', '75vh', 'auto'
-  paddingY?: string | null  // Padding vertical
+  paddingY?: string | null // Padding vertical
 
   // === Actions (CTA) ===
   primaryCta?: HeroCta
@@ -408,7 +406,7 @@ interface HeroEducationCardProps {
 interface PageHeaderEmits {
   'cta:primary': []
   'cta:secondary': []
-  'intersection': [isIntersecting: boolean] // Pour animations scroll
+  intersection: [isIntersecting: boolean] // Pour animations scroll
 }
 ```
 
@@ -490,8 +488,14 @@ const heroCard = {
   title: t('opensource.hero.infoCard.title'),
   bodyHtml: t('opensource.hero.infoCard.description'),
   items: [
-    { icon: 'mdi-checkbox-marked-circle-outline', text: t('opensource.hero.infoCard.items.openLicenses') },
-    { icon: 'mdi-checkbox-marked-circle-outline', text: t('opensource.hero.infoCard.items.collaborativeReviews') },
+    {
+      icon: 'mdi-checkbox-marked-circle-outline',
+      text: t('opensource.hero.infoCard.items.openLicenses'),
+    },
+    {
+      icon: 'mdi-checkbox-marked-circle-outline',
+      text: t('opensource.hero.infoCard.items.collaborativeReviews'),
+    },
   ],
 }
 </script>
@@ -580,7 +584,9 @@ export function useHeaderSeo(props: {
             '@type': 'ListItem',
             position: index + 1,
             name: item.label,
-            item: item.href ? new URL(item.href, requestURL.origin).toString() : undefined,
+            item: item.href
+              ? new URL(item.href, requestURL.origin).toString()
+              : undefined,
           })),
         }
       : undefined,
@@ -592,7 +598,7 @@ export function useHeaderSeo(props: {
     ogTitle: () => props.title,
     ogDescription: () => props.subtitle || props.description,
     ogUrl: () => canonicalUrl.value,
-    ogType: () => props.schemaType === 'Article' ? 'article' : 'website',
+    ogType: () => (props.schemaType === 'Article' ? 'article' : 'website'),
     ogImage: () => props.ogImage,
   })
 
@@ -712,7 +718,7 @@ export function useHeaderLayout(props: {
 1. **Structured Data** :
    - ✅ JSON-LD pour WebPage, Article, BreadcrumbList
    - ✅ `<h1>` unique par page (dans le header)
-   - ✅ Meta tags complets (title, description, og:*)
+   - ✅ Meta tags complets (title, description, og:\*)
 
 2. **Contenu** :
    - ✅ Textes alt pour toutes les images (i18n)
@@ -743,6 +749,7 @@ export function useHeaderLayout(props: {
 ### 6.4 Responsive
 
 1. **Breakpoints Vuetify** :
+
    ```scss
    xs: 0-599px
    sm: 600-959px
@@ -778,6 +785,7 @@ export function useHeaderLayout(props: {
 ### 7.1 Approche Proposée (Hybride)
 
 **✅ Avantages** :
+
 - Flexibilité maximale (props + slots)
 - Réutilisabilité via composables
 - Maintenance centralisée
@@ -785,6 +793,7 @@ export function useHeaderLayout(props: {
 - Performance (pas de sur-engineering)
 
 **⚠️ Inconvénients** :
+
 - Complexité initiale du composant
 - Risque de "God Component" si mal géré
 - Courbe d'apprentissage pour l'équipe
@@ -796,11 +805,13 @@ export function useHeaderLayout(props: {
 **Garder** : `OpensourceHero`, `TeamHero`, `PartnersHero`, etc.
 
 **✅ Avantages** :
+
 - Pas de migration nécessaire
 - Chaque composant simple et dédié
 - Pas de risque de régression
 
 **❌ Inconvénients** :
+
 - Duplication de code (maintenabilité -)
 - Incohérence visuelle
 - Modifications nécessitent updates multiples
@@ -815,11 +826,13 @@ export function useHeaderLayout(props: {
 **Utiliser** : Librairie tierce ou starter template
 
 **✅ Avantages** :
+
 - Pas de développement custom
 - Best practices incluses
 - Maintenance externe
 
 **❌ Inconvénients** :
+
 - Rigidité (pas de contrôle total)
 - Dépendance externe
 - Customisation limitée (besoins spécifiques comme ParallaxWidget, HeroEducationCard)
@@ -834,11 +847,13 @@ export function useHeaderLayout(props: {
 **Approche** : Composant sans style, logique uniquement, style via slots/composables
 
 **✅ Avantages** :
+
 - Flexibilité ultime
 - Testabilité maximale
 - Pas de contrainte visuelle
 
 **❌ Inconvénients** :
+
 - Sur-engineering pour ce besoin
 - Trop abstrait (développeurs doivent tout réimplémenter)
 - Pas de standardisation visuelle
@@ -850,6 +865,7 @@ export function useHeaderLayout(props: {
 ### 7.5 Recommandation Finale
 
 ✅ **Approche Hybride (Proposition 4.1)** est la meilleure solution :
+
 - Balance entre flexibilité et structure
 - Réutilise les patterns existants (HeroSurface, ParallaxWidget)
 - Standardise SEO/A11y/Performance
@@ -968,6 +984,7 @@ describe('PageHeader', () => {
 **Question** : Quelle limite de poids acceptable pour les assets (SVG, images) dans un header ?
 
 **Proposition** :
+
 - SVG : < 50 KB
 - Images WebP : < 300 KB
 - Background hero : < 500 KB
@@ -982,6 +999,7 @@ describe('PageHeader', () => {
 **Question** : Préférence pour le nom du composant ?
 
 **Options** :
+
 1. `PageHeader` (recommandé - générique)
 2. `SectionHeader` (trop restrictif)
 3. `HeroSection` (confond hero et header)
@@ -995,6 +1013,7 @@ describe('PageHeader', () => {
 **Question** : Combien de variantes au minimum ?
 
 **Proposition** :
+
 1. `hero-fullscreen` (homepage)
 2. `hero-standard` (pages internes)
 3. `section-header` (headers compacts dans pages)
@@ -1010,6 +1029,7 @@ describe('PageHeader', () => {
 **Question** : Faut-il intégrer avec `VSvgIcon` API ou wrapper custom ?
 
 **Proposition** : Wrapper custom `AnimatedSvg.vue` qui :
+
 - Charge SVG externe
 - Applique animations CSS
 - Respecte `prefers-reduced-motion`
@@ -1082,6 +1102,7 @@ describe('PageHeader', () => {
 ### Synthèse
 
 L'audit révèle **une opportunité d'unification significative** avec un potentiel de :
+
 - ✅ **Réduction de 70% du code** dédié aux headers
 - ✅ **Standardisation SEO/A11y** complète
 - ✅ **Amélioration maintenabilité** (+80%)
@@ -1096,6 +1117,7 @@ L'audit révèle **une opportunité d'unification significative** avec un potent
 ### Contact & Feedback
 
 Pour toute question ou clarification sur ce rapport :
+
 - Reviewer le code existant ensemble
 - Prototyper un POC sur une page pilote
 - Discuter des trade-offs architecture

@@ -72,11 +72,12 @@ const sectionClasses = computed(() => [
           >
             <div class="home-split__visual" role="presentation">
               <slot name="visual">
-                <img
+                <NuxtImg
                   v-if="props.image?.src"
                   :src="props.image.src"
                   :alt="props.image.alt"
                   class="home-split__image"
+                  :sizes="props.image.sizes ?? '(min-width: 960px) 320px, 70vw'"
                   :loading="props.image.loading ?? 'lazy'"
                   :width="props.image.width"
                   :height="props.image.height"

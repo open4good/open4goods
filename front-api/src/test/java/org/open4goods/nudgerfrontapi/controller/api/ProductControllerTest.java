@@ -29,6 +29,7 @@ import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,11 +48,14 @@ class ProductControllerTest {
     @Mock
     private VerticalsConfigService verticalsConfigService;
 
+    @Mock
+    private SearchService searchService;
+
     private ProductController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new ProductController(productMappingService, verticalsConfigService);
+        controller = new ProductController(productMappingService, verticalsConfigService, searchService);
     }
 
     @Test

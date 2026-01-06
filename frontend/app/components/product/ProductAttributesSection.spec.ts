@@ -2,7 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { createI18n } from 'vue-i18n'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 
 const runtimeConfigMock = vi.hoisted(() => ({
@@ -17,6 +17,14 @@ vi.mock('#imports', () => ({
   useRuntimeConfig: () => runtimeConfigMock,
 }))
 
+const isLoggedInRef = ref(false)
+
+vi.mock('~/composables/useAuth', () => ({
+  useAuth: () => ({
+    isLoggedIn: isLoggedInRef,
+  }),
+}))
+
 const VCardStub = defineComponent({
   name: 'VCardStub',
   setup(_, { slots }) {
@@ -28,6 +36,31 @@ const VTableStub = defineComponent({
   name: 'VTableStub',
   setup(_, { slots }) {
     return () => h('table', { class: 'v-table-stub' }, slots.default?.())
+  },
+})
+
+const VDataTableStub = defineComponent({
+  name: 'VDataTableStub',
+  props: ['headers', 'items', 'itemsPerPage', 'itemClass', 'density', 'class'],
+  setup(props, { slots }) {
+    return () =>
+      h(
+        'div',
+        { class: 'v-data-table-stub' },
+        ((props.items as Array<Record<string, unknown>>) ?? []).map(item => {
+          const rowClass =
+            typeof props.itemClass === 'function'
+              ? props.itemClass(item)
+              : props.itemClass
+
+          return h('div', { class: ['v-data-table-row-stub', rowClass] }, [
+            slots['item.attribute']?.({ item }),
+            slots['item.bestValue']?.({ item }),
+            slots['item.sources']?.({ item }),
+            slots['item.indexed']?.({ item }),
+          ])
+        })
+      )
   },
 })
 
@@ -140,6 +173,34 @@ const VTextFieldStub = defineComponent({
           onInput,
           type: 'text',
         }),
+      ])
+  },
+})
+
+const VCheckboxStub = defineComponent({
+  name: 'VCheckboxStub',
+  props: {
+    modelValue: { type: Boolean, default: false },
+    label: { type: String, default: '' },
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    const onChange = (event: Event) => {
+      const target = event.target as HTMLInputElement | null
+      emit('update:modelValue', target?.checked ?? false)
+    }
+
+    return () =>
+      h('label', { class: 'v-checkbox-stub' }, [
+        h('input', {
+          class: 'v-checkbox-stub__input',
+          type: 'checkbox',
+          checked: props.modelValue,
+          onChange,
+        }),
+        props.label
+          ? h('span', { class: 'v-checkbox-stub__label' }, props.label)
+          : null,
       ])
   },
 })
@@ -301,6 +362,27 @@ const i18n = createI18n({
           title: 'Technical specifications',
           subtitle: 'Browse every specification and filter with keywords.',
           searchPlaceholder: 'Search a specification',
+          audit: {
+            title: 'Attribute sourcing audit',
+            subtitle:
+              'Compare indexed attributes with their synonyms and data sources.',
+            searchPlaceholder: 'Search attributes',
+            filters: {
+              indexed: 'Indexed',
+              notIndexed: 'Not indexed',
+            },
+            columns: {
+              attribute: 'Attribute',
+              bestValue: 'Best value',
+              sources: 'Sources',
+              indexed: 'Status',
+            },
+            indexed: 'Indexed',
+            notIndexed: 'Not indexed',
+            noBestValue: 'No value',
+            empty: 'No attribute configuration is available yet.',
+            emptyFiltered: 'No attributes match the current filters.',
+          },
           main: {
             title: 'Key specifications',
             identity: {
@@ -357,17 +439,25 @@ const i18n = createI18n({
   },
 })
 
-const mountComponent = async (product: ProductDto) => {
+const mountComponent = async (
+  product: ProductDto,
+  options?: {
+    attributeConfigs?: Array<Record<string, unknown>>
+    isLoggedIn?: boolean
+  }
+) => {
+  isLoggedInRef.value = options?.isLoggedIn ?? false
   const module = await import('./ProductAttributesSection.vue')
   const Component = module.default
 
   const wrapper = await mountSuspended(Component, {
-    props: { product },
+    props: { product, attributeConfigs: options?.attributeConfigs ?? [] },
     global: {
       plugins: [i18n],
       stubs: {
         VCard: VCardStub,
         VTable: VTableStub,
+        VDataTable: VDataTableStub,
         VIcon: VIconStub,
         VChip: VChipStub,
         VTooltip: VTooltipStub,
@@ -375,6 +465,7 @@ const mountComponent = async (product: ProductDto) => {
         VDivider: VDividerStub,
         VImg: VImgStub,
         VTextField: VTextFieldStub,
+        VCheckbox: VCheckboxStub,
         VRow: VRowStub,
         VCol: VColStub,
         VTimeline: VTimelineStub,
@@ -448,5 +539,44 @@ describe('ProductAttributesSection', () => {
     const emptyState = wrapper.find('.product-attributes__empty--detailed')
     expect(emptyState.exists()).toBe(true)
     expect(emptyState.text()).toBe('No specifications match your search.')
+  })
+
+  it('renders the attribute audit table for logged-in users', async () => {
+    const wrapper = await mountComponent(buildProduct(), {
+      isLoggedIn: true,
+      attributeConfigs: [
+        {
+          key: 'weight',
+          name: 'Weight',
+          synonyms: { icecat: new Set(['weight', 'mass']) },
+        },
+        {
+          key: 'depth',
+          name: 'Depth',
+          synonyms: { icecat: new Set(['depth']) },
+        },
+        {
+          key: 'color',
+          name: 'Color',
+          synonyms: { eprel: new Set(['color']) },
+        },
+      ],
+    })
+
+    const rows = wrapper.findAll('.v-data-table-row-stub')
+    expect(rows).toHaveLength(3)
+    expect(wrapper.text()).toContain('Attribute sourcing audit')
+    expect(wrapper.text()).toContain('Weight')
+    expect(wrapper.text()).toContain('Color')
+
+    const matchedRows = wrapper.findAll(
+      '.product-attributes__audit-row--matched'
+    )
+    expect(matchedRows.length).toBeGreaterThanOrEqual(1)
+
+    const unindexedRows = wrapper.findAll(
+      '.product-attributes__audit-row--unindexed'
+    )
+    expect(unindexedRows).toHaveLength(1)
   })
 })

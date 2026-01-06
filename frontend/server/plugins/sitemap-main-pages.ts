@@ -15,9 +15,20 @@ export default defineNitroPlugin(nitroApp => {
       return
     }
 
-    const requestURL = ctx.event
+    let requestURL = ctx.event
       ? getRequestURL(ctx.event)
       : new URL('https://nudger.fr')
+
+    // Fallback for static generation where requestURL might be localhost
+    if (
+      (process.env.NODE_ENV === 'production' ||
+        process.env.NODE_ENV === 'prerender') &&
+      (requestURL.hostname === 'localhost' ||
+        requestURL.hostname === '127.0.0.1')
+    ) {
+      requestURL = new URL('https://nudger.fr')
+    }
+
     const { domainLanguage } = getDomainLanguageFromHostname(
       requestURL.hostname
     )

@@ -2,7 +2,7 @@
   <section :id="sectionId" class="product-attributes">
     <header class="product-attributes__header">
       <h2 class="product-attributes__title">
-        {{ $t('product.attributes.title') }}
+        {{ $t('product.attributes.title', titleParams) }}
       </h2>
       <p class="product-attributes__subtitle">
         {{ $t('product.attributes.subtitle') }}
@@ -118,6 +118,110 @@
       </v-row>
     </div>
 
+    <div
+      v-if="showAuditWidget"
+      class="product-attributes__block product-attributes__block--audit"
+    >
+      <div
+        class="product-attributes__block-header product-attributes__block-header--audit"
+      >
+        <div class="product-attributes__audit-heading">
+          <h3 class="product-attributes__block-title">
+            {{ $t('product.attributes.audit.title') }}
+          </h3>
+          <p class="product-attributes__audit-subtitle">
+            {{ $t('product.attributes.audit.subtitle') }}
+          </p>
+        </div>
+        <div class="product-attributes__audit-controls">
+          <v-text-field
+            v-model="auditSearchTerm"
+            :label="$t('product.attributes.audit.searchPlaceholder')"
+            prepend-inner-icon="mdi-magnify"
+            hide-details
+            clearable
+            class="product-attributes__search product-attributes__search--audit"
+          />
+          <div class="product-attributes__audit-filters">
+            <v-checkbox
+              v-model="showIndexed"
+              :label="$t('product.attributes.audit.filters.indexed')"
+              hide-details
+              density="compact"
+              class="product-attributes__audit-filter"
+            />
+            <v-checkbox
+              v-model="showNotIndexed"
+              :label="$t('product.attributes.audit.filters.notIndexed')"
+              hide-details
+              density="compact"
+              class="product-attributes__audit-filter"
+            />
+          </div>
+        </div>
+      </div>
+
+      <v-data-table
+        v-if="filteredAuditRows.length"
+        :headers="auditHeaders"
+        :items="filteredAuditRows"
+        :items-per-page="auditItemsPerPage"
+        :item-class="auditRowClass"
+        class="product-attributes__audit-table"
+        density="comfortable"
+      >
+        <template #[`item.attribute`]="{ item }">
+          <div class="product-attributes__audit-attribute">
+            <span class="product-attributes__audit-name">
+              {{ item.name }}
+            </span>
+            <span class="product-attributes__audit-key">
+              {{ item.key }}
+            </span>
+          </div>
+        </template>
+        <template #[`item.bestValue`]="{ item }">
+          <ProductAttributeSourcingLabel
+            :value="item.displayValue"
+            :sourcing="item.sourcing"
+            class="product-attributes__audit-value"
+          />
+        </template>
+        <template #[`item.sources`]="{ item }">
+          <span class="product-attributes__audit-count">
+            {{ item.sourceCount }}
+          </span>
+        </template>
+        <template #[`item.indexed`]="{ item }">
+          <v-chip
+            size="small"
+            variant="tonal"
+            :color="item.isIndexed ? 'surface-primary-120' : 'surface-muted'"
+          >
+            {{
+              $t(
+                item.isIndexed
+                  ? 'product.attributes.audit.indexed'
+                  : 'product.attributes.audit.notIndexed'
+              )
+            }}
+          </v-chip>
+        </template>
+      </v-data-table>
+      <p
+        v-else
+        class="product-attributes__empty product-attributes__empty--audit"
+      >
+        {{
+          $t(
+            auditHasFilters
+              ? 'product.attributes.audit.emptyFiltered'
+              : 'product.attributes.audit.empty'
+          )
+        }}
+      </p>
+    </div>
+
     <div class="product-attributes__block product-attributes__block--detailed">
       <div
         class="product-attributes__block-header product-attributes__block-header--detailed"
@@ -171,15 +275,18 @@
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAuth } from '~/composables/useAuth'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
 import ProductLifeTimeline from '~/components/product/ProductLifeTimeline.vue'
 import type {
+  AttributeConfigDto,
   ProductAttributeDto,
   ProductAttributeSourceDto,
   ProductAttributesDto,
   ProductDto,
   ProductIndexedAttributeDto,
+  ProductSourcedAttributeDto,
 } from '~~/shared/api-client'
 
 const props = defineProps({
@@ -191,17 +298,38 @@ const props = defineProps({
     type: Object as PropType<ProductAttributesDto | null>,
     default: null,
   },
+  attributeConfigs: {
+    type: Array as PropType<AttributeConfigDto[]>,
+    default: () => [],
+  },
   product: {
     type: Object as PropType<ProductDto | null>,
     default: null,
+  },
+  titleParams: {
+    type: Object as PropType<Record<string, string> | undefined>,
+    default: undefined,
   },
 })
 
 const { t, n, locale } = useI18n()
 const runtimeConfig = useRuntimeConfig()
+const { isLoggedIn } = useAuth()
 
 const searchTerm = ref('')
 const hasSearchTerm = computed(() => searchTerm.value.trim().length > 0)
+const auditSearchTerm = ref('')
+const showIndexed = ref(true)
+const showNotIndexed = ref(true)
+
+const auditHasFilters = computed(
+  () =>
+    auditSearchTerm.value.trim().length > 0 ||
+    !showIndexed.value ||
+    !showNotIndexed.value
+)
+
+const showAuditWidget = computed(() => isLoggedIn.value)
 
 const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
   if (props.attributes) {
@@ -330,6 +458,113 @@ const toStringList = (input: unknown): string[] => {
   }
 
   return []
+}
+
+const normalizeAttributeKey = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed.toUpperCase() : null
+}
+
+const normalizeSourcingSources = (
+  sources: ProductAttributeSourceDto['sources'] | null | undefined
+): ProductSourcedAttributeDto[] => {
+  if (!sources) {
+    return []
+  }
+
+  if (Array.isArray(sources)) {
+    return sources.filter((entry): entry is ProductSourcedAttributeDto =>
+      Boolean(entry)
+    )
+  }
+
+  if (sources instanceof Set) {
+    return Array.from(sources).filter(
+      (entry): entry is ProductSourcedAttributeDto => Boolean(entry)
+    )
+  }
+
+  if (sources instanceof Map) {
+    return Array.from(sources.values()).filter(
+      (entry): entry is ProductSourcedAttributeDto => Boolean(entry)
+    )
+  }
+
+  if (typeof sources === 'object') {
+    return Object.values(
+      sources as Record<string, ProductSourcedAttributeDto | null | undefined>
+    ).filter((entry): entry is ProductSourcedAttributeDto => Boolean(entry))
+  }
+
+  return []
+}
+
+const normalizeSynonyms = (
+  synonyms: AttributeConfigDto['synonyms']
+): Array<{ sourceName: string; tokens: string[] }> => {
+  if (!synonyms) {
+    return []
+  }
+
+  return Object.entries(synonyms).reduce<
+    Array<{ sourceName: string; tokens: string[] }>
+  >((accumulator, [sourceName, values]) => {
+    const tokens = toStringList(values)
+    if (!sourceName.trim() || !tokens.length) {
+      return accumulator
+    }
+
+    accumulator.push({ sourceName: sourceName.trim(), tokens })
+    return accumulator
+  }, [])
+}
+
+const buildSynonymSourcing = (
+  synonyms: AttributeConfigDto['synonyms']
+): ProductAttributeSourceDto | null => {
+  const entries = normalizeSynonyms(synonyms)
+  if (!entries.length) {
+    return null
+  }
+
+  const sources = entries.map<ProductSourcedAttributeDto>(entry => ({
+    datasourceName: entry.sourceName,
+    value: entry.tokens.join(', '),
+  }))
+
+  return {
+    bestValue: undefined,
+    conflicts: false,
+    sources: new Set(sources),
+  }
+}
+
+const buildSynonymTokenSet = (
+  synonyms: AttributeConfigDto['synonyms']
+): string[] => {
+  const tokens = normalizeSynonyms(synonyms).flatMap(entry => entry.tokens)
+  return tokens.map(token => token.toLowerCase())
+}
+
+const matchesSynonyms = (
+  tokens: string[],
+  values: Array<string | null | undefined>
+): boolean => {
+  if (!tokens.length) {
+    return false
+  }
+
+  const normalizedValues = values
+    .filter((value): value is string => typeof value === 'string')
+    .map(value => value.toLowerCase())
+
+  return tokens.some(token =>
+    normalizedValues.some(value => value.includes(token))
+  )
 }
 
 interface IdentityDetail {
@@ -503,6 +738,143 @@ const mainAttributes = computed<MainAttributeRow[]>(() => {
     []
   )
 })
+
+interface AuditAttributeRow {
+  key: string
+  name: string
+  displayValue: string
+  bestValue: string | null
+  sourceCount: number
+  sourcing: ProductAttributeSourceDto | null
+  isIndexed: boolean
+  isMatched: boolean
+  searchText: string
+}
+
+const auditHeaders = computed(() => [
+  {
+    title: t('product.attributes.audit.columns.attribute'),
+    key: 'attribute',
+    sortable: true,
+  },
+  {
+    title: t('product.attributes.audit.columns.bestValue'),
+    key: 'bestValue',
+    sortable: false,
+  },
+  {
+    title: t('product.attributes.audit.columns.sources'),
+    key: 'sources',
+    sortable: true,
+  },
+  {
+    title: t('product.attributes.audit.columns.indexed'),
+    key: 'indexed',
+    sortable: true,
+  },
+])
+
+const auditItemsPerPage = 10
+
+const auditRows = computed<AuditAttributeRow[]>(() => {
+  const configs = props.attributeConfigs ?? []
+  const indexedAttributes = resolvedAttributes.value?.indexedAttributes ?? {}
+  const indexedMap = new Map<string, ProductIndexedAttributeDto>()
+
+  Object.entries(indexedAttributes).forEach(([key, attribute]) => {
+    const normalized = normalizeAttributeKey(key)
+    if (normalized) {
+      indexedMap.set(normalized, attribute)
+    }
+  })
+
+  return configs.reduce<AuditAttributeRow[]>((accumulator, config) => {
+    const normalizedKey = normalizeAttributeKey(config.key)
+    if (!normalizedKey) {
+      return accumulator
+    }
+
+    const indexedAttribute = indexedMap.get(normalizedKey)
+    const isIndexed = Boolean(indexedAttribute)
+    const bestValue = formatMainAttributeValue(indexedAttribute)
+    const displayValue =
+      resolveDisplayValue(indexedAttribute, bestValue) ??
+      t('product.attributes.audit.noBestValue')
+
+    const name =
+      config.name?.trim() || indexedAttribute?.name?.trim() || normalizedKey
+
+    const synonyms = config.synonyms
+    const synonymSources = buildSynonymSourcing(synonyms)
+    const sourcing = indexedAttribute?.sourcing ?? synonymSources ?? null
+
+    const sourceCount = normalizeSourcingSources(sourcing?.sources).length
+
+    const synonymTokens = buildSynonymTokenSet(synonyms)
+    const indexedSources = normalizeSourcingSources(
+      indexedAttribute?.sourcing?.sources
+    )
+    const matchValues = [
+      indexedAttribute?.name,
+      indexedAttribute?.value,
+      indexedAttribute?.sourcing?.bestValue,
+      ...indexedSources.map(source => source.name),
+      ...indexedSources.map(source => source.value),
+    ]
+
+    const isMatched = isIndexed && matchesSynonyms(synonymTokens, matchValues)
+
+    const searchText = `${name} ${bestValue ?? ''}`.trim().toLowerCase()
+
+    accumulator.push({
+      key: normalizedKey,
+      name,
+      displayValue,
+      bestValue: bestValue ?? null,
+      sourceCount,
+      sourcing,
+      isIndexed,
+      isMatched,
+      searchText,
+    })
+
+    return accumulator
+  }, [])
+})
+
+const filteredAuditRows = computed(() => {
+  const term = auditSearchTerm.value.trim().toLowerCase()
+  const showIndexedValue = showIndexed.value
+  const showNotIndexedValue = showNotIndexed.value
+
+  return auditRows.value.filter(row => {
+    if (row.isIndexed && !showIndexedValue) {
+      return false
+    }
+
+    if (!row.isIndexed && !showNotIndexedValue) {
+      return false
+    }
+
+    if (!term) {
+      return true
+    }
+
+    return row.searchText.includes(term)
+  })
+})
+
+const auditRowClass = (item: AuditAttributeRow) => {
+  if (!item.isIndexed) {
+    return 'product-attributes__audit-row product-attributes__audit-row--unindexed'
+  }
+
+  if (item.isMatched) {
+    return 'product-attributes__audit-row product-attributes__audit-row--matched'
+  }
+
+  return 'product-attributes__audit-row product-attributes__audit-row--indexed'
+}
 
 export interface DetailAttributeView {
   key: string
@@ -819,9 +1191,94 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   gap: 1rem;
 }
 
+.product-attributes__block-header--audit {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.product-attributes__audit-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-attributes__audit-subtitle {
+  margin: 0;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+}
+
+.product-attributes__audit-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-attributes__audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.product-attributes__audit-filter {
+  margin: 0;
+}
+
+.product-attributes__audit-table {
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.96);
+}
+
+.product-attributes__audit-attribute {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.product-attributes__audit-name {
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-attributes__audit-key {
+  font-size: 0.8rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+}
+
+.product-attributes__audit-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.product-attributes__audit-count {
+  font-weight: 600;
+}
+
+.product-attributes__audit-row {
+  transition: background-color 0.2s ease;
+}
+
+.product-attributes__audit-row--indexed {
+  background: rgba(var(--v-theme-surface-primary-050), 0.5);
+}
+
+.product-attributes__audit-row--matched {
+  background: rgba(var(--v-theme-accent-supporting), 0.15);
+}
+
+.product-attributes__audit-row--unindexed {
+  background: rgba(var(--v-theme-surface-muted), 0.4);
+}
+
 .product-attributes__search {
   width: 100%;
   max-width: 100%;
+}
+
+.product-attributes__search--audit {
+  max-width: 420px;
 }
 
 .product-attributes__detailed-layout {
@@ -858,6 +1315,12 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   background: rgba(var(--v-theme-surface-primary-050), 0.7);
 }
 
+.product-attributes__empty--audit {
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: rgba(var(--v-theme-surface-primary-050), 0.7);
+}
+
 .product-attributes__timeline-row {
   margin-top: 1.5rem;
 }
@@ -873,8 +1336,22 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
     justify-content: space-between;
   }
 
+  .product-attributes__block-header--audit {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .product-attributes__audit-controls {
+    align-items: flex-end;
+  }
+
   .product-attributes__search {
     max-width: 320px;
+  }
+
+  .product-attributes__search--audit {
+    max-width: 360px;
   }
 }
 </style>

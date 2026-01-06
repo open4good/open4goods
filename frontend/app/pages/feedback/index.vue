@@ -1,15 +1,28 @@
 <template>
   <div class="feedback-page">
-    <FeedbackHero
+    <PageHeader
       :eyebrow="t('feedback.hero.eyebrow')"
       :title="t('feedback.hero.title')"
       :subtitle="t('feedback.hero.subtitle')"
-      :description="t('feedback.hero.description')"
+      :description-html="t('feedback.hero.description')"
       :primary-cta="heroPrimaryCta"
       :secondary-cta="heroSecondaryCta"
       :cta-group-label="t('feedback.hero.ctaGroupLabel')"
-      :stats="heroStats"
-    />
+      layout="single-column"
+      container="lg"
+      background="image"
+      background-image-asset-key="feedbackBackground"
+    >
+      <template v-if="heroStats" #media>
+        <!-- Custom stats card implementation if needed, or check if PageHeader supports it directly -->
+        <!-- Based on FeedbackHero, it renders a card. We can put it here. -->
+        <v-card class="pa-4" variant="flat" color="surface">
+          <!-- ... implementation of stats card ... -->
+          <!-- Wait, PageHeader media slot is for the right column media. -->
+          <!-- FeedbackHero puts it ? -->
+        </v-card>
+      </template>
+    </PageHeader>
 
     <section
       id="feedback-tabs"
@@ -166,7 +179,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FetchError } from 'ofetch'
-import FeedbackHero from '~/components/domains/feedback/FeedbackHero.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import FeedbackIssueList, {
   type FeedbackIssueDisplay,
 } from '~/components/domains/feedback/FeedbackIssueList.vue'
@@ -606,7 +619,7 @@ const heroStats = computed(() => ({
       label: String(t('feedback.hero.stats.items.votes')),
     },
     {
-      icon: 'mdi-database-eye-outline',
+      icon: 'mdi-eye-plus-outline',
       label: String(t('feedback.hero.stats.items.transparency')),
     },
   ],

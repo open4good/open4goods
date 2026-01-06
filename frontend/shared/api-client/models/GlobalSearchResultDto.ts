@@ -39,7 +39,25 @@ export interface GlobalSearchResultDto {
      * @memberof GlobalSearchResultDto
      */
     score?: number;
+    /**
+     * Effective search mode that produced the result
+     * @type {string}
+     * @memberof GlobalSearchResultDto
+     */
+    searchMode?: GlobalSearchResultDtoSearchModeEnum;
 }
+
+
+/**
+ * @export
+ */
+export const GlobalSearchResultDtoSearchModeEnum = {
+    ExactVertical: 'exact_vertical',
+    Global: 'global',
+    Semantic: 'semantic'
+} as const;
+export type GlobalSearchResultDtoSearchModeEnum = typeof GlobalSearchResultDtoSearchModeEnum[keyof typeof GlobalSearchResultDtoSearchModeEnum];
+
 
 /**
  * Check if a given object implements the GlobalSearchResultDto interface.
@@ -60,6 +78,7 @@ export function GlobalSearchResultDtoFromJSONTyped(json: any, ignoreDiscriminato
         
         'product': json['product'] == null ? undefined : ProductDtoFromJSON(json['product']),
         'score': json['score'] == null ? undefined : json['score'],
+        'searchMode': json['searchMode'] == null ? undefined : json['searchMode'],
     };
 }
 
@@ -76,6 +95,7 @@ export function GlobalSearchResultDtoToJSONTyped(value?: GlobalSearchResultDto |
         
         'product': ProductDtoToJSON(value['product']),
         'score': value['score'],
+        'searchMode': value['searchMode'],
     };
 }
 

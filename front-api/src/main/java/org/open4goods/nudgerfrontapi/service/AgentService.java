@@ -36,12 +36,25 @@ public class AgentService {
     private final IssueService issueService;
     private final HcaptchaService hcaptchaService;
 
+    /**
+     * Create a new service for agent prompt submissions.
+     *
+     * @param agentProperties configuration for agent templates
+     * @param issueService    GitHub issue service
+     * @param hcaptchaService captcha verification service
+     */
     public AgentService(AgentProperties agentProperties, IssueService issueService, HcaptchaService hcaptchaService) {
         this.agentProperties = agentProperties;
         this.issueService = issueService;
         this.hcaptchaService = hcaptchaService;
     }
 
+    /**
+     * List configured agent templates for the given domain language.
+     *
+     * @param domainLanguage requested domain language
+     * @return localized agent templates
+     */
     public List<AgentTemplateDto> listTemplates(DomainLanguage domainLanguage) {
         if (agentProperties.getAgents() == null) {
             return Collections.emptyList();
@@ -53,6 +66,13 @@ public class AgentService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Map a configuration entry to a template DTO with localized fields.
+     *
+     * @param config agent configuration entry
+     * @param lang   language tag for localization
+     * @return mapped template DTO
+     */
     private AgentTemplateDto mapToTemplateDto(AgentConfig config, String lang) {
         String name = resolveI18n(config.getName(), lang);
         String desc = resolveI18n(config.getDescription(), lang);
@@ -104,6 +124,13 @@ public class AgentService {
         );
     }
 
+    /**
+     * Resolve a localized value from a map of language tags.
+     *
+     * @param i18nMap map of language tags to values
+     * @param lang    requested language tag
+     * @return localized value or fallback
+     */
     private String resolveI18n(java.util.Map<String, String> i18nMap, String lang) {
         if (i18nMap == null || i18nMap.isEmpty()) {
             return "";
@@ -118,6 +145,14 @@ public class AgentService {
         return i18nMap.getOrDefault("en", i18nMap.values().iterator().next());
     }
 
+    /**
+     * Submit a user request to GitHub as an issue and add the rendered prompt as a comment.
+     *
+     * @param request  agent request payload
+     * @param clientIp client IP address
+     * @return response containing issue details
+     * @throws IOException when GitHub communication fails
+     */
     public AgentRequestResponseDto submitRequest(AgentRequestDto request, String clientIp) throws IOException {
         // Validate Captcha
         if (request.captchaToken() != null && !request.captchaToken().isEmpty()) {
@@ -168,6 +203,7 @@ public class AgentService {
         String author = request.userHandle() != null ? request.userHandle() : "Anonymous (" + clientIp + ")";
 
         org.open4goods.services.feedback.dto.IssueDto issue = issueService.createIssue(finalTitle, finalDescription, author, labels);
+        issueService.createIssueComment(issue.number(), buildPromptComment(request, promptTemplate));
 
         return new AgentRequestResponseDto(
                 String.valueOf(issue.number()),
@@ -181,12 +217,18 @@ public class AgentService {
         );
     }
 
+    /**
+     * Build the GitHub issue description without the rendered prompt.
+     *
+     * @param request        agent request payload
+     * @param promptTemplate prompt template configuration
+     * @return formatted issue description
+     */
     private String buildDescription(AgentRequestDto request, AgentProperties.PromptTemplateConfig promptTemplate) {
-        StringBuilder sb = new StringBuilder();
-        if (promptTemplate != null && promptTemplate.getContent() != null && !promptTemplate.getContent().isBlank()) {
-            sb.append("### Context / Instructions\n").append(promptTemplate.getContent()).append("\n\n");
-        }
-        sb.append("### User Request\n").append(request.promptUser()).append("\n\n");
+        StringBuilder sb = new StringBuilder()
+                .append("### Agent Request\n\n")
+                .append("- Template: `").append(promptTemplate.getId()).append("`\n")
+                .append("- Variant: `").append(request.promptVariantId()).append("`\n\n");
 
         if (request.attributeValues() != null && !request.attributeValues().isEmpty()) {
             sb.append("### Attributes\n");
@@ -196,14 +238,39 @@ public class AgentService {
             sb.append("\n");
         }
 
+        sb.append("Prompt posted in comments.");
         return sb.toString();
     }
 
+    /**
+     * Build the GitHub comment containing the rendered prompt sent by the user.
+     *
+     * @param request        agent request
+     * @param promptTemplate prompt template configuration
+     * @return formatted comment body
+     */
+    private String buildPromptComment(AgentRequestDto request, AgentProperties.PromptTemplateConfig promptTemplate) {
+        return "### Prompt (" + promptTemplate.getId() + ")\n\n" + request.promptUser();
+    }
+
+    /**
+     * Build the GitHub issue title based on template metadata and the rendered prompt.
+     *
+     * @param config  agent configuration
+     * @param request agent request payload
+     * @return issue title string
+     */
     private String buildTitle(AgentConfig config, AgentRequestDto request) {
         int len = Math.min(request.promptUser().length(), 50);
         return "[" + config.getId() + "/" + request.promptVariantId() + "] " + request.promptUser().substring(0, len) + (request.promptUser().length() > 50 ? "..." : "");
     }
 
+    /**
+     * Find an agent configuration by ID.
+     *
+     * @param agentId agent identifier
+     * @return matching configuration if found
+     */
     private Optional<AgentConfig> findAgentConfig(String agentId) {
         if (agentProperties.getAgents() == null) {
             return Optional.empty();
@@ -229,6 +296,13 @@ public class AgentService {
                 .findFirst();
     }
 
+    /**
+     * List recent GitHub activity for agent issues.
+     *
+     * @param domainLanguage requested locale
+     * @return list of activity DTOs
+     * @throws IOException when GitHub communication fails
+     */
     public List<AgentActivityDto> listActivity(DomainLanguage domainLanguage) throws IOException {
         List<IssueDto> issues = issueService.listIssues("feedback");
 
@@ -244,6 +318,12 @@ public class AgentService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Map a GitHub issue to an activity DTO.
+     *
+     * @param issue GitHub issue DTO
+     * @return mapped activity DTO
+     */
     private AgentActivityDto mapToActivityDto(IssueDto issue) {
         boolean isPrivate = issue.labels().contains("prompt-visibility:private");
 
@@ -346,6 +426,13 @@ public class AgentService {
         ));
     }
 
+    /**
+     * Build a mailto link for the configured agent mail template.
+     *
+     * @param agentId        agent identifier
+     * @param domainLanguage requested locale
+     * @return mailto link or null if template is missing
+     */
     public String getMailto(String agentId, DomainLanguage domainLanguage) {
         String lang = domainLanguage.languageTag();
         AgentConfig config = findAgentConfig(agentId).orElse(null);

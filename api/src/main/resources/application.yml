@@ -1,5 +1,6 @@
 
 server:
+  port: 8086
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
@@ -13,6 +14,8 @@ server:
 # Logging configuration
 ########################
 logging: 
+    level:
+      org.apache.fontbox.ttf.PostScriptTable: ERROR
     file:   
       max-history: 5      
       max-size: 200MB      
@@ -75,4 +78,5 @@ remote-file-caching:
 google-taxonomy:
   fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
   en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
+
 

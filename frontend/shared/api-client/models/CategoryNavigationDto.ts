@@ -27,13 +27,6 @@ import {
     CategoryBreadcrumbItemDtoToJSON,
     CategoryBreadcrumbItemDtoToJSONTyped,
 } from './CategoryBreadcrumbItemDto';
-import type { CategoryNavigationDtoChildCategoriesInner } from './CategoryNavigationDtoChildCategoriesInner';
-import {
-    CategoryNavigationDtoChildCategoriesInnerFromJSON,
-    CategoryNavigationDtoChildCategoriesInnerFromJSONTyped,
-    CategoryNavigationDtoChildCategoriesInnerToJSON,
-    CategoryNavigationDtoChildCategoriesInnerToJSONTyped,
-} from './CategoryNavigationDtoChildCategoriesInner';
 import type { ProductDto } from './ProductDto';
 import {
     ProductDtoFromJSON,
@@ -62,22 +55,22 @@ export interface CategoryNavigationDto {
     breadcrumbs?: Array<CategoryBreadcrumbItemDto>;
     /**
      * Immediate children of the selected node filtered by the presence of verticals downstream.
-     * @type {Array<CategoryNavigationDtoChildCategoriesInner>}
+     * @type {Array<GoogleCategoryDto>}
      * @memberof CategoryNavigationDto
      */
-    childCategories?: Array<CategoryNavigationDtoChildCategoriesInner>;
+    childCategories?: Array<GoogleCategoryDto>;
     /**
      * Descendant nodes exposing a vertical configuration but not already present in childCategories.
-     * @type {Array<CategoryNavigationDtoChildCategoriesInner>}
+     * @type {Array<GoogleCategoryDto>}
      * @memberof CategoryNavigationDto
      */
-    descendantVerticals?: Array<CategoryNavigationDtoChildCategoriesInner>;
+    descendantVerticals?: Array<GoogleCategoryDto>;
     /**
      * Popular categories descending from the current node, including indirect children.
-     * @type {Array<CategoryNavigationDtoChildCategoriesInner>}
+     * @type {Array<GoogleCategoryDto>}
      * @memberof CategoryNavigationDto
      */
-    popularCategories?: Array<CategoryNavigationDtoChildCategoriesInner>;
+    popularCategories?: Array<GoogleCategoryDto>;
     /**
      * Top five new products for the category ordered by descending impact score. Only the base facet is populated.
      * @type {Array<ProductDto>}
@@ -111,9 +104,9 @@ export function CategoryNavigationDtoFromJSONTyped(json: any, ignoreDiscriminato
         
         'category': json['category'] == null ? undefined : GoogleCategoryDtoFromJSON(json['category']),
         'breadcrumbs': json['breadcrumbs'] == null ? undefined : ((json['breadcrumbs'] as Array<any>).map(CategoryBreadcrumbItemDtoFromJSON)),
-        'childCategories': json['childCategories'] == null ? undefined : ((json['childCategories'] as Array<any>).map(CategoryNavigationDtoChildCategoriesInnerFromJSON)),
-        'descendantVerticals': json['descendantVerticals'] == null ? undefined : ((json['descendantVerticals'] as Array<any>).map(CategoryNavigationDtoChildCategoriesInnerFromJSON)),
-        'popularCategories': json['popularCategories'] == null ? undefined : ((json['popularCategories'] as Array<any>).map(CategoryNavigationDtoChildCategoriesInnerFromJSON)),
+        'childCategories': json['childCategories'] == null ? undefined : ((json['childCategories'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
+        'descendantVerticals': json['descendantVerticals'] == null ? undefined : ((json['descendantVerticals'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
+        'popularCategories': json['popularCategories'] == null ? undefined : ((json['popularCategories'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
         'topNewProducts': json['topNewProducts'] == null ? undefined : ((json['topNewProducts'] as Array<any>).map(ProductDtoFromJSON)),
         'topOccasionProducts': json['topOccasionProducts'] == null ? undefined : ((json['topOccasionProducts'] as Array<any>).map(ProductDtoFromJSON)),
     };
@@ -132,9 +125,9 @@ export function CategoryNavigationDtoToJSONTyped(value?: CategoryNavigationDto |
         
         'category': GoogleCategoryDtoToJSON(value['category']),
         'breadcrumbs': value['breadcrumbs'] == null ? undefined : ((value['breadcrumbs'] as Array<any>).map(CategoryBreadcrumbItemDtoToJSON)),
-        'childCategories': value['childCategories'] == null ? undefined : ((value['childCategories'] as Array<any>).map(CategoryNavigationDtoChildCategoriesInnerToJSON)),
-        'descendantVerticals': value['descendantVerticals'] == null ? undefined : ((value['descendantVerticals'] as Array<any>).map(CategoryNavigationDtoChildCategoriesInnerToJSON)),
-        'popularCategories': value['popularCategories'] == null ? undefined : ((value['popularCategories'] as Array<any>).map(CategoryNavigationDtoChildCategoriesInnerToJSON)),
+        'childCategories': value['childCategories'] == null ? undefined : ((value['childCategories'] as Array<any>).map(GoogleCategoryDtoToJSON)),
+        'descendantVerticals': value['descendantVerticals'] == null ? undefined : ((value['descendantVerticals'] as Array<any>).map(GoogleCategoryDtoToJSON)),
+        'popularCategories': value['popularCategories'] == null ? undefined : ((value['popularCategories'] as Array<any>).map(GoogleCategoryDtoToJSON)),
         'topNewProducts': value['topNewProducts'] == null ? undefined : ((value['topNewProducts'] as Array<any>).map(ProductDtoToJSON)),
         'topOccasionProducts': value['topOccasionProducts'] == null ? undefined : ((value['topOccasionProducts'] as Array<any>).map(ProductDtoToJSON)),
     };

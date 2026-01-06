@@ -551,7 +551,8 @@ public class Product implements Standardisable {
 			// TODO(p2, features) : Should render with appropriate leading 0
 			return String.valueOf(id);
 		} catch (final Exception e) {
-			return null;
+			System.err.println("NOT A INTEGER GTIN");
+			return "-1";
 		}
 	}
 

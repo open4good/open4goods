@@ -1,5 +1,6 @@
 package org.open4goods.services.productrepository.services;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.FieldSort;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.KnnSearch;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
@@ -760,6 +762,18 @@ public class ProductRepository {
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
+        /**
+         * Count recent products for a specific vertical.
+         *
+         * @param vertical vertical identifier
+         * @return count of recent products with offers for the vertical
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingVertical(String vertical) {
+                CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("vertical").is(vertical)));
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
         public Long countMainIndexHavingScore(String scoreName, String vertical) {
                 CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
@@ -905,10 +919,50 @@ public class ProductRepository {
 	 *
 	 * @return Criteria representing recent prices
 	 */
-	public Criteria getRecentPriceQuery() {
-		return getRecentProducts().and(new Criteria("offersCount").greaterThan(0));
+    public Criteria getRecentPriceQuery() {
+                return getRecentProducts().and(new Criteria("offersCount").greaterThan(0));
 
-	}
+        }
+
+        /**
+         * Executes a KNN search on the embedding field while enforcing recency and offer availability guardrails.
+         *
+         * @param vector the embedding vector to search with
+         * @param baseFilters optional additional filters to apply
+         * @param k number of neighbours to retrieve
+         * @return search hits ordered by vector similarity
+         */
+        public SearchHits<Product> knnSearchByEmbedding(float[] vector, Criteria baseFilters, int k)
+        {
+                Objects.requireNonNull(vector, "Embedding vector is required");
+                if (vector.length == 0)
+                {
+                        throw new IllegalArgumentException("Embedding vector must not be empty");
+                }
+
+                Criteria effectiveCriteria = (baseFilters == null ? new Criteria() : baseFilters).and(getRecentPriceQuery());
+
+                List<Float> queryVector = new ArrayList<>(vector.length);
+                for (float value : vector)
+                {
+                        queryVector.add(value);
+                }
+
+                KnnSearch knnSearch = KnnSearch.of(knn -> knn
+                                .field("embedding")
+                                .queryVector(queryVector)
+                                .k(k)
+                                .numCandidates(Math.max(k * 2, 50))
+                );
+
+                NativeQuery knnQuery = new NativeQueryBuilder()
+                                .withQuery(new CriteriaQuery(effectiveCriteria))
+                                .withKnnSearches(knnSearch)
+                                .withPageable(PageRequest.of(0, k))
+                                .build();
+
+                return elasticsearchOperations.search(knnQuery, Product.class, CURRENT_INDEX);
+        }
 
 	/**
 	 *

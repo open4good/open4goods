@@ -25,31 +25,31 @@ export const useParallaxConfig = () => {
     () => ({
       essentials: {
         overlay: 0.62,
-        parallaxAmount: 0.16,
+        parallaxAmount: 0.08,
         ariaLabel: String(t('home.parallax.essentials.ariaLabel')),
         maxOffsetRatio: null,
       },
       features: {
         overlay: 0.55,
-        parallaxAmount: 0.12,
+        parallaxAmount: 0.06,
         ariaLabel: String(t('home.parallax.features.ariaLabel')),
         maxOffsetRatio: null,
       },
       blog: {
         overlay: 0.5,
-        parallaxAmount: 0.1,
+        parallaxAmount: 0.05,
         ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
         maxOffsetRatio: null,
       },
       objections: {
         overlay: 0.58,
-        parallaxAmount: 0.11,
+        parallaxAmount: 0.05,
         ariaLabel: String(t('home.parallax.knowledge.ariaLabel')),
         maxOffsetRatio: null,
       },
       cta: {
         overlay: 0.48,
-        parallaxAmount: 0.08,
+        parallaxAmount: 0.04,
         ariaLabel: String(t('home.parallax.cta.ariaLabel')),
         maxOffsetRatio: null,
       },

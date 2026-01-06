@@ -18,7 +18,7 @@ const { categories, fetchCategories } = useCategories()
 
 const { pending } = await useAsyncData(
   'home-categories-slide',
-  () => fetchCategories(true), // Only enabled categories
+  () => fetchCategories(),
   { server: true, immediate: true }
 )
 

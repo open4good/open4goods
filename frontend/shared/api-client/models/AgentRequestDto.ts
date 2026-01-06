@@ -142,3 +142,4 @@ export function AgentRequestDtoToJSONTyped(value?: AgentRequestDto | null, ignor
         'captchaToken': value['captchaToken'],
     };
 }
+

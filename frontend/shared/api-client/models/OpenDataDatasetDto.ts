@@ -32,6 +32,12 @@ export interface OpenDataDatasetDto {
      */
     recordCount?: string;
     /**
+     * Raw number of rows in the dataset.
+     * @type {number}
+     * @memberof OpenDataDatasetDto
+     */
+    recordCountValue?: number;
+    /**
      * Last update timestamp formatted using the requested locale.
      * @type {string}
      * @memberof OpenDataDatasetDto
@@ -87,6 +93,7 @@ export function OpenDataDatasetDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         
         'type': json['type'] == null ? undefined : json['type'],
         'recordCount': json['recordCount'] == null ? undefined : json['recordCount'],
+        'recordCountValue': json['recordCountValue'] == null ? undefined : json['recordCountValue'],
         'lastUpdated': json['lastUpdated'] == null ? undefined : json['lastUpdated'],
         'fileSize': json['fileSize'] == null ? undefined : json['fileSize'],
         'downloadUrl': json['downloadUrl'] == null ? undefined : json['downloadUrl'],
@@ -107,6 +114,7 @@ export function OpenDataDatasetDtoToJSONTyped(value?: OpenDataDatasetDto | null,
         
         'type': value['type'],
         'recordCount': value['recordCount'],
+        'recordCountValue': value['recordCountValue'],
         'lastUpdated': value['lastUpdated'],
         'fileSize': value['fileSize'],
         'downloadUrl': value['downloadUrl'],

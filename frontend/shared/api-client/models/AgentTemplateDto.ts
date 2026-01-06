@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { MailTemplateDto } from './MailTemplateDto';
-import {
-    MailTemplateDtoFromJSON,
-    MailTemplateDtoFromJSONTyped,
-    MailTemplateDtoToJSON,
-    MailTemplateDtoToJSONTyped,
-} from './MailTemplateDto';
 import type { PromptTemplateDto } from './PromptTemplateDto';
 import {
     PromptTemplateDtoFromJSON,
@@ -27,6 +20,13 @@ import {
     PromptTemplateDtoToJSON,
     PromptTemplateDtoToJSONTyped,
 } from './PromptTemplateDto';
+import type { MailTemplateDto } from './MailTemplateDto';
+import {
+    MailTemplateDtoFromJSON,
+    MailTemplateDtoFromJSONTyped,
+    MailTemplateDtoToJSON,
+    MailTemplateDtoToJSONTyped,
+} from './MailTemplateDto';
 import type { AgentAttributeDto } from './AgentAttributeDto';
 import {
     AgentAttributeDtoFromJSON,
@@ -66,8 +66,8 @@ export interface AgentTemplateDto {
      */
     icon?: string;
     /**
-     * Prompt template text
-     * @type {string}
+     * Available prompt templates
+     * @type {Array<PromptTemplateDto>}
      * @memberof AgentTemplateDto
      */
     promptTemplates?: Array<PromptTemplateDto>;
@@ -164,3 +164,4 @@ export function AgentTemplateDtoToJSONTyped(value?: AgentTemplateDto | null, ign
         'attributes': value['attributes'] == null ? undefined : ((value['attributes'] as Array<any>).map(AgentAttributeDtoToJSON)),
     };
 }
+

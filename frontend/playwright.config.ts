@@ -13,6 +13,12 @@ export default defineConfig({
     headless: true,
     trace: 'on-first-retry',
   },
+  webServer: {
+    command: 'pnpm dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: true,
+    timeout: 120000,
+  },
   projects: [
     {
       name: 'chromium',

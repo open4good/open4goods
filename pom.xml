@@ -100,11 +100,13 @@
         <module>services/xwiki-spring-boot-starter</module>
         <module>services/image-processing</module>
         <module>services/icecat</module>
+        <module>services/embedding-djl</module>
         <module>services/blog</module>
         <module>services/gtinservice</module>
         <module>services/feedservice</module>
         <module>services/contribution</module>
         <module>services/eprel-service</module>
+        <module>services/exposed-docs</module>
 
 
 

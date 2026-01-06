@@ -1,15 +1,15 @@
-import { computed } from 'vue'
+import { computed, toValue, type MaybeRef } from 'vue'
 import { useTheme } from 'vuetify'
 
 import {
   THEME_ASSETS_FALLBACK,
-  seasonalThemeAssets,
   themeAssets,
   type ThemeAssetKey,
-  type EventPackName,
 } from '~~/config/theme/assets'
+import type { EventPackName } from '~~/config/theme/event-packs'
 import { useSeasonalEventPack } from './useSeasonalEventPack'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
+import { useEventPackI18n } from './useEventPackI18n'
 
 export type ThemedAssetIndex = Record<string, string>
 
@@ -35,37 +35,6 @@ const themedAssetIndex: ThemedAssetIndex = Object.entries(rawAssetIndex).reduce(
   {}
 )
 
-export const resolveAssetPathForTheme = (
-  assetKey: ThemeAssetKey,
-  themeName: ThemeName,
-  seasonalPack?: EventPackName
-): string[] => {
-  const seasonalTheme = seasonalPack
-    ? seasonalThemeAssets[seasonalPack]?.[themeName]?.[assetKey]
-    : undefined
-  const seasonalCommon = seasonalPack
-    ? seasonalThemeAssets[seasonalPack]?.common?.[assetKey]
-    : undefined
-  const seasonalFallback = seasonalPack
-    ? seasonalThemeAssets[seasonalPack]?.[THEME_ASSETS_FALLBACK]?.[assetKey]
-    : undefined
-
-  const fromTheme = themeAssets[themeName]?.[assetKey]
-  const fromCommon = themeAssets.common?.[assetKey]
-  const fallback = themeAssets[THEME_ASSETS_FALLBACK]?.[assetKey]
-
-  const candidates = [
-    seasonalTheme,
-    seasonalCommon,
-    seasonalFallback,
-    fromTheme,
-    fromCommon,
-    fallback,
-  ].filter(Boolean) as string[]
-
-  return Array.from(new Set(candidates))
-}
-
 export const resolveThemedAssetUrlFromIndex = (
   relativePath: string | string[],
   themeName: ThemeName,
@@ -90,13 +59,18 @@ export const resolveThemedAssetUrlFromIndex = (
     `${fallbackTheme}/${path}`,
   ])
 
-  return candidates.reduce<string | undefined>((resolved, candidate) => {
-    if (resolved) {
-      return resolved
-    }
+  const result = candidates.reduce<string | undefined>(
+    (resolved, candidate) => {
+      if (resolved) {
+        return resolved
+      }
+      // console.log(`[ThemeAsset] Checking candidate: ${candidate}, exists: ${!!index[candidate]}`)
+      return index[candidate]
+    },
+    undefined
+  )
 
-    return index[candidate]
-  }, undefined)
+  return result
 }
 
 const useCurrentThemeName = () => {
@@ -134,28 +108,40 @@ export const useThemedAsset = (relativePath: string) => {
   )
 }
 
-export const useThemeAsset = (assetKey: ThemeAssetKey) => {
+export const useThemeAsset = (assetKey: MaybeRef<ThemeAssetKey>) => {
   const themeName = useCurrentThemeName()
   const seasonalPack = useSeasonalEventPack()
+  const packI18n = useEventPackI18n(seasonalPack)
 
   return computed(() => {
-    const relativePaths = resolveAssetPathForTheme(
-      assetKey,
-      themeName.value,
-      seasonalPack.value
-    )
+    const key = toValue(assetKey)
+    if (!key) return ''
 
-    if (!relativePaths.length) {
+    const pack = toValue(seasonalPack)
+    const i18nAsset = packI18n.resolveString(`assets.${key}`)
+
+    // 1. Resolve candidates from i18n
+    const candidates: string[] = []
+    if (i18nAsset) {
+      candidates.push(i18nAsset)
+    }
+
+    // 2. Add fallback candidates from static themeAssets config
+    const fromTheme = themeAssets[themeName.value]?.[key]
+    const fromCommon = themeAssets.common?.[key]
+    const fallback = themeAssets[THEME_ASSETS_FALLBACK]?.[key]
+
+    if (fromTheme) candidates.push(fromTheme)
+    if (fromCommon) candidates.push(fromCommon)
+    if (fallback) candidates.push(fallback)
+
+    const uniqueCandidates = Array.from(new Set(candidates))
+
+    if (!uniqueCandidates.length) {
       return ''
     }
 
-    return (
-      resolveThemedAssetUrl(
-        relativePaths,
-        themeName.value,
-        seasonalPack.value
-      ) ?? ''
-    )
+    return resolveThemedAssetUrl(uniqueCandidates, themeName.value, pack) ?? ''
   })
 }
 

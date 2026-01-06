@@ -320,11 +320,10 @@ export const useCategories = () => {
 const { categories, loading, error, fetchCategories } = useCategories()
 
 // Fetch categories on component mount
-await useAsyncData(
-  'home-categories-slide',
-  () => fetchCategories(true), // Only enabled categories
-  { server: true, immediate: true }
-)
+await useAsyncData('home-categories-slide', () => fetchCategories(), {
+  server: true,
+  immediate: true,
+})
 
 // Transform categories to items format expected by The-slide
 const categoryItems = computed(() => {

@@ -1,14 +1,10 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.IOException;
-
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 //import org.open4goods.services.ai.AiService;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.open4goods.ui.services.GoogleIndexationService;
 import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -17,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -48,7 +43,6 @@ public class AdminController {
 
 	private VerticalsConfigService verticalsConfigService;
 
-	private GoogleIndexationService googleIndexationService;
 
 	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
 			ProductRepository repository, SitemapGenerationService sitemapService) {
@@ -57,7 +51,6 @@ public class AdminController {
 		this.sitemapService = sitemapService;
 		this.repository = repository;
 		this.verticalsConfigService = verticalsConfigService;
-		this.googleIndexationService = googleIndexationService;
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -99,40 +92,6 @@ public class AdminController {
 		return mv;
 	}
 
-
-	@GetMapping("/index/{verticalId}")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ModelAndView index(@PathVariable String verticalId, HttpServletRequest request) throws IOException {
-
-		// TODO(p3,i18n) : Should be siteLocale
-		googleIndexationService.indexVertical(verticalId, config.getBaseUrl(request.getLocale()));
-
-		ModelAndView mv = new ModelAndView("redirect:/");
-		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
-		return mv;
-	}
-
-	@GetMapping("/index")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ModelAndView indexPage(HttpServletRequest request, @RequestParam(name = "r", required = false) String redircectUrl) throws IOException {
-
-		googleIndexationService.indexPage(redircectUrl);
-
-		ModelAndView mv = new ModelAndView("redirect:/");
-		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
-		return mv;
-	}
-
-	@GetMapping("/indexNew")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
-	public ModelAndView indexNew(HttpServletRequest request ) throws IOException {
-
-		googleIndexationService.indexNewProducts();
-
-		ModelAndView mv = new ModelAndView("redirect:/");
-		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
-		return mv;
-	}
 
 
 

@@ -84,7 +84,9 @@ const { t } = useI18n()
 const heroBackgroundAsset = useHeroBackgroundAsset()
 
 const isInteractive = computed(() => props.selectable && !props.disabled)
-const tabIndex = computed(() => (props.disabled ? -1 : 0))
+const tabIndex = computed(() =>
+  isInteractive.value && !props.disabled ? 0 : -1
+)
 const ariaPressed = computed(() =>
   isInteractive.value ? String(props.selected) : undefined
 )
@@ -131,9 +133,13 @@ const cornerTooltip = computed(() => {
     return props.cornerTooltip
   }
 
+  if (!props.selectable) {
+    return ''
+  }
+
   return props.selected
-    ? t('shared.roundedCard.tooltipSelected')
-    : t('shared.roundedCard.tooltipIdle')
+    ? t('shared.roundedCard.cornerSelected')
+    : t('shared.roundedCard.cornerIdle')
 })
 
 const resolvedIcon = computed(() =>
@@ -170,6 +176,42 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
+const cardListeners = computed(() => {
+  if (!isInteractive.value) {
+    return {
+      mouseenter: () => {
+        isHovered.value = false
+      },
+      mouseleave: () => {
+        isHovered.value = false
+      },
+      focusin: () => {
+        isHovered.value = false
+      },
+      focusout: () => {
+        isHovered.value = false
+      },
+    }
+  }
+
+  return {
+    click: handleSelect,
+    keydown: handleKeyDown,
+    mouseenter: () => {
+      isHovered.value = true
+    },
+    mouseleave: () => {
+      isHovered.value = false
+    },
+    focusin: () => {
+      isHovered.value = true
+    },
+    focusout: () => {
+      isHovered.value = false
+    },
+  }
+})
+
 const cardAriaLabel = computed(
   () => props.ariaLabel || props.title || props.subtitle || undefined
 )
@@ -201,12 +243,7 @@ const hasHeader = computed(() =>
     :aria-disabled="ariaDisabled"
     :aria-label="cardAriaLabel"
     :ripple="isInteractive"
-    @click="handleSelect"
-    @keydown="handleKeyDown"
-    @mouseenter="isHovered = true"
-    @mouseleave="isHovered = false"
-    @focusin="isHovered = true"
-    @focusout="isHovered = false"
+    v-on="cardListeners"
   >
     <div
       class="rounded-card__corner"
@@ -277,7 +314,6 @@ const hasHeader = computed(() =>
   --rounded-card-radius: 18px;
 
   position: relative;
-  display: flex;
   padding: clamp(1rem, 3vw, 1.5rem) clamp(1.1rem, 3vw, 1.6rem);
   border-radius: var(--rounded-card-radius);
   border: 1px solid var(--rounded-card-border);

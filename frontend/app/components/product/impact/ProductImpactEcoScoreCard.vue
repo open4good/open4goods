@@ -21,18 +21,10 @@
     </header>
 
     <div class="impact-ecoscore__score">
-      <ImpactScore :score="normalizedScore" :max="5" size="large" show-value />
+      <ImpactScore :score="normalizedScore" :max="5" size="large" />
     </div>
 
     <div v-if="hasDetailContent" class="impact-ecoscore__analysis">
-      <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
-        <ProductImpactRadarChart
-          class="impact-ecoscore__analysis-radar-chart"
-          :axes="radarAxes"
-          :series="chartSeries"
-          :product-name="productName"
-        />
-      </div>
       <ProductImpactDetailsTable
         v-if="detailScores.length"
         class="impact-ecoscore__analysis-details"
@@ -64,6 +56,15 @@
 
     <v-expand-transition v-if="showAccordion">
       <div v-show="isSubscoreExpanded" class="impact-ecoscore__subscores">
+        <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
+          <ProductImpactRadarChart
+            class="impact-ecoscore__analysis-radar-chart"
+            :axes="radarAxes"
+            :series="chartSeries"
+            :product-name="productName"
+          />
+        </div>
+
         <v-skeleton-loader
           v-if="loading"
           type="image, article"
@@ -155,7 +156,10 @@ const hasDetailContent = computed(
   () => shouldDisplayRadar.value || detailScores.value.length > 0
 )
 const showAccordion = computed(
-  () => loading.value || secondaryScores.value.length > 0
+  () =>
+    loading.value ||
+    secondaryScores.value.length > 0 ||
+    shouldDisplayRadar.value
 )
 
 const toggleSubscores = () => {
@@ -266,10 +270,14 @@ const methodologyHref = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-bottom: 2rem;
 }
 
 .impact-ecoscore__analysis-radar-chart {
   flex: 1 1 auto;
+  min-height: 400px;
 }
 
 .impact-ecoscore__analysis-details--full {
@@ -349,11 +357,7 @@ const methodologyHref = computed(() => {
   }
 }
 
-@media (min-width: 960px) {
-  .impact-ecoscore__analysis {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  }
-}
+/* Analysis grid layout removed as it's now single column usually */
 
 @media (min-width: 640px) {
   .impact-ecoscore__subscores {

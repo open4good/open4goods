@@ -1,6 +1,24 @@
 <template>
   <div class="impact-score-page">
+<<<<<<< HEAD
     <ImpactScoreHero />
+=======
+    <PageHeader
+      variant="section-header"
+      :title="t('impactScorePage.hero.title')"
+      background="image"
+      background-image-asset-key="impactScoreBackground"
+      surface-variant="mesh"
+      layout="single-column"
+      container="xl"
+      content-align="center"
+      heading-level="h1"
+      schema-type="WebPage"
+      padding-y="clamp(5rem, 9vw, 7.5rem)"
+      heading-id="impact-score-hero-title"
+      aria-described-by="impact-score-hero-intro"
+    />
+>>>>>>> upstream/main
 
     <v-container class="impact-score-page__sections py-12 py-md-16">
       <ImpactScoreCriteria class="impact-score-page__section" />

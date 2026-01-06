@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 520" preserveAspectRatio="none" role="img" aria-label="Hero background mesh for feedback page">
+  <defs>
+    <!-- Single linear background gradient -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00DE9F"></stop>
+      <stop offset="100%" stop-color="#00A1C2"></stop>
+    </linearGradient>
+
+    <!-- Soft glow / blur -->
+    <filter id="blur16" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="16"></feGaussianBlur>
+    </filter>
+    <filter id="blur28" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="28"></feGaussianBlur>
+    </filter>
+
+    <!-- Very subtle noise (optional, lightweight) -->
+    <filter id="noise" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"></feTurbulence>
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 .06 0"></feColorMatrix>
+    </filter>
+
+    <!-- Star shape -->
+    <path id="star" d="M12 1.6l3.1 6.4 7.1 1-5.2 5 1.2 7.1L12 18.5 5.8 21.1 7 14l-5.2-5 7.1-1z"></path>
+
+    <!-- Chat bubble -->
+    <symbol id="bubble" viewBox="0 0 220 140">
+      <path d="M30 18h160a20 20 0 0 1 20 20v62a20 20 0 0 1-20 20H92l-28 18 6-18H30a20 20 0 0 1-20-20V38a20 20 0 0 1 20-20z"></path>
+    </symbol>
+
+    <!-- Logo-inspired leaf silhouette (simplified / inspired) -->
+    <linearGradient id="leafGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00DE9F" stop-opacity=".55"></stop>
+      <stop offset="100%" stop-color="#00A1C2" stop-opacity=".55"></stop>
+    </linearGradient>
+
+    <!-- Subtle shine -->
+    <radialGradient id="shine" cx="80%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity=".22"></stop>
+      <stop offset="55%" stop-color="#FFFFFF" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1440" height="520" fill="url(#bg)"></rect>
+  <rect width="1440" height="520" fill="url(#shine)"></rect>
+
+  <!-- Subtle texture -->
+  <rect width="1440" height="520" filter="url(#noise)" opacity=".22"></rect>
+
+  <!-- LEFT 1/5 (0–288px): soft blobs + leaf + feedback UI icons -->
+  <g>
+    <!-- blurred blobs -->
+    <circle cx="120" cy="120" r="120" fill="#FFFFFF" opacity=".10" filter="url(#blur28)"></circle>
+    <circle cx="220" cy="360" r="140" fill="#FFFFFF" opacity=".08" filter="url(#blur28)"></circle>
+    <circle cx="70" cy="260" r="70" fill="#00D1CE" opacity=".14" filter="url(#blur16)"></circle>
+
+    <!-- leaf silhouette -->
+    <g transform="translate(-20 40) rotate(-10 160 180)" opacity=".22" filter="url(#blur16)">
+      <path fill="url(#leafGrad)" d="M120,320
+        C70,315 30,275 30,225 V80 H175
+        C225,80 265,120 265,170 V240
+        L235,210 V175
+        C235,140 207,112 172,112 H82 V224
+        C82,234 90,242 100,243
+        C111,244 120,236 120,226 V195 H152
+        C170,195 185,210 185,228 V276
+        C185,286 189,295 196,302
+        L250,356
+        C255,361 262,362 268,359
+        C278,355 286,345 286,333 V188
+        C286,150 272,114 245,88
+        C218,62 182,48 144,48 H30
+        C14,48 0,62 0,78 V220
+        C0,258 14,294 41,320
+        C67,345 102,360 138,360 H190
+        C196,360 198,353 194,349
+        L176,331 C162,317 144,320 120,320 Z"></path>
+    </g>
+
+    <!-- chat bubble with "lines" -->
+    <g transform="translate(72 118)" opacity=".18">
+      <use href="#bubble" fill="#FFFFFF"></use>
+      <rect x="40" y="44" width="132" height="10" rx="5" fill="#00A1C2" opacity=".40"></rect>
+      <rect x="40" y="66" width="100" height="10" rx="5" fill="#00DE9F" opacity=".42"></rect>
+      <rect x="40" y="88" width="78" height="10" rx="5" fill="#FFFFFF" opacity=".34"></rect>
+    </g>
+
+    <!-- rating stars -->
+    <g transform="translate(56 372)" opacity=".18">
+      <g transform="translate(0 0) scale(1.2)">
+        <use href="#star" fill="#FFCD90"></use>
+        <use href="#star" x="30" fill="#FFCD90" opacity=".95"></use>
+        <use href="#star" x="60" fill="#FFCD90" opacity=".90"></use>
+        <use href="#star" x="90" fill="#FFCD90" opacity=".85"></use>
+        <use href="#star" x="120" fill="#FFFFFF" opacity=".30"></use>
+      </g>
+    </g>
+
+    <!-- subtle checkmark badge -->
+    <g transform="translate(210 40)" opacity=".16">
+      <circle cx="34" cy="34" r="34" fill="#FFFFFF"></circle>
+      <path d="M22 35l8 8 18-20" fill="none" stroke="#00DE9F" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+    </g>
+  </g>
+
+  <!-- CENTER CLEAR ZONE (approx 20%–80% width): intentionally empty -->
+
+  <!-- RIGHT 1/5 (1152–1440px): mirrored elements -->
+  <g>
+    <!-- blurred blobs -->
+    <circle cx="1320" cy="140" r="130" fill="#FFFFFF" opacity=".09" filter="url(#blur28)"></circle>
+    <circle cx="1240" cy="390" r="150" fill="#FFFFFF" opacity=".07" filter="url(#blur28)"></circle>
+    <circle cx="1390" cy="290" r="80" fill="#00D1CE" opacity=".14" filter="url(#blur16)"></circle>
+
+    <!-- mirrored leaf silhouette -->
+    <g transform="translate(1480 58) scale(-1,1) rotate(-6 220 220)" opacity=".20" filter="url(#blur16)">
+      <path fill="url(#leafGrad)" d="M120,320
+        C70,315 30,275 30,225 V80 H175
+        C225,80 265,120 265,170 V240
+        L235,210 V175
+        C235,140 207,112 172,112 H82 V224
+        C82,234 90,242 100,243
+        C111,244 120,236 120,226 V195 H152
+        C170,195 185,210 185,228 V276
+        C185,286 189,295 196,302
+        L250,356
+        C255,361 262,362 268,359
+        C278,355 286,345 286,333 V188
+        C286,150 272,114 245,88
+        C218,62 182,48 144,48 H30
+        C14,48 0,62 0,78 V220
+        C0,258 14,294 41,320
+        C67,345 102,360 138,360 H190
+        C196,360 198,353 194,349
+        L176,331 C162,317 144,320 120,320 Z"></path>
+    </g>
+
+    <!-- compact "feedback card" -->
+    <g transform="translate(1188 170)" opacity=".17">
+      <rect x="0" y="0" width="220" height="140" rx="20" fill="#FFFFFF"></rect>
+      <circle cx="44" cy="42" r="16" fill="#00DE9F" opacity=".45"></circle>
+      <rect x="74" y="32" width="118" height="12" rx="6" fill="#00A1C2" opacity=".38"></rect>
+      <rect x="22" y="70" width="170" height="10" rx="5" fill="#FFFFFF" opacity=".35"></rect>
+      <rect x="22" y="92" width="142" height="10" rx="5" fill="#FFFFFF" opacity=".28"></rect>
+      <g transform="translate(22 112) scale(.85)">
+        <use href="#star" fill="#FFCD90" opacity=".95"></use>
+        <use href="#star" x="26" fill="#FFCD90" opacity=".90"></use>
+        <use href="#star" x="52" fill="#FFCD90" opacity=".85"></use>
+        <use href="#star" x="78" fill="#FFCD90" opacity=".80"></use>
+        <use href="#star" x="104" fill="#FFFFFF" opacity=".25"></use>
+      </g>
+    </g>
+
+    <!-- small action spark lines -->
+    <g transform="translate(1368 64)" opacity=".14" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round">
+      <path d="M0 22h28"></path>
+      <path d="M10 0v28"></path>
+      <path d="M6 6l18 18"></path>
+      <path d="M24 6L6 24"></path>
+    </g>
+  </g>
+</svg>

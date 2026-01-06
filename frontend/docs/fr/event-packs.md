@@ -47,9 +47,7 @@ Toutes les chaînes dépendantes d’un pack vivent sous `home.events.<pack>.*`.
       "hold": {
         "hero": {
           "titleSubtitle": ["Des contenus hérités pour les tests."],
-          "subtitles": [
-            "Sous-titres de test pour le pack de rétention.",
-          ],
+          "subtitles": ["Sous-titres de test pour le pack de rétention."],
         },
       },
     },

@@ -10,5 +10,7 @@ public record GlobalSearchResultDto(
         @Schema(description = "Full product payload returned by the search result")
         ProductDto product,
         @Schema(description = "Pertinence score returned by Elasticsearch", example = "7.42")
-        double score) {
+        double score,
+        @Schema(description = "Effective search mode that produced the result", implementation = SearchMode.class)
+        SearchMode searchMode) {
 }

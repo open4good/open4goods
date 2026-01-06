@@ -1,0 +1,95 @@
+## 🥳 Welcome to **v0.9.9.10**
+
+This release covers **12 day(s)** of work, from **2025-12-24T13:24:15.000Z** to **2026-01-05T18:49:25.000Z**.
+
+### 📦 Stats
+- Diff: [compare](https://github.com/open4good/open4goods/compare/v0.9.9...v0.9.9.10)
+- Changed files: **302**
+- Commits: **251**
+- Additions: **11034** / Deletions: **5211**
+
+---
+
+
+
+<details>
+<summary>🙈 Other changes (73)</summary>
+
+| PR | Title | Author |
+|---:|---|---|
+| [PR 2453](https://github.com/open4good/open4goods/pull/2453) | chore(deps): update unhead monorepo to v2.1.1 | @renovate[bot] |
+| [PR 2452](https://github.com/open4good/open4goods/pull/2452) | chore(deps): update dependency vuetify to v3.11.5 | @renovate[bot] |
+| [PR 2454](https://github.com/open4good/open4goods/pull/2454) | Rename nudge tool welcome icon to animated icon | @GoulvenF |
+| [PR 2455](https://github.com/open4good/open4goods/pull/2455) | Add animated home hero subtitle | @GoulvenF |
+| [PR 2456](https://github.com/open4good/open4goods/pull/2456) | chore(deps): update dependency jsdom to v27.4.0 | @renovate[bot] |
+| [PR 2459](https://github.com/open4good/open4goods/pull/2459) | Expose disabled categories to clients and adjust disabled UX | @GoulvenF |
+| [PR 2460](https://github.com/open4good/open4goods/pull/2460) | Enhance ImpactScore layout options | @GoulvenF |
+| [PR 2461](https://github.com/open4good/open4goods/pull/2461) | Update FAQ content and impact CTA | @GoulvenF |
+| [PR 2457](https://github.com/open4good/open4goods/pull/2457) | chore(deps): update dependency isomorphic-dompurify to v2.35.0 | @renovate[bot] |
+| [PR 2462](https://github.com/open4good/open4goods/pull/2462) | Add subtitles and tooltips to nudge wizard steps | @GoulvenF |
+| [PR 2463](https://github.com/open4good/open4goods/pull/2463) | Improve nudge wizard navigation and card behavior | @GoulvenF |
+| [PR 2466](https://github.com/open4good/open4goods/pull/2466) | chore(deps): update actions/checkout action to v6 | @renovate[bot] |
+| [PR 2464](https://github.com/open4good/open4goods/pull/2464) | chore(deps): update dependency @typescript-eslint/parser to v8.51.0 | @renovate[bot] |
+| [PR 2468](https://github.com/open4good/open4goods/pull/2468) | Refactor embedding with reusable DJL starter | @GoulvenF |
+| [PR 2470](https://github.com/open4good/open4goods/pull/2470) | Add open data item counts to stats endpoint | @GoulvenF |
+| [PR 2469](https://github.com/open4good/open4goods/pull/2469) | Refine product tile card layout | @GoulvenF |
+| [PR 2471](https://github.com/open4good/open4goods/pull/2471) | Add device-specific scan and voice controls to search | @GoulvenF |
+| [PR 2473](https://github.com/open4good/open4goods/pull/2473) | Add contact form prefill and home contact redirect | @GoulvenF |
+| [PR 2472](https://github.com/open4good/open4goods/pull/2472) | Add divers aggregate handling for impact details | @GoulvenF |
+| [PR 2465](https://github.com/open4good/open4goods/pull/2465) | Support multi-category EPREL configuration | @GoulvenF |
+| [PR 2476](https://github.com/open4good/open4goods/pull/2476) | chore: bundle documentation resources into deployments | @GoulvenF |
+| [PR 2479](https://github.com/open4good/open4goods/pull/2479) | Add agent dev CI workflow and enforce role-aware agent UI | @GoulvenF |
+| [PR 2478](https://github.com/open4good/open4goods/pull/2478) | Add exposed docs microservice and front-api proxy | @GoulvenF |
+| [PR 2477](https://github.com/open4good/open4goods/pull/2477) | Add tile pricing thumbnail and category results link in nudge recommendations | @GoulvenF |
+| [PR 2475](https://github.com/open4good/open4goods/pull/2475) | feat(frontend): redesign product hero hero layout | @GoulvenF |
+| [PR 2480](https://github.com/open4good/open4goods/pull/2480) | Simplify homepage parallax sections and aplat sourcing | @GoulvenF |
+| [PR 2481](https://github.com/open4good/open4goods/pull/2481) | feat(frontend): support pack-aware home hero background and switch default asset to WebP | @GoulvenF |
+| [PR 2484](https://github.com/open4good/open4goods/pull/2484) | Normalize parallax asset references and simplify i18n entries | @GoulvenF |
+| [PR 2483](https://github.com/open4good/open4goods/pull/2483) | Add attribute sourcing audit table to product attributes | @GoulvenF |
+| [PR 2482](https://github.com/open4good/open4goods/pull/2482) | fix: serialize category configs in API | @GoulvenF |
+| [PR 2489](https://github.com/open4good/open4goods/pull/2489) | Add prettyName generation with attribute suffix support | @GoulvenF |
+| [PR 2488](https://github.com/open4good/open4goods/pull/2488) | Add open-data millions interpolation to home hero helpers | @GoulvenF |
+| [PR 2487](https://github.com/open4good/open4goods/pull/2487) | Add “unknown” category link to Nudge Tool wizard | @GoulvenF |
+| [PR 2486](https://github.com/open4good/open4goods/pull/2486) | fix(deps): update dependency org.xwiki.commons:xwiki-commons-component-default to v17.10.2 | @renovate[bot] |
+| [PR 2485](https://github.com/open4good/open4goods/pull/2485) | chore(deps): update dependency vuetify to v3.11.6 | @renovate[bot] |
+| [PR 2491](https://github.com/open4good/open4goods/pull/2491) | fix(deps): update dependency org.xwiki.rendering:xwiki-rendering-api to v17.10.2 | @renovate[bot] |
+| [PR 2490](https://github.com/open4good/open4goods/pull/2490) | fix(deps): update dependency org.xwiki.platform:xwiki-platform-rest-model to v17.10.2 | @renovate[bot] |
+| [PR 2493](https://github.com/open4good/open4goods/pull/2493) | chore(deps): update pnpm to v10.27.0 | @renovate[bot] |
+| [PR 2492](https://github.com/open4good/open4goods/pull/2492) | chore(deps): update dependency @openapitools/openapi-generator-cli to v2.27.0 | @renovate[bot] |
+| [PR 2495](https://github.com/open4good/open4goods/pull/2495) | fix(deps): update dependency org.jsoup:jsoup to v1.22.1 | @renovate[bot] |
+| [PR 2494](https://github.com/open4good/open4goods/pull/2494) | chore(deps): update dependency org.jreleaser:jreleaser-maven-plugin to v1.22.0 | @renovate[bot] |
+| [PR 2496](https://github.com/open4good/open4goods/pull/2496) | Consolidate DJL embedding: centralize image embeddings and use concrete Djl* services | @GoulvenF |
+| [PR 2498](https://github.com/open4good/open4goods/pull/2498) | feat(frontend): add homepage photo invitation CTA | @GoulvenF |
+| [PR 2497](https://github.com/open4good/open4goods/pull/2497) | fix(deps): update dependency org.springdoc:springdoc-openapi-starter-webmvc-ui to v2.8.15 | @renovate[bot] |
+| [PR 2501](https://github.com/open4good/open4goods/pull/2501) | feat(frontend): add subtle randomized hero background motion | @GoulvenF |
+| [PR 2500](https://github.com/open4good/open4goods/pull/2500) | Respect reduced motion when zoomed | @GoulvenF |
+| [PR 2499](https://github.com/open4good/open4goods/pull/2499) | chore(deps): update dependency vuetify-nuxt-module to v0.19.2 | @renovate[bot] |
+| [PR 2502](https://github.com/open4good/open4goods/pull/2502) | Redesign ImpactScore badge, surface attribute sourcing in details, and add aggregate i18n labels | @GoulvenF |
+| [PR 2507](https://github.com/open4good/open4goods/pull/2507) | Resolve release directory dynamically | @GoulvenF |
+| [PR 2506](https://github.com/open4good/open4goods/pull/2506) | Fix YAML merge behavior for vertical configs | @GoulvenF |
+| [PR 2504](https://github.com/open4good/open4goods/pull/2504) | Add impact score criteria generation and endpoint | @GoulvenF |
+| [PR 2509](https://github.com/open4good/open4goods/pull/2509) | Add configurable embedding prefixes and L2 normalization | @GoulvenF |
+| [PR 2511](https://github.com/open4good/open4goods/pull/2511) | Add corner stacked `/20` impact badge and surface it on product cards | @GoulvenF |
+| [PR 2505](https://github.com/open4good/open4goods/pull/2505) | chore(deps): update xwiki docker tag to v17.10.2 - autoclosed | @renovate[bot] |
+| [PR 2503](https://github.com/open4good/open4goods/pull/2503) | Improve product SEO metadata, headings and title helpers | @GoulvenF |
+| [PR 2510](https://github.com/open4good/open4goods/pull/2510) | Add semantic fallback for front-api searches | @GoulvenF |
+| [PR 2513](https://github.com/open4good/open4goods/pull/2513) | feat(frontend): rotate model variations into product section titles/subtitles | @GoulvenF |
+| [PR 2514](https://github.com/open4good/open4goods/pull/2514) | Apply standard search filters to semantic KNN queries | @GoulvenF |
+| [PR 2516](https://github.com/open4good/open4goods/pull/2516) | Improve frontend UX and accessibility (category hero, filters, search, i18n) | @GoulvenF |
+| [PR 2517](https://github.com/open4good/open4goods/pull/2517) | Align category list impact score badge styling | @GoulvenF |
+| [PR 2515](https://github.com/open4good/open4goods/pull/2515) | chore(deps): update dependency @nuxt/test-utils to v3.22.0 | @renovate[bot] |
+| [PR 2518](https://github.com/open4good/open4goods/pull/2518) | Update product page model variation titles and i18n placeholders | @GoulvenF |
+| [PR 2519](https://github.com/open4good/open4goods/pull/2519) | Support on20 impact scores, SSR-safe product display name, and responsive ProductTileCard layout | @GoulvenF |
+| [PR 2520](https://github.com/open4good/open4goods/pull/2520) | Adjust nudge tool card rendering and product page nav alignment | @GoulvenF |
+| [PR 2521](https://github.com/open4good/open4goods/pull/2521) | Hide AI review section when product has no category | @GoulvenF |
+| [PR 2522](https://github.com/open4good/open4goods/pull/2522) | Add review generation IP quota controls | @GoulvenF |
+| [PR 2523](https://github.com/open4good/open4goods/pull/2523) | Adjust product page sticky nav offset | @GoulvenF |
+| [PR 2524](https://github.com/open4good/open4goods/pull/2524) | Add global search/suggest APIs with searchMode/searchType and frontend integration | @GoulvenF |
+| [PR 2525](https://github.com/open4good/open4goods/pull/2525) | feat(lighthouse): add manual audit workflow and reporting | @GoulvenF |
+| [PR 2526](https://github.com/open4good/open4goods/pull/2526) | Render agent prompt template variables and post rendered prompts as GitHub comments | @GoulvenF |
+| [PR 2527](https://github.com/open4good/open4goods/pull/2527) | Add CSRF and same-origin protections for frontend API routes | @GoulvenF |
+| [PR 2528](https://github.com/open4good/open4goods/pull/2528) | test(frontend): add Playwright sitemap SSR checks and run Nuxt dev during tests | @GoulvenF |
+| [PR 2529](https://github.com/open4good/open4goods/pull/2529) | Add singular and singularDesignation generation and mapping for vertical i18n | @GoulvenF |
+
+
+</details>

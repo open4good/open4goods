@@ -130,3 +130,4 @@ export function AgentActivityDtoToJSONTyped(value?: AgentActivityDto | null, ign
         'commentsCount': value['commentsCount'],
     };
 }
+

@@ -27,6 +27,10 @@ public class IdHelper {
 
 	private static final Pattern brandUid = Pattern.compile("\\w*\\-?(\\d[A-Za-z])+|([A-Za-z]\\d)+\\-?\\w*");
 
+	private static final int TARGET_DIMS = 512;
+
+
+
 	/***
 	 * The key used for simple encryptions. Mabe a need one day to handle it from
 	 * conf
@@ -63,13 +67,13 @@ public class IdHelper {
 
 		return ret;
 	}
-	
+
 	public static String sanitizeAndNormalize(final String input) {
 		return StringUtils.normalizeSpace(StringEscapeUtils.unescapeHtml4(input));
 	}
 
 	/**
-	 * Normalize 
+	 * Normalize
 	 * @param string
 	 * @return
 	 */
@@ -153,11 +157,11 @@ public class IdHelper {
 	public static String azCharAndDigits(final String input) {
 		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9]", "");
 	}
-	
+
 	public static String azCharAndDigits(final String input, String replacement) {
 		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9]", replacement);
 	}
-	
+
 	public static String azCharAndDigitsPointsDash(String input) {
 		return azCharAndDigits(input);
 	}
@@ -167,7 +171,7 @@ public class IdHelper {
 		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9_-]",string);
 	}
 
-	
+
 	/**
 	 * Return a clean hashed name
 	 *
@@ -253,5 +257,22 @@ public class IdHelper {
 
 
 
+
+	public static float[] to512(float[] embedding) {
+	    if (embedding.length > TARGET_DIMS) {
+	        throw new IllegalArgumentException(
+	            "Embedding has more than 512 dims: " + embedding.length
+	        );
+	    }
+
+	    if (embedding.length == TARGET_DIMS) {
+	        return embedding;
+	    }
+
+	    float[] padded = new float[TARGET_DIMS];
+	    System.arraycopy(embedding, 0, padded, 0, embedding.length);
+	    // remaining values default to 0.0f
+	    return padded;
+	}
 
 }

@@ -5,7 +5,7 @@
         {{ t('product.impact.alternatives.title') }}
       </h3>
       <p class="product-alternatives__subtitle">
-        {{ t('product.impact.alternatives.subtitle') }}
+        {{ t('product.impact.alternatives.subtitle', subtitleParams) }}
       </p>
     </header>
 
@@ -58,9 +58,17 @@
               "
               v-slot="{ toggle, selectedClass }"
             >
-              <ProductAlternativeCard
+              <ProductTileCard
                 :product="alternative"
-                :popular-attributes="normalizedPopularAttributes"
+                :product-link="productLink(alternative)"
+                :image-src="resolveImage(alternative)"
+                :attributes="popularAttributesByProduct(alternative)"
+                :impact-score="impactScoreValue(alternative)"
+                :offer-badges="offerBadges(alternative)"
+                :offers-count-label="offersCountLabel(alternative)"
+                :untitled-label="t('product.impact.alternatives.untitled')"
+                :not-rated-label="t('category.products.notRated')"
+                layout="horizontal"
                 class="product-alternatives__slide-item product-alternatives__card"
                 :class="selectedClass"
                 @click="toggle"
@@ -104,8 +112,14 @@ import type {
   ProductSearchResponseDto,
 } from '~~/shared/api-client'
 import { ProductsIncludeEnum } from '~~/shared/api-client'
-import ProductAlternativeCard from './ProductAlternativeCard.vue'
-import { resolveAttributeRawValueByKey } from '~/utils/_product-attributes'
+import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
+import {
+  formatAttributeValue,
+  resolveAttributeRawValueByKey,
+  resolvePopularAttributes,
+} from '~/utils/_product-attributes'
+import { resolvePrimaryImpactScoreOn20 } from '~/utils/_product-scores'
+import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
 const props = defineProps({
@@ -125,9 +139,14 @@ const props = defineProps({
     type: Number,
     default: 5,
   },
+  subtitleParams: {
+    type: Object as PropType<Record<string, string> | undefined>,
+    default: undefined,
+  },
 })
 
 const { t, n } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 
 const alternatives = ref<ProductDto[]>([])
 const loading = ref(false)
@@ -139,6 +158,193 @@ let requestToken = 0
 const normalizedPopularAttributes = computed(
   () => props.popularAttributes ?? []
 )
+
+const currencySymbolCache = new Map<string, string>()
+const NBSP = '\u00A0'
+
+const resolveCurrencySymbol = (currency?: string | null): string | null => {
+  if (!currency) {
+    return null
+  }
+
+  const upperCaseCurrency = currency.toUpperCase()
+
+  if (currencySymbolCache.has(upperCaseCurrency)) {
+    return currencySymbolCache.get(upperCaseCurrency) ?? null
+  }
+
+  try {
+    const formatter = new Intl.NumberFormat('en', {
+      style: 'currency',
+      currency: upperCaseCurrency,
+    })
+    const symbol =
+      formatter.formatToParts(0).find(part => part.type === 'currency')
+        ?.value ?? upperCaseCurrency
+
+    currencySymbolCache.set(upperCaseCurrency, symbol)
+
+    return symbol
+  } catch {
+    currencySymbolCache.set(upperCaseCurrency, upperCaseCurrency)
+
+    return upperCaseCurrency
+  }
+}
+
+const resolveImage = (product: ProductDto) => {
+  return (
+    product.resources?.coverImagePath ??
+    product.resources?.externalCover ??
+    product.resources?.images?.[0]?.url ??
+    undefined
+  )
+}
+
+const productLink = (product: ProductDto) =>
+  product.fullSlug ?? product.slug ?? undefined
+
+const impactScoreValue = (product: ProductDto) =>
+  resolvePrimaryImpactScoreOn20(product)
+
+const offersCountLabel = (product: ProductDto) =>
+  formatOffersCount(product, translatePlural)
+
+type DisplayedAttribute = {
+  key: string
+  label: string
+  value: string
+  icon?: string | null
+}
+
+const popularAttributesByProduct = (
+  product: ProductDto
+): DisplayedAttribute[] => {
+  const attributes = resolvePopularAttributes(
+    product,
+    normalizedPopularAttributes.value
+  )
+  const entries: DisplayedAttribute[] = []
+
+  attributes.forEach(attribute => {
+    const value = formatAttributeValue(attribute, t, n)
+    if (!value) {
+      return
+    }
+
+    entries.push({
+      key: attribute.key,
+      label: attribute.label,
+      value,
+      icon: attribute.icon ?? null,
+    })
+  })
+
+  return entries
+}
+
+const formatOfferPrice = (
+  offer:
+    | { price?: number | null; shortPrice?: string | null }
+    | null
+    | undefined,
+  product: ProductDto
+): string | null => {
+  if (!offer) {
+    return null
+  }
+
+  const currency = product.offers?.bestPrice?.currency ?? null
+  const shortPrice = offer.shortPrice?.trim()
+
+  if (shortPrice) {
+    const symbol = resolveCurrencySymbol(currency)
+
+    if (!symbol) {
+      return shortPrice
+    }
+
+    const normalisedShortPrice = shortPrice.replace(/\s+/g, ' ').trim()
+    const containsSymbol =
+      normalisedShortPrice.includes(symbol) ||
+      normalisedShortPrice.toUpperCase().includes(currency?.toUpperCase() ?? '')
+
+    return containsSymbol
+      ? normalisedShortPrice
+      : `${normalisedShortPrice}${NBSP}${symbol}`
+  }
+
+  const price = offer.price
+
+  if (price == null) {
+    return null
+  }
+
+  if (currency) {
+    try {
+      return n(price, { style: 'currency', currency })
+    } catch {
+      return `${n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim()
+    }
+  }
+
+  return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+type OfferBadge = {
+  key: string
+  label: string
+  price: string
+  appearance: 'new' | 'occasion' | 'default'
+}
+
+const offerBadges = (product: ProductDto): OfferBadge[] => {
+  const entries: OfferBadge[] = []
+  const newOffer = product.offers?.bestNewOffer
+  const occasionOffer = product.offers?.bestOccasionOffer
+
+  if (newOffer) {
+    const formatted = formatOfferPrice(newOffer, product)
+
+    if (formatted) {
+      entries.push({
+        key: 'new',
+        label: t('category.products.pricing.newOfferLabel'),
+        price: formatted,
+        appearance: 'new',
+      })
+    }
+  }
+
+  if (occasionOffer) {
+    const formatted = formatOfferPrice(occasionOffer, product)
+
+    if (formatted) {
+      entries.push({
+        key: 'occasion',
+        label: t('category.products.pricing.occasionOfferLabel'),
+        price: formatted,
+        appearance: 'occasion',
+      })
+    }
+  }
+
+  if (!entries.length) {
+    const fallbackOffer = product.offers?.bestPrice
+    const formatted =
+      formatOfferPrice(fallbackOffer, product) ??
+      formatBestPrice(product, t, n)
+
+    entries.push({
+      key: 'best',
+      label: t('category.products.pricing.bestOfferLabel'),
+      price: formatted,
+      appearance: 'default',
+    })
+  }
+
+  return entries
+}
 
 const formatCurrency = (value: number, currency?: string | null) => {
   if (!Number.isFinite(value)) {

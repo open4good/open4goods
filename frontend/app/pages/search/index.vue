@@ -1,54 +1,59 @@
 <template>
   <div class="search-page">
-    <section class="search-hero" aria-labelledby="search-hero-heading">
-      <v-container
-        class="search-hero__container py-0 px-4 mx-auto"
-        max-width="xl"
+    <PageHeader
+      :eyebrow="t('search.hero.eyebrow')"
+      :title="t('search.hero.title')"
+      :description-html="t('search.hero.subtitle')"
+      layout="single-column"
+      container="lg"
+      background="image"
+      background-image-asset-key="searchBackground"
+      class="mb-8"
+    >
+      <form class="search-hero__form mt-6" @submit.prevent="handleSearchSubmit">
+        <SearchSuggestField
+          v-model="searchInput"
+          class="search-hero__field"
+          :label="t('search.form.label')"
+          :placeholder="t('search.form.placeholder')"
+          :aria-label="t('search.form.ariaLabel')"
+          :min-chars="MIN_QUERY_LENGTH"
+          :enable-suggest="false"
+          :enable-voice="true"
+          :voice-mobile="true"
+          :voice-desktop="true"
+          @clear="handleClear"
+          @select-category="handleCategorySuggestion"
+          @select-product="handleProductSuggestion"
+          @submit="handleSearchSubmit"
+        >
+          <template #append-inner>
+            <v-btn
+              class="search-hero__submit-icon"
+              icon="mdi-arrow-right"
+              variant="flat"
+              color="primary"
+              size="small"
+              type="submit"
+              :aria-label="t('search.form.submit')"
+            />
+          </template>
+        </SearchSuggestField>
+      </form>
+
+      <p
+        v-if="showInitialState"
+        class="search-hero__helper mt-4 text-medium-emphasis"
       >
-        <div class="search-hero__content">
-          <p class="search-hero__eyebrow">{{ t('search.hero.eyebrow') }}</p>
-          <div class="search-hero__copy">
-            <h1 id="search-hero-heading" class="search-hero__title">
-              {{ t('search.hero.title') }}
-            </h1>
-            <!-- eslint-disable vue/no-v-html -->
-            <p
-              class="search-hero__subtitle subtitle-text"
-              v-html="t('search.hero.subtitle')"
-            />
-            <!-- eslint-enable vue/no-v-html -->
-          </div>
-
-          <form class="search-hero__form" @submit.prevent="handleSearchSubmit">
-            <SearchSuggestField
-              v-model="searchInput"
-              class="search-hero__field"
-              :label="t('search.form.label')"
-              :placeholder="t('search.form.placeholder')"
-              :aria-label="t('search.form.ariaLabel')"
-              :min-chars="MIN_QUERY_LENGTH"
-              @clear="handleClear"
-              @select-category="handleCategorySuggestion"
-              @select-product="handleProductSuggestion"
-              @submit="handleSearchSubmit"
-            />
-            <v-btn class="search-hero__submit" type="submit" size="large">
-              {{ t('search.form.submit') }}
-            </v-btn>
-          </form>
-
-          <p v-if="showInitialState" class="search-hero__helper">
-            {{ t('search.states.initial') }}
-          </p>
-          <p
-            v-else-if="showMinimumNotice"
-            class="search-hero__helper search-hero__helper--warning"
-          >
-            {{ t('search.states.minimum', { min: MIN_QUERY_LENGTH }) }}
-          </p>
-        </div>
-      </v-container>
-    </section>
+        {{ t('search.states.initial') }}
+      </p>
+      <p
+        v-else-if="showMinimumNotice"
+        class="search-hero__helper search-hero__helper--warning mt-4 text-warning"
+      >
+        {{ t('search.states.minimum', { min: MIN_QUERY_LENGTH }) }}
+      </p>
+    </PageHeader>
 
     <v-progress-linear
       v-if="pending"
@@ -108,6 +113,28 @@
           <p v-if="usingFallback" class="search-page__fallback">
             {{ t('search.notice.fallback') }}
           </p>
+          <div v-if="activeSearchModeLabel" class="search-page__mode-row">
+            <p class="search-page__mode">
+              {{
+                t('search.results.modeLabel', {
+                  mode: activeSearchModeLabel,
+                })
+              }}
+            </p>
+            <v-btn
+              v-if="nextSearchModeLabel"
+              variant="tonal"
+              color="primary"
+              size="small"
+              @click="handleNextSearchMode"
+            >
+              {{
+                t('search.results.nextMode', {
+                  mode: nextSearchModeLabel,
+                })
+              }}
+            </v-btn>
+          </div>
 
           <SearchResultGroup
             v-for="group in displayGroups"
@@ -117,6 +144,7 @@
             :products="group.products"
             :popular-attributes="group.popularAttributes"
             :vertical-home-url="group.verticalHomeUrl"
+            :search-mode-label="group.searchModeLabel"
             :category-link-label="t('search.groups.viewCategory')"
             :category-link-aria="
               t('search.groups.viewCategoryAria', { title: group.title })
@@ -135,12 +163,14 @@ import type {
   AttributeConfigDto,
   GlobalSearchResponseDto,
   ProductDto,
+  SearchMode,
   VerticalConfigDto,
 } from '~~/shared/api-client'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
+import PageHeader from '~/components/shared/header/PageHeader.vue'
 import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { useAnalytics } from '~/composables/useAnalytics'
@@ -164,10 +194,18 @@ const routeQuery = computed(() =>
   typeof route.query.q === 'string' ? route.query.q : ''
 )
 const searchInput = ref(routeQuery.value)
+const requestedSearchType = ref<
+  'auto' | 'exact_vertical' | 'global' | 'semantic'
+>('auto')
 
-watch(routeQuery, value => {
-  searchInput.value = value
-})
+watch(
+  routeQuery,
+  value => {
+    searchInput.value = value
+    requestedSearchType.value = 'auto'
+  },
+  { immediate: true }
+)
 
 const normalizedQuery = computed(() => routeQuery.value.trim())
 const trimmedInput = computed(() => searchInput.value.trim())
@@ -191,15 +229,17 @@ const { data, pending, error, refresh } =
         return null
       }
 
-      return await $fetch<GlobalSearchResponseDto>('/api/search', {
+      return await $fetch<GlobalSearchResponseDto>('/api/products/search', {
+        method: 'POST',
         headers: requestHeaders,
-        params: {
+        body: {
           query: normalizedQuery.value,
+          searchType: requestedSearchType.value,
         },
       })
     },
     {
-      watch: [() => normalizedQuery.value],
+      watch: [() => normalizedQuery.value, () => requestedSearchType.value],
       immediate: hasMinimumLength.value,
     }
   )
@@ -242,6 +282,7 @@ interface SearchGroup {
   products: ProductDto[]
   popularAttributes: AttributeConfigDto[]
   verticalHomeUrl: string | null
+  searchModeLabel: string | null
 }
 
 const normalizeVerticalHomeUrl = (
@@ -276,6 +317,7 @@ const primaryGroups = computed(() => {
   return groups
     .map((group, index) => {
       const products = extractProducts(group.results)
+      const searchModeLabel = formatSearchModeLabel(group.searchMode)
       const verticalId = group.verticalId ?? null
       const vertical = verticalId
         ? (verticalById.value.get(verticalId) ?? null)
@@ -303,13 +345,17 @@ const primaryGroups = computed(() => {
         products,
         popularAttributes: vertical?.popularAttributes ?? [],
         verticalHomeUrl,
+        searchModeLabel,
       } satisfies SearchGroup | null
     })
     .filter((group): group is SearchGroup => Boolean(group))
 })
 
 const fallbackGroups = computed(() => {
-  const grouped = new Map<string | null, ProductDto[]>()
+  const grouped = new Map<
+    string | null,
+    { products: ProductDto[]; searchModeLabel: string | null }
+  >()
 
   for (const entry of data.value?.fallbackResults ?? []) {
     if (!entry?.product) {
@@ -319,15 +365,18 @@ const fallbackGroups = computed(() => {
     const verticalId = entry.product.base?.vertical ?? null
 
     if (!grouped.has(verticalId)) {
-      grouped.set(verticalId, [])
+      grouped.set(verticalId, {
+        products: [],
+        searchModeLabel: formatSearchModeLabel(entry.searchMode),
+      })
     }
 
-    grouped.get(verticalId)?.push(entry.product)
+    grouped.get(verticalId)?.products.push(entry.product)
   }
 
   return Array.from(grouped.entries())
-    .map(([verticalId, products], index) => {
-      if (!products.length) {
+    .map(([verticalId, groupData], index) => {
+      if (!groupData.products.length) {
         return null
       }
 
@@ -339,7 +388,7 @@ const fallbackGroups = computed(() => {
         (verticalId
           ? formatFallbackVerticalTitle(verticalId)
           : t('search.groups.unknownTitle'))
-      const countLabel = buildGroupCountLabel(products.length)
+      const countLabel = buildGroupCountLabel(groupData.products.length)
       const verticalHomeUrl = normalizeVerticalHomeUrl(
         vertical?.verticalHomeUrl
       )
@@ -348,9 +397,10 @@ const fallbackGroups = computed(() => {
         key: `fallback-${verticalId ?? index}`,
         title,
         countLabel,
-        products,
+        products: groupData.products,
         popularAttributes: vertical?.popularAttributes ?? [],
         verticalHomeUrl,
+        searchModeLabel: groupData.searchModeLabel,
       } satisfies SearchGroup | null
     })
     .filter((group): group is SearchGroup => Boolean(group))
@@ -381,6 +431,32 @@ const resultsSummaryLabel = computed(() =>
   })
 )
 
+const activeSearchMode = computed<SearchMode | null>(() => {
+  const primaryMode = data.value?.verticalGroups?.[0]?.searchMode ?? null
+  const fallbackMode = data.value?.fallbackResults?.[0]?.searchMode ?? null
+
+  return primaryMode ?? fallbackMode
+})
+
+const activeSearchModeLabel = computed(() =>
+  formatSearchModeLabel(activeSearchMode.value)
+)
+
+const nextSearchMode = computed(() => {
+  switch (activeSearchMode.value) {
+    case 'exact_vertical':
+      return 'global'
+    case 'global':
+      return 'semantic'
+    default:
+      return null
+  }
+})
+
+const nextSearchModeLabel = computed(() =>
+  formatSearchModeLabel(nextSearchMode.value)
+)
+
 const handleSearchSubmit = () => {
   const value = searchInput.value.trim()
 
@@ -394,6 +470,14 @@ const handleSearchSubmit = () => {
     path: route.path,
     query: value ? { q: value } : {},
   })
+}
+
+const handleNextSearchMode = () => {
+  if (!nextSearchMode.value) {
+    return
+  }
+
+  requestedSearchType.value = nextSearchMode.value
 }
 
 const handleClear = () => {
@@ -485,6 +569,14 @@ function formatFallbackVerticalTitle(verticalId: string): string {
     .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' ')
 }
+
+function formatSearchModeLabel(mode: SearchMode | string | null | undefined) {
+  if (!mode) {
+    return null
+  }
+
+  return t(`search.modes.${mode}`)
+}
 </script>
 
 <style scoped lang="sass">
@@ -544,6 +636,21 @@ function formatFallbackVerticalTitle(verticalId: string): string {
     margin: 0
     color: rgb(var(--v-theme-accent-supporting))
     font-weight: 500
+
+  &__mode-row
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
+
+    @media (min-width: 640px)
+      flex-direction: row
+      align-items: center
+      justify-content: space-between
+
+  &__mode
+    margin: 0
+    font-weight: 500
+    color: rgb(var(--v-theme-text-neutral-secondary))
 
   &__group-wrapper :deep(.search-result-group:first-of-type)
     padding-top: 0
@@ -620,6 +727,9 @@ function formatFallbackVerticalTitle(verticalId: string): string {
     flex-direction: column
     gap: 0.75rem
     margin-top: 1rem
+    width: 100%
+    max-width: 56rem
+    margin-inline: auto
 
     @media (min-width: 640px)
       flex-direction: row
@@ -654,6 +764,9 @@ function formatFallbackVerticalTitle(verticalId: string): string {
 
       &:focus-visible
         box-shadow: 0 0 0 3px rgba(var(--v-theme-hero-overlay-soft), 0.35)
+
+  &__submit-icon
+    border-radius: 50% !important
 
   &__helper
     margin: 0

@@ -287,6 +287,21 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ---
 
+### exposed-docs
+
+**Purpose**: Exposes embedded documentation and prompt resources for browsing.
+
+**Key Responsibilities**:
+- Index embedded `.md`, `.prompt`, and documentation assets from the classpath
+- Provide navigation trees, content retrieval, and search endpoints
+- Support configurable categories and optional authentication
+
+**Configuration**:
+- Configure resource categories and extensions via `exposed-docs.*`
+- Toggle public access and security with `exposed-docs.security.enabled`
+
+---
+
 ### remotefilecaching
 
 **Purpose**: Remote file fetching and caching service.
@@ -338,6 +353,17 @@ Each service has unique responsibilities and may have specific conventions beyon
 - Handle schema validation
 - Provide serialization utilities
 - Support versioned data formats
+
+---
+
+### embedding-djl
+
+**Purpose**: Shared DJL-based embedding starter.
+
+**Key Responsibilities**:
+- Provide reusable auto-configuration for text embeddings.
+- Centralise DJL model loading and health checks for downstream services.
+- Expose configuration properties for local vs remote models so applications fail fast when assets are missing.
 
 ---
 

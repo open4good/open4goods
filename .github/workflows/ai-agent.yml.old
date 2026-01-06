@@ -1,0 +1,333 @@
+name: 🤖 Multi‑LLM Agent (labels + comments)
+
+on:
+  issues:
+    types: [labeled]
+  pull_request:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      target_number:
+        description: "Numéro d'Issue/PR"
+        required: true
+        type: string
+      force_state:
+        description: "Force le state (UNDERSTANDING|PLANNING|READY_TO_CODE) - optionnel"
+        required: false
+        default: ""
+        type: string
+      force_provider:
+        description: "Force le provider (codex|claude|gemini) - optionnel"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ai-agent-queue
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout default branch (templates/config only)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 1
+
+      - name: Prep (route + context)
+        id: prep
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+
+            const cfg = JSON.parse(fs.readFileSync(".github/ai/agent.config.json", "utf8"));
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // -------- Resolve target number (Issue or PR) --------
+            let number = null;
+            if (context.eventName === "workflow_dispatch") {
+              number = Number(core.getInput("target_number", { required: true }));
+            } else if (context.payload.issue?.number) {
+              number = Number(context.payload.issue.number);
+            } else if (context.payload.pull_request?.number) {
+              number = Number(context.payload.pull_request.number);
+            }
+
+            if (!number || Number.isNaN(number)) {
+              core.setFailed("Could not resolve Issue/PR number.");
+              return;
+            }
+
+            // -------- Only maintainers (write/maintain/admin) --------
+            const actor = context.actor;
+            const perm = (await github.rest.repos.getCollaboratorPermissionLevel({ owner, repo, username: actor })).data.permission;
+            const allowed = new Set(["admin", "maintain", "write"]);
+            if (!allowed.has(perm)) {
+              core.info(`Ignoring event from non-maintainer: ${actor} (${perm})`);
+              core.setOutput("should_run", "false");
+              return;
+            }
+
+            // -------- Ignore bot comments to avoid loops --------
+            if (context.eventName === "issue_comment") {
+              const u = context.payload.comment?.user;
+              const login = u?.login || "";
+              if (login.endsWith("[bot]")) {
+                core.info(`Ignoring bot comment from ${login}`);
+                core.setOutput("should_run", "false");
+                return;
+              }
+              const body = String(context.payload.comment?.body || "");
+              const hasTrigger = (cfg.trigger_phrases || []).some(p => body.includes(p));
+              if (!hasTrigger) {
+                core.info("Comment doesn't contain trigger phrase; ignoring.");
+                core.setOutput("should_run", "false");
+                return;
+              }
+            }
+
+            // -------- Fetch Issue (covers PR too) --------
+            const issue = (await github.rest.issues.get({ owner, repo, issue_number: number })).data;
+
+            const labels = (issue.labels || [])
+              .map(l => (typeof l === "string" ? l : l.name))
+              .filter(Boolean)
+              .map(s => String(s));
+
+            const labelSetLower = new Set(labels.map(s => s.toLowerCase()));
+
+            // Must have agent:on
+            if (!labelSetLower.has(String(cfg.labels.agent_on).toLowerCase())) {
+              core.info("Missing agent:on label; nothing to do.");
+              core.setOutput("should_run", "false");
+              return;
+            }
+
+            // Avoid concurrent loops
+            if (labelSetLower.has(String(cfg.labels.working).toLowerCase())) {
+              core.info("Already working; skipping.");
+              core.setOutput("should_run", "false");
+              return;
+            }
+
+            // Provider from label or dispatch override
+            let provider = String(core.getInput("force_provider") || "").trim().toLowerCase();
+            if (!provider) {
+              const p = (cfg.provider_labels || []).find(x => labelSetLower.has(String(x).toLowerCase()));
+              provider = p || "";
+            }
+            if (!provider) {
+              core.setFailed("No provider label found (codex|claude|gemini).");
+              return;
+            }
+
+            // State from label or dispatch override
+            let state = String(core.getInput("force_state") || "").trim().toUpperCase();
+            if (!state) {
+              const entries = Object.entries(cfg.state_labels || {});
+              const found = entries.find(([k, v]) => labelSetLower.has(String(v).toLowerCase()));
+              state = found ? found[0] : "UNDERSTANDING";
+            }
+            if (!["UNDERSTANDING","PLANNING","READY_TO_CODE"].includes(state)) {
+              core.setFailed(`Invalid state: ${state}`);
+              return;
+            }
+
+            // Collect comments (Issue comments include PR discussion)
+            const commentsResp = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: number, per_page: 100 },
+              (resp) => resp.data
+            );
+
+            // Keep last N comments, truncate size
+            const maxComments = cfg.context?.max_comments ?? 30;
+            const maxCharsPer = cfg.context?.max_chars_per_comment ?? 2500;
+
+            const trimmed = commentsResp
+              .slice(-maxComments)
+              .map(c => ({
+                id: c.id,
+                user: c.user?.login || "unknown",
+                created_at: c.created_at,
+                body: String(c.body || "").slice(0, maxCharsPer),
+              }));
+
+            const maxBody = cfg.context?.max_body_chars ?? 12000;
+            const issueBody = String(issue.body || "").slice(0, maxBody);
+
+            const ctxObj = {
+              repo: { owner, repo },
+              number,
+              is_pr: Boolean(issue.pull_request),
+              title: issue.title || "",
+              body: issueBody,
+              labels,
+              url: issue.html_url,
+              author: issue.user?.login || "unknown",
+              comments: trimmed,
+              triggered_by: {
+                event: context.eventName,
+                actor,
+                at: new Date().toISOString(),
+                comment_id: context.payload.comment?.id || null,
+                comment_body: context.payload.comment?.body || null,
+              }
+            };
+
+            fs.writeFileSync("ai_context.json", JSON.stringify(ctxObj, null, 2));
+
+            core.setOutput("should_run", "true");
+            core.setOutput("number", String(number));
+            core.setOutput("provider", provider);
+            core.setOutput("state", state);
+            core.setOutput("context_file", "ai_context.json");
+            core.setOutput("schema_file", ".github/ai/schema/agent_contract.schema.json");
+            core.setOutput("template_file", `.github/ai/prompts/${state}.md`);
+            core.setOutput("working_label", cfg.labels.working);
+
+      - name: Add working label
+        if: steps.prep.outputs.should_run == 'true'
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner, repo = context.repo.repo;
+            const issue_number = Number("${{ steps.prep.outputs.number }}");
+            const label = "${{ steps.prep.outputs.working_label }}";
+            try { await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] }); }
+            catch (e) { core.info(`Could not add ${label}: ${e.message}`); }
+
+      - name: Run agent (provider API)
+        if: steps.prep.outputs.should_run == 'true'
+        id: agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          node scripts/ai/run_agent.mjs \
+            --config .github/ai/agent.config.json \
+            --provider "${{ steps.prep.outputs.provider }}" \
+            --state "${{ steps.prep.outputs.state }}" \
+            --template "${{ steps.prep.outputs.template_file }}" \
+            --schema "${{ steps.prep.outputs.schema_file }}" \
+            --context "${{ steps.prep.outputs.context_file }}" \
+            --out ai_result.json
+
+      - name: Apply result (comment + labels)
+        if: steps.prep.outputs.should_run == 'true'
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require("fs");
+            const cfg = JSON.parse(fs.readFileSync(".github/ai/agent.config.json","utf8"));
+            const owner = context.repo.owner, repo = context.repo.repo;
+            const issue_number = Number("${{ steps.prep.outputs.number }}");
+
+            const marker = cfg.comment_thread?.marker || "<!-- AI_MULTI_AGENT_THREAD v1 -->";
+            const title = cfg.comment_thread?.title || "🤖 Multi‑LLM Agent";
+
+            const resultRaw = fs.readFileSync("ai_result.json","utf8");
+            let result;
+            try { result = JSON.parse(resultRaw); }
+            catch (e) {
+              result = {
+                comment_markdown: `⚠️ Sortie agent invalide (JSON non parsable).\n\n\`\`\`\n${resultRaw.slice(0,4000)}\n\`\`\``,
+                labels_add: [cfg.labels.needs_human],
+                labels_remove: [],
+                next_state: "${{ steps.prep.outputs.state }}",
+                needs_human: true
+              };
+            }
+
+            // Minimal validation / normalization
+            const allowedStates = new Set(["UNDERSTANDING","PLANNING","READY_TO_CODE"]);
+            if (!allowedStates.has(result.next_state)) result.next_state = "${{ steps.prep.outputs.state }}";
+            if (typeof result.comment_markdown !== "string") result.comment_markdown = String(result.comment_markdown ?? "");
+            if (!Array.isArray(result.labels_add)) result.labels_add = [];
+            if (!Array.isArray(result.labels_remove)) result.labels_remove = [];
+            result.needs_human = Boolean(result.needs_human);
+
+            // Enforce allowlist on labels
+            const allowPrefixes = new Set(cfg.label_allowlist_prefixes || []);
+            const allowExact = new Set((cfg.label_allowlist_exact || []).map(s => String(s).toLowerCase()));
+
+            function okLabel(name) {
+              const s = String(name);
+              if (allowExact.has(s.toLowerCase())) return true;
+              for (const p of allowPrefixes) if (s.startsWith(p)) return true;
+              return false;
+            }
+
+            result.labels_add = result.labels_add.filter(okLabel);
+            result.labels_remove = result.labels_remove.filter(okLabel);
+
+            // needs_human label
+            if (result.needs_human && okLabel(cfg.labels.needs_human)) {
+              if (!result.labels_add.includes(cfg.labels.needs_human)) result.labels_add.push(cfg.labels.needs_human);
+            }
+
+            // Build the agent comment
+            const body = [
+              marker,
+              `## ${title}`,
+              `**Provider:** \`${{ steps.prep.outputs.provider }}\`  \n**State:** \`${{ steps.prep.outputs.state }}\` → \`${result.next_state}\``,
+              "",
+              result.comment_markdown || "_(empty)_",
+              "",
+              `> Triggered by @${context.actor} • ${new Date().toISOString()}`
+            ].join("\n");
+
+            // Upsert comment thread (single comment updated)
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+            const existing = comments.find(c => typeof c.body === "string" && c.body.includes(marker) && (c.user?.login || "").endsWith("[bot]"));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+            // Labels: update state machine deterministically
+            const current = (await github.rest.issues.get({ owner, repo, issue_number })).data;
+            const currentLabels = (current.labels || []).map(l => (typeof l === "string" ? l : l.name)).filter(Boolean).map(String);
+
+            const stateLabels = cfg.state_labels || {};
+            const desiredStateLabel = stateLabels[result.next_state];
+
+            const allStateLabels = new Set(Object.values(stateLabels).map(String));
+            const toRemove = currentLabels.filter(l => allStateLabels.has(l) && l !== desiredStateLabel);
+
+            // Merge label ops
+            const addSet = new Set([desiredStateLabel, ...result.labels_add].filter(Boolean));
+            const removeSet = new Set([...toRemove, ...result.labels_remove].filter(Boolean));
+
+            // Remove labels
+            for (const name of removeSet) {
+              try { await github.rest.issues.removeLabel({ owner, repo, issue_number, name }); } catch (_) {}
+            }
+
+            // Add labels
+            if (addSet.size) {
+              try { await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [...addSet] }); }
+              catch (e) { core.info(`AddLabels failed: ${e.message}`); }
+            }
+
+            // Remove working label at end
+            try { await github.rest.issues.removeLabel({ owner, repo, issue_number, name: cfg.labels.working }); } catch (_) {}
