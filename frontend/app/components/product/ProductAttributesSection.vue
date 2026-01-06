@@ -196,7 +196,8 @@
           <v-chip
             size="small"
             variant="tonal"
-            :color="item.isIndexed ? 'surface-primary-120' : 'surface-muted'"
+            :color="item.isIndexed ? 'primary' : 'error'"
+            class="product-attributes__audit-chip"
           >
             {{
               $t(
@@ -825,15 +826,21 @@ const auditRows = computed<AuditAttributeRow[]>(() => {
     // For indexed attributes, we don't usually show aims, but we could.
     // User focus is on MISSING attributes having aims.
 
-    const searchText = `${name} ${bestValue ?? ''}`.trim().toLowerCase()
+    const sources = normalizeSourcingSources(attribute?.sourcing?.sources)
+    const sourceNames = sources
+      .map(s => s.datasourceName)
+      .filter(Boolean)
+      .join(' ')
+    const searchText = `${name} ${bestValue ?? ''} ${sourceNames}`
+      .trim()
+      .toLowerCase()
 
     rows.push({
       key: `indexed-${normalizedKey}`,
       name,
       displayValue,
       bestValue: bestValue ?? null,
-      sourceCount: normalizeSourcingSources(attribute?.sourcing?.sources)
-        .length,
+      sourceCount: sources.length,
       sourcing: attribute?.sourcing ?? null,
       isIndexed: true,
       isMatched: true,
@@ -842,15 +849,36 @@ const auditRows = computed<AuditAttributeRow[]>(() => {
   })
 
   // 2. Add Unmapped Raw Attributes
-  const allRawAttributes = (
-    resolvedAttributes.value?.classifiedAttributes ?? []
-  )
+  const rawAttributesMap = new Map<string, ProductAttributeDto>()
+
+  // 2a. Include 'allAttributes' (new source of truth for full dump)
+  Object.values(
+    (resolvedAttributes.value?.allAttributes as Record<
+      string,
+      ProductAttributeDto
+    >) ?? {}
+  ).forEach(attr => {
+    if (attr.name) {
+      rawAttributesMap.set(attr.name, attr)
+    }
+  })
+
+  // 2b. Include 'classifiedAttributes' (legacy fallback / grouped view source)
+  ;(resolvedAttributes.value?.classifiedAttributes ?? [])
     .flatMap(group => [
       ...(group.attributes ?? []),
       ...(group.features ?? []),
       ...(group.unFeatures ?? []),
     ])
     .filter((attr): attr is ProductAttributeDto => Boolean(attr))
+    .forEach(attr => {
+      // Prioritize existing if name matches, or add if missing
+      if (attr.name && !rawAttributesMap.has(attr.name)) {
+        rawAttributesMap.set(attr.name, attr)
+      }
+    })
+
+  const allRawAttributes = Array.from(rawAttributesMap.values())
 
   allRawAttributes.forEach((attr, index) => {
     // Find matching config
@@ -875,8 +903,16 @@ const auditRows = computed<AuditAttributeRow[]>(() => {
       : []
     const aimsText = aims.length ? `(${aims.join(', ')})` : ''
 
+    const sources = normalizeSourcingSources(attr.sourcing?.sources)
+    const sourceNames = sources
+      .map(s => s.datasourceName)
+      .filter(Boolean)
+      .join(' ')
+
     const displayValue = aimsText ? `${rawValue} ${aimsText}` : rawValue
-    const searchText = `${name} ${rawValue} ${aimsText}`.trim().toLowerCase()
+    const searchText = `${name} ${rawValue} ${aimsText} ${sourceNames}`
+      .trim()
+      .toLowerCase()
 
     rows.push({
       key: `raw-${index}-${name}`,
@@ -917,15 +953,15 @@ const filteredAuditRows = computed(() => {
 })
 
 const auditRowClass = (item: AuditAttributeRow) => {
-  if (!item.isIndexed) {
-    return 'product-attributes__audit-row product-attributes__audit-row--unindexed'
+  if (item.isIndexed) {
+    return 'product-attributes__audit-row product-attributes__audit-row--indexed'
   }
 
   if (item.isMatched) {
     return 'product-attributes__audit-row product-attributes__audit-row--matched'
   }
 
-  return 'product-attributes__audit-row product-attributes__audit-row--indexed'
+  return 'product-attributes__audit-row product-attributes__audit-row--unindexed'
 }
 
 export interface DetailAttributeView {

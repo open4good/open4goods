@@ -558,7 +558,7 @@ public class ProductMappingService {
         List<ProductClassifiedAttributeGroupDto> classifiedAttributes = mapClassifiedAttributes(product, vConfig,
                 domainLanguage);
         if (attributes == null) {
-            return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), classifiedAttributes);
+            return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), classifiedAttributes, Collections.emptyMap());
         }
         Map<String, ProductIndexedAttributeDto> indexed;
         if (attributes.getIndexed() == null) {
@@ -576,7 +576,15 @@ public class ProductMappingService {
             attributes.getReferentielAttributes().forEach((key, value) -> referential.put(key.toString(), value));
         }
 
-        return new ProductAttributesDto(referential, indexed, classifiedAttributes);
+        Map<String, ProductAttributeDto> allAttributes;
+        if (attributes.getAll() == null) {
+            allAttributes = Collections.emptyMap();
+        } else {
+            allAttributes = new LinkedHashMap<>();
+            attributes.getAll().forEach((key, value) -> allAttributes.put(key, mapProductAttribute(value)));
+        }
+
+        return new ProductAttributesDto(referential, indexed, classifiedAttributes, allAttributes);
     }
 
     private List<ProductClassifiedAttributeGroupDto> mapClassifiedAttributes(Product product, VerticalConfig vConfig,

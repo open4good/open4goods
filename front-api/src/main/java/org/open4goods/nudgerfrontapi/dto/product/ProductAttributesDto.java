@@ -14,6 +14,8 @@ public record ProductAttributesDto(
         @Schema(description = "Indexed attributes keyed by their identifier")
         Map<String, ProductIndexedAttributeDto> indexedAttributes,
         @Schema(description = "Attributes classified using Icecat feature groups hierarchy")
-        List<ProductClassifiedAttributeGroupDto> classifiedAttributes
+        List<ProductClassifiedAttributeGroupDto> classifiedAttributes,
+        @Schema(description = "All raw attributes keyed by their identifier")
+        Map<String, ProductAttributeDto> allAttributes
 ) {
 }

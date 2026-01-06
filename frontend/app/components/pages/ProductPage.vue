@@ -1584,6 +1584,11 @@ const adminSections = computed<NavigableSection[]>(() => {
 
   return [
     {
+      id: sectionIds.attributes,
+      label: t('product.navigation.attributes'),
+      icon: 'mdi-format-list-bulleted',
+    },
+    {
       id: sectionIds.adminJson,
       label: t('product.navigation.adminPanel.items.productJson'),
       icon: 'mdi-code-json',
