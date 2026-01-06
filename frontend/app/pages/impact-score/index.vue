@@ -10,12 +10,14 @@
       />
       <ImpactScorePrinciples class="impact-score-page__section" />
       <ImpactScoreSummary class="impact-score-page__section" />
+      <ImpactScoreDetails class="impact-score-page__section" />
     </v-container>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import ImpactScoreDetails from '~/components/impact-score/ImpactScoreDetails.vue'
 import ImpactScoreExamples from '~/components/impact-score/ImpactScoreExamples.vue'
 import ImpactScoreHero from '~/components/impact-score/ImpactScoreHero.vue'
 import ImpactScoreMethodology from '~/components/impact-score/ImpactScoreMethodology.vue'

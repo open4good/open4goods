@@ -1268,7 +1268,7 @@
         "hero": {
             "eyebrow": "Impact Score",
             "title": "La boussole éco-responsable inspirée de l’Écoscore",
-            "subtitle": "Une grille de lecture simple pour comparer l’empreinte environnementale des produits et choisir en toute confiance.",
+            "subtitle": "évaluation de l'impact environnemental de vos produits",
             "definition": {
                 "title": "Une définition claire et accessible",
                 "description": "L’Impact Score traduit des données techniques en indicateurs compréhensibles, sans jargon.",
@@ -1276,6 +1276,46 @@
                     "scale": "Note de 0 à 5 : 5 signifie un impact exemplaire",
                     "data": "Appuyé sur des données vérifiées (fiches techniques, éco-organismes, études publiques)",
                     "update": "Mis à jour dès que de nouvelles informations sont publiées"
+                }
+            }
+        },
+        "details": {
+            "eyebrow": "Analyse approfondie",
+            "title": "L'Impact Score en détail",
+            "subtitle": "Une lecture transparente des critères, des pondérations et de la qualité des données.",
+            "cards": {
+                "weighting": {
+                    "title": "Une pondération de plusieurs critères",
+                    "description": "Notre éco-score est une note de 0 à 100. Elle résulte de la somme des scores par critère, adaptés à chaque typologie de produit.",
+                    "bullets": {
+                        "scale": "0 = très mauvais, 100 = formidable",
+                        "sum": "La note globale additionne les scores de chaque critère",
+                        "weights": "Les pondérations (0 à 1) sont définies par un système d’IA"
+                    }
+                },
+                "ai": {
+                    "title": "Une démarche IA, ouverte au débat",
+                    "description": "Nous sommes experts en données et en IA, pas en analyse du cycle de vie. Nous testons une approche alternative pour accélérer l’évaluation environnementale des produits électriques et électroniques.",
+                    "bullets": {
+                        "verticals": "Chaque catégorie dispose d’une page dédiée pour comprendre son Impact Score",
+                        "opensource": "Les configurations et coefficients sont disponibles en open-source",
+                        "discussion": "Proposez vos idées et ouvrez la discussion sur notre dépôt GitHub"
+                    }
+                },
+                "relativisation": {
+                    "title": "Principe de relativisation",
+                    "description": "Un indice de réparabilité à 7,7 n’est lisible que comparé aux autres produits. Nous attribuons 0 au produit le moins performant et 100 au meilleur pour faciliter la comparaison. L’Impact Score n’est pas relativisé : il reste une somme de scores pondérés, donc atteindre 100/100 est rare.",
+                    "bullets": {
+                        "ranking": "Un classement clair pour situer chaque produit dans sa catégorie"
+                    }
+                },
+                "dataQuality": {
+                    "title": "La qualité de la donnée, enjeu majeur",
+                    "description": "Quand une information manque, nous appliquons une valeur moyenne de la catégorie afin de ne ni pénaliser ni avantager un produit. Cette disponibilité des données influe ensuite sur le score via un malus dédié.",
+                    "bullets": {
+                        "average": "Score virtuel basé sur la moyenne de la catégorie",
+                        "malus": "Un malus reflète le manque d’information produit"
+                    }
                 }
             }
         },
