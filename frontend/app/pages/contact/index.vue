@@ -2,7 +2,7 @@
   <div class="contact-page">
     <PageHeader
       variant="hero-standard"
-      :title="t('contact.hero.title')"
+      :title="pageTitle"
       :subtitle="t('contact.hero.subtitle')"
       heading-level="h1"
       :heading-id="'contact-hero-heading'"
@@ -14,6 +14,7 @@
       container="xl"
     >
       <template #description>
+        <div v-if="!hasPrefill">
         <p class="mb-6">{{ t('contact.hero.description') }}</p>
         <ul class="contact-hero__highlights" role="list">
           <li
@@ -29,10 +30,12 @@
             <span class="contact-hero__highlight-text">{{ item.text }}</span>
           </li>
         </ul>
+        </div>
       </template>
 
       <template #media>
         <v-card
+          v-if="!hasPrefill"
           elevation="10"
           rounded="xl"
           color="primary"
@@ -84,6 +87,7 @@
     </PageHeader>
 
     <ContactDetailsSection
+      v-if="!hasPrefill"
       :eyebrow="t('contact.details.eyebrow')"
       :title="t('contact.details.title')"
       :subtitle="t('contact.details.subtitle')"
@@ -104,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FetchError } from 'ofetch'
 import type { ContactResponseDto } from '~~/shared/api-client'
@@ -128,7 +132,7 @@ definePageMeta({
   ssr: true,
 })
 
-const { t, locale, availableLocales } = useI18n()
+const { t, te, locale, availableLocales } = useI18n()
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const requestURL = useRequestURL()
@@ -142,6 +146,7 @@ const formError = ref<string | null>(null)
 
 const MAX_SUBJECT_LENGTH = 180
 const MAX_MESSAGE_LENGTH = 1200
+const MAX_TITLE_KEY_LENGTH = 160
 
 const normalizePrefillValue = (value: unknown, maxLength: number) => {
   if (typeof value !== 'string') {
@@ -162,6 +167,18 @@ const initialSubject = computed(() =>
 )
 const initialMessage = computed(() =>
   normalizePrefillValue(route.query.message, MAX_MESSAGE_LENGTH)
+)
+const prefillTitleKey = computed(() =>
+  normalizePrefillValue(route.query.titleKey, MAX_TITLE_KEY_LENGTH)
+)
+const titleOverride = ref<string | null>(null)
+const pageTitle = computed(() =>
+  titleOverride.value ? titleOverride.value : String(t('contact.hero.title'))
+)
+const hasPrefill = computed(() =>
+  Boolean(
+    initialSubject.value || initialMessage.value || prefillTitleKey.value
+  )
 )
 
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))
@@ -233,6 +250,33 @@ const contactDetailItems = computed<ContactDetailItem[]>(() => [
     ],
   },
 ])
+
+const applyTitleOverride = () => {
+  if (!prefillTitleKey.value) {
+    titleOverride.value = null
+    return
+  }
+  if (!te(prefillTitleKey.value)) {
+    titleOverride.value = null
+    return
+  }
+  titleOverride.value = String(t(prefillTitleKey.value))
+}
+
+onMounted(() => {
+  applyTitleOverride()
+})
+
+watch(
+  prefillTitleKey,
+  () => {
+    if (!import.meta.client) {
+      return
+    }
+    applyTitleOverride()
+  },
+  { immediate: false }
+)
 
 const canonicalUrl = computed(() =>
   new URL(
