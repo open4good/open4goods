@@ -1264,7 +1264,7 @@
         "hero": {
             "eyebrow": "Impact Score",
             "title": "An EcoScore-inspired compass for every purchase",
-            "subtitle": "A simple reading grid to compare environmental impact and buy with confidence.",
+            "subtitle": "Environmental impact assessment of your products",
             "definition": {
                 "title": "A clear, accessible definition",
                 "description": "Impact Score turns technical data into understandable indicators with no jargon.",
@@ -1272,6 +1272,46 @@
                     "scale": "Rating from 0 to 5: 5 means exemplary impact",
                     "data": "Built on verified data (spec sheets, eco-organisations, public studies)",
                     "update": "Updated as soon as new information is published"
+                }
+            }
+        },
+        "details": {
+            "eyebrow": "Deep dive",
+            "title": "Impact Score in detail",
+            "subtitle": "A transparent view of the criteria, weightings, and data quality behind the score.",
+            "cards": {
+                "weighting": {
+                    "title": "Weighted criteria combined",
+                    "description": "Our eco-score is a rating from 0 to 100. It sums the scores of each criterion, adapted to every product category.",
+                    "bullets": {
+                        "scale": "0 = very poor, 100 = outstanding",
+                        "sum": "The overall rating adds the score of each criterion",
+                        "weights": "Weightings (0 to 1) are defined by an AI system"
+                    }
+                },
+                "ai": {
+                    "title": "An AI-driven approach, open to debate",
+                    "description": "We are data and AI experts, not lifecycle assessment specialists. We test an alternative approach to scale environmental evaluation for electrical and electronic products.",
+                    "bullets": {
+                        "verticals": "Each category has its own page to explain its Impact Score",
+                        "opensource": "Configurations and coefficients are available open-source",
+                        "discussion": "Share your ideas and open a discussion on our GitHub repository"
+                    }
+                },
+                "relativisation": {
+                    "title": "Relative scoring principle",
+                    "description": "A repairability index of 7.7 only makes sense when compared to other products. We assign 0 to the lowest performer and 100 to the best to make comparisons easier. The Impact Score itself is not normalized: it remains a weighted sum, so 100/100 is rare.",
+                    "bullets": {
+                        "ranking": "A clear ranking to position each product within its category"
+                    }
+                },
+                "dataQuality": {
+                    "title": "Data quality matters most",
+                    "description": "When data is missing, we apply a category average so a product is neither penalized nor favored. This data availability is then reflected through a dedicated penalty in the final score.",
+                    "bullets": {
+                        "average": "Virtual score based on the category average",
+                        "malus": "A penalty reflects missing product information"
+                    }
                 }
             }
         },
