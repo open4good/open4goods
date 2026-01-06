@@ -142,6 +142,7 @@ public class SearchService {
     private static final String EXCLUDED_FIELD = "excluded";
     private static final String EXCLUDED_CAUSES_FIELD = FilterField.excludedCauses.fieldPath();
     private static final Set<String> BOOLEAN_AGGREGATION_FIELDS = Set.of();
+	private static final float MIN_SEMANTIC_SCORE = 0.9f;
 
     private final ProductRepository repository;
     private final VerticalsConfigService verticalsConfigService;
@@ -1231,7 +1232,8 @@ public class SearchService {
                 .withQuery(filterQuery)
                 .withKnnSearches(knnSearch)
                 .withPageable(PageRequest.of(0, knnLimit))
-                .withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+                .withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }))
+                .withMinScore(MIN_SEMANTIC_SCORE);
 
         try {
             return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
