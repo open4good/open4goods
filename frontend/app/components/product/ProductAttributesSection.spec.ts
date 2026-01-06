@@ -564,19 +564,25 @@ describe('ProductAttributesSection', () => {
     })
 
     const rows = wrapper.findAll('.v-data-table-row-stub')
-    expect(rows).toHaveLength(3)
+    // 3 indexed (Weight, Depth, Wireless) + 4 raw (Power, Height, Battery life, Noise level)
+    expect(rows).toHaveLength(7)
     expect(wrapper.text()).toContain('Attribute sourcing audit')
     expect(wrapper.text()).toContain('Weight')
-    expect(wrapper.text()).toContain('Color')
+    // Color is in config but not in data, so it should NOT be shown
+    expect(wrapper.text()).not.toContain('Color')
+    // Power is raw data, so it SHOULD be shown
+    expect(wrapper.text()).toContain('Power')
 
     const matchedRows = wrapper.findAll(
       '.product-attributes__audit-row--matched'
     )
-    expect(matchedRows.length).toBeGreaterThanOrEqual(1)
+    // 3 indexed attributes are considered matched
+    expect(matchedRows).toHaveLength(3)
 
     const unindexedRows = wrapper.findAll(
       '.product-attributes__audit-row--unindexed'
     )
-    expect(unindexedRows).toHaveLength(1)
+    // 4 raw attributes are unindexed
+    expect(unindexedRows).toHaveLength(4)
   })
 })

@@ -183,24 +183,27 @@ public class ProductCategory {
 	/**
 	 * Return all leafs from this node
 	 */
+	/**
+	 * Return all leafs from this node
+	 */
 	public List<ProductCategory> leafs(boolean havingVertical) {
-		List<ProductCategory> ret = new ArrayList<ProductCategory>();
+		List<ProductCategory> ret = new ArrayList<>();
+		collectLeafs(havingVertical, ret);
+		return ret;
+	}
 
+	private void collectLeafs(boolean havingVertical, List<ProductCategory> accumulator) {
 		for (ProductCategory c : children) {
-			ret.addAll(c.leafs(havingVertical));
+			c.collectLeafs(havingVertical, accumulator);
 		}
 
 		if (isLeaf()) {
 			if (getVertical() != null && havingVertical) {
-				ret.add(this);
-			} else if (!havingVertical){
-				ret.add(this);
+				accumulator.add(this);
+			} else if (!havingVertical) {
+				accumulator.add(this);
 			}
-
 		}
-
-		return ret;
-
 	}
 
 
@@ -208,18 +211,20 @@ public class ProductCategory {
 	 * Return all verticals defined from this google node
 	 */
 	public List<ProductCategory> verticals() {
-		List<ProductCategory> ret = new ArrayList<ProductCategory>();
+		List<ProductCategory> ret = new ArrayList<>();
+		collectVerticals(ret);
+		return ret;
 
+	}
+
+	private void collectVerticals(List<ProductCategory> accumulator) {
 		for (ProductCategory c : children) {
-			ret.addAll(c.verticals());
+			c.collectVerticals(accumulator);
 		}
 
 		if (vertical != null) {
-				ret.add(this);
+			accumulator.add(this);
 		}
-
-		return ret;
-
 	}
 
 

@@ -64,8 +64,6 @@ const VDataTableStub = defineComponent({
           h('div', { class: `row row-${item.rowType ?? 'unknown'}` }, [
             slots['item.label']?.({ item }),
             slots['item.attributeValue']?.({ item }),
-            slots['item.displayValue']?.({ item }),
-            slots['item.coefficient']?.({ item }),
             slots['item.lifecycle']?.({ item }),
           ])
         ) ?? []

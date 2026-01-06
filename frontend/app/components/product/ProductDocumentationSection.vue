@@ -612,6 +612,8 @@ const onPdfError = () => {
   padding: 0.75rem 1rem;
   border-radius: 18px;
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .product-docs__nav-arrow {

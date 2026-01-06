@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.constants.CacheConstants;
@@ -202,8 +203,11 @@ public class CategoriesController {
             return ResponseEntity.notFound().build();
         }
 
-        List<ProductDto> topNewProducts = resolveTopProducts(category, domainLanguage, CONDITION_NEW);
+        CompletableFuture<List<ProductDto>> topNewFuture = CompletableFuture.supplyAsync(
+                () -> resolveTopProducts(category, domainLanguage, CONDITION_NEW));
         List<ProductDto> topOccasionProducts = resolveTopProducts(category, domainLanguage, CONDITION_OCCASION);
+
+        List<ProductDto> topNewProducts = topNewFuture.join();
 
         CategoryNavigationDto body = categoryMappingService.toCategoryNavigationDto(category, domainLanguage, true,
                 topNewProducts,

@@ -1,6 +1,6 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
-import { computed, defineComponent, h } from 'vue'
+import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHero from './ProductHero.vue'
@@ -9,11 +9,6 @@ type CompareListBlockReason =
   | 'limit-reached'
   | 'vertical-mismatch'
   | 'missing-identifier'
-
-vi.mock('~/composables/useThemedAsset', () => ({
-  useHeroBackgroundAsset: () =>
-    computed(() => 'https://assets.example/hero.jpg'),
-}))
 
 vi.mock('~/stores/useProductCompareStore', () => {
   let isSelected = false
@@ -122,14 +117,7 @@ const stubs = {
         h('img', { class: 'nuxt-img-stub', src: props.src, alt: props.alt })
     },
   }),
-  ProductHeroBackground: defineComponent({
-    name: 'ProductHeroBackgroundStub',
-    props: { product: { type: Object, default: () => ({}) } },
-    setup() {
-      return () =>
-        h('div', { class: 'product-hero-background-stub' }, 'background')
-    },
-  }),
+
   'v-tooltip': defineComponent({
     name: 'VTooltipStub',
     props: { text: { type: String, default: '' } },
@@ -182,13 +170,12 @@ const baseProduct: ProductDto = {
   aiReview: { review: { mediumTitle: 'Next-gen Orbit X1' } },
 }
 
-const mountComponent = async (variant?: 'classic' | 'orbital') =>
+const mountComponent = async () =>
   mountSuspended(ProductHero, {
     props: {
       product: baseProduct,
       breadcrumbs: [{ title: 'Category' }],
       popularAttributes: [],
-      variant,
     },
     global: {
       plugins: [createI18nInstance()],
@@ -197,11 +184,9 @@ const mountComponent = async (variant?: 'classic' | 'orbital') =>
   })
 
 describe('ProductHero', () => {
-  it('renders the orbital variant with themed background and hero shells', async () => {
+  it('renders correctly', async () => {
     const wrapper = await mountComponent()
 
-    expect(wrapper.classes()).toContain('product-hero--orbital')
-    expect(wrapper.classes()).toContain('product-hero--has-background')
     expect(wrapper.get('.product-hero__title').text()).toContain(
       'Next-gen Orbit X1'
     )
@@ -210,20 +195,7 @@ describe('ProductHero', () => {
 
     expect(
       wrapper.findComponent({ name: 'ProductHeroBackgroundStub' }).exists()
-    ).toBe(true)
-
-    await wrapper.unmount()
-  })
-
-  it('renders the classic variant without orbital background helpers', async () => {
-    const wrapper = await mountComponent('classic')
-
-    expect(wrapper.classes()).toContain('product-hero--classic')
-    expect(wrapper.classes()).not.toContain('product-hero--has-background')
-    // Background component is still rendered in structure, but CSS class on parent is different
-    expect(
-      wrapper.findComponent({ name: 'ProductHeroBackgroundStub' }).exists()
-    ).toBe(true)
+    ).toBe(false)
 
     await wrapper.unmount()
   })

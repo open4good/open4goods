@@ -90,10 +90,7 @@
         role="img"
         tabindex="0"
       >
-        <div
-          v-if="badgeLayout === 'stacked'"
-          class="impact-score-badge__stack"
-        >
+        <div v-if="badgeLayout === 'stacked'" class="impact-score-badge__stack">
           <span class="impact-score-badge__value-main">
             {{ formattedBadgeValue }}
           </span>
@@ -195,11 +192,14 @@ const scoreOutOf20 = computed(() => {
 
 const formattedBadgeScore = computed(
   () =>
-    `${n(scoreOutOf20.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })} / 20`
+    `${n(scoreOutOf20.value, { maximumFractionDigits: 1, minimumFractionDigits: scoreOutOf20.value === 0 ? 0 : 1 })} / 20`
 )
 
 const formattedBadgeValue = computed(() =>
-  n(scoreOutOf20.value, { maximumFractionDigits: 1, minimumFractionDigits: 0 })
+  n(scoreOutOf20.value, {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: scoreOutOf20.value === 0 ? 0 : 1,
+  })
 )
 
 const outOf20Label = computed(() => t('components.impactScore.outOf20'))
@@ -247,7 +247,7 @@ const tooltipLabel = computed(() => {
     return t('components.impactScore.tooltipBadge', {
       value: n(scoreOutOf20.value, {
         maximumFractionDigits: 1,
-        minimumFractionDigits: 0,
+        minimumFractionDigits: scoreOutOf20.value === 0 ? 0 : 1,
       }),
     })
   }
@@ -255,7 +255,7 @@ const tooltipLabel = computed(() => {
     return t('components.impactScore.tooltip', {
       value: n(normalizedScore.value, {
         maximumFractionDigits: 1,
-        minimumFractionDigits: 0,
+        minimumFractionDigits: normalizedScore.value === 0 ? 0 : 1,
       }),
       max: length.value,
     })
@@ -264,7 +264,7 @@ const tooltipLabel = computed(() => {
   return t('components.impactScore.tooltipBadge', {
     value: n(scoreOutOf20.value, {
       maximumFractionDigits: 1,
-      minimumFractionDigits: 0,
+      minimumFractionDigits: scoreOutOf20.value === 0 ? 0 : 1,
     }),
   })
 })
@@ -382,7 +382,8 @@ const badgeVariant = computed(() => props.badgeVariant)
   line-height: 1;
 }
 
-.impact-score-badge--corner.impact-score-badge--stacked .impact-score-badge__stack {
+.impact-score-badge--corner.impact-score-badge--stacked
+  .impact-score-badge__stack {
   transform: rotate(-12deg);
 }
 

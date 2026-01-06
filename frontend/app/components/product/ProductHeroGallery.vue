@@ -1060,6 +1060,7 @@ onBeforeUnmount(() => {
 .product-gallery__stage-media,
 .product-hero__fallback {
   width: 100%;
+  max-width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
@@ -1217,6 +1218,7 @@ onBeforeUnmount(() => {
   position: relative;
   width: 0;
   height: 0;
+  overflow: hidden;
 }
 
 .product-gallery__lightbox :deep(.my-gallery) {

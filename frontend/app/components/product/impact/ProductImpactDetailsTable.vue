@@ -1,15 +1,13 @@
 <template>
+  <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
+    <ProductImpactRadarChart
+      class="impact-ecoscore__analysis-radar-chart"
+      :axes="radarAxes"
+      :series="chartSeries"
+      :product-name="productName"
+    />
+  </div>
 
-        <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
-        <ProductImpactRadarChart
-          class="impact-ecoscore__analysis-radar-chart"
-          :axes="radarAxes"
-          :series="chartSeries"
-          :product-name="productName"
-        />
-      </div>
-
-      
   <article class="impact-details">
     <h4 class="impact-details__title">
       {{ $t('product.impact.detailsTitle') }}
@@ -69,37 +67,7 @@
           <span v-else>{{ item.attributeValue }}</span>
         </span>
       </template>
-      <template #[`item.displayValue`]="{ item }">
-        <div
-          class="impact-details__value"
-          :class="{
-            'impact-details__cell--child': item.rowType === 'subscore',
-          }"
-        >
-          <ProductImpactSubscoreRating
-            v-if="item.displayValue != null"
-            :score="item.displayValue"
-            :max="5"
-            size="x-small"
-            :show-value="false"
-          />
-        </div>
-      </template>
-      <template #[`item.coefficient`]="{ item }">
-        <div
-          class="impact-details__coefficient"
-          :class="{
-            'impact-details__cell--child': item.rowType === 'subscore',
-          }"
-        >
-          <ImpactCoefficientBadge
-            v-if="item.coefficient != null"
-            :value="item.coefficient"
-            :tooltip-params="{ scoreName: item.label }"
-          />
-          <span v-else class="impact-details__coefficient-empty">—</span>
-        </div>
-      </template>
+
       <template #[`item.lifecycle`]="{ item }">
         <div
           class="impact-details__lifecycle"
@@ -131,9 +99,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
-import ProductImpactSubscoreRating from './ProductImpactSubscoreRating.vue'
 import type { ScoreView } from './impact-types'
 
 const props = defineProps<{
@@ -328,16 +294,7 @@ const headers = computed(() => [
     title: t('product.impact.tableHeaders.attributeValue'),
     sortable: false,
   },
-  {
-    key: 'displayValue',
-    title: t('product.impact.tableHeaders.scoreValue'),
-    sortable: false,
-  },
-  {
-    key: 'coefficient',
-    title: t('product.impact.tableHeaders.coefficient'),
-    sortable: false,
-  },
+
   {
     key: 'lifecycle',
     title: t('product.impact.tableHeaders.lifecycle'),
@@ -461,7 +418,6 @@ const toggleGroup = (groupId: string) => {
 }
 
 const isGroupExpanded = (groupId: string) => expandedGroups.value.has(groupId)
-
 </script>
 
 <style scoped>
@@ -470,6 +426,7 @@ const isGroupExpanded = (groupId: string) => expandedGroups.value.has(groupId)
   border-radius: 24px;
   padding: 1.5rem;
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.05);
+  overflow-x: auto;
 }
 
 .impact-details__title {

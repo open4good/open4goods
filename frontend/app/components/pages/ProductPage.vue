@@ -2004,7 +2004,7 @@ useHead(() => {
 
 @media (max-width: 1280px) {
   .product-page__layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .product-page__nav {

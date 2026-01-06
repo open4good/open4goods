@@ -62,11 +62,11 @@ describe('ImpactScore', () => {
     expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
     expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
     expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
-    expect(wrapper.text()).toContain('16 / 20') // (4/5)*20 = 16
+    expect(wrapper.text()).toContain('16.0 / 20') // (4/5)*20 = 16.0
 
     // Check tooltip text
     expect(wrapper.find('.v-tooltip-stub').attributes('data-text')).toBe(
-      'Score: 16 / 20'
+      'Score: 16.0 / 20'
     )
   })
 
@@ -95,7 +95,7 @@ describe('ImpactScore', () => {
     })
 
     // (2.5/5)*20 = 10
-    expect(wrapper.text()).toContain('10 / 20')
+    expect(wrapper.text()).toContain('10.0 / 20')
   })
 
   it('handles custom max correctly for badge score', () => {
@@ -108,7 +108,7 @@ describe('ImpactScore', () => {
     })
 
     // (75/100)*20 = 15
-    expect(wrapper.text()).toContain('15 / 20')
+    expect(wrapper.text()).toContain('15.0 / 20')
   })
 
   it('applies correct class based on size to the chip', () => {
@@ -137,7 +137,7 @@ describe('ImpactScore', () => {
     expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
     expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
     expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
-    expect(wrapper.text()).toContain('16 / 20')
+    expect(wrapper.text()).toContain('16.0 / 20')
   })
 
   it('supports vertical layout and toggleable elements', () => {
@@ -186,7 +186,7 @@ describe('ImpactScore', () => {
     const badge = wrapper.find('.impact-score-badge')
     expect(badge.classes()).toContain('impact-score-badge--stacked')
     expect(badge.classes()).toContain('impact-score-badge--corner')
-    expect(wrapper.text()).toContain('16')
+    expect(wrapper.text()).toContain('16.0')
     expect(wrapper.text()).toContain('/20')
   })
 })

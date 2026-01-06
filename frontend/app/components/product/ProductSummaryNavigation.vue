@@ -140,6 +140,7 @@ const onNavigate = (sectionId: string) => {
   padding: 0.75rem 1rem;
   box-shadow: none;
   width: 100%;
+  max-width: 100vw;
   border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
 }
 
@@ -154,10 +155,12 @@ const onNavigate = (sectionId: string) => {
 
 .product-summary-navigation--horizontal .product-summary-navigation__list {
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-start; /* Changed from space-between to allow scrolling start */
   gap: 0.75rem;
   overflow-x: auto;
   scrollbar-width: thin;
+  max-width: 100%; /* Ensure it fits within parent */
+  padding-bottom: 4px; /* Space for scrollbar */
 }
 
 .product-summary-navigation__item {

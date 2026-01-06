@@ -30,7 +30,7 @@
             <ImpactScore
               v-if="impactScore != null"
               :score="impactScore"
-              :max="20"
+              :max="scoreMax"
               size="small"
               mode="badge"
               badge-layout="stacked"
@@ -148,50 +148,54 @@
       </template>
 
       <template v-else>
-        <div class="product-tile-card__content product-tile-card__content--stacked">
+        <div
+          class="product-tile-card__content product-tile-card__content--stacked"
+        >
           <div class="product-tile-card__header">
             <div class="product-tile-card__header-top">
-              <h3 class="product-tile-card__title">
+              <h3 class="product-tile-card__title text-truncate">
                 {{ verticalTitle }}
               </h3>
-              <div
-                v-if="hasAttributes"
-                class="product-tile-card__attributes"
-                role="list"
-              >
-                <v-chip
-                  v-for="attribute in attributes"
-                  :key="attribute.key"
-                  class="product-tile-card__attribute"
-                  variant="tonal"
-                  size="small"
-                  color="surface-primary-080"
-                  role="listitem"
-                >
-                  <v-icon
-                    v-if="attribute.icon"
-                    :icon="attribute.icon"
-                    size="16"
-                    class="me-1"
-                  />
-                  <span class="product-tile-card__attribute-value">{{
-                    attribute.value
-                  }}</span>
-                </v-chip>
-              </div>
             </div>
-            <p class="product-tile-card__subtitle">
+            <div
+              v-if="hasAttributes"
+              class="product-tile-card__attributes"
+              role="list"
+            >
+              <v-chip
+                v-for="attribute in attributes"
+                :key="attribute.key"
+                class="product-tile-card__attribute"
+                variant="tonal"
+                size="x-small"
+                color="surface-primary-080"
+                role="listitem"
+              >
+                <v-icon
+                  v-if="attribute.icon"
+                  :icon="attribute.icon"
+                  size="14"
+                  class="me-1"
+                />
+                <span class="product-tile-card__attribute-value">{{
+                  attribute.value
+                }}</span>
+              </v-chip>
+            </div>
+            <p class="product-tile-card__subtitle text-truncate">
               {{ subtitle }}
             </p>
           </div>
 
-          <div class="product-tile-card__media product-tile-card__media--stacked">
+          <div
+            class="product-tile-card__media product-tile-card__media--stacked"
+          >
             <v-img
               :src="imageSrc"
               :alt="verticalTitle"
               aspect-ratio="4 / 3"
               class="product-tile-card__image"
-              cover
+              contain
             >
               <template #placeholder>
                 <v-skeleton-loader type="image" class="h-100" />
@@ -202,12 +206,13 @@
               <ImpactScore
                 v-if="impactScore != null"
                 :score="impactScore"
-                :max="20"
+                :max="scoreMax"
                 size="small"
                 mode="badge"
                 badge-layout="stacked"
                 badge-variant="corner"
               />
+
               <span v-else class="product-tile-card__corner-fallback">
                 {{ notRatedLabel }}
               </span>
@@ -239,7 +244,9 @@
             </div>
           </div>
 
-          <v-row class="product-tile-card__meta product-tile-card__meta--stacked">
+          <v-row
+            class="product-tile-card__meta product-tile-card__meta--stacked"
+          >
             <div class="product-tile-card__offers">
               <v-icon icon="mdi-store" size="16" class="me-1" />
               <span>{{ offersCountLabel }}</span>
@@ -308,6 +315,7 @@ const props = withDefaults(
     layout?: 'horizontal' | 'vertical'
     disabled?: boolean
     linkRel?: string
+    scoreMax?: number
   }>(),
   {
     attributes: () => [],
@@ -318,6 +326,7 @@ const props = withDefaults(
     layout: 'vertical',
     disabled: false,
     linkRel: undefined,
+    scoreMax: 5,
   }
 )
 
@@ -468,6 +477,10 @@ const toggleCompare = () => {
     line-height: 1.35;
     color: rgb(var(--v-theme-text-neutral-strong));
     font-weight: 700;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   &__subtitle {
@@ -475,6 +488,10 @@ const toggleCompare = () => {
     color: rgb(var(--v-theme-text-neutral-secondary));
     font-size: 0.9rem;
     line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   &__attributes {
@@ -569,7 +586,7 @@ const toggleCompare = () => {
   }
 
   &__meta--stacked {
-    margin-top: 0;
+    margin-top: auto;
   }
 
   &__media--stacked {
