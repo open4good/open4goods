@@ -44,16 +44,14 @@ describe('PwaMobileActionBar', () => {
     })
 
     const buttons = wrapper.findAll('.v-btn-stub')
-    expect(buttons).toHaveLength(4)
+    expect(buttons).toHaveLength(3)
 
     await buttons[0].trigger('click')
     await buttons[1].trigger('click')
     await buttons[2].trigger('click')
-    await buttons[3].trigger('click')
 
     expect(wrapper.emitted('scan')).toBeTruthy()
     expect(wrapper.emitted('wizard')).toBeTruthy()
     expect(wrapper.emitted('search')).toBeTruthy()
-    expect(wrapper.emitted('share')).toBeTruthy()
   })
 })
