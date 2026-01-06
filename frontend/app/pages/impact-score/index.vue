@@ -1,27 +1,13 @@
 <template>
   <div class="impact-score-page">
-<<<<<<< HEAD
     <ImpactScoreHero />
-=======
-    <PageHeader
-      variant="section-header"
-      :title="t('impactScorePage.hero.title')"
-      background="image"
-      background-image-asset-key="impactScoreBackground"
-      surface-variant="mesh"
-      layout="single-column"
-      container="xl"
-      content-align="center"
-      heading-level="h1"
-      schema-type="WebPage"
-      padding-y="clamp(5rem, 9vw, 7.5rem)"
-      heading-id="impact-score-hero-title"
-      aria-described-by="impact-score-hero-intro"
-    />
->>>>>>> upstream/main
 
     <v-container class="impact-score-page__sections py-12 py-md-16">
       <ImpactScoreExamples class="impact-score-page__section" />
+      <ImpactScoreMethodology
+        class="impact-score-page__section"
+        :verticals="verticals"
+      />
       <ImpactScorePrinciples class="impact-score-page__section" />
       <ImpactScoreSummary class="impact-score-page__section" />
     </v-container>
@@ -29,12 +15,26 @@
 </template>
 
 <script setup lang="ts">
+import type { VerticalConfigDto } from '~~/shared/api-client'
 import ImpactScoreExamples from '~/components/impact-score/ImpactScoreExamples.vue'
 import ImpactScoreHero from '~/components/impact-score/ImpactScoreHero.vue'
+import ImpactScoreMethodology from '~/components/impact-score/ImpactScoreMethodology.vue'
 import ImpactScorePrinciples from '~/components/impact-score/ImpactScorePrinciples.vue'
 import ImpactScoreSummary from '~/components/impact-score/ImpactScoreSummary.vue'
 
 const { t } = useI18n()
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+
+const { data: verticalsData } = await useAsyncData<VerticalConfigDto[]>(
+  'impact-score-verticals',
+  () =>
+    $fetch<VerticalConfigDto[]>('/api/categories', {
+      headers: requestHeaders,
+      params: { onlyEnabled: true },
+    })
+)
+
+const verticals = computed(() => verticalsData.value ?? [])
 
 useSeoMeta({
   title: t('impactScorePage.seo.title'),
