@@ -1336,8 +1336,9 @@
         },
         "examples": {
             "eyebrow": "Exemples de calcul",
-            "title": "Comment la note est calculée",
-            "subtitle": "Deux produits du quotidien pour illustrer l’Impact Score.",
+
+            "title": "Un \u00e9co-score lisible",
+            "subtitle": "Deux produits du quotidien pour illustrer l\u2019Impact Score.",
             "scoreHint": "Score sur 5",
             "television": {
                 "eyebrow": "Exemple 1",
