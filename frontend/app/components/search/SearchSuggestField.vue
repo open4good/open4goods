@@ -1,6 +1,7 @@
 <template>
   <div class="search-suggest-field__wrapper" v-bind="filteredAttrs">
     <v-autocomplete
+      v-if="isSuggestEnabled"
       v-model="selectedItem"
       :search="internalSearch"
       :items="suggestionItems"
@@ -176,6 +177,76 @@
         </div>
       </template>
     </v-autocomplete>
+
+    <v-text-field
+      v-else
+      v-model="internalSearch"
+      :label="label"
+      :placeholder="placeholder"
+      :aria-label="ariaLabel"
+      :elevation="getFieldElevation(isHovering)"
+      prepend-inner-icon="mdi-magnify"
+      variant="solo"
+      density="comfortable"
+      clearable
+      hide-details
+      :class="[
+        'search-suggest-field',
+        { 'search-suggest-field--active': isHovering || isFieldFocused },
+      ]"
+      @mouseenter="isHovering = true"
+      @mouseleave="isHovering = false"
+      @click:clear="handleClear"
+      @keydown.enter="handleEnterKey"
+      @blur="handleBlur"
+      @focus="handleFocus"
+    >
+      <template #append-inner>
+        <v-btn
+          v-if="shouldShowVoiceButton && isHydrated"
+          class="search-suggest-field__voice-button"
+          density="comfortable"
+          variant="text"
+          icon
+          :color="isVoiceListening ? 'primary' : undefined"
+          :title="
+            voiceError ||
+            (isVoiceListening
+              ? t('search.suggestions.voice.stopLabel')
+              : t('search.suggestions.voice.startLabel'))
+          "
+          :aria-label="
+            isVoiceListening
+              ? t('search.suggestions.voice.stopLabel')
+              : t('search.suggestions.voice.startLabel')
+          "
+          data-test="search-voice-button"
+          :disabled="!isVoiceSupported"
+          @click="toggleVoiceListening"
+        >
+          <v-icon
+            :icon="
+              isVoiceListening ? 'mdi-microphone' : 'mdi-microphone-outline'
+            "
+            size="20"
+            aria-hidden="true"
+          />
+        </v-btn>
+        <v-btn
+          v-if="shouldShowScannerButton"
+          class="search-suggest-field__scanner-button"
+          density="comfortable"
+          variant="text"
+          icon
+          :aria-label="t('search.suggestions.scanner.openLabel')"
+          data-test="search-scanner-button"
+          @click="openScannerDialog"
+        >
+          <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
+        </v-btn>
+        <slot v-if="$slots['append-inner']" name="append-inner" />
+      </template>
+    </v-text-field>
     <v-dialog
       v-model="isScannerDialogOpen"
       fullscreen

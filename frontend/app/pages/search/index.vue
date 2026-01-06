@@ -18,6 +18,7 @@
           :placeholder="t('search.form.placeholder')"
           :aria-label="t('search.form.ariaLabel')"
           :min-chars="MIN_QUERY_LENGTH"
+          :enable-suggest="false"
           :enable-voice="true"
           :voice-mobile="true"
           :voice-desktop="true"
@@ -197,10 +198,14 @@ const requestedSearchType = ref<
   'auto' | 'exact_vertical' | 'global' | 'semantic'
 >('auto')
 
-watch(routeQuery, value => {
-  searchInput.value = value
-  requestedSearchType.value = 'auto'
-})
+watch(
+  routeQuery,
+  value => {
+    searchInput.value = value
+    requestedSearchType.value = 'auto'
+  },
+  { immediate: true }
+)
 
 const normalizedQuery = computed(() => routeQuery.value.trim())
 const trimmedInput = computed(() => searchInput.value.trim())
@@ -722,6 +727,9 @@ function formatSearchModeLabel(mode: SearchMode | string | null | undefined) {
     flex-direction: column
     gap: 0.75rem
     margin-top: 1rem
+    width: 100%
+    max-width: 56rem
+    margin-inline: auto
 
     @media (min-width: 640px)
       flex-direction: row
