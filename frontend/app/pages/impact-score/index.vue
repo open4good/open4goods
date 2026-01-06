@@ -21,16 +21,14 @@
 >>>>>>> upstream/main
 
     <v-container class="impact-score-page__sections py-12 py-md-16">
-      <ImpactScoreCriteria class="impact-score-page__section" />
-      <ImpactScorePrinciples class="impact-score-page__section" />
       <ImpactScoreExamples class="impact-score-page__section" />
+      <ImpactScorePrinciples class="impact-score-page__section" />
       <ImpactScoreSummary class="impact-score-page__section" />
     </v-container>
   </div>
 </template>
 
 <script setup lang="ts">
-import ImpactScoreCriteria from '~/components/impact-score/ImpactScoreCriteria.vue'
 import ImpactScoreExamples from '~/components/impact-score/ImpactScoreExamples.vue'
 import ImpactScoreHero from '~/components/impact-score/ImpactScoreHero.vue'
 import ImpactScorePrinciples from '~/components/impact-score/ImpactScorePrinciples.vue'

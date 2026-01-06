@@ -1810,7 +1810,7 @@
         },
         "examples": {
             "eyebrow": "Calculation examples",
-            "title": "How the grade is built",
+            "title": "A readable eco-score",
             "subtitle": "Two everyday products to illustrate the Impact Score.",
             "scoreHint": "Score out of 5",
             "television": {
