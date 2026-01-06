@@ -36,16 +36,24 @@
           <p v-if="description" class="category-hero__description">
             {{ description }}
           </p>
-          <div
-            v-if="$slots['after-description']"
-            class="category-hero__after-description"
-          >
-            <slot name="after-description" />
-          </div>
+          <v-row dense class="category-hero__actions-row">
+            <v-col cols="12" md="auto">
+              <div
+                v-if="$slots['after-description']"
+                class="category-hero__after-description"
+              >
+                <slot name="after-description" />
+              </div>
+            </v-col>
 
-          <div v-if="$slots.actions" class="category-hero__actions">
-            <slot name="actions" />
-          </div>
+            <v-spacer />
+
+            <v-col cols="12" md="auto">
+              <div v-if="$slots.actions" class="category-hero__actions">
+                <slot name="actions" />
+              </div>
+            </v-col>
+          </v-row>
         </div>
       </div>
     </v-sheet>

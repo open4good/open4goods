@@ -225,7 +225,6 @@ const quickActions = computed(() => [
     title: t('pwa.landing.actions.scan.title'),
     description: t('pwa.landing.actions.scan.description'),
     onClick: () => (isScannerOpen.value = true),
-    badge: t('pwa.landing.actions.scan.badge'),
   },
   {
     key: 'wizard',

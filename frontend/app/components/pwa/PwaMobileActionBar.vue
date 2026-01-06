@@ -32,7 +32,7 @@
 import { computed } from 'vue'
 
 const emit = defineEmits<{
-  (event: 'scan' | 'wizard' | 'search' | 'share'): void
+  (event: 'scan' | 'wizard' | 'search'): void
 }>()
 
 const { t } = useI18n()
@@ -55,12 +55,6 @@ const actions = computed(() => [
     icon: 'mdi-magnify',
     label: t('pwa.landing.actions.search.title'),
     event: 'search' as const,
-  },
-  {
-    key: 'share',
-    icon: 'mdi-share-variant',
-    label: t('pwa.landing.actions.share.title'),
-    event: 'share' as const,
   },
 ])
 </script>
@@ -98,4 +92,15 @@ const actions = computed(() => [
 
   .pwa-action-bar__btn
     justify-content: center
+
+  @media (max-width: 380px)
+    .pwa-action-bar__label
+      display: none
+
+    .pwa-action-bar__btn
+      justify-content: center
+      padding-inline: 0
+
+    .pwa-action-bar__grid
+      grid-template-columns: repeat(3, 1fr)
 </style>

@@ -2380,7 +2380,7 @@
     },
     "nudge": {
       "fabAriaLabel": "Ouvrir l'assistant Nudger pour cette catégorie",
-      "fabLabel": "Besoin d'aide personnalisée ?"
+      "fabLabel": "🤘"
     },
     "price": {
       "condition": {
@@ -2715,15 +2715,15 @@
       },
       "actions": {
         "scan": {
-          "title": "Scanner un code-barres",
-          "description": "Utilise ta caméra pour obtenir instantanément impact et prix.",
+          "title": "Scanner",
+          "description": "Utilise ta caméra pour scanner un code-barres et obtenir instantanément impact et prix.",
           "helper": "Aligne le code-barres dans le cadre pour un décodage immédiat.",
           "loading": "Démarrage du scanner…",
           "error": "Scanner indisponible. Réessaie ou lance une recherche.",
           "badge": "Live"
         },
         "wizard": {
-          "title": "Laisse toi guider",
+          "title": "Assistant Nudger",
           "description": "Quelques questions pour des choix éco personnalisés.",
           "badge": "Nouveau"
         },
