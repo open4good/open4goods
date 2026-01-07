@@ -34,7 +34,7 @@ jobs:
               run: node scripts/lighthouse/process-lighthouse.mjs --input-dir .lighthouseci --output-dir lighthouse --history-file lighthouse/HISTORY.md --latest-dir lighthouse/latest --badges-dir lighthouse/badges
 
             - name: Commit Lighthouse reports
-              uses: stefanzweifel/git-auto-commit-action@v5
+              uses: stefanzweifel/git-auto-commit-action@v7
               with:
                   commit_message: "chore(lighthouse): update reports"
                   file_pattern: lighthouse/ README.md
