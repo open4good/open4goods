@@ -1,9 +1,8 @@
 {
   "index": {
   	"refresh_interval": "80s",
-  	"number_of_shards": "4",
-    "number_of_replicas": 0,  	
-  	"codec": "best_compression"
+  	"number_of_shards": "10",
+    "number_of_replicas": 0,
   },
   "analysis": {
     "analyzer": {
