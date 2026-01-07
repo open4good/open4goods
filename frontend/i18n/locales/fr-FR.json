@@ -1267,8 +1267,8 @@
         },
         "hero": {
             "eyebrow": "Impact Score",
-            "title": "La boussole éco-responsable inspirée de l’Écoscore",
-            "subtitle": "évaluation de l'impact environnemental de vos produits",
+            "title": "évaluation de l'impact environnemental de vos produits",
+            "subtitle": "La boussole éco-responsable inspirée de l’Écoscore",
             "definition": {
                 "title": "Une définition claire et accessible",
                 "description": "L’Impact Score traduit des données techniques en indicateurs compréhensibles, sans jargon.",
@@ -1451,8 +1451,8 @@
                 "title": "Comment est calculé l'Impact Score ?",
                 "verticalCarouselAria": "Parcourir le carrousel des catégories ecoscore",
                 "verticalCardAria": "Accéder à la catégorie {vertical}",
-                "verticalCta": "Découvrir l’impact détaillé",
-                "verticalCtaAria": "Découvrir l’impact détaillé de la catégorie {vertical}",
+                "verticalCta": "Explorer les produits",
+                "verticalCtaAria": "Explorer les produits de la catégorie {vertical}",
                 "verticalImageAlt": "Illustration de la catégorie {vertical}",
                 "verticalLabel": "Catégorie"
             },

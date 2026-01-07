@@ -38,9 +38,9 @@
                 vertical: item.label,
               })
             "
-            @click="navigateToCategory(item.categoryLink)"
-            @keydown.enter.prevent="navigateToCategory(item.categoryLink)"
-            @keydown.space.prevent="navigateToCategory(item.categoryLink)"
+            @click="navigateToEcoscore(item.ecoscoreLink)"
+            @keydown.enter.prevent="navigateToEcoscore(item.ecoscoreLink)"
+            @keydown.space.prevent="navigateToEcoscore(item.ecoscoreLink)"
           >
             <div class="impact-score-methodology__card-media">
               <v-img
@@ -51,7 +51,7 @@
                     vertical: item.label,
                   })
                 "
-                cover
+                contain
                 class="impact-score-methodology__card-image"
               />
               <div
@@ -164,7 +164,7 @@ const verticalCapsules = computed(() =>
     .sort((a, b) => a.order - b.order)
 )
 
-const navigateToCategory = (link: string) => {
+const navigateToEcoscore = (link: string) => {
   router.push(link)
 }
 </script>
