@@ -49,11 +49,11 @@ useSeoMeta({
 <style scoped>
 .impact-score-page {
   background: linear-gradient(
-      180deg,
-      rgba(var(--v-theme-hero-gradient-start), 0.12) 0%,
-      rgba(var(--v-theme-hero-gradient-end), 0.06) 22%,
-      rgb(var(--v-theme-surface-muted)) 22%
-    );
+    120deg,
+    rgba(var(--v-theme-hero-gradient-end), 0.85) 0%,
+    rgba(var(--v-theme-hero-gradient-start), 0.9) 55%,
+    rgba(var(--v-theme-hero-gradient-mid), 0.85) 100%
+  );
 }
 
 .impact-score-page__sections {
