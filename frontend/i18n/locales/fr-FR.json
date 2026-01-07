@@ -1379,7 +1379,6 @@
 
             "title": "Un \u00e9co-score lisible",
             "subtitle": "Deux produits du quotidien pour illustrer l\u2019Impact Score.",
-            "scoreHint": "Score sur 5",
             "television": {
                 "eyebrow": "Exemple 1",
                 "title": "Téléviseur 55'' à dalle LED",
@@ -1413,7 +1412,7 @@
                 "method": "Une méthode unique, inspirée de l’Écoscore et commune à toutes les catégories.",
                 "criteria": "5 critères pondérés pour comparer rapidement des produits similaires.",
                 "data": "Des données vérifiées, mises à jour et reliées à leurs sources.",
-                "usage": "Une note sur 5, lisible en un coup d’œil pour guider vos achats responsables."
+                "usage": "Une note sur 20, lisible en un coup d’œil pour guider vos achats responsables."
             }
         },
         "approach": {
