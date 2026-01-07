@@ -1263,8 +1263,8 @@
         },
         "hero": {
             "eyebrow": "Impact Score",
-            "title": "An EcoScore-inspired compass for every purchase",
-            "subtitle": "Environmental impact assessment of your products",
+            "title": "Environmental impact assessment of your products",
+            "subtitle": "An EcoScore-inspired compass for every purchase",
             "definition": {
                 "title": "A clear, accessible definition",
                 "description": "Impact Score turns technical data into understandable indicators with no jargon.",
@@ -1446,8 +1446,8 @@
                 "title": "How is the Impact Score calculated?",
                 "verticalCarouselAria": "Browse the ecoscore categories carousel",
                 "verticalCardAria": "Open the {vertical} category",
-                "verticalCta": "Explore the detailed impact",
-                "verticalCtaAria": "Explore the detailed impact for the {vertical} category",
+                "verticalCta": "Explore products",
+                "verticalCtaAria": "Explore products in the {vertical} category",
                 "verticalImageAlt": "Illustration for the {vertical} category",
                 "verticalLabel": "Category"
             },
