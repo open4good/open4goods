@@ -73,7 +73,7 @@
     "@nuxtjs/plausible": "^2.0.0",
     "@nuxtjs/robots": "^5.5.1",
     "@nuxtjs/seo": "^3.1.0",
-    "@nuxtjs/sitemap": "^7.4.3",
+    "@nuxtjs/sitemap": "^7.5.2",
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@openapitools/openapi-generator-cli": "^2.23.1",
     "@playwright/test": "^1.57.0",
@@ -127,7 +127,9 @@
     ]
   },
   "resolutions": {
-    "vue": "3.5.26"
+    "vue": "3.5.26",
+    "nuxt-site-config": "3.2.17",
+    "h3": "1.15.4"
   },
   "overrides": {
     "glob": "^13.0.0"
