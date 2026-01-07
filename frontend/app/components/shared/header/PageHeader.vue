@@ -25,6 +25,7 @@ import type { ThemeAssetKey } from '~/config/theme/assets'
 
 const props = withDefaults(defineProps<PageHeaderProps>(), {
   // Layout defaults
+  variant: 'hero-standard',
   layout: 'single-column',
   contentAlign: 'start',
   container: 'lg',

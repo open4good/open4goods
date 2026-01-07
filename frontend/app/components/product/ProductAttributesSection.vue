@@ -196,7 +196,8 @@
           <v-chip
             size="small"
             variant="tonal"
-            :color="item.isIndexed ? 'surface-primary-120' : 'surface-muted'"
+            :color="item.isIndexed ? 'primary' : 'error'"
+            class="product-attributes__audit-chip"
           >
             {{
               $t(
@@ -523,48 +524,14 @@ const normalizeSynonyms = (
   }, [])
 }
 
-const buildSynonymSourcing = (
-  synonyms: AttributeConfigDto['synonyms']
-): ProductAttributeSourceDto | null => {
-  const entries = normalizeSynonyms(synonyms)
-  if (!entries.length) {
-    return null
-  }
-
-  const sources = entries.map<ProductSourcedAttributeDto>(entry => ({
-    datasourceName: entry.sourceName,
-    value: entry.tokens.join(', '),
-  }))
-
-  return {
-    bestValue: undefined,
-    conflicts: false,
-    sources: new Set(sources),
-  }
-}
-
 const buildSynonymTokenSet = (
   synonyms: AttributeConfigDto['synonyms']
 ): string[] => {
-  const tokens = normalizeSynonyms(synonyms).flatMap(entry => entry.tokens)
-  return tokens.map(token => token.toLowerCase())
-}
-
-const matchesSynonyms = (
-  tokens: string[],
-  values: Array<string | null | undefined>
-): boolean => {
-  if (!tokens.length) {
-    return false
-  }
-
-  const normalizedValues = values
-    .filter((value): value is string => typeof value === 'string')
-    .map(value => value.toLowerCase())
-
-  return tokens.some(token =>
-    normalizedValues.some(value => value.includes(token))
+  const tokens = normalizeSynonyms(synonyms).reduce<string[]>(
+    (acc, entry) => acc.concat(entry.tokens),
+    []
   )
+  return tokens.map(token => token.toLowerCase())
 }
 
 interface IdentityDetail {
@@ -711,7 +678,11 @@ const formatMainAttributeValue = (
 }
 
 const mainAttributes = computed<MainAttributeRow[]>(() => {
-  const entries = resolvedAttributes.value?.indexedAttributes ?? {}
+  const entries =
+    (resolvedAttributes.value?.indexedAttributes as Record<
+      string,
+      ProductIndexedAttributeDto
+    >) ?? {}
 
   return Object.entries(entries).reduce<MainAttributeRow[]>(
     (accumulator, [key, attribute]) => {
@@ -776,70 +747,187 @@ const auditHeaders = computed(() => [
 
 const auditItemsPerPage = 10
 
+const checkAttributeMatchesConfig = (
+  attribute: ProductAttributeDto,
+  config: AttributeConfigDto
+): boolean => {
+  // Check exact name match
+  const rawName = attribute.name?.trim().toLowerCase()
+  if (!rawName) return false
+
+  if (config.key?.trim().toLowerCase() === rawName) return true
+  if (config.name?.trim().toLowerCase() === rawName) return true
+
+  // Check synonyms
+  const synonymTokens = buildSynonymTokenSet(config.synonyms)
+  if (synonymTokens.indexOf(rawName) !== -1) return true
+
+  // Check icecat IDs
+  if (attribute.icecatTaxonomyIds?.size && config.icecatFeaturesIds?.size) {
+    for (const id of attribute.icecatTaxonomyIds) {
+      if (config.icecatFeaturesIds.has(String(id))) {
+        // Double check name to be safe? Or trust ID?
+        // Trusting ID is better for specific feature matches
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+const getImplementationAims = (
+  config: AttributeConfigDto,
+  isIndexed: boolean
+): string[] => {
+  if (isIndexed) return []
+
+  const aims: string[] = []
+  if (config.participateInScores?.size) {
+    aims.push(t('product.attributes.audit.aims.score'))
+  }
+  if (config.participateInACV?.size) {
+    aims.push(t('product.attributes.audit.aims.acv'))
+  }
+  return aims
+}
+
 const auditRows = computed<AuditAttributeRow[]>(() => {
   const configs = props.attributeConfigs ?? []
-  const indexedAttributes = resolvedAttributes.value?.indexedAttributes ?? {}
-  const indexedMap = new Map<string, ProductIndexedAttributeDto>()
+  const indexedAttributes =
+    (resolvedAttributes.value?.indexedAttributes as Record<
+      string,
+      ProductIndexedAttributeDto
+    >) ?? {}
+  const rows: AuditAttributeRow[] = []
+  const usedConfigKeys = new Set<string>()
 
+  // 1. Add all Indexed Attributes
   Object.entries(indexedAttributes).forEach(([key, attribute]) => {
-    const normalized = normalizeAttributeKey(key)
-    if (normalized) {
-      indexedMap.set(normalized, attribute)
-    }
-  })
-
-  return configs.reduce<AuditAttributeRow[]>((accumulator, config) => {
-    const normalizedKey = normalizeAttributeKey(config.key)
-    if (!normalizedKey) {
-      return accumulator
+    const normalizedKey = normalizeAttributeKey(key)
+    if (normalizedKey) {
+      usedConfigKeys.add(normalizedKey)
     }
 
-    const indexedAttribute = indexedMap.get(normalizedKey)
-    const isIndexed = Boolean(indexedAttribute)
-    const bestValue = formatMainAttributeValue(indexedAttribute)
+    const config = configs.filter(
+      c => normalizeAttributeKey(c.key) === normalizedKey
+    )[0]
+    const name =
+      config?.name?.trim() ||
+      (typeof attribute?.name === 'string' ? attribute.name.trim() : '') ||
+      normalizedKey ||
+      t('product.attributes.audit.unknown')
+
+    const bestValue = formatMainAttributeValue(attribute)
     const displayValue =
-      resolveDisplayValue(indexedAttribute, bestValue) ??
+      resolveDisplayValue(attribute, bestValue) ??
       t('product.attributes.audit.noBestValue')
 
-    const name =
-      config.name?.trim() || indexedAttribute?.name?.trim() || normalizedKey
+    // For indexed attributes, we don't usually show aims, but we could.
+    // User focus is on MISSING attributes having aims.
 
-    const synonyms = config.synonyms
-    const synonymSources = buildSynonymSourcing(synonyms)
-    const sourcing = indexedAttribute?.sourcing ?? synonymSources ?? null
+    const sources = normalizeSourcingSources(attribute?.sourcing?.sources)
+    const sourceNames = sources
+      .map(s => s.datasourceName)
+      .filter(Boolean)
+      .join(' ')
+    const searchText = `${name} ${bestValue ?? ''} ${sourceNames}`
+      .trim()
+      .toLowerCase()
 
-    const sourceCount = normalizeSourcingSources(sourcing?.sources).length
-
-    const synonymTokens = buildSynonymTokenSet(synonyms)
-    const indexedSources = normalizeSourcingSources(
-      indexedAttribute?.sourcing?.sources
-    )
-    const matchValues = [
-      indexedAttribute?.name,
-      indexedAttribute?.value,
-      indexedAttribute?.sourcing?.bestValue,
-      ...indexedSources.map(source => source.name),
-      ...indexedSources.map(source => source.value),
-    ]
-
-    const isMatched = isIndexed && matchesSynonyms(synonymTokens, matchValues)
-
-    const searchText = `${name} ${bestValue ?? ''}`.trim().toLowerCase()
-
-    accumulator.push({
-      key: normalizedKey,
+    rows.push({
+      key: `indexed-${normalizedKey}`,
       name,
       displayValue,
       bestValue: bestValue ?? null,
-      sourceCount,
-      sourcing,
-      isIndexed,
-      isMatched,
+      sourceCount: sources.length,
+      sourcing: attribute?.sourcing ?? null,
+      isIndexed: true,
+      isMatched: true,
       searchText,
     })
+  })
 
-    return accumulator
-  }, [])
+  // 2. Add Unmapped Raw Attributes
+  const rawAttributesMap = new Map<string, ProductAttributeDto>()
+
+  // 2a. Include 'allAttributes' (new source of truth for full dump)
+  Object.values(
+    (resolvedAttributes.value?.allAttributes as Record<
+      string,
+      ProductAttributeDto
+    >) ?? {}
+  ).forEach(attr => {
+    if (attr.name) {
+      rawAttributesMap.set(attr.name, attr)
+    }
+  })
+
+  // 2b. Include 'classifiedAttributes' (legacy fallback / grouped view source)
+  ;(resolvedAttributes.value?.classifiedAttributes ?? [])
+    .flatMap(group => [
+      ...(group.attributes ?? []),
+      ...(group.features ?? []),
+      ...(group.unFeatures ?? []),
+    ])
+    .filter((attr): attr is ProductAttributeDto => Boolean(attr))
+    .forEach(attr => {
+      // Prioritize existing if name matches, or add if missing
+      if (attr.name && !rawAttributesMap.has(attr.name)) {
+        rawAttributesMap.set(attr.name, attr)
+      }
+    })
+
+  const allRawAttributes = Array.from(rawAttributesMap.values())
+
+  allRawAttributes.forEach((attr, index) => {
+    // Find matching config
+    const matchedConfig = configs.filter(config =>
+      checkAttributeMatchesConfig(attr, config)
+    )[0]
+
+    // If matched config matches an ALREADY indexed attribute, skip it (it's absorbed)
+    if (matchedConfig) {
+      const configKey = normalizeAttributeKey(matchedConfig.key)
+      if (configKey && usedConfigKeys.has(configKey)) {
+        return
+      }
+    }
+
+    // It is NOT indexed (or matched to a generic config that produced no index)
+    const name = attr.name?.trim() || t('product.attributes.audit.unknown')
+    const rawValue = attr.value?.trim() || ''
+
+    const aims = matchedConfig
+      ? getImplementationAims(matchedConfig, false)
+      : []
+    const aimsText = aims.length ? `(${aims.join(', ')})` : ''
+
+    const sources = normalizeSourcingSources(attr.sourcing?.sources)
+    const sourceNames = sources
+      .map(s => s.datasourceName)
+      .filter(Boolean)
+      .join(' ')
+
+    const displayValue = aimsText ? `${rawValue} ${aimsText}` : rawValue
+    const searchText = `${name} ${rawValue} ${aimsText} ${sourceNames}`
+      .trim()
+      .toLowerCase()
+
+    rows.push({
+      key: `raw-${index}-${name}`,
+      name,
+      displayValue,
+      bestValue: null,
+      sourceCount: 1, // It is its own source
+      sourcing: attr.sourcing ?? null,
+      isIndexed: false,
+      isMatched: Boolean(matchedConfig),
+      searchText,
+    })
+  })
+
+  return rows
 })
 
 const filteredAuditRows = computed(() => {
@@ -865,15 +953,15 @@ const filteredAuditRows = computed(() => {
 })
 
 const auditRowClass = (item: AuditAttributeRow) => {
-  if (!item.isIndexed) {
-    return 'product-attributes__audit-row product-attributes__audit-row--unindexed'
+  if (item.isIndexed) {
+    return 'product-attributes__audit-row product-attributes__audit-row--indexed'
   }
 
   if (item.isMatched) {
     return 'product-attributes__audit-row product-attributes__audit-row--matched'
   }
 
-  return 'product-attributes__audit-row product-attributes__audit-row--indexed'
+  return 'product-attributes__audit-row product-attributes__audit-row--unindexed'
 }
 
 export interface DetailAttributeView {
@@ -1027,6 +1115,8 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .product-attributes__header {

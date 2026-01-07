@@ -118,7 +118,7 @@ import {
   resolveAttributeRawValueByKey,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
-import { resolvePrimaryImpactScoreOn20 } from '~/utils/_product-scores'
+import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
@@ -205,7 +205,7 @@ const productLink = (product: ProductDto) =>
   product.fullSlug ?? product.slug ?? undefined
 
 const impactScoreValue = (product: ProductDto) =>
-  resolvePrimaryImpactScoreOn20(product)
+  resolvePrimaryImpactScore(product)
 
 const offersCountLabel = (product: ProductDto) =>
   formatOffersCount(product, translatePlural)
@@ -332,8 +332,7 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
   if (!entries.length) {
     const fallbackOffer = product.offers?.bestPrice
     const formatted =
-      formatOfferPrice(fallbackOffer, product) ??
-      formatBestPrice(product, t, n)
+      formatOfferPrice(fallbackOffer, product) ?? formatBestPrice(product, t, n)
 
     entries.push({
       key: 'best',
@@ -912,6 +911,8 @@ const retryFetch = () => {
   position: relative;
   display: flex;
   justify-content: center;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .product-alternatives__slide-group {

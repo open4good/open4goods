@@ -1,9 +1,5 @@
 <template>
-  <section class="product-hero" :class="heroClasses">
-    <div class="product-hero__background" aria-hidden="true">
-      <ProductHeroBackground :product="product" />
-    </div>
-
+  <section class="product-hero">
     <div class="product-hero__content">
       <header v-if="heroTitle" class="product-hero__heading">
         <h1 class="product-hero__title text-center">{{ heroTitle }}</h1>
@@ -25,7 +21,7 @@
             <ImpactScore
               v-if="impactScoreOn20 !== null"
               :score="impactScoreOn20"
-              :max="20"
+              :max="5"
               size="small"
               mode="badge"
               badge-layout="stacked"
@@ -180,7 +176,7 @@ import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
-import { resolvePrimaryImpactScoreOn20 } from '~/utils/_product-scores'
+import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { humanizeSlug } from '~/utils/_product-title'
 
 import type {
@@ -197,9 +193,6 @@ export interface ProductHeroBreadcrumb {
 const ProductHeroGallery = defineAsyncComponent(
   () => import('~/components/product/ProductHeroGallery.vue')
 )
-const ProductHeroBackground = defineAsyncComponent(
-  () => import('~/components/product/ProductHeroBackground.vue')
-)
 
 const props = defineProps({
   product: {
@@ -213,10 +206,6 @@ const props = defineProps({
   popularAttributes: {
     type: Array as PropType<AttributeConfigDto[]>,
     default: () => [],
-  },
-  variant: {
-    type: String as PropType<'classic' | 'orbital'>,
-    default: 'orbital',
   },
 })
 
@@ -232,9 +221,7 @@ const fallbackTitle = computed(() => {
   const slug = normalizeString(props.product.slug)
   const gtin = normalizeString(props.product.gtin?.toString())
   const normalizedSlug = slug ? humanizeSlug(slug, locale.value) : ''
-  const gtinLabel = gtin
-    ? t('product.meta.gtinFallback', { gtin })
-    : ''
+  const gtinLabel = gtin ? t('product.meta.gtinFallback', { gtin }) : ''
 
   return medium || identity || base || normalizedSlug || gtinLabel || ''
 })
@@ -535,18 +522,7 @@ const gtinCountry = computed(() => {
   }
 })
 
-const impactScoreOn20 = computed(() =>
-  resolvePrimaryImpactScoreOn20(props.product)
-)
-
-const heroVariant = computed(() =>
-  props.variant === 'classic' ? 'classic' : 'orbital'
-)
-
-const heroClasses = computed(() => [
-  `product-hero--${heroVariant.value}`,
-  { 'product-hero--has-background': heroVariant.value === 'orbital' },
-])
+const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 </script>
 
 <style scoped>
@@ -555,22 +531,7 @@ const heroClasses = computed(() => [
   overflow: hidden;
   padding: clamp(1.5rem, 4vw, 3rem);
   border-radius: 32px;
-  background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgba(var(--v-theme-hero-gradient-start), 0.12),
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 90% 10%,
-      rgba(var(--v-theme-hero-gradient-end), 0.08),
-      transparent 40%
-    ),
-    linear-gradient(
-      140deg,
-      rgba(var(--v-theme-surface-ice-050), 0.82),
-      rgba(var(--v-theme-surface-glass), 0.94)
-    );
+  background: white;
   box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
   isolation: isolate;
 }
@@ -712,6 +673,13 @@ const heroClasses = computed(() => [
   align-items: stretch;
 }
 
+@media (max-width: 960px) {
+  .product-hero__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}
+
 .product-hero__panel {
   position: relative;
   height: 100%;
@@ -725,6 +693,9 @@ const heroClasses = computed(() => [
 
 .product-hero__panel--gallery {
   background: rgba(var(--v-theme-surface-glass), 0.7);
+  overflow: hidden; /* Force clip children */
+  display: flex;
+  flex-direction: column;
 }
 
 .product-hero__panel--details {

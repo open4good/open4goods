@@ -93,6 +93,7 @@ onMounted(async () => {
 </script>
 
 <template>
+  <!-- eslint-disable-next-line vue/no-v-html -->
   <div ref="container" class="home-parallax-visual" v-html="svgContent"></div>
 </template>
 

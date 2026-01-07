@@ -41,7 +41,15 @@ const VTableStub = defineComponent({
 
 const VDataTableStub = defineComponent({
   name: 'VDataTableStub',
-  props: ['headers', 'items', 'itemsPerPage', 'itemClass', 'density', 'class'],
+  props: [
+    'headers',
+    'items',
+    'itemsPerPage',
+    'itemClass',
+    'density',
+    'class',
+    'rowProps',
+  ],
   setup(props, { slots }) {
     return () =>
       h(
@@ -49,9 +57,12 @@ const VDataTableStub = defineComponent({
         { class: 'v-data-table-stub' },
         ((props.items as Array<Record<string, unknown>>) ?? []).map(item => {
           const rowClass =
-            typeof props.itemClass === 'function'
-              ? props.itemClass(item)
-              : props.itemClass
+            (typeof props.itemClass === 'function'
+              ? props.itemClass(item) // Vuetify 2 legacy / custom prop in stub
+              : props.itemClass) ||
+            (typeof props.rowProps === 'function'
+              ? props.rowProps(item)
+              : props.rowProps)
 
           return h('div', { class: ['v-data-table-row-stub', rowClass] }, [
             slots['item.attribute']?.({ item }),
@@ -564,19 +575,100 @@ describe('ProductAttributesSection', () => {
     })
 
     const rows = wrapper.findAll('.v-data-table-row-stub')
-    expect(rows).toHaveLength(3)
+    // 3 indexed (Weight, Depth, Wireless) + 4 raw (Power, Height, Battery life, Noise level)
+    expect(rows).toHaveLength(7)
     expect(wrapper.text()).toContain('Attribute sourcing audit')
     expect(wrapper.text()).toContain('Weight')
-    expect(wrapper.text()).toContain('Color')
+    // Color is in config but not in data, so it should NOT be shown
+    expect(wrapper.text()).not.toContain('Color')
+    // Power is raw data, so it SHOULD be shown
+    expect(wrapper.text()).toContain('Power')
 
-    const matchedRows = wrapper.findAll(
-      '.product-attributes__audit-row--matched'
+    const indexedRows = wrapper.findAll(
+      '.product-attributes__audit-row--indexed'
     )
-    expect(matchedRows.length).toBeGreaterThanOrEqual(1)
+    // 3 indexed attributes are now styled as indexed
+    expect(indexedRows).toHaveLength(3)
 
     const unindexedRows = wrapper.findAll(
       '.product-attributes__audit-row--unindexed'
     )
-    expect(unindexedRows).toHaveLength(1)
+    // 4 raw attributes are unindexed
+    expect(unindexedRows).toHaveLength(4)
+  })
+
+  it('filters audit table by data source name', async () => {
+    const wrapper = await mountComponent(buildProduct(), {
+      isLoggedIn: true,
+      attributeConfigs: [],
+    })
+
+    const input = wrapper.find('input.v-text-field-stub__input')
+    await input.setValue('datasource-a')
+    await flushPromises()
+
+    // Should verify that rows containing 'datasource-a' are present
+    // Weight (indexed) has datasource-a
+    // Depth (indexed) has datasource-a
+    // Power (raw) has datasource-a
+    // Wireless (indexed) has NO sources (set empty)
+    // Height (raw) has NO sources
+    // So expected: Weight, Depth, Power.
+    // We must restrict check to the audit table rows, because 'Wireless' is also a Main Attribute
+    // and thus rendered elsewhere in the component.
+    const auditRows = wrapper.findAll('.product-attributes__audit-row')
+    const auditText = auditRows.map(r => r.text()).join(' ')
+
+    expect(auditText).toContain('Weight')
+    expect(auditText).toContain('Depth')
+    expect(auditText).toContain('Power')
+    expect(auditText).not.toContain('Wireless')
+    expect(auditText).not.toContain('Height')
+  })
+
+  it('applies correct styling classes to indexed rows', async () => {
+    const wrapper = await mountComponent(buildProduct(), {
+      isLoggedIn: true,
+      attributeConfigs: [],
+    })
+
+    // Indexed rows should have 'product-attributes__audit-row--indexed'
+    const indexedRows = wrapper.findAll(
+      '.product-attributes__audit-row--indexed'
+    )
+    expect(indexedRows.length).toBeGreaterThan(0)
+
+    // And they should NOT have '--matched' or '--unindexed'
+    // Note: The previous logic might have assigned 'matched' to indexed rows if matched?
+    // But our new logic strictly assigns 'indexed' first.
+    // 'Weight' is indexed. Let's find the row for Weight.
+    // In stub, we can't easily find specifically "the row with Weight" by class,
+    // but we can assume if we have indexed attributes, we should have the class.
+    expect(indexedRows.length).toBe(3) // Weight, Depth, Wireless
+  })
+
+  it('renders attributes from allAttributes in audit table', async () => {
+    const product = buildProduct()
+    // Add an attribute that is ONLY in allAttributes, not in classifiedAttributes
+    product.attributes!.allAttributes = {
+      'only-in-all': {
+        name: 'OnlyInAll',
+        value: '123',
+        icecatTaxonomyIds: new Set(),
+        sourcing: {
+          sources: [],
+        },
+      },
+    }
+
+    const wrapper = await mountComponent(product, {
+      isLoggedIn: true,
+      attributeConfigs: [],
+    })
+
+    const auditRows = wrapper.findAll('.product-attributes__audit-row')
+    const auditText = auditRows.map(r => r.text()).join(' ')
+
+    expect(auditText).toContain('OnlyInAll')
   })
 })

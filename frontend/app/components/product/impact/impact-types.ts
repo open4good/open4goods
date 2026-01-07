@@ -38,6 +38,7 @@ export type ScoreView = {
   aggregates?: Record<string, number> | null
   betterIs?: 'GREATER' | 'LOWER' | null
   importanceDescription?: string | null
+  virtual?: boolean
 }
 
 export type RankingInfo = {

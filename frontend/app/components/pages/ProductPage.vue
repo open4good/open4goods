@@ -1584,6 +1584,11 @@ const adminSections = computed<NavigableSection[]>(() => {
 
   return [
     {
+      id: sectionIds.attributes,
+      label: t('product.navigation.attributes'),
+      icon: 'mdi-format-list-bulleted',
+    },
+    {
       id: sectionIds.adminJson,
       label: t('product.navigation.adminPanel.items.productJson'),
       icon: 'mdi-code-json',
@@ -2004,7 +2009,7 @@ useHead(() => {
 
 @media (max-width: 1280px) {
   .product-page__layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .product-page__nav {

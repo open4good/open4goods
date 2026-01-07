@@ -10,14 +10,36 @@
           {{ score.description }}
         </p>
       </div>
-      <NuxtLink
-        :to="methodologyHref"
-        class="impact-ecoscore__cta"
-        :aria-label="$t('product.impact.methodologyLinkAria')"
-      >
-        <span>{{ $t('product.impact.methodologyLink') }}</span>
-        <v-icon icon="mdi-arrow-top-right" size="18" />
-      </NuxtLink>
+
+      <div class="impact-ecoscore__header-actions">
+        <v-chip-group v-model="selectedLifecycle" selected-class="text-primary">
+          <v-chip
+            v-for="stage in availableLifecycles"
+            :key="stage"
+            :value="stage"
+            filter
+            variant="outlined"
+          >
+            {{ lifecycleLabels[stage] ?? stage }}
+          </v-chip>
+        </v-chip-group>
+
+        <v-checkbox
+          v-model="showVirtualScores"
+          :label="$t('product.impact.showVirtualScores')"
+          hide-details
+          density="compact"
+        />
+
+        <NuxtLink
+          :to="methodologyHref"
+          class="impact-ecoscore__cta"
+          :aria-label="$t('product.impact.methodologyLinkAria')"
+        >
+          <span>{{ $t('product.impact.methodologyLink') }}</span>
+          <v-icon icon="mdi-arrow-top-right" size="18" />
+        </NuxtLink>
+      </div>
     </header>
 
     <div class="impact-ecoscore__score">
@@ -31,7 +53,7 @@
         :class="{
           'impact-ecoscore__analysis-details--full': !shouldDisplayRadar,
         }"
-        :scores="detailScores"
+        :scores="filteredDetailScores"
       />
     </div>
 
@@ -132,8 +154,10 @@ const props = defineProps<{
   verticalTitle?: string
 }>()
 
-const { locale } = useI18n()
+const { locale, t: $t } = useI18n()
 const isSubscoreExpanded = ref(false)
+const selectedLifecycle = ref<string | null>(null)
+const showVirtualScores = ref(false)
 
 const detailScores = computed(() => props.detailScores ?? [])
 const radarAxes = computed(() => props.radarAxes ?? [])
@@ -145,6 +169,31 @@ const productImage = computed(() => props.productImage ?? '')
 const verticalTitle = computed(() => props.verticalTitle ?? '')
 const secondaryScores = computed(() => props.secondaryScores ?? [])
 const loading = computed(() => props.loading ?? false)
+
+const availableLifecycles = computed(() => {
+  const allStages = detailScores.value.flatMap(
+    score => score.participateInACV ?? []
+  )
+  return Array.from(new Set(allStages)).sort()
+})
+
+const filteredDetailScores = computed(() => {
+  return detailScores.value.filter(score => {
+    // Lifecycle filter
+    if (selectedLifecycle.value) {
+      if (!score.participateInACV?.includes(selectedLifecycle.value)) {
+        return false
+      }
+    }
+
+    // Virtual score filter (hide virtual if toggle is off)
+    if (!showVirtualScores.value && score.virtual) {
+      return false
+    }
+
+    return true
+  })
+})
 const shouldDisplayRadar = computed(() =>
   Boolean(
     props.showRadar &&
@@ -198,6 +247,19 @@ const methodologyHref = computed(() => {
   }
 
   return resolveLocalizedRoutePath('impact-score', locale.value)
+})
+
+const lifecycleLabels = computed<Record<string, string>>(() => ({
+  EXTRACTION: $t('product.impact.lifecycle.EXTRACTION'),
+  MANUFACTURING: $t('product.impact.lifecycle.MANUFACTURING'),
+  TRANSPORTATION: $t('product.impact.lifecycle.TRANSPORTATION'),
+  USE: $t('product.impact.lifecycle.USE'),
+  END_OF_LIFE: $t('product.impact.lifecycle.END_OF_LIFE'),
+}))
+
+defineExpose({
+  selectedLifecycle,
+  showVirtualScores,
 })
 </script>
 

@@ -16,8 +16,12 @@ const i18n = createI18n({
       category: {
         products: {
           compare: {
-            added: 'Added',
-            buttonLabel: 'Compare',
+            addToList: 'Add to compare',
+            removeFromList: 'Remove from compare',
+            removeSingle: 'Remove {name}',
+            limitReached: 'Limit reached',
+            differentCategory: 'Different category',
+            missingIdentifier: 'Missing identifier',
           },
         },
       },
@@ -71,7 +75,9 @@ const createWrapper = (overrides: Partial<ProductDto> = {}) => {
         VSkeletonLoader: true,
         VChip: true,
         VIcon: true,
-        VBtn: true,
+        VTooltip: {
+          template: '<div><slot name="activator" :props="{}" /></div>',
+        },
         ImpactScore: true,
       },
     },
@@ -85,10 +91,10 @@ describe('ProductTileCard', () => {
   })
 
   it('builds the header title from the best available name', () => {
-    const wrapper = createWrapper()
+    const wrapper = createWrapper({ names: { prettyName: 'Pretty Z' } })
 
     expect(wrapper.find('.product-tile-card__title').text()).toBe(
-      'Acme Model Z'
+      'Pretty Z'
     )
     expect(wrapper.find('.product-tile-card__subtitle').text()).toBe('Model Z')
   })
@@ -106,7 +112,7 @@ describe('ProductTileCard', () => {
 
     expect(store.hasProduct(wrapper.props('product'))).toBe(false)
 
-    await wrapper.find('[data-test="product-tile-compare"]').trigger('click')
+    await wrapper.find('[data-test="category-product-compare"]').trigger('click')
 
     expect(store.hasProduct(wrapper.props('product'))).toBe(true)
   })

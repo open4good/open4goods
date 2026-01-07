@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ProductAttributeDto } from './ProductAttributeDto';
+import {
+    ProductAttributeDtoFromJSON,
+    ProductAttributeDtoFromJSONTyped,
+    ProductAttributeDtoToJSON,
+    ProductAttributeDtoToJSONTyped,
+} from './ProductAttributeDto';
 import type { ProductClassifiedAttributeGroupDto } from './ProductClassifiedAttributeGroupDto';
 import {
     ProductClassifiedAttributeGroupDtoFromJSON,
@@ -52,6 +59,12 @@ export interface ProductAttributesDto {
      * @memberof ProductAttributesDto
      */
     classifiedAttributes?: Array<ProductClassifiedAttributeGroupDto>;
+    /**
+     * All raw attributes keyed by their identifier
+     * @type {{ [key: string]: ProductAttributeDto; }}
+     * @memberof ProductAttributesDto
+     */
+    allAttributes?: { [key: string]: ProductAttributeDto; };
 }
 
 /**
@@ -74,6 +87,7 @@ export function ProductAttributesDtoFromJSONTyped(json: any, ignoreDiscriminator
         'referentialAttributes': json['referentialAttributes'] == null ? undefined : json['referentialAttributes'],
         'indexedAttributes': json['indexedAttributes'] == null ? undefined : (mapValues(json['indexedAttributes'], ProductIndexedAttributeDtoFromJSON)),
         'classifiedAttributes': json['classifiedAttributes'] == null ? undefined : ((json['classifiedAttributes'] as Array<any>).map(ProductClassifiedAttributeGroupDtoFromJSON)),
+        'allAttributes': json['allAttributes'] == null ? undefined : (mapValues(json['allAttributes'], ProductAttributeDtoFromJSON)),
     };
 }
 
@@ -91,6 +105,7 @@ export function ProductAttributesDtoToJSONTyped(value?: ProductAttributesDto | n
         'referentialAttributes': value['referentialAttributes'],
         'indexedAttributes': value['indexedAttributes'] == null ? undefined : (mapValues(value['indexedAttributes'], ProductIndexedAttributeDtoToJSON)),
         'classifiedAttributes': value['classifiedAttributes'] == null ? undefined : ((value['classifiedAttributes'] as Array<any>).map(ProductClassifiedAttributeGroupDtoToJSON)),
+        'allAttributes': value['allAttributes'] == null ? undefined : (mapValues(value['allAttributes'], ProductAttributeDtoToJSON)),
     };
 }
 

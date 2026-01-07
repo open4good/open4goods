@@ -22,6 +22,7 @@
         :image-src="resolveImage(product)"
         :attributes="popularAttributesByProduct(product)"
         :impact-score="impactScoreValue(product)"
+        :score-max="5"
         :offer-badges="offerBadges(product)"
         :offers-count-label="offersCountLabel(product)"
         :untitled-label="$t('category.products.untitledProduct')"
@@ -66,7 +67,7 @@
             <ImpactScore
               v-if="impactScoreValue(product) != null"
               :score="impactScoreValue(product) ?? 0"
-              :max="20"
+              :max="5"
               size="small"
               mode="badge"
               badge-layout="stacked"
@@ -178,7 +179,7 @@ import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
-import { resolvePrimaryImpactScoreOn20 } from '~/utils/_product-scores'
+import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 
 const props = defineProps<{
@@ -254,7 +255,7 @@ const productLink = (product: ProductDto) => {
 }
 
 const impactScoreValue = (product: ProductDto) =>
-  resolvePrimaryImpactScoreOn20(product)
+  resolvePrimaryImpactScore(product)
 
 const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
 

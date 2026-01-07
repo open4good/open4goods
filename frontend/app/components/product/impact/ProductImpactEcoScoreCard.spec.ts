@@ -68,6 +68,12 @@ describe('ProductImpactEcoScoreCard', () => {
             props: ['icon', 'size'],
             template: '<span class="v-icon-stub"></span>',
           }),
+          'v-chip-group': true,
+          'v-chip': true,
+          'v-checkbox': true,
+          'v-btn': true,
+          'v-expand-transition': true,
+          'v-skeleton-loader': true,
         },
       },
     })
@@ -87,5 +93,40 @@ describe('ProductImpactEcoScoreCard', () => {
     })
 
     expect(wrapper.text()).toContain('No score')
+  })
+
+  it('uses value (0-5) score directly', () => {
+    const scoreWithDifferentValues: ScoreView = {
+      ...stubScore,
+      value: 3.5,
+      on20: 20, // Should be ignored (20/4 = 5, but value is 3.5)
+    }
+
+    const wrapper = mount(ProductImpactEcoScoreCard, {
+      props: { score: scoreWithDifferentValues },
+      global: {
+        plugins: [i18n],
+        stubs: {
+          ImpactScore: defineComponent({
+            name: 'ImpactScoreStub',
+            props: ['score'],
+            setup(props) {
+              return () =>
+                h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
+            },
+          }),
+          NuxtLink: true,
+          'v-icon': true,
+          'v-chip-group': true,
+          'v-chip': true,
+          'v-checkbox': true,
+          'v-btn': true,
+          'v-expand-transition': true,
+          'v-skeleton-loader': true,
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain('score:3.5')
   })
 })

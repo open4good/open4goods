@@ -148,7 +148,7 @@ export interface ParallaxLayerConfig {
 export interface PageHeaderProps {
   // === Variante & Layout ===
   /** Header variant type */
-  variant: PageHeaderVariant
+  variant?: PageHeaderVariant
   /** Content layout columns */
   layout?: PageHeaderLayout
   /** Content horizontal alignment */
