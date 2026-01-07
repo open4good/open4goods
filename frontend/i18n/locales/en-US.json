@@ -1411,6 +1411,34 @@
                 "usage": "A 0-to-5 score that is readable at a glance to guide responsible purchases."
             }
         },
+        "approach": {
+            "eyebrow": "Our approach",
+            "title": "Our ecoscore: transparent, innovative and effective",
+            "subtitle": "We explain the ecoscore clearly with verifiable sources and criteria tailored to each product category.",
+            "pillars": {
+                "transparent": {
+                    "title": "Transparent",
+                    "description": "Nudger is open source so you can check the calculation. Each product page explains the score in a clear way."
+                },
+                "innovant": {
+                    "title": "Innovative",
+                    "description": "We recognise existing labelling initiatives and provide a versatile ecoscore for manufactured products."
+                },
+                "performant": {
+                    "title": "Effective",
+                    "description": "Our criteria blend reliable sources with meaningful weighting to compare products within a category."
+                }
+            },
+            "data": {
+                "title": "Data we consider",
+                "items": {
+                    "regulatory": "Regulatory data: repairability index, energy label, warranty duration…",
+                    "esg": "Extra-financial assessments of manufacturers (ESG/RSE).",
+                    "information": "Level of information available for the product: data quantity, quality, and openness.",
+                    "categorySpecific": "Category-specific data (e.g. noise level, water consumption, etc.)."
+                }
+            }
+        },
         "aria": {
             "navigation": "Impact Score section navigation",
             "pageOutline": "Impact Score page outline"

@@ -1416,6 +1416,34 @@
                 "usage": "Une note sur 5, lisible en un coup d’œil pour guider vos achats responsables."
             }
         },
+        "approach": {
+            "eyebrow": "Notre démarche",
+            "title": "Notre ecoscore : transparent, innovant et performant",
+            "subtitle": "Notre éco-score est expliqué simplement, avec des sources vérifiables et des critères adaptés à chaque catégorie de produit.",
+            "pillars": {
+                "transparent": {
+                    "title": "Transparent",
+                    "description": "Nudger est open-source : vous pouvez vérifier le calcul. Chaque fiche produit explique la note de façon simple et complète."
+                },
+                "innovant": {
+                    "title": "Innovant",
+                    "description": "Nous valorisons les initiatives existantes et proposons un éco-score polyvalent pour les produits manufacturés."
+                },
+                "performant": {
+                    "title": "Performant",
+                    "description": "Nos critères combinent des sources fiables et une pondération pertinente pour comparer les produits d’une même catégorie."
+                }
+            },
+            "data": {
+                "title": "Données prises en compte",
+                "items": {
+                    "regulatory": "Données réglementaires : indice de réparabilité, fiche énergie, durée de garantie…",
+                    "esg": "Évaluations extra-financières des fabricants (ESG/RSE).",
+                    "information": "Niveau d’information disponible sur le produit : quantité, qualité et ouverture des données.",
+                    "categorySpecific": "Données spécifiques à chaque catégorie (ex. niveau sonore, consommation d’eau, etc.)."
+                }
+            }
+        },
         "aria": {
             "navigation": "Navigation des sections Impact Score",
             "pageOutline": "Plan de la page Impact Score"
