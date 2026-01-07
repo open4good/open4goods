@@ -78,7 +78,8 @@
                     vertical: item.label,
                   })
                 "
-                @click.stop
+                @click.stop.prevent="navigateToEcoscore(item.ecoscoreLink)"
+                @keydown.enter.prevent="navigateToEcoscore(item.ecoscoreLink)"
               >
                 <span>{{
                   t('impactScorePage.sections.methodology.verticalCta')

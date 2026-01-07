@@ -4,13 +4,13 @@
 
     <v-container class="impact-score-page__sections py-12 py-md-16">
       <ImpactScoreExamples class="impact-score-page__section" />
-      <ImpactScoreApproach class="impact-score-page__section" />
       <ImpactScoreMethodology
         class="impact-score-page__section"
         :verticals="verticals"
       />
       <ImpactScorePrinciples class="impact-score-page__section" />
       <ImpactScoreSummary class="impact-score-page__section" />
+      <ImpactScoreApproach class="impact-score-page__section" />
       <ImpactScoreDetails class="impact-score-page__section" />
     </v-container>
   </div>

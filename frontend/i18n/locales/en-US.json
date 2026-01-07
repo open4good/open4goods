@@ -1374,7 +1374,6 @@
             "eyebrow": "Calculation examples",
             "title": "A readable eco-score",
             "subtitle": "Two everyday products to illustrate the Impact Score.",
-            "scoreHint": "Score out of 5",
             "television": {
                 "eyebrow": "Example 1",
                 "title": "55'' LED television",
@@ -1408,7 +1407,7 @@
                 "method": "One common method, inspired by the EcoScore, for every category.",
                 "criteria": "5 weighted criteria to quickly compare similar products.",
                 "data": "Verified, up-to-date data linked to their sources.",
-                "usage": "A 0-to-5 score that is readable at a glance to guide responsible purchases."
+                "usage": "A 0-to-20 score that is readable at a glance to guide responsible purchases."
             }
         },
         "approach": {
