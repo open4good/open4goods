@@ -1,6 +1,14 @@
 <template>
   <section class="impact-score-hero">
-    <v-container class="py-10 py-md-14">
+    <div
+      v-if="backgroundAsset"
+      class="impact-score-hero__background"
+      aria-hidden="true"
+    >
+      <img :src="backgroundAsset" alt="" class="impact-score-hero__background-image" />
+      <div class="impact-score-hero__background-overlay" />
+    </div>
+    <v-container class="impact-score-hero__content py-10 py-md-14">
       <v-row class="align-stretch" :gutter="24">
         <v-col cols="12" md="7">
           <div class="impact-score-hero__intro">
@@ -12,12 +20,12 @@
             >
               {{ t('impactScorePage.hero.eyebrow') }}
             </v-chip>
-            <h1 class="impact-score-hero__title">
-              {{ t('impactScorePage.hero.title') }}
-            </h1>
             <p class="impact-score-hero__subtitle">
               {{ t('impactScorePage.hero.subtitle') }}
             </p>
+            <h1 class="impact-score-hero__title">
+              {{ t('impactScorePage.hero.title') }}
+            </h1>
           </div>
         </v-col>
 
@@ -59,7 +67,11 @@
 </template>
 
 <script setup lang="ts">
+import { useThemedAsset } from '~/composables/useThemedAsset'
+
 const { t } = useI18n()
+
+const backgroundAsset = useThemedAsset('backgrounds/impact-score.svg')
 
 const definitionItems = computed(() => [
   t('impactScorePage.hero.definition.items.scale'),
@@ -70,12 +82,51 @@ const definitionItems = computed(() => [
 
 <style scoped>
 .impact-score-hero {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(
       120deg,
       rgba(var(--v-theme-hero-gradient-start), 0.18),
       rgba(var(--v-theme-hero-gradient-mid), 0.08)
     ),
     rgb(var(--v-theme-surface-default));
+}
+
+.impact-score-hero__background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.impact-score-hero__background-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.95;
+}
+
+.impact-score-hero__background-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 18% 30%,
+      rgba(var(--v-theme-hero-overlay-strong), 0.2),
+      transparent 40%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(var(--v-theme-surface-default), 0.12) 0%,
+      rgba(var(--v-theme-surface-default), 0.6) 100%
+    );
+}
+
+.impact-score-hero__content {
+  position: relative;
+  z-index: 1;
 }
 
 .impact-score-hero__intro {
