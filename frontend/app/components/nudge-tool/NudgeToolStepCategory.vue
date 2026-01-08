@@ -1,5 +1,8 @@
 <template>
-  <div class="nudge-step-category">
+  <div
+    class="nudge-step-category"
+    :class="{ 'nudge-step-category--compact': compact }"
+  >
     <!-- Header removed, moved to Wizard -->
 
     <v-slide-group
@@ -288,6 +291,7 @@ const props = defineProps<{
   categories: NudgeToolCategory[]
   selectedCategoryId?: string | null
   isAuthenticated?: boolean
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
@@ -503,6 +507,38 @@ watch(
     &__name {
       font-size: 0.95rem;
     }
+  }
+}
+
+.nudge-step-category--compact {
+  gap: clamp(0.75rem, 2.5vw, 1.25rem);
+  padding-bottom: 0.5rem;
+
+  .nudge-step-category__slider {
+    gap: 6px;
+
+    :deep(.v-slide-group__content) {
+      gap: 8px;
+    }
+  }
+
+  .nudge-step-category__card {
+    padding: 10px 12px;
+    min-width: 180px;
+    max-width: 220px;
+    flex-direction: row;
+    text-align: left;
+    gap: 10px;
+  }
+
+  .nudge-step-category__image {
+    width: clamp(56px, 8vw, 72px);
+    border-radius: 10px;
+  }
+
+  .nudge-step-category__name {
+    font-size: 0.95rem;
+    -webkit-line-clamp: 1;
   }
 }
 </style>

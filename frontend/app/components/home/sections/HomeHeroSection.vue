@@ -534,7 +534,7 @@ useHead({
             <v-sheet class="home-hero__panel" color="transparent" elevation="0">
               <div class="home-hero__panel-grid">
                 <div class="home-hero__panel-block">
-                  <NudgeToolWizard :verticals="wizardVerticals" />
+                  <NudgeToolWizard :verticals="wizardVerticals" compact />
                 </div>
                 <div class="home-hero__panel-block">
                   <form
