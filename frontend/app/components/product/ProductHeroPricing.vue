@@ -606,13 +606,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .product-hero__pricing-card {
-  border-radius: 24px;
-  background: rgba(var(--v-theme-surface-glass-strong), 0.9);
-  padding: 1.75rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.1);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  height: 100%;
 }
 
 .product-hero__price-conditions {

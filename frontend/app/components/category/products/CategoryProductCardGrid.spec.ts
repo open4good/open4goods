@@ -186,6 +186,11 @@ describe('CategoryProductCardGrid', () => {
                 occasionOfferLabel: 'Second-hand',
                 bestOfferLabel: 'Best',
                 conditionLabel: 'Condition: {condition}',
+                trends: {
+                  decrease: 'Price decrease',
+                  increase: 'Price increase',
+                  stable: 'Price stable',
+                },
               },
               compare: {
                 addToList: 'Add to compare',
@@ -261,26 +266,33 @@ describe('CategoryProductCardGrid', () => {
     expect(card.attributes('rel')).toBe('nofollow')
   })
 
-  it('renders new and occasion badges side by side without condition text', async () => {
+  it('renders new and occasion prices in the microtable layout', async () => {
     const product = buildProduct({
       offers: {
-        bestNewOffer: { price: 1068, currency: 'EUR' },
-        bestOccasionOffer: { price: 690, currency: 'EUR' },
+        bestNewOffer: { price: 1068, currency: 'EUR', shortPrice: '1068 €' },
+        bestOccasionOffer: { price: 690, currency: 'EUR', shortPrice: '690 €' },
       } as ProductDto['offers'],
     })
 
     const wrapper = await mountGrid([product])
 
-    const pricing = wrapper.get('.category-product-card-grid__pricing')
-    expect(pricing.classes()).toContain(
-      'category-product-card-grid__pricing--split'
+    // Check implementation of microtable
+    const pricingTable = wrapper.get(
+      '.category-product-card-grid__pricing-table'
     )
+    expect(pricingTable.exists()).toBe(true)
 
+    const cells = wrapper.findAll('.category-product-card-grid__pricing-cell')
+    expect(cells).toHaveLength(2)
+
+    // Check classes for specific offer types
     expect(
-      wrapper.findAll('.category-product-card-grid__price-badge')
-    ).toHaveLength(2)
+      wrapper.find('.category-product-card-grid__pricing-cell--new').exists()
+    ).toBe(true)
     expect(
-      wrapper.findAll('.category-product-card-grid__price-badge-condition')
-    ).toHaveLength(0)
+      wrapper
+        .find('.category-product-card-grid__pricing-cell--occasion')
+        .exists()
+    ).toBe(true)
   })
 })

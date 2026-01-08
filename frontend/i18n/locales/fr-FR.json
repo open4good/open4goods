@@ -654,7 +654,10 @@
     "ecoscorePage": {
       "breadcrumbLeaf": "impactscore",
       "description": "Nous préparons un contenu dédié au score éco pour {category}. Revenez bientôt !",
-      "impactScoreLabel": "Impact Score",
+      "primaryScoreLabel": "Impact Score",
+      "showVirtualScores": "Afficher les scores virtuels",
+      "scoreOn20": "Score / 20",
+      "subscoreDetailsToggle": "Détails du sous-score",
       "navigation": {
         "aiAudit": "Audit IA",
         "ariaLabel": "Navigation des sections Impact Score",

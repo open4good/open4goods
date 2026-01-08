@@ -191,7 +191,7 @@ describe('ProductHero', () => {
       'Next-gen Orbit X1'
     )
     expect(wrapper.find('.product-hero__panel--pricing').exists()).toBe(true)
-    expect(wrapper.find('.product-hero__panel--details').exists()).toBe(true)
+    expect(wrapper.find('.product-hero__details-section').exists()).toBe(true)
 
     expect(
       wrapper.findComponent({ name: 'ProductHeroBackgroundStub' }).exists()

@@ -27,15 +27,6 @@ jobs:
         run: pnpm build
         working-directory: frontend
 
-      - name: Set up SSH key for appleboy action
-        run: |
-          mkdir -p "$HOME/.ssh"
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
-          chmod 600 "$HOME/.ssh/id_rsa"
-          ssh-keyscan -H ${{ secrets.REMOTE_BETA_HOST }} >> "$HOME/.ssh/known_hosts"
-        env:
-          HOME: /root
-
       - name: Deploy SSR output to Beta server
         uses: easingthemes/ssh-deploy@main
         env:

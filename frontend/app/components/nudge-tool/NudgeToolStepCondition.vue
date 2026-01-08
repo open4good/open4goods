@@ -11,6 +11,7 @@
       >
         <v-card
           class="nudge-step-condition__card nudge-toggle-card"
+          elevation="2"
           :class="{
             'nudge-toggle-card--selected': isSelected(option.value),
           }"
@@ -118,7 +119,7 @@ const toggleOption = (choice: ProductConditionChoice) => {
     overflow: hidden;
     background: rgb(var(--v-theme-surface-primary-050)) !important;
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
-    box-shadow: none;
+    /* box-shadow: none; Removed to allow elevation */
     transition:
       transform 140ms ease,
       border-color 160ms ease,
@@ -160,7 +161,8 @@ const toggleOption = (choice: ProductConditionChoice) => {
     &:focus-visible {
       transform: translateY(-2px);
       border-color: rgba(var(--v-theme-accent-supporting), 0.6);
-      box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.08);
+      /* Custom hover shadow */
+      box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.15) !important;
       outline: none;
 
       .nudge-toggle-card__illustration {

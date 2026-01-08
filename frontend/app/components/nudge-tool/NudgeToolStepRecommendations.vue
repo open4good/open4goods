@@ -25,7 +25,7 @@
         :products="products"
         :popular-attributes="popularAttributes"
         variant="classic"
-        size="comfortable"
+        size="small"
       />
       <p v-else class="nudge-step-recos__empty">
         {{ $t('nudge-tool.steps.recommendations.empty') }}

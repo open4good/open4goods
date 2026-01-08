@@ -11,6 +11,7 @@
             <v-card
               v-bind="activatorProps"
               class="nudge-step-subset__card nudge-toggle-card"
+              elevation="2"
               :class="{
                 'nudge-toggle-card--selected': isSelected(subset.id),
               }"
@@ -135,7 +136,7 @@ const toggle = (subsetId: string) => {
     overflow: hidden;
     background: rgb(var(--v-theme-surface-primary-050)) !important;
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
-    box-shadow: none;
+    /* box-shadow: none; */
     transition:
       transform 140ms ease,
       border-color 160ms ease,
@@ -207,7 +208,8 @@ const toggle = (subsetId: string) => {
     &:focus-visible {
       transform: translateY(-2px);
       border-color: rgba(var(--v-theme-accent-supporting), 0.6);
-      box-shadow: 0 10px 20px rgba(var(--v-theme-shadow-primary-600), 0.08);
+      /* Custom hover shadow */
+      box-shadow: 0 10px 20px rgba(var(--v-theme-shadow-primary-600), 0.15) !important;
       outline: none;
     }
 

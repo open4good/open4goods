@@ -129,4 +129,59 @@ describe('ProductImpactEcoScoreCard', () => {
 
     expect(wrapper.text()).toContain('score:3.5')
   })
+
+  it('hides virtual scores by default and shows them when toggled', async () => {
+    const virtualScore: ScoreView = {
+      ...stubScore,
+      id: 'VIRTUAL',
+      virtual: true,
+    }
+    const scores = [stubScore, virtualScore]
+
+    const wrapper = mount(ProductImpactEcoScoreCard, {
+      props: {
+        score: stubScore,
+        detailScores: scores,
+      },
+      global: {
+        plugins: [i18n],
+        stubs: {
+          ImpactScore: true,
+          NuxtLink: true,
+          'v-icon': true,
+          'v-chip-group': true,
+          'v-chip': true,
+          'v-checkbox': {
+            template:
+              '<input type="checkbox" :checked="modelValue" @change="$emit(\'update:modelValue\', $event.target.checked)" />',
+            props: ['modelValue'],
+          },
+          'v-btn': true,
+          'v-expand-transition': true,
+          'v-skeleton-loader': true,
+          ProductImpactDetailsTable: {
+            props: ['scores'],
+            template:
+              '<div><div v-for="s in scores" :key="s.id" class="score-row">{{ s.id }}</div></div>',
+          },
+        },
+      },
+    })
+
+    // Default: virtual score hidden
+    // Only ECOSCORE is not virtual (stubScore) but ECOSCORE is usually filtered out by the table component itself if it matches ID,
+    // but here we pass it as detailScores.
+    // Let's see filtered logic: detailScores.value.filter...
+    // The component filters by virtual.
+
+    expect(wrapper.findAll('.score-row').length).toBe(1)
+    expect(wrapper.text()).toContain('ECOSCORE')
+    expect(wrapper.text()).not.toContain('VIRTUAL')
+
+    // Toggle virtual scores
+    await wrapper.find('input[type="checkbox"]').setValue(true)
+
+    expect(wrapper.findAll('.score-row').length).toBe(2)
+    expect(wrapper.text()).toContain('VIRTUAL')
+  })
 })

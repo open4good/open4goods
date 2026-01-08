@@ -1,13 +1,4 @@
 <template>
-  <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
-    <ProductImpactRadarChart
-      class="impact-ecoscore__analysis-radar-chart"
-      :axes="radarAxes"
-      :series="chartSeries"
-      :product-name="productName"
-    />
-  </div>
-
   <article class="impact-details">
     <h4 class="impact-details__title">
       {{ $t('product.impact.detailsTitle') }}
@@ -49,7 +40,16 @@
               size="18"
             />
           </v-btn>
-          <span class="impact-details__indicator">{{ item.label }}</span>
+          <span class="impact-details__indicator">
+            {{ item.label }}
+            <v-icon
+              v-if="item.virtual"
+              icon="mdi-flask-outline"
+              size="16"
+              class="ml-2 text-disabled"
+              :title="$t('product.impact.showVirtualScores')"
+            />
+          </span>
         </div>
       </template>
       <template #[`item.attributeValue`]="{ item }">
@@ -137,6 +137,7 @@ type DetailedScore = ScoreView & {
   displayValue: number | null
   coefficient: number | null
   scoreOn20: number | null
+  virtual?: boolean
 }
 type GroupedRows = {
   groups: Array<{
@@ -155,6 +156,7 @@ type TableRow = {
   coefficient: number | null
   scoreOn20: number | null
   lifecycle: string[]
+  virtual?: boolean
   rowType: 'aggregate' | 'subscore' | 'standalone'
   parentId?: string
 }
@@ -252,6 +254,7 @@ const displayScores = computed<DetailedScore[]>(() =>
         score.on20 != null && Number.isFinite(Number(score.on20))
           ? Number(score.on20)
           : null,
+      virtual: score.virtual,
     }))
 )
 
@@ -345,6 +348,7 @@ const buildTableRow = (
   coefficient: score.coefficient,
   scoreOn20: score.scoreOn20,
   lifecycle: score.participateInACV ?? [],
+  virtual: score.virtual,
   rowType,
   parentId,
 })
@@ -433,6 +437,7 @@ const buildAggregateRow = (
     coefficient: aggregateScore?.coefficient ?? null,
     scoreOn20: scoreOn20,
     lifecycle: aggregateScore?.participateInACV ?? [],
+    virtual: aggregateScore?.virtual,
     rowType: 'aggregate',
   }
 }

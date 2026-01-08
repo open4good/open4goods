@@ -43,14 +43,12 @@
     <path
       d="M125 30 L128 38 L136 39 L129 44 L130 52 L123 47 L116 52 L117 44 L110 39 L118 38 Z"
       fill="currentColor"
-      opacity="0.8"
     />
     <path
       d="M35 80 L37 84 L41 84.5 L37.5 87 L38 91 L35 88.5 L32 91 L32.5 87 L29 84.5 L33 84 Z"
       fill="currentColor"
       opacity="0.6"
     />
-    <circle cx="130" cy="80" r="3" fill="currentColor" opacity="0.4" />
   </svg>
 </template>
 
@@ -58,6 +56,8 @@
 .nudge-condition-icon {
   width: 100%;
   height: auto;
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-brand-primary));
+  max-width: 100%;
+  max-height: 100%;
 }
 </style>

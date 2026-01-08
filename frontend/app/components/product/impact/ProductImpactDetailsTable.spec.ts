@@ -238,4 +238,35 @@ describe('ProductImpactDetailsTable', () => {
     expect(childRows.map(row => row.parentId)).toContain('AGG2')
     expect(vm.tableItems.find(row => row.id === 'DIVERS')).toBeUndefined()
   })
+
+  it('correctly passes the virtual property to table rows', () => {
+    const scores: ScoreView[] = [
+      {
+        id: 'REAL',
+        label: 'Real score',
+        value: 1,
+        virtual: false,
+      },
+      {
+        id: 'VIRTUAL',
+        label: 'Virtual score',
+        value: 2,
+        virtual: true,
+      },
+    ]
+
+    const wrapper = mountComponent(scores)
+    const vm = wrapper.vm as unknown as {
+      tableItems: Array<{
+        id: string
+        virtual?: boolean
+      }>
+    }
+
+    const realRow = vm.tableItems.find(row => row.id === 'REAL')
+    const virtualRow = vm.tableItems.find(row => row.id === 'VIRTUAL')
+
+    expect(realRow?.virtual).toBeFalsy()
+    expect(virtualRow?.virtual).toBe(true)
+  })
 })
