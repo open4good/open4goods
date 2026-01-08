@@ -136,20 +136,39 @@
               }"
               role="list"
             >
-              <div
+              <v-chip
                 v-for="badge in badges"
                 :key="badge.key"
                 class="category-product-card-grid__price-badge"
-                :class="`category-product-card-grid__price-badge--${badge.appearance}`"
+                :color="
+                  badge.appearance === 'new'
+                    ? 'primary'
+                    : badge.appearance === 'occasion'
+                      ? 'accent-supporting'
+                      : 'surface-primary-080'
+                "
+                :variant="badge.appearance === 'default' ? 'flat' : 'tonal'"
+                size="default"
                 role="listitem"
               >
-                <span class="category-product-card-grid__price-badge-label">{{
-                  badge.label
-                }}</span>
-                <span class="category-product-card-grid__price-badge-amount">{{
-                  badge.price
-                }}</span>
-              </div>
+                <template v-if="badge.trendIcon" #prepend>
+                  <v-icon
+                    :icon="badge.trendIcon"
+                    :color="badge.trendColor"
+                    size="16"
+                    class="me-1"
+                  />
+                </template>
+                <div class="d-flex flex-column align-center">
+                  <span class="category-product-card-grid__price-badge-label">{{
+                    badge.label
+                  }}</span>
+                  <span
+                    class="category-product-card-grid__price-badge-amount"
+                    >{{ badge.price }}</span
+                  >
+                </div>
+              </v-chip>
             </div>
           </template>
 
@@ -172,6 +191,7 @@ import type {
   ProductAggregatedPriceDto,
   ProductDto,
 } from '~~/shared/api-client'
+import { ProductPriceTrendDtoTrendEnum } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
 import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
@@ -354,12 +374,46 @@ type OfferBadge = {
   label: string
   price: string
   appearance: 'new' | 'occasion' | 'default'
+  trendIcon?: string
+  trendColor?: string
+}
+
+const resolveTrendIcon = (
+  trend?: ProductPriceTrendDtoTrendEnum
+): string | undefined => {
+  switch (trend) {
+    case ProductPriceTrendDtoTrendEnum.PriceDecrease:
+      return 'mdi-trending-down'
+    case ProductPriceTrendDtoTrendEnum.PriceIncrease:
+      return 'mdi-trending-up'
+    case ProductPriceTrendDtoTrendEnum.PriceStable:
+      return 'mdi-trending-neutral'
+    default:
+      return undefined
+  }
+}
+
+const resolveTrendColor = (
+  trend?: ProductPriceTrendDtoTrendEnum
+): string | undefined => {
+  switch (trend) {
+    case ProductPriceTrendDtoTrendEnum.PriceDecrease:
+      return 'success'
+    case ProductPriceTrendDtoTrendEnum.PriceIncrease:
+      return 'error'
+    case ProductPriceTrendDtoTrendEnum.PriceStable:
+      return 'neutral'
+    default:
+      return undefined
+  }
 }
 
 const offerBadges = (product: ProductDto): OfferBadge[] => {
   const entries: OfferBadge[] = []
   const newOffer = product.offers?.bestNewOffer
   const occasionOffer = product.offers?.bestOccasionOffer
+  const newTrend = product.offers?.newTrend?.trend
+  const occasionTrend = product.offers?.occasionTrend?.trend
 
   if (newOffer) {
     const formatted = formatOfferPrice(newOffer, product)
@@ -370,6 +424,8 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         label: t('category.products.pricing.newOfferLabel'),
         price: formatted,
         appearance: 'new',
+        trendIcon: resolveTrendIcon(newTrend),
+        trendColor: resolveTrendColor(newTrend),
       })
     }
   }
@@ -383,6 +439,8 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         label: t('category.products.pricing.occasionOfferLabel'),
         price: formatted,
         appearance: 'occasion',
+        trendIcon: resolveTrendIcon(occasionTrend),
+        trendColor: resolveTrendColor(occasionTrend),
       })
     }
   }
@@ -552,37 +610,22 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
       grid-template-columns: minmax(0, 1fr)
 
   &__price-badge
-    background: rgba(var(--v-theme-surface-primary-080), 0.8)
-    border-radius: 1rem
-    padding: 0.85rem 1.1rem
-    display: flex
-    flex-direction: column
+    height: 100%
     justify-content: center
-    gap: 0.35rem
-    align-items: center
-    text-align: center
-    min-height: 100%
+    padding: 1.5rem 1rem
 
-    &--new
-      background: rgba(var(--v-theme-primary), 0.12)
-      color: rgb(var(--v-theme-primary))
-
-    &--occasion
-      background: rgba(var(--v-theme-accent-supporting), 0.12)
-      color: rgb(var(--v-theme-accent-supporting))
-
-    &--default
-      color: rgb(var(--v-theme-text-neutral-strong))
+    .d-flex
+        gap: 0.1rem
 
   &__price-badge-label
-    font-size: 0.75rem
+    font-size: 0.65rem
     text-transform: uppercase
     letter-spacing: 0.08em
-    font-weight: 600
-    color: rgba(var(--v-theme-text-neutral-strong), 0.9)
+    font-weight: 700
+    opacity: 0.9
 
   &__price-badge-amount
-    font-size: 1.25rem
+    font-size: 1rem
     font-weight: 700
 
   &--size-compact

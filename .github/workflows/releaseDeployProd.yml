@@ -86,8 +86,6 @@ jobs:
           mkdir -p frontend/app/public/reports/test-coverage/backend
           mkdir -p frontend/app/public/reports/test-coverage/frontend
 
-
-
       ############################################
       # 📝 Release Notes
       ############################################
@@ -275,8 +273,6 @@ jobs:
             echo "No frontend coverage directory found at ${SRC}; skipping."
           fi
 
-
-
       - name: 🔎 Debug reports (what exists, where)
         shell: bash
         run: |
@@ -295,8 +291,6 @@ jobs:
           find frontend/app/public/reports -maxdepth 6 -type f -name "index.html" -print | head -n 200 || true
           du -sh frontend/app/public/reports || true
 
-
-
       - name: Build Nuxt (Node SSR)
         working-directory: frontend
         run: pnpm build
@@ -306,7 +300,6 @@ jobs:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
           APP_ENV: production
 
-
       - name: 🔎 Verify Nuxt output contains reports
         shell: bash
         run: |
@@ -314,10 +307,6 @@ jobs:
           test -d frontend/.output/public || (echo "No frontend/.output/public"; exit 1)
           find frontend/.output/public/reports -maxdepth 6 -type f -name "index.html" -print | head -n 200 || true
           du -sh frontend/.output/public/reports || true
-
-
-
-
 
       ############################################
       # 📦 Always upload reports artifact (even in MODE=test)
@@ -398,11 +387,16 @@ jobs:
 
           git worktree remove "${WT_DIR}" --force
 
-
       ############################################
       # Deploy JARs to Production Server
       # 2) Corrige: SOURCE absolus ("/...") => relatifs ("...")
       ############################################
+      - name: Ensure HOME and .ssh exist
+        if: env.MODE != 'test'
+        run: |
+          export HOME="${HOME:-/root}"
+          mkdir -p "$HOME/.ssh"
+
       - name: 🚚 Deploy SBADMIN to Server
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
@@ -458,7 +452,7 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: sh /opt/open4goods/bin/publish-jars.sh prod
-                    
+
       ############################################
       # Deploy (prod) — inchangé, seulement en release
       ############################################

@@ -3,7 +3,7 @@ name: Deploy SSR frontend to Beta
 on:
   push:
     paths:
-      - 'frontend/**'
+      - "frontend/**"
     branches:
       - main
 
@@ -26,7 +26,12 @@ jobs:
       - name: Build Nuxt (Node SSR)
         run: pnpm build
         working-directory: frontend
-          
+
+      - name: Ensure HOME and .ssh exist
+        run: |
+          export HOME="${HOME:-/root}"
+          mkdir -p "$HOME/.ssh"
+
       - name: Deploy SSR output to Beta server
         uses: easingthemes/ssh-deploy@main
         env:

@@ -20,10 +20,12 @@
           {{ categoryLinkLabel }}
         </v-btn>
       </div>
-      <CategoryProductListView
+      <CategoryProductCardGrid
         v-if="hasProducts"
         :products="products"
         :popular-attributes="popularAttributes"
+        variant="classic"
+        size="comfortable"
       />
       <p v-else class="nudge-step-recos__empty">
         {{ $t('nudge-tool.steps.recommendations.empty') }}
@@ -43,7 +45,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
-import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
+import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 
 const props = withDefaults(
   defineProps<{
