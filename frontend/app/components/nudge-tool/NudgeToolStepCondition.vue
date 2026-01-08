@@ -1,5 +1,8 @@
 <template>
-  <div class="nudge-step-condition">
+  <div
+    class="nudge-step-condition"
+    :class="{ 'nudge-step-condition--compact': compact }"
+  >
     <v-row dense class="nudge-step-condition__row" justify="center">
       <v-col
         v-for="option in options"
@@ -65,6 +68,7 @@ const NudgeConditionUsedIcon = defineAsyncComponent(
 
 const props = defineProps<{
   modelValue: ProductConditionChoice[]
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -182,6 +186,39 @@ const toggleOption = (choice: ProductConditionChoice) => {
     .nudge-toggle-card__title {
       color: rgb(var(--v-theme-accent-supporting));
     }
+  }
+}
+
+.nudge-step-condition--compact {
+  .nudge-step-condition__row {
+    row-gap: 12px;
+    column-gap: 12px;
+  }
+
+  .nudge-toggle-card {
+    padding: 16px;
+    min-height: 150px;
+
+    &__header {
+      margin-bottom: 12px;
+    }
+
+    &__title {
+      font-size: 1rem;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &__illustration {
+      max-width: 140px;
+      max-height: 96px;
+    }
+  }
+
+  .nudge-toggle-card--selected {
+    padding: 15px;
   }
 }
 </style>
