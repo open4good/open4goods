@@ -45,11 +45,13 @@ public class Cardinality {
 
 
 
+	/**
+	 * The sum of squares for variance computation
+	 */
+	private Double sumOfSquares = 0.0;
+
 	public Cardinality() {
 	}
-
-
-
 
 	public Cardinality(Cardinality source) {
 		
@@ -58,10 +60,9 @@ public class Cardinality {
 		this.max=source.max;
 		this.min=source.min;
 		this.sum=source.sum;
+		this.sumOfSquares = source.sumOfSquares;
 		this.value=source.value;
 	}
-
-
 
 
 	@Override
@@ -69,35 +70,12 @@ public class Cardinality {
 		return min +" > " + avg + " < " +max+" (" + count+ " elements)";
 	}
 
-
-
-	
 	
 	public void increment(final Rating r) {
-
-		try {
-			// Min
-			if (null == min || min > r.getValue()) {
-				min = r.getValue();
-			}
-
-			// Max
-			if (null == max || max < r.getValue()) {
-				max = r.getValue();
-			}
-
-			// Count
-			count++;
-
-			// Sum
-			sum += r.getValue();
-
-			// Average
-			avg = sum / Double.valueOf(count);
-
-		} catch (Exception e) {
-			logger.error("Cardinality computation failed : {}", e.getMessage());
-		}
+        if (r == null || r.getValue() == null) {
+            return;
+        }
+		increment(r.getValue());
 	}
 		
 	/**
@@ -124,6 +102,9 @@ public class Cardinality {
 
 			// Sum
 			sum += value;
+            
+            // Sum of squares
+            sumOfSquares += value * value;
 
 			// Average
 			avg = sum / Double.valueOf(count);
@@ -132,6 +113,23 @@ public class Cardinality {
 			logger.error("Cardinality computation failed : {}", e.getMessage());
 		}
 	}
+    
+    /**
+     * Computes the standard deviation of the distribution.
+     * @return 0.0 if count is 0, otherwise the population standard deviation.
+     */
+    public Double getStdDev() {
+        if (count == 0 || count == 1) {
+            return 0.0;
+        }
+        
+        // Variance = (SumSq - (Sum^2 / N)) / N
+        double mean = sum / count;
+        double variance = (sumOfSquares / count) - (mean * mean);
+        
+        // Handle floating point precision issues near zero
+        return Math.sqrt(Math.max(0.0, variance)); 
+    }
 
 	public Double getMin() {
 		return min;
@@ -173,18 +171,20 @@ public class Cardinality {
 		this.sum = sum;
 	}
 
-
 	public Double getValue() {
 		return value;
 	}
-
-
-
 
 	public void setValue(Double value) {
 		this.value = value;
 	}
 	
-	
+	public Double getSumOfSquares() {
+		return sumOfSquares;
+	}
+
+	public void setSumOfSquares(Double sumOfSquares) {
+		this.sumOfSquares = sumOfSquares;
+	}
 
 }

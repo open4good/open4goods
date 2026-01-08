@@ -196,6 +196,8 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
 	/**
 	 * Relatives a number on a 0 - StandardiserService.DEFAULT_MAX_RATING scale, given the absolute min and max in the provided cardinality
+	 * Uses a Sigma (Standard Deviation) approach to handle outliers:
+     * Range is [Mean - 2*Sigma, Mean + 2*Sigma]
 	 * @param value
 	 * @param abs
 	 * @return
@@ -205,18 +207,35 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		if (null == value) {
 			throw new ValidationException("Empty value in relativization");
 		}
-		// Removing the min range
-		Double minBorn = abs.getMin();
-		// Standardizing Score based on real max
-		final Double max = abs.getMax();
-		
-                if (Double.compare(minBorn, max) == 0) {
-                        return StandardiserService.DEFAULT_MAX_RATING;
-                } else {
-
-                        return (value -minBorn) * StandardiserService.DEFAULT_MAX_RATING / (max -minBorn);
-                }
+        
+        Double mean = abs.getAvg();
+        Double sigma = abs.getStdDev();
+        
+        // Handle zero variance case (all values are identical)
+        if (sigma == 0.0) {
+            return StandardiserService.DEFAULT_MAX_RATING / 2.0; // Return middle score (2.5)
         }
+        
+        // Sigma Factor (Sensitivity). k=2 covers ~95% of distribution.
+        double k = 2.0;
+        
+        double lowerBound = mean - (k * sigma);
+        double upperBound = mean + (k * sigma);
+        
+        // Avoid division by zero if bounds are effectively equal (floating point safety)
+        if (Math.abs(upperBound - lowerBound) < 0.000001) {
+             return StandardiserService.DEFAULT_MAX_RATING / 2.0;
+        }
+
+        // Normalize to [0, 1] relative to the bounds
+        double normalized = (value - lowerBound) / (upperBound - lowerBound);
+        
+        // Scale to [0, MaxRating]
+        double scaled = normalized * StandardiserService.DEFAULT_MAX_RATING;
+        
+        // Clamp result to [0, MaxRating] to handle outliers
+        return Math.max(0.0, Math.min(StandardiserService.DEFAULT_MAX_RATING, scaled));
+    }
 	
         /**
          * Computes and maintains cardinality for both absolute and relative views.

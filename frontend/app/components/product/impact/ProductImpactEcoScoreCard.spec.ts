@@ -18,6 +18,7 @@ describe('ProductImpactEcoScoreCard', () => {
             noPrimaryScore: 'No score',
             methodologyLink: 'Access the methodology',
             methodologyLinkAria: 'Open the Impact Score methodology',
+            showVirtualScores: 'Show virtual scores',
           },
         },
       },

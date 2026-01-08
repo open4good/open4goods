@@ -430,6 +430,37 @@ const badgeVariant = computed(() => props.badgeVariant)
   font-size: 1.55rem;
 }
 
+/* Large Stacked */
+.impact-score-badge--large .impact-score-badge__value-main {
+  font-size: 1.4rem;
+}
+
+.impact-score-badge--large .impact-score-badge__value-secondary {
+  font-size: 0.8rem;
+}
+
+/* XLarge Stacked */
+.impact-score-badge--xlarge .impact-score-badge__value-main {
+  font-size: 1.8rem;
+}
+
+.impact-score-badge--xlarge .impact-score-badge__value-secondary {
+  font-size: 0.9rem;
+}
+
+/* XXLarge Stacked */
+.impact-score-badge--xxlarge .impact-score-badge__value-main {
+  font-size: 2.4rem;
+  line-height: 0.9;
+}
+
+.impact-score-badge--xxlarge .impact-score-badge__value-secondary {
+  font-size: 1.1rem;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+/* General size overrides for non-stacked if needed, already present below */
 .impact-score-badge--xxlarge .impact-score-badge__value {
   font-size: 1.85rem;
 }

@@ -16,6 +16,7 @@ const i18n = createI18n({
           noDetailsAvailable: 'No details',
           hideDetails: 'Hide details',
           subscoreDetailsToggle: 'Show details',
+          showVirtualScores: 'Show virtual scores',
           valueOutOf: '{value} / {max}',
           tableHeaders: {
             scoreName: 'Indicator',
@@ -23,6 +24,7 @@ const i18n = createI18n({
             scoreValue: 'Score',
             coefficient: 'Coefficient',
             lifecycle: 'Lifecycle',
+            scoreOn20: 'Score / 20',
           },
           lifecycle: {
             END_OF_LIFE: 'End of life',
@@ -34,6 +36,7 @@ const i18n = createI18n({
           aggregateScores: {
             DIVERS: 'Miscellaneous',
             AGG1: 'Aggregate 1',
+            AGG2: 'Aggregate 2',
           },
         },
       },
@@ -239,7 +242,7 @@ describe('ProductImpactDetailsTable', () => {
     expect(vm.tableItems.find(row => row.id === 'DIVERS')).toBeUndefined()
   })
 
-  it('correctly passes the virtual property to table rows', () => {
+  it('correctly passes the virtual property to table rows', async () => {
     const scores: ScoreView[] = [
       {
         id: 'REAL',
@@ -261,11 +264,18 @@ describe('ProductImpactDetailsTable', () => {
         id: string
         virtual?: boolean
       }>
+      toggleGroup: (id: string) => void
     }
+
+    // Expand the DIVERS group to see the rows (since both are orphans)
+    vm.toggleGroup('DIVERS')
+    await nextTick()
 
     const realRow = vm.tableItems.find(row => row.id === 'REAL')
     const virtualRow = vm.tableItems.find(row => row.id === 'VIRTUAL')
 
+    expect(realRow).toBeDefined()
+    expect(virtualRow).toBeDefined()
     expect(realRow?.virtual).toBeFalsy()
     expect(virtualRow?.virtual).toBe(true)
   })

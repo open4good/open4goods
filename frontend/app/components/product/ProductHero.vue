@@ -186,6 +186,7 @@ import {
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { humanizeSlug } from '~/utils/_product-title'
+import { resolveProductTitle } from '~/utils/_product-title-resolver'
 
 import type {
   AttributeConfigDto,
@@ -222,40 +223,20 @@ const { t, te, n, locale } = useI18n()
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''
 
-const fallbackTitle = computed(() => {
-  const medium = normalizeString(props.product.names?.h1Title)
-  const identity = normalizeString(props.product.identity?.bestName)
-  const base = normalizeString(props.product.base?.bestName)
-  const slug = normalizeString(props.product.slug)
-  const gtin = normalizeString(props.product.gtin?.toString())
-  const normalizedSlug = slug ? humanizeSlug(slug, locale.value) : ''
-  const gtinLabel = gtin ? t('product.meta.gtinFallback', { gtin }) : ''
-
-  return medium || identity || base || normalizedSlug || gtinLabel || ''
-})
-
-const bestName = computed(() => {
-  const identity = normalizeString(props.product.identity?.bestName)
-  if (identity) {
-    return identity
-  }
-
-  const base = normalizeString(props.product.base?.bestName)
-  if (base) {
-    return base
-  }
-
-  return fallbackTitle.value
-})
-
 const heroTitle = computed(() => {
-  const aiTitle = normalizeString(props.product.aiReview?.review?.mediumTitle)
-  if (aiTitle) {
-    return aiTitle
-  }
-
-  return fallbackTitle.value || bestName.value
+  return resolveProductTitle(props.product, locale.value)
 })
+
+const gtinLabel = computed(() => {
+  const gtin = normalizeString(props.product.gtin?.toString())
+  return gtin ? t('product.meta.gtinFallback', { gtin }) : ''
+})
+
+const fallbackTitle = computed(() => {
+  return heroTitle.value || gtinLabel.value
+})
+
+const bestName = computed(() => heroTitle.value)
 
 const productBrandName = computed(() =>
   normalizeString(props.product.identity?.brand)
@@ -754,8 +735,8 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   position: absolute;
   top: -1.75rem; /* Adjust based on panel padding */
   left: -1.75rem; /* Adjust based on panel padding */
-  width: 180px;
-  height: 180px;
+  width: 150px;
+  height: 150px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

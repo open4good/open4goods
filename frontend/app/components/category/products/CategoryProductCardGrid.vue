@@ -10,7 +10,7 @@
   >
     <v-col
       v-for="product in products"
-      :key="product.gtin ?? product.identity?.bestName ?? Math.random()"
+      :key="resolveProductTitle(product) ?? Math.random()"
       cols="12"
       :sm="normalizedSize === 'small' ? 6 : 6"
       :md="normalizedSize === 'small' ? 4 : 6"
@@ -88,12 +88,7 @@
               :is="normalizedSize === 'big' ? 'h2' : 'h3'"
               class="category-product-card-grid__title"
             >
-              {{
-                product.identity?.bestName ??
-                product.identity?.model ??
-                product.identity?.brand ??
-                '#' + product.gtin
-              }}
+              {{ resolveProductTitle(product) }}
             </component>
           </div>
 
@@ -191,6 +186,7 @@ import {
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
+import { resolveProductTitle } from '~/utils/_product-title-resolver'
 
 const props = defineProps<{
   products: ProductDto[]

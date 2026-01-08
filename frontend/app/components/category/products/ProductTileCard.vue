@@ -252,7 +252,7 @@ import { computed } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CategoryProductCompareToggle from '~/components/category/products/CategoryProductCompareToggle.vue'
-import { resolveProductDisplayName } from '~/utils/_product-title'
+import { resolveProductTitle } from '~/utils/_product-title-resolver'
 
 export type ProductTileAttribute = {
   key: string
@@ -306,12 +306,7 @@ const subtitle = computed(
 
 const hasAttributes = computed(() => props.attributes.length > 0)
 
-const displayTitle = computed(() =>
-  resolveProductDisplayName(props.product, {
-    fallbackLabel: props.untitledLabel,
-    preferPrettyName: true,
-  })
-)
+const displayTitle = computed(() => resolveProductTitle(props.product))
 </script>
 
 <style scoped lang="scss">
