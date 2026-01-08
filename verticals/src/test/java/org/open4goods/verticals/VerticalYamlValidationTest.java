@@ -106,7 +106,7 @@ class VerticalYamlValidationTest {
 
         assertThat(tvConfig.getAvailableImpactScoreCriterias())
             .as("Default impact score criteria should be merged into the TV config")
-            .contains("ESG", "DATA_QUALITY");
+            .contains("BRAND_SUSTAINABILITY", "DATA_QUALITY");
 
         List<String> attributeKeys = tvConfig.getAttributesConfig().getConfigs().stream()
             .map(AttributeConfig::getKey)
