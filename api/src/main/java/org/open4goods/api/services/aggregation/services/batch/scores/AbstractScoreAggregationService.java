@@ -81,7 +81,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                                 Score s = p.getScores().get(scoreName);
 				if (null != s) {
 					try {
-						relativize(s);
+						relativize(s, vConf);
 					} catch (ValidationException e) {
 						dedicatedLogger.warn("{} -> Relativization of {} failed", this.getClass().getSimpleName(),p.getScores().get(scoreName), e);
 					}									
@@ -130,16 +130,17 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 	/////////////////////////////////////////
 	// Private methods
 	/////////////////////////////////////////
-        /**
-         * Computes relativ values for the provided score while preserving
-         * absolute count/sum statistics. Relative scale is only applied to value,
-         * min, max and average to ensure comparisons remain meaningful without
-         * mutating occurrence information.
-         *
-         * @param score the score to relativize
-         * @throws ValidationException if required absolute values are missing
-         */
-        protected void relativize(Score score) throws ValidationException {
+	/**
+	 * Computes relativ values for the provided score while preserving
+	 * absolute count/sum statistics. Relative scale is only applied to value,
+	 * min, max and average to ensure comparisons remain meaningful without
+	 * mutating occurrence information.
+	 *
+	 * @param score the score to relativize
+	 * @param vConf the vertical configuration to check for inversion rules
+	 * @throws ValidationException if required absolute values are missing
+	 */
+	protected void relativize(Score score, VerticalConfig vConf) throws ValidationException {
 
 		// Substracting unused min
 
@@ -148,7 +149,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 			return ;
 		}
 		
-                Cardinality cardinality =  batchDatas.get(score.getName());
+		Cardinality cardinality =  batchDatas.get(score.getName());
 
 		if (null == cardinality) {
 			dedicatedLogger.warn("No source cardinality found for score {}",score);
@@ -159,11 +160,21 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		ret.setMax(relativize(cardinality.getMax(),score.getAbsolute()));
 		ret.setMin(relativize(cardinality.getMin(),score.getAbsolute()));
 		ret.setAvg(relativize(cardinality.getAvg(),score.getAbsolute()));
-                // Keep occurrence statistics absolute to avoid distorting
-                // aggregation insights while still scaling comparable values.
-                ret.setCount(cardinality.getCount());
-                ret.setSum(cardinality.getSum());
-                ret.setValue(relativize(score.getValue(),score.getAbsolute()));
+		// Keep occurrence statistics absolute to avoid distorting
+		// aggregation insights while still scaling comparable values.
+		ret.setCount(cardinality.getCount());
+		ret.setSum(cardinality.getSum());
+		
+		Double relValue = relativize(score.getValue(),score.getAbsolute());
+		
+		if (vConf != null) {
+			org.open4goods.model.vertical.AttributeConfig attrConfig = vConf.getAttributesConfig().getAttributeConfigByKey(score.getName());
+			if (attrConfig != null && org.open4goods.model.vertical.AttributeComparisonRule.LOWER.equals(attrConfig.getBetterIs())) {
+				relValue = StandardiserService.DEFAULT_MAX_RATING - relValue;
+			}
+		}
+
+		ret.setValue(relValue);
 
 		score.setRelativ(ret);
 		

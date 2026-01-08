@@ -2527,11 +2527,11 @@
       "valueOutOf": "{value} / {max}",
       "subtitle": "Comparez les scores environnementaux et sociétaux de ce produit.",
       "tableHeaders": {
-        "scoreName": "Indicateur",
-        "attributeValue": "Valeur brute",
-        "scoreValue": "Score",
-        "coefficient": "Coefficient",
-        "lifecycle": "Cycle de vie"
+        "attributeValue": "Valeur",
+        "lifecycle": "Cycle de vie",
+        "scoreName": "Critère",
+        "scoreOn20": "Note / 20",
+        "coefficient": "Coefficient"
       },
       "lifecycle": {
         "END_OF_LIFE": "Fin de vie & recyclage",

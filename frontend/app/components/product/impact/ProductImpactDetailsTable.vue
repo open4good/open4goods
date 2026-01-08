@@ -89,6 +89,33 @@
           <span v-else class="impact-details__coefficient-empty">—</span>
         </div>
       </template>
+
+      <template #[`item.scoreOn20`]="{ item }">
+        <div
+          class="impact-details__score-on-20"
+          :class="{
+            'impact-details__score-on-20--aggregate':
+              item.rowType === 'aggregate',
+          }"
+        >
+          <v-chip
+            v-if="item.scoreOn20 != null"
+            :color="
+              item.scoreOn20 < 10
+                ? 'error'
+                : item.scoreOn20 < 15
+                  ? 'warning'
+                  : 'success'
+            "
+            variant="flat"
+            size="small"
+            class="font-weight-bold"
+          >
+            {{ item.scoreOn20.toFixed(1) }} / 20
+          </v-chip>
+          <span v-else class="text-caption text-disabled">—</span>
+        </div>
+      </template>
     </v-data-table>
     <p v-else class="impact-details__empty">
       {{ $t('product.impact.noDetailsAvailable') }}
@@ -109,6 +136,7 @@ const props = defineProps<{
 type DetailedScore = ScoreView & {
   displayValue: number | null
   coefficient: number | null
+  scoreOn20: number | null
 }
 type GroupedRows = {
   groups: Array<{
@@ -125,6 +153,7 @@ type TableRow = {
   attributeSourcing: ScoreView['attributeSourcing']
   displayValue: number | null
   coefficient: number | null
+  scoreOn20: number | null
   lifecycle: string[]
   rowType: 'aggregate' | 'subscore' | 'standalone'
   parentId?: string
@@ -182,15 +211,6 @@ const lifecycleColors: Record<string, string> = {
 
 const DIVERS_AGGREGATE_ID = 'DIVERS'
 
-const toFiniteNumber = (value: number | null | undefined): number | null => {
-  if (value == null) {
-    return null
-  }
-
-  const parsed = typeof value === 'number' ? value : Number(value)
-  return Number.isFinite(parsed) ? parsed : null
-}
-
 const normalizeParticipations = (participations?: string[] | null): string[] =>
   (participations ?? [])
     .map(entry => entry?.toString().trim().toUpperCase())
@@ -228,6 +248,10 @@ const displayScores = computed<DetailedScore[]>(() =>
       ...score,
       displayValue: resolveScoreValue(score),
       coefficient: resolveCoefficientValue(score.coefficient ?? null),
+      scoreOn20:
+        score.on20 != null && Number.isFinite(Number(score.on20))
+          ? Number(score.on20)
+          : null,
     }))
 )
 
@@ -300,6 +324,12 @@ const headers = computed(() => [
     title: t('product.impact.tableHeaders.lifecycle'),
     sortable: false,
   },
+  {
+    key: 'scoreOn20',
+    title: t('product.impact.tableHeaders.scoreOn20'),
+    align: 'end',
+    sortable: false,
+  },
 ])
 
 const buildTableRow = (
@@ -313,6 +343,7 @@ const buildTableRow = (
   attributeSourcing: score.attributeSourcing ?? null,
   displayValue: score.displayValue,
   coefficient: score.coefficient,
+  scoreOn20: score.scoreOn20,
   lifecycle: score.participateInACV ?? [],
   rowType,
   parentId,
@@ -325,50 +356,86 @@ const resolveAggregateDisplayValue = (
   aggregateId: string,
   aggregateScore: DetailedScore | null,
   subscores: DetailedScore[]
-): number | null => {
+): { displayValue: number | null; scoreOn20: number | null } => {
+  const result = {
+    displayValue: null as number | null,
+    scoreOn20: null as number | null,
+  }
+
   const directValue = resolveScoreValue(aggregateScore)
   if (directValue != null) {
-    return directValue
+    result.displayValue = directValue
   }
 
-  const aggregateValues = subscores
-    .map(score => score.aggregates?.[aggregateId])
-    .map(toFiniteNumber)
-    .filter((value): value is number => value != null)
-
-  if (aggregateValues.length) {
-    return resolveAverage(aggregateValues)
+  if (
+    aggregateScore?.on20 != null &&
+    Number.isFinite(Number(aggregateScore.on20))
+  ) {
+    result.scoreOn20 = Number(aggregateScore.on20)
   }
 
-  const childValues = subscores
-    .map(score => score.displayValue)
-    .filter((value): value is number => value != null)
+  if (result.displayValue == null) {
+    const aggregateValues = subscores
+      .map(score =>
+        score.aggregates?.[aggregateId] &&
+        Number.isFinite(Number(score.aggregates[aggregateId]))
+          ? Number(score.aggregates[aggregateId])
+          : null
+      )
+      .filter((value): value is number => value != null)
 
-  if (childValues.length) {
-    return resolveAverage(childValues)
+    if (aggregateValues.length) {
+      result.displayValue = resolveAverage(aggregateValues)
+    } else {
+      const childValues = subscores
+        .map(score => score.displayValue)
+        .filter((value): value is number => value != null)
+
+      if (childValues.length) {
+        result.displayValue = resolveAverage(childValues)
+      }
+    }
   }
 
-  return null
+  // Fallback for aggregations if not present on parent
+  // We prioritize direct value, but if missing we might need to compute
+  // For scoreOn20, usually it is on the aggregate score. If not, average subscores.
+
+  if (result.scoreOn20 == null) {
+    const subScoresOn20 = subscores
+      .map(s => s.scoreOn20)
+      .filter((v): v is number => v != null)
+
+    if (subScoresOn20.length) {
+      result.scoreOn20 = resolveAverage(subScoresOn20)
+    }
+  }
+
+  return result
 }
 
 const buildAggregateRow = (
   aggregateId: string,
   aggregateScore: DetailedScore | null,
   subscores: DetailedScore[]
-): TableRow => ({
-  id: aggregateId,
-  label: resolveAggregateLabel(aggregateId, aggregateScore),
-  attributeValue: '—',
-  attributeSourcing: null,
-  displayValue: resolveAggregateDisplayValue(
+): TableRow => {
+  const { displayValue, scoreOn20 } = resolveAggregateDisplayValue(
     aggregateId,
     aggregateScore,
     subscores
-  ),
-  coefficient: aggregateScore?.coefficient ?? null,
-  lifecycle: aggregateScore?.participateInACV ?? [],
-  rowType: 'aggregate',
-})
+  )
+  return {
+    id: aggregateId,
+    label: resolveAggregateLabel(aggregateId, aggregateScore),
+    attributeValue: '—',
+    attributeSourcing: null,
+    displayValue: displayValue,
+    coefficient: aggregateScore?.coefficient ?? null,
+    scoreOn20: scoreOn20,
+    lifecycle: aggregateScore?.participateInACV ?? [],
+    rowType: 'aggregate',
+  }
+}
 
 const tableItems = computed<TableRow[]>(() => {
   const rows: TableRow[] = []
