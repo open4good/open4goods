@@ -8,7 +8,10 @@
     corner-variant="custom"
     :corner-size="resolvedCornerSize"
     :style="wizardStyle"
-    :class="{ 'nudge-wizard--content-mode': isContentMode }"
+    :class="{
+      'nudge-wizard--content-mode': isContentMode,
+      'nudge-wizard--compact': compact,
+    }"
     :selectable="false"
   >
     <template #corner>
@@ -178,7 +181,7 @@
 </template>
 
 <script setup lang="ts">
-import { useDebounceFn, useElementSize } from '@vueuse/core'
+import { useDebounceFn, useElementSize, useWindowSize } from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
@@ -220,6 +223,7 @@ const props = defineProps<{
   initialFilters?: FilterRequestDto
   initialCategoryId?: string | null
   initialSubsets?: string[]
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{ (event: 'navigate', target: string): void }>()
@@ -440,6 +444,7 @@ const steps = computed<WizardStep[]>(() => {
       categories: displayCategories.value,
       selectedCategoryId: selectedCategoryId.value,
       isAuthenticated: isLoggedIn.value,
+      compact: props.compact ?? false,
     },
   })
 
@@ -464,7 +469,10 @@ const steps = computed<WizardStep[]>(() => {
     title: t('nudge-tool.steps.condition.title'),
     subtitle: t('nudge-tool.steps.condition.subtitle'),
     icon: 'mdi-compare-horizontal',
-    props: { modelValue: condition.value },
+    props: {
+      modelValue: condition.value,
+      compact: props.compact ?? false,
+    },
     onUpdate: (value: ProductConditionSelection) => {
       condition.value = value
     },
@@ -813,6 +821,7 @@ const footerRef = ref<HTMLElement>()
 const { height: headerHeight } = useElementSize(headerRef)
 const { height: windowHeight } = useElementSize(windowWrapperRef)
 const { height: footerHeight } = useElementSize(footerRef)
+const { height: viewportHeight } = useWindowSize()
 
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
@@ -822,6 +831,10 @@ const lockedLayoutHeight = ref<number | null>(null)
 const lockedWindowHeight = ref<number | null>(null)
 
 const attemptLockHeights = () => {
+  if (props.compact) {
+    return
+  }
+
   if (!isContentMode.value) {
     return
   }
@@ -859,6 +872,18 @@ const wizardStyle = computed(() => {
 })
 
 const windowWrapperStyle = computed(() => {
+  if (props.compact) {
+    const reservedSpace = headerHeight.value + footerHeight.value + 64
+    const availableHeight = Math.max(
+      viewportHeight.value - reservedSpace,
+      WIZARD_MIN_HEIGHT
+    )
+    const maxHeight = Math.min(availableHeight, 420)
+    return {
+      maxHeight: `${maxHeight}px`,
+    }
+  }
+
   if (!lockedWindowHeight.value) {
     return undefined
   }
@@ -870,7 +895,7 @@ const windowWrapperStyle = computed(() => {
 })
 
 const windowContentStyle = computed(() => {
-  if (!lockedWindowHeight.value) {
+  if (props.compact || !lockedWindowHeight.value) {
     return undefined
   }
 
@@ -1096,5 +1121,22 @@ const cornerIconDimensions = computed(() => {
 
 .nudge-wizard--content-mode .nudge-wizard__corner-content {
   transform: translateY(2px) scale(1.04);
+}
+
+.nudge-wizard--compact {
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+
+  .nudge-wizard__progress {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+
+  .nudge-wizard__window-wrapper {
+    padding: clamp(0.25rem, 0.8vw, 0.6rem) 0;
+  }
+
+  .nudge-wizard__window :deep(.v-window__container) {
+    align-items: stretch;
+  }
 }
 </style>

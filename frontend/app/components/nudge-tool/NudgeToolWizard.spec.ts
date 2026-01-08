@@ -51,6 +51,7 @@ const zoomedState = ref(false)
 vi.mock('@vueuse/core', () => ({
   useDebounceFn: (fn: (...args: unknown[]) => unknown) => fn,
   useElementSize: () => ({ height: ref(100) }),
+  useWindowSize: () => ({ height: ref(900) }),
   useTransition: (source: unknown) => source,
   usePreferredReducedMotion: () => ({ value: false }),
   useStorage: (_key: string, defaultValue: boolean) => {
