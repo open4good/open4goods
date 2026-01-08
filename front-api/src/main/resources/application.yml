@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: ${SERVER_PORT:8082}
   forward-headers-strategy: framework
 spring:
   profiles:
@@ -20,7 +20,7 @@ springdoc:
     use-root-path: true
 
 front:
-  resourceRootPath: "https://static.nudger.fr"
+  resourceRootPath: "${FRONT_RESOURCE_ROOT_PATH:https://static.nudger.fr}"
   max-page-size: 50
   cache:
     path: ./cache
@@ -35,7 +35,7 @@ front:
     email: ${FRONT_CONTACT_EMAIL}
   security:
     enabled: true
-    cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:"http://localhost:8082,http://localhost:3000"}
+    cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:http://localhost:8082,http://localhost:3000}
     jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
     shared-token: ${FRONT_SECURITY_SHARED_TOKEN:CHANGE_ME_SHARED_TOKEN}
   exposed-docs:
@@ -52,9 +52,9 @@ front:
 
   blog:
     base-urls:
-      default: "https://nudger.fr"
-      fr: "https://nudger.fr"
-      en: "https://nudger.fr/en"
+      default: "${FRONT_BLOG_BASE_URL_DEFAULT:https://nudger.fr}"
+      fr: "${FRONT_BLOG_BASE_URL_FR:https://nudger.fr}"
+      en: "${FRONT_BLOG_BASE_URL_EN:https://nudger.fr/en}"
 
   rate-limit:
     anonymous: 100
@@ -122,9 +122,9 @@ feedback:
     default-votable: ${FEEDBACK_VOTING_DEFAULT_VOTABLE:true}
 
 xwiki:
-    username: user
-    password: pwd 
-    baseUrl: https://dummy.fr
+    username: ${XWIKI_USERNAME:user}
+    password: ${XWIKI_PASSWORD:pwd}
+    baseUrl: ${XWIKI_BASE_URL:https://dummy.fr}
     
 management:
   health:

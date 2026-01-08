@@ -2,9 +2,8 @@ services:
 ####################################################################
 # Elastic Search
 ###################################################################
-       
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
     container_name: elastic
     environment:
       - http.max_content_length=200mb
@@ -12,10 +11,9 @@ services:
       - cluster.name=es-docker-cluster
       - cluster.initial_master_nodes=elastic
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms10g -Xmx10g"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - xpack.security.enabled=false
       - logger.level=WARN
-      
     ulimits:
       memlock:
         soft: -1
@@ -24,42 +22,19 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-
     volumes:
-      - /opt/open4goods/elastic-data:/usr/share/elasticsearch/data
-
+      - elastic-data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
     networks:
       - o4g-network
-
-####################################################################
-# Redis
-###################################################################
-       
-#  redis:
-#    image: bitnami/redis:7.4.0
-#    container_name: redis
-#    command: ["redis-server", "--stop-writes-on-bgsave-error","no","--protected-mode","no", "--appendonly", "no", "--maxmemory", "20mb", "--maxmemory-policy", "allkeys-lru"]
-#    ports:
-#      - 6379:6379        
-#    environment:
-#      - ALLOW_EMPTY_PASSWORD=yes
-# 
-#    networks:
-#      - o4g-network
-      
-      
+    env_file: .env
 
 ####################################################################
 # Kibana
 ###################################################################
-
-# Uncomment the below section to enable kibana 
-
-
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.2.3
+    image: docker.elastic.co/kibana/kibana:8.11.3
     container_name: kibana
     depends_on:
       - elastic
@@ -68,24 +43,71 @@ services:
     environment:
       ELASTICSEARCH_URL: http://elastic:9200
       ELASTICSEARCH_HOSTS: http://elastic:9200
-
     networks:
       - o4g-network
+    env_file: .env
 
+####################################################################
+# API (Backend)
+###################################################################
+  api:
+    image: eclipse-temurin:21-jre
+    container_name: api
+    volumes:
+      - ./api/target/api-0.0.1-SNAPSHOT.jar:/app/app.jar
+      - ./api/src/main/resources:/app/config
+    command: java -jar /app/app.jar
+    ports:
+      - "${SERVER_PORT_API:-8086}:8086"
+    depends_on:
+      - elastic
+    networks:
+      - o4g-network
+    env_file: .env
+    environment:
+      - SERVER_PORT=8086
+      - SPRING_ELASTICSEARCH_URIS=http://elastic:9200
+
+####################################################################
+# Front API (Backend for Frontend)
+###################################################################
+  front-api:
+    image: eclipse-temurin:21-jre
+    container_name: front-api
+    volumes:
+      - ./front-api/target/front-api-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    ports:
+      - "${SERVER_PORT_FRONT_API:-8082}:8082"
+    depends_on:
+      - api
+    networks:
+      - o4g-network
+    env_file: .env
+    environment:
+      - SERVER_PORT=8082
+      - FRONT_EXPOSED_DOCS_BASE_URL=http://api:8086
+
+####################################################################
+# Frontend (SSR)
+###################################################################
   frontend-ssr:
-    image: node:24
+    image: node:20
     container_name: frontend-ssr
     working_dir: /usr/src/app
     volumes:
-      - /opt/open4goods/bin/frontend-ssr:/usr/src/app
+      - ./frontend/.output:/usr/src/app/.output
+      - ./frontend/package.json:/usr/src/app/package.json
     command: ["node", ".output/server/index.mjs"]
     restart: unless-stopped
     networks:
       - o4g-network
     ports:
-      - "3000:3000"
+      - "${PORT_FRONTEND_SSR:-3000}:3000"
+    depends_on:
+      - front-api
+    env_file: .env
 
-    
 volumes:
   elastic-data:
     driver: local

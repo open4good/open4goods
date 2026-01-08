@@ -185,7 +185,6 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { humanizeSlug } from '~/utils/_product-title'
 import { resolveProductTitle } from '~/utils/_product-title-resolver'
 
 import type {
@@ -226,17 +225,6 @@ const normalizeString = (value: string | null | undefined) =>
 const heroTitle = computed(() => {
   return resolveProductTitle(props.product, locale.value)
 })
-
-const gtinLabel = computed(() => {
-  const gtin = normalizeString(props.product.gtin?.toString())
-  return gtin ? t('product.meta.gtinFallback', { gtin }) : ''
-})
-
-const fallbackTitle = computed(() => {
-  return heroTitle.value || gtinLabel.value
-})
-
-const bestName = computed(() => heroTitle.value)
 
 const productBrandName = computed(() =>
   normalizeString(props.product.identity?.brand)

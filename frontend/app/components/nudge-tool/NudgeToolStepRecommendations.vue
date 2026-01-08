@@ -7,32 +7,33 @@
       <v-skeleton-loader type="image, article" />
     </div>
     <div v-else>
-      <div v-if="categoryLink" class="nudge-step-recos__link">
-        <v-btn
-          class="text-none"
-          variant="tonal"
-          size="small"
-          rounded="pill"
-          color="primary"
-          :to="categoryLink"
-          :aria-label="categoryLinkLabel"
-        >
-          {{ categoryLinkLabel }}
-        </v-btn>
-      </div>
       <CategoryProductCardGrid
         v-if="hasProducts"
         :products="products"
         :popular-attributes="popularAttributes"
         variant="classic"
-        size="small"
+        size="big"
       />
       <p v-else class="nudge-step-recos__empty">
         {{ $t('nudge-tool.steps.recommendations.empty') }}
       </p>
     </div>
 
-    <p class="nudge-step-recos__footnote">
+    <div v-if="categoryLink" class="nudge-step-recos__footnote-wrapper">
+      <NuxtLink
+        :to="categoryLink"
+        :aria-label="categoryLinkLabel"
+        class="nudge-step-recos__footnote"
+      >
+        {{
+          $t('nudge-tool.steps.recommendations.total', {
+            count: totalCount,
+          })
+        }}
+        <v-icon icon="mdi-arrow-right" size="small" class="ms-1" />
+      </NuxtLink>
+    </div>
+    <p v-else class="nudge-step-recos__footnote">
       {{
         $t('nudge-tool.steps.recommendations.total', {
           count: totalCount,
@@ -103,15 +104,24 @@ const hasProducts = computed(() => products.value.length > 0)
     color: rgb(var(--v-theme-text-neutral-secondary));
   }
 
-  &__link {
+  &__footnote-wrapper {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 12px;
+    margin-top: 12px;
   }
 
   &__footnote {
-    margin-top: 12px;
     color: rgb(var(--v-theme-text-neutral-secondary));
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.2s;
+
+    &:hover {
+      color: rgb(var(--v-theme-primary));
+      text-decoration: underline;
+    }
   }
 }
 </style>

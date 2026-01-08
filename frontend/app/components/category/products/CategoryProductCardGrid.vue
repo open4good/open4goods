@@ -13,9 +13,9 @@
       :key="resolveProductTitle(product) ?? Math.random()"
       cols="12"
       :sm="normalizedSize === 'small' ? 6 : 6"
-      :md="normalizedSize === 'small' ? 4 : 6"
-      :lg="normalizedSize === 'small' ? 3 : 4"
-      :xl="normalizedSize === 'small' ? 2 : 3"
+      :md="normalizedSize === 'small' ? 4 : normalizedSize === 'big' ? 6 : 6"
+      :lg="normalizedSize === 'small' ? 3 : normalizedSize === 'big' ? 6 : 4"
+      :xl="normalizedSize === 'small' ? 2 : normalizedSize === 'big' ? 3 : 3"
     >
       <ProductTileCard
         v-if="variant === 'compact-tile'"
@@ -569,7 +569,7 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
   &__compare
     position: absolute
     right: 0.75rem
-    top: 0.75rem
+    bottom: 0.75rem /* Moved to bottom */
     z-index: 5
 
   &__body
