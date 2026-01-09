@@ -30,6 +30,7 @@
         <ProductImpactCta
           v-if="categoryDetail && categoryDetail.impactScoreConfig"
           :category-detail="categoryDetail"
+          @open-nudge="isNudgeWizardOpen = true"
         />
 
         <ProductSummaryNavigation

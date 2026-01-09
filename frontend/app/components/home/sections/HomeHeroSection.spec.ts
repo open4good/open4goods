@@ -240,16 +240,14 @@ afterEach(() => {
 })
 
 describe('HomeHeroSection', () => {
-  it('shows the launcher icon', async () => {
+  it('shows the logo icon', async () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.1)
 
     const wrapper = await mountComponent()
 
     const icon = wrapper.find('.home-hero__icon')
 
-    expect(icon.attributes('src')).toBe(
-      '/pwa-assets/icons/android/android-launchericon-512-512.png'
-    )
+    expect(icon.attributes('src')).toContain('data:image/svg+xml')
     expect(icon.attributes('alt')).toBe(messages['packs.default.hero.iconAlt'])
 
     await wrapper.unmount()

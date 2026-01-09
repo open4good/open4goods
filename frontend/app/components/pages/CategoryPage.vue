@@ -9,34 +9,12 @@
       :eyebrow="category.verticalMetaTitle"
       :show-image="isDesktop"
     >
-      <template #after-description>
-        <CategoryEcoscoreCard
-          v-if="category?.verticalHomeUrl"
-          class="category-page__ecoscore-card"
-          :vertical-home-url="category.verticalHomeUrl"
-          :category-name="categoryDisplayName"
-        />
-      </template>
       <template #actions>
-        <div class="category-page__hero-actions">
-          <p class="category-page__hero-eyebrow">
-            {{ $t('category.hero.nudge.eyebrow') }}
-          </p>
-          <v-tooltip :text="$t('category.hero.nudge.subtitle')">
-            <template #activator="{ props: tooltipProps }">
-              <v-btn
-                v-bind="tooltipProps"
-                color="primary"
-                variant="flat"
-                prepend-icon="mdi-robot-love"
-                class="category-page__hero-cta"
-                @click="isNudgeWizardOpen = true"
-              >
-                {{ $t('category.hero.nudge.cta') }}
-              </v-btn>
-            </template>
-          </v-tooltip>
-        </div>
+        <CategoryHeroActionsContent
+          :vertical-home-url="category?.verticalHomeUrl"
+          :category-name="categoryDisplayName"
+          @open-nudge="isNudgeWizardOpen = true"
+        />
       </template>
     </CategoryHero>
 
@@ -453,8 +431,8 @@ import { AggTypeEnum } from '~~/shared/api-client'
 import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.vue'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
+import CategoryHeroActionsContent from '~/components/category/CategoryHeroActionsContent.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
-import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryResultsCount from '~/components/category/CategoryResultsCount.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
@@ -2133,25 +2111,6 @@ const clearAllFilters = () => {
 
   &__container
     max-width: 1560px
-
-  &__hero-actions
-    display: inline-flex
-    flex-direction: column
-    align-items: flex-start
-    gap: 0.5rem
-
-  &__hero-eyebrow
-    margin: 0
-    font-size: 0.85rem
-    letter-spacing: 0.08em
-    text-transform: uppercase
-    color: rgba(var(--v-theme-accent-supporting), 0.9)
-
-  &__hero-cta
-    box-shadow: 0 12px 24px rgba(var(--v-theme-shadow-primary-600), 0.18)
-
-  &__ecoscore-card
-    align-self: flex-start
 
   &__toolbar
     display: flex
