@@ -3,20 +3,14 @@ package org.open4goods.api.controller.api;
 import java.util.Set;
 
 import org.open4goods.api.services.BatchService;
-import org.open4goods.api.services.ScrapperOrchestrationService;
-import org.open4goods.services.feedservice.service.FeedService;
-import org.open4goods.api.services.store.DataFragmentStoreService;
-import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.model.dto.api.IndexationResponse;
-import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.affiliation.AffiliationPartner;
-import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.feedservice.service.FeedService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 

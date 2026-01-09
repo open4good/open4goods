@@ -1224,7 +1224,7 @@ public class ProductController {
     private String determineSortableValueType(ProductDtoSortableFields field) {
         LOGGER.info("Entering determineSortableValueType(field={})", field);
         return switch (field) {
-        case price, offersCount -> VALUE_TYPE_NUMERIC;
+        case price, offersCount, ecoscore -> VALUE_TYPE_NUMERIC;
 		case brand, model -> VALUE_TYPE_TEXT;
 		default -> throw new IllegalArgumentException("Unexpected value: " + field);
         };

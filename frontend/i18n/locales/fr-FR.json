@@ -2986,7 +2986,7 @@
     },
     "steps": {
       "category": {
-        "title": "Nudger te guide, pas à pas.",
+        "title": "Impact Score : Etape par étape.",
         "subtitle": "Trouve le produit idéal qui correspond à ton budget et tes valeurs",
         "step": "Étape {step}"
       },

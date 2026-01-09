@@ -389,13 +389,18 @@ class ProductControllerIT {
     }
 
     @Test
-    void sortableFieldsEndpointReturnsList() throws Exception {
-        mockMvc.perform(get("/products/fields/sortable")
+    void sortableFieldsForVerticalReturnsList() throws Exception {
+        VerticalConfig config = new VerticalConfig();
+        config.setId("oven");
+        given(verticalsConfigService.getConfigById("oven")).willReturn(config);
+
+        mockMvc.perform(get("/products/fields/sortable/oven")
                         .param("domainLanguage", "FR")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_FRONTEND)))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.global").isArray())
+                .andExpect(jsonPath("$.global[?(@.mapping=='scores.ECOSCORE.value')]").exists());
     }
 
     @Test
