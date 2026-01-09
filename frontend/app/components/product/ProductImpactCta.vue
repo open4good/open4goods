@@ -4,6 +4,8 @@
       <CategoryHeroActionsContent
         :vertical-home-url="categoryLink"
         :category-name="categoryName"
+        :show-nudge="false"
+        :show-description="false"
         @open-nudge="emit('open-nudge')"
       />
     </HeroActionCard>

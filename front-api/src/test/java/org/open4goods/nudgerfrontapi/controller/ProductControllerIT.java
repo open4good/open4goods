@@ -87,7 +87,7 @@ class ProductControllerIT {
         mockMvc.perform(get("/products/{gtin}/reviews", gtin)
                 .header("Accept-Language", "de")
                 .header("X-Shared-Token", SHARED_TOKEN)
-                .param("domainLanguage", "FR")
+                .param("domainLanguage", "fr")
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
             .andExpect(status().isOk())
             .andExpect(header().string("Cache-Control", "public, max-age=3600"))
@@ -105,7 +105,7 @@ class ProductControllerIT {
 
         mockMvc.perform(get("/products/{gtin}", gtin)
                         .param("include", "gtin")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -120,7 +120,7 @@ class ProductControllerIT {
                 .willThrow(new ResourceNotFoundException());
 
         mockMvc.perform(get("/products/{gtin}", gtin)
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isNotFound());
@@ -134,8 +134,8 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
-        mockMvc.perform(get("/products")
-                        .param("domainLanguage", "FR")
+        mockMvc.perform(post("/products")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -156,10 +156,10 @@ class ProductControllerIT {
         config.setId("electronics");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("aggs", "[{\"name\":\"per_price\",\"field\":\"price.minPrice.price\",\"type\":\"terms\"}]")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -186,10 +186,10 @@ class ProductControllerIT {
         config.setId("electronics");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("aggs", "{\"aggs\":[{\"name\":\"per_price\",\"field\":\"price.minPrice.price\",\"type\":\"terms\"}]}")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -207,9 +207,9 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointReturns400OnInvalidFilters() throws Exception {
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("filters", "{invalid")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
@@ -217,9 +217,9 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointReturns400OnInvalidSort() throws Exception {
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("sort", "invalid,asc")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
@@ -227,9 +227,9 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointRejectsAggregationWithoutVertical() throws Exception {
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("aggs", "[{\"name\":\"by_price\",\"field\":\"price.minPrice.price\",\"type\":\"range\"}]")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
@@ -237,9 +237,9 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointReturns400OnInvalidInclude() throws Exception {
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("include", "wrong")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
@@ -256,10 +256,10 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("sort", "attributes.indexed.battery_life.numericValue,asc")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -277,10 +277,10 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("sort", "attributes.referentielAttributes.BRAND,asc")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -297,10 +297,10 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("sort", "[{\"field\":\"attributes.indexed.battery_life.numericValue\",\"order\":\"desc\"}]")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -311,10 +311,10 @@ class ProductControllerIT {
         VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("sort", "attributes.indexed.weight.numericValue,desc")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
@@ -331,10 +331,10 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("aggs", "{\"aggs\":[{\"name\":\"by_battery\",\"field\":\"attributes.indexed.battery_life.numericValue\",\"type\":\"range\"}]}")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -345,10 +345,10 @@ class ProductControllerIT {
         VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("aggs", "{\"aggs\":[{\"name\":\"by_weight\",\"field\":\"attributes.indexed.weight.numericValue\",\"type\":\"range\"}]}")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
@@ -365,10 +365,10 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("filters", "{\"filters\":[{\"field\":\"attributes.indexed.battery_life.numericValue\",\"operator\":\"range\",\"min\":10,\"max\":50}]}")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -379,13 +379,23 @@ class ProductControllerIT {
         VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("filters", "{\"filters\":[{\"field\":\"attributes.indexed.weight.numericValue\",\"operator\":\"range\",\"min\":10,\"max\":50}]}")
                         .param("verticalId", "electronics")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sortableFieldsEndpointReturnsList() throws Exception {
+        mockMvc.perform(get("/products/fields/sortable")
+                        .param("domainLanguage", "fr")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 
     @Test
@@ -395,7 +405,7 @@ class ProductControllerIT {
         given(verticalsConfigService.getConfigById("oven")).willReturn(config);
 
         mockMvc.perform(get("/products/fields/sortable/oven")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_FRONTEND)))))
                 .andExpect(status().isOk())
@@ -411,9 +421,9 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("filters", "[{\"field\":\"price\",\"operator\":\"range\",\"min\":10,\"max\":50}]")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -436,9 +446,9 @@ class ProductControllerIT {
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class)))
                 .willReturn(responseDto);
 
-        mockMvc.perform(get("/products")
+        mockMvc.perform(post("/products")
                         .param("filters", "{\"filters\":[{\"field\":\"price\",\"operator\":\"range\",\"min\":10,\"max\":50}]}")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
@@ -456,7 +466,7 @@ class ProductControllerIT {
     @Test
     void componentsEndpointReturnsList() throws Exception {
         mockMvc.perform(get("/products/fields/components")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -466,7 +476,7 @@ class ProductControllerIT {
     @Test
     void aggregatableFieldsEndpointReturnsList() throws Exception {
         mockMvc.perform(get("/products/fields/aggregatable")
-                        .param("domainLanguage", "FR")
+                        .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk())
@@ -483,7 +493,7 @@ class ProductControllerIT {
 
         mockMvc.perform(post("/products/{gtin}/review", gtin)
                 .param("hcaptchaResponse", "resp")
-                .param("domainLanguage", "FR")
+                .param("domainLanguage", "fr")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
             .andExpect(status().isOk());
@@ -495,7 +505,7 @@ class ProductControllerIT {
 
         mockMvc.perform(post("/products/{gtin}/review", gtin)
                 .param("hcaptchaResponse", "resp")
-                .param("domainLanguage", "FR"))
+                .param("domainLanguage", "fr"))
             .andExpect(status().isUnauthorized());
     }
 

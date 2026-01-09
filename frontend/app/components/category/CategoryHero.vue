@@ -38,10 +38,8 @@
           </p>
 
           <v-row dense class="category-hero__actions-row">
-            <v-col cols="12" md="auto" class="flex-grow-1">
-              <HeroActionCard v-if="$slots.actions">
-                <slot name="actions" />
-              </HeroActionCard>
+            <v-col cols="12" class="flex-grow-1">
+              <slot name="actions" />
             </v-col>
           </v-row>
         </div>
@@ -51,12 +49,11 @@
 </template>
 
 <script setup lang="ts">
-import { useId } from 'vue'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { CategoryBreadcrumbItemDto } from '~~/shared/api-client'
 
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
-import HeroActionCard from '~/components/shared/HeroActionCard.vue'
 
 type HeroBreadcrumbItem = {
   title: string

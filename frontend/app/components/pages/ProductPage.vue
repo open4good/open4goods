@@ -27,12 +27,6 @@
         class="product-page__nav"
         :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
       >
-        <ProductImpactCta
-          v-if="categoryDetail && categoryDetail.impactScoreConfig"
-          :category-detail="categoryDetail"
-          @open-nudge="isNudgeWizardOpen = true"
-        />
-
         <ProductSummaryNavigation
           :sections="navigableSections"
           :admin-sections="adminNavigableSections"
@@ -51,7 +45,6 @@
             :product="product"
             :breadcrumbs="productBreadcrumbs"
             :popular-attributes="heroPopularAttributes"
-            :image="resolvedProductImageSource"
           />
         </section>
 
@@ -170,15 +163,11 @@
           <v-fab
             class="product-page__fab"
             color="primary"
-            :icon="nudgeFabIcon"
-            :extended="isFabExtended"
             :aria-label="nudgeFabAriaLabel"
             v-bind="tooltipProps"
             @click="isNudgeWizardOpen = true"
           >
-            <span v-if="isFabExtended" class="product-page__fab-label">
-              {{ nudgeFabLabel }}
-            </span>
+            <NudgeToolAnimatedIcon />
           </v-fab>
         </template>
       </v-tooltip>
@@ -248,8 +237,9 @@ const ProductAdminSection = defineAsyncComponent(
 const NudgeToolWizard = defineAsyncComponent(
   () => import('~/components/nudge-tool/NudgeToolWizard.vue')
 )
-const ProductImpactCta = defineAsyncComponent(
-  () => import('~/components/product/ProductImpactCta.vue')
+
+const NudgeToolAnimatedIcon = defineAsyncComponent(
+  () => import('~/components/nudge-tool/NudgeToolAnimatedIcon.vue')
 )
 
 const route = useRoute()
@@ -277,11 +267,9 @@ const PRODUCT_COMPONENTS = [
 const stickyBannerThresholdRatio = 0.8
 const isStickyBannerOpen = ref(false)
 const isNudgeWizardOpen = ref(false)
-const nudgeFabIcon = 'mdi-robot-love'
 
 const nudgeFabLabel = computed(() => t('product.nudge.fabLabel'))
 const nudgeFabAriaLabel = computed(() => t('product.nudge.fabAriaLabel'))
-const isFabExtended = computed(() => display.smAndUp.value)
 
 const bannerMessage = computed(() => t('product.banner.message'))
 const bannerCtaLabel = computed(() => t('product.banner.cta'))
@@ -1982,8 +1970,7 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 50vh;
-  transform: translateY(-50%);
+  top: 100px;
   align-self: start;
   height: fit-content;
 }

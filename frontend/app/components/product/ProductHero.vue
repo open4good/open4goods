@@ -1,17 +1,5 @@
 <template>
   <section class="product-hero">
-    <div class="product-hero__background" aria-hidden="true">
-      <div class="product-hero__bg-gradient" />
-      <div
-        v-if="image"
-        class="product-hero__bg-image"
-        :style="backgroundImageStyle"
-      />
-      <div class="product-hero__bg-grid" />
-      <div class="product-hero__bg-glow product-hero__bg-glow--primary" />
-      <div class="product-hero__bg-glow product-hero__bg-glow--accent" />
-    </div>
-
     <div class="product-hero__content">
       <header v-if="heroTitle" class="product-hero__heading">
         <h1 class="product-hero__title text-center">{{ heroTitle }}</h1>
@@ -237,16 +225,6 @@ const { t, te, n, locale } = useI18n()
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''
-
-const backgroundImageStyle = computed(() => {
-  if (!props.image) {
-    return {}
-  }
-
-  // Basic escaping for URL to prevent breaking out of url()
-  const sanitized = props.image.replace(/['"()]/g, '')
-  return { backgroundImage: `url('${sanitized}')` }
-})
 
 const heroTitle = computed(() => {
   return resolveProductTitle(props.product, locale.value)
@@ -533,83 +511,6 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   position: relative;
   overflow: hidden;
   padding: clamp(1.5rem, 4vw, 3rem);
-  border-radius: 32px;
-  background: white;
-  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
-  isolation: isolate;
-}
-
-.product-hero__background {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.product-hero__bg-gradient {
-  position: absolute;
-  inset: -20%;
-  background: radial-gradient(
-    circle at 50% 20%,
-    rgba(var(--v-theme-hero-overlay-strong), 0.08),
-    rgba(var(--v-theme-hero-gradient-mid), 0.06),
-    transparent 70%
-  );
-  transform: translateZ(0);
-}
-
-.product-hero__bg-image {
-  position: absolute;
-  inset: -10%;
-  background-size: cover;
-  background-position: center;
-  opacity: 0.5;
-  filter: saturate(1.15) blur(2px);
-  transform: translate3d(0, 0, 0) scale(1.05);
-  background-attachment: fixed;
-}
-
-.product-hero__bg-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(
-      rgba(var(--v-theme-border-primary-strong), 0.07) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(var(--v-theme-border-primary-strong), 0.07) 1px,
-      transparent 1px
-    );
-  background-size: 120px 120px;
-  mask-image: radial-gradient(
-    circle at 50% 30%,
-    rgba(0, 0, 0, 0.6),
-    transparent 70%
-  );
-}
-
-.product-hero__bg-glow {
-  position: absolute;
-  width: 480px;
-  height: 480px;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.5;
-}
-
-.product-hero__bg-glow--primary {
-  top: -80px;
-  left: -120px;
-  background: rgba(var(--v-theme-hero-gradient-start), 0.35);
-}
-
-.product-hero__bg-glow--accent {
-  bottom: -180px;
-  right: -140px;
-  background: rgba(var(--v-theme-hero-gradient-end), 0.38);
 }
 
 .product-hero__content {
@@ -749,8 +650,8 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   position: absolute;
   top: -1.75rem; /* Adjust based on panel padding */
   left: -1.75rem; /* Adjust based on panel padding */
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

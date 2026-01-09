@@ -780,8 +780,13 @@
         "country": "Code pays du GTIN",
         "datasource": "Sources de données",
         "googleTaxonomyId": "Catégorie produit Google",
-        "offersCount": "Nombre d'offres",
-        "price": "Fourchette de prix"
+        "googleTaxonomyId": "Catégorie produit Google",
+        "offersCount": {
+          "one": "{count} offre",
+          "other": "{count} offres"
+        },
+        "price": "Fourchette de prix",
+        "title": "Filtres"
       },
       "globalTitle": "Filtres globaux",
       "hideImpact": "Masquer les filtres d'impact",

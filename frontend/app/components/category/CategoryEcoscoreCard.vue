@@ -17,7 +17,10 @@
       <p class="category-ecoscore-card__title">
         {{ t('category.filters.ecoscore.title') }}
       </p>
-      <p class="category-ecoscore-card__description">
+      <p
+        v-if="showDescription !== false"
+        class="category-ecoscore-card__description"
+      >
         {{ description }}
       </p>
       <span class="category-ecoscore-card__cta">

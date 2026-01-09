@@ -388,8 +388,15 @@ watch(
     padding-inline: 4px;
     gap: 10px;
 
+    /* Center the slider and limit width to show max 4 items (4 * 240px + gaps) */
+    margin-inline: auto;
+    max-width: 1050px;
+    width: 100%;
+
     :deep(.v-slide-group__container) {
       align-items: stretch;
+      /* Ensure the container doesn't overflow its parent in a way that hides arrows */
+      contain: content;
     }
 
     :deep(.v-slide-group__content) {
