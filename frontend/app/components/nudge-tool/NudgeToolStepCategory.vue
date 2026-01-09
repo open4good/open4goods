@@ -8,27 +8,30 @@
     <v-slide-group
       v-model="selected"
       class="nudge-step-category__slider"
-      :class="{ 'nudge-step-category__slider--stacked': isMobile }"
-      :show-arrows="!isMobile"
+      show-arrows
       center-active
       mandatory
     >
-      <template v-if="!isMobile" #prev="{ props: prevArrowProps }">
+      <template #prev="prevArrowProps">
         <v-btn
+          v-if="!prevArrowProps.disabled"
           v-bind="prevArrowProps"
-          class="nudge-step-category__arrow"
+          class="nudge-step-category__arrow nudge-step-category__arrow--prev"
           icon="mdi-chevron-left"
           variant="flat"
+          size="small"
           :aria-label="$t('nudge-tool.actions.previous')"
         />
       </template>
 
-      <template v-if="!isMobile" #next="{ props: nextArrowProps }">
+      <template #next="nextArrowProps">
         <v-btn
+          v-if="!nextArrowProps.disabled"
           v-bind="nextArrowProps"
-          class="nudge-step-category__arrow"
+          class="nudge-step-category__arrow nudge-step-category__arrow--next"
           icon="mdi-chevron-right"
           variant="flat"
+          size="small"
           :aria-label="$t('nudge-tool.actions.next')"
         />
       </template>
@@ -289,7 +292,6 @@
 </template>
 
 <script setup lang="ts">
-import { useDisplay } from 'vuetify'
 import type { NudgeToolCategory } from '~/types/nudge-tool'
 
 const props = defineProps<{
@@ -302,8 +304,6 @@ const props = defineProps<{
 const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
 
 const selected = ref<string | null>(props.selectedCategoryId ?? null)
-const display = useDisplay()
-const isMobile = computed(() => display.smAndDown.value)
 const allowDisabledSelection = computed(() => props.isAuthenticated ?? false)
 
 const isCategoryDisabled = (category: NudgeToolCategory) =>
@@ -393,32 +393,38 @@ watch(
     }
 
     :deep(.v-slide-group__content) {
-      justify-content: center;
       gap: 12px;
       padding-block: 4px;
     }
 
     &--stacked {
-      padding-inline: 0;
-
-      :deep(.v-slide-group__container) {
-        overflow: visible;
-      }
-
-      :deep(.v-slide-group__content) {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 12px;
-        width: 100%;
-      }
+      display: none; // No longer used, keeping for reference or removal
     }
   }
 
   &__arrow {
-    background: rgb(var(--v-theme-surface-primary-080));
+    background: rgba(var(--v-theme-surface-glass-strong), 0.9) !important;
+    backdrop-filter: blur(8px);
     color: rgb(var(--v-theme-accent-primary-highlight));
-    box-shadow: none;
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3) !important;
+    transition: all 0.3s ease;
+    z-index: 10;
+    width: 40px !important;
+    height: 40px !important;
+
+    &:hover {
+      background: rgb(var(--v-theme-surface-primary-100)) !important;
+      transform: scale(1.1);
+    }
+
+    &--prev {
+      margin-right: -8px;
+    }
+
+    &--next {
+      margin-left: -8px;
+    }
   }
 
   &__card {

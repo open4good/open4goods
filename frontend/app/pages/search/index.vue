@@ -55,8 +55,6 @@
       </p>
     </PageHeader>
 
-
-
     <v-navigation-drawer
       v-model="filtersOpen"
       location="right"
@@ -166,17 +164,17 @@
       <template v-else>
         <!-- Filtered Results (Product Search) -->
         <div v-if="isFiltered" class="search-page__filtered-results">
-           <div
+          <div
             v-if="!productResults.length && !productsPending"
             class="search-page__empty"
           >
-             <h2 class="search-page__empty-title">
+            <h2 class="search-page__empty-title">
               {{ t('search.states.empty.title', { query: normalizedQuery }) }}
             </h2>
             <p class="search-page__empty-description">
               {{ t('search.states.empty.description') }}
             </p>
-             <v-btn
+            <v-btn
               variant="text"
               color="primary"
               class="mt-4"
@@ -366,7 +364,11 @@ const { data, pending, error, refresh } =
       })
     },
     {
-      watch: [() => normalizedQuery.value, () => requestedSearchType.value, () => isFiltered.value],
+      watch: [
+        () => normalizedQuery.value,
+        () => requestedSearchType.value,
+        () => isFiltered.value,
+      ],
       immediate: hasMinimumLength.value,
     }
   )
@@ -396,29 +398,29 @@ const manualFields: FieldMetadataDto[] = [
 const filterFields = computed(() => manualFields)
 
 const currentSort = computed<SortDto[]>(() => {
-    switch(sortOption.value) {
-        case 'price_asc':
-            return [{ field: 'price.minPrice.price', order: 'asc' }]
-        case 'price_desc':
-            return [{ field: 'price.minPrice.price', order: 'desc' }]
-        case 'impact':
-        default:
-            return [{ field: 'scores.ECOSCORE.value', order: 'desc' }] // Default Sort: Impact Score DESC
-    }
+  switch (sortOption.value) {
+    case 'price_asc':
+      return [{ field: 'price.minPrice.price', order: 'asc' }]
+    case 'price_desc':
+      return [{ field: 'price.minPrice.price', order: 'desc' }]
+    case 'impact':
+    default:
+      return [{ field: 'scores.ECOSCORE.value', order: 'desc' }] // Default Sort: Impact Score DESC
+  }
 })
 
 const requestBody = computed<ProductSearchRequestDto>(() => ({
   filters: filterRequest.value,
   sort: {
-      sorts: currentSort.value
+    sorts: currentSort.value,
   },
   aggs: {
-      aggs: [
-          { name: 'price', field: 'price.minPrice.price', type: 'range' },
-          { name: 'ecoscore', field: 'scores.ECOSCORE.value', type: 'range' },
-          { name: 'condition', field: 'price.conditions', type: 'terms' }
-      ]
-  }
+    aggs: [
+      { name: 'price', field: 'price.minPrice.price', type: 'range' },
+      { name: 'ecoscore', field: 'scores.ECOSCORE.value', type: 'range' },
+      { name: 'condition', field: 'price.conditions', type: 'terms' },
+    ],
+  },
 }))
 
 const {
@@ -454,50 +456,63 @@ const {
   },
   {
     watch: [
-        () => normalizedQuery.value,
-        () => filterRequest.value,
-        () => filtersOpen.value // Fetch when drawer opens to get aggs
+      () => normalizedQuery.value,
+      () => filterRequest.value,
+      () => filtersOpen.value, // Fetch when drawer opens to get aggs
     ],
     immediate: false, // Wait for interaction
   }
 )
 
-const productResults = computed(() => productSearchData.value?.products?.content ?? [])
-const productAggregations = computed<Record<string, AggregationResponseDto>>(() => {
+const productResults = computed(
+  () => productSearchData.value?.products?.content ?? []
+)
+const productAggregations = computed<Record<string, AggregationResponseDto>>(
+  () => {
     const aggs = productSearchData.value?.aggregations ?? []
-    return aggs.reduce((acc, curr) => {
-        if(curr.field) acc[curr.field] = curr
+    return aggs.reduce(
+      (acc, curr) => {
+        if (curr.field) acc[curr.field] = curr
         return acc
-    }, {} as Record<string, AggregationResponseDto>)
-})
+      },
+      {} as Record<string, AggregationResponseDto>
+    )
+  }
+)
 
-const updateRangeFilter = (field: string, payload: { min?: number; max?: number }) => {
+const updateRangeFilter = (
+  field: string,
+  payload: { min?: number; max?: number }
+) => {
   const current = activeFilters.value.filter(f => f.field !== field)
   if (payload.min == null && payload.max == null) {
-      filterRequest.value = { ...filterRequest.value, filters: current }
-      return
+    filterRequest.value = { ...filterRequest.value, filters: current }
+    return
   }
   filterRequest.value = {
-      ...filterRequest.value,
-      filters: [...current, { field, operator: 'range', min: payload.min, max: payload.max }]
+    ...filterRequest.value,
+    filters: [
+      ...current,
+      { field, operator: 'range', min: payload.min, max: payload.max },
+    ],
   }
 }
 
 const updateTermsFilter = (field: string, terms: string[]) => {
   const current = activeFilters.value.filter(f => f.field !== field)
   if (!terms.length) {
-      filterRequest.value = { ...filterRequest.value, filters: current }
-      return
+    filterRequest.value = { ...filterRequest.value, filters: current }
+    return
   }
   filterRequest.value = {
-      ...filterRequest.value,
-      filters: [...current, { field, operator: 'term', terms }]
+    ...filterRequest.value,
+    filters: [...current, { field, operator: 'term', terms }],
   }
 }
 
 const clearFilters = () => {
-    filterRequest.value = { filters: [], filterGroups: [] }
-    filtersOpen.value = false
+  filterRequest.value = { filters: [], filterGroups: [] }
+  filtersOpen.value = false
 }
 
 // ... Rest of existing code ...
@@ -694,9 +709,9 @@ const activeSearchModeLabel = computed(() =>
 const nextSearchMode = computed(() => {
   switch (activeSearchMode.value) {
     case 'exact_vertical':
-      return 'global'
-    case 'global':
       return 'semantic'
+    case 'semantic':
+      return 'global'
     default:
       return null
   }

@@ -136,8 +136,8 @@ public class SearchService {
             """;
     private static final List<SearchMode> GLOBAL_SEARCH_SEQUENCE = List.of(
             SearchMode.exact_vertical,
-            SearchMode.global,
-            SearchMode.semantic);
+            SearchMode.semantic,
+            SearchMode.global);
 
     private static final String EXCLUDED_FIELD = "excluded";
     private static final String EXCLUDED_CAUSES_FIELD = FilterField.excludedCauses.fieldPath();
