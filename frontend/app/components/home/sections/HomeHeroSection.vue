@@ -866,6 +866,7 @@ useHead({
   display: flex
   flex-direction: column
   gap: clamp(1.25rem, 2vw, 1.75rem)
+  min-width: 0
 
 .home-hero__context
   flex-direction: column
