@@ -118,65 +118,12 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	 * compared) and recalculates the batch cardinalities before delegating to the
 	 * standard relativisation process.
 	 */
-        @Override
-        public void done(Collection<Product> datas, VerticalConfig vConf) {
-
-		/////////////////////////////////////////////////
-		// Reversing the scores that need to be (ie. weight, electric consumption :
-		///////////////////////////////////////////////// lower values are the best
-		///////////////////////////////////////////////// scored)
-		// To reverse a score, we substract max absolute score from item absolute score
-		/////////////////////////////////////////////////
-
-                // Selecting the scores to reverse
-                List<String> scoresToReverse = vConf.getAttributesConfig().getConfigs().stream()
-                                .filter(AttributeConfig::isAsScore)
-                                .filter(config -> AttributeComparisonRule.LOWER.equals(config.getBetterIs()))
-                                .map(AttributeConfig::getKey)
-                                .toList();
-
-		// For each score to reverse
-		for (String key : scoresToReverse) {
-
-                        Cardinality sourceCardinality = absoluteCardinalities.get(key);
-                        if (null == sourceCardinality) {
-                                dedicatedLogger.warn("Cannot reverse score {} – no cardinality available", key);
-                                continue;
-                        }
-
-                        Double max = sourceCardinality.getMax();
-                        Double min = sourceCardinality.getMin();
-                        if (null == max || null == min) {
-                                dedicatedLogger.warn("Cannot reverse score {} – no min/max value available", key);
-                                continue;
-                        }
-
-			// Recompute the global cardinality with the reversed values so that
-			// subsequent relativisation and frontend explanations rely on the same extrema.
-			Cardinality reversedCardinality = new Cardinality();
-
-                        for (Product p : datas) {
-                                Score score = p.getScores().get(key);
-                                if (score == null) {
-                                        dedicatedLogger.info("No score {} for {}", key, p);
-                                        continue;
-                                }
-                                Double originalValue = score.getValue();
-                                absoluteValuesOverrides.computeIfAbsent(p.getId(), ignored -> new HashMap<>()).put(key, originalValue);
-                                Double reversed = (max + min) - originalValue;
-                                score.setValue(reversed);
-                                reversedCardinality.increment(reversed);
-                                dedicatedLogger.info("Score {} reversed for {}. Original was {}, min is {}, max is {}. New value is {}", key, p, originalValue, min, max, reversed);
-                        }
-
-                        batchDatas.put(key, reversedCardinality);
-		}
-
-                // SUPER important : Score relativisation is operated in the
-                // AbstactScoreAggService
+	@Override
+	public void done(Collection<Product> datas, VerticalConfig vConf) {
+                // Score relativisation is operated in the AbstactScoreAggService
                 super.done(datas, vConf);
                 absoluteValuesOverrides.clear();
-        }
+	}
 
         @Override
         protected Double resolveAbsoluteValue(Product product, String scoreName, Score score) {

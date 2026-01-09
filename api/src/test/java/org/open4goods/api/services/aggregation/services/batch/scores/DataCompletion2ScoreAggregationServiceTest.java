@@ -36,6 +36,6 @@ class DataCompletion2ScoreAggregationServiceTest {
         assertThat(dataQuality.getVirtual()).isFalse();
         assertThat(dataQuality.getAbsolute()).isNotNull();
         assertThat(dataQuality.getAbsolute().getValue()).isEqualTo(1.0);
-        assertThat(dataQuality.getRelativ().getValue()).isEqualTo(StandardiserService.DEFAULT_MAX_RATING);
+        assertThat(dataQuality.getRelativ().getValue()).isEqualTo(StandardiserService.DEFAULT_MAX_RATING / 2);
     }
 }

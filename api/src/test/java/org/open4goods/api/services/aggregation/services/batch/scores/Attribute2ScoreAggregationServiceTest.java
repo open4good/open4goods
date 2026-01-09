@@ -49,12 +49,12 @@ class Attribute2ScoreAggregationServiceTest {
         assertThat(betterScore.getAbsolute().getMin()).isEqualTo(4.0);
         assertThat(betterScore.getAbsolute().getValue()).isEqualTo(4.0);
         assertThat(worseScore.getAbsolute().getValue()).isEqualTo(9.0);
-        assertThat(betterScore.getValue()).isEqualTo(9.0);
-        assertThat(worseScore.getValue()).isEqualTo(4.0);
-        assertThat(betterScore.getRelativ().getValue()).isEqualTo(5.0);
-        assertThat(worseScore.getRelativ().getValue()).isEqualTo(0.0);
-        assertThat(betterScore.on20()).isEqualTo(20L);
-        assertThat(worseScore.on20()).isEqualTo(0L);
+        assertThat(betterScore.getValue()).isEqualTo(4.0);
+        assertThat(worseScore.getValue()).isEqualTo(9.0);
+        assertThat(betterScore.getRelativ().getValue()).isEqualTo(3.75);
+        assertThat(worseScore.getRelativ().getValue()).isEqualTo(1.25);
+        assertThat(betterScore.on20()).isEqualTo(15L);
+        assertThat(worseScore.on20()).isEqualTo(5L);
     }
 
     @Test
@@ -92,9 +92,9 @@ class Attribute2ScoreAggregationServiceTest {
         assertThat(efficient.getScores()).doesNotContainKey(synonymKey);
         assertThat(efficientScore.getAbsolute().getValue()).isEqualTo(50.0);
         assertThat(inefficientScore.getAbsolute().getValue()).isEqualTo(100.0);
-        assertThat(efficientScore.getValue()).isEqualTo(100.0);
-        assertThat(inefficientScore.getValue()).isEqualTo(50.0);
-        assertThat(efficientScore.getValue()).isGreaterThan(inefficientScore.getValue());
+        assertThat(efficientScore.getValue()).isEqualTo(50.0);
+        assertThat(inefficientScore.getValue()).isEqualTo(100.0);
+        assertThat(efficientScore.getValue()).isLessThan(inefficientScore.getValue());
     }
 
     @Test
@@ -114,10 +114,10 @@ class Attribute2ScoreAggregationServiceTest {
         assertThat(lighterScore.getAbsolute().getMax()).isCloseTo(10.0, offset(1e-9));
         assertThat(lighterScore.getAbsolute().getValue()).isCloseTo(3.1, offset(1e-9));
         assertThat(heavierScore.getAbsolute().getValue()).isCloseTo(10.0, offset(1e-9));
-        assertThat(lighterScore.getValue()).isCloseTo(10.0, offset(1e-9));
-        assertThat(heavierScore.getValue()).isCloseTo(3.1, offset(1e-9));
-        assertThat(lighterScore.getRelativ().getValue()).isCloseTo(5.0, offset(1e-9));
-        assertThat(heavierScore.getRelativ().getValue()).isCloseTo(0.0, offset(1e-9));
+        assertThat(lighterScore.getValue()).isCloseTo(3.1, offset(1e-9));
+        assertThat(heavierScore.getValue()).isCloseTo(10.0, offset(1e-9));
+        assertThat(lighterScore.getRelativ().getValue()).isCloseTo(3.75, offset(1e-9));
+        assertThat(heavierScore.getRelativ().getValue()).isCloseTo(1.25, offset(1e-9));
     }
 
     private void aggregate(List<Product> products, VerticalConfig verticalConfig) {

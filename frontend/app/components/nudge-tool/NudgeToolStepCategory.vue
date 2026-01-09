@@ -430,14 +430,13 @@ watch(
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-width: 220px; /* Adjusted to ensure fewer items fit on screen */
-    max-width: 280px;
+    width: 240px;
     box-shadow: none;
     background: transparent !important;
     border: none !important;
 
     @media (max-width: 960px) {
-      min-width: 180px; /* Fallback for smaller screens */
+      width: 180px;
     }
   }
 
@@ -499,7 +498,7 @@ watch(
 
   @media (max-width: 600px) {
     &__card {
-      min-width: 140px;
+      width: 140px;
       padding: 12px 10px;
       gap: 6px;
     }

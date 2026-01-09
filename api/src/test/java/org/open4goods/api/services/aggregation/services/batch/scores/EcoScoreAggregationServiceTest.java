@@ -57,7 +57,14 @@ class EcoScoreAggregationServiceTest {
         Cardinality absolute = new Cardinality();
         absolute.setMin(0d);
         absolute.setMax(10d);
-        absolute.setAvg(5d);
+        
+        // Define distribution stats to have Mean=5.0 and StdDev=2.5
+        // This corresponds to a dataset like {2.5, 7.5}
+        absolute.setCount(2);
+        absolute.setSum(10.0);
+        absolute.setSumOfSquares(62.5);
+        absolute.setAvg(5.0);
+        
         absolute.setValue(4d);
         baseScore.setAbsolute(absolute);
         product.getScores().put("CRITERIA", baseScore);
