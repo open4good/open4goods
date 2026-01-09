@@ -12,6 +12,8 @@ public record GlobalSearchResponseDto(
         List<GlobalSearchVerticalGroupDto> verticalGroups,
         @Schema(description = "Fallback results when no vertical match is found")
         List<GlobalSearchResultDto> fallbackResults,
+        @Schema(description = "Category suggestion if a strict match is found")
+        SearchSuggestCategoryDto verticalCta,
         @Schema(description = "Flag indicating whether the fallback pass has been executed", example = "false")
         boolean fallbackTriggered) {
 }

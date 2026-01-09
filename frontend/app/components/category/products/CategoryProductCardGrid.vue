@@ -13,9 +13,9 @@
       :key="resolveProductTitle(product) ?? Math.random()"
       cols="12"
       :sm="normalizedSize === 'small' ? 6 : 6"
-      :md="normalizedSize === 'small' ? 4 : normalizedSize === 'big' ? 6 : 6"
-      :lg="normalizedSize === 'small' ? 3 : normalizedSize === 'big' ? 6 : 4"
-      :xl="normalizedSize === 'small' ? 2 : normalizedSize === 'big' ? 3 : 3"
+      :md="normalizedSize === 'small' ? 4 : normalizedSize === 'big' ? 4 : 6"
+      :lg="normalizedSize === 'small' ? 3 : normalizedSize === 'big' ? 4 : 4"
+      :xl="normalizedSize === 'small' ? 2 : normalizedSize === 'big' ? 4 : 3"
     >
       <ProductTileCard
         v-if="variant === 'compact-tile'"
@@ -65,6 +65,16 @@
                 <v-skeleton-loader type="image" class="h-100" />
               </template>
             </v-img>
+
+            <div class="category-product-card-grid__title-overlay">
+              <component
+                :is="normalizedSize === 'big' ? 'h2' : 'h3'"
+                class="category-product-card-grid__title"
+              >
+                {{ resolveProductTitle(product) }}
+              </component>
+            </div>
+
             <div class="category-product-card-grid__corner" role="presentation">
               <ImpactScore
                 v-if="impactScoreValue(product) != null"
@@ -83,15 +93,6 @@
         </div>
 
         <v-card-item class="category-product-card-grid__body">
-          <div class="category-product-card-grid__header">
-            <component
-              :is="normalizedSize === 'big' ? 'h2' : 'h3'"
-              class="category-product-card-grid__title"
-            >
-              {{ resolveProductTitle(product) }}
-            </component>
-          </div>
-
           <div
             v-if="popularAttributesByProduct(product).length"
             class="category-product-card-grid__attributes"
@@ -125,13 +126,9 @@
                 class="category-product-card-grid__pricing-cell"
                 :class="`category-product-card-grid__pricing-cell--${badge.appearance}`"
               >
-                <span class="category-product-card-grid__pricing-label">
-                  {{ badge.label }}
-                </span>
-
-                <div class="category-product-card-grid__pricing-value-group">
-                  <span class="category-product-card-grid__pricing-amount">
-                    {{ badge.price }}
+                <div class="category-product-card-grid__pricing-label-group">
+                  <span class="category-product-card-grid__pricing-label">
+                    {{ badge.label }}
                   </span>
 
                   <v-tooltip
@@ -144,7 +141,7 @@
                         v-bind="tooltipProps"
                         :icon="badge.trendIcon"
                         :color="badge.trendColor"
-                        size="16"
+                        size="14"
                         class="category-product-card-grid__pricing-trend"
                       />
                     </template>
@@ -153,16 +150,22 @@
                     </span>
                   </v-tooltip>
                 </div>
+
+                <span class="category-product-card-grid__pricing-amount">
+                  {{ badge.price }}
+                </span>
+
+                <div
+                  v-if="badge.countLabel"
+                  class="category-product-card-grid__pricing-count"
+                >
+                  {{ badge.countLabel }}
+                </div>
               </div>
             </template>
           </div>
 
-          <div class="category-product-card-grid__meta">
-            <span class="category-product-card-grid__offers">
-              <v-icon icon="mdi-store" size="16" class="me-1" />
-              {{ offersCountLabel(product) }}
-            </span>
-          </div>
+          <!-- Global offers count removed (moved to cells) -->
         </v-card-item>
       </v-card>
     </v-col>
@@ -370,6 +373,7 @@ type OfferBadge = {
   trendIcon?: string
   trendColor?: string
   trend?: ProductPriceTrendDtoTrendEnum
+  countLabel?: string
 }
 
 const resolveTrendIcon = (
@@ -437,6 +441,7 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         trendIcon: resolveTrendIcon(newTrend),
         trendColor: resolveTrendColor(newTrend),
         trend: newTrend,
+        countLabel: getConditionCountLabel(product, 'new'),
       })
     }
   }
@@ -453,6 +458,7 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         trendIcon: resolveTrendIcon(occasionTrend),
         trendColor: resolveTrendColor(occasionTrend),
         trend: occasionTrend,
+        countLabel: getConditionCountLabel(product, 'occasion'),
       })
     }
   }
@@ -472,6 +478,32 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
   }
 
   return entries
+}
+
+const getConditionCountLabel = (
+  product: ProductDto,
+  type: 'new' | 'occasion'
+): string | undefined => {
+  const offersByCondition = product.offers?.offersByCondition
+  if (!offersByCondition) return undefined
+
+  let count = 0
+  if (type === 'new') {
+    // Sum up "new" like keys. Typically 'NEW'
+    count = offersByCondition['NEW']?.length ?? 0
+  } else {
+    // Sum up anything not NEW? or specific keys like 'USED', 'REFURBISHED'
+    // For simplicity, we assume we want to show count for the 'bestOccasion' context.
+    // We can iterate keys.
+    Object.keys(offersByCondition).forEach(key => {
+      if (key !== 'NEW') {
+        count += offersByCondition[key]?.length ?? 0
+      }
+    })
+  }
+
+  if (count <= 0) return undefined
+  return translatePlural('category.products.offersCount', count)
 }
 </script>
 
@@ -586,17 +618,32 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     text-align: center
     gap: 0.25rem
 
+  &__title-overlay
+    position: absolute
+    top: 0
+    left: 56px /* Width of corner badge */
+    right: 0
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem /* Right padding for compare toggle */
+    z-index: 2
+    display: flex
+    align-items: center
+    min-height: 56px /* Match corner height */
+
   &__title
-    font-size: 1rem
+    font-size: 0.85rem
     font-weight: 700
     color: rgb(var(--v-theme-text-neutral-strong))
     margin: 0
-    line-height: 1.3
+    line-height: 1.2
     display: -webkit-box
     -webkit-line-clamp: 2
     -webkit-box-orient: vertical
     overflow: hidden
-    text-align: center
+    background: rgba(var(--v-theme-surface-default), 0.7)
+    backdrop-filter: blur(4px)
+    padding: 0.35rem 0.75rem
+    border-radius: 1rem
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05)
 
   &__attributes
     display: flex
@@ -619,7 +666,9 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     border-radius: 8px
     overflow: hidden
     margin-top: auto /* Push to bottom */
-    background: rgb(var(--v-theme-surface-default))
+    margin-top: auto /* Push to bottom */
+    background: rgba(var(--v-theme-surface-default), 0.6) /* More transparent */
+    backdrop-filter: blur(4px)
 
     /* Only one item? Span full width */
     > *:only-child
@@ -638,12 +687,12 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
       border-right: 1px solid rgba(var(--v-theme-border-primary), 0.15)
 
     &--new
-      background: rgba(var(--v-theme-primary), 0.04)
+      background: transparent
       .category-product-card-grid__pricing-label
         color: rgb(var(--v-theme-primary))
 
     &--occasion
-      background: rgba(var(--v-theme-accent-supporting), 0.04)
+      background: transparent
       .category-product-card-grid__pricing-label
         color: rgb(var(--v-theme-accent-supporting))
 
@@ -657,6 +706,11 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     letter-spacing: 0.05em
     opacity: 0.85
 
+  &__pricing-label-group
+    display: flex
+    align-items: center
+    gap: 0.35rem
+
   &__pricing-value-group
     display: flex
     align-items: center
@@ -666,6 +720,11 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
     font-weight: 700
     font-size: 0.95rem
     color: rgb(var(--v-theme-text-neutral-strong))
+
+  .category-product-card-grid__pricing-count
+    font-size: 0.7rem
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    font-weight: 500
 
   &__pricing-trend
     opacity: 0.9
@@ -706,7 +765,7 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         max-height: 320px
 
     .category-product-card-grid__title
-        font-size: 1.25rem
+        font-size: 1rem
 
     .category-product-card-grid__pricing-amount
         font-size: 1.25rem

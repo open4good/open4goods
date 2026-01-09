@@ -239,7 +239,8 @@ const { t } = useI18n()
 const { isLoggedIn } = useAuth()
 const router = useRouter()
 
-const { fetchCategories } = useCategories()
+const { fetchCategories, selectCategoryBySlug, currentCategory } =
+  useCategories()
 
 const categories = useState<VerticalCategoryDto[]>('nudge-categories', () => [])
 const selectedCategoryId = ref<string | null>(props.initialCategoryId ?? null)
@@ -256,11 +257,16 @@ const activeStepKey = ref('category')
 const previousStepKey = ref<string | null>(null)
 const visitedStepKeys = ref<string[]>(['category'])
 
-const selectedCategory = computed(
-  () =>
+const selectedCategory = computed(() => {
+  // Prefer detailed category if loaded and matching
+  if (currentCategory.value?.id === selectedCategoryId.value) {
+    return currentCategory.value
+  }
+  return (
     categories.value.find(entry => entry.id === selectedCategoryId.value) ??
     null
-)
+  )
+})
 
 const categoryIcon = computed(
   () =>
@@ -347,9 +353,9 @@ const filterRequest = computed<FilterRequestDto>(() => {
 
 const isCategoryStep = computed(() => activeStepKey.value === 'category')
 
-const windowTransition = computed(() => undefined)
+const windowTransition = computed(() => 'slide-x-transition')
 
-const windowReverseTransition = computed(() => undefined)
+const windowReverseTransition = computed(() => 'slide-x-reverse-transition')
 
 const categorySummary = computed(() => {
   if (!selectedCategory.value || activeStepKey.value === 'category') {
@@ -599,6 +605,17 @@ const getFirstContentStepKey = () =>
 
 const onCategorySelect = async (categoryId: string) => {
   selectedCategoryId.value = categoryId
+
+  // Optimistically fetch details to ensure attributes are available
+  const simpleCategory = categories.value.find(c => c.id === categoryId)
+  if (simpleCategory?.verticalHomeUrl) {
+    const slug = simpleCategory.verticalHomeUrl.replace(/^\/+/, '')
+    // Don't await strictly to allow transition to start, but we need it for the end step
+    selectCategoryBySlug(slug).catch(() => {
+      /* ignore */
+    })
+  }
+
   await nextTick()
   const nextStepKey = getFirstContentStepKey()
   if (nextStepKey) {

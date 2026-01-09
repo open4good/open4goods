@@ -142,10 +142,12 @@ i18n:
     h1Title:
       prefix: "|| TV | Télévision | Téléviseur ||"
       attrs:
-        - TV_TYPE
         - BRAND
-        - MODEL
+        - TV_TYPE
+        - DIAGONALE_POUCES
+        - DISPLAY_TECHNOLOGY
         - YEAR
+        - MODEL
     prettyName:
       prefix: "|| TV | Télévision | Téléviseur ||"
       attrs:

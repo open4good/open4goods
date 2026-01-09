@@ -55,8 +55,42 @@
       </p>
     </PageHeader>
 
+
+
+    <v-navigation-drawer
+      v-model="filtersOpen"
+      location="right"
+      width="320"
+      temporary
+      class="search-page__filters-drawer"
+    >
+      <div class="pa-4 d-flex align-center justify-space-between">
+        <h3 class="text-h6 font-weight-bold mb-0">
+          {{ t('category.filters.title') }}
+        </h3>
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          density="comfortable"
+          @click="filtersOpen = false"
+        />
+      </div>
+
+      <v-divider />
+
+      <div class="pa-4">
+        <CategoryFilterList
+          :fields="filterFields"
+          :aggregations="productAggregations"
+          :active-filters="activeFilters"
+          @update-range="updateRangeFilter"
+          @update-terms="updateTermsFilter"
+        />
+      </div>
+    </v-navigation-drawer>
+
     <v-progress-linear
-      v-if="pending"
+      v-if="pending || productsPending"
       class="search-page__loader"
       indeterminate
       color="primary"
@@ -69,8 +103,40 @@
       class="search-page__results py-10 px-4 mx-auto"
       max-width="xl"
     >
+      <div class="d-flex justify-end align-center mb-4 gap-4">
+        <v-select
+          v-if="isFiltered"
+          v-model="sortOption"
+          :items="sortOptions"
+          item-title="label"
+          item-value="value"
+          density="compact"
+          variant="outlined"
+          hide-details
+          class="search-page__sort-select"
+          style="max-width: 200px"
+          prepend-inner-icon="mdi-sort"
+        />
+        <v-btn
+          v-if="!showInitialState && !error"
+          prepend-icon="mdi-filter-variant"
+          variant="tonal"
+          color="primary"
+          @click="filtersOpen = true"
+        >
+          {{ t('category.filters.title') }}
+          <v-badge
+            v-if="activeFilters.length"
+            :content="activeFilters.length"
+            color="primary"
+            inline
+            class="ms-2"
+          />
+        </v-btn>
+      </div>
+
       <v-alert
-        v-if="error"
+        v-if="error || productsError"
         type="error"
         variant="tonal"
         border="start"
@@ -87,70 +153,106 @@
           </p>
         </div>
         <template #append>
-          <v-btn color="primary" variant="text" @click="refresh">{{
-            t('common.actions.retry')
-          }}</v-btn>
+          <v-btn
+            color="primary"
+            variant="text"
+            @click="isFiltered ? refreshProducts() : refresh()"
+          >
+            {{ t('common.actions.retry') }}
+          </v-btn>
         </template>
       </v-alert>
 
       <template v-else>
-        <div
-          v-if="!displayGroups.length && !pending"
-          class="search-page__empty"
-        >
-          <h2 class="search-page__empty-title">
-            {{ t('search.states.empty.title', { query: normalizedQuery }) }}
-          </h2>
-          <p class="search-page__empty-description">
-            {{ t('search.states.empty.description') }}
-          </p>
-        </div>
-
-        <div v-else class="search-page__group-wrapper">
-          <p class="search-page__summary">
-            {{ resultsSummaryLabel }}
-          </p>
-          <p v-if="usingFallback" class="search-page__fallback">
-            {{ t('search.notice.fallback') }}
-          </p>
-          <div v-if="activeSearchModeLabel" class="search-page__mode-row">
-            <p class="search-page__mode">
-              {{
-                t('search.results.modeLabel', {
-                  mode: activeSearchModeLabel,
-                })
-              }}
+        <!-- Filtered Results (Product Search) -->
+        <div v-if="isFiltered" class="search-page__filtered-results">
+           <div
+            v-if="!productResults.length && !productsPending"
+            class="search-page__empty"
+          >
+             <h2 class="search-page__empty-title">
+              {{ t('search.states.empty.title', { query: normalizedQuery }) }}
+            </h2>
+            <p class="search-page__empty-description">
+              {{ t('search.states.empty.description') }}
             </p>
-            <v-btn
-              v-if="nextSearchModeLabel"
-              variant="tonal"
+             <v-btn
+              variant="text"
               color="primary"
-              size="small"
-              @click="handleNextSearchMode"
+              class="mt-4"
+              @click="clearFilters"
             >
-              {{
-                t('search.results.nextMode', {
-                  mode: nextSearchModeLabel,
-                })
-              }}
+              {{ t('category.filters.reset') }}
             </v-btn>
           </div>
 
-          <SearchResultGroup
-            v-for="group in displayGroups"
-            :key="group.key"
-            :title="group.title"
-            :count-label="group.countLabel"
-            :products="group.products"
-            :popular-attributes="group.popularAttributes"
-            :vertical-home-url="group.verticalHomeUrl"
-            :search-mode-label="group.searchModeLabel"
-            :category-link-label="t('search.groups.viewCategory')"
-            :category-link-aria="
-              t('search.groups.viewCategoryAria', { title: group.title })
-            "
+          <CategoryProductCardGrid
+            v-else
+            :products="productResults"
+            size="medium"
           />
         </div>
+
+        <!-- Default Global Search Results (Groups) -->
+        <template v-else>
+          <div
+            v-if="!displayGroups.length && !pending"
+            class="search-page__empty"
+          >
+            <h2 class="search-page__empty-title">
+              {{ t('search.states.empty.title', { query: normalizedQuery }) }}
+            </h2>
+            <p class="search-page__empty-description">
+              {{ t('search.states.empty.description') }}
+            </p>
+          </div>
+
+          <div v-else class="search-page__group-wrapper">
+            <p class="search-page__summary">
+              {{ resultsSummaryLabel }}
+            </p>
+            <p v-if="usingFallback" class="search-page__fallback">
+              {{ t('search.notice.fallback') }}
+            </p>
+            <div v-if="activeSearchModeLabel" class="search-page__mode-row">
+              <p class="search-page__mode">
+                {{
+                  t('search.results.modeLabel', {
+                    mode: activeSearchModeLabel,
+                  })
+                }}
+              </p>
+              <v-btn
+                v-if="nextSearchModeLabel"
+                variant="tonal"
+                color="primary"
+                size="small"
+                @click="handleNextSearchMode"
+              >
+                {{
+                  t('search.results.nextMode', {
+                    mode: nextSearchModeLabel,
+                  })
+                }}
+              </v-btn>
+            </div>
+
+            <SearchResultGroup
+              v-for="group in displayGroups"
+              :key="group.key"
+              :title="group.title"
+              :count-label="group.countLabel"
+              :products="group.products"
+              :popular-attributes="group.popularAttributes"
+              :vertical-home-url="group.verticalHomeUrl"
+              :search-mode-label="group.searchModeLabel"
+              :category-link-label="t('search.groups.viewCategory')"
+              :category-link-aria="
+                t('search.groups.viewCategoryAria', { title: group.title })
+              "
+            />
+          </div>
+        </template>
       </template>
     </v-container>
   </div>
@@ -165,6 +267,12 @@ import type {
   ProductDto,
   SearchMode,
   VerticalConfigDto,
+  ProductSearchResponseDto,
+  ProductSearchRequestDto,
+  FilterRequestDto,
+  FieldMetadataDto,
+  AggregationResponseDto,
+  SortDto,
 } from '~~/shared/api-client'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -172,6 +280,8 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
+import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
+import CategoryFilterList from '~/components/category/filters/CategoryFilterList.vue'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { useAnalytics } from '~/composables/useAnalytics'
 
@@ -198,11 +308,25 @@ const requestedSearchType = ref<
   'auto' | 'exact_vertical' | 'global' | 'semantic'
 >('auto')
 
+const filtersOpen = ref(false)
+const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
+const sortOption = ref<string>('impact')
+
+const sortOptions = computed(() => [
+  { label: t('category.sorting.score'), value: 'impact' },
+  { label: t('category.sorting.priceAsc'), value: 'price_asc' },
+  { label: t('category.sorting.priceDesc'), value: 'price_desc' },
+])
+
 watch(
   routeQuery,
   value => {
     searchInput.value = value
     requestedSearchType.value = 'auto'
+    // Do NOT reset filters automatically to allow refining search with filters kept?
+    // User requirement: "taillés sur les resultats retournés". Usually implies new search -> new context.
+    // But if I type "iPhone" and filter price, then change to "Samsung", I might want to keep price filter.
+    // For now, let's keep filters.
   },
   { immediate: true }
 )
@@ -221,11 +345,14 @@ const showMinimumNotice = computed(
     trimmedInput.value.length < MIN_QUERY_LENGTH
 )
 
+// Global Search Data
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(
     'global-search',
     async () => {
-      if (!hasMinimumLength.value) {
+      // If filtered, we don't need global search, but we might want to keep it cached?
+      // Actually, if we switch mode, we strictly use the other endpoint.
+      if (!hasMinimumLength.value || isFiltered.value) {
         return null
       }
 
@@ -239,19 +366,141 @@ const { data, pending, error, refresh } =
       })
     },
     {
-      watch: [() => normalizedQuery.value, () => requestedSearchType.value],
+      watch: [() => normalizedQuery.value, () => requestedSearchType.value, () => isFiltered.value],
       immediate: hasMinimumLength.value,
     }
   )
 
-watch(
-  () => hasMinimumLength.value,
-  canSearch => {
-    if (!canSearch && data.value) {
-      data.value = null
+// Filtered Product Search Data
+const activeFilters = computed(() => filterRequest.value.filters ?? [])
+const isFiltered = computed(() => activeFilters.value.length > 0)
+
+const manualFields: FieldMetadataDto[] = [
+  {
+    mapping: 'price.minPrice.price',
+    title: 'Price', // Will be localized by resolveFilterFieldTitle if keys match
+    valueType: 'numeric',
+  },
+  {
+    mapping: 'scores.ECOSCORE.value',
+    title: 'Eco-score',
+    valueType: 'numeric',
+  },
+  {
+    mapping: 'price.conditions', // backend mapping for condition
+    title: 'Condition',
+    valueType: 'keyword',
+  },
+]
+
+const filterFields = computed(() => manualFields)
+
+const currentSort = computed<SortDto[]>(() => {
+    switch(sortOption.value) {
+        case 'price_asc':
+            return [{ field: 'price.minPrice.price', order: 'asc' }]
+        case 'price_desc':
+            return [{ field: 'price.minPrice.price', order: 'desc' }]
+        case 'impact':
+        default:
+            return [{ field: 'scores.ECOSCORE.value', order: 'desc' }] // Default Sort: Impact Score DESC
     }
+})
+
+const requestBody = computed<ProductSearchRequestDto>(() => ({
+  filters: filterRequest.value,
+  sort: {
+      sorts: currentSort.value
+  },
+  aggs: {
+      aggs: [
+          { name: 'price', field: 'price.minPrice.price', type: 'range' },
+          { name: 'ecoscore', field: 'scores.ECOSCORE.value', type: 'range' },
+          { name: 'condition', field: 'price.conditions', type: 'terms' }
+      ]
+  }
+}))
+
+const {
+  data: productSearchData,
+  pending: productsPending,
+  error: productsError,
+  refresh: refreshProducts,
+} = await useAsyncData<ProductSearchResponseDto | null>(
+  'product-search-filtered',
+  async () => {
+    // Only fetch if has query AND (filters are open/active OR we want to prefetch? No, lazy load)
+    // To support "taillés sur les resultats", we need to fetch aggregations EVEN IF no filter is applied
+    // IF the user opens the filter drawer.
+    // OR if filters are active.
+    if (!hasMinimumLength.value) return null
+
+    // If global search is active and no filters, skip unless drawer is open?
+    // Let's simplified: If isFiltered is true, we fetch.
+    // If IS NOT filtered, we rely on Global Search.
+    // BUT we need aggregations to show in the drawer.
+    // So if drawer is OPEN, we need to fetch aggregations.
+    if (!isFiltered.value && !filtersOpen.value) return null
+
+    return await $fetch<ProductSearchResponseDto>('/api/products', {
+      method: 'POST',
+      headers: requestHeaders,
+      params: {
+        query: normalizedQuery.value,
+        domainLanguage: locale.value,
+      },
+      body: requestBody.value,
+    })
+  },
+  {
+    watch: [
+        () => normalizedQuery.value,
+        () => filterRequest.value,
+        () => filtersOpen.value // Fetch when drawer opens to get aggs
+    ],
+    immediate: false, // Wait for interaction
   }
 )
+
+const productResults = computed(() => productSearchData.value?.products?.content ?? [])
+const productAggregations = computed<Record<string, AggregationResponseDto>>(() => {
+    const aggs = productSearchData.value?.aggregations ?? []
+    return aggs.reduce((acc, curr) => {
+        if(curr.field) acc[curr.field] = curr
+        return acc
+    }, {} as Record<string, AggregationResponseDto>)
+})
+
+const updateRangeFilter = (field: string, payload: { min?: number; max?: number }) => {
+  const current = activeFilters.value.filter(f => f.field !== field)
+  if (payload.min == null && payload.max == null) {
+      filterRequest.value = { ...filterRequest.value, filters: current }
+      return
+  }
+  filterRequest.value = {
+      ...filterRequest.value,
+      filters: [...current, { field, operator: 'range', min: payload.min, max: payload.max }]
+  }
+}
+
+const updateTermsFilter = (field: string, terms: string[]) => {
+  const current = activeFilters.value.filter(f => f.field !== field)
+  if (!terms.length) {
+      filterRequest.value = { ...filterRequest.value, filters: current }
+      return
+  }
+  filterRequest.value = {
+      ...filterRequest.value,
+      filters: [...current, { field, operator: 'term', terms }]
+  }
+}
+
+const clearFilters = () => {
+    filterRequest.value = { filters: [], filterGroups: [] }
+    filtersOpen.value = false
+}
+
+// ... Rest of existing code ...
 
 const { data: verticalsData } = await useAsyncData<VerticalConfigDto[]>(
   'search-verticals',
@@ -466,6 +715,9 @@ const handleSearchSubmit = () => {
 
   trackSearch({ query: value, source: 'form' })
 
+  // Clear filters on new search?
+  clearFilters()
+
   router.push({
     path: route.path,
     query: value ? { q: value } : {},
@@ -591,6 +843,18 @@ function formatSearchModeLabel(mode: SearchMode | string | null | undefined) {
   &__results
     max-width: 1200px
     margin: 0 auto
+
+  &__filters-drawer
+     border-left: 1px solid rgba(var(--v-theme-border-primary), 0.12)
+     background-color: rgb(var(--v-theme-surface-default))
+
+     :deep(.v-navigation-drawer__content)
+        background-color: rgb(var(--v-theme-surface-default))
+
+  &__filtered-results
+     display: flex
+     flex-direction: column
+     gap: 1.5rem
 
   &__alert-content
     display: flex

@@ -112,10 +112,6 @@ public record VerticalConfigFullDto(
         @Schema(description = "Scoring aggregation configuration.")
         ScoringAggregationConfig scoringAggregationConfig,
         @Schema(description = "Feature groups ordering attributes for UI rendering with localised labels.")
-        List<FeatureGroupDto> featureGroups,
-        @Schema(description = "Threshold defining how many low scores are considered worsts.")
-        Integer worseLimit,
-        @Schema(description = "Threshold defining how many high scores are considered bests.")
-        Integer bettersLimit
+        List<FeatureGroupDto> featureGroups
 ) {
 }

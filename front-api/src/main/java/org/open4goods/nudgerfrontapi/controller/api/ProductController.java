@@ -456,7 +456,13 @@ public class ProductController {
                 .map(hit -> toDto(hit, result.searchMode()))
                 .toList();
 
-        GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups, fallback, result.fallbackTriggered());
+        if (result.verticalCta() != null) {
+            LOGGER.info("Vertical CTA found for query '{}': {}", query, result.verticalCta().verticalId());
+        }
+
+        GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups, fallback,
+                toCategoryDto(result.verticalCta()),
+                result.fallbackTriggered());
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .header("X-Locale", domainLanguage.languageTag())
@@ -510,6 +516,14 @@ public class ProductController {
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .header("X-Locale", domainLanguage.languageTag())
                 .body(body);
+    }
+
+    private SearchSuggestCategoryDto toCategoryDto(SearchService.CategorySuggestion suggestion) {
+        if (suggestion == null) {
+            return null;
+        }
+        return new SearchSuggestCategoryDto(suggestion.verticalId(), suggestion.imageSmall(),
+                suggestion.verticalHomeTitle(), suggestion.verticalHomeUrl());
     }
 
     private ResponseEntity<ProductSearchResponseDto> badRequest(String title, String detail) {
@@ -1233,16 +1247,7 @@ public class ProductController {
         return new GlobalSearchResultDto(hit.product(), hit.score(), searchMode);
     }
 
-    /**
-     * Map a category suggestion to its DTO representation.
-     *
-     * @param suggestion suggestion returned by the search service
-     * @return mapped category suggestion DTO
-     */
-    private SearchSuggestCategoryDto toCategoryDto(SearchService.CategorySuggestion suggestion) {
-        return new SearchSuggestCategoryDto(suggestion.verticalId(), suggestion.imageSmall(),
-                suggestion.verticalHomeTitle(), suggestion.verticalHomeUrl());
-    }
+
 
     /**
      * Map a product suggestion hit to its DTO representation.

@@ -67,7 +67,8 @@ public record ProductDto(
                 price("price.minPrice.price"),
                 offersCount("offersCount"),
                 brand("attributes.referentielAttributes.BRAND"),
-                model("attributes.referentielAttributes.MODEL");
+                model("attributes.referentielAttributes.MODEL"),
+                ecoscore("scores.ECOSCORE.value");
 
 
                 private final String text;
@@ -104,7 +105,8 @@ public record ProductDto(
                 offersCount(FilterField.offersCount),
                 condition(FilterField.condition),
                 brand(FilterField.brand),
-                country(FilterField.country);
+                country(FilterField.country),
+                ecoscore(FilterField.ecoscore);
 
                 private final FilterField delegate;
 

@@ -610,7 +610,7 @@ useHead({
                         {{ heroContextTitle }}
                       </p>
 
-                      <v-row class="home-hero__helper-row">
+                      <v-row class="home-hero__helper-row" justify="center">
                         <v-col
                           cols="4"
                           class="align-center home-hero__eyebrow-block"

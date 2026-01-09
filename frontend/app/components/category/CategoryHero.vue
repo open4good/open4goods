@@ -36,22 +36,25 @@
           <p v-if="description" class="category-hero__description">
             {{ description }}
           </p>
+
           <v-row dense class="category-hero__actions-row">
-            <v-col cols="12" md="auto">
-              <div
-                v-if="$slots['after-description']"
-                class="category-hero__after-description"
+            <v-col cols="12" md="auto" class="flex-grow-1">
+              <HeroActionCard
+                v-if="$slots.actions || $slots['after-description']"
               >
-                <slot name="after-description" />
-              </div>
-            </v-col>
+                <div class="category-hero__actions-content">
+                  <div
+                    v-if="$slots['after-description']"
+                    class="category-hero__after-description"
+                  >
+                    <slot name="after-description" />
+                  </div>
 
-            <v-spacer />
-
-            <v-col cols="12" md="auto">
-              <div v-if="$slots.actions" class="category-hero__actions">
-                <slot name="actions" />
-              </div>
+                  <div v-if="$slots.actions" class="category-hero__actions">
+                    <slot name="actions" />
+                  </div>
+                </div>
+              </HeroActionCard>
             </v-col>
           </v-row>
         </div>
@@ -66,6 +69,7 @@ import { useI18n } from 'vue-i18n'
 import type { CategoryBreadcrumbItemDto } from '~~/shared/api-client'
 
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
+import HeroActionCard from '~/components/shared/HeroActionCard.vue'
 
 type HeroBreadcrumbItem = {
   title: string

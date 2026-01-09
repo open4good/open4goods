@@ -27,6 +27,11 @@
         class="product-page__nav"
         :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
       >
+        <ProductImpactCta
+          v-if="categoryDetail && categoryDetail.impactScoreConfig"
+          :category-detail="categoryDetail"
+        />
+
         <ProductSummaryNavigation
           :sections="navigableSections"
           :admin-sections="adminNavigableSections"
@@ -240,6 +245,9 @@ const ProductAdminSection = defineAsyncComponent(
 )
 const NudgeToolWizard = defineAsyncComponent(
   () => import('~/components/nudge-tool/NudgeToolWizard.vue')
+)
+const ProductImpactCta = defineAsyncComponent(
+  () => import('~/components/product/ProductImpactCta.vue')
 )
 
 const route = useRoute()

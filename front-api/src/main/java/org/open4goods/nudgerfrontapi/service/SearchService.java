@@ -285,7 +285,7 @@ public class SearchService {
 
         String sanitizedQuery = sanitize(query);
         if (!StringUtils.hasText(sanitizedQuery)) {
-            return new GlobalSearchResult(List.of(), List.of(), SearchMode.exact_vertical, false);
+            return new GlobalSearchResult(List.of(), List.of(), null, SearchMode.exact_vertical, false);
         }
 
         SearchMode startMode = resolveStartMode(searchType);
@@ -293,6 +293,9 @@ public class SearchService {
         if (startIndex < 0) {
             startIndex = 0;
         }
+
+        // Detect explicit vertical intention
+        CategorySuggestion verticalCta = findExactVerticalMatch(sanitizedQuery, domainLanguage);
 
         for (int index = startIndex; index < GLOBAL_SEARCH_SEQUENCE.size(); index++) {
             SearchMode mode = GLOBAL_SEARCH_SEQUENCE.get(index);
@@ -302,21 +305,21 @@ public class SearchService {
                 SearchHits<Product> firstPassHits = executeGlobalSearch(sanitizedQuery, true, false);
                 if (firstPassHits != null && !firstPassHits.isEmpty()) {
                     List<GlobalSearchVerticalGroup> groups = groupByVertical(firstPassHits, domainLanguage);
-                    return new GlobalSearchResult(groups, List.of(), mode, fallbackTriggered);
+                    return new GlobalSearchResult(groups, List.of(), verticalCta, mode, fallbackTriggered);
                 }
             } else if (mode == SearchMode.global) {
                 SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
                 List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
                 if (fallback != null && !fallback.isEmpty()) {
-                    return new GlobalSearchResult(List.of(), fallback, mode, fallbackTriggered);
+                    return new GlobalSearchResult(List.of(), fallback, verticalCta, mode, fallbackTriggered);
                 }
             } else if (mode == SearchMode.semantic) {
                 List<GlobalSearchHit> semanticFallback = executeSemanticGlobalFallback(sanitizedQuery, domainLanguage);
-                return new GlobalSearchResult(List.of(), semanticFallback, mode, fallbackTriggered);
+                return new GlobalSearchResult(List.of(), semanticFallback, verticalCta, mode, fallbackTriggered);
             }
         }
 
-        return new GlobalSearchResult(List.of(), List.of(), startMode, false);
+        return new GlobalSearchResult(List.of(), List.of(), verticalCta, startMode, false);
     }
 
     /**
@@ -1520,10 +1523,44 @@ public class SearchService {
     }
 
     /**
+     * Look for a vertical strictly matching the query to provide a navigational shortcut.
+     *
+     * @param query          user query
+     * @param domainLanguage localisation hint
+     * @return a category suggestion if a strict match is found
+     */
+    private CategorySuggestion findExactVerticalMatch(String query, DomainLanguage domainLanguage) {
+        if (!StringUtils.hasText(query)) {
+            return null;
+        }
+
+        List<String> tokens = normalizedTokens(normalizeForComparison(query));
+        if (tokens.isEmpty()) {
+            return null;
+        }
+
+        // 1. Try to find a match in the suggestions
+        List<CategorySuggestion> matches = findCategoryMatches(tokens, domainLanguage);
+
+        if (matches.isEmpty()) {
+            return null;
+        }
+        
+        // 2. We want a "certain" match. 
+        // For now, we consider a certain match if we have exactly one proposal
+        // and if the match quality is high (checked via token inclusion in findCategoryMatches)
+        if (matches.size() == 1) {
+             return matches.get(0);
+        }
+        
+        return null;
+    }
+
+    /**
      * Global search result including grouped hits, effective search mode and optional fallback.
      */
     public record GlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
-            List<GlobalSearchHit> fallbackResults, SearchMode searchMode, boolean fallbackTriggered) {
+            List<GlobalSearchHit> fallbackResults, CategorySuggestion verticalCta, SearchMode searchMode, boolean fallbackTriggered) {
 
         public GlobalSearchResult {
             verticalGroups = List.copyOf(verticalGroups);

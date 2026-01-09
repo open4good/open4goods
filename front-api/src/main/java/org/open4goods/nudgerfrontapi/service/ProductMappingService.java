@@ -697,15 +697,8 @@ public class ProductMappingService {
         ProductScoreDto ecoscore = product.ecoscore() == null
                 ? null
                 : mapScore(product.ecoscore(), domainLanguage, vConf, referencedProducts);
-        Set<String> worstScores = product.getWorsesScores() == null
-                ? Collections.emptySet()
-                : new LinkedHashSet<>(product.getWorsesScores());
-        Set<String> bestScores = product.getBestsScores() == null
-                ? Collections.emptySet()
-                : new LinkedHashSet<>(product.getBestsScores());
         ProductRankingDto ranking = mapRanking(product, referencedProducts);
-
-        return new ProductScoresDto(scores, ecoscore, worstScores, bestScores, ranking);
+        return new ProductScoresDto(scores, ecoscore, ranking);
     }
 
     /**

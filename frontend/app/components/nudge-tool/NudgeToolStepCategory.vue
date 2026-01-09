@@ -122,8 +122,7 @@
                   :class="{
                     'nudge-option-card--selected':
                       !isExternalCategory(category) && isSelected,
-                    'nudge-option-card--disabled':
-                      isCategoryDisabled(category),
+                    'nudge-option-card--disabled': isCategoryDisabled(category),
                     'nudge-step-category__card--static':
                       isStaticCategory(category),
                   }"
@@ -208,13 +207,19 @@
                   >
                     <template #placeholder>
                       <div class="nudge-step-category__fallback">
-                        <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
+                        <v-icon
+                          :icon="category.mdiIcon ?? 'mdi-tag'"
+                          size="28"
+                        />
                       </div>
                     </template>
 
                     <template #error>
                       <div class="nudge-step-category__fallback">
-                        <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" size="28" />
+                        <v-icon
+                          :icon="category.mdiIcon ?? 'mdi-tag'"
+                          size="28"
+                        />
                       </div>
                     </template>
                   </v-img>
@@ -425,14 +430,14 @@ watch(
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-width: 22%; /* Adjusted to ensure ~4 items fit on screen */
-    max-width: 250px;
+    min-width: 220px; /* Adjusted to ensure fewer items fit on screen */
+    max-width: 280px;
     box-shadow: none;
     background: transparent !important;
     border: none !important;
 
     @media (max-width: 960px) {
-      min-width: 160px; /* Fallback for smaller screens */
+      min-width: 180px; /* Fallback for smaller screens */
     }
   }
 

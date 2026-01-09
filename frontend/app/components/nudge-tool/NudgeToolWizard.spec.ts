@@ -15,7 +15,11 @@ vi.mock('vuetify', () => ({
   useDisplay: () => ({ smAndDown: { value: false } }),
 }))
 vi.mock('~/composables/categories/useCategories', () => ({
-  useCategories: () => ({ fetchCategories: vi.fn().mockResolvedValue([]) }),
+  useCategories: () => ({
+    fetchCategories: vi.fn().mockResolvedValue([]),
+    selectCategoryBySlug: vi.fn(),
+    currentCategory: { value: null },
+  }),
 }))
 vi.mock('~/composables/useAuth', () => ({
   useAuth: () => ({ isLoggedIn: { value: false } }),

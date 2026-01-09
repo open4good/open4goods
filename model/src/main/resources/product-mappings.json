@@ -298,14 +298,7 @@
         }
       }
     },
-    "bestsScores": {
-      "type": "object",
-      "enabled": false
-    },
-    "worsesScores": {
-      "type": "object",
-      "enabled": false
-    },
+
     "scores": {
       "dynamic": "true",
       "properties": {
