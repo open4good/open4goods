@@ -39,7 +39,7 @@
       "default": {
         "hero": {
           "eyebrow": "Comparateur responsable",
-          "title": "Acheter mieux. Sans dépenser plus.",
+          "title": "Le comparateur de prix qui pense aussi à la planète.",
           "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
           "subtitles": [
             "Gagne du temps. Choisis librement.",
@@ -2987,7 +2987,7 @@
     "steps": {
       "category": {
         "title": "Nudger te guide, pas à pas.",
-        "subtitle": "Choisis une catégorie",
+        "subtitle": "Trouve le produit idéal qui correspond à ton budget et tes valeurs",
         "step": "Étape {step}"
       },
       "condition": {
@@ -3245,7 +3245,7 @@
       },
       "hero": {
         "eyebrow": "Nudger, c'est :",
-        "title": "Acheter mieux. Sans dépenser plus.",
+        "title": "Le comparateur qui pense aussi à la planète",
         "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
         "subtitles": [
           "Gagne du temps. Choisis librement.",

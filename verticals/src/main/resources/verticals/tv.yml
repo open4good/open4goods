@@ -23,11 +23,11 @@ googleTaxonomyId: 404
 #The icecat category id. Set -1 if unknown
 icecatTaxonomyId: 1584
 
-
 # See /open4goods/docs/eprel_codes.md
 eprelGroupNames:
   - televisions
   - Televisions
+  - electronicdisplays
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
 # Provide a large one, thumnails will be generated automaticaly. MUST be PNG or JPG
@@ -675,7 +675,7 @@ attributesConfig:
 
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
-    - MEUBLE
+  - MEUBLE
 
 matchingCategories:
   all: []

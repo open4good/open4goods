@@ -1,5 +1,17 @@
 <template>
   <section class="product-hero">
+    <div class="product-hero__background" aria-hidden="true">
+      <div class="product-hero__bg-gradient" />
+      <div
+        v-if="image"
+        class="product-hero__bg-image"
+        :style="backgroundImageStyle"
+      />
+      <div class="product-hero__bg-grid" />
+      <div class="product-hero__bg-glow product-hero__bg-glow--primary" />
+      <div class="product-hero__bg-glow product-hero__bg-glow--accent" />
+    </div>
+
     <div class="product-hero__content">
       <header v-if="heroTitle" class="product-hero__heading">
         <h1 class="product-hero__title text-center">{{ heroTitle }}</h1>
@@ -215,12 +227,26 @@ const props = defineProps({
     type: Array as PropType<AttributeConfigDto[]>,
     default: () => [],
   },
+  image: {
+    type: String,
+    default: null,
+  },
 })
 
 const { t, te, n, locale } = useI18n()
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''
+
+const backgroundImageStyle = computed(() => {
+  if (!props.image) {
+    return {}
+  }
+
+  // Basic escaping for URL to prevent breaking out of url()
+  const sanitized = props.image.replace(/['"()]/g, '')
+  return { backgroundImage: `url('${sanitized}')` }
+})
 
 const heroTitle = computed(() => {
   return resolveProductTitle(props.product, locale.value)
@@ -538,7 +564,7 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   inset: -10%;
   background-size: cover;
   background-position: center;
-  opacity: 0.35;
+  opacity: 0.5;
   filter: saturate(1.15) blur(2px);
   transform: translate3d(0, 0, 0) scale(1.05);
   background-attachment: fixed;

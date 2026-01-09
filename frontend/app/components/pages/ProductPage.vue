@@ -50,6 +50,7 @@
             :product="product"
             :breadcrumbs="productBreadcrumbs"
             :popular-attributes="heroPopularAttributes"
+            :image="resolvedProductImageSource"
           />
         </section>
 
