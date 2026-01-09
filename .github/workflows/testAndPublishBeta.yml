@@ -53,8 +53,8 @@ jobs:
       ############################################
       # 4. Maven Dependency Tree Submission
       ############################################
-      - name: Maven Dependency Submission
-        uses: advanced-security/maven-dependency-submission-action@v5.0.0
+    #  - name: Maven Dependency Submission
+    #    uses: advanced-security/maven-dependency-submission-action@v5.0.0
 
       ############################################
       # 5. Build and Test with Maven
