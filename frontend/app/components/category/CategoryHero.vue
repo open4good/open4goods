@@ -39,21 +39,8 @@
 
           <v-row dense class="category-hero__actions-row">
             <v-col cols="12" md="auto" class="flex-grow-1">
-              <HeroActionCard
-                v-if="$slots.actions || $slots['after-description']"
-              >
-                <div class="category-hero__actions-content">
-                  <div
-                    v-if="$slots['after-description']"
-                    class="category-hero__after-description"
-                  >
-                    <slot name="after-description" />
-                  </div>
-
-                  <div v-if="$slots.actions" class="category-hero__actions">
-                    <slot name="actions" />
-                  </div>
-                </div>
+              <HeroActionCard v-if="$slots.actions">
+                <slot name="actions" />
               </HeroActionCard>
             </v-col>
           </v-row>
@@ -207,18 +194,6 @@ defineExpose({ headingId, t })
     font-size: 1.05rem
     line-height: 1.6
     color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
-
-  &__after-description
-    display: flex
-    flex-direction: column
-    align-items: flex-start
-    gap: 0.75rem
-
-  &__actions
-    display: flex
-    flex-wrap: wrap
-    gap: 0.75rem
-    align-items: center
 
   &__media
     position: relative

@@ -12,6 +12,7 @@ import AnimatedSubtitle from '~/components/shared/ui/AnimatedSubtitle.vue'
 import {
   resolveThemedAssetUrl,
   useHeroBackgroundAsset,
+  useLogoAsset,
 } from '~~/app/composables/useThemedAsset'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 import {
@@ -372,7 +373,7 @@ const heroIconAlt = computed(
       fallbackKeys: ['home.hero.iconAlt'],
     }) ?? ''
 )
-const heroIconSrc = '/pwa-assets/icons/android/android-launchericon-512-512.png'
+const heroIconSrc = useLogoAsset()
 const heroIconAnimationOptions = [
   'home-hero__icon--fade',
   'home-hero__icon--scale',
