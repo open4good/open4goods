@@ -343,6 +343,9 @@ const showMinimumNotice = computed(
     trimmedInput.value.length < MIN_QUERY_LENGTH
 )
 
+const activeFilters = computed(() => filterRequest.value.filters ?? [])
+const isFiltered = computed(() => activeFilters.value.length > 0)
+
 // Global Search Data
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(
@@ -374,9 +377,6 @@ const { data, pending, error, refresh } =
   )
 
 // Filtered Product Search Data
-const activeFilters = computed(() => filterRequest.value.filters ?? [])
-const isFiltered = computed(() => activeFilters.value.length > 0)
-
 const manualFields: FieldMetadataDto[] = [
   {
     mapping: 'price.minPrice.price',
