@@ -780,7 +780,6 @@
         "country": "Code pays du GTIN",
         "datasource": "Sources de données",
         "googleTaxonomyId": "Catégorie produit Google",
-        "googleTaxonomyId": "Catégorie produit Google",
         "offersCount": {
           "one": "{count} offre",
           "other": "{count} offres"
