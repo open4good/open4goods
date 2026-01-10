@@ -2621,7 +2621,8 @@
       "noScore": "Pas d'évaluation sur ce produit !"
     },
     "meta": {
-      "impactScore": " | Impact Score : {score}/20"
+      "impactScore": " | Impact Score : {score}/20",
+      "gtinFallback": "GTIN non disponible : {gtin}"
     }
   },
   "siteIdentity": {
@@ -3328,7 +3329,7 @@
   },
   "product": {
     "meta": {
-      "gtinFallback": "GTIN non disponible : {gtin}"
+
     }
   }
 }
