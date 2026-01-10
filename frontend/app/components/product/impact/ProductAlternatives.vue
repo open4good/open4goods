@@ -774,6 +774,9 @@ const fetchAlternatives = async () => {
       '/api/products/search',
       {
         method: 'POST',
+        headers: {
+          'X-XSRF-TOKEN': useCookie('XSRF-TOKEN').value || '',
+        },
         body,
       }
     )

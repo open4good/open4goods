@@ -787,6 +787,7 @@
         "price": "Fourchette de prix",
         "title": "Filtres"
       },
+      "title": "Filtres",
       "globalTitle": "Filtres globaux",
       "hideImpact": "Masquer les filtres d'impact",
       "hideTechnical": "Masquer les filtres techniques",
@@ -3323,6 +3324,11 @@
           "ariaLabel": "Nudger - évaluation environnementale"
         }
       }
+    }
+  },
+  "product": {
+    "meta": {
+      "gtinFallback": "GTIN non disponible : {gtin}"
     }
   }
 }

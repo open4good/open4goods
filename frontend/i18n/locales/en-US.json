@@ -780,6 +780,7 @@
         "offersCount": "Number of offers",
         "price": "Price range"
       },
+      "title": "Filters",
       "globalTitle": "Global filters",
       "hideImpact": "Hide impact filters",
       "hideTechnical": "Hide technical filters",
@@ -3285,6 +3286,11 @@
         "cta": "parallax-background-bastille-cta.svg",
         "aplat": "parallax-aplats.svg"
       }
+    }
+  },
+  "product": {
+    "meta": {
+      "gtinFallback": "GTIN unavailable: {gtin}"
     }
   }
 }
