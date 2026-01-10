@@ -1262,8 +1262,8 @@
   },
   "impactScorePage": {
     "seo": {
-      "title": "Impact Score : la lecture écologique simple de chaque produit",
-      "description": "Découvrez comment l’Impact Score évalue l’impact environnemental d’un produit grâce à 5 critères clairs et des exemples concrets."
+      "title": "Impact Score : une lecture écologique et sociétale simple de chaque produit",
+      "description": "Découvrez comment l’Impact Score évalue l’impact environnemental d’un produit grâce à méthode transparente et ouverte."
     },
     "hero": {
       "eyebrow": "Impact Score",
@@ -1271,10 +1271,10 @@
       "subtitle": "La boussole éco-responsable inspirée de l’Écoscore",
       "definition": {
         "title": "Une définition claire et accessible",
-        "description": "L’Impact Score traduit des données techniques en indicateurs compréhensibles, sans jargon.",
+        "description": "L’Impact Score traduit des données techniques en indicateurs compréhensibles et comparables, sans jargon.",
         "items": {
-          "scale": "Note de 0 à 5 : 5 signifie un impact exemplaire",
-          "data": "Appuyé sur des données vérifiées (fiches techniques, éco-organismes, études publiques)",
+          "scale": "Note de 0 à 20 : 20 ne signifie pas une absence d'impact ou un produit bon pour la planète, mais que ce produit est le mieux classé par rapport à tous les autres",
+          "data": "Appuyé sur des données vérifiées (fiches techniques, éco-organismes, référentiels publiques)",
           "update": "Mis à jour dès que de nouvelles informations sont publiées"
         }
       }
@@ -1286,11 +1286,11 @@
       "cards": {
         "weighting": {
           "title": "Une pondération de plusieurs critères",
-          "description": "Notre éco-score est une note de 0 à 100. Elle résulte de la somme des scores par critère, adaptés à chaque typologie de produit.",
+          "description": "Notre éco-score est une note de 0 à 20. Elle résulte de la somme des scores par critère, adaptés à chaque typologie de produit. Chaque critère à une pondération dans la note globale",
           "bullets": {
-            "scale": "0 = très mauvais, 100 = formidable",
+            "scale": "0 = très mauvais, 20 = le moins pire",
             "sum": "La note globale additionne les scores de chaque critère",
-            "weights": "Les pondérations (0 à 1) sont définies par un système d’IA"
+            "weights": "Les pondérations (0 à 1) sont définies par un système d’IA, dont les prompts et les réponses sont transparentes."
           }
         },
         "ai": {
@@ -1304,14 +1304,14 @@
         },
         "relativisation": {
           "title": "Principe de relativisation",
-          "description": "Un indice de réparabilité à 7,7 n’est lisible que comparé aux autres produits. Nous attribuons 0 au produit le moins performant et 100 au meilleur pour faciliter la comparaison. L’Impact Score n’est pas relativisé : il reste une somme de scores pondérés, donc atteindre 100/100 est rare.",
+          "description": "Un indice de réparabilité à 7,7 n’est lisible que quand on connait la meilleure et la pire note. Nous attribuons sur chaque critère 0 au produit le moins performant et 20 au meilleur pour faciliter la comparaison. Par choix, l’Impact Score final, lui, n’est pas relativisé : il est une somme de scores pondérés, ne laissant ainsi pas groupe avec des produits ayant 20/20 qu'ils sont sans impact sur la planète !",
           "bullets": {
             "ranking": "Un classement clair pour situer chaque produit dans sa catégorie"
           }
         },
         "dataQuality": {
           "title": "La qualité de la donnée, enjeu majeur",
-          "description": "Quand une information manque, nous appliquons une valeur moyenne de la catégorie afin de ne ni pénaliser ni avantager un produit. Cette disponibilité des données influe ensuite sur le score via un malus dédié.",
+          "description": "Quand une information manque, nous appliquons une valeur moyenne de la catégorie afin de ne ni pénaliser ni avantager un produit. Cette moindre disponibilité des données est pénalisée au travers de l'application d'un malus sur le score de qualité de la donnée.",
           "bullets": {
             "average": "Score virtuel basé sur la moyenne de la catégorie",
             "malus": "Un malus reflète le manque d’information produit"
@@ -1320,12 +1320,12 @@
       }
     },
     "criteria": {
-      "eyebrow": "Les 5 critères",
-      "title": "Notre Impact Score en capsules",
-      "subtitle": "Chaque critère pèse dans la note finale et peut être comparé entre produits d’une même catégorie.",
+      "eyebrow": "Exemple de critères",
+      "title": "Notre Impact Score en bref",
+      "subtitle": "Chaque critère pèse dans la note finale et permet la comparaison entre produits d’une même catégorie. La liste précise des critères est disponible dana la page Impact Score de chaque catégorie. Par exemple : ",
       "items": {
         "circularity": {
-          "title": "Circularité et réparabilité",
+          "title": "Réparabilité",
           "description": "Durabilité, disponibilité des pièces, facilité de réparation et garantie constructeur.",
           "weight": "35 %"
         },

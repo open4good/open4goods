@@ -174,18 +174,12 @@ const parallaxAplatKey = computed(
 
 const aplatSuffixes = ['left', 'center', 'right']
 
-const essentialsAplatSuffix = ref('center')
-const blogAplatSuffix = ref('center')
-const objectionsAplatSuffix = ref('center')
+const getRandomSuffix = () =>
+  aplatSuffixes[Math.floor(Math.random() * aplatSuffixes.length)]
 
-onMounted(() => {
-  const getRandomSuffix = () =>
-    aplatSuffixes[Math.floor(Math.random() * aplatSuffixes.length)]
-
-  essentialsAplatSuffix.value = getRandomSuffix()
-  blogAplatSuffix.value = getRandomSuffix()
-  objectionsAplatSuffix.value = getRandomSuffix()
-})
+const essentialsAplatSuffix = useState('home-aplat-essentials', getRandomSuffix)
+const blogAplatSuffix = useState('home-aplat-blog', getRandomSuffix)
+const objectionsAplatSuffix = useState('home-aplat-objections', getRandomSuffix)
 
 const resolveAplatVariant = (suffix: string) => {
   const name = `parallax/parallax-aplats-${suffix}.svg`

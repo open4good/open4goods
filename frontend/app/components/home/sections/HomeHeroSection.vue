@@ -379,7 +379,13 @@ const heroIconAnimationOptions = [
   'home-hero__icon--scale',
   'home-hero__icon--pulse',
 ] as const
-const heroIconAnimation = ref(heroIconAnimationOptions[0])
+const heroIconAnimation = useState<string>(
+  'home-hero-icon-animation',
+  () =>
+    heroIconAnimationOptions[
+      Math.floor(Math.random() * heroIconAnimationOptions.length)
+    ] || heroIconAnimationOptions[0]
+)
 const showHeroIcon = computed(() => Boolean(heroIconAlt.value))
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
@@ -449,11 +455,6 @@ const handleHeroImageLoad = () => {
 }
 
 onMounted(() => {
-  heroIconAnimation.value =
-    heroIconAnimationOptions[
-      Math.floor(Math.random() * heroIconAnimationOptions.length)
-    ] || heroIconAnimationOptions[0]
-
   window.setTimeout(() => {
     if (!isHeroImageLoaded.value) {
       isHeroImageLoaded.value = true
