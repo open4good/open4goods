@@ -1237,14 +1237,14 @@
     "tabs": {
       "ariaLabel": "Catégories de feedback",
       "bug": {
-        "description": "Décrivez toute anomalie ou comportement inattendu observé. Des signalements précis nous aident à corriger plus vite.",
+        "description": "Décrire toute anomalie ou comportement inattendu observé. Des signalements précis nous aident à corriger plus vite !",
         "issueTitle": "Bugs signalés",
         "label": "Bugs"
       },
-      "description": "Choisissez une catégorie pour explorer les discussions en cours, voter pour les sujets qui vous concernent ou en ouvrir une nouvelle.",
+      "description": "Choisis une catégorie pour explorer les discussions en cours, vote pour les sujets qui te concerne ou en ouvrir une nouvelle.",
       "eyebrow": "Tableau communautaire",
       "idea": {
-        "description": "Proposez des améliorations qui rendraient Nudger plus utile pour vous ou votre organisation. Nous passons chaque idée en revue chaque semaine.",
+        "description": "Propose des améliorations qui rendraient Nudger plus utile. Nous passons chaque idée en revue !",
         "issueTitle": "Idées de la communauté",
         "label": "Idées"
       },
