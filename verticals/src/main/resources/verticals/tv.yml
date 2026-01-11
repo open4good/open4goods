@@ -313,14 +313,14 @@ nudgeToolConfig:
         en: "low-price"
         fr: "petits-prix"
       caption:
-        en: "< 500 €"
-        fr: "< 500 €"
-      title:
-        en: "Affordable TVs"
-        fr: "TV pas chères"
-      description:
         en: "TVs priced under €500."
         fr: "Les TV dont le prix est inférieur à 500€."
+      title:
+        en: "< 500 €"
+        fr: "< 500 €"
+      description:
+        en: ""
+        fr: ""
 
     - id: "price_500_1000"
       group: "price"
@@ -336,14 +336,14 @@ nudgeToolConfig:
         en: "tv-500-1000-euros"
         fr: "tv-500-1000-euros"
       caption:
-        en: "500 - 1000 €"
-        fr: "500 - 1000 €"
-      title:
-        en: "Mid-range TVs"
-        fr: "TV milieu de gamme"
-      description:
         en: "TVs priced between €500 and €1000."
         fr: "Les TV dont le prix est compris entre 500€ et 1000€."
+      title:
+        en: "500 - 1000 €"
+        fr: "500 - 1000 €"
+      description:
+        en: "500 - 1000 €"
+        fr: "500 - 1000 €"
 
     - id: "price_greater_1000"
       group: "price"
@@ -356,11 +356,9 @@ nudgeToolConfig:
         en: "premium-price"
         fr: "haut-de-gamme"
       caption:
-        en: "> 1000 €"
-        fr: "> 1000 €"
-      title:
         en: "Premium TVs"
         fr: "TV haut de gamme"
+      title:
       description:
         en: "TVs priced over €1000."
         fr: "Les TV dont le prix est supérieur à 1000€."
