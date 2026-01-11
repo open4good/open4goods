@@ -319,15 +319,15 @@
       "description": "Nudger analyse les données écologiques, sociétales, techniques et les prix pour simplifier vos achats.",
       "benefits": {
         "time": {
-          "title": "Gagnez du temps",
+          "title": "Gagner du temps",
           "description": "On analyse pour vous."
         },
         "savings": {
-          "title": "Économisez",
+          "title": "Économiser",
           "description": "Comparateur de prix intégré."
         },
         "planet": {
-          "title": "Consommez mieux",
+          "title": "Consommer mieux",
           "description": "Repérez les produits les plus responsables."
         },
         "trust": {
@@ -339,7 +339,7 @@
     },
     "features": {
       "title": "Fonctionnalités clés",
-      "subtitle": "Découvrez ce que Nudger met à votre service.",
+      "subtitle": "Découvre ce que Nudger met à ton service.",
       "cards": {
         "impactScore": {
           "title": "Impact Score IA",
@@ -369,7 +369,7 @@
       "cta": "Voir les produits",
       "impactLink": "impactscore televiseurs",
       "fallbackTitle": "Catégorie",
-      "fallbackDescription": "Parcourez des produits responsables dans cet univers.",
+      "fallbackDescription": "Parcourir les produits dans cet univers.",
       "carouselAriaLabel": "Carrousel des catégories populaires",
       "bannerAriaLabel": "Navigation des catégories mises en avant",
       "scrollPrevious": "Faire défiler vers les catégories précédentes",
@@ -379,11 +379,11 @@
       "items": {
         "electronics": {
           "title": "Électronique",
-          "description": "Smartphones, TV, audio… restez connecté sans renoncer à vos valeurs."
+          "description": "Smartphones, TV, audio… reste connecté sans renoncer à tes valeurs."
         },
         "appliances": {
           "title": "Électroménager",
-          "description": "Lave-linge, lave-vaisselle, frigos… optimisez vos consommations d’énergie."
+          "description": "Lave-linge, lave-vaisselle, frigos… "
         }
       }
     },
@@ -451,15 +451,15 @@
         },
         "account": {
           "question": "Besoin d’un compte ?",
-          "answer": "Non pour rechercher ; compte optionnel si vous souhaitez listes ou alertes."
+          "answer": "Non pour rechercher ; compte optionnel si tu souhaites listes ou alertes."
         },
         "categories": {
           "question": "Quelles catégories ?",
           "answer": "Électronique & Électroménager aujourd’hui, extensions à venir."
         },
         "impactScore": {
-          "question": "Comment calculez-vous l’Impact Score ?",
-          "answer": "5 critères pondérés + IA sobre, méthode ouverte et auditée.",
+          "question": "Comment est calculé l’Impact Score ?",
+          "answer": "Une multitude de critères pondérés + IA sobre, méthode ouverte et auditée.",
           "cta": "En savoir plus",
           "ctaAria": "Ouvrir la page dédiée à l'Impact Score"
         },
@@ -515,11 +515,11 @@
         "text": {
           "eyebrow": "Texte · haut droite · moyen",
           "title": "Coin texte",
-          "subtitle": "Remplacez l'icône par un badge texte avec icône optionnelle.",
+          "subtitle": "Remplacer l'icône par un badge texte avec icône optionnelle.",
           "tooltip": "Badge texte du coin",
           "cornerLabel": "Données fraîches",
           "bullets": [
-            "Utilisez `cornerVariant=text` avec icône optionnelle",
+            "Utiliser `cornerVariant=text` avec icône optionnelle",
             "Parfait pour les badges « beta » ou « new »",
             "Accent discret côté arrondi"
           ]
@@ -538,12 +538,12 @@
         "custom": {
           "eyebrow": "Slot custom · bas gauche · moyen",
           "title": "Contenu sur-mesure",
-          "subtitle": "Injectez avatars, anneaux de progression ou KPIs dans le coin.",
+          "subtitle": "Injecter avatars, anneaux de progression ou KPIs dans le coin.",
           "tooltip": "Contenu custom du coin",
           "progressLabel": "{value}% de préparation impact",
           "bullets": [
-            "Alimentez via le slot `corner`",
-            "Mélangez texte, icônes ou graphiques",
+            "Alimenter via le slot `corner`",
+            "Mélange texte, icônes ou graphiques",
             "Conserve le masque et le dégradé arrondi"
           ]
         },
@@ -563,7 +563,7 @@
     },
     "cta": {
       "title": "Prêt à acheter mieux sans vous ruiner ?",
-      "subtitle": "Relancez une recherche ou découvrez les offres analysées.",
+      "subtitle": "Relance une recherche ou découvre les offres.",
       "button": "Lancer une recherche",
       "searchSubmit": "Lancer la recherche",
       "browseTaxonomy": "Explorer les catégories"
@@ -579,8 +579,8 @@
     },
     "contactRedirect": {
       "eyebrow": "Besoin d’aide ?",
-      "title": "Vous ne trouvez pas votre réponse ?",
-      "subtitle": "Saisissez quelques mots et on vous redirige vers le formulaire de contact.",
+      "title": "Tu ne trouves pas ta réponse ?",
+      "subtitle": "Saisis quelques mots et on te redirige vers le formulaire de contact.",
       "inputLabel": "Votre demande en bref",
       "placeholder": "ex. Je cherche une facture ou une info produit",
       "cta": "Envoyer vers Contact",
@@ -601,16 +601,16 @@
   "categories": {
     "navigation": {
       "error": {
-        "loadFailed": "Impossible de charger la navigation des catégories. Veuillez réessayer."
+        "loadFailed": "Impossible de charger la navigation des catégories. Merci de réessayer plus tard."
       },
       "grid": {
         "cardAriaLabel": "Carte de catégorie {category}",
-        "emptySubtitle": "Modifiez votre recherche pour afficher des catégories pertinentes.",
+        "emptySubtitle": "Modifier la recherche pour afficher des catégories pertinentes.",
         "emptyTitle": "Aucune catégorie trouvée",
         "leafLabel": "Feuille",
         "openSubcategory": "Ouvrir les sous-catégories de {category}",
         "openSubcategoryCta": "Voir les sous-catégories",
-        "subtitle": "Choisissez une famille pour afficher ses sous-catégories ou découvrir nos guides.",
+        "subtitle": "Choisis une famille pour afficher ses sous-catégories ou découvrir nos guides.",
         "title": "Parcourir les catégories",
         "verticalLabel": "Guide sélectionné",
         "viewVertical": "Ouvrir le guide {category}",
@@ -618,8 +618,8 @@
       },
       "hero": {
         "breadcrumbAriaLabel": "Fil d'Ariane de la navigation par catégories",
-        "childDescription": "Explorez les sous-catégories et les sélections associées aux {category}.",
-        "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
+        "childDescription": "Explore les sous-catégories et les sélections associées aux {category}.",
+        "description": "Découvre toutes les familles de produits analysées et accéde directement à la plus pertinente.",
         "resultsSummary": {
           "one": "{count} catégorie affichée",
           "other": "{count} catégories affichées"
@@ -627,7 +627,7 @@
         "rootBreadcrumb": "Toutes les catégories",
         "rootProductsTitle": "Les produits disponibles",
         "searchLabel": "Rechercher une catégorie",
-        "searchPlaceholder": "Tapez le nom d'une catégorie",
+        "searchPlaceholder": "Tape le nom d'une catégorie",
         "title": "Toutes les catégories de produits"
       },
       "loading": "Chargement de la navigation des catégories",
@@ -653,7 +653,7 @@
     },
     "ecoscorePage": {
       "breadcrumbLeaf": "impactscore",
-      "description": "Nous préparons un contenu dédié au score éco pour {category}. Revenez bientôt !",
+      "description": "Nous préparons un contenu dédié au score éco pour {category}. C'est pour bientôt !",
       "primaryScoreLabel": "Impact Score",
       "showVirtualScores": "Afficher les scores virtuels",
       "scoreOn20": "Score / 20",
@@ -709,7 +709,7 @@
           "title": "Pourquoi et comment nous évaluons les {category}"
         },
         "transparency": {
-          "communityBody": "La définition de l'Impact Score {category} est disponible sur GitHub. Partagez vos retours ou proposez des ajustements.",
+          "communityBody": "La définition de l'Impact Score {category} est disponible sur GitHub. Partage tes retours ou propose des ajustements.",
           "communityCta": "Consulter la configuration",
           "communityIssues": "Ouvrir une discussion",
           "communityTitle": "En discuter",
@@ -728,13 +728,13 @@
           "cards": {
             "openSource": {
               "title": "Méthodologie open-source",
-              "description": "Consultez nos dépôts publics pour suivre l'amélioration de l'Impact Score des {category}.",
+              "description": "Consulte nos dépôts publics pour suivre l'amélioration de l'Impact Score des {category}.",
               "cta": "Découvrir notre démarche open-source",
               "aria": "Découvrir les ressources open-source pour l'Impact Score des {category}"
             },
             "openData": {
               "title": "Données ouvertes",
-              "description": "Accédez aux jeux de données qui alimentent l'Impact Score des {category} et réutilisez-les pour vos analyses.",
+              "description": "Accéder aux jeux de données qui alimentent l'Impact Score des {category} et réutilise-les pour tes analyses.",
               "cta": "Explorer l'espace données",
               "aria": "Explorer les ressources open data pour l'Impact Score des {category}"
             }
@@ -749,7 +749,7 @@
         "USE": "Usage du produit"
       },
       "seo": {
-        "description": "Découvrez comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA.",
+        "description": "Découvre comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA.",
         "title": "{category} – Impact Score détaillé"
       },
       "title": "{category} – {label}"
@@ -825,7 +825,7 @@
       "filters": {
         "excludedCauses": {
           "title": "Causes d'exclusion",
-          "helper": "Regroupez les résultats par motif de modération ou raison légale."
+          "helper": "Regroupe les résultats par motif de modération ou raison légale."
         }
       }
     },
@@ -835,23 +835,23 @@
       "missingBreadcrumbTitle": "Catégorie",
       "nudge": {
         "cta": "Trouver les bons produits",
-        "subtitle": "Passez directement aux meilleures pistes de cette catégorie avec un accompagnement guidé.",
+        "subtitle": "Passe directement aux meilleures pistes de cette catégorie avec un accompagnement guidé.",
         "eyebrow": "Assistant intelligent"
       }
     },
     "products": {
       "compare": {
-        "addMoreHint": "Sélectionnez au moins deux produits pour lancer une comparaison.",
+        "addMoreHint": "Sélectionne au moins deux produits pour lancer une comparaison.",
         "addToList": "Ajouter à la comparaison",
         "collapsePanel": "Masquer la liste",
-        "differentCategory": "Comparez uniquement des produits de la même catégorie.",
+        "differentCategory": "Compare uniquement des produits de la même catégorie.",
         "expandPanel": "Afficher la liste",
         "itemsCount": {
           "one": "{count} produit sélectionné",
           "other": "{count} produits sélectionnés"
         },
         "launchComparison": "Comparer maintenant",
-        "limitReached": "Vous pouvez comparer jusqu'à {count} produits.",
+        "limitReached": "Tu peux comparer jusqu'à {count} produits.",
         "missingIdentifier": "Impossible de comparer ce produit.",
         "regionLabel": "Produits sélectionnés pour la comparaison",
         "removeFromList": "Retirer de la comparaison",
@@ -865,7 +865,7 @@
         "unknown": "Non précisée"
       },
       "ecoscoreLabel": "Score éco {letter}",
-      "fetchError": "Impossible de charger les produits. Veuillez réessayer.",
+      "fetchError": "Impossible de charger les produits. Merci de réessayer plus tard.",
       "headers": {
         "bestPrice": "Meilleur prix",
         "brand": "Marque",
@@ -927,7 +927,7 @@
   "cms": {
     "page": {
       "edit": "Modifier cette page",
-      "error": "Nous n'avons pas pu charger cette page. Veuillez réessayer plus tard.",
+      "error": "Nous n'avons pas pu charger cette page. Merci de réessayer plus tard.",
       "loading": "Chargement de la page…"
     }
   },
@@ -957,7 +957,7 @@
         "community": {
           "cta": "Nous suivre sur LinkedIn",
           "ctaAria": "Ouvrir la page LinkedIn de Nudger dans un nouvel onglet",
-          "description": "Suivez nos actualités, sorties produit et appels à contribution sur LinkedIn.",
+          "description": "Suivre nos actualités, sorties produit et appels à contribution sur LinkedIn.",
           "title": "Rejoindre la communauté"
         },
         "partnerships": {
@@ -969,7 +969,7 @@
         "support": {
           "cta": "Nous écrire",
           "ctaAria": "Aller au formulaire de contact pour écrire à l'équipe Nudger",
-          "description": "Décrivez votre question dans le formulaire et donnez un maximum de contexte pour que nous puissions vous répondre concrètement.",
+          "description": "Décris ta question dans le formulaire et donne un maximum de contexte pour que nous puissions répondre concrètement.",
           "title": "Besoin d'un coup de pouce ?"
         }
       },
@@ -1028,8 +1028,8 @@
         }
       },
       "privacy": "Vos coordonnées ne sont utilisées que pour répondre à votre message et ne sont jamais partagées.",
-      "subtitle": "Remplissez les informations ci-dessous, nous reviendrons vers vous rapidement.",
-      "title": "Parlez-nous de vous"
+      "subtitle": "Remplis les informations ci-dessous, nous répondons rapidement.",
+      "title": "Un message ?"
     },
     "hero": {
       "channels": {
@@ -1037,18 +1037,18 @@
           "description": "Envie de collaborer, d'intégrer les données Nudger ou de co-construire un dispositif ? Parlons-en.",
           "label": "Partenariats & écosystème"
         },
-        "subtitle": "Choisissez le sujet qui vous ressemble : toute demande arrive à la même équipe bienveillante.",
+        "subtitle": "Choisis le sujet qui t'interesse : toutes les demande arrivent à la même équipe.",
         "support": {
           "description": "Questions sur le comparateur, difficulté de connexion ? On vous accompagne pas à pas.",
           "label": "Support produit & utilisateurs"
         },
         "title": "Comment pouvons-nous vous aider ?",
         "trust": {
-          "description": "Journalistes, institutions ou chercheurs : contactez-nous pour interviews, témoignages et chiffres clés.",
+          "description": "Journalistes, institutions ou chercheurs : nous contacter pour interviews, témoignages et chiffres clés.",
           "label": "Presse & impact citoyen"
         }
       },
-      "description": "Parlez-nous de votre projet, de votre organisation ou de votre usage de Nudger afin que nous vous orientions vers la bonne personne.",
+      "description": "Parle-nous de ton projet, de ton organisation ou de ton usage de Nudger afin que nous vous orientions vers la bonne personne.",
       "eyebrow": "Entrons en contact",
       "highlights": {
         "commitment": "Une réponse sous deux jours ouvrés pour la plupart des demandes.",
@@ -1059,7 +1059,7 @@
       "title": "Échangeons ensemble"
     },
     "seo": {
-      "description": "Prenez contact avec l'équipe Nudger pour un partenariat, une question produit ou un échange sur l'impact.",
+      "description": "Prendre contact avec l'équipe Nudger pour un partenariat, une question produit ou un échange sur l'impact.",
       "imageAlt": "Logotype Nudger utilisé pour l'aperçu de la page contact",
       "title": "Nous contacter | Nudger"
     },
@@ -1072,13 +1072,13 @@
   "contrib": {
     "error": {
       "cta": "Retour à l'accueil",
-      "description": "Le lien de contribution a peut-être expiré ou est invalide. Vous pouvez retourner à l'accueil et réessayer.",
+      "description": "Le lien de contribution a peut-être expiré ou est invalide. Retourner à l'accueil et réessayer.",
       "detailsPrefix": "Détails :",
       "title": "Impossible de valider ce lien"
     },
     "loading": {
-      "message": "Veuillez patienter pendant la validation de votre lien de contribution.",
-      "title": "Préparation de votre redirection…"
+      "message": "Merci de patienter pendant la validation de votre lien de contribution.",
+      "title": "Préparation de la redirection…"
     },
     "seo": {
       "description": "Nous vérifions votre lien de contribution sécurisé avant de vous rediriger vers le partenaire de Nudger.",
