@@ -34,7 +34,7 @@ public class BackupConfig {
 	/**
 	 * Number of concurent threads running import (1 thread per file, so should be less or equals than productsExportThreads)
 	 */
-	private int productImportThreads = 4;
+	private int productImportThreads = 2;
 
 	/**
 	 * Number of threads (and of files) to operate export with
