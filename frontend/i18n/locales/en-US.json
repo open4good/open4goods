@@ -3287,10 +3287,5 @@
         "aplat": "parallax-aplats.svg"
       }
     }
-  },
-  "product": {
-    "meta": {
-      "gtinFallback": "GTIN unavailable: {gtin}"
-    }
   }
 }
