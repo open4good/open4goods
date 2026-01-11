@@ -1,7 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { ref } from 'vue'
-import type { VerticalCategoryDto, VerticalConfigDto } from '~~/shared/api-client'
+import type {
+  VerticalCategoryDto,
+  VerticalConfigDto,
+} from '~~/shared/api-client'
 import NudgeToolWizard from './NudgeToolWizard.vue'
 
 // Basic mocks for Nuxt/Vue usage
@@ -76,13 +79,23 @@ vi.mock('@vueuse/core', () => ({
   },
 }))
 
+vi.stubGlobal(
+  '$fetch',
+  vi.fn().mockResolvedValue({
+    products: {
+      data: [],
+      page: { totalElements: 0 },
+    },
+  })
+)
+
 describe('NudgeToolWizard', () => {
   it('renders and shows active steps limited to current index', async () => {
     // We cannot easily test internal computed without exposing it or deep interaction.
     // However, we can check v-stepper items prop.
 
     // Stub components to avoid deep rendering
-    const wrapper = mount(NudgeToolWizard, {
+    const wrapper = await mountSuspended(NudgeToolWizard, {
       global: {
         mocks: {
           $t: (t: string) => t,
@@ -110,11 +123,19 @@ describe('NudgeToolWizard', () => {
             props: ['items', 'modelValue'],
             template: '<div class="stub-stepper">{{ items.length }}</div>',
           },
-          NudgeToolStepCategory: true,
-          NudgeToolStepScores: true,
-          NudgeToolStepCondition: true,
-          NudgeToolStepSubsetGroup: true,
-          NudgeToolStepRecommendations: true,
+          NudgeToolStepCategory: {
+            template: '<div data-step="category"></div>',
+          },
+          NudgeToolStepScores: { template: '<div data-step="scores"></div>' },
+          NudgeToolStepCondition: {
+            template: '<div data-step="condition"></div>',
+          },
+          NudgeToolStepSubsetGroup: {
+            template: '<div data-step="subset"></div>',
+          },
+          NudgeToolStepRecommendations: {
+            template: '<div data-step="recommendations"></div>',
+          },
         },
       },
       props: {
@@ -122,6 +143,8 @@ describe('NudgeToolWizard', () => {
           { id: 'v1', nudgeToolConfig: { scores: ['s1'], subsets: [] } },
         ] as unknown as VerticalConfigDto[],
       },
+      // Suppress Vuetify warnings if any remain
+      attachTo: document.body,
     })
 
     expect(wrapper.exists()).toBe(true)
@@ -132,7 +155,7 @@ describe('NudgeToolWizard', () => {
     // Header row was removed in refactor, removed assertion.
   })
 
-  it('orders subset groups before condition', () => {
+  it('orders subset groups before condition', async () => {
     currentCategory.value = {
       id: 'cat-1',
       verticalHomeTitle: 'Category',
@@ -154,7 +177,7 @@ describe('NudgeToolWizard', () => {
       },
     } as VerticalCategoryDto
 
-    const wrapper = mount(NudgeToolWizard, {
+    const wrapper = await mountSuspended(NudgeToolWizard, {
       global: {
         mocks: {
           $t: (t: string) => t,
@@ -174,6 +197,19 @@ describe('NudgeToolWizard', () => {
             props: ['text', 'location'],
             template:
               '<div class="v-tooltip-stub"><slot name="activator" :props="{}" /><slot /></div>',
+          },
+          NudgeToolStepCategory: {
+            template: '<div data-step="category"></div>',
+          },
+          NudgeToolStepScores: { template: '<div data-step="scores"></div>' },
+          NudgeToolStepCondition: {
+            template: '<div data-step="condition"></div>',
+          },
+          NudgeToolStepSubsetGroup: {
+            template: '<div data-step="subset"></div>',
+          },
+          NudgeToolStepRecommendations: {
+            template: '<div data-step="recommendations"></div>',
           },
         },
       },

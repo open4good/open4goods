@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { defineComponent, h } from 'vue'
 import NudgeToolStepCondition from './NudgeToolStepCondition.vue'
 
@@ -45,7 +45,7 @@ const VIconStub = defineComponent({
 
 describe('NudgeToolStepCondition', () => {
   it('blocks unchecked selections when zero results', async () => {
-    const wrapper = mount(NudgeToolStepCondition, {
+    const wrapper = await mountSuspended(NudgeToolStepCondition, {
       props: {
         modelValue: [],
         isZeroResults: true,
@@ -69,7 +69,7 @@ describe('NudgeToolStepCondition', () => {
   })
 
   it('allows unchecking when zero results', async () => {
-    const wrapper = mount(NudgeToolStepCondition, {
+    const wrapper = await mountSuspended(NudgeToolStepCondition, {
       props: {
         modelValue: ['new'],
         isZeroResults: true,

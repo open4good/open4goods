@@ -254,6 +254,10 @@ const loading = ref(false)
 const animatedMatches = ref(0)
 const hasFetchedResults = ref(false)
 
+const hasZeroMatches = computed(
+  () => hasFetchedResults.value && !loading.value && totalMatches.value === 0
+)
+
 const activeStepKey = ref('category')
 const previousStepKey = ref<string | null>(null)
 const visitedStepKeys = ref<string[]>(['category'])
@@ -730,10 +734,6 @@ const hasNextStep = computed(() => {
   const index = steps.value.findIndex(step => step.key === activeStepKey.value)
   return index >= 0 && index < steps.value.length - 1
 })
-
-const hasZeroMatches = computed(
-  () => hasFetchedResults.value && !loading.value && totalMatches.value === 0
-)
 
 const isNextDisabled = computed(() => {
   if (activeStepKey.value === 'category') {
