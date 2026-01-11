@@ -1149,7 +1149,7 @@
         "author": {
           "default": "Membre de la communauté Nudger",
           "label": "Nom affiché",
-          "placeholder": "Sous quel nom souhaitez-vous apparaître ?"
+          "placeholder": "Sous quel nom souhaites-tu apparaître ?"
         },
         "message": {
           "label": "Message"
@@ -1158,22 +1158,22 @@
           "label": "Titre"
         }
       },
-      "privacy": "Les retours sont publics : n'indiquez pas de données personnelles sensibles.",
+      "privacy": "Les retours sont publics : ne pas indiquer de données personnelles sensibles !",
       "sections": {
         "bug": {
           "eyebrow": "Signaler un bug",
-          "intro": "Partagez les étapes pour reproduire le bug, ce que vous attendiez et ce qui s'est réellement produit afin que nous puissions enquêter rapidement.",
-          "messagePlaceholder": "Précisez les étapes, le comportement attendu et ce qui s'est produit.",
-          "subtitle": "Plus vous donnez de détails, plus nous pourrons corriger rapidement.",
-          "title": "Décrivez le problème rencontré",
+          "intro": "Partager les étapes pour reproduire le bug, ce que tu attendais et ce qui s'est réellement produit afin que nous puissions enquêter rapidement.",
+          "messagePlaceholder": "Préciser les étapes, le comportement attendu et ce qui s'est produit.",
+          "subtitle": "Plus tu donnes de détails, plus nous pourrons corriger rapidement.",
+          "title": "Décris le problème rencontré",
           "titlePlaceholder": "Ex. Erreur 500 sur la fiche produit"
         },
         "idea": {
           "eyebrow": "Proposer une idée",
-          "intro": "Présentez le contexte de votre idée, son importance et la manière dont elle améliorerait Nudger pour toutes et tous.",
-          "messagePlaceholder": "Décrivez votre idée, le contexte et les bénéfices attendus.",
-          "subtitle": "Expliquez comment Nudger pourrait mieux vous aider.",
-          "title": "Imaginez la prochaine évolution",
+          "intro": "Présente le contexte de ton idée, son importance et la manière dont elle améliorerait Nudger pour toutes et tous.",
+          "messagePlaceholder": "Décris ton idée, le contexte et les bénéfices attendus.",
+          "subtitle": "Explique comment Nudger pourrait mieux faire.",
+          "title": "Imagine la prochaine évolution",
           "titlePlaceholder": "Ex. Comparer l'empreinte carbone des frigos"
         }
       }
@@ -1191,7 +1191,7 @@
         "label": "Ouvrir les issues GitHub"
       },
       "stats": {
-        "description": "Aidez-nous à concentrer l'équipe sur les améliorations utiles.",
+        "description": "Aide-nous à concentrer l'équipe sur les améliorations utiles.",
         "eyebrow": "En pratique",
         "items": {
           "iterations": "Itérations hebdomadaires sur les sujets les plus soutenus.",
@@ -1200,7 +1200,7 @@
         },
         "title": "Un backlog collaboratif"
       },
-      "subtitle": "Signalez les bugs, proposez des évolutions et votez pour les priorités qui comptent.",
+      "subtitle": "Signaler les bugs, proposez des évolutions et votez pour les priorités qui comptent.",
       "title": "Construisons Nudger avec vos idées"
     },
     "issues": {
