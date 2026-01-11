@@ -24,12 +24,10 @@ public class CrawlController {
 
 	private final FetchersService fetchersService;
 
-	private final FetcherProperties config;
 
 	public CrawlController(final FetchersService fetchersService, final FetcherProperties config) {
 		super();
 		this.fetchersService = fetchersService;
-		this.config = config;
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(CrawlController.class);
@@ -39,13 +37,13 @@ public class CrawlController {
 
 		final FetchRequestResponse ret = new FetchRequestResponse(true);
 
-		
+
 		if (null != p.getCsvDatasource() ) {
 			logger.warn("{} will be ignored, CSV Jobs must be triggered through feedservice",datasourceConfName);
 			ret.setCrawlAccepted(false);
 			ret.setMessage("This job is a CSV job, use feedService");
 			return ret;
-			
+
 		}else if (fetchersService.stats().getCrawlerStats().containsKey(datasourceConfName)) {
 			logger.warn("Will skip crawl of {}, this job is already running",datasourceConfName);
 			ret.setCrawlAccepted(false);
