@@ -843,7 +843,16 @@ public class VerticalConfig {
 	}
 
 	public void setBrandsAlias(Map<String, String> brandsAlias) {
-		this.brandsAlias = brandsAlias;
+		if (brandsAlias == null) {
+			this.brandsAlias = new HashMap<>();
+		} else {
+			this.brandsAlias = brandsAlias.entrySet().stream()
+					.collect(Collectors.toMap(
+							e -> e.getKey().toUpperCase(),
+							Entry::getValue,
+							(v1, v2) -> v2,
+							HashMap::new));
+		}
 	}
 
 	public Set<String> getBrandsExclusion() {

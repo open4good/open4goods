@@ -65,4 +65,41 @@ class ProductTest
                 sourcedAttribute.setValue(value);
                 return sourcedAttribute;
         }
+
+	@Test
+	void testAddBrandAliasCaseSensitivity() {
+		Product product = new Product(1L);
+		java.util.Map<String, String> aliases = new java.util.HashMap<>();
+		aliases.put("LG Electronics Inc.", "LG"); // Mixed case key
+		aliases.put("LG ELECTRONICS", "LG"); // Uppercase key
+
+		org.open4goods.model.vertical.VerticalConfig vc = new org.open4goods.model.vertical.VerticalConfig();
+		vc.setBrandsAlias(aliases);
+		// We use the map FROM the config object to ensure the cleaning logic was applied
+		java.util.Map<String, String> cleanedAliases = vc.getBrandsAlias();
+
+		// Test case 1: Exact match with uppercase key (Should work if logic matches
+		// normalized input)
+		product.addBrand("test", "LG ELECTRONICS", null, cleanedAliases);
+		assertEquals("LG", product.brand(), "LG ELECTRONICS should be aliased to LG");
+
+		// reset
+		product = new Product(2L);
+
+		// Test case 2: Mixed case input, matching uppercase key (Should work because
+		// input is uppercased)
+		product.addBrand("test", "LG Electronics", null, cleanedAliases);
+		assertEquals("LG", product.brand(), "LG Electronics should be aliased to LG (via uppercase key)");
+
+		// reset
+		product = new Product(3L);
+
+		// Test case 3: Mixed case input, matching mixed case key
+		// "LG Electronics Inc." -> "LG ELECTRONICS INC." (input uppercased)
+		// Map should now have "LG ELECTRONICS INC." because we ran it through
+		// setBrandsAlias which uppercases keys.
+		product.addBrand("test", "LG Electronics Inc.", null, cleanedAliases);
+
+		assertEquals("LG", product.brand(), "LG Electronics Inc. should be aliased to LG");
+	}
 }
