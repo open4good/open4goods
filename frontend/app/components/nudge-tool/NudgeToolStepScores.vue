@@ -17,12 +17,14 @@
               border="thin"
               :class="{
                 'nudge-toggle-card--selected': isSelected(score.scoreName),
+                'nudge-toggle-card--disabled': isDisabled(score.scoreName),
               }"
               rounded="lg"
               role="button"
               :aria-pressed="isSelected(score.scoreName).toString()"
+              :aria-disabled="isDisabled(score.scoreName).toString()"
               :aria-label="score.title"
-              tabindex="0"
+              :tabindex="isDisabled(score.scoreName) ? -1 : 0"
               @click="toggle(score.scoreName ?? '')"
               @keydown.enter.prevent="toggle(score.scoreName ?? '')"
               @keydown.space.prevent="toggle(score.scoreName ?? '')"
@@ -55,6 +57,7 @@ import type { NudgeToolScoreDto } from '~~/shared/api-client'
 const props = defineProps<{
   scores: NudgeToolScoreDto[]
   modelValue: string[]
+  isZeroResults?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -69,7 +72,14 @@ const getScoreIcon = (score: NudgeToolScoreDto) => score.mdiIcon ?? 'mdi-leaf'
 const isSelected = (scoreName?: string | null) =>
   scoreName ? selectedNames.value.includes(scoreName) : false
 
+const isDisabled = (scoreName?: string | null) =>
+  Boolean(props.isZeroResults) && !isSelected(scoreName)
+
 const toggle = (scoreName: string) => {
+  if (isDisabled(scoreName)) {
+    return
+  }
+
   const next = new Set(selectedNames.value)
 
   if (next.has(scoreName)) {
@@ -213,6 +223,20 @@ const toggle = (scoreName: string) => {
 
     .nudge-toggle-card__title {
       color: rgb(var(--v-theme-text-neutral-strong));
+    }
+  }
+
+  .nudge-toggle-card--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    pointer-events: none;
+
+    &:hover,
+    &:focus-visible {
+      transform: none;
+      border-color: rgba(var(--v-theme-border-primary-strong), 0.4);
+      box-shadow: none !important;
     }
   }
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref } from 'vue'
-import type { VerticalConfigDto } from '~~/shared/api-client'
+import type { VerticalCategoryDto, VerticalConfigDto } from '~~/shared/api-client'
 import NudgeToolWizard from './NudgeToolWizard.vue'
 
 // Basic mocks for Nuxt/Vue usage
@@ -14,11 +14,13 @@ vi.mock('vue-i18n', () => ({
 vi.mock('vuetify', () => ({
   useDisplay: () => ({ smAndDown: { value: false } }),
 }))
+const currentCategory = ref<VerticalCategoryDto | null>(null)
+
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: () => ({
     fetchCategories: vi.fn().mockResolvedValue([]),
     selectCategoryBySlug: vi.fn(),
-    currentCategory: { value: null },
+    currentCategory,
   }),
 }))
 vi.mock('~/composables/useAuth', () => ({
@@ -29,11 +31,19 @@ vi.mock('~/components/nudge-tool/NudgeWizardHeader.vue', () => ({
 }))
 
 vi.mock('#components', () => ({
-  NudgeToolStepCategory: { template: '<div>Category</div>' },
-  NudgeToolStepScores: { template: '<div>Scores</div>' },
-  NudgeToolStepCondition: { template: '<div>Condition</div>' },
-  NudgeToolStepSubsetGroup: { template: '<div>SubsetGroup</div>' },
-  NudgeToolStepRecommendations: { template: '<div>Recommendations</div>' },
+  NudgeToolStepCategory: {
+    template: '<div data-step="category">Category</div>',
+  },
+  NudgeToolStepScores: { template: '<div data-step="scores">Scores</div>' },
+  NudgeToolStepCondition: {
+    template: '<div data-step="condition">Condition</div>',
+  },
+  NudgeToolStepSubsetGroup: {
+    template: '<div data-step="subset">SubsetGroup</div>',
+  },
+  NudgeToolStepRecommendations: {
+    template: '<div data-step="recommendations">Recommendations</div>',
+  },
   RoundedCornerCard: { template: '<div><slot /><slot name="corner"/></div>' },
   NudgeWizardHeader: { template: '<div class="header-stub"></div>' },
 }))
@@ -120,5 +130,71 @@ describe('NudgeToolWizard', () => {
     expect(wrapper.exists()).toBe(true)
 
     // Header row was removed in refactor, removed assertion.
+  })
+
+  it('orders subset groups before condition', () => {
+    currentCategory.value = {
+      id: 'cat-1',
+      verticalHomeTitle: 'Category',
+      verticalHomeUrl: '/category',
+      nudgeToolConfig: {
+        scores: [
+          {
+            scoreName: 'score',
+            title: 'Score',
+          },
+        ],
+        subsets: [
+          {
+            id: 'price-1',
+            title: 'Budget',
+            group: 'price',
+          },
+        ],
+      },
+    } as VerticalCategoryDto
+
+    const wrapper = mount(NudgeToolWizard, {
+      global: {
+        mocks: {
+          $t: (t: string) => t,
+        },
+        stubs: {
+          RoundedCornerCard: {
+            template: '<div><slot /><slot name="corner" /></div>',
+          },
+          VBtn: true,
+          VAvatar: true,
+          VImg: true,
+          VIcon: true,
+          VProgressLinear: true,
+          VWindow: { template: '<div><slot /></div>' },
+          VWindowItem: { template: '<div><slot /></div>', props: ['value'] },
+          VTooltip: {
+            props: ['text', 'location'],
+            template:
+              '<div class="v-tooltip-stub"><slot name="activator" :props="{}" /><slot /></div>',
+          },
+        },
+      },
+      props: {
+        initialCategoryId: 'cat-1',
+        verticals: [
+          { id: 'v1', nudgeToolConfig: { scores: ['s1'], subsets: [] } },
+        ] as unknown as VerticalConfigDto[],
+      },
+    })
+
+    const stepKeys = wrapper
+      .findAll('[data-step]')
+      .map(node => node.attributes('data-step'))
+
+    expect(stepKeys).toEqual([
+      'category',
+      'scores',
+      'subset',
+      'condition',
+      'recommendations',
+    ])
   })
 })

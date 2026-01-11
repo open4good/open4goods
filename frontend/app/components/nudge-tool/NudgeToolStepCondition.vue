@@ -17,12 +17,14 @@
           elevation="2"
           :class="{
             'nudge-toggle-card--selected': isSelected(option.value),
+            'nudge-toggle-card--disabled': isDisabled(option.value),
           }"
           rounded="xl"
           role="button"
           :aria-pressed="isSelected(option.value).toString()"
+          :aria-disabled="isDisabled(option.value).toString()"
           :aria-label="option.label"
-          tabindex="0"
+          :tabindex="isDisabled(option.value) ? -1 : 0"
           @click="() => toggleOption(option.value)"
           @keydown.enter.prevent="toggleOption(option.value)"
           @keydown.space.prevent="toggleOption(option.value)"
@@ -70,6 +72,7 @@ const NudgeConditionUsedIcon = defineAsyncComponent(
 const props = defineProps<{
   modelValue: ProductConditionChoice[]
   compact?: boolean
+  isZeroResults?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -99,7 +102,14 @@ const isSelected = (choice: ProductConditionChoice) => {
   return props.modelValue.includes(choice)
 }
 
+const isDisabled = (choice: ProductConditionChoice) =>
+  Boolean(props.isZeroResults) && !isSelected(choice)
+
 const toggleOption = (choice: ProductConditionChoice) => {
+  if (isDisabled(choice)) {
+    return
+  }
+
   const nextSelection = isSelected(choice)
     ? props.modelValue.filter(entry => entry !== choice)
     : [...props.modelValue, choice]
@@ -187,6 +197,20 @@ const toggleOption = (choice: ProductConditionChoice) => {
 
     .nudge-toggle-card__title {
       color: rgb(var(--v-theme-accent-supporting));
+    }
+  }
+
+  .nudge-toggle-card--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    pointer-events: none;
+
+    &:hover,
+    &:focus-visible {
+      transform: none;
+      border-color: rgba(var(--v-theme-border-primary-strong), 0.4);
+      box-shadow: none !important;
     }
   }
 }
