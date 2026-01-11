@@ -252,6 +252,7 @@ const recommendations = ref<ProductDto[]>([])
 const totalMatches = ref(0)
 const loading = ref(false)
 const animatedMatches = ref(0)
+const hasFetchedResults = ref(false)
 
 const activeStepKey = ref('category')
 const previousStepKey = ref<string | null>(null)
@@ -464,25 +465,11 @@ const steps = computed<WizardStep[]>(() => {
       props: {
         modelValue: selectedScores.value,
         scores: nudgeConfig.value?.scores ?? [],
+        isZeroResults: hasZeroMatches.value,
       },
       onUpdate: (value: string[]) => (selectedScores.value = value),
     })
   }
-
-  sequence.push({
-    key: 'condition',
-    component: NudgeToolStepCondition,
-    title: t('nudge-tool.steps.condition.title'),
-    subtitle: t('nudge-tool.steps.condition.subtitle'),
-    icon: 'mdi-compare-horizontal',
-    props: {
-      modelValue: condition.value,
-      compact: props.compact ?? false,
-    },
-    onUpdate: (value: ProductConditionSelection) => {
-      condition.value = value
-    },
-  })
 
   let subsetStepNumber = sequence.length + 1
 
@@ -508,11 +495,28 @@ const steps = computed<WizardStep[]>(() => {
           selectedCategory.value?.verticalHomeTitle ??
           selectedCategory.value?.id ??
           '',
+        isZeroResults: hasZeroMatches.value,
       },
       onUpdate: (value: string[]) => (activeSubsetIds.value = value),
     })
 
     subsetStepNumber += 1
+  })
+
+  sequence.push({
+    key: 'condition',
+    component: NudgeToolStepCondition,
+    title: t('nudge-tool.steps.condition.title'),
+    subtitle: t('nudge-tool.steps.condition.subtitle'),
+    icon: 'mdi-compare-horizontal',
+    props: {
+      modelValue: condition.value,
+      compact: props.compact ?? false,
+      isZeroResults: hasZeroMatches.value,
+    },
+    onUpdate: (value: ProductConditionSelection) => {
+      condition.value = value
+    },
   })
 
   sequence.push({
@@ -653,6 +657,7 @@ const fetchRecommendations = async () => {
 
     recommendations.value = response.products?.data ?? []
     totalMatches.value = response.products?.page?.totalElements ?? 0
+    hasFetchedResults.value = true
   } finally {
     loading.value = false
   }
@@ -726,12 +731,16 @@ const hasNextStep = computed(() => {
   return index >= 0 && index < steps.value.length - 1
 })
 
+const hasZeroMatches = computed(
+  () => hasFetchedResults.value && !loading.value && totalMatches.value === 0
+)
+
 const isNextDisabled = computed(() => {
   if (activeStepKey.value === 'category') {
     return !selectedCategoryId.value
   }
 
-  return false
+  return hasZeroMatches.value
 })
 
 const canAccessStep = (stepKey: string) =>
@@ -765,6 +774,7 @@ const resetCategorySelectionState = () => {
   condition.value = []
   recommendations.value = []
   totalMatches.value = 0
+  hasFetchedResults.value = false
   visitedStepKeys.value = ['category']
   // Keep locked heights intact so returning to the wizard keeps the layout stable
 }

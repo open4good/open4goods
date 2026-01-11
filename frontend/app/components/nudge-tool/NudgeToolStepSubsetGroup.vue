@@ -14,12 +14,14 @@
               elevation="2"
               :class="{
                 'nudge-toggle-card--selected': isSelected(subset.id),
+                'nudge-toggle-card--disabled': isDisabled(subset.id),
               }"
               rounded="lg"
               role="button"
               :aria-pressed="isSelected(subset.id).toString()"
+              :aria-disabled="isDisabled(subset.id).toString()"
               :aria-label="subset.title"
-              tabindex="0"
+              :tabindex="isDisabled(subset.id) ? -1 : 0"
               @click="toggle(subset.id ?? '')"
               @keydown.enter.prevent="toggle(subset.id ?? '')"
               @keydown.space.prevent="toggle(subset.id ?? '')"
@@ -59,6 +61,7 @@ const props = defineProps<{
   stepNumber: number
   categoryIcon?: string | null
   categoryLabel?: string | null
+  isZeroResults?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -69,10 +72,17 @@ const emit = defineEmits<{
 const isSelected = (subsetId?: string | null) =>
   subsetId ? props.modelValue.includes(subsetId) : false
 
+const isDisabled = (subsetId?: string | null) =>
+  Boolean(props.isZeroResults) && !isSelected(subsetId)
+
 const getSubsetIcon = (subset: VerticalSubsetDto) =>
   subset.mdiIcon ?? 'mdi-sprout'
 
 const toggle = (subsetId: string) => {
+  if (isDisabled(subsetId)) {
+    return
+  }
+
   const next = new Set(props.modelValue)
 
   if (next.has(subsetId)) {
@@ -232,6 +242,20 @@ const toggle = (subsetId: string) => {
       color: rgb(var(--v-theme-surface-default));
       box-shadow: inset 0 0 0 1px rgba(var(--v-theme-accent-supporting), 0.55);
       transform: translateY(-1px);
+    }
+  }
+
+  .nudge-toggle-card--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    pointer-events: none;
+
+    &:hover,
+    &:focus-visible {
+      transform: none;
+      border-color: rgba(var(--v-theme-border-primary-strong), 0.4);
+      box-shadow: none !important;
     }
   }
 }
