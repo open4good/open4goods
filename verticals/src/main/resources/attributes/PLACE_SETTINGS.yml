@@ -1,0 +1,25 @@
+key: "PLACE_SETTINGS"
+betterIs: "GREATER"
+faIcon: "mdi-silverware-fork-knife"
+name:
+  default: "Place settings"
+  fr: "Nombre de couverts"
+suffix:
+  default: "place settings"
+  fr: "couverts"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "NOMBRE DE COUVERTS"
+    - "RATEDCAPACITY"
+    - "CAPACITE"
+    - "CAPACITÉ"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "COUVERTS"

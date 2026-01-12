@@ -33,7 +33,10 @@ popular: true
 # The mainly presented attributes for this category
 popularAttributes:
   - CLASSE_ENERGY
-  - POWER_CONSUMPTION_TYPICAL
+  - ENERGY_CONSUMPTION_100_CYCLES
+  - WATER_CONSUMPTION
+  - NOISE_LEVEL
+  - PLACE_SETTINGS
 
 # GenAiConfig for this vertical
 genAiConfig:
@@ -83,7 +86,7 @@ i18n:
         - MODEL
         - YEAR
     h1Title:
-      prefix: "|| lave vaisselle | lave-vaisselles ||"
+      prefix: "|| Lave-vaisselle | Lave-vaisselles ||"
       attrs:
         - BRAND
         - MODEL
@@ -97,9 +100,9 @@ i18n:
     productMetaOpenGraphType: "product"
 
     # Vertical page elements
-    verticalHomeUrl: "laves-vaisselles"
-    verticalHomeTitle: "Laves-Vaisselles"
-    verticalHomeDescription: "Comparez les laves vaisselles (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
+    verticalHomeUrl: "lave-vaisselles"
+    verticalHomeTitle: "Lave-vaisselles"
+    verticalHomeDescription: "Comparez les lave-vaisselles (pose libre, encastrables, 45/60 cm, nombre de couverts, niveau sonore…) selon l’éco-score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
   #    wikiPages:
@@ -110,13 +113,13 @@ i18n:
 
   en:
     url:
-      prefix: "|| lave-vaisselle | lave vaisselle ||"
+      prefix: "|| dishwasher | dishwashers ||"
       attrs:
         - BRAND
         - MODEL
         - YEAR
     h1Title:
-      prefix: "Lave Vaisselle"
+      prefix: "|| Dishwasher | Dishwashers ||"
       attrs:
         - BRAND
         - MODEL
@@ -130,7 +133,7 @@ i18n:
 
     verticalHomeUrl: "dishwashers"
     verticalHomeTitle: "Dishwashers"
-    verticalHomeDescription: "Compare dishwashers (built-in, convection, self-cleaning…) by eco-score and price."
+    verticalHomeDescription: "Compare dishwashers (built-in or freestanding, 45/60 cm, capacity, noise level) by eco-score and price."
 
 #####################################################################################################################################
 # NUDGE TOOL CONFIGURATION
@@ -145,7 +148,7 @@ nudgeToolConfig:
         fr: "Consommation énergétique"
       description:
         en: "dishwashers with a low energy consumption"
-        fr: "Laves vaisselles avec une faible consommation énergétique"
+        fr: "Lave-vaisselles avec une faible consommation énergétique"
 
     - scoreName: "DURABILITY"
       scoreMinValue: 3
@@ -165,7 +168,7 @@ nudgeToolConfig:
         fr: "Réparabilité"
       description:
         en: "dishwashers with a good reparability"
-        fr: "Laves vaisselles avec une bonne réparabilité"
+        fr: "Lave-vaisselles avec une bonne réparabilité"
 
     - scoreName: "BRAND_SUSTAINABILITY"
       scoreMinValue: 4
@@ -210,10 +213,10 @@ nudgeToolConfig:
         fr: "< 400 €"
       title:
         en: "Affordable dishwashers"
-        fr: "Laves vaisselles pas chers"
+        fr: "Lave-vaisselles pas chers"
       description:
         en: "dishwashers priced under €400."
-        fr: "Les laves vaisselles dont le prix est inférieur à 400€."
+        fr: "Les lave-vaisselles dont le prix est inférieur à 400€."
 
     - id: "price_400_800"
       group: "price"
@@ -233,10 +236,10 @@ nudgeToolConfig:
         fr: "400 - 800 €"
       title:
         en: "Mid-range dishwashers"
-        fr: "Laves vaisselles milieu de gamme"
+        fr: "Lave-vaisselles milieu de gamme"
       description:
         en: "dishwashers priced between €400 and €800."
-        fr: "Les laves-vaisselle dont le prix est compris entre 400€ et 800€."
+        fr: "Les lave-vaisselles dont le prix est compris entre 400€ et 800€."
 
     - id: "price_greater_800"
       group: "price"
@@ -253,10 +256,10 @@ nudgeToolConfig:
         fr: "> 800 €"
       title:
         en: "Premium dishwashers"
-        fr: "Laves vaisselles haut de gamme"
+        fr: "Lave-vaisselles haut de gamme"
       description:
         en: "dishwashers priced over €800."
-        fr: "Les Laves-vaisselles dont le prix est supérieur à 800€."
+        fr: "Les lave-vaisselles dont le prix est supérieur à 800€."
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -281,8 +284,20 @@ aggregationConfiguration:
   "scores.DATA_QUALITY.value":
     interval: 1
     buckets: 5
-  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
-    interval: 250
+  "attributes.indexed.ENERGY_CONSUMPTION_100_CYCLES":
+    interval: 10
+    buckets: 12
+  "attributes.indexed.WATER_CONSUMPTION":
+    interval: 1
+    buckets: 12
+  "attributes.indexed.NOISE_LEVEL":
+    interval: 2
+    buckets: 12
+  "attributes.indexed.PLACE_SETTINGS":
+    interval: 1
+    buckets: 16
+  "attributes.indexed.PROGRAM_DURATION_ECO":
+    interval: 20
     buckets: 12
   "attributes.indexed.WEIGHT":
     interval: 2
@@ -293,9 +308,15 @@ aggregationConfiguration:
 
 ecoFilters:
   - "CLASSE_ENERGY"
+  - "ENERGY_CONSUMPTION_100_CYCLES"
+  - "WATER_CONSUMPTION"
 
 technicalFilters:
-  - "POWER_CONSUMPTION_TYPICAL"
+  - "NOISE_LEVEL"
+  - "PLACE_SETTINGS"
+  - "PROGRAM_DURATION_ECO"
+  - "PROGRAM_COUNT"
+  - "INSTALLATION_TYPE"
   - "WEIGHT"
 
 ####################################################################################
@@ -304,7 +325,15 @@ technicalFilters:
 attributesConfig:
   configs:
     - key: "CLASSE_ENERGY"
-    - key: "POWER_CONSUMPTION_TYPICAL"
+    - key: "ENERGY_CONSUMPTION_100_CYCLES"
+    - key: "ENERGY_CONSUMPTION_PER_CYCLE"
+    - key: "WATER_CONSUMPTION"
+    - key: "NOISE_LEVEL"
+    - key: "NOISE_CLASS"
+    - key: "PLACE_SETTINGS"
+    - key: "PROGRAM_DURATION_ECO"
+    - key: "PROGRAM_COUNT"
+    - key: "INSTALLATION_TYPE"
     - key: "WEIGHT"
     - key: "WARRANTY"
     - key: "YEAR"

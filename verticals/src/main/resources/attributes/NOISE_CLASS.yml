@@ -1,0 +1,27 @@
+key: "NOISE_CLASS"
+betterIs: "GREATER"
+faIcon: "mdi-volume-medium"
+name:
+  default: "Noise class"
+  fr: "Classe sonore"
+filteringType: "TEXT"
+asScore: false
+attributeValuesOrdering: "MAPPED"
+numericMapping:
+  A: 4.0
+  B: 3.0
+  C: 2.0
+  D: 1.0
+  E: 0.0
+synonyms:
+  all:
+    - "NOISECLASS"
+    - "CLASSE DE PERCEPTION SONORE"
+    - "CLASSE DE BRUIT"
+    - "CLASSE SONORE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

@@ -1,0 +1,31 @@
+key: "WATER_CONSUMPTION"
+betterIs: "LOWER"
+faIcon: "mdi-water"
+name:
+  default: "Water consumption per cycle"
+  fr: "Consommation d'eau par cycle"
+suffix:
+  default: "L/cycle"
+  fr: "L/cycle"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "WATERCONS"
+    - "WATER CONSUMPTION"
+    - "WATER CONSUMPTION PER CYCLE"
+    - "CONSOMMATION D'EAU"
+    - "CONSOMMATION D'EAU PAR CYCLE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "L"
+    - "LITRE"
+    - "LITRES"
+    - "L/CYCLE"
+    - "L PAR CYCLE"
+    - "CYCLE"

@@ -1,0 +1,28 @@
+key: "PROGRAM_DURATION_ECO"
+betterIs: "LOWER"
+faIcon: "mdi-timer-outline"
+name:
+  default: "Eco program duration"
+  fr: "Durée du programme éco"
+suffix:
+  default: "min"
+  fr: "min"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "PROGRAMMEDURATION"
+    - "DUREE DU PROGRAMME ECO EN HEURES"
+    - "DUREE DU PROGRAMME ECO"
+    - "DURÉE DU PROGRAMME ÉCO"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "MIN"
+    - "MINUTES"
+    - "HEURES"
+    - "H"
