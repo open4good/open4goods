@@ -13,5 +13,7 @@ public record ProductSearchRequestDto(
         @Schema(description = "Aggregations computed alongside the result set.")
         AggregationRequestDto aggs,
         @Schema(description = "Filter clauses restricting the result set.")
-        FilterRequestDto filters) {
+        FilterRequestDto filters,
+        @Schema(description = "Enable semantic search for text queries.")
+        Boolean semanticSearch) {
 }
