@@ -359,6 +359,8 @@ nudgeToolConfig:
         en: "Premium TVs"
         fr: "TV haut de gamme"
       title:
+        en: "> 1000 €"
+        fr: "> 1000 €"        
       description:
         en: "TVs priced over €1000."
         fr: "Les TV dont le prix est supérieur à 1000€."
@@ -378,7 +380,7 @@ nudgeToolConfig:
         fr: "petits-ecrans"
       caption:
         en: 'Small screens (< 32")'
-        fr: 'Petits écrans (< 32")'
+        fr: 'Diagonale < 32 pouces'
       title:
         en: "Small Screen TVs"
         fr: "Petits écrans"
@@ -401,7 +403,7 @@ nudgeToolConfig:
         fr: "ecrans-moyens"
       caption:
         en: 'Medium screens (32" - 55")'
-        fr: 'Écrans moyens (32" - 55")'
+        fr: 'Diagonale entre 32 et 55 pouces)'
       title:
         en: "Medium Screen TVs"
         fr: "Écrans moyens"
@@ -421,7 +423,7 @@ nudgeToolConfig:
         fr: "grands-ecrans"
       caption:
         en: 'Large screens (> 55")'
-        fr: 'Grands écrans (> 55")'
+        fr: 'Diagonale > 55 pouces'
       title:
         en: "Large Screen TVs"
         fr: "Grands écrans"

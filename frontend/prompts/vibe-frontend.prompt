@@ -10,6 +10,7 @@
  * All static texts must be i18n localised
  * You will heavily respect coding guidelines defined in the AGENTS.md
  * After coding tasks, you will check always validate against pnpm fast reported errors and warnings
+ * Always challenge existing implementation, looking for code simplification or better code documentation
  * Test with screenshots if possible
 
 # SCOPE
