@@ -58,7 +58,7 @@ i18n:
     ##################################
     # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
     h1Title:
-      prefix: "|| Lave-linge | Machine à laver | Lave linge ||"
+      prefix: "|| Lave-linge | Machine à laver ||"
       attrs:
         - BRAND
         - MODEL
@@ -69,7 +69,7 @@ i18n:
     ##################################
 
     # url for vertical (appened to baseUrl). No templating here
-    verticalHomeUrl: "laves-linges"
+    verticalHomeUrl: "lave-linges"
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Machines à laver"
@@ -83,6 +83,45 @@ i18n:
 #          verticalUrl: "oled-qled-lcd-que-choisir"
 #          title: "OLED, QLED,LCD, ... Quelle technologie choisir ?"
 #          faIcon: "fa-star"
+  en:
+    # The layout a product url will have. Ex : 81234555-washing-machine-samsung-QL659P-2023
+    url:
+      # We can add a custom prefix (with our conditional templating language if we want)
+      prefix: "|| washing machine | washer ||"
+      # Then we add some attributes values with hyphens if present (ex : samsung-QL659P-2023)
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    ##################################
+    # Product page meta and h1 title
+    ##################################
+    # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
+    h1Title:
+      prefix: "|| Washing machine | Washer ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    # Product metas (generic templates reused)
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphType: "product"
+
+    ##################################
+    # Vertical page elements
+    ##################################
+
+    # url for vertical (appened to baseUrl). No templating here
+    verticalHomeUrl: "washing-machines"
+    # Text displaid as title for the vertical
+    # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
+    verticalHomeTitle: "Washing machines"
+    # Text displaid as jumbotron for the vertical
+    verticalHomeDescription: "Explore our selection of washing machines. Water and energy use, noise levels, and durability all matter for environmental impact. Nudger helps you choose the most responsible model that still matches your daily needs."
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -164,3 +203,14 @@ attributesConfig:
   ##################################################################################################################
   configs:
     - key: CLASSE_ENERGY
+    - key: INSTALLATION_TYPE
+    - key: WASHING_CAPACITY
+    - key: SPIN_SPEED
+    - key: SPIN_CLASS
+    - key: ENERGY_CONSUMPTION_100_CYCLES
+    - key: ENERGY_CONSUMPTION_PER_CYCLE
+    - key: WATER_CONSUMPTION
+    - key: NOISE_LEVEL
+    - key: NOISE_CLASS
+    - key: PROGRAM_DURATION_ECO
+    - key: PROGRAM_COUNT
