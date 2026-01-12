@@ -67,6 +67,9 @@ front:
     quota:
       max-per-ip: ${FRONT_REVIEW_GENERATION_MAX_PER_IP:3}
       window: ${FRONT_REVIEW_GENERATION_WINDOW:24h}
+  search:
+    suggest:
+      semantic-fallback-enabled: true
 
   partners:
     ecosystem:

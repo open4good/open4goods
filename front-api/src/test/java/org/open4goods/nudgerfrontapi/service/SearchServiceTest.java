@@ -23,6 +23,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
 import org.open4goods.nudgerfrontapi.dto.search.SearchMode;
 import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
@@ -45,6 +46,7 @@ class SearchServiceTest {
     private ProductMappingService productMappingService;
     @Mock
     private ApiProperties apiProperties;
+    private SearchProperties searchProperties;
     @Mock
     private DjlTextEmbeddingService textEmbeddingService;
     @Mock
@@ -55,8 +57,9 @@ class SearchServiceTest {
 
     @BeforeEach
     void setUp() {
+        searchProperties = new SearchProperties();
         searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties,
-                textEmbeddingService, embeddingProperties);
+                searchProperties, textEmbeddingService, embeddingProperties);
     }
 
     @Test

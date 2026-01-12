@@ -31,6 +31,7 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
@@ -139,17 +140,20 @@ public class SearchService {
 	private final VerticalsConfigService verticalsConfigService;
 	private final ProductMappingService productMappingService;
 	private final ApiProperties apiProperties;
+	private final SearchProperties searchProperties;
 	private final DjlTextEmbeddingService textEmbeddingService;
 	private final DjlEmbeddingProperties embeddingProperties;
 	private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
 	public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
 			@Lazy ProductMappingService productMappingService, ApiProperties apiProperties,
+			SearchProperties searchProperties,
 			DjlTextEmbeddingService textEmbeddingService, DjlEmbeddingProperties embeddingProperties) {
 		this.repository = repository;
 		this.verticalsConfigService = verticalsConfigService;
 		this.productMappingService = productMappingService;
 		this.apiProperties = apiProperties;
+		this.searchProperties = searchProperties;
 		this.textEmbeddingService = textEmbeddingService;
 		this.embeddingProperties = embeddingProperties;
 	}
@@ -360,10 +364,24 @@ public class SearchService {
 		List<String> scriptTokens = tokenizeForScript(sanitizedQuery);
 		SearchHits<Product> productHits = executeSuggestProductSearch(sanitizedQuery, scriptTokens);
 		List<ProductSuggestHit> productMatches = mapSuggestHits(productHits);
+		if (productMatches.isEmpty() && isSemanticSuggestFallbackEnabled()) {
+			SearchHits<Product> semanticHits = executeSemanticSuggestProductSearch(sanitizedQuery);
+			productMatches = mapSuggestHits(semanticHits);
+		}
 
 		LOGGER.info("Suggest for {} : {} categories match, {} product matched", query, categoryMatches.size(),
 				productMatches.size());
 		return new SuggestResult(categoryMatches, productMatches);
+	}
+
+	/**
+	 * Determines whether semantic fallback is enabled for suggest results.
+	 *
+	 * @return {@code true} when semantic fallback is enabled
+	 */
+	private boolean isSemanticSuggestFallbackEnabled() {
+		SearchProperties.Suggest suggestConfig = searchProperties != null ? searchProperties.getSuggest() : null;
+		return suggestConfig != null && suggestConfig.isSemanticFallbackEnabled();
 	}
 
 	private List<CategorySuggestion> findCategoryMatches(List<String> tokens, DomainLanguage domainLanguage) {
@@ -430,6 +448,44 @@ public class SearchService {
 		}
 	}
 
+	/**
+	 * Executes a semantic search for suggest when text prefix queries yield no products.
+	 *
+	 * @param sanitizedQuery normalized text query
+	 * @return semantic suggest hits, or {@code null} if embeddings are unavailable
+	 */
+	private SearchHits<Product> executeSemanticSuggestProductSearch(String sanitizedQuery) {
+		float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
+		if (embedding == null) {
+			return null;
+		}
+
+		Query filterQuery = buildSuggestFilterQuery();
+
+		int knnLimit = SUGGEST_RESULT_LIMIT;
+		List<Float> queryVector = new ArrayList<>(embedding.length);
+		for (float value : embedding) {
+			queryVector.add(value);
+		}
+
+		co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch
+				.of(knn -> knn.field("embedding").queryVector(queryVector).k(knnLimit)
+						.numCandidates(Math.max(knnLimit * 2, 50))
+						.filter(filterQuery == null ? List.of() : List.of(filterQuery)));
+
+		NativeQueryBuilder builder = new NativeQueryBuilder().withQuery(filterQuery).withKnnSearches(knnSearch)
+				.withPageable(PageRequest.of(0, knnLimit))
+				.withSourceFilter(new FetchSourceFilter(true, SUGGEST_SOURCE_INCLUDES, null))
+				.withMinScore(MIN_SEMANTIC_SCORE);
+
+		try {
+			return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+		} catch (Exception e) {
+			elasticLog(e);
+			throw e;
+		}
+	}
+
 	private Query buildSuggestProductQuery(String sanitizedQuery, List<String> tokens) {
 		Long expiration = repository.expirationClause();
 
@@ -449,6 +505,23 @@ public class SearchService {
 						.source(OFFER_NAMES_DENSITY_SCRIPT).params(Map.of("tokens", JsonData.of(tokens)))))));
 			}
 			return fs;
+		}));
+	}
+
+	/**
+	 * Builds the filter query shared by suggest searches, excluding text criteria.
+	 *
+	 * @return query containing suggest filters
+	 */
+	private Query buildSuggestFilterQuery() {
+		Long expiration = repository.expirationClause();
+
+		return Query.of(q -> q.bool(b -> {
+			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+			b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+			b.filter(f -> f.exists(e -> e.field("vertical")));
+			return b;
 		}));
 	}
 
