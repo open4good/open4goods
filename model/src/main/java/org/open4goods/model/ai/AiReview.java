@@ -214,6 +214,7 @@ public class AiReview {
     /**
      * Represents an attribute of the product.
      */
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = AiAttributeDeserializer.class)
     public static record AiAttribute(
             @JsonProperty(required = true, value = "name")
             @AiGeneratedField(instruction = "Le nom de l'attribut")
@@ -228,5 +229,16 @@ public class AiReview {
         public String getName() { return name; }
         public String getValue() { return value; }
         public Integer getNumber() { return number; }
+    }
+
+    public static class AiAttributeDeserializer extends com.fasterxml.jackson.databind.JsonDeserializer<AiAttribute> {
+        @Override
+        public AiAttribute deserialize(com.fasterxml.jackson.core.JsonParser p, com.fasterxml.jackson.databind.DeserializationContext ctxt) throws java.io.IOException {
+            com.fasterxml.jackson.databind.JsonNode node = p.getCodec().readTree(p);
+            String name = node.has("name") ? node.get("name").asText() : null;
+            String value = node.has("value") && !node.get("value").isNull() ? node.get("value").asText() : "";
+            Integer number = node.has("number") && !node.get("number").isNull() ? node.get("number").asInt() : null;
+            return new AiAttribute(name, value, number);
+        }
     }
 }
