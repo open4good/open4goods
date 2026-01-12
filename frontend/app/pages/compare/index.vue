@@ -165,6 +165,7 @@
                     :max="5"
                     size="medium"
                     class="compare-grid__product-impact"
+                    flat
                   />
                   <NuxtLink
                     v-if="productLink(product)"

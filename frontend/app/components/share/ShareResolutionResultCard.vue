@@ -19,12 +19,14 @@
           :score="candidate.impactScore"
           size="large"
           show-value
+          flat
         />
         <ImpactScore
           v-else-if="candidate.ecoScore != null"
           :score="candidate.ecoScore"
           size="large"
           show-value
+          flat
         />
       </div>
 
