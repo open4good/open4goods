@@ -45,6 +45,9 @@ const resolvedImageClass = computed(() =>
     ? 'home-split__image--gain'
     : 'home-split__image--pain'
 )
+const isLocalAsset = computed(() =>
+  Boolean(resolvedImage.value?.src?.startsWith('/'))
+)
 const sectionClasses = computed(() => [
   'home-section',
   'home-split',
@@ -91,8 +94,18 @@ const sectionClasses = computed(() => [
           >
             <div class="home-split__visual" role="presentation">
               <slot name="visual">
+                <img
+                  v-if="resolvedImage?.src && isLocalAsset"
+                  :src="resolvedImage.src"
+                  :alt="resolvedImage.alt"
+                  :class="['home-split__image', resolvedImageClass]"
+                  :loading="resolvedImage.loading ?? 'lazy'"
+                  :width="resolvedImage.width"
+                  :height="resolvedImage.height"
+                  decoding="async"
+                />
                 <NuxtImg
-                  v-if="resolvedImage?.src"
+                  v-else-if="resolvedImage?.src"
                   :src="resolvedImage.src"
                   :alt="resolvedImage.alt"
                   :class="['home-split__image', resolvedImageClass]"
