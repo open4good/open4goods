@@ -433,7 +433,7 @@ import {
 } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { formatDistanceToNow, format } from 'date-fns'
+import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { useAnalytics } from '~/composables/useAnalytics'
 import type {
@@ -728,27 +728,6 @@ const newTrendLabel = computed(() => {
   return t('product.price.trend.stable')
 })
 
-const sortedOffers = computed(() => {
-  const entries = props.offers?.offersByCondition ?? {}
-  const aggregated = Object.values(entries)
-    .flat()
-    .map((offer, index) => ({
-      ...offer,
-      id: offer.url ?? `${offer.datasourceName ?? 'source'}-${index}`,
-      conditionLabel: t(
-        `product.price.condition.${typeof offer.condition === 'string' ? offer.condition.toLowerCase() : 'new'}`
-      ),
-      updatedLabel: formatUpdated(offer.timeStamp),
-    }))
-
-  return aggregated
-    .filter(
-      (offer): offer is (typeof aggregated)[number] & { price: number } =>
-        typeof offer.price === 'number'
-    )
-    .sort((a, b) => a.price - b.price)
-})
-
 const buildChartOption = (
   entries: HistoryEntry[],
   events: Array<{ start: number; end: number; label?: string }>
@@ -865,19 +844,6 @@ const formatCurrency = (value?: number | null, currency: string = 'EUR') => {
   }
 
   return n(value, { style: 'currency', currency, maximumFractionDigits: 2 })
-}
-
-const formatUpdated = (timestamp?: number | null) => {
-  const numericTimestamp =
-    typeof timestamp === 'number' ? timestamp : Number(timestamp)
-  if (!Number.isFinite(numericTimestamp) || numericTimestamp <= 0) {
-    return '—'
-  }
-
-  return formatDistanceToNow(numericTimestamp, {
-    addSuffix: true,
-    locale: locale.value.startsWith('fr') ? fr : enUS,
-  })
 }
 
 onBeforeUnmount(() => {
