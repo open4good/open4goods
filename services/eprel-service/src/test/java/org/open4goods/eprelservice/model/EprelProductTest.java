@@ -35,5 +35,29 @@ class EprelProductTest
         assertThat(product.getEprelCategory()).isEqualTo("MONITOR");
     }
 
+    @Test
+    @DisplayName("Dates described as integer years should be converted to epoch seconds (1st Jan)")
+    void shouldConvertDatesFromIntegerYear() throws Exception
+    {
+        String json = "{" +
+                "\"onMarketStartDate\":2024" +
+                "}";
+        EprelProduct product = objectMapper.readValue(json, EprelProduct.class);
+        long expectedEpoch = LocalDate.of(2024, 1, 1).atStartOfDay().toEpochSecond(ZoneOffset.UTC);
+        assertThat(product.getOnMarketStartDate()).isEqualTo(expectedEpoch);
+    }
+
+    @Test
+    @DisplayName("Dates described as large long/integers should be treated as epoch seconds")
+    void shouldConvertDatesFromTimestamp() throws Exception
+    {
+        long timestamp = 1706659200L; // 2024-01-31
+        String json = "{" +
+                "\"onMarketStartDate\":" + timestamp + "" +
+                "}";
+        EprelProduct product = objectMapper.readValue(json, EprelProduct.class);
+        assertThat(product.getOnMarketStartDate()).isEqualTo(timestamp);
+    }
+
 
 }

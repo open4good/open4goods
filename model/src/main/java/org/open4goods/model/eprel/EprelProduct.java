@@ -480,9 +480,9 @@ public class EprelProduct implements Serializable
     }
 
     @JsonSetter("onMarketStartDate")
-    public void setOnMarketStartDate(List<Integer> dateParts)
+    public void setOnMarketStartDate(Object dateParts)
     {
-        this.onMarketStartDate = toEpoch(dateParts);
+        this.onMarketStartDate = toEpochFromObject(dateParts);
     }
 
     public Long getOnMarketStartDateTs()
@@ -502,9 +502,9 @@ public class EprelProduct implements Serializable
     }
 
     @JsonSetter("onMarketEndDate")
-    public void setOnMarketEndDate(List<Integer> dateParts)
+    public void setOnMarketEndDate(Object dateParts)
     {
-        this.onMarketEndDate = toEpoch(dateParts);
+        this.onMarketEndDate = toEpochFromObject(dateParts);
     }
 
     public Long getOnMarketEndDateTs()
@@ -524,9 +524,9 @@ public class EprelProduct implements Serializable
     }
 
     @JsonSetter("onMarketFirstStartDate")
-    public void setOnMarketFirstStartDate(List<Integer> dateParts)
+    public void setOnMarketFirstStartDate(Object dateParts)
     {
-        this.onMarketFirstStartDate = toEpoch(dateParts);
+        this.onMarketFirstStartDate = toEpochFromObject(dateParts);
     }
 
     public Long getOnMarketFirstStartDateTs()
@@ -546,9 +546,9 @@ public class EprelProduct implements Serializable
     }
 
     @JsonSetter("firstPublicationDate")
-    public void setFirstPublicationDate(List<Integer> dateParts)
+    public void setFirstPublicationDate(Object dateParts)
     {
-        this.firstPublicationDate = toEpoch(dateParts);
+        this.firstPublicationDate = toEpochFromObject(dateParts);
     }
 
     public Long getFirstPublicationDateTs()
@@ -568,9 +568,9 @@ public class EprelProduct implements Serializable
     }
 
     @JsonSetter("publishedOnDate")
-    public void setPublishedOnDate(List<Integer> dateParts)
+    public void setPublishedOnDate(Object dateParts)
     {
-        this.publishedOnDate = toEpoch(dateParts);
+        this.publishedOnDate = toEpochFromObject(dateParts);
     }
 
     public Long getPublishedOnDateTs()
@@ -866,6 +866,26 @@ public class EprelProduct implements Serializable
             .filter(value -> !value.isEmpty())
             .distinct()
             .toList();
+    }
+
+    private Long toEpochFromObject(Object datePayload)
+    {
+        if (datePayload instanceof List<?> list)
+        {
+            return toEpoch(list);
+        }
+        else if (datePayload instanceof Number number)
+        {
+            long val = number.longValue();
+            // Heuristic: If value is small (< 3000), treat as Year
+            if (val < 3000) {
+                return LocalDate.of((int) val, 1, 1).atStartOfDay().toEpochSecond(ZoneOffset.UTC);
+            }
+            // Else treat as epoch seconds (or millis if very large, but starting with seconds for now as per other fields)
+            // EPREL usually sends year or array.
+            return val;
+        }
+        return null;
     }
 
     private Long toEpoch(List<?> dateParts)
