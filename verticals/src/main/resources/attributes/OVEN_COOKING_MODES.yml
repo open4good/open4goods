@@ -1,0 +1,16 @@
+key: "OVEN_COOKING_MODES"
+faIcon: "mdi-chef-hat"
+name:
+  default: "Cooking modes"
+  fr: "Modes de cuisson"
+filteringType: "TEXT"
+synonyms:
+  all:
+    - "MODES DE CUISSON DU FOUR"
+    - "MODES DE CUISSON"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

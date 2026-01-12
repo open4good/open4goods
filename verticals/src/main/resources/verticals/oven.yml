@@ -32,7 +32,8 @@ popular: true
 # The mainly presented attributes for this category
 popularAttributes:
   - CLASSE_ENERGY
-  - POWER_CONSUMPTION_TYPICAL
+  - OVEN_CAPACITY
+  - OVEN_CLEANING_MODE
 
 # GenAiConfig for this vertical
 genAiConfig:
@@ -98,7 +99,7 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "fours"
     verticalHomeTitle: "Fours"
-    verticalHomeDescription: "Comparez les fours (encastrables, chaleur tournante, pyrolyse…) selon l’éco-score et le prix."
+    verticalHomeDescription: "Comparez les fours encastrables ou posables (chaleur tournante, pyrolyse, vapeur…) selon l’éco-score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
   #    wikiPages:
@@ -115,7 +116,7 @@ i18n:
         - MODEL
         - YEAR
     h1Title:
-      prefix: "Oven"
+      prefix: "|| Oven | Ovens ||"
       attrs:
         - BRAND
         - MODEL
@@ -129,7 +130,7 @@ i18n:
 
     verticalHomeUrl: "ovens"
     verticalHomeTitle: "Ovens"
-    verticalHomeDescription: "Compare ovens (built-in, convection, self-cleaning…) by eco-score and price."
+    verticalHomeDescription: "Compare ovens (built-in or freestanding, convection, pyrolysis, steam…) by eco-score and price."
 
 #####################################################################################################################################
 # NUDGE TOOL CONFIGURATION
@@ -286,6 +287,18 @@ aggregationConfiguration:
   "attributes.indexed.WEIGHT":
     interval: 2
     buckets: 12
+  "attributes.indexed.OVEN_CAPACITY":
+    interval: 5
+    buckets: 12
+  "attributes.indexed.OVEN_POWER":
+    interval: 200
+    buckets: 12
+  "attributes.indexed.OVEN_CAVITY_COUNT":
+    interval: 1
+    buckets: 4
+  "attributes.indexed.OVEN_ENERGY_CONSUMPTION_CYCLE":
+    interval: 0.1
+    buckets: 12
   "price.minPrice.price":
     interval: 50
     buckets: 30
@@ -296,6 +309,14 @@ ecoFilters:
 technicalFilters:
   - "POWER_CONSUMPTION_TYPICAL"
   - "WEIGHT"
+  - "OVEN_CAPACITY"
+  - "OVEN_INSTALLATION_TYPE"
+  - "OVEN_ENERGY_TYPE"
+  - "OVEN_CLEANING_MODE"
+  - "OVEN_COOKING_MODES"
+  - "OVEN_CAVITY_COUNT"
+  - "OVEN_POWER"
+  - "OVEN_ENERGY_CONSUMPTION_CYCLE"
 
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
@@ -305,6 +326,14 @@ attributesConfig:
     - key: "CLASSE_ENERGY"
     - key: "POWER_CONSUMPTION_TYPICAL"
     - key: "WEIGHT"
+    - key: "OVEN_CAPACITY"
+    - key: "OVEN_ENERGY_TYPE"
+    - key: "OVEN_INSTALLATION_TYPE"
+    - key: "OVEN_CLEANING_MODE"
+    - key: "OVEN_COOKING_MODES"
+    - key: "OVEN_CAVITY_COUNT"
+    - key: "OVEN_POWER"
+    - key: "OVEN_ENERGY_CONSUMPTION_CYCLE"
     - key: "WARRANTY"
     - key: "YEAR"
     - key: "COLOR"

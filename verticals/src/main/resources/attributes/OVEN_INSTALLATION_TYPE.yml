@@ -1,0 +1,18 @@
+key: "OVEN_INSTALLATION_TYPE"
+faIcon: "mdi-hammer-wrench"
+name:
+  default: "Installation type"
+  fr: "Type d'installation"
+filteringType: "TEXT"
+synonyms:
+  all:
+    - "TYPE DE POSE"
+    - "TYPE DE POSE DU FOUR"
+    - "TYPE D'INSTALLATION"
+    - "TYPE D’INSTALLATION"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

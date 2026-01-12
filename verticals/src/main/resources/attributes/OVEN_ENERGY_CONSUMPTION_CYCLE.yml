@@ -1,0 +1,27 @@
+key: "OVEN_ENERGY_CONSUMPTION_CYCLE"
+betterIs: "LOWER"
+faIcon: "mdi-flash"
+name:
+  default: "Energy consumption per cycle"
+  fr: "Consommation d'énergie par cycle"
+suffix:
+  default: "kWh/cycle"
+  fr: "kWh/cycle"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "CAVITIES[0]-ENERGYCONSUMPTIONCYCLE"
+    - "CAVITIES[0]-ENERGYCONSUMPTIONCYCLEFANFORCED"
+    - "ENERGYCONSUMPTIONCYCLE"
+    - "ENERGYCONSUMPTIONCYCLEFANFORCED"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "KWH"
+    - "KWH/CYCLE"
+    - "KWH/CYCLES"
