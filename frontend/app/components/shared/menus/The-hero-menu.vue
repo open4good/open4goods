@@ -408,8 +408,68 @@
           </div>
         </template>
       </v-list>
-      <ThemeToggle test-id="hero-theme-toggle" />
-      <ZoomToggle />
+      <v-menu
+        location="bottom"
+        transition="fade-transition"
+        :offset="[0, 12]"
+        :close-on-content-click="false"
+      >
+        <template #activator="{ props, isActive }">
+          <v-btn
+            v-bind="props"
+            variant="text"
+            class="accessibility-menu__activator"
+            :aria-label="accessibilityLabel"
+          >
+            <v-icon icon="mdi-sunglasses" start />
+            <span class="accessibility-menu__label">{{ accessibilityLabel }}</span>
+            <v-icon
+              :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+              size="18"
+              end
+            />
+          </v-btn>
+        </template>
+
+        <v-card class="accessibility-menu" color="surface-default" elevation="8">
+          <div class="accessibility-menu__section">
+            <p class="accessibility-menu__section-title">
+              {{ t('siteIdentity.menu.themeToggle') }}
+            </p>
+            <ThemeToggle
+              test-id="hero-theme-toggle"
+              density="compact"
+              size="small"
+              show-labels
+            />
+          </div>
+
+          <v-divider class="accessibility-menu__divider" />
+
+          <v-list density="comfortable" class="accessibility-menu__list">
+            <v-list-item class="accessibility-menu__item">
+              <template #prepend>
+                <v-icon :icon="zoomIcon" />
+              </template>
+              <v-list-item-title>
+                {{ t('siteIdentity.menu.zoom.label') }}
+              </v-list-item-title>
+              <template #append>
+                <v-switch
+                  :model-value="isZoomed"
+                  inset
+                  color="primary"
+                  density="compact"
+                  hide-details
+                  :aria-label="t('siteIdentity.menu.zoom.label')"
+                  @click.stop
+                  @update:model-value="setZoomed"
+                />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-menu>
       <v-menu
         v-if="isLoggedIn"
         v-model="isAccountMenuOpen"
@@ -511,8 +571,8 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
+import { storeToRefs } from 'pinia'
 import ThemeToggle from './ThemeToggle.vue'
-import ZoomToggle from './ZoomToggle.vue'
 import { useI18n } from 'vue-i18n'
 import { useCommunityMenu } from './useCommunityMenu'
 import type { CommunitySection } from './useCommunityMenu'
@@ -529,6 +589,7 @@ import {
   MIN_SEARCH_QUERY_LENGTH,
   useMenuSearchControls,
 } from '~/composables/menus/useMenuSearchControls'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -546,6 +607,13 @@ const nuxtApp = useNuxtApp()
 const { isLoggedIn, logout, username, roles } = useAuth()
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
+const accessibilityStore = useAccessibilityStore()
+const { isZoomed } = storeToRefs(accessibilityStore)
+const { setZoomed } = accessibilityStore
+const accessibilityLabel = computed(() => t('siteIdentity.menu.zoom.label'))
+const zoomIcon = computed(() =>
+  isZoomed.value ? 'mdi-magnify-minus' : 'mdi-magnify-plus'
+)
 const {
   navigation: categoryNavigation,
   fetchNavigation,
@@ -1495,6 +1563,43 @@ const isMenuItemActive = (item: MenuItem): boolean => {
 
 .text-neutral-soft
   color: rgb(var(--v-theme-text-neutral-soft))
+
+.accessibility-menu__activator
+  text-transform: none
+  color: rgb(var(--v-theme-text-neutral-strong))
+  gap: 0.35rem
+
+  &:hover
+    color: rgb(var(--v-theme-accent-supporting))
+
+.accessibility-menu__label
+  font-weight: 700
+
+.accessibility-menu
+  min-width: 240px
+  padding: 1rem
+  border-radius: 1rem
+  box-shadow: 0 18px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
+
+.accessibility-menu__section
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
+
+.accessibility-menu__section-title
+  margin: 0
+  font-size: 0.85rem
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.accessibility-menu__divider
+  margin-block: 0.85rem
+
+.accessibility-menu__list
+  padding: 0
+
+.accessibility-menu__item
+  padding-inline: 0
 
 @media (max-width: 1263px)
   .community-menu

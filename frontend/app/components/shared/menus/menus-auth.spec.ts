@@ -266,6 +266,7 @@ describe('Shared menu authentication controls', () => {
     attachTo: document.body,
     global: {
       stubs: {
+        Teleport: true,
         VMenu: vMenuStub,
         SearchSuggestField: {
           template: '<div class="search-suggest-field-stub" />',
@@ -276,6 +277,7 @@ describe('Shared menu authentication controls', () => {
   const mobileMountOptions = {
     global: {
       stubs: {
+        Teleport: true,
         VMenu: vMenuStub,
         SearchSuggestField: {
           template: '<div class="search-suggest-field-stub" />',
@@ -507,19 +509,33 @@ describe('Shared menu authentication controls', () => {
   it('renders theme toggles and synchronises the stored preference', async () => {
     const heroWrapper = await mountSuspended(TheHeroMenu)
 
-    expect(heroWrapper.find('[data-testid="hero-theme-toggle"]').exists()).toBe(
-      true
+    await heroWrapper
+      .get('.accessibility-menu__activator')
+      .trigger('click')
+    await flushPromises()
+
+    const heroToggle = document.body.querySelector(
+      '[data-testid="hero-theme-toggle"]'
     )
+    expect(heroToggle).not.toBeNull()
 
-    const darkToggle = heroWrapper.get('[data-testid="hero-theme-toggle-dark"]')
+    const darkToggle = document.body.querySelector(
+      '[data-testid="hero-theme-toggle-dark"]'
+    )
+    expect(darkToggle).not.toBeNull()
 
-    await darkToggle.trigger('click')
+    darkToggle?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     await flushPromises()
 
     expect(storedThemePreference.value).toBe('dark')
     expect(themeName.value).toBe('dark')
 
     const mobileWrapper = await mountSuspended(TheMobileMenu)
+
+    await mobileWrapper
+      .get('.mobile-menu__accessibility-activator')
+      .trigger('click')
+    await flushPromises()
 
     expect(
       mobileWrapper.find('[data-testid="mobile-theme-toggle"]').exists()

@@ -2,6 +2,7 @@
   <v-btn-toggle
     v-model="selectedTheme"
     class="theme-toggle"
+    :class="{ 'theme-toggle--labeled': showLabels }"
     :density="density"
     color="accent"
     mandatory
@@ -19,7 +20,12 @@
           icon
           variant="plain"
         >
-          <v-icon icon="mdi-white-balance-sunny" />
+          <span class="theme-toggle__content">
+            <v-icon icon="mdi-white-balance-sunny" />
+            <span v-if="showLabels" class="theme-toggle__label">
+              {{ lightLabel }}
+            </span>
+          </span>
         </v-btn>
       </template>
     </v-tooltip>
@@ -35,7 +41,12 @@
           icon
           variant="plain"
         >
-          <v-icon icon="mdi-weather-night" />
+          <span class="theme-toggle__content">
+            <v-icon icon="mdi-weather-night" />
+            <span v-if="showLabels" class="theme-toggle__label">
+              {{ darkLabel }}
+            </span>
+          </span>
         </v-btn>
       </template>
     </v-tooltip>
@@ -59,11 +70,13 @@ const props = withDefaults(
     density?: 'default' | 'comfortable' | 'compact'
     size?: 'x-small' | 'small' | 'default'
     testId?: string
+    showLabels?: boolean
   }>(),
   {
     density: 'comfortable',
     size: 'small',
     testId: 'theme-toggle',
+    showLabels: false,
   }
 )
 
@@ -118,10 +131,13 @@ const lightAriaLabel = computed(() =>
   t('siteIdentity.menu.theme.lightAriaLabel')
 )
 const darkAriaLabel = computed(() => t('siteIdentity.menu.theme.darkAriaLabel'))
+const lightLabel = computed(() => t('siteIdentity.menu.theme.lightTooltip'))
+const darkLabel = computed(() => t('siteIdentity.menu.theme.darkTooltip'))
 
 const density = toRef(props, 'density')
 const size = toRef(props, 'size')
 const testId = toRef(props, 'testId')
+const showLabels = toRef(props, 'showLabels')
 </script>
 
 <style scoped lang="sass">
@@ -131,4 +147,20 @@ const testId = toRef(props, 'testId')
     color: rgb(var(--v-theme-text-neutral-strong))
   :deep(.v-btn.v-btn--active)
     color: rgb(var(--v-theme-accent-supporting))
+
+.theme-toggle__content
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 0.35rem
+
+.theme-toggle__label
+  font-size: 0.72rem
+  font-weight: 600
+  line-height: 1.1
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
+
+.theme-toggle--labeled
+  :deep(.v-btn)
+    padding-inline: 0.85rem
 </style>
