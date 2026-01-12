@@ -5,11 +5,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.services.opendata.service.OpenDataService;
 import org.springframework.core.io.ByteArrayResource;
@@ -28,6 +30,7 @@ class StatsServiceTest {
         ResourcePatternResolver resolver = mock(ResourcePatternResolver.class);
         AffiliationPartnerService partnerService = mock(AffiliationPartnerService.class);
         OpenDataService openDataService = mock(OpenDataService.class);
+        ProductRepository productRepository = mock(ProductRepository.class);
 
         Resource defaultResource = resource("_default.yml", DEFAULT_YAML);
         Resource enabledResource = resource("enabled.yml", ENABLED_YAML);
@@ -38,9 +41,10 @@ class StatsServiceTest {
                 .willReturn(new Resource[]{defaultResource, enabledResource, disabledResource});
         given(openDataService.totalItemsGTIN()).willReturn(1_234L);
         given(openDataService.totalItemsISBN()).willReturn(567L);
+        given(productRepository.countMainIndexHavingVertical("enabled")).willReturn(42L);
         given(partnerService.getPartners()).willReturn(List.of(mock(AffiliationPartner.class), mock(AffiliationPartner.class)));
 
-        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService);
+        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository);
 
         CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
 
@@ -48,6 +52,8 @@ class StatsServiceTest {
         assertThat(dto.affiliationPartnersCount()).isEqualTo(2);
         assertThat(dto.gtinOpenDataItemsCount()).isEqualTo(1_234L);
         assertThat(dto.isbnOpenDataItemsCount()).isEqualTo(567L);
+        assertThat(dto.productsCountByCategory()).isEqualTo(Map.of("enabled", 42L));
+        assertThat(dto.productsCountSum()).isEqualTo(42L);
     }
 
     private Resource resource(String filename, String yaml) {

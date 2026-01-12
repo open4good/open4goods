@@ -3,17 +3,22 @@ package org.open4goods.nudgerfrontapi.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.open4goods.model.affiliation.AffiliationPartner;
+import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.model.stats.AffiliationPartnersStats;
 import org.open4goods.services.opendata.service.OpenDataService;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -38,23 +43,28 @@ public class StatsService {
     private final ResourcePatternResolver resourceResolver;
     private final AffiliationPartnerService affiliationPartnerService;
     private final OpenDataService openDataService;
+    private final ProductRepository productRepository;
 
     public StatsService(SerialisationService serialisationService,
                         ResourcePatternResolver resourceResolver,
                         AffiliationPartnerService affiliationPartnerService,
-                        OpenDataService openDataService) {
+                        OpenDataService openDataService,
+                        ProductRepository productRepository) {
         this.serialisationService = serialisationService;
         this.resourceResolver = resourceResolver;
         this.affiliationPartnerService = affiliationPartnerService;
         this.openDataService = openDataService;
+        this.productRepository = productRepository;
     }
 
     /**
      * Compute statistics about categories mappings.
      *
      * @param domainLanguage currently unused but retained for future localisation of statistics labels
-     * @return DTO describing the category statistics used by the frontend including affiliation partners and OpenData counts.
+     * @return DTO describing the category statistics used by the frontend including affiliation partners,
+     * OpenData counts, and per-category product counts for recent products with offers.
      */
+    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
         VerticalConfig defaultConfig = loadDefaultConfig();
         Resource[] resources = loadVerticalResources();
@@ -62,15 +72,37 @@ public class StatsService {
         long gtinItemsCount = openDataService.totalItemsGTIN();
         long isbnItemsCount = openDataService.totalItemsISBN();
 
-        long enabledCount = Arrays.stream(resources)
+        List<VerticalConfig> enabledVerticals = Arrays.stream(resources)
                 .filter(resource -> !Objects.equals(resource.getFilename(), DEFAULT_CONFIG_FILENAME))
                 // Copy the default config before merging custom values to keep defaults intact.
                 .map(resource -> loadVerticalConfig(resource, defaultConfig))
                 .filter(Objects::nonNull)
                 .filter(VerticalConfig::isEnabled)
-                .count();
+                .toList();
 
-        return new CategoriesStatsDto(Math.toIntExact(enabledCount), partnersStats.count(), gtinItemsCount, isbnItemsCount);
+        Map<String, Long> productsCountByCategory = new LinkedHashMap<>();
+        for (VerticalConfig vertical : enabledVerticals) {
+            String verticalId = vertical.getId();
+            if (verticalId == null || verticalId.isBlank()) {
+                continue;
+            }
+
+            Long count = productRepository.countMainIndexHavingVertical(verticalId);
+            productsCountByCategory.put(verticalId, count == null ? 0L : count);
+        }
+
+        long productsCountSum = productsCountByCategory.values().stream()
+                .mapToLong(Long::longValue)
+                .sum();
+
+        return new CategoriesStatsDto(
+                Math.toIntExact(enabledVerticals.size()),
+                partnersStats.count(),
+                gtinItemsCount,
+                isbnItemsCount,
+                productsCountByCategory,
+                productsCountSum
+        );
     }
 
     /**
