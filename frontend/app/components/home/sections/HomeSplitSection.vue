@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRandomHomepageImages } from '~/composables/useRandomHomepageImages'
+import gainImageSrc from '~/assets/homepage/gain/nudger-screaming.webp'
+import painImageSrc from '~/assets/homepage/pain/nudger-problem.webp'
 
 defineOptions({ inheritAttrs: false })
 
@@ -27,14 +28,12 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
-const { painImage, gainImage } = useRandomHomepageImages()
-
 const titleId = computed(() => `${props.id}-title`)
 const fallbackImage = computed(() => {
   const isPainVisual = props.visualPosition === 'left'
 
   return {
-    src: isPainVisual ? painImage.value : gainImage.value,
+    src: isPainVisual ? painImageSrc : gainImageSrc,
     alt: isPainVisual ? t('home.split.painAlt') : t('home.split.gainAlt'),
     sizes: '(min-width: 960px) 320px, 70vw',
     loading: 'lazy' as const,
