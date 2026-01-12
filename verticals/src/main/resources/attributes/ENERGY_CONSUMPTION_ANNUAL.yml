@@ -1,0 +1,31 @@
+key: "ENERGY_CONSUMPTION_ANNUAL"
+betterIs: "LOWER"
+faIcon: "mdi-flash"
+name:
+  default: "Annual energy consumption"
+  fr: "Consommation d'énergie annuelle"
+suffix:
+  default: "kWh/year"
+  fr: "kWh/an"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "ENERGYCONSANNUALV2"
+    - "ENERGYCONSANNUAL"
+    - "CONSOLIDATEDENERGYCONSANNUAL"
+    - "ENERGY CONSUMPTION ANNUAL"
+    - "CONSOMMATION ANNUELLE D'ENERGIE"
+    - "CONSOMMATION ANNUELLE D'ÉNERGIE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "KWH"
+    - "KWH/AN"
+    - "KWH PAR AN"
+    - "KWH/YEAR"
+    - "KWH PER YEAR"

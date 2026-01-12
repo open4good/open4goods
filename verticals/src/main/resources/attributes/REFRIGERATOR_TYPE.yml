@@ -1,0 +1,18 @@
+key: "REFRIGERATOR_TYPE"
+faIcon: "mdi-fridge-outline"
+name:
+  default: "Refrigerator type"
+  fr: "Type de réfrigérateur"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "TYPE DE REFRIGERATEUR/CONGELATEUR"
+    - "TYPE DE REFRIGERATEUR"
+    - "DESIGNTYPE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

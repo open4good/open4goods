@@ -1,0 +1,30 @@
+key: "FRIDGE_NET_CAPACITY"
+faIcon: "mdi-fridge-outline"
+name:
+  default: "Refrigerator net capacity"
+  fr: "Capacité nette du réfrigérateur"
+suffix:
+  default: "L"
+  fr: "L"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "CAPREFRNET"
+    - "VOLUME UTILE DE REFRIGERATEUR"
+    - "VOLUME UTILE DU REFRIGERATEUR"
+    - "CAPACITE NETTE DU REFRIGERATEUR"
+    - "CAPACITÉ NETTE DU REFRIGERATEUR"
+    - "CAPACITE NETTE REFRIGERATEUR"
+    - "COMPARTMENTS0-VOLUME"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "L"
+    - "L."
+    - "LITRE"
+    - "LITRES"
