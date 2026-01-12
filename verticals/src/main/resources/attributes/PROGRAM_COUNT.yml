@@ -1,0 +1,22 @@
+key: "PROGRAM_COUNT"
+betterIs: "GREATER"
+faIcon: "mdi-format-list-numbered"
+name:
+  default: "Program count"
+  fr: "Nombre de programmes"
+suffix:
+  default: "programs"
+  fr: "programmes"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "NBRE DE PROGRAMMES"
+    - "NOMBRE DE PROGRAMMES"
+    - "PROGRAM_COUNT"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

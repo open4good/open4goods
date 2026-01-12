@@ -1,0 +1,33 @@
+key: "ENERGY_CONSUMPTION_100_CYCLES"
+betterIs: "LOWER"
+faIcon: "mdi-flash"
+name:
+  default: "Energy consumption per 100 cycles"
+  fr: "Consommation d'énergie pour 100 cycles"
+suffix:
+  default: "kWh/100 cycles"
+  fr: "kWh/100 cycles"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "ENERGYCONS100"
+    - "ENERGY CONSUMPTION 100 CYCLES"
+    - "ENERGYCONSUMPTION100CYCLES"
+    - "CONSOMMATION D'ENERGIE PAR 100 CYCLES"
+    - "CONSOMMATION D'ENERGIE POUR 100 CYCLES"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "KWH"
+    - "KWH/100"
+    - "KWH/100 CYCLE"
+    - "KWH/100 CYCLES"
+    - "KWH/100CYCLES"
+    - "KWH/100-CYCLES"
+    - "KWH / 100 CYCLES"
+    - "CYCLES"
