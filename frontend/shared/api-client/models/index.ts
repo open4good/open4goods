@@ -61,6 +61,8 @@ export * from './GlobalSearchVerticalGroupDto';
 export * from './GoogleCategoryDto';
 export * from './ImpactScoreConfigDto';
 export * from './ImpactScoreTexts';
+export * from './IpQuotaCategory';
+export * from './IpQuotaStatusDto';
 export * from './IssueCommentDto';
 export * from './LegacyPromptConfig';
 export * from './LoginRequest';

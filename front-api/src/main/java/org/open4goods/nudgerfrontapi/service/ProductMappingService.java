@@ -94,6 +94,7 @@ import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;
+import org.open4goods.commons.model.IpQuotaCategory;
 import org.open4goods.commons.services.IpQuotaService;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -136,7 +137,7 @@ public class ProductMappingService {
     private static final String FAVICON_ENDPOINT = "/favicon?url=";
     private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
     private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
-    private static final String REVIEW_GENERATION_QUOTA_ACTION = "REVIEW_GENERATION";
+    private static final IpQuotaCategory REVIEW_GENERATION_QUOTA_CATEGORY = IpQuotaCategory.REVIEW_GENERATION;
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -958,12 +959,12 @@ public class ProductMappingService {
         hcaptchaService.verifyRecaptcha(clientIp, captchaResponse);
         ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
         int maxPerIp = quota.getMaxPerIp();
-        if (!ipQuotaService.isAllowed(REVIEW_GENERATION_QUOTA_ACTION, clientIp, maxPerIp, quota.getWindow())) {
+        if (!ipQuotaService.isAllowed(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, maxPerIp, quota.getWindow())) {
             logger.warn("IP {} reached review generation limit ({})", clientIp, maxPerIp);
             throw new ReviewGenerationLimitExceededException(
                     "Maximum " + maxPerIp + " review generations reached for this period");
         }
-        int newUsage = ipQuotaService.increment(REVIEW_GENERATION_QUOTA_ACTION, clientIp, quota.getWindow());
+        int newUsage = ipQuotaService.increment(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, quota.getWindow());
         Product product = repository.getById(gtin);
         long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId());
         int remaining = Math.max(0, maxPerIp - newUsage);
