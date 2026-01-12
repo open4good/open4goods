@@ -59,6 +59,12 @@ export interface ProductSearchRequestDto {
      * @memberof ProductSearchRequestDto
      */
     filters?: FilterRequestDto;
+    /**
+     * Enable semantic search for text queries.
+     * @type {boolean}
+     * @memberof ProductSearchRequestDto
+     */
+    semanticSearch?: boolean;
 }
 
 /**
@@ -81,6 +87,7 @@ export function ProductSearchRequestDtoFromJSONTyped(json: any, ignoreDiscrimina
         'sort': json['sort'] == null ? undefined : SortRequestDtoFromJSON(json['sort']),
         'aggs': json['aggs'] == null ? undefined : AggregationRequestDtoFromJSON(json['aggs']),
         'filters': json['filters'] == null ? undefined : FilterRequestDtoFromJSON(json['filters']),
+        'semanticSearch': json['semanticSearch'] == null ? undefined : json['semanticSearch'],
     };
 }
 
@@ -98,6 +105,6 @@ export function ProductSearchRequestDtoToJSONTyped(value?: ProductSearchRequestD
         'sort': SortRequestDtoToJSON(value['sort']),
         'aggs': AggregationRequestDtoToJSON(value['aggs']),
         'filters': FilterRequestDtoToJSON(value['filters']),
+        'semanticSearch': value['semanticSearch'],
     };
 }
-

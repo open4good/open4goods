@@ -24,6 +24,7 @@ interface ProductsSearchPayload {
   sort?: SortRequestDto
   aggs?: AggregationRequestDto
   filters?: FilterRequestDto
+  semanticSearch?: boolean
   query?: string
   include?: ProductsIncludeEnum[]
 }
@@ -97,6 +98,11 @@ export default defineEventHandler(
 
       if (input.filters) {
         body.filters = input.filters
+        hasContent = true
+      }
+
+      if (typeof input.semanticSearch === 'boolean') {
+        body.semanticSearch = input.semanticSearch
         hasContent = true
       }
 

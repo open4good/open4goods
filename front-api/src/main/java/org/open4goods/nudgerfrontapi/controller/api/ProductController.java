@@ -389,11 +389,12 @@ public class ProductController {
         }
         filterDto = filterValidation.value();
 
+        boolean semanticSearch = searchPayload != null && Boolean.TRUE.equals(searchPayload.semanticSearch());
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
         Set<String> requestedComponents = include == null ? Set.of() : include;
 
         ProductSearchResponseDto body = service.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
-                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
+                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto, semanticSearch);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
     }

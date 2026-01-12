@@ -175,8 +175,8 @@ public class SearchService {
 	 *                              Nuxt contract
 	 * @param filters               optional structured filters applied on the
 	 *                              search query
-	 * @param allowSemanticFallback whether semantic fallback is allowed when no
-	 *                              hits are found
+	 * @param allowSemanticFallback whether semantic search should be attempted
+	 *                              when a text query is provided
 	 * @return a {@link SearchResult} bundling {@link SearchHits} and aggregation
 	 *         metadata
 	 */
@@ -189,21 +189,36 @@ public class SearchService {
 		FilterRequestDto normalizedFilters = normalizeFilters(filters);
 		boolean hasExcludedOverride = hasExcludedOverride(normalizedFilters);
 		boolean applyDefaultExclusion = !hasExcludedOverride;
+		boolean useSemanticSearch = allowSemanticFallback && StringUtils.hasText(sanitizedQuery);
+		float[] semanticEmbedding = null;
+		if (useSemanticSearch) {
+			semanticEmbedding = buildNormalizedEmbedding(sanitizedQuery);
+			if (semanticEmbedding == null) {
+				useSemanticSearch = false;
+			}
+		}
 
-		Query searchQuery = buildProductSearchQuery(normalizedVerticalId, sanitizedQuery, normalizedFilters,
-				applyDefaultExclusion);
+		Query searchQuery = buildProductSearchQuery(normalizedVerticalId, useSemanticSearch ? null : sanitizedQuery,
+				normalizedFilters, applyDefaultExclusion);
 
 		List<Agg> excludedAggregations = extractExcludedAggregations(aggregationQuery);
 		boolean requiresAdminExcludedAggregation = applyDefaultExclusion && !excludedAggregations.isEmpty();
 		Query adminAggregationQuery = requiresAdminExcludedAggregation
-				? buildProductSearchQuery(normalizedVerticalId, sanitizedQuery, normalizedFilters, false)
+				? buildProductSearchQuery(normalizedVerticalId, useSemanticSearch ? null : sanitizedQuery,
+						normalizedFilters, false)
 				: null;
 
 		List<AggregationDescriptor> descriptors = new ArrayList<>();
 		var nativeQueryBuilder = new org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder()
-				.withQuery(searchQuery).withPageable(pageable)
+				.withQuery(searchQuery)
 				.withSourceFilter(new org.springframework.data.elasticsearch.core.query.FetchSourceFilter(true, null,
 						new String[] { "embedding" }));
+
+		if (useSemanticSearch) {
+			applySemanticSearch(nativeQueryBuilder, semanticEmbedding, searchQuery, pageable);
+		} else {
+			nativeQueryBuilder.withPageable(pageable);
+		}
 
 		if (aggregationQuery != null && aggregationQuery.aggs() != null) {
 			for (Agg agg : aggregationQuery.aggs()) {
@@ -225,7 +240,11 @@ public class SearchService {
 			elasticLog(e);
 			throw e;
 		}
-		if (allowSemanticFallback && shouldFallbackToSemantic(hits, sanitizedQuery, normalizedVerticalId)) {
+		if (useSemanticSearch) {
+			hits = sliceSearchHits(hits, pageable);
+		}
+		if (!useSemanticSearch && allowSemanticFallback
+				&& shouldFallbackToSemantic(hits, sanitizedQuery, normalizedVerticalId)) {
 			SearchHits<Product> semanticHits = executeSemanticFallback(pageable, normalizedVerticalId, sanitizedQuery,
 					normalizedFilters, applyDefaultExclusion);
 			if (semanticHits != null && !semanticHits.isEmpty()) {
@@ -239,6 +258,29 @@ public class SearchService {
 			aggregations = mergeAggregationOverrides(aggregations, overrides);
 		}
 		return new SearchResult(hits, List.copyOf(aggregations));
+	}
+
+	/**
+	 * Configure semantic KNN search clauses for a {@link NativeQueryBuilder}.
+	 *
+	 * @param builder    base query builder to enrich
+	 * @param embedding normalized embedding vector
+	 * @param filter     filter query scoping the semantic search
+	 * @param pageable   requested page used to compute the KNN candidate size
+	 */
+	private void applySemanticSearch(NativeQueryBuilder builder, float[] embedding, Query filter, Pageable pageable) {
+		int knnLimit = Math.max(pageable.getPageSize() * (pageable.getPageNumber() + 1), pageable.getPageSize());
+		List<Float> queryVector = new ArrayList<>(embedding.length);
+		for (float value : embedding) {
+			queryVector.add(value);
+		}
+
+		co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch
+				.of(knn -> knn.field("embedding").queryVector(queryVector).k(knnLimit)
+						.numCandidates(Math.max(knnLimit * 2, 50))
+						.filter(filter == null ? List.of() : List.of(filter)));
+
+		builder.withKnnSearches(knnSearch).withPageable(PageRequest.of(0, knnLimit)).withMinScore(MIN_SEMANTIC_SCORE);
 	}
 
 	Query buildProductSearchQuery(String normalizedVerticalId, String sanitizedQuery, FilterRequestDto filters,
