@@ -215,6 +215,7 @@ import { useI18n } from 'vue-i18n'
 import { buildCategoryHash } from '~/utils/_category-filter-state'
 import { resolveScoreNumericValue } from '~/utils/score-values'
 import { formatBrandModelTitle, humanizeSlug } from '~/utils/_product-title'
+import { resolveProductTitle } from '~/utils/_product-title-resolver'
 
 const ProductImpactSection = defineAsyncComponent(
   () => import('~/components/product/ProductImpactSection.vue')
@@ -509,12 +510,17 @@ const productTitle = computed(() => {
     ? t('product.meta.gtinFallback', { gtin: gtinValue })
     : ''
 
-  return (
-    product.value?.names?.h1Title ??
-    product.value?.identity?.bestName ??
-    slugFallback ??
-    gtinFallback
-  )
+  if (!product.value) {
+    return slugFallback || gtinFallback
+  }
+
+  const resolvedTitle = resolveProductTitle(product.value, locale.value, {
+    preferH1Title: true,
+    uppercaseBrand: true,
+    gtinFallback,
+  })
+
+  return resolvedTitle || slugFallback || gtinFallback
 })
 
 const heroPopularAttributes = computed(

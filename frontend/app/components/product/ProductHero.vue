@@ -228,7 +228,10 @@ const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''
 
 const heroTitle = computed(() => {
-  return resolveProductTitle(props.product, locale.value)
+  return resolveProductTitle(props.product, locale.value, {
+    preferH1Title: true,
+    uppercaseBrand: true,
+  })
 })
 
 const productBrandName = computed(() =>
