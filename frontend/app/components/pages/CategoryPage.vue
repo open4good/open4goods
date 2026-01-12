@@ -8,15 +8,7 @@
       :breadcrumbs="category.breadCrumb ?? []"
       :eyebrow="category.verticalMetaTitle"
       :show-image="isDesktop"
-    >
-      <template #actions>
-        <CategoryHeroActionsContent
-          :vertical-home-url="category?.verticalHomeUrl"
-          :category-name="categoryDisplayName"
-          @open-nudge="isNudgeWizardOpen = true"
-        />
-      </template>
-    </CategoryHero>
+    />
 
     <v-dialog
       v-model="isNudgeWizardOpen"
@@ -103,29 +95,48 @@
               class="category-page__filters-drawer"
               temporary
             >
-              <CategoryFiltersSidebar
-                :filter-options="filterOptions"
-                :aggregations="currentAggregations"
-                :baseline-aggregations="baselineAggregations"
-                :filters="manualFilters"
-                :impact-expanded="impactExpanded"
-                :technical-expanded="technicalExpanded"
-                :show-mobile-actions="true"
-                :has-documentation="hasDocumentation"
-                :wiki-pages="category?.wikiPages ?? []"
-                :related-posts="category?.relatedPosts ?? []"
-                :show-admin-panel="showAdminFilters"
-                :admin-filter-fields="adminFilterFields"
-                @update:filters="onFiltersChange"
-                @update:impact-expanded="
-                  (value: boolean) => (impactExpanded = value)
-                "
-                @update:technical-expanded="
-                  (value: boolean) => (technicalExpanded = value)
-                "
-                @apply-mobile="applyMobileFilters"
-                @clear-mobile="clearAllFilters"
-              />
+            <CategoryFiltersSidebar
+              :filter-options="filterOptions"
+              :aggregations="currentAggregations"
+              :baseline-aggregations="baselineAggregations"
+              :filters="manualFilters"
+              :impact-expanded="impactExpanded"
+              :technical-expanded="technicalExpanded"
+              :show-mobile-actions="true"
+              :has-documentation="hasDocumentation"
+              :wiki-pages="category?.wikiPages ?? []"
+              :related-posts="category?.relatedPosts ?? []"
+              :show-admin-panel="showAdminFilters"
+              :admin-filter-fields="adminFilterFields"
+              @update:filters="onFiltersChange"
+              @update:impact-expanded="
+                (value: boolean) => (impactExpanded = value)
+              "
+              @update:technical-expanded="
+                (value: boolean) => (technicalExpanded = value)
+              "
+              @apply-mobile="applyMobileFilters"
+              @clear-mobile="clearAllFilters"
+            >
+              <template #extra>
+                <div class="category-page__filters-cta">
+                  <CategoryEcoscoreCard
+                    :vertical-home-url="category?.verticalHomeUrl"
+                    :category-name="categoryDisplayName"
+                  />
+                  <v-btn
+                    block
+                    color="primary"
+                    variant="flat"
+                    prepend-icon="mdi-robot-love"
+                    class="category-page__nudge-cta"
+                    @click="isNudgeWizardOpen = true"
+                  >
+                    {{ $t('category.hero.nudge.cta') }}
+                  </v-btn>
+                </div>
+              </template>
+            </CategoryFiltersSidebar>
             </v-navigation-drawer>
           </ClientOnly>
         </template>
@@ -163,7 +174,26 @@
               @update:technical-expanded="
                 (value: boolean) => (technicalExpanded = value)
               "
-            />
+            >
+              <template #extra>
+                <div class="category-page__filters-cta">
+                  <CategoryEcoscoreCard
+                    :vertical-home-url="category?.verticalHomeUrl"
+                    :category-name="categoryDisplayName"
+                  />
+                  <v-btn
+                    block
+                    color="primary"
+                    variant="flat"
+                    prepend-icon="mdi-robot-love"
+                    class="category-page__nudge-cta"
+                    @click="isNudgeWizardOpen = true"
+                  >
+                    {{ $t('category.hero.nudge.cta') }}
+                  </v-btn>
+                </div>
+              </template>
+            </CategoryFiltersSidebar>
           </aside>
 
           <div
@@ -431,7 +461,7 @@ import { AggTypeEnum } from '~~/shared/api-client'
 import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.vue'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
-import CategoryHeroActionsContent from '~/components/category/CategoryHeroActionsContent.vue'
+import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
 import CategoryResultsCount from '~/components/category/CategoryResultsCount.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
@@ -2322,6 +2352,19 @@ const clearAllFilters = () => {
 
   &__filters-actions
     padding: 0.5rem 0.75rem 0
+
+  &__filters-extra
+    display: flex
+    flex-direction: column
+    gap: 1rem
+
+  &__filters-cta
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
+
+  &__nudge-cta
+    box-shadow: 0 14px 28px -22px rgba(var(--v-theme-shadow-primary-600), 0.45)
 
   &__results
     min-height: 420px

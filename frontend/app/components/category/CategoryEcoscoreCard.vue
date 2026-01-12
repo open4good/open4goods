@@ -17,14 +17,12 @@
       <p class="category-ecoscore-card__title">
         {{ t('category.filters.ecoscore.title') }}
       </p>
-      <p
-        v-if="showDescription !== false"
-        class="category-ecoscore-card__description"
-      >
-        {{ description }}
-      </p>
       <span class="category-ecoscore-card__cta">
-        {{ t('category.filters.ecoscore.cta') }}
+        {{
+          t('category.filters.ecoscore.cta', {
+            category: normalizedCategoryName,
+          })
+        }}
         <v-icon icon="mdi-arrow-top-right" size="18" />
       </span>
     </div>
@@ -46,12 +44,6 @@ const normalizedCategoryName = computed(() => {
 
   return props.categoryName.toLocaleLowerCase(locale.value)
 })
-
-const description = computed(() =>
-  t('category.filters.ecoscore.description', {
-    category: normalizedCategoryName.value,
-  })
-)
 
 const ecoscoreUrl = computed(() => {
   if (!props.verticalHomeUrl) {
@@ -108,12 +100,6 @@ const ecoscoreUrl = computed(() => {
     font-size: 1rem
     font-weight: 600
     margin: 0
-
-  &__description
-    margin: 0
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    font-size: 0.875rem
-    line-height: 1.5
 
   &__cta
     display: inline-flex

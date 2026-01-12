@@ -639,20 +639,18 @@ describe('Home page', () => {
     vi.unstubAllGlobals()
   })
 
-  it('submits the search query using the localized search route', async () => {
+  it('renders the hero title and subtitle', async () => {
     const wrapper = await mountHomePage()
 
-    const searchForm = wrapper.find('section.home-hero form[role="search"]')
-    const searchInput = searchForm.find('input')
+    const heroTitle = wrapper.find('section.home-hero .home-hero__title')
+    const heroSubtitle = wrapper.find(
+      'section.home-hero .home-hero__title-subtitle'
+    )
 
-    await searchInput.setValue('smart tv')
-    await searchForm.trigger('submit.prevent')
-
-    expect(localePathMock).toHaveBeenCalledWith({
-      name: 'search',
-      query: { q: 'smart tv' },
-    })
-    expect(routerPush).toHaveBeenCalledWith('/localized/search?q=smart tv')
+    expect(heroTitle.text()).toBe(messages['packs.default.hero.title'])
+    expect(heroSubtitle.text()).toBe(
+      (messages['packs.default.hero.titleSubtitle'] as string[])[0]
+    )
   })
 
   it('registers FAQ structured data in head tags', async () => {

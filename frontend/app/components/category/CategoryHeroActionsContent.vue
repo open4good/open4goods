@@ -10,7 +10,6 @@
         class="category-hero-actions__ecoscore"
         :vertical-home-url="verticalHomeUrl"
         :category-name="categoryName"
-        :show-description="showDescription"
       />
     </v-col>
 
@@ -52,14 +51,12 @@ const props = withDefaults(
     categoryName?: string | null
     showNudge?: boolean
     showEcoscore?: boolean
-    showDescription?: boolean
   }>(),
   {
     verticalHomeUrl: null,
     categoryName: null,
     showNudge: true,
     showEcoscore: true,
-    showDescription: true,
   }
 )
 

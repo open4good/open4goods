@@ -3,6 +3,14 @@ import { describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import ProductImpactRadarChart from './ProductImpactRadarChart.vue'
 
+interface RadarChartInstance {
+  option: {
+    radar: {
+      indicator: Array<{ name: string; max: number }>
+    }
+  } | null
+}
+
 // Mock echarts since we don't need to render the actual canvas for logic testing
 vi.mock('vue-echarts', () => ({
   default: {
@@ -67,10 +75,11 @@ describe('ProductImpactRadarChart', () => {
     })
 
     // Access the component instance to get the computed option
-    const vm = wrapper.vm as any
+    const vm = wrapper.vm as unknown as RadarChartInstance
     const option = vm.option
 
     expect(option).not.toBeNull()
+    if (!option) return
 
     const indicators = option.radar.indicator
     expect(indicators).toHaveLength(2)
@@ -108,8 +117,11 @@ describe('ProductImpactRadarChart', () => {
       },
     })
 
-    const vm = wrapper.vm as any
+    const vm = wrapper.vm as unknown as RadarChartInstance
     const option = vm.option
+
+    expect(option).not.toBeNull()
+    if (!option) return
 
     const indicators = option.radar.indicator
     // First axis has only null, default max is 5
