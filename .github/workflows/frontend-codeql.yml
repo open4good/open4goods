@@ -3,14 +3,18 @@ name: CodeQL
 on:
   push:
     paths:
-      - 'frontend/**'    
+      - "frontend/**"
     branches: ["main"]
   pull_request:
     paths:
-      - 'frontend/**'    
+      - "frontend/**"
     branches: ["main"]
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: "0 0 * * 0"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
@@ -22,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript', 'typescript' ]
+        language: ["javascript", "typescript"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

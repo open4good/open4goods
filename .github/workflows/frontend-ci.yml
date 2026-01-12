@@ -1,11 +1,15 @@
-name: Frontend CI
+name: Frontend CI & Deploy
 on:
   push:
     paths:
-      - 'frontend/**'    
+      - "frontend/**"
     branches: [main]
   pull_request:
-    paths: ['frontend/**']
+    paths: ["frontend/**"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -26,3 +30,23 @@ jobs:
       - name: Verify production build
         run: pnpm build
         working-directory: frontend
+
+      - name: Deploy SSR output to Beta server
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "frontend/.output"
+          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+          TARGET: "/opt/open4goods/bin/latest/frontend-ssr"
+
+      - name: Publish frontend
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: ${{ secrets.REMOTE_BETA_HOST }}
+          username: ${{ secrets.REMOTE_BETA_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: sh /opt/open4goods/bin/publish-frontend.sh beta
