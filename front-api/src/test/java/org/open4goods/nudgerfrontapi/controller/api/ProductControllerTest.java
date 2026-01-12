@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,11 +74,12 @@ class ProductControllerTest {
 
         Filter filter = new Filter("scores.ENERGY_CONSUMPTION.value", FilterOperator.range, null, 0.0, 100.0);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
-                new FilterRequestDto(List.of(filter), List.of()));
+                new FilterRequestDto(List.of(filter), List.of()), null);
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any()))
+        when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
+                anyBoolean()))
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
@@ -87,7 +89,7 @@ class ProductControllerTest {
 
         ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
         verify(productMappingService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                filterCaptor.capture());
+                filterCaptor.capture(), anyBoolean());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("scores.ENERGY_CONSUMPTION.value");
@@ -107,12 +109,12 @@ class ProductControllerTest {
         Filter filter = new Filter("attributes.indexed.BRAND_SUSTAINABILITY.value", FilterOperator.term,
                 List.of("AA"), null, null);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
-                new FilterRequestDto(List.of(filter), List.of()));
+                new FilterRequestDto(List.of(filter), List.of()), null);
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                any()))
+                any(), anyBoolean()))
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
@@ -122,10 +124,9 @@ class ProductControllerTest {
 
         ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
         verify(productMappingService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                filterCaptor.capture());
+                filterCaptor.capture(), anyBoolean());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("attributes.indexed.BRAND_SUSTAINABILITY.value");
     }
 }
-
