@@ -2571,7 +2571,18 @@
       "label": "Product detail navigation",
       "overview": "Overview",
       "alternatives": "Alternatives",
-      "price": "Pricing"
+      "price": "Pricing",
+      "submenus": {
+        "price": {
+          "bestOffers": "Best offers",
+          "history": "Trends & tracking"
+        },
+        "attributes": {
+          "summary": "Summary",
+          "dates": "Dates",
+          "details": "Details"
+        }
+      }
     },
     "nudge": {
       "fabAriaLabel": "Open the Nudger assistant for this category",
@@ -2604,6 +2615,7 @@
         "viewOffer": "Open offer from {source}",
         "unknownSource": "Unknown source"
       },
+      "historyTitle": "Price history",
       "noHistory": "Price history is not yet available for this product.",
       "subtitle": "Track price evolution and compare offers.",
       "title": "Prices and trends",

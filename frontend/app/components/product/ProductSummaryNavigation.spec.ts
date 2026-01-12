@@ -57,6 +57,37 @@ describe('ProductSummaryNavigation', () => {
     await wrapper.unmount()
   })
 
+  it('renders submenu entries and emits navigate', async () => {
+    const wrapper = await mountComponent({
+      sections: [
+        {
+          id: 'impact',
+          label: 'Impact',
+          icon: 'mdi-leaf',
+          subsections: [
+            { id: 'impact-energy', label: 'Energy' },
+            { id: 'impact-repair', label: 'Repairability' },
+          ],
+        },
+      ],
+    })
+
+    const toggle = wrapper.find('button.product-summary-navigation__toggle')
+    await toggle.trigger('click')
+
+    const submenuLinks = wrapper.findAll(
+      'button.product-summary-navigation__submenu-link'
+    )
+    expect(submenuLinks).toHaveLength(2)
+
+    await submenuLinks[1]?.trigger('click')
+
+    const emitted = wrapper.emitted('navigate') ?? []
+    expect(emitted[emitted.length - 1]).toEqual(['impact-repair'])
+
+    await wrapper.unmount()
+  })
+
   it('applies horizontal orientation modifier', async () => {
     const wrapper = await mountComponent({ orientation: 'horizontal' })
 
