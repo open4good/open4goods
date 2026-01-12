@@ -10,27 +10,82 @@
         :key="section.id"
         class="product-summary-navigation__item"
       >
-        <button
-          type="button"
-          class="product-summary-navigation__link"
-          :class="{
-            'product-summary-navigation__link--active':
-              section.id === activeSection,
-          }"
-          :aria-current="section.id === activeSection ? 'true' : undefined"
-          :aria-controls="section.id"
-          @click="onNavigate(section.id)"
-        >
-          <v-icon
-            v-if="section.icon"
-            :icon="section.icon"
-            size="18"
-            class="product-summary-navigation__icon"
-          />
-          <span class="product-summary-navigation__label">{{
-            section.label
-          }}</span>
-        </button>
+        <div class="product-summary-navigation__item-header">
+          <button
+            type="button"
+            class="product-summary-navigation__link"
+            :class="{
+              'product-summary-navigation__link--active':
+                isSectionActive(section),
+            }"
+            :aria-current="isSectionActive(section) ? 'true' : undefined"
+            :aria-controls="section.id"
+            @click="handleSectionClick(section)"
+          >
+            <v-icon
+              v-if="section.icon"
+              :icon="section.icon"
+              size="18"
+              class="product-summary-navigation__icon"
+            />
+            <span class="product-summary-navigation__label">{{
+              section.label
+            }}</span>
+          </button>
+          <button
+            v-if="hasSubsections(section)"
+            type="button"
+            class="product-summary-navigation__toggle"
+            :aria-expanded="isSubmenuOpen(section)"
+            :aria-controls="`submenu-${section.id}`"
+            @click="toggleSubmenu(section.id)"
+          >
+            <v-icon
+              :icon="
+                isSubmenuOpen(section) ? 'mdi-chevron-up' : 'mdi-chevron-down'
+              "
+              size="18"
+            />
+          </button>
+        </div>
+        <v-expand-transition>
+          <ul
+            v-if="hasSubsections(section)"
+            v-show="isSubmenuOpen(section)"
+            :id="`submenu-${section.id}`"
+            class="product-summary-navigation__submenu"
+          >
+            <li
+              v-for="subsection in section.subsections"
+              :key="subsection.id"
+              class="product-summary-navigation__submenu-item"
+            >
+              <button
+                type="button"
+                class="product-summary-navigation__submenu-link"
+                :class="{
+                  'product-summary-navigation__submenu-link--active':
+                    subsection.id === activeSection,
+                }"
+                :aria-current="
+                  subsection.id === activeSection ? 'true' : undefined
+                "
+                :aria-controls="subsection.id"
+                @click="onNavigate(subsection.id)"
+              >
+                <v-icon
+                  v-if="subsection.icon"
+                  :icon="subsection.icon"
+                  size="16"
+                  class="product-summary-navigation__submenu-icon"
+                />
+                <span class="product-summary-navigation__submenu-label">{{
+                  subsection.label
+                }}</span>
+              </button>
+            </li>
+          </ul>
+        </v-expand-transition>
       </li>
     </ul>
 
@@ -78,11 +133,17 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
+import { ref } from 'vue'
 
 const _props = defineProps({
   sections: {
     type: Array as PropType<
-      Array<{ id: string; label: string; icon?: string }>
+      Array<{
+        id: string
+        label: string
+        icon?: string
+        subsections?: Array<{ id: string; label: string; icon?: string }>
+      }>
     >,
     default: () => [],
   },
@@ -116,8 +177,37 @@ const _props = defineProps({
 
 const emit = defineEmits<{ navigate: [string] }>()
 
+const openSectionId = ref<string | null>(null)
+
 const onNavigate = (sectionId: string) => {
   emit('navigate', sectionId)
+}
+
+const hasSubsections = (section: {
+  subsections?: Array<{ id: string }>
+}) => (section.subsections?.length ?? 0) > 0
+
+const isSectionActive = (section: {
+  id: string
+  subsections?: Array<{ id: string }>
+}) =>
+  section.id === _props.activeSection ||
+  Boolean(
+    section.subsections?.some(sub => sub.id === _props.activeSection)
+  )
+
+const isSubmenuOpen = (section: { id: string }) =>
+  openSectionId.value === section.id || isSectionActive(section)
+
+const toggleSubmenu = (sectionId: string) => {
+  openSectionId.value = openSectionId.value === sectionId ? null : sectionId
+}
+
+const handleSectionClick = (section: { id: string }) => {
+  if (hasSubsections(section)) {
+    openSectionId.value = section.id
+  }
+  onNavigate(section.id)
 }
 </script>
 
@@ -164,7 +254,15 @@ const onNavigate = (sectionId: string) => {
 }
 
 .product-summary-navigation__item {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-summary-navigation__item-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .product-summary-navigation__link {
@@ -180,6 +278,70 @@ const onNavigate = (sectionId: string) => {
   font-size: 0.92rem;
   color: rgb(var(--v-theme-text-neutral-secondary));
   transition: all 0.25s ease;
+}
+
+.product-summary-navigation__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: rgba(var(--v-theme-surface-primary-080), 0.5);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  transition: all 0.25s ease;
+}
+
+.product-summary-navigation__toggle:hover,
+.product-summary-navigation__toggle:focus-visible {
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.6);
+  background: rgba(var(--v-theme-surface-primary-100), 0.7);
+}
+
+.product-summary-navigation__submenu {
+  list-style: none;
+  padding: 0 0 0 1.75rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-summary-navigation__submenu-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+  transition: all 0.2s ease;
+}
+
+.product-summary-navigation__submenu-link:hover,
+.product-summary-navigation__submenu-link:focus-visible {
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.5);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  background: rgba(var(--v-theme-surface-primary-080), 0.55);
+}
+
+.product-summary-navigation__submenu-link--active {
+  background: rgba(var(--v-theme-surface-primary-100), 0.7);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.85);
+}
+
+.product-summary-navigation__submenu-icon {
+  color: rgb(var(--v-theme-accent-primary-highlight));
+}
+
+.product-summary-navigation__submenu-label {
+  white-space: nowrap;
 }
 
 .product-summary-navigation__link:hover,
@@ -288,6 +450,14 @@ const onNavigate = (sectionId: string) => {
   justify-content: center;
 }
 
+.product-summary-navigation--horizontal .product-summary-navigation__item {
+  min-width: max-content;
+}
+
+.product-summary-navigation--horizontal .product-summary-navigation__submenu {
+  padding-left: 0.5rem;
+}
+
 .product-summary-navigation--horizontal
   .product-summary-navigation__admin-panel {
   margin-top: 1rem;
@@ -310,6 +480,10 @@ const onNavigate = (sectionId: string) => {
   .product-summary-navigation__link {
     font-size: 0.85rem;
     padding: 0.5rem 0.75rem;
+  }
+
+  .product-summary-navigation__submenu {
+    padding-left: 1rem;
   }
 
   .product-summary-navigation__admin-link {

@@ -11,7 +11,10 @@
 
     <div class="product-attributes__block">
       <div class="product-attributes__block-header">
-        <h3 class="product-attributes__block-title">
+        <h3
+          id="attributes-main"
+          class="product-attributes__block-title"
+        >
           {{ $t('product.attributes.main.title') }}
         </h3>
       </div>
@@ -113,7 +116,7 @@
 
       <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
         <v-col cols="12">
-          <ProductLifeTimeline :timeline="timeline" />
+          <ProductLifeTimeline id="attributes-timeline" :timeline="timeline" />
         </v-col>
       </v-row>
     </div>
@@ -227,7 +230,10 @@
       <div
         class="product-attributes__block-header product-attributes__block-header--detailed"
       >
-        <h3 class="product-attributes__block-title">
+        <h3
+          id="attributes-details"
+          class="product-attributes__block-title"
+        >
           {{ $t('product.attributes.detailed.title') }}
         </h3>
         <v-text-field
