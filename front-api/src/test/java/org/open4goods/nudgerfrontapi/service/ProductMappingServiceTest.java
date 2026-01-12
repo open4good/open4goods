@@ -45,6 +45,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
 import org.open4goods.commons.services.IpQuotaService;
+import org.open4goods.commons.model.IpQuotaCategory;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -331,9 +332,9 @@ class ProductMappingServiceTest {
         when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
         when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
         when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
-        when(ipQuotaService.isAllowed(eq("REVIEW_GENERATION"), eq("127.0.0.1"), eq(3),
+        when(ipQuotaService.isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
                 eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(true);
-        when(ipQuotaService.increment(eq("REVIEW_GENERATION"), eq("127.0.0.1"),
+        when(ipQuotaService.increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
                 eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(1);
         Product product = new Product(gtin);
         when(repository.getById(gtin)).thenReturn(product);
@@ -342,9 +343,9 @@ class ProductMappingServiceTest {
         long scheduled = service.createReview(gtin, "token", httpServletRequest);
 
         verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
-        verify(ipQuotaService).isAllowed(eq("REVIEW_GENERATION"), eq("127.0.0.1"), eq(3),
+        verify(ipQuotaService).isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
                 eq(reviewGenerationProperties.getQuota().getWindow()));
-        verify(ipQuotaService).increment(eq("REVIEW_GENERATION"), eq("127.0.0.1"),
+        verify(ipQuotaService).increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
                 eq(reviewGenerationProperties.getQuota().getWindow()));
         verify(repository).getById(gtin);
         verify(reviewGenerationClient).triggerGeneration(gtin);
@@ -357,7 +358,7 @@ class ProductMappingServiceTest {
         when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
         when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
         when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
-        when(ipQuotaService.isAllowed(eq("REVIEW_GENERATION"), eq("127.0.0.1"), eq(3),
+        when(ipQuotaService.isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
                 eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(false);
 
         assertThatThrownBy(() -> service.createReview(gtin, "token", httpServletRequest))
@@ -365,7 +366,7 @@ class ProductMappingServiceTest {
                 .hasMessageContaining("Maximum 3 review generations");
 
         verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
-        verify(ipQuotaService, never()).increment(eq("REVIEW_GENERATION"), eq("127.0.0.1"),
+        verify(ipQuotaService, never()).increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
                 eq(reviewGenerationProperties.getQuota().getWindow()));
         verify(reviewGenerationClient, never()).triggerGeneration(gtin);
     }
