@@ -16,8 +16,13 @@ vi.mock('vue-echarts', () => ({
   default: {
     name: 'VueECharts',
     render: () => null,
-    props: ['option'],
+    props: ['option', 'autoresize'],
   },
+}))
+
+// Mock the ensureECharts loader to avoid side-effects
+vi.mock('~/utils/echarts-loader', () => ({
+  ensureECharts: vi.fn(),
 }))
 
 // Mock useElementSize to allow rendering
