@@ -268,6 +268,7 @@ const worstValue = computed(() => formatNumber(worstRawValue.value))
 
 const bestValue = computed(() => formatNumber(bestRawValue.value))
 const averageValue = computed(() => formatNumber(absoluteStats.value?.avg))
+
 const averageOn20Value = computed(() => {
   // Sigma scoring definition: Average is always the pivot at 10/20 (2.5/5)
   return formatNumber(10, { maximumFractionDigits: 0 })

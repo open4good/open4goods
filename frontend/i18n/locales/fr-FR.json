@@ -2494,15 +2494,15 @@
           "readIndicator": {
             "title": "Comment lire cet indicateur",
             "higher": {
-              "worst": "Le plus faible {scoreLabelLower} observé est de {worst}, soit une note de 0/20.",
-              "best": "Le meilleur {scoreLabelLower} constaté parmi les {count} {verticalTitle} atteint {best}, pour une note de 20/20.",
-              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}, ce qui correspond à {averageOn20}/20.",
+              "worst": "Le plus faible {scoreLabelLower} observé est de {worst}.",
+              "best": "Le meilleur {scoreLabelLower} constaté parmi les {count} {verticalTitle} atteint {best}.",
+              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}, note pivot de 10/20.",
               "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}, obtient la note de {productOn20}/20."
             },
             "lower": {
-              "worst": "Le {scoreLabelLower} le plus élevé observé est de {worst}, ce qui vaut la note de 0/20.",
-              "best": "Le {scoreLabelLower} le plus faible constaté parmi les {count} {verticalTitle} atteint {best}, pour une note de 20/20.",
-              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}, ce qui correspond à {averageOn20}/20.",
+              "worst": "Le {scoreLabelLower} le plus élevé observé est de {worst}.",
+              "best": "Le {scoreLabelLower} le plus faible constaté parmi les {count} {verticalTitle} atteint {best}.",
+              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}, note pivot de 10/20.",
               "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}, obtient la note de {productOn20}/20."
             }
           }
@@ -2512,15 +2512,15 @@
           "readIndicator": {
             "title": "Comment lire cet indicateur de réparabilité",
             "higher": {
-              "worst": "Le pire indice de réparabilité est {worst}, ce qui vaut la note de 0/20.",
-              "best": "Le meilleur indice de réparabilité rencontré pour les {count} {verticalTitle} est {best}, ce qui donne la note de 20/20.",
-              "average": "La moyenne de ce critère pour les {count} {verticalTitle} disposant d'informations est de {average}, ce qui équivaut à {averageOn20}/20.",
+              "worst": "Le pire indice de réparabilité est {worst}.",
+              "best": "Le meilleur indice de réparabilité rencontré pour les {count} {verticalTitle} est {best}.",
+              "average": "La moyenne de ce critère pour les {count} {verticalTitle} disposant d'informations est de {average}, note pivot de 10/20.",
               "product": "Le {productName}, avec un indice de réparabilité de {productAbsolute}, obtient la note de {productOn20}/20."
             },
             "lower": {
-              "worst": "L'indice de réparabilité le plus élevé observé est {worst}, ce qui vaut la note de 0/20.",
-              "best": "L'indice de réparabilité le plus bas constaté parmi les {count} {verticalTitle} est {best}, ce qui donne la note de 20/20.",
-              "average": "La moyenne de ce critère pour les {count} {verticalTitle} disposant d'informations est de {average}, ce qui équivaut à {averageOn20}/20.",
+              "worst": "L'indice de réparabilité le plus élevé observé est {worst}.",
+              "best": "L'indice de réparabilité le plus bas constaté parmi les {count} {verticalTitle} est {best}.",
+              "average": "La moyenne de ce critère pour les {count} {verticalTitle} disposant d'informations est de {average}, note pivot de 10/20.",
               "product": "Le {productName}, avec un indice de réparabilité de {productAbsolute}, obtient la note de {productOn20}/20."
             }
           }

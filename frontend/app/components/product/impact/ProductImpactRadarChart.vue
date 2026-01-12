@@ -87,20 +87,19 @@ const option = computed<EChartsOption | null>(() => {
     return null
   }
 
-  const finiteValues = props.series
-    .flatMap(entry => entry.values)
-    .filter(
-      (value): value is number =>
-        typeof value === 'number' && Number.isFinite(value)
-    )
+  const indicator = props.axes.map((entry, index) => {
+    const valuesForAxis = props.series
+      .map(s => s.values[index])
+      .filter((v): v is number => typeof v === 'number' && Number.isFinite(v))
 
-  const maxObservedValue = finiteValues.length ? Math.max(...finiteValues) : 5
-  const paddedMax = maxObservedValue > 0 ? maxObservedValue * 1.1 : 5
+    const maxObserved = valuesForAxis.length ? Math.max(...valuesForAxis) : 5
+    const paddedMax = maxObserved > 0 ? maxObserved * 1.1 : 5
 
-  const indicator = props.axes.map(entry => ({
-    name: entry.name,
-    max: paddedMax,
-  }))
+    return {
+      name: entry.name,
+      max: paddedMax,
+    }
+  })
   const seriesData = props.series.map(entry => ({
     value: entry.values.map(value =>
       typeof value === 'number' && Number.isFinite(value) ? value : null
