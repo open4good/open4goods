@@ -172,7 +172,7 @@ i18n:
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Téléviseurs"
     # Text displaid as title for the vertical
-    verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi-nécessaires, nos TV's ne sont malheureusement pas neutres pour l'environnement! Heureusement, Nudger est là pour vous informer et vous aider à choisir la TV la plus écologique et la plus adaptée à votre besoin."
+    verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires, nos téléviseurs ne sont malheureusement pas neutres pour l'environnement. Heureusement, Nudger est là pour vous informer et vous aider à choisir le téléviseur le plus écologique et le plus adapté à votre besoin."
     # The image used as a logo
 
     # A mapping beetween custom page names behind this vertical and wiki pages
@@ -226,9 +226,9 @@ i18n:
     verticalHomeUrl: "tvs"
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
-    verticalHomeTitle: "Tv's"
+    verticalHomeTitle: "TVs"
     # Text displaid as title for the vertical
-    verticalHomeDescription: "Welcome in our TV's'."
+    verticalHomeDescription: "Welcome to our TVs."
     # The image used as a logo
 
 nudgeToolConfig:
@@ -290,7 +290,7 @@ nudgeToolConfig:
         en: "Screen size"
         fr: "Taille d'écran"
       description:
-        en: "Find the diagonale that fits your space."
+        en: "Find the diagonal that fits your space."
         fr: "Trouvez la diagonale adaptée à votre espace."
       ctaLabel:
         en: "Continue"
@@ -403,7 +403,7 @@ nudgeToolConfig:
         fr: "ecrans-moyens"
       caption:
         en: 'Medium screens (32" - 55")'
-        fr: 'Diagonale entre 32 et 55 pouces)'
+        fr: 'Diagonale entre 32 et 55 pouces'
       title:
         en: "Medium Screen TVs"
         fr: "Écrans moyens"
@@ -654,6 +654,7 @@ attributesConfig:
     - key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
     - key: "DIAGONALE_POUCES"
     - key: "DISPLAY_TECHNOLOGY"
+    - key: "HDMI_PORTS_QUANTITY"
     - key: "FREQUENCY_RATE"
     - key: "VOICE_AVAILABLE"
     - key: "AUTO_BRIGHTNESS_CONTROL_AVAILABLE"

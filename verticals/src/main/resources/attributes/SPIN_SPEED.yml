@@ -1,0 +1,31 @@
+key: "SPIN_SPEED"
+betterIs: "GREATER"
+faIcon: "mdi-fan"
+name:
+  default: "Spin speed"
+  fr: "Vitesse d'essorage"
+suffix:
+  default: "rpm"
+  fr: "tr/min"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "SPINSPEEDRATED"
+    - "MAXIMUMSPINSPEED"
+    - "SPINSPEEDHALF"
+    - "SPINSPEEDQUARTER"
+    - "VITESSE D'ESSORAGE"
+    - "ESSORAGE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "RPM"
+    - "TR/MIN"
+    - "TR MIN"
+    - "TOURS/MIN"
+    - "TOURS/MINUTE"

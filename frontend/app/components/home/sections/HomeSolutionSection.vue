@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import HomeParallaxVisual from '../HomeParallaxVisual.vue'
+import solutionImageSrc from '~/assets/homepage/gain/nudger-screaming.webp'
 
 type SolutionBenefit = {
   emoji: string
@@ -60,9 +60,13 @@ const sectionDescription = computed(() => t('home.solution.description'))
         </v-col>
         <v-col cols="12" md="6" class="home-solution__visual">
           <div class="home-solution__image-wrapper">
-            <HomeParallaxVisual
-              src="/images/parallax/solution.svg"
+            <NuxtImg
+              :src="solutionImageSrc"
               :alt="sectionTitle"
+              class="home-solution__image"
+              sizes="(min-width: 960px) 320px, 70vw"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </v-col>

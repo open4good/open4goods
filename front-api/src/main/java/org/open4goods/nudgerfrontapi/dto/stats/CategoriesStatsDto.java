@@ -2,6 +2,8 @@ package org.open4goods.nudgerfrontapi.dto.stats;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.Map;
+
 /**
  * DTO exposing aggregated statistics about vertical categories.
  */
@@ -16,5 +18,11 @@ public record CategoriesStatsDto(
         long gtinOpenDataItemsCount,
 
         @Schema(description = "Total number of ISBN items available in the OpenData exports.", example = "870000")
-        long isbnOpenDataItemsCount
+        long isbnOpenDataItemsCount,
+
+        @Schema(description = "Per-category product counts for recent products with offers, keyed by vertical id.", example = "{\"electronics\": 12000, \"appliances\": 8500}")
+        Map<String, Long> productsCountByCategory,
+
+        @Schema(description = "Sum of product counts across enabled categories.", example = "20500")
+        long productsCountSum
 ) { }

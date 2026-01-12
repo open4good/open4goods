@@ -58,34 +58,34 @@
             "helpers": [
               {
                 "icon": "🌿",
-                "label": "Une évaluation écologique et environnementale unique",
+                "label": "Une évaluation écologique et environnementale unique pour {products} dans {categories} catégories",
                 "segments": [
                   {
                     "text": "Une évaluation écologique",
                     "to": "/impact-score"
                   },
                   {
-                    "text": " et environnementale unique"
+                    "text": " et environnementale unique pour {products} dans {categories} catégories"
                   }
                 ]
               },
               {
                 "icon": "🛡️",
-                "label": "100% indépendant, logiciel libre et données ouvertes",
+                "label": "100% indépendant. Plus de {millions}M de produits en données ouvertes et logiciel libre",
                 "segments": [
                   {
-                    "text": "100% indépendant, "
+                    "text": "100% indépendant. Plus de {millions}M de produits en "
                   },
                   {
-                    "text": "logiciel libre",
-                    "to": "/opensource"
+                    "text": "données ouvertes",
+                    "to": "/opendata"
                   },
                   {
                     "text": " et "
                   },
                   {
-                    "text": "données ouvertes",
-                    "to": "/opendata"
+                    "text": "logiciel libre",
+                    "to": "/opensource"
                   }
                 ]
               },
@@ -232,34 +232,34 @@
         "helpers": [
           {
             "icon": "🌿",
-            "label": "Une évaluation écologique et environnementale unique",
+            "label": "Une évaluation écologique et environnementale unique pour {products} dans {categories} catégories",
             "segments": [
               {
                 "text": "Une évaluation écologique",
                 "to": "/impact-score"
               },
               {
-                "text": " et environnementale unique"
+                "text": " et environnementale unique pour {products} dans {categories} catégories"
               }
             ]
           },
           {
             "icon": "🛡️",
-            "label": "100% indépendant, logiciel libre et données ouvertes",
+            "label": "100% indépendant. Plus de {millions}M de produits en données ouvertes et logiciel libre",
             "segments": [
               {
-                "text": "100% indépendant, "
+                "text": "100% indépendant. Plus de {millions}M de produits en "
               },
               {
-                "text": "logiciel libre",
-                "to": "/opensource"
+                "text": "données ouvertes",
+                "to": "/opendata"
               },
               {
                 "text": " et "
               },
               {
-                "text": "données ouvertes",
-                "to": "/opendata"
+                "text": "logiciel libre",
+                "to": "/opensource"
               }
             ]
           },
@@ -3168,14 +3168,14 @@
           "helpers": [
             {
               "icon": "🎄",
-              "label": "Une évaluation écologique et environnementale unique",
+              "label": "Une évaluation écologique et environnementale unique pour {products} dans {categories} catégories",
               "segments": [
                 {
                   "text": "Une évaluation écologique",
                   "to": "/impact-score"
                 },
                 {
-                  "text": " et environnementale unique"
+                  "text": " et environnementale unique pour {products} dans {categories} catégories"
                 }
               ]
             },
@@ -3286,34 +3286,34 @@
           "helpers": [
             {
               "icon": "🌿",
-              "label": "Une évaluation écologique et environnementale unique",
+              "label": "Une évaluation écologique et environnementale unique pour {products} dans {categories} catégories",
               "segments": [
                 {
                   "text": "Une évaluation écologique",
                   "to": "/impact-score"
                 },
                 {
-                  "text": " et environnementale unique"
+                  "text": " et environnementale unique pour {products} dans {categories} catégories"
                 }
               ]
             },
             {
               "icon": "🛡️",
-              "label": "100% indépendant, logiciel libre et données ouvertes",
+              "label": "100% indépendant. Plus de {millions}M de produits en données ouvertes et logiciel libre",
               "segments": [
                 {
-                  "text": "100% indépendant, "
+                  "text": "100% indépendant. Plus de {millions}M de produits en "
                 },
                 {
-                  "text": "logiciel libre",
-                  "to": "/opensource"
+                  "text": "données ouvertes",
+                  "to": "/opendata"
                 },
                 {
                   "text": " et "
                 },
                 {
-                  "text": "données ouvertes",
-                  "to": "/opendata"
+                  "text": "logiciel libre",
+                  "to": "/opensource"
                 }
               ]
             },

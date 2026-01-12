@@ -120,6 +120,28 @@ const openDataMillions = computed(() => {
   return roundedMillions > 0 ? roundedMillions : null
 })
 
+const productsCount = computed(() => {
+  const count = categoriesStats.value?.productsCountSum
+
+  if (typeof count !== 'number' || !Number.isFinite(count) || count <= 0) {
+    return null
+  }
+
+  return count
+})
+
+const categoriesCount = computed(() => {
+  const count = rawCategories.value?.length ?? 0
+
+  if (count > 0) {
+    return count
+  }
+
+  const fallbackCount = categoriesStats.value?.enabledVerticalConfigs ?? 0
+
+  return fallbackCount > 0 ? fallbackCount : null
+})
+
 const seasonalEventPack = useSeasonalEventPack()
 const theme = useTheme()
 const parallaxAplatFallback = useThemeAsset('parallaxAplat')
@@ -802,6 +824,8 @@ useHead(() => ({
         :verticals="rawCategories"
         :partners-count="heroPartnersCount"
         :open-data-millions="openDataMillions"
+        :products-count="productsCount"
+        :categories-count="categoriesCount"
         hero-background-i18n-key="hero.background"
         @submit="handleSearchSubmit"
         @select-category="handleCategorySuggestion"

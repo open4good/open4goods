@@ -58,14 +58,14 @@
             "helpers": [
               {
                 "icon": "🌿",
-                "label": "A unique ecological and environmental assessment",
+                "label": "A unique ecological and environmental assessment for {products} across {categories} categories",
                 "segments": [
                   {
                     "text": "A unique ecological assessment",
                     "to": "/impact-score"
                   },
                   {
-                    "text": " and environmental review"
+                    "text": " and environmental review for {products} across {categories} categories"
                   }
                 ]
               },
@@ -84,21 +84,21 @@
               },
               {
                 "icon": "🛡️",
-                "label": "Independent comparator, open-source software and open data",
+                "label": "100% independent. Over {millions}M products in open data and free software",
                 "segments": [
                   {
-                    "text": "Independent comparator, "
+                    "text": "100% independent. Over {millions}M products in "
                   },
                   {
-                    "text": "open-source software",
-                    "to": "/opensource"
+                    "text": "open data",
+                    "to": "/opendata"
                   },
                   {
                     "text": " and "
                   },
                   {
-                    "text": "open data",
-                    "to": "/opendata"
+                    "text": "free software",
+                    "to": "/opensource"
                   }
                 ]
               }
@@ -230,14 +230,14 @@
         "helpers": [
           {
             "icon": "🌿",
-            "label": "A unique ecological and environmental assessment",
+            "label": "A unique ecological and environmental assessment for {products} across {categories} categories",
             "segments": [
               {
                 "text": "A unique ecological assessment",
                 "to": "/impact-score"
               },
               {
-                "text": " and environmental review"
+                "text": " and environmental review for {products} across {categories} categories"
               }
             ]
           },
@@ -256,21 +256,21 @@
           },
           {
             "icon": "🛡️",
-            "label": "Independent comparator, open-source software and open data",
+            "label": "100% independent. Over {millions}M products in open data and free software",
             "segments": [
               {
-                "text": "Independent comparator, "
+                "text": "100% independent. Over {millions}M products in "
               },
               {
-                "text": "open-source software",
-                "to": "/opensource"
+                "text": "open data",
+                "to": "/opendata"
               },
               {
                 "text": " and "
               },
               {
-                "text": "open data",
-                "to": "/opendata"
+                "text": "free software",
+                "to": "/opensource"
               }
             ]
           }
@@ -3182,14 +3182,14 @@
           "helpers": [
             {
               "icon": "🌿",
-              "label": "A unique ecological and environmental assessment",
+              "label": "A unique ecological and environmental assessment for {products} across {categories} categories",
               "segments": [
                 {
                   "text": "A unique ecological assessment",
                   "to": "/impact-score"
                 },
                 {
-                  "text": " and environmental review"
+                  "text": " and environmental review for {products} across {categories} categories"
                 }
               ]
             },
