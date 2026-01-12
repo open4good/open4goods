@@ -43,6 +43,18 @@ export interface CategoriesStatsDto {
      * @memberof CategoriesStatsDto
      */
     isbnOpenDataItemsCount?: number;
+    /**
+     * Per-category product counts for recent products with offers, keyed by vertical id.
+     * @type {{ [key: string]: number; }}
+     * @memberof CategoriesStatsDto
+     */
+    productsCountByCategory?: { [key: string]: number; };
+    /**
+     * Sum of product counts across enabled categories.
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    productsCountSum?: number;
 }
 
 /**
@@ -66,6 +78,8 @@ export function CategoriesStatsDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'affiliationPartnersCount': json['affiliationPartnersCount'] == null ? undefined : json['affiliationPartnersCount'],
         'gtinOpenDataItemsCount': json['gtinOpenDataItemsCount'] == null ? undefined : json['gtinOpenDataItemsCount'],
         'isbnOpenDataItemsCount': json['isbnOpenDataItemsCount'] == null ? undefined : json['isbnOpenDataItemsCount'],
+        'productsCountByCategory': json['productsCountByCategory'] == null ? undefined : mapValues(json['productsCountByCategory'], (item) => item),
+        'productsCountSum': json['productsCountSum'] == null ? undefined : json['productsCountSum'],
     };
 }
 
@@ -84,6 +98,7 @@ export function CategoriesStatsDtoToJSONTyped(value?: CategoriesStatsDto | null,
         'affiliationPartnersCount': value['affiliationPartnersCount'],
         'gtinOpenDataItemsCount': value['gtinOpenDataItemsCount'],
         'isbnOpenDataItemsCount': value['isbnOpenDataItemsCount'],
+        'productsCountByCategory': value['productsCountByCategory'] == null ? undefined : mapValues(value['productsCountByCategory'], (item) => item),
+        'productsCountSum': value['productsCountSum'],
     };
 }
-

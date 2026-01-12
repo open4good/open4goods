@@ -43,6 +43,8 @@ const props = defineProps<{
   heroImageDark?: string
   partnersCount?: number
   openDataMillions?: number
+  productsCount?: number
+  categoriesCount?: number
   heroBackgroundI18nKey?: string
 }>()
 
@@ -64,6 +66,8 @@ const themeName = computed(() =>
 
 const partnersLinkPlaceholder = '{partnersLink}'
 const openDataMillionsPlaceholder = '{millions}'
+const productsCountPlaceholder = '{products}'
+const categoriesCountPlaceholder = '{categories}'
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -156,7 +160,9 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
 
   if (translatedItems.length > 0) {
     return applyOpenDataMillionsPlaceholder(
-      applyPartnerLinkPlaceholder(translatedItems)
+      applyProductsCategoriesPlaceholder(
+        applyPartnerLinkPlaceholder(translatedItems)
+      )
     )
   }
 
@@ -166,7 +172,9 @@ const heroHelperItems = computed<HeroHelperItem[]>(() => {
     const directTranslated = normalizeHelperItems(tmItems)
     if (directTranslated.length > 0) {
       return applyOpenDataMillionsPlaceholder(
-        applyPartnerLinkPlaceholder(directTranslated)
+        applyProductsCategoriesPlaceholder(
+          applyPartnerLinkPlaceholder(directTranslated)
+        )
       )
     }
   }
@@ -282,6 +290,34 @@ const formattedOpenDataMillions = computed(() => {
   }
 })
 
+const formattedProductsCount = computed(() => {
+  const value = props.productsCount
+
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    return null
+  }
+
+  try {
+    return new Intl.NumberFormat(locale.value).format(value)
+  } catch {
+    return String(value)
+  }
+})
+
+const formattedCategoriesCount = computed(() => {
+  const value = props.categoriesCount
+
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    return null
+  }
+
+  try {
+    return new Intl.NumberFormat(locale.value).format(value)
+  } catch {
+    return String(value)
+  }
+})
+
 const applyPartnerLinkPlaceholder = (items: HeroHelperItem[]) => {
   const partnerLinkText = heroPartnersLinkText.value
 
@@ -362,6 +398,48 @@ const applyOpenDataMillionsPlaceholder = (items: HeroHelperItem[]) => {
         segmentsWithOpenDataMillions.length > 0
           ? segmentsWithOpenDataMillions
           : item.segments,
+    }
+  })
+}
+
+const applyProductsCategoriesPlaceholder = (items: HeroHelperItem[]) => {
+  const productsLabel = formattedProductsCount.value
+  const categoriesLabel = formattedCategoriesCount.value
+
+  if (!productsLabel || !categoriesLabel) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithCounts = item.segments
+      .map(segment => {
+        if (
+          !segment.text.includes(productsCountPlaceholder) &&
+          !segment.text.includes(categoriesCountPlaceholder)
+        ) {
+          return segment
+        }
+
+        const replacedText = segment.text
+          .replaceAll(productsCountPlaceholder, productsLabel)
+          .replaceAll(categoriesCountPlaceholder, categoriesLabel)
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHelperSegment => segment != null)
+
+    return {
+      ...item,
+      segments: segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
     }
   })
 }
