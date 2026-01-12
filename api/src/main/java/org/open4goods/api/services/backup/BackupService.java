@@ -309,6 +309,16 @@ public class BackupService implements HealthIndicator {
 //			p.getCategoriesByDatasources().put(e.getKey(), e.getValue());
 //		});
 		
+		// Sanitize embeddings
+		if (p.getResources() != null) {
+			p.getResources().forEach(r -> {
+				if (r.getImageInfo() != null && r.getImageInfo().getEmbedding() != null
+						&& r.getImageInfo().getEmbedding().length > 512) {
+					r.getImageInfo().setEmbedding(null);
+				}
+			});
+		}
+
 		return p;
 	}
 
