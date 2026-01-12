@@ -8,6 +8,7 @@
       :headers="headers"
       :items="tableItems"
       :items-per-page="itemsPerPage"
+      :row-props="rowProps"
       class="impact-details__table"
       density="compact"
       hide-default-footer
@@ -128,6 +129,10 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import type { ScoreView } from './impact-types'
+import {
+  buildImpactAggregateAnchorId,
+  buildImpactScoreGroups,
+} from './impact-score-groups'
 
 const props = defineProps<{
   scores: ScoreView[]
@@ -138,14 +143,6 @@ type DetailedScore = ScoreView & {
   coefficient: number | null
   scoreOn20: number | null
   virtual?: boolean
-}
-type GroupedRows = {
-  groups: Array<{
-    id: string
-    aggregate: DetailedScore | null
-    subscores: DetailedScore[]
-  }>
-  divers: DetailedScore[]
 }
 type TableRow = {
   id: string
@@ -211,13 +208,6 @@ const lifecycleColors: Record<string, string> = {
   END_OF_LIFE: 'success',
 }
 
-const DIVERS_AGGREGATE_ID = 'DIVERS'
-
-const normalizeParticipations = (participations?: string[] | null): string[] =>
-  (participations ?? [])
-    .map(entry => entry?.toString().trim().toUpperCase())
-    .filter((entry): entry is string => Boolean(entry))
-
 const formatAttributeValue = (score: ScoreView) => {
   const raw = score.attributeValue?.toString().trim()
   if (!raw) {
@@ -229,18 +219,6 @@ const formatAttributeValue = (score: ScoreView) => {
     score.unit?.toString().trim() ||
     ''
   return suffix.length ? `${raw} ${suffix}` : raw
-}
-
-const resolveAggregateLabel = (
-  aggregateId: string,
-  aggregateScore: DetailedScore | null
-) => {
-  const translationKey = `product.impact.aggregateScores.${aggregateId}`
-  if (t(translationKey) !== translationKey) {
-    return t(translationKey)
-  }
-
-  return aggregateScore?.label ?? aggregateId
 }
 
 const displayScores = computed<DetailedScore[]>(() =>
@@ -258,57 +236,9 @@ const displayScores = computed<DetailedScore[]>(() =>
     }))
 )
 
-const groupedScores = computed<GroupedRows>(() => {
-  const scoreMap = displayScores.value.reduce<Map<string, DetailedScore>>(
-    (map, score) => {
-      const normalizedId = score.id?.toString().trim().toUpperCase()
-      if (normalizedId) {
-        map.set(normalizedId, score)
-      }
-
-      return map
-    },
-    new Map()
-  )
-
-  const aggregateSet = new Set<string>()
-  const participationMap = new Map<string, DetailedScore[]>()
-  const standalone: DetailedScore[] = []
-
-  displayScores.value.forEach(score => {
-    const participations = normalizeParticipations(score.participateInScores)
-
-    if (!participations.length) {
-      standalone.push(score)
-      return
-    }
-
-    participations.forEach(aggregateId => {
-      aggregateSet.add(aggregateId)
-
-      if (!participationMap.has(aggregateId)) {
-        participationMap.set(aggregateId, [])
-      }
-
-      participationMap.get(aggregateId)?.push(score)
-    })
-  })
-
-  const groups = Array.from(participationMap.entries()).map(
-    ([id, subscores]) => ({
-      id,
-      aggregate: scoreMap.get(id) ?? null,
-      subscores,
-    })
-  )
-
-  const filteredStandalone = standalone.filter(score => {
-    const normalizedId = score.id?.toString().trim().toUpperCase()
-    return normalizedId && !aggregateSet.has(normalizedId)
-  })
-
-  return { groups, divers: filteredStandalone }
-})
+const groupedScores = computed(() =>
+  buildImpactScoreGroups(displayScores.value, t)
+)
 
 const headers = computed(() => [
   {
@@ -420,6 +350,7 @@ const resolveAggregateDisplayValue = (
 
 const buildAggregateRow = (
   aggregateId: string,
+  label: string,
   aggregateScore: DetailedScore | null,
   subscores: DetailedScore[]
 ): TableRow => {
@@ -430,7 +361,7 @@ const buildAggregateRow = (
   )
   return {
     id: aggregateId,
-    label: resolveAggregateLabel(aggregateId, aggregateScore),
+    label,
     attributeValue: '—',
     attributeSourcing: null,
     displayValue: displayValue,
@@ -447,7 +378,14 @@ const tableItems = computed<TableRow[]>(() => {
   const expanded = new Set(expandedGroups.value)
 
   groupedScores.value.groups.forEach(group => {
-    rows.push(buildAggregateRow(group.id, group.aggregate, group.subscores))
+    rows.push(
+      buildAggregateRow(
+        group.id,
+        group.label,
+        group.aggregate,
+        group.subscores
+      )
+    )
 
     if (expanded.has(group.id)) {
       rows.push(
@@ -458,15 +396,20 @@ const tableItems = computed<TableRow[]>(() => {
     }
   })
 
-  if (groupedScores.value.divers.length) {
+  if (groupedScores.value.divers) {
     rows.push(
-      buildAggregateRow(DIVERS_AGGREGATE_ID, null, groupedScores.value.divers)
+      buildAggregateRow(
+        groupedScores.value.divers.id,
+        groupedScores.value.divers.label,
+        null,
+        groupedScores.value.divers.subscores
+      )
     )
 
-    if (expanded.has(DIVERS_AGGREGATE_ID)) {
+    if (expanded.has(groupedScores.value.divers.id)) {
       rows.push(
-        ...groupedScores.value.divers.map(score =>
-          buildTableRow(score, 'subscore', DIVERS_AGGREGATE_ID)
+        ...groupedScores.value.divers.subscores.map(score =>
+          buildTableRow(score, 'subscore', groupedScores.value.divers?.id)
         )
       )
     }
@@ -477,6 +420,13 @@ const tableItems = computed<TableRow[]>(() => {
 
 const hasRows = computed(() => tableItems.value.length > 0)
 const itemsPerPage = computed(() => Math.max(tableItems.value.length, 1))
+
+const rowProps = ({ item }: { item: TableRow }) => ({
+  id:
+    item.rowType === 'aggregate'
+      ? buildImpactAggregateAnchorId(item.id)
+      : undefined,
+})
 
 const toggleGroup = (groupId: string) => {
   const next = new Set(expandedGroups.value)

@@ -153,6 +153,7 @@
                   class="search-suggest-field__impact"
                   :score="item.raw.ecoscoreValue"
                   size="small"
+                  flat
                 />
               </template>
             </v-list-item>

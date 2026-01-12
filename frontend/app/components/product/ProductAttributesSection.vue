@@ -11,7 +11,10 @@
 
     <div class="product-attributes__block">
       <div class="product-attributes__block-header">
-        <h3 class="product-attributes__block-title">
+        <h3
+          id="attributes-main"
+          class="product-attributes__block-title"
+        >
           {{ $t('product.attributes.main.title') }}
         </h3>
       </div>
@@ -48,8 +51,14 @@
                     v-for="detail in row.details"
                     :key="detail.key"
                     class="product-attributes__identity-detail"
+                    :class="{
+                      'product-attributes__identity-detail--muted': detail.muted,
+                    }"
                   >
-                    <span class="product-attributes__identity-detail-label">
+                    <span
+                      v-if="detail.label"
+                      class="product-attributes__identity-detail-label"
+                    >
                       {{ detail.label }}
                     </span>
                     <ul class="product-attributes__identity-detail-list">
@@ -78,7 +87,7 @@
                 })
               "
               class="product-attributes__gtin-image"
-              cover
+              contain
             />
             <figcaption class="product-attributes__gtin-caption">
               {{ $t('product.attributes.main.identity.gtinLabel') }}
@@ -113,7 +122,7 @@
 
       <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
         <v-col cols="12">
-          <ProductLifeTimeline :timeline="timeline" />
+          <ProductLifeTimeline id="attributes-timeline" :timeline="timeline" />
         </v-col>
       </v-row>
     </div>
@@ -227,7 +236,10 @@
       <div
         class="product-attributes__block-header product-attributes__block-header--detailed"
       >
-        <h3 class="product-attributes__block-title">
+        <h3
+          id="attributes-details"
+          class="product-attributes__block-title"
+        >
           {{ $t('product.attributes.detailed.title') }}
         </h3>
         <v-text-field
@@ -536,8 +548,9 @@ const buildSynonymTokenSet = (
 
 interface IdentityDetail {
   key: string
-  label: string
+  label?: string
   values: string[]
+  muted?: boolean
 }
 
 interface IdentityRow {
@@ -584,8 +597,8 @@ const identityRows = computed<IdentityRow[]>(() => {
     if (alternativeModels.length) {
       details.push({
         key: 'akaModels',
-        label: t('product.attributes.main.identity.akaModels'),
         values: alternativeModels,
+        muted: true,
       })
     }
 
@@ -594,14 +607,6 @@ const identityRows = computed<IdentityRow[]>(() => {
       label: t('product.attributes.main.identity.model'),
       value: model ?? '—',
       details: details.length ? details : undefined,
-    })
-  }
-
-  if (gtinDisplay.value) {
-    rows.push({
-      key: 'gtin',
-      label: t('product.attributes.main.identity.gtin'),
-      value: gtinDisplay.value,
     })
   }
 
@@ -622,6 +627,14 @@ const identityRows = computed<IdentityRow[]>(() => {
       key: 'lastUpdated',
       label: t('product.attributes.main.identity.lastUpdated'),
       value: lastUpdated,
+    })
+  }
+
+  if (gtinDisplay.value) {
+    rows.push({
+      key: 'gtin',
+      label: t('product.attributes.main.identity.gtin'),
+      value: gtinDisplay.value,
     })
   }
 
@@ -1229,6 +1242,16 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
+.product-attributes__identity-detail--muted {
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+  font-size: 0.9rem;
+}
+
+.product-attributes__identity-detail--muted
+  .product-attributes__identity-detail-list {
+  color: inherit;
+}
+
 .product-attributes__gtin {
   display: flex;
   flex-direction: column;
@@ -1238,9 +1261,11 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 .product-attributes__gtin-image {
   border-radius: 16px;
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6);
-  min-height: 160px;
   background: rgb(var(--v-theme-surface-primary-080));
-  width: min(180px, 33%);
+  width: min(200px, 100%);
+  max-width: 200px;
+  max-height: 80px;
+  height: auto;
   align-self: center;
 }
 

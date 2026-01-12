@@ -305,6 +305,10 @@
         "ariaLabel": "Fond décoratif pour la FAQ et l’appel à l’action"
       }
     },
+    "split": {
+      "painAlt": "Illustration d’un acheteur submergé par les choix de produits.",
+      "gainAlt": "Illustration d’un acheteur soulagé après un choix responsable."
+    },
     "problems": {
       "title": "Trop d'infos, mais pas celle qu'il faut ?",
       "description": "Comparer impact, prix, fiabilité... Pas toujours facile !",
@@ -2575,7 +2579,18 @@
       "label": "Navigation de la fiche produit",
       "overview": "Aperçu",
       "alternatives": "Alternatives",
-      "price": "Prix"
+      "price": "Prix",
+      "submenus": {
+        "price": {
+          "bestOffers": "Meilleurs prix",
+          "history": "Évolution & suivi"
+        },
+        "attributes": {
+          "summary": "Synthèse",
+          "dates": "Dates",
+          "details": "Détails"
+        }
+      }
     },
     "nudge": {
       "fabAriaLabel": "Ouvrir l'assistant Nudger pour cette catégorie",
@@ -2608,6 +2623,7 @@
         "viewOffer": "Ouvrir l'offre chez {source}",
         "unknownSource": "Source inconnue"
       },
+      "historyTitle": "Historique des prix",
       "noHistory": "Pas assez de données pour afficher l'historique des prix.",
       "subtitle": "Suivez l’évolution des prix et comparez les offres.",
       "title": "Prix et évolution",

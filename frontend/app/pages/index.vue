@@ -626,10 +626,32 @@ const handleSearchSubmit = () => {
   navigateToSearch(trimmedQuery)
 }
 
+const resolveCategorySuggestionUrl = (
+  suggestion: CategorySuggestionItem
+): string | null => {
+  const normalizedUrl = normalizeVerticalHomeUrl(suggestion.url)
+
+  if (normalizedUrl) {
+    return normalizedUrl
+  }
+
+  const verticalId = suggestion.verticalId?.trim()
+
+  if (!verticalId) {
+    return null
+  }
+
+  const matchedCategory = rawCategories.value.find(
+    category => category.id === verticalId
+  )
+
+  return normalizeVerticalHomeUrl(matchedCategory?.verticalHomeUrl)
+}
+
 const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
   searchQuery.value = suggestion.title
 
-  const normalizedUrl = normalizeVerticalHomeUrl(suggestion.url)
+  const normalizedUrl = resolveCategorySuggestionUrl(suggestion)
 
   if (normalizedUrl) {
     router.push(normalizedUrl)

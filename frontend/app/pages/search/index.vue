@@ -755,15 +755,32 @@ const handleClear = () => {
   })
 }
 
-const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
-  const verticalUrl = normalizeVerticalHomeUrl(
-    suggestion.url ??
-      (suggestion.verticalId
-        ? verticalById.value.get(suggestion.verticalId)?.verticalHomeUrl
-        : null)
+const resolveCategorySuggestionUrl = (
+  suggestion: CategorySuggestionItem
+): string | null => {
+  const normalizedFromSuggestion = normalizeVerticalHomeUrl(suggestion.url)
+
+  if (normalizedFromSuggestion) {
+    return normalizedFromSuggestion
+  }
+
+  const verticalId = suggestion.verticalId?.trim()
+
+  if (!verticalId) {
+    return null
+  }
+
+  return normalizeVerticalHomeUrl(
+    verticalById.value.get(verticalId)?.verticalHomeUrl
   )
+}
+
+const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
+  const verticalUrl = resolveCategorySuggestionUrl(suggestion)
 
   if (!verticalUrl) {
+    trackSearch({ query: suggestion.title, source: 'suggestion' })
+    handleSearchSubmit()
     return
   }
 

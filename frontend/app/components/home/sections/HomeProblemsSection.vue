@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import HomeSplitSection from './HomeSplitSection.vue'
-import HomeParallaxVisual from '../HomeParallaxVisual.vue'
 
 type ProblemItem = {
   icon: string
@@ -26,12 +25,6 @@ const sectionDescription = computed(() => t('home.problems.description'))
     :description="sectionDescription"
     visual-position="left"
   >
-    <template #visual>
-      <HomeParallaxVisual
-        src="/images/parallax/problem.svg"
-        :alt="sectionTitle"
-      />
-    </template>
     <v-row class="home-problems__list" dense>
       <v-col
         v-for="item in props.items"

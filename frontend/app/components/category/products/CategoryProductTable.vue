@@ -39,7 +39,13 @@
     </template>
 
     <template #[`item.impactScore`]="{ value }">
-      <ImpactScore v-if="value != null" :score="value" :max="5" size="small" />
+      <ImpactScore
+        v-if="value != null"
+        :score="value"
+        :max="5"
+        size="small"
+        flat
+      />
       <span v-else>{{ $t('category.products.notRated') }}</span>
     </template>
 

@@ -204,32 +204,6 @@ const formatNumber = (
   })
 }
 
-const computeOn20 = (
-  value: number | null | undefined,
-  worst: number | null | undefined,
-  best: number | null | undefined
-) => {
-  if (
-    typeof value !== 'number' ||
-    typeof worst !== 'number' ||
-    typeof best !== 'number' ||
-    Number.isNaN(value) ||
-    Number.isNaN(worst) ||
-    Number.isNaN(best) ||
-    worst === best
-  ) {
-    return null
-  }
-
-  const ratio = (value - worst) / (best - worst)
-  const scaled = ratio * 20
-  if (!Number.isFinite(scaled)) {
-    return null
-  }
-
-  return Math.max(0, Math.min(20, scaled))
-}
-
 const infoItems = computed(() => {
   const items: Array<{ label: string; value: string }> = []
 
@@ -295,12 +269,8 @@ const worstValue = computed(() => formatNumber(worstRawValue.value))
 const bestValue = computed(() => formatNumber(bestRawValue.value))
 const averageValue = computed(() => formatNumber(absoluteStats.value?.avg))
 const averageOn20Value = computed(() => {
-  const computedValue = computeOn20(
-    absoluteStats.value?.avg ?? null,
-    worstRawValue.value,
-    bestRawValue.value
-  )
-  return formatNumber(computedValue, { maximumFractionDigits: 1 })
+  // Sigma scoring definition: Average is always the pivot at 10/20 (2.5/5)
+  return formatNumber(10, { maximumFractionDigits: 0 })
 })
 
 const productAbsoluteValue = computed(() => {

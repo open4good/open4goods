@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRandomHomepageImages } from '~/composables/useRandomHomepageImages'
 
 defineOptions({ inheritAttrs: false })
 
@@ -25,7 +26,26 @@ const props = withDefaults(
   }
 )
 
+const { t } = useI18n()
+const { painImage, gainImage } = useRandomHomepageImages()
+
 const titleId = computed(() => `${props.id}-title`)
+const fallbackImage = computed(() => {
+  const isPainVisual = props.visualPosition === 'left'
+
+  return {
+    src: isPainVisual ? painImage.value : gainImage.value,
+    alt: isPainVisual ? t('home.split.painAlt') : t('home.split.gainAlt'),
+    sizes: '(min-width: 960px) 320px, 70vw',
+    loading: 'lazy' as const,
+  }
+})
+const resolvedImage = computed(() => props.image ?? fallbackImage.value)
+const resolvedImageClass = computed(() =>
+  props.image ? null : props.visualPosition === 'right'
+    ? 'home-split__image--gain'
+    : 'home-split__image--pain'
+)
 const sectionClasses = computed(() => [
   'home-section',
   'home-split',
@@ -73,14 +93,14 @@ const sectionClasses = computed(() => [
             <div class="home-split__visual" role="presentation">
               <slot name="visual">
                 <NuxtImg
-                  v-if="props.image?.src"
-                  :src="props.image.src"
-                  :alt="props.image.alt"
-                  class="home-split__image"
-                  :sizes="props.image.sizes ?? '(min-width: 960px) 320px, 70vw'"
-                  :loading="props.image.loading ?? 'lazy'"
-                  :width="props.image.width"
-                  :height="props.image.height"
+                  v-if="resolvedImage?.src"
+                  :src="resolvedImage.src"
+                  :alt="resolvedImage.alt"
+                  :class="['home-split__image', resolvedImageClass]"
+                  :sizes="resolvedImage.sizes ?? '(min-width: 960px) 320px, 70vw'"
+                  :loading="resolvedImage.loading ?? 'lazy'"
+                  :width="resolvedImage.width"
+                  :height="resolvedImage.height"
                   decoding="async"
                 />
               </slot>
@@ -152,6 +172,9 @@ const sectionClasses = computed(() => [
   height: auto
   display: block
   margin-inline: auto
+
+.home-split__image--gain
+  transform: rotate(8deg)
 
 .home-split--visual-left .home-split__col--visual
   order: -1

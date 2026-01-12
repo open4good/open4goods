@@ -4,6 +4,7 @@ import type {
   CategorySuggestionItem,
   ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
+import { useCategories } from '~/composables/categories/useCategories'
 import {
   normalizeLocale,
   resolveLocalizedRoutePath,
@@ -30,6 +31,7 @@ export const useMenuSearchControls = (
   const route = useRoute()
   const router = useRouter()
   const { locale } = useI18n()
+  const { categories, fetchCategories } = useCategories()
 
   const searchQuery = ref('')
   const isSearchOpen = ref(false)
@@ -118,10 +120,38 @@ export const useMenuSearchControls = (
     return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
   }
 
-  const handleCategorySuggestion = (suggestion: CategorySuggestionItem) => {
+  const resolveCategoryUrl = async (
+    suggestion: CategorySuggestionItem
+  ): Promise<string | null> => {
+    const normalizedUrl = normalizeSuggestionUrl(suggestion.url)
+
+    if (normalizedUrl) {
+      return normalizedUrl
+    }
+
+    const verticalId = suggestion.verticalId?.trim()
+
+    if (!verticalId) {
+      return null
+    }
+
+    if (!categories.value.length) {
+      await fetchCategories()
+    }
+
+    const matchedCategory = categories.value.find(
+      category => category.id === verticalId
+    )
+
+    return normalizeSuggestionUrl(matchedCategory?.verticalHomeUrl)
+  }
+
+  const handleCategorySuggestion = async (
+    suggestion: CategorySuggestionItem
+  ) => {
     searchQuery.value = suggestion.title
 
-    const normalizedUrl = normalizeSuggestionUrl(suggestion.url)
+    const normalizedUrl = await resolveCategoryUrl(suggestion)
 
     if (normalizedUrl) {
       if (

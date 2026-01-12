@@ -84,6 +84,7 @@
                 mode="badge"
                 badge-layout="stacked"
                 badge-variant="corner"
+                flat
               />
               <span v-else class="category-product-card-grid__corner-fallback">
                 {{ $t('category.products.notRated') }}
