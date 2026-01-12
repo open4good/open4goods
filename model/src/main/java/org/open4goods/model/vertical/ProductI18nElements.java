@@ -16,6 +16,13 @@ public class ProductI18nElements {
 	private PrefixedAttrText singular = new PrefixedAttrText();
 	@JsonMerge
 	private PrefixedAttrText singularDesignation = new PrefixedAttrText();
+	
+	@JsonMerge
+	private String cardTitle;
+	@JsonMerge
+	private String shortName;
+	@JsonMerge
+	private String longName;
 
 
 
@@ -190,5 +197,29 @@ public class ProductI18nElements {
 
 	public void setAiConfigs(AiPromptsConfig aiConfigs) {
 		this.aiConfigs = aiConfigs;
+	}
+
+	public String getCardTitle() {
+		return cardTitle;
+	}
+
+	public void setCardTitle(String cardTitle) {
+		this.cardTitle = cardTitle;
+	}
+
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
+	}
+
+	public String getLongName() {
+		return longName;
+	}
+
+	public void setLongName(String longName) {
+		this.longName = longName;
 	}
 }

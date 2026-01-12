@@ -4,6 +4,9 @@ import { humanizeSlug } from '~/utils/_product-title'
 export interface ProductTitleOptions {
   preferH1Title?: boolean
   preferPrettyName?: boolean
+  preferCardTitle?: boolean
+  preferShortName?: boolean
+  preferLongName?: boolean
   uppercaseBrand?: boolean
   gtinFallback?: string
 }
@@ -37,62 +40,86 @@ export const resolveProductTitle = (
   const {
     preferH1Title = false,
     preferPrettyName = true,
+    preferCardTitle = false,
+    preferShortName = false,
+    preferLongName = false,
     uppercaseBrand = false,
     gtinFallback,
   } = options
 
   const brand = normalizeString(product.identity?.brand)
-  const resolvedBrand = uppercaseBrand
-    ? brand.toLocaleUpperCase(locale)
-    : brand
+  const resolvedBrand = uppercaseBrand ? brand.toLocaleUpperCase(locale) : brand
 
   const finalizeTitle = (title: string): string =>
     uppercaseBrand ? applyBrandCasing(title, brand, locale) : title
 
-  // 1. H1 Title (long form)
+  // 1. New Fields Priorities
+  if (preferCardTitle) {
+    const cardTitle = normalizeString(product.names?.cardTitle)
+    if (cardTitle) return finalizeTitle(cardTitle)
+  }
+
+  if (preferShortName) {
+    const shortName = normalizeString(product.names?.shortName)
+    if (shortName) return finalizeTitle(shortName)
+  }
+
+  if (preferLongName) {
+    const longName = normalizeString(product.names?.longName)
+    if (longName) return finalizeTitle(longName)
+  }
+
+  // 2. H1 Title / Long Name equivalent
   if (preferH1Title) {
+    // Prefer longName if available as it captures the "full" title intent
+    const longName = normalizeString(product.names?.longName)
+    if (longName) return finalizeTitle(longName)
+
     const h1Title = normalizeString(product.names?.h1Title)
     if (h1Title) return finalizeTitle(h1Title)
   }
 
-  // 2. Pretty Name / AI Medium Title
+  // 3. Pretty Name / Short Name equivalent (Default fallback for many cases)
   if (preferPrettyName) {
+    // Prefer shortName if available
+    const shortName = normalizeString(product.names?.shortName)
+    if (shortName) return finalizeTitle(shortName)
+
     const prettyName = normalizeString(product.names?.prettyName)
     if (prettyName) return finalizeTitle(prettyName)
   }
 
+  // 4. AI Title
   const aiTitle = normalizeString(product.aiReview?.review?.mediumTitle)
   if (aiTitle) return finalizeTitle(aiTitle)
 
-  // 3. Best Name
+  // 5. Best Name (Identity -> Base)
   const identityBestName = normalizeString(product.identity?.bestName)
   if (identityBestName) return finalizeTitle(identityBestName)
 
   const baseBestName = normalizeString(product.base?.bestName)
   if (baseBestName) return finalizeTitle(baseBestName)
 
-  // 4. Brand - Model
+  // 6. Brand - Model (Client-side fallback, kept for products without generated titles)
   const model = normalizeString(product.identity?.model)
   if (resolvedBrand && model) {
     return finalizeTitle(`${resolvedBrand} - ${model}`)
   }
-  if (model) return finalizeTitle(model) // If only model is present, it's better than nothing, although priority says "Brand - Model"
+  if (model) return finalizeTitle(model)
 
-  // 5. Best Offer Name
+  // 7. Best Offer Name
   const bestOfferName = normalizeString(product.offers?.bestPrice?.offerName)
   if (bestOfferName) return finalizeTitle(bestOfferName)
 
-  // Fallbacks (from original ProductHero logic)
-  const namesH1 = normalizeString(product.names?.h1Title)
-  if (namesH1) return finalizeTitle(namesH1)
-
+  // 8. Last Resorts
   const slug = normalizeString(product.slug)
   if (slug && locale) return finalizeTitle(humanizeSlug(slug, locale))
 
   const gtin = normalizeString(product.gtin?.toString())
   if (gtin) {
-    const fallbackValue =
-      gtinFallback?.trim().length ? gtinFallback : `GTIN: ${gtin}`
+    const fallbackValue = gtinFallback?.trim().length
+      ? gtinFallback
+      : `GTIN: ${gtin}`
 
     return finalizeTitle(fallbackValue)
   }

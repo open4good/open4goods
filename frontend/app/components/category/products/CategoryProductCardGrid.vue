@@ -10,7 +10,10 @@
   >
     <v-col
       v-for="product in products"
-      :key="resolveProductTitle(product) ?? Math.random()"
+      :key="
+        resolveProductTitle(product, undefined, { preferCardTitle: true }) ??
+        Math.random()
+      "
       cols="12"
       :sm="normalizedSize === 'small' ? 6 : 6"
       :md="normalizedSize === 'small' ? 4 : normalizedSize === 'big' ? 4 : 6"
@@ -71,7 +74,11 @@
                 :is="normalizedSize === 'big' ? 'h2' : 'h3'"
                 class="category-product-card-grid__title"
               >
-                {{ resolveProductTitle(product) }}
+                {{
+                  resolveProductTitle(product, undefined, {
+                    preferCardTitle: true,
+                  })
+                }}
               </component>
             </div>
 

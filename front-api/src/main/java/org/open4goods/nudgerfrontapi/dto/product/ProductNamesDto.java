@@ -22,6 +22,13 @@ public record ProductNamesDto(
         String ogTitle,
         @Schema(description = "OpenGraph description for social sharing")
         String ogDescription,
+        @Schema(description = "Title for product card", example = "Samsung TV")
+        String cardTitle,
+        @Schema(description = "Short name", example = "Samsung TV")
+        String shortName,
+        @Schema(description = "Long name", example = "Samsung TV 55 inches 4K")
+        String longName,
+
         @Schema(description = "Offer names aggregated across datasources")
         Set<String> offerNames,
         @Schema(description = "Longest detected offer name", nullable = true)

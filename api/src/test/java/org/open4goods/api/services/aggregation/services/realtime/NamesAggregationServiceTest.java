@@ -196,4 +196,32 @@ class NamesAggregationServiceTest {
 		assertThat(generatedUrl).startsWith("123456789-");
 		assertThat(generatedUrl).contains("tv-55");
 	}
+
+	@Test
+	void onProduct_shouldComputeTemplateTitles() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		config.getI18n().get("fr").setCardTitle("{BRAND} {MODEL}");
+		config.getI18n().get("fr").setShortName("{BRAND}");
+		config.getI18n().get("fr").setLongName("{BRAND} {MODEL} - {DIAGONALE_POUCES} {ATTRIBUTE_NOT_EXIST}");
+
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(100L);
+		product.setVertical("tv");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Samsung");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Galaxy TV");
+		
+		org.open4goods.model.attribute.ProductAttribute attr = new org.open4goods.model.attribute.ProductAttribute();
+		attr.setName("DIAGONALE_POUCES");
+		attr.setValue("55");
+		product.getAttributes().getAll().put("DIAGONALE_POUCES", attr);
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getCardTitle().get("fr")).isEqualTo("Samsung Galaxy TV");
+		assertThat(product.getNames().getShortName().get("fr")).isEqualTo("Samsung");
+		// Attribute resolution + whitespace normalization (empty attribute replaced by empty string)
+		assertThat(product.getNames().getLongName().get("fr")).isEqualTo("Samsung Galaxy TV - 55");
+	}
 }

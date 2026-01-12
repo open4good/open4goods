@@ -546,6 +546,9 @@ public class ProductMappingService {
                 resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale),
+                resolveLocalisedString(product.getNames().getCardTitle(), domainLanguage, locale),
+                resolveLocalisedString(product.getNames().getShortName(), domainLanguage, locale),
+                resolveLocalisedString(product.getNames().getLongName(), domainLanguage, locale),
                 product.getOfferNames() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getOfferNames()),
                 safeCall(product::longestOfferName),
                 safeCall(product::shortestOfferName));

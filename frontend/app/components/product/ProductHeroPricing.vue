@@ -11,30 +11,145 @@
       :content="String(product.offers?.offersCount ?? 0)"
     />
     <meta itemprop="priceCurrency" :content="priceCurrencyCode" />
-    <div
+
+    <!-- Condition Tabs -->
+    <v-tabs
       v-if="conditionOptions.length"
-      class="product-hero__price-conditions"
-      role="group"
-      :aria-label="conditionToggleAriaLabel"
+      v-model="selectedCondition"
+      density="compact"
+      color="primary"
+      class="mb-4 product-hero__tabs"
+      hide-slider
+      height="36"
     >
-      <button
+      <v-tab
         v-for="option in conditionOptions"
         :key="option.value"
-        type="button"
-        class="product-hero__price-chip"
-        :class="{ 'product-hero__price-chip--active': option.selected }"
-        :aria-pressed="option.selected"
-        :disabled="!hasConditionToggle && !option.selected"
-        @click="selectCondition(option.value)"
+        :value="option.value"
+        class="product-hero__tab"
+        :class="{ 'product-hero__tab--active': option.selected }"
+        rounded="pill"
+        variant="flat"
       >
         {{ option.label }}
-      </button>
-    </div>
-    <div class="product-hero__pricing-header">
+      </v-tab>
+    </v-tabs>
+
+    <v-row no-gutters class="align-center mt-2">
+      <!-- Merchant / Favicon (Left) -->
+      <v-col cols="12" md="6" class="d-flex align-center">
+        <div v-if="bestPriceMerchant" class="product-hero__price-merchant">
+          <template v-if="bestPriceMerchant.url">
+            <ClientOnly v-if="bestPriceMerchant.clientOnly">
+              <template #default>
+                <NuxtLink
+                  :to="bestPriceMerchant.url"
+                  class="product-hero__price-merchant-link"
+                  :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
+                  :rel="
+                    bestPriceMerchant.isInternal
+                      ? undefined
+                      : 'nofollow noopener'
+                  "
+                  :prefetch="false"
+                  @click="handleMerchantClick"
+                >
+                  <img
+                    v-if="bestPriceMerchant.favicon"
+                    :src="bestPriceMerchant.favicon"
+                    :alt="bestPriceMerchant.name"
+                    width="48"
+                    height="48"
+                    class="product-hero__price-merchant-favicon"
+                  />
+                  <span class="d-md-none ml-2">{{
+                    bestPriceMerchant.name
+                  }}</span>
+                </NuxtLink>
+              </template>
+              <template #fallback>
+                <div class="product-hero__price-merchant-static">
+                  <img
+                    v-if="bestPriceMerchant.favicon"
+                    :src="bestPriceMerchant.favicon"
+                    :alt="bestPriceMerchant.name"
+                    width="48"
+                    height="48"
+                    class="product-hero__price-merchant-favicon"
+                  />
+                  <span class="d-md-none ml-2">{{
+                    bestPriceMerchant.name
+                  }}</span>
+                </div>
+              </template>
+            </ClientOnly>
+            <NuxtLink
+              v-else
+              :to="bestPriceMerchant.url"
+              class="product-hero__price-merchant-link"
+              :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
+              :rel="
+                bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'
+              "
+              :prefetch="false"
+              @click="handleMerchantClick"
+            >
+              <img
+                v-if="bestPriceMerchant.favicon"
+                :src="bestPriceMerchant.favicon"
+                :alt="bestPriceMerchant.name"
+                width="48"
+                height="48"
+                class="product-hero__price-merchant-favicon"
+              />
+              <span class="d-md-none ml-2">{{ bestPriceMerchant.name }}</span>
+            </NuxtLink>
+          </template>
+          <div v-else class="product-hero__price-merchant-static">
+            <img
+              v-if="bestPriceMerchant.favicon"
+              :src="bestPriceMerchant.favicon"
+              :alt="bestPriceMerchant.name"
+              width="48"
+              height="48"
+              class="product-hero__price-merchant-favicon"
+            />
+            <span class="d-md-none ml-2">{{ bestPriceMerchant.name }}</span>
+          </div>
+        </div>
+      </v-col>
+
+      <!-- Price (Right) -->
+      <v-col
+        cols="12"
+        md="6"
+        class="text-right d-flex flex-column align-end justify-center"
+      >
+        <p
+          class="product-hero__pricing-title mb-1 text-subtitle-2 text-medium-emphasis"
+        >
+          {{ $t('product.hero.bestPriceTitle') }}
+        </p>
+        <div class="product-hero__price">
+          <span class="product-hero__price-value" itemprop="lowPrice">
+            {{ bestPriceLabel }}
+          </span>
+          <span v-if="displayCurrency" class="product-hero__price-currency">
+            {{ displayCurrency }}
+          </span>
+        </div>
+      </v-col>
+    </v-row>
+
+    <!-- Trend & Meta info -->
+    <div
+      class="product-hero__pricing-footer d-flex align-center justify-space-between mt-4"
+    >
+      <!-- Trend -->
       <button
         v-if="priceTrendLabel"
         type="button"
-        class="product-hero__price-trend"
+        class="product-hero__price-trend ma-0"
         :class="priceTrendToneClass"
         @click="scrollToSelector('#price-history')"
       >
@@ -46,101 +161,16 @@
         <span>{{ priceTrendLabel }}</span>
       </button>
 
-      <p class="product-hero__pricing-title">
-        {{ $t('product.hero.bestPriceTitle') }}
-      </p>
-    </div>
-    <div class="product-hero__price">
-      <span class="product-hero__price-value" itemprop="lowPrice">
-        {{ bestPriceLabel }}
-      </span>
-      <span v-if="displayCurrency" class="product-hero__price-currency">
-        {{ displayCurrency }}
-      </span>
-    </div>
-    <div class="product-hero__price-meta">
-      <div v-if="bestPriceMerchant" class="product-hero__price-merchant">
-        <template v-if="bestPriceMerchant.url">
-          <ClientOnly v-if="bestPriceMerchant.clientOnly">
-            <template #default>
-              <NuxtLink
-                :to="bestPriceMerchant.url"
-                class="product-hero__price-merchant-link"
-                :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
-                :rel="
-                  bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'
-                "
-                :prefetch="false"
-                @click="handleMerchantClick"
-              >
-                <img
-                  v-if="bestPriceMerchant.favicon"
-                  :src="bestPriceMerchant.favicon"
-                  :alt="bestPriceMerchant.name"
-                  width="48"
-                  height="48"
-                  class="product-hero__price-merchant-favicon"
-                />
-                <span>{{ bestPriceMerchant.name }}</span>
-              </NuxtLink>
-            </template>
-            <template #fallback>
-              <div class="product-hero__price-merchant-static">
-                <img
-                  v-if="bestPriceMerchant.favicon"
-                  :src="bestPriceMerchant.favicon"
-                  :alt="bestPriceMerchant.name"
-                  width="48"
-                  height="48"
-                  class="product-hero__price-merchant-favicon"
-                />
-                <span>{{ bestPriceMerchant.name }}</span>
-              </div>
-            </template>
-          </ClientOnly>
-          <NuxtLink
-            v-else
-            :to="bestPriceMerchant.url"
-            class="product-hero__price-merchant-link"
-            :target="bestPriceMerchant.isInternal ? undefined : '_blank'"
-            :rel="
-              bestPriceMerchant.isInternal ? undefined : 'nofollow noopener'
-            "
-            :prefetch="false"
-            @click="handleMerchantClick"
-          >
-            <img
-              v-if="bestPriceMerchant.favicon"
-              :src="bestPriceMerchant.favicon"
-              :alt="bestPriceMerchant.name"
-              width="48"
-              height="48"
-              class="product-hero__price-merchant-favicon"
-            />
-            <span>{{ bestPriceMerchant.name }}</span>
-          </NuxtLink>
-        </template>
-        <div v-else class="product-hero__price-merchant-static">
-          <img
-            v-if="bestPriceMerchant.favicon"
-            :src="bestPriceMerchant.favicon"
-            :alt="bestPriceMerchant.name"
-            width="48"
-            height="48"
-            class="product-hero__price-merchant-favicon"
-          />
-          <span>{{ bestPriceMerchant.name }}</span>
-        </div>
+      <!-- CTA View Offers -->
+      <div class="product-hero__price-actions ml-auto">
+        <v-btn
+          color="primary"
+          variant="flat"
+          @click="scrollToSelector('#offers-list', 136)"
+        >
+          {{ viewOffersLabel }}
+        </v-btn>
       </div>
-    </div>
-    <div class="product-hero__price-actions">
-      <v-btn
-        color="primary"
-        variant="flat"
-        @click="scrollToSelector('#offers-list', 136)"
-      >
-        {{ viewOffersLabel }}
-      </v-btn>
     </div>
   </div>
 </template>
@@ -232,14 +262,6 @@ const activeCondition = computed<OfferCondition>(() => {
   return availableConditions.value[0] ?? 'new'
 })
 
-const selectCondition = (condition: OfferCondition) => {
-  if (!availableConditions.value.includes(condition)) {
-    return
-  }
-
-  selectedCondition.value = condition
-}
-
 const activeOffer = computed<AggregatedOffer | null>(
   () => bestOffersByCondition.value[activeCondition.value]
 )
@@ -250,12 +272,6 @@ const conditionOptions = computed(() =>
     label: t(`product.hero.offerConditions.${condition}`),
     selected: condition === activeCondition.value,
   }))
-)
-
-const hasConditionToggle = computed(() => conditionOptions.value.length > 1)
-
-const conditionToggleAriaLabel = computed(() =>
-  t('product.hero.offerConditionsToggleAria')
 )
 
 const priceCurrencyCode = computed(
@@ -612,46 +628,7 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-.product-hero__price-conditions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.product-hero__price-chip {
-  border: none;
-  border-radius: 999px;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: rgba(var(--v-theme-surface-default), 0.85);
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.product-hero__price-chip:hover,
-.product-hero__price-chip:focus-visible {
-  background: rgba(var(--v-theme-surface-default), 1);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
-}
-
-.product-hero__price-chip--active {
-  background: rgba(var(--v-theme-primary), 0.18);
-  color: rgb(var(--v-theme-primary));
-  box-shadow: 0 8px 20px rgba(var(--v-theme-primary), 0.18);
-}
-
-.product-hero__price-chip:disabled {
-  cursor: default;
-  box-shadow: none;
-}
+/* CSS removed as part of refactoring to v-tabs */
 
 .product-hero__pricing-header {
   display: flex;

@@ -229,6 +229,7 @@ const normalizeString = (value: string | null | undefined) =>
 
 const heroTitle = computed(() => {
   return resolveProductTitle(props.product, locale.value, {
+    preferLongName: true,
     preferH1Title: true,
     uppercaseBrand: true,
   })

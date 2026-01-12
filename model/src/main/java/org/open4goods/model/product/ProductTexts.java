@@ -13,6 +13,10 @@ public class ProductTexts {
 	private Localisable<String,String> singular = new Localisable<>();
 
 	private Localisable<String,String> singularDesignation = new Localisable<>();
+
+	private Localisable<String,String> cardTitle = new Localisable<>();
+	private Localisable<String,String> shortName = new Localisable<>();
+	private Localisable<String,String> longName = new Localisable<>();
 	
 	private Localisable<String,String> metaDescription = new Localisable<>();
 	
@@ -64,6 +68,31 @@ public class ProductTexts {
 	public void setSingularDesignation(Localisable<String, String> singularDesignation) {
 		this.singularDesignation = singularDesignation;
 	}
+
+	public Localisable<String, String> getCardTitle() {
+		return cardTitle;
+	}
+
+	public void setCardTitle(Localisable<String, String> cardTitle) {
+		this.cardTitle = cardTitle;
+	}
+
+	public Localisable<String, String> getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(Localisable<String, String> shortName) {
+		this.shortName = shortName;
+	}
+
+	public Localisable<String, String> getLongName() {
+		return longName;
+	}
+
+	public void setLongName(Localisable<String, String> longName) {
+		this.longName = longName;
+	}
+
 
 	public Localisable<String, String> getMetaDescription() {
 		return metaDescription;

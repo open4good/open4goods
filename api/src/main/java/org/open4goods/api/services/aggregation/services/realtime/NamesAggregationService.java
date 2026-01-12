@@ -215,6 +215,31 @@ public class NamesAggregationService extends AbstractAggregationService {
 					// SEO meta generation intentionally left commented-out (as in original),
 					// because of previous disk-space / stack-trace issues and template evaluation failures.
 					// Keeping behavior unchanged.
+					
+					// ---- Card Title ----
+					if (tConf.getCardTitle() != null) {
+						String computed = computeTemplate(data, tConf.getCardTitle());
+						if (StringUtils.isNotBlank(computed)) {
+							data.getNames().getCardTitle().put(lang, computed);
+						}
+					}
+
+					// ---- Short Name ----
+					if (tConf.getShortName() != null) {
+						String computed = computeTemplate(data, tConf.getShortName());
+						if (StringUtils.isNotBlank(computed)) {
+							data.getNames().getShortName().put(lang, computed);
+						}
+					}
+
+					// ---- Long Name ----
+					if (tConf.getLongName() != null) {
+						String computed = computeTemplate(data, tConf.getLongName());
+						if (StringUtils.isNotBlank(computed)) {
+							data.getNames().getLongName().put(lang, computed);
+						}
+					}
+
 
 				} catch (InvalidParameterException ex) {
 					logger.error("Error while computing names for product {}", data.getId(), ex);
@@ -508,6 +533,55 @@ public class NamesAggregationService extends AbstractAggregationService {
 			return combined.substring(0, 1000);
 		}
 		return combined;
+	}
+
+	/**
+	 * Computes a text from a template string with placeholders like {BRAND}, {MODEL}, {ATTRIBUTE_KEY}.
+	 * Placeholders are replaced by product attribute values.
+	 * If a placeholder cannot be resolved, it is removed.
+	 * 
+	 * @param data product data
+	 * @param template the template string
+	 * @return computed text
+	 */
+	private String computeTemplate(final Product data, final String template) {
+		if (data == null || StringUtils.isBlank(template)) {
+			return "";
+		}
+
+
+		
+		// Simple regex to find {KEY} pattern
+		java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\{([A-Z0-9_]+)\\}");
+		java.util.regex.Matcher matcher = pattern.matcher(template);
+		
+		StringBuffer sb = new StringBuffer();
+		while (matcher.find()) {
+			String key = matcher.group(1);
+			String value = null;
+			
+			if ("BRAND".equals(key)) {
+				value = data.brand();
+			} else if ("MODEL".equals(key)) {
+				value = data.model();
+			} else {
+				// Fallback to indexed attributes
+				if (data.getAttributes() != null) {
+					value = data.getAttributes().val(key);
+				}
+			}
+			
+			if (value != null) {
+				// Sanitize value
+				matcher.appendReplacement(sb, java.util.regex.Matcher.quoteReplacement(value.trim()));
+			} else {
+				// If not found, replace with empty string
+				matcher.appendReplacement(sb, "");
+			}
+		}
+		matcher.appendTail(sb);
+		
+		return StringUtils.normalizeSpace(sb.toString());
 	}
 
 }
