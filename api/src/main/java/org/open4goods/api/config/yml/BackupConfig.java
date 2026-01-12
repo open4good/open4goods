@@ -29,7 +29,7 @@ public class BackupConfig {
 	/**
 	 * Size of the bulk to use for products importation
 	 */
-	private  int importBulkSize = 100;
+	private  int importBulkSize = 50;
 
 	/**
 	 * Number of concurent threads running import (1 thread per file, so should be less or equals than productsExportThreads)
