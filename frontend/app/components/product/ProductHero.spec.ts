@@ -158,7 +158,7 @@ const stubs = {
 }
 
 const baseProduct: ProductDto = {
-  names: { h1Title: 'Orbital Product' },
+  names: { h1Title: 'Television orbit 43 pouces lcd' },
   identity: { brand: 'Orbit', model: 'X1', bestName: 'Orbit X1' },
   base: {
     bestName: 'Orbit X1',
@@ -188,7 +188,7 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     expect(wrapper.get('.product-hero__title').text()).toContain(
-      'Next-gen Orbit X1'
+      'Television ORBIT 43 pouces lcd'
     )
     expect(wrapper.find('.product-hero__panel--pricing').exists()).toBe(true)
     expect(wrapper.find('.product-hero__details-section').exists()).toBe(true)

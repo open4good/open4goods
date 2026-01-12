@@ -13,6 +13,7 @@ export interface ResolvedProductAttribute {
   unit?: string | null
   icon?: string | null
   suffix?: string | null
+  mappings?: Record<string, string> | null
 }
 
 const hasMeaningfulValue = (value: unknown): boolean => {
@@ -161,6 +162,7 @@ export const resolvePopularAttributes = (
       unit: config.unit,
       icon: config.icon,
       suffix: config.suffix ?? null,
+      mappings: config.mappings ?? null,
     })
 
     return accumulator
@@ -213,10 +215,53 @@ export const resolveRemainingAttributes = (
   return limit != null ? results.slice(0, limit) : results
 }
 
+const normalizeMappings = (
+  mappings?: Record<string, string> | null
+): Map<string, string> => {
+  const normalized = new Map<string, string>()
+
+  if (!mappings) {
+    return normalized
+  }
+
+  Object.entries(mappings).forEach(([key, value]) => {
+    const normalizedKey = key.trim().toLocaleLowerCase()
+    if (!normalizedKey.length) {
+      return
+    }
+
+    normalized.set(normalizedKey, value)
+  })
+
+  return normalized
+}
+
+const resolveMappedValue = (
+  value: string,
+  mappings: Map<string, string>
+): string => {
+  if (!mappings.size) {
+    return value
+  }
+
+  const normalized = value.trim().toLocaleLowerCase()
+  if (!normalized.length) {
+    return value
+  }
+
+  const mapped = mappings.get(normalized)
+  if (typeof mapped === 'string' && mapped.trim().length) {
+    return mapped
+  }
+
+  return value
+}
+
 const formatRawValue = (
   value: unknown,
   t: TranslateFn,
-  n: NumberFormatFn
+  n: NumberFormatFn,
+  mappings: Map<string, string>
 ): string | null => {
   if (value == null) {
     return null
@@ -224,7 +269,7 @@ const formatRawValue = (
 
   if (Array.isArray(value)) {
     const formatted = value
-      .map(entry => formatRawValue(entry, t, n))
+      .map(entry => formatRawValue(entry, t, n, mappings))
       .filter((entry): entry is string => Boolean(entry))
       .join(', ')
 
@@ -245,7 +290,11 @@ const formatRawValue = (
 
   if (typeof value === 'string') {
     const trimmed = value.trim()
-    return trimmed.length ? trimmed : null
+    if (!trimmed.length) {
+      return null
+    }
+
+    return resolveMappedValue(trimmed, mappings)
   }
 
   return String(value)
@@ -256,7 +305,8 @@ export const formatAttributeValue = (
   t: TranslateFn,
   n: NumberFormatFn
 ): string | null => {
-  const base = formatRawValue(attribute.rawValue, t, n)
+  const mappings = normalizeMappings(attribute.mappings)
+  const base = formatRawValue(attribute.rawValue, t, n, mappings)
 
   if (!base) {
     return null

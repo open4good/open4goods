@@ -145,6 +145,10 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits<{
+  alternativesUpdated: [{ hasAlternatives: boolean; hydrated: boolean }]
+}>()
+
 const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
@@ -154,6 +158,13 @@ const errorMessage = ref<string | null>(null)
 const hasInteracted = ref(false)
 const activeFilterKeys = ref<Set<string>>(new Set())
 let requestToken = 0
+
+const emitAlternativesState = (hydrated: boolean) => {
+  emit('alternativesUpdated', {
+    hasAlternatives: alternatives.value.length > 0,
+    hydrated,
+  })
+}
 
 const normalizedPopularAttributes = computed(
   () => props.popularAttributes ?? []
@@ -726,6 +737,7 @@ watch(
     alternatives.value = []
     errorMessage.value = null
     syncActiveFilters(false)
+    emitAlternativesState(false)
   },
   { immediate: true }
 )
@@ -741,6 +753,7 @@ watch(
 const fetchAlternatives = async () => {
   if (!canSearch.value) {
     alternatives.value = []
+    emitAlternativesState(false)
     return
   }
 
@@ -792,6 +805,7 @@ const fetchAlternatives = async () => {
       candidate => candidate.gtin !== props.product?.gtin
     )
     alternatives.value = products.slice(0, props.maxResults)
+    emitAlternativesState(true)
   } catch (error) {
     if (currentToken !== requestToken) {
       return
@@ -800,6 +814,7 @@ const fetchAlternatives = async () => {
     console.error('Failed to fetch product alternatives', error)
     errorMessage.value = t('product.impact.alternatives.error')
     alternatives.value = []
+    emitAlternativesState(true)
   } finally {
     if (currentToken === requestToken) {
       loading.value = false

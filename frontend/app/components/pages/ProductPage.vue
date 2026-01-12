@@ -109,6 +109,7 @@
             :vertical-id="categoryDetail?.id ?? ''"
             :popular-attributes="categoryDetail?.popularAttributes ?? []"
             :subtitle-params="alternativesSubtitleParams"
+            @alternatives-updated="handleAlternativesUpdated"
           />
         </section>
 
@@ -215,6 +216,11 @@ import { useI18n } from 'vue-i18n'
 import { buildCategoryHash } from '~/utils/_category-filter-state'
 import { resolveScoreNumericValue } from '~/utils/score-values'
 import { formatBrandModelTitle, humanizeSlug } from '~/utils/_product-title'
+import { resolveProductTitle } from '~/utils/_product-title-resolver'
+import {
+  buildImpactAggregateAnchorId,
+  buildImpactScoreGroups,
+} from '~/components/product/impact/impact-score-groups'
 
 const ProductImpactSection = defineAsyncComponent(
   () => import('~/components/product/ProductImpactSection.vue')
@@ -509,12 +515,17 @@ const productTitle = computed(() => {
     ? t('product.meta.gtinFallback', { gtin: gtinValue })
     : ''
 
-  return (
-    product.value?.names?.h1Title ??
-    product.value?.identity?.bestName ??
-    slugFallback ??
-    gtinFallback
-  )
+  if (!product.value) {
+    return slugFallback || gtinFallback
+  }
+
+  const resolvedTitle = resolveProductTitle(product.value, locale.value, {
+    preferH1Title: true,
+    uppercaseBrand: true,
+    gtinFallback,
+  })
+
+  return resolvedTitle || slugFallback || gtinFallback
 })
 
 const heroPopularAttributes = computed(
@@ -603,6 +614,14 @@ const handleNudgeNavigate = (payload?: {
     path: normalizedSlug,
     hash: normalizedHash || undefined,
   })
+}
+
+const handleAlternativesUpdated = (payload: {
+  hasAlternatives: boolean
+  hydrated: boolean
+}) => {
+  alternativesHydrated.value = payload.hydrated
+  hasAlternatives.value = payload.hasAlternatives
 }
 
 const productBrand = computed(() => {
@@ -1507,6 +1526,8 @@ const showAttributesSection = computed(() => {
 const showAlternativesSection = computed(() =>
   Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0)
 )
+const alternativesHydrated = ref(false)
+const hasAlternatives = ref(true)
 const showAiReviewSection = computed(() => Boolean(categoryDetail.value))
 
 const sectionIds = {
@@ -1521,8 +1542,71 @@ const sectionIds = {
   adminJson: 'admin-json',
 } as const
 
-type NavigableSection = { id: string; label: string; icon: string }
+const subSectionIds = {
+  priceOffers: 'offers-list',
+  priceHistory: 'price-history',
+  attributesMain: 'attributes-main',
+  attributesTimeline: 'attributes-timeline',
+  attributesDetails: 'attributes-details',
+} as const
+
+type NavigableSection = {
+  id: string
+  label: string
+  icon: string
+  subsections?: Array<{ id: string; label: string; icon?: string }>
+}
 type ConditionalSection = NavigableSection & { condition: boolean }
+
+const impactSubsections = computed(() => {
+  if (!impactScores.value.length) {
+    return []
+  }
+
+  const { groups, divers } = buildImpactScoreGroups(impactScores.value, t)
+  const entries = groups.map(group => ({
+    id: buildImpactAggregateAnchorId(group.id),
+    label: group.label,
+  }))
+
+  if (divers) {
+    entries.push({
+      id: buildImpactAggregateAnchorId(divers.id),
+      label: divers.label,
+    })
+  }
+
+  return entries
+})
+
+const attributesSubsections = computed(() => {
+  const entries = [
+    {
+      id: subSectionIds.attributesMain,
+      label: t('product.navigation.submenus.attributes.summary'),
+    },
+  ]
+
+  if (product.value?.timeline) {
+    entries.push({
+      id: subSectionIds.attributesTimeline,
+      label: t('product.navigation.submenus.attributes.dates'),
+    })
+  }
+
+  entries.push({
+    id: subSectionIds.attributesDetails,
+    label: t('product.navigation.submenus.attributes.details'),
+  })
+
+  return entries
+})
+
+const shouldShowAlternativesNavigation = computed(
+  () =>
+    showAlternativesSection.value &&
+    (!alternativesHydrated.value || hasAlternatives.value)
+)
 
 const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
   {
@@ -1536,6 +1620,7 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
     label: t('product.navigation.impact'),
     icon: 'mdi-leaf',
     condition: impactScores.value.length > 0,
+    subsections: impactSubsections.value,
   },
   {
     id: sectionIds.ai,
@@ -1548,18 +1633,29 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
     label: t('product.navigation.price'),
     icon: 'mdi-currency-eur',
     condition: !!product.value?.offers,
+    subsections: [
+      {
+        id: subSectionIds.priceOffers,
+        label: t('product.navigation.submenus.price.bestOffers'),
+      },
+      {
+        id: subSectionIds.priceHistory,
+        label: t('product.navigation.submenus.price.history'),
+      },
+    ],
   },
   {
     id: sectionIds.alternatives,
     label: t('product.navigation.alternatives'),
     icon: 'mdi-compare-horizontal',
-    condition: showAlternativesSection.value,
+    condition: shouldShowAlternativesNavigation.value,
   },
   {
     id: sectionIds.attributes,
     label: t('product.navigation.attributes'),
     icon: 'mdi-format-list-bulleted',
     condition: showAttributesSection.value,
+    subsections: attributesSubsections.value,
   },
   {
     id: sectionIds.docs,
