@@ -1,0 +1,17 @@
+key: "OVEN_CLEANING_MODE"
+faIcon: "mdi-spray-bottle"
+name:
+  default: "Cleaning mode"
+  fr: "Mode de nettoyage"
+filteringType: "TEXT"
+synonyms:
+  all:
+    - "MODE DE NETTOYAGE"
+    - "TYPE DE NETTOYAGE"
+    - "NETTOYAGE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

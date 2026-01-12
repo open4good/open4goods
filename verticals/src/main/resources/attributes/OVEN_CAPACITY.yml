@@ -1,0 +1,29 @@
+key: "OVEN_CAPACITY"
+faIcon: "mdi-cube-outline"
+name:
+  default: "Oven capacity"
+  fr: "Capacité du four"
+suffix:
+  default: "L"
+  fr: "L"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "CONTENANCE DU FOUR"
+    - "CAPACITE DU FOUR"
+    - "CAPACITÉ DU FOUR"
+    - "VOLUME DU FOUR"
+    - "VOLUME"
+    - "CAVITIES[0]-VOLUME"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "L"
+    - "L."
+    - "LITRE"
+    - "LITRES"

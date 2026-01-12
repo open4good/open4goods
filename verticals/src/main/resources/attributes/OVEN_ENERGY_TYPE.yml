@@ -1,0 +1,20 @@
+key: "OVEN_ENERGY_TYPE"
+faIcon: "mdi-fire"
+name:
+  default: "Energy type"
+  fr: "Énergie"
+filteringType: "TEXT"
+synonyms:
+  all:
+    - "ENERGIE"
+    - "ÉNERGIE"
+    - "TYPE D'ENERGIE"
+    - "TYPE D’ÉNERGIE"
+    - "CAVITIES[0]-HEATSOURCETYPE"
+    - "HEATSOURCETYPE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

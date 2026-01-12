@@ -1,0 +1,27 @@
+key: "OVEN_POWER"
+faIcon: "mdi-lightning-bolt"
+name:
+  default: "Power"
+  fr: "Puissance"
+suffix:
+  default: "W"
+  fr: "W"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "PUISSANCE (W)"
+    - "PUISSANCE ELECTRIQUE"
+    - "PUISSANCE ÉLECTRIQUE"
+    - "PUISSANCE"
+    - "CONSOMMATION D'ENERGIE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "W"
+    - "WATT"
+    - "WATTS"
