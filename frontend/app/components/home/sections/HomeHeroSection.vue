@@ -12,7 +12,6 @@ import AnimatedSubtitle from '~/components/shared/ui/AnimatedSubtitle.vue'
 import {
   resolveThemedAssetUrl,
   useHeroBackgroundAsset,
-  useLogoAsset,
 } from '~~/app/composables/useThemedAsset'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 import {
@@ -367,27 +366,6 @@ const applyOpenDataMillionsPlaceholder = (items: HeroHelperItem[]) => {
   })
 }
 
-const heroIconAlt = computed(
-  () =>
-    packI18n.resolveString('hero.iconAlt', {
-      fallbackKeys: ['home.hero.iconAlt'],
-    }) ?? ''
-)
-const heroIconSrc = useLogoAsset()
-const heroIconAnimationOptions = [
-  'home-hero__icon--fade',
-  'home-hero__icon--scale',
-  'home-hero__icon--pulse',
-] as const
-const heroIconAnimation = useState<string>(
-  'home-hero-icon-animation',
-  () =>
-    heroIconAnimationOptions[
-      Math.floor(Math.random() * heroIconAnimationOptions.length)
-    ] || heroIconAnimationOptions[0]
-)
-const showHeroIcon = computed(() => Boolean(heroIconAlt.value))
-
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
 const heroBackgroundI18nKey = computed(
   () => props.heroBackgroundI18nKey?.trim() || 'hero.background'
@@ -614,24 +592,8 @@ useHead({
 
                       <v-row class="home-hero__helper-row" justify="center">
                         <v-col
-                          cols="4"
-                          class="align-center home-hero__eyebrow-block"
-                        >
-                          <div
-                            v-if="showHeroIcon"
-                            class="home-hero__icon-wrapper"
-                          >
-                            <img
-                              :src="heroIconSrc"
-                              :alt="heroIconAlt"
-                              :class="['home-hero__icon', heroIconAnimation]"
-                              loading="lazy"
-                            />
-                          </div>
-                        </v-col>
-                        <v-col
                           v-if="heroHelperItems.length"
-                          cols="6"
+                          cols="12"
                           class="home-hero__helpers-wrapper"
                         >
                           <ul class="home-hero__helpers">
@@ -773,49 +735,6 @@ useHead({
   align-items: center
   text-align: center
 
-.home-hero__eyebrow-block
-  display: inline-flex
-  flex-direction: column
-  gap: clamp(0.5rem, 1.5vw, 0.75rem)
-  padding-inline-start: clamp(0.25rem, 1.25vw, 0.75rem)
-  align-items: flex-start
-
-.home-hero__eyebrow
-  font-weight: 600
-  letter-spacing: 0.08em
-  text-transform: uppercase
-  color: rgba(var(--v-theme-hero-gradient-end), 0.9)
-  margin: 0
-
-.home-hero__icon-wrapper
-  width: clamp(4.5rem, 16vw, 7.5rem)
-  height: clamp(4.5rem, 16vw, 7.5rem)
-  box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.12)
-  backdrop-filter: blur(8px)
-  border-radius: 50%
-  padding: clamp(0.6rem, 1.6vw, 0.9rem)
-  box-sizing: border-box
-  background: rgba(var(--v-theme-surface-default), 0.92)
-
-.home-hero__icon
-  border-radius: inherit
-  width: 92%
-  height: 92%
-  transition: transform 250ms ease, filter 250ms ease
-  filter: drop-shadow(0 6px 14px rgba(var(--v-theme-shadow-primary-600), 0.25))
-  object-fit: contain
-  display: block
-  margin: auto
-
-.home-hero__icon--fade
-  animation: home-hero-fade-up 900ms ease-out both
-
-.home-hero__icon--scale
-  animation: home-hero-scale-in 800ms ease-out both
-
-.home-hero__icon--pulse
-  animation: home-hero-pulse 1200ms ease-in-out both
-
 .home-hero__title
   font-size: clamp(2.2rem, 5vw, 3.8rem)
   line-height: 1.05
@@ -882,6 +801,9 @@ useHead({
   flex-wrap: wrap
   align-items: center
 
+.home-hero__helpers-wrapper
+  width: 100%
+
 .home-hero__helpers
   margin: 0
   padding: 0
@@ -922,48 +844,8 @@ useHead({
   width: 100%
 
 
-.home-hero__helpers-title
-  font-size: 0.875rem
-  font-weight: 600
-  color: rgb(var(--v-theme-text-neutral-secondary))
-  margin-bottom: 0.5rem
-  display: block
-  letter-spacing: 0.01em
-
 .home-hero__wizard
   width: 100%
-
-
-
-@keyframes home-hero-fade-up
-  from
-    opacity: 0
-    transform: translateY(12px) scale(0.98)
-  to
-    opacity: 1
-    transform: translateY(0) scale(1)
-
-@keyframes home-hero-scale-in
-  from
-    opacity: 0
-    transform: scale(0.9)
-  55%
-    opacity: 1
-    transform: scale(1.02)
-  to
-    transform: scale(1)
-
-@keyframes home-hero-pulse
-  0%
-    transform: scale(0.92)
-    opacity: 0
-  35%
-    transform: scale(1.04)
-    opacity: 1
-  70%
-    transform: scale(0.98)
-  100%
-    transform: scale(1)
 
 @media (max-width: 959px)
   .home-hero

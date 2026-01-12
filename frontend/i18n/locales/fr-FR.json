@@ -305,6 +305,10 @@
         "ariaLabel": "Fond décoratif pour la FAQ et l’appel à l’action"
       }
     },
+    "split": {
+      "painAlt": "Illustration d’un acheteur submergé par les choix de produits.",
+      "gainAlt": "Illustration d’un acheteur soulagé après un choix responsable."
+    },
     "problems": {
       "title": "Trop d'infos, mais pas celle qu'il faut ?",
       "description": "Comparer impact, prix, fiabilité... Pas toujours facile !",

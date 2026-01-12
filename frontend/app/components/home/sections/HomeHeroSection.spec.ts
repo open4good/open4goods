@@ -49,7 +49,6 @@ const messages: Record<string, unknown> = {
       ],
     },
   ],
-  'packs.default.hero.iconAlt': 'Icône du lanceur PWA Nudger',
   'packs.default.hero.background': 'hero-background.webp',
   'packs.default.hero.context.ariaLabel':
     'Carte contexte du héros présentant la promesse Nudger',
@@ -209,12 +208,6 @@ const mountComponent = async (options?: {
     seedState.value = { ...(options.variantSeeds ?? {}) }
   }
 
-  // Clear animation state to force re-evaluation of Math.random spy
-  const nuxtApp = useNuxtApp()
-  if (nuxtApp?.payload?.state) {
-    Reflect.deleteProperty(nuxtApp.payload.state, 'home-hero-icon-animation')
-  }
-
   return mountSuspended(HomeHeroSection, {
     props: {
       searchQuery: '',
@@ -246,37 +239,6 @@ afterEach(() => {
 })
 
 describe('HomeHeroSection', () => {
-  it('shows the logo icon', async () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.1)
-
-    const wrapper = await mountComponent()
-
-    const icon = wrapper.find('.home-hero__icon')
-
-    expect(icon.attributes('src')).toContain('data:image/svg+xml')
-    expect(icon.attributes('alt')).toBe(messages['packs.default.hero.iconAlt'])
-
-    await wrapper.unmount()
-  })
-
-  it('applies a random animation class from the configured list', async () => {
-    // Note: With useState, the random value might be persisted from previous tests in the environment.
-    // We check that the applied class is one of the valid options.
-    const validClasses = [
-      'home-hero__icon--fade',
-      'home-hero__icon--scale',
-      'home-hero__icon--pulse',
-    ]
-
-    const wrapper = await mountComponent()
-    const icon = wrapper.find('.home-hero__icon')
-    const classes = icon.classes()
-
-    expect(validClasses.some(c => classes.includes(c))).toBe(true)
-
-    await wrapper.unmount()
-  })
-
   it('renders helper text with linked segments', async () => {
     const wrapper = await mountComponent()
     const helpers = wrapper.findAll('.home-hero__helper')
