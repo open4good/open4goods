@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHRepository;
+import org.open4goods.commons.model.IpQuotaCategory;
 import org.open4goods.services.feedback.config.FeedbackConfiguration;
 import org.open4goods.services.feedback.exception.VotingLimitExceededException;
 import org.open4goods.services.feedback.exception.VotingNotAllowedException;
@@ -45,7 +46,7 @@ public class VoteService {
 
     private final org.open4goods.commons.services.IpQuotaService ipQuotaService;
 
-    private static final String QUOTA_ACTION_VOTE = "VOTE";
+    private static final IpQuotaCategory VOTE_QUOTA_CATEGORY = IpQuotaCategory.FEEDBACK_VOTE;
 
     public VoteService(FeedbackConfiguration config,
                        @org.springframework.beans.factory.annotation.Autowired(required = false) GHRepository repository,
@@ -63,7 +64,7 @@ public class VoteService {
      */
     public boolean userCanVote(String ip) {
         int max = config.getVoting().getMaxVotesPerIpPerDay();
-        return ipQuotaService.isAllowed(QUOTA_ACTION_VOTE, ip, max);
+        return ipQuotaService.isAllowed(VOTE_QUOTA_CATEGORY.actionKey(), ip, max);
     }
 
     /**
@@ -93,13 +94,13 @@ public class VoteService {
 
         // 1) Check usage (quota)
         int max = config.getVoting().getMaxVotesPerIpPerDay();
-        if (!ipQuotaService.isAllowed(QUOTA_ACTION_VOTE, ip, max)) {
+        if (!ipQuotaService.isAllowed(VOTE_QUOTA_CATEGORY.actionKey(), ip, max)) {
             logger.warn("IP {} reached daily vote limit ({})", ip, max);
             throw new VotingLimitExceededException("Maximum " + max + " votes reached today");
         }
         
         // Increment usage
-        int newUsage = ipQuotaService.increment(QUOTA_ACTION_VOTE, ip);
+        int newUsage = ipQuotaService.increment(VOTE_QUOTA_CATEGORY.actionKey(), ip);
 
         // 2) Increment our local total
         AtomicInteger totalCounter = voteCountCache
@@ -125,7 +126,7 @@ public class VoteService {
      */
     public int getRemainingVotes(String ip) {
         int max = config.getVoting().getMaxVotesPerIpPerDay();
-        return ipQuotaService.getRemaining(QUOTA_ACTION_VOTE, ip, max);
+        return ipQuotaService.getRemaining(VOTE_QUOTA_CATEGORY.actionKey(), ip, max);
     }
 
     /**

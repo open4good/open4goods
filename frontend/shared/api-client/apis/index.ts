@@ -14,6 +14,7 @@ export * from './FeedbackApi';
 export * from './OpenDataApi';
 export * from './PartnerApi';
 export * from './ProductApi';
+export * from './QuotaApi';
 export * from './ShareApi';
 export * from './StatsApi';
 export * from './TeamApi';

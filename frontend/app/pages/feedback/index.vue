@@ -190,9 +190,8 @@ import FeedbackOpenSourceSection from '~/components/domains/feedback/FeedbackOpe
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type {
   FeedbackIssueDto,
-  FeedbackRemainingVotesDto,
-  FeedbackVoteEligibilityDto,
   FeedbackSubmissionResponseDto,
+  IpQuotaCategory,
 } from '~~/shared/api-client'
 
 definePageMeta({
@@ -285,21 +284,6 @@ const fetchIssues = async (category: FeedbackCategory) => {
   }
 }
 
-const votesRequestNonce = ref(0)
-interface VotesQuery {
-  cacheBuster?: string
-}
-
-const buildVotesQuery = (): VotesQuery => {
-  const query: VotesQuery = {}
-
-  if (votesRequestNonce.value > 0) {
-    query.cacheBuster = String(votesRequestNonce.value)
-  }
-
-  return query
-}
-
 const ideaIssues = ref<FeedbackIssueDisplay[]>([])
 const bugIssues = ref<FeedbackIssueDisplay[]>([])
 const ideaIssuesLoading = ref(true)
@@ -323,58 +307,21 @@ const loadIssuesForCategory = async (category: FeedbackCategory) => {
   }
 }
 
-const remainingVotesState = ref<FeedbackRemainingVotesDto | null>(null)
-const canVoteState = ref<FeedbackVoteEligibilityDto | null>(null)
-const votesRemainingEndpoint: string = '/api/feedback/votes/remaining'
-const votesEligibilityEndpoint: string = '/api/feedback/votes/can'
+const { getRemaining, recordUsage, refreshQuota } = useIpQuota()
+const feedbackQuotaCategory: IpQuotaCategory = IpQuotaCategory.FeedbackVote
 
-const loadRemainingVotes = async () => {
+const loadFeedbackQuota = async () => {
   if (!import.meta.client) {
     return
   }
 
   try {
-    remainingVotesState.value = await $fetch<FeedbackRemainingVotesDto, string>(
-      votesRemainingEndpoint,
-      {
-        query: buildVotesQuery(),
-        headers: {
-          ...requestHeaders,
-          'cache-control': 'no-cache',
-        },
-      }
-    )
+    await refreshQuota(feedbackQuotaCategory)
   } catch (error) {
     console.warn(
       'Unable to load remaining votes, falling back to unknown state',
       error
     )
-    remainingVotesState.value = {}
-  }
-}
-
-const loadVoteEligibility = async () => {
-  if (!import.meta.client) {
-    return
-  }
-
-  try {
-    canVoteState.value = await $fetch<FeedbackVoteEligibilityDto, string>(
-      votesEligibilityEndpoint,
-      {
-        query: buildVotesQuery(),
-        headers: {
-          ...requestHeaders,
-          'cache-control': 'no-cache',
-        },
-      }
-    )
-  } catch (error) {
-    console.warn(
-      'Unable to determine vote eligibility, assuming voting is allowed',
-      error
-    )
-    canVoteState.value = { canVote: true }
   }
 }
 
@@ -390,10 +337,10 @@ const issueLoadingStates = computed<Record<FeedbackCategory, boolean>>(() => ({
   BUG: bugIssuesLoading.value,
 }))
 
-const remainingVotes = computed(
-  () => remainingVotesState.value?.remainingVotes ?? null
+const remainingVotes = computed(() => getRemaining(feedbackQuotaCategory))
+const canVote = computed(() =>
+  remainingVotes.value === null ? true : remainingVotes.value > 0
 )
-const canVote = computed(() => canVoteState.value?.canVote ?? true)
 
 const voteStatusMessage = computed(() => {
   if (!canVote.value) {
@@ -461,8 +408,7 @@ const extractErrorMessage = (error: unknown): string => {
 }
 
 const refreshVotesState = async () => {
-  votesRequestNonce.value = Date.now()
-  await Promise.allSettled([loadRemainingVotes(), loadVoteEligibility()])
+  await loadFeedbackQuota()
 }
 
 const handleVote = async (
@@ -487,31 +433,7 @@ const handleVote = async (
       votedIssueIds.value = [...votedIssueIds.value, issueId]
     }
 
-    const currentRemainingVotes = remainingVotesState.value?.remainingVotes
-
-    if (typeof currentRemainingVotes === 'number') {
-      const nextRemainingVotes = Math.max(currentRemainingVotes - 1, 0)
-
-      if (!remainingVotesState.value) {
-        remainingVotesState.value = { remainingVotes: nextRemainingVotes }
-      } else {
-        remainingVotesState.value = {
-          ...remainingVotesState.value,
-          remainingVotes: nextRemainingVotes,
-        }
-      }
-
-      if (nextRemainingVotes <= 0) {
-        if (!canVoteState.value) {
-          canVoteState.value = { canVote: false }
-        } else {
-          canVoteState.value = {
-            ...canVoteState.value,
-            canVote: false,
-          }
-        }
-      }
-    }
+    recordUsage(feedbackQuotaCategory, 1)
 
     await loadIssuesForCategory(category)
 
@@ -754,8 +676,7 @@ onMounted(async () => {
   await Promise.allSettled([
     loadIssuesForCategory('IDEA'),
     loadIssuesForCategory('BUG'),
-    loadRemainingVotes(),
-    loadVoteEligibility(),
+    loadFeedbackQuota(),
   ])
 })
 </script>
