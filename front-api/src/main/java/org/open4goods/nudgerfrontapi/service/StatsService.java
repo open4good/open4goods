@@ -81,6 +81,7 @@ public class StatsService {
                 .toList();
 
         Map<String, Long> productsCountByCategory = new LinkedHashMap<>();
+        long productsCountSum = 0L;
         for (VerticalConfig vertical : enabledVerticals) {
             String verticalId = vertical.getId();
             if (verticalId == null || verticalId.isBlank()) {
@@ -88,12 +89,10 @@ public class StatsService {
             }
 
             Long count = productRepository.countMainIndexHavingVertical(verticalId);
-            productsCountByCategory.put(verticalId, count == null ? 0L : count);
+            long safeCount = count == null ? 0L : count;
+            productsCountByCategory.put(verticalId, safeCount);
+            productsCountSum += safeCount;
         }
-
-        long productsCountSum = productsCountByCategory.values().stream()
-                .mapToLong(Long::longValue)
-                .sum();
 
         return new CategoriesStatsDto(
                 Math.toIntExact(enabledVerticals.size()),
