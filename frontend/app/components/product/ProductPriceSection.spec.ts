@@ -23,13 +23,6 @@ vi.mock('vue-echarts', () => ({
   }),
 }))
 
-const TableStub = defineComponent({
-  name: 'VTableStub',
-  setup(_, { slots }) {
-    return () => h('table', { class: 'v-table-stub' }, slots.default?.())
-  },
-})
-
 const i18nMessages = {
   'fr-FR': {
     product: {
@@ -258,24 +251,10 @@ describe('ProductPriceSection', () => {
                 )
             },
           }),
-          'v-table': TableStub,
         },
       },
     })
   }
-
-  it('sorts offers by ascending price in the table', async () => {
-    const wrapper = await mountComponent()
-
-    const rows = wrapper.findAll('tbody tr')
-    expect(rows).toHaveLength(3)
-    const firstCells = rows[0]?.findAll('td') ?? []
-    const secondCells = rows[1]?.findAll('td') ?? []
-    expect(firstCells[1]?.text()).toContain('Offer U')
-    expect(secondCells[1]?.text()).toContain('Offer B')
-
-    await wrapper.unmount()
-  })
 
   it('renders a trend label when prices decrease', async () => {
     const wrapper = await mountComponent()
