@@ -58,14 +58,18 @@
             "helpers": [
               {
                 "icon": "🌿",
-                "label": "Une évaluation écologique et environnementale unique pour {products} dans {categories} catégories",
+                "label": "Une évaluation écologique et environnementale unique pour {products} produits dans {categories} catégories",
                 "segments": [
                   {
                     "text": "Une évaluation écologique",
                     "to": "/impact-score"
                   },
                   {
-                    "text": " et environnementale unique pour {products} dans {categories} catégories"
+                    "text": " et environnementale unique pour {products} produits dans "
+                  },
+                  {
+                    "text": "{categories} catégories",
+                    "to": "/categories"
                   }
                 ]
               },
@@ -232,14 +236,18 @@
         "helpers": [
           {
             "icon": "🌿",
-            "label": "Une évaluation écologique et environnementale unique pour {products} dans {categories} catégories",
+            "label": "Une évaluation écologique et environnementale unique pour {products} produits dans {categories} catégories",
             "segments": [
               {
                 "text": "Une évaluation écologique",
                 "to": "/impact-score"
               },
               {
-                "text": " et environnementale unique pour {products} dans {categories} catégories"
+                "text": " et environnementale unique pour {products} produits dans "
+              },
+              {
+                "text": "{categories} catégories",
+                "to": "/categories"
               }
             ]
           },
