@@ -1,0 +1,29 @@
+key: "TOTAL_VOLUME"
+faIcon: "mdi-cube-outline"
+name:
+  default: "Total volume"
+  fr: "Volume total"
+suffix:
+  default: "L"
+  fr: "L"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "TOTALVOLUME"
+    - "VOLUME UTILE TOTAL"
+    - "CAPACITE NETTE TOTALE"
+    - "CAPACITÉ NETTE TOTALE"
+    - "CAPACITE BRUTE TOTALE"
+    - "CAPACITÉ BRUTE TOTALE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "L"
+    - "L."
+    - "LITRE"
+    - "LITRES"
