@@ -838,7 +838,7 @@
       "breadcrumbDivider": "/",
       "missingBreadcrumbTitle": "Catégorie",
       "nudge": {
-        "cta": "Trouver les bons produits",
+        "cta": "Assistant",
         "subtitle": "Passe directement aux meilleures pistes de cette catégorie avec un accompagnement guidé.",
         "eyebrow": "Assistant intelligent"
       }
