@@ -2486,15 +2486,15 @@
           "readIndicator": {
             "title": "How to read this indicator",
             "higher": {
-              "worst": "The lowest {scoreLabelLower} recorded is {worst}, which corresponds to a 0/20 score.",
-              "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}, worth 20/20.",
-              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, equivalent to {averageOn20}/20.",
+              "worst": "The lowest {scoreLabelLower} recorded is {worst}.",
+              "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}.",
+              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, a pivot score of 10/20.",
               "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}, which converts to {productOn20}/20."
             },
             "lower": {
-              "worst": "The highest {scoreLabelLower} recorded is {worst}, which corresponds to a 0/20 score.",
-              "best": "The lowest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}, worth 20/20.",
-              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, equivalent to {averageOn20}/20.",
+              "worst": "The highest {scoreLabelLower} recorded is {worst}.",
+              "best": "The lowest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}.",
+              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, a pivot score of 10/20.",
               "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}, which converts to {productOn20}/20."
             }
           }
@@ -2504,15 +2504,15 @@
           "readIndicator": {
             "title": "How to read this repairability indicator",
             "higher": {
-              "worst": "The worst repairability index observed is {worst}, which yields a 0/20 score.",
-              "best": "The best repairability index among the {count} {verticalTitle} reaches {best}, worth 20/20.",
-              "average": "On average, the {count} {verticalTitle} with available data score {average}, i.e. {averageOn20}/20.",
+              "worst": "The worst repairability index observed is {worst}.",
+              "best": "The best repairability index among the {count} {verticalTitle} reaches {best}.",
+              "average": "On average, the {count} {verticalTitle} with available data score {average}, a pivot score of 10/20.",
               "product": "{productName}, with a repairability index of {productAbsolute}, earns {productOn20}/20."
             },
             "lower": {
-              "worst": "The highest repairability index recorded is {worst}, which yields a 0/20 score.",
-              "best": "The lowest repairability index among the {count} {verticalTitle} reaches {best}, worth 20/20.",
-              "average": "On average, the {count} {verticalTitle} with available data score {average}, i.e. {averageOn20}/20.",
+              "worst": "The highest repairability index recorded is {worst}.",
+              "best": "The lowest repairability index among the {count} {verticalTitle} reaches {best}.",
+              "average": "On average, the {count} {verticalTitle} with available data score {average}, a pivot score of 10/20.",
               "product": "{productName}, with a repairability index of {productAbsolute}, earns {productOn20}/20."
             }
           }
