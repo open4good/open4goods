@@ -123,46 +123,44 @@
           <!-- Microtable Pricing Layout -->
           <div class="category-product-card-grid__pricing-table">
             <template v-for="badge in offerBadges(product)" :key="badge.key">
-              <div
-                class="category-product-card-grid__pricing-cell"
-                :class="`category-product-card-grid__pricing-cell--${badge.appearance}`"
-              >
-                <div class="category-product-card-grid__pricing-label-group">
-                  <span class="category-product-card-grid__pricing-label">
-                    {{ badge.label }}
-                  </span>
-
-                  <v-tooltip
-                    v-if="badge.trendIcon"
-                    location="top"
-                    open-on-click
+              <v-tooltip location="bottom" open-delay="200">
+                <template #activator="{ props: tooltipProps }">
+                  <div
+                    class="category-product-card-grid__pricing-cell"
+                    :class="`category-product-card-grid__pricing-cell--${badge.appearance}`"
+                    v-bind="tooltipProps"
                   >
-                    <template #activator="{ props: tooltipProps }">
-                      <v-icon
-                        v-bind="tooltipProps"
-                        :icon="badge.trendIcon"
-                        :color="badge.trendColor"
-                        size="14"
-                        class="category-product-card-grid__pricing-trend"
-                      />
-                    </template>
-                    <span>
-                      {{ getTrendDescription(badge.trend, badge.label) }}
+                    <!-- Row Layout: LABEL - PRICE - TREND -->
+                    <span class="category-product-card-grid__pricing-label">
+                      {{ badge.label }}
                     </span>
-                  </v-tooltip>
-                </div>
 
-                <span class="category-product-card-grid__pricing-amount">
-                  {{ badge.price }}
-                </span>
+                    <span class="category-product-card-grid__pricing-amount">
+                      {{ badge.price }}
+                    </span>
 
-                <div
-                  v-if="badge.countLabel"
-                  class="category-product-card-grid__pricing-count"
-                >
-                  {{ badge.countLabel }}
+                    <v-icon
+                      v-if="badge.trendIcon"
+                      :icon="badge.trendIcon"
+                      :color="badge.trendColor"
+                      size="small"
+                      class="category-product-card-grid__pricing-trend"
+                    />
+                  </div>
+                </template>
+
+                <!-- Tooltip Content -->
+                <div class="text-center">
+                  <div v-if="badge.countLabel" class="font-weight-bold mb-1">
+                    {{ badge.countLabel }}
+                  </div>
+                  <div v-else class="font-weight-bold mb-1">1 offre</div>
+
+                  <div v-if="badge.trendDescription" class="text-caption">
+                    {{ badge.trendDescription }}
+                  </div>
                 </div>
-              </div>
+              </v-tooltip>
             </template>
           </div>
 
@@ -375,6 +373,7 @@ type OfferBadge = {
   trendColor?: string
   trend?: ProductPriceTrendDtoTrendEnum
   countLabel?: string
+  trendDescription?: string
 }
 
 const resolveTrendIcon = (
@@ -443,6 +442,10 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         trendColor: resolveTrendColor(newTrend),
         trend: newTrend,
         countLabel: getConditionCountLabel(product, 'new'),
+        trendDescription: getTrendDescription(
+          newTrend,
+          t('category.products.pricing.newOfferLabel')
+        ),
       })
     }
   }
@@ -460,6 +463,10 @@ const offerBadges = (product: ProductDto): OfferBadge[] => {
         trendColor: resolveTrendColor(occasionTrend),
         trend: occasionTrend,
         countLabel: getConditionCountLabel(product, 'occasion'),
+        trendDescription: getTrendDescription(
+          occasionTrend,
+          t('category.products.pricing.occasionOfferLabel')
+        ),
       })
     }
   }
@@ -608,8 +615,8 @@ const getConditionCountLabel = (
   &__body
     display: flex
     flex-direction: column
-    gap: 0.75rem
-    padding: 1rem
+    gap: 0.25rem
+    padding: 0.75rem
     flex-grow: 1
 
   &__header
@@ -660,32 +667,28 @@ const getConditionCountLabel = (
     border: 1px solid rgba(var(--v-theme-border-primary), 0.1)
 
   &__pricing-table
-    display: grid
-    grid-template-columns: 1fr 1fr
+    display: flex
+    flex-direction: column
     gap: 0px
     border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
     border-radius: 8px
     overflow: hidden
     margin-top: auto /* Push to bottom */
-    margin-top: auto /* Push to bottom */
     background: rgba(var(--v-theme-surface-default), 0.6) /* More transparent */
     backdrop-filter: blur(4px)
 
-    /* Only one item? Span full width */
-    > *:only-child
-      grid-column: span 2
-
   &__pricing-cell
     display: flex
-    flex-direction: column
-    align-items: center
-    justify-content: center
-    padding: 0.65rem 0.5rem
-    gap: 0.15rem
+    flex-direction: row
+    align-items: baseline
+    justify-content: flex-start
+    padding: 0.5rem 0.75rem
+    gap: 0.5rem
     transition: background 0.2s
+    cursor: help
 
     &:not(:last-child)
-      border-right: 1px solid rgba(var(--v-theme-border-primary), 0.15)
+      border-bottom: 1px solid rgba(var(--v-theme-border-primary), 0.15)
 
     &--new
       background: transparent
@@ -701,34 +704,23 @@ const getConditionCountLabel = (
       background: transparent
 
   &__pricing-label
-    font-size: 0.65rem
+    font-size: 0.7rem
     text-transform: uppercase
     font-weight: 700
     letter-spacing: 0.05em
     opacity: 0.85
-
-  &__pricing-label-group
-    display: flex
-    align-items: center
-    gap: 0.35rem
-
-  &__pricing-value-group
-    display: flex
-    align-items: center
-    gap: 0.25rem
+    min-width: 4rem /* Align prices if possible */
 
   &__pricing-amount
     font-weight: 700
-    font-size: 0.95rem
+    font-size: 1rem
     color: rgb(var(--v-theme-text-neutral-strong))
+    margin-left: auto /* Push price to right? Or keep left? User said flow */
 
-  .category-product-card-grid__pricing-count
-    font-size: 0.7rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    font-weight: 500
 
   &__pricing-trend
     opacity: 0.9
+    margin-left: 0.25rem
 
   &__meta
     display: flex

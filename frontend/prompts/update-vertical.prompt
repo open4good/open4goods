@@ -1,0 +1,35 @@
+You will work on updating yaml categories config.
+
+As a sample, you will have the sample tv category config : /open4goods/verticals/src/main/resources/verticals/tv.yml
+All verticals inherits the default vertical config : /open4goods/verticals/src/main/resources/verticals/_default.yml
+
+
+You will update the vertical
+
+/verticals/src/main/resources/verticals/tv.yml
+
+- Check for errors, adjust texts if needed (translations in i18n, (the base, correct texts is fr) to be semantically correct with the vertical title)
+
+Attributes génération
+
+Generate or update attributes definitions (reuse existing ones if possible, but you can create new definitions in /verticals/src/main/resources/attributes/*). Only for attributes specific to the category,  and having a correct coverage
+
+
+
+As input data, you will have :
+> The coverage of attributes
+> The sample files
+> Existing attributes  (/open4goods/verticals/src/main/resources/attributes)
+
+
+
+
+
+
+------------- ATTRIBUTES COVERAGE (result of api project, on /{vertical}/attributes/)
+: Availlable on /open4goods/verticals/src/main/resources/verticals/attribute-coverage.txt
+
+
+
+
+Create a plan. Ask for any clarifications or additional data

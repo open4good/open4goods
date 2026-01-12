@@ -56,6 +56,7 @@ public class StatsService {
      * @return DTO describing the category statistics used by the frontend including affiliation partners and OpenData counts.
      */
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
+    	// TOSO : Should use verticalsconfigservice
         VerticalConfig defaultConfig = loadDefaultConfig();
         Resource[] resources = loadVerticalResources();
         AffiliationPartnersStats partnersStats = computeAffiliationPartnersStats();
