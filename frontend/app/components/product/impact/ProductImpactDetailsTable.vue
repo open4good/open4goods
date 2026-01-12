@@ -6,6 +6,7 @@
     <v-data-table
       v-if="hasRows"
       :headers="headers"
+      v-model:expanded="expandedSubscores"
       :items="tableItems"
       :items-per-page="itemsPerPage"
       :row-props="rowProps"
@@ -37,6 +38,29 @@
             <v-icon
               :icon="
                 isGroupExpanded(item.id) ? 'mdi-chevron-up' : 'mdi-chevron-down'
+              "
+              size="18"
+            />
+          </v-btn>
+
+          <v-btn
+            v-else-if="item.rowType === 'subscore'"
+            class="impact-details__toggle"
+            icon
+            density="comfortable"
+            variant="text"
+            :aria-label="
+              expandedSubscores.includes(item.id)
+                ? $t('product.impact.hideDetails')
+                : $t('product.impact.subscoreDetailsToggle')
+            "
+            @click="toggleSubscoreExpansion(item)"
+          >
+            <v-icon
+              :icon="
+                expandedSubscores.includes(item.id)
+                  ? 'mdi-chevron-up'
+                  : 'mdi-chevron-down'
               "
               size="18"
             />
@@ -117,6 +141,23 @@
           <span v-else class="text-caption text-disabled">—</span>
         </div>
       </template>
+
+      <template #expanded-row="{ columns, item }">
+        <tr class="impact-details__expanded-row">
+          <td :colspan="columns.length" class="pa-4 bg-surface-light">
+            <ProductImpactSubscoreCard
+              :score="item"
+              :product-name="productName"
+              :product-brand="productBrand"
+              :product-model="productModel"
+              :product-image="productImage"
+              :vertical-title="verticalTitle"
+              class="mx-auto"
+              style="max-width: 800px"
+            />
+          </td>
+        </tr>
+      </template>
     </v-data-table>
     <p v-else class="impact-details__empty">
       {{ $t('product.impact.noDetailsAvailable') }}
@@ -128,6 +169,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
+import ProductImpactSubscoreCard from './ProductImpactSubscoreCard.vue'
 import type { ScoreView } from './impact-types'
 import {
   buildImpactAggregateAnchorId,
@@ -136,7 +178,18 @@ import {
 
 const props = defineProps<{
   scores: ScoreView[]
+  productName?: string
+  productBrand?: string
+  productModel?: string
+  productImage?: string
+  verticalTitle?: string
 }>()
+
+const productName = computed(() => props.productName ?? '')
+const productBrand = computed(() => props.productBrand ?? '')
+const productModel = computed(() => props.productModel ?? '')
+const productImage = computed(() => props.productImage ?? '')
+const verticalTitle = computed(() => props.verticalTitle ?? '')
 
 type DetailedScore = ScoreView & {
   displayValue: number | null
@@ -191,6 +244,7 @@ const resolveCoefficientValue = (
 
 const { t } = useI18n()
 const expandedGroups = ref<Set<string>>(new Set())
+const expandedSubscores = ref<string[]>([])
 
 const lifecycleLabels = computed<Record<string, string>>(() => ({
   EXTRACTION: t('product.impact.lifecycle.EXTRACTION'),
@@ -270,6 +324,7 @@ const buildTableRow = (
   rowType: TableRow['rowType'],
   parentId?: string
 ): TableRow => ({
+  ...score,
   id: score.id,
   label: score.label,
   attributeValue: formatAttributeValue(score),
@@ -379,12 +434,7 @@ const tableItems = computed<TableRow[]>(() => {
 
   groupedScores.value.groups.forEach(group => {
     rows.push(
-      buildAggregateRow(
-        group.id,
-        group.label,
-        group.aggregate,
-        group.subscores
-      )
+      buildAggregateRow(group.id, group.label, group.aggregate, group.subscores)
     )
 
     if (expanded.has(group.id)) {
@@ -440,6 +490,19 @@ const toggleGroup = (groupId: string) => {
 }
 
 const isGroupExpanded = (groupId: string) => expandedGroups.value.has(groupId)
+
+const toggleSubscoreExpansion = (item: TableRow) => {
+  if (item.rowType !== 'subscore') return
+
+  const id = item.id
+  const index = expandedSubscores.value.indexOf(id)
+
+  if (index === -1) {
+    expandedSubscores.value.push(id)
+  } else {
+    expandedSubscores.value.splice(index, 1)
+  }
+}
 </script>
 
 <style scoped>

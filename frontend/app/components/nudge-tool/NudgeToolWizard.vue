@@ -123,6 +123,32 @@
         >
           {{ $t('nudge-tool.actions.advancedSearch') }}
         </v-btn>
+        <div
+          v-if="categoryNavigationTarget"
+          class="nudge-wizard__reco-count-wrapper my-auto px-2"
+        >
+          <NuxtLink
+            :to="categoryNavigationTarget"
+            :aria-label="cornerSummaryLabel"
+            class="nudge-wizard__reco-count"
+          >
+            {{
+              $t('nudge-tool.steps.recommendations.total', {
+                count: animatedMatches,
+              })
+            }}
+            <v-icon icon="mdi-arrow-right" size="small" class="ms-1" />
+          </NuxtLink>
+        </div>
+        <div v-else class="nudge-wizard__reco-count-wrapper my-auto px-2">
+          <p class="nudge-wizard__reco-count">
+            {{
+              $t('nudge-tool.steps.recommendations.total', {
+                count: animatedMatches,
+              })
+            }}
+          </p>
+        </div>
         <v-tooltip
           v-for="step in progressSteps"
           :key="step.key"
@@ -532,10 +558,7 @@ const steps = computed<WizardStep[]>(() => {
     props: {
       products: recommendations.value,
       popularAttributes: selectedCategory.value?.attributesConfig?.configs,
-      totalCount: totalMatches.value,
       loading: loading.value,
-      categoryLink: categoryNavigationTarget.value,
-      categoryLinkLabel: cornerSummaryLabel.value,
     },
   })
 
@@ -1143,6 +1166,26 @@ const cornerIconDimensions = computed(() => {
 
   &__footer-btn {
     font-weight: 700;
+  }
+
+  &__reco-count-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  &__reco-count {
+    color: rgb(var(--v-theme-text-neutral-secondary));
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.2s;
+    margin: 0;
+
+    &:hover {
+      color: rgb(var(--v-theme-primary));
+      text-decoration: underline;
+    }
   }
 }
 

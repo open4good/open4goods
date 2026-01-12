@@ -42,6 +42,11 @@
           'impact-ecoscore__analysis-details--full': !shouldDisplayRadar,
         }"
         :scores="filteredDetailScores"
+        :product-name="productName"
+        :product-brand="productBrand"
+        :product-model="productModel"
+        :product-image="productImage"
+        :vertical-title="verticalTitle"
       />
     </div>
 
