@@ -389,6 +389,7 @@ const badgeVariant = computed(() => props.badgeVariant)
 
 .impact-score-badge--flat {
   border-color: transparent;
+  background: rgba(var(--v-theme-surface-glass), 0.6);
   box-shadow: none;
 }
 
