@@ -58,17 +58,17 @@ else
     node_version_ok=false
 fi
 
-PNPM_MINIMUM="10.12.1"
+PNPM_TARGET="10.26.0"
 if command -v pnpm >/dev/null 2>&1; then
     PNPM_VERSION=$(pnpm -v)
-    if [[ "$(printf '%s\n' "${PNPM_MINIMUM}" "${PNPM_VERSION}" | sort -V | head -n1)" != "${PNPM_MINIMUM}" ]]; then
-        echo "[WARN] pnpm ${PNPM_VERSION} detected; expected >= ${PNPM_MINIMUM}." \
-             "Run: npm install -g pnpm@${PNPM_MINIMUM}"
+    if [[ "${PNPM_VERSION}" != "${PNPM_TARGET}" ]]; then
+        echo "[WARN] pnpm ${PNPM_VERSION} detected; expected ${PNPM_TARGET}." \
+             "Run: npm install -g pnpm@${PNPM_TARGET}"
     else
-        echo "[OK] pnpm ${PNPM_VERSION} >= ${PNPM_MINIMUM}"
+        echo "[OK] pnpm ${PNPM_VERSION} matches ${PNPM_TARGET}"
     fi
 else
-    echo "[WARN] pnpm missing; install pnpm@${PNPM_MINIMUM}"
+    echo "[WARN] pnpm missing; install pnpm@${PNPM_TARGET}"
 fi
 
 print_header "Environment variables"
