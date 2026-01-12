@@ -1,0 +1,26 @@
+key: "SPIN_CLASS"
+betterIs: "GREATER"
+faIcon: "mdi-alphabetical"
+name:
+  default: "Spin class"
+  fr: "Classe d'essorage"
+filteringType: "TEXT"
+asScore: false
+attributeValuesOrdering: "MAPPED"
+numericMapping:
+  A: 4.0
+  B: 3.0
+  C: 2.0
+  D: 1.0
+  E: 0.0
+synonyms:
+  all:
+    - "SPINCLASS"
+    - "SPINDRYINGCLASS"
+    - "CLASSE D'ESSORAGE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
