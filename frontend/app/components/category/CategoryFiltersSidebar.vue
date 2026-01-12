@@ -23,6 +23,10 @@
       @update:filters="value => emit('update:filters', value)"
     />
 
+    <div v-if="$slots.extra" class="category-page__filters-extra">
+      <slot name="extra" />
+    </div>
+
     <div v-if="showMobileActions" class="category-page__filters-actions">
       <v-btn block color="primary" class="mb-2" @click="emit('apply-mobile')">
         {{ t('category.filters.mobileApply') }}

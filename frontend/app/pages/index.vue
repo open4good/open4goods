@@ -4,11 +4,7 @@ import { usePreferredReducedMotion } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useTheme } from 'vuetify'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import type {
-  AffiliationPartnerDto,
-  BlogPostDto,
-  CategoriesStatsDto,
-} from '~~/shared/api-client'
+import type { BlogPostDto } from '~~/shared/api-client'
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeProblemsSection from '~/components/home/sections/HomeProblemsSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
@@ -50,7 +46,6 @@ const { t, locale, availableLocales } = useI18n()
 const router = useRouter()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
-const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const searchQuery = ref('')
 
@@ -63,62 +58,6 @@ const { categories: rawCategories, fetchCategories } = useCategories()
 const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
 const BLOG_ARTICLES_LIMIT = 4
-
-const { data: categoriesStats } = await useAsyncData<CategoriesStatsDto | null>(
-  'home-categories-stats',
-  () =>
-    $fetch<CategoriesStatsDto>('/api/stats/categories', {
-      headers: requestHeaders,
-    }).catch(() => null),
-  {
-    default: () => null,
-    server: true,
-    lazy: true,
-  }
-)
-
-const { data: affiliationPartners } = await useAsyncData<
-  AffiliationPartnerDto[]
->(
-  'home-affiliation-partners',
-  () =>
-    $fetch<AffiliationPartnerDto[]>('/api/partners/affiliation', {
-      headers: requestHeaders,
-    }).catch(() => []),
-  {
-    default: () => [],
-    server: true,
-    lazy: true,
-  }
-)
-
-const heroPartnersCount = computed(() => {
-  const statsCount = categoriesStats.value?.affiliationPartnersCount
-
-  if (typeof statsCount === 'number' && Number.isFinite(statsCount)) {
-    return statsCount
-  }
-
-  return affiliationPartners.value?.length ?? 0
-})
-
-const openDataMillions = computed(() => {
-  const gtinCount = categoriesStats.value?.gtinOpenDataItemsCount
-  const isbnCount = categoriesStats.value?.isbnOpenDataItemsCount
-  const resolvedGtinCount =
-    typeof gtinCount === 'number' && Number.isFinite(gtinCount) ? gtinCount : 0
-  const resolvedIsbnCount =
-    typeof isbnCount === 'number' && Number.isFinite(isbnCount) ? isbnCount : 0
-  const totalCount = resolvedGtinCount + resolvedIsbnCount
-
-  if (totalCount <= 0) {
-    return null
-  }
-
-  const roundedMillions = Math.round(totalCount / 1_000_000)
-
-  return roundedMillions > 0 ? roundedMillions : null
-})
 
 const seasonalEventPack = useSeasonalEventPack()
 const theme = useTheme()
@@ -774,16 +713,8 @@ useHead(() => ({
     />
     <div class="home-page">
       <HomeHeroSection
-        v-model:search-query="searchQuery"
         class="d-none d-md-block"
-        :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-        :verticals="rawCategories"
-        :partners-count="heroPartnersCount"
-        :open-data-millions="openDataMillions"
         hero-background-i18n-key="hero.background"
-        @submit="handleSearchSubmit"
-        @select-category="handleCategorySuggestion"
-        @select-product="handleProductSuggestion"
       />
       <div class="home-page__sections">
         <ParallaxWidget

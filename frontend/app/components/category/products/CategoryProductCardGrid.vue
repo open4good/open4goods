@@ -503,7 +503,7 @@ const getConditionCountLabel = (
   }
 
   if (count <= 0) return undefined
-  return translatePlural('category.products.offersCount', count)
+  return translatePlural('category.products.offerCount', count, { count })
 }
 </script>
 

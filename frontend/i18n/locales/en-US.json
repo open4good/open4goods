@@ -808,7 +808,7 @@
       "ecoscore": {
         "title": "Discover the Impact Score",
         "description": "Understand how the eco-score is calculated for {category}",
-        "cta": "Explore the methodology",
+        "cta": "Methodology {category}",
         "ariaLabel": "Open the Eco-score guide"
       }
     },
