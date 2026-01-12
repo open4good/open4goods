@@ -28,6 +28,7 @@
                   mode="badge"
                   badge-layout="stacked"
                   badge-variant="corner"
+                  flat
                 />
                 <span v-else class="product-hero__corner-fallback">
                   {{ t('category.products.notRated') }}

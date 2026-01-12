@@ -35,6 +35,7 @@
               mode="badge"
               badge-layout="stacked"
               badge-variant="corner"
+              flat
             />
             <span v-else class="product-tile-card__corner-fallback">
               {{ notRatedLabel }}
@@ -195,6 +196,7 @@
                 mode="badge"
                 badge-layout="stacked"
                 badge-variant="corner"
+                flat
               />
 
               <span v-else class="product-tile-card__corner-fallback">

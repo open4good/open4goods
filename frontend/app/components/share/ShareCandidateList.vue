@@ -39,12 +39,14 @@
             :score="candidate.impactScore"
             size="small"
             show-value
+            flat
           />
           <ImpactScore
             v-else-if="candidate.ecoScore != null"
             :score="candidate.ecoScore"
             size="small"
             show-value
+            flat
           />
 
           <v-chip v-if="candidate.confidence != null" size="small" class="ml-2">
