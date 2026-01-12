@@ -194,7 +194,7 @@
         <!-- Default Global Search Results (Groups) -->
         <template v-else>
           <div
-            v-if="!displayGroups.length && !pending"
+            v-if="!limitedGroups.length && !pending"
             class="search-page__empty"
           >
             <h2 class="search-page__empty-title">
@@ -236,7 +236,7 @@
             </div>
 
             <SearchResultGroup
-              v-for="group in displayGroups"
+              v-for="group in limitedGroups"
               :key="group.key"
               :title="group.title"
               :count-label="group.countLabel"
@@ -282,8 +282,11 @@ import CategoryProductCardGrid from '~/components/category/products/CategoryProd
 import CategoryFilterList from '~/components/category/filters/CategoryFilterList.vue'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { useAnalytics } from '~/composables/useAnalytics'
+import { buildCategoryHash } from '~/utils/_category-filter-state'
 
 const MIN_QUERY_LENGTH = 2
+const DEFAULT_GLOBAL_RESULTS_LIMIT = 20
+const SEMANTIC_REDIRECT_THRESHOLD = 0.9
 
 definePageMeta({
   ssr: true,
@@ -678,8 +681,33 @@ const displayGroups = computed(() =>
   primaryGroups.value.length ? primaryGroups.value : fallbackGroups.value
 )
 
+const limitedGroups = computed(() => {
+  let remaining = DEFAULT_GLOBAL_RESULTS_LIMIT
+
+  return displayGroups.value
+    .map(group => {
+      if (remaining <= 0) {
+        return null
+      }
+
+      const limitedProducts = group.products.slice(0, remaining)
+      remaining -= limitedProducts.length
+
+      if (!limitedProducts.length) {
+        return null
+      }
+
+      return {
+        ...group,
+        products: limitedProducts,
+        countLabel: buildGroupCountLabel(limitedProducts.length),
+      }
+    })
+    .filter((group): group is SearchGroup => Boolean(group))
+})
+
 const totalResults = computed(() =>
-  displayGroups.value.reduce((sum, group) => sum + group.products.length, 0)
+  limitedGroups.value.reduce((sum, group) => sum + group.products.length, 0)
 )
 
 const resultsCountLabel = computed(() =>
@@ -719,6 +747,106 @@ const nextSearchMode = computed(() => {
 
 const nextSearchModeLabel = computed(() =>
   formatSearchModeLabel(nextSearchMode.value)
+)
+
+const resolveVerticalCounts = (response: GlobalSearchResponseDto | null) => {
+  if (!response) {
+    return new Map<string, number>()
+  }
+
+  const counts = new Map<string, number>()
+  const verticalGroups = response.verticalGroups ?? []
+
+  if (verticalGroups.length) {
+    verticalGroups.forEach(group => {
+      const verticalId = group.verticalId ?? ''
+      if (!verticalId) {
+        return
+      }
+
+      const count = group.results?.length ?? 0
+      if (count > 0) {
+        counts.set(verticalId, (counts.get(verticalId) ?? 0) + count)
+      }
+    })
+  } else {
+    response.fallbackResults?.forEach(result => {
+      const verticalId = result.product?.base?.vertical ?? ''
+      if (!verticalId) {
+        return
+      }
+
+      counts.set(verticalId, (counts.get(verticalId) ?? 0) + 1)
+    })
+  }
+
+  return counts
+}
+
+const semanticRedirectTarget = computed(() => {
+  if (activeSearchMode.value !== 'semantic') {
+    return null
+  }
+
+  const counts = resolveVerticalCounts(data.value ?? null)
+  if (!counts.size) {
+    return null
+  }
+
+  let topVertical: { id: string; count: number } | null = null
+  let total = 0
+
+  counts.forEach((count, id) => {
+    total += count
+    if (!topVertical || count > topVertical.count) {
+      topVertical = { id, count }
+    }
+  })
+
+  if (!topVertical || total === 0) {
+    return null
+  }
+
+  const ratio = topVertical.count / total
+  if (ratio < SEMANTIC_REDIRECT_THRESHOLD) {
+    return null
+  }
+
+  return topVertical.id
+})
+
+const lastSemanticRedirect = ref<string | null>(null)
+
+watch(
+  [semanticRedirectTarget, normalizedQuery, isFiltered],
+  ([target, query, filtered]) => {
+    if (!import.meta.client) {
+      return
+    }
+
+    if (!target || filtered || !query) {
+      return
+    }
+
+    const vertical = verticalById.value.get(target) ?? null
+    const verticalUrl = normalizeVerticalHomeUrl(vertical?.verticalHomeUrl)
+
+    if (!verticalUrl) {
+      return
+    }
+
+    const redirectKey = `${target}::${query}`
+    if (lastSemanticRedirect.value === redirectKey) {
+      return
+    }
+
+    lastSemanticRedirect.value = redirectKey
+
+    router.replace({
+      path: verticalUrl,
+      hash: buildCategoryHash({ search: query }),
+    })
+  }
 )
 
 const handleSearchSubmit = () => {
