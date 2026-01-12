@@ -92,7 +92,7 @@ services:
 # Frontend (SSR)
 ###################################################################
   frontend-ssr:
-    image: node:20
+    image: node:24
     container_name: frontend-ssr
     working_dir: /usr/src/app
     volumes:
