@@ -111,7 +111,11 @@
               {{ lifecycleLabels[stage] ?? stage }}
             </v-chip>
           </template>
-          <span v-else class="impact-details__coefficient-empty">—</span>
+          <span
+            v-else-if="item.rowType !== 'aggregate'"
+            class="impact-details__coefficient-empty"
+            >—</span
+          >
         </div>
       </template>
 
@@ -417,7 +421,7 @@ const buildAggregateRow = (
   return {
     id: aggregateId,
     label,
-    attributeValue: '—',
+    attributeValue: '',
     attributeSourcing: null,
     displayValue: displayValue,
     coefficient: aggregateScore?.coefficient ?? null,

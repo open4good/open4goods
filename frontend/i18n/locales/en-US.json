@@ -2530,7 +2530,6 @@
           }
         }
       },
-      "primaryScoreLabel": "Overall impact",
       "radarAria": "Impact radar chart for {product}",
       "radarControls": {
         "ariaLabel": "Toggle radar comparison series",
@@ -2563,7 +2562,6 @@
         "DURABILITY": "Durability",
         "ESG": "ESG performance"
       },
-      "showDetails": "Show detailed indicators",
       "hideDetails": "Hide detailed indicators",
       "title": "Environmental impact"
     },
@@ -2714,11 +2712,41 @@
     },
     "menu": {
       "closeLabel": "Close menu",
+      "openLabel": "Open menu",
       "items": {
         "blog": "Blog",
         "contact": "Community",
         "impactScore": "Impact Score",
         "products": "Products"
+      },
+      "account": {
+        "defaultLabel": "Account",
+        "guestLabel": "Private session",
+        "noRoles": "No assigned roles",
+        "clearCache": "Clear cache",
+        "clearingCache": "Clearing cache…",
+        "logout": "Logout",
+        "privacy": {
+          "title": "Privacy-first session",
+          "subtitle": "We keep Nudger transparent: you decide what stays on your device.",
+          "ip": {
+            "title": "Your IP address",
+            "description": "We only use it for technical and security needs on our servers.",
+            "unavailable": "Unavailable"
+          },
+          "cookies": {
+            "title": "Cookies on this device",
+            "description": "Stored keys: {count}. Clear them anytime to reset your session.",
+            "empty": "No cookies stored yet.",
+            "resetCta": "Reset cookies"
+          },
+          "storage": {
+            "title": "Local storage",
+            "description": "Stored keys: {count}. These remain only in your browser.",
+            "empty": "No local storage entries yet.",
+            "resetCta": "Reset local storage"
+          }
+        }
       },
       "productsMenu": {
         "title": "Our products",

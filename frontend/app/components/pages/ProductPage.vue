@@ -56,7 +56,6 @@
           <ProductImpactSection
             :scores="impactScores"
             :radar-data="radarData"
-            :loading="loadingAggregations"
             :product-name="productTitle"
             :product-brand="productBrand"
             :product-model="productModel"

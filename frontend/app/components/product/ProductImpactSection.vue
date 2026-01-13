@@ -18,8 +18,6 @@
         :radar-axes="radarAxes"
         :chart-series="chartSeries"
         :product-name="productName"
-        :loading="loading"
-        :secondary-scores="secondaryScores"
         :product-brand="productBrand"
         :product-model="productModel"
         :product-image="productImage"
@@ -92,10 +90,6 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
   verticalHomeUrl: {
     type: String,
     default: '',
@@ -121,7 +115,6 @@ const subtitleParams = toRef(props, 'subtitleParams')
 const { t } = useI18n()
 
 const primaryScore = computed(() => props.scores[0] ?? null)
-const secondaryScores = computed(() => props.scores.slice(1))
 const detailScores = computed(() =>
   props.scores.filter(score => score.id?.toUpperCase() !== 'ECOSCORE')
 )

@@ -2546,7 +2546,6 @@
           }
         }
       },
-      "primaryScoreLabel": "Score global",
       "radarAria": "Radar des scores pour {product}",
       "radarControls": {
         "ariaLabel": "Afficher ou masquer les produits à comparer sur le radar",
@@ -2579,7 +2578,6 @@
         "DURABILITY": "Durabilité",
         "ESG": "Performance ESG"
       },
-      "showDetails": "Afficher les indicateurs détaillés",
       "hideDetails": "Masquer les indicateurs détaillés",
       "title": "Impact Score"
     },
@@ -2730,11 +2728,41 @@
       "ariaLabel": "Menu principal",
       "mobileAriaLabel": "Menu mobile",
       "closeLabel": "Fermer le menu",
+      "openLabel": "Ouvrir le menu",
       "items": {
         "blog": "Blog",
         "contact": "Communauté",
         "impactScore": "Impact Score",
         "products": "Les produits"
+      },
+      "account": {
+        "defaultLabel": "Compte",
+        "guestLabel": "Session privée",
+        "noRoles": "Aucun rôle attribué",
+        "clearCache": "Vider le cache",
+        "clearingCache": "Nettoyage du cache…",
+        "logout": "Se déconnecter",
+        "privacy": {
+          "title": "Session respectueuse de la vie privée",
+          "subtitle": "Nudger reste transparent : vous gardez le contrôle sur vos données.",
+          "ip": {
+            "title": "Votre adresse IP",
+            "description": "Nous l'utilisons uniquement pour des besoins techniques et de sécurité.",
+            "unavailable": "Indisponible"
+          },
+          "cookies": {
+            "title": "Cookies sur cet appareil",
+            "description": "Clés enregistrées : {count}. Vous pouvez les effacer à tout moment.",
+            "empty": "Aucun cookie enregistré pour le moment.",
+            "resetCta": "Réinitialiser les cookies"
+          },
+          "storage": {
+            "title": "Stockage local",
+            "description": "Clés enregistrées : {count}. Elles restent uniquement dans votre navigateur.",
+            "empty": "Aucune entrée de stockage local pour le moment.",
+            "resetCta": "Réinitialiser le stockage local"
+          }
+        }
       },
       "productsMenu": {
         "title": "Nos produits",

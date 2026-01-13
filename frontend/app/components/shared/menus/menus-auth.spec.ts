@@ -350,7 +350,7 @@ describe('Shared menu authentication controls', () => {
     delete (globalThis as { $fetch?: unknown }).$fetch
   })
 
-  it('does not render account controls when logged out', async () => {
+  it('shows the privacy panel when logged out', async () => {
     const heroWrapper = await mountSuspended(TheHeroMenu, heroMountOptions)
     const mobileWrapper = await mountSuspended(
       TheMobileMenu,
@@ -359,10 +359,16 @@ describe('Shared menu authentication controls', () => {
 
     expect(
       heroWrapper.find('[data-testid="hero-account-menu-activator"]').exists()
-    ).toBe(false)
+    ).toBe(true)
+    expect(
+      heroWrapper.find('[data-testid="account-privacy-card"]').exists()
+    ).toBe(true)
     expect(mobileWrapper.find('[data-testid="mobile-logout"]').exists()).toBe(
       false
     )
+    expect(
+      mobileWrapper.find('[data-testid="account-privacy-card"]').exists()
+    ).toBe(true)
     expect(
       mobileWrapper.find('[data-testid="mobile-clear-cache"]').exists()
     ).toBe(false)
