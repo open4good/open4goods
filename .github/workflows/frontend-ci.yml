@@ -40,7 +40,7 @@ jobs:
           SOURCE: "frontend/.output"
           REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/bin/latest/frontend-ssr"
+          TARGET: "/opt/open4goods/latest/frontend-ssr"
 
       - name: Publish frontend
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'

@@ -1,4 +1,4 @@
-import gainImageFallback from '~/assets/homepage/gain/nudger-screaming.webp'
+const gainImageFallback = '/homepage/gain/nudger-screaming.webp'
 
 const painImages = Object.values(
   import.meta.glob('~/assets/homepage/pain/*.{png,jpg,jpeg,webp,svg}', {

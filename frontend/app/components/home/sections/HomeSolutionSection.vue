@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import solutionImageSrc from '~/assets/homepage/gain/nudger-screaming.webp'
+const solutionImageSrc = '/homepage/gain/nudger-screaming.webp'
 
 type SolutionBenefit = {
   emoji: string

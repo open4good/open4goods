@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import gainImageSrc from '~/assets/homepage/gain/nudger-screaming.webp'
+const gainImageSrc = '/homepage/gain/nudger-screaming.webp'
 import painImageSrc from '~/assets/homepage/pain/nudger-problem.webp'
 
 defineOptions({ inheritAttrs: false })
@@ -41,9 +41,11 @@ const fallbackImage = computed(() => {
 })
 const resolvedImage = computed(() => props.image ?? fallbackImage.value)
 const resolvedImageClass = computed(() =>
-  props.image ? null : props.visualPosition === 'right'
-    ? 'home-split__image--gain'
-    : 'home-split__image--pain'
+  props.image
+    ? null
+    : props.visualPosition === 'right'
+      ? 'home-split__image--gain'
+      : 'home-split__image--pain'
 )
 const isLocalAsset = computed(() =>
   Boolean(resolvedImage.value?.src?.startsWith('/'))
@@ -109,7 +111,9 @@ const sectionClasses = computed(() => [
                   :src="resolvedImage.src"
                   :alt="resolvedImage.alt"
                   :class="['home-split__image', resolvedImageClass]"
-                  :sizes="resolvedImage.sizes ?? '(min-width: 960px) 320px, 70vw'"
+                  :sizes="
+                    resolvedImage.sizes ?? '(min-width: 960px) 320px, 70vw'
+                  "
                   :loading="resolvedImage.loading ?? 'lazy'"
                   :width="resolvedImage.width"
                   :height="resolvedImage.height"
