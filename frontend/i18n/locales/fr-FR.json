@@ -2878,6 +2878,11 @@
         "activate": "Plus simple. Plus gros.",
         "reset": "Désactiver le mode accessible"
       },
+      "readingMode": {
+        "label": "Police dyslexie",
+        "shortLabel": "ABC",
+        "ariaLabel": "Activer la police dyslexie"
+      },
       "themeToggle": "Changer de thème",
       "title": "Menu"
     },

@@ -2,6 +2,7 @@
 
 $font-family-primary: 'Hanken Grotesk', sans-serif
 $font-family-signature: 'Hanken Grotesk', sans-serif
+$font-family-dyslexic: 'OpenDyslexic', 'Hanken Grotesk', sans-serif
 
 $font-weights: (
   regular: 400,
@@ -18,15 +19,38 @@ $font-weights: (
 @include font-face('Hanken Grotesk', map.get($font-weights, 'regular'), normal, 'HankenGrotesk-Regular')
 @include font-face('Hanken Grotesk', map.get($font-weights, 'regular'), italic, 'HankenGrotesk-Italic')
 
+@font-face
+  font-family: 'OpenDyslexic'
+  font-style: normal
+  font-weight: 400
+  font-display: swap
+  src: url('/fonts/OpenDyslexic/OpenDyslexic-Regular.woff2') format('woff2')
+
+@font-face
+  font-family: 'OpenDyslexic'
+  font-style: normal
+  font-weight: 700
+  font-display: swap
+  src: url('/fonts/OpenDyslexic/OpenDyslexic-Bold.woff2') format('woff2')
+
 :root
-  --font-family-base: #{$font-family-primary}
+  --app-font-family: #{$font-family-primary}
+  --font-family-base: var(--app-font-family)
   --font-family-signature: #{$font-family-signature}
 
 .v-theme--light
-  --font-family-base: #{$font-family-primary}
+  --app-font-family: #{$font-family-primary}
+
+html.is-dyslexic
+  --app-font-family: #{$font-family-dyslexic}
+  --font-family-base: #{$font-family-dyslexic}
+  --font-family-signature: #{$font-family-dyslexic}
 
 html, body
-  font-family: var(--font-family-base)
+  font-family: var(--app-font-family)
+
+html body
+  font-family: var(--app-font-family) !important
 
 .v-application
-  font-family: var(--font-family-base) !important
+  font-family: var(--app-font-family) !important
