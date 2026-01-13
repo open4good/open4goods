@@ -89,9 +89,6 @@
               class="product-attributes__gtin-image"
               contain
             />
-            <figcaption class="product-attributes__gtin-caption">
-              {{ $t('product.attributes.main.identity.gtinLabel') }}
-            </figcaption>
           </figure>
         </v-card>
 
@@ -1259,9 +1256,6 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 }
 
 .product-attributes__gtin-image {
-  border-radius: 16px;
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6);
-  background: rgb(var(--v-theme-surface-primary-080));
   width: min(200px, 100%);
   max-width: 200px;
   max-height: 80px;

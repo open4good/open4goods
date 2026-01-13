@@ -961,152 +961,6 @@ const handleScannerDecode = (rawValue: string | null) => {
 }
 </script>
 
-    cursor: text
-
-  :deep(.v-field__field)
-    cursor: text
-
-  :deep(.v-field__prepend-inner .v-icon)
-    color: rgba(var(--v-theme-text-neutral-secondary), 0.5)
-
-  :deep(input)
-    color: rgb(var(--v-theme-text-neutral-strong))
-    cursor: text
-
-  :deep(.v-overlay__content)
-    border-radius: 1rem
-    overflow: hidden
-
-  &--active :deep(.v-field)
-    background-color: rgba(var(--v-theme-surface-default), 0.98)
-    transform: translateY(-2px)
-    box-shadow: 0 4px 16px rgba(var(--v-theme-shadow-primary-400), 0.12)
-
-.search-suggest-field__voice-button,
-.search-suggest-field__scanner-button
-  min-width: auto
-  margin-inline-start: 0.35rem
-  color: rgb(var(--v-theme-primary))
-
-  :deep(.v-btn__overlay)
-    display: none
-
-.search-suggest-field__scanner-dialog
-  backdrop-filter: blur(4px)
-
-.search-suggest-field__scanner-card
-  height: 100%
-  display: flex
-  flex-direction: column
-  background-color: rgba(var(--v-theme-surface-default), 0.98)
-
-.search-suggest-field__scanner-header
-  display: flex
-  align-items: center
-  justify-content: space-between
-  padding: 0.75rem 1rem
-  border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
-
-.search-suggest-field__scanner-title
-  margin: 0
-  font-size: 1rem
-  font-weight: 600
-  color: rgb(var(--v-theme-text-neutral-strong))
-
-.search-suggest-field__scanner-body
-  flex: 1
-  display: flex
-  flex-direction: column
-  gap: 1rem
-  padding: 1rem
-
-.search-suggest-field__scanner-stream
-  flex: 1
-  border-radius: 1rem
-  overflow: hidden
-  background-color: rgb(7, 12, 24)
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.45)
-
-.search-suggest-field__scanner-helper
-  margin: 0
-  text-align: center
-  font-size: 0.9rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-
-.search-suggest-field__scanner-loading
-  margin: 0
-  text-align: center
-  font-size: 0.95rem
-  font-weight: 600
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
-
-.search-suggest-field__entry
-  display: flex
-  flex-direction: column
-
-.search-suggest-field__section
-  margin: 0
-  padding: 0.75rem 1rem 0.25rem
-  font-size: 0.9rem
-  font-weight: 600
-  color: rgba(var(--v-theme-text-neutral-strong), 0.72)
-  text-transform: uppercase
-  letter-spacing: 0.08em
-
-  &--compact
-    padding-top: 0.5rem
-
-.search-suggest-field__item
-  border-radius: 0.9rem
-  margin: 0 0.5rem
-  transition: background-color 0.2s ease, transform 0.2s ease
-
-  &:hover,
-  &:focus-visible
-    background-color: rgba(var(--v-theme-surface-primary-080), 0.85)
-    transform: translateY(-1px)
-
-  :deep(.v-list-item__overlay)
-    display: none
-
-.search-suggest-field__item--category
-  padding-block: 0.9rem
-
-.search-suggest-field__item--product
-  padding-block: 0.6rem
-
-.search-suggest-field__avatar
-  background-color: rgba(var(--v-theme-surface-glass), 0.8)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
-
-.search-suggest-field__title
-  font-weight: 600
-  font-size: 1.05rem
-  color: rgb(var(--v-theme-text-neutral-strong))
-
-.search-suggest-field__product-title
-  display: flex
-  flex-direction: column
-  font-size: 0.95rem
-  font-weight: 600
-  color: rgb(var(--v-theme-text-neutral-strong))
-
-.search-suggest-field__impact
-  margin-inline-start: 0.5rem
-
-.search-suggest-field__empty
-  padding: 1rem 1.25rem
-  text-align: center
-  color: rgb(var(--v-theme-text-neutral-secondary))
-
-.search-suggest-field__empty-text
-  margin: 0
-  font-size: 0.9rem
-
-  &--error
-    color: rgb(var(--v-theme-error))
-</style>
-
 <style lang="css">
 .search-suggest-field__wrapper .v-autocomplete__content {
   overflow-y: auto !important;
@@ -1118,7 +972,8 @@ const handleScannerDecode = (rawValue: string | null) => {
   width: 6px;
 }
 
-.search-suggest-field__wrapper .v-autocomplete__content::-webkit-scrollbar-thumb {
+.search-suggest-field__wrapper
+  .v-autocomplete__content::-webkit-scrollbar-thumb {
   background-color: rgba(var(--v-theme-on-surface), 0.3);
   border-radius: 4px;
 }
@@ -1263,3 +1118,4 @@ const handleScannerDecode = (rawValue: string | null) => {
 
   &--error
     color: rgb(var(--v-theme-error))
+</style>
