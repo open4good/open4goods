@@ -16,7 +16,8 @@ scoreTitle:
 scoreDescription:
   fr: "La classe énergétique du téléviseur en mode SDR"
 scoreUtility:
-  fr: "Ce score illustre l’efficacité énergétique en mode SDR, phase la plus fréquente d’usage d’un téléviseur, et oriente vers des modèles moins énergivores pendant toute leur durée de vie."
+  fr: "Résume l’efficacité énergétique en mode SDR, le plus utilisé, pour comparer les modèles et limiter la consommation sur la durée."
+  en: "Summarises SDR energy efficiency, the most common mode, to compare models quickly and reduce lifetime electricity use."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:

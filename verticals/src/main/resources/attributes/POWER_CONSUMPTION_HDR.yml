@@ -20,6 +20,7 @@ scoreDescription:
   fr: "La consommation électrique du téléviseur en mode HDR (haute définition)"
 scoreUtility:
   fr: "Prend en compte l’énergie dépensée dans le mode HDR plus exigeant, important pour les usages intensifs."
+  en: "Captures energy used in demanding HDR mode, which matters for heavy viewing and higher brightness peaks."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:

@@ -436,11 +436,15 @@ const availableImpactCriteriaMap = computed(() => {
       map.set(normalizedKey, {
         title: attribute?.scoreTitle ?? attribute?.name ?? normalizedKey,
         description: attribute?.scoreDescription ?? null,
+        utility: attribute?.scoreUtility ?? null,
       })
     }
 
     return map
-  }, new Map<string, { title: string; description: string | null }>())
+  }, new Map<
+    string,
+    { title: string; description: string | null; utility: string | null }
+  >())
 })
 
 if (categorySlug) {
@@ -1125,7 +1129,7 @@ const impactScores = computed(() => {
       unit: attributeConfig?.unit ?? attributeConfig?.suffix ?? null,
       aggregates,
       betterIs: attributeConfig?.betterIs ?? null,
-      importanceDescription: criterion?.description ?? null,
+      importanceDescription: criterion?.utility ?? null,
     }
   })
 })

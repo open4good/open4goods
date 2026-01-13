@@ -20,6 +20,7 @@ scoreDescription:
   fr: "Durée de garantie du produit"
 scoreUtility:
   fr: "Une garantie longue encourage la durabilité en incitant les fabricants à concevoir des produits plus fiables et réparables."
+  en: "Longer warranties encourage durable design, repairs, and fewer early replacements."
 participateInScores:
   - DURABILITY
 participateInACV:

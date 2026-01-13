@@ -12,6 +12,7 @@ scoreDescription:
   fr: "La classe énergétique"
 scoreUtility:
   fr: "Offre un repère immédiat sur l’efficacité globale de l’appareil pendant son utilisation quotidienne."
+  en: "Provides a quick signal of overall energy efficiency during daily use."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:
