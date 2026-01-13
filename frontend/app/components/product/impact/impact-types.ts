@@ -11,6 +11,7 @@ export type ScoreAbsoluteStats = {
   avg?: number | null
   count?: number | null
   value?: number | null
+  stdDev?: number | null
 }
 
 export type ScoreView = {

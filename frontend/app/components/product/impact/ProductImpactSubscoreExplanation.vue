@@ -320,6 +320,8 @@ const readIndicatorParams = computed(() => ({
   productOn20: productOn20Value.value,
   count: populationValue.value?.formatted,
   ranking: rankingValue.value,
+  unit: props.score.unit ?? '',
+  sigma: formatNumber(absoluteStats.value?.stdDev),
 }))
 
 const readIndicatorTitle = computed(() =>
@@ -344,6 +346,10 @@ const readIndicatorParagraphs = computed(() => {
 
   if (productAbsoluteValue.value && productOn20Value.value) {
     paragraphs.push(resolveReadIndicatorTranslation('product', params))
+  }
+
+  if (absoluteStats.value?.stdDev != null && absoluteStats.value.avg != null) {
+    paragraphs.push(resolveReadIndicatorTranslation('distribution', params))
   }
 
   return paragraphs.filter(paragraph => paragraph?.toString().trim().length)

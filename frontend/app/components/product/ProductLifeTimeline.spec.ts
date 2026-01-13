@@ -148,7 +148,7 @@ describe('ProductLifeTimeline', () => {
     const wrapper = await mountComponent(buildTimeline())
 
     const monthLabels = wrapper
-      .findAll('.product-life-timeline__event-month')
+      .findAll('.product-life-timeline__month-label')
       .map(node => node.text())
     const titles = wrapper
       .findAll('.product-life-timeline__event-title')

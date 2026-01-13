@@ -1587,6 +1587,7 @@ public class ProductMappingService {
                 cardinality.getAvg(),
                 cardinality.getCount(),
                 cardinality.getSum(),
+                cardinality.getStdDev(),
                 cardinality.getValue());
     }
 

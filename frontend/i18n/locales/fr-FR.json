@@ -2519,16 +2519,18 @@
           "readIndicator": {
             "title": "Comment lire cet indicateur",
             "higher": {
-              "worst": "Le plus faible {scoreLabelLower} observé est de {worst}.",
-              "best": "Le meilleur {scoreLabelLower} constaté parmi les {count} {verticalTitle} atteint {best}.",
-              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}, note pivot de 10/20.",
-              "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}, obtient la note de {productOn20}/20."
+              "worst": "Le plus faible {scoreLabelLower} observé est de {worst}{unit}.",
+              "best": "Le meilleur {scoreLabelLower} constaté parmi les {count} {verticalTitle} atteint {best}{unit}.",
+              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}{unit}.",
+              "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}{unit}, obtient la note de {productOn20}/20.",
+              "distribution": "La notation utilise l'écart-type ({sigma}{unit}) pour s'assurer que les valeurs extrêmes n'écrasent pas les différences entre produits courants."
             },
             "lower": {
-              "worst": "Le {scoreLabelLower} le plus élevé observé est de {worst}.",
-              "best": "Le {scoreLabelLower} le plus faible constaté parmi les {count} {verticalTitle} atteint {best}.",
-              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}, note pivot de 10/20.",
-              "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}, obtient la note de {productOn20}/20."
+              "worst": "Le {scoreLabelLower} le plus élevé observé est de {worst}{unit}.",
+              "best": "Le {scoreLabelLower} le plus faible constaté parmi les {count} {verticalTitle} atteint {best}{unit}.",
+              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}{unit}.",
+              "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}{unit}, obtient la note de {productOn20}/20.",
+              "distribution": "La notation utilise l'écart-type ({sigma}{unit}) pour s'assurer que les valeurs extrêmes n'écrasent pas les différences entre produits courants."
             }
           }
         },

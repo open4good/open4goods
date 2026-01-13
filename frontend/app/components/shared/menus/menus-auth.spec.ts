@@ -367,7 +367,7 @@ describe('Shared menu authentication controls', () => {
       false
     )
     expect(
-      mobileWrapper.find('[data-testid="account-privacy-card"]').exists()
+      mobileWrapper.find('[data-testid="mobile-privacy-card"]').exists()
     ).toBe(true)
     expect(
       mobileWrapper.find('[data-testid="mobile-clear-cache"]').exists()
@@ -515,9 +515,7 @@ describe('Shared menu authentication controls', () => {
   it('renders theme toggles and synchronises the stored preference', async () => {
     const heroWrapper = await mountSuspended(TheHeroMenu)
 
-    await heroWrapper
-      .get('.accessibility-menu__activator')
-      .trigger('click')
+    await heroWrapper.get('.accessibility-menu__activator').trigger('click')
     await flushPromises()
 
     const heroToggle = document.body.querySelector(

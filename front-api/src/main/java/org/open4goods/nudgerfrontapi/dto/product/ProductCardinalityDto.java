@@ -16,6 +16,8 @@ public record ProductCardinalityDto(
         Integer count,
         @Schema(description = "Sum of the values")
         Double sum,
+        @Schema(description = "Standard deviation of the distribution")
+        Double stdDev,
         @Schema(description = "Current value")
         Double value
 ) {

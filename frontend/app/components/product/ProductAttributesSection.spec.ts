@@ -538,6 +538,13 @@ describe('ProductAttributesSection', () => {
 
     const input = wrapper.find('input.v-text-field-stub__input')
     await input.setValue('Power')
+
+    // Switch to cards mode as cards are expected
+    const gridBtn = wrapper
+      .findAll('.v-btn-stub')
+      .find(b => b.html().includes('mdi-view-grid'))
+    if (gridBtn) await gridBtn.trigger('click')
+
     await flushPromises()
 
     const cards = wrapper.findAll('.product-attributes__detail-card')
@@ -574,7 +581,9 @@ describe('ProductAttributesSection', () => {
       ],
     })
 
-    const rows = wrapper.findAll('.v-data-table-row-stub')
+    const rows = wrapper.findAll(
+      '.product-attributes__audit-table .v-data-table-row-stub'
+    )
     // 3 indexed (Weight, Depth, Wireless) + 4 raw (Power, Height, Battery life, Noise level)
     expect(rows).toHaveLength(7)
     expect(wrapper.text()).toContain('Attribute sourcing audit')

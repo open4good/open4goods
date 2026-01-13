@@ -2,13 +2,7 @@
   <article v-if="score" class="impact-ecoscore">
     <header class="impact-ecoscore__header">
       <div class="impact-ecoscore__header-main">
-<<<<<<< HEAD
-        <span class="impact-ecoscore__eyebrow">{{
-          $t('product.impact.primaryScoreLabel')
-        }}</span>
-=======
         <h3 class="impact-ecoscore__title">{{ score.label }}</h3>
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
         <p v-if="score.description" class="impact-ecoscore__description">
           {{ score.description }}
         </p>

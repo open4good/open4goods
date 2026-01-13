@@ -2503,16 +2503,18 @@
           "readIndicator": {
             "title": "How to read this indicator",
             "higher": {
-              "worst": "The lowest {scoreLabelLower} recorded is {worst}.",
-              "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}.",
-              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, a pivot score of 10/20.",
-              "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}, which converts to {productOn20}/20."
+              "worst": "The lowest {scoreLabelLower} recorded is {worst}{unit}.",
+              "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}{unit}.",
+              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}{unit}.",
+              "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}{unit}, which converts to {productOn20}/20.",
+              "distribution": "The scoring uses standard deviation ({sigma}{unit}) to ensure extreme values do not overshadow differences between common products."
             },
             "lower": {
-              "worst": "The highest {scoreLabelLower} recorded is {worst}.",
-              "best": "The lowest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}.",
-              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}, a pivot score of 10/20.",
-              "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}, which converts to {productOn20}/20."
+              "worst": "The highest {scoreLabelLower} recorded is {worst}{unit}.",
+              "best": "The lowest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}{unit}.",
+              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}{unit}.",
+              "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}{unit}, which converts to {productOn20}/20.",
+              "distribution": "The scoring uses standard deviation ({sigma}{unit}) to ensure extreme values do not overshadow differences between common products."
             }
           }
         },

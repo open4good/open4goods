@@ -5,7 +5,8 @@ import {
   HOTJAR_RECORDING_COOKIE_VALUE,
 } from '~~/shared/utils/hotjar-recording'
 
-type HotjarPluginDefinition = (typeof import('./hotjar.client'))['default']
+type HotjarPluginDefinition =
+  (typeof import('../plugins/hotjar.client'))['default']
 
 type HotjarRuntimeConfig = {
   public: {
@@ -81,7 +82,7 @@ describe('hotjar client plugin', () => {
       return { value: undefined }
     })
 
-    const plugin = (await import('./hotjar.client')).default
+    const plugin = (await import('../plugins/hotjar.client')).default
 
     plugin.setup?.(nuxtApp)
 
@@ -105,7 +106,7 @@ describe('hotjar client plugin', () => {
     })
     useCookieMock.mockReturnValue({ value: undefined })
 
-    const plugin = (await import('./hotjar.client')).default
+    const plugin = (await import('../plugins/hotjar.client')).default
 
     plugin.setup?.(nuxtApp)
 
@@ -126,7 +127,7 @@ describe('hotjar client plugin', () => {
     useCookieMock.mockReturnValue({ value: HOTJAR_RECORDING_COOKIE_VALUE })
     isDoNotTrackEnabledMock.mockReturnValue(true)
 
-    const plugin = (await import('./hotjar.client')).default
+    const plugin = (await import('../plugins/hotjar.client')).default
 
     plugin.setup?.(nuxtApp)
 

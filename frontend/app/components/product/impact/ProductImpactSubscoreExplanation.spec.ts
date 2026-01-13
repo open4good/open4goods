@@ -64,7 +64,6 @@ describe('ProductImpactSubscoreExplanation', () => {
     // Check for the updated text structure
     const text = wrapper.text()
     expect(text).toContain('the average reaches 2.5')
-    expect(text).toContain('a pivot score of 10/20')
   })
 
   it('displays the product score on 20 scale using the provided on20 value', () => {
@@ -117,13 +116,48 @@ describe('ProductImpactSubscoreExplanation', () => {
     })
 
     const text = wrapper.text()
-
-    // Worst (Highest for LOWER betterIs)
-    expect(text).toContain('The highest test score recorded is 50.')
-
     // Best (Lowest for LOWER betterIs)
     expect(text).toContain(
       'The lowest test score observed among the 100 ovens is 10.'
     )
+  })
+
+  it('displays unit when provided', () => {
+    const scoreWithUnit: ScoreView = {
+      ...baseScore,
+      unit: 'kg',
+    }
+
+    const wrapper = mount(ProductImpactSubscoreExplanation, {
+      props: { ...defaultProps, score: scoreWithUnit },
+      global: {
+        plugins: [i18n],
+      },
+    })
+
+    const text = wrapper.text()
+    expect(text).toContain('2.5kg') // Average with unit
+    expect(text).toContain('5kg') // Max with unit
+  })
+
+  it('displays distribution explanation when stdDev is present', () => {
+    const scoreWithSigma: ScoreView = {
+      ...baseScore,
+      unit: 'W',
+      absolute: {
+        ...baseScore.absolute,
+        stdDev: 1.5,
+      },
+    }
+
+    const wrapper = mount(ProductImpactSubscoreExplanation, {
+      props: { ...defaultProps, score: scoreWithSigma },
+      global: {
+        plugins: [i18n],
+      },
+    })
+
+    const text = wrapper.text()
+    expect(text).toContain('standard deviation (1.5W)')
   })
 })
