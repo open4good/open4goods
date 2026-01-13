@@ -13,7 +13,6 @@ describe('ProductImpactEcoScoreCard', () => {
       'en-US': {
         product: {
           impact: {
-            primaryScoreLabel: 'Overall impact',
             absoluteValue: 'Absolute value',
             noPrimaryScore: 'No score',
             methodologyLink: 'Access the methodology',
@@ -72,9 +71,6 @@ describe('ProductImpactEcoScoreCard', () => {
           'v-chip-group': true,
           'v-chip': true,
           'v-checkbox': true,
-          'v-btn': true,
-          'v-expand-transition': true,
-          'v-skeleton-loader': true,
         },
       },
     })
@@ -121,9 +117,6 @@ describe('ProductImpactEcoScoreCard', () => {
           'v-chip-group': true,
           'v-chip': true,
           'v-checkbox': true,
-          'v-btn': true,
-          'v-expand-transition': true,
-          'v-skeleton-loader': true,
         },
       },
     })
@@ -157,9 +150,6 @@ describe('ProductImpactEcoScoreCard', () => {
               '<input type="checkbox" :checked="modelValue" @change="$emit(\'update:modelValue\', $event.target.checked)" />',
             props: ['modelValue'],
           },
-          'v-btn': true,
-          'v-expand-transition': true,
-          'v-skeleton-loader': true,
           ProductImpactDetailsTable: {
             props: ['scores'],
             template:
