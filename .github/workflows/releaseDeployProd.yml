@@ -1,4 +1,5 @@
 name: 🚀 Release
+run-name: 🚀 Release ${{ inputs.ref || github.ref_name }} (${{ inputs.mode || 'release' }}) by @${{ github.actor }}
 
 on:
   push:
@@ -389,51 +390,26 @@ jobs:
 
       ############################################
       # Deploy JARs to Production Server
-      # 2) Corrige: SOURCE absolus ("/...") => relatifs ("...")
       ############################################
-      - name: 🚚 Deploy SBADMIN to Server
+      - name: 📦 Gather JARs for Deployment
         if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "admin/target/admin-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"
+        run: |
+          mkdir -p deploy-jars
+          cp admin/target/admin-0.0.1-SNAPSHOT.jar deploy-jars/sbadmin-latest.jar
+          cp api/target/api-0.0.1-SNAPSHOT.jar deploy-jars/api-latest.jar
+          cp ui/target/ui-0.0.1-SNAPSHOT.jar deploy-jars/ui-latest.jar
+          cp front-api/target/front-api-0.0.1-SNAPSHOT.jar deploy-jars/front-api-latest.jar
 
-      - name: 🚚 Deploy API to Server
+      - name: 🚚 Deploy JARs to Server (Consolidated)
         if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "api/target/api-0.0.1-SNAPSHOT.jar"
+          SOURCE: "deploy-jars/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/api-latest.jar"
-
-      - name: 🚚 Deploy UI (static server) to Production Server
-        if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "ui/target/ui-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
-
-      - name: 🚚 Deploy front-api to Qualification Server
-        if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "front-api/target/front-api-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/front-api-latest.jar"
+          TARGET: "/opt/open4goods/latest/"
 
       ############################################
       # Restart Applications
@@ -459,7 +435,7 @@ jobs:
           SOURCE: "frontend/.output"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/frontend-ssr"
+          TARGET: "/opt/open4goods/latest/frontend-ssr"
 
       - name: Deploy reports (forced) to server
         uses: easingthemes/ssh-deploy@main
@@ -469,7 +445,7 @@ jobs:
           SOURCE: "frontend/app/public/reports/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/bin/latest/frontend-ssr/.output/public/reports"
+          TARGET: "/opt/open4goods/latest/frontend-ssr/.output/public/reports"
 
       - name: Publish frontend
         if: env.MODE != 'test'

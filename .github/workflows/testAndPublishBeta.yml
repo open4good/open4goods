@@ -6,6 +6,7 @@ on:
       - "frontend/**"
 
 name: 🔘 Beta - Build, Test, and Publish
+run-name: 🔘 Beta Build by @${{ github.actor }}
 
 jobs:
   deploy:
@@ -53,8 +54,8 @@ jobs:
       ############################################
       # 4. Maven Dependency Tree Submission
       ############################################
-    #  - name: Maven Dependency Submission
-    #    uses: advanced-security/maven-dependency-submission-action@v5.0.0
+      #  - name: Maven Dependency Submission
+      #    uses: advanced-security/maven-dependency-submission-action@v5.0.0
 
       ############################################
       # 5. Build and Test with Maven
@@ -77,45 +78,23 @@ jobs:
       ############################################
       # 6. Deploy JAR Files to Qualification Environment
       ############################################
-      - name: Deploy SBADMIN to Qualification Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/admin/target/admin-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/bin/latest/sbadmin-latest.jar"
+      - name: 📦 Gather JARs for Deployment
+        run: |
+          mkdir -p deploy-jars
+          cp admin/target/admin-0.0.1-SNAPSHOT.jar deploy-jars/sbadmin-latest.jar
+          cp api/target/api-0.0.1-SNAPSHOT.jar deploy-jars/api-latest.jar
+          cp ui/target/ui-0.0.1-SNAPSHOT.jar deploy-jars/ui-latest.jar
+          cp front-api/target/front-api-0.0.1-SNAPSHOT.jar deploy-jars/front-api-latest.jar
 
-      - name: Deploy API to Qualification Server
+      - name: 🚚 Deploy JARs to Qualification Server (Consolidated)
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/api/target/api-0.0.1-SNAPSHOT.jar"
+          SOURCE: "deploy-jars/"
           REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/bin/latest/api-latest.jar"
-
-      - name: Deploy UI to Qualification Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/ui/target/ui-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/bin/latest/ui-latest.jar"
-
-      - name: Deploy font-api to Qualification Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "/front-api/target/front-api-0.0.1-SNAPSHOT.jar"
-          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/bin/latest/front-api-latest.jar"
+          TARGET: "/opt/open4goods/latest/"
 
       ############################################
       # 7. Restarting Application
