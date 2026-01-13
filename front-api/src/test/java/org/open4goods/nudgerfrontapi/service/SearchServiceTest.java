@@ -59,7 +59,7 @@ class SearchServiceTest {
     void setUp() {
         searchProperties = new SearchProperties();
         searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties,
-                searchProperties, textEmbeddingService, embeddingProperties);
+                textEmbeddingService, embeddingProperties);
     }
 
     @Test
@@ -68,7 +68,7 @@ class SearchServiceTest {
         VerticalConfig tvConfig = new VerticalConfig();
         tvConfig.setId("tv");
         tvConfig.setVerticalImage("tv.png");
-        
+
         ProductI18nElements frElements = new ProductI18nElements();
         frElements.setVerticalHomeTitle("Téléviseurs");
         frElements.setVerticalHomeUrl("televiseurs");
@@ -78,12 +78,12 @@ class SearchServiceTest {
         when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
 
         searchService.initializeSuggestIndex();
-        
+
         // Mock empty results for product searches to avoid NPEs logic down the line if it tries to map hits
         // But here we return early on vertical match? No, findExactVerticalMatch just sets validity.
         // The service continues to execute searches.
         // Sequence: exact_vertical -> semantic -> global.
-        
+
         // For this test, we just want to check CTA.
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
@@ -106,7 +106,7 @@ class SearchServiceTest {
         tvConfig.setI18n(Map.of("fr", new ProductI18nElements()));
         when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(tvConfig));
         when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
-        
+
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
@@ -118,32 +118,32 @@ class SearchServiceTest {
         // THEN
         assertThat(result.verticalCta()).isNull();
     }
-    
+
     @Test
     void globalSearch_shouldFallbackToSemantic_whenExactVerticalFails() {
         // GIVEN initial setup
         when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(Collections.emptyList());
         searchService.initializeSuggestIndex();
-        
+
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
-        
+
         // Setup repository to return empty for first call (exact_vertical)
         // And then we expect a call for semantic (which involves embedding)
         // Then we can assume semantic returns something or empty.
-        
+
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
-        
+
         // For semantic search, we need textEmbeddingService to return a vector
         when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f, 0.2f});
-        
+
         // WHEN
         GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, SearchType.auto);
-        
+
         // THEN
         // We verify that textEmbeddingService was called, which implies semantic search was attempted.
         // Since we return empty hits for everything, it should go: Exact -> Semantic -> Global
         verify(textEmbeddingService, times(1)).embed("iphone");
-        
+
         // We can also check that the result has mode Global (since all failed/empty) or Semantic if we mocked hits?
         // If all fail/empty, it returns the start mode but with empty lists.
         // Actually the logic is: loops through sequence. If hits found, returns with that mode.

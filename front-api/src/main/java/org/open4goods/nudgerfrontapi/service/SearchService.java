@@ -31,7 +31,6 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
@@ -141,20 +140,17 @@ public class SearchService {
 	private final VerticalsConfigService verticalsConfigService;
 	private final ProductMappingService productMappingService;
 	private final ApiProperties apiProperties;
-	private final SearchProperties searchProperties;
 	private final DjlTextEmbeddingService textEmbeddingService;
 	private final DjlEmbeddingProperties embeddingProperties;
 	private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
 	public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
 			@Lazy ProductMappingService productMappingService, ApiProperties apiProperties,
-			SearchProperties searchProperties,
 			DjlTextEmbeddingService textEmbeddingService, DjlEmbeddingProperties embeddingProperties) {
 		this.repository = repository;
 		this.verticalsConfigService = verticalsConfigService;
 		this.productMappingService = productMappingService;
 		this.apiProperties = apiProperties;
-		this.searchProperties = searchProperties;
 		this.textEmbeddingService = textEmbeddingService;
 		this.embeddingProperties = embeddingProperties;
 	}
@@ -423,8 +419,7 @@ public class SearchService {
 	 * @return {@code true} when semantic fallback is enabled
 	 */
 	private boolean isSemanticSuggestFallbackEnabled() {
-		SearchProperties.Suggest suggestConfig = searchProperties != null ? searchProperties.getSuggest() : null;
-		return suggestConfig != null && suggestConfig.isSemanticFallbackEnabled();
+		return true;
 	}
 
 	private List<CategorySuggestion> findCategoryMatches(List<String> tokens, DomainLanguage domainLanguage) {
@@ -568,7 +563,6 @@ public class SearchService {
 			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
 			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
 			b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
-			b.filter(f -> f.exists(e -> e.field("vertical")));
 			return b;
 		}));
 	}

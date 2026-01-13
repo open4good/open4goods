@@ -5,7 +5,6 @@
         <span class="impact-ecoscore__eyebrow">{{
           $t('product.impact.primaryScoreLabel')
         }}</span>
-        <h3 class="impact-ecoscore__title">{{ score.label }}</h3>
         <p v-if="score.description" class="impact-ecoscore__description">
           {{ score.description }}
         </p>

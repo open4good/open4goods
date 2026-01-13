@@ -50,6 +50,12 @@ const actions = computed(() => [
     label: t('pwa.landing.actions.wizard.title'),
     event: 'wizard' as const,
   },
+  {
+    key: 'search',
+    icon: 'mdi-magnify',
+    label: t('pwa.landing.actions.search.title'),
+    event: 'search' as const,
+  },
 ])
 </script>
 
@@ -62,7 +68,7 @@ const actions = computed(() => [
 
 .pwa-action-bar__grid
   display: grid
-  grid-template-columns: 1fr 1fr
+  grid-template-columns: repeat(3, 1fr)
   gap: 0.5rem
 
 .pwa-action-bar__btn

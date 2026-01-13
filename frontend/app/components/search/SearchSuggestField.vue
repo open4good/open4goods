@@ -3,6 +3,7 @@
     <v-autocomplete
       v-if="isSuggestEnabled"
       v-model="selectedItem"
+      v-model:menu="menu"
       :search="internalSearch"
       :items="suggestionItems"
       item-value="id"
@@ -303,7 +304,6 @@ import type { Component } from 'vue'
 import {
   computed,
   defineAsyncComponent,
-  nextTick,
   onMounted,
   onBeforeUnmount,
   reactive,
@@ -318,31 +318,13 @@ import type {
   SearchSuggestCategoryMatchDto,
   SearchSuggestProductMatchDto,
   SearchSuggestResponseDto,
-} from '~~/shared/api-client'
+  SuggestionItem,
+} from '~/shared/api-client'
+import type {
+  CategorySuggestionItem,
+  ProductSuggestionItem,
+} from '~/types/search-suggest'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-
-interface CategorySuggestionItem {
-  type: 'category'
-  id: string
-  title: string
-  image: string | null
-  url: string | null
-  verticalId: string | null
-}
-
-interface ProductSuggestionItem {
-  type: 'product'
-  id: string
-  title: string
-  image: string | null
-  gtin: string | null
-  verticalId: string | null
-  ecoscoreValue: number | null
-}
-
-type SuggestionItem = CategorySuggestionItem | ProductSuggestionItem
-
-export type { CategorySuggestionItem, ProductSuggestionItem }
 
 defineOptions({ inheritAttrs: false })
 
@@ -416,6 +398,7 @@ const isVoiceListening = ref(false)
 const voiceError = ref<string | null>(null)
 const speechRecognition = ref<SpeechRecognition | null>(null)
 const isHydrated = ref(false)
+const menu = ref(false)
 
 onMounted(() => {
   isHydrated.value = true
@@ -509,7 +492,8 @@ const openScannerDialog = async () => {
       isScannerActive.value = true
     }
   } catch (error) {
-    if (import.meta.dev) {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    if ((process as any).dev) {
       console.error('Failed to load barcode scanner component', error)
     }
   }
@@ -549,7 +533,8 @@ const handleVoiceError = () => {
 }
 
 const initializeSpeechRecognition = () => {
-  if (!import.meta.client) {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  if (!(process as any).client) {
     return
   }
 
@@ -718,6 +703,7 @@ const loadSuggestions = async (query: string) => {
   if (trimmed.length < minChars.value) {
     resetSuggestions()
     hasError.value = false
+    menu.value = false
     return
   }
 
@@ -747,17 +733,29 @@ const loadSuggestions = async (query: string) => {
 
     categories.value = normalizedCategories
     products.value = normalizedProducts
+
+    // Automatically open menu if we have results and field is focused
+    if (
+      (categories.value.length > 0 || products.value.length > 0) &&
+      isFieldFocused.value
+    ) {
+      menu.value = true
+    }
   } catch (error) {
     if (requestId !== currentRequest.value) {
       return
     }
 
-    if (import.meta.dev) {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    if ((process as any).dev) {
       console.error('Failed to load search suggestions', error)
     }
 
     hasError.value = true
     resetSuggestions()
+    if (isFieldFocused.value) {
+      menu.value = true
+    }
   } finally {
     if (requestId === currentRequest.value) {
       loading.value = false
@@ -766,7 +764,8 @@ const loadSuggestions = async (query: string) => {
 }
 
 const debouncedLoad = useDebounceFn((value: string) => {
-  if (!import.meta.client) {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  if (!(process as any).client) {
     return
   }
 
@@ -778,8 +777,6 @@ const debouncedLoad = useDebounceFn((value: string) => {
 }, 300)
 
 let suppressInternalWatch = false
-const isBlurring = ref(false)
-let blurResetTimeout: ReturnType<typeof setTimeout> | null = null
 
 const setInternalSearchValue = (value: string) => {
   if (internalSearch.value === value) {
@@ -790,6 +787,7 @@ const setInternalSearchValue = (value: string) => {
   internalSearch.value = value
 }
 
+// Watch internalSearch to trigger suggestion loads
 watch(
   internalSearch,
   value => {
@@ -800,6 +798,12 @@ watch(
 
     if (value !== props.modelValue) {
       emit('update:modelValue', value)
+    }
+
+    // Force menu open/close logic is handled in loadSuggestions
+    // But if we clear the input, close the menu immediately
+    if (!value || value.length < minChars.value) {
+      menu.value = false
     }
 
     debouncedLoad(value)
@@ -828,7 +832,8 @@ watch(
   isSuggestEnabled,
   enabled => {
     if (!enabled) {
-      debouncedLoad.cancel?.()
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      ;(debouncedLoad as any).cancel?.()
       resetSuggestions()
       hasError.value = false
       return
@@ -840,38 +845,24 @@ watch(
 )
 
 const handleBlur = () => {
-  isBlurring.value = true
   isFieldFocused.value = false
-
-  if (blurResetTimeout !== null) {
-    clearTimeout(blurResetTimeout)
-    blurResetTimeout = null
-  }
-
-  nextTick(() => {
-    setInternalSearchValue(lastCommittedValue.value)
-    blurResetTimeout = setTimeout(() => {
-      isBlurring.value = false
-      blurResetTimeout = null
-    }, 0)
-  })
+  // Don't modify menu.value here immediately to allow clicking on items
+  // Vuetify handles menu closing on blur usually, but we want to control it for the "Escape" bug
 }
 
 const handleFocus = () => {
-  if (blurResetTimeout !== null) {
-    clearTimeout(blurResetTimeout)
-    blurResetTimeout = null
-  }
-
-  isBlurring.value = false
   isFieldFocused.value = true
+
+  // If we have existing results, reopen the menu on focus
+  if (
+    hasMinimumLength.value &&
+    (categories.value.length > 0 || products.value.length > 0)
+  ) {
+    menu.value = true
+  }
 }
 
 const handleSearchInput = (value: string) => {
-  if (isBlurring.value) {
-    return
-  }
-
   // Prevent Vuetify from clearing the search input on mount when it's not focused
   if (!isFieldFocused.value && !value && props.modelValue) {
     return
@@ -897,6 +888,7 @@ const handleEnterKey = (event: KeyboardEvent) => {
   }
 
   pendingSubmit.value = true
+  menu.value = false // Close menu on enter
 
   if (submitTimeout !== null) {
     clearTimeout(submitTimeout)
@@ -913,12 +905,6 @@ const handleEnterKey = (event: KeyboardEvent) => {
 
 onBeforeUnmount(() => {
   cancelPendingSubmit()
-
-  if (blurResetTimeout !== null) {
-    clearTimeout(blurResetTimeout)
-    blurResetTimeout = null
-  }
-
   stopVoiceListening()
 })
 
@@ -936,6 +922,7 @@ const handleSelection = (item: SuggestionItem | null) => {
   }
 
   selectedItem.value = null
+  menu.value = false
 }
 
 const handleClear = () => {
@@ -943,11 +930,12 @@ const handleClear = () => {
   internalSearch.value = ''
   resetSuggestions()
   hasError.value = false
+  menu.value = false
   emit('clear')
 }
 
 const handleScannerDecode = (rawValue: string | null) => {
-  const normalized = (rawValue ?? '').replace(/\s+/gu, '')
+  const normalized = (rawValue ?? '').replace(/\s+/g, '')
 
   if (!normalized) {
     return
