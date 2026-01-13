@@ -44,6 +44,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
+import org.open4goods.model.Localisable;
 import org.open4goods.nudgerfrontapi.dto.search.SearchMode;
 import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -405,10 +406,10 @@ public class SearchService {
 
 		List<String> scriptTokens = tokenizeForScript(sanitizedQuery);
 		SearchHits<Product> productHits = executeSuggestProductSearch(sanitizedQuery, scriptTokens);
-		List<ProductSuggestHit> productMatches = mapSuggestHits(productHits);
+		List<ProductSuggestHit> productMatches = mapSuggestHits(productHits, domainLanguage);
 		if (productMatches.isEmpty() && isSemanticSuggestFallbackEnabled()) {
 			SearchHits<Product> semanticHits = executeSemanticSuggestProductSearch(sanitizedQuery);
-			productMatches = mapSuggestHits(semanticHits);
+			productMatches = mapSuggestHits(semanticHits, domainLanguage);
 		}
 
 		LOGGER.info("Suggest for {} : {} categories match, {} product matched", query, categoryMatches.size(),
@@ -447,14 +448,15 @@ public class SearchService {
 		return new CategorySuggestion(entry.verticalId(), entry.imageSmall(), entry.title(), entry.url());
 	}
 
-	private List<ProductSuggestHit> mapSuggestHits(SearchHits<Product> hits) {
+	private List<ProductSuggestHit> mapSuggestHits(SearchHits<Product> hits, DomainLanguage domainLanguage) {
 		if (hits == null || hits.isEmpty()) {
 			return List.of();
 		}
-		return hits.getSearchHits().stream().map(this::mapSuggestHit).filter(Objects::nonNull).toList();
+		return hits.getSearchHits().stream().map(hit -> mapSuggestHit(hit, domainLanguage)).filter(Objects::nonNull)
+				.toList();
 	}
 
-	private ProductSuggestHit mapSuggestHit(SearchHit<Product> hit) {
+	private ProductSuggestHit mapSuggestHit(SearchHit<Product> hit, DomainLanguage domainLanguage) {
 		if (hit == null || hit.getContent() == null) {
 			return null;
 		}
@@ -470,8 +472,12 @@ public class SearchService {
 		AggregatedPrice bestPrice = product.bestPrice();
 		Double bestPriceValue = bestPrice != null ? bestPrice.getPrice() : null;
 		Currency bestPriceCurrency = bestPrice != null ? bestPrice.getCurrency() : null;
+		String prettyName = null;
+		if (product.getNames() != null && product.getNames().getPrettyName() != null) {
+			prettyName = localise(product.getNames().getPrettyName(), domainLanguage);
+		}
 		return new ProductSuggestHit(model, brand, gtin, product.getCoverImagePath(), product.getVertical(),
-				ecoscoreValue, bestPriceValue, bestPriceCurrency, (double) hit.getScore());
+				ecoscoreValue, bestPriceValue, bestPriceCurrency, (double) hit.getScore(), prettyName);
 	}
 
 	private SearchHits<Product> executeSuggestProductSearch(String sanitizedQuery, List<String> tokens) {
@@ -1632,7 +1638,7 @@ public class SearchService {
 	 * Product suggestion built from a lightweight Elasticsearch hit.
 	 */
 	public record ProductSuggestHit(String model, String brand, String gtin, String coverImagePath, String verticalId,
-			Double ecoscoreValue, Double bestPrice, Currency bestPriceCurrency, Double score) {
+			Double ecoscoreValue, Double bestPrice, Currency bestPriceCurrency, Double score, String prettyName) {
 	}
 
 	private record VerticalSuggestionEntry(String verticalId, String languageKey, String imageSmall, String title,
@@ -1686,5 +1692,13 @@ public class SearchService {
 				LOGGER.error("Error : ", e);
 			}
 		}
+	}
+
+	private String localise(Localisable<String, String> localisable, DomainLanguage domainLanguage) {
+		if (localisable == null) {
+			return null;
+		}
+		String language = domainLanguage != null ? domainLanguage.languageTag() : null;
+		return localisable.i18n(language);
 	}
 }

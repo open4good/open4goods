@@ -680,11 +680,13 @@ const normalizeProduct = (
 ): ProductSuggestionItem | null => {
   const brand = match.brand?.trim()
   const model = match.model?.trim()
+  const prettyName = match.prettyName?.trim()
 
   const title =
-    brand && model
+    prettyName ||
+    (brand && model
       ? `${brand} – ${model}`
-      : brand || model || unknownProductLabel.value
+      : brand || model || unknownProductLabel.value)
 
   const gtin = match.gtin?.trim() || null
 
@@ -959,20 +961,6 @@ const handleScannerDecode = (rawValue: string | null) => {
 }
 </script>
 
-<style scoped lang="sass">
-.search-suggest-field__wrapper
-  width: 100%
-
-.search-suggest-field
-  width: 100%
-
-  :deep(.v-field)
-    background-color: rgba(var(--v-theme-surface-glass-strong), 0.96)
-    border-radius: 1rem
-    cursor: text
-    transition: transform 0.25s ease, background-color 0.25s ease
-
-  :deep(.v-field__overlay)
     cursor: text
 
   :deep(.v-field__field)
@@ -1118,3 +1106,160 @@ const handleScannerDecode = (rawValue: string | null) => {
   &--error
     color: rgb(var(--v-theme-error))
 </style>
+
+<style lang="css">
+.search-suggest-field__wrapper .v-autocomplete__content {
+  overflow-y: auto !important;
+  max-height: 420px !important;
+  scrollbar-width: thin;
+}
+
+.search-suggest-field__wrapper .v-autocomplete__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-suggest-field__wrapper .v-autocomplete__content::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--v-theme-on-surface), 0.3);
+  border-radius: 4px;
+}
+</style>
+
+<style scoped lang="sass">
+.search-suggest-field
+  &__wrapper
+    width: 100%
+
+  :deep(.v-field)
+    background-color: rgba(var(--v-theme-surface-glass-strong), 0.96)
+    border-radius: 1rem
+    cursor: text
+    transition: transform 0.25s ease, background-color 0.25s ease
+
+  :deep(.v-field__overlay)
+    display: none
+
+  :deep(.v-input__details)
+    display: none
+
+  &--active
+    :deep(.v-field)
+      background-color: rgb(var(--v-theme-surface))
+      transform: scale(1.02)
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)
+
+.search-suggest-field__voice-button,
+.search-suggest-field__scanner-button
+  opacity: 0.7
+  transition: opacity 0.2s ease
+
+  &:hover
+    opacity: 1
+
+.search-suggest-field__scanner-dialog
+  background-color: rgb(var(--v-theme-background))
+
+.search-suggest-field__scanner-card
+  display: flex
+  flex-direction: column
+  height: 100%
+  background: transparent !important
+
+.search-suggest-field__scanner-header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  padding: 1rem
+  background-color: rgb(var(--v-theme-surface))
+  border-bottom: 1px solid rgba(var(--v-theme-border-primary), 0.2)
+
+.search-suggest-field__scanner-title
+  font-size: 1.25rem
+  font-weight: 600
+  margin: 0
+
+.search-suggest-field__scanner-body
+  flex: 1
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  padding: 2rem
+  position: relative
+  background-color: #000
+
+.search-suggest-field__scanner-stream
+  width: 100%
+  height: 100%
+  object-fit: cover
+
+.search-suggest-field__scanner-loading,
+.search-suggest-field__scanner-helper
+  color: #fff
+  text-align: center
+  margin-top: 1rem
+  z-index: 10
+
+.search-suggest-field__entry
+  display: contents
+
+.search-suggest-field__section
+  padding: 0.5rem 1rem 0.25rem
+  margin: 0
+  font-size: 0.8rem
+  font-weight: 600
+  color: rgba(var(--v-theme-text-neutral-strong), 0.72)
+  text-transform: uppercase
+  letter-spacing: 0.08em
+
+  &--compact
+    padding-top: 0.5rem
+
+.search-suggest-field__item
+  border-radius: 0.9rem
+  margin: 0 0.5rem
+  transition: background-color 0.2s ease, transform 0.2s ease
+
+  &:hover,
+  &:focus-visible
+    background-color: rgba(var(--v-theme-surface-primary-080), 0.85)
+    transform: translateY(-1px)
+
+  :deep(.v-list-item__overlay)
+    display: none
+
+.search-suggest-field__item--category
+  padding-block: 0.9rem
+
+.search-suggest-field__item--product
+  padding-block: 0.6rem
+
+.search-suggest-field__avatar
+  background-color: rgba(var(--v-theme-surface-glass), 0.8)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+
+.search-suggest-field__title
+  font-weight: 600
+  font-size: 1.05rem
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.search-suggest-field__product-title
+  display: flex
+  flex-direction: column
+  font-size: 0.95rem
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.search-suggest-field__impact
+  margin-inline-start: 0.5rem
+
+.search-suggest-field__empty
+  padding: 1rem 1.25rem
+  text-align: center
+  color: rgb(var(--v-theme-text-neutral-secondary))
+
+.search-suggest-field__empty-text
+  margin: 0
+  font-size: 0.9rem
+
+  &--error
+    color: rgb(var(--v-theme-error))

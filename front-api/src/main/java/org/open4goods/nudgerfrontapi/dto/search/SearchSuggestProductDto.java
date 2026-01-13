@@ -34,6 +34,9 @@ public record SearchSuggestProductDto(
         Currency bestPriceCurrency,
 
         @Schema(description = "Native Elasticsearch score associated with the hit.", example = "1.85")
-        Double score
+        Double score,
+        
+        @Schema(description = "Pretty name of the product.", example = "Samsung TV 55 inches")
+        String prettyName
 ) {
 }
