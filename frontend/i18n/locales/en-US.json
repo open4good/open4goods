@@ -2350,7 +2350,19 @@
         "unknownLabel": "Specification",
         "untitledGroup": "Additional details",
         "empty": "No detailed specifications are available for this product yet.",
-        "noResults": "No specifications match your search."
+        "noResults": "No specifications match your search.",
+        "viewTable": "Table view",
+        "viewCards": "Card view",
+        "showDetails": "Show category details",
+        "hideDetails": "Hide category details",
+        "tooltips": {
+          "viewTable": "Show specifications as a table",
+          "viewCards": "Show specifications as cards"
+        },
+        "columns": {
+          "group": "Category",
+          "count": "Count"
+        }
       },
       "sourcing": {
         "bestValue": "Best value",

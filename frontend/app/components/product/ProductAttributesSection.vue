@@ -239,29 +239,176 @@
         >
           {{ $t('product.attributes.detailed.title') }}
         </h3>
-        <v-text-field
-          v-model="searchTerm"
-          :label="$t('product.attributes.searchPlaceholder')"
-          prepend-inner-icon="mdi-magnify"
-          hide-details
-          clearable
-          class="product-attributes__search"
-        />
+        <div class="product-attributes__detail-controls">
+          <v-text-field
+            v-model="searchTerm"
+            :label="$t('product.attributes.searchPlaceholder')"
+            prepend-inner-icon="mdi-magnify"
+            hide-details
+            clearable
+            class="product-attributes__search"
+          />
+          <v-btn-toggle
+            v-model="detailViewMode"
+            mandatory
+            class="product-attributes__view-toggle"
+          >
+            <v-btn
+              value="table"
+              :aria-label="$t('product.attributes.detailed.viewTable')"
+            >
+              <v-icon icon="mdi-view-list" />
+              <v-tooltip
+                activator="parent"
+                location="bottom"
+                :text="$t('product.attributes.detailed.tooltips.viewTable')"
+              />
+            </v-btn>
+            <v-btn
+              value="cards"
+              :aria-label="$t('product.attributes.detailed.viewCards')"
+            >
+              <v-icon icon="mdi-view-grid" />
+              <v-tooltip
+                activator="parent"
+                location="bottom"
+                :text="$t('product.attributes.detailed.tooltips.viewCards')"
+              />
+            </v-btn>
+          </v-btn-toggle>
+        </div>
       </div>
 
       <div class="product-attributes__detailed-layout">
         <div class="product-attributes__details-panel">
-          <v-row
-            v-if="filteredGroups.length"
-            class="product-attributes__details-grid"
-            dense
-          >
-            <ProductAttributesDetailCard
-              v-for="group in filteredGroups"
-              :key="group.id"
-              :group="group"
-            />
-          </v-row>
+          <template v-if="filteredGroups.length">
+            <v-data-table
+              v-if="detailViewMode === 'table'"
+              v-model:expanded="expandedDetailGroups"
+              :headers="detailTableHeaders"
+              :items="detailTableItems"
+              item-value="id"
+              :items-per-page="detailItemsPerPage"
+              class="product-attributes__details-table"
+              density="comfortable"
+              hide-default-footer
+            >
+              <template #[`item.name`]="{ item }">
+                <div class="product-attributes__details-label">
+                  <v-btn
+                    class="product-attributes__details-toggle"
+                    icon
+                    density="comfortable"
+                    variant="text"
+                    :aria-label="
+                      isDetailGroupExpanded(item.id)
+                        ? $t('product.attributes.detailed.hideDetails')
+                        : $t('product.attributes.detailed.showDetails')
+                    "
+                    @click="toggleDetailGroup(item.id)"
+                  >
+                    <v-icon
+                      :icon="
+                        isDetailGroupExpanded(item.id)
+                          ? 'mdi-chevron-up'
+                          : 'mdi-chevron-down'
+                      "
+                      size="18"
+                    />
+                  </v-btn>
+                  <span>{{ item.name }}</span>
+                </div>
+              </template>
+              <template #[`item.totalCount`]="{ item }">
+                <v-chip size="small" variant="tonal" color="primary">
+                  {{ item.totalCount }}
+                </v-chip>
+              </template>
+              <template #expanded-row="{ columns, item }">
+                <tr class="product-attributes__details-expanded-row">
+                  <td :colspan="columns.length">
+                    <div class="product-attributes__details-expanded-content">
+                      <div
+                        v-if="item.features.length"
+                        class="product-attributes__chip-list product-attributes__chip-list--positive"
+                      >
+                        <ul>
+                          <li
+                            v-for="feature in item.features"
+                            :key="feature.key"
+                          >
+                            <v-icon
+                              icon="mdi-check-circle"
+                              size="18"
+                              class="product-attributes__chip-icon product-attributes__chip-icon--positive"
+                            />
+                            <span class="product-attributes__chip-label">{{
+                              feature.name
+                            }}</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div
+                        v-if="item.unFeatures.length"
+                        class="product-attributes__chip-list product-attributes__chip-list--negative"
+                      >
+                        <ul>
+                          <li
+                            v-for="feature in item.unFeatures"
+                            :key="feature.key"
+                          >
+                            <v-icon
+                              icon="mdi-close-octagon-outline"
+                              size="18"
+                              class="product-attributes__chip-icon product-attributes__chip-icon--negative"
+                            />
+                            <span class="product-attributes__chip-label">{{
+                              feature.name
+                            }}</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <v-table
+                        v-if="item.attributes.length"
+                        density="comfortable"
+                        class="product-attributes__table product-attributes__details-attributes-table"
+                      >
+                        <tbody>
+                          <tr
+                            v-for="attribute in item.attributes"
+                            :key="attribute.key"
+                          >
+                            <th scope="row">{{ attribute.name }}</th>
+                            <td>
+                              <ProductAttributeSourcingLabel
+                                class="product-attributes__table-value"
+                                :sourcing="attribute.sourcing"
+                                :value="attribute.value"
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </v-table>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </v-data-table>
+
+            <v-row
+              v-else
+              class="product-attributes__details-grid"
+              dense
+            >
+              <ProductAttributesDetailCard
+                v-for="group in filteredGroups"
+                :key="group.id"
+                :group="group"
+              />
+            </v-row>
+          </template>
 
           <p
             v-else
@@ -328,6 +475,7 @@ const { isLoggedIn } = useAuth()
 
 const searchTerm = ref('')
 const hasSearchTerm = computed(() => searchTerm.value.trim().length > 0)
+const detailViewMode = ref<'table' | 'cards'>('table')
 const auditSearchTerm = ref('')
 const showIndexed = ref(true)
 const showNotIndexed = ref(true)
@@ -1118,6 +1266,39 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
     })
     .filter((group): group is DetailGroupView => Boolean(group))
 })
+
+const detailTableHeaders = computed(() => [
+  {
+    title: t('product.attributes.detailed.columns.group'),
+    key: 'name',
+    sortable: true,
+  },
+  {
+    title: t('product.attributes.detailed.columns.count'),
+    key: 'totalCount',
+    sortable: true,
+  },
+])
+
+const detailItemsPerPage = -1
+
+const expandedDetailGroups = ref<string[]>([])
+
+const detailTableItems = computed(() => filteredGroups.value)
+
+const isDetailGroupExpanded = (id: string) =>
+  expandedDetailGroups.value.includes(id)
+
+const toggleDetailGroup = (id: string) => {
+  if (isDetailGroupExpanded(id)) {
+    expandedDetailGroups.value = expandedDetailGroups.value.filter(
+      entry => entry !== id
+    )
+    return
+  }
+
+  expandedDetailGroups.value = [...expandedDetailGroups.value, id]
+}
 </script>
 
 <style scoped>
@@ -1300,6 +1481,12 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   gap: 1rem;
 }
 
+.product-attributes__detail-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .product-attributes__block-header--audit {
   display: flex;
   flex-direction: column;
@@ -1386,6 +1573,10 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
   max-width: 100%;
 }
 
+.product-attributes__view-toggle {
+  align-self: flex-start;
+}
+
 .product-attributes__search--audit {
   max-width: 420px;
 }
@@ -1402,6 +1593,40 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
 
 .product-attributes__details-grid {
   margin: 0 -0.75rem;
+}
+
+.product-attributes__details-table {
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.96);
+}
+
+.product-attributes__details-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-attributes__details-toggle {
+  margin-left: -0.35rem;
+}
+
+.product-attributes__details-expanded-row td {
+  padding: 0;
+}
+
+.product-attributes__details-expanded-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.5rem 1.5rem;
+  background: rgba(var(--v-theme-surface-primary-050), 0.6);
+}
+
+.product-attributes__details-attributes-table {
+  background: transparent;
 }
 
 .product-attributes__table-value {
@@ -1443,6 +1668,12 @@ const filteredGroups = computed<DetailGroupView[]>(() => {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .product-attributes__detail-controls {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
   }
 
   .product-attributes__block-header--audit {
