@@ -474,6 +474,36 @@
           <v-divider class="accessibility-menu__divider" />
 
           <div
+            class="accessibility-menu__reading-row d-flex align-center px-4 py-2"
+          >
+            <v-switch
+              :model-value="isDyslexic"
+              inset
+              color="primary"
+              density="compact"
+              hide-details
+              class="mr-3"
+              :aria-label="readingModeAriaLabel"
+              :aria-pressed="isDyslexic"
+              @click.stop
+              @update:model-value="updateReadingMode"
+            />
+            <v-chip
+              class="accessibility-menu__reading-chip"
+              color="surface-primary-080"
+              size="small"
+              label
+            >
+              {{ readingModeShortLabel }}
+            </v-chip>
+            <span class="text-body-2 font-weight-medium">
+              {{ readingModeLabel }}
+            </span>
+          </div>
+
+          <v-divider class="accessibility-menu__divider" />
+
+          <div
             class="accessibility-menu__zoom-row d-flex align-center px-4 py-2"
           >
             <v-switch
@@ -645,6 +675,7 @@ import {
   resolveThemeName,
   type ThemeName,
 } from '~~/shared/constants/theme'
+import { useReadingMode } from '~/composables/useReadingMode'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -666,6 +697,19 @@ const accessibilityStore = useAccessibilityStore()
 const { isZoomed } = storeToRefs(accessibilityStore)
 const { setZoomed } = accessibilityStore
 const accessibilityLabel = computed(() => t('siteIdentity.menu.zoom.label'))
+const { isDyslexic, setMode: setReadingMode } = useReadingMode()
+const readingModeLabel = computed(() =>
+  t('siteIdentity.menu.readingMode.label')
+)
+const readingModeShortLabel = computed(() =>
+  t('siteIdentity.menu.readingMode.shortLabel')
+)
+const readingModeAriaLabel = computed(() =>
+  t('siteIdentity.menu.readingMode.ariaLabel')
+)
+const updateReadingMode = (value: boolean) => {
+  setReadingMode(value ? 'dyslexic' : 'default')
+}
 
 // Theme logic
 const theme = useTheme()
@@ -1682,11 +1726,17 @@ const isMenuItemActive = (item: MenuItem): boolean => {
   &:hover
     background-color: rgba(var(--v-theme-surface-primary-080), 0.5)
 
-.accessibility-menu__zoom-row
+.accessibility-menu__zoom-row,
+.accessibility-menu__reading-row
   border-radius: 0.5rem
+  gap: 0.5rem
   transition: background-color 0.2s ease
   &:hover
     background-color: rgba(var(--v-theme-surface-primary-080), 0.5)
+
+.accessibility-menu__reading-chip
+  font-weight: 700
+  letter-spacing: 0.05em
 
 @media (max-width: 1263px)
   .community-menu

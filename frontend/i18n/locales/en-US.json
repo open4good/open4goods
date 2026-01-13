@@ -2852,6 +2852,11 @@
         "activate": "Zoom in (120%)",
         "reset": "Reset zoom"
       },
+      "readingMode": {
+        "label": "Dyslexia-friendly font",
+        "shortLabel": "ABC",
+        "ariaLabel": "Toggle dyslexia-friendly font"
+      },
       "themeToggle": "Toggle theme",
       "title": "Menu"
     },
