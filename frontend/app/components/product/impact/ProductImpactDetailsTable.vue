@@ -5,8 +5,8 @@
     </h4>
     <v-data-table
       v-if="hasRows"
-      :headers="headers"
       v-model:expanded="expandedSubscores"
+      :headers="headers"
       :items="tableItems"
       :items-per-page="itemsPerPage"
       :row-props="rowProps"
