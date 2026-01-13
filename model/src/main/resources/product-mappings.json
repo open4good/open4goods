@@ -279,20 +279,8 @@
           "type": "keyword"
         },
         "imageInfo": {
-          "properties": {
-            "width": {
-              "type": "integer",
-              "index": false
-            },
-            "height": {
-              "type": "integer",
-              "index": false
-            },
-            "embedding": {
-              "type": "object",
-              "enabled": false
-            }
-          }
+          "type": "object",
+          "enabled": false
         }
       }
     },
