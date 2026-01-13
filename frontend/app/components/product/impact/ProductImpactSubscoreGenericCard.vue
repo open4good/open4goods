@@ -39,6 +39,9 @@
       v-if="hasDistribution"
       :distribution="score.distribution ?? []"
       :label="score.label"
+      :average-value="score.absolute?.avg ?? null"
+      :current-value="score.value ?? null"
+      :product-name="productName"
     />
 
     <div v-if="hasDetails" class="impact-subscore__details">
