@@ -29,9 +29,9 @@
     "seo": {
       "baseTitle": "Blog Nudger",
       "description": "Découvrez les guides et actualités de Nudger.",
-      "pageTitle": "{title} – Page {page}",
+      "pageTitle": "{title} - Page {page}",
       "tagDescription": "Parcourez les articles {tag} du blog Nudger.",
-      "tagTitle": "Articles {tag} – Blog Nudger"
+      "tagTitle": "Articles {tag} - Blog Nudger"
     }
   },
   "home": {
@@ -191,7 +191,7 @@
       }
     },
     "seo": {
-      "title": "Nudger – Consommer responsable n’est pas un luxe",
+      "title": "Nudger - Consommer responsable n’est pas un luxe",
       "description": "Comparez l’impact environnemental et les prix de plus de 50 millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d’impact et des prix."
     },
@@ -403,7 +403,7 @@
       "title": "Preuves & confiance",
       "subtitle": "Des partenaires exigeants et des données ouvertes pour garder le cap.",
       "logos": {
-        "ademe": "ADEME – Agence de la transition écologique"
+        "ademe": "ADEME - Agence de la transition écologique"
       },
       "stats": {
         "references": "50 000 000+ références open data",
@@ -762,9 +762,9 @@
       },
       "seo": {
         "description": "Découvre comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA.",
-        "title": "{category} – Impact Score détaillé"
+        "title": "{category} - Impact Score détaillé"
       },
-      "title": "{category} – {label}"
+      "title": "{category} - {label}"
     },
     "fastFilters": {
       "activeClauses": "Filtres de sous-ensemble appliqués",
@@ -1244,7 +1244,7 @@
     "seo": {
       "description": "Partagez vos idées, signalez les bugs et votez pour les prochaines évolutions de Nudger.",
       "imageAlt": "Illustration du tableau de feedback de la communauté Nudger.",
-      "title": "Feedback & roadmap – Communauté Nudger"
+      "title": "Feedback & roadmap - Communauté Nudger"
     },
     "tabs": {
       "ariaLabel": "Catégories de feedback",
@@ -1692,7 +1692,7 @@
         },
         "seo": {
           "description": "Accédez à la base GTIN de Nudger, mise à jour chaque semaine, avec les options de téléchargement et le schéma détaillé pour vos projets data sur les codes-barres.",
-          "title": "Données ouvertes GTIN – télécharger le catalogue de codes-barres"
+          "title": "Données ouvertes GTIN - télécharger le catalogue de codes-barres"
         },
         "summary": {
           "title": "Chiffres clés du dataset GTIN"
@@ -1701,15 +1701,15 @@
       "isbn": {
         "columns": {
           "classification_decitre_1": {
-            "description": "Classification Decitre – niveau 1.",
+            "description": "Classification Decitre - niveau 1.",
             "label": "classification_decitre_1"
           },
           "classification_decitre_2": {
-            "description": "Classification Decitre – niveau 2.",
+            "description": "Classification Decitre - niveau 2.",
             "label": "classification_decitre_2"
           },
           "classification_decitre_3": {
-            "description": "Classification Decitre – niveau 3.",
+            "description": "Classification Decitre - niveau 3.",
             "label": "classification_decitre_3"
           },
           "currency": {
@@ -1824,7 +1824,7 @@
         },
         "seo": {
           "description": "Téléchargez la base ISBN de Nudger, actualisée chaque semaine, avec les miroirs de téléchargement et le schéma détaillé pour vos analyses du secteur du livre.",
-          "title": "Données ouvertes ISBN – télécharger l'export de métadonnées livres"
+          "title": "Données ouvertes ISBN - télécharger l'export de métadonnées livres"
         },
         "summary": {
           "title": "Chiffres clés du dataset ISBN"
@@ -2742,7 +2742,7 @@
         "nudge": {
           "title": "Envie d'un raccourci ?",
           "description": "Répondez à quelques questions pour pré-filtrer cette catégorie automatiquement.",
-          "button": "Lancer l'outil Nudge"
+          "button": "Assistant"
         },
         "cta": {
           "label": "Explorer toutes nos catégories"
@@ -2936,9 +2936,9 @@
       "hero": {
         "eyebrow": "PWA",
         "title": "Votre compagnon éco sur mobile",
-        "subtitle": "Scanne, compare et nudger en quelques gestes. Pensé pour la décision rapide.",
+        "subtitle": "Scanne, compare et trouve  les meilleurs produits en quelques gestes.",
         "meta": {
-          "title": "Nudger – Compagnon mobile de l'impact",
+          "title": "Nudger - Compagnon mobile de l'impact",
           "description": "Découvrez Nudger en version mobile-first : scanner de codes-barres, assistant IA et partage d'éco-guides.",
           "imageAlt": "Vue mobile de Nudger avec actions rapides et scanner de code-barres."
         }
