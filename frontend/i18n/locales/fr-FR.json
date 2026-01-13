@@ -2507,6 +2507,11 @@
       "weightTooltip": "Le score {scoreName} compte pour {value}% de la note totale",
       "subscoreDetailsToggle": "Voir les détails de l'indicateur",
       "subscoreEyebrow": "Indicateur d'impact",
+      "subscoreChart": {
+        "markerAverage": "La moyenne de {scoreLabel} se positionne ici.",
+        "markerProduct": "{productName} se positionne ici.",
+        "unknownProduct": "Ce produit"
+      },
       "importanceTitle": "Pourquoi c'est important ?",
       "subscores": {
         "default": {

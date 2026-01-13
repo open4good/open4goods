@@ -2491,6 +2491,11 @@
       "weightTooltip": "The {scoreName} score counts for {value}% of the total score",
       "subscoreDetailsToggle": "View indicator details",
       "subscoreEyebrow": "Impact indicator",
+      "subscoreChart": {
+        "markerAverage": "Average for {scoreLabel} sits here.",
+        "markerProduct": "{productName} sits here.",
+        "unknownProduct": "This product"
+      },
       "importanceTitle": "Why it matters",
       "subscores": {
         "default": {
