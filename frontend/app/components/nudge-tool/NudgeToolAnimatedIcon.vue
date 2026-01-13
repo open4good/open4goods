@@ -92,6 +92,7 @@ const scale = ref(1)
 const easing = ref(EASE_IN_OUT)
 const animationDuration = ref(0)
 const animationDelay = ref(0)
+const isHydrated = ref(false)
 
 let rng = createRng(props.seed)
 
@@ -133,7 +134,7 @@ const resolveMidpoint = (min: number, max: number) =>
 
 const updateAnimationTiming = () => {
   const [min, max] = normalizedFrequencyRange.value
-  if (props.randomizeOnMount) {
+  if (props.randomizeOnMount && isHydrated.value) {
     animationDuration.value = Math.round(randomBetween(min, max))
     animationDelay.value = Math.round(randomBetween(0, min))
     return
@@ -244,6 +245,7 @@ const runPulse = (remaining: number) => {
 // -- Lifecycle --
 onMounted(() => {
   rng = createRng(props.seed)
+  isHydrated.value = true
   updateAnimationTiming()
   if (isPulseVariant.value) {
     scheduleIdle()
