@@ -2366,7 +2366,19 @@
         "unknownLabel": "Spécification",
         "untitledGroup": "Détails complémentaires",
         "empty": "Aucune caractéristique détaillée n'est disponible pour ce produit pour le moment.",
-        "noResults": "Aucune caractéristique ne correspond à votre recherche."
+        "noResults": "Aucune caractéristique ne correspond à votre recherche.",
+        "viewTable": "Vue tableau",
+        "viewCards": "Vue cartes",
+        "showDetails": "Afficher les détails de la catégorie",
+        "hideDetails": "Masquer les détails de la catégorie",
+        "tooltips": {
+          "viewTable": "Afficher les caractéristiques en tableau",
+          "viewCards": "Afficher les caractéristiques en cartes"
+        },
+        "columns": {
+          "group": "Catégorie",
+          "count": "Nombre"
+        }
       },
       "sourcing": {
         "bestValue": "Valeur retenue",
