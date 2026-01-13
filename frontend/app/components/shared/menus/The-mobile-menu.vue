@@ -247,7 +247,7 @@
 
       <v-list-item v-if="isLoggedIn" class="px-6 py-4 account-summary">
         <template #prepend>
-          <v-icon icon="mdi-account-circle" class="me-4" />
+          <v-icon :icon="accountIcon" class="me-4" />
         </template>
         <v-list-item-title class="text-body-1 font-weight-medium">
           {{ displayName }}
@@ -267,7 +267,7 @@
           </div>
         </v-list-item-subtitle>
         <v-list-item-subtitle v-else class="text-neutral-soft">
-          No assigned roles
+          {{ t('siteIdentity.menu.account.noRoles') }}
         </v-list-item-subtitle>
       </v-list-item>
 
@@ -282,7 +282,11 @@
           <v-icon icon="mdi-refresh" class="me-4" />
         </template>
         <v-list-item-title class="text-body-1">
-          {{ isClearingCache ? 'Clearing cache…' : 'Clear cache' }}
+          {{
+            isClearingCache
+              ? t('siteIdentity.menu.account.clearingCache')
+              : t('siteIdentity.menu.account.clearCache')
+          }}
         </v-list-item-title>
       </v-list-item>
 
@@ -295,8 +299,16 @@
         <template #prepend>
           <v-icon icon="mdi-logout" class="me-4" />
         </template>
-        <v-list-item-title class="text-body-1"> Logout </v-list-item-title>
+        <v-list-item-title class="text-body-1">
+          {{ t('siteIdentity.menu.account.logout') }}
+        </v-list-item-title>
       </v-list-item>
+
+      <v-divider v-if="!isLoggedIn" class="mx-6" />
+
+      <div v-if="!isLoggedIn" class="px-6 py-4">
+        <AccountPrivacyCard data-testid="mobile-privacy-card" />
+      </div>
     </v-list>
   </nav>
 </template>
@@ -305,6 +317,7 @@
 import { defineAsyncComponent } from 'vue'
 import { storeToRefs } from 'pinia'
 import ThemeToggle from './ThemeToggle.vue'
+import AccountPrivacyCard from './AccountPrivacyCard.vue'
 import { useI18n } from 'vue-i18n'
 
 import {
@@ -419,8 +432,13 @@ const resolveFetch = (): FetchLike | undefined => {
 
 const displayName = computed(() => {
   const label = username.value?.trim()
-  return label && label.length > 0 ? label : 'Account'
+  return label && label.length > 0
+    ? label
+    : t('siteIdentity.menu.account.defaultLabel')
 })
+const accountIcon = computed(() =>
+  isLoggedIn.value ? 'mdi-account-circle' : 'mdi-navigation-private'
+)
 
 const accountRoles = computed(() =>
   roles.value.map(role => role.trim()).filter(role => role.length > 0)

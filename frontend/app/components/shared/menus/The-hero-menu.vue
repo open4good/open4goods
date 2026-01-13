@@ -471,11 +471,10 @@
         </v-card>
       </v-menu>
       <v-menu
-        v-if="isLoggedIn"
         v-model="isAccountMenuOpen"
         location="bottom"
         transition="fade-transition"
-        min-width="260"
+        :min-width="isLoggedIn ? 260 : 360"
         offset="8"
       >
         <template #activator="{ props }">
@@ -487,15 +486,22 @@
             variant="flat"
             data-testid="hero-account-menu-activator"
           >
-            <v-icon icon="mdi-account-circle" start />
+            <v-icon :icon="accountIcon" start />
             <span class="account-username text-truncate">{{
-              displayName
+              accountLabel
             }}</span>
             <v-icon icon="mdi-menu-down" end />
           </v-btn>
         </template>
 
-        <v-card class="account-menu" color="surface-default" elevation="4">
+        <AccountPrivacyCard v-if="!isLoggedIn" />
+
+        <v-card
+          v-else
+          class="account-menu"
+          color="surface-default"
+          elevation="4"
+        >
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="font-weight-medium text-truncate">
@@ -516,7 +522,7 @@
                 </div>
               </v-list-item-subtitle>
               <v-list-item-subtitle v-else class="text-neutral-soft">
-                No assigned roles
+                {{ t('siteIdentity.menu.account.noRoles') }}
               </v-list-item-subtitle>
             </v-list-item>
 
@@ -532,7 +538,11 @@
                 <v-icon icon="mdi-refresh" />
               </template>
               <v-list-item-title>
-                {{ isClearingCache ? 'Clearing cache…' : 'Clear cache' }}
+                {{
+                  isClearingCache
+                    ? t('siteIdentity.menu.account.clearingCache')
+                    : t('siteIdentity.menu.account.clearCache')
+                }}
               </v-list-item-title>
             </v-list-item>
 
@@ -544,7 +554,9 @@
               <template #prepend>
                 <v-icon icon="mdi-logout" />
               </template>
-              <v-list-item-title>Logout</v-list-item-title>
+              <v-list-item-title>
+                {{ t('siteIdentity.menu.account.logout') }}
+              </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-card>
@@ -563,7 +575,11 @@
 
   <!-- Mobile menu command -->
   <div class="d-flex justify-end d-md-none">
-    <v-btn icon aria-label="Ouvrir le menu" @click="$emit('toggle-drawer')">
+    <v-btn
+      icon
+      :aria-label="t('siteIdentity.menu.openLabel')"
+      @click="$emit('toggle-drawer')"
+    >
       <v-icon icon="mdi-menu" />
     </v-btn>
   </div>
@@ -573,6 +589,7 @@
 import { defineAsyncComponent } from 'vue'
 import { storeToRefs } from 'pinia'
 import ThemeToggle from './ThemeToggle.vue'
+import AccountPrivacyCard from './AccountPrivacyCard.vue'
 import { useI18n } from 'vue-i18n'
 import { useCommunityMenu } from './useCommunityMenu'
 import type { CommunitySection } from './useCommunityMenu'
@@ -721,8 +738,16 @@ const isClearingCache = ref(false)
 
 const displayName = computed(() => {
   const label = username.value?.trim()
-  return label && label.length > 0 ? label : 'Account'
+  return label && label.length > 0
+    ? label
+    : t('siteIdentity.menu.account.defaultLabel')
 })
+const accountLabel = computed(() =>
+  isLoggedIn.value ? displayName.value : t('siteIdentity.menu.account.guestLabel')
+)
+const accountIcon = computed(() =>
+  isLoggedIn.value ? 'mdi-account-circle' : 'mdi-navigation-private'
+)
 
 const accountRoles = computed(() =>
   roles.value.map(role => role.trim()).filter(role => role.length > 0)
