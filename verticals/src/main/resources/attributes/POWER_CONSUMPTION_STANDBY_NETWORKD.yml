@@ -20,6 +20,7 @@ scoreDescription:
   fr: "La consommation électrique de l'appareil en mode veille ou réseau"
 scoreUtility:
   fr: "Capture l’énergie consommée en veille réseau, souvent continue, pour réduire l’impact cumulé sur toute la durée de vie."
+  en: "Captures energy used in networked standby, often continuous, to reduce cumulative lifetime impact."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:

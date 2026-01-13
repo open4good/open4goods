@@ -6,3 +6,6 @@ name:
   default: "Data quality"
   fr: "Qualité de la donnée"
 asScore: true
+scoreUtility:
+  fr: "Des données complètes améliorent la fiabilité du score et évitent de pénaliser ou favoriser un produit sur des valeurs manquantes."
+  en: "Complete data improves score reliability and avoids unfair penalties or bonuses from missing values."

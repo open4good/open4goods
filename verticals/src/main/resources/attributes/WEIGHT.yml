@@ -18,6 +18,7 @@ scoreDescription:
   fr: "Le poids de l'objet"
 scoreUtility:
   fr: "Le poids reflète la quantité de matière et l’énergie grise mobilisées, impactant l’extraction, la fabrication et le transport."
+  en: "Weight signals material intensity and embodied energy, affecting extraction, manufacturing, and transport impacts."
 participateInACV:
   - EXTRACTION
   - TRANSPORTATION

@@ -9,6 +9,7 @@ scoreDescription:
   fr: "La consommation électrique de l'objet en fonctionnement"
 scoreUtility:
   fr: "Mesure directe de l’énergie consommée en usage réel, principale source d’émissions pendant la phase d’utilisation."
+  en: "Directly measures energy use during operation, the main source of use-phase emissions."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:

@@ -20,6 +20,7 @@ scoreDescription:
   fr: "La consommation électrique du téléviseur en mode SDR (basse définition)"
 scoreUtility:
   fr: "Reflète la dépense énergétique sur le mode SDR majoritaire, clé pour réduire l’impact d’usage quotidien."
+  en: "Tracks SDR energy use, the most common viewing mode, to lower everyday impact."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:

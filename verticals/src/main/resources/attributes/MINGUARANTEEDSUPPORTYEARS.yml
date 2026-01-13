@@ -20,6 +20,7 @@ scoreDescription:
   fr: "Durée minimale du support garanti"
 scoreUtility:
   fr: "Assure la maintenance et les correctifs nécessaires pour maintenir l’appareil sûr et fonctionnel sur la durée."
+  en: "Guaranteed support keeps devices secure and functional for longer, reducing early replacement."
 participateInScores:
   - DURABILITY
 participateInACV:

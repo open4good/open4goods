@@ -6,5 +6,8 @@ name:
   default: "Evaluation ESG (Sustainalytics) de la marque"
   fr: "Evaluation ESG de la marque (Sustainalytics)"
 asScore: true
+scoreUtility:
+  fr: "Reflète les engagements globaux de la marque qui influencent l’empreinte de ses produits."
+  en: "Reflects brand-wide commitments that influence the footprint of its products."
 participateInScores:
   - ESG

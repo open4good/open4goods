@@ -20,6 +20,7 @@ scoreDescription:
   fr: "La consommation électrique de l'appareil en mode veille"
 scoreUtility:
   fr: "Quantifie la consommation continue en veille et met en évidence les gains possibles en limitant l’énergie passive."
+  en: "Shows continuous standby draw and the savings from reducing passive energy use."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:

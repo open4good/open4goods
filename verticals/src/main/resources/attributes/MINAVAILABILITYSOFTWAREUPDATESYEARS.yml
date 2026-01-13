@@ -20,6 +20,7 @@ scoreDescription:
   fr: "Durée minimale de disponibilité des mises à jour logicielles"
 scoreUtility:
   fr: "Garantit la sécurité et la compatibilité du produit sur le long terme, prolongeant son usage et évitant un renouvellement prématuré."
+  en: "Long update support keeps security and apps working, extending product life."
 participateInScores:
   - DURABILITY
 participateInACV:

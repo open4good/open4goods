@@ -9,6 +9,7 @@ scoreDescription:
   fr: "La consommation électrique à l'arrêt, ou en veille"
 scoreUtility:
   fr: "Met en lumière les pertes résiduelles quand l’appareil est éteint pour réduire le gaspillage permanent."
+  en: "Highlights residual losses when the device is off to reduce permanent waste."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:

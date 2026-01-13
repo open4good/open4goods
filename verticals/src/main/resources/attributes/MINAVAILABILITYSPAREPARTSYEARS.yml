@@ -20,6 +20,7 @@ scoreDescription:
   fr: "Durée minimale de disponibilité des pièces détachées"
 scoreUtility:
   fr: "Une longue disponibilité des pièces prolonge la réparabilité, évite le remplacement prématuré et limite les déchets en fin de vie."
+  en: "Long spare-parts availability keeps products repairable, avoids premature replacement, and reduces end-of-life waste."
 participateInScores:
   - REPARABILITY
 participateInACV:

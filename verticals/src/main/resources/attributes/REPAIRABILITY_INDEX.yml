@@ -12,6 +12,7 @@ scoreDescription:
   fr: "L'indice de réparabilité de l'objet"
 scoreUtility:
   fr: "Un indice élevé prolonge la durée de vie, limite les remplacements et réduit les impacts de fabrication et de fin de vie."
+  en: "Higher repairability extends product life, reduces replacements, and cuts manufacturing and waste impacts."
 participateInScores:
   - REPARABILITY
 participateInACV:

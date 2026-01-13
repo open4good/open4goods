@@ -16,6 +16,9 @@ suffix:
   fr: "\""
 filteringType: "NUMERIC"
 asScore: true
+scoreUtility:
+  fr: "La diagonale influe sur matériaux et énergie : plus elle est grande, plus l’impact de fabrication, transport et usage augmente."
+  en: "Screen size drives materials and energy; larger sizes usually raise manufacturing, transport, and use impacts."
 participateInACV:
   - MANUFACTURING
   - TRANSPORTATION
