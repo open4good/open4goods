@@ -1,3 +1,5 @@
+import gainImageFallback from '~/assets/homepage/gain/nudger-screaming.webp'
+
 const painImages = Object.values(
   import.meta.glob('~/assets/homepage/pain/*.{png,jpg,jpeg,webp,svg}', {
     eager: true,
@@ -25,7 +27,7 @@ export const useRandomHomepageImages = () => {
     pickRandomImage(painImages, '/images/home/nudger-problem.webp')
   )
   const gainImage = useState<string>('home-gain-random-image', () =>
-    pickRandomImage(gainImages, '/images/home/nudger-screaming.webp')
+    pickRandomImage(gainImages, gainImageFallback)
   )
 
   const pickGainImage = () => {
