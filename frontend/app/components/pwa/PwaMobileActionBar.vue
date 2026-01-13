@@ -50,12 +50,6 @@ const actions = computed(() => [
     label: t('pwa.landing.actions.wizard.title'),
     event: 'wizard' as const,
   },
-  {
-    key: 'search',
-    icon: 'mdi-magnify',
-    label: t('pwa.landing.actions.search.title'),
-    event: 'search' as const,
-  },
 ])
 </script>
 

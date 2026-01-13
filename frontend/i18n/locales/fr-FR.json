@@ -2952,7 +2952,7 @@
       },
       "actions": {
         "scan": {
-          "title": "Scanner un code-barres",
+          "title": "Scanner",
           "description": "Utilise ta caméra pour obtenir instantanément impact et prix.",
           "helper": "Aligne le code-barres dans le cadre pour un décodage immédiat.",
           "loading": "Démarrage du scanner…",
@@ -2960,7 +2960,7 @@
           "badge": "Live"
         },
         "wizard": {
-          "title": "Assistant IA",
+          "title": "Assistant Nudger",
           "description": "Quelques questions pour des choix éco personnalisés.",
           "badge": "Nouveau"
         },
