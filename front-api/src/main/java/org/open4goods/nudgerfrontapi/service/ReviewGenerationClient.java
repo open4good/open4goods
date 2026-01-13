@@ -15,6 +15,8 @@ import org.springframework.web.client.RestClientResponseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+
 /**
  * HTTP client responsible for bridging review generation requests to the
  * back-office API.
@@ -41,8 +43,14 @@ public class ReviewGenerationClient {
 
     public ReviewGenerationClient(RestClient.Builder restClientBuilder, ReviewGenerationProperties properties) {
         this.properties = properties;
+        
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout((int) properties.getConnectTimeout().toMillis());
+        requestFactory.setReadTimeout((int) properties.getReadTimeout().toMillis());
+        
         this.restClient = restClientBuilder.baseUrl(properties.getApiBaseUrl())
                 .defaultHeader(UrlConstants.APIKEY_PARAMETER, properties.getApiKey())
+                .requestFactory(requestFactory)
                 .build();
     }
 

@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.ai.AiReview.AiSource;
@@ -111,7 +112,9 @@ public class ReviewGenerationService implements HealthIndicator {
 
     // New fields for batch tracking.
     private final File trackingFolder;
+
     private final ObjectMapper objectMapper;
+    private static final String AI_SOURCE_NAME = "AI";
 
 
     /**
@@ -347,19 +350,11 @@ public class ReviewGenerationService implements HealthIndicator {
         promptVariables.put("PRODUCT", product);
         promptVariables.put("VERTICAL_NAME", verticalConfig.i18n("fr").getH1Title().getPrefix());
 
-        StringBuilder sb = new StringBuilder();
-        verticalConfig.getAttributesConfig().getConfigs().forEach(attrConf -> {
-            if (attrConf.getSynonyms().size() > 0) {
-                sb.append("        ")
-                  .append("- ")
-                  .append(attrConf.getKey())
-                  .append(" (")
-                  .append(attrConf.getName().get("fr"))
-                  .append(")")
-                  .append("\n");
-            }
-        });
-        promptVariables.put("ATTRIBUTES", sb.toString());
+        String attributesList = verticalConfig.getAttributesConfig().getConfigs().stream()
+                .filter(attrConf -> !attrConf.getSynonyms().isEmpty())
+                .map(attrConf -> String.format("        - %s (%s)", attrConf.getKey(), attrConf.getName().get("fr")))
+                .collect(Collectors.joining("\n"));
+        promptVariables.put("ATTRIBUTES", attributesList);
         status.addMessage("AI generation");
 
         // Store aggregated tokens for convenience.
@@ -631,11 +626,10 @@ public class ReviewGenerationService implements HealthIndicator {
 
 
 			String source;
-			try {
-				// TODO : i18n, const or deduct  provider name from source
-				// TODO : The add source behaviour should not be weared onfly. Means also shared code with
 
-				source = "openai.com";
+			try {
+                // TODO: Deduct provider name from source or config
+				source = AI_SOURCE_NAME;
 				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.getName(), a.getValue(), "fr") , source));
 
 				// Replacing new AggAttribute in product

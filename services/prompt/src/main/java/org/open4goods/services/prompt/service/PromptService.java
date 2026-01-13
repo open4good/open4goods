@@ -55,6 +55,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class PromptService implements HealthIndicator {
 
     private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
+    
+    private static final String INSTRUCTION_HEADER_FR = "\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
 
     /**
      * Cache for chat models (keyed by prompt config key).
@@ -179,7 +181,7 @@ public class PromptService implements HealthIndicator {
         // Adding the instructions at the end of system prompt if presents
 
         if (null != instructions && instructions.size() > 0) {
-        	systemPromptEvaluated +="\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
+        	systemPromptEvaluated += INSTRUCTION_HEADER_FR;
         	for (Entry<String, String> entry : instructions.entrySet()) {
         		systemPromptEvaluated+=entry.getKey() + " : " + entry.getValue()+"\n";
         	}

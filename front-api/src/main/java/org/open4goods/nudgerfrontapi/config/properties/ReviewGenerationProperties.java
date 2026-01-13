@@ -101,6 +101,32 @@ public class ReviewGenerationProperties {
     }
 
     /**
+     * Timeout for the connection to the back-office API.
+     */
+    private Duration connectTimeout = Duration.ofSeconds(5);
+
+    /**
+     * Timeout for reading the response from the back-office API.
+     */
+    private Duration readTimeout = Duration.ofSeconds(30);
+
+    public Duration getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(Duration connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public Duration getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(Duration readTimeout) {
+        this.readTimeout = readTimeout;
+    }
+
+    /**
      * Configuration properties controlling IP-based quotas for review generation.
      */
     public static class Quota {
