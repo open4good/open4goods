@@ -36,58 +36,71 @@
             <div class="product-life-timeline__rail-line" />
 
             <div
-              v-for="event in group.events"
-              :key="event.key"
-              class="product-life-timeline__event"
-              role="listitem"
+              v-for="month in group.months"
+              :key="month.key"
+              class="product-life-timeline__month-group"
             >
-              <v-tooltip location="top" max-width="320">
-                <template #activator="{ props: tooltipProps }">
-                  <button
-                    type="button"
-                    class="product-life-timeline__event-point"
-                    :style="{
-                      '--timeline-event-color': `rgb(var(--v-theme-${event.color}))`,
-                    }"
-                    v-bind="tooltipProps"
-                    :aria-label="event.ariaLabel"
+              <span class="product-life-timeline__month-label">
+                {{ month.monthLabel }}
+              </span>
+              <div class="product-life-timeline__event-list">
+                <div
+                  v-for="event in month.events"
+                  :key="event.key"
+                  class="product-life-timeline__event"
+                  role="listitem"
+                >
+                  <v-tooltip
+                    location="top"
+                    max-width="320"
+                    content-class="product-life-timeline__tooltip-surface"
                   >
-                    <span class="product-life-timeline__event-dot" />
-                    <v-icon
-                      :icon="event.icon"
-                      size="18"
-                      class="product-life-timeline__event-icon"
-                    />
-                  </button>
-                </template>
+                    <template #activator="{ props: tooltipProps }">
+                      <button
+                        type="button"
+                        class="product-life-timeline__event-point"
+                        :style="{
+                          '--timeline-event-color': `rgb(var(--v-theme-${event.color}))`,
+                        }"
+                        v-bind="tooltipProps"
+                        :aria-label="event.ariaLabel"
+                      >
+                        <span class="product-life-timeline__event-dot" />
+                        <v-icon
+                          :icon="event.icon"
+                          size="18"
+                          class="product-life-timeline__event-icon"
+                        />
+                      </button>
+                    </template>
 
-                <div class="product-life-timeline__tooltip">
-                  <p class="product-life-timeline__tooltip-title">
-                    {{ event.label }}
-                  </p>
-                  <p class="product-life-timeline__tooltip-description">
-                    {{ event.description }}
-                  </p>
+                    <div class="product-life-timeline__tooltip">
+                      <p class="product-life-timeline__tooltip-title">
+                        {{ event.label }}
+                      </p>
+                      <p class="product-life-timeline__tooltip-description">
+                        {{ event.description }}
+                      </p>
 
-                  <div class="product-life-timeline__tooltip-meta">
-                    <span
-                      >{{ t('product.attributes.timeline.tooltip.date') }} ·
-                      {{ event.fullDateLabel }}</span
-                    >
-                    <span v-if="event.sourceLabel">
-                      {{ t('product.attributes.timeline.tooltip.source') }} ·
-                      {{ event.sourceLabel }}
-                    </span>
-                  </div>
+                      <div class="product-life-timeline__tooltip-meta">
+                        <span>
+                          {{ t('product.attributes.timeline.tooltip.date') }} ·
+                          {{ event.fullDateLabel }}
+                        </span>
+                        <span v-if="event.sourceLabel">
+                          {{ t('product.attributes.timeline.tooltip.source') }}
+                          ·
+                          {{ event.sourceLabel }}
+                        </span>
+                      </div>
+                    </div>
+                  </v-tooltip>
+
+                  <span class="product-life-timeline__event-title">{{
+                    event.label
+                  }}</span>
                 </div>
-              </v-tooltip>
-
-              <span class="product-life-timeline__event-month">{{
-                event.monthLabel
-              }}</span>
-              <span class="product-life-timeline__event-title">{{
-                event.label
-              }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -138,6 +151,13 @@ type TimelineEventViewModel = {
 type TimelineYearGroup = {
   key: string
   year: number
+  months: TimelineMonthGroup[]
+}
+
+type TimelineMonthGroup = {
+  key: string
+  monthIndex: number
+  monthLabel: string
   events: TimelineEventViewModel[]
 }
 
@@ -230,7 +250,14 @@ const eventDescriptionKeys: Record<string, string> = {
 
 const groupedEvents = computed<TimelineYearGroup[]>(() => {
   const rawEvents = props.timeline?.events ?? []
-  const yearGroups = new Map<number, TimelineYearGroup>()
+  const yearGroups = new Map<
+    number,
+    {
+      key: string
+      year: number
+      months: Map<number, TimelineMonthGroup>
+    }
+  >()
 
   rawEvents
     .filter(
@@ -268,6 +295,8 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
           )
         : null
       const year = date.getFullYear()
+      const monthIndex = date.getMonth()
+      const monthKey = `${year}-${monthIndex}`
       const ariaLabel = t('product.attributes.timeline.tooltip.ariaLabel', {
         label,
         date: fullDateLabel,
@@ -278,7 +307,7 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
         yearGroups.set(year, {
           key: `${year}`,
           year,
-          events: [],
+          months: new Map(),
         })
       }
 
@@ -287,7 +316,21 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
         return
       }
 
-      group.events.push({
+      if (!group.months.has(monthIndex)) {
+        group.months.set(monthIndex, {
+          key: monthKey,
+          monthIndex,
+          monthLabel,
+          events: [],
+        })
+      }
+
+      const monthGroup = group.months.get(monthIndex)
+      if (!monthGroup) {
+        return
+      }
+
+      monthGroup.events.push({
         key,
         label,
         description,
@@ -303,10 +346,20 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
 
   return Array.from(yearGroups.values())
     .sort((a, b) => a.year - b.year)
-    .map(group => ({
-      ...group,
-      events: group.events.sort((a, b) => a.timestamp - b.timestamp),
-    }))
+    .map(group => {
+      const months = Array.from(group.months.values())
+        .sort((a, b) => a.monthIndex - b.monthIndex)
+        .map(month => ({
+          ...month,
+          events: month.events.sort((a, b) => a.timestamp - b.timestamp),
+        }))
+
+      return {
+        key: group.key,
+        year: group.year,
+        months,
+      }
+    })
 })
 
 const hasEvents = computed(() => groupedEvents.value.length > 0)
@@ -415,14 +468,35 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   border-radius: 999px;
 }
 
-.product-life-timeline__event {
+.product-life-timeline__month-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.6rem;
+  min-width: 170px;
+  align-items: flex-start;
+}
+
+.product-life-timeline__month-label {
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  font-weight: 700;
+}
+
+.product-life-timeline__event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  align-items: flex-start;
+}
+
+.product-life-timeline__event {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
   align-items: center;
   position: relative;
-  min-width: 72px;
-  text-align: center;
+  min-width: 0;
+  text-align: left;
 }
 
 .product-life-timeline__event-point {
@@ -470,18 +544,12 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   z-index: 1;
 }
 
-.product-life-timeline__event-month {
-  font-size: 0.85rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
-  font-weight: 600;
-}
-
 .product-life-timeline__event-title {
   font-size: 0.9rem;
   color: rgb(var(--v-theme-text-neutral-strong));
   font-weight: 600;
   line-height: 1.2;
-  max-width: 16ch;
+  max-width: 22ch;
 }
 
 .product-life-timeline__tooltip {
@@ -489,6 +557,15 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   flex-direction: column;
   gap: 0.35rem;
   max-width: 300px;
+}
+
+.product-life-timeline__tooltip-surface {
+  background: rgb(var(--v-theme-surface-default)) !important;
+  color: rgb(var(--v-theme-text-neutral-strong));
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 14px 32px -24px rgba(15, 23, 42, 0.5);
 }
 
 .product-life-timeline__tooltip-title {
