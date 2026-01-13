@@ -27,15 +27,17 @@ vi.mock('~/composables/useAuth', () => ({
 
 const VCardStub = defineComponent({
   name: 'VCardStub',
-  setup(_, { slots }) {
-    return () => h('div', { class: 'v-card-stub' }, slots.default?.())
+  setup(_, { slots, attrs }) {
+    return () =>
+      h('div', { class: ['v-card-stub', attrs.class] }, slots.default?.())
   },
 })
 
 const VTableStub = defineComponent({
   name: 'VTableStub',
-  setup(_, { slots }) {
-    return () => h('table', { class: 'v-table-stub' }, slots.default?.())
+  setup(_, { slots, attrs }) {
+    return () =>
+      h('table', { class: ['v-table-stub', attrs.class] }, slots.default?.())
   },
 })
 
@@ -54,7 +56,7 @@ const VDataTableStub = defineComponent({
     return () =>
       h(
         'div',
-        { class: 'v-data-table-stub' },
+        { class: ['v-data-table-stub', props.class] },
         ((props.items as Array<Record<string, unknown>>) ?? []).map(item => {
           const rowClass =
             (typeof props.itemClass === 'function'
@@ -99,8 +101,9 @@ const VIconStub = defineComponent({
 
 const VChipStub = defineComponent({
   name: 'VChipStub',
-  setup(_, { slots }) {
-    return () => h('span', { class: 'v-chip-stub' }, slots.default?.())
+  setup(_, { slots, attrs }) {
+    return () =>
+      h('span', { class: ['v-chip-stub', attrs.class] }, slots.default?.())
   },
 })
 
@@ -124,20 +127,32 @@ const VBtnStub = defineComponent({
     icon: { type: Boolean, default: false },
     density: { type: String, default: 'default' },
     variant: { type: String, default: 'text' },
+    value: { type: String, default: undefined },
   },
-  setup(props, { slots }) {
+  setup(props, { slots, attrs }) {
     return () =>
       h(
         'button',
         {
-          class: 'v-btn-stub',
+          class: ['v-btn-stub', attrs.class],
           'data-icon': props.icon,
           'data-density': props.density,
           'data-variant': props.variant,
           type: 'button',
+          value: props.value,
         },
         slots.default?.()
       )
+  },
+})
+
+const VBtnToggleStub = defineComponent({
+  name: 'VBtnToggleStub',
+  props: ['modelValue'],
+  emits: ['update:modelValue'],
+  setup(props, { slots, attrs }) {
+    return () =>
+      h('div', { class: ['v-btn-toggle-stub', attrs.class] }, slots.default?.())
   },
 })
 
@@ -154,9 +169,13 @@ const VImgStub = defineComponent({
     src: { type: String, default: '' },
     alt: { type: String, default: '' },
   },
-  setup(props) {
+  setup(props, { attrs }) {
     return () =>
-      h('img', { class: 'v-img-stub', src: props.src, alt: props.alt })
+      h('img', {
+        class: ['v-img-stub', attrs.class],
+        src: props.src,
+        alt: props.alt,
+      })
   },
 })
 
@@ -167,14 +186,14 @@ const VTextFieldStub = defineComponent({
     label: { type: String, default: '' },
   },
   emits: ['update:modelValue'],
-  setup(props, { emit }) {
+  setup(props, { emit, attrs }) {
     const onInput = (event: Event) => {
       const target = event.target as HTMLInputElement | null
       emit('update:modelValue', target?.value ?? '')
     }
 
     return () =>
-      h('label', { class: 'v-text-field-stub' }, [
+      h('label', { class: ['v-text-field-stub', attrs.class] }, [
         props.label
           ? h('span', { class: 'v-text-field-stub__label' }, props.label)
           : null,
@@ -195,14 +214,14 @@ const VCheckboxStub = defineComponent({
     label: { type: String, default: '' },
   },
   emits: ['update:modelValue'],
-  setup(props, { emit }) {
+  setup(props, { emit, attrs }) {
     const onChange = (event: Event) => {
       const target = event.target as HTMLInputElement | null
       emit('update:modelValue', target?.checked ?? false)
     }
 
     return () =>
-      h('label', { class: 'v-checkbox-stub' }, [
+      h('label', { class: ['v-checkbox-stub', attrs.class] }, [
         h('input', {
           class: 'v-checkbox-stub__input',
           type: 'checkbox',
@@ -218,8 +237,9 @@ const VCheckboxStub = defineComponent({
 
 const VRowStub = defineComponent({
   name: 'VRowStub',
-  setup(_, { slots }) {
-    return () => h('div', { class: 'v-row-stub' }, slots.default?.())
+  setup(_, { slots, attrs }) {
+    return () =>
+      h('div', { class: ['v-row-stub', attrs.class] }, slots.default?.())
   },
 })
 
@@ -230,8 +250,9 @@ const VColStub = defineComponent({
     sm: { type: [Number, String], default: undefined },
     lg: { type: [Number, String], default: undefined },
   },
-  setup(_, { slots }) {
-    return () => h('div', { class: 'v-col-stub' }, slots.default?.())
+  setup(_, { slots, attrs }) {
+    return () =>
+      h('div', { class: ['v-col-stub', attrs.class] }, slots.default?.())
   },
 })
 
@@ -473,6 +494,7 @@ const mountComponent = async (
         VChip: VChipStub,
         VTooltip: VTooltipStub,
         VBtn: VBtnStub,
+        VBtnToggle: VBtnToggleStub,
         VDivider: VDividerStub,
         VImg: VImgStub,
         VTextField: VTextFieldStub,
@@ -540,14 +562,23 @@ describe('ProductAttributesSection', () => {
     await input.setValue('Power')
 
     // Switch to cards mode as cards are expected
-    const gridBtn = wrapper
-      .findAll('.v-btn-stub')
-      .find(b => b.html().includes('mdi-view-grid'))
-    if (gridBtn) await gridBtn.trigger('click')
+    // const gridBtn = wrapper
+    //   .findAll('.v-btn-stub')
+    //   .find(b => b.html().includes('mdi-view-grid'))
+    // if (gridBtn) await gridBtn.trigger('click')
+
+    // Simulate toggle change manually as stub doesn't handle click->update
+    const toggle = wrapper.findComponent({ name: 'VBtnToggleStub' })
+    if (toggle.exists()) {
+      toggle.vm.$emit('update:modelValue', 'cards')
+    }
 
     await flushPromises()
 
     const cards = wrapper.findAll('.product-attributes__detail-card')
+    if (cards.length !== 1) {
+      console.log('DEBUG: Card count mismatch. Wrapper HTML:', wrapper.html())
+    }
     expect(cards).toHaveLength(1)
     expect(cards[0].text()).toContain('Power')
 
@@ -584,6 +615,7 @@ describe('ProductAttributesSection', () => {
     const rows = wrapper.findAll(
       '.product-attributes__audit-table .v-data-table-row-stub'
     )
+    // 3 indexed (Weight, Depth, Wireless) + 4 raw (Power, Height, Battery life, Noise level)
     // 3 indexed (Weight, Depth, Wireless) + 4 raw (Power, Height, Battery life, Noise level)
     expect(rows).toHaveLength(7)
     expect(wrapper.text()).toContain('Attribute sourcing audit')

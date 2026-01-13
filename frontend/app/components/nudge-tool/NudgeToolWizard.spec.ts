@@ -81,11 +81,17 @@ vi.mock('@vueuse/core', () => ({
 
 vi.stubGlobal(
   '$fetch',
-  vi.fn().mockResolvedValue({
-    products: {
-      data: [],
-      page: { totalElements: 0 },
-    },
+  vi.fn(url => {
+    const normalizedUrl = url.split('?')[0]
+    if (normalizedUrl === '/api/products/search') {
+      return Promise.resolve({
+        products: {
+          data: [],
+          page: { totalElements: 0 },
+        },
+      })
+    }
+    return Promise.resolve({})
   })
 )
 

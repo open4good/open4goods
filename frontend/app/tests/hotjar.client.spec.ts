@@ -1,5 +1,5 @@
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 import {
   HOTJAR_RECORDING_COOKIE_NAME,
   HOTJAR_RECORDING_COOKIE_VALUE,
@@ -26,8 +26,27 @@ type NuxtAppStub = {
   vueApp: VueApp
 }
 
-const useRuntimeConfigMock = vi.hoisted(() => vi.fn())
+// Mock useCookie
 const useCookieMock = vi.hoisted(() => vi.fn())
+mockNuxtImport('useCookie', () => useCookieMock)
+
+// Mock useRuntimeConfig
+const runtimeConfigMock = vi.hoisted(() => ({
+  value: {
+    public: {
+      hotjar: {
+        enabled: false,
+        siteId: 0,
+        snippetVersion: 6,
+      },
+    },
+  },
+}))
+mockNuxtImport('useRuntimeConfig', () => () => runtimeConfigMock.value)
+
+// Mock defineNuxtPlugin (pass through)
+mockNuxtImport('defineNuxtPlugin', () => (plugin: any) => plugin)
+
 const isDoNotTrackEnabledMock = vi.hoisted(() => vi.fn())
 const hotjarPlugin = vi.hoisted(() => ({ install: vi.fn() }))
 
@@ -39,12 +58,6 @@ vi.mock('~/utils/do-not-track', () => ({
   isDoNotTrackEnabled: isDoNotTrackEnabledMock,
 }))
 
-vi.mock('#imports', () => ({
-  defineNuxtPlugin: (plugin: HotjarPluginDefinition) => plugin,
-  useRuntimeConfig: useRuntimeConfigMock,
-  useCookie: useCookieMock,
-}))
-
 describe('hotjar client plugin', () => {
   const createNuxtApp = (): NuxtAppStub => ({
     vueApp: {
@@ -52,13 +65,22 @@ describe('hotjar client plugin', () => {
     },
   })
 
-  const setRuntimeConfig = (config: HotjarRuntimeConfig) => {
-    useRuntimeConfigMock.mockReturnValue(config)
+  const setRuntimeConfig = (config: any) => {
+    runtimeConfigMock.value = config
   }
 
   beforeEach(() => {
     vi.resetModules()
-    useRuntimeConfigMock.mockReset()
+    // Reset config to default disabled state
+    runtimeConfigMock.value = {
+      public: {
+        hotjar: {
+          enabled: false,
+          siteId: 0,
+          snippetVersion: 6,
+        },
+      },
+    }
     useCookieMock.mockReset()
     isDoNotTrackEnabledMock.mockReset()
     isDoNotTrackEnabledMock.mockReturnValue(false)
