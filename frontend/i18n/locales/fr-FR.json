@@ -2304,8 +2304,8 @@
           "akaBrands": "Aussi référencé comme",
           "model": "Modèle",
           "akaModels": "Autres appellations",
-          "knownSince": "Présent dans notre base depuis",
-          "lastUpdated": "Mise à jour :",
+          "knownSince": "Présent depuis",
+          "lastUpdated": "Mise à jour",
           "gtin": "GTIN",
           "gtinLabel": "Référence code-barres GTIN",
           "gtinImageAlt": "Code-barres GTIN pour {gtin}",
@@ -2816,7 +2816,7 @@
         "nudgerTooltip": "Basculer vers le thème signature Nudger"
       },
       "zoom": {
-        "label": "Mode accessible",
+        "label": "",
         "activate": "Plus simple. Plus gros.",
         "reset": "Désactiver le mode accessible"
       },
