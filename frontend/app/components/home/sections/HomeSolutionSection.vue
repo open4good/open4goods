@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const solutionImageSrc = '/images/home/nudger-screaming.webp'
+import solutionImageSrc from '~/assets/homepage/gain/nudger-screaming.webp'
 
 type SolutionBenefit = {
   emoji: string
@@ -115,6 +115,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
   height: auto
   display: block
   filter: drop-shadow(0 20px 40px rgba(var(--v-theme-shadow-primary-600), 0.15))
+  transform: rotate(10deg)
 
 .home-solution__next-btn
   position: absolute
