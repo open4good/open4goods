@@ -275,3 +275,4 @@ onMounted(() => {
 
     &__header
       align-items: flex-start
+</style>
