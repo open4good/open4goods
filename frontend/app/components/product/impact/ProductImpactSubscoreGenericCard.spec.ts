@@ -75,7 +75,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
     relativeValue: 3.6,
     absoluteValue: 42.5,
     absolute: { min: 10, max: 100, avg: 55, count: 200, value: 42.5 },
-    energyLetter: 'A',
+    energyClassDisplay: 'A',
     distribution: [
       { label: '1', value: 5 },
       { label: '2', value: 10 },
@@ -133,6 +133,7 @@ describe('ProductImpactSubscoreGenericCard', () => {
     expect(wrapper.text()).toContain('coefficient:0.42')
     expect(wrapper.text()).toContain('17.3')
     expect(wrapper.find('.impact-subscore__value-number').text()).toBe('42.5')
+    expect(wrapper.text()).toContain('A')
     expect(wrapper.text()).toContain('How to read this indicator')
     expect(wrapper.text()).toContain('Lower is better')
     expect(wrapper.text()).not.toContain('Percentile')

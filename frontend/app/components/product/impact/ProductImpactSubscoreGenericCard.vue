@@ -31,8 +31,19 @@
       />
     </div>
 
-    <div v-if="score.energyLetter" class="impact-subscore__badge">
-      <span class="impact-subscore__energy">{{ score.energyLetter }}</span>
+    <div v-if="hasEnergyClass" class="impact-subscore__badge">
+      <v-img
+        v-if="energyClassImageSrc"
+        :src="energyClassImageSrc"
+        :alt="energyLabelAlt"
+        class="impact-subscore__energy-image"
+        width="140"
+        height="88"
+        cover
+      />
+      <span class="impact-subscore__energy" :aria-label="energyLabelAlt">
+        {{ energyClassLabel }}
+      </span>
     </div>
 
     <ProductImpactSubscoreChart
@@ -76,7 +87,7 @@ const props = defineProps<{
   verticalTitle: string
 }>()
 
-const { n } = useI18n()
+const { n, t } = useI18n()
 
 const relativeScore = computed(() => (props.score.relativeValue ?? 0) || 0)
 
@@ -94,6 +105,36 @@ const absoluteValue = computed(() => {
 })
 
 const absoluteUnit = computed(() => props.score.unit?.toString().trim() || null)
+
+const energyClassLabel = computed(() => {
+  const display = props.score.energyClassDisplay?.trim()
+  if (display?.length) {
+    return display
+  }
+
+  return props.score.energyLetter?.trim() ?? ''
+})
+
+const energyClassImage = computed(
+  () => props.score.energyClassImage?.trim() ?? ''
+)
+
+const energyClassImageSrc = computed(() =>
+  energyClassImage.value.length
+    ? `/images/eprel/${energyClassImage.value}`
+    : ''
+)
+
+const hasEnergyClass = computed(
+  () =>
+    energyClassLabel.value.length > 0 || energyClassImageSrc.value.length > 0
+)
+
+const energyLabelAlt = computed(() =>
+  t('product.impact.energyLabelAlt', {
+    value: energyClassLabel.value || props.score.label || '—',
+  })
+)
 
 const hasDistribution = computed(() =>
   Boolean(props.score.distribution?.length)
@@ -227,6 +268,15 @@ const coefficientValue = computed(() => {
 
 .impact-subscore__badge {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.impact-subscore__energy-image {
+  max-width: min(100%, 180px);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
 }
 
 .impact-subscore__energy {

@@ -34,6 +34,8 @@ export type ScoreView = {
   on20?: number | null
   distribution?: DistributionBucket[]
   energyLetter?: string | null
+  energyClassDisplay?: string | null
+  energyClassImage?: string | null
   metadatas?: Record<string, string> | null
   unit?: string | null
   aggregates?: Record<string, number> | null

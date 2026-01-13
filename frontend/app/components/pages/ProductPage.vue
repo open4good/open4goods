@@ -1049,6 +1049,74 @@ const selectedProductScores = computed(() => {
     .filter(isRenderableScore)
 })
 
+const ENERGY_CLASS_SCORE_IDS = new Set([
+  'CLASSE_ENERGY',
+  'CLASSE_ENERGY_SDR',
+  'CLASSE_ENERGY_HDR',
+])
+
+const normalizeEprelValue = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed : null
+}
+
+const resolveCategorySpecificAttribute = (key: string): string | null => {
+  const attributes = product.value?.eprel?.categorySpecificAttributes
+  if (!attributes || typeof attributes !== 'object') {
+    return null
+  }
+
+  return normalizeEprelValue(
+    (attributes as Record<string, unknown>)[key]
+  )
+}
+
+const resolveEnergyClassDisplay = (
+  scoreId: string,
+  attributeValue: string | null
+): string | null => {
+  const normalizedAttribute = attributeValue?.trim() ?? ''
+  if (normalizedAttribute.length) {
+    return normalizedAttribute
+  }
+
+  if (scoreId === 'CLASSE_ENERGY_SDR') {
+    return resolveCategorySpecificAttribute('energyClassSDR')
+  }
+
+  if (scoreId === 'CLASSE_ENERGY_HDR') {
+    return resolveCategorySpecificAttribute('energyClassHDR')
+  }
+
+  return (
+    normalizeEprelValue(product.value?.eprel?.energyClass) ??
+    resolveCategorySpecificAttribute('energyClass') ??
+    resolveCategorySpecificAttribute('energyClassSDR') ??
+    resolveCategorySpecificAttribute('energyClassHDR')
+  )
+}
+
+const resolveEnergyClassImage = (scoreId: string): string | null => {
+  const categorySpecific = resolveCategorySpecificAttribute(
+    'energyClassImageWithScale'
+  )
+  const generic = normalizeEprelValue(product.value?.eprel?.energyClassImage)
+
+  if (scoreId === 'CLASSE_ENERGY') {
+    return categorySpecific ?? generic
+  }
+
+  if (scoreId === 'CLASSE_ENERGY_SDR' || scoreId === 'CLASSE_ENERGY_HDR') {
+    return categorySpecific ?? generic
+  }
+
+  return null
+}
+
 const impactScores = computed(() => {
   const desiredScores = selectedProductScores.value
   const coefficients = scoreCoefficientMap.value
@@ -1101,6 +1169,13 @@ const impactScores = computed(() => {
           aggregates?: Record<string, number> | null
         }
       ).aggregates ?? null
+    const isEnergyClassScore = ENERGY_CLASS_SCORE_IDS.has(normalizedScoreId)
+    const energyClassDisplay = isEnergyClassScore
+      ? resolveEnergyClassDisplay(normalizedScoreId, attributeValue)
+      : null
+    const energyClassImage = isEnergyClassScore
+      ? resolveEnergyClassImage(normalizedScoreId)
+      : null
 
     return {
       id: score.id,
@@ -1115,7 +1190,9 @@ const impactScores = computed(() => {
       attributeValue,
       attributeSourcing,
       attributeSuffix,
-      absoluteValue: score.absoluteValue ?? null,
+      absoluteValue: isEnergyClassScore
+        ? energyClassDisplay ?? score.absoluteValue ?? null
+        : score.absoluteValue ?? null,
       absolute: score.absolute ?? null,
       coefficient: coefficients[normalizedScoreId] ?? null,
       percent: score.percent ?? null,
@@ -1125,6 +1202,8 @@ const impactScores = computed(() => {
       distribution,
       energyLetter:
         score.id === 'CLASSE_ENERGY' && score.letter ? score.letter : null,
+      energyClassDisplay,
+      energyClassImage,
       metadatas: score.metadatas ?? null,
       unit: attributeConfig?.unit ?? attributeConfig?.suffix ?? null,
       aggregates,
