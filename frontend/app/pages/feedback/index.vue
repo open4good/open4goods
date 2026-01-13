@@ -188,10 +188,10 @@ import FeedbackSubmissionForm, {
 } from '~/components/domains/feedback/FeedbackSubmissionForm.vue'
 import FeedbackOpenSourceSection from '~/components/domains/feedback/FeedbackOpenSourceSection.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+import { IpQuotaCategory } from '~~/shared/api-client'
 import type {
   FeedbackIssueDto,
   FeedbackSubmissionResponseDto,
-  IpQuotaCategory,
 } from '~~/shared/api-client'
 
 definePageMeta({
