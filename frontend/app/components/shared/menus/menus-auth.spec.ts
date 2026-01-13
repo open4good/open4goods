@@ -167,6 +167,19 @@ vi.mock('~/composables/categories/useCategoryNavigation', () => ({
   useCategoryNavigation: useCategoryNavigationComposable,
 }))
 
+vi.mock('~/composables/useIpQuota', () => ({
+  useIpQuota: () => ({
+    getRemaining: () => 10,
+    refreshQuota: vi.fn(),
+  }),
+}))
+
+vi.mock('~/stores/useProductCompareStore', () => ({
+  useProductCompareStore: () => ({
+    items: computed(() => []),
+  }),
+}))
+
 const installPromptVisible = ref(false)
 const isInstallSupported = ref(false)
 const installInProgress = ref(false)
@@ -358,7 +371,9 @@ describe('Shared menu authentication controls', () => {
     )
 
     expect(
-      heroWrapper.find('[data-testid="hero-account-menu-activator"]').exists()
+      heroWrapper
+        .find('[data-testid="hero-account-menu-activator-guest"]')
+        .exists()
     ).toBe(true)
     expect(
       heroWrapper.find('[data-testid="account-privacy-card"]').exists()
@@ -518,13 +533,13 @@ describe('Shared menu authentication controls', () => {
     await heroWrapper.get('.accessibility-menu__activator').trigger('click')
     await flushPromises()
 
-    const heroToggle = document.body.querySelector(
-      '[data-testid="hero-theme-toggle"]'
+    const heroLightToggle = document.body.querySelector(
+      '[data-testid="hero-theme-light"]'
     )
-    expect(heroToggle).not.toBeNull()
+    expect(heroLightToggle).not.toBeNull()
 
     const darkToggle = document.body.querySelector(
-      '[data-testid="hero-theme-toggle-dark"]'
+      '[data-testid="hero-theme-dark"]'
     )
     expect(darkToggle).not.toBeNull()
 

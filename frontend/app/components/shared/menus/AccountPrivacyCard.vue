@@ -11,11 +11,11 @@
         color="surface-primary-080"
         class="account-privacy-card__avatar"
       >
-        <v-icon icon="mdi-navigation-private" color="primary" />
+        <v-icon icon="mdi-shield-account" color="primary" />
       </v-avatar>
       <div>
         <p class="account-privacy-card__title">
-          {{ t('siteIdentity.menu.account.privacy.title') }}
+          {{ t('siteIdentity.menu.account.privacy.cardTitle') }}
         </p>
         <p class="account-privacy-card__subtitle">
           {{ t('siteIdentity.menu.account.privacy.subtitle') }}
@@ -25,6 +25,7 @@
 
     <v-divider class="my-4" />
 
+    <!-- IP Address -->
     <div class="account-privacy-card__section">
       <div class="account-privacy-card__section-header">
         <div>
@@ -39,32 +40,66 @@
           size="small"
           color="surface-primary-100"
           variant="flat"
-          class="account-privacy-card__chip"
+          class="account-privacy-card__chip font-weight-bold"
         >
           {{ ipLabel }}
         </v-chip>
       </div>
     </div>
 
+    <!-- Quotas -->
     <div class="account-privacy-card__section">
-      <div class="account-privacy-card__section-header">
-        <div>
-          <p class="account-privacy-card__section-title">
-            {{ t('siteIdentity.menu.account.privacy.cookies.title') }}
-          </p>
-          <p class="account-privacy-card__section-description">
-            {{
-              t('siteIdentity.menu.account.privacy.cookies.description', {
-                count: cookieKeys.length,
-              })
-            }}
-          </p>
-        </div>
+      <p class="account-privacy-card__section-title mb-2">
+        {{ t('siteIdentity.menu.account.privacy.quotas.title') }}
+      </p>
+      <v-list density="compact" nav bg-color="transparent" class="pa-0">
+        <v-list-item v-if="aiQuota !== null" class="px-0">
+          <template #prepend>
+            <v-icon icon="mdi-robot-outline" size="small" class="mr-2" />
+          </template>
+          <div class="d-flex justify-space-between w-100 align-center">
+            <span class="text-body-2">{{
+              t('siteIdentity.menu.account.privacy.quotas.aiRemaining')
+            }}</span>
+            <v-chip size="x-small" color="primary" variant="flat">{{
+              aiQuota
+            }}</v-chip>
+          </div>
+        </v-list-item>
+        <v-list-item
+          v-if="voteQuota !== null"
+          to="/feedback"
+          class="px-0"
+          color="primary"
+        >
+          <template #prepend>
+            <v-icon icon="mdi-vote-outline" size="small" class="mr-2" />
+          </template>
+          <div class="d-flex justify-space-between w-100 align-center">
+            <span class="text-body-2">{{
+              t('siteIdentity.menu.account.privacy.quotas.votesRemaining')
+            }}</span>
+            <v-chip size="x-small" color="primary" variant="flat">{{
+              voteQuota
+            }}</v-chip>
+          </div>
+          <template #append>
+            <v-icon icon="mdi-chevron-right" size="small" />
+          </template>
+        </v-list-item>
+      </v-list>
+    </div>
+
+    <!-- Cookies -->
+    <div class="account-privacy-card__section">
+      <div class="d-flex justify-space-between align-center mb-2">
+        <p class="account-privacy-card__section-title">
+          {{ t('siteIdentity.menu.account.privacy.cookies.title') }}
+        </p>
         <v-btn
           color="primary"
-          variant="tonal"
-          size="small"
-          class="account-privacy-card__action"
+          variant="text"
+          size="x-small"
           data-testid="privacy-reset-cookies"
           :disabled="cookieKeys.length === 0"
           @click="handleClearCookies"
@@ -73,43 +108,30 @@
         </v-btn>
       </div>
 
-      <div class="account-privacy-card__chips">
-        <template v-if="cookieKeys.length">
-          <v-chip
-            v-for="cookieKey in cookieKeys"
-            :key="cookieKey"
-            size="x-small"
-            variant="outlined"
-            class="account-privacy-card__chip"
-          >
-            {{ cookieKey }}
-          </v-chip>
-        </template>
-        <p v-else class="account-privacy-card__empty">
-          {{ t('siteIdentity.menu.account.privacy.cookies.empty') }}
-        </p>
-      </div>
+      <v-table density="compact" class="account-privacy-table">
+        <tbody>
+          <tr v-for="key in cookieKeys" :key="key">
+            <td class="text-caption text-neutral-secondary">{{ key }}</td>
+          </tr>
+          <tr v-if="cookieKeys.length === 0">
+            <td class="text-caption text-neutral-soft text-center py-2">
+              {{ t('siteIdentity.menu.account.privacy.cookies.empty') }}
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
     </div>
 
+    <!-- Storage -->
     <div class="account-privacy-card__section">
-      <div class="account-privacy-card__section-header">
-        <div>
-          <p class="account-privacy-card__section-title">
-            {{ t('siteIdentity.menu.account.privacy.storage.title') }}
-          </p>
-          <p class="account-privacy-card__section-description">
-            {{
-              t('siteIdentity.menu.account.privacy.storage.description', {
-                count: localStorageKeys.length,
-              })
-            }}
-          </p>
-        </div>
+      <div class="d-flex justify-space-between align-center mb-2">
+        <p class="account-privacy-card__section-title">
+          {{ t('siteIdentity.menu.account.privacy.storage.title') }}
+        </p>
         <v-btn
           color="primary"
-          variant="tonal"
-          size="small"
-          class="account-privacy-card__action"
+          variant="text"
+          size="x-small"
           data-testid="privacy-reset-local-storage"
           :disabled="localStorageKeys.length === 0"
           @click="handleClearLocalStorage"
@@ -118,21 +140,38 @@
         </v-btn>
       </div>
 
-      <div class="account-privacy-card__chips">
-        <template v-if="localStorageKeys.length">
-          <v-chip
-            v-for="storageKey in localStorageKeys"
-            :key="storageKey"
-            size="x-small"
-            variant="outlined"
-            class="account-privacy-card__chip"
-          >
-            {{ storageKey }}
-          </v-chip>
-        </template>
-        <p v-else class="account-privacy-card__empty">
-          {{ t('siteIdentity.menu.account.privacy.storage.empty') }}
-        </p>
+      <v-table density="compact" class="account-privacy-table">
+        <tbody>
+          <tr v-for="key in localStorageKeys" :key="key">
+            <td class="text-caption text-neutral-secondary">{{ key }}</td>
+          </tr>
+          <tr v-if="localStorageKeys.length === 0">
+            <td class="text-caption text-neutral-soft text-center py-2">
+              {{ t('siteIdentity.menu.account.privacy.storage.empty') }}
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
+    </div>
+
+    <!-- Compare -->
+    <div v-if="compareCount > 0" class="mt-2">
+      <v-divider class="mb-3" />
+      <div class="d-flex justify-space-between align-center">
+        <span class="text-caption font-weight-medium">{{
+          t('siteIdentity.menu.account.privacy.compare.count', {
+            count: compareCount,
+          })
+        }}</span>
+        <v-btn
+          to="/compare"
+          color="primary"
+          variant="flat"
+          size="small"
+          prepend-icon="mdi-scale-balance"
+        >
+          {{ t('siteIdentity.menu.account.privacy.compare.cta') }}
+        </v-btn>
       </div>
     </div>
   </v-card>
@@ -140,13 +179,16 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { IpQuotaCategory } from '~~/shared/api-client'
+import { storeToRefs } from 'pinia'
+import { computed, ref, onMounted } from 'vue'
+import { useIpQuota } from '~/composables/useIpQuota'
+import { useProductCompareStore } from '~/stores/useProductCompareStore'
 
 const { t } = useI18n()
 const requestHeaders = useRequestHeaders(['x-forwarded-for', 'x-real-ip'])
 
-const cookieKeys = ref<string[]>([])
-const localStorageKeys = ref<string[]>([])
-
+// --- IP Logic ---
 const resolveIpAddress = () => {
   const forwardedHeader = requestHeaders['x-forwarded-for']
   const forwardedIp = forwardedHeader?.split(',')[0]?.trim()
@@ -157,6 +199,28 @@ const ipLabel = computed(() => {
   const resolvedIp = resolveIpAddress()
   return resolvedIp ?? t('siteIdentity.menu.account.privacy.ip.unavailable')
 })
+
+// --- Quota Logic ---
+const { getRemaining, refreshQuota } = useIpQuota()
+
+const aiQuotaCategory = IpQuotaCategory.ReviewGeneration
+const voteQuotaCategory = IpQuotaCategory.FeedbackVote
+
+const aiQuota = computed(() => getRemaining(aiQuotaCategory))
+const voteQuota = computed(() => getRemaining(voteQuotaCategory))
+
+const loadQuotas = async () => {
+  if (import.meta.client) {
+    await Promise.allSettled([
+      refreshQuota(aiQuotaCategory),
+      refreshQuota(voteQuotaCategory),
+    ])
+  }
+}
+
+// --- Cookies & Storage Logic ---
+const cookieKeys = ref<string[]>([])
+const localStorageKeys = ref<string[]>([])
 
 const refreshStorageSnapshot = () => {
   if (typeof window === 'undefined') {
@@ -186,7 +250,6 @@ const handleClearCookies = () => {
   if (typeof window === 'undefined') {
     return
   }
-
   cookieKeys.value.forEach(clearCookieKey)
   refreshStorageSnapshot()
 }
@@ -195,13 +258,18 @@ const handleClearLocalStorage = () => {
   if (typeof window === 'undefined') {
     return
   }
-
   window.localStorage.clear()
   refreshStorageSnapshot()
 }
 
+// --- Compare Logic ---
+const compareStore = useProductCompareStore()
+const { items: compareItems } = storeToRefs(compareStore)
+const compareCount = computed(() => compareItems.value.length)
+
 onMounted(() => {
   refreshStorageSnapshot()
+  loadQuotas()
 })
 </script>
 

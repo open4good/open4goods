@@ -2499,11 +2499,11 @@
       "explanationTitle": "Comment lire cet indicateur",
       "detailsTitle": "Détails de l'évaluation",
       "noPrimaryScore": "Score indisponible",
-    "noDetailsAvailable": "Les détails de cette évaluation ne sont pas disponibles.",
-    "methodologyLink": "Accéder à la méthodologie",
-    "methodologyLinkAria": "Ouvrir la méthodologie de l'Impact Score",
-    "energyLabelAlt": "Étiquette énergie {value}",
-    "percentile": "Percentile",
+      "noDetailsAvailable": "Les détails de cette évaluation ne sont pas disponibles.",
+      "methodologyLink": "Accéder à la méthodologie",
+      "methodologyLinkAria": "Ouvrir la méthodologie de l'Impact Score",
+      "energyLabelAlt": "Étiquette énergie {value}",
+      "percentile": "Percentile",
       "weightChip": "Compte pour {value}% de la note totale",
       "weightTooltip": "Le score {scoreName} compte pour {value}% de la note totale",
       "subscoreDetailsToggle": "Voir les détails de l'indicateur",
@@ -2769,7 +2769,17 @@
             "description": "Clés enregistrées : {count}. Elles restent uniquement dans votre navigateur.",
             "empty": "Aucune entrée de stockage local pour le moment.",
             "resetCta": "Réinitialiser le stockage local"
-          }
+          },
+          "quotas": {
+            "title": "Quotas & Activité",
+            "aiRemaining": "Générations IA restantes",
+            "votesRemaining": "Votes restants"
+          },
+          "compare": {
+            "count": "{count} produit dans le comparateur | {count} produits dans le comparateur",
+            "cta": "Comparer"
+          },
+          "cardTitle": "Compte & Confidentialité"
         }
       },
       "productsMenu": {

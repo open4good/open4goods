@@ -412,7 +412,8 @@
         location="bottom"
         transition="fade-transition"
         :offset="[0, 12]"
-        :close-on-content-click="false"
+        :close-on-content-click="true"
+        open-on-hover
       >
         <template #activator="{ props, isActive }">
           <v-btn
@@ -422,7 +423,9 @@
             :aria-label="accessibilityLabel"
           >
             <v-icon icon="mdi-sunglasses" start />
-            <span class="accessibility-menu__label">{{ accessibilityLabel }}</span>
+            <span class="accessibility-menu__label">{{
+              accessibilityLabel
+            }}</span>
             <v-icon
               :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
               size="18"
@@ -431,54 +434,73 @@
           </v-btn>
         </template>
 
-        <v-card class="accessibility-menu" color="surface-default" elevation="8">
-          <div class="accessibility-menu__section">
-            <p class="accessibility-menu__section-title">
-              {{ t('siteIdentity.menu.themeToggle') }}
-            </p>
-            <ThemeToggle
-              test-id="hero-theme-toggle"
-              density="compact"
-              size="small"
-              show-labels
-            />
-          </div>
+        <v-card
+          class="accessibility-menu"
+          color="surface-default"
+          elevation="8"
+        >
+          <p class="accessibility-menu__section-title">
+            {{ t('siteIdentity.menu.themeToggle') }}
+          </p>
+
+          <v-list density="compact" class="accessibility-menu__list" nav>
+            <v-list-item
+              :active="currentTheme === 'light'"
+              color="primary"
+              class="accessibility-menu__item"
+              data-testid="hero-theme-light"
+              @click="setTheme('light')"
+            >
+              <template #prepend>
+                <v-icon icon="mdi-white-balance-sunny" size="20" />
+              </template>
+              <v-list-item-title>Thème clair</v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              :active="currentTheme === 'dark'"
+              color="primary"
+              class="accessibility-menu__item"
+              data-testid="hero-theme-dark"
+              @click="setTheme('dark')"
+            >
+              <template #prepend>
+                <v-icon icon="mdi-weather-night" size="20" />
+              </template>
+              <v-list-item-title>Thème sombre</v-list-item-title>
+            </v-list-item>
+          </v-list>
 
           <v-divider class="accessibility-menu__divider" />
 
-          <v-list density="comfortable" class="accessibility-menu__list">
-            <v-list-item class="accessibility-menu__item">
-              <template #prepend>
-                <v-icon :icon="zoomIcon" />
-              </template>
-              <v-list-item-title>
-                {{ t('siteIdentity.menu.zoom.label') }}
-              </v-list-item-title>
-              <template #append>
-                <v-switch
-                  :model-value="isZoomed"
-                  inset
-                  color="primary"
-                  density="compact"
-                  hide-details
-                  :aria-label="t('siteIdentity.menu.zoom.label')"
-                  @click.stop
-                  @update:model-value="setZoomed"
-                />
-              </template>
-            </v-list-item>
-          </v-list>
+          <div
+            class="accessibility-menu__zoom-row d-flex align-center px-4 py-2"
+          >
+            <v-switch
+              :model-value="isZoomed"
+              inset
+              color="primary"
+              density="compact"
+              hide-details
+              class="mr-3"
+              :aria-label="t('siteIdentity.menu.zoom.label')"
+              @click.stop
+              @update:model-value="setZoomed"
+            />
+            <span class="text-body-2 font-weight-medium">Mode Accessible</span>
+          </div>
         </v-card>
       </v-menu>
       <v-menu
-        v-model="isAccountMenuOpen"
         location="bottom"
         transition="fade-transition"
         :min-width="isLoggedIn ? 260 : 360"
         offset="8"
+        open-on-hover
       >
-        <template #activator="{ props }">
+        <template #activator="{ props, isActive }">
           <v-btn
+            v-if="isLoggedIn"
             v-bind="props"
             color="surface-primary-080"
             class="font-weight-bold account-menu-activator"
@@ -490,7 +512,17 @@
             <span class="account-username text-truncate">{{
               accountLabel
             }}</span>
-            <v-icon icon="mdi-menu-down" end />
+            <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" end />
+          </v-btn>
+          <v-btn
+            v-else
+            v-bind="props"
+            class="account-menu-activator"
+            variant="text"
+            icon
+            data-testid="hero-account-menu-activator-guest"
+          >
+            <v-icon icon="mdi-incognito" size="large" />
           </v-btn>
         </template>
 
@@ -588,7 +620,6 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
 import { storeToRefs } from 'pinia'
-import ThemeToggle from './ThemeToggle.vue'
 import AccountPrivacyCard from './AccountPrivacyCard.vue'
 import { useI18n } from 'vue-i18n'
 import { useCommunityMenu } from './useCommunityMenu'
@@ -607,6 +638,13 @@ import {
   useMenuSearchControls,
 } from '~/composables/menus/useMenuSearchControls'
 import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
+import { useTheme } from 'vuetify'
+import { useStorage } from '@vueuse/core'
+import {
+  THEME_PREFERENCE_KEY,
+  resolveThemeName,
+  type ThemeName,
+} from '~~/shared/constants/theme'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -628,9 +666,28 @@ const accessibilityStore = useAccessibilityStore()
 const { isZoomed } = storeToRefs(accessibilityStore)
 const { setZoomed } = accessibilityStore
 const accessibilityLabel = computed(() => t('siteIdentity.menu.zoom.label'))
-const zoomIcon = computed(() =>
-  isZoomed.value ? 'mdi-magnify-minus' : 'mdi-magnify-plus'
+
+// Theme logic
+const theme = useTheme()
+const themeCookie = useCookie<string | null>(THEME_PREFERENCE_KEY, {
+  sameSite: 'lax',
+  path: '/',
+  watch: false,
+})
+// Initialize storage with current cookie or theme value
+const storedPreference = useStorage<ThemeName>(
+  THEME_PREFERENCE_KEY,
+  resolveThemeName(themeCookie.value, theme.global.name.value as ThemeName)
 )
+
+const currentTheme = computed(() => theme.global.name.value)
+
+const setTheme = (value: ThemeName) => {
+  theme.global.name.value = value
+  storedPreference.value = value
+  // Persist to cookie for SSR
+  themeCookie.value = value
+}
 const {
   navigation: categoryNavigation,
   fetchNavigation,
@@ -733,7 +790,7 @@ const resolveFetch = (): FetchLike | undefined => {
 }
 
 const isNudgeWizardOpen = ref(false)
-const isAccountMenuOpen = ref(false)
+// const isAccountMenuOpen = ref(false) // Removed
 const isClearingCache = ref(false)
 
 const displayName = computed(() => {
@@ -743,10 +800,12 @@ const displayName = computed(() => {
     : t('siteIdentity.menu.account.defaultLabel')
 })
 const accountLabel = computed(() =>
-  isLoggedIn.value ? displayName.value : t('siteIdentity.menu.account.guestLabel')
+  isLoggedIn.value
+    ? displayName.value
+    : t('siteIdentity.menu.account.guestLabel')
 )
 const accountIcon = computed(() =>
-  isLoggedIn.value ? 'mdi-account-circle' : 'mdi-navigation-private'
+  isLoggedIn.value ? 'mdi-account-circle' : 'mdi-incognito'
 )
 
 const accountRoles = computed(() =>
@@ -762,7 +821,6 @@ const handleLogout = async () => {
   try {
     await logout()
     await router.replace(route.fullPath || '/')
-    isAccountMenuOpen.value = false
   } catch (error) {
     console.error('Logout failed', error)
   }
@@ -805,8 +863,6 @@ const handleClearCache = async () => {
       )
       return
     }
-
-    isAccountMenuOpen.value = false
 
     if (typeof window !== 'undefined') {
       window.location.reload()
@@ -1606,25 +1662,31 @@ const isMenuItemActive = (item: MenuItem): boolean => {
   border-radius: 1rem
   box-shadow: 0 18px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
 
-.accessibility-menu__section
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-
 .accessibility-menu__section-title
-  margin: 0
+  margin: 0 0 0.5rem
   font-size: 0.85rem
-  font-weight: 600
-  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-weight: 700
+  color: rgb(var(--v-theme-text-neutral-strong))
+  text-transform: uppercase
+  letter-spacing: 0.05em
 
 .accessibility-menu__divider
-  margin-block: 0.85rem
+  margin-block: 0.5rem
 
 .accessibility-menu__list
   padding: 0
 
 .accessibility-menu__item
-  padding-inline: 0
+  border-radius: 0.5rem
+  margin-bottom: 0.25rem
+  &:hover
+    background-color: rgba(var(--v-theme-surface-primary-080), 0.5)
+
+.accessibility-menu__zoom-row
+  border-radius: 0.5rem
+  transition: background-color 0.2s ease
+  &:hover
+    background-color: rgba(var(--v-theme-surface-primary-080), 0.5)
 
 @media (max-width: 1263px)
   .community-menu
