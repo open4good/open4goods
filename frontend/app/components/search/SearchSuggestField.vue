@@ -918,6 +918,9 @@ const handleSelection = (item: SuggestionItem | null) => {
   if (item.type === 'category') {
     emit('select-category', item)
   } else if (item.type === 'product') {
+    if (item.gtin) {
+      router.push(`/${item.gtin}`)
+    }
     emit('select-product', item)
   }
 
