@@ -234,7 +234,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 3
+      scoreMinValue: 2.6
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -243,7 +243,7 @@ nudgeToolConfig:
         en: "Televisions with a low energy consumption"
         fr: "Téléviseurs avec une faible consommation énergétique"
     - scoreName: "DURABILITY"
-      scoreMinValue: 3
+      scoreMinValue: 2.6
       mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
@@ -253,7 +253,7 @@ nudgeToolConfig:
         fr: "Téléviseurs avec une bonne durabilité"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 3
+      scoreMinValue: 2.6
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -262,7 +262,7 @@ nudgeToolConfig:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
     - scoreName: "BRAND_SUSTAINABILITY"
-      scoreMinValue: 4
+      scoreMinValue: 2.6
       mdiIcon: "mdi-scale-balance"
       title:
         en: "ESG criterias"
