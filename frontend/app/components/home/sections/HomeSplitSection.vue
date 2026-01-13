@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-const gainImageSrc = '/homepage/gain/nudger-screaming.webp'
 import painImageSrc from '~/assets/homepage/pain/nudger-problem.webp'
+const gainImageSrc = '/homepage/gain/nudger-screaming.webp'
 
 defineOptions({ inheritAttrs: false })
 

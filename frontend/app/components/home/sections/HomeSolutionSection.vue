@@ -61,11 +61,10 @@ const sectionDescription = computed(() => t('home.solution.description'))
         </v-col>
         <v-col cols="12" md="6" class="home-solution__visual">
           <div class="home-solution__image-wrapper">
-            <NuxtImg
+            <img
               :src="solutionImageSrc"
               :alt="sectionTitle"
               class="home-solution__image"
-              sizes="(min-width: 960px) 320px, 70vw"
               loading="lazy"
               decoding="async"
             />
@@ -115,7 +114,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
   height: auto
   display: block
   filter: drop-shadow(0 20px 40px rgba(var(--v-theme-shadow-primary-600), 0.15))
-  transform: rotate(10deg)
+  transform: rotate(5deg)
 
 .home-solution__next-btn
   position: absolute
