@@ -2530,7 +2530,6 @@
           }
         }
       },
-      "primaryScoreLabel": "Overall impact",
       "radarAria": "Impact radar chart for {product}",
       "radarControls": {
         "ariaLabel": "Toggle radar comparison series",
@@ -2563,7 +2562,6 @@
         "DURABILITY": "Durability",
         "ESG": "ESG performance"
       },
-      "showDetails": "Show detailed indicators",
       "hideDetails": "Hide detailed indicators",
       "title": "Environmental impact"
     },

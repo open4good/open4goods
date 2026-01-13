@@ -41,28 +41,17 @@
       :label="score.label"
     />
 
-    <v-expansion-panels
-      v-if="hasDetails"
-      class="impact-subscore__details"
-      variant="accordion"
-    >
-      <v-expansion-panel elevation="0" rounded="lg">
-        <v-expansion-panel-title class="impact-subscore__details-title">
-          {{ $t('product.impact.subscoreDetailsToggle') }}
-        </v-expansion-panel-title>
-        <v-expansion-panel-text class="impact-subscore__details-content">
-          <ProductImpactSubscoreExplanation
-            :score="score"
-            :absolute-value="absoluteValue"
-            :product-name="productName"
-            :product-brand="productBrand"
-            :product-model="productModel"
-            :vertical-title="verticalTitle"
-            :importance-description="importanceDescription"
-          />
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+    <div v-if="hasDetails" class="impact-subscore__details">
+      <ProductImpactSubscoreExplanation
+        :score="score"
+        :absolute-value="absoluteValue"
+        :product-name="productName"
+        :product-brand="productBrand"
+        :product-model="productModel"
+        :vertical-title="verticalTitle"
+        :importance-description="importanceDescription"
+      />
+    </div>
   </article>
 </template>
 
@@ -255,26 +244,6 @@ const coefficientValue = computed(() => {
   border-radius: 18px;
   background: rgba(var(--v-theme-surface-glass), 0.9);
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.05);
-}
-
-.impact-subscore__details-title {
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.impact-subscore__details-content {
-  padding-top: 0;
-}
-
-.impact-subscore__details :deep(.v-expansion-panel-title__overlay) {
-  display: none;
-}
-
-.impact-subscore__details :deep(.v-expansion-panel-title) {
-  padding: 0.75rem 1rem;
-}
-
-.impact-subscore__details :deep(.v-expansion-panel-text__wrapper) {
-  padding: 0 1rem 1rem;
+  padding: 1rem;
 }
 </style>

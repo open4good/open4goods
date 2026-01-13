@@ -16,7 +16,6 @@ describe('ProductImpactSubscoreGenericCard', () => {
           impact: {
             percentile: 'Percentile',
             weightChip: 'Counts for {value}% of the total score',
-            subscoreDetailsToggle: 'View indicator details',
             importanceTitle: 'Why it matters',
             tableHeaders: {
               ranking: 'Rank',
@@ -121,42 +120,6 @@ describe('ProductImpactSubscoreGenericCard', () => {
                 )
             },
           }),
-          'v-expansion-panels': defineComponent({
-            name: 'VExpansionPanelsStub',
-            setup(_, { slots }) {
-              return () =>
-                h('div', { class: 'expansion-panels-stub' }, slots.default?.())
-            },
-          }),
-          'v-expansion-panel': defineComponent({
-            name: 'VExpansionPanelStub',
-            setup(_, { slots }) {
-              return () =>
-                h('div', { class: 'expansion-panel-stub' }, slots.default?.())
-            },
-          }),
-          'v-expansion-panel-title': defineComponent({
-            name: 'VExpansionPanelTitleStub',
-            setup(_, { slots }) {
-              return () =>
-                h(
-                  'div',
-                  { class: 'expansion-panel-title-stub' },
-                  slots.default?.()
-                )
-            },
-          }),
-          'v-expansion-panel-text': defineComponent({
-            name: 'VExpansionPanelTextStub',
-            setup(_, { slots }) {
-              return () =>
-                h(
-                  'div',
-                  { class: 'expansion-panel-text-stub' },
-                  slots.default?.()
-                )
-            },
-          }),
           ClientOnly: defineComponent({
             name: 'ClientOnlyStub',
             setup(_, { slots }) {
@@ -172,7 +135,6 @@ describe('ProductImpactSubscoreGenericCard', () => {
     expect(wrapper.find('.impact-subscore__value-number').text()).toBe('42.5')
     expect(wrapper.text()).toContain('How to read this indicator')
     expect(wrapper.text()).toContain('Lower is better')
-    expect(wrapper.text()).toContain('View indicator details')
     expect(wrapper.text()).not.toContain('Percentile')
     expect(wrapper.text()).toContain('Rank')
     expect(wrapper.text()).toContain('3')
@@ -215,42 +177,6 @@ describe('ProductImpactSubscoreGenericCard', () => {
                   'span',
                   { class: 'coefficient-stub' },
                   `coefficient:${props.value}`
-                )
-            },
-          }),
-          'v-expansion-panels': defineComponent({
-            name: 'VExpansionPanelsStub',
-            setup(_, { slots }) {
-              return () =>
-                h('div', { class: 'expansion-panels-stub' }, slots.default?.())
-            },
-          }),
-          'v-expansion-panel': defineComponent({
-            name: 'VExpansionPanelStub',
-            setup(_, { slots }) {
-              return () =>
-                h('div', { class: 'expansion-panel-stub' }, slots.default?.())
-            },
-          }),
-          'v-expansion-panel-title': defineComponent({
-            name: 'VExpansionPanelTitleStub',
-            setup(_, { slots }) {
-              return () =>
-                h(
-                  'div',
-                  { class: 'expansion-panel-title-stub' },
-                  slots.default?.()
-                )
-            },
-          }),
-          'v-expansion-panel-text': defineComponent({
-            name: 'VExpansionPanelTextStub',
-            setup(_, { slots }) {
-              return () =>
-                h(
-                  'div',
-                  { class: 'expansion-panel-text-stub' },
-                  slots.default?.()
                 )
             },
           }),

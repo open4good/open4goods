@@ -2546,7 +2546,6 @@
           }
         }
       },
-      "primaryScoreLabel": "Score global",
       "radarAria": "Radar des scores pour {product}",
       "radarControls": {
         "ariaLabel": "Afficher ou masquer les produits à comparer sur le radar",
@@ -2579,7 +2578,6 @@
         "DURABILITY": "Durabilité",
         "ESG": "Performance ESG"
       },
-      "showDetails": "Afficher les indicateurs détaillés",
       "hideDetails": "Masquer les indicateurs détaillés",
       "title": "Impact Score"
     },
