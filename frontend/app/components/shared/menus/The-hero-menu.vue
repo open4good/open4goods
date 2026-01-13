@@ -549,10 +549,10 @@
             v-bind="props"
             class="account-menu-activator"
             variant="text"
-            icon
             data-testid="hero-account-menu-activator-guest"
           >
-            <v-icon icon="mdi-incognito" size="large" />
+            <v-icon icon="mdi-incognito" />
+            <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" end />
           </v-btn>
         </template>
 

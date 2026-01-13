@@ -57,7 +57,7 @@
           <template #prepend>
             <v-icon icon="mdi-robot-outline" size="small" class="mr-2" />
           </template>
-          <div class="d-flex justify-space-between w-100 align-center">
+          <div class="d-flex align-center ga-2 w-100">
             <span class="text-body-2">{{
               t('siteIdentity.menu.account.privacy.quotas.aiRemaining')
             }}</span>
@@ -75,7 +75,7 @@
           <template #prepend>
             <v-icon icon="mdi-vote-outline" size="small" class="mr-2" />
           </template>
-          <div class="d-flex justify-space-between w-100 align-center">
+          <div class="d-flex align-center ga-2 w-100">
             <span class="text-body-2">{{
               t('siteIdentity.menu.account.privacy.quotas.votesRemaining')
             }}</span>
@@ -83,75 +83,104 @@
               voteQuota
             }}</v-chip>
           </div>
-          <template #append>
-            <v-icon icon="mdi-chevron-right" size="small" />
-          </template>
         </v-list-item>
       </v-list>
     </div>
 
     <!-- Cookies -->
     <div class="account-privacy-card__section">
-      <div class="d-flex justify-space-between align-center mb-2">
-        <p class="account-privacy-card__section-title">
-          {{ t('siteIdentity.menu.account.privacy.cookies.title') }}
-        </p>
+      <div
+        class="d-flex justify-space-between align-center mb-2 cursor-pointer"
+        @click="isCookiesListOpen = !isCookiesListOpen"
+      >
+        <div class="d-flex align-center ga-2">
+          <p class="account-privacy-card__section-title">
+            {{ t('siteIdentity.menu.account.privacy.cookies.title') }}
+          </p>
+          <v-icon
+            :icon="isCookiesListOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            size="small"
+            color="neutral-secondary"
+          />
+        </div>
         <v-btn
           color="primary"
           variant="text"
           size="x-small"
           data-testid="privacy-reset-cookies"
           :disabled="cookieKeys.length === 0"
-          @click="handleClearCookies"
+          @click.stop="handleClearCookies"
         >
           {{ t('siteIdentity.menu.account.privacy.cookies.resetCta') }}
         </v-btn>
       </div>
 
-      <v-table density="compact" class="account-privacy-table">
-        <tbody>
-          <tr v-for="key in cookieKeys" :key="key">
-            <td class="text-caption text-neutral-secondary">{{ key }}</td>
-          </tr>
-          <tr v-if="cookieKeys.length === 0">
-            <td class="text-caption text-neutral-soft text-center py-2">
-              {{ t('siteIdentity.menu.account.privacy.cookies.empty') }}
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
+      <v-expand-transition>
+        <v-table
+          v-if="isCookiesListOpen"
+          density="compact"
+          class="account-privacy-table"
+        >
+          <tbody>
+            <tr v-for="key in cookieKeys" :key="key">
+              <td class="text-caption text-neutral-secondary">{{ key }}</td>
+            </tr>
+            <tr v-if="cookieKeys.length === 0">
+              <td class="text-caption text-neutral-soft text-center py-2">
+                {{ t('siteIdentity.menu.account.privacy.cookies.empty') }}
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-expand-transition>
     </div>
 
     <!-- Storage -->
     <div class="account-privacy-card__section">
-      <div class="d-flex justify-space-between align-center mb-2">
-        <p class="account-privacy-card__section-title">
-          {{ t('siteIdentity.menu.account.privacy.storage.title') }}
-        </p>
+      <div
+        class="d-flex justify-space-between align-center mb-2 cursor-pointer"
+        @click="isStorageListOpen = !isStorageListOpen"
+      >
+        <div class="d-flex align-center ga-2">
+          <p class="account-privacy-card__section-title">
+            {{ t('siteIdentity.menu.account.privacy.storage.title') }}
+          </p>
+          <v-icon
+            :icon="isStorageListOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            size="small"
+            color="neutral-secondary"
+          />
+        </div>
         <v-btn
           color="primary"
           variant="text"
           size="x-small"
           data-testid="privacy-reset-local-storage"
           :disabled="localStorageKeys.length === 0"
-          @click="handleClearLocalStorage"
+          @click.stop="handleClearLocalStorage"
         >
           {{ t('siteIdentity.menu.account.privacy.storage.resetCta') }}
         </v-btn>
       </div>
 
-      <v-table density="compact" class="account-privacy-table">
-        <tbody>
-          <tr v-for="key in localStorageKeys" :key="key">
-            <td class="text-caption text-neutral-secondary">{{ key }}</td>
-          </tr>
-          <tr v-if="localStorageKeys.length === 0">
-            <td class="text-caption text-neutral-soft text-center py-2">
-              {{ t('siteIdentity.menu.account.privacy.storage.empty') }}
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
+      <v-expand-transition>
+        <v-table
+          v-if="isStorageListOpen"
+          density="compact"
+          class="account-privacy-table"
+        >
+          <tbody>
+            <tr v-for="key in localStorageKeys" :key="key">
+              <td class="text-caption text-neutral-secondary">{{ key }}</td>
+            </tr>
+            <tr v-if="localStorageKeys.length === 0">
+              <td class="text-caption text-neutral-soft text-center py-2">
+                {{ t('siteIdentity.menu.account.privacy.storage.empty') }}
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-expand-transition>
     </div>
 
     <!-- Compare -->
@@ -219,6 +248,8 @@ const loadQuotas = async () => {
 }
 
 // --- Cookies & Storage Logic ---
+const isCookiesListOpen = ref(false)
+const isStorageListOpen = ref(false)
 const cookieKeys = ref<string[]>([])
 const localStorageKeys = ref<string[]>([])
 
