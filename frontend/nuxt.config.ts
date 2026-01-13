@@ -55,6 +55,12 @@ const PLAUSIBLE_API_HOST =
   process.env.PLAUSIBLE_API_HOST || 'https://plausible.nudger.fr'
 const PLAUSIBLE_ENABLED = process.env.NODE_ENV === 'production'
 const PLAUSIBLE_IGNORED_HOSTNAMES = ['localhost', '127.0.0.1']
+const HOTJAR_ENABLED =
+  process.env.HOTJAR_ENABLED !== undefined
+    ? process.env.HOTJAR_ENABLED === 'true'
+    : process.env.NODE_ENV === 'production'
+const HOTJAR_SITE_ID = Number(process.env.HOTJAR_SITE_ID ?? 0)
+const HOTJAR_SNIPPET_VERSION = Number(process.env.HOTJAR_SNIPPET_VERSION ?? 6)
 const navigationOfflineFallbackPlugin = {
   handlerDidError: async () => {
     const offlineResponse = await globalThis.caches?.match('/offline')
@@ -502,6 +508,11 @@ export default defineNuxtConfig({
         autoPageviews: true,
         autoOutboundTracking: true,
         ignoredHostnames: PLAUSIBLE_IGNORED_HOSTNAMES,
+      },
+      hotjar: {
+        enabled: HOTJAR_ENABLED,
+        siteId: HOTJAR_SITE_ID,
+        snippetVersion: HOTJAR_SNIPPET_VERSION,
       },
     },
   },
