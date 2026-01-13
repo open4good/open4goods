@@ -5,19 +5,6 @@ import {
   HOTJAR_RECORDING_COOKIE_VALUE,
 } from '~~/shared/utils/hotjar-recording'
 
-type HotjarPluginDefinition =
-  (typeof import('../plugins/hotjar.client'))['default']
-
-type HotjarRuntimeConfig = {
-  public: {
-    hotjar: {
-      enabled: boolean
-      siteId: number
-      snippetVersion: number
-    }
-  }
-}
-
 type VueApp = {
   use: (plugin: unknown, options?: unknown) => void
 }
@@ -45,7 +32,7 @@ const runtimeConfigMock = vi.hoisted(() => ({
 mockNuxtImport('useRuntimeConfig', () => () => runtimeConfigMock.value)
 
 // Mock defineNuxtPlugin (pass through)
-mockNuxtImport('defineNuxtPlugin', () => (plugin: any) => plugin)
+mockNuxtImport('defineNuxtPlugin', () => (plugin: unknown) => plugin)
 
 const isDoNotTrackEnabledMock = vi.hoisted(() => vi.fn())
 const hotjarPlugin = vi.hoisted(() => ({ install: vi.fn() }))
@@ -65,7 +52,7 @@ describe('hotjar client plugin', () => {
     },
   })
 
-  const setRuntimeConfig = (config: any) => {
+  const setRuntimeConfig = (config: unknown) => {
     runtimeConfigMock.value = config
   }
 
