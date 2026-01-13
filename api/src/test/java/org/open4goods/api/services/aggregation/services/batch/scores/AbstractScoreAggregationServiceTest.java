@@ -1,13 +1,37 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.StandardiserService;
+import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.LoggerFactory;
 
 class AbstractScoreAggregationServiceTest {
+
+    private static class TestScoreAggregationService extends DataCompletion2ScoreAggregationService {
+
+        TestScoreAggregationService() {
+            super(LoggerFactory.getLogger(AbstractScoreAggregationServiceTest.class));
+        }
+
+        void registerValue(String scoreName, Double value) throws ValidationException {
+            incrementCardinality(scoreName, value);
+        }
+
+        Cardinality getAbsoluteCardinality(String scoreName) {
+            return absoluteCardinalities.get(scoreName);
+        }
+
+        Double relativizeWithConfig(String scoreName, Double value, Cardinality abs, VerticalConfig config)
+            throws ValidationException {
+            return relativizeScoreValue(scoreName, value, abs, config);
+        }
+    }
 
     @Test
     void relativizeReturnsBoundedValueWhenMinEqualsMax() throws Exception {
@@ -61,5 +85,59 @@ class AbstractScoreAggregationServiceTest {
         // Score: 5.0
         Double scoreForOutlier = service.relativize(12d, cardinality);
         assertThat(scoreForOutlier).isEqualTo(5.0);
+    }
+
+    @Test
+    void relativizeUsesPercentileWhenDistinctValuesAreBelowThreshold() throws Exception {
+        TestScoreAggregationService service = new TestScoreAggregationService();
+        String scoreName = "POWER_CONSUMPTION_STANDBY_NETWORKD";
+
+        service.registerValue(scoreName, 0d);
+        service.registerValue(scoreName, 0d);
+        service.registerValue(scoreName, 0d);
+        service.registerValue(scoreName, 1d);
+        service.registerValue(scoreName, 1d);
+        service.registerValue(scoreName, 2d);
+
+        VerticalConfig config = new VerticalConfig();
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setMinDistinctValuesForSigma(4);
+        config.setImpactScoreConfig(impactScoreConfig);
+
+        Cardinality absolute = service.getAbsoluteCardinality(scoreName);
+        Double percentileScore = service.relativizeWithConfig(scoreName, 2d, absolute, config);
+
+        assertThat(percentileScore).isCloseTo(4.5833, within(1e-4));
+    }
+
+    @Test
+    void relativizeUsesSigmaWhenDistinctValuesMeetThreshold() throws Exception {
+        TestScoreAggregationService service = new TestScoreAggregationService();
+        String scoreName = "POWER_CONSUMPTION_STANDBY_NETWORKD";
+
+        service.registerValue(scoreName, 0d);
+        service.registerValue(scoreName, 0d);
+        service.registerValue(scoreName, 0d);
+        service.registerValue(scoreName, 1d);
+        service.registerValue(scoreName, 1d);
+        service.registerValue(scoreName, 2d);
+
+        VerticalConfig config = new VerticalConfig();
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setMinDistinctValuesForSigma(3);
+        config.setImpactScoreConfig(impactScoreConfig);
+
+        Cardinality absolute = service.getAbsoluteCardinality(scoreName);
+        Double sigmaScore = service.relativizeWithConfig(scoreName, 2d, absolute, config);
+
+        double mean = 4d / 6d;
+        double variance = (6d / 6d) - (mean * mean);
+        double sigma = Math.sqrt(variance);
+        double lowerBound = mean - (2 * sigma);
+        double upperBound = mean + (2 * sigma);
+        double normalized = (2d - lowerBound) / (upperBound - lowerBound);
+        double expected = normalized * StandardiserService.DEFAULT_MAX_RATING;
+
+        assertThat(sigmaScore).isCloseTo(expected, within(1e-6));
     }
 }

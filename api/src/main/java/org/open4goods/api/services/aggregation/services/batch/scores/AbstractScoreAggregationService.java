@@ -26,6 +26,8 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
         protected Map<String, Cardinality> absoluteCardinalities = new HashMap<>();
 
+        protected Map<String, Map<Double, Integer>> valueFrequencies = new HashMap<>();
+
 
         public AbstractScoreAggregationService(Logger logger) {
                 super(logger);
@@ -37,6 +39,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                 super.init(datas);
                 batchDatas.clear();
                 absoluteCardinalities.clear();
+                valueFrequencies.clear();
         }
 
 
@@ -146,15 +149,15 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		}
 		
 		Cardinality ret = new Cardinality();
-		ret.setMax(relativize(cardinality.getMax(),score.getAbsolute()));
-		ret.setMin(relativize(cardinality.getMin(),score.getAbsolute()));
-		ret.setAvg(relativize(cardinality.getAvg(),score.getAbsolute()));
+		ret.setMax(relativizeScoreValue(score.getName(), cardinality.getMax(), score.getAbsolute(), vConf));
+		ret.setMin(relativizeScoreValue(score.getName(), cardinality.getMin(), score.getAbsolute(), vConf));
+		ret.setAvg(relativizeScoreValue(score.getName(), cardinality.getAvg(), score.getAbsolute(), vConf));
 		// Keep occurrence statistics absolute to avoid distorting
 		// aggregation insights while still scaling comparable values.
 		ret.setCount(cardinality.getCount());
 		ret.setSum(cardinality.getSum());
 		
-		Double relValue = relativize(score.getValue(),score.getAbsolute());
+		Double relValue = relativizeScoreValue(score.getName(), score.getValue(), score.getAbsolute(), vConf);
 		
 		if (vConf != null) {
 			org.open4goods.model.vertical.AttributeConfig attrConfig = vConf.getAttributesConfig().getAttributeConfigByKey(score.getName());
@@ -167,6 +170,66 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
 		score.setRelativ(ret);
 		
+	}
+
+	protected Double relativizeScoreValue(String scoreName, Double value, Cardinality abs, VerticalConfig vConf)
+			throws ValidationException {
+		if (shouldUsePercentileScoring(scoreName, vConf)) {
+			return relativizeUsingPercentile(scoreName, value, abs);
+		}
+
+		return relativize(value, abs);
+	}
+
+	private boolean shouldUsePercentileScoring(String scoreName, VerticalConfig vConf) {
+		if (vConf == null || vConf.getImpactScoreConfig() == null) {
+			return false;
+		}
+
+		Integer minDistinctValues = vConf.getImpactScoreConfig().getMinDistinctValuesForSigma();
+		if (minDistinctValues == null || minDistinctValues <= 0) {
+			return false;
+		}
+
+		Map<Double, Integer> frequencies = valueFrequencies.get(scoreName);
+		if (frequencies == null) {
+			return false;
+		}
+
+		return frequencies.size() < minDistinctValues;
+	}
+
+	private Double relativizeUsingPercentile(String scoreName, Double value, Cardinality abs) throws ValidationException {
+		if (value == null) {
+			throw new ValidationException("Empty value in relativization");
+		}
+
+		Map<Double, Integer> frequencies = valueFrequencies.get(scoreName);
+		if (frequencies == null || frequencies.isEmpty()) {
+			return StandardiserService.DEFAULT_MAX_RATING / 2.0;
+		}
+
+		Integer totalCount = abs.getCount();
+		if (totalCount == null || totalCount == 0) {
+			return StandardiserService.DEFAULT_MAX_RATING / 2.0;
+		}
+
+		int countBelow = 0;
+		int countAt = 0;
+
+		for (Map.Entry<Double, Integer> entry : frequencies.entrySet()) {
+			int comparison = Double.compare(entry.getKey(), value);
+			if (comparison < 0) {
+				countBelow += entry.getValue();
+			} else if (comparison == 0) {
+				countAt += entry.getValue();
+			}
+		}
+
+		double percentile = (countBelow + (0.5 * countAt)) / totalCount;
+		double scaled = percentile * StandardiserService.DEFAULT_MAX_RATING;
+
+		return Math.max(0.0, Math.min(StandardiserService.DEFAULT_MAX_RATING, scaled));
 	}
 
 
@@ -250,11 +313,21 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
                 absolute.increment(value);
                 relative.increment(value);
+                incrementValueFrequency(scoreName, value);
 
                 absoluteCardinalities.put(scoreName, absolute);
                 batchDatas.put(scoreName, relative);
         }
 
+        private void incrementValueFrequency(String scoreName, Double value) {
+                Map<Double, Integer> frequencies = valueFrequencies.computeIfAbsent(scoreName, key -> new HashMap<>());
+                Integer current = frequencies.get(value);
+                if (current == null) {
+                        frequencies.put(value, 1);
+                        return;
+                }
+                frequencies.put(value, current + 1);
+        }
 
 
 

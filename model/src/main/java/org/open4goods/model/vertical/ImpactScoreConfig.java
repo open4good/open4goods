@@ -12,6 +12,13 @@ public class ImpactScoreConfig {
 	 */
 	private Map<String, Double> criteriasPonderation = new HashMap<>();
 
+	/**
+	 * Minimum number of distinct values required to use sigma scoring.
+	 * When the distribution is too discrete (lower than this threshold),
+	 * percentile scoring is used to preserve meaningful separation.
+	 */
+	private Integer minDistinctValuesForSigma;
+
 	////////////////////////
 	// Audit / justification
 	///////////////////////
@@ -28,6 +35,12 @@ public class ImpactScoreConfig {
 	}
 	public void setCriteriasPonderation(Map<String, Double> criteriasPonderation) {
 		this.criteriasPonderation = criteriasPonderation;
+	}
+	public Integer getMinDistinctValuesForSigma() {
+		return minDistinctValuesForSigma;
+	}
+	public void setMinDistinctValuesForSigma(Integer minDistinctValuesForSigma) {
+		this.minDistinctValuesForSigma = minDistinctValuesForSigma;
 	}
 	public Localisable<String, ImpactScoreTexts> getTexts() {
 		return texts;

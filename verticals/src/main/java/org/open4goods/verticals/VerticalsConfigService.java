@@ -24,6 +24,7 @@ import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.NudgeToolConfig;
 import org.open4goods.model.vertical.NudgeToolScore;
 import org.open4goods.model.vertical.NudgeToolSubsetGroup;
@@ -285,6 +286,14 @@ public class VerticalsConfigService {
 				mergeStringSet(defaults.getRequiredAttributes(), config.getRequiredAttributes()));
 		config.setBrandsAlias(mergeMap(defaults.getBrandsAlias(), config.getBrandsAlias()));
 		config.setSubsets(mergeByKey(defaults.getSubsets(), config.getSubsets(), VerticalSubset::getId));
+
+		ImpactScoreConfig impactScoreConfig = config.getImpactScoreConfig();
+		ImpactScoreConfig defaultImpactScoreConfig = defaults.getImpactScoreConfig();
+		if (impactScoreConfig != null && defaultImpactScoreConfig != null) {
+			if (impactScoreConfig.getMinDistinctValuesForSigma() == null) {
+				impactScoreConfig.setMinDistinctValuesForSigma(defaultImpactScoreConfig.getMinDistinctValuesForSigma());
+			}
+		}
 
 		AttributesConfig attributesConfig = config.getAttributesConfig();
 		AttributesConfig defaultAttributesConfig = defaults.getAttributesConfig();

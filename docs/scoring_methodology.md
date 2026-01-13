@@ -37,6 +37,29 @@ Scores are mapped linearly within this range:
 2.  **Representativity**: A product with "Average" performance receives an "Average" score (2.5), aligning with user expectations.
 3.  **Automatic Tuning**: The scale adjusts automatically to the diversity (variance) of the products in the category.
 
+## Low-Entropy Distributions: Percentile Scoring Fallback
+
+Some attributes are reported in **coarse buckets** (e.g., 0 W, 0.5 W, 2 W) even when the dataset is large. In these cases, the standard deviation is small and sigma scoring compresses values near the mean, making the "worst" value look average. To preserve meaningful separation, the system switches to **percentile scoring** when the number of distinct values is too low.
+
+### Switching Rule (Configurable)
+
+Sigma scoring remains the default. The fallback is activated when:
+
+```
+distinctValues < impactScoreConfig.minDistinctValuesForSigma
+```
+
+### Percentile Scoring (Mid-rank)
+
+For a given value:
+
+```
+Percentile = (CountBelow + 0.5 * CountAt) / TotalCount
+Score = Percentile * 5
+```
+
+This preserves a smooth ranking even for discrete values while keeping scores on the same 0–5 scale.
+
 ## Technical Implementation
 
 This logic is implemented in `AbstractScoreAggregationService.java`.

@@ -6,7 +6,7 @@ This document details the computation of the **Impact Score** (often referred to
 
 The Impact Score is a **Weighted Sum** of **Relativized Sub-scores**.
 
-- **Sub-scores**: Individual criteria (e.g., Repairability, Warranty) are first normalized to a **0-5 scale** (by default) using a **Sigma Scoring** method (Statistical Normalization).
+- **Sub-scores**: Individual criteria (e.g., Repairability, Warranty) are first normalized to a **0-5 scale** (by default) using **Sigma Scoring**. When a distribution is too discrete (few distinct values), the system automatically switches to **Percentile Scoring** to preserve meaningful separation.
 - **Impact Score**: These normalized sub-scores are summed according to configured weights to produce the final Impact Score.
 
 ## Step-by-Step Computation
@@ -57,6 +57,25 @@ We define a "Normal Range" of **$\pm 2\sigma$** around the Mean ($\mu$).
 - A product at **$\mu + 2\sigma$** (top ~2.5% of random normal dist) gets **5 / 5**.
 - A product at **$\mu - 2\sigma$** (bottom ~2.5%) gets **0 / 5**.
 
+#### Low-entropy fallback: Percentile Scoring
+
+When a criterion has too few distinct values (e.g., power standby reported as only 0 W / 0.5 W / 2 W), sigma scoring collapses values near the mean. In that case, the system switches to **percentile scoring** to restore ranking separation.
+
+**Rule (configurable)**:
+
+```
+if distinctValues < impactScoreConfig.minDistinctValuesForSigma
+  use percentile scoring
+else
+  use sigma scoring
+```
+
+**Percentile formula** (mid-rank):
+
+$$ Percentile = \frac{CountBelow + 0.5 \times CountAt}{TotalCount} $$
+
+The percentile is then scaled to the same 0–5 range and clamped as usual.
+
 ### 3. Impact Score Aggregation
 
 **Service**: `EcoScoreAggregationService`
@@ -98,6 +117,7 @@ _Example Observation_: Scores between **6.5 and 14** suggest a configuration whe
 - **Configuration**:
   - `StandardiserService.DEFAULT_MAX_RATING` (Default: 5.0).
   - Vertical YAML files (define weights).
+  - `impactScoreConfig.minDistinctValuesForSigma` (minimum distinct values required to keep sigma scoring).
 
 ## Potential Improvements / Methodology Notes
 
