@@ -48,6 +48,13 @@ availableImpactScoreCriterias:
   - DATA_QUALITY
   - BRAND_SUSTAINABILITY
 
+#####################################################################################################################################
+# Impact score normalization safeguards
+#####################################################################################################################################
+
+impactScoreConfig:
+  minDistinctValuesForSigma: 6
+
 subsets:
   ################
   # Impact Score
