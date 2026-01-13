@@ -279,22 +279,8 @@
           "type": "keyword"
         },
         "imageInfo": {
-          "properties": {
-            "width": {
-              "type": "integer",
-              "index": false
-            },
-            "height": {
-              "type": "integer",
-              "index": false
-            },
-            "embedding": {
-              "type": "dense_vector",
-              "dims": 512,
-              "index": true,
-              "similarity": "cosine"
-            }
-          }
+          "type": "object",
+          "enabled": false
         }
       }
     },
