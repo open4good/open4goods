@@ -59,7 +59,9 @@ public class WebSecurityConfig {
 				.and().formLogin().permitAll()
 				.and().logout().permitAll()
 				// CSRF is disabled for actuator endpoints
-				.and().csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable());
+				.and().csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable())
+				// Homepage is forbidden
+				.authorizeRequests().requestMatchers("/").denyAll();
 
 
 		if (config.getWebConfig().getWebAuthentication().booleanValue()) {
