@@ -825,7 +825,7 @@
         "show": "Afficher la colonne des filtres"
       },
       "ecoscore": {
-        "title": "Découvrir l'Impact Score",
+        "title": "Impact Score",
         "description": "Comprendre comment est calculé l'écoscore des {category}",
         "cta": "Méthodologie {category}",
         "ariaLabel": "Ouvrir le guide Eco-score"

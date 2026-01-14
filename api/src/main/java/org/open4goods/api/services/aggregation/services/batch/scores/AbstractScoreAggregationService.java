@@ -156,13 +156,18 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		// aggregation insights while still scaling comparable values.
 		ret.setCount(cardinality.getCount());
 		ret.setSum(cardinality.getSum());
+		ret.setSumOfSquares(cardinality.getSumOfSquares());
 		
 		Double relValue = relativizeScoreValue(score.getName(), score.getValue(), score.getAbsolute(), vConf);
 		
 		if (vConf != null) {
 			org.open4goods.model.vertical.AttributeConfig attrConfig = vConf.getAttributesConfig().getAttributeConfigByKey(score.getName());
-			if (attrConfig != null && org.open4goods.model.vertical.AttributeComparisonRule.LOWER.equals(attrConfig.getBetterIs())) {
+			if (attrConfig == null) {
+				dedicatedLogger.warn("Scoring inversion check failed: No AttributeConfig found for score '{}'. Check vertical config.", score.getName());
+			} else if (org.open4goods.model.vertical.AttributeComparisonRule.LOWER.equals(attrConfig.getBetterIs())) {
 				relValue = StandardiserService.DEFAULT_MAX_RATING - relValue;
+			} else {
+				dedicatedLogger.warn("Should have a vertical config ! ");
 			}
 		}
 

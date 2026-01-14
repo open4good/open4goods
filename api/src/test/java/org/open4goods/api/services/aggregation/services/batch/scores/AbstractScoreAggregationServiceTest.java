@@ -140,4 +140,50 @@ class AbstractScoreAggregationServiceTest {
 
         assertThat(sigmaScore).isCloseTo(expected, within(1e-6));
     }
+    @Test
+    void relativizePreservesStdDev() throws Exception {
+        DataCompletion2ScoreAggregationService service =
+                new DataCompletion2ScoreAggregationService(LoggerFactory.getLogger(AbstractScoreAggregationServiceTest.class));
+
+        Cardinality cardinality = new Cardinality();
+        // Values: 0, 10. Mean=5. Variance=25. StdDev=5.
+        // SumSq = 0 + 100 = 100.
+        // Sum = 10.
+        // Count = 2.
+        
+        cardinality.setCount(2);
+        cardinality.setSum(10d);
+        cardinality.setSumOfSquares(100d);
+        cardinality.setMin(0d);
+        cardinality.setMax(10d);
+        cardinality.setAvg(5d);
+        
+        // This relies on service.relativize creating a NEW cardinality that copies sumOfSquares
+        Double relativeValue = service.relativize(5d, cardinality); // Value at Mean -> 2.5
+        
+        // We can't easily inspect the 'ret' cardinality created inside 'relativize' method 
+        // because it interacts with 'p.getScores()'.
+        // But AbstractScoreAggregationService.relativize(Double, Cardinality) only returns Double.
+        // The one that updates the Score object is relativize(Score, VerticalConfig).
+        
+        // So we need to use a dummy Score object to test the copying side effect.
+        
+        org.open4goods.model.product.Score score = new org.open4goods.model.product.Score("TEST", 5d);
+        score.setAbsolute(cardinality);
+        // We need to inject the cardinality into batchDatas map of the service.
+        java.lang.reflect.Field field = AbstractScoreAggregationService.class.getDeclaredField("batchDatas");
+        field.setAccessible(true);
+        java.util.Map<String, Cardinality> batchDatas = (java.util.Map<String, Cardinality>) field.get(service);
+        batchDatas.put("TEST", cardinality);
+        
+        // We need a dummy VerticalConfig
+        VerticalConfig vConf = new VerticalConfig();
+        vConf.setAttributesConfig(new org.open4goods.model.vertical.AttributesConfig()); 
+        
+        service.relativize(score, vConf); // This calls the method that creates 'ret'
+        
+        assertThat(score.getRelativ()).isNotNull();
+        assertThat(score.getRelativ().getStdDev()).isEqualTo(5.0);
+    }
+
 }
