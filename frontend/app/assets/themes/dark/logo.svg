@@ -3,10 +3,10 @@
   <defs>
     <style>
       .cls-1 {
-        fill: url(#Dégradé_sans_nom_384);
+        fill: url(#Degrade_sans_nom_384);
       }
     </style>
-    <linearGradient id="Dégradé_sans_nom_384" data-name="Dégradé sans nom 384" x1="-4928.82" y1="-2721.08" x2="-4565.61" y2="-2357.87" gradientTransform="translate(4934.57 2726.82)" gradientUnits="userSpaceOnUse">
+    <linearGradient id="Degrade_sans_nom_384" data-name="Degrade sans nom 384" x1="-4928.82" y1="-2721.08" x2="-4565.61" y2="-2357.87" gradientTransform="translate(4934.57 2726.82)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#ffcd90"/>
       <stop offset=".23" stop-color="#ffc98e"/>
       <stop offset=".42" stop-color="#ffbf8b"/>

@@ -11,6 +11,21 @@
       <ImpactScorePrinciples class="impact-score-page__section" />
       <ImpactScoreSummary class="impact-score-page__section" />
       <ImpactScoreApproach class="impact-score-page__section" />
+
+      <div class="impact-score-page__section">
+        <v-row>
+          <v-col cols="12">
+            <h2 class="text-h4 font-weight-bold mb-4">
+              {{ t('impactScorePage.methodologyExplanation.title') }}
+            </h2>
+            <div
+              class="text-body-1"
+              v-html="t('impactScorePage.methodologyExplanation.content')"
+            ></div>
+          </v-col>
+        </v-row>
+      </div>
+
       <ImpactScoreDetails class="impact-score-page__section" />
     </v-container>
   </div>

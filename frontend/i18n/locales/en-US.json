@@ -1262,6 +1262,10 @@
       "title": "Impact Score: a simple, transparent eco rating",
       "description": "See how the Impact Score rates a product’s environmental footprint with 5 clear criteria and real-world examples."
     },
+    "methodologyExplanation": {
+      "title": "Sigma, percentile.... What???",
+      "content": "To ensure a fair score across all products, we use a statistical approach called **Sigma Scoring**.<br><br>Unlike a simple average, this method takes into account the **dispersion** of the data (standard deviation).<br><ul><li><strong>Sigma Scoring:</strong> Most products fall within the average range. Exceptional products (good or bad) don't skew the score for everyone else.</li><li><strong>Percentile (Fallback):</strong> If there are too few distinct values (e.g., only 3 possible warranty options), Sigma Scoring becomes less effective. We then switch to **Percentile** scoring to rank products from best to worst, while keeping a score out of 5.</li></ul><br>This allows us to give you a truly useful score, regardless of the product category!"
+    },
     "hero": {
       "eyebrow": "Impact Score",
       "title": "Environmental impact assessment of your products",
@@ -2483,11 +2487,11 @@
       "explanationTitle": "How to interpret this indicator",
       "detailsTitle": "Assessment details",
       "noPrimaryScore": "Impact score unavailable",
-    "noDetailsAvailable": "No details are available for this assessment yet.",
-    "methodologyLink": "Access the methodology",
-    "methodologyLinkAria": "Open the Impact Score methodology",
-    "energyLabelAlt": "Energy label {value}",
-    "percentile": "Percentile",
+      "noDetailsAvailable": "No details are available for this assessment yet.",
+      "methodologyLink": "Access the methodology",
+      "methodologyLinkAria": "Open the Impact Score methodology",
+      "energyLabelAlt": "Energy label {value}",
+      "percentile": "Percentile",
       "weightChip": "Counts for {value}% of the total score",
       "weightTooltip": "The {scoreName} score counts for {value}% of the total score",
       "subscoreDetailsToggle": "View indicator details",

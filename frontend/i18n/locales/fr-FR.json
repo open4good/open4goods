@@ -1277,6 +1277,10 @@
       "title": "Impact Score : une lecture écologique et sociétale simple de chaque produit",
       "description": "Découvrez comment l’Impact Score évalue l’impact environnemental d’un produit grâce à méthode transparente et ouverte."
     },
+    "methodologyExplanation": {
+      "title": "Sigma, percentile.... Quoi ???",
+      "content": "Pour garantir un score équitable entre tous les produits, nous utilisons une approche statistique appelée **Sigma Scoring**.<br><br>Contrairement à une simple moyenne, cette méthode prend en compte la **dispersion** des données (écart-type).<br><ul><li><strong>Sigma Scoring :</strong> La plupart des produits se situent dans la moyenne. Les produits exceptionnels (en bien ou en mal) n'écrasent pas le score des autres.</li><li><strong>Percentile (Secours) :</strong> Si trop peu de valeurs différentes existent (ex: seulement 3 options de garantie possibles), le Sigma Scoring ne fonctionne plus bien. Nous passons alors en mode **Percentile** pour classer les produits du meilleur au moins bon, tout en gardant une note sur 5.</li></ul><br>C'est ce qui nous permet de vous donner une note vraiment utile, quelle que soit la catégorie de produit !"
+    },
     "hero": {
       "eyebrow": "Impact Score",
       "title": "évaluation de l'impact environnemental de vos produits",
@@ -2105,7 +2109,7 @@
   "search": {
     "hero": {
       "eyebrow": "Explorer le catalogue",
-      "title": "Rechercher des produits responsables",
+      "title": "Les produits disponibles",
       "subtitle": "Trouvez des produits, des marques et des références sélectionnés par Nudger dans chaque verticale."
     },
     "form": {

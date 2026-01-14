@@ -22,6 +22,7 @@
       clearable
       hide-details
       return-object
+      :custom-filter="() => true"
       :class="[
         'search-suggest-field',
         { 'search-suggest-field--active': isHovering || isFieldFocused },

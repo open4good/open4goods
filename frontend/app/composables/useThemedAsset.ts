@@ -35,6 +35,14 @@ const themedAssetIndex: ThemedAssetIndex = Object.entries(rawAssetIndex).reduce(
   {}
 )
 
+console.log('DEBUG: Validating themedAssetIndex keys...')
+console.log('DEBUG: Total keys:', Object.keys(themedAssetIndex).length)
+console.log('DEBUG: Sample keys:', Object.keys(themedAssetIndex).slice(0, 5))
+if (Object.keys(themedAssetIndex).length === 0) {
+  console.log('DEBUG: NO KEYS FOUND! checking rawAssetIndex...')
+  console.log('DEBUG: Raw keys sample:', Object.keys(rawAssetIndex).slice(0, 5))
+}
+
 export const resolveThemedAssetUrlFromIndex = (
   relativePath: string | string[],
   themeName: ThemeName,
@@ -64,7 +72,13 @@ export const resolveThemedAssetUrlFromIndex = (
       if (resolved) {
         return resolved
       }
-      // console.log(`[ThemeAsset] Checking candidate: ${candidate}, exists: ${!!index[candidate]}`)
+      // Log debugging info
+      console.log(
+        `[ThemeAsset] Checking candidate: ${candidate}, exists: ${!!index[candidate]}`
+      )
+      if (!index[candidate]) {
+        // console.log('Available keys sample:', Object.keys(index).slice(0, 5))
+      }
       return index[candidate]
     },
     undefined

@@ -6,11 +6,11 @@
 
   <defs>
     <style>
-      .cls-1 { fill: url(#Dégradé_sans_nom_538); }
+      .cls-1 { fill: url(#Degrade_sans_nom_538); }
       .cls-2 { fill: #fff; }
     </style>
 
-    <linearGradient id="Dégradé_sans_nom_538"
+    <linearGradient id="Degrade_sans_nom_538"
       x1="5.84" y1="5.84" x2="375.32" y2="375.32"
       gradientUnits="userSpaceOnUse">
       <stop offset=".03" stop-color="#00de9f"/>
