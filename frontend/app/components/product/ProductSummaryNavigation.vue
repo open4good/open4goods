@@ -133,7 +133,7 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const _props = defineProps({
   sections: {
@@ -183,18 +183,15 @@ const onNavigate = (sectionId: string) => {
   emit('navigate', sectionId)
 }
 
-const hasSubsections = (section: {
-  subsections?: Array<{ id: string }>
-}) => (section.subsections?.length ?? 0) > 0
+const hasSubsections = (section: { subsections?: Array<{ id: string }> }) =>
+  (section.subsections?.length ?? 0) > 0
 
 const isSectionActive = (section: {
   id: string
   subsections?: Array<{ id: string }>
 }) =>
   section.id === _props.activeSection ||
-  Boolean(
-    section.subsections?.some(sub => sub.id === _props.activeSection)
-  )
+  Boolean(section.subsections?.some(sub => sub.id === _props.activeSection))
 
 const isSubmenuOpen = (section: { id: string }) =>
   openSectionId.value === section.id || isSectionActive(section)
@@ -205,10 +202,34 @@ const toggleSubmenu = (sectionId: string) => {
 
 const handleSectionClick = (section: { id: string }) => {
   if (hasSubsections(section)) {
+    // If clicking the section header, ensure it opens
     openSectionId.value = section.id
   }
   onNavigate(section.id)
 }
+
+// Watch activeSection to latch the open state
+// This prevents the menu from collapsing when scrolling through gaps or "up" out of a section
+// It ensures the *last active* section remains open until a new one is engaged
+
+watch(
+  () => _props.activeSection,
+  newActiveId => {
+    if (!newActiveId) return
+
+    // Find which section this ID belongs to
+    const section = _props.sections.find(
+      s =>
+        s.id === newActiveId ||
+        s.subsections?.some(sub => sub.id === newActiveId)
+    )
+
+    if (section && hasSubsections(section)) {
+      openSectionId.value = section.id
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
@@ -287,16 +308,16 @@ const handleSectionClick = (section: { id: string }) => {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  border: 1px solid transparent;
-  background: rgba(var(--v-theme-surface-primary-080), 0.5);
+  border: none;
+  background: transparent;
   color: rgb(var(--v-theme-text-neutral-strong));
   transition: all 0.25s ease;
 }
 
 .product-summary-navigation__toggle:hover,
 .product-summary-navigation__toggle:focus-visible {
-  border-color: rgba(var(--v-theme-border-primary-strong), 0.6);
-  background: rgba(var(--v-theme-surface-primary-100), 0.7);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  background: rgba(var(--v-theme-surface-primary-080), 0.5);
 }
 
 .product-summary-navigation__submenu {

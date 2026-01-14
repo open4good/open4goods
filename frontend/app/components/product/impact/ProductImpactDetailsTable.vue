@@ -20,7 +20,14 @@
           :class="{
             'impact-details__label--child': item.rowType === 'subscore',
             'impact-details__label--aggregate': item.rowType === 'aggregate',
+            'cursor-pointer':
+              item.rowType === 'aggregate' || item.rowType === 'subscore',
           }"
+          @click="
+            item.rowType === 'aggregate'
+              ? toggleGroup(item.id)
+              : toggleSubscoreExpansion(item)
+          "
         >
           <v-btn
             v-if="item.rowType === 'aggregate'"
@@ -33,7 +40,7 @@
                 ? $t('product.impact.hideDetails')
                 : $t('product.impact.subscoreDetailsToggle')
             "
-            @click="toggleGroup(item.id)"
+            @click.stop="toggleGroup(item.id)"
           >
             <v-icon
               :icon="
@@ -54,7 +61,7 @@
                 ? $t('product.impact.hideDetails')
                 : $t('product.impact.subscoreDetailsToggle')
             "
-            @click="toggleSubscoreExpansion(item)"
+            @click.stop="toggleSubscoreExpansion(item)"
           >
             <v-icon
               :icon="

@@ -1,12 +1,7 @@
 <template>
   <article v-if="score" class="impact-ecoscore">
     <header class="impact-ecoscore__header">
-      <div class="impact-ecoscore__header-main">
-        <h3 class="impact-ecoscore__title">{{ score.label }}</h3>
-        <p v-if="score.description" class="impact-ecoscore__description">
-          {{ score.description }}
-        </p>
-      </div>
+
 
       <div class="impact-ecoscore__header-actions">
         <v-checkbox

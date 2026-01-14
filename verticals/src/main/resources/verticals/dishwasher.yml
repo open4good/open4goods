@@ -70,7 +70,6 @@ impactScoreConfig:
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
   - POWER_CONSUMPTION_TYPICAL
-  - WEIGHT
   - WARRANTY
 
 #####################################################################################################################################

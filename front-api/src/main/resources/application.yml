@@ -78,10 +78,10 @@ front:
           blocId: 'pages:ecosystem:frenchtech'
           url: https://www.ft-brestbretagneouest.bzh
           imageUrl: /images/ecosystem/frenchtech.png
-        - name: ADEME
-          blocId: 'pages:ecosystem:ademe'
-          url: https://www.ademe.fr
-          imageUrl: /images/ecosystem/ademe.png
+#        - name: ADEME
+#          blocId: 'pages:ecosystem:ademe'
+#          url: https://www.ademe.fr
+#          imageUrl: /images/ecosystem/ademe.png
 
         - name: Icecat
           blocId: 'pages:ecosystem:icecat'
