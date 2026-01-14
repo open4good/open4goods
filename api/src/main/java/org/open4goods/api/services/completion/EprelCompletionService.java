@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.api.controller.api.CsvEnrichmentController;
 import org.open4goods.api.services.AbstractCompletionService;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
@@ -36,7 +35,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 	private static final int REFRESH_IN_DAYS = 1;
 	private EprelSearchService eprelSearchService;
 
-	Logger logger = LoggerFactory.getLogger(CsvEnrichmentController.class);
+	Logger logger = LoggerFactory.getLogger(EprelCompletionService.class);
 	private StandardAggregator aggregator;
 
 	public EprelCompletionService(VerticalsConfigService verticalConfigService, ProductRepository dataRepository, ApiProperties apiProperties, EprelSearchService eprelSearchService, AggregationFacadeService aggregationFacade) {

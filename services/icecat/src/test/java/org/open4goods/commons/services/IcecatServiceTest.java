@@ -21,6 +21,11 @@ import org.open4goods.brand.service.BrandService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.verticals.VerticalsConfigService;
 
+import org.open4goods.model.Localisable;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.FeatureGroup;
+import org.open4goods.model.vertical.VerticalConfig;
+
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class IcecatServiceTest {
@@ -67,5 +72,55 @@ public class IcecatServiceTest {
 
         String resolved = service.getOriginalEnglishName("Color", null);
         assertEquals("Color", resolved);
+    }
+
+
+    @Test
+    public void testFeaturesWithNullAttributeValue() {
+        // Setup Mocks
+        IcecatConfiguration cfg = new IcecatConfiguration();
+        RemoteFileCachingService cache = Mockito.mock(RemoteFileCachingService.class);
+        BrandService brand = Mockito.mock(BrandService.class);
+        VerticalsConfigService verticalService = Mockito.mock(VerticalsConfigService.class);
+        FeatureLoader fl = Mockito.mock(FeatureLoader.class);
+        CategoryLoader cl = Mockito.mock(CategoryLoader.class);
+
+        IcecatService service = new IcecatService(new XmlMapper(), cfg, cache, ".", fl, cl);
+
+        // Setup Data
+        int featureId = 123;
+        String language = "fr";
+        
+        // Mock VerticalConfig
+        VerticalConfig verticalConfig = Mockito.mock(VerticalConfig.class);
+        FeatureGroup featureGroup = new FeatureGroup();
+        featureGroup.setFeaturesId(Collections.singletonList(featureId));
+        Localisable<String, String> groupName = new Localisable<>();
+        groupName.put("fr", "Group Name");
+        featureGroup.setName(groupName);
+        Mockito.when(verticalConfig.getFeatureGroups()).thenReturn(Collections.singletonList(featureGroup));
+
+        // Mock Product and Attribute
+        Product product = Mockito.mock(Product.class);
+        org.open4goods.model.attribute.ProductAttributes attributes = Mockito.mock(org.open4goods.model.attribute.ProductAttributes.class);
+        org.open4goods.model.attribute.ProductAttribute attribute = new org.open4goods.model.attribute.ProductAttribute();
+        attribute.setValue(null); // The cause of NPE
+        
+        Mockito.when(product.getAttributes()).thenReturn(attributes);
+        Mockito.when(attributes.attributeByFeatureId(featureId)).thenReturn(attribute);
+
+        // Mock FeatureLoader behavior
+        IcecatFeature icecatFeature = new IcecatFeature();
+        IcecatNames names = new IcecatNames();
+        names.setNames(Collections.emptyList());
+        icecatFeature.setNames(names);
+        
+        Map<Integer, IcecatFeature> featuresMap = Mockito.mock(Map.class);
+        Mockito.when(fl.getFeaturesById()).thenReturn(featuresMap);
+        Mockito.when(featuresMap.get(featureId)).thenReturn(icecatFeature);
+
+        // Execute and Assert
+        // This should NOT throw NPE after fix
+        assertDoesNotThrow(() -> service.features(verticalConfig, language, product));
     }
 }

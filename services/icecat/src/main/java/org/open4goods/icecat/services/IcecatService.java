@@ -276,7 +276,7 @@ public class IcecatService {
 
 
 						// Splitting on "," for multi values
-						if (a.getValue().contains(",")) {
+						if (a.getValue() != null && a.getValue().contains(",")) {
 							String[] values = a.getValue().split(",");
 							if (values.length > 2)
 							{
