@@ -22,6 +22,7 @@
         :product-model="productModel"
         :product-image="productImage"
         :vertical-title="verticalTitle"
+        :expanded-score-id="expandedScoreId"
       />
     </div>
   </section>
@@ -102,6 +103,10 @@ const props = defineProps({
     type: Object as PropType<Record<string, string> | undefined>,
     default: undefined,
   },
+  expandedScoreId: {
+    type: String as PropType<string | null>,
+    default: null,
+  },
 })
 
 const radarData = toRef(props, 'radarData')
@@ -112,6 +117,7 @@ const productImage = toRef(props, 'productImage')
 const verticalHomeUrl = toRef(props, 'verticalHomeUrl')
 const verticalTitle = toRef(props, 'verticalTitle')
 const subtitleParams = toRef(props, 'subtitleParams')
+const expandedScoreId = toRef(props, 'expandedScoreId')
 const { t } = useI18n()
 
 const primaryScore = computed(() => props.scores[0] ?? null)

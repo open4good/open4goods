@@ -1,8 +1,6 @@
 <template>
   <article v-if="score" class="impact-ecoscore">
     <header class="impact-ecoscore__header">
-
-
       <div class="impact-ecoscore__header-actions">
         <v-checkbox
           v-model="showVirtualScores"
@@ -45,6 +43,7 @@
         :product-model="productModel"
         :product-image="productImage"
         :vertical-title="verticalTitle"
+        :expanded-score-id="expandedScoreId"
       />
     </div>
 
@@ -58,9 +57,22 @@
     </div>
   </article>
   <article v-else class="impact-ecoscore impact-ecoscore--empty">
-    <span class="impact-ecoscore__placeholder">{{
-      $t('product.impact.noPrimaryScore')
-    }}</span>
+    <div class="impact-ecoscore__empty-content">
+      <h3 class="impact-ecoscore__empty-title">
+        {{ $t('product.impact.notRated.title') }}
+      </h3>
+      <p class="impact-ecoscore__empty-desc">
+        {{ $t('product.impact.notRated.description') }}
+      </p>
+      <NuxtLink
+        :to="methodologyHref"
+        class="impact-ecoscore__cta mt-4"
+        :aria-label="$t('product.impact.methodologyLinkAria')"
+      >
+        <span>{{ $t('product.impact.methodologyLink') }}</span>
+        <v-icon icon="mdi-arrow-top-right" size="18" />
+      </NuxtLink>
+    </div>
   </article>
 </template>
 
@@ -99,6 +111,7 @@ const props = defineProps<{
   productModel?: string
   productImage?: string
   verticalTitle?: string
+  expandedScoreId?: string | null
 }>()
 
 const { locale, t: $t } = useI18n()
@@ -283,6 +296,26 @@ defineExpose({
 .impact-ecoscore__placeholder {
   font-size: 0.95rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+}
+
+.impact-ecoscore__empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem;
+}
+
+.impact-ecoscore__empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.impact-ecoscore__empty-desc {
+  font-size: 1rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  margin: 0;
 }
 
 @media (max-width: 768px) {

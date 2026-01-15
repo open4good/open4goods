@@ -177,7 +177,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductImpactSubscoreCard from './ProductImpactSubscoreCard.vue'
@@ -194,6 +194,7 @@ const props = defineProps<{
   productModel?: string
   productImage?: string
   verticalTitle?: string
+  expandedScoreId?: string | null
 }>()
 
 const productName = computed(() => props.productName ?? '')
@@ -514,6 +515,62 @@ const toggleSubscoreExpansion = (item: TableRow) => {
     expandedSubscores.value.splice(index, 1)
   }
 }
+
+const expandScore = (scoreId: string) => {
+  // Check if it's a group ID
+  if (groupedScores.value.groups.some(g => g.id === scoreId)) {
+    if (!expandedGroups.value.has(scoreId)) {
+      expandedGroups.value.add(scoreId)
+      // Trigger reactivity
+      expandedGroups.value = new Set(expandedGroups.value)
+    }
+    return
+  }
+
+  // Check if it's the 'divers' group ID
+  if (groupedScores.value.divers?.id === scoreId) {
+    if (!expandedGroups.value.has(scoreId)) {
+      expandedGroups.value.add(scoreId)
+      expandedGroups.value = new Set(expandedGroups.value)
+    }
+    return
+  }
+
+  // Check if it's a subscore
+  let foundGroup = groupedScores.value.groups.find(g =>
+    g.subscores.some(s => s.id === scoreId)
+  )
+
+  if (
+    !foundGroup &&
+    groupedScores.value.divers?.subscores.some(s => s.id === scoreId)
+  ) {
+    foundGroup = groupedScores.value.divers
+  }
+
+  if (foundGroup) {
+    // Expand the group
+    if (!expandedGroups.value.has(foundGroup.id)) {
+      expandedGroups.value.add(foundGroup.id)
+      expandedGroups.value = new Set(expandedGroups.value)
+    }
+
+    // Expand the subscore (add to expandedSubscores if not present)
+    if (!expandedSubscores.value.includes(scoreId)) {
+      expandedSubscores.value.push(scoreId)
+    }
+  }
+}
+
+watch(
+  () => props.expandedScoreId,
+  newId => {
+    if (newId) {
+      expandScore(newId)
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
@@ -543,11 +600,13 @@ const toggleSubscoreExpansion = (item: TableRow) => {
 .impact-details__table :deep(th) {
   font-weight: 600;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  font-size: 1rem;
 }
 
 .impact-details__table :deep(td) {
   font-weight: 500;
   color: rgb(var(--v-theme-text-neutral-strong));
+  font-size: 1rem;
 }
 
 .impact-details__indicator {

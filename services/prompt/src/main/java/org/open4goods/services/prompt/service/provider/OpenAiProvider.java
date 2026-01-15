@@ -42,7 +42,7 @@ public class OpenAiProvider implements GenAiProvider {
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
-    public OpenAiProvider(OpenAiApi openAiApi, PromptServiceConfig config) {
+    public OpenAiProvider(@org.springframework.beans.factory.annotation.Qualifier("openAiCustomApi") OpenAiApi openAiApi, PromptServiceConfig config) {
         this.openAiApi = openAiApi;
         this.config = config;
         this.objectMapper = new ObjectMapper();

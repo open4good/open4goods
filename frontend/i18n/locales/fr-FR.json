@@ -2507,6 +2507,11 @@
       "noDetailsAvailable": "Les détails de cette évaluation ne sont pas disponibles.",
       "methodologyLink": "Accéder à la méthodologie",
       "methodologyLinkAria": "Ouvrir la méthodologie de l'Impact Score",
+      "notRated": {
+        "title": "Non encore évalué",
+        "description": "L'impact de ce produit n'a pas encore été calculé."
+      },
+      "showVirtualScores": "Afficher les scores virtuels",
       "energyLabelAlt": "Étiquette énergie {value}",
       "percentile": "Percentile",
       "weightChip": "Compte pour {value}% de la note totale",

@@ -49,7 +49,7 @@
         </section>
 
         <section
-          v-if="categoryDetail && impactScores.length"
+          v-if="categoryDetail"
           :id="sectionIds.impact"
           class="product-page__section"
         >
@@ -63,6 +63,7 @@
             :vertical-home-url="verticalHomeUrl"
             :vertical-title="normalizedVerticalTitle"
             :subtitle-params="impactSubtitleParams"
+            :expanded-score-id="expandedScoreId"
           />
         </section>
 
@@ -441,10 +442,7 @@ const availableImpactCriteriaMap = computed(() => {
     }
 
     return map
-  }, new Map<
-    string,
-    { title: string; description: string | null; utility: string | null }
-  >())
+  }, new Map<string, { title: string; description: string | null; utility: string | null }>())
 })
 
 if (categorySlug) {
@@ -1070,9 +1068,7 @@ const resolveCategorySpecificAttribute = (key: string): string | null => {
     return null
   }
 
-  return normalizeEprelValue(
-    (attributes as Record<string, unknown>)[key]
-  )
+  return normalizeEprelValue((attributes as Record<string, unknown>)[key])
 }
 
 const resolveEnergyClassDisplay = (
@@ -1191,8 +1187,8 @@ const impactScores = computed(() => {
       attributeSourcing,
       attributeSuffix,
       absoluteValue: isEnergyClassScore
-        ? energyClassDisplay ?? score.absoluteValue ?? null
-        : score.absoluteValue ?? null,
+        ? (energyClassDisplay ?? score.absoluteValue ?? null)
+        : (score.absoluteValue ?? null),
       absolute: score.absolute ?? null,
       coefficient: coefficients[normalizedScoreId] ?? null,
       percent: score.percent ?? null,
@@ -1209,6 +1205,7 @@ const impactScores = computed(() => {
       aggregates,
       betterIs: attributeConfig?.betterIs ?? null,
       importanceDescription: criterion?.utility ?? null,
+      virtual: score.virtual ?? false,
     }
   })
 })
@@ -1894,17 +1891,42 @@ onBeforeUnmount(() => {
   visibleSectionRatios.clear()
 })
 
+const expandedScoreId = ref<string | null>(null)
+
+const impactAnchorToScoreIdMap = computed(() => {
+  const map = new Map<string, string>()
+  const { groups, divers } = buildImpactScoreGroups(impactScores.value, t)
+
+  groups.forEach(group => {
+    map.set(buildImpactAggregateAnchorId(group.id), group.id)
+  })
+
+  if (divers) {
+    map.set(buildImpactAggregateAnchorId(divers.id), divers.id)
+  }
+
+  return map
+})
+
 const scrollToSection = (sectionId: string) => {
   if (!import.meta.client) {
     return
   }
 
-  const element = document.getElementById(sectionId)
+  let targetId = sectionId
+  const scoreId = impactAnchorToScoreIdMap.value.get(sectionId)
+
+  if (scoreId) {
+    expandedScoreId.value = scoreId
+    targetId = sectionIds.impact
+  }
+
+  const element = document.getElementById(targetId)
   if (!element) {
     return
   }
 
-  activeSection.value = sectionId
+  activeSection.value = targetId
 
   const offset = orientation.value === 'horizontal' ? 96 : 120
   const top = element.getBoundingClientRect().top + window.scrollY - offset
