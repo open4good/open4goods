@@ -2758,10 +2758,26 @@
         "privacy": {
           "title": "Session respectueuse de la vie privée",
           "subtitle": "Nudger reste transparent : vous gardez le contrôle sur vos données.",
+          "hero": {
+            "title": "On respecte vos données",
+            "subtitle": "Nudger ne collecte aucune donnée personnelle."
+          },
+          "sections": {
+            "remote": "Données distantes",
+            "local": "Données locales"
+          },
           "ip": {
             "title": "Votre adresse IP",
             "description": "Nous l'utilisons uniquement pour des besoins techniques et de sécurité.",
             "unavailable": "Indisponible"
+          },
+          "userAgent": {
+            "label": "User agent",
+            "unavailable": "Indisponible"
+          },
+          "technicalOnly": {
+            "label": "Les seules données collectées",
+            "tooltip": "Uniquement des données techniques, aucune donnée personnelle."
           },
           "cookies": {
             "title": "Cookies sur cet appareil",
@@ -2778,7 +2794,12 @@
           "quotas": {
             "title": "Quotas & Activité",
             "aiRemaining": "Générations IA restantes",
+            "aiRemainingTooltip": "Nudger vous permet de générer des synthèses IA puissantes, partagées auprès de tous.",
             "votesRemaining": "Votes restants"
+          },
+          "ctas": {
+            "openSource": "Open source",
+            "dataPrivacy": "Données personnelles"
           },
           "compare": {
             "count": "{count} produit dans le comparateur | {count} produits dans le comparateur",
