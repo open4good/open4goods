@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.Localisable;
+import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
@@ -95,12 +96,61 @@ class ReviewGenerationServiceTest {
         holder.setEnoughData(true);
         // Created 1 day ago
         holder.setCreatedMs(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli());
+        
+        // Ensure the review is valid
+        AiReview review = new AiReview();
+        review.setDescription("This is a sufficiently long description that should pass the validation check of 20 characters.");
+        review.setAttributes(java.util.List.of(new AiReview.AiAttribute("attr1", "val1", 1)));
+        holder.setReview(review);
+        
         reviews.put("fr", holder);
         product.setReviews(reviews);
 
         boolean result = invokeShouldGenerateReview(product);
 
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void shouldGenerateReview_ReturnsTrue_WhenReviewIsInvalid_ShortDescription() {
+        Product product = new Product();
+        Localisable<String, AiReviewHolder> reviews = new Localisable<>();
+        AiReviewHolder holder = new AiReviewHolder();
+        holder.setEnoughData(true);
+        holder.setCreatedMs(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli());
+
+        AiReview review = new AiReview();
+        review.setDescription("Too short"); // < 20 chars
+        review.setAttributes(java.util.List.of(new AiReview.AiAttribute("attr1", "val1", 1)));
+        holder.setReview(review);
+
+        reviews.put("fr", holder);
+        product.setReviews(reviews);
+
+        boolean result = invokeShouldGenerateReview(product);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void shouldGenerateReview_ReturnsTrue_WhenReviewIsInvalid_NoAttributes() {
+        Product product = new Product();
+        Localisable<String, AiReviewHolder> reviews = new Localisable<>();
+        AiReviewHolder holder = new AiReviewHolder();
+        holder.setEnoughData(true);
+        holder.setCreatedMs(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli());
+
+        AiReview review = new AiReview();
+        review.setDescription("This is a sufficiently long description that should pass the validation check.");
+        review.setAttributes(java.util.Collections.emptyList()); // Empty attributes
+        holder.setReview(review);
+
+        reviews.put("fr", holder);
+        product.setReviews(reviews);
+
+        boolean result = invokeShouldGenerateReview(product);
+
+        assertThat(result).isTrue();
     }
 
 

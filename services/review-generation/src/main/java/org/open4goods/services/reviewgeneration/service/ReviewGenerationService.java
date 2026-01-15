@@ -162,11 +162,39 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (existingReview == null || existingReview.getCreatedMs() == null) {
 			return true;
 		}
+
+		// Check for validity of the existing review
+		if (!isValidReview(existingReview.getReview())) {
+			logger.warn("Existing AI review for UPC {} is invalid (insufficient content). Forcing regeneration.", product.getId());
+			return true;
+		}
+
 		Instant reviewCreated = Instant.ofEpochMilli(existingReview.getCreatedMs());
 		int delayDays = existingReview.isEnoughData() ? properties.getRegenerationDelayDays()
 				: properties.getRetryDelayDays();
 		Instant threshold = reviewCreated.plus(delayDays, ChronoUnit.DAYS);
 		return Instant.now().isAfter(threshold);
+	}
+
+	/**
+	 * Checks if an AI review is considered valid/complete enough to be kept.
+	 * A valid review must not be null, must have a description of reasonable length
+	 * (e.g. > 20 chars), and must have at least one attribute populated.
+	 *
+	 * @param review the review to check
+	 * @return true if valid, false otherwise
+	 */
+	private boolean isValidReview(AiReview review) {
+		if (review == null) {
+			return false;
+		}
+		if (review.getDescription() == null || review.getDescription().trim().length() < 20) {
+			return false;
+		}
+		if (review.getAttributes() == null || review.getAttributes().isEmpty()) {
+			return false;
+		}
+		return true;
 	}
 
 
