@@ -217,7 +217,7 @@ import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
 import NudgeToolAnimatedIcon from '~/components/nudge-tool/NudgeToolAnimatedIcon.vue'
-import type { CornerSize } from '~/components/shared/cards/RoundedCornerCard.vue'
+
 import {
   NudgeToolStepCategory,
   NudgeToolStepCondition,
@@ -258,13 +258,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ (event: 'navigate', target: string): void }>()
-
-const accentCornerOffsets: Record<CornerSize, string> = {
-  sm: '46px',
-  md: '58px',
-  lg: '72px',
-  xl: '120px',
-}
 
 const { t } = useI18n()
 const { isLoggedIn } = useAuth()
@@ -962,10 +955,6 @@ const windowContentStyle = computed(() => {
 })
 
 const resolvedCornerSize = computed(() => (isContentMode.value ? 'xl' : 'lg'))
-
-const footerOffsetStyle = computed(() => ({
-  paddingLeft: accentCornerOffsets[resolvedCornerSize.value],
-}))
 
 const cornerIconScaleFactor = 1.3
 const baseCornerIconSize = 26

@@ -1,103 +1,111 @@
 <template>
   <div class="search-suggest-field__wrapper" v-bind="filteredAttrs">
-    <v-autocomplete
-      v-if="isSuggestEnabled"
-      v-model="selectedItem"
-      v-model:menu="menu"
-      :search="internalSearch"
-      :items="suggestionItems"
-      item-value="id"
-      :label="label"
-      :placeholder="placeholder"
-      :aria-label="ariaLabel"
-      :loading="loading"
-      :menu-props="menuProps"
-      :hide-no-data="!showEmptyState"
-      :no-data-text="''"
-      :elevation="getFieldElevation(isHovering)"
-      menu-icon=""
-      prepend-inner-icon="mdi-magnify"
-      variant="solo"
-      density="comfortable"
-      clearable
-      hide-details
-      return-object
-      :custom-filter="() => true"
-      :class="[
-        'search-suggest-field',
-        { 'search-suggest-field--active': isHovering || isFieldFocused },
-      ]"
-      @mouseenter="isHovering = true"
-      @mouseleave="isHovering = false"
-      @update:model-value="handleSelection"
-      @click:clear="handleClear"
-      @keydown.enter="handleEnterKey"
-      @update:search="handleSearchInput"
-      @blur="handleBlur"
-      @focus="handleFocus"
+    <v-menu
+      v-model="menu"
+      :close-on-content-click="false"
+      location="bottom"
+      :offset="4"
+      content-class="search-suggest-field__menu-content"
+      :max-height="420"
+      :min-width="$el?.clientWidth"
     >
-      <template #append-inner>
-        <v-btn
-          v-if="shouldShowVoiceButton && isHydrated"
-          class="search-suggest-field__voice-button"
+      <template #activator="{ props: menuProps }">
+        <v-text-field
+          v-bind="menuProps"
+          v-model="internalSearch"
+          :label="label"
+          :placeholder="placeholder"
+          :aria-label="ariaLabel"
+          :loading="loading"
+          :elevation="getFieldElevation(isHovering)"
+          prepend-inner-icon="mdi-magnify"
+          variant="solo"
           density="comfortable"
-          variant="text"
-          icon
-          :color="isVoiceListening ? 'primary' : undefined"
-          :title="
-            voiceError ||
-            (isVoiceListening
-              ? t('search.suggestions.voice.stopLabel')
-              : t('search.suggestions.voice.startLabel'))
-          "
-          :aria-label="
-            isVoiceListening
-              ? t('search.suggestions.voice.stopLabel')
-              : t('search.suggestions.voice.startLabel')
-          "
-          data-test="search-voice-button"
-          :disabled="!isVoiceSupported"
-          @click="toggleVoiceListening"
+          clearable
+          hide-details
+          :class="[
+            'search-suggest-field',
+            { 'search-suggest-field--active': isHovering || isFieldFocused },
+          ]"
+          @mouseenter="isHovering = true"
+          @mouseleave="isHovering = false"
+          @click:clear="handleClear"
+          @keydown.enter="handleEnterKey"
+          @keydown.down.prevent="navigateHighlight(1)"
+          @keydown.up.prevent="navigateHighlight(-1)"
+          @keydown.esc="menu = false"
+          @update:model-value="handleSearchInput"
+          @blur="handleBlur"
+          @focus="handleFocus"
         >
-          <v-icon
-            :icon="
-              isVoiceListening ? 'mdi-microphone' : 'mdi-microphone-outline'
-            "
-            size="20"
-            aria-hidden="true"
-          />
-        </v-btn>
-        <v-btn
-          v-if="shouldShowScannerButton"
-          class="search-suggest-field__scanner-button"
-          density="comfortable"
-          variant="text"
-          icon
-          :aria-label="t('search.suggestions.scanner.openLabel')"
-          data-test="search-scanner-button"
-          @click="openScannerDialog"
-        >
-          <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
-        </v-btn>
-        <slot v-if="$slots['append-inner']" name="append-inner" />
-      </template>
-      <template #item="{ item, props: itemProps, index }">
-        <div class="search-suggest-field__entry" :data-section="item.raw.type">
-          <p
-            v-if="item.raw.type === 'category' && index === 0"
-            class="search-suggest-field__section"
-          >
-            {{ t('search.suggestions.sections.categories') }}
-          </p>
-          <template v-if="item.raw.type === 'category'">
-            <v-list-item
-              v-bind="itemProps"
-              class="search-suggest-field__item search-suggest-field__item--category"
-              :aria-label="
-                t('search.suggestions.categoryAria', {
-                  category: item.raw.title,
-                })
+          <template #append-inner>
+            <v-btn
+              v-if="shouldShowVoiceButton && isHydrated"
+              class="search-suggest-field__voice-button"
+              density="comfortable"
+              variant="text"
+              icon
+              :color="isVoiceListening ? 'primary' : undefined"
+              :title="
+                voiceError ||
+                (isVoiceListening
+                  ? t('search.suggestions.voice.stopLabel')
+                  : t('search.suggestions.voice.startLabel'))
               "
+              :aria-label="
+                isVoiceListening
+                  ? t('search.suggestions.voice.stopLabel')
+                  : t('search.suggestions.voice.startLabel')
+              "
+              data-test="search-voice-button"
+              :disabled="!isVoiceSupported"
+              @click="toggleVoiceListening"
+            >
+              <v-icon
+                :icon="
+                  isVoiceListening ? 'mdi-microphone' : 'mdi-microphone-outline'
+                "
+                size="20"
+                aria-hidden="true"
+              />
+            </v-btn>
+            <v-btn
+              v-if="shouldShowScannerButton"
+              class="search-suggest-field__scanner-button"
+              density="comfortable"
+              variant="text"
+              icon
+              :aria-label="t('search.suggestions.scanner.openLabel')"
+              data-test="search-scanner-button"
+              @click="openScannerDialog"
+            >
+              <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
+            </v-btn>
+            <slot v-if="$slots['append-inner']" name="append-inner" />
+          </template>
+        </v-text-field>
+      </template>
+
+      <v-list
+        v-if="hasSuggestions || showEmptyState"
+        class="search-suggest-field__list"
+        elevation="16"
+      >
+        <template v-if="hasSuggestions">
+          <!-- Categories Section -->
+          <template v-if="categories.length > 0">
+            <v-list-subheader class="search-suggest-field__section">
+              {{ t('search.suggestions.sections.categories') }}
+            </v-list-subheader>
+
+            <v-list-item
+              v-for="(item, index) in categories"
+              :key="item.id"
+              :value="item"
+              :active="highlightedIndex === index"
+              class="search-suggest-field__item search-suggest-field__item--category"
+              @click="handleSelection(item)"
+              @mousemove="highlightedIndex = index"
             >
               <template #prepend>
                 <v-avatar
@@ -105,11 +113,11 @@
                   rounded="lg"
                   size="52"
                 >
-                  <v-img :src="item.raw.image" :alt="''" cover />
+                  <v-img :src="item.image" :alt="''" cover />
                 </v-avatar>
               </template>
               <v-list-item-title class="search-suggest-field__title">
-                {{ item.raw.title }}
+                {{ item.title }}
               </v-list-item-title>
               <template #append>
                 <v-icon
@@ -121,21 +129,22 @@
             </v-list-item>
           </template>
 
-          <p
-            v-if="item.raw.type === 'product' && index === firstProductIndex"
-            class="search-suggest-field__section search-suggest-field__section--compact"
-          >
-            {{ t('search.suggestions.sections.products') }}
-          </p>
-          <template v-if="item.raw.type === 'product'">
+          <!-- Products Section -->
+          <template v-if="products.length > 0">
+            <v-list-subheader
+              class="search-suggest-field__section search-suggest-field__section--compact"
+            >
+              {{ t('search.suggestions.sections.products') }}
+            </v-list-subheader>
+
             <v-list-item
-              v-bind="itemProps"
+              v-for="(item, index) in products"
+              :key="item.id"
+              :value="item"
+              :active="highlightedIndex === categories.length + index"
               class="search-suggest-field__item search-suggest-field__item--product"
-              :aria-label="
-                t('search.suggestions.productAria', {
-                  product: item.raw.title,
-                })
-              "
+              @click="handleSelection(item)"
+              @mousemove="highlightedIndex = categories.length + index"
             >
               <template #prepend>
                 <v-avatar
@@ -143,113 +152,49 @@
                   rounded="lg"
                   size="44"
                 >
-                  <v-img :src="item.raw.image" :alt="''" cover />
+                  <v-img :src="item.image" :alt="''" cover />
                 </v-avatar>
               </template>
               <v-list-item-title class="search-suggest-field__product-title">
-                {{ item.raw.title }}
+                {{ item.title }}
               </v-list-item-title>
               <template #append>
                 <ImpactScore
-                  v-if="item.raw.ecoscoreValue !== null"
+                  v-if="item.ecoscoreValue !== null"
                   class="search-suggest-field__impact"
-                  :score="item.raw.ecoscoreValue"
+                  :score="item.ecoscoreValue"
                   size="small"
                   flat
                 />
               </template>
             </v-list-item>
           </template>
-        </div>
-      </template>
+        </template>
 
-      <template v-if="showEmptyState" #no-data>
-        <div class="search-suggest-field__empty">
-          <p v-if="!hasMinimumLength" class="search-suggest-field__empty-text">
-            {{ t('search.suggestions.minimum', { min: minChars }) }}
-          </p>
-          <p
-            v-else-if="hasError"
-            class="search-suggest-field__empty-text search-suggest-field__empty-text--error"
-          >
-            {{ t('search.suggestions.error') }}
-          </p>
-          <p v-else class="search-suggest-field__empty-text">
-            {{ t('search.suggestions.empty') }}
-          </p>
-        </div>
-      </template>
-    </v-autocomplete>
+        <!-- Empty State -->
+        <template v-else-if="showEmptyState">
+          <div class="search-suggest-field__empty">
+            <p
+              v-if="!hasMinimumLength"
+              class="search-suggest-field__empty-text"
+            >
+              {{ t('search.suggestions.minimum', { min: minChars }) }}
+            </p>
+            <p
+              v-else-if="hasError"
+              class="search-suggest-field__empty-text search-suggest-field__empty-text--error"
+            >
+              {{ t('search.suggestions.error') }}
+            </p>
+            <p v-else class="search-suggest-field__empty-text">
+              {{ t('search.suggestions.empty') }}
+            </p>
+          </div>
+        </template>
+      </v-list>
+    </v-menu>
 
-    <v-text-field
-      v-else
-      v-model="internalSearch"
-      :label="label"
-      :placeholder="placeholder"
-      :aria-label="ariaLabel"
-      :elevation="getFieldElevation(isHovering)"
-      prepend-inner-icon="mdi-magnify"
-      variant="solo"
-      density="comfortable"
-      clearable
-      hide-details
-      :class="[
-        'search-suggest-field',
-        { 'search-suggest-field--active': isHovering || isFieldFocused },
-      ]"
-      @mouseenter="isHovering = true"
-      @mouseleave="isHovering = false"
-      @click:clear="handleClear"
-      @keydown.enter="handleEnterKey"
-      @blur="handleBlur"
-      @focus="handleFocus"
-    >
-      <template #append-inner>
-        <v-btn
-          v-if="shouldShowVoiceButton && isHydrated"
-          class="search-suggest-field__voice-button"
-          density="comfortable"
-          variant="text"
-          icon
-          :color="isVoiceListening ? 'primary' : undefined"
-          :title="
-            voiceError ||
-            (isVoiceListening
-              ? t('search.suggestions.voice.stopLabel')
-              : t('search.suggestions.voice.startLabel'))
-          "
-          :aria-label="
-            isVoiceListening
-              ? t('search.suggestions.voice.stopLabel')
-              : t('search.suggestions.voice.startLabel')
-          "
-          data-test="search-voice-button"
-          :disabled="!isVoiceSupported"
-          @click="toggleVoiceListening"
-        >
-          <v-icon
-            :icon="
-              isVoiceListening ? 'mdi-microphone' : 'mdi-microphone-outline'
-            "
-            size="20"
-            aria-hidden="true"
-          />
-        </v-btn>
-        <v-btn
-          v-if="shouldShowScannerButton"
-          class="search-suggest-field__scanner-button"
-          density="comfortable"
-          variant="text"
-          icon
-          :aria-label="t('search.suggestions.scanner.openLabel')"
-          data-test="search-scanner-button"
-          @click="openScannerDialog"
-        >
-          <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
-        </v-btn>
-        <slot v-if="$slots['append-inner']" name="append-inner" />
-      </template>
-    </v-text-field>
+    <!-- Scanner Dialog remains unchanged -->
     <v-dialog
       v-model="isScannerDialogOpen"
       fullscreen
@@ -382,7 +327,7 @@ const isMobile = computed(() => display.smAndDown.value)
 
 const internalSearch = ref(props.modelValue ?? '')
 const lastCommittedValue = ref(internalSearch.value)
-const selectedItem = ref<SuggestionItem | null>(null)
+// const selectedItem = ref<SuggestionItem | null>(null) // Removed, we handle selection manually
 const loading = ref(false)
 const hasError = ref(false)
 const categories = ref<CategorySuggestionItem[]>([])
@@ -400,6 +345,7 @@ const voiceError = ref<string | null>(null)
 const speechRecognition = ref<SpeechRecognition | null>(null)
 const isHydrated = ref(false)
 const menu = ref(false)
+const highlightedIndex = ref(-1)
 
 onMounted(() => {
   isHydrated.value = true
@@ -419,6 +365,15 @@ const isSuggestEnabled = computed(() => {
   return props.enableSuggest && Boolean(deviceAllowance)
 })
 
+const hasSuggestions = computed(
+  () => categories.value.length > 0 || products.value.length > 0
+)
+
+const suggestionItems = computed<SuggestionItem[]>(() => [
+  ...categories.value,
+  ...products.value,
+])
+
 const showEmptyState = computed(
   () =>
     isSuggestEnabled.value &&
@@ -427,21 +382,8 @@ const showEmptyState = computed(
     (hasError.value || (!categories.value.length && !products.value.length))
 )
 
-const firstProductIndex = computed(() => categories.value.length)
-
-const menuProps = reactive({
-  maxHeight: 420,
-  offset: 4,
-  elevation: 16,
-})
-
 const getFieldElevation = (isHovering: boolean) =>
   isHovering || isFieldFocused.value ? 2 : 3
-
-const suggestionItems = computed<SuggestionItem[]>(() => [
-  ...categories.value,
-  ...products.value,
-])
 
 const shouldShowScannerButton = computed(
   () =>
@@ -692,6 +634,7 @@ const normalizeProduct = (
 const resetSuggestions = () => {
   categories.value = []
   products.value = []
+  highlightedIndex.value = -1
 }
 
 const loadSuggestions = async (query: string) => {
@@ -711,6 +654,7 @@ const loadSuggestions = async (query: string) => {
   const requestId = ++currentRequest.value
   loading.value = true
   hasError.value = false
+  // Don't reset suggestions immediately to avoid flicker, replace them when data arrives
 
   try {
     const response = await $fetch<SearchSuggestResponseDto>(
@@ -734,6 +678,7 @@ const loadSuggestions = async (query: string) => {
 
     categories.value = normalizedCategories
     products.value = normalizedProducts
+    highlightedIndex.value = -1 // Reset highlight on new data
 
     // Automatically open menu if we have results and field is focused
     if (
@@ -849,6 +794,7 @@ const handleBlur = () => {
   isFieldFocused.value = false
   // Don't modify menu.value here immediately to allow clicking on items
   // Vuetify handles menu closing on blur usually, but we want to control it for the "Escape" bug
+  // With v-menu and text-field, we might need a small delay or rely on menu default behavior
 }
 
 const handleFocus = () => {
@@ -888,6 +834,16 @@ const handleEnterKey = (event: KeyboardEvent) => {
     return
   }
 
+  // If menu is open and an item is highlighted, select it
+  if (menu.value && highlightedIndex.value >= 0) {
+    const total = suggestionItems.value.length
+    if (highlightedIndex.value < total) {
+      handleSelection(suggestionItems.value[highlightedIndex.value])
+      return
+    }
+  }
+
+  // Otherwise perform standard submit
   pendingSubmit.value = true
   menu.value = false // Close menu on enter
 
@@ -904,6 +860,24 @@ const handleEnterKey = (event: KeyboardEvent) => {
   }, 0)
 }
 
+const navigateHighlight = (direction: number) => {
+  if (!menu.value || !hasSuggestions.value) {
+    if (hasSuggestions.value) menu.value = true
+    return
+  }
+
+  const total = suggestionItems.value.length
+  let next = highlightedIndex.value + direction
+
+  if (next >= total) {
+    next = 0
+  } else if (next < 0) {
+    next = total - 1
+  }
+
+  highlightedIndex.value = next
+}
+
 onBeforeUnmount(() => {
   cancelPendingSubmit()
   stopVoiceListening()
@@ -917,15 +891,21 @@ const handleSelection = (item: SuggestionItem | null) => {
   cancelPendingSubmit()
 
   if (item.type === 'category') {
+    // REDIRECT LOGIC FOR CATEGORY
+    if (item.url) {
+      router.push(item.url)
+    }
     emit('select-category', item)
   } else if (item.type === 'product') {
+    // REDIRECT LOGIC FOR PRODUCT
     if (item.gtin) {
       router.push(`/${item.gtin}`)
     }
     emit('select-product', item)
   }
 
-  selectedItem.value = null
+  // Do NOT clear or update internalSearch
+  // selectedItem.value = null
   menu.value = false
 }
 
@@ -954,20 +934,11 @@ const handleScannerDecode = (rawValue: string | null) => {
 </script>
 
 <style lang="css">
-.search-suggest-field__wrapper .v-autocomplete__content {
-  overflow-y: auto !important;
-  max-height: 420px !important;
-  scrollbar-width: thin;
-}
-
-.search-suggest-field__wrapper .v-autocomplete__content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.search-suggest-field__wrapper
-  .v-autocomplete__content::-webkit-scrollbar-thumb {
-  background-color: rgba(var(--v-theme-on-surface), 0.3);
-  border-radius: 4px;
+.search-suggest-field__menu-content {
+  /* Styles for the v-menu content if needed */
+  border-radius: 4px; /* Optional standard */
+  max-height: 420px;
+  overflow-y: auto;
 }
 </style>
 
@@ -1057,6 +1028,8 @@ const handleScannerDecode = (rawValue: string | null) => {
   color: rgba(var(--v-theme-text-neutral-strong), 0.72)
   text-transform: uppercase
   letter-spacing: 0.08em
+  background: transparent /* fix for v-list-subheader */
+  min-height: unset /* ensure compact */
 
   &--compact
     padding-top: 0.5rem
@@ -1067,7 +1040,8 @@ const handleScannerDecode = (rawValue: string | null) => {
   transition: background-color 0.2s ease, transform 0.2s ease
 
   &:hover,
-  &:focus-visible
+  &:focus-visible,
+  &.v-list-item--active
     background-color: rgba(var(--v-theme-surface-primary-080), 0.85)
     transform: translateY(-1px)
 

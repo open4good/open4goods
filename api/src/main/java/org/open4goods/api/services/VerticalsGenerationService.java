@@ -529,20 +529,25 @@ public class VerticalsGenerationService {
 			context.put("VERTICAL_NAME", vConf.getI18n().get("fr").getVerticalHomeTitle());
 
 			// Prompt
-			PromptResponse<Map<String, Object>> response = genAiService.jsonPrompt("impactscore-generation", context);
+			PromptResponse<org.open4goods.model.ai.ImpactScoreAiResult> response = genAiService.objectPrompt("impactscore-generation", context, org.open4goods.model.ai.ImpactScoreAiResult.class);
 
-			// TODO(p2, safety) : To strictYaml
-			String rawRet = serialisationService.toYaml(response.getBody());
-			ImpactScoreConfig impactScoreConfig = serialisationService.fromYaml(rawRet, ImpactScoreConfig.class);
+			ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+			impactScoreConfig.setAiResult(response.getBody());
+			
+			// Legacy mapping
+			Map<String, Double> criteriasPonderation = new HashMap<>();
+			if (response.getBody() != null && response.getBody().getCriteriaWeights() != null) {
+				for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : response.getBody().getCriteriaWeights()) {
+					criteriasPonderation.put(cw.criterion, cw.weight);
+				}
+			}
+			impactScoreConfig.setCriteriasPonderation(criteriasPonderation);
+
 
 			// Completing
 			impactScoreConfig.setYamlPrompt(serialisationService.toYaml(response.getPrompt()));
 			impactScoreConfig.setAiJsonResponse(serialisationService.toJson(response.getBody(),true));
 
-
-			// Setting prompt and response
-			rawRet = rawRet.replace("---", "");
-			
 			// Directly serialize the config object, as it is now a standalone file
 			ret = serialisationService.toYaml(impactScoreConfig).replace("---", "");
 

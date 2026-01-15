@@ -687,6 +687,7 @@
           "responseHelper": "Résultat JSON de l'IA ayant servi de base à la configuration.",
           "responseTitle": "Réponse du modèle",
           "title": "Audit de génération IA",
+          "auditTitle": "Données structurées",
           "yamlUnavailable": "Prompt indisponible."
         },
         "criteria": {
@@ -3314,7 +3315,6 @@
     "default": {
       "assets": {
         "illustration": "placeholders/illustration.svg",
-        "heroBackground": "hero-background.webp",
         "problemImage": "placeholders/problem.webp",
         "solutionImage": "placeholders/solution.webp",
         "productBackground": "backgrounds/product.svg",

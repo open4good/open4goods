@@ -25,9 +25,12 @@ public class ImpactScoreConfig {
 	
 	private Localisable<String, ImpactScoreTexts> texts = new Localisable<>();
 	
+
 	// For auditability. Strange in config file, but to be marbered with with criterias generation 
 	private String yamlPrompt;
-	private String aiJsonResponse;   
+	private String aiJsonResponse;
+	
+	private org.open4goods.model.ai.ImpactScoreAiResult aiResult;
 	
 	// TODO : The validate method (check sums is 1)
 	public Map<String, Double> getCriteriasPonderation() {
@@ -60,6 +63,12 @@ public class ImpactScoreConfig {
 	public void setAiJsonResponse(String aiJsonResponse) {
 		this.aiJsonResponse = aiJsonResponse;
 	}
-	
+	public org.open4goods.model.ai.ImpactScoreAiResult getAiResult() {
+		return aiResult;
+	}
+	public void setAiResult(org.open4goods.model.ai.ImpactScoreAiResult aiResult) {
+		this.aiResult = aiResult;
+	}
+
 
 }

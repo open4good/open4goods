@@ -111,7 +111,7 @@ const sizeStyles = computed(() => {
     }
     /* Check if theme is light, if so apply opacity */
     if (!theme.global.current.value.dark) {
-      styles['--rounded-card-bg-opacity'] = '0.5'
+      styles['--rounded-card-bg-opacity'] = '0.3'
     }
   }
 
@@ -334,6 +334,25 @@ const hasHeader = computed(() =>
     transform 180ms ease,
     border-color 180ms ease;
 
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        circle at 22% 18%,
+        rgba(var(--v-theme-surface-primary-080), 0.5),
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(var(--v-theme-surface-primary-100), 0.45),
+        transparent 40%
+      );
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
   &--surface-strong {
     --rounded-card-bg: rgba(var(--v-theme-surface-glass-strong), 0.98);
   }
@@ -358,8 +377,8 @@ const hasHeader = computed(() =>
       inset: 0;
       background: linear-gradient(
         160deg,
-        rgba(var(--v-theme-surface-default), 0.1) 0%,
-        rgba(var(--v-theme-surface-default), 0.4) 100%
+        rgba(var(--v-theme-surface-default), 0.75) 0%,
+        rgba(var(--v-theme-surface-default), 0.15) 100%
       );
       backdrop-filter: blur(0px);
       z-index: 0;
@@ -385,25 +404,6 @@ const hasHeader = computed(() =>
   &--disabled {
     opacity: 0.6;
     cursor: not-allowed;
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(
-        circle at 22% 18%,
-        rgba(var(--v-theme-surface-primary-080), 0.5),
-        transparent 40%
-      ),
-      radial-gradient(
-        circle at 80% 80%,
-        rgba(var(--v-theme-surface-primary-100), 0.45),
-        transparent 40%
-      );
-    opacity: 0.85;
-    pointer-events: none;
   }
 
   &__body {

@@ -78,6 +78,65 @@ class VerticalsGenerationServiceTest {
         assertThat(fragment).doesNotContain("TARGET_SCORE");
     }
 
+    @Test
+    void generateEcoscoreYamlConfigWithAiResultTest() throws Exception {
+        // Setup
+        VerticalConfig vConf = verticalConfig("tv");
+        org.open4goods.model.vertical.ProductI18nElements frI18n = new org.open4goods.model.vertical.ProductI18nElements();
+        frI18n.setVerticalHomeTitle("TV");
+        vConf.setI18n(Map.of("fr", frI18n));
+
+        PromptService promptService = mock(PromptService.class);
+        SerialisationService serialisationService = mock(SerialisationService.class);
+        
+        org.open4goods.services.prompt.config.PromptConfig promptConfig = new org.open4goods.services.prompt.config.PromptConfig();
+        
+        org.open4goods.model.ai.ImpactScoreAiResult aiResult = new org.open4goods.model.ai.ImpactScoreAiResult();
+        org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw1 = new org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight();
+        cw1.criterion = "SCORE_1";
+        cw1.weight = 0.3;
+        org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw2 = new org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight();
+        cw2.criterion = "SCORE_2";
+        cw2.weight = 0.7;
+        aiResult.setCriteriaWeights(List.of(cw1, cw2));
+        
+        org.open4goods.services.prompt.dto.PromptResponse<org.open4goods.model.ai.ImpactScoreAiResult> response = new org.open4goods.services.prompt.dto.PromptResponse<>();
+        response.setBody(aiResult);
+        response.setPrompt(promptConfig);
+
+        when(promptService.objectPrompt(
+                org.mockito.ArgumentMatchers.eq("impactscore-generation"), 
+                org.mockito.ArgumentMatchers.anyMap(), 
+                org.mockito.ArgumentMatchers.eq(org.open4goods.model.ai.ImpactScoreAiResult.class)))
+            .thenReturn(response);
+
+        when(serialisationService.toYaml(org.mockito.ArgumentMatchers.any(ImpactScoreConfig.class))).thenAnswer(invocation -> {
+            ImpactScoreConfig config = invocation.getArgument(0);
+            return "criteriasPonderation: " + config.getCriteriasPonderation();
+        });
+        
+        when(serialisationService.toYaml(org.mockito.ArgumentMatchers.any(org.open4goods.services.prompt.config.PromptConfig.class))).thenReturn("PROMPT");
+        when(serialisationService.toJson(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyBoolean())).thenReturn("JSON");
+
+        VerticalsGenerationService service = new VerticalsGenerationService(
+                new VerticalsGenerationConfig(),
+                mock(ProductRepository.class),
+                serialisationService,
+                mock(GoogleTaxonomyService.class),
+                mock(VerticalsConfigService.class),
+                mock(ResourcePatternResolver.class),
+                mock(EvaluationService.class),
+                mock(IcecatService.class),
+                promptService);
+
+        // Execute
+        String result = service.generateEcoscoreYamlConfig(vConf);
+
+        // Verify
+        assertThat(result).contains("SCORE_1=0.3");
+        assertThat(result).contains("SCORE_2=0.7");
+    }
+
     private VerticalConfig verticalConfig(String id) {
         VerticalConfig config = new VerticalConfig();
         config.setId(id);

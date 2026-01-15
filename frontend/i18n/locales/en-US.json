@@ -3228,7 +3228,6 @@
         ],
         "iconAlt": "Nudger PWA launcher icon",
         "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
-        "background": "hero-background.webp",
         "search": {
           "label": "Search for a product",
           "placeholder": "Search a product (e.g. television, smartphone...)",
