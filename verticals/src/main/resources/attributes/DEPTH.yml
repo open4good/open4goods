@@ -1,0 +1,23 @@
+- key: "DEPTH"
+  filteringType: "NUMERIC"
+  unit: "cm"
+  asScore: false
+  faIcon: "mdi-arrow-collapse-vertical"
+
+  icecatFeaturesIds:
+    - 1650
+    - 33219
+    - 5486
+
+  name:
+    default: "Depth"
+    fr: "Profondeur"
+
+  synonyms:
+    all:
+    icecat.biz:
+      - "PROFONDEUR"
+    rakuten.com:
+      - "PROFONDEUR"
+    123comparer.fr:
+      - "PROFONDEUR"

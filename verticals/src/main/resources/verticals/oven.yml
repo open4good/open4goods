@@ -44,15 +44,16 @@ genAiConfig:
 # Must stay structurally present; content will be auto-generated later.
 #####################################################################################################################################
 
-
-
 # The scores that are available to build the impact score. They come from scored attributes.
 # Scores from _default.yml are merged
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
-#  - POWER_CONSUMPTION_TYPICAL
+  #  - POWER_CONSUMPTION_TYPICAL
   - WEIGHT
   - WARRANTY
+  - REPAIRABILITY_INDEX
+  - BRAND_SUSTAINABILITY
+  - DATA_QUALITY
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -307,6 +308,4924 @@ technicalFilters:
 ####################################################################################
 attributesConfig:
   configs:
+    ################################################################################
+    #                         CUSTOM_4
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 75% (2464/3261) .
+    # TOP attributes values are :
+    #     - ELECTROMENAGER (771 items)
+    #     - Materiel CHR Pro (367 items)
+    #     - elektronikshome (222 items)
+    #     - 0.0 (81 items)
+    #     - Super10Count (73 items)
+    #     - $linkur (63 items)
+    #     - Icoza (62 items)
+    #     - Digital Bay (50 items)
+    #     - Villatech (43 items)
+    #     - M24 (42 items)
+    #     + 81 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_4"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      backmarket.fr:
+    #        - "CUSTOM_4"
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_4"
+    #      joom.com:
+    #        - "CUSTOM_4"
+    #      darty.com:
+    #        - "CUSTOM_4"
+    #      fnac.com:
+    #        - "CUSTOM_4"
+    #      JoomFR:
+    #        - "CUSTOM_4"
+    #      cdiscount.com:
+    #        - "CUSTOM_4"
+    #      manomano.fr:
+    #        - "CUSTOM_4"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_1
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 73% (2395/3261) .
+    # TOP attributes values are :
+    #     - Produit MarketPlace (657 items)
+    #     - G (393 items)
+    #     - 34 (58 items)
+    #     - bons plans (56 items)
+    #     - 1102 (43 items)
+    #     - 767 (43 items)
+    #     - 1117 (40 items)
+    #     - 1099 (39 items)
+    #     - 149810 (38 items)
+    #     - unisex (30 items)
+    #     + 122 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_1"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rueducommerce.fr:
+    #        - "CUSTOM_1"
+    #      backmarket.fr:
+    #        - "CUSTOM_1"
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_1"
+    #      joom.com:
+    #        - "CUSTOM_1"
+    #      darty.com:
+    #        - "CUSTOM_1"
+    #      fnac.com:
+    #        - "CUSTOM_1"
+    #      JoomFR:
+    #        - "CUSTOM_1"
+    #      underdog.shop:
+    #        - "CUSTOM_1"
+    #      UNDERDOGFR:
+    #        - "CUSTOM_1"
+    #      manomano.fr:
+    #        - "CUSTOM_1"
+    #      e.leclerc:
+    #        - "CUSTOM_1"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_5
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 73% (2386/3261) .
+    # TOP attributes values are :
+    #     - 0 (1305 items)
+    #     - 25 euros offerts des 249 euros d'achat jusqu'au 09/01/2026 (104 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 09/01/2026 (81 items)
+    #     - 10 euros offerts des 79 euros d'achat jusqu'au 01/12/2025 (72 items)
+    #     - true (29 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 21/11/2025 (7 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 08/10/2025 (7 items)
+    #     - 11 euros offerts des 111 euros d'achat jusqu'au 11/11/2025 (6 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 07/10/2025 (4 items)
+    #     - 25 euros de remise des 249 euros d'achat (4 items)
+    #     + 11 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_5"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      backmarket.fr:
+    #        - "CUSTOM_5"
+    #      joom.com:
+    #        - "CUSTOM_5"
+    #      darty.com:
+    #        - "CUSTOM_5"
+    #      fnac.com:
+    #        - "CUSTOM_5"
+    #      JoomFR:
+    #        - "CUSTOM_5"
+    #      cdiscount.com:
+    #        - "CUSTOM_5"
+    #      manomano.fr:
+    #        - "CUSTOM_5"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_3
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 63% (2084/3261) .
+    # TOP attributes values are :
+    #     - 0 (1017 items)
+    #     - 0.00 (439 items)
+    #     - 59.00 (12 items)
+    #     - 6.95 (9 items)
+    #     - true (7 items)
+    #     - 24 (4 items)
+    #     - 8 (4 items)
+    #     - 18 (4 items)
+    #     - 7.99 (4 items)
+    #     - 34 (4 items)
+    #     + 55 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_3"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_3"
+    #      fnac.com:
+    #        - "CUSTOM_3"
+    #      manomano.fr:
+    #        - "CUSTOM_3"
+    #      cdiscount.com:
+    #        - "CUSTOM_3"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TITRE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 54% (1793/3261) .
+    # TOP attributes values are :
+    #     - vidaXL Rangement de poubelle à roulettes pour 3 poubelles Anthracite (16 items)
+    #     - vidaXL Rangement de poubelle à roulettes pour 3 poubelles Argent (5 items)
+    #     - APPUIS DE FENÊTRE 2 PCS BOIS DE CHÊNE MASSIF NON TRAITÉ (5 items)
+    #     - vidaXL Cabinet à chaussures Sonoma 60 x 35 x 44 cm Bois d'ingénierie (2 items)
+    #     - FOUR ENCASTRABLE ELECTROLUX EDF4P46X2 (2 items)
+    #     - alpina Appareil Croque Monsieur 230V/1000W - Appareil à Panini - Légumes, Pain et Viande - Revêtement Anti-Adhésif - Bac de Récupération - Noir/Rouge (2 items)
+    #     - Four Néerlandais Avec Accessoires Inclus (2 items)
+    #
+    ##################################
+    #   - key: "TITRE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 16547
+    #
+    #     name:
+    #      default: "Title"
+    #      fr: "Titre"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "TITRE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_2
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 54% (1789/3261) .
+    # TOP attributes values are :
+    #     - Marketplace (782 items)
+    #     - adult (57 items)
+    #     - Offre Propre (29 items)
+    #     - Boys and Girls (6 items)
+    #     - TH-HE34L (2 items)
+    #     - SELSQ8JCW0FK5PDCHEER (2 items)
+    #
+    ##################################
+    #   - key: "CUSTOM_2"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_2"
+    #      joom.com:
+    #        - "CUSTOM_2"
+    #      JoomFR:
+    #        - "CUSTOM_2"
+    #      manomano.fr:
+    #        - "CUSTOM_2"
+    #      cdiscount.com:
+    #        - "CUSTOM_2"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_9
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 45% (1492/3261) .
+    # TOP attributes values are :
+    #     - Acier inoxydable (inox) (10 items)
+    #     - Average (4 items)
+    #     - Verre (4 items)
+    #
+    ##################################
+    #   - key: "CUSTOM_9"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      cdiscount.com:
+    #        - "CUSTOM_9"
+    #      manomano.fr:
+    #        - "CUSTOM_9"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TYPE DE PRODUIT
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 43% (1413/3261) .
+    # TOP attributes values are :
+    #     - Four (926 items)
+    #     - Appareil de cuisson (166 items)
+    #     - Mini four (88 items)
+    #     - Micro-ondes (50 items)
+    #     - Presse-agrumes électrique (23 items)
+    #     - Machine à café (17 items)
+    #     - Friteuse (15 items)
+    #     - Bouilloire (10 items)
+    #     - Grille-pain (8 items)
+    #     - Autre (8 items)
+    #     + 17 more attributes...
+    #
+    ##################################
+    #   - key: "TYPE DE PRODUIT"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 14052
+    #
+    #     name:
+    #      default: "Product type"
+    #      fr: "Type de produit"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "TYPE DE PRODUIT"
+    #      rakuten.com:
+    #        - "TYPE DE PRODUIT"
+    #      123comparer.fr:
+    #        - "TYPE DE PRODUIT"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DIMENSIONS
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 27% (906/3261) .
+    # TOP attributes values are :
+    #     - 59.5000 cmx59.5000 cm (24 items)
+    #     - 548.0000 mmx594.0000 mmx595.0000 mm (14 items)
+    #     - 60.90 cmx59.20 cmx59.20 cm (11 items)
+    #     - 57.00 cmx60.00 cmx59.00 cm (10 items)
+    #     - 56.70 cmx59.40 cmx59.50 cm (10 items)
+    #     - 59.50 cmx57.00 cmx59.60 cm (10 items)
+    #     - 56.4000 cmx59.5000 cmx59.5000 cm (9 items)
+    #     - 56.40 cmx59.50 cmx59.70 cm (8 items)
+    #     - 54.80 cmx59.70 cmx59.20 cm (8 items)
+    #     - 54.00 cmx59.00 cmx45.50 cm (8 items)
+    #     + 78 more attributes...
+    #
+    ##################################
+    #   - key: "DIMENSIONS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 19583
+    #
+    #     name:
+    #      default: "Dimensions"
+    #      fr: "Dimensions"
+    #
+    #     synonyms:
+    #      all:
+    #      fnac.com:
+    #        - "DIMENSIONS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TRANCHE DE POIDS
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 24% (792/3261) .
+    # TOP attributes values are :
+    #     - 30 à 50 kg (224 items)
+    #     - 3 à 10 kg (197 items)
+    #     - 500 g à 3 kg (182 items)
+    #     - 250 à 500 g (46 items)
+    #     - 10 à 15 kg (40 items)
+    #     - 15 à 30 kg (37 items)
+    #     - 0 à 100 g (26 items)
+    #     - + de 100 kg (11 items)
+    #     - 100 à 250 g (6 items)
+    #     - 50 à 70 kg (5 items)
+    #     + 2 more attributes...
+    #
+    ##################################
+    #   - key: "TRANCHE DE POIDS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "TRANCHE DE POIDS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         STORE_PRICE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 22% (718/3261) .
+    # TOP attributes values are :
+    #     - 374 (7 items)
+    #     - 89.99 (6 items)
+    #     - 374.99 (5 items)
+    #     - 774 (5 items)
+    #     - 124.99 (4 items)
+    #     - 524 (4 items)
+    #     - 134.99 (4 items)
+    #     - 274.99 (4 items)
+    #     - 29.99 (4 items)
+    #     - 974 (3 items)
+    #     + 55 more attributes...
+    #
+    ##################################
+    #   - key: "STORE_PRICE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      UNDERDOGFR:
+    #        - "STORE_PRICE"
+    #      underdog.shop:
+    #        - "STORE_PRICE"
+    #      cdiscount.com:
+    #        - "STORE_PRICE"
+    #      SamsungFR:
+    #        - "STORE_PRICE"
+    #      manomano.fr:
+    #        - "STORE_PRICE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_6
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 20% (683/3261) .
+    # TOP attributes values are :
+    #     - Verre (184 items)
+    #     - Acier inoxydable (inox) (182 items)
+    #     - Acier (58 items)
+    #     - Métal (48 items)
+    #     - Plastique (37 items)
+    #     - Céramique (26 items)
+    #     - Aluminium (21 items)
+    #     - Verre trempé (18 items)
+    #     - Choix durable (16 items)
+    #     - Bois (14 items)
+    #     + 12 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_6"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      darty.com:
+    #        - "CUSTOM_6"
+    #      manomano.fr:
+    #        - "CUSTOM_6"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EXPORTDATETS
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 19% (650/3261) .
+    # TOP attributes values are :
+    #     - 1761568467578 (19 items)
+    #     - 1761554112455 (15 items)
+    #     - 1761437658107 (15 items)
+    #     - 1761570252984 (14 items)
+    #     - 1761568467577 (11 items)
+    #     - 1761561902265 (10 items)
+    #     - 1761440046173 (10 items)
+    #     - 1761570252985 (10 items)
+    #     - 1761554112454 (9 items)
+    #     - 1761566688726 (9 items)
+    #     + 125 more attributes...
+    #
+    ##################################
+    #   - key: "EXPORTDATETS"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "EXPORTDATETS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYCLASSIMAGE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen.png (341 items)
+    #     - A-Left-Yellow.png (253 items)
+    #     - APP-Left-MediumGreen.png (27 items)
+    #     - B-Left-LightOrange.png (2 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYCLASSIMAGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYCLASSIMAGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSIMAGE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen.png (341 items)
+    #     - A-Left-Yellow.png (250 items)
+    #     - APP-Left-MediumGreen.png (27 items)
+    #     - B-Left-LightOrange.png (5 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSIMAGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSIMAGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ORDERNUMBER
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - 1 (624 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ORDERNUMBER"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ORDERNUMBER"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSRANGE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - APPP_D (624 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSRANGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSRANGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYEFFICIENCYINDEX
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - 81.2 (164 items)
+    #     - 95.3 (61 items)
+    #     - 95.2 (47 items)
+    #     - 81.6 (47 items)
+    #     - 81 (35 items)
+    #     - 81.4 (30 items)
+    #     - 94.7 (22 items)
+    #     - 95.1 (22 items)
+    #     - 94 (17 items)
+    #     - 81.3 (15 items)
+    #     + 27 more attributes...
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSIMAGEWITHSCALE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 19% (623/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen-WithAPPPDScale.svg (340 items)
+    #     - A-Left-Yellow-WithAPPPDScale.svg (250 items)
+    #     - APP-Left-MediumGreen-WithAPPPDScale.svg (27 items)
+    #     - B-Left-LightOrange-WithAPPPDScale.svg (5 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSIMAGEWITHSCALE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSIMAGEWITHSCALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 19% (623/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen-WithAPPPDScale.svg (340 items)
+    #     - A-Left-Yellow-WithAPPPDScale.svg (253 items)
+    #     - APP-Left-MediumGreen-WithAPPPDScale.svg (27 items)
+    #     - B-Left-LightOrange-WithAPPPDScale.svg (2 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         LARGEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 18% (611/3261) .
+    # TOP attributes values are :
+    #     - 59.5 (128 items)
+    #     - 594 (65 items)
+    #     - 59.4 (61 items)
+    #     - 595 (59 items)
+    #     - 59.7 (28 items)
+    #     - 59.2 (28 items)
+    #     - 59.6 (17 items)
+    #     - 59,5 (6 items)
+    #     - 59 (6 items)
+    #     - 60 (5 items)
+    #     + 53 more attributes...
+    #
+    ##################################
+    #   - key: "LARGEUR"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![1649, 4157]
+    #
+    #     name:
+    #      default: "Width"
+    #      fr: "Largeur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "LARGEUR"
+    #      rakuten.com:
+    #        - "LARGEUR"
+    #      123comparer.fr:
+    #        - "LARGEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         PROFONDEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 18% (605/3261) .
+    # TOP attributes values are :
+    #     - 548 (59 items)
+    #     - 56.7 (42 items)
+    #     - 54.8 (36 items)
+    #     - 57 (23 items)
+    #     - 56.4 (22 items)
+    #     - 56.8 (18 items)
+    #     - 56.9 (18 items)
+    #     - 568 (18 items)
+    #     - 54.4 (18 items)
+    #     - 55.1 (12 items)
+    #     + 61 more attributes...
+    #
+    ##################################
+    #   - key: "PROFONDEUR"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![1650, 33219, 5486]
+    #
+    #     name:
+    #      default: "Depth"
+    #      fr: "Profondeur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "PROFONDEUR"
+    #      rakuten.com:
+    #        - "PROFONDEUR"
+    #      123comparer.fr:
+    #        - "PROFONDEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         HAUTEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 18% (605/3261) .
+    # TOP attributes values are :
+    #     - 59.5 (138 items)
+    #     - 595 (79 items)
+    #     - 59.6 (34 items)
+    #     - 59.4 (24 items)
+    #     - 59.2 (21 items)
+    #     - 45.5 (19 items)
+    #     - 594 (18 items)
+    #     - 455 (12 items)
+    #     - 59.7 (8 items)
+    #     - 60 (7 items)
+    #     + 51 more attributes...
+    #
+    ##################################
+    #   - key: "HAUTEUR"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![5478, 1464]
+    #
+    #     name:
+    #      default: "Height (imperial)"
+    #      fr: "Hauteur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "HAUTEUR"
+    #      rakuten.com:
+    #        - "HAUTEUR"
+    #      123comparer.fr:
+    #        - "HAUTEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EPREL CERTIFICATION CODE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 11% (371/3261) .
+    # TOP attributes values are :
+    #     - 0 (11 items)
+    #     - 1842239 (2 items)
+    #     - 552756 (2 items)
+    #     - 1143399 (2 items)
+    #     - 121878 (2 items)
+    #
+    ##################################
+    #   - key: "EPREL CERTIFICATION CODE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "EPREL CERTIFICATION CODE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DISPOSITIF DE SECURITE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 11% (364/3261) .
+    # TOP attributes values are :
+    #     - Porte froide (149 items)
+    #     - Sécurité enfants (37 items)
+    #     - Verrouillage (26 items)
+    #     - Système de refroidissement par ventilateur (23 items)
+    #     - Arrêt automatique (23 items)
+    #     - Double porte vitrée (21 items)
+    #     - Indicateur de chaleur résiduelle (16 items)
+    #     - Porte refroidissante (14 items)
+    #     - Porte à quadruple vitrage (12 items)
+    #     - Thermostat de sécurité (5 items)
+    #     + 10 more attributes...
+    #
+    ##################################
+    #   - key: "DISPOSITIF DE SECURITE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "DISPOSITIF DE SECURITE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ECHELLE D'EFFICACITE ENERGETIQUE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 11% (364/3261) .
+    # TOP attributes values are :
+    #     - A+++-D (360 items)
+    #     - APPP_D (4 items)
+    #
+    ##################################
+    #   - key: "ECHELLE D'EFFICACITE ENERGETIQUE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "ECHELLE D'EFFICACITE ENERGETIQUE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EPREL CATEGORY
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 10% (358/3261) .
+    # TOP attributes values are :
+    #     - ovens (356 items)
+    #     - rangehoods (2 items)
+    #
+    ##################################
+    #   - key: "EPREL CATEGORY"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "EPREL CATEGORY"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ECOLABEL
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 10% (339/3261) .
+    # TOP attributes values are :
+    #     - false (337 items)
+    #     - true (2 items)
+    #
+    ##################################
+    #   - key: "ECOLABEL"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ECOLABEL"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         COULEUR EXTERIEURE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 10% (328/3261) .
+    # TOP attributes values are :
+    #     - Acier inoxydable (88 items)
+    #     - Noir (88 items)
+    #     - Blanc (31 items)
+    #     - Inox (12 items)
+    #     - Noir/inox (11 items)
+    #     - Argent (8 items)
+    #     - Gris (4 items)
+    #     - Noir propre (4 items)
+    #     - Acier (4 items)
+    #     - Inox/noir (4 items)
+    #     + 18 more attributes...
+    #
+    ##################################
+    #   - key: "COULEUR EXTERIEURE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "COULEUR EXTERIEURE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         GAMME DE PRODUITS
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 10% (328/3261) .
+    # TOP attributes values are :
+    #     - Brandt (24 items)
+    #     - SEVERIN (22 items)
+    #     - Sauter (10 items)
+    #     - Whirlpool (8 items)
+    #     - Samsung Series 4 (8 items)
+    #     - Indesit (7 items)
+    #     - Moulinex Optimo (7 items)
+    #     - Continental Edison (5 items)
+    #     - Hotpoint Ariston (5 items)
+    #     - ASKO Craft (5 items)
+    #     + 52 more attributes...
+    #
+    ##################################
+    #   - key: "GAMME DE PRODUITS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "GAMME DE PRODUITS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         COULEUR GENERIQUE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 9% (321/3261) .
+    # TOP attributes values are :
+    #     - Noir (186 items)
+    #     - Argent (76 items)
+    #     - Blanc (36 items)
+    #     - Gris (11 items)
+    #     - Rouge (5 items)
+    #     - Transparent (2 items)
+    #     - Bleu (2 items)
+    #     - Beige (2 items)
+    #
+    ##################################
+    #   - key: "COULEUR GENERIQUE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "COULEUR GENERIQUE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         HAUTEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 8% (284/3261) .
+    # TOP attributes values are :
+    #     - 65.5 (29 items)
+    #     - 67 (25 items)
+    #     - 675 (22 items)
+    #     - 66 (19 items)
+    #     - 665 (15 items)
+    #     - 670 (10 items)
+    #     - 70 (8 items)
+    #     - 55 (8 items)
+    #     - 66.5 (7 items)
+    #     - 67.5 (7 items)
+    #     + 24 more attributes...
+    #
+    ##################################
+    #   - key: "HAUTEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "HAUTEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         LARGEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 8% (284/3261) .
+    # TOP attributes values are :
+    #     - 66 (48 items)
+    #     - 660 (24 items)
+    #     - 64 (19 items)
+    #     - 620 (18 items)
+    #     - 62 (13 items)
+    #     - 69.4 (12 items)
+    #     - 63.5 (9 items)
+    #     - 63 (7 items)
+    #     - 670 (7 items)
+    #     - 69 (7 items)
+    #     + 22 more attributes...
+    #
+    ##################################
+    #   - key: "LARGEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "LARGEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         PROFONDEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 8% (281/3261) .
+    # TOP attributes values are :
+    #     - 66 (62 items)
+    #     - 690 (22 items)
+    #     - 70 (14 items)
+    #     - 67 (13 items)
+    #     - 646 (12 items)
+    #     - 64 (10 items)
+    #     - 65 (8 items)
+    #     - 670 (6 items)
+    #     - 640 (6 items)
+    #     - 660 (6 items)
+    #     + 22 more attributes...
+    #
+    ##################################
+    #   - key: "PROFONDEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "PROFONDEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         STYLE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 8% (271/3261) .
+    # TOP attributes values are :
+    #     - null (271 items)
+    #
+    ##################################
+    #   - key: "STYLE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![42533, 13002]
+    #
+    #     name:
+    #      default: "Style"
+    #      fr: "Style"
+    #
+    #     synonyms:
+    #      all:
+    #      darty.com:
+    #        - "STYLE"
+    #      DartyProCashback:
+    #        - "STYLE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         POIDS EMBALLE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 8% (266/3261) .
+    # TOP attributes values are :
+    #     - 38 (5 items)
+    #     - 37 (5 items)
+    #     - 37,5 (5 items)
+    #     - 30 (5 items)
+    #     - 13.5 (4 items)
+    #     - 38.6 (4 items)
+    #     - 36 (4 items)
+    #     - 14 (4 items)
+    #     - 38.1 (4 items)
+    #     - 32 (3 items)
+    #     + 34 more attributes...
+    #
+    ##################################
+    #   - key: "POIDS EMBALLE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "POIDS EMBALLE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ORIGINE_IMPORT
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 6% (215/3261) .
+    # TOP attributes values are :
+    #     - All-in-one (198 items)
+    #     - Converter (14 items)
+    #     - hightech_minimaliste (3 items)
+    #
+    ##################################
+    #   - key: "ORIGINE_IMPORT"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "ORIGINE_IMPORT"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         NIVEAU SONORE MAXIMUM
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 1% (41/3261) .
+    # TOP attributes values are :
+    #     - 78 dB (6 items)
+    #     - 53 dB (5 items)
+    #     - 79 dB (5 items)
+    #     - 59 dB (3 items)
+    #     - 57 dB (2 items)
+    #     - 72 dB (2 items)
+    #     - 47 dB (2 items)
+    #     - 55 dB (2 items)
+    #     - 45 dB (2 items)
+    #     - 69 dB (2 items)
+    #
+    ##################################
+    #   - key: "NIVEAU SONORE MAXIMUM"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "NIVEAU SONORE MAXIMUM"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DIAGONALE
+    ################################################################################
+    # Generated on 15/01/2026 16:13, coverage was 0% (10/3261) .
+    # TOP attributes values are :
+    #     - 7 (10 items)
+    #
+    ##################################
+    #   - key: "DIAGONALE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![15780, 2140]
+    #
+    #     name:
+    #      default: "Diagonal (metric)"
+    #      fr: "Diagonale (métrique)"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "DIAGONALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+
+    ################################################################################
+    #                         CUSTOM_4
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 75% (2464/3261) .
+    # TOP attributes values are :
+    #     - ELECTROMENAGER (771 items)
+    #     - Materiel CHR Pro (367 items)
+    #     - elektronikshome (222 items)
+    #     - 0.0 (81 items)
+    #     - Super10Count (73 items)
+    #     - $linkur (63 items)
+    #     - Icoza (62 items)
+    #     - Digital Bay (50 items)
+    #     - Villatech (43 items)
+    #     - M24 (42 items)
+    #     + 81 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_4"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      backmarket.fr:
+    #        - "CUSTOM_4"
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_4"
+    #      joom.com:
+    #        - "CUSTOM_4"
+    #      darty.com:
+    #        - "CUSTOM_4"
+    #      fnac.com:
+    #        - "CUSTOM_4"
+    #      JoomFR:
+    #        - "CUSTOM_4"
+    #      cdiscount.com:
+    #        - "CUSTOM_4"
+    #      manomano.fr:
+    #        - "CUSTOM_4"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_1
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 73% (2395/3261) .
+    # TOP attributes values are :
+    #     - Produit MarketPlace (657 items)
+    #     - G (393 items)
+    #     - 34 (58 items)
+    #     - bons plans (56 items)
+    #     - 1102 (43 items)
+    #     - 767 (43 items)
+    #     - 1117 (40 items)
+    #     - 1099 (39 items)
+    #     - 149810 (38 items)
+    #     - unisex (30 items)
+    #     + 122 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_1"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rueducommerce.fr:
+    #        - "CUSTOM_1"
+    #      backmarket.fr:
+    #        - "CUSTOM_1"
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_1"
+    #      joom.com:
+    #        - "CUSTOM_1"
+    #      darty.com:
+    #        - "CUSTOM_1"
+    #      fnac.com:
+    #        - "CUSTOM_1"
+    #      JoomFR:
+    #        - "CUSTOM_1"
+    #      underdog.shop:
+    #        - "CUSTOM_1"
+    #      UNDERDOGFR:
+    #        - "CUSTOM_1"
+    #      manomano.fr:
+    #        - "CUSTOM_1"
+    #      e.leclerc:
+    #        - "CUSTOM_1"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_5
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 73% (2386/3261) .
+    # TOP attributes values are :
+    #     - 0 (1305 items)
+    #     - 25 euros offerts des 249 euros d'achat jusqu'au 09/01/2026 (104 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 09/01/2026 (81 items)
+    #     - 10 euros offerts des 79 euros d'achat jusqu'au 01/12/2025 (72 items)
+    #     - true (29 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 21/11/2025 (7 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 08/10/2025 (7 items)
+    #     - 11 euros offerts des 111 euros d'achat jusqu'au 11/11/2025 (6 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 07/10/2025 (4 items)
+    #     - 25 euros de remise des 249 euros d'achat (4 items)
+    #     + 11 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_5"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      backmarket.fr:
+    #        - "CUSTOM_5"
+    #      joom.com:
+    #        - "CUSTOM_5"
+    #      darty.com:
+    #        - "CUSTOM_5"
+    #      fnac.com:
+    #        - "CUSTOM_5"
+    #      JoomFR:
+    #        - "CUSTOM_5"
+    #      cdiscount.com:
+    #        - "CUSTOM_5"
+    #      manomano.fr:
+    #        - "CUSTOM_5"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_3
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 63% (2084/3261) .
+    # TOP attributes values are :
+    #     - 0 (1017 items)
+    #     - 0.00 (439 items)
+    #     - 59.00 (12 items)
+    #     - 6.95 (9 items)
+    #     - true (7 items)
+    #     - 24 (4 items)
+    #     - 8 (4 items)
+    #     - 18 (4 items)
+    #     - 7.99 (4 items)
+    #     - 34 (4 items)
+    #     + 55 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_3"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_3"
+    #      fnac.com:
+    #        - "CUSTOM_3"
+    #      manomano.fr:
+    #        - "CUSTOM_3"
+    #      cdiscount.com:
+    #        - "CUSTOM_3"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TITRE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 54% (1793/3261) .
+    # TOP attributes values are :
+    #     - vidaXL Rangement de poubelle à roulettes pour 3 poubelles Anthracite (16 items)
+    #     - vidaXL Rangement de poubelle à roulettes pour 3 poubelles Argent (5 items)
+    #     - APPUIS DE FENÊTRE 2 PCS BOIS DE CHÊNE MASSIF NON TRAITÉ (5 items)
+    #     - vidaXL Cabinet à chaussures Sonoma 60 x 35 x 44 cm Bois d'ingénierie (2 items)
+    #     - FOUR ENCASTRABLE ELECTROLUX EDF4P46X2 (2 items)
+    #     - alpina Appareil Croque Monsieur 230V/1000W - Appareil à Panini - Légumes, Pain et Viande - Revêtement Anti-Adhésif - Bac de Récupération - Noir/Rouge (2 items)
+    #     - Four Néerlandais Avec Accessoires Inclus (2 items)
+    #
+    ##################################
+    #   - key: "TITRE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 16547
+    #
+    #     name:
+    #      default: "Title"
+    #      fr: "Titre"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "TITRE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_2
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 54% (1789/3261) .
+    # TOP attributes values are :
+    #     - Marketplace (782 items)
+    #     - adult (57 items)
+    #     - Offre Propre (29 items)
+    #     - Boys and Girls (6 items)
+    #     - TH-HE34L (2 items)
+    #     - SELSQ8JCW0FK5PDCHEER (2 items)
+    #
+    ##################################
+    #   - key: "CUSTOM_2"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_2"
+    #      joom.com:
+    #        - "CUSTOM_2"
+    #      JoomFR:
+    #        - "CUSTOM_2"
+    #      manomano.fr:
+    #        - "CUSTOM_2"
+    #      cdiscount.com:
+    #        - "CUSTOM_2"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_9
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 45% (1492/3261) .
+    # TOP attributes values are :
+    #     - Acier inoxydable (inox) (10 items)
+    #     - Average (4 items)
+    #     - Verre (4 items)
+    #
+    ##################################
+    #   - key: "CUSTOM_9"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      cdiscount.com:
+    #        - "CUSTOM_9"
+    #      manomano.fr:
+    #        - "CUSTOM_9"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TYPE DE PRODUIT
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 43% (1413/3261) .
+    # TOP attributes values are :
+    #     - Four (926 items)
+    #     - Appareil de cuisson (166 items)
+    #     - Mini four (88 items)
+    #     - Micro-ondes (50 items)
+    #     - Presse-agrumes électrique (23 items)
+    #     - Machine à café (17 items)
+    #     - Friteuse (15 items)
+    #     - Bouilloire (10 items)
+    #     - Grille-pain (8 items)
+    #     - Autre (8 items)
+    #     + 17 more attributes...
+    #
+    ##################################
+    #   - key: "TYPE DE PRODUIT"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 14052
+    #
+    #     name:
+    #      default: "Product type"
+    #      fr: "Type de produit"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "TYPE DE PRODUIT"
+    #      rakuten.com:
+    #        - "TYPE DE PRODUIT"
+    #      123comparer.fr:
+    #        - "TYPE DE PRODUIT"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DIMENSIONS
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 27% (906/3261) .
+    # TOP attributes values are :
+    #     - 59.5000 cmx59.5000 cm (24 items)
+    #     - 548.0000 mmx594.0000 mmx595.0000 mm (14 items)
+    #     - 60.90 cmx59.20 cmx59.20 cm (11 items)
+    #     - 57.00 cmx60.00 cmx59.00 cm (10 items)
+    #     - 56.70 cmx59.40 cmx59.50 cm (10 items)
+    #     - 59.50 cmx57.00 cmx59.60 cm (10 items)
+    #     - 56.4000 cmx59.5000 cmx59.5000 cm (9 items)
+    #     - 56.40 cmx59.50 cmx59.70 cm (8 items)
+    #     - 54.80 cmx59.70 cmx59.20 cm (8 items)
+    #     - 54.00 cmx59.00 cmx45.50 cm (8 items)
+    #     + 78 more attributes...
+    #
+    ##################################
+    #   - key: "DIMENSIONS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 19583
+    #
+    #     name:
+    #      default: "Dimensions"
+    #      fr: "Dimensions"
+    #
+    #     synonyms:
+    #      all:
+    #      fnac.com:
+    #        - "DIMENSIONS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TRANCHE DE POIDS
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 24% (792/3261) .
+    # TOP attributes values are :
+    #     - 30 à 50 kg (224 items)
+    #     - 3 à 10 kg (197 items)
+    #     - 500 g à 3 kg (182 items)
+    #     - 250 à 500 g (46 items)
+    #     - 10 à 15 kg (40 items)
+    #     - 15 à 30 kg (37 items)
+    #     - 0 à 100 g (26 items)
+    #     - + de 100 kg (11 items)
+    #     - 100 à 250 g (6 items)
+    #     - 50 à 70 kg (5 items)
+    #     + 2 more attributes...
+    #
+    ##################################
+    #   - key: "TRANCHE DE POIDS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "TRANCHE DE POIDS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         STORE_PRICE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 22% (718/3261) .
+    # TOP attributes values are :
+    #     - 374 (7 items)
+    #     - 89.99 (6 items)
+    #     - 374.99 (5 items)
+    #     - 774 (5 items)
+    #     - 124.99 (4 items)
+    #     - 524 (4 items)
+    #     - 134.99 (4 items)
+    #     - 274.99 (4 items)
+    #     - 29.99 (4 items)
+    #     - 974 (3 items)
+    #     + 55 more attributes...
+    #
+    ##################################
+    #   - key: "STORE_PRICE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      UNDERDOGFR:
+    #        - "STORE_PRICE"
+    #      underdog.shop:
+    #        - "STORE_PRICE"
+    #      cdiscount.com:
+    #        - "STORE_PRICE"
+    #      SamsungFR:
+    #        - "STORE_PRICE"
+    #      manomano.fr:
+    #        - "STORE_PRICE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_6
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 20% (683/3261) .
+    # TOP attributes values are :
+    #     - Verre (184 items)
+    #     - Acier inoxydable (inox) (182 items)
+    #     - Acier (58 items)
+    #     - Métal (48 items)
+    #     - Plastique (37 items)
+    #     - Céramique (26 items)
+    #     - Aluminium (21 items)
+    #     - Verre trempé (18 items)
+    #     - Choix durable (16 items)
+    #     - Bois (14 items)
+    #     + 12 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_6"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      darty.com:
+    #        - "CUSTOM_6"
+    #      manomano.fr:
+    #        - "CUSTOM_6"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EXPORTDATETS
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 19% (650/3261) .
+    # TOP attributes values are :
+    #     - 1761568467578 (19 items)
+    #     - 1761554112455 (15 items)
+    #     - 1761437658107 (15 items)
+    #     - 1761570252984 (14 items)
+    #     - 1761568467577 (11 items)
+    #     - 1761561902265 (10 items)
+    #     - 1761440046173 (10 items)
+    #     - 1761570252985 (10 items)
+    #     - 1761554112454 (9 items)
+    #     - 1761566688726 (9 items)
+    #     + 125 more attributes...
+    #
+    ##################################
+    #   - key: "EXPORTDATETS"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "EXPORTDATETS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYCLASSIMAGE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen.png (341 items)
+    #     - A-Left-Yellow.png (253 items)
+    #     - APP-Left-MediumGreen.png (27 items)
+    #     - B-Left-LightOrange.png (2 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYCLASSIMAGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYCLASSIMAGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSIMAGE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen.png (341 items)
+    #     - A-Left-Yellow.png (250 items)
+    #     - APP-Left-MediumGreen.png (27 items)
+    #     - B-Left-LightOrange.png (5 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSIMAGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSIMAGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ORDERNUMBER
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - 1 (624 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ORDERNUMBER"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ORDERNUMBER"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSRANGE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - APPP_D (624 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSRANGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSRANGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYEFFICIENCYINDEX
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - 81.2 (164 items)
+    #     - 95.3 (61 items)
+    #     - 95.2 (47 items)
+    #     - 81.6 (47 items)
+    #     - 81 (35 items)
+    #     - 81.4 (30 items)
+    #     - 94.7 (22 items)
+    #     - 95.1 (22 items)
+    #     - 94 (17 items)
+    #     - 81.3 (15 items)
+    #     + 27 more attributes...
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSIMAGEWITHSCALE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 19% (623/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen-WithAPPPDScale.svg (340 items)
+    #     - A-Left-Yellow-WithAPPPDScale.svg (250 items)
+    #     - APP-Left-MediumGreen-WithAPPPDScale.svg (27 items)
+    #     - B-Left-LightOrange-WithAPPPDScale.svg (5 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSIMAGEWITHSCALE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSIMAGEWITHSCALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 19% (623/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen-WithAPPPDScale.svg (340 items)
+    #     - A-Left-Yellow-WithAPPPDScale.svg (253 items)
+    #     - APP-Left-MediumGreen-WithAPPPDScale.svg (27 items)
+    #     - B-Left-LightOrange-WithAPPPDScale.svg (2 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         LARGEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 18% (611/3261) .
+    # TOP attributes values are :
+    #     - 59.5 (128 items)
+    #     - 594 (65 items)
+    #     - 59.4 (61 items)
+    #     - 595 (59 items)
+    #     - 59.7 (28 items)
+    #     - 59.2 (28 items)
+    #     - 59.6 (17 items)
+    #     - 59,5 (6 items)
+    #     - 59 (6 items)
+    #     - 60 (5 items)
+    #     + 53 more attributes...
+    #
+    ##################################
+    #   - key: "LARGEUR"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![1649, 4157]
+    #
+    #     name:
+    #      default: "Width"
+    #      fr: "Largeur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "LARGEUR"
+    #      rakuten.com:
+    #        - "LARGEUR"
+    #      123comparer.fr:
+    #        - "LARGEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         PROFONDEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 18% (605/3261) .
+    # TOP attributes values are :
+    #     - 548 (59 items)
+    #     - 56.7 (42 items)
+    #     - 54.8 (36 items)
+    #     - 57 (23 items)
+    #     - 56.4 (22 items)
+    #     - 56.8 (18 items)
+    #     - 56.9 (18 items)
+    #     - 568 (18 items)
+    #     - 54.4 (18 items)
+    #     - 55.1 (12 items)
+    #     + 61 more attributes...
+    #
+    ##################################
+    #   - key: "PROFONDEUR"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![1650, 33219, 5486]
+    #
+    #     name:
+    #      default: "Depth"
+    #      fr: "Profondeur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "PROFONDEUR"
+    #      rakuten.com:
+    #        - "PROFONDEUR"
+    #      123comparer.fr:
+    #        - "PROFONDEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         HAUTEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 18% (605/3261) .
+    # TOP attributes values are :
+    #     - 59.5 (138 items)
+    #     - 595 (79 items)
+    #     - 59.6 (34 items)
+    #     - 59.4 (24 items)
+    #     - 59.2 (21 items)
+    #     - 45.5 (19 items)
+    #     - 594 (18 items)
+    #     - 455 (12 items)
+    #     - 59.7 (8 items)
+    #     - 60 (7 items)
+    #     + 51 more attributes...
+    #
+    ##################################
+    #   - key: "HAUTEUR"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![5478, 1464]
+    #
+    #     name:
+    #      default: "Height (imperial)"
+    #      fr: "Hauteur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "HAUTEUR"
+    #      rakuten.com:
+    #        - "HAUTEUR"
+    #      123comparer.fr:
+    #        - "HAUTEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EPREL CERTIFICATION CODE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 11% (371/3261) .
+    # TOP attributes values are :
+    #     - 0 (11 items)
+    #     - 1842239 (2 items)
+    #     - 552756 (2 items)
+    #     - 1143399 (2 items)
+    #     - 121878 (2 items)
+    #
+    ##################################
+    #   - key: "EPREL CERTIFICATION CODE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "EPREL CERTIFICATION CODE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DISPOSITIF DE SECURITE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 11% (364/3261) .
+    # TOP attributes values are :
+    #     - Porte froide (149 items)
+    #     - Sécurité enfants (37 items)
+    #     - Verrouillage (26 items)
+    #     - Système de refroidissement par ventilateur (23 items)
+    #     - Arrêt automatique (23 items)
+    #     - Double porte vitrée (21 items)
+    #     - Indicateur de chaleur résiduelle (16 items)
+    #     - Porte refroidissante (14 items)
+    #     - Porte à quadruple vitrage (12 items)
+    #     - Thermostat de sécurité (5 items)
+    #     + 10 more attributes...
+    #
+    ##################################
+    #   - key: "DISPOSITIF DE SECURITE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "DISPOSITIF DE SECURITE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ECHELLE D'EFFICACITE ENERGETIQUE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 11% (364/3261) .
+    # TOP attributes values are :
+    #     - A+++-D (360 items)
+    #     - APPP_D (4 items)
+    #
+    ##################################
+    #   - key: "ECHELLE D'EFFICACITE ENERGETIQUE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "ECHELLE D'EFFICACITE ENERGETIQUE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EPREL CATEGORY
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 10% (358/3261) .
+    # TOP attributes values are :
+    #     - ovens (356 items)
+    #     - rangehoods (2 items)
+    #
+    ##################################
+    #   - key: "EPREL CATEGORY"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "EPREL CATEGORY"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ECOLABEL
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 10% (339/3261) .
+    # TOP attributes values are :
+    #     - false (337 items)
+    #     - true (2 items)
+    #
+    ##################################
+    #   - key: "ECOLABEL"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ECOLABEL"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         COULEUR EXTERIEURE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 10% (328/3261) .
+    # TOP attributes values are :
+    #     - Acier inoxydable (88 items)
+    #     - Noir (88 items)
+    #     - Blanc (31 items)
+    #     - Inox (12 items)
+    #     - Noir/inox (11 items)
+    #     - Argent (8 items)
+    #     - Gris (4 items)
+    #     - Noir propre (4 items)
+    #     - Acier (4 items)
+    #     - Inox/noir (4 items)
+    #     + 18 more attributes...
+    #
+    ##################################
+    #   - key: "COULEUR EXTERIEURE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "COULEUR EXTERIEURE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         GAMME DE PRODUITS
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 10% (328/3261) .
+    # TOP attributes values are :
+    #     - Brandt (24 items)
+    #     - SEVERIN (22 items)
+    #     - Sauter (10 items)
+    #     - Whirlpool (8 items)
+    #     - Samsung Series 4 (8 items)
+    #     - Indesit (7 items)
+    #     - Moulinex Optimo (7 items)
+    #     - Continental Edison (5 items)
+    #     - Hotpoint Ariston (5 items)
+    #     - ASKO Craft (5 items)
+    #     + 52 more attributes...
+    #
+    ##################################
+    #   - key: "GAMME DE PRODUITS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "GAMME DE PRODUITS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         COULEUR GENERIQUE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 9% (321/3261) .
+    # TOP attributes values are :
+    #     - Noir (186 items)
+    #     - Argent (76 items)
+    #     - Blanc (36 items)
+    #     - Gris (11 items)
+    #     - Rouge (5 items)
+    #     - Transparent (2 items)
+    #     - Bleu (2 items)
+    #     - Beige (2 items)
+    #
+    ##################################
+    #   - key: "COULEUR GENERIQUE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "COULEUR GENERIQUE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         HAUTEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 8% (284/3261) .
+    # TOP attributes values are :
+    #     - 65.5 (29 items)
+    #     - 67 (25 items)
+    #     - 675 (22 items)
+    #     - 66 (19 items)
+    #     - 665 (15 items)
+    #     - 670 (10 items)
+    #     - 70 (8 items)
+    #     - 55 (8 items)
+    #     - 66.5 (7 items)
+    #     - 67.5 (7 items)
+    #     + 24 more attributes...
+    #
+    ##################################
+    #   - key: "HAUTEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "HAUTEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         LARGEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 8% (284/3261) .
+    # TOP attributes values are :
+    #     - 66 (48 items)
+    #     - 660 (24 items)
+    #     - 64 (19 items)
+    #     - 620 (18 items)
+    #     - 62 (13 items)
+    #     - 69.4 (12 items)
+    #     - 63.5 (9 items)
+    #     - 63 (7 items)
+    #     - 670 (7 items)
+    #     - 69 (7 items)
+    #     + 22 more attributes...
+    #
+    ##################################
+    #   - key: "LARGEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "LARGEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         PROFONDEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 8% (281/3261) .
+    # TOP attributes values are :
+    #     - 66 (62 items)
+    #     - 690 (22 items)
+    #     - 70 (14 items)
+    #     - 67 (13 items)
+    #     - 646 (12 items)
+    #     - 64 (10 items)
+    #     - 65 (8 items)
+    #     - 670 (6 items)
+    #     - 640 (6 items)
+    #     - 660 (6 items)
+    #     + 22 more attributes...
+    #
+    ##################################
+    #   - key: "PROFONDEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "PROFONDEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         STYLE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 8% (271/3261) .
+    # TOP attributes values are :
+    #     - null (271 items)
+    #
+    ##################################
+    #   - key: "STYLE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![42533, 13002]
+    #
+    #     name:
+    #      default: "Style"
+    #      fr: "Style"
+    #
+    #     synonyms:
+    #      all:
+    #      darty.com:
+    #        - "STYLE"
+    #      DartyProCashback:
+    #        - "STYLE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         POIDS EMBALLE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 8% (266/3261) .
+    # TOP attributes values are :
+    #     - 38 (5 items)
+    #     - 37 (5 items)
+    #     - 37,5 (5 items)
+    #     - 30 (5 items)
+    #     - 13.5 (4 items)
+    #     - 38.6 (4 items)
+    #     - 36 (4 items)
+    #     - 14 (4 items)
+    #     - 38.1 (4 items)
+    #     - 32 (3 items)
+    #     + 34 more attributes...
+    #
+    ##################################
+    #   - key: "POIDS EMBALLE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "POIDS EMBALLE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ORIGINE_IMPORT
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 6% (215/3261) .
+    # TOP attributes values are :
+    #     - All-in-one (198 items)
+    #     - Converter (14 items)
+    #     - hightech_minimaliste (3 items)
+    #
+    ##################################
+    #   - key: "ORIGINE_IMPORT"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "ORIGINE_IMPORT"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         NIVEAU SONORE MAXIMUM
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 1% (41/3261) .
+    # TOP attributes values are :
+    #     - 78 dB (6 items)
+    #     - 53 dB (5 items)
+    #     - 79 dB (5 items)
+    #     - 59 dB (3 items)
+    #     - 57 dB (2 items)
+    #     - 72 dB (2 items)
+    #     - 47 dB (2 items)
+    #     - 55 dB (2 items)
+    #     - 45 dB (2 items)
+    #     - 69 dB (2 items)
+    #
+    ##################################
+    #   - key: "NIVEAU SONORE MAXIMUM"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "NIVEAU SONORE MAXIMUM"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DIAGONALE
+    ################################################################################
+    # Generated on 15/01/2026 16:12, coverage was 0% (10/3261) .
+    # TOP attributes values are :
+    #     - 7 (10 items)
+    #
+    ##################################
+    #   - key: "DIAGONALE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![15780, 2140]
+    #
+    #     name:
+    #      default: "Diagonal (metric)"
+    #      fr: "Diagonale (métrique)"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "DIAGONALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+
+    ################################################################################
+    #                         CUSTOM_4
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 75% (2464/3261) .
+    # TOP attributes values are :
+    #     - ELECTROMENAGER (771 items)
+    #     - Materiel CHR Pro (367 items)
+    #     - elektronikshome (222 items)
+    #     - 0.0 (81 items)
+    #     - Super10Count (73 items)
+    #     - $linkur (63 items)
+    #     - Icoza (62 items)
+    #     - Digital Bay (50 items)
+    #     - Villatech (43 items)
+    #     - M24 (42 items)
+    #     + 81 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_4"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      backmarket.fr:
+    #        - "CUSTOM_4"
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_4"
+    #      joom.com:
+    #        - "CUSTOM_4"
+    #      darty.com:
+    #        - "CUSTOM_4"
+    #      fnac.com:
+    #        - "CUSTOM_4"
+    #      JoomFR:
+    #        - "CUSTOM_4"
+    #      cdiscount.com:
+    #        - "CUSTOM_4"
+    #      manomano.fr:
+    #        - "CUSTOM_4"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_1
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 73% (2395/3261) .
+    # TOP attributes values are :
+    #     - Produit MarketPlace (657 items)
+    #     - G (393 items)
+    #     - 34 (58 items)
+    #     - bons plans (56 items)
+    #     - 1102 (43 items)
+    #     - 767 (43 items)
+    #     - 1117 (40 items)
+    #     - 1099 (39 items)
+    #     - 149810 (38 items)
+    #     - unisex (30 items)
+    #     + 122 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_1"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rueducommerce.fr:
+    #        - "CUSTOM_1"
+    #      backmarket.fr:
+    #        - "CUSTOM_1"
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_1"
+    #      joom.com:
+    #        - "CUSTOM_1"
+    #      darty.com:
+    #        - "CUSTOM_1"
+    #      fnac.com:
+    #        - "CUSTOM_1"
+    #      JoomFR:
+    #        - "CUSTOM_1"
+    #      underdog.shop:
+    #        - "CUSTOM_1"
+    #      UNDERDOGFR:
+    #        - "CUSTOM_1"
+    #      manomano.fr:
+    #        - "CUSTOM_1"
+    #      e.leclerc:
+    #        - "CUSTOM_1"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_5
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 73% (2386/3261) .
+    # TOP attributes values are :
+    #     - 0 (1305 items)
+    #     - 25 euros offerts des 249 euros d'achat jusqu'au 09/01/2026 (104 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 09/01/2026 (81 items)
+    #     - 10 euros offerts des 79 euros d'achat jusqu'au 01/12/2025 (72 items)
+    #     - true (29 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 21/11/2025 (7 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 08/10/2025 (7 items)
+    #     - 11 euros offerts des 111 euros d'achat jusqu'au 11/11/2025 (6 items)
+    #     - 15 euros offerts des 129 euros d'achat jusqu'au 07/10/2025 (4 items)
+    #     - 25 euros de remise des 249 euros d'achat (4 items)
+    #     + 11 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_5"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      backmarket.fr:
+    #        - "CUSTOM_5"
+    #      joom.com:
+    #        - "CUSTOM_5"
+    #      darty.com:
+    #        - "CUSTOM_5"
+    #      fnac.com:
+    #        - "CUSTOM_5"
+    #      JoomFR:
+    #        - "CUSTOM_5"
+    #      cdiscount.com:
+    #        - "CUSTOM_5"
+    #      manomano.fr:
+    #        - "CUSTOM_5"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_3
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 63% (2084/3261) .
+    # TOP attributes values are :
+    #     - 0 (1017 items)
+    #     - 0.00 (439 items)
+    #     - 59.00 (12 items)
+    #     - 6.95 (9 items)
+    #     - true (7 items)
+    #     - 24 (4 items)
+    #     - 8 (4 items)
+    #     - 18 (4 items)
+    #     - 7.99 (4 items)
+    #     - 34 (4 items)
+    #     + 55 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_3"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_3"
+    #      fnac.com:
+    #        - "CUSTOM_3"
+    #      manomano.fr:
+    #        - "CUSTOM_3"
+    #      cdiscount.com:
+    #        - "CUSTOM_3"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TITRE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 54% (1793/3261) .
+    # TOP attributes values are :
+    #     - vidaXL Rangement de poubelle à roulettes pour 3 poubelles Anthracite (16 items)
+    #     - vidaXL Rangement de poubelle à roulettes pour 3 poubelles Argent (5 items)
+    #     - APPUIS DE FENÊTRE 2 PCS BOIS DE CHÊNE MASSIF NON TRAITÉ (5 items)
+    #     - vidaXL Cabinet à chaussures Sonoma 60 x 35 x 44 cm Bois d'ingénierie (2 items)
+    #     - FOUR ENCASTRABLE ELECTROLUX EDF4P46X2 (2 items)
+    #     - alpina Appareil Croque Monsieur 230V/1000W - Appareil à Panini - Légumes, Pain et Viande - Revêtement Anti-Adhésif - Bac de Récupération - Noir/Rouge (2 items)
+    #     - Four Néerlandais Avec Accessoires Inclus (2 items)
+    #
+    ##################################
+    #   - key: "TITRE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 16547
+    #
+    #     name:
+    #      default: "Title"
+    #      fr: "Titre"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "TITRE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_2
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 54% (1789/3261) .
+    # TOP attributes values are :
+    #     - Marketplace (782 items)
+    #     - adult (57 items)
+    #     - Offre Propre (29 items)
+    #     - Boys and Girls (6 items)
+    #     - TH-HE34L (2 items)
+    #     - SELSQ8JCW0FK5PDCHEER (2 items)
+    #
+    ##################################
+    #   - key: "CUSTOM_2"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      natureetdecouvertes.com:
+    #        - "CUSTOM_2"
+    #      joom.com:
+    #        - "CUSTOM_2"
+    #      JoomFR:
+    #        - "CUSTOM_2"
+    #      manomano.fr:
+    #        - "CUSTOM_2"
+    #      cdiscount.com:
+    #        - "CUSTOM_2"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_9
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 45% (1492/3261) .
+    # TOP attributes values are :
+    #     - Acier inoxydable (inox) (10 items)
+    #     - Average (4 items)
+    #     - Verre (4 items)
+    #
+    ##################################
+    #   - key: "CUSTOM_9"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      cdiscount.com:
+    #        - "CUSTOM_9"
+    #      manomano.fr:
+    #        - "CUSTOM_9"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TYPE DE PRODUIT
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 43% (1413/3261) .
+    # TOP attributes values are :
+    #     - Four (926 items)
+    #     - Appareil de cuisson (166 items)
+    #     - Mini four (88 items)
+    #     - Micro-ondes (50 items)
+    #     - Presse-agrumes électrique (23 items)
+    #     - Machine à café (17 items)
+    #     - Friteuse (15 items)
+    #     - Bouilloire (10 items)
+    #     - Grille-pain (8 items)
+    #     - Autre (8 items)
+    #     + 17 more attributes...
+    #
+    ##################################
+    #   - key: "TYPE DE PRODUIT"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 14052
+    #
+    #     name:
+    #      default: "Product type"
+    #      fr: "Type de produit"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "TYPE DE PRODUIT"
+    #      rakuten.com:
+    #        - "TYPE DE PRODUIT"
+    #      123comparer.fr:
+    #        - "TYPE DE PRODUIT"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DIMENSIONS
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 27% (906/3261) .
+    # TOP attributes values are :
+    #     - 59.5000 cmx59.5000 cm (24 items)
+    #     - 548.0000 mmx594.0000 mmx595.0000 mm (14 items)
+    #     - 60.90 cmx59.20 cmx59.20 cm (11 items)
+    #     - 57.00 cmx60.00 cmx59.00 cm (10 items)
+    #     - 56.70 cmx59.40 cmx59.50 cm (10 items)
+    #     - 59.50 cmx57.00 cmx59.60 cm (10 items)
+    #     - 56.4000 cmx59.5000 cmx59.5000 cm (9 items)
+    #     - 56.40 cmx59.50 cmx59.70 cm (8 items)
+    #     - 54.80 cmx59.70 cmx59.20 cm (8 items)
+    #     - 54.00 cmx59.00 cmx45.50 cm (8 items)
+    #     + 78 more attributes...
+    #
+    ##################################
+    #   - key: "DIMENSIONS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - 19583
+    #
+    #     name:
+    #      default: "Dimensions"
+    #      fr: "Dimensions"
+    #
+    #     synonyms:
+    #      all:
+    #      fnac.com:
+    #        - "DIMENSIONS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         TRANCHE DE POIDS
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 24% (792/3261) .
+    # TOP attributes values are :
+    #     - 30 à 50 kg (224 items)
+    #     - 3 à 10 kg (197 items)
+    #     - 500 g à 3 kg (182 items)
+    #     - 250 à 500 g (46 items)
+    #     - 10 à 15 kg (40 items)
+    #     - 15 à 30 kg (37 items)
+    #     - 0 à 100 g (26 items)
+    #     - + de 100 kg (11 items)
+    #     - 100 à 250 g (6 items)
+    #     - 50 à 70 kg (5 items)
+    #     + 2 more attributes...
+    #
+    ##################################
+    #   - key: "TRANCHE DE POIDS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "TRANCHE DE POIDS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         STORE_PRICE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 22% (718/3261) .
+    # TOP attributes values are :
+    #     - 374 (7 items)
+    #     - 89.99 (6 items)
+    #     - 374.99 (5 items)
+    #     - 774 (5 items)
+    #     - 124.99 (4 items)
+    #     - 524 (4 items)
+    #     - 134.99 (4 items)
+    #     - 274.99 (4 items)
+    #     - 29.99 (4 items)
+    #     - 974 (3 items)
+    #     + 55 more attributes...
+    #
+    ##################################
+    #   - key: "STORE_PRICE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      UNDERDOGFR:
+    #        - "STORE_PRICE"
+    #      underdog.shop:
+    #        - "STORE_PRICE"
+    #      cdiscount.com:
+    #        - "STORE_PRICE"
+    #      SamsungFR:
+    #        - "STORE_PRICE"
+    #      manomano.fr:
+    #        - "STORE_PRICE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CUSTOM_6
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 20% (683/3261) .
+    # TOP attributes values are :
+    #     - Verre (184 items)
+    #     - Acier inoxydable (inox) (182 items)
+    #     - Acier (58 items)
+    #     - Métal (48 items)
+    #     - Plastique (37 items)
+    #     - Céramique (26 items)
+    #     - Aluminium (21 items)
+    #     - Verre trempé (18 items)
+    #     - Choix durable (16 items)
+    #     - Bois (14 items)
+    #     + 12 more attributes...
+    #
+    ##################################
+    #   - key: "CUSTOM_6"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      darty.com:
+    #        - "CUSTOM_6"
+    #      manomano.fr:
+    #        - "CUSTOM_6"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EXPORTDATETS
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 19% (650/3261) .
+    # TOP attributes values are :
+    #     - 1761568467578 (19 items)
+    #     - 1761554112455 (15 items)
+    #     - 1761437658107 (15 items)
+    #     - 1761570252984 (14 items)
+    #     - 1761568467577 (11 items)
+    #     - 1761561902265 (10 items)
+    #     - 1761440046173 (10 items)
+    #     - 1761570252985 (10 items)
+    #     - 1761554112454 (9 items)
+    #     - 1761566688726 (9 items)
+    #     + 125 more attributes...
+    #
+    ##################################
+    #   - key: "EXPORTDATETS"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "EXPORTDATETS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYCLASSIMAGE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen.png (341 items)
+    #     - A-Left-Yellow.png (253 items)
+    #     - APP-Left-MediumGreen.png (27 items)
+    #     - B-Left-LightOrange.png (2 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYCLASSIMAGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYCLASSIMAGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSIMAGE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen.png (341 items)
+    #     - A-Left-Yellow.png (250 items)
+    #     - APP-Left-MediumGreen.png (27 items)
+    #     - B-Left-LightOrange.png (5 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSIMAGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSIMAGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ORDERNUMBER
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - 1 (624 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ORDERNUMBER"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ORDERNUMBER"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSRANGE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - APPP_D (624 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSRANGE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSRANGE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYEFFICIENCYINDEX
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 19% (624/3261) .
+    # TOP attributes values are :
+    #     - 81.2 (164 items)
+    #     - 95.3 (61 items)
+    #     - 95.2 (47 items)
+    #     - 81.6 (47 items)
+    #     - 81 (35 items)
+    #     - 81.4 (30 items)
+    #     - 94.7 (22 items)
+    #     - 95.1 (22 items)
+    #     - 94 (17 items)
+    #     - 81.3 (15 items)
+    #     + 27 more attributes...
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ENERGYCLASSIMAGEWITHSCALE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 19% (623/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen-WithAPPPDScale.svg (340 items)
+    #     - A-Left-Yellow-WithAPPPDScale.svg (250 items)
+    #     - APP-Left-MediumGreen-WithAPPPDScale.svg (27 items)
+    #     - B-Left-LightOrange-WithAPPPDScale.svg (5 items)
+    #
+    ##################################
+    #   - key: "ENERGYCLASSIMAGEWITHSCALE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ENERGYCLASSIMAGEWITHSCALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 19% (623/3261) .
+    # TOP attributes values are :
+    #     - AP-Left-LightGreen-WithAPPPDScale.svg (340 items)
+    #     - A-Left-Yellow-WithAPPPDScale.svg (253 items)
+    #     - APP-Left-MediumGreen-WithAPPPDScale.svg (27 items)
+    #     - B-Left-LightOrange-WithAPPPDScale.svg (2 items)
+    #
+    ##################################
+    #   - key: "CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         LARGEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 18% (611/3261) .
+    # TOP attributes values are :
+    #     - 59.5 (128 items)
+    #     - 594 (65 items)
+    #     - 59.4 (61 items)
+    #     - 595 (59 items)
+    #     - 59.7 (28 items)
+    #     - 59.2 (28 items)
+    #     - 59.6 (17 items)
+    #     - 59,5 (6 items)
+    #     - 59 (6 items)
+    #     - 60 (5 items)
+    #     + 53 more attributes...
+    #
+    ##################################
+    #   - key: "LARGEUR"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![1649, 4157]
+    #
+    #     name:
+    #      default: "Width"
+    #      fr: "Largeur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "LARGEUR"
+    #      rakuten.com:
+    #        - "LARGEUR"
+    #      123comparer.fr:
+    #        - "LARGEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         PROFONDEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 18% (605/3261) .
+    # TOP attributes values are :
+    #     - 548 (59 items)
+    #     - 56.7 (42 items)
+    #     - 54.8 (36 items)
+    #     - 57 (23 items)
+    #     - 56.4 (22 items)
+    #     - 56.8 (18 items)
+    #     - 56.9 (18 items)
+    #     - 568 (18 items)
+    #     - 54.4 (18 items)
+    #     - 55.1 (12 items)
+    #     + 61 more attributes...
+    #
+    ##################################
+    #   - key: "PROFONDEUR"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![1650, 33219, 5486]
+    #
+    #     name:
+    #      default: "Depth"
+    #      fr: "Profondeur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "PROFONDEUR"
+    #      rakuten.com:
+    #        - "PROFONDEUR"
+    #      123comparer.fr:
+    #        - "PROFONDEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         HAUTEUR
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 18% (605/3261) .
+    # TOP attributes values are :
+    #     - 59.5 (138 items)
+    #     - 595 (79 items)
+    #     - 59.6 (34 items)
+    #     - 59.4 (24 items)
+    #     - 59.2 (21 items)
+    #     - 45.5 (19 items)
+    #     - 594 (18 items)
+    #     - 455 (12 items)
+    #     - 59.7 (8 items)
+    #     - 60 (7 items)
+    #     + 51 more attributes...
+    #
+    ##################################
+    #   - key: "HAUTEUR"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![5478, 1464]
+    #
+    #     name:
+    #      default: "Height (imperial)"
+    #      fr: "Hauteur"
+    #
+    #     synonyms:
+    #      all:
+    #      icecat.biz:
+    #        - "HAUTEUR"
+    #      rakuten.com:
+    #        - "HAUTEUR"
+    #      123comparer.fr:
+    #        - "HAUTEUR"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EPREL CERTIFICATION CODE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 11% (371/3261) .
+    # TOP attributes values are :
+    #     - 0 (11 items)
+    #     - 1842239 (2 items)
+    #     - 552756 (2 items)
+    #     - 1143399 (2 items)
+    #     - 121878 (2 items)
+    #
+    ##################################
+    #   - key: "EPREL CERTIFICATION CODE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "EPREL CERTIFICATION CODE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DISPOSITIF DE SECURITE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 11% (364/3261) .
+    # TOP attributes values are :
+    #     - Porte froide (149 items)
+    #     - Sécurité enfants (37 items)
+    #     - Verrouillage (26 items)
+    #     - Système de refroidissement par ventilateur (23 items)
+    #     - Arrêt automatique (23 items)
+    #     - Double porte vitrée (21 items)
+    #     - Indicateur de chaleur résiduelle (16 items)
+    #     - Porte refroidissante (14 items)
+    #     - Porte à quadruple vitrage (12 items)
+    #     - Thermostat de sécurité (5 items)
+    #     + 10 more attributes...
+    #
+    ##################################
+    #   - key: "DISPOSITIF DE SECURITE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "DISPOSITIF DE SECURITE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ECHELLE D'EFFICACITE ENERGETIQUE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 11% (364/3261) .
+    # TOP attributes values are :
+    #     - A+++-D (360 items)
+    #     - APPP_D (4 items)
+    #
+    ##################################
+    #   - key: "ECHELLE D'EFFICACITE ENERGETIQUE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "ECHELLE D'EFFICACITE ENERGETIQUE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         EPREL CATEGORY
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 10% (358/3261) .
+    # TOP attributes values are :
+    #     - ovens (356 items)
+    #     - rangehoods (2 items)
+    #
+    ##################################
+    #   - key: "EPREL CATEGORY"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "EPREL CATEGORY"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ECOLABEL
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 10% (339/3261) .
+    # TOP attributes values are :
+    #     - false (337 items)
+    #     - true (2 items)
+    #
+    ##################################
+    #   - key: "ECOLABEL"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      eprel:
+    #        - "ECOLABEL"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         COULEUR EXTERIEURE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 10% (328/3261) .
+    # TOP attributes values are :
+    #     - Acier inoxydable (88 items)
+    #     - Noir (88 items)
+    #     - Blanc (31 items)
+    #     - Inox (12 items)
+    #     - Noir/inox (11 items)
+    #     - Argent (8 items)
+    #     - Gris (4 items)
+    #     - Noir propre (4 items)
+    #     - Acier (4 items)
+    #     - Inox/noir (4 items)
+    #     + 18 more attributes...
+    #
+    ##################################
+    #   - key: "COULEUR EXTERIEURE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "COULEUR EXTERIEURE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         GAMME DE PRODUITS
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 10% (328/3261) .
+    # TOP attributes values are :
+    #     - Brandt (24 items)
+    #     - SEVERIN (22 items)
+    #     - Sauter (10 items)
+    #     - Whirlpool (8 items)
+    #     - Samsung Series 4 (8 items)
+    #     - Indesit (7 items)
+    #     - Moulinex Optimo (7 items)
+    #     - Continental Edison (5 items)
+    #     - Hotpoint Ariston (5 items)
+    #     - ASKO Craft (5 items)
+    #     + 52 more attributes...
+    #
+    ##################################
+    #   - key: "GAMME DE PRODUITS"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "GAMME DE PRODUITS"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         COULEUR GENERIQUE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 9% (321/3261) .
+    # TOP attributes values are :
+    #     - Noir (186 items)
+    #     - Argent (76 items)
+    #     - Blanc (36 items)
+    #     - Gris (11 items)
+    #     - Rouge (5 items)
+    #     - Transparent (2 items)
+    #     - Bleu (2 items)
+    #     - Beige (2 items)
+    #
+    ##################################
+    #   - key: "COULEUR GENERIQUE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "COULEUR GENERIQUE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         HAUTEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 8% (284/3261) .
+    # TOP attributes values are :
+    #     - 65.5 (29 items)
+    #     - 67 (25 items)
+    #     - 675 (22 items)
+    #     - 66 (19 items)
+    #     - 665 (15 items)
+    #     - 670 (10 items)
+    #     - 70 (8 items)
+    #     - 55 (8 items)
+    #     - 66.5 (7 items)
+    #     - 67.5 (7 items)
+    #     + 24 more attributes...
+    #
+    ##################################
+    #   - key: "HAUTEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "HAUTEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         LARGEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 8% (284/3261) .
+    # TOP attributes values are :
+    #     - 66 (48 items)
+    #     - 660 (24 items)
+    #     - 64 (19 items)
+    #     - 620 (18 items)
+    #     - 62 (13 items)
+    #     - 69.4 (12 items)
+    #     - 63.5 (9 items)
+    #     - 63 (7 items)
+    #     - 670 (7 items)
+    #     - 69 (7 items)
+    #     + 22 more attributes...
+    #
+    ##################################
+    #   - key: "LARGEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "LARGEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         PROFONDEUR EMBALLEE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 8% (281/3261) .
+    # TOP attributes values are :
+    #     - 66 (62 items)
+    #     - 690 (22 items)
+    #     - 70 (14 items)
+    #     - 67 (13 items)
+    #     - 646 (12 items)
+    #     - 64 (10 items)
+    #     - 65 (8 items)
+    #     - 670 (6 items)
+    #     - 640 (6 items)
+    #     - 660 (6 items)
+    #     + 22 more attributes...
+    #
+    ##################################
+    #   - key: "PROFONDEUR EMBALLEE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "PROFONDEUR EMBALLEE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         STYLE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 8% (271/3261) .
+    # TOP attributes values are :
+    #     - null (271 items)
+    #
+    ##################################
+    #   - key: "STYLE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![42533, 13002]
+    #
+    #     name:
+    #      default: "Style"
+    #      fr: "Style"
+    #
+    #     synonyms:
+    #      all:
+    #      darty.com:
+    #        - "STYLE"
+    #      DartyProCashback:
+    #        - "STYLE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         POIDS EMBALLE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 8% (266/3261) .
+    # TOP attributes values are :
+    #     - 38 (5 items)
+    #     - 37 (5 items)
+    #     - 37,5 (5 items)
+    #     - 30 (5 items)
+    #     - 13.5 (4 items)
+    #     - 38.6 (4 items)
+    #     - 36 (4 items)
+    #     - 14 (4 items)
+    #     - 38.1 (4 items)
+    #     - 32 (3 items)
+    #     + 34 more attributes...
+    #
+    ##################################
+    #   - key: "POIDS EMBALLE"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "POIDS EMBALLE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         ORIGINE_IMPORT
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 6% (215/3261) .
+    # TOP attributes values are :
+    #     - All-in-one (198 items)
+    #     - Converter (14 items)
+    #     - hightech_minimaliste (3 items)
+    #
+    ##################################
+    #   - key: "ORIGINE_IMPORT"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "ORIGINE_IMPORT"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         NIVEAU SONORE MAXIMUM
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 1% (41/3261) .
+    # TOP attributes values are :
+    #     - 78 dB (6 items)
+    #     - 53 dB (5 items)
+    #     - 79 dB (5 items)
+    #     - 59 dB (3 items)
+    #     - 57 dB (2 items)
+    #     - 72 dB (2 items)
+    #     - 47 dB (2 items)
+    #     - 55 dB (2 items)
+    #     - 45 dB (2 items)
+    #     - 69 dB (2 items)
+    #
+    ##################################
+    #   - key: "NIVEAU SONORE MAXIMUM"
+    #     filteringType: "STRING"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - TODO
+    #
+    #     name:
+    #      default: "!!COMPLETE_HERE!!"
+    #      fr: "!!COMPLETE_HERE!!"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "NIVEAU SONORE MAXIMUM"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+    ################################################################################
+    #                         DIAGONALE
+    ################################################################################
+    # Generated on 15/01/2026 16:11, coverage was 0% (10/3261) .
+    # TOP attributes values are :
+    #     - 7 (10 items)
+    #
+    ##################################
+    #   - key: "DIAGONALE"
+    #     filteringType: "NUMERIC"
+    #     asScore: false
+    #     faIcon: ""
+    #
+    #     icecatFeaturesIds:
+    #      - !!!![15780, 2140]
+    #
+    #     name:
+    #      default: "Diagonal (metric)"
+    #      fr: "Diagonale (métrique)"
+    #
+    #     synonyms:
+    #      all:
+    #      rakuten.com:
+    #        - "DIAGONALE"
+    #
+    #    parser:
+    #      normalize: true
+    #      trim: false
+    #      lowerCase: false
+    #      upperCase: true
+    #      removeParenthesis: false
+    #      deleteTokens:
+    #        - "..."
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+attributesConfig:
+  configs:
     - key: "CLASSE_ENERGY"
     - key: "POWER_CONSUMPTION_TYPICAL"
     - key: "WEIGHT"
@@ -324,6 +5243,9 @@ attributesConfig:
     - key: "FEATURES"
     - key: "BRAND_SUSTAINABILITY"
     - key: "DATA_QUALITY"
+    - key: "WIDTH"
+    - key: "HEIGHT"
+    - key: "DEPTH"
 
 ####################################################################################
 # Product classification from categories (samples, will be overridden post-generation)

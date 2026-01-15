@@ -749,12 +749,7 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
   const gtin = suggestion.gtin?.trim()
 
   if (gtin) {
-    router.push(
-      localePath({
-        name: 'gtin',
-        params: { gtin },
-      })
-    )
+    router.push(localePath(`/${gtin}`))
     return
   }
 

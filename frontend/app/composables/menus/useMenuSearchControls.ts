@@ -33,6 +33,8 @@ export const useMenuSearchControls = (
   const { locale } = useI18n()
   const { categories, fetchCategories } = useCategories()
 
+  const localePath = useLocalePath()
+
   const searchQuery = ref('')
   const isSearchOpen = ref(false)
 
@@ -177,10 +179,7 @@ export const useMenuSearchControls = (
     const gtin = suggestion.gtin?.trim()
 
     if (gtin) {
-      router.push({
-        name: 'gtin',
-        params: { gtin },
-      })
+      router.push(localePath(`/${gtin}`))
       finalizeNavigation()
       return
     }

@@ -15,6 +15,7 @@ synonyms:
     - "RATEDCAPACITY"
     - "CAPACITE"
     - "CAPACITÉ"
+    - "CAPACITE NOMINALE"
 parser:
   normalize: true
   trim: true

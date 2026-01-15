@@ -1,12 +1,16 @@
-You will work on updating yaml categories config.
+Note :  {CATEGORY} with : tv
 
-As a sample, you will have the sample tv category config : /verticals/src/main/resources/verticals/tv.yml
+
+You will work on updating yaml categories config for {CATEGORY}.
+
+
+As a sample, you will have the sample {CATEGORY} category config : /verticals/src/main/resources/verticals/{CATEGORY}.yml
 All verticals inherits the default vertical config : /verticals/src/main/resources/verticals/_default.yml
 
 
 You will update the vertical
 
-/verticals/src/main/resources/verticals/tv.yml
+/verticals/src/main/resources/verticals/{CATEGORY}.yml
 
 ## Task 1
 - Check for errors, adjust texts if needed (translations in i18n, (the base, correct texts is fr) to be semantically correct with the vertical title)
@@ -16,9 +20,7 @@ You will update the vertical
 Generate or update attributes definitions (reuse existing ones if possible, but you can create new definitions in /verticals/src/main/resources/attributes/*). Only for attributes specific to the category,  and having a correct coverage
 
 
-As input data, you have access to : 
-
-
+As input data, you have access to :
 
 > The sample files
 > Existing attributes  (/open4goods/verticals/src/main/resources/attributes)
@@ -26,15 +28,81 @@ As input data, you have access to :
 And also, live datas provided through the local api
 API on localhost, to fetch the following datas :
 
-> The coverage of attributes
+# Attributes mapping
+
+You will update existing attributes mapping against :
 
 curl -X 'GET' \
-  'http://localhost:8081/update/tv/attributes/?minCoverage=5' \
+  'http://localhost:8081/update/{CATEGORY}/attributes/?minCoverage=5' \
   -H 'accept: */*' \
   -H 'Authorization: open4goods'
-   
-  
-  
+
+
+sample result :
+
+"ENERGYCLASSRANGE": {
+      "hits": 816,
+      "datasourceNames": [
+        "eprel"
+      ],
+      "values": {
+        "A_G": 751,
+        "APPP_D": 41,
+        "APP_E": 24
+      }
+    },
+    "ENERGYCLASSIMAGEWITHSCALE": {
+      "hits": 816,
+      "datasourceNames": [
+        "eprel"
+      ],
+      "values": {
+        "G-Left-Red-WithAGScale.svg": 351,
+        "F-Left-DarkOrange-WithAGScale.svg": 233,
+        "E-Left-LightOrange-WithAGScale.svg": 143,
+...
+        "B-Left-Yellow-WithAPPEScale.svg": 2
+      }
+    },
+    "DIAGONALINCH": {
+      "hits": 816,
+      "datasourceNames": [
+        "eprel"
+      ],
+      "values": {
+        "10": 3,
+        "19": 4,
+...
+        "86": 9,
+        "97": 2,
+        "98": 10
+      }
+    },
+    "ENERGYCLASSIMAGE": {
+      "hits": 816,
+      "datasourceNames": [
+
+
+
+You will Dismiss all CUSTOM_ * attributes, and "Themss, or non product category specific / meaning less attributes), then map
+
+# Categories mapping.
+
+You will get good probabilities of categories mapping using, in a matchingCategories: yaml fragment ready to paste in destination vertical file ready to
+
+
+curl -X 'GET' \
+  'http://localhost:8081/{CATEGORY}/categories/?minOffersCount=2' \
+  -H 'accept: */*' \
+  -H 'Authorization: open4goods'
+
+Remove errors (removes unrelated categories, or too large mapping)
+Then replace or merge with existing categories
+
+
+
+
+
 
 ## Task 3 - impactScore participants
 

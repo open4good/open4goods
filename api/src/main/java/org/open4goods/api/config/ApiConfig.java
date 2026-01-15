@@ -188,6 +188,13 @@ public class ApiConfig {
 		return new OpenAiApi(apiConfig.getGenAiConfig().getOpenaiApiKey());
 	}
 
+	@Bean
+	@Qualifier("geminiApi")
+	OpenAiApi geminiApi(ApiProperties apiConfig) {
+		return new OpenAiApi("https://generativelanguage.googleapis.com/v1beta/openai/",
+				apiConfig.getGenAiConfig().getGeminiApiKey());
+	}
+
 //	@Bean
 //	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi,
 //								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,

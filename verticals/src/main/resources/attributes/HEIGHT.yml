@@ -1,0 +1,22 @@
+- key: "HEIGHT"
+  filteringType: "NUMERIC"
+  unit: "cm"
+  asScore: false
+  faIcon: "mdi-arrow-expand-vertical"
+
+  icecatFeaturesIds:
+    - 1464
+    - 5478
+
+  name:
+    default: "Height"
+    fr: "Hauteur"
+
+  synonyms:
+    all:
+    icecat.biz:
+      - "HAUTEUR"
+    rakuten.com:
+      - "HAUTEUR"
+    123comparer.fr:
+      - "HAUTEUR"

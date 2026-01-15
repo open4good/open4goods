@@ -926,12 +926,7 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
 
   trackSearch({ query: suggestion.title ?? gtin, source: 'suggestion' })
 
-  router.push(
-    localePath({
-      name: 'gtin',
-      params: { gtin },
-    })
-  )
+  router.push(localePath(`/${gtin}`))
 }
 
 const canonicalUrl = computed(() =>
