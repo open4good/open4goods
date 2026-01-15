@@ -18,11 +18,12 @@
             <h2 class="text-h4 font-weight-bold mb-4">
               {{ t('impactScorePage.methodologyExplanation.title') }}
             </h2>
-            <!-- eslint-disable-next-line vue/no-v-html -->
+            <!-- eslint-disable vue/no-v-html -->
             <div
               class="text-body-1"
               v-html="t('impactScorePage.methodologyExplanation.content')"
             ></div>
+            <!-- eslint-enable vue/no-v-html -->
           </v-col>
         </v-row>
       </div>
