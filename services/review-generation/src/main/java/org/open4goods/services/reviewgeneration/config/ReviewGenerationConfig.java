@@ -67,6 +67,21 @@ public class ReviewGenerationConfig {
      */
     private int retryDelayDays = 7;
 
+    /**
+     * Prompt key used for standard external-source review generation.
+     */
+    private String promptKey = "review-generation";
+
+    /**
+     * Prompt key used for model-native web search review generation.
+     */
+    private String groundedPromptKey = "review-generation-grounded";
+
+    /**
+     * Flag to enable the grounded prompt flow.
+     */
+    private boolean useGroundedPrompt = false;
+
     // ---------------------- Getters/Setters ---------------------- //
 
     public int getThreadPoolSize() {
@@ -158,6 +173,24 @@ public class ReviewGenerationConfig {
     }
     public void setRetryDelayDays(int retryDelayDays) {
         this.retryDelayDays = retryDelayDays;
+    }
+    public String getPromptKey() {
+        return promptKey;
+    }
+    public void setPromptKey(String promptKey) {
+        this.promptKey = promptKey;
+    }
+    public String getGroundedPromptKey() {
+        return groundedPromptKey;
+    }
+    public void setGroundedPromptKey(String groundedPromptKey) {
+        this.groundedPromptKey = groundedPromptKey;
+    }
+    public boolean isUseGroundedPrompt() {
+        return useGroundedPrompt;
+    }
+    public void setUseGroundedPrompt(boolean useGroundedPrompt) {
+        this.useGroundedPrompt = useGroundedPrompt;
     }
 	public int getMinGlobalTokens() {
 		return minGlobalTokens;

@@ -12,24 +12,21 @@ import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.model.ai.AiFieldScanner;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.model.product.Product;
 import org.open4goods.services.evaluation.exception.TemplateEvaluationException;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
+import org.open4goods.services.prompt.config.RetrievalMode;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.prompt.service.provider.GenAiProvider;
+import org.open4goods.services.prompt.service.provider.ProviderRegistry;
+import org.open4goods.services.prompt.service.provider.ProviderRequest;
+import org.open4goods.services.prompt.service.provider.ProviderResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
-import org.springframework.ai.chat.client.ChatClient.ChatClientRequestSpec;
 import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Service;
@@ -59,21 +56,15 @@ public class PromptService implements HealthIndicator {
     private static final String INSTRUCTION_HEADER_FR = "\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
 
     /**
-     * Cache for chat models (keyed by prompt config key).
-     */
-    private final Map<String, OpenAiChatModel> models = new HashMap<>();
-
-    /**
      * Cache for prompt configurations (loaded from YAML files).
      */
     private final Map<String, PromptConfig> prompts = new HashMap<>();
 
-    private final OpenAiApi openAiApi;
-    private final OpenAiApi perplexityApi;
     private final SerialisationService serialisationService;
     private final EvaluationService evaluationService;
     private final PromptServiceConfig genAiConfig;
     private final MeterRegistry meterRegistry;
+    private final ProviderRegistry providerRegistry;
 
     /**
      * Flag indicating the health status of the external API calls.
@@ -91,14 +82,14 @@ public class PromptService implements HealthIndicator {
      * @param evaluationService    Service to evaluate prompt templates.
      * @param meterRegistry        The MeterRegistry for actuator metrics.
      */
-    public PromptService(PromptServiceConfig genAiConfig, OpenAiApi perplexityApi, OpenAiApi openAiCustomApi,
-                         SerialisationService serialisationService, EvaluationService evaluationService, MeterRegistry meterRegistry) {
-        this.openAiApi = openAiCustomApi;
-        this.perplexityApi = perplexityApi;
+    public PromptService(PromptServiceConfig genAiConfig, SerialisationService serialisationService,
+                         EvaluationService evaluationService, MeterRegistry meterRegistry,
+                         ProviderRegistry providerRegistry) {
         this.evaluationService = evaluationService;
         this.serialisationService = serialisationService;
         this.genAiConfig = genAiConfig;
         this.meterRegistry = meterRegistry;
+        this.providerRegistry = providerRegistry;
 
         // Check if the service is enabled (if supported by configuration)
         if (!genAiConfig.isEnabled()) {
@@ -108,7 +99,6 @@ public class PromptService implements HealthIndicator {
 
         // Load prompt templates and initialize chat models
         loadPrompts(genAiConfig.getPromptsTemplatesFolder());
-        loadModels();
     }
 
     /**
@@ -128,7 +118,8 @@ public class PromptService implements HealthIndicator {
      * @throws ResourceNotFoundException if the prompt configuration is not found.
      * @throws SerialisationException    if a serialization error occurs.
      */
-    private PromptResponse<CallResponseSpec> promptNativ(String promptKey, Map<String, Object> variables, String jsonSchema, Map<String, String> instructions)
+    private PromptResponse<ProviderResult> promptNativ(String promptKey, Map<String, Object> variables, String jsonSchema,
+                                                       Map<String, String> instructions)
             throws ResourceNotFoundException, SerialisationException {
 
         PromptConfig pConf = getPromptConfig(promptKey);
@@ -138,9 +129,12 @@ public class PromptService implements HealthIndicator {
         }
 
         // Increment request metric
-        meterRegistry.counter("prompt.requests", "model", promptKey).increment();
+        meterRegistry.counter("prompt.requests",
+                "prompt", promptKey,
+                "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
+                "retrievalMode", pConf.getRetrievalMode().name()).increment();
 
-        PromptResponse<CallResponseSpec> ret = new PromptResponse<>();
+        PromptResponse<ProviderResult> ret = new PromptResponse<>();
         ret.setStart(System.currentTimeMillis());
 
         // Evaluate system and user prompts using Thymeleaf with TemplateEvaluationException handling
@@ -149,7 +143,10 @@ public class PromptService implements HealthIndicator {
             try {
                 systemPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
             } catch (TemplateEvaluationException e) {
-                meterRegistry.counter("prompt.errors", "model", promptKey).increment();
+                meterRegistry.counter("prompt.errors",
+                        "prompt", promptKey,
+                        "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
+                        "retrievalMode", pConf.getRetrievalMode().name()).increment();
                 logger.error("Template evaluation error for system prompt in {}: {}", promptKey, e.getMessage());
                 throw e;
             }
@@ -158,25 +155,13 @@ public class PromptService implements HealthIndicator {
         try {
             userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
         } catch (TemplateEvaluationException e) {
-            meterRegistry.counter("prompt.errors", "model", promptKey).increment();
+            meterRegistry.counter("prompt.errors",
+                    "prompt", promptKey,
+                    "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
+                    "retrievalMode", pConf.getRetrievalMode().name()).increment();
             logger.error("Template evaluation error for user prompt in {}: {}", promptKey, e.getMessage());
             throw e;
         }
-
-        // Build the chat client request with evaluated prompts and options
-        ChatClientRequestSpec chatRequest = ChatClient.create(models.get(promptKey))
-                .prompt()
-                .user(userPromptEvaluated);
-
-                if (!org.apache.commons.lang3.StringUtils.isEmpty(jsonSchema)) {
-                	OpenAiChatOptions opts = serialisationService.clone(pConf.getOptions());
-                	opts.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema));
-                	chatRequest.options(opts);
-                } else {
-                	chatRequest.options(pConf.getOptions());
-                }
-
-
 
         // Adding the instructions at the end of system prompt if presents
 
@@ -187,10 +172,6 @@ public class PromptService implements HealthIndicator {
         	}
         }
 
-
-        if (StringUtils.hasText(systemPromptEvaluated)) {
-            chatRequest = chatRequest.system(systemPromptEvaluated);
-        }
 
         // Clone prompt configuration and update with evaluated prompts
         String yamlPromptConfig = serialisationService.toYamLiteral(pConf);
@@ -247,14 +228,22 @@ public class PromptService implements HealthIndicator {
         }
         // ------------------------------------------------
 
-        // Execute the API call and record response if successful.
-        CallResponseSpec genAiResponse;
+        ProviderResult providerResult;
         String responseContent = null;
         try {
-            genAiResponse = chatRequest.call();
-            if (genAiResponse != null) {
-                responseContent = genAiResponse.content();
-            }
+            GenAiProvider provider = providerRegistry.getProvider(pConf.getAiService());
+            ProviderRequest providerRequest = new ProviderRequest(
+                    promptKey,
+                    systemPromptEvaluated,
+                    userPromptEvaluated,
+                    pConf.getOptions(),
+                    pConf.getRetrievalMode(),
+                    jsonSchema,
+                    pConf.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH,
+                    pConf.getProviderOptions()
+            );
+            providerResult = provider.generateText(providerRequest);
+            responseContent = providerResult.getContent();
             externalApiHealthy = true; // API call succeeded, mark healthy.
             // --- Recording Response AFTER API call ---
             if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
@@ -278,18 +267,17 @@ public class PromptService implements HealthIndicator {
             }
         } catch (Exception e) {
             externalApiHealthy = false; // Mark as unhealthy due to API call exception.
-            meterRegistry.counter("prompt.errors", "model", promptKey).increment();
+            meterRegistry.counter("prompt.errors",
+                    "prompt", promptKey,
+                    "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
+                    "retrievalMode", pConf.getRetrievalMode().name()).increment();
             logger.error("Error during API call for promptKey {}: {}", promptKey, e.getMessage(), e);
             throw e;
         }
 
         // Populate the response object
-        ret.setBody(genAiResponse);
-        if (responseContent != null) {
-            ret.setRaw(responseContent);
-        } else if (genAiResponse != null) {
-            ret.setRaw(genAiResponse.content());
-        }
+        ret.setBody(providerResult);
+        ret.setRaw(responseContent);
         ret.setDuration(System.currentTimeMillis() - ret.getStart());
 
         return ret;
@@ -300,9 +288,9 @@ public class PromptService implements HealthIndicator {
 
         PromptResponse<String> ret = new PromptResponse<String>();
 
-        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, null, null);
-        ret.setBody(nativ.getRaw());
-        ret.setRaw(nativ.getRaw());
+        PromptResponse<ProviderResult> nativ = promptNativ(promptKey, variables, null, null);
+        ret.setBody(nativ.getBody().getContent());
+        ret.setRaw(nativ.getBody().getContent());
         ret.setDuration(nativ.getDuration());
         ret.setPrompt(nativ.getPrompt());
         ret.setStart(nativ.getStart());
@@ -328,9 +316,23 @@ public class PromptService implements HealthIndicator {
        }
 
 
-        PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, jsonSchema, instructions);
-        ret.setBody(outputConverter.convert(nativ.getRaw()));
-        ret.setRaw(nativ.getRaw());
+        PromptResponse<ProviderResult> nativ = promptNativ(promptKey, variables, jsonSchema, instructions);
+        String raw = nativ.getBody().getContent();
+        try {
+            ret.setBody(outputConverter.convert(raw));
+            ret.setRaw(raw);
+        } catch (Exception e) {
+            meterRegistry.counter("prompt.json.repair",
+                    "prompt", promptKey,
+                    "provider", nativ.getPrompt().getAiService() != null
+                            ? nativ.getPrompt().getAiService().name()
+                            : "UNKNOWN",
+                    "retrievalMode", nativ.getPrompt().getRetrievalMode().name()).increment();
+            logger.warn("JSON parsing failed for prompt {}. Attempting repair.", promptKey, e);
+            String repaired = repairJson(promptKey, raw, jsonSchema, nativ.getPrompt());
+            ret.setBody(outputConverter.convert(repaired));
+            ret.setRaw(repaired);
+        }
         ret.setDuration(nativ.getDuration());
         ret.setPrompt(nativ.getPrompt());
         ret.setStart(nativ.getStart());
@@ -351,14 +353,14 @@ public class PromptService implements HealthIndicator {
             throws ResourceNotFoundException, SerialisationException {
 
         PromptResponse<Map<String, Object>> ret = new PromptResponse<>();
-        PromptResponse<CallResponseSpec> internal = promptNativ(promptKey, variables, null, null);
+        PromptResponse<ProviderResult> internal = promptNativ(promptKey, variables, null, null);
 
         ret.setDuration(internal.getDuration());
         ret.setStart(internal.getStart());
         ret.setPrompt(internal.getPrompt());
 
         // Clean up markdown formatting from the response
-        String response = internal.getBody().content().replace("```json", "").replace("```", "");
+        String response = internal.getBody().getContent().replace("```json", "").replace("```", "");
         ret.setRaw(response);
         try {
             ret.setBody(serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {}));
@@ -367,20 +369,6 @@ public class PromptService implements HealthIndicator {
             throw new IllegalStateException("Response mapping to JSON failed", e);
         }
         return ret;
-    }
-
-    /**
-     * Loads and instantiates chat models based on the prompt configurations.
-     */
-    public void loadModels() {
-        for (PromptConfig promptConfig : prompts.values()) {
-            OpenAiChatModel model = switch (promptConfig.getAiService()) {
-                case OPEN_AI -> new OpenAiChatModel(openAiApi);
-                case PERPLEXITY -> new OpenAiChatModel(perplexityApi);
-                default -> throw new IllegalArgumentException("Unexpected value: " + promptConfig.getAiService());
-            };
-            models.put(promptConfig.getKey(), model);
-        }
     }
 
     /**
@@ -503,13 +491,75 @@ public class PromptService implements HealthIndicator {
      */
     @Override
     public Health health() {
-        if (genAiConfig.getOpenaiApiKey() == null || genAiConfig.getOpenaiApiKey().isBlank() ||
-            genAiConfig.getPerplexityApiKey() == null || genAiConfig.getPerplexityApiKey().isBlank()) {
+        if (!hasRequiredKeys()) {
             return Health.down().withDetail("Error", "Missing API keys for external AI services").build();
         }
         if (!externalApiHealthy) {
             return Health.down().withDetail("Error", "Exception encountered during external API call").build();
         }
         return Health.up().build();
+    }
+
+    private boolean hasRequiredKeys() {
+        for (PromptConfig promptConfig : prompts.values()) {
+            if (promptConfig.getAiService() == null) {
+                continue;
+            }
+            switch (promptConfig.getAiService()) {
+                case OPEN_AI -> {
+                    if (!StringUtils.hasText(genAiConfig.getOpenaiApiKey())) {
+                        return false;
+                    }
+                }
+                case PERPLEXITY -> {
+                    if (!StringUtils.hasText(genAiConfig.getPerplexityApiKey())) {
+                        return false;
+                    }
+                }
+                case GEMINI -> {
+                    if (!StringUtils.hasText(genAiConfig.getGeminiApiKey())) {
+                        return false;
+                    }
+                }
+                default -> {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private String repairJson(String promptKey, String raw, String jsonSchema, PromptConfig promptConfig)
+            throws SerialisationException {
+        String systemPrompt = "You are a JSON repair assistant. Return only valid JSON.";
+        if (StringUtils.hasText(jsonSchema)) {
+            systemPrompt += "\n\nEnsure the output matches this schema:\n" + jsonSchema;
+        }
+        String userPrompt = "Repair the following JSON response to be valid and match the schema.\n\n" + raw;
+        ProviderRequest repairRequest = new ProviderRequest(
+                promptKey + "-repair",
+                systemPrompt,
+                userPrompt,
+                promptConfig.getOptions(),
+                RetrievalMode.EXTERNAL_SOURCES,
+                jsonSchema,
+                false,
+                promptConfig.getProviderOptions()
+        );
+        ProviderResult repairResult = providerRegistry.getProvider(promptConfig.getAiService()).generateText(repairRequest);
+        if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
+            try {
+                File recordDir = new File(genAiConfig.getRecordFolder());
+                if (!recordDir.exists()) {
+                    recordDir.mkdirs();
+                }
+                File responseFile = new File(recordDir, promptKey + "-response-repaired.txt");
+                FileUtils.writeStringToFile(responseFile, repairResult.getContent(), Charset.defaultCharset());
+                logger.info("Recorded repaired prompt response content to file: {}", responseFile.getAbsolutePath());
+            } catch (Exception e) {
+                logger.error("Error recording repaired prompt response for key {}: {}", promptKey, e.getMessage(), e);
+            }
+        }
+        return repairResult.getContent();
     }
 }

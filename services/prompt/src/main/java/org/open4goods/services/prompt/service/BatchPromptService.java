@@ -26,8 +26,6 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -94,6 +92,16 @@ public class BatchPromptService implements HealthIndicator {
      * @throws BatchTokenLimitExceededException if the total estimated tokens exceed the allowed limit.
      */
     public String batchPromptRequest(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds, Class type) {
+        var promptConfig = promptService.getPromptConfig(promptKey);
+        if (promptConfig == null) {
+            throw new IllegalStateException("Prompt config not found for " + promptKey);
+        }
+        if (promptConfig.getAiService() != org.open4goods.services.prompt.config.GenAiServiceType.OPEN_AI) {
+            throw new IllegalStateException("Batch not supported for " + promptConfig.getAiService() + " (phase 1).");
+        }
+        if (promptConfig.getRetrievalMode() == org.open4goods.services.prompt.config.RetrievalMode.MODEL_WEB_SEARCH) {
+            throw new IllegalStateException("Batch not supported for model-native search prompts.");
+        }
         List<BatchRequestEntry> requestEntries = new ArrayList<>();
         int totalEstimatedTokens = 0;
         for (int index = 0; index < variablesList.size(); index++) {
