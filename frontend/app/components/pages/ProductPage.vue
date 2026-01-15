@@ -2251,11 +2251,6 @@ useHead(() => {
     bottom: 1rem;
   }
 }
-  .product-page__fab {
-    right: 1rem;
-    bottom: 1rem;
-  }
-}
 
 .product-page__unrated {
   display: flex;

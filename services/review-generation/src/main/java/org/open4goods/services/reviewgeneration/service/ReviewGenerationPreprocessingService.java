@@ -230,6 +230,12 @@ public class ReviewGenerationPreprocessingService {
 				.filter(attrConf -> !attrConf.getSynonyms().isEmpty())
 				.map(attrConf -> String.format("        - %s (%s)", attrConf.getKey(), attrConf.getName().get("fr")))
 				.collect(Collectors.joining("\n"));
+        // Initialize standard variables to avoid NPE in template and service
+        promptVariables.put("sources", new HashMap<>());
+        promptVariables.put("tokens", new HashMap<>());
+        promptVariables.put("TOTAL_TOKENS", 0);
+        promptVariables.put("SOURCE_TOKENS", new HashMap<>());
+
 		promptVariables.put("ATTRIBUTES", attributesList);
 		return promptVariables;
 	}

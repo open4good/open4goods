@@ -442,10 +442,24 @@ const i18n = createI18n({
             empty:
               'No detailed specifications are available for this product yet.',
             noResults: 'No specifications match your search.',
+            viewTable: 'Table view',
+            viewCards: 'Card view',
+            tooltips: {
+              viewTable: 'Switch to table view',
+              viewCards: 'Switch to card view',
+            },
+            columns: {
+              group: 'Category',
+              count: 'Count',
+            },
           },
           sourcing: {
             bestValue: 'Best value',
             description: 'Details provided by our trusted data sources.',
+            sourceCount: {
+              one: '1 source',
+              other: '{count} sources',
+            },
             columns: {
               source: 'Source',
               value: 'Value',
