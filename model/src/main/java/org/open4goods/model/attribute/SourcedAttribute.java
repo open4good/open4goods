@@ -4,6 +4,7 @@ public class SourcedAttribute {
 
 	private String dataSourcename;
 	private String value;
+	private String cleanedValue;
 	private String language;
 	private Integer icecatTaxonomyId;
 	private String name;
@@ -70,6 +71,14 @@ public class SourcedAttribute {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getCleanedValue() {
+		return cleanedValue;
+	}
+
+	public void setCleanedValue(String cleanedValue) {
+		this.cleanedValue = cleanedValue;
 	}
 
 }

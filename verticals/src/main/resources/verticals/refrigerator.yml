@@ -50,8 +50,10 @@ genAiConfig:
 # Scores from _default.yml are merged
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
   - WEIGHT
   - WARRANTY
+  - REPAIRABILITY_INDEX
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -93,7 +95,7 @@ i18n:
 
   en:
     url:
-      prefix: "|| refrigerators | fridges ||"
+      prefix: "|| refrigerator | fridge ||"
       attrs:
         - BRAND
         - MODEL
@@ -317,7 +319,11 @@ attributesConfig:
     - key: "NOISE_CLASS"
     - key: "INSTALLATION_TYPE"
     - key: "REFRIGERATOR_TYPE"
+    - key: "REPAIRABILITY_INDEX"
     - key: "WARRANTY"
+    - key: "HEIGHT"
+    - key: "WIDTH"
+    - key: "DEPTH"
     - key: "YEAR"
     - key: "COLOR"
     - key: "FEATURES"

@@ -29,7 +29,7 @@ synonyms:
   - "WEIGHT"
   
 parser:
-  clazz: org.open4goods.api.services.aggregation.services.realtime.parser.WeightParser  
+#  clazz: org.open4goods.api.services.aggregation.services.realtime.parser.WeightParser  
   normalize: true
   trim: false
   lowerCase: false

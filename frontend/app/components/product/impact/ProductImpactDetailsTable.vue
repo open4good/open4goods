@@ -559,6 +559,16 @@ const expandScore = (scoreId: string) => {
     if (!expandedSubscores.value.includes(scoreId)) {
       expandedSubscores.value.push(scoreId)
     }
+
+    // Also expand all sibling subscores if the target was the group itself (via navigation anchor assumption) or if we want to be generous
+    // If the input scoreId MATCHES the group ID (which matches foundGroup.id), we should expand ALL subscores
+    if (scoreId === foundGroup.id) {
+      foundGroup.subscores.forEach(s => {
+        if (!expandedSubscores.value.includes(s.id)) {
+          expandedSubscores.value.push(s.id)
+        }
+      })
+    }
   }
 }
 
@@ -600,13 +610,13 @@ watch(
 .impact-details__table :deep(th) {
   font-weight: 600;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .impact-details__table :deep(td) {
   font-weight: 500;
   color: rgb(var(--v-theme-text-neutral-strong));
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .impact-details__indicator {

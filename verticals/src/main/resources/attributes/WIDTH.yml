@@ -1,22 +1,23 @@
-- key: "WIDTH"
-  filteringType: "NUMERIC"
-  unit: "cm"
-  asScore: false
-  faIcon: "mdi-arrow-expand-horizontal"
+key: "WIDTH"
+filteringType: "NUMERIC"
+unit:
+  default: "cm"
+asScore: false
+faIcon: "mdi-arrow-expand-horizontal"
 
-  icecatFeaturesIds:
-    - 1649
-    - 4157
+icecatFeaturesIds:
+  - 1649
+  - 4157
 
-  name:
-    default: "Width"
-    fr: "Largeur"
+name:
+  default: "Width"
+  fr: "Largeur"
 
-  synonyms:
-    all:
-    icecat.biz:
-      - "LARGEUR"
-    rakuten.com:
-      - "LARGEUR"
-    123comparer.fr:
-      - "LARGEUR"
+synonyms:
+  all:
+  icecat.biz:
+    - "LARGEUR"
+  rakuten.com:
+    - "LARGEUR"
+  123comparer.fr:
+    - "LARGEUR"

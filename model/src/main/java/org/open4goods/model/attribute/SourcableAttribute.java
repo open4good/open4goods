@@ -44,14 +44,15 @@ public abstract class SourcableAttribute {
 		Map<String, ValueStats> valueCounter = new HashMap<>();
 
 		for (SourcedAttribute sourcedAttribute : source) {
-			if (StringUtils.isBlank(sourcedAttribute.getValue())) {
+			String valueToUse = sourcedAttribute.getCleanedValue() != null ? sourcedAttribute.getCleanedValue() : sourcedAttribute.getValue();
+			if (StringUtils.isBlank(valueToUse)) {
 				continue;
 			}
 
-			String normalizedValue = normalizeValue(sourcedAttribute.getValue());
+			String normalizedValue = normalizeValue(valueToUse);
 			int priorityIndex = trustedSourcePriorityIndex(sourcedAttribute.getDataSourcename());
 
-			valueCounter.computeIfAbsent(normalizedValue, ignored -> new ValueStats()).accept(priorityIndex, sourcedAttribute.getValue());
+			valueCounter.computeIfAbsent(normalizedValue, ignored -> new ValueStats()).accept(priorityIndex, valueToUse);
 		}
 
 		if (valueCounter.isEmpty()) {
@@ -69,7 +70,7 @@ public abstract class SourcableAttribute {
 	 * @return
 	 */
 	public long ponderedvalues() {
-		return source.stream().map(e -> e.getValue()).distinct().count();
+		return source.stream().map(e -> e.getCleanedValue() != null ? e.getCleanedValue() : e.getValue()).distinct().count();
 	}
 
 	/**
@@ -87,7 +88,7 @@ public abstract class SourcableAttribute {
 	 * @return
 	 */
 	public long distinctValues() {
-		return source.stream().map(e -> e.getValue()).distinct().count();
+		return source.stream().map(e -> e.getCleanedValue() != null ? e.getCleanedValue() : e.getValue()).distinct().count();
 	}
 
 	/**

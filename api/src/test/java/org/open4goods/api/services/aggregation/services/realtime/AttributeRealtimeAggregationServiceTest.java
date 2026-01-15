@@ -14,6 +14,7 @@ import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -77,4 +78,49 @@ class AttributeRealtimeAggregationServiceTest {
                 method.setAccessible(true);
                 method.invoke(service, product, verticalConfig);
         }
+	@Test
+	void testSynonymsResolution() throws Exception {
+		// Arrange
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("ENERGY_CLASS");
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setDeleteTokens(java.util.List.of("CLASSE"));
+		attrConfig.getParser().setNormalize(true);
+		attrConfig.getParser().setTrim(true);
+
+		ProductAttribute attr = new ProductAttribute();
+		attr.setName("ENERGY_CLASS");
+		
+		org.open4goods.model.attribute.SourcedAttribute source1 = new org.open4goods.model.attribute.SourcedAttribute();
+		source1.setDataSourcename("source1");
+		source1.setValue("Classe F");
+		source1.setName("ENERGY_CLASS");
+		
+		org.open4goods.model.attribute.SourcedAttribute source2 = new org.open4goods.model.attribute.SourcedAttribute();
+		source2.setDataSourcename("source2");
+		source2.setValue("F");
+		source2.setName("ENERGY_CLASS");
+		
+		attr.addSourceAttribute(source1);
+		attr.addSourceAttribute(source2);
+		
+		org.open4goods.model.attribute.IndexedAttribute indexedAttr = new org.open4goods.model.attribute.IndexedAttribute("ENERGY_CLASS", "F");
+
+		// Act
+		Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("mergeSourcesAndRefreshValue", org.open4goods.model.attribute.IndexedAttribute.class, ProductAttribute.class, AttributeConfig.class, VerticalConfig.class);
+		method.setAccessible(true);
+		method.invoke(service, indexedAttr, attr, attrConfig, verticalConfig);
+
+		// Assert
+		assertThat(indexedAttr.hasConflicts()).isFalse();
+		assertThat(indexedAttr.distinctValues()).isEqualTo(1);
+		assertThat(indexedAttr.getValue()).isEqualTo("F");
+		
+		// Check that source attributes have cleaned values
+		assertThat(attr.getSource()).anySatisfy(s -> {
+			if (s.getDataSourcename().equals("source1")) {
+				assertThat(s.getCleanedValue()).isEqualTo("F");
+			}
+		});
+	}
 }

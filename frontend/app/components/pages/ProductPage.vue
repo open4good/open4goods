@@ -67,14 +67,24 @@
           />
         </section>
 
-        <v-alert
-          v-else-if="!categoryDetail"
-          type="info"
-          variant="tonal"
-          class="mb-8"
-        >
-          {{ $t('product.uncategorized.noScore') }}
-        </v-alert>
+        <div v-else-if="!categoryDetail" class="product-page__unrated">
+          <div class="product-page__unrated-content">
+            <h3 class="product-page__unrated-title">
+              {{ $t('product.impact.notRated.title') }}
+            </h3>
+            <p class="product-page__unrated-desc">
+              {{ $t('product.impact.notRated.description') }}
+            </p>
+            <NuxtLink
+              :to="methodologyHref"
+              class="product-page__unrated-cta"
+              :aria-label="$t('product.impact.methodologyLinkAria')"
+            >
+              <span>{{ $t('product.impact.methodologyLink') }}</span>
+              <v-icon icon="mdi-arrow-top-right" size="18" />
+            </NuxtLink>
+          </div>
+        </div>
 
         <section
           v-if="showAiReviewSection"
@@ -204,6 +214,7 @@ import {
 } from '~~/shared/api-client'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import TopBanner from '~/components/shared/ui/TopBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
@@ -564,6 +575,18 @@ const normalizedVerticalTitle = computed(() => {
 
     return title.toLowerCase()
   }
+})
+
+const methodologyHref = computed(() => {
+  const raw = verticalHomeUrl.value
+  if (raw) {
+    const sanitized = raw.replace(/^\/+/, '').replace(/\/+$/, '')
+    if (sanitized.length) {
+      return `/${sanitized}/ecoscore`
+    }
+  }
+
+  return resolveLocalizedRoutePath('impact-score', locale.value)
 })
 
 const BRAND_FILTER_FIELD = 'attributes.referentielAttributes.BRAND' as const
@@ -2227,5 +2250,71 @@ useHead(() => {
     right: 1rem;
     bottom: 1rem;
   }
+}
+  .product-page__fab {
+    right: 1rem;
+    bottom: 1rem;
+  }
+}
+
+.product-page__unrated {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  border-radius: 26px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-primary-100), 0.95),
+    rgba(var(--v-theme-surface-glass-strong), 0.9)
+  );
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.12);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.product-page__unrated-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.product-page__unrated-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.product-page__unrated-desc {
+  font-size: 1rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  margin: 0;
+}
+
+.product-page__unrated-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-surface-default), 0.9);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.product-page__unrated-cta:hover,
+.product-page__unrated-cta:focus-visible {
+  transform: translateY(-2px);
+  background: rgba(var(--v-theme-surface-default), 1);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
 }
 </style>

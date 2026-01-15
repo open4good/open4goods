@@ -147,7 +147,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 					}
 
-					mergeSourcesAndRefreshValue(indexedAttr, attr, attrConfig);
+					mergeSourcesAndRefreshValue(indexedAttr, attr, attrConfig, vConf);
 					indexed.put(attrConfig.getKey(), indexedAttr);
 
 				} catch (Exception e) {
@@ -168,7 +168,17 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	private void mergeSourcesAndRefreshValue(IndexedAttribute indexedAttr, ProductAttribute attr,
-			AttributeConfig attrConf) throws ValidationException {
+			AttributeConfig attrConf, VerticalConfig vConf) throws ValidationException {
+		
+		for (org.open4goods.model.attribute.SourcedAttribute source : attr.getSource()) {
+			try {
+				String parsed = parseValue(source.getValue(), attrConf, vConf);
+				source.setCleanedValue(parsed);
+			} catch (ValidationException e) {
+				dedicatedLogger.warn("Failed to parse source value {} for attribute {}", source.getValue(), attrConf.getKey());
+			}
+		}
+		
 		indexedAttr.getSource().addAll(attr.getSource());
 
 		String bestValue = indexedAttr.bestValue();
@@ -647,7 +657,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	public String parseAttributeValue(final ProductAttribute attr, final AttributeConfig attrConf, VerticalConfig vConf)
 			throws ValidationException {
 
-		String string = attr.getValue();
+		return parseValue(attr.getValue(), attrConf, vConf);
+
+	}
+
+	public String parseValue(final String rawValue, final AttributeConfig attrConf, VerticalConfig vConf)
+			throws ValidationException {
+
+		String string = rawValue;
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
@@ -736,7 +753,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (!StringUtils.isEmpty(attrConf.getParser().getClazz())) {
 			try {
 				final AttributeParser parser = attrConf.getParserInstance();
-				string = parser.parse(attr, attrConf, vConf);
+				string = parser.parse(rawValue, attrConf, vConf);
 			} catch (final ResourceNotFoundException e) {
 				dedicatedLogger.warn("Error while applying specific parser for {}", attrConf.getParser().getClazz(), e);
 				throw new ValidationException(e.getMessage());

@@ -35,6 +35,7 @@ class ReviewGenerationServiceTest {
     @Mock private PromptService genAiService;
     @Mock private BatchPromptService batchAiService;
     @Mock private ProductRepository productRepository;
+    @Mock private ReviewGenerationPreprocessingService preprocessingService;
     private MeterRegistry meterRegistry;
 
     @BeforeEach
@@ -53,7 +54,8 @@ class ReviewGenerationServiceTest {
                 genAiService,
                 batchAiService,
                 meterRegistry,
-                productRepository
+                productRepository,
+                preprocessingService
         );
     }
 
