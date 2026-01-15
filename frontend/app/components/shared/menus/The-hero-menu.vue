@@ -551,8 +551,10 @@
             variant="text"
             data-testid="hero-account-menu-activator-guest"
           >
-            <v-icon icon="mdi-incognito" />
-            <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" end />
+            <span class="account-menu-activator__guest-icons">
+              <v-icon icon="mdi-incognito" />
+              <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" />
+            </span>
           </v-btn>
         </template>
 
@@ -1676,6 +1678,11 @@ const isMenuItemActive = (item: MenuItem): boolean => {
   .account-username
     max-width: 140px
     display: inline-block
+
+  &__guest-icons
+    display: inline-flex
+    align-items: center
+    gap: 0.2rem
 
 .account-menu
   background-color: rgb(var(--v-theme-surface-default))

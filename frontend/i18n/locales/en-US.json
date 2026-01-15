@@ -2741,10 +2741,26 @@
         "privacy": {
           "title": "Privacy-first session",
           "subtitle": "We keep Nudger transparent: you decide what stays on your device.",
+          "hero": {
+            "title": "We respect your data",
+            "subtitle": "Nudger collects no personal data."
+          },
+          "sections": {
+            "remote": "Remote data",
+            "local": "Local data"
+          },
           "ip": {
             "title": "Your IP address",
             "description": "We only use it for technical and security needs on our servers.",
             "unavailable": "Unavailable"
+          },
+          "userAgent": {
+            "label": "User agent",
+            "unavailable": "Unavailable"
+          },
+          "technicalOnly": {
+            "label": "Only data collected",
+            "tooltip": "Only technical data, no personal data."
           },
           "cookies": {
             "title": "Cookies on this device",
@@ -2757,7 +2773,22 @@
             "description": "Stored keys: {count}. These remain only in your browser.",
             "empty": "No local storage entries yet.",
             "resetCta": "Reset local storage"
-          }
+          },
+          "quotas": {
+            "title": "Quotas & Activity",
+            "aiRemaining": "AI generations remaining",
+            "aiRemainingTooltip": "Nudger lets you generate powerful AI summaries shared with everyone.",
+            "votesRemaining": "Votes remaining"
+          },
+          "ctas": {
+            "openSource": "Open source",
+            "dataPrivacy": "Personal data"
+          },
+          "compare": {
+            "count": "{count} product in the comparator | {count} products in the comparator",
+            "cta": "Compare"
+          },
+          "cardTitle": "Account & Privacy"
         }
       },
       "productsMenu": {
