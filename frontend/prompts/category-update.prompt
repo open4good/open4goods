@@ -16,10 +16,25 @@ You will update the vertical
 Generate or update attributes definitions (reuse existing ones if possible, but you can create new definitions in /verticals/src/main/resources/attributes/*). Only for attributes specific to the category,  and having a correct coverage
 
 
-As input data, you will have :
-> The coverage of attributes
+As input data, you have access to : 
+
+
+
 > The sample files
 > Existing attributes  (/open4goods/verticals/src/main/resources/attributes)
+
+And also, live datas provided through the local api
+API on localhost, to fetch the following datas :
+
+> The coverage of attributes
+
+curl -X 'GET' \
+  'http://localhost:8081/update/tv/attributes/?minCoverage=5' \
+  -H 'accept: */*' \
+  -H 'Authorization: open4goods'
+   
+  
+  
 
 ## Task 3 - impactScore participants
 

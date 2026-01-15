@@ -4,10 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -135,6 +141,45 @@ class VerticalsGenerationServiceTest {
         // Verify
         assertThat(result).contains("SCORE_1=0.3");
         assertThat(result).contains("SCORE_2=0.7");
+    }
+
+    @Test
+    void updateVerticalFileWithCategoriesHandlesEndOfFile(@TempDir java.nio.file.Path tempDir) throws Exception {
+        // Setup
+        String verticalId = "test-vertical";
+        File tempFile = tempDir.resolve(verticalId + ".yml").toFile();
+        String initialContent = "id: " + verticalId + "\nmatchingCategories:\n  all: []";
+        FileUtils.writeStringToFile(tempFile, initialContent, Charset.defaultCharset());
+
+        VerticalConfig vConf = verticalConfig(verticalId);
+        VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
+        when(verticalsConfigService.getConfigById(verticalId)).thenReturn(vConf);
+
+        ProductRepository repository = mock(ProductRepository.class);
+        when(repository.exportVerticalWithOffersCountGreater(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt()))
+            .thenReturn(Stream.empty());
+
+        SerialisationService serialisationService = mock(SerialisationService.class);
+        when(serialisationService.toYaml(org.mockito.ArgumentMatchers.anyMap())).thenReturn("matchingCategories:\n  all: [\"NEW_CAT\"]\n");
+
+        VerticalsGenerationService service = new VerticalsGenerationService(
+                new VerticalsGenerationConfig(),
+                repository,
+                serialisationService,
+                mock(GoogleTaxonomyService.class),
+                verticalsConfigService,
+                mock(ResourcePatternResolver.class),
+                mock(EvaluationService.class),
+                mock(IcecatService.class),
+                mock(PromptService.class));
+
+        // Execute
+        String result = service.updateVerticalFileWithCategories(1, tempFile.getAbsolutePath());
+
+        // Verify
+        assertThat(result).isEqualTo("id: test-vertical\nmatchingCategories:\n  all: [\"NEW_CAT\"]\n");
+        String fileContent = FileUtils.readFileToString(tempFile, Charset.defaultCharset());
+        assertThat(fileContent).isEqualTo(result);
     }
 
     private VerticalConfig verticalConfig(String id) {

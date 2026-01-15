@@ -266,7 +266,11 @@ public class VerticalsGenerationService {
 			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
 
 			int startIndex = originalContent.indexOf("matchingCategories:");
+
 			int endIndex = originalContent.indexOf("\n\n", startIndex);
+			if (endIndex == -1) {
+				endIndex = originalContent.length();
+			}
 
 			String newContent = originalContent.substring(0, startIndex);
 			newContent += generateMapping(vc, minOffers);
@@ -633,11 +637,8 @@ public class VerticalsGenerationService {
 
 				}
 
-			}
-
-			// Adding icecatIds
-			if (null != icecatIds) {
-
+			} else {
+				context.put("icecatIds", "TODO");
 			}
 
 			context.put("default_name",default_name);
