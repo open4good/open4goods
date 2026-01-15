@@ -49,12 +49,12 @@ public class AiReview {
 
     /** The technical review of the product. */
     @JsonProperty(required = true, value = "technicalReview")
-    @AiGeneratedField(instruction = "Revue technique approfondie du produit, uniquement basée sur le contenu des pages webs fournies.")
+    @AiGeneratedField(instruction = "Revue technique approfondie du produit, axée sur les performances et les matériaux, uniquement basée sur le contenu des pages webs fournies.")
     private String technicalReview;
 
     /** The ecological review of the product. */
     @JsonProperty(required = true, value = "ecologicalReview")
-    @AiGeneratedField(instruction = "Revue écologique du produit")
+    @AiGeneratedField(instruction = "Revue écologique du produit, incluant réparabilité, durabilité, efficacité énergétique")
     private String ecologicalReview;
 
     /** A summary of the product review. */

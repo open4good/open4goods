@@ -5,8 +5,6 @@ import { h, ref } from 'vue'
 
 const useFullPageMock = vi.hoisted(() => vi.fn())
 
-vi.mock('~/assets/css/text-content.css', () => ({}))
-
 vi.mock('~/composables/cms/useFullPage', () => ({
   useFullPage: useFullPageMock,
 }))

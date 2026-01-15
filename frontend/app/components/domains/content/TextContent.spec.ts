@@ -19,8 +19,6 @@ const authState = {
 
 let runtimeConfig: { public: { editRoles: string[] } }
 
-vi.mock('~/assets/css/text-content.css', () => ({}))
-
 vi.mock('~/composables/content/useContentBloc', () => ({
   useContentBloc: useContentBlocMock,
 }))

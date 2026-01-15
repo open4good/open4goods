@@ -7,7 +7,6 @@ import {
   DEFAULT_LOREM_LENGTH,
   _generateLoremIpsum,
 } from '~/utils/content/_loremIpsum'
-import '~/assets/css/text-content.css'
 
 // Props
 

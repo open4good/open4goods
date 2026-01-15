@@ -13,7 +13,7 @@ const messages: Record<string, unknown> = {
   'product.navigation.alternatives': 'Alternatives',
   'product.navigation.attributes': 'Attributes',
   'product.navigation.docs': 'Documentation',
-  'product.uncategorized.noScore': "Pas d'évaluation sur ce produit !",
+  'product.uncategorized.noScore': 'Non encore évalué',
   'product.impact.alternatives.title': 'Alternatives',
   'product.nudge.fabLabel': 'Open nudge',
   'product.nudge.fabAriaLabel': 'Open nudge aria',

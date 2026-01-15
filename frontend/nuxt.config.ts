@@ -8,7 +8,6 @@ import type { ManifestOptions } from 'vite-plugin-pwa'
 import VueDevTools from 'vite-plugin-vue-devtools'
 import { VueMcp } from 'vite-plugin-vue-mcp'
 
-import xwikiSandboxPrefixerOptions from './config/postcss/xwiki-sandbox-prefixer-options.js'
 import {
   DEFAULT_NUXT_LOCALE,
   buildI18nLocaleDomains,
@@ -395,15 +394,6 @@ export default defineNuxtConfig({
         sitemapName: `${APP_ROUTES_SITEMAP_KEY}.xml`,
         includeAppSources: true,
         exclude: ['/offline', '/share/callback'],
-      },
-    },
-  },
-
-  postcss: {
-    plugins: {
-      'postcss-prefix-selector': {
-        includeFiles: [/\/assets\/css\/bootstrap\.css$/i],
-        ...xwikiSandboxPrefixerOptions,
       },
     },
   },

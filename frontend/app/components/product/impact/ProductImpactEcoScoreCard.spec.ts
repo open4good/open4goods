@@ -15,6 +15,11 @@ describe('ProductImpactEcoScoreCard', () => {
           impact: {
             absoluteValue: 'Absolute value',
             noPrimaryScore: 'No score',
+            notRated: {
+              title: 'No score',
+              description:
+                "We don't have enough data to calculate an impact score for this product yet.",
+            },
             methodologyLink: 'Access the methodology',
             methodologyLinkAria: 'Open the Impact Score methodology',
             showVirtualScores: 'Show virtual scores',

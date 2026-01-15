@@ -2487,6 +2487,10 @@
       "explanationTitle": "How to interpret this indicator",
       "detailsTitle": "Assessment details",
       "noPrimaryScore": "Impact score unavailable",
+      "notRated": {
+        "title": "No score",
+        "description": "We don't have enough data to calculate an impact score for this product yet."
+      },
       "noDetailsAvailable": "No details are available for this assessment yet.",
       "methodologyLink": "Access the methodology",
       "methodologyLinkAria": "Open the Impact Score methodology",
