@@ -32,13 +32,17 @@ const { t } = useI18n()
           sm="6"
           lg="4"
         >
-          <v-card class="home-features__card" variant="flat">
-            <v-icon
-              class="home-features__icon"
-              :icon="feature.icon"
-              size="36"
-            />
-            <h3 class="home-features__card-title">{{ feature.title }}</h3>
+          <v-card class="home-features__card card__nudger" variant="flat">
+            <div class="text-center">
+              <v-icon
+                class="home-features__icon"
+                :icon="feature.icon"
+                size="100"
+              />
+            </div>
+            <h3 class="home-hero__subtitle home-features__card-title">
+              {{ feature.title }}
+            </h3>
             <p class="home-features__card-description">
               {{ feature.description }}
             </p>
@@ -71,18 +75,15 @@ const { t } = useI18n()
   --v-gutter-y: clamp(1.5rem, 4vw, 2.5rem)
 
 .home-features__card
-  height: 100%
-  display: flex
-  flex-direction: column
-  gap: 1rem
-  padding: clamp(1.75rem, 4vw, 2.25rem)
-  border-radius: clamp(1.25rem, 3vw, 1.75rem)
-  background: rgba(var(--v-theme-surface-glass-strong), 0.9)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
-  box-shadow: 0 16px 28px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 16px 28px rgba(var(--v-theme-shadow-primary-600), 0.12);
 
 .home-features__icon
-  color: rgba(var(--v-theme-hero-gradient-start), 0.9)
+  color: rgb(var(--v-theme-secondary));
+  text-align: center;
 
 .home-features__card-title
   margin: 0
