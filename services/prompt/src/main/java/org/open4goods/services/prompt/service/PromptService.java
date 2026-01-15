@@ -55,7 +55,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class PromptService implements HealthIndicator {
 
     private static final Logger logger = LoggerFactory.getLogger(PromptService.class);
-    
+
     private static final String INSTRUCTION_HEADER_FR = "\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
 
     /**
@@ -322,6 +322,10 @@ public class PromptService implements HealthIndicator {
         logger.info("Deducted json schema for prompt {} with type {} is {}", promptKey, type, jsonSchema);
 
        Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
+
+       if (null == instructions || instructions.size() == 0) {
+    	   logger.error("Error while retrieving AifieldScanner instructions");
+       }
 
 
         PromptResponse<CallResponseSpec> nativ = promptNativ(promptKey, variables, jsonSchema, instructions);

@@ -252,7 +252,6 @@ import {
   defineAsyncComponent,
   onMounted,
   onBeforeUnmount,
-  reactive,
   ref,
   useAttrs,
   watch,
@@ -327,7 +326,6 @@ const isMobile = computed(() => display.smAndDown.value)
 
 const internalSearch = ref(props.modelValue ?? '')
 const lastCommittedValue = ref(internalSearch.value)
-// const selectedItem = ref<SuggestionItem | null>(null) // Removed, we handle selection manually
 const loading = ref(false)
 const hasError = ref(false)
 const categories = ref<CategorySuggestionItem[]>([])

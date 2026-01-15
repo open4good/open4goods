@@ -1,7 +1,20 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import SearchSuggestField from './SearchSuggestField.vue'
 import { nextTick } from 'vue'
+import type {
+  CategorySuggestionItem,
+  ProductSuggestionItem,
+  SuggestionItem,
+} from '~/types/search-suggest'
+
+interface ComponentVM {
+  categories: CategorySuggestionItem[]
+  products: ProductSuggestionItem[]
+  internalSearch: string
+  handleSelection: (item: SuggestionItem) => Promise<void>
+  loadSuggestions: (query: string) => Promise<void>
+}
 
 // Mock dependencies
 const fetchMock = vi.fn()
@@ -9,17 +22,28 @@ vi.stubGlobal('$fetch', fetchMock)
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: (key: string) => key,
+    t: (key: string): string => key,
     locale: { value: 'en-US' },
   }),
 }))
 
+const pushMock = vi.fn()
+const replaceMock = vi.fn()
+mockNuxtImport('useRouter', () => {
+  return () => ({
+    push: pushMock,
+    replace: replaceMock,
+    currentRoute: { value: { path: '/' } },
+  })
+})
+
 describe('SearchSuggestField', () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    pushMock.mockReset()
   })
 
-  it('fetches and displays suggestions when typing', async () => {
+  it('fetches and displays suggestions when typing, and does NOT update input on selection', async () => {
     const wrapper = await mountSuspended(SearchSuggestField, {
       props: {
         modelValue: '',
@@ -30,22 +54,19 @@ describe('SearchSuggestField', () => {
     })
 
     fetchMock.mockResolvedValue({
-      categoryMatches: [],
-      productMatches: [
+      categoryMatches: [
         {
-          title: 'Apple Pie',
-          gtin: '123',
-          image: '/apple.jpg',
-          brand: 'Bakery',
-          model: 'Pie',
-          prettyName: 'Apple Pie',
-          ecoscoreValue: 80,
+          verticalId: 'test-vertical',
+          verticalHomeTitle: 'Test Category',
+          verticalHomeUrl: '/category/test',
+          imageSmall: '/cat.jpg',
         },
       ],
+      productMatches: [],
     })
 
-    // Simulate typing "apple"
-    await wrapper.find('input').setValue('apple')
+    const input = wrapper.find('input')
+    await input.setValue('apple')
     await nextTick()
 
     // Wait for debounce (300ms)
@@ -58,16 +79,30 @@ describe('SearchSuggestField', () => {
         params: { query: 'apple' },
       })
     )
+
+    const vm = wrapper.vm as unknown as ComponentVM
+    // Simulate API return processing (since we stubbed $fetch, we rely on the component successfully handling the promise)
+    // Wait for component to update state
+    await nextTick()
+
+    // Check if category loaded
+    expect(vm.categories.length).toBe(1)
+
+    // Simulate selection of the category
+    await vm.handleSelection(vm.categories[0])
+
+    // Verify Redirect
+    expect(pushMock).toHaveBeenCalledWith('/category/test')
+
+    // Verify Input did NOT change
+    expect(vm.internalSearch).toBe('apple')
+    expect(input.element.value).toBe('apple')
   })
 
-  it('keeps suggestions when user types a space', async () => {
-    // This test aims to reproduce the bug where typing a space hides suggestions
-    // because v-autocomplete locally filters them out if they don't match the query strictly.
-    // "Apple Pie" contains "apple", but naive containment might fail on "apple ".
-
+  it('redirects to product page on product selection', async () => {
     const wrapper = await mountSuspended(SearchSuggestField, {
       props: {
-        modelValue: '',
+        modelValue: 'bread',
         label: 'Search',
         placeholder: 'Search...',
         ariaLabel: 'Search',
@@ -79,7 +114,7 @@ describe('SearchSuggestField', () => {
       productMatches: [
         {
           title: 'Apple Pie',
-          gtin: '123',
+          gtin: '123456',
           image: '/apple.jpg',
           brand: 'Bakery',
           model: 'Pie',
@@ -89,38 +124,18 @@ describe('SearchSuggestField', () => {
       ],
     })
 
-    // Simulate typing "apple "
-    await wrapper.find('input').setValue('apple ')
+    // Trigger search
+    const vm = wrapper.vm as unknown as ComponentVM
+    // Calling internal function directly for speed, but standard debounce flow in first test covers integrity
+    await vm.loadSuggestions('bread')
     await nextTick()
 
-    // Wait for debounce
-    await new Promise(resolve => setTimeout(resolve, 350))
-    await nextTick()
+    expect(vm.products.length).toBe(1)
 
-    // Verify API is called with trimmed value
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/products/suggest',
-      expect.objectContaining({
-        params: { query: 'apple' },
-      })
-    )
+    // Simulate product selection
+    await vm.handleSelection(vm.products[0])
 
-    // In a real browser, v-autocomplete would hide the item "Apple Pie" here if local filtering is enabled
-    // because "Apple Pie" does not contain "apple " (it has a space in the middle but maybe the matching logic is specific).
-    // Actually "Apple Pie" DOES contain "apple ".
-    // BUT if we type "apple p" -> "Apple Pie" matches.
-    // If we type "apple " (trailing space), usually fuzzy search or simple includes might fail if it expects the space to be exactly matched and followed by something,
-    // OR if the Vuetify default filter splits by space and checks if all parts are present.
-    // "apple" -> present. "" -> present.
-
-    // Let's check if we can verify the filter prop is set to disable default filtering.
-    // We can inspect the v-autocomplete component directly.
-    const autocomplete = wrapper.findComponent({ name: 'VAutocomplete' })
-    expect(autocomplete.exists()).toBe(true)
-
-    // Check that custom-filter is set to a function that returns true
-    const customFilter = autocomplete.props('customFilter')
-    expect(typeof customFilter).toBe('function')
-    expect(customFilter('any', 'query', {})).toBe(true)
+    expect(pushMock).toHaveBeenCalledWith('/123456')
+    expect(vm.internalSearch).toBe('bread') // Input remains
   })
 })

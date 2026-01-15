@@ -290,11 +290,11 @@ public class VerticalsGenerationService {
 			String verticalId = file.getName().substring(0, file.getName().length()-4);
 			VerticalConfig vc = verticalConfigservice.getConfigById(verticalId);
 			if (vc == null) {
-				return "Error: Vertical not found for id " + verticalId; 
+				return "Error: Vertical not found for id " + verticalId;
 			}
-			
+
 			LOGGER.warn("Will update {} with impactscore", file.getName());
-			
+
 			String newContent = generateEcoscoreYamlConfig(vc);
 			if (newContent == null) {
 				return "Error: Failed to generate impact score config";
@@ -403,7 +403,7 @@ public class VerticalsGenerationService {
 			if (!exclusions.contains(cat.getKey())) {
 				boolean isKnown = knownAttributes.contains(cat.getKey());
 				int coveragePercent = Double.valueOf(cat.getValue().getHits() / Double.valueOf(totalItems) * 100.0).intValue();
-				
+
 				if (isKnown || coveragePercent > minCoverage) {
 					LOGGER.info("Generating template for attribute : {} (Known: {}, Coverage: {}%)", cat.getKey(), isKnown, coveragePercent);
 					// TODO(conf,p2) : numberofsamples from conf
@@ -525,6 +525,8 @@ public class VerticalsGenerationService {
 		try {
 			Map<String, Object> context = new HashMap<String, Object>();
 
+			// TODO : Enforce, log
+
 			context.put("AVAILABLE_CRITERIAS", getCriterias(vConf));
 			context.put("VERTICAL_NAME", vConf.getI18n().get("fr").getVerticalHomeTitle());
 
@@ -533,7 +535,7 @@ public class VerticalsGenerationService {
 
 			ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
 			impactScoreConfig.setAiResult(response.getBody());
-			
+
 			// Legacy mapping
 			Map<String, Double> criteriasPonderation = new HashMap<>();
 			if (response.getBody() != null && response.getBody().getCriteriaWeights() != null) {
