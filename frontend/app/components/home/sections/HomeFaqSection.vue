@@ -59,7 +59,7 @@ const sanitize = (content: string) => DOMPurify.sanitize(content)
                 class="home-faq__cta-wrapper"
               >
                 <v-btn
-                  class="home-faq__cta"
+                  class="home-faq__cta nudger_degrade-defaut"
                   color="primary"
                   variant="tonal"
                   :to="impactScorePath"
@@ -77,57 +77,43 @@ const sanitize = (content: string) => DOMPurify.sanitize(content)
 </template>
 
 <style scoped lang="sass">
-.home-section
-  padding-block: clamp(1.5rem, 3vw, 2.75rem)
-  background: rgb(var(--v-theme-surface-default))
+  .home-section
+    padding-block: clamp(1.5rem, 3vw, 2.75rem)
+    background: rgb(var(--v-theme-surface-default))
 
-.home-section__container
-  padding-inline: 0
+  .home-section__container
+    padding-inline: 0
 
-.home-section__inner
-  max-width: 1180px
-  margin: 0 auto
-  display: flex
-  flex-direction: column
-  gap: clamp(0.875rem, 2vw, 1.5rem)
+  .home-section__inner
+    max-width: 1180px
+    margin: 0 auto
+    display: flex
+    flex-direction: column
+    gap: clamp(0.875rem, 2vw, 1.25rem);
 
-.home-section__header
-  max-width: 760px
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
+  .home-section__header
+    max-width: 760px
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
 
-.home-section__subtitle
-  margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
-
-.home-faq__panels
-  border-radius: clamp(1.25rem, 3vw, 1.75rem)
-  overflow: hidden
-  border: 1px solid rgb(var(--v-theme-primary))
-
-.home-faq__panel-title
-  font-weight: 600
-  font-size: 1.05rem
-
-.home-faq__panel-text
-  background: rgb(var(--v-theme-surface-default))
-
-.home-faq__answer
-  padding-block: 0.5rem
-  text-align: left
-  margin-left: 1.25rem
-  gap: 0.375rem
-  color: rgb(var(--v-theme-text-neutral-secondary))
-
-  ul
-    padding-left: 2.25rem
+  .home-section__subtitle
     margin: 0
+    color: rgb(var(--v-theme-text-neutral-secondary))
 
-.home-faq__cta-wrapper
-  margin-top: 0.5rem
+  .home-faq__panels
+    border-radius: clamp(1.25rem, 3vw, 1.75rem)
+    overflow: hidden
+    border: 1px solid rgb(var(--v-theme-primary))
 
-.home-faq__cta
-  width: fit-content
-  font-weight: 600
+  .home-faq__panel-title
+    font-weight: 600
+    font-size: 1.05rem
+
+  .home-faq__panel-text
+    //background: rgba(var(--v-theme-surface-primary-080), 0.4)
+    background: rgb(var(--v-theme-surface-default))
+
+  .home-faq__text-content
+    padding-block: 0.5rem
 </style>

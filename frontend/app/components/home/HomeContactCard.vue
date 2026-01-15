@@ -89,6 +89,7 @@ const handleContactRedirect = () => {
             <v-btn
               type="submit"
               color="primary"
+              class="nudger_degrade-defaut"
               size="large"
               prepend-icon="mdi-arrow-right"
               block

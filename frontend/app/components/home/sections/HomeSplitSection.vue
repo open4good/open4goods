@@ -129,73 +129,71 @@ const sectionClasses = computed(() => [
 </template>
 
 <style scoped lang="sass">
-.home-section
-  padding-block: clamp(1.5rem, 3vw, 2.75rem)
-  background: rgb(var(--v-theme-surface-default))
+  .home-section
+    padding-block: clamp(1.5rem, 3vw, 2.75rem)
+    background: rgb(var(--v-theme-surface-default))
 
-.home-section__container
-  padding-inline: clamp(1.5rem, 5vw, 4rem)
+  .home-section__container
+    padding-inline: clamp(1.5rem, 5vw, 4rem)
 
-.home-hero__subtitle
-  text-align: left
+  .home-hero__subtitle
+    text-align: left
 
-.home-section__inner
-  max-width: 1180px
-  margin: 0 auto
-  display: flex
-  flex-direction: column
-  gap: clamp(2rem, 5vw, 3.25rem)
+  .home-section__inner
+    max-width: 1180px
+    margin: 0 auto
+    display: flex
+    flex-direction: column
+    gap: clamp(2rem, 5vw, 3.25rem)
 
-.home-section__header
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
+  .home-section__header
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
 
-.home-section__subtitle
-  margin: 0
-  color: rgb(var(--v-theme-text-neutral-secondary))
+  .home-section__subtitle
+    margin: 0
+    color: rgb(var(--v-theme-text-neutral-secondary))
 
-.home-section__body
-  display: flex
-  flex-direction: column
-  gap: clamp(1.5rem, 4vw, 2.5rem)
+  .home-section__body
+    display: flex
+    flex-direction: column
+    gap: clamp(1.5rem, 4vw, 2.5rem)
 
-.home-split__content
-  row-gap: clamp(2rem, 5vw, 3rem)
-  //background: rgb(var(--v-theme-hero-overlay-strong))
+  .home-split__content
+    row-gap: clamp(2rem, 5vw, 3rem)
+    //background: rgb(var(--v-theme-hero-overlay-strong))
 
-.home-split__col--copy
-  display: flex
-  flex-direction: column
-  gap: clamp(0.875rem, 2vw, 1.25rem)
+  .home-split__col--copy
+    display: flex
+    flex-direction: column
+    gap: clamp(0.875rem, 2vw, 1.25rem)
 
-.home-split__col--visual
-  display: flex
-  justify-content: center
-  position: relative
-
-.home-split__visual
-  position: relative
-  width: min(100%, 460px)
-  display: flex
-  justify-content: center
-  align-items: center
-
-.home-split__image
-  position: relative
-  z-index: 1
-  width: min(66%, 320px)
-  height: auto
-  display: block
-  margin-inline: auto
-
-.home-split__image--gain
-  transform: rotate(8deg)
-
-.home-split--visual-left .home-split__col--visual
-  order: -1
-
-@media (max-width: 959px)
   .home-split__col--visual
+    display: flex
+    justify-content: center
+    position: sticky;
+    top: 64px // hauteur header menu
+
+  .home-split__visual
+    position: relative
+    width: min(100%, 460px)
+    display: flex
+    justify-content: center
+    align-items: center
+
+  .home-split__image
+    position: relative
+    z-index: 1
+    width: min(66%, 320px)
+    height: auto
+    display: block
+    margin-inline: auto
+
+  .home-split--visual-left .home-split__col--visual
     order: -1
+
+  @media (max-width: 959px)
+    .home-split__col--visual
+      order: -1
 </style>
