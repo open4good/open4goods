@@ -8,31 +8,62 @@
         </p>
       </header>
 
-      <article
-        :id="jsonSectionId"
-        class="product-admin__block"
-        role="region"
-        :aria-label="$t('product.admin.sections.productJson.title')"
-      >
-        <header class="product-admin__block-header">
-          <h3 class="product-admin__block-title">
-            {{ $t('product.admin.sections.productJson.title') }}
-          </h3>
-          <p class="product-admin__block-helper">
-            {{ $t('product.admin.sections.productJson.helper') }}
-          </p>
-        </header>
-        <!-- eslint-disable vue/no-v-html -->
-        <pre class="product-admin__code" aria-live="polite">
-          <code
-            v-if="highlightedJson"
-            class="hljs language-json"
-            v-html="highlightedJson"
-          />
-          <code v-else class="product-admin__code-fallback">{{ formatted }}</code>
-        </pre>
-        <!-- eslint-enable vue/no-v-html -->
-      </article>
+      <v-tabs v-model="activeTab" bg-color="transparent" color="primary">
+        <v-tab value="local">{{
+          $t('product.admin.sections.productJson.title')
+        }}</v-tab>
+        <v-tab value="payload">Payload JSON du produit</v-tab>
+      </v-tabs>
+
+      <v-window v-model="activeTab">
+        <v-window-item value="local">
+          <article
+            :id="jsonSectionId"
+            class="product-admin__block"
+            role="region"
+            :aria-label="$t('product.admin.sections.productJson.title')"
+          >
+            <header class="product-admin__block-header">
+              <h3 class="product-admin__block-title">
+                {{ $t('product.admin.sections.productJson.title') }}
+              </h3>
+              <p class="product-admin__block-helper">
+                {{ $t('product.admin.sections.productJson.helper') }}
+              </p>
+            </header>
+            <!-- eslint-disable vue/no-v-html -->
+            <pre class="product-admin__code" aria-live="polite">
+              <code
+                v-if="highlightedJson"
+                class="hljs language-json"
+                v-html="highlightedJson"
+              />
+              <code v-else class="product-admin__code-fallback">{{ formatted }}</code>
+            </pre>
+            <!-- eslint-enable vue/no-v-html -->
+          </article>
+        </v-window-item>
+
+        <v-window-item value="payload">
+          <article class="product-admin__block">
+            <header class="product-admin__block-header">
+              <h3 class="product-admin__block-title">
+                Payload JSON du produit
+              </h3>
+              <p class="product-admin__block-helper">
+                Données JSON brutes via l'API Nudger
+              </p>
+            </header>
+            <div class="product-admin__iframe-wrapper">
+              <iframe
+                :src="apiPayloadUrl"
+                class="product-admin__iframe"
+                title="API Payload"
+              />
+            </div>
+          </article>
+        </v-window-item>
+      </v-window>
     </section>
   </ClientOnly>
 </template>
@@ -63,6 +94,11 @@ const { isLoggedIn } = useAuth()
 
 const showAdmin = computed(() => isLoggedIn.value)
 const formatted = computed(() => JSON.stringify(props.product, null, 2))
+
+const activeTab = ref('local')
+const apiPayloadUrl = computed(
+  () => `https://api.nudger.fr/product/?gtin=${props.product.gtin}`
+)
 
 const highlightedJson = ref(formatted.value)
 
@@ -192,5 +228,20 @@ watch(
   .product-admin__code {
     max-height: 320px;
   }
+}
+
+.product-admin__iframe-wrapper {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 600px;
+}
+
+.product-admin__iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
 }
 </style>

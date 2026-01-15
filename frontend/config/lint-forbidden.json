@@ -1,0 +1,20 @@
+{
+  "ignore": [
+    "node_modules",
+    ".git",
+    ".nuxt",
+    ".output",
+    "dist",
+    "coverage",
+    "public",
+    "**/*.min.js",
+    "**/*.lock",
+    "pnpm-lock.yaml"
+  ],
+  "rules": [
+    {
+      "extensions": [".md", ".yml", ".json"],
+      "forbidden": ["\u2014"]
+    }
+  ]
+}
