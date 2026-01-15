@@ -25,10 +25,6 @@ mdiIcon: mdi-washing-machine
 enabled: true
 popular: true
 
-impactScoreConfig:
-  criteriasPonderation:
-    CLASSE_ENERGY: 1.0
-    BRAND_SUSTAINABILITY: 0.0
 
 availableImpactScoreCriterias:
   - CLASSE_ENERGY

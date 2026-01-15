@@ -52,8 +52,6 @@ availableImpactScoreCriterias:
 # Impact score normalization safeguards
 #####################################################################################################################################
 
-impactScoreConfig:
-  minDistinctValuesForSigma: 6
 
 subsets:
   ################

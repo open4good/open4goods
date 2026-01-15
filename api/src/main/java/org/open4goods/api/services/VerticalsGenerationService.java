@@ -286,32 +286,26 @@ public class VerticalsGenerationService {
 	public String updateVerticalFileWithImpactScore(String fileName) {
 		File file = new File(fileName);
 		try {
-			VerticalConfig vc = verticalConfigservice.getConfigById(file.getName().substring(0, file.getName().length()-4));
-			LOGGER.warn("Will update {} with impactscore",file.getName());
-			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
-
-			int startIndex = originalContent.indexOf("impactScoreConfig:");
-			int endIndex = originalContent.indexOf("\n\n", startIndex);
-
-			if (-1 == startIndex) {
-				startIndex = originalContent.length();
-				endIndex=originalContent.length();
+			// Expected filename format: vertical-id.yml
+			String verticalId = file.getName().substring(0, file.getName().length()-4);
+			VerticalConfig vc = verticalConfigservice.getConfigById(verticalId);
+			if (vc == null) {
+				return "Error: Vertical not found for id " + verticalId; 
+			}
+			
+			LOGGER.warn("Will update {} with impactscore", file.getName());
+			
+			String newContent = generateEcoscoreYamlConfig(vc);
+			if (newContent == null) {
+				return "Error: Failed to generate impact score config";
 			}
 
-			if (endIndex == -1) {
-				endIndex=originalContent.length();
-			}
-
-
-			String newContent = originalContent.substring(0, startIndex);
-			newContent += generateEcoscoreYamlConfig(vc);
-			newContent += originalContent.substring(endIndex);
-
+			// For separate files, we overwrite the entire content
 			FileUtils.writeStringToFile(file, newContent, Charset.defaultCharset());
 			return newContent;
 
 		} catch (IOException e1) {
-			LOGGER.error("Error while updaing vertical file {}",file,e1);
+			LOGGER.error("Error while updaing vertical file {}", file, e1);
 			return "Error: " + e1.getMessage();
 		}
 
@@ -547,20 +541,10 @@ public class VerticalsGenerationService {
 
 
 			// Setting prompt and response
-
 			rawRet = rawRet.replace("---", "");
-
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("impactScoreConfig", impactScoreConfig);
-
-//			StringBuilder buffer = new StringBuilder("impactScoreConfig:\n");
-//			buffer.append("# Generated with AI on " ).append(new Date().toLocaleString()).append("\n");
-//			Arrays.asList(rawRet.split("\n")).forEach(line -> {
-//				buffer.append("  ").append(line).append("\n");
-//
-//			});
-
-			ret = serialisationService.toYaml(map).replace("---", "");
+			
+			// Directly serialize the config object, as it is now a standalone file
+			ret = serialisationService.toYaml(impactScoreConfig).replace("---", "");
 
 
 		} catch (Exception e) {

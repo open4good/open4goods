@@ -195,7 +195,7 @@ public class VerticalsGenerationController {
 			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
 
 		// TODO(p2,conf) : from conf
-		verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml");
+		verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/impactscores/" + vertical + ".yml");
 		verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml", 3, null);
 		return verticalsGenService.updateVerticalFileWithCategories(2, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
 
@@ -209,7 +209,7 @@ public class VerticalsGenerationController {
 			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
 
 		//TODO(p2,conf) : from conf
- 		  return verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
+ 		  return verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/impactscores/"+vertical+".yml");
 
 	}
 

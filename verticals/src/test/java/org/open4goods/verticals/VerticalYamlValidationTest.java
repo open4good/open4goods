@@ -71,6 +71,14 @@ class VerticalYamlValidationTest {
         for (Resource resource : verticalResources) {
             try (InputStream inputStream = resource.getInputStream()) {
                 VerticalConfig config = verticalsConfigService.getConfig(inputStream, verticalsConfigService.getDefaultConfig());
+                
+                // Inject impact score config from the already loaded service instance
+                // This simulates the loading process which now separates vertical and impact score configs
+                VerticalConfig loadedConfig = verticalsConfigService.getConfigById(config.getId());
+                if (loadedConfig != null) {
+                    config.setImpactScoreConfig(loadedConfig.getImpactScoreConfig());
+                }
+
                 assertVerticalConfig(config, resource.getFilename());
             }
         }

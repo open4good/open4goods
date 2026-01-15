@@ -59,6 +59,8 @@ public class VerticalsConfigService {
 	private static final String CLASSPATH_VERTICALS = "classpath:/verticals/*.yml";
 	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:/verticals/_default.yml";
 	private static final String CLASSPATH_ATTRIBUTES = "classpath:/attributes/*.yml";
+	private static final String CLASSPATH_IMPACT_SCORES = "classpath:/verticals/impactscores/*.yml";
+	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:/verticals/impactscores/_default.yml";
 
 	private SerialisationService serialisationService;
 
@@ -126,8 +128,10 @@ public class VerticalsConfigService {
 		/////////////////////////////////////////
 		// Load configurations from classpath
 		/////////////////////////////////////////
+		
+		Map<String, ImpactScoreConfig> impactScores = loadImpactScoreConfigs();
 
-		for (VerticalConfig uc : loadFromClasspath()) {
+		for (VerticalConfig uc : loadFromClasspath(impactScores)) {
 			logger.info("Adding config {} from classpath", uc.getId());
 			vConfs.put(uc.getId(), uc);
 		}
@@ -173,7 +177,7 @@ public class VerticalsConfigService {
 	 *
 	 * @return the available verticals configurations from classpath
 	 */
-	private List<VerticalConfig> loadFromClasspath() {
+	private List<VerticalConfig> loadFromClasspath(Map<String, ImpactScoreConfig> impactScores) {
 		List<VerticalConfig> ret = new ArrayList<>();
 		Resource[] resources = null;
 		try {
@@ -189,10 +193,7 @@ public class VerticalsConfigService {
 			}
 			try {
 				VerticalConfig config = getConfig(r.getInputStream(), getDefaultConfig());
-				if (config.getImpactScoreConfig() == null) {
-					logger.warn("Vertical {} (from {}) has a NULL impact score configuration. It might not behave as expected.",
-							config.getId(), r.getFilename());
-				}
+				// Removed check for null impactScoreConfig here as it will be injected later
 
 				// Check if ID is unique in the current list
 				boolean exists = ret.stream().anyMatch(v -> v.getId().equals(config.getId()));
@@ -203,12 +204,68 @@ public class VerticalsConfigService {
 				}
 
 				ret.add(config);
+			} catch (IllegalStateException e) {
+				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
 			} catch (Exception e) {
 				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
+			}
+			
+			// Inject impact score config
+			try {
+				if (null != impactScores.get(r.getFilename())) {
+					ret.get(ret.size() - 1).setImpactScoreConfig(impactScores.get(r.getFilename()));
+				}
+			} catch (Exception e) {
+				logger.error("Cannot inject impact score config : {}", r.getFilename(), e);
 			}
 		}
 
 		return ret;
+	}
+
+	private Map<String, ImpactScoreConfig> loadImpactScoreConfigs() {
+		Map<String, ImpactScoreConfig> configs = new HashMap<>();
+		ImpactScoreConfig defaultConfig = null;
+
+		// Loading default
+		try {
+			Resource r = resourceResolver.getResource(CLASSPATH_IMPACT_SCORES_DEFAULT);
+			if (r.exists()) {
+				defaultConfig = serialisationService.fromYaml(r.getInputStream(), ImpactScoreConfig.class);
+			}
+		} catch (Exception e) {
+			logger.error("Cannot load default impact score config from {}", CLASSPATH_IMPACT_SCORES_DEFAULT, e);
+		}
+
+		Resource[] resources;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_IMPACT_SCORES);
+		} catch (IOException e) {
+			logger.error("Cannot load impact score configs from {}", CLASSPATH_IMPACT_SCORES, e);
+			return configs;
+		}
+
+		for (Resource r : resources) {
+			if (DEFAULT_CONFIG_FILENAME.equals(r.getFilename())) {
+				continue;
+			}
+			try (InputStream inputStream = r.getInputStream()) {
+				ImpactScoreConfig config = serialisationService.fromYaml(inputStream, ImpactScoreConfig.class);
+				
+				// Merging with default
+				if (defaultConfig != null && config != null) {
+					if (config.getMinDistinctValuesForSigma() == null) {
+						config.setMinDistinctValuesForSigma(defaultConfig.getMinDistinctValuesForSigma());
+					}
+					// Note: texts could also be merged if needed, similar to VerticalConfig mergeDefaults
+				}
+				
+				configs.put(r.getFilename(), config);
+			} catch (Exception e) {
+				logger.error("Cannot load impact score config from {}", r.getFilename(), e);
+			}
+		}
+		return configs;
 	}
 
 	private Map<String, AttributeConfig> loadAttributeCatalog() {

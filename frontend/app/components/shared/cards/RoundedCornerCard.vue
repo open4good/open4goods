@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useSlots } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTheme } from 'vuetify'
 import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 
 export type CornerSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -78,6 +79,7 @@ type RoundedCornerCardEmits = {
 }
 
 const emit = defineEmits<RoundedCornerCardEmits>()
+const theme = useTheme()
 
 const slots = useSlots()
 const { t } = useI18n()
@@ -102,8 +104,15 @@ const sizeStyles = computed(() => {
     '--rounded-card-radius': roundedSizeTokens[props.rounded],
   }
 
-  if (props.surface === 'hero' && heroBackgroundAsset.value) {
-    styles['--rounded-card-bg-image'] = `url('${heroBackgroundAsset.value}')`
+  /* Opacity adjustment for light theme background */
+  if (props.surface === 'hero') {
+    if (heroBackgroundAsset.value) {
+      styles['--rounded-card-bg-image'] = `url('${heroBackgroundAsset.value}')`
+    }
+    /* Check if theme is light, if so apply opacity */
+    if (!theme.global.current.value.dark) {
+      styles['--rounded-card-bg-opacity'] = '0.5'
+    }
   }
 
   return styles
@@ -331,19 +340,30 @@ const hasHeader = computed(() =>
 
   &--surface-hero {
     --rounded-card-bg: rgba(var(--v-theme-surface-glass), 0.85);
-    background-image: var(--rounded-card-bg-image);
-    background-size: cover;
-    background-position: center;
-    color: rgb(var(--v-theme-text-light-strong));
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
-
     &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: var(--rounded-card-bg-image);
+      background-size: cover;
+      background-position: center;
+      opacity: var(--rounded-card-bg-opacity, 1);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
       background: linear-gradient(
         160deg,
         rgba(var(--v-theme-surface-default), 0.1) 0%,
         rgba(var(--v-theme-surface-default), 0.4) 100%
       );
-      backdrop-filter: blur(0px); /* Reset blur if needed */
+      backdrop-filter: blur(0px);
+      z-index: 0;
+      pointer-events: none;
     }
   }
 

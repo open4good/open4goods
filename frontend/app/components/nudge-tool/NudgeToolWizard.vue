@@ -1,6 +1,7 @@
 <template>
   <RoundedCornerCard
     class="nudge-wizard"
+    surface="hero"
     rounded="xl"
     :elevation="3"
     :hover-elevation="3"
@@ -109,23 +110,66 @@
       </v-window>
     </div>
     <div ref="footerRef" class="nudge-wizard__footer">
-      <div
-        v-if="progressSteps.length > 1"
-        class="nudge-wizard__progress-bubbles"
-        :style="footerOffsetStyle"
-      >
+      <!-- Left: Previous -->
+      <div class="nudge-wizard__footer-left d-flex align-center">
         <v-btn
-          v-if="activeStepKey !== 'category'"
+          v-if="hasPreviousStep"
           variant="text"
-          class="px-2"
-          color="primary"
-          @click="navigateToCategoryResults"
+          prepend-icon="mdi-chevron-left"
+          class="nudge-wizard__footer-btn"
+          @click="goToPrevious"
         >
-          {{ $t('nudge-tool.actions.advancedSearch') }}
+          {{ $t('nudge-tool.actions.previous') }}
         </v-btn>
+      </div>
+
+      <!-- Center: Steppers -->
+      <div
+        class="nudge-wizard__footer-center d-flex justify-start flex-grow-1 ps-4"
+      >
+        <div
+          v-if="progressSteps.length > 1"
+          class="nudge-wizard__progress-bubbles"
+        >
+          <v-tooltip
+            v-for="step in progressSteps"
+            :key="step.key"
+            location="top"
+            :text="step.key === 'category' ? step.subtitle : step.title"
+          >
+            <template #activator="{ props: tooltipProps }">
+              <span
+                class="nudge-wizard__progress-bubble-wrapper"
+                v-bind="tooltipProps"
+              >
+                <v-btn
+                  class="nudge-wizard__progress-bubble"
+                  :variant="step.key === activeStepKey ? 'flat' : 'text'"
+                  :color="step.key === activeStepKey ? 'primary' : undefined"
+                  :aria-label="step.title"
+                  :disabled="!canAccessStep(step.key)"
+                  icon
+                  size="44"
+                  @click="() => handleProgressClick(step.key)"
+                >
+                  <span class="nudge-wizard__progress-index">{{
+                    step.index
+                  }}</span>
+                </v-btn>
+              </span>
+            </template>
+          </v-tooltip>
+        </div>
+      </div>
+
+      <!-- Right: Result Count + Next -->
+      <div
+        class="nudge-wizard__footer-right d-flex align-center justify-end gap-2"
+      >
+        <!-- Result Count -->
         <div
           v-if="categoryNavigationTarget"
-          class="nudge-wizard__reco-count-wrapper my-auto px-2"
+          class="nudge-wizard__reco-count-wrapper px-2"
         >
           <NuxtLink
             :to="categoryNavigationTarget"
@@ -140,7 +184,7 @@
             <v-icon icon="mdi-arrow-right" size="small" class="ms-1" />
           </NuxtLink>
         </div>
-        <div v-else class="nudge-wizard__reco-count-wrapper my-auto px-2">
+        <div v-else class="nudge-wizard__reco-count-wrapper px-2">
           <p class="nudge-wizard__reco-count">
             {{
               $t('nudge-tool.steps.recommendations.total', {
@@ -149,54 +193,15 @@
             }}
           </p>
         </div>
-        <v-tooltip
-          v-for="step in progressSteps"
-          :key="step.key"
-          location="top"
-          :text="step.key === 'category' ? step.subtitle : step.title"
-        >
-          <template #activator="{ props: tooltipProps }">
-            <span
-              class="nudge-wizard__progress-bubble-wrapper"
-              v-bind="tooltipProps"
-            >
-              <v-btn
-                class="nudge-wizard__progress-bubble"
-                :variant="step.key === activeStepKey ? 'flat' : 'text'"
-                :color="step.key === activeStepKey ? 'primary' : undefined"
-                :aria-label="step.title"
-                :disabled="!canAccessStep(step.key)"
-                icon
-                size="44"
-                @click="() => handleProgressClick(step.key)"
-              >
-                <span class="nudge-wizard__progress-index">{{
-                  step.index
-                }}</span>
-              </v-btn>
-            </span>
-          </template>
-        </v-tooltip>
-      </div>
-      <div class="nudge-wizard__footer-actions">
-        <v-btn
-          v-if="hasPreviousStep"
-          variant="text"
-          prepend-icon="mdi-chevron-left"
-          class="nudge-wizard__footer-btn"
-          @click="goToPrevious"
-        >
-          {{ $t('nudge-tool.actions.previous') }}
-        </v-btn>
-        <div v-else></div>
 
+        <!-- Next Button -->
         <v-btn
           v-if="hasNextStep"
           color="primary"
           variant="flat"
           :disabled="isNextDisabled"
           append-icon="mdi-chevron-right"
-          class="nudge-wizard__footer-btn"
+          class="nudge-wizard__footer-btn ms-2"
           @click="goToNext"
         >
           {{ $t('nudge-tool.actions.next') }}
@@ -1113,14 +1118,16 @@ const cornerIconDimensions = computed(() => {
 
   &__footer {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr auto;
     gap: 12px;
     margin-top: 16px;
     align-items: center;
 
     @media (max-width: 960px) {
       grid-template-columns: 1fr;
-      justify-items: stretch;
+      justify-items: center;
+      gap: 16px;
+      text-align: center;
     }
   }
 

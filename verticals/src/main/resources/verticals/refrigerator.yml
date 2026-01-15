@@ -45,29 +45,11 @@ genAiConfig:
 # ImpacScore configuration.
 # Must stay structurally present; content will be auto-generated later.
 #####################################################################################################################################
-impactScoreConfig:
-  criteriasPonderation:
-    CLASSE_ENERGY: 0.4
-    POWER_CONSUMPTION_TYPICAL: 0.3
-    WEIGHT: 0.2
-    WARRANTY: 0.1
-    BRAND_SUSTAINABILITY: 0.0
-  texts:
-    fr:
-      purpose: "L'objectif est de fournir un éco-score clair et spécifique aux réfrigérateurs, en combinant les éléments de consommation d'énergie, de taille utile et de durabilité afin d'aider à comparer des modèles équivalents sur leur impact environnemental."
-      availlableDatas: "Les données disponibles couvrent principalement la classe énergétique, la consommation annuelle, le volume utile et le niveau sonore, complétées par des informations de garantie et de poids."
-      criticalReview: "La méthodologie privilégie l'usage (énergie) tout en intégrant la durabilité et la taille. Elle reste dépendante de la qualité des données déclaratives et peut sous-pondérer certains aspects comme la réparabilité ou l'impact de fabrication."
-      criteriasAnalysis:
-        CLASSE_ENERGY: "La classe énergétique synthétise l'efficacité globale du réfrigérateur selon les normes européennes. Elle est facilement lisible par le public et complète les valeurs chiffrées de consommation."
-        POWER_CONSUMPTION_TYPICAL: "La consommation typique reflète l'impact réel en phase d'usage, qui domine l'empreinte d'un réfrigérateur sur plusieurs années. Un modèle sobre est priorisé."
-        WEIGHT: "Le poids du produit est un indicateur indirect de l'impact de fabrication et du volume de matières mobilisées. Il doit rester secondaire par rapport à l'usage."
-        WARRANTY: "Une garantie plus longue incite à la fiabilité et limite le remplacement prématuré, renforçant la durabilité du produit."
 
 # The scores that are available to build the impact score. They come from scored attributes.
 # Scores from _default.yml are merged
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
-  - POWER_CONSUMPTION_TYPICAL
   - WEIGHT
   - WARRANTY
 
@@ -98,7 +80,7 @@ i18n:
     productMetaOpenGraphType: "product"
 
     # Vertical page elements
-    verticalHomeUrl: "refrigerateurs"
+    verticalHomeUrl: "refrigerators"
     verticalHomeTitle: "Réfrigérateurs"
     verticalHomeDescription: "Comparez les réfrigérateurs"
 

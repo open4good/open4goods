@@ -83,7 +83,7 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     logo: 'logo.svg',
     footerLogo: 'placeholders/logo-footer.svg',
     favicon: 'placeholders/favicon.svg',
-    heroBackground: 'hero-background.webp',
+    heroBackground: 'hero-background.svg',
     illustration: 'placeholders/illustration.svg',
     productBackground: 'product-background.svg',
     contactBackground: 'contact-background.svg',

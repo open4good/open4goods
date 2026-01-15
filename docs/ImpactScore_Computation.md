@@ -46,8 +46,8 @@ We define a "Normal Range" of **$\pm 2\sigma$** around the Mean ($\mu$).
    $$ Normalized = \frac{Value - LowerBound}{UpperBound - LowerBound} $$
 
 3. **Scale and Clamp (0 to MaxRating)**:
-   $$ Score = Normalized \times DEFAULT_MAX_RATING $$
-   _(Default Max Rating is 5.0)_
+   $$ Score = Normalized \times DEFAULT*MAX_RATING $$
+   *(Default Max Rating is 5.0)\_
 
    The score is clamped to be between 0 and MaxRating.
 
@@ -116,7 +116,7 @@ _Example Observation_: Scores between **6.5 and 14** suggest a configuration whe
 
 - **Configuration**:
   - `StandardiserService.DEFAULT_MAX_RATING` (Default: 5.0).
-  - Vertical YAML files (define weights).
+  - Vertical YAML files (define weights). See [Verticals Configuration](VerticalsConfiguration.md) for details on file structure (`verticals/*.yml` and `verticals/impactscores/*.yml`).
   - `impactScoreConfig.minDistinctValuesForSigma` (minimum distinct values required to keep sigma scoring).
 
 ## Potential Improvements / Methodology Notes
