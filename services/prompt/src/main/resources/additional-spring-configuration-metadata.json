@@ -46,6 +46,21 @@
       "name": "genAiConfig.batchApiEndpoint",
       "type": "java.lang.String",
       "description": "The OpenAI Batch API endpoint URL."
+    },
+    {
+      "name": "genAiConfig.openaiApiKey",
+      "type": "java.lang.String",
+      "description": "OpenAI API key."
+    },
+    {
+      "name": "genAiConfig.perplexityApiKey",
+      "type": "java.lang.String",
+      "description": "Perplexity API key."
+    },
+    {
+      "name": "genAiConfig.geminiApiKey",
+      "type": "java.lang.String",
+      "description": "Gemini API key."
     }
   ]
 }

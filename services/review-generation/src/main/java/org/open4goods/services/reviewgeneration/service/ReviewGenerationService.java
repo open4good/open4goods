@@ -47,6 +47,8 @@ import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.dto.openai.BatchOutput;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
+import org.open4goods.services.prompt.config.PromptConfig;
+import org.open4goods.services.prompt.config.RetrievalMode;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
@@ -332,10 +334,20 @@ public class ReviewGenerationService implements HealthIndicator {
 					+ accumulatedTokens + ", sources=" + finalSourcesMap.size());
 		}
 
-		// Compose prompt variables.
-		Map<String, Object> promptVariables = new HashMap<>();
+		Map<String, Object> promptVariables = buildBasePromptVariables(product, verticalConfig);
 		promptVariables.put("sources", finalSourcesMap);
 		promptVariables.put("tokens", finalTokensMap);
+		status.addMessage("AI generation");
+
+		// Store aggregated tokens for convenience.
+		promptVariables.put("TOTAL_TOKENS", accumulatedTokens);
+		promptVariables.put("SOURCE_TOKENS", finalTokensMap);
+
+		return promptVariables;
+	}
+
+	private Map<String, Object> buildBasePromptVariables(Product product, VerticalConfig verticalConfig) {
+		Map<String, Object> promptVariables = new HashMap<>();
 		promptVariables.put("PRODUCT_NAME", product.shortestOfferName());
 		promptVariables.put("PRODUCT_BRAND", product.brand());
 		promptVariables.put("PRODUCT_MODEL", product.model());
@@ -348,12 +360,6 @@ public class ReviewGenerationService implements HealthIndicator {
 				.map(attrConf -> String.format("        - %s (%s)", attrConf.getKey(), attrConf.getName().get("fr")))
 				.collect(Collectors.joining("\n"));
 		promptVariables.put("ATTRIBUTES", attributesList);
-		status.addMessage("AI generation");
-
-		// Store aggregated tokens for convenience.
-		promptVariables.put("TOTAL_TOKENS", accumulatedTokens);
-		promptVariables.put("SOURCE_TOKENS", finalTokensMap);
-
 		return promptVariables;
 	}
 
@@ -416,9 +422,21 @@ public class ReviewGenerationService implements HealthIndicator {
 					preProcessingFuture.get();
 					status.addMessage("External preprocessing complete.");
 				}
-				status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
-				Map<String, Object> promptVariables = preparePromptVariables(product, verticalConfig, status);
-				PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt("review-generation",
+				String promptKey = resolvePromptKey();
+				PromptConfig promptConfig = genAiService.getPromptConfig(promptKey);
+				if (promptConfig == null) {
+					throw new ResourceNotFoundException("Prompt not found: " + promptKey);
+				}
+				Map<String, Object> promptVariables;
+				if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
+					status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
+					status.addMessage("AI grounding search...");
+					promptVariables = buildBasePromptVariables(product, verticalConfig);
+				} else {
+					status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
+					promptVariables = preparePromptVariables(product, verticalConfig, status);
+				}
+				PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt(promptKey,
 						promptVariables, AiReview.class);
 				AiReview newReview = reviewResponse.getBody();
 				newReview = updateAiReviewReferences(newReview);
@@ -482,6 +500,11 @@ public class ReviewGenerationService implements HealthIndicator {
 	public String generateReviewBatchRequest(List<Product> products, VerticalConfig verticalConfig) {
 		List<Map<String, Object>> promptVariablesList = new ArrayList<>();
 		List<String> ids = new ArrayList<>();
+		String promptKey = resolvePromptKey();
+		PromptConfig promptConfig = genAiService.getPromptConfig(promptKey);
+		if (promptConfig != null && promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
+			throw new IllegalStateException("Batch review generation is not supported for model-native search.");
+		}
 		for (Product product : products) {
 			long upc = product.getId();
 			if (!shouldGenerateReview(product)) {
@@ -518,7 +541,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		}
 		// Submit batch job using the updated batchPromptRequest method in
 		// BatchPromptService.
-		String jobId = batchAiService.batchPromptRequest("review-generation", promptVariablesList, ids, AiReview.class);
+		String jobId = batchAiService.batchPromptRequest(promptKey, promptVariablesList, ids, AiReview.class);
 		logger.info("Launched batch review generation job with ID: {}", jobId);
 		// Write a tracking file (JSON) mapping the job ID to the list of product GTINs.
 		File trackingFile = new File(trackingFolder, "tracking_" + jobId + ".json");
@@ -531,6 +554,13 @@ public class ReviewGenerationService implements HealthIndicator {
 			logger.error("Error writing tracking file for job {}: {}", jobId, e.getMessage());
 		}
 		return jobId;
+	}
+
+	private String resolvePromptKey() {
+		if (properties.isUseGroundedPrompt()) {
+			return properties.getGroundedPromptKey();
+		}
+		return properties.getPromptKey();
 	}
 
 	/**

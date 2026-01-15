@@ -16,8 +16,8 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
+import org.open4goods.services.prompt.service.provider.ProviderRegistry;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -34,21 +34,19 @@ class PromptServiceTest {
 
     private PromptService genAiService;
     private PromptServiceConfig mockConfig;
-    private OpenAiApi openAiApi;
-    private OpenAiApi perplexityApi;
     private SerialisationService serialisationService;
     private EvaluationService evaluationService;
     private MeterRegistry meterRegistry;
+    private ProviderRegistry providerRegistry;
 
     @BeforeEach
     void setUp() {
         // Create mocks for dependencies
         mockConfig = org.mockito.Mockito.mock(PromptServiceConfig.class);
-        openAiApi = org.mockito.Mockito.mock(OpenAiApi.class);
-        perplexityApi = org.mockito.Mockito.mock(OpenAiApi.class);
         serialisationService = org.mockito.Mockito.mock(SerialisationService.class);
         evaluationService = org.mockito.Mockito.mock(EvaluationService.class);
         meterRegistry = org.mockito.Mockito.mock(MeterRegistry.class);
+        providerRegistry = org.mockito.Mockito.mock(ProviderRegistry.class);
 
         // Stub configuration methods
         when(mockConfig.isEnabled()).thenReturn(true);
@@ -65,7 +63,7 @@ class PromptServiceTest {
         }
 
         // Instantiate the service under test
-        genAiService = new PromptService(mockConfig, perplexityApi, openAiApi, serialisationService, evaluationService, meterRegistry);
+        genAiService = new PromptService(mockConfig, serialisationService, evaluationService, meterRegistry, providerRegistry);
     }
 
     @Test

@@ -30,6 +30,8 @@ public class PromptServiceConfig {
 	private String openaiApiKey;
 
 	private String perplexityApiKey;
+
+	private String geminiApiKey;
 	
 	private String perplexityBaseUrl = "https://api.perplexity.ai";
 
@@ -70,6 +72,12 @@ public class PromptServiceConfig {
 	}
 	public void setPerplexityApiKey(String perplexityApiKey) {
 		this.perplexityApiKey = perplexityApiKey;
+	}
+	public String getGeminiApiKey() {
+		return geminiApiKey;
+	}
+	public void setGeminiApiKey(String geminiApiKey) {
+		this.geminiApiKey = geminiApiKey;
 	}
 	public String getPerplexityBaseUrl() {
 		return perplexityBaseUrl;

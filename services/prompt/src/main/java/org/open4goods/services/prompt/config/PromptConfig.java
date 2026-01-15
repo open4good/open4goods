@@ -1,7 +1,10 @@
 package org.open4goods.services.prompt.config;
 
-import org.springframework.ai.openai.OpenAiChatOptions;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
  * Represents a prompt configuration which defines the AI service to use,
@@ -30,9 +33,19 @@ public class PromptConfig {
     private String userPrompt;
 
     /**
-     * Options for the chat model (e.g., temperature, top-k).
+     * Retrieval mode for the prompt.
      */
-    private OpenAiChatOptions options;
+    private RetrievalMode retrievalMode = RetrievalMode.EXTERNAL_SOURCES;
+
+    /**
+     * Provider-agnostic options for the chat model (e.g., temperature, max tokens).
+     */
+    private PromptOptions options = new PromptOptions();
+
+    /**
+     * Provider-specific options that are not mapped to PromptOptions.
+     */
+    private Map<String, Object> providerOptions = new HashMap<>();
 
     public String getKey() {
         return key;
@@ -66,12 +79,39 @@ public class PromptConfig {
         this.userPrompt = userPrompt;
     }
 
-    public OpenAiChatOptions getOptions() {
+    public RetrievalMode getRetrievalMode() {
+        return retrievalMode == null ? RetrievalMode.EXTERNAL_SOURCES : retrievalMode;
+    }
+
+    public void setRetrievalMode(RetrievalMode retrievalMode) {
+        this.retrievalMode = retrievalMode;
+    }
+
+    public PromptOptions getOptions() {
         return options;
     }
 
-    public void setOptions(OpenAiChatOptions options) {
+    public void setOptions(PromptOptions options) {
         this.options = options;
+    }
+
+    @JsonSetter("options")
+    public void setOptionsFromYaml(Map<String, Object> optionsMap) {
+        if (optionsMap == null) {
+            this.options = new PromptOptions();
+            this.providerOptions = new HashMap<>();
+            return;
+        }
+        this.providerOptions = new HashMap<>();
+        this.options = PromptOptions.fromMap(optionsMap, this.providerOptions);
+    }
+
+    public Map<String, Object> getProviderOptions() {
+        return providerOptions;
+    }
+
+    public void setProviderOptions(Map<String, Object> providerOptions) {
+        this.providerOptions = providerOptions;
     }
 
     @Override
@@ -81,13 +121,15 @@ public class PromptConfig {
                 ", aiService=" + aiService +
                 ", systemPrompt='" + systemPrompt + '\'' +
                 ", userPrompt='" + userPrompt + '\'' +
+                ", retrievalMode=" + retrievalMode +
                 ", options=" + options +
+                ", providerOptions=" + providerOptions +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, aiService, systemPrompt, userPrompt, options);
+        return Objects.hash(key, aiService, systemPrompt, userPrompt, retrievalMode, options, providerOptions);
     }
 
     @Override
@@ -99,6 +141,8 @@ public class PromptConfig {
                aiService == that.aiService &&
                Objects.equals(systemPrompt, that.systemPrompt) &&
                Objects.equals(userPrompt, that.userPrompt) &&
-               Objects.equals(options, that.options);
+               retrievalMode == that.retrievalMode &&
+               Objects.equals(options, that.options) &&
+               Objects.equals(providerOptions, that.providerOptions);
     }
 }

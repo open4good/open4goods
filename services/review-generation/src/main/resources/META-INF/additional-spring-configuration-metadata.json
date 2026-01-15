@@ -84,6 +84,24 @@
       "type": "java.lang.Integer",
       "description": "Delay in days after which an unsuccessful AI review generation (insufficient data) can be retried.",
       "defaultValue": 7
+    },
+    {
+      "name": "review.generation.prompt-key",
+      "type": "java.lang.String",
+      "description": "Prompt key used for external-source review generation.",
+      "defaultValue": "review-generation"
+    },
+    {
+      "name": "review.generation.grounded-prompt-key",
+      "type": "java.lang.String",
+      "description": "Prompt key used for model-native web search review generation.",
+      "defaultValue": "review-generation-grounded"
+    },
+    {
+      "name": "review.generation.use-grounded-prompt",
+      "type": "java.lang.Boolean",
+      "description": "Enable model-native web search prompt flow.",
+      "defaultValue": false
     }
   ]
 }
