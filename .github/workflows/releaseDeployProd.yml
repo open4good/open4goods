@@ -424,7 +424,7 @@ jobs:
           script: sh /opt/open4goods/bin/publish-jars.sh prod
 
       ############################################
-      # Deploy (prod) — inchangé, seulement en release
+      # Deploy (prod) - inchangé, seulement en release
       ############################################
       - name: Deploy SSR output to  server
         if: env.MODE != 'test'

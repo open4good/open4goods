@@ -23,7 +23,7 @@ Top-level routes now expose translated slugs per locale through [`shared/utils/l
 
 1. Pick a stable route name for the page (e.g. the `team` page). Nuxt will use the file-based name (`pages/team.vue` → `team`).
 2. Update `LOCALIZED_ROUTE_PATHS` so each locale maps to the desired slug. Slugs must start with `/` and may include dynamic parameters using the Nuxt syntax (`/blog/[slug]`).
-3. Consume `resolveLocalizedRoutePath(routeName, locale, params?)` wherever a link is generated. The helper accepts optional params for dynamic segments—`resolveLocalizedRoutePath('blog-slug', 'fr-FR', { slug })` renders `/blog/${slug}` with URL encoding applied automatically.
+3. Consume `resolveLocalizedRoutePath(routeName, locale, params?)` wherever a link is generated. The helper accepts optional params for dynamic segments-`resolveLocalizedRoutePath('blog-slug', 'fr-FR', { slug })` renders `/blog/${slug}` with URL encoding applied automatically.
 4. Import `normalizeLocale(locale)` when dealing with untrusted input. It coerces unknown locales back to the default (`DEFAULT_NUXT_LOCALE`) so navigation never breaks.
 
 ### Sharing the configuration with Nuxt i18n
@@ -83,5 +83,5 @@ When adding or updating a locale:
 
 Each domain listed above automatically loads the matching bundle; there is no
 need for query parameters or path prefixes. Manual language switching widgets
-should respect the hostname contract—if a different behaviour is needed, adjust
+should respect the hostname contract-if a different behaviour is needed, adjust
 the shared helper first so SSR, CSR, and server-to-server calls remain aligned.

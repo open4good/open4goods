@@ -34,7 +34,7 @@
 - `app/layouts/`, `app/stores/`, `app/plugins/`, `app/assets/`, `app/utils/` – Follow Nuxt conventions.
 - `server/` – Nuxt server routes and middleware that wrap OpenAPI clients.
 - `shared/` – Code shared between client and server (generated clients, utils, constants).
-- Theme-scoped visuals (logos, hero/parallax backgrounds, textures) live under `app/assets/themes/<theme>/` with `common/` fallbacks—resolve them via `useThemedAsset`/`useThemeAsset` so light/dark switching stays consistent.
+- Theme-scoped visuals (logos, hero/parallax backgrounds, textures) live under `app/assets/themes/<theme>/` with `common/` fallbacks-resolve them via `useThemedAsset`/`useThemeAsset` so light/dark switching stays consistent.
 
 ## Coding Conventions
 
@@ -123,7 +123,7 @@ Every code that is produced MUST me validated using :
 
 ## Backend API authentication and caching guidelines
 
-- Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent—never call `new Configuration()` directly.
+- Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent-never call `new Configuration()` directly.
 - Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication.
 - Every server route that returns backend data is domain-sensitive. Apply caching headers through `setDomainLanguageCacheHeaders(event, cacheControl)` from `server/utils/cache-headers` so both `Cache-Control` and the host-aware `Vary` header are set together. Do **not** set either header manually.
 

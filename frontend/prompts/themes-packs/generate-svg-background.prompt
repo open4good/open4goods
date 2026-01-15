@@ -2,7 +2,7 @@ Génération d'un prompt de resources parallax ou SVG. Peut servir a des fonds d
 
 
 
-# Utilify — Parallax SVG Prompt (export en 3 couches)
+# Utilify - Parallax SVG Prompt (export en 3 couches)
 > Objectif : produire **3 SVG** (back / mid / front) par section pour un vrai effet parallax, sans “bandes” aux bords.
 
 ---

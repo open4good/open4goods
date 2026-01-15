@@ -36,4 +36,4 @@ Ce document recense l’état actuel des visuels de la page d’accueil et propo
 
 - Les overlays (`overlayOpacity`) varient par section dans `app/pages/index.vue` ; conserver des couleurs de fond suffisamment contrastées pour éviter le « wash out » en light comme en dark.
 - Le fallback d’assets suit l’ordre `theme -> common -> THEME_ASSETS_FALLBACK` ; garder des noms symétriques entre thèmes pour faciliter la régénération automatisée.
-- Les packs saisonniers sont sélectionnés par `config/theme/seasons.ts` (fenêtres de dates UTC) — toute nouvelle variante doit y être référencée.
+- Les packs saisonniers sont sélectionnés par `config/theme/seasons.ts` (fenêtres de dates UTC) - toute nouvelle variante doit y être référencée.

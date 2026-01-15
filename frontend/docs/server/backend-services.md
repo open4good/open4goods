@@ -134,7 +134,7 @@ This keeps request validation, caching, localisation, and error translation clos
 to the network boundary while delegating the backend call to the wrapper. Use
 `setDomainLanguageCacheHeaders()` in every server route that surfaces backend
 data so the response carries both `Cache-Control` and the host-aware `Vary`
-header—mixing manual header calls risks dropping one of them and breaking
+header-mixing manual header calls risks dropping one of them and breaking
 multi-domain caching.
 
 ## 3. Consume the server route from a composable
@@ -215,7 +215,7 @@ const article = computed(() => currentArticle.value)
 computed properties (title, dates, SEO metadata), sanitises HTML, and exposes the
 final markup without concerning itself with backend access.
 
-Following this workflow—service wrapper → Nuxt route → composable → component—
+Following this workflow-service wrapper → Nuxt route → composable → component-
 keeps backend integrations testable, SSR-safe, and easy to reason about. When
 adding a new feature, mirror the blog example so the team can recognise the
 control flow instantly.

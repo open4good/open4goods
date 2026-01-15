@@ -93,7 +93,7 @@ A modern, friendly, and trustworthy color system built around teal–green found
 - Body text: Neutral dark gray or near-black (not pure black).
 - Text on primary backgrounds: White or off-white with contrast ≥ 4.5:1.
 - Avoid green-on-green text combinations.
-- Charts must not rely on color alone—use labels or patterns.
+- Charts must not rely on color alone-use labels or patterns.
 
 ---
 

@@ -1034,7 +1034,7 @@
           "description": "Looking to collaborate, integrate Nudger data or co-create initiatives? Let's explore it together.",
           "label": "Partnerships & ecosystem"
         },
-        "subtitle": "Pick the topic that suits you best—every request reaches the same caring team.",
+        "subtitle": "Pick the topic that suits you best-every request reaches the same caring team.",
         "support": {
           "description": "Questions about the comparator or trouble signing in? We will guide you step by step.",
           "label": "Product & user support"
@@ -1105,14 +1105,14 @@
         "badge": "We hit a snag",
         "description": "An unexpected error prevented us from loading this page.",
         "helper": "Please try another section of Nudger or reach out if the problem persists.",
-        "statusMessage": "Error 500 — something went wrong on our side.",
+        "statusMessage": "Error 500 - something went wrong on our side.",
         "title": "We're working on a fix"
       },
       "notFound": {
         "badge": "Page missing",
         "description": "The link you followed may be broken or the page may have moved.",
         "helper": "Use the navigation links below or return to the homepage to continue exploring responsible shopping.",
-        "statusMessage": "Error 404 — the requested resource could not be located.",
+        "statusMessage": "Error 404 - the requested resource could not be located.",
         "title": "We can’t find this page"
       },
       "statusLabel": "Status code {code}"
@@ -1155,7 +1155,7 @@
           "label": "Title"
         }
       },
-      "privacy": "Feedback is public—please avoid sharing personal or sensitive data.",
+      "privacy": "Feedback is public-please avoid sharing personal or sensitive data.",
       "sections": {
         "bug": {
           "eyebrow": "Report a bug",
@@ -1559,7 +1559,7 @@
             "title": "Fast mirror (data.gouv.fr)"
           }
         },
-        "placeholder": "—",
+        "placeholder": "-",
         "summary": {
           "records": "Total records",
           "size": "Compressed size",
@@ -1836,7 +1836,7 @@
           "question": "What do we mean by open data?"
         },
         "importance": {
-          "answer": "<p>Open data is crucial for promoting transparency and innovation. By making data accessible, it helps citizens better understand government decisions and participate in public debate with informed arguments. Companies can use these data to develop new products and services, stimulating economic growth. Open data also supports better decision-making because public information can be analysed to improve policies, reduce inefficiencies and make institutions more accountable. Finally, open data fosters collaboration between stakeholders—researchers, entrepreneurs, developers and local communities—who can work together to solve shared challenges creatively.</p>",
+          "answer": "<p>Open data is crucial for promoting transparency and innovation. By making data accessible, it helps citizens better understand government decisions and participate in public debate with informed arguments. Companies can use these data to develop new products and services, stimulating economic growth. Open data also supports better decision-making because public information can be analysed to improve policies, reduce inefficiencies and make institutions more accountable. Finally, open data fosters collaboration between stakeholders-researchers, entrepreneurs, developers and local communities-who can work together to solve shared challenges creatively.</p>",
           "question": "Why is open data important for commerce?"
         },
         "sources": {
@@ -1888,7 +1888,7 @@
         "description": "Currently available data packages.",
         "label": "Published datasets"
       },
-      "placeholder": "—",
+      "placeholder": "-",
       "totalProducts": {
         "description": "Unique products referenced across all exports.",
         "label": "Products covered",

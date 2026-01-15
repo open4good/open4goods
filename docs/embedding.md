@@ -6,10 +6,10 @@ The project provides a shared **DJL-based text embedding starter** (`embedding-d
 
 Configuration is driven by the `embedding.*` properties (`DjlEmbeddingProperties`):
 
-- `embedding.text-model-url` / `embedding.multimodal-model-url` — remote identifiers for text embeddings (primary + fallback).
-- `embedding.vision-model-url` / `embedding.image-input-size` — remote identifier and input size for image embeddings.
-- `embedding.fail-on-missing-model` — when true, startup fails if neither text model nor multimodal fallback can be loaded.
-- `embedding.pooling-mode`, `embedding.engine` — translator and engine tuning knobs (embeddings are always L2-normalized).
+- `embedding.text-model-url` / `embedding.multimodal-model-url` - remote identifiers for text embeddings (primary + fallback).
+- `embedding.vision-model-url` / `embedding.image-input-size` - remote identifier and input size for image embeddings.
+- `embedding.fail-on-missing-model` - when true, startup fails if neither text model nor multimodal fallback can be loaded.
+- `embedding.pooling-mode`, `embedding.engine` - translator and engine tuning knobs (embeddings are always L2-normalized).
 
 A health indicator (`DjlEmbeddingHealthIndicator`) publishes which model was loaded and its resolved path/URL when Spring Boot Actuator is present.
 

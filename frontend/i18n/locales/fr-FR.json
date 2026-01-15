@@ -1121,14 +1121,14 @@
         "badge": "Un contretemps est survenu",
         "description": "Une erreur inattendue nous a empêchés de charger cette page.",
         "helper": "Essayez une autre section de Nudger ou contactez-nous si le problème persiste.",
-        "statusMessage": "Erreur 500 — quelque chose s’est mal passé de notre côté.",
+        "statusMessage": "Erreur 500 - quelque chose s’est mal passé de notre côté.",
         "title": "Nous corrigeons le problème"
       },
       "notFound": {
         "badge": "Page introuvable",
         "description": "Le lien suivi est peut-être obsolète ou la page a été déplacée.",
         "helper": "Utilisez les liens ci-dessous ou retournez à l’accueil pour poursuivre votre exploration.",
-        "statusMessage": "Erreur 404 — la ressource demandée est introuvable.",
+        "statusMessage": "Erreur 404 - la ressource demandée est introuvable.",
         "title": "Nous ne trouvons pas cette page"
       },
       "statusLabel": "Code statut {code}"
@@ -1576,7 +1576,7 @@
             "title": "Téléchargement depuis data.gouv.fr"
           }
         },
-        "placeholder": "—",
+        "placeholder": "-",
         "summary": {
           "records": "Nombre total d'enregistrements",
           "size": "Taille compressée",
@@ -1905,7 +1905,7 @@
         "description": "Catalogues actuellement disponibles.",
         "label": "Jeux de données publiés"
       },
-      "placeholder": "—",
+      "placeholder": "-",
       "totalProducts": {
         "description": "Produits uniques mis à disposition.",
         "label": "Produits accessibles",

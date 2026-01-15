@@ -51,7 +51,7 @@ To get the project up and running locally, follow these steps:
    - `TOKEN_COOKIE_NAME`: Name of the cookie storing the JWT. Defaults to `access_token`.
    - `REFRESH_COOKIE_NAME`: Name of the cookie storing the refresh token. Defaults to `refresh_token`.
    - `MACHINE_TOKEN`: Shared secret used for server-to-server requests. This value is loaded only on the server and never exposed to the client.
-   - `EDITOR_ROLES`: Comma-separated roles allowed to edit content blocs. Defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP`—the role names issued in the JWT—and is exposed as `config.public.editRoles`.
+   - `EDITOR_ROLES`: Comma-separated roles allowed to edit content blocs. Defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP`-the role names issued in the JWT-and is exposed as `config.public.editRoles`.
 
 5. **Run the Dev Server**:
 

@@ -1,4 +1,4 @@
-# Nudger Front API — AGENTS Guide
+# Nudger Front API - AGENTS Guide
 
 > **Parent Guide**: [Root AGENTS.md](../AGENTS.md)  
 > This guide **extends** the root conventions with front-API-specific rules for Spring Boot 3 and SpringDoc.
@@ -156,7 +156,7 @@ public record OfferDto(
 
 ### 6.3 Enums & nested DTOs
 - Enums: either `allowableValues`, or annotate the `enum` class directly.  
-- Nested DTOs follow the same rules — no exceptions.
+- Nested DTOs follow the same rules - no exceptions.
 
 ---
 
