@@ -1,19 +1,19 @@
 You will work on updating yaml categories config.
 
-As a sample, you will have the sample tv category config : /open4goods/verticals/src/main/resources/verticals/tv.yml
-All verticals inherits the default vertical config : /open4goods/verticals/src/main/resources/verticals/_default.yml
+As a sample, you will have the sample tv category config : /verticals/src/main/resources/verticals/tv.yml
+All verticals inherits the default vertical config : /verticals/src/main/resources/verticals/_default.yml
 
 
 You will update the vertical
 
 /verticals/src/main/resources/verticals/tv.yml
 
+## Task 1
 - Check for errors, adjust texts if needed (translations in i18n, (the base, correct texts is fr) to be semantically correct with the vertical title)
 
-Attributes génération
+## Task 2 - Attributes génération
 
 Generate or update attributes definitions (reuse existing ones if possible, but you can create new definitions in /verticals/src/main/resources/attributes/*). Only for attributes specific to the category,  and having a correct coverage
-
 
 
 As input data, you will have :
@@ -21,15 +21,15 @@ As input data, you will have :
 > The sample files
 > Existing attributes  (/open4goods/verticals/src/main/resources/attributes)
 
+## Task 3 - impactScore participants
 
-
-
+You will also generate or update availableImpactScoreCriterias :
+* In the configuration defined attributes (/verticals/src/main/resources/attributes), find all potential scores (.yml files having asScore: true), that could be used in the ecological score computation.
+* Then  write them in availableImpactScoreCriterias
 
 
 ------------- ATTRIBUTES COVERAGE (result of api project, on /{vertical}/attributes/)
-: Availlable on /open4goods/verticals/src/main/resources/verticals/attribute-coverage.txt
-
-
+: Availlable on /verticals/src/main/resources/verticals/attribute-coverage.txt
 
 
 Create a plan. Ask for any clarifications or additional data
