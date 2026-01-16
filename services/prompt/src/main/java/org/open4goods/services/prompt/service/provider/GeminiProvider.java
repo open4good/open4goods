@@ -28,111 +28,107 @@ import reactor.core.publisher.Flux;
 @Component
 public class GeminiProvider implements GenAiProvider {
 
-    private final ChatModel chatModel;
+	private final ChatModel chatModel;
 
-    public GeminiProvider(@Qualifier("geminiChatModel") ChatModel chatModel) {
-        this.chatModel = chatModel;
-    }
+	public GeminiProvider(@Qualifier("geminiChatModel") ChatModel chatModel) {
+		this.chatModel = chatModel;
+	}
 
-    @Override
-    public GenAiServiceType service() {
-        return GenAiServiceType.GEMINI;
-    }
+	@Override
+	public GenAiServiceType service() {
+		return GenAiServiceType.GEMINI;
+	}
 
-    @Override
-    public ProviderResult generateText(ProviderRequest request) {
-        OpenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
-                request.isAllowWebSearch());
-        if (StringUtils.hasText(request.getJsonSchema())) {
-            options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, request.getJsonSchema()));
-        }
-        ChatResponse response = chatModel.call(buildPrompt(request, options));
-        String content = response.getResult().getOutput().getText();
-        Map<String, Object> metadata = extractGroundingMetadata(response);
-        return new ProviderResult(service(), options.getModel(), content, content, metadata);
-    }
+	@Override
+	public ProviderResult generateText(ProviderRequest request) {
+		OpenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
+				request.isAllowWebSearch());
+		if (StringUtils.hasText(request.getJsonSchema())) {
+			options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, request.getJsonSchema()));
+		}
+		ChatResponse response = chatModel.call(buildPrompt(request, options));
+		String content = response.getResult().getOutput().getText();
+		Map<String, Object> metadata = extractGroundingMetadata(response);
+		return new ProviderResult(service(), options.getModel(), content, content, metadata);
+	}
 
-    @Override
-    public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
-        OpenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
-                request.isAllowWebSearch());
-         if (StringUtils.hasText(request.getJsonSchema())) {
-            // Note: Streaming with JSON schema might behave differently depending on provider
-            options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, request.getJsonSchema()));
-        }
-        Prompt prompt = buildPrompt(request, options);
-        return Flux.defer(() -> {
-            StringBuilder content = new StringBuilder();
-            Map<String, Object> metadata = new LinkedHashMap<>();
-            return Flux.concat(
-                    Flux.just(ProviderEvent.started(service(), options.getModel())),
-                    chatModel.stream(prompt)
-                            .map(response -> {
-                                String delta = response.getResult().getOutput().getText();
-                                if (StringUtils.hasText(delta)) {
-                                    content.append(delta);
-                                }
-                                Map<String, Object> responseMetadata = extractGroundingMetadata(response);
-                                if (!responseMetadata.isEmpty()) {
-                                    metadata.putAll(responseMetadata);
-                                }
-                                if (StringUtils.hasText(delta)) {
-                                    return ProviderEvent.streamChunk(service(), options.getModel(), delta);
-                                }
-                                return null;
-                            })
-                            .filter(Objects::nonNull),
-                    Flux.defer(() -> Flux.just(ProviderEvent.metadata(service(), options.getModel(), metadata))),
-                    Flux.defer(() -> Flux.just(ProviderEvent.completed(service(), options.getModel(),
-                            content.toString(), metadata)))
-            );
-        }).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
-    }
+	@Override
+	public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
+		OpenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
+				request.isAllowWebSearch());
+		if (StringUtils.hasText(request.getJsonSchema())) {
+			// Note: Streaming with JSON schema might behave differently depending on
+			// provider
+			options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, request.getJsonSchema()));
+		}
+		Prompt prompt = buildPrompt(request, options);
+		return Flux.defer(() -> {
+			StringBuilder content = new StringBuilder();
+			Map<String, Object> metadata = new LinkedHashMap<>();
+			return Flux.concat(Flux.just(ProviderEvent.started(service(), options.getModel())),
+					chatModel.stream(prompt).map(response -> {
+						String delta = response.getResult().getOutput().getText();
+						if (StringUtils.hasText(delta)) {
+							content.append(delta);
+						}
+						Map<String, Object> responseMetadata = extractGroundingMetadata(response);
+						if (!responseMetadata.isEmpty()) {
+							metadata.putAll(responseMetadata);
+						}
+						if (StringUtils.hasText(delta)) {
+							return ProviderEvent.streamChunk(service(), options.getModel(), delta);
+						}
+						return null;
+					}).filter(Objects::nonNull),
+					Flux.defer(() -> Flux.just(ProviderEvent.metadata(service(), options.getModel(), metadata))),
+					Flux.defer(() -> Flux.just(
+							ProviderEvent.completed(service(), options.getModel(), content.toString(), metadata))));
+		}).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
+	}
 
-    private OpenAiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode,
-                                                   boolean allowWebSearch) {
-        OpenAiChatOptions chatOptions = new OpenAiChatOptions();
-        
-        if (options != null) {
-            chatOptions.setModel(resolveModel(options));
-            if (options.getTemperature() != null) {
-                chatOptions.setTemperature(options.getTemperature());
-            }
-            if (options.getTopP() != null) {
-                chatOptions.setTopP(options.getTopP());
-            }
-            if (options.getMaxTokens() != null) {
-                chatOptions.setMaxTokens(options.getMaxTokens());
-            }
-        }
+	private OpenAiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode, boolean allowWebSearch) {
+		OpenAiChatOptions chatOptions = new OpenAiChatOptions();
 
-        if (retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch) {
-            // Log warning or implement workaround for Google Search with OpenAI client
-        }
-        return chatOptions;
-    }
+		if (options != null) {
+			chatOptions.setModel(resolveModel(options));
+			if (options.getTemperature() != null) {
+				chatOptions.setTemperature(options.getTemperature());
+			}
+			if (options.getTopP() != null) {
+				chatOptions.setTopP(options.getTopP());
+			}
+			if (options.getMaxTokens() != null) {
+				chatOptions.setMaxTokens(options.getMaxTokens());
+			}
+		}
 
-    private String resolveModel(PromptOptions options) {
-        if (options != null && StringUtils.hasText(options.getModel())) {
-            return options.getModel();
-        }
-        return "gemini-2.0-flash";
-    }
+		if (retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch) {
+			// Log warning or implement workaround for Google Search with OpenAI client
+		}
+		return chatOptions;
+	}
 
-    private Prompt buildPrompt(ProviderRequest request, OpenAiChatOptions options) {
-        List<org.springframework.ai.chat.messages.Message> messages = new ArrayList<>();
-        if (StringUtils.hasText(request.getSystemPrompt())) {
-            messages.add(new SystemMessage(request.getSystemPrompt()));
-        }
-        messages.add(new UserMessage(request.getUserPrompt()));
-        return new Prompt(messages, options);
-    }
+	private String resolveModel(PromptOptions options) {
+		if (options != null && StringUtils.hasText(options.getModel())) {
+			return options.getModel();
+		}
+		return "gemini-2.0-flash";
+	}
 
-    private Map<String, Object> extractGroundingMetadata(ChatResponse response) {
-        if (response == null || response.getMetadata() == null) {
-            return Map.of();
-        }
-        // Metadata extraction logic might need adjustment for OpenAI-mapped response
-        return Map.of();
-    }
+	private Prompt buildPrompt(ProviderRequest request, OpenAiChatOptions options) {
+		List<org.springframework.ai.chat.messages.Message> messages = new ArrayList<>();
+		if (StringUtils.hasText(request.getSystemPrompt())) {
+			messages.add(new SystemMessage(request.getSystemPrompt()));
+		}
+		messages.add(new UserMessage(request.getUserPrompt()));
+		return new Prompt(messages, options);
+	}
+
+	private Map<String, Object> extractGroundingMetadata(ChatResponse response) {
+		if (response == null || response.getMetadata() == null) {
+			return Map.of();
+		}
+		// Metadata extraction logic might need adjustment for OpenAI-mapped response
+		return Map.of();
+	}
 }
