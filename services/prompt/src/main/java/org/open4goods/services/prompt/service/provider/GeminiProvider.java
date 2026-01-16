@@ -14,6 +14,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -43,7 +44,7 @@ public class GeminiProvider implements GenAiProvider {
         OpenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
                 request.isAllowWebSearch());
         if (StringUtils.hasText(request.getJsonSchema())) {
-            options = OpenAiChatOptions.builder().from(options).withResponseFormat(new org.springframework.ai.chat.prompt.ChatOptions.ResponseFormat("json_object", request.getJsonSchema())).build();
+            options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, request.getJsonSchema()));
         }
         ChatResponse response = chatModel.call(buildPrompt(request, options));
         String content = response.getResult().getOutput().getText();
@@ -57,7 +58,7 @@ public class GeminiProvider implements GenAiProvider {
                 request.isAllowWebSearch());
          if (StringUtils.hasText(request.getJsonSchema())) {
             // Note: Streaming with JSON schema might behave differently depending on provider
-            // options.setResponseFormat(...)
+            options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, request.getJsonSchema()));
         }
         Prompt prompt = buildPrompt(request, options);
         return Flux.defer(() -> {
@@ -90,24 +91,25 @@ public class GeminiProvider implements GenAiProvider {
 
     private OpenAiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode,
                                                    boolean allowWebSearch) {
-        OpenAiChatOptions.Builder builder = OpenAiChatOptions.builder();
+        OpenAiChatOptions chatOptions = new OpenAiChatOptions();
+        
         if (options != null) {
-            builder.withModel(resolveModel(options));
+            chatOptions.setModel(resolveModel(options));
             if (options.getTemperature() != null) {
-                builder.withTemperature(options.getTemperature());
+                chatOptions.setTemperature(options.getTemperature());
             }
             if (options.getTopP() != null) {
-                builder.withTopP(options.getTopP());
+                chatOptions.setTopP(options.getTopP());
             }
-        }
-        if (options != null && options.getMaxTokens() != null) {
-            builder.withMaxTokens(options.getMaxTokens());
+            if (options.getMaxTokens() != null) {
+                chatOptions.setMaxTokens(options.getMaxTokens());
+            }
         }
 
         if (retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch) {
             // Log warning or implement workaround for Google Search with OpenAI client
         }
-        return builder.build();
+        return chatOptions;
     }
 
     private String resolveModel(PromptOptions options) {
