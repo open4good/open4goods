@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
 import org.open4goods.model.ai.AiFieldScanner;
@@ -21,6 +22,8 @@ import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.services.prompt.service.provider.GenAiProvider;
+import org.open4goods.services.prompt.service.provider.ProviderEvent;
+import org.open4goods.services.prompt.service.provider.ProviderEventAccumulator;
 import org.open4goods.services.prompt.service.provider.ProviderRegistry;
 import org.open4goods.services.prompt.service.provider.ProviderRequest;
 import org.open4goods.services.prompt.service.provider.ProviderResult;
@@ -35,6 +38,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import reactor.core.publisher.Flux;
 
 /**
  * Service handling interactions with generative AI services.
@@ -278,6 +282,7 @@ public class PromptService implements HealthIndicator {
         // Populate the response object
         ret.setBody(providerResult);
         ret.setRaw(responseContent);
+        ret.setMetadata(providerResult.getMetadata());
         ret.setDuration(System.currentTimeMillis() - ret.getStart());
 
         return ret;
@@ -291,6 +296,7 @@ public class PromptService implements HealthIndicator {
         PromptResponse<ProviderResult> nativ = promptNativ(promptKey, variables, null, null);
         ret.setBody(nativ.getBody().getContent());
         ret.setRaw(nativ.getBody().getContent());
+        ret.setMetadata(nativ.getMetadata());
         ret.setDuration(nativ.getDuration());
         ret.setPrompt(nativ.getPrompt());
         ret.setStart(nativ.getStart());
@@ -333,10 +339,141 @@ public class PromptService implements HealthIndicator {
             ret.setBody(outputConverter.convert(repaired));
             ret.setRaw(repaired);
         }
+        ret.setMetadata(nativ.getMetadata());
         ret.setDuration(nativ.getDuration());
         ret.setPrompt(nativ.getPrompt());
         ret.setStart(nativ.getStart());
 
+        return ret;
+    }
+
+    /**
+     * Executes a prompt with streaming callbacks while still producing a typed response.
+     *
+     * @param promptKey      The key identifying the prompt configuration.
+     * @param variables      The variables to resolve within the prompt templates.
+     * @param type           The response type to convert to.
+     * @param eventConsumer  A consumer receiving streaming provider events.
+     * @return A {@link PromptResponse} with the final parsed body and metadata.
+     */
+    public <T> PromptResponse<T> objectPromptStream(String promptKey, Map<String, Object> variables, Class<T> type,
+                                                    Consumer<ProviderEvent> eventConsumer)
+            throws ResourceNotFoundException, SerialisationException {
+
+        PromptConfig pConf = getPromptConfig(promptKey);
+        if (pConf == null) {
+            logger.error("PromptConfig {} does not exist", promptKey);
+            throw new ResourceNotFoundException("Prompt not found");
+        }
+
+        meterRegistry.counter("prompt.requests",
+                "prompt", promptKey,
+                "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
+                "retrievalMode", pConf.getRetrievalMode().name()).increment();
+
+        PromptResponse<T> ret = new PromptResponse<>();
+        ret.setStart(System.currentTimeMillis());
+
+        var outputConverter = new BeanOutputConverter<>(type);
+        var jsonSchema = outputConverter.getJsonSchema();
+        Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
+
+        String systemPromptEvaluated = "";
+        if (pConf.getSystemPrompt() != null) {
+            try {
+                systemPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
+            } catch (TemplateEvaluationException e) {
+                meterRegistry.counter("prompt.errors",
+                        "prompt", promptKey,
+                        "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
+                        "retrievalMode", pConf.getRetrievalMode().name()).increment();
+                logger.error("Template evaluation error for system prompt in {}: {}", promptKey, e.getMessage());
+                throw e;
+            }
+        }
+        String userPromptEvaluated;
+        try {
+            userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
+        } catch (TemplateEvaluationException e) {
+            meterRegistry.counter("prompt.errors",
+                    "prompt", promptKey,
+                    "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
+                    "retrievalMode", pConf.getRetrievalMode().name()).increment();
+            logger.error("Template evaluation error for user prompt in {}: {}", promptKey, e.getMessage());
+            throw e;
+        }
+
+        if (null != instructions && !instructions.isEmpty()) {
+            systemPromptEvaluated += INSTRUCTION_HEADER_FR;
+            for (Entry<String, String> entry : instructions.entrySet()) {
+                systemPromptEvaluated += entry.getKey() + " : " + entry.getValue() + "\n";
+            }
+        }
+
+        String yamlPromptConfig = serialisationService.toYamLiteral(pConf);
+        PromptConfig updatedConfig = serialisationService.fromYaml(yamlPromptConfig, PromptConfig.class);
+        updatedConfig.setSystemPrompt(systemPromptEvaluated);
+        updatedConfig.setUserPrompt(userPromptEvaluated);
+        ret.setPrompt(updatedConfig);
+
+        if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
+            recordPromptRequest(promptKey, updatedConfig, systemPromptEvaluated, userPromptEvaluated);
+        }
+
+        GenAiProvider provider = providerRegistry.getProvider(pConf.getAiService());
+        ProviderRequest providerRequest = new ProviderRequest(
+                promptKey,
+                systemPromptEvaluated,
+                userPromptEvaluated,
+                pConf.getOptions(),
+                pConf.getRetrievalMode(),
+                jsonSchema,
+                pConf.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH,
+                pConf.getProviderOptions()
+        );
+
+        ProviderEventAccumulator accumulator = new ProviderEventAccumulator();
+        try {
+            Flux<ProviderEvent> stream = provider.generateTextStream(providerRequest)
+                    .doOnNext(event -> {
+                        accumulator.accept(event);
+                        if (eventConsumer != null) {
+                            eventConsumer.accept(event);
+                        }
+                    });
+            stream.blockLast();
+            externalApiHealthy = true;
+        } catch (Exception e) {
+            externalApiHealthy = false;
+            meterRegistry.counter("prompt.errors",
+                    "prompt", promptKey,
+                    "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
+                    "retrievalMode", pConf.getRetrievalMode().name()).increment();
+            logger.error("Error during streaming API call for promptKey {}: {}", promptKey, e.getMessage(), e);
+            throw e;
+        }
+
+        String raw = accumulator.getContent();
+        try {
+            ret.setBody(outputConverter.convert(raw));
+            ret.setRaw(raw);
+        } catch (Exception e) {
+            meterRegistry.counter("prompt.json.repair",
+                    "prompt", promptKey,
+                    "provider", pConf.getAiService() != null
+                            ? pConf.getAiService().name()
+                            : "UNKNOWN",
+                    "retrievalMode", pConf.getRetrievalMode().name()).increment();
+            logger.warn("JSON parsing failed for prompt {}. Attempting repair.", promptKey, e);
+            String repaired = repairJson(promptKey, raw, jsonSchema, updatedConfig);
+            ret.setBody(outputConverter.convert(repaired));
+            ret.setRaw(repaired);
+        }
+        ret.setMetadata(accumulator.getMetadata());
+        ret.setDuration(System.currentTimeMillis() - ret.getStart());
+        if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null && ret.getRaw() != null) {
+            recordPromptResponse(promptKey, ret.getRaw());
+        }
         return ret;
     }
 
@@ -358,6 +495,7 @@ public class PromptService implements HealthIndicator {
         ret.setDuration(internal.getDuration());
         ret.setStart(internal.getStart());
         ret.setPrompt(internal.getPrompt());
+        ret.setMetadata(internal.getMetadata());
 
         // Clean up markdown formatting from the response
         String response = internal.getBody().getContent().replace("```json", "").replace("```", "");
@@ -517,7 +655,7 @@ public class PromptService implements HealthIndicator {
                     }
                 }
                 case GEMINI -> {
-                    if (!StringUtils.hasText(genAiConfig.getGeminiApiKey())) {
+                    if (!StringUtils.hasText(genAiConfig.getVertexProjectId()) || !StringUtils.hasText(genAiConfig.getVertexLocation())) {
                         return false;
                     }
                 }
@@ -561,5 +699,52 @@ public class PromptService implements HealthIndicator {
             }
         }
         return repairResult.getContent();
+    }
+
+    private void recordPromptRequest(String promptKey, PromptConfig updatedConfig, String systemPromptEvaluated,
+                                     String userPromptEvaluated) {
+        try {
+            File recordDir = new File(genAiConfig.getRecordFolder());
+            if (!recordDir.exists()) {
+                recordDir.mkdirs();
+            }
+            String requestYaml = serialisationService.toYamLiteral(updatedConfig);
+            File requestFile = new File(recordDir, promptKey + "-request.yaml");
+            FileUtils.writeStringToFile(requestFile, requestYaml, Charset.defaultCharset());
+            logger.info("Recorded prompt request to file: {}", requestFile.getAbsolutePath());
+
+            int systemTokens = estimateTokens(systemPromptEvaluated);
+            int userTokens = estimateTokens(userPromptEvaluated);
+            String headerSystem = "####################################################################\n" +
+                    "Generation Date: " + new Date() + "\n" +
+                    "Prompt Type: SYSTEM\n" +
+                    "Estimated Tokens: " + systemTokens + "\n" +
+                    "####################################################################\n";
+            String headerUser = "####################################################################\n" +
+                    "Generation Date: " + new Date() + "\n" +
+                    "Prompt Type: USER\n" +
+                    "Estimated Tokens: " + userTokens + "\n" +
+                    "####################################################################\n";
+            String promptRecordContent = headerSystem + systemPromptEvaluated + "\n\n" + headerUser + userPromptEvaluated;
+            File promptRecordFile = new File(recordDir, promptKey + "-request-prompts.txt");
+            FileUtils.writeStringToFile(promptRecordFile, promptRecordContent, Charset.defaultCharset());
+            logger.info("Recorded prompt texts to file: {}", promptRecordFile.getAbsolutePath());
+        } catch (Exception e) {
+            logger.error("Error recording prompt request for key {}: {}", promptKey, e.getMessage(), e);
+        }
+    }
+
+    private void recordPromptResponse(String promptKey, String rawResponse) {
+        try {
+            File recordDir = new File(genAiConfig.getRecordFolder());
+            if (!recordDir.exists()) {
+                recordDir.mkdirs();
+            }
+            File responseFile = new File(recordDir, promptKey + "-response.txt");
+            FileUtils.writeStringToFile(responseFile, rawResponse, Charset.defaultCharset());
+            logger.info("Recorded prompt response content to file: {}", responseFile.getAbsolutePath());
+        } catch (Exception e) {
+            logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
+        }
     }
 }

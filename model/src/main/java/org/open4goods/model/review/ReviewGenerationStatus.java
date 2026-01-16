@@ -25,6 +25,28 @@ public class ReviewGenerationStatus {
         FAILED;
     }
 
+    /**
+     * Streaming progress events for review generation.
+     */
+    public enum ProgressEventType {
+        STARTED,
+        SEARCHING,
+        STREAM_CHUNK,
+        COMPLETED,
+        ERROR
+    }
+
+    /**
+     * Event entry representing a progress update.
+     *
+     * @param type      the event type
+     * @param message   the associated message
+     * @param chunk     the streamed content chunk (if any)
+     * @param timestamp the event timestamp in epoch milliseconds
+     */
+    public record ReviewGenerationEvent(ProgressEventType type, String message, String chunk, long timestamp) {
+    }
+
     private long upc;
     private Status status;
     private Long startTime;
@@ -37,6 +59,11 @@ public class ReviewGenerationStatus {
      * List of processing messages that track the internal state.
      */
     private List<String> messages = new ArrayList<>();
+
+    /**
+     * List of progress events emitted during streaming.
+     */
+    private List<ReviewGenerationEvent> events = new ArrayList<>();
 
     /**
      * Duration of the review generation process in milliseconds.
@@ -114,6 +141,14 @@ public class ReviewGenerationStatus {
         this.messages = messages;
     }
 
+    public List<ReviewGenerationEvent> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<ReviewGenerationEvent> events) {
+        this.events = events;
+    }
+
     /**
      * Appends a new message to the process status messages.
      *
@@ -121,6 +156,17 @@ public class ReviewGenerationStatus {
      */
     public void addMessage(String message) {
         this.messages.add(message);
+    }
+
+    /**
+     * Appends a new progress event to the status.
+     *
+     * @param type    the event type
+     * @param message the event message
+     * @param chunk   the streamed chunk (if any)
+     */
+    public void addEvent(ProgressEventType type, String message, String chunk) {
+        this.events.add(new ReviewGenerationEvent(type, message, chunk, System.currentTimeMillis()));
     }
 
     public long getDuration() {
@@ -170,6 +216,7 @@ public class ReviewGenerationStatus {
                 ", result=" + result +
                 ", errorMessage='" + errorMessage + '\'' +
                 ", messages=" + messages +
+                ", events=" + events +
                 ", duration=" + duration +
                 ", remaining=" + remaining +
                 ", gtin='" + gtin + '\'' +
@@ -178,7 +225,8 @@ public class ReviewGenerationStatus {
 
     @Override
     public int hashCode() {
-        return Objects.hash(upc, status, startTime, endTime, result, errorMessage, messages, duration, remaining, gtin);
+        return Objects.hash(upc, status, startTime, endTime, result, errorMessage, messages, events, duration, remaining,
+                gtin);
     }
 
     @Override
@@ -195,6 +243,7 @@ public class ReviewGenerationStatus {
                 Objects.equals(result, that.result) &&
                 Objects.equals(errorMessage, that.errorMessage) &&
                 Objects.equals(messages, that.messages) &&
+                Objects.equals(events, that.events) &&
                 Objects.equals(gtin, that.gtin);
     }
 }

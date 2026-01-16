@@ -2267,8 +2267,12 @@
     "banner": {
       "message": "Soutenez une plateforme éthique !",
       "cta": "Achetez avec Nudger",
-      "ariaLabel": "Bannière fixe pour promouvoir un achat responsable"
+      "ariaLabel": "Bannière fixe pour promouvoir un achat responsable",
+      "offersCount": "{count} offre | {count} offres"
     },
+    "start_impact_text": "Vous aimez bien ?",
+    "start_impact_subtext": "Soutenez un web indépendant, ouvert et à impact en faisant vos achats par nudger ! Ca marche aussi via nos commerçants partenaires",
+    "partners_link": "nos partenaires",
     "aiReview": {
       "empty": "Synthèse non encore demandée.",
       "errors": {

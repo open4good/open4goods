@@ -19,23 +19,6 @@
       </div>
     </div>
 
-    <div class="account-privacy-card__header">
-      <v-avatar
-        size="44"
-        color="surface-primary-080"
-        class="account-privacy-card__avatar"
-      >
-        <v-icon icon="mdi-shield-account" color="primary" />
-      </v-avatar>
-      <div>
-        <p class="account-privacy-card__title">
-          {{ t('siteIdentity.menu.account.privacy.cardTitle') }}
-        </p>
-        <p class="account-privacy-card__subtitle">
-          {{ t('siteIdentity.menu.account.privacy.subtitle') }}
-        </p>
-      </div>
-    </div>
 
     <v-divider class="my-4" />
 

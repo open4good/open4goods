@@ -1,14 +1,17 @@
 <template>
   <div class="product-page">
-    <TopBanner
-      v-model:open="isStickyBannerOpen"
-      :message="bannerMessage"
-      :aria-label="bannerAriaLabel"
-      :cta-label="bannerCtaLabel"
-      :cta-aria-label="bannerCtaLabel"
-      dismissible
-      @cta-click="scrollToSection(sectionIds.price)"
-    />
+    <ClientOnly>
+      <ProductStickyPriceBanner
+        :open="isStickyBannerOpen"
+        :new-price-label="bannerNewPriceLabel"
+        :new-price-link="bannerNewPriceLink"
+        :used-price-label="bannerUsedPriceLabel"
+        :used-price-link="bannerUsedPriceLink"
+        :offers-count-label="bannerOffersCountLabel"
+        @offers-click="scrollToSection(sectionIds.price)"
+        @scroll-to-offers="scrollToSection(sectionIds.price)"
+      />
+    </ClientOnly>
 
     <v-alert
       v-if="errorMessage"
@@ -51,6 +54,7 @@
         <section
           v-if="categoryDetail"
           :id="sectionIds.impact"
+          ref="impactSectionRef"
           class="product-page__section"
         >
           <ProductImpactSection
@@ -187,7 +191,7 @@
 </template>
 
 <script setup lang="ts">
-import { useWindowScroll, useWindowSize } from '@vueuse/core'
+import { useElementBounding } from '@vueuse/core'
 import {
   computed,
   defineAsyncComponent,
@@ -211,11 +215,12 @@ import {
   type ProductReferenceDto,
   type ProductScoreDto,
   type ProductSearchResponseDto,
+  type ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import TopBanner from '~/components/shared/ui/TopBanner.vue'
+import ProductStickyPriceBanner from '~/components/product/ProductStickyPriceBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
@@ -262,11 +267,13 @@ const NudgeToolAnimatedIcon = defineAsyncComponent(
 const route = useRoute()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
-const { t, locale } = useI18n()
+const { t, n, locale } = useI18n()
 const { isLoggedIn } = useAuth()
+// Variables removed: scrollY, viewportHeight
 const display = useDisplay()
-const { y: scrollY } = useWindowScroll()
-const { height: viewportHeight } = useWindowSize()
+
+const isStickyBannerOpen = ref(false)
+const isNudgeWizardOpen = ref(false)
 
 const PRODUCT_COMPONENTS = [
   'base',
@@ -281,16 +288,76 @@ const PRODUCT_COMPONENTS = [
   'eprel',
 ].join(',')
 
-const stickyBannerThresholdRatio = 0.8
-const isStickyBannerOpen = ref(false)
-const isNudgeWizardOpen = ref(false)
+const impactSectionRef = ref<HTMLElement | null>(null)
+const { top: impactSectionTop } = useElementBounding(impactSectionRef)
+
+const bannerNewPriceLabel = computed(() => {
+  const offer = product.value?.offers?.bestNewOffer
+  if (!offer?.price) return undefined
+  return n(offer.price, {
+    style: 'currency',
+    currency: offer.currency ?? 'EUR',
+    maximumFractionDigits: 2,
+  })
+})
+
+const bannerUsedPriceLabel = computed(() => {
+  const offer = product.value?.offers?.bestOccasionOffer
+  if (!offer?.price) return undefined
+  return n(offer.price, {
+    style: 'currency',
+    currency: offer.currency ?? 'EUR',
+    maximumFractionDigits: 2,
+  })
+})
+
+const resolveOfferLink = (
+  offer: ProductAggregatedPriceDto | null | undefined
+) => {
+  if (!offer) return undefined
+  if (offer.affiliationToken) return `/contrib/${offer.affiliationToken}`
+  return offer.url ?? undefined
+}
+
+const bannerNewPriceLink = computed(() =>
+  resolveOfferLink(product.value?.offers?.bestNewOffer)
+)
+const bannerUsedPriceLink = computed(() =>
+  resolveOfferLink(product.value?.offers?.bestOccasionOffer)
+)
+
+const bannerOffersCountLabel = computed(() => {
+  const count = product.value?.offers?.offersCount ?? 0
+  if (count <= 0) return undefined
+  return t('product.banner.offersCount', { count }, count)
+})
+
+watch(
+  () => impactSectionTop.value,
+  top => {
+    // Show banner when Impact Section reaches the top (offset by header height ~64px)
+    // We add a small buffer (e.g. 80px) so it triggers just as it's passing under the header
+    // The user wants it "on top of it's screen".
+    // If top is <= 64 (header height), it is at or above the viewport 'start' (under header).
+    // We also check if it's not *too* far up (scrolled past), but typically sticky banners stay until another section?
+    // User request: "Should not appears directly, should appears only when scrolling down"
+    // "triggered when user has 'Impact Score' on top of it's screen"
+
+    if (!impactSectionRef.value) {
+      isStickyBannerOpen.value = false
+      return
+    }
+
+    // Header is 64px.
+    // If Impact Section Top is <= 64px, it means the top of the section has hit the bottom of the header.
+    // We want it to show *from that point onwards* as we scroll down.
+    isStickyBannerOpen.value = top <= 80
+  },
+  { immediate: true }
+)
 
 const nudgeFabLabel = computed(() => t('product.nudge.fabLabel'))
 const nudgeFabAriaLabel = computed(() => t('product.nudge.fabAriaLabel'))
-
-const bannerMessage = computed(() => t('product.banner.message'))
-const bannerCtaLabel = computed(() => t('product.banner.cta'))
-const bannerAriaLabel = computed(() => t('product.banner.ariaLabel'))
 
 const props = defineProps<{
   productRoute: ProductRouteMatch
@@ -1869,33 +1936,16 @@ watch(shouldShowNudgeWizard, canShow => {
   }
 })
 
+/*
 watch(
   () => scrollY.value,
   (current, previous) => {
-    if (!import.meta.client) {
-      return
-    }
-
-    const viewport =
-      viewportHeight.value ||
-      (typeof window !== 'undefined' ? window.innerHeight : 0)
-    if (viewport <= 0) {
-      return
-    }
-
-    const threshold = viewport * stickyBannerThresholdRatio
-    const previousValue = typeof previous === 'number' ? previous : 0
-    const isScrollingDown = current > previousValue
-    const isScrollingUp = current < previousValue
-
-    if (isScrollingDown && current > threshold) {
-      isStickyBannerOpen.value = true
-    } else if (isScrollingUp && current <= threshold) {
-      isStickyBannerOpen.value = false
-    }
+    // ... removed redundant logic that was causing ReferenceError (stickyBannerThresholdRatio undefined)
+    // Sticky banner toggle is already handled by IntersectionObserver on the impact section
   },
   { flush: 'post' }
 )
+*/
 
 onMounted(() => {
   observeSections()
@@ -2193,7 +2243,7 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 100px;
+  top: 108px; /* 64px header + 44px banner */
   align-self: start;
   height: fit-content;
 }
@@ -2212,7 +2262,7 @@ useHead(() => {
 }
 
 .product-page__section {
-  scroll-margin-top: 96px;
+  scroll-margin-top: 108px; /* Match sticky nav + banner */
 }
 
 .product-page__fab {

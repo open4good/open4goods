@@ -48,7 +48,14 @@ const PRECACHE_EXTENSIONS = [
   'woff2',
 ]
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
-const WORKBOX_GLOB_IGNORES = ['videos/**/*', '**/_payload.json']
+const WORKBOX_GLOB_IGNORES = [
+  'videos/**/*',
+  '**/_payload.json',
+  '**/*.ts',
+  '**/*.map',
+  '**/node_modules/**',
+  '**/.nuxt/**',
+]
 const PLAUSIBLE_DOMAIN = process.env.PLAUSIBLE_DOMAIN || 'nudger.fr'
 const PLAUSIBLE_API_HOST =
   process.env.PLAUSIBLE_API_HOST || 'https://plausible.nudger.fr'
