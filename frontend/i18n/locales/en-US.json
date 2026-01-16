@@ -1266,6 +1266,10 @@
       "title": "Sigma, percentile.... What???",
       "content": "To ensure a fair score across all products, we use a statistical approach called **Sigma Scoring**.<br><br>Unlike a simple average, this method takes into account the **dispersion** of the data (standard deviation).<br><ul><li><strong>Sigma Scoring:</strong> Most products fall within the average range. Exceptional products (good or bad) don't skew the score for everyone else.</li><li><strong>Percentile (Fallback):</strong> If there are too few distinct values (e.g., only 3 possible warranty options), Sigma Scoring becomes less effective. We then switch to **Percentile** scoring to rank products from best to worst, while keeping a score out of 5.</li></ul><br>This allows us to give you a truly useful score, regardless of the product category!"
     },
+    "docs": {
+      "title": "Impact Score documentation",
+      "description": "Explore the reference docs, methodology notes, and data sources behind the Impact Score."
+    },
     "hero": {
       "eyebrow": "Impact Score",
       "title": "Environmental impact assessment of your products",
@@ -3392,6 +3396,45 @@
         "objections": "parallax-background-bastille-objections.svg",
         "cta": "parallax-background-bastille-cta.svg",
         "aplat": "parallax-aplats.svg"
+      }
+    }
+  },
+  "docs": {
+    "labels": {
+      "documentation": "Documentation",
+      "loading": "Loading documentation",
+      "article": "Documentation article",
+      "toc": "On this page",
+      "tags": "Tags",
+      "updated": "Updated",
+      "previous": "Previous",
+      "next": "Next",
+      "noDescription": "No description available yet.",
+      "metaTooltip": "Documentation metadata",
+      "path": "Path",
+      "unknown": "Unknown",
+      "untagged": "Untagged"
+    },
+    "errors": {
+      "load": "Unable to load documentation right now.",
+      "notFound": "Documentation not found."
+    },
+    "search": {
+      "label": "Search documentation",
+      "placeholder": "Search by title, content, or tags",
+      "filtersTitle": "Filters",
+      "tagsLabel": "Tags",
+      "results": "{count} result(s)",
+      "empty": "No matching documentation found.",
+      "loading": "Updating results"
+    },
+    "browser": {
+      "title": "Documentation browser",
+      "description": "Navigate the documentation tree and read pages without leaving this view.",
+      "treeToggle": "Open navigation",
+      "seo": {
+        "title": "Documentation browser",
+        "description": "Explore the documentation tree, search pages, and read content inline."
       }
     }
   }

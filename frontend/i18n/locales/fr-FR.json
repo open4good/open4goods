@@ -1282,6 +1282,10 @@
       "title": "Sigma, percentile.... Quoi ???",
       "content": "Pour garantir un score équitable entre tous les produits, nous utilisons une approche statistique appelée **Sigma Scoring**.<br><br>Contrairement à une simple moyenne, cette méthode prend en compte la **dispersion** des données (écart-type).<br><ul><li><strong>Sigma Scoring :</strong> La plupart des produits se situent dans la moyenne. Les produits exceptionnels (en bien ou en mal) n'écrasent pas le score des autres.</li><li><strong>Percentile (Secours) :</strong> Si trop peu de valeurs différentes existent (ex: seulement 3 options de garantie possibles), le Sigma Scoring ne fonctionne plus bien. Nous passons alors en mode **Percentile** pour classer les produits du meilleur au moins bon, tout en gardant une note sur 5.</li></ul><br>C'est ce qui nous permet de vous donner une note vraiment utile, quelle que soit la catégorie de produit !"
     },
+    "docs": {
+      "title": "Documentation Impact Score",
+      "description": "Explorez les documents de référence, notes méthodologiques et sources de données de l’Impact Score."
+    },
     "hero": {
       "eyebrow": "Impact Score",
       "title": "évaluation de l'impact environnemental de vos produits",
@@ -3441,6 +3445,45 @@
           "title": "Le comparateur nouveau est arrivé !",
           "ariaLabel": "Nudger - évaluation environnementale"
         }
+      }
+    }
+  },
+  "docs": {
+    "labels": {
+      "documentation": "Documentation",
+      "loading": "Chargement de la documentation",
+      "article": "Article de documentation",
+      "toc": "Sur cette page",
+      "tags": "Tags",
+      "updated": "Mis à jour",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "noDescription": "Aucune description disponible pour le moment.",
+      "metaTooltip": "Métadonnées de documentation",
+      "path": "Chemin",
+      "unknown": "Inconnu",
+      "untagged": "Sans tag"
+    },
+    "errors": {
+      "load": "Impossible de charger la documentation pour le moment.",
+      "notFound": "Documentation introuvable."
+    },
+    "search": {
+      "label": "Rechercher dans la documentation",
+      "placeholder": "Rechercher par titre, contenu ou tags",
+      "filtersTitle": "Filtres",
+      "tagsLabel": "Tags",
+      "results": "{count} résultat(s)",
+      "empty": "Aucun document correspondant.",
+      "loading": "Mise à jour des résultats"
+    },
+    "browser": {
+      "title": "Navigateur de documentation",
+      "description": "Parcourez l’arborescence et lisez les pages sans quitter la vue.",
+      "treeToggle": "Ouvrir la navigation",
+      "seo": {
+        "title": "Navigateur de documentation",
+        "description": "Explorez l’arborescence, recherchez des pages et lisez les contenus en inline."
       }
     }
   }
