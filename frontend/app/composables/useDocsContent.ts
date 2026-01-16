@@ -1,6 +1,4 @@
 import { computed } from 'vue'
-import { queryCollection } from '#content'
-import { useRequestURL } from '#imports'
 
 import {
   DEFAULT_DOMAIN_LANGUAGE,
@@ -137,9 +135,7 @@ export const normalizeBasePath = (basePath?: string | null): string => {
     return DEFAULT_DOCS_BASE_PATH
   }
 
-  const normalized = sanitized.startsWith('/')
-    ? sanitized
-    : `/${sanitized}`
+  const normalized = sanitized.startsWith('/') ? sanitized : `/${sanitized}`
 
   if (!normalized.startsWith(DEFAULT_DOCS_BASE_PATH)) {
     return DEFAULT_DOCS_BASE_PATH
@@ -150,9 +146,8 @@ export const normalizeBasePath = (basePath?: string | null): string => {
     : normalized.replace(/\/+$/, '')
 }
 
-export const normalizeSlugOrPath = (
-  slugOrPath?: string | null
-): string => normalizePathSegment(slugOrPath)
+export const normalizeSlugOrPath = (slugOrPath?: string | null): string =>
+  normalizePathSegment(slugOrPath)
 
 export const resolveDocPath = ({
   locale,
@@ -214,8 +209,8 @@ const buildNormalizedDoc = (doc: DocsDoc): DocsDoc => {
     doc.title ??
     (doc.body &&
       typeof doc.body === 'object' &&
-      (doc.body as { toc?: { links?: Array<{ text?: string }> } }).toc?.links?.[0]
-        ?.text) ??
+      (doc.body as { toc?: { links?: Array<{ text?: string }> } }).toc
+        ?.links?.[0]?.text) ??
     null
 
   const derivedTitle = titleCandidate || deriveTitleFromPath(doc.path)
@@ -331,9 +326,7 @@ export const useDocsContent = () => {
 
     const query = queryCollection('docs').where('path', '=', path)
     const resolvedQuery =
-      fields && fields.length > 0
-        ? query.select(fields)
-        : query
+      fields && fields.length > 0 ? query.select(fields) : query
 
     const doc = (await resolvedQuery.first()) as DocsDoc | null
 
