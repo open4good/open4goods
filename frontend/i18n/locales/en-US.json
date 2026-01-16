@@ -2246,8 +2246,12 @@
     "banner": {
       "message": "Support an ethical platform!",
       "cta": "Shop with Nudger",
-      "ariaLabel": "Sticky banner promoting responsible shopping"
+      "ariaLabel": "Sticky banner promoting responsible shopping",
+      "offersCount": "{count} offer | {count} offers"
     },
+    "start_impact_text": "Enjoying this?",
+    "start_impact_subtext": "Support an independent, open, and impactful web by shopping through Nudger! It also works via our partner merchants",
+    "partners_link": "our partners",
     "aiReview": {
       "empty": "Summary not requested yet.",
       "errors": {

@@ -1,13 +1,14 @@
 <template>
   <div class="product-page">
-    <TopBanner
-      v-model:open="isStickyBannerOpen"
-      :message="bannerMessage"
-      :aria-label="bannerAriaLabel"
-      :cta-label="bannerCtaLabel"
-      :cta-aria-label="bannerCtaLabel"
-      dismissible
-      @cta-click="scrollToSection(sectionIds.price)"
+    <ProductStickyPriceBanner
+      :open="isStickyBannerOpen"
+      :new-price-label="bannerNewPriceLabel"
+      :new-price-link="bannerNewPriceLink"
+      :used-price-label="bannerUsedPriceLabel"
+      :used-price-link="bannerUsedPriceLink"
+      :offers-count-label="bannerOffersCountLabel"
+      @offers-click="scrollToSection(sectionIds.price)"
+      @scroll-to-offers="scrollToSection(sectionIds.price)"
     />
 
     <v-alert
@@ -24,6 +25,7 @@
 
     <div v-else-if="product" class="product-page__layout">
       <aside
+        ref="productNavRef"
         class="product-page__nav"
         :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
       >
@@ -187,7 +189,11 @@
 </template>
 
 <script setup lang="ts">
-import { useWindowScroll, useWindowSize } from '@vueuse/core'
+import {
+  useWindowScroll,
+  useWindowSize,
+  useElementBounding,
+} from '@vueuse/core'
 import {
   computed,
   defineAsyncComponent,
@@ -215,7 +221,7 @@ import {
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import TopBanner from '~/components/shared/ui/TopBanner.vue'
+import ProductStickyPriceBanner from '~/components/product/ProductStickyPriceBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
@@ -281,16 +287,57 @@ const PRODUCT_COMPONENTS = [
   'eprel',
 ].join(',')
 
-const stickyBannerThresholdRatio = 0.8
-const isStickyBannerOpen = ref(false)
-const isNudgeWizardOpen = ref(false)
+const productNavRef = ref<HTMLElement | null>(null)
+const { top: navTop } = useElementBounding(productNavRef)
 
-const nudgeFabLabel = computed(() => t('product.nudge.fabLabel'))
-const nudgeFabAriaLabel = computed(() => t('product.nudge.fabAriaLabel'))
+const bannerNewPriceLabel = computed(() => {
+  const offer = product.value?.offers?.bestNewOffer
+  if (!offer?.price) return null
+  return n(offer.price, {
+    style: 'currency',
+    currency: offer.currency ?? 'EUR',
+    maximumFractionDigits: 2,
+  })
+})
 
-const bannerMessage = computed(() => t('product.banner.message'))
-const bannerCtaLabel = computed(() => t('product.banner.cta'))
-const bannerAriaLabel = computed(() => t('product.banner.ariaLabel'))
+const bannerUsedPriceLabel = computed(() => {
+  const offer = product.value?.offers?.bestOccasionOffer
+  if (!offer?.price) return null
+  return n(offer.price, {
+    style: 'currency',
+    currency: offer.currency ?? 'EUR',
+    maximumFractionDigits: 2,
+  })
+})
+
+const resolveOfferLink = (offer: any) => {
+  if (!offer) return null
+  if (offer.affiliationToken) return `/contrib/${offer.affiliationToken}`
+  return offer.url ?? null
+}
+
+const bannerNewPriceLink = computed(() =>
+  resolveOfferLink(product.value?.offers?.bestNewOffer)
+)
+const bannerUsedPriceLink = computed(() =>
+  resolveOfferLink(product.value?.offers?.bestOccasionOffer)
+)
+
+const bannerOffersCountLabel = computed(() => {
+  const count = product.value?.offers?.offersCount ?? 0
+  if (count <= 0) return null
+  return t('product.banner.offersCount', { count }, count)
+})
+
+watch(
+  () => navTop.value,
+  top => {
+    // Nav sticks at top: 100px. We trigger when it gets close.
+    // Adding a small buffer (e.g. <= 101) to ensure it triggers when sticky.
+    isStickyBannerOpen.value = top <= 105 && top > 0
+  },
+  { immediate: true }
+)
 
 const props = defineProps<{
   productRoute: ProductRouteMatch
