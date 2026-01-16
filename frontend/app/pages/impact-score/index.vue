@@ -29,6 +29,7 @@
       </div>
 
       <ImpactScoreDetails class="impact-score-page__section" />
+      <ImpactScoreDocsPanel class="impact-score-page__section" />
     </v-container>
   </div>
 </template>
@@ -42,6 +43,7 @@ import ImpactScoreHero from '~/components/impact-score/ImpactScoreHero.vue'
 import ImpactScoreMethodology from '~/components/impact-score/ImpactScoreMethodology.vue'
 import ImpactScorePrinciples from '~/components/impact-score/ImpactScorePrinciples.vue'
 import ImpactScoreSummary from '~/components/impact-score/ImpactScoreSummary.vue'
+import ImpactScoreDocsPanel from '~/components/impact-score/ImpactScoreDocsPanel.vue'
 
 const { t } = useI18n()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])

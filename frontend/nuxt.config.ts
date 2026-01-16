@@ -291,6 +291,7 @@ export default defineNuxtConfig({
   },
   modules: [
     'vuetify-nuxt-module',
+    '@nuxt/content',
     '@nuxtjs/i18n',
     '@nuxt/image',
     '@vueuse/nuxt',
