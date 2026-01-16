@@ -64,6 +64,12 @@ spring:
           temperature: 1.0
 #          response-format:
 #            type: JSON_OBJECT
+    vertex:
+      ai:
+        gemini:
+          project-id: ${gen-ai-config.vertex-project-id}
+          location: ${gen-ai-config.vertex-location}
+          api-key: ${gen-ai-config.vertex-api-key}
 
 springdoc:
   swagger-ui:

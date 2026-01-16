@@ -13,8 +13,10 @@ const handleToggleDrawer = () => emit('toggle-drawer')
         <v-app-bar-title class="d-flex align-center mt-sm">
           <the-main-logo />
         </v-app-bar-title>
-        <v-spacer />
-        <the-hero-menu @toggle-drawer="handleToggleDrawer" />
+        <the-hero-menu
+          class="flex-grow-1 ml-4"
+          @toggle-drawer="handleToggleDrawer"
+        />
       </div>
     </v-container>
   </v-app-bar>

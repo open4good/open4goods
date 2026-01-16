@@ -1,15 +1,17 @@
 <template>
   <div class="product-page">
-    <ProductStickyPriceBanner
-      :open="isStickyBannerOpen"
-      :new-price-label="bannerNewPriceLabel"
-      :new-price-link="bannerNewPriceLink"
-      :used-price-label="bannerUsedPriceLabel"
-      :used-price-link="bannerUsedPriceLink"
-      :offers-count-label="bannerOffersCountLabel"
-      @offers-click="scrollToSection(sectionIds.price)"
-      @scroll-to-offers="scrollToSection(sectionIds.price)"
-    />
+    <ClientOnly>
+      <ProductStickyPriceBanner
+        :open="isStickyBannerOpen"
+        :new-price-label="bannerNewPriceLabel"
+        :new-price-link="bannerNewPriceLink"
+        :used-price-label="bannerUsedPriceLabel"
+        :used-price-link="bannerUsedPriceLink"
+        :offers-count-label="bannerOffersCountLabel"
+        @offers-click="scrollToSection(sectionIds.price)"
+        @scroll-to-offers="scrollToSection(sectionIds.price)"
+      />
+    </ClientOnly>
 
     <v-alert
       v-if="errorMessage"
@@ -25,7 +27,6 @@
 
     <div v-else-if="product" class="product-page__layout">
       <aside
-        ref="productNavRef"
         class="product-page__nav"
         :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
       >
@@ -53,6 +54,7 @@
         <section
           v-if="categoryDetail"
           :id="sectionIds.impact"
+          ref="impactSectionRef"
           class="product-page__section"
         >
           <ProductImpactSection
@@ -217,6 +219,7 @@ import {
   type ProductReferenceDto,
   type ProductScoreDto,
   type ProductSearchResponseDto,
+  type ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
@@ -268,11 +271,14 @@ const NudgeToolAnimatedIcon = defineAsyncComponent(
 const route = useRoute()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
-const { t, locale } = useI18n()
+const { t, n, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const display = useDisplay()
 const { y: scrollY } = useWindowScroll()
 const { height: viewportHeight } = useWindowSize()
+
+const isStickyBannerOpen = ref(false)
+const isNudgeWizardOpen = ref(false)
 
 const PRODUCT_COMPONENTS = [
   'base',
@@ -287,12 +293,12 @@ const PRODUCT_COMPONENTS = [
   'eprel',
 ].join(',')
 
-const productNavRef = ref<HTMLElement | null>(null)
-const { top: navTop } = useElementBounding(productNavRef)
+const impactSectionRef = ref<HTMLElement | null>(null)
+const { top: impactSectionTop } = useElementBounding(impactSectionRef)
 
 const bannerNewPriceLabel = computed(() => {
   const offer = product.value?.offers?.bestNewOffer
-  if (!offer?.price) return null
+  if (!offer?.price) return undefined
   return n(offer.price, {
     style: 'currency',
     currency: offer.currency ?? 'EUR',
@@ -302,7 +308,7 @@ const bannerNewPriceLabel = computed(() => {
 
 const bannerUsedPriceLabel = computed(() => {
   const offer = product.value?.offers?.bestOccasionOffer
-  if (!offer?.price) return null
+  if (!offer?.price) return undefined
   return n(offer.price, {
     style: 'currency',
     currency: offer.currency ?? 'EUR',
@@ -310,10 +316,12 @@ const bannerUsedPriceLabel = computed(() => {
   })
 })
 
-const resolveOfferLink = (offer: any) => {
-  if (!offer) return null
+const resolveOfferLink = (
+  offer: ProductAggregatedPriceDto | null | undefined
+) => {
+  if (!offer) return undefined
   if (offer.affiliationToken) return `/contrib/${offer.affiliationToken}`
-  return offer.url ?? null
+  return offer.url ?? undefined
 }
 
 const bannerNewPriceLink = computed(() =>
@@ -325,19 +333,36 @@ const bannerUsedPriceLink = computed(() =>
 
 const bannerOffersCountLabel = computed(() => {
   const count = product.value?.offers?.offersCount ?? 0
-  if (count <= 0) return null
+  if (count <= 0) return undefined
   return t('product.banner.offersCount', { count }, count)
 })
 
 watch(
-  () => navTop.value,
+  () => impactSectionTop.value,
   top => {
-    // Nav sticks at top: 100px. We trigger when it gets close.
-    // Adding a small buffer (e.g. <= 101) to ensure it triggers when sticky.
-    isStickyBannerOpen.value = top <= 105 && top > 0
+    // Show banner when Impact Section reaches the top (offset by header height ~64px)
+    // We add a small buffer (e.g. 80px) so it triggers just as it's passing under the header
+    // The user wants it "on top of it's screen".
+    // If top is <= 64 (header height), it is at or above the viewport 'start' (under header).
+    // We also check if it's not *too* far up (scrolled past), but typically sticky banners stay until another section?
+    // User request: "Should not appears directly, should appears only when scrolling down"
+    // "triggered when user has 'Impact Score' on top of it's screen"
+
+    if (!impactSectionRef.value) {
+      isStickyBannerOpen.value = false
+      return
+    }
+
+    // Header is 64px.
+    // If Impact Section Top is <= 64px, it means the top of the section has hit the bottom of the header.
+    // We want it to show *from that point onwards* as we scroll down.
+    isStickyBannerOpen.value = top <= 80
   },
   { immediate: true }
 )
+
+const nudgeFabLabel = computed(() => t('product.nudge.fabLabel'))
+const nudgeFabAriaLabel = computed(() => t('product.nudge.fabAriaLabel'))
 
 const props = defineProps<{
   productRoute: ProductRouteMatch
@@ -2240,7 +2265,7 @@ useHead(() => {
 
 .product-page__nav {
   position: sticky;
-  top: 100px;
+  top: 108px; /* 64px header + 44px banner */
   align-self: start;
   height: fit-content;
 }
@@ -2259,7 +2284,7 @@ useHead(() => {
 }
 
 .product-page__section {
-  scroll-margin-top: 96px;
+  scroll-margin-top: 108px; /* Match sticky nav + banner */
 }
 
 .product-page__fab {

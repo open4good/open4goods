@@ -18,12 +18,14 @@ import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.provider.GenAiProvider;
+import org.open4goods.services.prompt.service.provider.ProviderEvent;
 import org.open4goods.services.prompt.service.provider.ProviderRegistry;
 import org.open4goods.services.prompt.service.provider.ProviderRequest;
 import org.open4goods.services.prompt.service.provider.ProviderResult;
 import org.open4goods.services.serialisation.service.SerialisationService;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import reactor.core.publisher.Flux;
 
 class PromptServiceJsonRepairTest {
 
@@ -88,6 +90,12 @@ class PromptServiceJsonRepairTest {
             }
             return new ProviderResult(service(), "stub", "{\"name\":\"fixed\"}", "{\"name\":\"fixed\"}", Map.of());
         }
+
+		@Override
+		public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 
     private record TestPayload(String name) {

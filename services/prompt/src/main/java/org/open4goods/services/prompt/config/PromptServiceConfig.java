@@ -33,6 +33,14 @@ public class PromptServiceConfig {
 
 	private String geminiApiKey;
 	
+	private String vertexProjectId;
+	
+	private String vertexLocation = "us-central1";
+	
+	private String vertexApiKey;
+	
+	private String vertexCredentialsJson;
+	
 	private String perplexityBaseUrl = "https://api.perplexity.ai";
 
 	private String perplexityCompletionsPath = "/chat/completions";
@@ -130,6 +138,24 @@ public class PromptServiceConfig {
 	}
 	public void setBatchApiEndpoint(String batchApiEndpoint) {
 		this.batchApiEndpoint = batchApiEndpoint;
+	}
+	public String getVertexProjectId() {
+		return vertexProjectId;
+	}
+	public void setVertexProjectId(String vertexProjectId) {
+		this.vertexProjectId = vertexProjectId;
+	}
+	public String getVertexLocation() {
+		return vertexLocation;
+	}
+	public void setVertexLocation(String vertexLocation) {
+		this.vertexLocation = vertexLocation;
+	}
+	public String getVertexApiKey() {
+		return vertexApiKey;
+	}
+	public void setVertexApiKey(String vertexApiKey) {
+		this.vertexApiKey = vertexApiKey;
 	}
 	
 	

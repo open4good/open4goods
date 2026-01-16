@@ -15,9 +15,9 @@
           <p class="product-sticky-banner__text">
             <span class="product-sticky-banner__icon">❤️</span>
             <span class="product-sticky-banner__message">
-              {{ $t('product.start_impact_text') }}
+              {{ t('product.start_impact_text') }}
               <br class="d-lg-none" />
-              {{ $t('product.start_impact_subtext') }}
+              {{ t('product.start_impact_subtext') }}
             </span>
             <a
               :href="partnersLink"
@@ -25,7 +25,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              {{ $t('product.partners_link') }}
+              {{ t('product.partners_link') }}
             </a>
           </p>
         </div>
@@ -76,29 +76,33 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 withDefaults(
   defineProps<{
     open?: boolean
     color?: string
     elevation?: string | number
     ariaLabel?: string
-    newPriceLabel?: string | null
-    newPriceLink?: string | null
-    usedPriceLabel?: string | null
-    usedPriceLink?: string | null
-    offersCountLabel?: string | null
+    newPriceLabel?: string
+    newPriceLink?: string
+    usedPriceLabel?: string
+    usedPriceLink?: string
+    offersCountLabel?: string
     partnersLink?: string
   }>(),
   {
     open: false,
-    color: 'surface-primary-080',
+    color: undefined,
     elevation: 8,
     ariaLabel: undefined,
-    newPriceLabel: null,
-    newPriceLink: null,
-    usedPriceLabel: null,
-    usedPriceLink: null,
-    offersCountLabel: null,
+    newPriceLabel: undefined,
+    newPriceLink: undefined,
+    usedPriceLabel: undefined,
+    usedPriceLink: undefined,
+    offersCountLabel: undefined,
     partnersLink: '/partners',
   }
 )
@@ -114,14 +118,15 @@ defineEmits<{
   position: fixed;
   top: 64px;
   inset-inline: 0;
-  height: 80px;
+  height: 44px;
   z-index: 29;
-  padding: 0 1.5rem;
-  background: rgba(var(--v-theme-hero-gradient-mid), 0.98);
-  color: rgb(var(--v-theme-text-on-accent));
-  box-shadow: 0 4px 12px rgba(var(--v-theme-shadow-primary-600), 0.15);
+  padding: 0 1rem;
+  background: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-surface));
+  box-shadow: 0 4px 12px rgba(var(--v-theme-shadow-primary-600), 0.08);
   display: flex;
   align-items: center;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 
 .product-sticky-banner__content {
@@ -143,9 +148,9 @@ defineEmits<{
 
 .product-sticky-banner__text {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.3;
-  color: rgba(var(--v-theme-text-on-accent), 0.95);
+  font-size: 0.825rem;
+  line-height: 1.2;
+  color: rgba(var(--v-theme-on-surface), 0.85);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -153,25 +158,25 @@ defineEmits<{
 }
 
 .product-sticky-banner__icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-right: 0.25rem;
 }
 
 .product-sticky-banner__link {
-  color: rgb(var(--v-theme-primary-lighten-1));
+  color: rgb(var(--v-theme-primary));
   text-decoration: underline;
-  font-weight: 600;
+  font-weight: 500;
   margin-left: 0.25rem;
 }
 
 .product-sticky-banner__link:hover {
-  color: rgb(var(--v-theme-primary-lighten-2));
+  color: rgb(var(--v-theme-primary-darken-1));
 }
 
 .product-sticky-banner__right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-shrink: 0;
 }
 
@@ -181,19 +186,21 @@ defineEmits<{
 }
 
 .product-sticky-banner__price-btn {
-  font-weight: 700;
+  font-weight: 600;
   text-transform: none;
-  min-width: 100px;
+  min-width: 80px;
+  height: 28px !important;
 }
 
 .product-sticky-banner__count-btn {
-  color: rgba(var(--v-theme-text-on-accent), 0.9);
+  color: rgba(var(--v-theme-on-surface), 0.7);
   text-transform: none;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: normal;
+  height: 28px !important;
 }
 
 .product-sticky-banner__count-btn:hover {
-  color: rgb(var(--v-theme-text-on-accent));
+  color: rgb(var(--v-theme-on-surface));
 }
 </style>

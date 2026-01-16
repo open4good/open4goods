@@ -655,7 +655,7 @@ public class PromptService implements HealthIndicator {
                     }
                 }
                 case GEMINI -> {
-                    if (!StringUtils.hasText(genAiConfig.getGeminiApiKey())) {
+                    if (!StringUtils.hasText(genAiConfig.getVertexProjectId()) || !StringUtils.hasText(genAiConfig.getVertexLocation())) {
                         return false;
                     }
                 }

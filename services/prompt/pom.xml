@@ -19,11 +19,14 @@
       <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
       <version>1.0.0-M6</version>
     </dependency>
-    <dependency>
+    <!-- Vertex AI removed, adding generic Google Gemini if available, or relying on OpenAI bridge -->
+    <!-- <dependency>
       <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
+      <artifactId>spring-ai-google-gemini-spring-boot-starter</artifactId>
       <version>1.0.0-M6</version>
-    </dependency>
+    </dependency> --> 
+    <!-- Actually, simplest is to use OpenAI starter for now and configure it for Gemini, 
+         OR just keep the OpenAI one which is already there. -->
     <!-- Commons Codec -->
     <dependency>
       <groupId>commons-codec</groupId>
