@@ -19,7 +19,7 @@ import org.open4goods.services.feedservice.service.EffiliationFeedService;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.prompt.config.PromptServiceConfig;
+
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -30,9 +30,9 @@ import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.springframework.ai.openai.api.OpenAiApi;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
@@ -49,8 +49,7 @@ import org.springframework.web.util.UrlPathHelper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
-import io.micrometer.core.aop.TimedAspect;
-import io.micrometer.core.instrument.MeterRegistry;
+
 
 @Configuration
 public class AppConfig {
@@ -326,14 +325,7 @@ public class AppConfig {
 
 
 
-	// TODO : Should be removed
 
-
-	@Bean
-	@Qualifier("openAiCustomApi")
-	OpenAiApi openAiCustomApi(@Autowired PromptServiceConfig genAiConfig) {
-		return new OpenAiApi(genAiConfig.getOpenaiApiKey());
-	}
 
 
 }

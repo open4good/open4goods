@@ -35,7 +35,13 @@ import reactor.core.publisher.Flux;
 /**
  * OpenAI provider implementation.
  */
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
+/**
+ * OpenAI provider implementation.
+ */
 @Component
+@ConditionalOnProperty(prefix = "gen-ai-config", name = "openai-api-key")
 public class OpenAiProvider implements GenAiProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenAiProvider.class);

@@ -22,10 +22,13 @@ import org.springframework.util.StringUtils;
 
 import reactor.core.publisher.Flux;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
 /**
  * Gemini provider implementation using Google Gemini via OpenAI compatibility.
  */
 @Component
+@ConditionalOnProperty(prefix = "gen-ai-config", name = "gemini-api-key")
 public class GeminiProvider implements GenAiProvider {
 
 	private final ChatModel chatModel;

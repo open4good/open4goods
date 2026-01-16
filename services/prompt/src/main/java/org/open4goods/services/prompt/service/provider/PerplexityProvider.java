@@ -24,7 +24,13 @@ import reactor.core.publisher.Flux;
 /**
  * Perplexity provider using OpenAI-compatible API.
  */
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
+/**
+ * Perplexity provider using OpenAI-compatible API.
+ */
 @Component
+@ConditionalOnProperty(prefix = "gen-ai-config", name = "perplexity-api-key")
 public class PerplexityProvider implements GenAiProvider {
 
     private final OpenAiApi perplexityApi;
