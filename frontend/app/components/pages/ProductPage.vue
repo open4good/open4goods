@@ -191,11 +191,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  useWindowScroll,
-  useWindowSize,
-  useElementBounding,
-} from '@vueuse/core'
+import { useElementBounding } from '@vueuse/core'
 import {
   computed,
   defineAsyncComponent,
@@ -273,9 +269,8 @@ const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const { t, n, locale } = useI18n()
 const { isLoggedIn } = useAuth()
+// Variables removed: scrollY, viewportHeight
 const display = useDisplay()
-const { y: scrollY } = useWindowScroll()
-const { height: viewportHeight } = useWindowSize()
 
 const isStickyBannerOpen = ref(false)
 const isNudgeWizardOpen = ref(false)
@@ -1941,33 +1936,16 @@ watch(shouldShowNudgeWizard, canShow => {
   }
 })
 
+/*
 watch(
   () => scrollY.value,
   (current, previous) => {
-    if (!import.meta.client) {
-      return
-    }
-
-    const viewport =
-      viewportHeight.value ||
-      (typeof window !== 'undefined' ? window.innerHeight : 0)
-    if (viewport <= 0) {
-      return
-    }
-
-    const threshold = viewport * stickyBannerThresholdRatio
-    const previousValue = typeof previous === 'number' ? previous : 0
-    const isScrollingDown = current > previousValue
-    const isScrollingUp = current < previousValue
-
-    if (isScrollingDown && current > threshold) {
-      isStickyBannerOpen.value = true
-    } else if (isScrollingUp && current <= threshold) {
-      isStickyBannerOpen.value = false
-    }
+    // ... removed redundant logic that was causing ReferenceError (stickyBannerThresholdRatio undefined)
+    // Sticky banner toggle is already handled by IntersectionObserver on the impact section
   },
   { flush: 'post' }
 )
+*/
 
 onMounted(() => {
   observeSections()

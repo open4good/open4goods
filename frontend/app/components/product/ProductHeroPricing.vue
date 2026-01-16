@@ -13,27 +13,29 @@
     <meta itemprop="priceCurrency" :content="priceCurrencyCode" />
 
     <!-- Condition Tabs -->
-    <v-tabs
-      v-if="conditionOptions.length"
-      v-model="selectedCondition"
-      density="compact"
-      color="primary"
-      class="mb-4 product-hero__tabs"
-      hide-slider
-      height="36"
-    >
-      <v-tab
-        v-for="option in conditionOptions"
-        :key="option.value"
-        :value="option.value"
-        class="product-hero__tab"
-        :class="{ 'product-hero__tab--active': option.selected }"
-        rounded="pill"
-        variant="flat"
+    <ClientOnly>
+      <v-tabs
+        v-if="conditionOptions.length"
+        v-model="selectedCondition"
+        density="compact"
+        color="primary"
+        class="mb-4 product-hero__tabs"
+        hide-slider
+        height="36"
       >
-        {{ option.label }}
-      </v-tab>
-    </v-tabs>
+        <v-tab
+          v-for="option in conditionOptions"
+          :key="option.value"
+          :value="option.value"
+          class="product-hero__tab"
+          :class="{ 'product-hero__tab--active': option.selected }"
+          rounded="pill"
+          variant="flat"
+        >
+          {{ option.label }}
+        </v-tab>
+      </v-tabs>
+    </ClientOnly>
 
     <v-row no-gutters class="align-center mt-2">
       <!-- Merchant / Favicon (Left) -->
@@ -176,7 +178,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch, type PropType } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  type PropType,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAnalytics } from '~/composables/useAnalytics'
 import type { ProductDto } from '~~/shared/api-client'
@@ -601,17 +610,15 @@ const startPriceCountdown = (condition: OfferCondition) => {
   animationFrameId.value = requestAnimationFrame(tick)
 }
 
-watch(
-  activeCondition,
-  condition => {
-    if (!import.meta.client) {
-      return
-    }
-
-    startPriceCountdown(condition)
-  },
-  { immediate: true }
-)
+onMounted(() => {
+  watch(
+    activeCondition,
+    condition => {
+      startPriceCountdown(condition)
+    },
+    { immediate: true }
+  )
+})
 
 onBeforeUnmount(() => {
   if (animationFrameId.value != null) {
