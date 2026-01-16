@@ -38,6 +38,7 @@ import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.dto.openai.BatchOutput;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
+import org.open4goods.services.prompt.service.provider.ProviderEvent;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.slf4j.Logger;
@@ -101,6 +102,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	private final ObjectMapper objectMapper;
 	private static final String AI_SOURCE_NAME = "AI";
+	private static final String CITATIONS_METADATA_KEY = "citations";
 
 	/**
 	 * Constructs a new ReviewGenerationService.
@@ -267,14 +269,21 @@ public class ReviewGenerationService implements HealthIndicator {
 				if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
 					status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
 					status.addMessage("AI grounding search...");
+					status.addEvent(ReviewGenerationStatus.ProgressEventType.SEARCHING, "AI grounding search", null);
 					promptVariables = preprocessingService.buildBasePromptVariables(product, verticalConfig);
 				} else {
 					status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
 					promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig, status);
 				}
-				PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt(promptKey,
-						promptVariables, AiReview.class);
-				AiReview newReview = reviewResponse.getBody();
+				status.addEvent(ReviewGenerationStatus.ProgressEventType.STARTED, "AI generation started", null);
+				PromptResponse<AiReview> reviewResponse;
+				if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
+					reviewResponse = genAiService.objectPromptStream(promptKey, promptVariables, AiReview.class,
+							event -> handleProviderEvent(status, event));
+				} else {
+					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
+				}
+				AiReview newReview = applyCitationsAndNormalize(reviewResponse.getBody(), reviewResponse.getMetadata());
 				newReview = updateAiReviewReferences(newReview);
 
 				// Populate attributes
@@ -286,6 +295,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				holder.setEnoughData(true);
 				status.setResult(holder);
 				status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
+				status.addEvent(ReviewGenerationStatus.ProgressEventType.COMPLETED, "AI generation completed", null);
 				meterRegistry.counter("review.generation.success").increment();
 			} catch (NotEnoughDataException e) {
 				logger.warn("Not enought data for generating ai review for {}", product);
@@ -293,12 +303,14 @@ public class ReviewGenerationService implements HealthIndicator {
 				status.setResult(holder);
 				status.setStatus(ReviewGenerationStatus.Status.FAILED);
 				status.setErrorMessage("Not enough data to generate an AI review for this product.");
+				status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR, status.getErrorMessage(), null);
 				meterRegistry.counter("review.generation.failed").increment();
 				lastGenerationFailed = true;
 			} catch (Exception e) {
 				logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
 				status.setStatus(ReviewGenerationStatus.Status.FAILED);
 				status.setErrorMessage(e.getMessage());
+				status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR, status.getErrorMessage(), null);
 				meterRegistry.counter("review.generation.failed").increment();
 				lastGenerationFailed = true;
 			} finally {
@@ -628,13 +640,21 @@ public class ReviewGenerationService implements HealthIndicator {
 		String ecologicalReview = replaceReferences(review.getEcologicalReview());
 		String summary = replaceReferences(review.getSummary());
 		String dataQuality = replaceReferences(review.getDataQuality());
-		List<String> pros = review.getPros().stream().map(this::replaceReferences).toList();
-		List<String> cons = review.getCons().stream().map(this::replaceReferences).toList();
-		List<AiReview.AiSource> sources = review.getSources().stream()
+		List<String> pros = review.getPros() == null
+				? List.of()
+				: review.getPros().stream().map(this::replaceReferences).toList();
+		List<String> cons = review.getCons() == null
+				? List.of()
+				: review.getCons().stream().map(this::replaceReferences).toList();
+		List<AiReview.AiSource> sources = review.getSources() == null
+				? List.of()
+				: review.getSources().stream()
 				.map(source -> new AiReview.AiSource(source.getNumber(), replaceReferences(source.getName()),
 						replaceReferences(source.getDescription()), source.getUrl()))
 				.toList();
-		List<AiReview.AiAttribute> attributes = review.getAttributes().stream()
+		List<AiReview.AiAttribute> attributes = review.getAttributes() == null
+				? List.of()
+				: review.getAttributes().stream()
 				.map(attr -> new AiReview.AiAttribute(replaceReferences(attr.getName()),
 						replaceReferences(attr.getValue()), attr.getNumber()))
 				.toList();
@@ -648,6 +668,150 @@ public class ReviewGenerationService implements HealthIndicator {
 			return Health.down().withDetail("error", "One or more review generations have failed").build();
 		}
 		return Health.up().build();
+	}
+
+	private void handleProviderEvent(ReviewGenerationStatus status, ProviderEvent event) {
+		if (event == null) {
+			return;
+		}
+		switch (event.getType()) {
+			case STARTED -> status.addEvent(ReviewGenerationStatus.ProgressEventType.STARTED,
+					"Streaming generation started", null);
+			case SEARCHING -> status.addEvent(ReviewGenerationStatus.ProgressEventType.SEARCHING,
+					event.getContent(), null);
+			case STREAM_CHUNK -> status.addEvent(ReviewGenerationStatus.ProgressEventType.STREAM_CHUNK,
+					null, event.getContent());
+			case COMPLETED -> status.addEvent(ReviewGenerationStatus.ProgressEventType.COMPLETED,
+					"Streaming generation completed", null);
+			case ERROR -> status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR,
+					event.getErrorMessage(), null);
+			default -> {
+			}
+		}
+	}
+
+	private AiReview applyCitationsAndNormalize(AiReview review, Map<String, Object> metadata) {
+		if (review == null) {
+			return null;
+		}
+		List<AiReview.AiSource> sources = review.getSources() == null ? List.of() : review.getSources();
+		List<AiReview.AiSource> metadataSources = resolveSourcesFromMetadata(metadata);
+		if (!metadataSources.isEmpty()) {
+			sources = metadataSources;
+		}
+		int maxSourceNumber = sources == null ? 0 : sources.size();
+		ReferenceNormalization normalization = normalizeReferences(review, sources, maxSourceNumber);
+		String dataQuality = normalization.dataQuality();
+		return new AiReview(normalization.description(), normalization.shortDescription(), normalization.mediumTitle(),
+				normalization.shortTitle(), normalization.technicalReview(), normalization.ecologicalReview(),
+				normalization.summary(), normalization.pros(), normalization.cons(), sources, normalization.attributes(),
+				dataQuality);
+	}
+
+	private List<AiReview.AiSource> resolveSourcesFromMetadata(Map<String, Object> metadata) {
+		if (metadata == null || metadata.isEmpty()) {
+			return List.of();
+		}
+		Object citations = metadata.get(CITATIONS_METADATA_KEY);
+		if (!(citations instanceof List<?> citationList)) {
+			return List.of();
+		}
+		List<AiReview.AiSource> sources = new ArrayList<>();
+		int index = 1;
+		for (Object citation : citationList) {
+			if (!(citation instanceof Map<?, ?> citationMap)) {
+				continue;
+			}
+			String url = citationMap.get("url") != null ? citationMap.get("url").toString() : null;
+			if (url == null || url.isBlank()) {
+				continue;
+			}
+			String title = citationMap.get("title") != null ? citationMap.get("title").toString() : url;
+			String snippet = citationMap.get("snippet") != null ? citationMap.get("snippet").toString() : "";
+			sources.add(new AiReview.AiSource(index++, title, snippet, url));
+		}
+		return sources;
+	}
+
+	private ReferenceNormalization normalizeReferences(AiReview review, List<AiReview.AiSource> sources,
+			int maxSourceNumber) {
+		ReferenceNormalizer normalizer = new ReferenceNormalizer(maxSourceNumber);
+		String description = normalizer.normalize(review.getDescription());
+		String shortDescription = normalizer.normalize(review.getShortDescription());
+		String mediumTitle = normalizer.normalize(review.getMediumTitle());
+		String shortTitle = normalizer.normalize(review.getShortTitle());
+		String technicalReview = normalizer.normalize(review.getTechnicalReview());
+		String ecologicalReview = normalizer.normalize(review.getEcologicalReview());
+		String summary = normalizer.normalize(review.getSummary());
+		String dataQuality = review.getDataQuality();
+		List<String> pros = review.getPros() == null
+				? List.of()
+				: review.getPros().stream().map(normalizer::normalize).toList();
+		List<String> cons = review.getCons() == null
+				? List.of()
+				: review.getCons().stream().map(normalizer::normalize).toList();
+		List<AiReview.AiAttribute> attributes = review.getAttributes() == null
+				? List.of()
+				: review.getAttributes().stream()
+				.map(attr -> new AiReview.AiAttribute(normalizer.normalize(attr.getName()),
+						normalizer.normalize(attr.getValue()), attr.getNumber()))
+				.toList();
+
+		if (maxSourceNumber == 0) {
+			dataQuality = appendDataQuality(dataQuality, "Aucune source fiable n'a été trouvée.");
+		} else if (normalizer.hasRemovedReferences()) {
+			dataQuality = appendDataQuality(dataQuality,
+					"Certaines références ont été retirées car elles ne correspondaient à aucune source.");
+		}
+		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle, technicalReview,
+				ecologicalReview, summary, pros, cons, attributes, dataQuality);
+	}
+
+	private String appendDataQuality(String dataQuality, String note) {
+		if (dataQuality == null || dataQuality.isBlank()) {
+			return note;
+		}
+		if (dataQuality.contains(note)) {
+			return dataQuality;
+		}
+		return dataQuality + " " + note;
+	}
+
+	private record ReferenceNormalization(String description, String shortDescription, String mediumTitle,
+			String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros,
+			List<String> cons, List<AiReview.AiAttribute> attributes, String dataQuality) {
+	}
+
+	private static class ReferenceNormalizer {
+		private final int maxSourceNumber;
+		private boolean removedReferences;
+
+		private ReferenceNormalizer(int maxSourceNumber) {
+			this.maxSourceNumber = maxSourceNumber;
+		}
+
+		private String normalize(String text) {
+			if (text == null) {
+				return null;
+			}
+			java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\[(\\d+)]").matcher(text);
+			StringBuffer buffer = new StringBuffer();
+			while (matcher.find()) {
+				int number = Integer.parseInt(matcher.group(1));
+				if (number > maxSourceNumber || number <= 0) {
+					removedReferences = true;
+					matcher.appendReplacement(buffer, "");
+				} else {
+					matcher.appendReplacement(buffer, matcher.group(0));
+				}
+			}
+			matcher.appendTail(buffer);
+			return buffer.toString();
+		}
+
+		private boolean hasRemovedReferences() {
+			return removedReferences;
+		}
 	}
 
 }

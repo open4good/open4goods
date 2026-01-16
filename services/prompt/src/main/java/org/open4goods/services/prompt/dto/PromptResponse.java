@@ -26,6 +26,11 @@ public class PromptResponse<T> {
     private String raw;
 
     /**
+     * Provider metadata associated with the response.
+     */
+    private java.util.Map<String, Object> metadata = new java.util.HashMap<>();
+
+    /**
      * Duration of the generation process (in milliseconds).
      */
     private long duration;
@@ -75,12 +80,21 @@ public class PromptResponse<T> {
         this.raw = raw;
     }
 
+    public java.util.Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(java.util.Map<String, Object> metadata) {
+        this.metadata = metadata;
+    }
+
     @Override
     public String toString() {
         return "PromptResponse{" +
                 "body=" + body +
                 ", prompt=" + prompt +
                 ", raw='" + raw + '\'' +
+                ", metadata=" + metadata +
                 ", duration=" + duration +
                 ", start=" + start +
                 '}';
@@ -88,7 +102,7 @@ public class PromptResponse<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(body, prompt, raw, duration, start);
+        return Objects.hash(body, prompt, raw, metadata, duration, start);
     }
 
     @Override
@@ -100,6 +114,7 @@ public class PromptResponse<T> {
                start == that.start &&
                Objects.equals(body, that.body) &&
                Objects.equals(prompt, that.prompt) &&
-               Objects.equals(raw, that.raw);
+               Objects.equals(raw, that.raw) &&
+               Objects.equals(metadata, that.metadata);
     }
 }

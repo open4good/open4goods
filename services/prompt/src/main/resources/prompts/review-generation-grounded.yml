@@ -9,6 +9,8 @@ systemPrompt: |
   Ne mentionne pas de prix, de dates, ni d'état neuf/occasion.
   Réponds exclusivement en JSON conforme au schéma fourni, sans texte supplémentaire.
   Référence les sources dans le texte avec des marqueurs [1], [2], etc.
+  Ne fabrique jamais de sources ni d'URL. Si tu n'as pas de sources fiables, laisse la liste "sources" vide
+  et explique clairement dans "dataQuality" que la recherche n'a rien donné.
 
 userPrompt: |
   Produit : [[${PRODUCT_NAME}]]
@@ -21,8 +23,10 @@ userPrompt: |
   [[${ATTRIBUTES}]]
 
   Rédige un avis structuré en français basé sur des tests, comparatifs et retours d'expérience.
-  Inclue un tableau "sources" avec {number, url, label?}.
-  Ne cite que des sources réelles trouvées via la recherche.
+  Respecte strictement le schéma AiReview.
+  La liste "sources" doit contenir {number, name, description, url}.
+  Ne cite que des sources réelles trouvées via la recherche et utilise les marqueurs [n] dans le texte.
+  Si aucune source fiable n'est trouvée, garde "sources" vide et baisse la qualité dans "dataQuality".
 
 options:
   model: "gpt-4o-mini"

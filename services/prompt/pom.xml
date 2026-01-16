@@ -19,6 +19,11 @@
       <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
       <version>1.0.0-M6</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
+      <version>1.0.0-M6</version>
+    </dependency>
     <!-- Commons Codec -->
     <dependency>
       <groupId>commons-codec</groupId>
