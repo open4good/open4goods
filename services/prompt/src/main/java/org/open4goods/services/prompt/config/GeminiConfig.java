@@ -27,8 +27,8 @@ public class GeminiConfig implements org.springframework.context.EnvironmentAwar
     @Bean
     @org.springframework.context.annotation.Primary
     public VertexAI vertexAi() throws IOException {
-        String projectId = env.getProperty("spring.ai.google.genai.project-id");
-        String location = env.getProperty("spring.ai.google.genai.location");
+        String projectId = env.getProperty("gen-ai-config.vertex-project-id");
+        String location = env.getProperty("gen-ai-config.vertex-location");
         String googleApiJson = env.getProperty("gen-ai-config.google-api-json");
 
         logger.info("****************************************************************");

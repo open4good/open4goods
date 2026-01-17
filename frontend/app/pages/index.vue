@@ -926,13 +926,8 @@ useHead(() => ({
                 <div v-show="animatedSections.blog">
                   <HomeBlogSection
                     :loading="blogLoading"
-<<<<<<< HEAD
                     :items="enrichedBlogItems"
-=======
-                    :featured-item="featuredBlogItem"
-                    :secondary-items="secondaryBlogItems"
                     :reveal="animatedSections.blog"
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
                   />
                 </div>
               </v-slide-x-transition>

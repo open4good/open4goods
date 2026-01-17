@@ -969,11 +969,10 @@ const updateLayoutPadding = () => {
     return
   }
 
-  const wizardComponent = wizardRef.value as any
   const wizardEl =
-    wizardComponent && '$el' in wizardComponent
-      ? (wizardComponent.$el as HTMLElement)
-      : (wizardComponent as HTMLElement | null)
+    wizardRef.value && '$el' in wizardRef.value
+      ? (wizardRef.value.$el as HTMLElement)
+      : (wizardRef.value as HTMLElement | null)
 
   const wrapperEl = windowWrapperRef.value
 
