@@ -1,5 +1,6 @@
 <template>
   <RoundedCornerCard
+    ref="wizardRef"
     surface="hero"
     rounded="xl"
     :elevation="3"
@@ -12,11 +13,12 @@
       'nudge-wizard',
       {
         'nudge-wizard--content-mode': isContentMode,
+        'nudge-wizard--category': isCategoryStep,
         'nudge-wizard--compact': compact,
+        'nudge-wizard--reduced-motion': shouldReduceMotion,
       },
     ]"
     :selectable="false"
-    ref="wizardRef"
   >
     <template #corner>
       <div
@@ -85,7 +87,11 @@
       </NudgeWizardHeader>
     </div>
 
-    <div class="nudge-wizard__progress mb-4" aria-hidden="true">
+    <div
+      ref="progressRef"
+      class="nudge-wizard__progress mb-4"
+      aria-hidden="true"
+    >
       <v-progress-linear
         :indeterminate="loading"
         :model-value="loading ? undefined : 0"
@@ -106,7 +112,6 @@
         :touch="false"
         :transition="windowTransition"
         :reverse-transition="windowReverseTransition"
-        :style="windowContentStyle"
       >
         <v-window-item
           v-for="step in steps"
@@ -114,14 +119,19 @@
           :value="step.key"
           class="fill-height"
         >
-          <component
-            :is="step.component"
-            v-bind="step.props"
-            @select="onCategorySelect"
-            @update:model-value="(value: unknown) => step.onUpdate?.(value)"
-            @continue="goToNext"
-            @return-to-category="resetForCategorySelection"
-          />
+          <div
+            :ref="element => setStepRef(element, step.key)"
+            class="nudge-wizard__step-content"
+          >
+            <component
+              :is="step.component"
+              v-bind="step.props"
+              @select="onCategorySelect"
+              @update:model-value="(value: unknown) => step.onUpdate?.(value)"
+              @continue="goToNext"
+              @return-to-category="resetForCategorySelection"
+            />
+          </div>
         </v-window-item>
       </v-window>
     </div>
@@ -231,7 +241,13 @@
 </template>
 
 <script setup lang="ts">
-import { useDebounceFn, useElementSize, useWindowSize } from '@vueuse/core'
+import type { ComponentPublicInstance } from 'vue'
+import {
+  useDebounceFn,
+  useElementSize,
+  usePreferredReducedMotion,
+  useWindowSize,
+} from '@vueuse/core'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import NudgeWizardHeader from '~/components/nudge-tool/NudgeWizardHeader.vue'
@@ -281,6 +297,10 @@ const emit = defineEmits<{ (event: 'navigate', target: string): void }>()
 const { t } = useI18n()
 const { isLoggedIn } = useAuth()
 const router = useRouter()
+const prefersReducedMotion = usePreferredReducedMotion()
+const shouldReduceMotion = computed(
+  () => prefersReducedMotion.value === 'reduce'
+)
 
 const { fetchCategories, selectCategoryBySlug, currentCategory } =
   useCategories()
@@ -886,102 +906,168 @@ onMounted(async () => {
 })
 
 const headerRef = ref<HTMLElement>()
+const progressRef = ref<HTMLElement>()
 const windowWrapperRef = ref<HTMLElement>()
 const footerRef = ref<HTMLElement>()
+const activeStepRef = ref<HTMLElement | null>(null)
+const stepRefs = ref<Record<string, HTMLElement | null>>({})
 
 const { height: headerHeight } = useElementSize(headerRef)
-const { height: windowHeight } = useElementSize(windowWrapperRef)
+const { height: progressHeight } = useElementSize(progressRef)
 const { height: footerHeight } = useElementSize(footerRef)
 const { height: viewportHeight } = useWindowSize()
+const { height: activeStepHeight } = useElementSize(activeStepRef)
 
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
 const WIZARD_MIN_HEIGHT = 300
-const lockedLayoutHeight = ref<number | null>(null)
-const lockedWindowHeight = ref<number | null>(null)
+const CATEGORY_HEIGHT_OFFSET = 200
+const WINDOW_MIN_HEIGHT = 220
+const VIEWPORT_PADDING = 32
 
 const wizardRef = ref<HTMLElement>()
-const { height: currentWizardHeight } = useElementSize(wizardRef)
+const wizardPadding = ref(0)
+const windowWrapperPadding = ref(0)
+const lockedContentHeight = ref<number | null>(null)
+const lastViewportHeight = ref<number | null>(null)
 
-const fixedContentHeight = ref<number | null>(null)
+const setStepRef = (
+  element: Element | ComponentPublicInstance | null,
+  key: string
+) => {
+  const resolved =
+    element && '$el' in element
+      ? (element.$el as HTMLElement | null)
+      : (element as HTMLElement | null)
 
-watch(
-  activeStepKey,
-  (next, previous) => {
-    // When moving from category to content steps, lock the height
-    if (previous === 'category' && next !== 'category') {
-      // Calculate target height: Current (Category) Height - 200px
-      const targetHeight = currentWizardHeight.value - 200
-      // Ensure we don't go too small (minimum 300px + wiggle room, or WIZARD_MIN_HEIGHT)
-      fixedContentHeight.value = Math.max(targetHeight, WIZARD_MIN_HEIGHT)
-    } else if (next === 'category') {
-      // Reset when going back to category
-      fixedContentHeight.value = null
-      lockedLayoutHeight.value = null
-      lockedWindowHeight.value = null
+  if (!resolved) {
+    stepRefs.value[key] = null
+    if (activeStepKey.value === key) {
+      activeStepRef.value = null
     }
-  },
-  { flush: 'pre' } // Capture height before update
-)
-
-// Legacy lock logic - only run if we haven't set a fixed content height
-const attemptLockHeights = () => {
-  if (props.compact || fixedContentHeight.value !== null) {
     return
   }
 
-  if (!isContentMode.value) {
-    return
+  stepRefs.value[key] = resolved
+  if (activeStepKey.value === key) {
+    activeStepRef.value = resolved
   }
-
-  if (
-    lockedLayoutHeight.value !== null ||
-    lockedWindowHeight.value !== null ||
-    headerHeight.value <= 0 ||
-    windowHeight.value <= 0 ||
-    footerHeight.value <= 0
-  ) {
-    return
-  }
-
-  const lockedWindow = Math.max(windowHeight.value, WIZARD_MIN_HEIGHT)
-  const layoutHeight = headerHeight.value + lockedWindow + footerHeight.value
-  lockedLayoutHeight.value = Math.max(layoutHeight, WIZARD_MIN_HEIGHT)
-  lockedWindowHeight.value = lockedWindow
 }
 
 watch(
-  [isContentMode, headerHeight, windowHeight, footerHeight],
-  attemptLockHeights,
-  {
-    immediate: true,
+  activeStepKey,
+  key => {
+    activeStepRef.value = stepRefs.value[key] ?? null
+  },
+  { flush: 'post' }
+)
+
+const updateLayoutPadding = () => {
+  if (!import.meta.client) {
+    return
   }
+
+  if (!wizardRef.value || !windowWrapperRef.value) {
+    return
+  }
+
+  const wizardStyles = getComputedStyle(wizardRef.value)
+  const wrapperStyles = getComputedStyle(windowWrapperRef.value)
+
+  wizardPadding.value =
+    Number.parseFloat(wizardStyles.paddingTop) +
+    Number.parseFloat(wizardStyles.paddingBottom)
+  windowWrapperPadding.value =
+    Number.parseFloat(wrapperStyles.paddingTop) +
+    Number.parseFloat(wrapperStyles.paddingBottom)
+}
+
+onMounted(() => {
+  updateLayoutPadding()
+  lastViewportHeight.value = viewportHeight.value
+})
+
+watch(
+  [viewportHeight, isCategoryStep],
+  async () => {
+    await nextTick()
+    updateLayoutPadding()
+  },
+  { flush: 'post' }
+)
+
+const baseSpacing = computed(
+  () =>
+    headerHeight.value +
+    progressHeight.value +
+    footerHeight.value +
+    wizardPadding.value +
+    windowWrapperPadding.value
+)
+
+const clampHeight = (height: number) => {
+  const maxHeight = Math.max(
+    viewportHeight.value - VIEWPORT_PADDING,
+    WIZARD_MIN_HEIGHT
+  )
+  return Math.min(Math.max(height, WIZARD_MIN_HEIGHT), maxHeight)
+}
+
+const baseTotalHeight = computed(() => {
+  const windowHeight = Math.max(activeStepHeight.value, WINDOW_MIN_HEIGHT)
+  return baseSpacing.value + windowHeight
+})
+
+const categoryHeight = computed(() => {
+  return clampHeight(baseTotalHeight.value - CATEGORY_HEIGHT_OFFSET)
+})
+
+watch(
+  [isContentMode, viewportHeight],
+  async () => {
+    if (props.compact || !isContentMode.value) {
+      lockedContentHeight.value = null
+      lastViewportHeight.value = viewportHeight.value
+      return
+    }
+
+    const viewportChanged = lastViewportHeight.value !== viewportHeight.value
+
+    if (lockedContentHeight.value === null || viewportChanged) {
+      await nextTick()
+      lockedContentHeight.value = clampHeight(baseTotalHeight.value)
+      lastViewportHeight.value = viewportHeight.value
+    }
+  },
+  { flush: 'post', immediate: true }
 )
 
 const wizardStyle = computed(() => {
-  if (fixedContentHeight.value !== null) {
+  if (props.compact) {
+    return undefined
+  }
+
+  if (isCategoryStep.value) {
     return {
-      height: `${fixedContentHeight.value}px`,
-      minHeight: `${fixedContentHeight.value}px`,
-      overflow: 'hidden',
+      height: `${categoryHeight.value}px`,
+      minHeight: `${categoryHeight.value}px`,
     }
   }
 
-  if (!lockedLayoutHeight.value) {
+  if (!lockedContentHeight.value) {
     return undefined
   }
 
-  return { minHeight: `${lockedLayoutHeight.value}px` }
+  return {
+    height: `${lockedContentHeight.value}px`,
+    minHeight: `${lockedContentHeight.value}px`,
+  }
 })
 
 const windowWrapperStyle = computed(() => {
-  // If we have a fixed total height, let flexbox handle the window wrapper height
-  if (fixedContentHeight.value !== null) {
-    return undefined
-  }
-
   if (props.compact) {
-    const reservedSpace = headerHeight.value + footerHeight.value + 64
+    const reservedSpace =
+      headerHeight.value + progressHeight.value + footerHeight.value + 64
     const availableHeight = Math.max(
       viewportHeight.value - reservedSpace,
       WIZARD_MIN_HEIGHT
@@ -992,22 +1078,7 @@ const windowWrapperStyle = computed(() => {
     }
   }
 
-  if (!lockedWindowHeight.value) {
-    return undefined
-  }
-
-  return {
-    minHeight: `${lockedWindowHeight.value}px`,
-    maxHeight: `${lockedWindowHeight.value}px`,
-  }
-})
-
-const windowContentStyle = computed(() => {
-  if (props.compact || !lockedWindowHeight.value) {
-    return undefined
-  }
-
-  return { minHeight: `${lockedWindowHeight.value}px` }
+  return undefined
 })
 
 const resolvedCornerSize = computed(() => (isContentMode.value ? 'xl' : 'lg'))
@@ -1049,6 +1120,9 @@ const cornerIconDimensions = computed(() => {
   max-width: none;
   display: flex;
   flex-direction: column;
+  transition:
+    height 280ms cubic-bezier(0.4, 0, 0.2, 1),
+    min-height 280ms cubic-bezier(0.4, 0, 0.2, 1);
 
   &__corner-content {
     display: flex;
@@ -1249,6 +1323,29 @@ const cornerIconDimensions = computed(() => {
 
 .nudge-wizard--content-mode .nudge-wizard__corner-content {
   transform: translateY(2px) scale(1.04);
+}
+
+.nudge-wizard--category {
+  .nudge-wizard__window {
+    justify-content: flex-start;
+
+    :deep(.v-window__container) {
+      align-items: flex-start;
+    }
+
+    :deep(.v-window-item) {
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+  }
+
+  .nudge-wizard__window-wrapper {
+    padding-block: clamp(0.25rem, 0.6vw, 0.5rem);
+  }
+}
+
+.nudge-wizard--reduced-motion {
+  transition: none;
 }
 
 .nudge-wizard--compact {
