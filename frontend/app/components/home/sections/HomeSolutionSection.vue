@@ -12,12 +12,14 @@ type SolutionBenefit = {
 
 const props = defineProps<{
   benefits: SolutionBenefit[]
+  reveal?: boolean
 }>()
 
 const { t } = useI18n()
 
 const sectionTitle = computed(() => t('home.solution.title'))
 const sectionDescription = computed(() => t('home.solution.description'))
+const isVisible = computed(() => Boolean(props.reveal))
 </script>
 
 <template>
@@ -43,18 +45,23 @@ const sectionDescription = computed(() => t('home.solution.description'))
               {{ sectionDescription }}
             </p>
           </header>
-          <v-row class="home-solution__list" dense>
+          <v-row
+            class="home-solution__list home-reveal-group"
+            :class="{ 'is-ready': true, 'is-visible': isVisible }"
+            dense
+          >
             <v-col
-              v-for="item in props.benefits"
+              v-for="(item, index) in props.benefits"
               :key="item.label"
               cols="12"
               md="6"
             >
               <NudgerCard
-                class="home-solution__item"
+                class="home-solution__item home-hover-card home-reveal-item"
                 border
                 :flat-corners="['top-left']"
                 :accent-corners="['bottom-left']"
+                :style="{ '--reveal-delay': `${index * 90}ms` }"
               >
                 <v-avatar class="home-solution__icon" size="60" color="surface">
                   <span aria-hidden="true">{{ item.emoji }}</span>
