@@ -29,16 +29,24 @@ dans les sections marketing (home, landing pages, etc.).
 
 ## API principale
 
-| Prop | Type | Rôle |
-| --- | --- | --- |
-| `border` | `boolean` | Ajoute la bordure primaire. |
-| `accentCorners` | `Array<'top-left'|'top-right'|'bottom-right'|'bottom-left'>` | Applique un rayon “accent” à un ou plusieurs coins. |
-| `flatCorners` | `Array<'top-left'|'top-right'|'bottom-right'|'bottom-left'>` | Force un coin à `0` pour obtenir un angle droit. |
-| `baseRadius` | `string` | Rayon par défaut pour tous les coins. |
-| `accentRadius` | `string` | Rayon appliqué aux coins “accent”. |
-| `padding` | `string` | Padding interne de la carte. |
-| `background` | `string` | Couleur ou gradient de fond. |
-| `elevation` | `number` | Élévation Vuetify optionnelle. |
+| Prop | Type | Défaut | Rôle |
+| --- | --- | --- | --- |
+| `border` | `boolean` | `false` | Ajoute la bordure primaire. |
+| `shadow` | `boolean` | `true` | Active l'ombre portée (box-shadow). |
+| `hoverable` | `boolean` | `true` | Active l'effet de survol (lift + ombre renforcée). |
+| `accentCorners` | `Array<NudgerCorner>` | `[]` | Applique un rayon "accent" à un ou plusieurs coins. |
+| `flatCorners` | `Array<NudgerCorner>` | `[]` | Force un coin à `0` pour obtenir un angle droit. |
+| `baseRadius` | `string` | `'30px'` | Rayon par défaut pour tous les coins. |
+| `accentRadius` | `string` | `'50px'` | Rayon appliqué aux coins "accent". |
+| `topLeftRadius` | `string` | - | Surcharge individuelle du coin haut-gauche. |
+| `topRightRadius` | `string` | - | Surcharge individuelle du coin haut-droit. |
+| `bottomRightRadius` | `string` | - | Surcharge individuelle du coin bas-droit. |
+| `bottomLeftRadius` | `string` | - | Surcharge individuelle du coin bas-gauche. |
+| `padding` | `string` | `'1.25rem'` | Padding interne de la carte. |
+| `background` | `string` | `'#ffffff'` | Couleur ou gradient de fond. |
+| `elevation` | `number` | `0` | Élévation Vuetify optionnelle. |
+
+> **NudgerCorner** = `'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'`
 
 ## Exemples
 
@@ -54,7 +62,7 @@ dans les sections marketing (home, landing pages, etc.).
 </NudgerCard>
 ```
 
-### Carte “plein écran” personnalisée
+### Carte "plein écran" personnalisée
 
 ```vue
 <NudgerCard
@@ -63,6 +71,40 @@ dans les sections marketing (home, landing pages, etc.).
   base-radius="clamp(1.75rem, 4vw, 2.5rem)"
 >
   <p>CTA</p>
+</NudgerCard>
+```
+
+### Surcharge individuelle des coins
+
+Utilisez les props `topLeftRadius`, `topRightRadius`, `bottomRightRadius` et `bottomLeftRadius` pour un contrôle précis :
+
+```vue
+<NudgerCard
+  border
+  top-left-radius="0"
+  bottom-right-radius="60px"
+>
+  <p>Coin haut-gauche carré, coin bas-droit accentué</p>
+</NudgerCard>
+```
+
+### Carte statique (sans hover)
+
+Désactivez les effets de survol pour les cartes informatives :
+
+```vue
+<NudgerCard :hoverable="false">
+  <p>Cette carte ne réagit pas au survol</p>
+</NudgerCard>
+```
+
+### Carte sans ombre
+
+Pour un style plus plat :
+
+```vue
+<NudgerCard :shadow="false" border>
+  <p>Carte avec bordure mais sans ombre</p>
 </NudgerCard>
 ```
 
