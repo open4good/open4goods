@@ -374,7 +374,8 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
 
     return {
       ...item,
-      segments: segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
+      segments:
+        segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
     }
   })
 }
@@ -382,7 +383,7 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
 
 <template>
   <div class="home-hero-highlights" role="list">
-    <v-row class="home-hero-highlights__row" align="stretch">
+    <v-row align="stretch">
       <v-col
         v-for="(item, index) in heroHighlightItems"
         :key="`hero-highlight-${index}`"
@@ -428,9 +429,7 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
 </template>
 
 <style scoped lang="sass">
-.home-hero-highlights__row
-  margin: 0
-  gap: clamp(1rem, 3vw, 1.5rem)
+
 
 .home-hero-highlights__col
   display: flex

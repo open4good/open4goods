@@ -44,8 +44,8 @@
                   <div class="main-menu-search__actions">
                     <v-btn
                       icon="mdi-arrow-right"
-                      variant="flat"
-                      color="primary"
+                      variant="plain"
+                      rounded="0"
                       size="small"
                       :aria-label="t('siteIdentity.menu.search.submitLabel')"
                       @click.prevent="handleSearchSubmit"

@@ -115,7 +115,7 @@
               "title": "🌿 ImpactScore : Guider vos achats",
               "segments": [
                 {
-                  "text": "Une évaluation écologique et environnementale innovante pour {products} produits dans"
+                  "text": "Une évaluation écologique et environnementale innovante pour vous faire acheter mieux. {products} produits évalués, dans"
                 },
                 {
                   "text": "{categories} catégories",
@@ -140,7 +140,7 @@
               ]
             },
             {
-              "title": "Comparateur de prix",
+              "title": " 💶 Comparateur de prix",
               "segments": [
                 {
                   "text": "Sans se faire avoir sur les prix avec"

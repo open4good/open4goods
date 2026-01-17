@@ -138,15 +138,18 @@
     <div ref="footerRef" class="nudge-wizard__footer">
       <!-- Left: Previous -->
       <div class="nudge-wizard__footer-left d-flex align-center">
-        <v-btn
-          v-if="hasPreviousStep"
-          variant="text"
-          prepend-icon="mdi-chevron-left"
-          class="nudge-wizard__footer-btn"
-          @click="goToPrevious"
-        >
-          {{ $t('nudge-tool.actions.previous') }}
-        </v-btn>
+        <transition name="rapid-fade">
+          <v-btn
+            v-if="hasPreviousStep"
+            key="wizard-prev-btn"
+            variant="text"
+            icon="mdi-chevron-left"
+            class="nudge-wizard__footer-btn"
+            :disabled="!hasPreviousStep"
+            :aria-label="$t('nudge-tool.actions.previous')"
+            @click="goToPrevious"
+          />
+        </transition>
       </div>
 
       <!-- Center: Steppers -->
@@ -229,12 +232,11 @@
           color="primary"
           variant="flat"
           :disabled="isNextDisabled"
-          append-icon="mdi-chevron-right"
+          icon="mdi-chevron-right"
           class="nudge-wizard__footer-btn ms-2"
+          :aria-label="$t('nudge-tool.actions.next')"
           @click="goToNext"
-        >
-          {{ $t('nudge-tool.actions.next') }}
-        </v-btn>
+        />
       </div>
     </div>
   </RoundedCornerCard>
@@ -967,12 +969,25 @@ const updateLayoutPadding = () => {
     return
   }
 
-  if (!wizardRef.value || !windowWrapperRef.value) {
+  const wizardComponent = wizardRef.value as any
+  const wizardEl =
+    wizardComponent && '$el' in wizardComponent
+      ? (wizardComponent.$el as HTMLElement)
+      : (wizardComponent as HTMLElement | null)
+
+  const wrapperEl = windowWrapperRef.value
+
+  if (
+    !wizardEl ||
+    !wrapperEl ||
+    !(wizardEl instanceof Element) ||
+    !(wrapperEl instanceof Element)
+  ) {
     return
   }
 
-  const wizardStyles = getComputedStyle(wizardRef.value)
-  const wrapperStyles = getComputedStyle(windowWrapperRef.value)
+  const wizardStyles = getComputedStyle(wizardEl)
+  const wrapperStyles = getComputedStyle(wrapperEl)
 
   wizardPadding.value =
     Number.parseFloat(wizardStyles.paddingTop) +
@@ -1363,5 +1378,15 @@ const cornerIconDimensions = computed(() => {
   .nudge-wizard__window :deep(.v-window__container) {
     align-items: stretch;
   }
+}
+
+.rapid-fade-enter-active,
+.rapid-fade-leave-active {
+  transition: opacity 0.15s ease-out;
+}
+
+.rapid-fade-enter-from,
+.rapid-fade-leave-to {
+  opacity: 0;
 }
 </style>

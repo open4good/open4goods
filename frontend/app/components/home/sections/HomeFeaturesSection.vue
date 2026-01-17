@@ -25,7 +25,7 @@ const { t } = useI18n()
         />
         <!-- eslint-enable vue/no-v-html -->
       </header>
-      <v-row class="home-features__grid" align="stretch">
+      <v-row class="home-features__grid" align="stretch" justify="center">
         <v-col
           v-for="feature in props.features"
           :key="feature.title"

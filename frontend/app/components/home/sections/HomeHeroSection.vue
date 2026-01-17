@@ -244,10 +244,10 @@ useHead({
                     >
                       <template #append-inner>
                         <v-btn
-                          class="home-hero__search-submit nudger_degrade-defaut"
+                          class="home-hero__search-submit"
                           icon="mdi-arrow-right"
-                          variant="flat"
-                          color="primary"
+                          variant="plain"
+                          rounded="0"
                           size="small"
                           type="submit"
                           :aria-label="
@@ -259,15 +259,17 @@ useHead({
                       </template>
                     </SearchSuggestField>
                   </form>
+
+                  <div class="home-hero__panel-block">
+                    <NudgeToolWizard :verticals="wizardVerticals" />
+                  </div>
+
                   <HomeHeroHighlights
                     :partners-count="partnersCount"
                     :open-data-millions="openDataMillions"
                     :products-count="productsCount"
                     :categories-count="categoriesCount"
                   />
-                </div>
-                <div class="home-hero__panel-block">
-                  <NudgeToolWizard :verticals="wizardVerticals" />
                 </div>
               </div>
             </v-sheet>

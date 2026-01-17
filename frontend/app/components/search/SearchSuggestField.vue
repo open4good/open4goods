@@ -43,8 +43,8 @@
               v-if="shouldShowVoiceButton && isHydrated"
               class="search-suggest-field__voice-button"
               density="comfortable"
-              variant="text"
-              icon
+              variant="plain"
+              rounded="0"
               :color="isVoiceListening ? 'primary' : undefined"
               :title="
                 voiceError ||
@@ -73,8 +73,8 @@
               v-if="shouldShowScannerButton"
               class="search-suggest-field__scanner-button"
               density="comfortable"
-              variant="text"
-              icon
+              variant="plain"
+              rounded="0"
               :aria-label="t('search.suggestions.scanner.openLabel')"
               data-test="search-scanner-button"
               @click="openScannerDialog"

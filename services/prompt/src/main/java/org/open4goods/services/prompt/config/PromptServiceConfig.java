@@ -103,4 +103,17 @@ public class PromptServiceConfig {
     public void setBatchPollInterval(Duration batchPollInterval) {
         this.batchPollInterval = batchPollInterval;
     }
+    
+    /**
+     * JSON content for Google Cloud authentication (SA key).
+     */
+    private String googleApiJson;
+
+    public String getGoogleApiJson() {
+        return googleApiJson;
+    }
+
+    public void setGoogleApiJson(String googleApiJson) {
+        this.googleApiJson = googleApiJson;
+    }
 }
