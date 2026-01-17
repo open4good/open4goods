@@ -204,18 +204,27 @@ jobs:
             ui/target/ui-0.0.1-SNAPSHOT.jar
             front-api/target/front-api-0.0.1-SNAPSHOT.jar
 
-      - name: 🌐 Generate Maven Site (stage)
+      - name: 🌐 Generate Maven Site (minimal)
         shell: bash
         run: |
           set -euo pipefail
-          mvn -B -ntp -T 1C -DskipTests site site:stage
+          mvn -B -ntp -T 1C -DskipTests -Psite-minimal site
+
+      - name: 🧩 Generate dependency graph (DOT)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mvn -B -ntp -DskipTests \
+            org.apache.maven.plugins:maven-dependency-plugin:tree \
+            -DoutputType=dot \
+            -DoutputFile=target/site/dependency-graph.dot
 
       - name: 🧾 Copy Maven site & JaCoCo aggregate into frontend/app/public/reports
         shell: bash
         run: |
           set -euo pipefail
 
-          MAVEN_SITE_SRC="target/staging"
+          MAVEN_SITE_SRC="target/site"
 
           if [[ -d "target/site/jacoco-aggregate" ]]; then
             JACOCO_SRC="target/site/jacoco-aggregate"
@@ -281,7 +290,7 @@ jobs:
 
           echo "=== Maven/Jacoco candidates ==="
           find . -maxdepth 6 -type d \( \
-            -path "*/target/staging*" -o \
+            -path "*/target/site*" -o \
             -path "*/target/site/jacoco*" \
           \) -print || true
 
@@ -478,5 +487,5 @@ jobs:
             admin/target/admin-0.0.1-SNAPSHOT.jar
             api/target/api-0.0.1-SNAPSHOT.jar
             ui/target/ui-0.0.1-SNAPSHOT.jar
-            target/staging/taglist/taglist.xml
+            target/site/taglist/taglist.xml
             reports-${{ steps.meta.outputs.safe_version }}.tgz

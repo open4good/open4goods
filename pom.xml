@@ -146,6 +146,16 @@
 				<artifactId>swagger-annotations</artifactId>
 				<version>${swagger.core.v3.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.sf.barcode4j</groupId>
+				<artifactId>barcode4j</artifactId>
+				<version>${barcode4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sleepycat</groupId>
+				<artifactId>je</artifactId>
+				<version>${sleepycat-je.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -158,19 +168,6 @@
 		    <artifactId>spring-boot-docker-compose</artifactId>
 		</dependency>
 -->
-
-
-                <dependency>
-                        <groupId>net.sf.barcode4j</groupId>
-                        <artifactId>barcode4j</artifactId>
-                        <version>${barcode4j.version}</version>
-                </dependency>
-
-                <dependency>
-                        <groupId>com.sleepycat</groupId>
-                        <artifactId>je</artifactId>
-                        <version>${sleepycat-je.version}</version>
-                </dependency>
 
 
                 <dependency>
@@ -403,7 +400,6 @@
     <profiles>
       <profile>
         <id>site</id>
-
         <reporting>
           <plugins>
             <plugin>
@@ -412,7 +408,7 @@
               <reportSets>
                 <reportSet>
                   <reports>
-                    <report>report</report>
+                    <report>report-aggregate</report>
                   </reports>
                 </reportSet>
               </reportSets>
@@ -439,14 +435,6 @@
               </configuration>
               <reportSets>
                 <reportSet>
-                  <!-- defines taglist reports in the modules -->
-                  <id>taglist-report</id>
-                  <reports>
-                    <report>taglist</report>
-                  </reports>
-                </reportSet>
-                <reportSet>
-                  <!-- defines taglist aggregate report -->
                   <id>taglist-aggregate</id>
                   <inherited>false</inherited>
                   <reports>
@@ -458,7 +446,6 @@
                 </reportSet>
               </reportSets>
             </plugin>
-            <!-- Maven site plugin configuration -->
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-site-plugin</artifactId>
@@ -466,6 +453,59 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-project-info-reports-plugin</artifactId>
+            </plugin>
+          </plugins>
+        </reporting>
+      </profile>
+      <profile>
+        <id>site-minimal</id>
+        <reporting>
+          <plugins>
+            <plugin>
+              <groupId>org.jacoco</groupId>
+              <artifactId>jacoco-maven-plugin</artifactId>
+              <reportSets>
+                <reportSet>
+                  <reports>
+                    <report>report-aggregate</report>
+                  </reports>
+                </reportSet>
+              </reportSets>
+            </plugin>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>taglist-maven-plugin</artifactId>
+              <configuration>
+                <aggregate>true</aggregate>
+                <xmlOutputDirectory>${project.build.directory}/site/taglist</xmlOutputDirectory>
+              </configuration>
+              <reportSets>
+                <reportSet>
+                  <id>taglist-aggregate</id>
+                  <inherited>false</inherited>
+                  <reports>
+                    <report>taglist</report>
+                  </reports>
+                  <configuration>
+                    <aggregate>true</aggregate>
+                  </configuration>
+                </reportSet>
+              </reportSets>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-project-info-reports-plugin</artifactId>
+              <reportSets>
+                <reportSet>
+                  <reports>
+                    <report>dependencies</report>
+                  </reports>
+                </reportSet>
+              </reportSets>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-site-plugin</artifactId>
             </plugin>
           </plugins>
         </reporting>
