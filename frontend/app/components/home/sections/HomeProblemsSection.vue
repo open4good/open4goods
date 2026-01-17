@@ -10,12 +10,14 @@ type ProblemItem = {
 
 const props = defineProps<{
   items: ProblemItem[]
+  reveal?: boolean
 }>()
 
 const { t } = useI18n()
 
 const sectionTitle = computed(() => t('home.problems.title'))
 const sectionDescription = computed(() => t('home.problems.description'))
+const isVisible = computed(() => Boolean(props.reveal))
 </script>
 
 <template>
@@ -26,13 +28,22 @@ const sectionDescription = computed(() => t('home.problems.description'))
     :description="sectionDescription"
     visual-position="left"
   >
-    <v-row class="home-problems__list" dense>
-      <v-col v-for="item in props.items" :key="item.text" cols="12">
+    <v-row
+      class="home-problems__list home-reveal-group"
+      :class="{ 'is-ready': true, 'is-visible': isVisible }"
+      dense
+    >
+      <v-col
+        v-for="(item, index) in props.items"
+        :key="item.text"
+        cols="12"
+      >
         <NudgerCard
-          class="home-problems__card"
+          class="home-problems__card home-hover-card home-reveal-item"
           border
           :flat-corners="['top-right']"
           :accent-corners="['bottom-right']"
+          :style="{ '--reveal-delay': `${index * 90}ms` }"
         >
           <v-avatar class="home-problems__icon" color="surface" size="64">
             <v-icon :icon="item.icon" size="32" />

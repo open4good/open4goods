@@ -821,6 +821,7 @@ useHead(() => ({
         :open-data-millions="openDataMillions"
         :products-count="productsCount"
         :categories-count="categoriesCount"
+        :should-reduce-motion="shouldReduceMotion"
         hero-background-i18n-key="hero.background"
         @submit="handleSearchSubmit"
         @select-category="handleCategorySuggestion"
@@ -851,7 +852,10 @@ useHead(() => ({
             >
               <v-slide-y-transition :disabled="shouldReduceMotion">
                 <div v-show="animatedSections.problems">
-                  <HomeProblemsSection :items="problemItems" />
+                  <HomeProblemsSection
+                    :items="problemItems"
+                    :reveal="animatedSections.problems"
+                  />
                 </div>
               </v-slide-y-transition>
             </div>
@@ -862,7 +866,10 @@ useHead(() => ({
             >
               <v-slide-y-reverse-transition :disabled="shouldReduceMotion">
                 <div v-show="animatedSections.solution">
-                  <HomeSolutionSection :benefits="solutionBenefits" />
+                  <HomeSolutionSection
+                    :benefits="solutionBenefits"
+                    :reveal="animatedSections.solution"
+                  />
                 </div>
               </v-slide-y-reverse-transition>
             </div>
@@ -887,7 +894,10 @@ useHead(() => ({
             >
               <v-scale-transition :disabled="shouldReduceMotion">
                 <div v-show="animatedSections.features">
-                  <HomeFeaturesSection :features="featureCards" />
+                  <HomeFeaturesSection
+                    :features="featureCards"
+                    :reveal="animatedSections.features"
+                  />
                 </div>
               </v-scale-transition>
             </div>
@@ -921,6 +931,7 @@ useHead(() => ({
                     :loading="blogLoading"
                     :featured-item="featuredBlogItem"
                     :secondary-items="secondaryBlogItems"
+                    :reveal="animatedSections.blog"
                   />
                 </div>
               </v-slide-x-transition>
@@ -951,7 +962,10 @@ useHead(() => ({
             >
               <v-slide-x-reverse-transition :disabled="shouldReduceMotion">
                 <div v-show="animatedSections.objections">
-                  <HomeObjectionsSection :items="objectionItems" />
+                  <HomeObjectionsSection
+                    :items="objectionItems"
+                    :reveal="animatedSections.objections"
+                  />
                 </div>
               </v-slide-x-reverse-transition>
             </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRefs } from 'vue'
+import { computed, toRefs } from 'vue'
 
 interface BlogItem {
   title?: string | null
@@ -14,9 +14,11 @@ const props = defineProps<{
   loading: boolean
   featuredItem: BlogItem | null
   secondaryItems: BlogItem[]
+  reveal?: boolean
 }>()
 
-const { loading, featuredItem, secondaryItems } = toRefs(props)
+const { loading, featuredItem, secondaryItems, reveal } = toRefs(props)
+const isVisible = computed(() => Boolean(reveal?.value))
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -28,19 +30,23 @@ const secondaryFallbackIconSize = 48
 <template>
   <section class="home-section home-blog" aria-labelledby="home-blog-title">
     <v-container fluid class="home-section__container">
-      <div class="home-section__inner">
-        <p id="home-blog-title" class="home-hero__subtitle">
+      <div
+        class="home-section__inner home-reveal-group"
+        :class="{ 'is-ready': true, 'is-visible': isVisible }"
+      >
+        <p id="home-blog-title" class="home-hero__subtitle home-reveal-item">
           {{ t('home.blog.title') }}
         </p>
-        <p class="home-section__subtitle text-center">
+        <p class="home-section__subtitle text-center home-reveal-item">
           {{ t('home.blog.subtitle') }}
         </p>
         <v-btn
-          class="home-section__cta nudger_degrade-defaut mx-auto"
+          class="home-section__cta nudger_degrade-defaut mx-auto home-reveal-item"
           :to="localePath({ name: 'blog' })"
           color="primary"
           variant="tonal"
           size="large"
+          :style="{ '--reveal-delay': '120ms' }"
         >
           {{ t('home.blog.cta') }}
         </v-btn>
@@ -55,7 +61,11 @@ const secondaryFallbackIconSize = 48
         </div>
         <template v-else>
           <div v-if="featuredItem" class="home-blog__featured">
-            <NuxtLink :to="featuredItem.link" class="home-blog__featured-link">
+            <NuxtLink
+              :to="featuredItem.link"
+              class="home-blog__featured-link home-reveal-item"
+              :style="{ '--reveal-delay': '200ms' }"
+            >
               <article class="home-blog__featured-card">
                 <div class="home-blog__media" aria-hidden="true">
                   <v-img
@@ -93,13 +103,14 @@ const secondaryFallbackIconSize = 48
             align="stretch"
           >
             <v-col
-              v-for="article in secondaryItems"
+              v-for="(article, index) in secondaryItems"
               :key="article.link"
               cols="12"
               sm="6"
               md="5"
               lg="4"
-              class="home-blog__col"
+              class="home-blog__col home-reveal-item"
+              :style="{ '--reveal-delay': `${240 + index * 90}ms` }"
             >
               <NuxtLink :to="article.link" class="home-blog__item">
                 <article class="home-blog__card">
