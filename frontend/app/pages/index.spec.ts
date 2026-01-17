@@ -42,6 +42,51 @@ const messages: Record<string, unknown> = {
       segments: [{ text: '50M references' }],
     },
   ],
+  'packs.default.hero.highlights': [
+    {
+      title: '🌿 ImpactScore: guiding your purchases',
+      segments: [
+        {
+          text: 'An innovative ecological and environmental assessment for {products} products across',
+        },
+        {
+          text: '{categories} categories',
+          to: '/categories',
+        },
+      ],
+    },
+    {
+      title: '🇫🇷 Open & ethical',
+      segments: [
+        {
+          text: '100% independent. Over {millions}M products in',
+        },
+        {
+          text: 'open data.',
+          to: '/opendata',
+        },
+        {
+          text: 'Open-source software',
+          to: '/opensource',
+        },
+      ],
+    },
+    {
+      title: 'Price comparison',
+      segments: [
+        {
+          text: 'Avoid price traps with',
+        },
+        {
+          text: '{partnersLink}.',
+          to: '/partners',
+        },
+        {
+          text: 'Best prices, new and used price history for {products} products',
+        },
+      ],
+    },
+  ],
   'packs.default.hero.search.partnerLinkLabel':
     '{formattedCount} partner | {formattedCount} partners',
   'packs.default.hero.search.partnerLinkFallback': 'our partners',
@@ -91,6 +136,51 @@ const messages: Record<string, unknown> = {
       icon: '⚡',
       label: '50M references',
       segments: [{ text: '50M references' }],
+    },
+  ],
+  'home.hero.highlights': [
+    {
+      title: '🌿 ImpactScore: guiding your purchases',
+      segments: [
+        {
+          text: 'An innovative ecological and environmental assessment for {products} products across',
+        },
+        {
+          text: '{categories} categories',
+          to: '/categories',
+        },
+      ],
+    },
+    {
+      title: '🇫🇷 Open & ethical',
+      segments: [
+        {
+          text: '100% independent. Over {millions}M products in',
+        },
+        {
+          text: 'open data.',
+          to: '/opendata',
+        },
+        {
+          text: 'Open-source software',
+          to: '/opensource',
+        },
+      ],
+    },
+    {
+      title: 'Price comparison',
+      segments: [
+        {
+          text: 'Avoid price traps with',
+        },
+        {
+          text: '{partnersLink}.',
+          to: '/partners',
+        },
+        {
+          text: 'Best prices, new and used price history for {products} products',
+        },
+      ],
     },
   ],
   'home.hero.search.partnerLinkLabel':
