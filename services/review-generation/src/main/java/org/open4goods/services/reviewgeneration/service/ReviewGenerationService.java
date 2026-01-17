@@ -35,7 +35,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.config.RetrievalMode;
 import org.open4goods.services.prompt.dto.PromptResponse;
-import org.open4goods.services.prompt.dto.openai.BatchOutput;
+import org.open4goods.services.prompt.dto.BatchResultItem;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.prompt.service.provider.ProviderEvent;
@@ -416,7 +416,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * <p>
 	 * For each tracking file, it reads the job ID and associated product GTINs,
 	 * checks the job status via batchPromptResponse (which will throw if not
-	 * complete), and if the job is complete, processes each BatchOutput to update
+	 * complete), and if the job is complete, processes each batch result to update
 	 * the corresponding product review. Finally, the tracking file is deleted.
 	 * TODO(p2,design) : separate the handle method
 	 * </p>
@@ -434,7 +434,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				String jobId = (String) trackingInfo.get("jobId");
 				@SuppressWarnings("unchecked")
 				// Retrieve batch results; this method throws if the job is not yet complete.
-				PromptResponse<List<BatchOutput>> response = batchAiService.batchPromptResponse(jobId);
+				PromptResponse<List<BatchResultItem>> response = batchAiService.batchPromptResponse(jobId);
 				if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
 					handleBatchResponse(jobId, response);
 					// Delete the tracking file after processing.
@@ -449,23 +449,23 @@ public class ReviewGenerationService implements HealthIndicator {
 	public void triggerResponseHandling(String jobId) throws ResourceNotFoundException, IOException {
 
 		// Retrieve batch results; this method throws if the job is not yet complete.
-		PromptResponse<List<BatchOutput>> response = batchAiService.batchPromptResponse(jobId);
+		PromptResponse<List<BatchResultItem>> response = batchAiService.batchPromptResponse(jobId);
 		if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
 			handleBatchResponse(jobId, response);
 		}
 	}
 
-	private void handleBatchResponse(String jobId, PromptResponse<List<BatchOutput>> response)
+	private void handleBatchResponse(String jobId, PromptResponse<List<BatchResultItem>> response)
 			throws ResourceNotFoundException, IOException {
 		logger.info("Batch job {} completed. Processing {} outputs.", jobId, response.getBody().size());
 		// For each batch output (assumed to contain a customId that corresponds to the
 		// product GTIN)
-		for (BatchOutput output : response.getBody()) {
+		for (BatchResultItem output : response.getBody()) {
 			String productGtin = output.customId();
 			// Retrieve the product from the repository.
 			Product product = productRepository.getById(Long.valueOf(productGtin));
 			if (product != null) {
-				// Process the BatchOutput to convert it into an AiReview.
+				// Process the batch result to convert it into an AiReview.
 				AiReview newReview = processBatchOutputToAiReview(output);
 				if (null != newReview) {
 					// Populate attributes
@@ -524,14 +524,11 @@ public class ReviewGenerationService implements HealthIndicator {
 	// -------------------- Helper Methods -------------------- //
 
 
-	private AiReview processBatchOutputToAiReview(BatchOutput output) {
-		if (output.response().body().choices().size() > 1) {
-			logger.error("Error, multiple choices for {}", output);
-		}
+	private AiReview processBatchOutputToAiReview(BatchResultItem output) {
 		// TODO(p2, perf) : instance variable
 		var outputConverter = new BeanOutputConverter<>(AiReview.class);
 
-		String jsonContent = output.response().body().choices().getFirst().message().getContent();
+		String jsonContent = output.content();
 		AiReview ret = outputConverter.convert(jsonContent);
 
 		ret = updateAiReviewReferences(ret);

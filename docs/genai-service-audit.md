@@ -15,7 +15,7 @@ sequenceDiagram
     participant Back-Office (ReviewGenerationController)
     participant ReviewGenerationService
     participant PromptService
-    participant External AI (OpenAI/Perplexity)
+    participant External AI (OpenAI/Gemini)
 
     User->>Frontend: Request AI Review
     Frontend->>Frontend: Check privacy/quota cache
@@ -101,4 +101,3 @@ The `ReviewGenerationService` orchestrates the complex flow of gathering context
 5.  **Post-processing**:
     - `updateAiReviewReferences`: Replaces `[1]` with HTML links.
     - `populateAttributes`: Extracts dynamic attributes.
-

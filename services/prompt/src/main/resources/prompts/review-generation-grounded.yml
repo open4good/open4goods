@@ -1,5 +1,6 @@
 key: "review-generation-grounded"
 aiService: "OPEN_AI"
+# Interactive prompt only. Batch jobs must use EXTERNAL_SOURCES.
 retrievalMode: "MODEL_WEB_SEARCH"
 systemPrompt: |
   Tu es un agent expert en rédaction d'avis produits.

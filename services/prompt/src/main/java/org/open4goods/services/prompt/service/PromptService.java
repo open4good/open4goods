@@ -48,8 +48,8 @@ import reactor.core.publisher.Flux;
  * checking that required external AI API keys are provided and that the latest external API call succeeded.
  * </p>
  * <p>
- * This implementation uses the OpenAiChatModel from Spring AI to communicate with the appropriate AI
- * backend (e.g., OpenAI or Perplexity).
+ * This implementation uses Spring AI chat models to communicate with the appropriate AI
+ * backend (OpenAI or Gemini).
  * </p>
  */
 @Service
@@ -80,8 +80,6 @@ public class PromptService implements HealthIndicator {
      * Constructs a new PromptService with the given dependencies including a MeterRegistry for metrics.
      *
      * @param genAiConfig          The configuration for the GenAI service.
-     * @param perplexityApi        The API instance for Perplexity.
-     * @param openAiCustomApi      The API instance for OpenAI.
      * @param serialisationService Service to handle serialization/deserialization.
      * @param evaluationService    Service to evaluate prompt templates.
      * @param meterRegistry        The MeterRegistry for actuator metrics.
@@ -621,16 +619,16 @@ public class PromptService implements HealthIndicator {
     /**
      * Health check for the Prompt Service.
      * <p>
-     * Returns DOWN if either the OpenAI or Perplexity API key is missing,
-     * or if the last external API call resulted in an exception.
+     * Returns DOWN if a required provider is missing, or if the last external API call resulted
+     * in an exception.
      * </p>
      *
      * @return the Health status.
      */
     @Override
     public Health health() {
-        if (!hasRequiredKeys()) {
-            return Health.down().withDetail("Error", "Missing API keys for external AI services").build();
+        if (!hasRequiredProviders()) {
+            return Health.down().withDetail("Error", "Missing GenAI provider configuration").build();
         }
         if (!externalApiHealthy) {
             return Health.down().withDetail("Error", "Exception encountered during external API call").build();
@@ -638,30 +636,13 @@ public class PromptService implements HealthIndicator {
         return Health.up().build();
     }
 
-    private boolean hasRequiredKeys() {
+    private boolean hasRequiredProviders() {
         for (PromptConfig promptConfig : prompts.values()) {
             if (promptConfig.getAiService() == null) {
                 continue;
             }
-            switch (promptConfig.getAiService()) {
-                case OPEN_AI -> {
-                    if (!StringUtils.hasText(genAiConfig.getOpenaiApiKey())) {
-                        return false;
-                    }
-                }
-                case PERPLEXITY -> {
-                    if (!StringUtils.hasText(genAiConfig.getPerplexityApiKey())) {
-                        return false;
-                    }
-                }
-                case GEMINI -> {
-                    if (!StringUtils.hasText(genAiConfig.getGoogleApiJson())) {
-                        return false;
-                    }
-                }
-                default -> {
-                    return false;
-                }
+            if (!providerRegistry.hasProvider(promptConfig.getAiService())) {
+                return false;
             }
         }
         return true;

@@ -16,10 +16,6 @@ import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient.CallResponseSpec;
-import org.springframework.ai.chat.client.DefaultChatClient.DefaultCallResponseSpec;
-import org.springframework.ai.chat.client.DefaultChatClient.DefaultChatClientRequestSpec;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -36,8 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * it falls back to reading from that folder. Otherwise, it returns a dummy response with the raw response prefixed by
  * "ORIGINAL PROMPT AS MOCKED RESPONSE:".
  * <p>
- * This configuration uses an embedded ObjectMapper for JSON serialization/deserialization and provides dummy beans for
- * the OpenAiApi dependencies.
+ * This configuration uses an embedded ObjectMapper for JSON serialization/deserialization.
  */
 @TestConfiguration
 public class PromptServiceMock {
@@ -47,9 +42,7 @@ public class PromptServiceMock {
     @Bean
     @Primary
     public PromptService promptService(PromptServiceConfig properties,
-                                       EvaluationService evaluationService,
-                                       OpenAiApi openAiApi,
-                                       OpenAiApi perplexityApi) throws ResourceNotFoundException, SerialisationException {
+                                       EvaluationService evaluationService) throws ResourceNotFoundException, SerialisationException {
         // Create an embedded ObjectMapper instance.
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -165,15 +158,4 @@ public class PromptServiceMock {
         return mockService;
     }
 
-    // Provide a dummy OpenAiApi bean.
-    @Bean
-    public OpenAiApi openAiApi() {
-        return Mockito.mock(OpenAiApi.class);
-    }
-
-    // Provide a dummy perplexityApi bean.
-    @Bean
-    public OpenAiApi perplexityApi() {
-        return Mockito.mock(OpenAiApi.class);
-    }
 }

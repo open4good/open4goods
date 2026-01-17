@@ -2,12 +2,12 @@ package org.open4goods.services.prompt.service;
 
 import java.io.File;
 
-import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.dto.openai.BatchCreateRequest;
 import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
 import org.open4goods.services.prompt.dto.openai.FileUploadResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,13 +28,13 @@ public class OpenAiBatchClient {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenAiBatchClient.class);
     private final RestTemplate restTemplate;
-    private final PromptServiceConfig config;
     private final OpenAiFilesClient filesClient;
+    private final Environment environment;
 
-    public OpenAiBatchClient(PromptServiceConfig config, OpenAiFilesClient filesClient) {
-        this.config = config;
+    public OpenAiBatchClient(OpenAiFilesClient filesClient, Environment environment) {
         this.filesClient = filesClient;
         this.restTemplate = new RestTemplate();
+        this.environment = environment;
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
     }
 
@@ -43,9 +43,9 @@ public class OpenAiBatchClient {
         FileUploadResponse uploadResponse = filesClient.uploadFile(submissionFile, "batch");
         String fileId = uploadResponse.getId();
         BatchCreateRequest requestPayload = new BatchCreateRequest(fileId, "/v1/chat/completions", "24h", null);
-        String url = config.getBatchApiEndpoint();
+        String url = resolveBatchEndpoint();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + config.getOpenaiApiKey());
+        headers.set("Authorization", "Bearer " + resolveApiKey());
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<BatchCreateRequest> requestEntity = new HttpEntity<>(requestPayload, headers);
         ResponseEntity<BatchJobResponse> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, BatchJobResponse.class);
@@ -64,9 +64,9 @@ public class OpenAiBatchClient {
      * @return the BatchJobResponse representing the current status.
      */
     public BatchJobResponse getBatchStatus(String jobId) {
-        String url = config.getBatchApiEndpoint() + "/" + jobId;
+        String url = resolveBatchEndpoint() + "/" + jobId;
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + config.getOpenaiApiKey());
+        headers.set("Authorization", "Bearer " + resolveApiKey());
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<BatchJobResponse> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, BatchJobResponse.class);
@@ -94,5 +94,25 @@ public class OpenAiBatchClient {
         // Use the files client to download the file content.
         return filesClient.downloadFileContent(outputFileId);
     	
+    }
+
+    private String resolveBatchEndpoint() {
+        String endpoint = environment.getProperty("spring.ai.openai.batch.endpoint");
+        if (endpoint != null && !endpoint.isBlank()) {
+            return endpoint;
+        }
+        endpoint = environment.getProperty("gen-ai-config.batch-api-endpoint");
+        if (endpoint != null && !endpoint.isBlank()) {
+            return endpoint;
+        }
+        return "https://api.openai.com/v1/batches";
+    }
+
+    private String resolveApiKey() {
+        String apiKey = environment.getProperty("spring.ai.openai.api-key");
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException("Missing spring.ai.openai.api-key for OpenAI batch");
+        }
+        return apiKey;
     }
 }

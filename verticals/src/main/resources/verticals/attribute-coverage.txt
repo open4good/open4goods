@@ -4235,7 +4235,7 @@
         "123comparer.fr",
         "mda-electromenager.com",
         "ElectrodepotGuidesetComparateurs",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "BLACK": 168,
@@ -4415,7 +4415,7 @@
       "datasourceNames": [
         "openai.com",
         "rakuten.com",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "20": 2,
@@ -5107,7 +5107,7 @@
         "rakuten.com",
         "123comparer.fr",
         "mda-electromenager.com",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "G": 191,
@@ -5194,7 +5194,7 @@
         "icecat.biz",
         "openai.com",
         "rakuten.com",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "2016": 2,
@@ -6611,7 +6611,7 @@
         "openai.com",
         "icecat.biz",
         "rakuten.com",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "6": 8,
@@ -7489,7 +7489,7 @@
       "datasourceNames": [
         "openai.com",
         "amazon.fr",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "": 7,
@@ -7539,7 +7539,7 @@
       "hits": 137,
       "datasourceNames": [
         "openai.com",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "": 12,
@@ -7566,7 +7566,7 @@
       "hits": 137,
       "datasourceNames": [
         "openai.com",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "0.5 W": 51,
@@ -7586,7 +7586,7 @@
       "hits": 137,
       "datasourceNames": [
         "openai.com",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "QLED": 33,
@@ -7618,7 +7618,7 @@
       "hits": 136,
       "datasourceNames": [
         "openai.com",
-        "perplexity.ai"
+        "openai.com"
       ],
       "values": {
         "2": 11,

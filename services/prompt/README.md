@@ -1,11 +1,11 @@
 # Prompt Service
 
-The **Prompt Service** is part of the [open4goods](https://github.com/open4good/open4goods) project. It provides capabilities to interact with generative AI services (e.g., OpenAI, Perplexity) by loading prompt templates, evaluating them using Thymeleaf, and executing chat-based requests.
+The **Prompt Service** is part of the [open4goods](https://github.com/open4good/open4goods) project. It provides capabilities to interact with generative AI services (OpenAI and Gemini) by loading prompt templates, evaluating them using Thymeleaf, and executing chat-based requests.
 
 ## Features
 
 - Loads YAML prompt templates from a configurable folder.
-- Supports multiple AI backends (OpenAI and Perplexity).
+- Supports multiple AI backends (OpenAI and Gemini).
 - Evaluates dynamic variables in prompt templates.
 - Returns both raw and parsed responses.
 
@@ -37,6 +37,8 @@ genAiConfig:
   cacheTemplates: true
   enabled: true
 ```
+
+For provider credentials and batch options, see `docs/genai.md` at the repository root.
 
 ### Calling the Service
 
@@ -83,7 +85,6 @@ key: "impactscore-prompt"
 
 # The Gen ai service to use
 aiService: "OPEN_AI"
-#aiService: "PERPLEXITY"
 
 # The system prompt
 # No system prompt with o1

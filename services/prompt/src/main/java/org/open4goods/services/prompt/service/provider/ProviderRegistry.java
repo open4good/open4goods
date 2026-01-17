@@ -28,4 +28,8 @@ public class ProviderRegistry {
         }
         return provider;
     }
+
+    public boolean hasProvider(GenAiServiceType serviceType) {
+        return providers.containsKey(serviceType);
+    }
 }

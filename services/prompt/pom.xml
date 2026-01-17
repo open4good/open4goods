@@ -18,12 +18,15 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
-        <!-- Vertex AI removed, adding generic Google Gemini if available, or
-        relying on OpenAI bridge -->
-        <!-- Vertex AI Native Grounding Starter -->
+        <!-- Google GenAI Starter -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-model-vertex-ai-gemini</artifactId>
+            <artifactId>spring-ai-starter-model-google-genai</artifactId>
+        </dependency>
+        <!-- Google Cloud Storage client for Vertex batch input/output -->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-storage</artifactId>
         </dependency>
         <!-- Commons Codec -->
         <dependency>

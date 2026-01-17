@@ -13,7 +13,6 @@ import java.util.Objects;
 
 import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptOptions;
-import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.config.RetrievalMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +22,8 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.openai.api.ResponseFormat;
-import org.springframework.stereotype.Component;
+import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,39 +33,21 @@ import reactor.core.publisher.Flux;
 /**
  * OpenAI provider implementation.
  */
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-
-/**
- * OpenAI provider implementation.
- */
-@Component
-@ConditionalOnProperty(prefix = "gen-ai-config", name = "openai-api-key")
 public class OpenAiProvider implements GenAiProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenAiProvider.class);
     private static final String RESPONSES_ENDPOINT = "https://api.openai.com/v1/responses";
-    private static final String CHAT_COMPLETIONS_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
-    private final OpenAiApi openAiApi;
-    private final PromptServiceConfig config;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
-    private final org.springframework.ai.model.tool.ToolCallingManager toolCallingManager;
-    private final org.springframework.retry.support.RetryTemplate retryTemplate;
-    private final io.micrometer.observation.ObservationRegistry observationRegistry;
+    private final OpenAiChatModel chatModel;
+    private final Environment environment;
 
-    public OpenAiProvider(@org.springframework.beans.factory.annotation.Qualifier("openAiCustomApi") OpenAiApi openAiApi,
-                          PromptServiceConfig config,
-                          org.springframework.ai.model.tool.ToolCallingManager toolCallingManager,
-                          org.springframework.retry.support.RetryTemplate retryTemplate,
-                          io.micrometer.observation.ObservationRegistry observationRegistry) {
-        this.openAiApi = openAiApi;
-        this.config = config;
+    public OpenAiProvider(OpenAiChatModel chatModel, Environment environment) {
         this.objectMapper = new ObjectMapper();
         this.httpClient = HttpClient.newHttpClient();
-        this.toolCallingManager = toolCallingManager;
-        this.retryTemplate = retryTemplate;
-        this.observationRegistry = observationRegistry;
+        this.chatModel = chatModel;
+        this.environment = environment;
     }
 
     @Override
@@ -79,9 +59,6 @@ public class OpenAiProvider implements GenAiProvider {
     public ProviderResult generateText(ProviderRequest request) {
         if (request.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH && request.isAllowWebSearch()) {
             String model = resolveModel(request.getOptions());
-            if (isSearchPreviewModel(model)) {
-                return generateWithSearchPreview(request);
-            }
             return generateWithWebSearch(request);
         }
         return generateWithChatModel(request);
@@ -91,10 +68,7 @@ public class OpenAiProvider implements GenAiProvider {
     public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
         String model = resolveModel(request.getOptions());
         if (request.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH && request.isAllowWebSearch()) {
-            ProviderResult result = isSearchPreviewModel(model)
-                    ? generateWithSearchPreview(request)
-                    : generateWithWebSearch(request);
-            return streamFromResult(result);
+            return streamFromWebSearch(request, model);
         }
         return streamFromChatModel(request);
     }
@@ -104,7 +78,6 @@ public class OpenAiProvider implements GenAiProvider {
         if (StringUtils.hasText(request.getJsonSchema())) {
             options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, request.getJsonSchema()));
         }
-        OpenAiChatModel chatModel = new OpenAiChatModel(openAiApi, OpenAiChatOptions.builder().build(), toolCallingManager, retryTemplate, observationRegistry);
         Prompt prompt = buildPrompt(request, options);
         ChatResponse response = chatModel.call(prompt);
         String content = response.getResult().getOutput().getText();
@@ -133,7 +106,7 @@ public class OpenAiProvider implements GenAiProvider {
             String payload = objectMapper.writeValueAsString(body);
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(RESPONSES_ENDPOINT))
-                    .header("Authorization", "Bearer " + config.getOpenaiApiKey())
+                    .header("Authorization", "Bearer " + resolveApiKey())
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(payload));
             applyTimeout(requestBuilder, request.getOptions());
@@ -151,44 +124,6 @@ public class OpenAiProvider implements GenAiProvider {
         }
     }
 
-    private ProviderResult generateWithSearchPreview(ProviderRequest request) {
-        try {
-            Map<String, Object> body = new LinkedHashMap<>();
-            String model = resolveModel(request.getOptions());
-            body.put("model", model);
-            body.put("messages", buildMessages(request));
-            if (StringUtils.hasText(request.getJsonSchema())) {
-                JsonNode schemaNode = objectMapper.readTree(request.getJsonSchema());
-                body.put("response_format", Map.of(
-                        "type", "json_schema",
-                        "json_schema", Map.of(
-                                "name", "response",
-                                "schema", schemaNode,
-                                "strict", true
-                        )
-                ));
-            }
-            String payload = objectMapper.writeValueAsString(body);
-            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create(CHAT_COMPLETIONS_ENDPOINT))
-                    .header("Authorization", "Bearer " + config.getOpenaiApiKey())
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(payload));
-            applyTimeout(requestBuilder, request.getOptions());
-            HttpResponse<String> response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 300) {
-                throw new IllegalStateException("OpenAI chat completions failed with status " + response.statusCode());
-            }
-            String raw = response.body();
-            String content = extractChatCompletionContent(raw);
-            Map<String, Object> metadata = extractAnnotationsFromRaw(raw);
-            return new ProviderResult(service(), model, raw, content, metadata);
-        } catch (Exception e) {
-            logger.error("OpenAI search-preview request failed: {}", e.getMessage(), e);
-            throw new IllegalStateException("OpenAI search-preview request failed", e);
-        }
-    }
-
     private List<Map<String, Object>> buildInput(ProviderRequest request) {
         Map<String, Object> user = Map.of(
                 "role", "user",
@@ -202,47 +137,6 @@ public class OpenAiProvider implements GenAiProvider {
             return List.of(system, user);
         }
         return List.of(user);
-    }
-
-    private List<Map<String, Object>> buildMessages(ProviderRequest request) {
-        List<Map<String, Object>> messages = new ArrayList<>();
-        if (StringUtils.hasText(request.getSystemPrompt())) {
-            messages.add(Map.of("role", "system", "content", request.getSystemPrompt()));
-        }
-        messages.add(Map.of("role", "user", "content", request.getUserPrompt()));
-        return messages;
-    }
-
-    private String extractContent(String rawResponse) throws Exception {
-        JsonNode root = objectMapper.readTree(rawResponse);
-        JsonNode outputText = root.path("output_text");
-        if (outputText.isTextual()) {
-            return outputText.asText();
-        }
-        JsonNode output = root.path("output");
-        if (output.isArray() && output.size() > 0) {
-            JsonNode content = output.get(0).path("content");
-            if (content.isArray() && content.size() > 0) {
-                JsonNode text = content.get(0).path("text");
-                if (text.isTextual()) {
-                    return text.asText();
-                }
-            }
-        }
-        throw new IllegalStateException("Unable to extract content from OpenAI response.");
-    }
-
-    private String extractChatCompletionContent(String rawResponse) throws Exception {
-        JsonNode root = objectMapper.readTree(rawResponse);
-        JsonNode choices = root.path("choices");
-        if (choices.isArray() && !choices.isEmpty()) {
-            JsonNode message = choices.get(0).path("message");
-            JsonNode content = message.path("content");
-            if (content.isTextual()) {
-                return content.asText();
-            }
-        }
-        throw new IllegalStateException("Unable to extract content from OpenAI chat completion response.");
     }
 
     private OpenAiChatOptions buildOptions(PromptOptions options) {
@@ -292,7 +186,6 @@ public class OpenAiProvider implements GenAiProvider {
         if (StringUtils.hasText(request.getJsonSchema())) {
             options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, request.getJsonSchema()));
         }
-        OpenAiChatModel chatModel = new OpenAiChatModel(openAiApi, OpenAiChatOptions.builder().build(), toolCallingManager, retryTemplate, observationRegistry);
         Prompt prompt = buildPrompt(request, options);
         return Flux.defer(() -> {
             StringBuilder content = new StringBuilder();
@@ -322,37 +215,19 @@ public class OpenAiProvider implements GenAiProvider {
         }).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
     }
 
-    private Flux<ProviderEvent> streamFromResult(ProviderResult result) {
+    private Flux<ProviderEvent> streamFromWebSearch(ProviderRequest request, String model) {
         return Flux.defer(() -> {
-            List<String> chunks = splitIntoChunks(result.getContent());
-            List<ProviderEvent> events = new ArrayList<>();
-            events.add(ProviderEvent.started(result.getProvider(), result.getModel()));
-            for (String chunk : chunks) {
-                events.add(ProviderEvent.streamChunk(result.getProvider(), result.getModel(), chunk));
-            }
-            if (result.getMetadata() != null && !result.getMetadata().isEmpty()) {
-                events.add(ProviderEvent.metadata(result.getProvider(), result.getModel(), result.getMetadata()));
-            }
-            events.add(ProviderEvent.completed(result.getProvider(), result.getModel(), result.getContent(),
-                    result.getMetadata()));
-            return Flux.fromIterable(events);
-        });
-    }
-
-    private List<String> splitIntoChunks(String content) {
-        if (!StringUtils.hasText(content)) {
-            return List.of();
-        }
-        int chunkSize = 120;
-        List<String> chunks = new ArrayList<>();
-        for (int i = 0; i < content.length(); i += chunkSize) {
-            chunks.add(content.substring(i, Math.min(i + chunkSize, content.length())));
-        }
-        return chunks;
-    }
-
-    private boolean isSearchPreviewModel(String model) {
-        return StringUtils.hasText(model) && model.contains("search-preview");
+            ProviderEvent start = ProviderEvent.started(service(), model);
+            ProviderEvent toolStart = ProviderEvent.toolStatus(service(), model, "web_search", "started", Map.of());
+            ProviderResult result = generateWithWebSearch(request);
+            ProviderEvent toolComplete = ProviderEvent.toolStatus(service(), model, "web_search", "completed", Map.of());
+            return Flux.concat(
+                    Flux.just(start, toolStart, toolComplete),
+                    Flux.just(ProviderEvent.streamChunk(service(), model, result.getContent())),
+                    Flux.just(ProviderEvent.metadata(service(), model, result.getMetadata())),
+                    Flux.just(ProviderEvent.completed(service(), model, result.getContent(), result.getMetadata()))
+            );
+        }).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), model, ex.getMessage())));
     }
 
     private Map<String, Object> extractAnnotationsFromResponse(ChatResponse response) {
@@ -384,5 +259,32 @@ public class OpenAiProvider implements GenAiProvider {
             logger.warn("Failed to parse OpenAI annotations: {}", e.getMessage());
             return Map.of();
         }
+    }
+
+    private String extractContent(String rawResponse) throws Exception {
+        JsonNode root = objectMapper.readTree(rawResponse);
+        JsonNode outputText = root.path("output_text");
+        if (outputText.isTextual()) {
+            return outputText.asText();
+        }
+        JsonNode output = root.path("output");
+        if (output.isArray() && output.size() > 0) {
+            JsonNode content = output.get(0).path("content");
+            if (content.isArray() && content.size() > 0) {
+                JsonNode text = content.get(0).path("text");
+                if (text.isTextual()) {
+                    return text.asText();
+                }
+            }
+        }
+        throw new IllegalStateException("Unable to extract content from OpenAI response.");
+    }
+
+    private String resolveApiKey() {
+        String apiKey = environment.getProperty("spring.ai.openai.api-key");
+        if (!StringUtils.hasText(apiKey)) {
+            throw new IllegalStateException("Missing spring.ai.openai.api-key for OpenAI web search");
+        }
+        return apiKey;
     }
 }
