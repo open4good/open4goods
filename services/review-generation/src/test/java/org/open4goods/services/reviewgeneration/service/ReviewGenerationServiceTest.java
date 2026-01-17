@@ -45,7 +45,7 @@ class ReviewGenerationServiceTest {
         properties.setRegenerationDelayDays(30);
         properties.setRetryDelayDays(7);
         properties.setBatchFolder(System.getProperty("java.io.tmpdir") + "/batch-test");
-        
+
         meterRegistry = new SimpleMeterRegistry();
 
         reviewGenerationService = new ReviewGenerationService(
@@ -96,13 +96,13 @@ class ReviewGenerationServiceTest {
         holder.setEnoughData(true);
         // Created 1 day ago
         holder.setCreatedMs(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli());
-        
+
         // Ensure the review is valid
         AiReview review = new AiReview();
         review.setDescription("This is a sufficiently long description that should pass the validation check of 20 characters.");
         review.setAttributes(java.util.List.of(new AiReview.AiAttribute("attr1", "val1", 1)));
         holder.setReview(review);
-        
+
         reviews.put("fr", holder);
         product.setReviews(reviews);
 
@@ -154,7 +154,7 @@ class ReviewGenerationServiceTest {
     }
 
 
-    
+
     // Helper to invoke private method
     private boolean invokeShouldGenerateReview(Product product) {
         return ReflectionTestUtils.invokeMethod(reviewGenerationService, "shouldGenerateReview", product);

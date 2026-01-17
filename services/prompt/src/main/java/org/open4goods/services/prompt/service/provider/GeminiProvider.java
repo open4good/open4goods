@@ -9,13 +9,15 @@ import java.util.Objects;
 import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptOptions;
 import org.open4goods.services.prompt.config.RetrievalMode;
+import org.open4goods.services.prompt.service.OpenAiBatchClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.openai.api.ResponseFormat;
-import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,12 +27,13 @@ import reactor.core.publisher.Flux;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
- * Gemini provider implementation using Google Gemini via OpenAI compatibility.
+ * Gemini provider implementation using Native Vertex AI and Grounding.
  */
 @Component
-@ConditionalOnProperty(prefix = "gen-ai-config", name = "gemini-api-key")
+@ConditionalOnProperty(prefix = "gen-ai-config", name = "google-api-json")
 public class GeminiProvider implements GenAiProvider {
 
+	private static final Logger logger = LoggerFactory.getLogger(GeminiProvider.class);
 	private final ChatModel chatModel;
 
 	public GeminiProvider(@Qualifier("geminiChatModel") ChatModel chatModel) {
@@ -44,11 +47,9 @@ public class GeminiProvider implements GenAiProvider {
 
 	@Override
 	public ProviderResult generateText(ProviderRequest request) {
-		OpenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
+		VertexAiGeminiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
 				request.isAllowWebSearch());
-		if (StringUtils.hasText(request.getJsonSchema())) {
-			options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, request.getJsonSchema()));
-		}
+
 		ChatResponse response = chatModel.call(buildPrompt(request, options));
 		String content = response.getResult().getOutput().getText();
 		Map<String, Object> metadata = extractGroundingMetadata(response);
@@ -57,13 +58,9 @@ public class GeminiProvider implements GenAiProvider {
 
 	@Override
 	public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
-		OpenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
+		VertexAiGeminiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
 				request.isAllowWebSearch());
-		if (StringUtils.hasText(request.getJsonSchema())) {
-			// Note: Streaming with JSON schema might behave differently depending on
-			// provider
-			options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_OBJECT, request.getJsonSchema()));
-		}
+
 		Prompt prompt = buildPrompt(request, options);
 		return Flux.defer(() -> {
 			StringBuilder content = new StringBuilder();
@@ -89,26 +86,29 @@ public class GeminiProvider implements GenAiProvider {
 		}).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
 	}
 
-	private OpenAiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode, boolean allowWebSearch) {
-		OpenAiChatOptions chatOptions = new OpenAiChatOptions();
+	private VertexAiGeminiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode, boolean allowWebSearch) {
+		VertexAiGeminiChatOptions.Builder builder = VertexAiGeminiChatOptions.builder();
 
 		if (options != null) {
-			chatOptions.setModel(resolveModel(options));
+			builder.model(resolveModel(options));
 			if (options.getTemperature() != null) {
-				chatOptions.setTemperature(options.getTemperature());
+				builder.temperature(options.getTemperature());
 			}
 			if (options.getTopP() != null) {
-				chatOptions.setTopP(options.getTopP());
+				builder.topP(options.getTopP());
 			}
 			if (options.getMaxTokens() != null) {
-				chatOptions.setMaxTokens(options.getMaxTokens());
+				builder.maxOutputTokens(options.getMaxTokens());
 			}
-		}
+		} else {
+             builder.model("gemini-2.0-flash");
+        }
 
+		// Enable Native Grounding
 		if (retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch) {
-			// Log warning or implement workaround for Google Search with OpenAI client
+             builder.googleSearchRetrieval(true);
 		}
-		return chatOptions;
+		return builder.build();
 	}
 
 	private String resolveModel(PromptOptions options) {
@@ -118,7 +118,7 @@ public class GeminiProvider implements GenAiProvider {
 		return "gemini-2.0-flash";
 	}
 
-	private Prompt buildPrompt(ProviderRequest request, OpenAiChatOptions options) {
+	private Prompt buildPrompt(ProviderRequest request, VertexAiGeminiChatOptions options) {
 		List<org.springframework.ai.chat.messages.Message> messages = new ArrayList<>();
 		if (StringUtils.hasText(request.getSystemPrompt())) {
 			messages.add(new SystemMessage(request.getSystemPrompt()));
@@ -128,10 +128,23 @@ public class GeminiProvider implements GenAiProvider {
 	}
 
 	private Map<String, Object> extractGroundingMetadata(ChatResponse response) {
-		if (response == null || response.getMetadata() == null) {
+		if (response == null || response.getResult() == null || response.getResult().getMetadata() == null) {
 			return Map.of();
 		}
-		// Metadata extraction logic might need adjustment for OpenAI-mapped response
-		return Map.of();
+		// ChatGenerationMetadata usually implements Map or has access to it
+        // We'll create a new map to be safe
+        Map<String, Object> metadata = new LinkedHashMap<>();
+        try {
+            // Attempt to treat it as a map or use accessor if known.
+            // Spring AI 'ChatGenerationMetadata' is an interface, default impl might just wrap a map.
+            // But relying on toString or key-value access is safer.
+            // Let's assume it puts everything in the definition.
+            // For Vertex AI, grounding info is often in a specific key.
+            // We saw earlier that entrySet() worked.
+             response.getResult().getMetadata().entrySet().forEach(e -> metadata.put(e.getKey(), e.getValue()));
+        } catch (Exception e) {
+        	logger.warn("Error extractGroundingMetadata  ",e);
+        }
+		return metadata;
 	}
 }

@@ -31,7 +31,7 @@ public class PromptServiceConfig {
 
 	private String perplexityApiKey;
 
-	private String geminiApiKey;
+
 	
 	private String vertexProjectId;
 	
@@ -40,6 +40,8 @@ public class PromptServiceConfig {
 	private String vertexApiKey;
 	
 	private String vertexCredentialsJson;
+	
+	private String googleApiJson;
 	
 	private String perplexityBaseUrl = "https://api.perplexity.ai";
 
@@ -81,12 +83,7 @@ public class PromptServiceConfig {
 	public void setPerplexityApiKey(String perplexityApiKey) {
 		this.perplexityApiKey = perplexityApiKey;
 	}
-	public String getGeminiApiKey() {
-		return geminiApiKey;
-	}
-	public void setGeminiApiKey(String geminiApiKey) {
-		this.geminiApiKey = geminiApiKey;
-	}
+
 	public String getPerplexityBaseUrl() {
 		return perplexityBaseUrl;
 	}
@@ -158,5 +155,12 @@ public class PromptServiceConfig {
 		this.vertexApiKey = vertexApiKey;
 	}
 	
+	public String getGoogleApiJson() {
+		return googleApiJson;
+	}
+
+	public void setGoogleApiJson(String googleApiJson) {
+		this.googleApiJson = googleApiJson;
+	}
 	
 }
