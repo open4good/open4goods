@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { buildRevealStyle } from '~/utils/sectionReveal'
 
 const solutionImageSrc = '/homepage/gain/nudger-screaming.webp'
 
@@ -9,9 +10,15 @@ type SolutionBenefit = {
   description: string
 }
 
-const props = defineProps<{
-  benefits: SolutionBenefit[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    benefits: SolutionBenefit[]
+    isVisible?: boolean
+  }>(),
+  {
+    isVisible: false,
+  }
+)
 
 const { t } = useI18n()
 
@@ -38,15 +45,24 @@ const sectionDescription = computed(() => t('home.solution.description'))
               {{ sectionDescription }}
             </p>
           </header>
-          <v-row class="home-solution__list" dense>
+          <v-row
+            class="home-solution__list reveal-group"
+            :class="{ 'reveal-group--visible': props.isVisible }"
+            dense
+          >
             <v-col
-              v-for="item in props.benefits"
+              v-for="(item, index) in props.benefits"
               :key="item.label"
               cols="12"
               md="6"
-              class="home-solution__list-col card__nudger card__nudger--border card__nudger--radius_top-left_0 card__nudger--radius_bottom-left_50px"
+              class="home-solution__list-col reveal-item"
+              :style="buildRevealStyle(index)"
             >
-              <v-sheet class="home-solution__item" rounded="xl" elevation="0">
+              <v-sheet
+                class="home-solution__item hover-lift card__nudger card__nudger--border card__nudger--radius_top-left_0 card__nudger--radius_bottom-left_50px"
+                rounded="xl"
+                elevation="0"
+              >
                 <v-avatar class="home-solution__icon" size="60" color="surface">
                   <span aria-hidden="true">{{ item.emoji }}</span>
                 </v-avatar>

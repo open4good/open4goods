@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { buildRevealStyle } from '~/utils/sectionReveal'
 import HomeSplitSection from './HomeSplitSection.vue'
 
 type ProblemItem = {
@@ -7,9 +8,15 @@ type ProblemItem = {
   text: string
 }
 
-const props = defineProps<{
-  items: ProblemItem[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    items: ProblemItem[]
+    isVisible?: boolean
+  }>(),
+  {
+    isVisible: false,
+  }
+)
 
 const { t } = useI18n()
 
@@ -25,14 +32,23 @@ const sectionDescription = computed(() => t('home.problems.description'))
     :description="sectionDescription"
     visual-position="left"
   >
-    <v-row class="home-problems__list" dense>
+    <v-row
+      class="home-problems__list reveal-group"
+      :class="{ 'reveal-group--visible': props.isVisible }"
+      dense
+    >
       <v-col
-        v-for="item in props.items"
+        v-for="(item, index) in props.items"
         :key="item.text"
         cols="12"
-        class="home-problems__list-item card__nudger card__nudger--border card__nudger--radius_top-right_0 card__nudger--radius_bottom-right_50px"
+        class="home-problems__list-item reveal-item"
+        :style="buildRevealStyle(index)"
       >
-        <v-sheet class="home-problems__card" rounded="xl" elevation="0">
+        <v-sheet
+          class="home-problems__card hover-lift card__nudger card__nudger--border card__nudger--radius_top-right_0 card__nudger--radius_bottom-right_50px"
+          rounded="xl"
+          elevation="0"
+        >
           <v-avatar class="home-problems__icon" color="surface" size="64">
             <v-icon :icon="item.icon" size="32" />
           </v-avatar>

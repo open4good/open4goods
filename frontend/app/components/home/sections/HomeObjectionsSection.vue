@@ -1,13 +1,21 @@
 <script setup lang="ts">
+import { buildRevealStyle } from '~/utils/sectionReveal'
+
 type ObjectionItem = {
   icon: string
   question: string
   answer: string
 }
 
-const props = defineProps<{
-  items: ObjectionItem[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    items: ObjectionItem[]
+    isVisible?: boolean
+  }>(),
+  {
+    isVisible: false,
+  }
+)
 
 const { t } = useI18n()
 </script>
@@ -26,18 +34,24 @@ const { t } = useI18n()
           {{ t('home.objections.subtitle') }}
         </p>
         <v-row
-          class="home-features__grid mt-5 home-objections__grid"
+          class="home-features__grid mt-5 home-objections__grid reveal-group"
+          :class="{ 'reveal-group--visible': props.isVisible }"
           align="stretch"
           justify="center"
         >
           <v-col
-            v-for="item in props.items"
+            v-for="(item, index) in props.items"
             :key="item.question"
             cols="12"
             sm="6"
             lg="4"
+            class="reveal-item"
+            :style="buildRevealStyle(index)"
           >
-            <v-card class="home-features__card card__nudger" variant="flat">
+            <v-card
+              class="home-features__card hover-lift card__nudger"
+              variant="flat"
+            >
               <div class="text-center">
                 <v-icon
                   class="home-features__icon _home-objections__icon_"

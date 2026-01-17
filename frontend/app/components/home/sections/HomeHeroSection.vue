@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, toRefs } from 'vue'
+import { computed, onMounted, ref, toRefs, watch } from 'vue'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import { useTheme } from 'vuetify'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import SearchSuggestField, {
@@ -8,6 +9,7 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
+import { buildRevealStyle } from '~/utils/sectionReveal'
 
 import {
   resolveThemedAssetUrl,
@@ -57,6 +59,7 @@ const emit = defineEmits<{
 
 const { t, te, tm, locale } = useI18n()
 const theme = useTheme()
+const preferredMotion = usePreferredReducedMotion()
 const heroBackgroundAsset = useHeroBackgroundAsset()
 const activeEventPack = useSeasonalEventPack()
 const packI18n = useEventPackI18n(activeEventPack)
@@ -68,6 +71,11 @@ const partnersLinkPlaceholder = '{partnersLink}'
 const openDataMillionsPlaceholder = '{millions}'
 const productsCountPlaceholder = '{products}'
 const categoriesCountPlaceholder = '{categories}'
+
+const isHeroVisible = ref(false)
+const shouldReduceMotion = computed(
+  () => preferredMotion.value === 'reduce'
+)
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -531,6 +539,31 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   emit('select-product', payload)
 }
 
+const revealHero = () => {
+  if (isHeroVisible.value) {
+    return
+  }
+
+  if (shouldReduceMotion.value) {
+    isHeroVisible.value = true
+    return
+  }
+
+  requestAnimationFrame(() => {
+    isHeroVisible.value = true
+  })
+}
+
+watch(shouldReduceMotion, reduceMotion => {
+  if (reduceMotion) {
+    isHeroVisible.value = true
+  }
+})
+
+onMounted(() => {
+  revealHero()
+})
+
 useHead({
   link: [
     {
@@ -573,10 +606,20 @@ useHead({
       <div class="home-hero__inner">
         <v-row class="home-hero__layout" align="stretch" justify="center">
           <v-col cols="12" class="home-hero__content">
-            <h1 id="home-hero-title" class="mt-8 home-hero__title">
+            <h1
+              id="home-hero-title"
+              class="mt-8 home-hero__title home-hero__reveal-item"
+              :class="{ 'home-hero__reveal-item--visible': isHeroVisible }"
+              :style="buildRevealStyle(0)"
+            >
               {{ heroTitle }}
             </h1>
-            <p v-if="heroTitleSubtitle" class="home-hero__title-subtitle">
+            <p
+              v-if="heroTitleSubtitle"
+              class="home-hero__title-subtitle home-hero__reveal-item"
+              :class="{ 'home-hero__reveal-item--visible': isHeroVisible }"
+              :style="buildRevealStyle(1)"
+            >
               {{ heroTitleSubtitle }}
             </p>
           </v-col>
@@ -585,10 +628,18 @@ useHead({
           <v-col cols="12" lg="10" xl="8">
             <v-sheet class="home-hero__panel" color="transparent" elevation="0">
               <div class="home-hero__panel-grid">
-                <div class="home-hero__panel-block">
+                <div
+                  class="home-hero__panel-block home-hero__reveal-item"
+                  :class="{ 'home-hero__reveal-item--visible': isHeroVisible }"
+                  :style="buildRevealStyle(2)"
+                >
                   <NudgeToolWizard :verticals="wizardVerticals" />
                 </div>
-                <div class="home-hero__panel-block">
+                <div
+                  class="home-hero__panel-block home-hero__reveal-item"
+                  :class="{ 'home-hero__reveal-item--visible': isHeroVisible }"
+                  :style="buildRevealStyle(3)"
+                >
                   <form
                     class="home-hero__search"
                     role="search"
@@ -657,7 +708,11 @@ useHead({
                       })
                     "
                   >
-                    <div class="home-hero__context">
+                    <div
+                      class="home-hero__context home-hero__reveal-item"
+                      :class="{ 'home-hero__reveal-item--visible': isHeroVisible }"
+                      :style="buildRevealStyle(4)"
+                    >
                       <p class="home-hero__subtitle text-center">
                         {{ heroContextTitle }}
                       </p>
@@ -672,7 +727,11 @@ useHead({
                             <li
                               v-for="(item, index) in heroHelperItems"
                               :key="`hero-helper-${index}`"
-                              class="home-hero__helper"
+                              class="home-hero__helper home-hero__reveal-item"
+                              :class="{
+                                'home-hero__reveal-item--visible': isHeroVisible,
+                              }"
+                              :style="buildRevealStyle(index + 5)"
                             >
                               <span
                                 class="home-hero__helper-icon"
@@ -867,6 +926,17 @@ useHead({
   flex-direction: column
   gap: clamp(1.25rem, 2vw, 1.75rem)
   min-width: 0
+
+.home-hero__reveal-item
+  opacity: 0
+  transform: translateY(18px) scale(0.985)
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)
+  transition-delay: var(--reveal-delay, 0ms)
+  will-change: opacity, transform
+
+.home-hero__reveal-item--visible
+  opacity: 1
+  transform: translateY(0) scale(1)
 
 .home-hero__context
   flex-direction: column

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { toRefs } from 'vue'
+import { buildRevealStyle } from '~/utils/sectionReveal'
 
 interface BlogItem {
   title?: string | null
@@ -10,11 +11,17 @@ interface BlogItem {
   hasImage: boolean
 }
 
-const props = defineProps<{
-  loading: boolean
-  featuredItem: BlogItem | null
-  secondaryItems: BlogItem[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    loading: boolean
+    featuredItem: BlogItem | null
+    secondaryItems: BlogItem[]
+    isVisible?: boolean
+  }>(),
+  {
+    isVisible: false,
+  }
+)
 
 const { loading, featuredItem, secondaryItems } = toRefs(props)
 
@@ -28,19 +35,26 @@ const secondaryFallbackIconSize = 48
 <template>
   <section class="home-section home-blog" aria-labelledby="home-blog-title">
     <v-container fluid class="home-section__container">
-      <div class="home-section__inner">
-        <p id="home-blog-title" class="home-hero__subtitle">
+      <div
+        class="home-section__inner reveal-group"
+        :class="{ 'reveal-group--visible': props.isVisible }"
+      >
+        <p id="home-blog-title" class="home-hero__subtitle reveal-item">
           {{ t('home.blog.title') }}
         </p>
-        <p class="home-section__subtitle text-center">
+        <p
+          class="home-section__subtitle text-center reveal-item"
+          :style="buildRevealStyle(1)"
+        >
           {{ t('home.blog.subtitle') }}
         </p>
         <v-btn
-          class="home-section__cta nudger_degrade-defaut mx-auto"
+          class="home-section__cta nudger_degrade-defaut mx-auto reveal-item"
           :to="localePath({ name: 'blog' })"
           color="primary"
           variant="tonal"
           size="large"
+          :style="buildRevealStyle(2)"
         >
           {{ t('home.blog.cta') }}
         </v-btn>
@@ -54,9 +68,13 @@ const secondaryFallbackIconSize = 48
           />
         </div>
         <template v-else>
-          <div v-if="featuredItem" class="home-blog__featured">
+          <div
+            v-if="featuredItem"
+            class="home-blog__featured reveal-item"
+            :style="buildRevealStyle(3)"
+          >
             <NuxtLink :to="featuredItem.link" class="home-blog__featured-link">
-              <article class="home-blog__featured-card">
+              <article class="home-blog__featured-card hover-lift">
                 <div class="home-blog__media" aria-hidden="true">
                   <v-img
                     v-if="featuredItem.hasImage"
@@ -93,16 +111,17 @@ const secondaryFallbackIconSize = 48
             align="stretch"
           >
             <v-col
-              v-for="article in secondaryItems"
+              v-for="(article, index) in secondaryItems"
               :key="article.link"
               cols="12"
               sm="6"
               md="5"
               lg="4"
-              class="home-blog__col"
+              class="home-blog__col reveal-item"
+              :style="buildRevealStyle(index + 4)"
             >
               <NuxtLink :to="article.link" class="home-blog__item">
-                <article class="home-blog__card">
+                <article class="home-blog__card hover-lift">
                   <div class="home-blog__media" aria-hidden="true">
                     <v-img
                       v-if="article.hasImage"

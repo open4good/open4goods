@@ -851,7 +851,10 @@ useHead(() => ({
             >
               <v-slide-y-transition :disabled="shouldReduceMotion">
                 <div v-show="animatedSections.problems">
-                  <HomeProblemsSection :items="problemItems" />
+                  <HomeProblemsSection
+                    :items="problemItems"
+                    :is-visible="animatedSections.problems"
+                  />
                 </div>
               </v-slide-y-transition>
             </div>
@@ -862,7 +865,10 @@ useHead(() => ({
             >
               <v-slide-y-reverse-transition :disabled="shouldReduceMotion">
                 <div v-show="animatedSections.solution">
-                  <HomeSolutionSection :benefits="solutionBenefits" />
+                  <HomeSolutionSection
+                    :benefits="solutionBenefits"
+                    :is-visible="animatedSections.solution"
+                  />
                 </div>
               </v-slide-y-reverse-transition>
             </div>
@@ -887,7 +893,10 @@ useHead(() => ({
             >
               <v-scale-transition :disabled="shouldReduceMotion">
                 <div v-show="animatedSections.features">
-                  <HomeFeaturesSection :features="featureCards" />
+                  <HomeFeaturesSection
+                    :features="featureCards"
+                    :is-visible="animatedSections.features"
+                  />
                 </div>
               </v-scale-transition>
             </div>
@@ -921,6 +930,7 @@ useHead(() => ({
                     :loading="blogLoading"
                     :featured-item="featuredBlogItem"
                     :secondary-items="secondaryBlogItems"
+                    :is-visible="animatedSections.blog"
                   />
                 </div>
               </v-slide-x-transition>
@@ -951,7 +961,10 @@ useHead(() => ({
             >
               <v-slide-x-reverse-transition :disabled="shouldReduceMotion">
                 <div v-show="animatedSections.objections">
-                  <HomeObjectionsSection :items="objectionItems" />
+                  <HomeObjectionsSection
+                    :items="objectionItems"
+                    :is-visible="animatedSections.objections"
+                  />
                 </div>
               </v-slide-x-reverse-transition>
             </div>

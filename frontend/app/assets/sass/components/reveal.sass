@@ -1,0 +1,45 @@
+.reveal-group
+  --reveal-distance: 16px
+  --reveal-duration: 0.5s
+  --reveal-ease: cubic-bezier(0.16, 1, 0.3, 1)
+
+  .reveal-item
+    opacity: 0
+    transform: translateY(var(--reveal-distance))
+    transition: opacity var(--reveal-duration) var(--reveal-ease), transform var(--reveal-duration) var(--reveal-ease)
+    transition-delay: var(--reveal-delay, 0ms)
+    will-change: opacity, transform
+
+  &.reveal-group--visible
+    .reveal-item
+      opacity: 1
+      transform: translateY(0)
+
+.hover-lift
+  transition: transform 0.22s ease, box-shadow 0.22s ease
+  will-change: transform, box-shadow
+
+  @media (hover: hover) and (pointer: fine)
+    &:hover
+      transform: translateY(-4px)
+      box-shadow: 0 18px 32px rgba(var(--v-theme-shadow-primary-600), 0.16)
+
+:root.accessibility-reduced-motion
+  .reveal-group
+    .reveal-item
+      opacity: 1
+      transform: none
+      transition: none
+
+  .hover-lift
+    transition: none
+
+@media (prefers-reduced-motion: reduce)
+  .reveal-group
+    .reveal-item
+      opacity: 1
+      transform: none
+      transition: none
+
+  .hover-lift
+    transition: none

@@ -1,13 +1,21 @@
 <script setup lang="ts">
+import { buildRevealStyle } from '~/utils/sectionReveal'
+
 type FeatureCard = {
   icon: string
   title: string
   description: string
 }
 
-const props = defineProps<{
-  features: FeatureCard[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    features: FeatureCard[]
+    isVisible?: boolean
+  }>(),
+  {
+    isVisible: false,
+  }
+)
 
 const { t } = useI18n()
 </script>
@@ -24,15 +32,24 @@ const { t } = useI18n()
         />
         <!-- eslint-enable vue/no-v-html -->
       </header>
-      <v-row class="home-features__grid" align="stretch">
+      <v-row
+        class="home-features__grid reveal-group"
+        :class="{ 'reveal-group--visible': props.isVisible }"
+        align="stretch"
+      >
         <v-col
-          v-for="feature in props.features"
+          v-for="(feature, index) in props.features"
           :key="feature.title"
           cols="12"
           sm="6"
           lg="4"
+          class="reveal-item"
+          :style="buildRevealStyle(index)"
         >
-          <v-card class="home-features__card card__nudger" variant="flat">
+          <v-card
+            class="home-features__card hover-lift card__nudger"
+            variant="flat"
+          >
             <div class="text-center">
               <v-icon
                 class="home-features__icon"
