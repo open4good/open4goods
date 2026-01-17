@@ -44,7 +44,12 @@ const sectionDescription = computed(() => t('home.solution.description'))
             </p>
           </header>
           <v-row class="home-solution__list" dense>
-            <v-col v-for="item in props.benefits" :key="item.label" cols="12" md="6">
+            <v-col
+              v-for="item in props.benefits"
+              :key="item.label"
+              cols="12"
+              md="6"
+            >
               <NudgerCard
                 class="home-solution__item"
                 border
@@ -95,11 +100,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
   padding: 0
   row-gap: clamp(1rem, 2.5vw, 1.5rem)
 
-<<<<<<< HEAD
-.home-solution__list-col
-  display: flex
-=======
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
+
 
 .home-solution__item
   width: 100%;
@@ -154,35 +155,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
 
 @media (max-width: 599px)
   .home-solution__item
-<<<<<<< HEAD
-=======
-    width: 100%;
-    display: flex;
-    gap: 1rem;
-    align-items: center;
 
-  .home-solution__item::after
-    display: none
-
-  .home-solution__icon
-    font-size: clamp(1.65rem, 5vw, 2rem)
-    //background: rgba(var(--v-theme-surface-primary-080), 0.6)
-    border: 1px solid rgb(var(--v-theme-secondary))
-    color: rgb(var(--v-theme-secondary))
-
-  .home-solution
-    display: flex;
-    flex-direction: column;
-    gap: clamp(0.875rem, 2vw, 1.25rem);
-
-  .home-section__header
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
-  .home-solution__texts
-    display: flex
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     flex-direction: column
     text-align: center
     align-items: center
