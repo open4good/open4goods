@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 
 const solutionImageSrc = '/homepage/gain/nudger-screaming.webp'
 
@@ -39,14 +40,13 @@ const sectionDescription = computed(() => t('home.solution.description'))
             </p>
           </header>
           <v-row class="home-solution__list" dense>
-            <v-col
-              v-for="item in props.benefits"
-              :key="item.label"
-              cols="12"
-              md="6"
-              class="home-solution__list-col card__nudger card__nudger--border card__nudger--radius_top-left_0 card__nudger--radius_bottom-left_50px"
-            >
-              <v-sheet class="home-solution__item" rounded="xl" elevation="0">
+            <v-col v-for="item in props.benefits" :key="item.label" cols="12" md="6">
+              <NudgerCard
+                class="home-solution__item"
+                border
+                :flat-corners="['top-left']"
+                :accent-corners="['bottom-left']"
+              >
                 <v-avatar class="home-solution__icon" size="60" color="surface">
                   <span aria-hidden="true">{{ item.emoji }}</span>
                 </v-avatar>
@@ -56,7 +56,7 @@ const sectionDescription = computed(() => t('home.solution.description'))
                     {{ item.description }}
                   </p>
                 </div>
-              </v-sheet>
+              </NudgerCard>
             </v-col>
           </v-row>
         </v-col>
@@ -91,15 +91,12 @@ const sectionDescription = computed(() => t('home.solution.description'))
     padding: 0
     row-gap: clamp(1rem, 2.5vw, 1.5rem)
 
-  .home-solution__list-col
-    display: flex
 
   .home-solution__item
     width: 100%;
     display: flex;
     gap: 1rem;
     align-items: center;
-    background: transparent !important;
 
   .home-solution__item::after
     display: none
