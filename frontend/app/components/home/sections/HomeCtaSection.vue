@@ -4,6 +4,7 @@ import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
+import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 import { useEventPackI18n } from '~/composables/useEventPackI18n'
 
@@ -62,7 +63,12 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
     <v-container fluid class="home-section__container">
       <v-row justify="center">
         <v-col cols="12" lg="6">
-          <div class="home-cta__content card__nudger">
+          <NudgerCard
+            class="home-cta__content"
+            background="rgba(var(--v-theme-surface-default), 0.96)"
+            padding="clamp(2rem, 5vw, 3rem)"
+            base-radius="clamp(1.75rem, 4vw, 2.5rem)"
+          >
             <p id="home-cta-title" class="home-hero__subtitle">
               {{ t('home.cta.title') }}
             </p>
@@ -133,7 +139,7 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
                 </v-btn>
               </div>
             </div>
-          </div>
+          </NudgerCard>
         </v-col>
       </v-row>
     </v-container>
@@ -152,9 +158,6 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
   display: flex
   flex-direction: column
   gap: clamp(0.875rem, 2vw, 1.25rem);
-  padding: clamp(2rem, 5vw, 3rem)
-  border-radius: clamp(1.75rem, 4vw, 2.5rem)
-  background: rgba(var(--v-theme-surface-default), 0.96)
   box-shadow: 0 24px 36px rgba(var(--v-theme-shadow-primary-600), 0.15)
 
 .home-hero__search

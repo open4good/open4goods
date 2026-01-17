@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 type ObjectionItem = {
   icon: string
   question: string
@@ -37,7 +38,7 @@ const { t } = useI18n()
             sm="6"
             lg="4"
           >
-            <v-card class="home-features__card card__nudger" variant="flat">
+            <NudgerCard class="home-features__card">
               <div class="text-center">
                 <v-icon
                   class="home-features__icon _home-objections__icon_"
@@ -53,7 +54,7 @@ const { t } = useI18n()
               <p class="home-features__card-description text-center mt-auto">
                 {{ item.answer }}
               </p>
-            </v-card>
+            </NudgerCard>
           </v-col>
         </v-row>
       </div>
