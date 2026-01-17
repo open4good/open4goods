@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 type FeatureCard = {
   icon: string
@@ -8,9 +9,11 @@ type FeatureCard = {
 
 const props = defineProps<{
   features: FeatureCard[]
+  reveal?: boolean
 }>()
 
 const { t } = useI18n()
+const isVisible = computed(() => Boolean(props.reveal))
 </script>
 
 <template>
@@ -25,15 +28,23 @@ const { t } = useI18n()
         />
         <!-- eslint-enable vue/no-v-html -->
       </header>
-      <v-row class="home-features__grid" align="stretch" justify="center">
+      <v-row
+        class="home-features__grid home-reveal-group"
+        :class="{ 'is-ready': true, 'is-visible': isVisible }"
+        align="stretch"
+        justify="center"
+      >
         <v-col
-          v-for="feature in props.features"
+          v-for="(feature, index) in props.features"
           :key="feature.title"
           cols="12"
           sm="6"
           lg="4"
         >
-          <NudgerCard class="home-features__card">
+          <NudgerCard
+            class="home-features__card home-hover-card home-reveal-item"
+            :style="{ '--reveal-delay': `${index * 90}ms` }"
+          >
             <div class="text-center">
               <v-icon
                 class="home-features__icon"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, toRefs } from 'vue'
+import { computed, onMounted, ref, toRefs, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import SearchSuggestField, {
@@ -32,6 +32,7 @@ const props = defineProps<{
   productsCount?: number
   categoriesCount?: number
   heroBackgroundI18nKey?: string
+  shouldReduceMotion?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -52,7 +53,14 @@ const themeName = computed(() =>
 const searchQueryValue = computed(() => props.searchQuery)
 
 const { minSuggestionQueryLength } = toRefs(props)
+const shouldReduceMotion = computed(() => Boolean(props.shouldReduceMotion))
 const wizardVerticals = computed(() => props.verticals ?? [])
+const heroRevealReady = ref(false)
+const heroRevealVisible = ref(false)
+const heroRevealClasses = computed(() => ({
+  'is-ready': heroRevealReady.value,
+  'is-visible': heroRevealVisible.value,
+}))
 
 const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
@@ -138,6 +146,24 @@ onMounted(() => {
       isHeroImageLoaded.value = true
     }
   }, heroReadyFallbackDelayMs)
+
+  if (shouldReduceMotion.value) {
+    heroRevealReady.value = true
+    heroRevealVisible.value = true
+    return
+  }
+
+  heroRevealReady.value = true
+  window.requestAnimationFrame(() => {
+    heroRevealVisible.value = true
+  })
+})
+
+watch(shouldReduceMotion, value => {
+  if (value) {
+    heroRevealReady.value = true
+    heroRevealVisible.value = true
+  }
 })
 
 const handleSubmit = () => {
@@ -191,20 +217,33 @@ useHead({
       <div class="home-hero__background-overlay" />
     </div>
     <v-container fluid class="home-hero__container">
-      <div class="home-hero__inner">
+      <div class="home-hero__inner home-reveal-group" :class="heroRevealClasses">
         <v-row class="home-hero__layout" align="stretch" justify="center">
           <v-col cols="12" class="home-hero__content">
-            <h1 id="home-hero-title" class="mt-8 home-hero__title">
+            <h1
+              id="home-hero-title"
+              class="mt-8 home-hero__title home-reveal-item"
+              :style="{ '--reveal-delay': '0ms' }"
+            >
               {{ heroTitle }}
             </h1>
-            <p v-if="heroTitleSubtitle" class="home-hero__title-subtitle">
+            <p
+              v-if="heroTitleSubtitle"
+              class="home-hero__title-subtitle home-reveal-item"
+              :style="{ '--reveal-delay': '90ms' }"
+            >
               {{ heroTitleSubtitle }}
             </p>
           </v-col>
         </v-row>
         <v-row justify="center">
           <v-col cols="12" lg="10" xl="8">
-            <v-sheet class="home-hero__panel" color="transparent" elevation="0">
+            <v-sheet
+              class="home-hero__panel home-reveal-item home-reveal-item--scale"
+              color="transparent"
+              elevation="0"
+              :style="{ '--reveal-delay': '180ms' }"
+            >
               <div class="home-hero__panel-grid">
                 <div class="home-hero__panel-block">
                   <form

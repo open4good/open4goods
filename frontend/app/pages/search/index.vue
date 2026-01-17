@@ -101,38 +101,6 @@
       class="search-page__results py-10 px-4 mx-auto"
       max-width="xl"
     >
-      <div class="d-flex justify-end align-center mb-4 gap-4">
-        <v-select
-          v-if="isFiltered"
-          v-model="sortOption"
-          :items="sortOptions"
-          item-title="label"
-          item-value="value"
-          density="compact"
-          variant="outlined"
-          hide-details
-          class="search-page__sort-select"
-          style="max-width: 200px"
-          prepend-inner-icon="mdi-sort"
-        />
-        <v-btn
-          v-if="!showInitialState && !error"
-          prepend-icon="mdi-filter-variant"
-          variant="tonal"
-          color="primary"
-          @click="filtersOpen = true"
-        >
-          {{ t('category.filters.title') }}
-          <v-badge
-            v-if="activeFilters.length"
-            :content="activeFilters.length"
-            color="primary"
-            inline
-            class="ms-2"
-          />
-        </v-btn>
-      </div>
-
       <v-alert
         v-if="error || productsError"
         type="error"
@@ -162,95 +130,179 @@
       </v-alert>
 
       <template v-else>
-        <!-- Filtered Results (Product Search) -->
-        <div v-if="isFiltered" class="search-page__filtered-results">
-          <div
-            v-if="!productResults.length && !productsPending"
-            class="search-page__empty"
-          >
-            <h2 class="search-page__empty-title">
-              {{ t('search.states.empty.title', { query: normalizedQuery }) }}
-            </h2>
-            <p class="search-page__empty-description">
-              {{ t('search.states.empty.description') }}
-            </p>
-            <v-btn
-              variant="text"
-              color="primary"
-              class="mt-4"
-              @click="clearFilters"
-            >
-              {{ t('category.filters.reset') }}
-            </v-btn>
-          </div>
+        <v-row class="search-page__layout" align="start" justify="center">
+          <v-col cols="12" lg="5">
+            <section class="search-page__column">
+              <div class="search-page__column-header">
+                <h2 class="text-h5 font-weight-bold mb-0">
+                  {{ t('search.columns.verticals.title') }}
+                </h2>
+              </div>
 
-          <CategoryProductCardGrid
-            v-else
-            :products="productResults"
-            size="medium"
-          />
-        </div>
-
-        <!-- Default Global Search Results (Groups) -->
-        <template v-else>
-          <div
-            v-if="!limitedGroups.length && !pending"
-            class="search-page__empty"
-          >
-            <h2 class="search-page__empty-title">
-              {{ t('search.states.empty.title', { query: normalizedQuery }) }}
-            </h2>
-            <p class="search-page__empty-description">
-              {{ t('search.states.empty.description') }}
-            </p>
-          </div>
-
-          <div v-else class="search-page__group-wrapper">
-            <p class="search-page__summary">
-              {{ resultsSummaryLabel }}
-            </p>
-            <p v-if="usingFallback" class="search-page__fallback">
-              {{ t('search.notice.fallback') }}
-            </p>
-            <div v-if="activeSearchModeLabel" class="search-page__mode-row">
-              <p class="search-page__mode">
-                {{
-                  t('search.results.modeLabel', {
-                    mode: activeSearchModeLabel,
-                  })
-                }}
-              </p>
-              <v-btn
-                v-if="nextSearchModeLabel"
-                variant="tonal"
-                color="primary"
-                size="small"
-                @click="handleNextSearchMode"
+              <div
+                v-if="!limitedGroups.length && !pending"
+                class="search-page__empty"
               >
-                {{
-                  t('search.results.nextMode', {
-                    mode: nextSearchModeLabel,
-                  })
-                }}
-              </v-btn>
-            </div>
+                <h3 class="search-page__empty-title">
+                  {{
+                    t('search.columns.verticals.emptyTitle', {
+                      query: normalizedQuery,
+                    })
+                  }}
+                </h3>
+                <p class="search-page__empty-description">
+                  {{ t('search.columns.verticals.emptyDescription') }}
+                </p>
+              </div>
 
-            <SearchResultGroup
-              v-for="group in limitedGroups"
-              :key="group.key"
-              :title="group.title"
-              :count-label="group.countLabel"
-              :products="group.products"
-              :popular-attributes="group.popularAttributes"
-              :vertical-home-url="group.verticalHomeUrl"
-              :search-mode-label="group.searchModeLabel"
-              :category-link-label="t('search.groups.viewCategory')"
-              :category-link-aria="
-                t('search.groups.viewCategoryAria', { title: group.title })
-              "
-            />
-          </div>
-        </template>
+              <v-expansion-panels
+                v-else
+                v-model="openPanels"
+                multiple
+                class="search-page__panels"
+              >
+                <v-expansion-panel
+                  v-for="group in limitedGroups"
+                  :key="group.key"
+                >
+                  <v-expansion-panel-title>
+                    <div class="search-page__panel-title">
+                      <span>{{ group.title }}</span>
+                      <span
+                        v-if="group.countLabel"
+                        class="search-page__panel-count"
+                      >
+                        {{ group.countLabel }}
+                      </span>
+                    </div>
+                  </v-expansion-panel-title>
+                  <v-expansion-panel-text>
+                    <div class="search-page__panel-meta">
+                      <v-btn
+                        v-if="group.verticalHomeUrl"
+                        :to="group.verticalHomeUrl"
+                        variant="text"
+                        color="primary"
+                        class="px-0"
+                        :aria-label="
+                          t('search.groups.viewCategoryAria', {
+                            title: group.title,
+                          })
+                        "
+                      >
+                        {{ t('search.groups.viewCategory') }}
+                        <v-icon
+                          icon="mdi-arrow-right"
+                          size="small"
+                          aria-hidden="true"
+                        />
+                      </v-btn>
+                    </div>
+                    <CategoryProductCardGrid
+                      :products="group.products"
+                      :popular-attributes="group.popularAttributes"
+                      size="compact"
+                    />
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </section>
+          </v-col>
+
+          <v-col cols="12" lg="7">
+            <section class="search-page__column">
+              <div
+                class="search-page__column-header search-page__column-header--with-actions"
+              >
+                <div class="search-page__column-title">
+                  <h2 class="text-h5 font-weight-bold mb-0">
+                    {{ t('search.columns.products.title') }}
+                  </h2>
+                  <p class="search-page__column-subtitle">
+                    {{ t('search.columns.products.subtitle') }}
+                  </p>
+                </div>
+                <div class="search-page__column-actions">
+                  <v-select
+                    v-if="isFiltered"
+                    v-model="sortOption"
+                    :items="sortOptions"
+                    item-title="label"
+                    item-value="value"
+                    density="compact"
+                    variant="outlined"
+                    hide-details
+                    class="search-page__sort-select"
+                    prepend-inner-icon="mdi-sort"
+                  />
+                  <v-btn
+                    v-if="!showInitialState"
+                    prepend-icon="mdi-filter-variant"
+                    variant="tonal"
+                    color="primary"
+                    @click="handleFiltersToggle"
+                  >
+                    {{ t('category.filters.title') }}
+                    <v-badge
+                      v-if="activeFilters.length"
+                      :content="activeFilters.length"
+                      color="primary"
+                      inline
+                      class="ms-2"
+                    />
+                  </v-btn>
+                </div>
+              </div>
+
+              <v-expand-transition>
+                <div
+                  v-if="mdAndUp"
+                  v-show="filtersPanelOpen"
+                  class="search-page__filters-panel"
+                >
+                  <CategoryFilterList
+                    :fields="filterFields"
+                    :aggregations="productAggregations"
+                    :active-filters="activeFilters"
+                    @update-range="updateRangeFilter"
+                    @update-terms="updateTermsFilter"
+                  />
+                </div>
+              </v-expand-transition>
+
+              <div
+                v-if="!rightColumnProducts.length && !rightColumnPending"
+                class="search-page__empty"
+              >
+                <h3 class="search-page__empty-title">
+                  {{
+                    t('search.columns.products.emptyTitle', {
+                      query: normalizedQuery,
+                    })
+                  }}
+                </h3>
+                <p class="search-page__empty-description">
+                  {{ t('search.columns.products.emptyDescription') }}
+                </p>
+                <v-btn
+                  v-if="isFiltered"
+                  variant="text"
+                  color="primary"
+                  class="mt-4"
+                  @click="clearFilters"
+                >
+                  {{ t('category.filters.reset') }}
+                </v-btn>
+              </div>
+
+              <CategoryProductCardGrid
+                v-else
+                :products="rightColumnProducts"
+                size="medium"
+              />
+            </section>
+          </v-col>
+        </v-row>
       </template>
     </v-container>
   </div>
@@ -259,11 +311,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useDisplay } from 'vuetify'
 import type {
   AttributeConfigDto,
   GlobalSearchResponseDto,
   ProductDto,
-  SearchMode,
   VerticalConfigDto,
   ProductSearchResponseDto,
   ProductSearchRequestDto,
@@ -277,22 +329,20 @@ import SearchSuggestField, {
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import PageHeader from '~/components/shared/header/PageHeader.vue'
-import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryFilterList from '~/components/category/filters/CategoryFilterList.vue'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { useAnalytics } from '~/composables/useAnalytics'
-import { buildCategoryHash } from '~/utils/_category-filter-state'
 
 const MIN_QUERY_LENGTH = 2
-const DEFAULT_GLOBAL_RESULTS_LIMIT = 20
-const SEMANTIC_REDIRECT_THRESHOLD = 0.9
+const VERTICAL_RESULTS_LIMIT = 4
 
 definePageMeta({
   ssr: true,
 })
 
 const { t, locale, availableLocales } = useI18n()
+const { mdAndUp } = useDisplay()
 const { translatePlural } = usePluralizedTranslation()
 const { trackSearch } = useAnalytics()
 const route = useRoute()
@@ -305,13 +355,13 @@ const routeQuery = computed(() =>
   typeof route.query.q === 'string' ? route.query.q : ''
 )
 const searchInput = ref(routeQuery.value)
-const requestedSearchType = ref<
-  'auto' | 'exact_vertical' | 'global' | 'semantic'
->('auto')
+const requestedSearchType = ref<'semantic'>('semantic')
 
 const filtersOpen = ref(false)
+const filtersPanelOpen = ref(true)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
 const sortOption = ref<string>('impact')
+const openPanels = ref<number[]>([0])
 
 const sortOptions = computed(() => [
   { label: t('category.sorting.score'), value: 'impact' },
@@ -323,11 +373,18 @@ watch(
   routeQuery,
   value => {
     searchInput.value = value
-    requestedSearchType.value = 'auto'
     // Do NOT reset filters automatically to allow refining search with filters kept?
     // User requirement: "taillés sur les resultats retournés". Usually implies new search -> new context.
     // But if I type "iPhone" and filter price, then change to "Samsung", I might want to keep price filter.
     // For now, let's keep filters.
+  },
+  { immediate: true }
+)
+
+watch(
+  mdAndUp,
+  value => {
+    filtersPanelOpen.value = value
   },
   { immediate: true }
 )
@@ -348,15 +405,16 @@ const showMinimumNotice = computed(
 
 const activeFilters = computed(() => filterRequest.value.filters ?? [])
 const isFiltered = computed(() => activeFilters.value.length > 0)
+const filtersVisible = computed(() =>
+  mdAndUp.value ? filtersPanelOpen.value : filtersOpen.value
+)
 
 // Global Search Data
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(
     'global-search',
     async () => {
-      // If filtered, we don't need global search, but we might want to keep it cached?
-      // Actually, if we switch mode, we strictly use the other endpoint.
-      if (!hasMinimumLength.value || isFiltered.value) {
+      if (!hasMinimumLength.value) {
         return null
       }
 
@@ -373,7 +431,6 @@ const { data, pending, error, refresh } =
       watch: [
         () => normalizedQuery.value,
         () => requestedSearchType.value,
-        () => isFiltered.value,
       ],
       immediate: hasMinimumLength.value,
     }
@@ -445,7 +502,7 @@ const {
     // If IS NOT filtered, we rely on Global Search.
     // BUT we need aggregations to show in the drawer.
     // So if drawer is OPEN, we need to fetch aggregations.
-    if (!isFiltered.value && !filtersOpen.value) return null
+    if (!isFiltered.value && !filtersVisible.value) return null
 
     return await $fetch<ProductSearchResponseDto>('/api/products', {
       method: 'POST',
@@ -461,7 +518,7 @@ const {
     watch: [
       () => normalizedQuery.value,
       () => filterRequest.value,
-      () => filtersOpen.value, // Fetch when drawer opens to get aggs
+      () => filtersVisible.value, // Fetch when filters are visible to get aggs
     ],
     immediate: false, // Wait for interaction
   }
@@ -515,10 +572,19 @@ const updateTermsFilter = (field: string, terms: string[]) => {
 
 const clearFilters = () => {
   filterRequest.value = { filters: [], filterGroups: [] }
-  filtersOpen.value = false
+  if (!mdAndUp.value) {
+    filtersOpen.value = false
+  }
 }
 
-// ... Rest of existing code ...
+const handleFiltersToggle = () => {
+  if (mdAndUp.value) {
+    filtersPanelOpen.value = !filtersPanelOpen.value
+    return
+  }
+
+  filtersOpen.value = true
+}
 
 const { data: verticalsData } = await useAsyncData<VerticalConfigDto[]>(
   'search-verticals',
@@ -549,7 +615,6 @@ interface SearchGroup {
   products: ProductDto[]
   popularAttributes: AttributeConfigDto[]
   verticalHomeUrl: string | null
-  searchModeLabel: string | null
 }
 
 const normalizeVerticalHomeUrl = (
@@ -584,7 +649,6 @@ const primaryGroups = computed(() => {
   return groups
     .map((group, index) => {
       const products = extractProducts(group.results)
-      const searchModeLabel = formatSearchModeLabel(group.searchMode)
       const verticalId = group.verticalId ?? null
       const vertical = verticalId
         ? (verticalById.value.get(verticalId) ?? null)
@@ -598,7 +662,7 @@ const primaryGroups = computed(() => {
         vertical?.verticalHomeTitle ??
         (verticalId
           ? formatFallbackVerticalTitle(verticalId)
-          : t('search.groups.unknownTitle'))
+          : t('search.columns.verticals.unknownTitle'))
 
       const countLabel = buildGroupCountLabel(products.length)
       const verticalHomeUrl = normalizeVerticalHomeUrl(
@@ -612,87 +676,15 @@ const primaryGroups = computed(() => {
         products,
         popularAttributes: vertical?.popularAttributes ?? [],
         verticalHomeUrl,
-        searchModeLabel,
       } satisfies SearchGroup | null
     })
     .filter((group): group is SearchGroup => Boolean(group))
 })
-
-const fallbackGroups = computed(() => {
-  const grouped = new Map<
-    string | null,
-    { products: ProductDto[]; searchModeLabel: string | null }
-  >()
-
-  for (const entry of data.value?.fallbackResults ?? []) {
-    if (!entry?.product) {
-      continue
-    }
-
-    const verticalId = entry.product.base?.vertical ?? null
-
-    if (!grouped.has(verticalId)) {
-      grouped.set(verticalId, {
-        products: [],
-        searchModeLabel: formatSearchModeLabel(entry.searchMode),
-      })
-    }
-
-    grouped.get(verticalId)?.products.push(entry.product)
-  }
-
-  return Array.from(grouped.entries())
-    .map(([verticalId, groupData], index) => {
-      if (!groupData.products.length) {
-        return null
-      }
-
-      const vertical = verticalId
-        ? (verticalById.value.get(verticalId) ?? null)
-        : null
-      const title =
-        vertical?.verticalHomeTitle ??
-        (verticalId
-          ? formatFallbackVerticalTitle(verticalId)
-          : t('search.groups.unknownTitle'))
-      const countLabel = buildGroupCountLabel(groupData.products.length)
-      const verticalHomeUrl = normalizeVerticalHomeUrl(
-        vertical?.verticalHomeUrl
-      )
-
-      return {
-        key: `fallback-${verticalId ?? index}`,
-        title,
-        countLabel,
-        products: groupData.products,
-        popularAttributes: vertical?.popularAttributes ?? [],
-        verticalHomeUrl,
-        searchModeLabel: groupData.searchModeLabel,
-      } satisfies SearchGroup | null
-    })
-    .filter((group): group is SearchGroup => Boolean(group))
-    .sort((a, b) => b.products.length - a.products.length)
-})
-
-const usingFallback = computed(
-  () => !primaryGroups.value.length && fallbackGroups.value.length > 0
-)
-const displayGroups = computed(() =>
-  primaryGroups.value.length ? primaryGroups.value : fallbackGroups.value
-)
 
 const limitedGroups = computed(() => {
-  let remaining = DEFAULT_GLOBAL_RESULTS_LIMIT
-
-  return displayGroups.value
+  return primaryGroups.value
     .map(group => {
-      if (remaining <= 0) {
-        return null
-      }
-
-      const limitedProducts = group.products.slice(0, remaining)
-      remaining -= limitedProducts.length
-
+      const limitedProducts = group.products.slice(0, VERTICAL_RESULTS_LIMIT)
       if (!limitedProducts.length) {
         return null
       }
@@ -706,147 +698,24 @@ const limitedGroups = computed(() => {
     .filter((group): group is SearchGroup => Boolean(group))
 })
 
-const totalResults = computed(() =>
-  limitedGroups.value.reduce((sum, group) => sum + group.products.length, 0)
-)
-
-const resultsCountLabel = computed(() =>
-  translatePlural('search.results.count', totalResults.value, {
-    count: totalResults.value,
-  })
-)
-
-const resultsSummaryLabel = computed(() =>
-  t('search.results.summary', {
-    countLabel: resultsCountLabel.value,
-    query: normalizedQuery.value,
-  })
-)
-
-const activeSearchMode = computed<SearchMode | null>(() => {
-  const primaryMode = data.value?.verticalGroups?.[0]?.searchMode ?? null
-  const fallbackMode = data.value?.fallbackResults?.[0]?.searchMode ?? null
-
-  return primaryMode ?? fallbackMode
-})
-
-const activeSearchModeLabel = computed(() =>
-  formatSearchModeLabel(activeSearchMode.value)
-)
-
-const nextSearchMode = computed(() => {
-  switch (activeSearchMode.value) {
-    case 'exact_vertical':
-      return 'semantic'
-    case 'semantic':
-      return 'global'
-    default:
-      return null
-  }
-})
-
-const nextSearchModeLabel = computed(() =>
-  formatSearchModeLabel(nextSearchMode.value)
-)
-
-const resolveVerticalCounts = (response: GlobalSearchResponseDto | null) => {
-  if (!response) {
-    return new Map<string, number>()
-  }
-
-  const counts = new Map<string, number>()
-  const verticalGroups = response.verticalGroups ?? []
-
-  if (verticalGroups.length) {
-    verticalGroups.forEach(group => {
-      const verticalId = group.verticalId ?? ''
-      if (!verticalId) {
-        return
-      }
-
-      const count = group.results?.length ?? 0
-      if (count > 0) {
-        counts.set(verticalId, (counts.get(verticalId) ?? 0) + count)
-      }
-    })
-  } else {
-    response.fallbackResults?.forEach(result => {
-      const verticalId = result.product?.base?.vertical ?? ''
-      if (!verticalId) {
-        return
-      }
-
-      counts.set(verticalId, (counts.get(verticalId) ?? 0) + 1)
-    })
-  }
-
-  return counts
-}
-
-const semanticRedirectTarget = computed(() => {
-  if (activeSearchMode.value !== 'semantic') {
-    return null
-  }
-
-  const counts = resolveVerticalCounts(data.value ?? null)
-  if (!counts.size) {
-    return null
-  }
-
-  let topVertical: { id: string; count: number } | null = null
-  let total = 0
-
-  counts.forEach((count, id) => {
-    total += count
-    if (!topVertical || count > topVertical.count) {
-      topVertical = { id, count }
-    }
-  })
-
-  if (!topVertical || total === 0) {
-    return null
-  }
-
-  const ratio = topVertical.count / total
-  if (ratio < SEMANTIC_REDIRECT_THRESHOLD) {
-    return null
-  }
-
-  return topVertical.id
-})
-
-const lastSemanticRedirect = ref<string | null>(null)
-
 watch(
-  [semanticRedirectTarget, normalizedQuery, isFiltered],
-  ([target, query, filtered]) => {
-    if (!import.meta.client) {
-      return
-    }
+  limitedGroups,
+  groups => {
+    openPanels.value = groups.length ? [0] : []
+  },
+  { immediate: true }
+)
 
-    if (!target || filtered || !query) {
-      return
-    }
+const missingVerticalProducts = computed(() =>
+  extractProducts(data.value?.missingVerticalResults ?? [])
+)
 
-    const vertical = verticalById.value.get(target) ?? null
-    const verticalUrl = normalizeVerticalHomeUrl(vertical?.verticalHomeUrl)
+const rightColumnProducts = computed(() =>
+  isFiltered.value ? productResults.value : missingVerticalProducts.value
+)
 
-    if (!verticalUrl) {
-      return
-    }
-
-    const redirectKey = `${target}::${query}`
-    if (lastSemanticRedirect.value === redirectKey) {
-      return
-    }
-
-    lastSemanticRedirect.value = redirectKey
-
-    router.replace({
-      path: verticalUrl,
-      hash: buildCategoryHash({ search: query }),
-    })
-  }
+const rightColumnPending = computed(() =>
+  isFiltered.value ? productsPending.value : pending.value
 )
 
 const handleSearchSubmit = () => {
@@ -865,14 +734,6 @@ const handleSearchSubmit = () => {
     path: route.path,
     query: value ? { q: value } : {},
   })
-}
-
-const handleNextSearchMode = () => {
-  if (!nextSearchMode.value) {
-    return
-  }
-
-  requestedSearchType.value = nextSearchMode.value
 }
 
 const handleClear = () => {
@@ -976,14 +837,6 @@ function formatFallbackVerticalTitle(verticalId: string): string {
     .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' ')
 }
-
-function formatSearchModeLabel(mode: SearchMode | string | null | undefined) {
-  if (!mode) {
-    return null
-  }
-
-  return t(`search.modes.${mode}`)
-}
 </script>
 
 <style scoped lang="sass">
@@ -1005,11 +858,6 @@ function formatSearchModeLabel(mode: SearchMode | string | null | undefined) {
 
      :deep(.v-navigation-drawer__content)
         background-color: rgb(var(--v-theme-surface-default))
-
-  &__filtered-results
-     display: flex
-     flex-direction: column
-     gap: 1.5rem
 
   &__alert-content
     display: flex
@@ -1041,42 +889,73 @@ function formatSearchModeLabel(mode: SearchMode | string | null | undefined) {
     max-width: 28rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 
-  &__group-wrapper
+  &__layout
+    row-gap: 2.5rem
+
+  &__column
     display: flex
     flex-direction: column
-    gap: 2rem
+    gap: 1.5rem
 
-  &__summary
-    margin: 0
-    font-weight: 500
-    color: rgb(var(--v-theme-text-neutral-secondary))
-
-  &__fallback
-    margin: 0
-    color: rgb(var(--v-theme-accent-supporting))
-    font-weight: 500
-
-  &__mode-row
+  &__column-header
     display: flex
     flex-direction: column
     gap: 0.75rem
 
-    @media (min-width: 640px)
-      flex-direction: row
-      align-items: center
-      justify-content: space-between
+    &--with-actions
+      gap: 1rem
 
-  &__mode
+      @media (min-width: 960px)
+        flex-direction: row
+        align-items: flex-start
+        justify-content: space-between
+
+  &__column-title
+    display: flex
+    flex-direction: column
+    gap: 0.35rem
+
+  &__column-subtitle
     margin: 0
-    font-weight: 500
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    font-size: 0.95rem
+
+  &__column-actions
+    display: flex
+    flex-wrap: wrap
+    gap: 0.75rem
+    align-items: center
+
+  &__filters-panel
+    padding: 1.25rem
+    border-radius: 1rem
+    background: rgba(var(--v-theme-surface-muted), 0.7)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+
+  &__panels
+    border-radius: 1rem
+    overflow: hidden
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
+
+    :deep(.v-expansion-panel)
+      background: rgb(var(--v-theme-surface-default))
+
+  &__panel-title
+    display: flex
+    align-items: center
+    justify-content: space-between
+    width: 100%
+    font-weight: 600
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__panel-count
+    font-size: 0.9rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 
-  &__group-wrapper :deep(.search-result-group:first-of-type)
-    padding-top: 0
-
-  &__group-wrapper :deep(.search-result-group:last-of-type)
-    padding-bottom: 0
-    border-bottom: none
+  &__panel-meta
+    display: flex
+    justify-content: flex-end
+    margin-bottom: 0.5rem
 
 .search-hero
   position: relative

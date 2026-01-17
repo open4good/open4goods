@@ -389,8 +389,8 @@ public class ProductController {
         }
         filterDto = filterValidation.value();
 
-        boolean semanticSearch = searchPayload != null && Boolean.TRUE.equals(searchPayload.semanticSearch());
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
+        boolean semanticSearch = StringUtils.hasText(normalizedQuery);
         Set<String> requestedComponents = include == null ? Set.of() : include;
 
         ProductSearchResponseDto body = service.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
@@ -456,12 +456,16 @@ public class ProductController {
         List<GlobalSearchResultDto> fallback = result.fallbackResults().stream()
                 .map(hit -> toDto(hit, result.searchMode()))
                 .toList();
+        List<GlobalSearchResultDto> missingVerticalResults = result.missingVerticalResults().stream()
+                .map(hit -> toDto(hit, result.searchMode()))
+                .toList();
 
         if (result.verticalCta() != null) {
             LOGGER.info("Vertical CTA found for query '{}': {}", query, result.verticalCta().verticalId());
         }
 
         GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups, fallback,
+                missingVerticalResults,
                 toCategoryDto(result.verticalCta()),
                 result.fallbackTriggered());
         return ResponseEntity.ok()

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 type ObjectionItem = {
   icon: string
@@ -8,9 +9,11 @@ type ObjectionItem = {
 
 const props = defineProps<{
   items: ObjectionItem[]
+  reveal?: boolean
 }>()
 
 const { t } = useI18n()
+const isVisible = computed(() => Boolean(props.reveal))
 </script>
 
 <template>
@@ -27,18 +30,22 @@ const { t } = useI18n()
           {{ t('home.objections.subtitle') }}
         </p>
         <v-row
-          class="home-features__grid mt-5 home-objections__grid"
+          class="home-features__grid mt-5 home-objections__grid home-reveal-group"
+          :class="{ 'is-ready': true, 'is-visible': isVisible }"
           align="stretch"
           justify="center"
         >
           <v-col
-            v-for="item in props.items"
+            v-for="(item, index) in props.items"
             :key="item.question"
             cols="12"
             sm="6"
             lg="4"
           >
-            <NudgerCard class="home-features__card">
+            <NudgerCard
+              class="home-features__card home-hover-card home-reveal-item"
+              :style="{ '--reveal-delay': `${index * 90}ms` }"
+            >
               <div class="text-center">
                 <v-icon
                   class="home-features__icon _home-objections__icon_"

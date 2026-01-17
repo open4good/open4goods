@@ -2226,18 +2226,19 @@
         "description": "Essayez un autre mot-clé ou explorez le catalogue depuis la page des catégories."
       }
     },
-    "results": {
-      "summary": "Affichage de {countLabel} pour « {query} »",
-      "count": {
-        "one": "{count} résultat",
-        "other": "{count} résultats",
-        "zero": "Aucun résultat"
+    "columns": {
+      "verticals": {
+        "title": "Catégories sémantiques",
+        "emptyTitle": "Aucune catégorie pour « {query} »",
+        "emptyDescription": "Essayez un autre mot-clé ou élargissez votre recherche.",
+        "unknownTitle": "Autres catégories"
       },
-      "modeLabel": "Mode de recherche : {mode}",
-      "nextMode": "Rechercher en mode {mode}"
-    },
-    "notice": {
-      "fallback": "Nous n'avons pas identifié de verticale précise, voici les produits les plus pertinents globalement."
+      "products": {
+        "title": "Produits sans catégorie",
+        "subtitle": "Produits trouvés sémantiquement sans verticale associée.",
+        "emptyTitle": "Aucun produit sans catégorie pour « {query} »",
+        "emptyDescription": "Essayez un autre mot-clé ou ajustez vos filtres."
+      }
     },
     "suggestions": {
       "sections": {
@@ -2271,7 +2272,6 @@
         "one": "{count} produit",
         "other": "{count} produits"
       },
-      "unknownTitle": "Autres produits",
       "viewCategory": "Accéder à la catégorie",
       "viewCategoryAria": "Accéder à la catégorie {title}"
     },
@@ -2282,7 +2282,6 @@
     },
     "modes": {
       "exact_vertical": "Exact (catégories)",
-      "global": "Global",
       "semantic": "Sémantique"
     }
   },

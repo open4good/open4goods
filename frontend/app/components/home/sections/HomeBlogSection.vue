@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRefs } from 'vue'
+import { computed, toRefs } from 'vue'
 
 interface BlogItem {
   title?: string | null
@@ -12,10 +12,21 @@ interface BlogItem {
 
 const props = defineProps<{
   loading: boolean
+<<<<<<< HEAD
   items: BlogItem[]
+=======
+  featuredItem: BlogItem | null
+  secondaryItems: BlogItem[]
+  reveal?: boolean
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 }>()
 
+<<<<<<< HEAD
 const { loading, items } = toRefs(props)
+=======
+const { loading, featuredItem, secondaryItems, reveal } = toRefs(props)
+const isVisible = computed(() => Boolean(reveal?.value))
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -26,19 +37,23 @@ const fallbackIconSize = 48
 <template>
   <section class="home-section home-blog" aria-labelledby="home-blog-title">
     <v-container fluid class="home-section__container">
-      <div class="home-section__inner">
-        <p id="home-blog-title" class="home-hero__subtitle">
+      <div
+        class="home-section__inner home-reveal-group"
+        :class="{ 'is-ready': true, 'is-visible': isVisible }"
+      >
+        <p id="home-blog-title" class="home-hero__subtitle home-reveal-item">
           {{ t('home.blog.title') }}
         </p>
-        <p class="home-section__subtitle text-center">
+        <p class="home-section__subtitle text-center home-reveal-item">
           {{ t('home.blog.subtitle') }}
         </p>
         <v-btn
-          class="home-section__cta nudger_degrade-defaut mx-auto"
+          class="home-section__cta nudger_degrade-defaut mx-auto home-reveal-item"
           :to="localePath({ name: 'blog' })"
           color="primary"
           variant="tonal"
           size="large"
+          :style="{ '--reveal-delay': '120ms' }"
         >
           {{ t('home.blog.cta') }}
         </v-btn>
@@ -52,14 +67,70 @@ const fallbackIconSize = 48
           />
         </div>
         <template v-else>
+<<<<<<< HEAD
           <v-row v-if="items.length" class="home-blog__grid" align="stretch">
+=======
+          <div v-if="featuredItem" class="home-blog__featured">
+            <NuxtLink
+              :to="featuredItem.link"
+              class="home-blog__featured-link home-reveal-item"
+              :style="{ '--reveal-delay': '200ms' }"
+            >
+              <article class="home-blog__featured-card">
+                <div class="home-blog__media" aria-hidden="true">
+                  <v-img
+                    v-if="featuredItem.hasImage"
+                    :src="featuredItem.image"
+                    :alt="featuredItem.title ?? ''"
+                    cover
+                  />
+                  <div v-else class="home-blog__placeholder">
+                    <v-icon
+                      icon="mdi-post-outline"
+                      :size="featuredFallbackIconSize"
+                    />
+                  </div>
+                </div>
+                <div class="home-blog__content">
+                  <p class="home-blog__date">
+                    {{ featuredItem.formattedDate }}
+                  </p>
+                  <h3 class="home-blog__title home-hero__subtitle text-left">
+                    {{ featuredItem.title }}
+                  </h3>
+                  <p class="home-blog__summary">{{ featuredItem.summary }}</p>
+                  <span class="home-blog__link-label">{{
+                    t('home.blog.readMore')
+                  }}</span>
+                </div>
+              </article>
+            </NuxtLink>
+          </div>
+
+          <v-row
+            v-if="secondaryItems.length"
+            class="home-blog__grid"
+            align="stretch"
+          >
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
             <v-col
+<<<<<<< HEAD
               v-for="article in items"
+=======
+              v-for="(article, index) in secondaryItems"
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
               :key="article.link"
               cols="12"
               sm="6"
+<<<<<<< HEAD
               md="4"
               class="home-blog__col"
+=======
+              md="5"
+              lg="4"
+              class="home-blog__col home-reveal-item"
+              :style="{ '--reveal-delay': `${240 + index * 90}ms` }"
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
             >
               <NuxtLink :to="article.link" class="home-blog__item">
                 <article class="home-blog__card">
