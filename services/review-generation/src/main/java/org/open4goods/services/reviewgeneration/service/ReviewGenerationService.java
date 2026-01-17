@@ -1,5 +1,6 @@
 package org.open4goods.services.reviewgeneration.service;
 
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,7 +24,6 @@ import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
-
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
@@ -34,8 +34,8 @@ import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.config.RetrievalMode;
-import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.dto.BatchResultItem;
+import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.prompt.service.provider.ProviderEvent;
@@ -344,8 +344,9 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param products       the list of products to process.
 	 * @param verticalConfig the vertical configuration.
 	 * @return the batch job ID.
+	 * @throws IOException
 	 */
-	public String generateReviewBatchRequest(List<Product> products, VerticalConfig verticalConfig) {
+	public String generateReviewBatchRequest(List<Product> products, VerticalConfig verticalConfig) throws IOException {
 		List<Map<String, Object>> promptVariablesList = new ArrayList<>();
 		List<String> ids = new ArrayList<>();
 		String promptKey = resolvePromptKey();

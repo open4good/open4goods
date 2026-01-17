@@ -43,9 +43,9 @@ public class GenAiController {
 	private ProductRepository repository;
 	private VerticalsConfigService verticalsConfigservice;
 	private ReviewGenerationService reviewGenerationService;
-	
 
-	
+
+
 	private VerticalsConfigService verticalsConfigService;
 
 
@@ -57,31 +57,31 @@ public class GenAiController {
 		this.verticalsConfigservice = verticalsConfigService;
 		this.reviewGenerationService = reviewGenerationService;
 	}
-	
-	
-	
+
+
+
 	@GetMapping("/prompt/json")
 	@Operation(summary="Launch prompt")
-	public Map<String, Object> promptJson(@RequestParam(defaultValue = "test") String key, 
+	public Map<String, Object> promptJson(@RequestParam(defaultValue = "test") String key,
 			@RequestParam Map<String,Object> context) throws ResourceNotFoundException, SerialisationException {
-		
+
 		return aiService.jsonPrompt(key, context).getBody();
 	}
-	
+
 	@GetMapping("/prompt/text")
 	@Operation(summary="Launch prompt")
-	public String prompt(@RequestParam(defaultValue = "test") String key, 
+	public String prompt(@RequestParam(defaultValue = "test") String key,
 			@RequestParam Map<String,Object> context) throws ResourceNotFoundException, SerialisationException {
-		
+
 		return aiService.prompt(key, context).getRaw();
 	}
-	
+
 	@GetMapping("/batch/request")
 	@Operation(summary = "Launch batch review generation")
 	public String batchReview(
 	        @RequestParam(defaultValue = "tv") String vertical,
 	        @RequestParam(defaultValue = "2") Integer numberOfProducts)
-	        throws ResourceNotFoundException, SerialisationException {
+	        throws ResourceNotFoundException, SerialisationException, IOException {
 
 	    VerticalConfig verticalConfig = verticalsConfigservice.getConfigById(vertical);
 	    Stream<Product> productsStream = repository.exportVerticalWithValidDate(verticalConfig, false);
@@ -92,7 +92,7 @@ public class GenAiController {
 	    return reviewGenerationService.generateReviewBatchRequest(products, verticalConfig);
 	}
 
-	
+
 	/**
      * Endpoint to check the current status of a batch job.
      *
@@ -105,22 +105,22 @@ public class GenAiController {
         return batchAiService.checkStatus(jobId);
     }
 
-    
+
 	/**
      * Endpoint to check the current status of a batch job.
      *
      * @param jobId the identifier of the batch job.
      * @return the BatchJobResponse containing the job status.
-	 * @throws IOException 
-	 * @throws ResourceNotFoundException 
+	 * @throws IOException
+	 * @throws ResourceNotFoundException
      */
     @GetMapping("/batch/processResponse")
     @Operation(summary = "Process the response for a given jobId")
     public void trigger(@RequestParam String jobId) throws ResourceNotFoundException, IOException {
          reviewGenerationService.triggerResponseHandling(jobId);
     }
-    
-    
+
+
     /**
      * Endpoint to process and retrieve the response of a completed batch job.
      *
@@ -131,8 +131,8 @@ public class GenAiController {
     @Operation(summary = "Process and retrieve batch job response by jobId")
     public void processResponse() {
         reviewGenerationService.checkBatchJobStatuses();
-        
-        
+
+
     }
-	
+
 }

@@ -2,6 +2,7 @@ package org.open4goods.services.prompt.service;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -83,11 +84,11 @@ public class BatchPromptService implements HealthIndicator {
         this.jobStore = new BatchJobStore(batchFolder, objectMapper);
     }
 
-    
-    
-    
-    
-    
+
+
+
+
+
     /**
      * Submits a batch prompt request.
      * <p>
@@ -100,9 +101,10 @@ public class BatchPromptService implements HealthIndicator {
      * @param variablesList the list of prompt variable maps.
      * @param customIds     the list of custom IDs (typically product identifiers).
      * @return the generated batch job ID.
+     * @throws IOException
      * @throws BatchTokenLimitExceededException if the total estimated tokens exceed the allowed limit.
      */
-    public String batchPromptRequest(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds, Class type) {
+    public String batchPromptRequest(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds, Class type) throws IOException {
         var promptConfig = promptService.getPromptConfig(promptKey);
         if (promptConfig == null) {
             throw new IllegalStateException("Prompt config not found for " + promptKey);
@@ -197,8 +199,8 @@ public class BatchPromptService implements HealthIndicator {
         }
         throw new IllegalStateException("Batch not supported for " + job.getProvider());
     }
-    
-    
+
+
     /**
      * Checks the status of a batch job.
      * <p>
@@ -217,8 +219,8 @@ public class BatchPromptService implements HealthIndicator {
         logger.info("Checked batch status for job {}: {}", job.getRemoteJobId(), status.status());
         return status;
     }
-    
-//    
+
+//
 //    /**
 //     * Submits a batch prompt request with a list of variable maps.
 //     * <p>
@@ -289,12 +291,12 @@ public class BatchPromptService implements HealthIndicator {
         }
         String userEvaluated = evaluationService.thymeleafEval(variables, promptConfig.getUserPrompt());
 
-        
+
         // TODO(p2, perf) : cache
         var outputConverter = new BeanOutputConverter<>(type);
-        var jsonSchema = outputConverter.getJsonSchema();  
+        var jsonSchema = outputConverter.getJsonSchema();
         Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
-        
+
         // Adding json fields instructions
         if (instructions.size() > 0) {
         	systemEvaluated +="\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
@@ -302,15 +304,15 @@ public class BatchPromptService implements HealthIndicator {
         		systemEvaluated+=entry.getKey() + " : " + entry.getValue()+"\n";
         	}
         }
-                
+
         if (!StringUtils.isEmpty(jsonSchema)) {
         	systemEvaluated+="\n\n Output response format must strictly follow the following json schema : \n\n";
         	systemEvaluated+=jsonSchema + "\n\n";
         }
-        
-        
-        
-        
+
+
+
+
         // Build the message list.
         List<org.open4goods.services.prompt.dto.openai.BatchMessage> messages = new ArrayList<>();
         if (StringUtils.hasText(systemEvaluated)) {

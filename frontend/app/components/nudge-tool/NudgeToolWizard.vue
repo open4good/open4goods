@@ -169,7 +169,7 @@
       >
         <!-- Result Count -->
         <div
-          v-if="categoryNavigationTarget"
+          v-if="!isCategoryStep && categoryNavigationTarget"
           class="nudge-wizard__reco-count-wrapper px-2"
         >
           <NuxtLink
@@ -185,7 +185,7 @@
             <v-icon icon="mdi-arrow-right" size="small" class="ms-1" />
           </NuxtLink>
         </div>
-        <div v-else class="nudge-wizard__reco-count-wrapper px-2">
+        <div v-else-if="!isCategoryStep" class="nudge-wizard__reco-count-wrapper px-2">
           <p class="nudge-wizard__reco-count">
             {{
               $t('nudge-tool.steps.recommendations.total', {
