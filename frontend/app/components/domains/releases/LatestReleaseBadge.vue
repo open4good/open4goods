@@ -51,10 +51,9 @@ const handleClick = (event: Event) => {
   display: inline-flex
   align-items: stretch
   gap: 10px
-  padding: 6px 12px 6px 0
+  padding: 6px 6px 6px 6px
   border-radius: 999px
   border: 1px solid rgba(var(--v-theme-on-surface), 0.16)
-  background: linear-gradient(90deg, rgba(var(--v-theme-surface-default), 0.85), rgba(var(--v-theme-surface-muted), 0.9))
   color: rgb(var(--v-theme-on-surface))
   text-decoration: none
   box-shadow: 0 6px 20px rgba(var(--v-theme-shadow-primary-600), 0.12)

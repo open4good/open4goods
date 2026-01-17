@@ -58,6 +58,7 @@ spring:
       enabled: true
   ai:
     openai:
+      api-key: ${gen-ai-config.openai-api-key}
       chat:
         options:
           model: ${OPENAI_MODEL:gpt-4o-mini}

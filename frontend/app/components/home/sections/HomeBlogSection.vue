@@ -12,17 +12,15 @@ interface BlogItem {
 
 const props = defineProps<{
   loading: boolean
-  featuredItem: BlogItem | null
-  secondaryItems: BlogItem[]
+  items: BlogItem[]
 }>()
 
-const { loading, featuredItem, secondaryItems } = toRefs(props)
+const { loading, items } = toRefs(props)
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 
-const featuredFallbackIconSize = 68
-const secondaryFallbackIconSize = 48
+const fallbackIconSize = 48
 </script>
 
 <template>
@@ -54,51 +52,13 @@ const secondaryFallbackIconSize = 48
           />
         </div>
         <template v-else>
-          <div v-if="featuredItem" class="home-blog__featured">
-            <NuxtLink :to="featuredItem.link" class="home-blog__featured-link">
-              <article class="home-blog__featured-card">
-                <div class="home-blog__media" aria-hidden="true">
-                  <v-img
-                    v-if="featuredItem.hasImage"
-                    :src="featuredItem.image"
-                    :alt="featuredItem.title ?? ''"
-                    cover
-                  />
-                  <div v-else class="home-blog__placeholder">
-                    <v-icon
-                      icon="mdi-post-outline"
-                      :size="featuredFallbackIconSize"
-                    />
-                  </div>
-                </div>
-                <div class="home-blog__content">
-                  <p class="home-blog__date">
-                    {{ featuredItem.formattedDate }}
-                  </p>
-                  <h3 class="home-blog__title home-hero__subtitle text-left">
-                    {{ featuredItem.title }}
-                  </h3>
-                  <p class="home-blog__summary">{{ featuredItem.summary }}</p>
-                  <span class="home-blog__link-label">{{
-                    t('home.blog.readMore')
-                  }}</span>
-                </div>
-              </article>
-            </NuxtLink>
-          </div>
-
-          <v-row
-            v-if="secondaryItems.length"
-            class="home-blog__grid"
-            align="stretch"
-          >
+          <v-row v-if="items.length" class="home-blog__grid" align="stretch">
             <v-col
-              v-for="article in secondaryItems"
+              v-for="article in items"
               :key="article.link"
               cols="12"
               sm="6"
-              md="5"
-              lg="4"
+              md="4"
               class="home-blog__col"
             >
               <NuxtLink :to="article.link" class="home-blog__item">
@@ -113,7 +73,7 @@ const secondaryFallbackIconSize = 48
                     <div v-else class="home-blog__placeholder">
                       <v-icon
                         icon="mdi-post-outline"
-                        :size="secondaryFallbackIconSize"
+                        :size="fallbackIconSize"
                       />
                     </div>
                   </div>
@@ -131,7 +91,7 @@ const secondaryFallbackIconSize = 48
           </v-row>
 
           <v-alert
-            v-else-if="!featuredItem"
+            v-else
             type="info"
             variant="tonal"
             border="start"
@@ -184,28 +144,7 @@ const secondaryFallbackIconSize = 48
 .home-blog__skeleton
   border-radius: clamp(1.25rem, 3vw, 1.75rem)
 
-.home-blog__featured
-  display: flex
 
-.home-blog__featured-link
-  flex: 1
-  text-decoration: none
-  color: inherit
-
-.home-blog__featured-card
-  display: grid
-  gap: clamp(1.5rem, 4vw, 2rem)
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
-  border-radius: clamp(1.5rem, 4vw, 2.2rem)
-  overflow: hidden
-  background: rgba(var(--v-theme-surface-default), 0.98)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.28)
-  box-shadow: 0 22px 36px rgba(var(--v-theme-shadow-primary-600), 0.14)
-  transition: transform 0.25s ease, box-shadow 0.25s ease
-
-.home-blog__featured-link:hover .home-blog__featured-card
-  transform: translateY(-6px)
-  box-shadow: 0 28px 44px rgba(var(--v-theme-shadow-primary-600), 0.18)
 
 .home-blog__grid
   --v-gutter-x: clamp(1.5rem, 4vw, 2.5rem)
@@ -282,9 +221,4 @@ const secondaryFallbackIconSize = 48
 
 .home-blog__empty
   border-radius: clamp(1.25rem, 3vw, 1.75rem)
-
-
-@media (max-width: 959px)
-  .home-blog__featured-card
-    grid-template-columns: 1fr
 </style>

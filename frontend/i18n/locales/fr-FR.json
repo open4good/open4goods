@@ -338,7 +338,7 @@
           "title": "🌿 ImpactScore : Guider vos achats",
           "segments": [
             {
-              "text": "Une évaluation écologique et environnementale innovante pour {products} produits dans"
+              "text": "On va vous faire acheter moins pire pour la planète, grâce à notre évaluation environnementale innovante pour {products} produits dans"
             },
             {
               "text": "{categories} catégories",
@@ -353,7 +353,7 @@
               "text": "100% indépendant. Plus de {millions}M de produits en"
             },
             {
-              "text": "données ouvertes.",
+              "text": "données ouvertes.Nudger est un ",
               "to": "/opendata"
             },
             {
@@ -2360,8 +2360,8 @@
       "ariaLabel": "Bannière fixe pour promouvoir un achat responsable",
       "offersCount": "{count} offre | {count} offres"
     },
-    "start_impact_text": "Vous aimez bien ?",
-    "start_impact_subtext": "Soutenez un web indépendant, ouvert et à impact en faisant vos achats par nudger ! Ca marche aussi via nos commerçants partenaires",
+    "start_impact_text": "Vous aimez ?",
+    "start_impact_subtext": "Soutenez un projet à impact, ouvert et éthique en faisant vos achats par Nudger ! Ca marche aussi en passant directement via nos ",
     "partners_link": "nos partenaires",
     "aiReview": {
       "empty": "Synthèse non encore demandée.",
@@ -3224,7 +3224,7 @@
         }
       },
       "scores": {
-        "title": "Tes priorités écologiques",
+        "title": "Priorités écologiques",
         "subtitle": ""
       },
       "recommendations": {

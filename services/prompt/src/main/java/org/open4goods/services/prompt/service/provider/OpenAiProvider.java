@@ -48,6 +48,9 @@ public class OpenAiProvider implements GenAiProvider {
         this.httpClient = HttpClient.newHttpClient();
         this.chatModel = chatModel;
         this.environment = environment;
+        logger.info("****************************************************************");
+        logger.info("Initializing OpenAiProvider with chatModel: {}", chatModel);
+        logger.info("****************************************************************");
     }
 
     @Override

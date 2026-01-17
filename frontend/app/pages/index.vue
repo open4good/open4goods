@@ -62,7 +62,7 @@ type EnrichedBlogItem = HomeBlogItem & { link: string; hasImage: boolean }
 const { categories: rawCategories, fetchCategories } = useCategories()
 const { paginatedArticles, fetchArticles, loading: blogLoading } = useBlog()
 
-const BLOG_ARTICLES_LIMIT = 4
+const BLOG_ARTICLES_LIMIT = 3
 
 const { data: categoriesStats } = await useAsyncData<CategoriesStatsDto | null>(
   'home-categories-stats',
@@ -680,9 +680,6 @@ const enrichedBlogItems = computed<EnrichedBlogItem[]>(() =>
   })
 )
 
-const featuredBlogItem = computed(() => enrichedBlogItems.value[0] ?? null)
-const secondaryBlogItems = computed(() => enrichedBlogItems.value.slice(1))
-
 const ogImageUrl = computed(() => logoUrl.value)
 
 const navigateToSearch = (query?: string) => {
@@ -919,8 +916,7 @@ useHead(() => ({
                 <div v-show="animatedSections.blog">
                   <HomeBlogSection
                     :loading="blogLoading"
-                    :featured-item="featuredBlogItem"
-                    :secondary-items="secondaryBlogItems"
+                    :items="enrichedBlogItems"
                   />
                 </div>
               </v-slide-x-transition>

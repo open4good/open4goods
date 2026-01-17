@@ -18,10 +18,10 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
-        <!-- Google GenAI Starter -->
+        <!-- Vertex AI Gemini Starter (Standard) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-model-google-genai</artifactId>
+            <artifactId>spring-ai-starter-model-vertex-ai-gemini</artifactId>
         </dependency>
         <!-- Google Cloud Storage client for Vertex batch input/output -->
         <dependency>

@@ -14,10 +14,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProviderRegistry {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ProviderRegistry.class);
+
     private final Map<GenAiServiceType, GenAiProvider> providers;
 
     public ProviderRegistry(List<GenAiProvider> providers) {
+        logger.info("DEBUG: ProviderRegistry initializing with {} providers: {}", providers.size(), providers);
         this.providers = providers.stream()
+                .map(p -> {
+                    logger.info("DEBUG: Registering provider: {} for service: {}", p.getClass().getSimpleName(), p.service());
+                    return p;
+                })
                 .collect(Collectors.toMap(GenAiProvider::service, Function.identity()));
     }
 

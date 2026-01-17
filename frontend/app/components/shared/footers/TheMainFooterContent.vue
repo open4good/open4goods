@@ -115,7 +115,7 @@ const footerLogo = useFooterLogoAsset()
     </h2>
 
     <v-row class="g-8 footer-upper">
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="3">
         <div class="footer-panel d-flex flex-column ga-4">
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.feedback.title') }}
@@ -163,7 +163,7 @@ const footerLogo = useFooterLogoAsset()
         </div>
       </v-col>
 
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="4">
         <div class="footer-panel d-flex flex-column ga-4">
           <div class="footer-action-title text-subtitle-1">
             <span>{{ t('siteIdentity.footer.highlightLinks.title') }}</span>
@@ -241,7 +241,7 @@ const footerLogo = useFooterLogoAsset()
         </div>
       </v-col>
 
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="4">
         <div class="footer-panel d-flex flex-column ga-4">
           <p class="footer-mission text-body-1 mb-0">
             {{ t('siteIdentity.footer.mission') }}
