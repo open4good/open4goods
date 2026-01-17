@@ -2711,12 +2711,14 @@
       "feedback": {
         "cta": "Donnez votre avis",
         "links": {
+          "feedback": "Donner votre avis",
           "contact": "Nous contacter",
           "linkedin": "Nous suivre sur LinkedIn"
         },
         "title": "Nous aider"
       },
       "highlightLinks": {
+        "title": "Impact score",
         "allProducts": "Tous nos produits",
         "ecoscore": "Évaluation environnementale"
       },

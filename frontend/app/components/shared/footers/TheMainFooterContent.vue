@@ -40,10 +40,12 @@ const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
     to: resolveLocalizedRoutePath('/impact-score', currentLocale.value),
+    icon: 'mdi-leaf-circle-outline',
   },
   {
     label: t('siteIdentity.footer.highlightLinks.allProducts'),
     to: categoriesPath.value,
+    icon: 'mdi-package-variant-closed',
   },
 ])
 
@@ -51,18 +53,22 @@ const resourceLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.comparator.links.openData'),
     to: '/opendata',
+    icon: 'mdi-database-outline',
   },
   {
     label: t('siteIdentity.footer.comparator.links.openSource'),
     to: '/opensource',
+    icon: 'mdi-github',
   },
   {
     label: t('siteIdentity.footer.comparator.links.privacy'),
     to: resolveLocalizedRoutePath('data-privacy', currentLocale.value),
+    icon: 'mdi-shield-lock-outline',
   },
   {
     label: t('siteIdentity.footer.comparator.links.legal'),
     to: resolveLocalizedRoutePath('legal-notice', currentLocale.value),
+    icon: 'mdi-scale-balance',
   },
 ])
 
@@ -70,14 +76,21 @@ const communityLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.community.links.team'),
     to: resolveLocalizedRoutePath('team', currentLocale.value),
+    icon: 'mdi-account-group-outline',
   },
   {
     label: t('siteIdentity.footer.community.links.partners'),
     to: resolveLocalizedRoutePath('partners', currentLocale.value),
+    icon: 'mdi-handshake-outline',
   },
 ])
 
 const feedbackLinks = computed<FooterLink[]>(() => [
+  {
+    label: t('siteIdentity.footer.feedback.links.feedback'),
+    to: feedbackPath.value,
+    icon: 'mdi-message-text-outline',
+  },
   {
     label: t('siteIdentity.footer.feedback.links.contact'),
     to: resolveLocalizedRoutePath('contact', currentLocale.value),
@@ -102,87 +115,133 @@ const footerLogo = useFooterLogoAsset()
     </h2>
 
     <v-row class="g-8 footer-upper">
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="6">
         <div class="footer-panel d-flex flex-column ga-4">
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
             {{ t('siteIdentity.footer.feedback.title') }}
           </div>
 
-          <v-btn
-            :to="feedbackPath"
-            variant="text"
-            append-icon="mdi-arrow-right"
-            color="hero-overlay-strong"
-            class="footer-link-btn px-0"
-          >
-            {{ t('siteIdentity.footer.feedback.cta') }}
-          </v-btn>
+          <div class="footer-action-title text-subtitle-1">
+            <span>{{ t('siteIdentity.footer.feedback.cta') }}</span>
+            <v-icon
+              icon="mdi-arrow-right"
+              size="18"
+              class="ms-2"
+              aria-hidden="true"
+            />
+          </div>
 
           <nav
             class="d-flex flex-column ga-1 mt-2"
             :aria-label="t('siteIdentity.footer.feedback.title')"
           >
-            <NuxtLink
-              v-for="link in feedbackLinks"
-              :key="String(link.to ?? link.href ?? link.label)"
-              :to="link.to"
-              :href="link.href"
-              class="footer-list-item py-1 px-2 d-flex align-center"
-              :class="{ 'text-decoration-none': true }"
-              :target="link.target"
-              :rel="link.rel"
-            >
-              <v-icon
-                v-if="link.icon"
-                :icon="link.icon"
-                size="18"
-                class="me-2"
-              />
-              <span class="text-body-2">{{ link.label }}</span>
-            </NuxtLink>
+            <ul class="footer-list">
+              <li
+                v-for="link in feedbackLinks"
+                :key="String(link.to ?? link.href ?? link.label)"
+                class="footer-list-item"
+              >
+                <NuxtLink
+                  :to="link.to"
+                  :href="link.href"
+                  class="py-1 px-2 d-flex align-center"
+                  :class="{ 'text-decoration-none': true }"
+                  :target="link.target"
+                  :rel="link.rel"
+                >
+                  <v-icon
+                    v-if="link.icon"
+                    :icon="link.icon"
+                    size="18"
+                    class="me-2"
+                  />
+                  <span class="text-body-2">{{ link.label }}</span>
+                </NuxtLink>
+              </li>
+            </ul>
           </nav>
         </div>
       </v-col>
 
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="3">
         <div class="footer-panel d-flex flex-column ga-4">
-          <div class="d-flex flex-column ga-2">
-            <v-btn
-              v-for="link in highlightLinks"
-              :key="String(link.to ?? link.href ?? link.label)"
-              :to="link.to"
-              :href="link.href"
-              variant="text"
-              append-icon="mdi-arrow-right"
-              color="hero-overlay-strong"
-              class="footer-link-btn px-0"
-            >
-              {{ link.label }}
-            </v-btn>
+          <div class="footer-action-title text-subtitle-1">
+            <span>{{ t('siteIdentity.footer.highlightLinks.title') }}</span>
+            <v-icon
+              icon="mdi-arrow-right"
+              size="18"
+              class="ms-2"
+              aria-hidden="true"
+            />
           </div>
+          <nav
+            class="d-flex flex-column ga-1 mt-2"
+            :aria-label="t('siteIdentity.footer.highlightLinks.title')"
+          >
+            <ul class="footer-list">
+              <li
+                v-for="link in highlightLinks"
+                :key="String(link.to ?? link.href ?? link.label)"
+                class="footer-list-item"
+              >
+                <NuxtLink
+                  :to="link.to"
+                  :href="link.href"
+                  class="py-1 px-2 d-flex align-center"
+                  :class="{ 'text-decoration-none': true }"
+                >
+                  <v-icon
+                    v-if="link.icon"
+                    :icon="link.icon"
+                    size="18"
+                    class="me-2"
+                  />
+                  <span class="text-body-2">{{ link.label }}</span>
+                </NuxtLink>
+              </li>
+            </ul>
+          </nav>
 
-          <div class="footer-section-title text-subtitle-1 font-weight-medium">
-            {{ t('siteIdentity.footer.comparator.title') }}
+          <div class="footer-action-title text-subtitle-1">
+            <span>{{ t('siteIdentity.footer.comparator.title') }}</span>
+            <v-icon
+              icon="mdi-arrow-right"
+              size="18"
+              class="ms-2"
+              aria-hidden="true"
+            />
           </div>
           <nav
             class="d-flex flex-column ga-1 mt-2"
             :aria-label="t('siteIdentity.footer.comparator.title')"
           >
-            <NuxtLink
-              v-for="link in resourceLinks"
-              :key="String(link.to ?? link.href ?? link.label)"
-              :to="link.to"
-              :href="link.href"
-              class="footer-list-item py-1 px-2 d-flex align-center"
-              :class="{ 'text-decoration-none': true }"
-            >
-              <span class="text-body-2">{{ link.label }}</span>
-            </NuxtLink>
+            <ul class="footer-list">
+              <li
+                v-for="link in resourceLinks"
+                :key="String(link.to ?? link.href ?? link.label)"
+                class="footer-list-item"
+              >
+                <NuxtLink
+                  :to="link.to"
+                  :href="link.href"
+                  class="py-1 px-2 d-flex align-center"
+                  :class="{ 'text-decoration-none': true }"
+                >
+                  <v-icon
+                    v-if="link.icon"
+                    :icon="link.icon"
+                    size="18"
+                    class="me-2"
+                  />
+                  <span class="text-body-2">{{ link.label }}</span>
+                </NuxtLink>
+              </li>
+            </ul>
           </nav>
         </div>
       </v-col>
 
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="3">
         <div class="footer-panel d-flex flex-column ga-4">
           <p class="footer-mission text-body-1 mb-0">
             {{ t('siteIdentity.footer.mission') }}
@@ -195,6 +254,9 @@ const footerLogo = useFooterLogoAsset()
             color="hero-overlay-strong"
             class="footer-link-btn px-0"
           >
+            <template #prepend>
+              <v-icon icon="mdi-post-outline" size="18" class="me-2" />
+            </template>
             {{ t('siteIdentity.footer.blogLink') }}
           </v-btn>
 
@@ -205,16 +267,28 @@ const footerLogo = useFooterLogoAsset()
             class="d-flex flex-column ga-1 mt-2"
             :aria-label="t('siteIdentity.footer.community.title')"
           >
-            <NuxtLink
-              v-for="link in communityLinks"
-              :key="String(link.to ?? link.href ?? link.label)"
-              :to="link.to"
-              :href="link.href"
-              class="footer-list-item py-1 px-2 d-flex align-center"
-              :class="{ 'text-decoration-none': true }"
-            >
-              <span class="text-body-2">{{ link.label }}</span>
-            </NuxtLink>
+            <ul class="footer-list">
+              <li
+                v-for="link in communityLinks"
+                :key="String(link.to ?? link.href ?? link.label)"
+                class="footer-list-item"
+              >
+                <NuxtLink
+                  :to="link.to"
+                  :href="link.href"
+                  class="py-1 px-2 d-flex align-center"
+                  :class="{ 'text-decoration-none': true }"
+                >
+                  <v-icon
+                    v-if="link.icon"
+                    :icon="link.icon"
+                    size="18"
+                    class="me-2"
+                  />
+                  <span class="text-body-2">{{ link.label }}</span>
+                </NuxtLink>
+              </li>
+            </ul>
           </nav>
         </div>
       </v-col>
@@ -287,14 +361,24 @@ const footerLogo = useFooterLogoAsset()
   opacity: 0.9;
 }
 
+.footer-action-title {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(var(--v-theme-hero-overlay-strong), 0.98);
+}
+
 .footer-section-title {
   color: rgba(var(--v-theme-hero-overlay-strong), 0.88);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-.footer-list :deep(.v-list-item-title) {
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.82);
+.footer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .footer-list-item {
@@ -305,7 +389,13 @@ const footerLogo = useFooterLogoAsset()
   text-decoration: none;
 }
 
-.footer-list-item:hover {
+.footer-list-item > a {
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer-list-item:hover > a {
   background-color: rgba(var(--v-theme-hero-overlay-soft), 0.1);
   text-decoration: none;
 }
