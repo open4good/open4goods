@@ -172,16 +172,6 @@ public class ApiConfig {
         }
 
 
-	@Bean
-	@Qualifier("perplexityChatModel")
-	OpenAiApi perplexityApi(ApiProperties apiConfig) {
-		return new OpenAiApi(apiConfig.getGenAiConfig().getPerplexityBaseUrl(),
-							 apiConfig.getGenAiConfig().getPerplexityApiKey(),
-							 apiConfig.getGenAiConfig().getPerplexityCompletionsPath(),
-							 "/v1/embeddings", RestClient.builder(), WebClient.builder(),
-							 RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
-	}
-
 //	@Bean
 //	@Qualifier("openAiCustomApi")
 //	OpenAiApi openAiCustomApi(ApiProperties apiConfig) {

@@ -52,12 +52,22 @@ public class OpenAiProvider implements GenAiProvider {
     private final PromptServiceConfig config;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    private final org.springframework.ai.model.tool.ToolCallingManager toolCallingManager;
+    private final org.springframework.retry.support.RetryTemplate retryTemplate;
+    private final io.micrometer.observation.ObservationRegistry observationRegistry;
 
-    public OpenAiProvider(@org.springframework.beans.factory.annotation.Qualifier("openAiCustomApi") OpenAiApi openAiApi, PromptServiceConfig config) {
+    public OpenAiProvider(@org.springframework.beans.factory.annotation.Qualifier("openAiCustomApi") OpenAiApi openAiApi,
+                          PromptServiceConfig config,
+                          org.springframework.ai.model.tool.ToolCallingManager toolCallingManager,
+                          org.springframework.retry.support.RetryTemplate retryTemplate,
+                          io.micrometer.observation.ObservationRegistry observationRegistry) {
         this.openAiApi = openAiApi;
         this.config = config;
         this.objectMapper = new ObjectMapper();
         this.httpClient = HttpClient.newHttpClient();
+        this.toolCallingManager = toolCallingManager;
+        this.retryTemplate = retryTemplate;
+        this.observationRegistry = observationRegistry;
     }
 
     @Override
@@ -94,7 +104,7 @@ public class OpenAiProvider implements GenAiProvider {
         if (StringUtils.hasText(request.getJsonSchema())) {
             options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, request.getJsonSchema()));
         }
-        OpenAiChatModel chatModel = new OpenAiChatModel(openAiApi);
+        OpenAiChatModel chatModel = new OpenAiChatModel(openAiApi, OpenAiChatOptions.builder().build(), toolCallingManager, retryTemplate, observationRegistry);
         Prompt prompt = buildPrompt(request, options);
         ChatResponse response = chatModel.call(prompt);
         String content = response.getResult().getOutput().getText();
@@ -282,7 +292,7 @@ public class OpenAiProvider implements GenAiProvider {
         if (StringUtils.hasText(request.getJsonSchema())) {
             options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, request.getJsonSchema()));
         }
-        OpenAiChatModel chatModel = new OpenAiChatModel(openAiApi);
+        OpenAiChatModel chatModel = new OpenAiChatModel(openAiApi, OpenAiChatOptions.builder().build(), toolCallingManager, retryTemplate, observationRegistry);
         Prompt prompt = buildPrompt(request, options);
         return Flux.defer(() -> {
             StringBuilder content = new StringBuilder();

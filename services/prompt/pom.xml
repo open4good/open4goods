@@ -1,101 +1,104 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.open4goods</groupId>
-    <artifactId>org.open4goods</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../..</relativePath>
-  </parent>
+    <parent>
+        <groupId>org.open4goods</groupId>
+        <artifactId>org.open4goods</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../..</relativePath>
+    </parent>
 
-  <artifactId>prompt</artifactId>
+    <artifactId>prompt</artifactId>
 
-  <repositories>
-    <repository>
-      <id>spring-milestones</id>
-      <name>Spring Milestones</name>
-      <url>https://repo.spring.io/milestone</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+    <dependencies>
+        <!-- OpenAI Spring Boot Starter -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
+        <!-- Vertex AI removed, adding generic Google Gemini if available, or
+        relying on OpenAI bridge -->
+        <!-- Vertex AI Native Grounding Starter -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-vertex-ai-gemini</artifactId>
+        </dependency>
+        <!-- Commons Codec -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <!-- Serialisation module -->
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>serialisation</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+        <!-- Evaluation module -->
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>evaluation</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>googlesearch</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
-  <dependencies>
-    <!-- OpenAI Spring Boot Starter -->
-    <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
-      <version>1.0.0-M6</version>
-    </dependency>
-    <!-- Vertex AI removed, adding generic Google Gemini if available, or relying on OpenAI bridge -->
-    <!-- Vertex AI Native Grounding Starter -->
-    <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
-      <version>1.0.0-M6</version>
-    </dependency>
-    <!-- Commons Codec -->
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    </dependency>
-    <!-- Serialisation module -->
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>serialisation</artifactId>
-      <version>${global.version}</version>
-    </dependency>
-    <!-- Evaluation module -->
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>evaluation</artifactId>
-      <version>${global.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>googlesearch</artifactId>
-      <version>${global.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 
-    <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-configuration-processor</artifactId>
-    	<optional>true</optional>
-    </dependency>
-  </dependencies>
-   <build>
-    <plugins>
-      <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-jar-plugin</artifactId>
-      <executions>
-        <execution>
-          <goals>
-            <goal>test-jar</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-      <!-- Maven Compiler Plugin -->
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-        </configuration>
-      </plugin>
-      <!-- Spring Boot Maven Plugin -->
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>1.1.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -34,9 +34,18 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 public class PerplexityProvider implements GenAiProvider {
 
     private final OpenAiApi perplexityApi;
+    private final org.springframework.ai.model.tool.ToolCallingManager toolCallingManager;
+    private final org.springframework.retry.support.RetryTemplate retryTemplate;
+    private final io.micrometer.observation.ObservationRegistry observationRegistry;
 
-    public PerplexityProvider(OpenAiApi perplexityApi) {
+    public PerplexityProvider(OpenAiApi perplexityApi,
+                              org.springframework.ai.model.tool.ToolCallingManager toolCallingManager,
+                              org.springframework.retry.support.RetryTemplate retryTemplate,
+                              io.micrometer.observation.ObservationRegistry observationRegistry) {
         this.perplexityApi = perplexityApi;
+        this.toolCallingManager = toolCallingManager;
+        this.retryTemplate = retryTemplate;
+        this.observationRegistry = observationRegistry;
     }
 
     @Override
@@ -53,7 +62,7 @@ public class PerplexityProvider implements GenAiProvider {
         if (StringUtils.hasText(request.getJsonSchema())) {
             options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, request.getJsonSchema()));
         }
-        OpenAiChatModel chatModel = new OpenAiChatModel(perplexityApi);
+        OpenAiChatModel chatModel = new OpenAiChatModel(perplexityApi, OpenAiChatOptions.builder().build(), toolCallingManager, retryTemplate, observationRegistry);
         Prompt prompt = buildPrompt(request, options);
         ChatResponse response = chatModel.call(prompt);
         String content = response.getResult().getOutput().getText();
@@ -70,7 +79,7 @@ public class PerplexityProvider implements GenAiProvider {
         if (StringUtils.hasText(request.getJsonSchema())) {
             options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, request.getJsonSchema()));
         }
-        OpenAiChatModel chatModel = new OpenAiChatModel(perplexityApi);
+        OpenAiChatModel chatModel = new OpenAiChatModel(perplexityApi, OpenAiChatOptions.builder().build(), toolCallingManager, retryTemplate, observationRegistry);
         Prompt prompt = buildPrompt(request, options);
         return Flux.defer(() -> {
             StringBuilder content = new StringBuilder();

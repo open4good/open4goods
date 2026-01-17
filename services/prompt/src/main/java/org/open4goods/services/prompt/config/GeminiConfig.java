@@ -25,7 +25,10 @@ public class GeminiConfig {
 
     @Bean("geminiChatModel")
     @ConditionalOnProperty(prefix = "gen-ai-config", name = "google-api-json")
-    public ChatModel geminiChatModel(PromptServiceConfig config) throws IOException {
+    public ChatModel geminiChatModel(PromptServiceConfig config, 
+                                     org.springframework.ai.model.tool.ToolCallingManager toolCallingManager,
+                                     org.springframework.retry.support.RetryTemplate retryTemplate,
+                                     io.micrometer.observation.ObservationRegistry observationRegistry) throws IOException {
         String jsonKey = config.getGoogleApiJson();
         
         if (!StringUtils.hasText(jsonKey)) {
@@ -68,6 +71,9 @@ public class GeminiConfig {
 
         return new VertexAiGeminiChatModel(vertexAi, VertexAiGeminiChatOptions.builder()
                 .model("gemini-2.0-flash")
-                .build());
+                .build(),
+                toolCallingManager,
+                retryTemplate,
+                observationRegistry);
     }
 }
