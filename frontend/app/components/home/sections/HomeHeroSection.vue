@@ -586,9 +586,6 @@ useHead({
             <v-sheet class="home-hero__panel" color="transparent" elevation="0">
               <div class="home-hero__panel-grid">
                 <div class="home-hero__panel-block">
-                  <NudgeToolWizard :verticals="wizardVerticals" />
-                </div>
-                <div class="home-hero__panel-block">
                   <form
                     class="home-hero__search"
                     role="search"
@@ -712,6 +709,9 @@ useHead({
                       </v-row>
                     </div>
                   </RoundedCornerCard>
+                </div>
+                <div class="home-hero__panel-block">
+                  <NudgeToolWizard :verticals="wizardVerticals" />
                 </div>
               </div>
             </v-sheet>
