@@ -166,7 +166,7 @@ export const resolveDocPath = ({
   let slugPath = normalizedSlug ? `/${normalizedSlug}` : ''
 
   if (slugPath.startsWith(`${basePrefix}/`)) {
-    slugPath = slugPath.slice(basePrefix.length + 1)
+    slugPath = slugPath.slice(basePrefix.length)
   } else if (slugPath === basePrefix) {
     slugPath = ''
   }
