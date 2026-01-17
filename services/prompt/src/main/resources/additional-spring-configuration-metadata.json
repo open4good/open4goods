@@ -4,6 +4,11 @@
       "name": "genAiConfig",
       "type": "org.open4goods.services.prompt.config.PromptServiceConfig",
       "sourceType": "org.open4goods.services.prompt.config.PromptServiceConfig"
+    },
+    {
+      "name": "vertex.batch",
+      "type": "org.open4goods.services.prompt.config.VertexBatchConfig",
+      "sourceType": "org.open4goods.services.prompt.config.VertexBatchConfig"
     }
   ],
   "properties": [
@@ -48,19 +53,39 @@
       "description": "The OpenAI Batch API endpoint URL."
     },
     {
-      "name": "genAiConfig.openaiApiKey",
-      "type": "java.lang.String",
-      "description": "OpenAI API key."
+      "name": "genAiConfig.batchPollInterval",
+      "type": "java.time.Duration",
+      "description": "Poll interval for batch status checks."
     },
     {
-      "name": "genAiConfig.perplexityApiKey",
+      "name": "vertex.batch.projectId",
       "type": "java.lang.String",
-      "description": "Perplexity API key."
+      "description": "GCP project id for Vertex batch jobs."
     },
     {
-      "name": "genAiConfig.geminiApiKey",
+      "name": "vertex.batch.location",
       "type": "java.lang.String",
-      "description": "Gemini API key."
+      "description": "GCP location for Vertex batch jobs."
+    },
+    {
+      "name": "vertex.batch.bucket",
+      "type": "java.lang.String",
+      "description": "GCS bucket for Vertex batch input/output."
+    },
+    {
+      "name": "vertex.batch.outputPrefix",
+      "type": "java.lang.String",
+      "description": "Output prefix for Vertex batch results."
+    },
+    {
+      "name": "vertex.batch.pollInterval",
+      "type": "java.time.Duration",
+      "description": "Poll interval for Vertex batch status checks."
+    },
+    {
+      "name": "vertex.batch.credentialsJson",
+      "type": "java.lang.String",
+      "description": "Service account JSON content for Vertex batch jobs."
     }
   ]
 }

@@ -47,9 +47,3 @@ xwiki:
   password: mock
   username: mock
 
-genAiConfig:
-  perplexityBaseUrl: https://api.perplexity.ai
-  perplexityApiKey: mock
-  perplexityCompletionsPath: /chat/completions
-
-

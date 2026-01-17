@@ -9,20 +9,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.open4goods.model.ai.AiFieldScanner;
 import org.open4goods.services.evaluation.service.EvaluationService;
+import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
-import org.open4goods.services.prompt.dto.BatchPromptResponse;
+import org.open4goods.services.prompt.config.VertexBatchConfig;
 import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.dto.BatchResultItem;
 import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
 import org.open4goods.services.prompt.dto.openai.BatchOutput;
 import org.open4goods.services.prompt.dto.openai.BatchRequestEntry;
-import org.open4goods.services.prompt.dto.openai.BatchResponse;
 import org.open4goods.services.prompt.exceptions.BatchTokenLimitExceededException;
-import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.prompt.model.BatchJob;
+import org.open4goods.services.prompt.model.BatchJobStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.converter.BeanOutputConverter;
@@ -32,16 +33,17 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 
 /**
- * Service that implements batch prompt functionality based on OpenAI’s JSONL Batch API.
+ * Service that implements batch prompt functionality for OpenAI and Vertex Gemini.
  * <p>
  * This service processes a batch of prompt evaluations, writes them as NDJSON entries
- * to a designated folder, and submits them via the OpenAI Batch API.
- * It also reinitializes pending jobs upon restart and scans for external response files to complete the futures.
+ * to a designated folder, and submits them via the provider batch API.
+ * It also reinitializes pending jobs upon restart and scans for remote responses.
  * </p>
  */
 @Service
@@ -50,26 +52,35 @@ public class BatchPromptService implements HealthIndicator {
     private static final Logger logger = LoggerFactory.getLogger(BatchPromptService.class);
 
     private final PromptServiceConfig config;
+    private final VertexBatchConfig vertexBatchConfig;
     private final EvaluationService evaluationService;
-    private final SerialisationService serialisationService;
     private final ObjectMapper objectMapper;
     private final OpenAiBatchClient openAiBatchClient;
+    private final VertexGeminiBatchClient vertexGeminiBatchClient;
     private final PromptService promptService; // for retrieving prompt config and evaluation
+    private final BatchJobStore jobStore;
 
-    // Map to track active batch jobs; now the future holds PromptResponse with a List of BatchOutput.
-    private final ConcurrentHashMap<String, CompletableFuture<PromptResponse<List<BatchOutput>>>> activeBatchJobs = new ConcurrentHashMap<>();
+    // Map to track active batch jobs.
+    private final ConcurrentHashMap<String, BatchJob> activeBatchJobs = new ConcurrentHashMap<>();
 
     public BatchPromptService(PromptServiceConfig config,
+                              VertexBatchConfig vertexBatchConfig,
                               EvaluationService evaluationService,
-                              SerialisationService serialisationService,
                               OpenAiBatchClient openAiBatchClient,
+                              VertexGeminiBatchClient vertexGeminiBatchClient,
                               PromptService promptService) {
         this.config = config;
+        this.vertexBatchConfig = vertexBatchConfig;
         this.evaluationService = evaluationService;
-        this.serialisationService = serialisationService;
         this.openAiBatchClient = openAiBatchClient;
+        this.vertexGeminiBatchClient = vertexGeminiBatchClient;
         this.promptService = promptService;
         this.objectMapper = new ObjectMapper();
+        File batchFolder = new File(config.getBatchFolder());
+        if (!batchFolder.exists() && !batchFolder.mkdirs()) {
+            logger.warn("Failed to create batch folder at {}", batchFolder.getAbsolutePath());
+        }
+        this.jobStore = new BatchJobStore(batchFolder, objectMapper);
     }
 
     
@@ -96,19 +107,22 @@ public class BatchPromptService implements HealthIndicator {
         if (promptConfig == null) {
             throw new IllegalStateException("Prompt config not found for " + promptKey);
         }
-        if (promptConfig.getAiService() != org.open4goods.services.prompt.config.GenAiServiceType.OPEN_AI) {
-            throw new IllegalStateException("Batch not supported for " + promptConfig.getAiService() + " (phase 1).");
-        }
         if (promptConfig.getRetrievalMode() == org.open4goods.services.prompt.config.RetrievalMode.MODEL_WEB_SEARCH) {
-            throw new IllegalStateException("Batch not supported for model-native search prompts.");
+            throw new IllegalStateException("Batch does not support model-native web search/grounding. Use EXTERNAL_SOURCES and inject sources.");
         }
-        List<BatchRequestEntry> requestEntries = new ArrayList<>();
         int totalEstimatedTokens = 0;
+        List<Object> requestEntries = new ArrayList<>();
         for (int index = 0; index < variablesList.size(); index++) {
             Map<String, Object> vars = variablesList.get(index);
-            BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index, customIds.get(index), type);
-            requestEntries.add(entry);
-            totalEstimatedTokens += estimateTokensFromBatchEntry(entry);
+            if (promptConfig.getAiService() == GenAiServiceType.OPEN_AI) {
+                BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index, customIds.get(index), type);
+                requestEntries.add(entry);
+                totalEstimatedTokens += estimateTokensFromBatchEntry(entry);
+            } else if (promptConfig.getAiService() == GenAiServiceType.GEMINI) {
+                Map<String, Object> entry = createVertexBatchEntry(promptKey, vars, customIds.get(index), type);
+                requestEntries.add(entry);
+                totalEstimatedTokens += estimateTokensFromVertexEntry(entry);
+            }
         }
         logger.info("Batch prompt {} submitted with total estimated tokens: {}", promptKey, totalEstimatedTokens);
         if (totalEstimatedTokens > config.getBatchMaxTokens()) {
@@ -127,7 +141,7 @@ public class BatchPromptService implements HealthIndicator {
         }
         File submissionFile = new File(batchFolder, "batch-" + jobId + "-submission.jsonl");
         try (FileWriter writer = new FileWriter(submissionFile, Charset.defaultCharset())) {
-            for (BatchRequestEntry entry : requestEntries) {
+            for (Object entry : requestEntries) {
                 String line = objectMapper.writeValueAsString(entry);
                 writer.write(line + System.lineSeparator());
             }
@@ -136,11 +150,31 @@ public class BatchPromptService implements HealthIndicator {
             throw new IllegalStateException(e);
         }
 
-        // Submit the batch job.
-        BatchJobResponse batchJobResponse = openAiBatchClient.submitBatch(submissionFile);
-        logger.info("Submitted batch job to OpenAI: {}", batchJobResponse.id());
-        // Optionally, you might want to use the job ID from the response. Here we return our generated jobId.
-        return batchJobResponse.id();
+        BatchJob job = new BatchJob();
+        job.setId(jobId);
+        job.setPromptKey(promptKey);
+        job.setSubmissionFilePath(submissionFile.getAbsolutePath());
+        job.setStatus(BatchJobStatus.SUBMITTED);
+
+        if (promptConfig.getAiService() == GenAiServiceType.OPEN_AI) {
+            BatchJobResponse batchJobResponse = openAiBatchClient.submitBatch(submissionFile);
+            job.setProvider(GenAiServiceType.OPEN_AI);
+            job.setRemoteJobId(batchJobResponse.id());
+        } else if (promptConfig.getAiService() == GenAiServiceType.GEMINI) {
+            validateVertexBatchConfig();
+            job.setProvider(GenAiServiceType.GEMINI);
+            String inputUri = vertexGeminiBatchClient.uploadInputFile(jobId, Files.readString(submissionFile.toPath(), Charset.defaultCharset()));
+            String remoteJobId = vertexGeminiBatchClient.submitBatchJob("batch-" + jobId,
+                    resolveModel(promptConfig.getOptions()), inputUri);
+            job.setRemoteJobId(remoteJobId);
+        } else {
+            throw new IllegalStateException("Batch not supported for " + promptConfig.getAiService());
+        }
+
+        jobStore.save(job);
+        activeBatchJobs.put(jobId, job);
+        logger.info("Submitted batch job {} to provider {}", job.getRemoteJobId(), job.getProvider());
+        return jobId;
     }
 
     /**
@@ -153,46 +187,15 @@ public class BatchPromptService implements HealthIndicator {
      * @param jobId the job ID to process.
      * @return a PromptResponse containing the list of BatchOutput objects.
      */
-    public PromptResponse<List<BatchOutput>> batchPromptResponse(String jobId) {
-        BatchJobResponse batchStatus = openAiBatchClient.getBatchStatus(jobId);
-        logger.debug("Batch job {} status: {}", jobId, batchStatus.status());
-        if (!"completed".equalsIgnoreCase(batchStatus.status())) {
-            throw new IllegalStateException("Batch job " + jobId + " is not completed yet");
+    public PromptResponse<List<BatchResultItem>> batchPromptResponse(String jobId) {
+        BatchJob job = loadJob(jobId);
+        if (job.getProvider() == GenAiServiceType.OPEN_AI) {
+            return openAiBatchPromptResponse(job);
         }
-        String outputContent = openAiBatchClient.downloadBatchOutput(jobId);
-        // Write output to a local file for record keeping.
-        File outputFile = new File(config.getBatchFolder(), "batch-" + jobId + "-output.jsonl");
-        try {
-            Files.writeString(outputFile.toPath(), outputContent, Charset.defaultCharset());
-        } catch (Exception e) {
-            logger.error("Error writing output file for job {}: {}", jobId, e.getMessage(), e);
+        if (job.getProvider() == GenAiServiceType.GEMINI) {
+            return geminiBatchPromptResponse(job);
         }
-
-        List<String> lines;
-        List<BatchOutput> batchOutputs = new ArrayList<>();
-        try {
-            lines = Files.readAllLines(outputFile.toPath(), Charset.defaultCharset());
-            long submittedAt = 0;
-            for (String line : lines) {
-                if (StringUtils.hasText(line)) {
-                    BatchOutput output = objectMapper.readValue(line, BatchOutput.class);
-                    batchOutputs.add(output);
-                    if (submittedAt == 0 && output.response() != null && output.response().body() != null) {
-                        submittedAt = output.response().body().created();
-                    }
-                }
-            }
-            Files.deleteIfExists(outputFile.toPath());
-        } catch (Exception e) {
-            logger.error("Error processing batch output for job {}: {}", jobId, e.getMessage(), e);
-            throw new IllegalStateException(e);
-        }
-        PromptResponse<List<BatchOutput>> promptResponse = new PromptResponse<>();
-        promptResponse.setBody(batchOutputs);
-        promptResponse.setRaw(outputContent);
-        promptResponse.setStart(batchStatus.createdAt() != null ? batchStatus.createdAt() : System.currentTimeMillis());
-        promptResponse.setDuration(System.currentTimeMillis() - promptResponse.getStart());
-        return promptResponse;
+        throw new IllegalStateException("Batch not supported for " + job.getProvider());
     }
     
     
@@ -206,8 +209,12 @@ public class BatchPromptService implements HealthIndicator {
      * @return the BatchJobResponse representing the current status.
      */
     public BatchJobResponse checkStatus(String jobId) {
-        BatchJobResponse status = openAiBatchClient.getBatchStatus(jobId);
-        logger.info("Checked batch status for job {}: {}", jobId, status.status());
+        BatchJob job = loadJob(jobId);
+        if (job.getProvider() != GenAiServiceType.OPEN_AI) {
+            throw new IllegalStateException("Status check is only available for OpenAI jobs.");
+        }
+        BatchJobResponse status = openAiBatchClient.getBatchStatus(job.getRemoteJobId());
+        logger.info("Checked batch status for job {}: {}", job.getRemoteJobId(), status.status());
         return status;
     }
     
@@ -329,10 +336,79 @@ public class BatchPromptService implements HealthIndicator {
         return entry;
     }
 
+    private Map<String, Object> createVertexBatchEntry(String promptKey, Map<String, Object> variables, String customId, Class type) {
+        var promptConfig = promptService.getPromptConfig(promptKey);
+        if (promptConfig == null) {
+            throw new IllegalStateException("Prompt config not found for " + promptKey);
+        }
+        String systemEvaluated = "";
+        if (promptConfig.getSystemPrompt() != null) {
+            systemEvaluated = evaluationService.thymeleafEval(variables, promptConfig.getSystemPrompt());
+        }
+        String userEvaluated = evaluationService.thymeleafEval(variables, promptConfig.getUserPrompt());
+
+        var outputConverter = new BeanOutputConverter<>(type);
+        var jsonSchema = outputConverter.getJsonSchema();
+        Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
+        if (!instructions.isEmpty()) {
+            systemEvaluated += "\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\n";
+            for (Entry<String, String> entry : instructions.entrySet()) {
+                systemEvaluated += entry.getKey() + " : " + entry.getValue() + "\n";
+            }
+        }
+        if (StringUtils.hasText(jsonSchema)) {
+            systemEvaluated += "\n\n Output response format must strictly follow the following json schema : \n\n";
+            systemEvaluated += jsonSchema + "\n\n";
+        }
+
+        return Map.of(
+                "custom_id", customId,
+                "contents", List.of(Map.of(
+                        "role", "user",
+                        "parts", List.of(Map.of("text", userEvaluated))
+                )),
+                "system_instruction", Map.of(
+                        "parts", List.of(Map.of("text", systemEvaluated))
+                )
+        );
+    }
+
     private int estimateTokensFromBatchEntry(org.open4goods.services.prompt.dto.openai.BatchRequestEntry entry) {
         int tokens = 0;
         for (org.open4goods.services.prompt.dto.openai.BatchMessage m : entry.getBody().getMessages()) {
             tokens += estimateTokens(m.getContent());
+        }
+        return tokens;
+    }
+
+    private int estimateTokensFromVertexEntry(Map<String, Object> entry) {
+        int tokens = 0;
+        Object contents = entry.get("contents");
+        if (contents instanceof List<?> list) {
+            for (Object item : list) {
+                if (item instanceof Map<?, ?> map) {
+                    Object parts = map.get("parts");
+                    tokens += estimateTokensFromParts(parts);
+                }
+            }
+        }
+        Object systemInstruction = entry.get("system_instruction");
+        if (systemInstruction instanceof Map<?, ?> map) {
+            tokens += estimateTokensFromParts(map.get("parts"));
+        }
+        return tokens;
+    }
+
+    private int estimateTokensFromParts(Object parts) {
+        if (!(parts instanceof List<?> list)) {
+            return 0;
+        }
+        int tokens = 0;
+        for (Object part : list) {
+            if (part instanceof Map<?, ?> partMap) {
+                Object text = partMap.get("text");
+                tokens += estimateTokens(text != null ? text.toString() : null);
+            }
         }
         return tokens;
     }
@@ -353,50 +429,40 @@ public class BatchPromptService implements HealthIndicator {
      * and then cleans up the file.
      * </p>
      */
+    @Scheduled(fixedDelayString = "${gen-ai-config.batch-poll-interval:PT30S}")
     public void scanBatchResponses() {
         // Iterate over a copy of job IDs to avoid concurrent modification.
-        for (String jobRawId : new ArrayList<>(activeBatchJobs.keySet())) {
-            // Convert the raw job id to match the expected batch API format.
-//            String jobId = "batch_" + jobRawId.replace("-", "");
-        	String jobId = "batch_67f7cde83c8c8190b7386d4179f17efe";
+        for (String jobId : new ArrayList<>(activeBatchJobs.keySet())) {
             try {
-                BatchJobResponse batchStatus = openAiBatchClient.getBatchStatus(jobId);
-                logger.debug("Batch job {} status: {}", jobId, batchStatus.status());
-
-                if ("completed".equalsIgnoreCase(batchStatus.status())) {
-                    String outputContent = openAiBatchClient.downloadBatchOutput(jobId);
-                    File outputFile = new File(config.getBatchFolder(), "batch-" + jobId + "-output.jsonl");
-                    Files.writeString(outputFile.toPath(), outputContent, Charset.defaultCharset());
-                    logger.info("Downloaded output for batch job {} to file {}", jobId, outputFile.getName());
-
-                    List<String> lines = Files.readAllLines(outputFile.toPath(), Charset.defaultCharset());
-                    List<BatchOutput> batchOutputs = new ArrayList<>();
-                    long submittedAt = 0;
-                    for (String line : lines) {
-                        if (StringUtils.hasText(line)) {
-                            // Parse the line into a BatchOutput object.
-                            BatchOutput output = objectMapper.readValue(line, BatchOutput.class);
-                            batchOutputs.add(output);
-                            if (submittedAt == 0 && output.response() != null && output.response().body() != null) {
-                                submittedAt = output.response().body().created();
-                            }
-                        }
-                    }
-
-                    CompletableFuture<PromptResponse<List<BatchOutput>>> future = activeBatchJobs.get(jobId);
-                    if (future != null) {
-                        PromptResponse<List<BatchOutput>> promptResponse = new PromptResponse<>();
-                        promptResponse.setBody(batchOutputs);
-                        promptResponse.setRaw(outputContent);
-                        promptResponse.setStart(submittedAt);
-                        promptResponse.setDuration(System.currentTimeMillis() - submittedAt);
-                        future.complete(promptResponse);
+                BatchJob job = loadJob(jobId);
+                if (job.getProvider() == GenAiServiceType.OPEN_AI) {
+                    BatchJobResponse batchStatus = openAiBatchClient.getBatchStatus(job.getRemoteJobId());
+                    logger.debug("Batch job {} status: {}", job.getRemoteJobId(), batchStatus.status());
+                    if ("completed".equalsIgnoreCase(batchStatus.status())) {
+                        job.setStatus(BatchJobStatus.COMPLETED);
+                        jobStore.save(job);
                         activeBatchJobs.remove(jobId);
-                        logger.info("Batch job {} processed and future completed.", jobId);
+                    } else if ("in_progress".equalsIgnoreCase(batchStatus.status())
+                            || "running".equalsIgnoreCase(batchStatus.status())) {
+                        job.setStatus(BatchJobStatus.RUNNING);
+                        jobStore.save(job);
                     }
-                    Files.deleteIfExists(outputFile.toPath());
-                } else {
-                    logger.error("Batch with uncompleted status: {}", jobId);
+                } else if (job.getProvider() == GenAiServiceType.GEMINI) {
+                    JsonNode status = vertexGeminiBatchClient.getJobStatus(job.getRemoteJobId());
+                    String state = status.path("state").asText();
+                    if ("JOB_STATE_SUCCEEDED".equalsIgnoreCase(state)) {
+                        job.setStatus(BatchJobStatus.COMPLETED);
+                        jobStore.save(job);
+                        activeBatchJobs.remove(jobId);
+                    } else if ("JOB_STATE_RUNNING".equalsIgnoreCase(state)) {
+                        job.setStatus(BatchJobStatus.RUNNING);
+                        jobStore.save(job);
+                    } else if ("JOB_STATE_FAILED".equalsIgnoreCase(state) || "JOB_STATE_CANCELLED".equalsIgnoreCase(state)) {
+                        job.setStatus(BatchJobStatus.FAILED);
+                        job.setErrorMessage(status.path("error").path("message").asText());
+                        jobStore.save(job);
+                        activeBatchJobs.remove(jobId);
+                    }
                 }
             } catch (Exception e) {
                 logger.error("Error processing batch job {}: {}", jobId, e.getMessage(), e);
@@ -423,19 +489,110 @@ public class BatchPromptService implements HealthIndicator {
                 config.getBatchFolder(), config.getBatchMaxTokens());
         File folder = new File(config.getBatchFolder());
         if (folder.exists() && folder.isDirectory()) {
-            File[] submissionFiles = folder.listFiles((dir, name) -> name.matches("batch-.*-submission\\.jsonl$"));
-            if (submissionFiles != null) {
-                for (File file : submissionFiles) {
-                    try {
-                        String fileName = file.getName();
-                        String jobId = fileName.substring("batch-".length(), fileName.indexOf("-submission.jsonl"));
-                        activeBatchJobs.putIfAbsent(jobId, new CompletableFuture<>());
-                        logger.info("Recovered batch job {} from submission file {}", jobId, fileName);
-                    } catch (Exception e) {
-                        logger.error("Error recovering batch job from file {}: {}", file.getName(), e.getMessage(), e);
-                    }
+            for (BatchJob job : jobStore.loadAll()) {
+                if (job.getStatus() == BatchJobStatus.SUBMITTED || job.getStatus() == BatchJobStatus.RUNNING) {
+                    activeBatchJobs.put(job.getId(), job);
+                    logger.info("Recovered batch job {} from store", job.getId());
                 }
             }
+        }
+    }
+
+    private PromptResponse<List<BatchResultItem>> openAiBatchPromptResponse(BatchJob job) {
+        BatchJobResponse batchStatus = openAiBatchClient.getBatchStatus(job.getRemoteJobId());
+        logger.debug("Batch job {} status: {}", job.getRemoteJobId(), batchStatus.status());
+        if (!"completed".equalsIgnoreCase(batchStatus.status())) {
+            throw new IllegalStateException("Batch job " + job.getRemoteJobId() + " is not completed yet");
+        }
+        job.setStatus(BatchJobStatus.COMPLETED);
+        jobStore.save(job);
+        String outputContent = openAiBatchClient.downloadBatchOutput(job.getRemoteJobId());
+        File outputFile = new File(config.getBatchFolder(), "batch-" + job.getId() + "-output.jsonl");
+        try {
+            Files.writeString(outputFile.toPath(), outputContent, Charset.defaultCharset());
+        } catch (Exception e) {
+            logger.error("Error writing output file for job {}: {}", job.getId(), e.getMessage(), e);
+        }
+        List<BatchResultItem> outputs = new ArrayList<>();
+        long submittedAt = batchStatus.createdAt() != null ? batchStatus.createdAt() : System.currentTimeMillis();
+        try {
+            List<String> lines = Files.readAllLines(outputFile.toPath(), Charset.defaultCharset());
+            for (String line : lines) {
+                if (StringUtils.hasText(line)) {
+                    BatchOutput output = objectMapper.readValue(line, BatchOutput.class);
+                    String content = output.response().body().choices().getFirst().message().getContent();
+                    outputs.add(new BatchResultItem(output.customId(), content, line, Map.of()));
+                }
+            }
+            Files.deleteIfExists(outputFile.toPath());
+        } catch (Exception e) {
+            logger.error("Error processing batch output for job {}: {}", job.getId(), e.getMessage(), e);
+            throw new IllegalStateException(e);
+        }
+        PromptResponse<List<BatchResultItem>> promptResponse = new PromptResponse<>();
+        promptResponse.setBody(outputs);
+        promptResponse.setRaw(outputContent);
+        promptResponse.setStart(submittedAt);
+        promptResponse.setDuration(System.currentTimeMillis() - promptResponse.getStart());
+        return promptResponse;
+    }
+
+    private PromptResponse<List<BatchResultItem>> geminiBatchPromptResponse(BatchJob job) {
+        JsonNode status = vertexGeminiBatchClient.getJobStatus(job.getRemoteJobId());
+        String state = status.path("state").asText();
+        if (!"JOB_STATE_SUCCEEDED".equalsIgnoreCase(state)) {
+            throw new IllegalStateException("Vertex batch job " + job.getRemoteJobId() + " is not completed yet");
+        }
+        job.setStatus(BatchJobStatus.COMPLETED);
+        jobStore.save(job);
+        String outputUriPrefix = status.path("outputInfo").path("gcsOutputDirectory").asText();
+        String outputContent = vertexGeminiBatchClient.downloadBatchOutput(outputUriPrefix);
+        File outputFile = new File(config.getBatchFolder(), "batch-" + job.getId() + "-output.jsonl");
+        try {
+            Files.writeString(outputFile.toPath(), outputContent, Charset.defaultCharset());
+        } catch (Exception e) {
+            logger.error("Error writing output file for job {}: {}", job.getId(), e.getMessage(), e);
+        }
+        List<BatchResultItem> outputs = new ArrayList<>();
+        try {
+            List<String> lines = Files.readAllLines(outputFile.toPath(), Charset.defaultCharset());
+            for (String line : lines) {
+                if (StringUtils.hasText(line)) {
+                    JsonNode node = objectMapper.readTree(line);
+                    String customId = node.path("custom_id").asText();
+                    String content = node.path("predictions").path(0).path("content").asText();
+                    outputs.add(new BatchResultItem(customId, content, line, Map.of()));
+                }
+            }
+            Files.deleteIfExists(outputFile.toPath());
+        } catch (Exception e) {
+            logger.error("Error processing Vertex batch output for job {}: {}", job.getId(), e.getMessage(), e);
+            throw new IllegalStateException(e);
+        }
+        PromptResponse<List<BatchResultItem>> promptResponse = new PromptResponse<>();
+        promptResponse.setBody(outputs);
+        promptResponse.setRaw(outputContent);
+        promptResponse.setStart(System.currentTimeMillis());
+        promptResponse.setDuration(System.currentTimeMillis() - promptResponse.getStart());
+        return promptResponse;
+    }
+
+    private BatchJob loadJob(String jobId) {
+        return jobStore.load(jobId).orElseThrow(() -> new IllegalStateException("Batch job not found: " + jobId));
+    }
+
+    private String resolveModel(org.open4goods.services.prompt.config.PromptOptions options) {
+        if (options != null && StringUtils.hasText(options.getModel())) {
+            return options.getModel();
+        }
+        return "publishers/google/models/gemini-1.5-flash-001";
+    }
+
+    private void validateVertexBatchConfig() {
+        if (!StringUtils.hasText(vertexBatchConfig.getProjectId())
+                || !StringUtils.hasText(vertexBatchConfig.getBucket())
+                || !StringUtils.hasText(vertexBatchConfig.getCredentialsJson())) {
+            throw new IllegalStateException("Vertex batch configuration is missing (vertex.batch.project-id, bucket, credentials-json).");
         }
     }
 }

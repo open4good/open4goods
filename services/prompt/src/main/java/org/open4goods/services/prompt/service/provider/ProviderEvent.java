@@ -16,6 +16,7 @@ public class ProviderEvent {
     public enum Type {
         STARTED,
         SEARCHING,
+        TOOL_STATUS,
         STREAM_CHUNK,
         METADATA,
         COMPLETED,
@@ -47,6 +48,12 @@ public class ProviderEvent {
 
     public static ProviderEvent searching(GenAiServiceType provider, String model, String message) {
         return new ProviderEvent(Type.SEARCHING, provider, model, message, Map.of(), null, Instant.now());
+    }
+
+    public static ProviderEvent toolStatus(GenAiServiceType provider, String model, String toolName, String status,
+                                           Map<String, Object> payload) {
+        return new ProviderEvent(Type.TOOL_STATUS, provider, model, null,
+                Map.of("tool", toolName, "status", status, "payload", payload), null, Instant.now());
     }
 
     public static ProviderEvent streamChunk(GenAiServiceType provider, String model, String chunk) {

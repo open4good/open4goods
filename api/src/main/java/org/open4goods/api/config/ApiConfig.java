@@ -171,25 +171,6 @@ public class ApiConfig {
                 return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), featureLoader, categoryLoader);
         }
 
-
-//	@Bean
-//	@Qualifier("openAiCustomApi")
-//	OpenAiApi openAiCustomApi(ApiProperties apiConfig) {
-//		return new OpenAiApi(apiConfig.getGenAiConfig().getOpenaiApiKey());
-//	}
-
-
-
-//	@Bean
-//	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi,
-//								@Autowired @Qualifier("openAiCustomApi") OpenAiApi openAiCustomApi,
-//								ApiProperties apiConfig, EvaluationService spelEvaluationService, SerialisationService serialisationService,
-//								@Autowired MeterRegistry meterRegistry) {
-//		return new PromptService(apiProperties.getGenAiConfig(), perplexityApi, openAiCustomApi, serialisationService, spelEvaluationService,  meterRegistry);
-//	}
-
-
-
 	@Bean
 	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
 		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
