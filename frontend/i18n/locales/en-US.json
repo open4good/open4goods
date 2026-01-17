@@ -2694,12 +2694,14 @@
       "feedback": {
         "cta": "Share your feedback",
         "links": {
+          "feedback": "Share your feedback",
           "contact": "Contact us",
           "linkedin": "Follow us on LinkedIn"
         },
         "title": "Get involved"
       },
       "highlightLinks": {
+        "title": "Impact score",
         "allProducts": "All products",
         "compensation": "Ecological contribution",
         "ecoscore": "Environmental assessment"
