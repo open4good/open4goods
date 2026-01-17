@@ -1,5 +1,6 @@
 <template>
   <RoundedCornerCard
+    ref="wizardRef"
     surface="hero"
     rounded="xl"
     :elevation="3"
@@ -16,7 +17,6 @@
       },
     ]"
     :selectable="false"
-    ref="wizardRef"
   >
     <template #corner>
       <div
