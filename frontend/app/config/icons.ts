@@ -20,6 +20,7 @@ import {
   mdiArrowLeft,
   mdiArrowRight,
   mdiArrowTopRight,
+  mdiArrowTopRightThin,
   mdiBarcodeScan,
   mdiBookOpenPageVariant,
   mdiBookOpenVariant,
@@ -222,7 +223,7 @@ import {
   mdiWaterAlertOutline,
   mdiWeatherNight,
   mdiWhiteBalanceSunny,
-  mdiWifiOff
+  mdiWifiOff,
 } from '@mdi/js'
 
 export const icons: Record<string, string> = {
@@ -243,6 +244,7 @@ export const icons: Record<string, string> = {
   'mdi-arrow-left': mdiArrowLeft,
   'mdi-arrow-right': mdiArrowRight,
   'mdi-arrow-top-right': mdiArrowTopRight,
+  'mdi-arrow-top-right-thin': mdiArrowTopRightThin,
   'mdi-barcode-scan': mdiBarcodeScan,
   'mdi-book-open-page-variant': mdiBookOpenPageVariant,
   'mdi-book-open-variant': mdiBookOpenVariant,

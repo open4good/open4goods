@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { buildRevealStyle } from '~/utils/sectionReveal'
+import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 import HomeSplitSection from './HomeSplitSection.vue'
 
 type ProblemItem = {
@@ -44,16 +45,17 @@ const sectionDescription = computed(() => t('home.problems.description'))
         class="home-problems__list-item reveal-item"
         :style="buildRevealStyle(index)"
       >
-        <v-sheet
-          class="home-problems__card hover-lift card__nudger card__nudger--border card__nudger--radius_top-right_0 card__nudger--radius_bottom-right_50px"
-          rounded="xl"
-          elevation="0"
+        <NudgerCard
+          class="home-problems__card hover-lift card__nudger"
+          border
+          :flat-corners="['top-right']"
+          :accent-corners="['bottom-right']"
         >
           <v-avatar class="home-problems__icon" color="surface" size="64">
             <v-icon :icon="item.icon" size="32" />
           </v-avatar>
           <p class="home-problems__text">{{ item.text }}</p>
-        </v-sheet>
+        </NudgerCard>
       </v-col>
     </v-row>
   </HomeSplitSection>
@@ -70,24 +72,14 @@ const sectionDescription = computed(() => t('home.problems.description'))
 .home-problems
   //background: rgba(var(--v-theme-surface-default), 0.98)
 
-  .card__nudger
-    margin-bottom: 1rem
-
-    &:last-of-type
-      margin-bottom: 0
-
 .home-problems__list
   --v-gutter-y: clamp(1rem, 3vw, 1.5rem)
-
-.home-problems__list-item
-  display: flex
 
 .home-problems__card
   width: 100%
   display: flex
   gap: 1rem
   align-items: center
-  background: transparent!important
 
 .home-problems__icon
   border: 1px solid rgb(var(--v-theme-secondary))

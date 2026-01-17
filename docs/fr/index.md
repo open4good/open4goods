@@ -19,5 +19,6 @@ parcourir chaque section.
 - Des références Impact Score avec des métadonnées structurées.
 - Une recherche plein texte rapide dans les contenus.
 - Des blocs réutilisables en rendu inline ou en page complète.
+- Des guides UI comme [`NudgerCard`](./ui/nudger-card.md) pour les composants frontend.
 
 > Astuce : chaque page peut définir des métadonnées SEO, icônes, tags et ordre.

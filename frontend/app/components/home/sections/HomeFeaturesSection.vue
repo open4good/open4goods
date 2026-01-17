@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { buildRevealStyle } from '~/utils/sectionReveal'
-
+import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 type FeatureCard = {
   icon: string
   title: string
@@ -46,10 +46,7 @@ const { t } = useI18n()
           class="reveal-item"
           :style="buildRevealStyle(index)"
         >
-          <v-card
-            class="home-features__card hover-lift card__nudger"
-            variant="flat"
-          >
+          <NudgerCard class="home-features__card hover-lift card__nudger">
             <div class="text-center">
               <v-icon
                 class="home-features__icon"
@@ -63,7 +60,7 @@ const { t } = useI18n()
             <p class="home-features__card-description">
               {{ feature.description }}
             </p>
-          </v-card>
+          </NudgerCard>
         </v-col>
       </v-row>
     </div>

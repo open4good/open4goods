@@ -121,7 +121,7 @@
               </v-list-item-title>
               <template #append>
                 <v-icon
-                  icon="mdi-arrow-top-right"
+                  icon="mdi-arrow-top-right-thin"
                   size="small"
                   aria-hidden="true"
                 />

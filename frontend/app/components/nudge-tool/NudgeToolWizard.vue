@@ -1,31 +1,34 @@
 <template>
   <RoundedCornerCard
-    class="nudge-wizard"
     surface="hero"
     rounded="xl"
     :elevation="3"
     :hover-elevation="3"
-    accent-corner="top-left"
+    :accent-corner="isCategoryStep ? undefined : 'top-left'"
     corner-variant="custom"
     :corner-size="resolvedCornerSize"
     :style="wizardStyle"
-    :class="{
-      'nudge-wizard--content-mode': isContentMode,
-      'nudge-wizard--compact': compact,
-    }"
+    :class="[
+      'nudge-wizard',
+      {
+        'nudge-wizard--content-mode': isContentMode,
+        'nudge-wizard--compact': compact,
+      },
+    ]"
     :selectable="false"
     ref="wizardRef"
   >
     <template #corner>
       <div
-        class="nudge-wizard__corner-content"
-        :class="{
-          'nudge-wizard__corner-content--expanded': isContentMode,
-        }"
+        :class="[
+          'nudge-wizard__corner-content',
+          {
+            'nudge-wizard__corner-content--expanded': isContentMode,
+          },
+        ]"
       >
-        <NudgeToolAnimatedIcon v-if="activeStepKey === 'category'" />
         <v-btn
-          v-else-if="categorySummary"
+          v-if="!isCategoryStep && categorySummary"
           class="nudge-wizard__corner-summary d-flex flex-column align-center justify-center fill-height pt-1 pb-1"
           variant="text"
           color="white"
@@ -37,10 +40,13 @@
             class="nudge-wizard__corner-visual d-flex align-center justify-center"
           >
             <div
-              class="nudge-wizard__corner-icon"
-              :class="{
-                'nudge-wizard__corner-icon--enlarged': shouldEnlargeCornerIcon,
-              }"
+              :class="[
+                'nudge-wizard__corner-icon',
+                {
+                  'nudge-wizard__corner-icon--enlarged':
+                    shouldEnlargeCornerIcon,
+                },
+              ]"
               :style="cornerIconDimensions"
             >
               <v-icon
@@ -65,9 +71,18 @@
         :title="currentStepTitle"
         :subtitle="currentStepSubtitle"
         :title-icon="currentStepIcon"
-        :accent-corner="'top-left'"
+        :accent-corner="isCategoryStep ? undefined : 'top-left'"
         :corner-size="resolvedCornerSize"
-      />
+      >
+        <template #append-title>
+          <NudgeToolAnimatedIcon
+            v-if="isCategoryStep"
+            class="ms-2"
+            :frequency-range="[1000, 2500]"
+            :max-scale="1.4"
+          />
+        </template>
+      </NudgeWizardHeader>
     </div>
 
     <div class="nudge-wizard__progress mb-4" aria-hidden="true">
@@ -185,7 +200,10 @@
             <v-icon icon="mdi-arrow-right" size="small" class="ms-1" />
           </NuxtLink>
         </div>
-        <div v-else-if="!isCategoryStep" class="nudge-wizard__reco-count-wrapper px-2">
+        <div
+          v-else-if="!isCategoryStep"
+          class="nudge-wizard__reco-count-wrapper px-2"
+        >
           <p class="nudge-wizard__reco-count">
             {{
               $t('nudge-tool.steps.recommendations.total', {

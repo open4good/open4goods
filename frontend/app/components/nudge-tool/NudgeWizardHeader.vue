@@ -13,6 +13,7 @@
           class="wizard-header__title-icon"
         />
         <h2 class="wizard-header__title-text">{{ title }}</h2>
+        <slot name="append-title" />
       </div>
       <p v-if="subtitle" class="wizard-header__subtitle">{{ subtitle }}</p>
     </div>

@@ -73,9 +73,7 @@ const productsCountPlaceholder = '{products}'
 const categoriesCountPlaceholder = '{categories}'
 
 const isHeroVisible = ref(false)
-const shouldReduceMotion = computed(
-  () => preferredMotion.value === 'reduce'
-)
+const shouldReduceMotion = computed(() => preferredMotion.value === 'reduce')
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -710,7 +708,9 @@ useHead({
                   >
                     <div
                       class="home-hero__context home-hero__reveal-item"
-                      :class="{ 'home-hero__reveal-item--visible': isHeroVisible }"
+                      :class="{
+                        'home-hero__reveal-item--visible': isHeroVisible,
+                      }"
                       :style="buildRevealStyle(4)"
                     >
                       <p class="home-hero__subtitle text-center">
@@ -729,7 +729,8 @@ useHead({
                               :key="`hero-helper-${index}`"
                               class="home-hero__helper home-hero__reveal-item"
                               :class="{
-                                'home-hero__reveal-item--visible': isHeroVisible,
+                                'home-hero__reveal-item--visible':
+                                  isHeroVisible,
                               }"
                               :style="buildRevealStyle(index + 5)"
                             >
