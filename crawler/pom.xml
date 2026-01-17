@@ -121,6 +121,10 @@
             <version>${commons-text.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.sleepycat</groupId>
+            <artifactId>je</artifactId>
+        </dependency>
 
 
 
