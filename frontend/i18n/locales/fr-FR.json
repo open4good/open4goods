@@ -110,6 +110,51 @@
             "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
             "partnerLinkFallback": "nos partenaires"
           },
+          "highlights": [
+            {
+              "title": "🌿 ImpactScore : Guider vos achats",
+              "segments": [
+                {
+                  "text": "Une évaluation écologique et environnementale innovante pour {products} produits dans"
+                },
+                {
+                  "text": "{categories} catégories",
+                  "to": "/categories"
+                }
+              ]
+            },
+            {
+              "title": "🇫🇷 Ouvert & éthique",
+              "segments": [
+                {
+                  "text": "100% indépendant. Plus de {millions}M de produits en"
+                },
+                {
+                  "text": "données ouvertes.",
+                  "to": "/opendata"
+                },
+                {
+                  "text": "Logiciel libre",
+                  "to": "/opensource"
+                }
+              ]
+            },
+            {
+              "title": "Comparateur de prix",
+              "segments": [
+                {
+                  "text": "Sans se faire avoir sur les prix avec"
+                },
+                {
+                  "text": "{partnersLink}.",
+                  "to": "/partenaires"
+                },
+                {
+                  "text": "Les meilleurs prix, l'historique neuf et occasion pour {products} produits"
+                }
+              ]
+            }
+          ],
           "context": {
             "cornerLabel": "Résumé impact",
             "cornerTooltip": "Les points forts de la méthodologie Nudger",
@@ -288,6 +333,51 @@
         "partnerLinkLabel": "{formattedCount} partenaire | {formattedCount} partenaires",
         "partnerLinkFallback": "nos partenaires"
       },
+      "highlights": [
+        {
+          "title": "🌿 ImpactScore : Guider vos achats",
+          "segments": [
+            {
+              "text": "Une évaluation écologique et environnementale innovante pour {products} produits dans"
+            },
+            {
+              "text": "{categories} catégories",
+              "to": "/categories"
+            }
+          ]
+        },
+        {
+          "title": "🇫🇷 Ouvert & éthique",
+          "segments": [
+            {
+              "text": "100% indépendant. Plus de {millions}M de produits en"
+            },
+            {
+              "text": "données ouvertes.",
+              "to": "/opendata"
+            },
+            {
+              "text": "Logiciel libre",
+              "to": "/opensource"
+            }
+          ]
+        },
+        {
+          "title": "Comparateur de prix",
+          "segments": [
+            {
+              "text": "Sans se faire avoir sur les prix avec"
+            },
+            {
+              "text": "{partnersLink}.",
+              "to": "/partenaires"
+            },
+            {
+              "text": "Les meilleurs prix, l'historique neuf et occasion pour {products} produits"
+            }
+          ]
+        }
+      ],
       "agent": {
         "title": "Une question ?",
         "subtitle": "Posez votre question à notre agent IA expert Nudger."

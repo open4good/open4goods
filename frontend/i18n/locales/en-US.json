@@ -106,6 +106,51 @@
             "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
             "partnerLinkFallback": "our partners"
           },
+          "highlights": [
+            {
+              "title": "🌿 ImpactScore: guiding your purchases",
+              "segments": [
+                {
+                  "text": "An innovative ecological and environmental assessment for {products} products across"
+                },
+                {
+                  "text": "{categories} categories",
+                  "to": "/categories"
+                }
+              ]
+            },
+            {
+              "title": "🇫🇷 Open & ethical",
+              "segments": [
+                {
+                  "text": "100% independent. Over {millions}M products in"
+                },
+                {
+                  "text": "open data.",
+                  "to": "/opendata"
+                },
+                {
+                  "text": "Open-source software",
+                  "to": "/opensource"
+                }
+              ]
+            },
+            {
+              "title": "Price comparison",
+              "segments": [
+                {
+                  "text": "Avoid price traps with"
+                },
+                {
+                  "text": "{partnersLink}.",
+                  "to": "/partners"
+                },
+                {
+                  "text": "Best prices, new and used price history for {products} products"
+                }
+              ]
+            }
+          ],
           "context": {
             "cornerLabel": "Impact digest",
             "cornerTooltip": "Key highlights from Nudger’s methodology",
@@ -278,6 +323,51 @@
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners"
       },
+      "highlights": [
+        {
+          "title": "🌿 ImpactScore: guiding your purchases",
+          "segments": [
+            {
+              "text": "An innovative ecological and environmental assessment for {products} products across"
+            },
+            {
+              "text": "{categories} categories",
+              "to": "/categories"
+            }
+          ]
+        },
+        {
+          "title": "🇫🇷 Open & ethical",
+          "segments": [
+            {
+              "text": "100% independent. Over {millions}M products in"
+            },
+            {
+              "text": "open data.",
+              "to": "/opendata"
+            },
+            {
+              "text": "Open-source software",
+              "to": "/opensource"
+            }
+          ]
+        },
+        {
+          "title": "Price comparison",
+          "segments": [
+            {
+              "text": "Avoid price traps with"
+            },
+            {
+              "text": "{partnersLink}.",
+              "to": "/partners"
+            },
+            {
+              "text": "Best prices, new and used price history for {products} products"
+            }
+          ]
+        }
+      ],
       "agent": {
         "title": "Any questions?",
         "subtitle": "Ask your question to our expert AI agent Nudger."
