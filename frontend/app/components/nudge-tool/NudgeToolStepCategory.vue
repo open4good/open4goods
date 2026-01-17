@@ -349,8 +349,8 @@ watch(
 .nudge-step-category {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.5rem, 4vw, 2.5rem);
-  padding-bottom: 1.5rem;
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  padding-bottom: 0.75rem;
 
   &__header {
     display: flex;
