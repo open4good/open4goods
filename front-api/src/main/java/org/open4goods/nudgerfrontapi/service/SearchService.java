@@ -327,7 +327,7 @@ public class SearchService {
 
 		String sanitizedQuery = sanitize(query);
 		if (!StringUtils.hasText(sanitizedQuery)) {
-			return new GlobalSearchResult(List.of(), List.of(), null, SearchMode.exact_vertical, false);
+			return new GlobalSearchResult(List.of(), List.of(), List.of(), null, SearchMode.exact_vertical, false);
 		}
 
 		SearchMode startMode = resolveStartMode(searchType);
@@ -347,21 +347,22 @@ public class SearchService {
 				SearchHits<Product> firstPassHits = executeGlobalSearch(sanitizedQuery, true, false);
 				if (firstPassHits != null && !firstPassHits.isEmpty()) {
 					List<GlobalSearchVerticalGroup> groups = groupByVertical(firstPassHits, domainLanguage);
-					return new GlobalSearchResult(groups, List.of(), verticalCta, mode, fallbackTriggered);
+					return new GlobalSearchResult(groups, List.of(), List.of(), verticalCta, mode, fallbackTriggered);
 				}
 			} else if (mode == SearchMode.global) {
 				SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
 				List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
 				if (fallback != null && !fallback.isEmpty()) {
-					return new GlobalSearchResult(List.of(), fallback, verticalCta, mode, fallbackTriggered);
+					return new GlobalSearchResult(List.of(), fallback, List.of(), verticalCta, mode, fallbackTriggered);
 				}
 			} else if (mode == SearchMode.semantic) {
-				List<GlobalSearchHit> semanticFallback = executeSemanticGlobalFallback(sanitizedQuery, domainLanguage);
-				return new GlobalSearchResult(List.of(), semanticFallback, verticalCta, mode, fallbackTriggered);
+				SemanticGlobalSearchResult semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage);
+				return new GlobalSearchResult(semanticResult.verticalGroups(), List.of(),
+						semanticResult.missingVerticalResults(), verticalCta, mode, fallbackTriggered);
 			}
 		}
 
-		return new GlobalSearchResult(List.of(), List.of(), verticalCta, startMode, false);
+		return new GlobalSearchResult(List.of(), List.of(), List.of(), verticalCta, startMode, false);
 	}
 
 	/**
@@ -1066,6 +1067,36 @@ public class SearchService {
 	}
 
 	/**
+	 * Group mapped hits by vertical identifier and sort groups by best score.
+	 *
+	 * @param hits mapped global search hits
+	 * @return grouped vertical results sorted by relevance
+	 */
+	private List<GlobalSearchVerticalGroup> groupHitsByVertical(List<GlobalSearchHit> hits) {
+		if (hits == null || hits.isEmpty()) {
+			return List.of();
+		}
+
+		Map<String, List<GlobalSearchHit>> grouped = new LinkedHashMap<>();
+		for (GlobalSearchHit hit : hits) {
+			if (hit == null || !StringUtils.hasText(hit.verticalId())) {
+				continue;
+			}
+			grouped.computeIfAbsent(hit.verticalId(), key -> new ArrayList<>()).add(hit);
+		}
+
+		return grouped.entrySet().stream()
+				.map(entry -> new GlobalSearchVerticalGroup(entry.getKey(),
+						entry.getValue().stream().sorted(Comparator.comparing(GlobalSearchHit::score).reversed())
+								.toList()))
+				.sorted(Comparator.comparing(
+						(GlobalSearchVerticalGroup group) -> group.results().isEmpty() ? Double.NEGATIVE_INFINITY
+								: group.results().get(0).score())
+						.reversed())
+				.toList();
+	}
+
+	/**
 	 * Determines whether semantic fallback should be executed based on current
 	 * search hits.
 	 *
@@ -1112,38 +1143,80 @@ public class SearchService {
 	}
 
 	/**
-	 * Executes semantic fallback for global search, using a two-step strategy:
+	 * Executes semantic search for global search, returning grouped vertical hits
+	 * plus missing-vertical results.
+	 *
 	 * <ol>
 	 * <li>Resolve candidate verticals based on the query text</li>
 	 * <li>Run vector search within each candidate vertical</li>
+	 * <li>Run a dedicated semantic search on products without a vertical</li>
 	 * </ol>
 	 *
 	 * @param sanitizedQuery sanitized query string
 	 * @param domainLanguage localisation hint
-	 * @return list of semantic hits, sorted by score
+	 * @return grouped semantic hits and missing-vertical results
 	 */
-	private List<GlobalSearchHit> executeSemanticGlobalFallback(String sanitizedQuery, DomainLanguage domainLanguage) {
+	private SemanticGlobalSearchResult executeSemanticGlobalSearch(String sanitizedQuery, DomainLanguage domainLanguage) {
 		float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
 		if (embedding == null) {
-			return List.of();
+			return new SemanticGlobalSearchResult(List.of(), List.of());
 		}
 
 		List<String> candidateVerticals = resolveSemanticVerticalCandidates(sanitizedQuery, domainLanguage);
-		if (candidateVerticals.isEmpty()) {
+		List<GlobalSearchHit> combined = new ArrayList<>();
+		if (!candidateVerticals.isEmpty()) {
+			int perVerticalLimit = Math.max(1, GLOBAL_SEARCH_LIMIT / Math.max(1, candidateVerticals.size()));
+			Pageable pageable = PageRequest.of(0, perVerticalLimit);
+
+			for (String verticalId : candidateVerticals) {
+				SearchHits<Product> hits = executeSemanticSearch(verticalId, embedding, null, true, pageable);
+				combined.addAll(mapHits(hits, domainLanguage));
+			}
+		}
+
+		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(combined);
+		List<GlobalSearchHit> missingVerticalResults = executeSemanticMissingVerticalSearch(embedding, domainLanguage);
+
+		return new SemanticGlobalSearchResult(grouped, missingVerticalResults);
+	}
+
+	/**
+	 * Execute semantic search on products missing a vertical.
+	 *
+	 * @param embedding      normalized embedding vector
+	 * @param domainLanguage localisation hint
+	 * @return semantic hits without a vertical assignment
+	 */
+	private List<GlobalSearchHit> executeSemanticMissingVerticalSearch(float[] embedding, DomainLanguage domainLanguage) {
+		Query filterQuery = buildMissingVerticalSearchQuery(true);
+		SearchHits<Product> hits = executeSemanticSearchWithFilter(embedding, filterQuery,
+				PageRequest.of(0, GLOBAL_SEARCH_LIMIT));
+		if (hits == null || hits.isEmpty()) {
 			return List.of();
 		}
+		return mapHits(hits, domainLanguage).stream()
+				.filter(hit -> !StringUtils.hasText(hit.verticalId()))
+				.limit(GLOBAL_SEARCH_LIMIT)
+				.toList();
+	}
 
-		int perVerticalLimit = Math.max(1, GLOBAL_SEARCH_LIMIT / Math.max(1, candidateVerticals.size()));
-		Pageable pageable = PageRequest.of(0, perVerticalLimit);
-
-		List<GlobalSearchHit> combined = new ArrayList<>();
-		for (String verticalId : candidateVerticals) {
-			SearchHits<Product> hits = executeSemanticSearch(verticalId, embedding, null, true, pageable);
-			combined.addAll(mapHits(hits, domainLanguage));
-		}
-
-		return combined.stream().sorted(Comparator.comparing(GlobalSearchHit::score).reversed())
-				.limit(GLOBAL_SEARCH_LIMIT).toList();
+	/**
+	 * Build a filter query for products without a vertical identifier.
+	 *
+	 * @param applyDefaultExclusion whether exclusion filters should be applied
+	 * @return filter query for missing-vertical products
+	 */
+	private Query buildMissingVerticalSearchQuery(boolean applyDefaultExclusion) {
+		Long expiration = repository.expirationClause();
+		return Query.of(q -> q.bool(b -> {
+			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+			if (applyDefaultExclusion) {
+				b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+			}
+			b.mustNot(m -> m.exists(e -> e.field("vertical")));
+			return b;
+		}));
 	}
 
 	/**
@@ -1244,11 +1317,23 @@ public class SearchService {
 	 */
 	private SearchHits<Product> executeSemanticSearch(String verticalId, float[] embedding, FilterRequestDto filters,
 			boolean applyDefaultExclusion, Pageable pageable) {
+		Query filterQuery = buildProductSearchQuery(verticalId, null, filters, applyDefaultExclusion);
+		return executeSemanticSearchWithFilter(embedding, filterQuery, pageable);
+	}
+
+	/**
+	 * Execute a semantic search using a pre-built filter query.
+	 *
+	 * @param embedding   normalized embedding vector
+	 * @param filterQuery query used to scope semantic results
+	 * @param pageable    requested page
+	 * @return search hits from the semantic query
+	 */
+	private SearchHits<Product> executeSemanticSearchWithFilter(float[] embedding, Query filterQuery,
+			Pageable pageable) {
 		if (embedding == null || embedding.length == 0) {
 			return null;
 		}
-
-		Query filterQuery = buildProductSearchQuery(verticalId, null, filters, applyDefaultExclusion);
 
 		int knnLimit = Math.max(pageable.getPageSize() * (pageable.getPageNumber() + 1), pageable.getPageSize());
 		List<Float> queryVector = new ArrayList<>(embedding.length);
@@ -1584,12 +1669,27 @@ public class SearchService {
 	 * optional fallback.
 	 */
 	public record GlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
-			List<GlobalSearchHit> fallbackResults, CategorySuggestion verticalCta, SearchMode searchMode,
+			List<GlobalSearchHit> fallbackResults, List<GlobalSearchHit> missingVerticalResults,
+			CategorySuggestion verticalCta, SearchMode searchMode,
 			boolean fallbackTriggered) {
 
 		public GlobalSearchResult {
 			verticalGroups = List.copyOf(verticalGroups);
 			fallbackResults = List.copyOf(fallbackResults);
+			missingVerticalResults = List.copyOf(missingVerticalResults);
+		}
+	}
+
+	/**
+	 * Semantic search output used by global search to separate vertical and
+	 * missing-vertical hits.
+	 */
+	private record SemanticGlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
+			List<GlobalSearchHit> missingVerticalResults) {
+
+		private SemanticGlobalSearchResult {
+			verticalGroups = List.copyOf(verticalGroups);
+			missingVerticalResults = List.copyOf(missingVerticalResults);
 		}
 	}
 

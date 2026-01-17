@@ -47,6 +47,12 @@ export interface GlobalSearchResponseDto {
      */
     fallbackResults?: Array<GlobalSearchResultDto>;
     /**
+     * Semantic results that have no vertical assigned
+     * @type {Array<GlobalSearchResultDto>}
+     * @memberof GlobalSearchResponseDto
+     */
+    missingVerticalResults?: Array<GlobalSearchResultDto>;
+    /**
      * Flag indicating whether the fallback pass has been executed
      * @type {boolean}
      * @memberof GlobalSearchResponseDto
@@ -73,6 +79,7 @@ export function GlobalSearchResponseDtoFromJSONTyped(json: any, ignoreDiscrimina
         
         'verticalGroups': json['verticalGroups'] == null ? undefined : ((json['verticalGroups'] as Array<any>).map(GlobalSearchVerticalGroupDtoFromJSON)),
         'fallbackResults': json['fallbackResults'] == null ? undefined : ((json['fallbackResults'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
+        'missingVerticalResults': json['missingVerticalResults'] == null ? undefined : ((json['missingVerticalResults'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
         'fallbackTriggered': json['fallbackTriggered'] == null ? undefined : json['fallbackTriggered'],
     };
 }
@@ -90,7 +97,7 @@ export function GlobalSearchResponseDtoToJSONTyped(value?: GlobalSearchResponseD
         
         'verticalGroups': value['verticalGroups'] == null ? undefined : ((value['verticalGroups'] as Array<any>).map(GlobalSearchVerticalGroupDtoToJSON)),
         'fallbackResults': value['fallbackResults'] == null ? undefined : ((value['fallbackResults'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
+        'missingVerticalResults': value['missingVerticalResults'] == null ? undefined : ((value['missingVerticalResults'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
         'fallbackTriggered': value['fallbackTriggered'],
     };
 }
-

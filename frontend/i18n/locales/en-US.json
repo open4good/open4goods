@@ -2209,18 +2209,19 @@
         "description": "Try another keyword or explore the catalogue from the categories page."
       }
     },
-    "results": {
-      "summary": "Displaying {countLabel} for “{query}”",
-      "count": {
-        "one": "{count} result",
-        "other": "{count} results",
-        "zero": "No results"
+    "columns": {
+      "verticals": {
+        "title": "Semantic categories",
+        "emptyTitle": "No category matches for “{query}”",
+        "emptyDescription": "Try a different keyword or broaden your query.",
+        "unknownTitle": "Other categories"
       },
-      "modeLabel": "Search mode: {mode}",
-      "nextMode": "Search in {mode} mode"
-    },
-    "notice": {
-      "fallback": "We could not match a specific category, so we are showing the most relevant products overall."
+      "products": {
+        "title": "Uncategorised products",
+        "subtitle": "Products matched semantically without an assigned category.",
+        "emptyTitle": "No uncategorised products for “{query}”",
+        "emptyDescription": "Try another keyword or adjust your filters."
+      }
     },
     "suggestions": {
       "sections": {
@@ -2254,7 +2255,6 @@
         "one": "{count} product",
         "other": "{count} products"
       },
-      "unknownTitle": "Other products",
       "viewCategory": "Browse this category",
       "viewCategoryAria": "Browse the {title} category"
     },
@@ -2265,7 +2265,6 @@
     },
     "modes": {
       "exact_vertical": "Exact (category)",
-      "global": "Global",
       "semantic": "Semantic"
     }
   },
