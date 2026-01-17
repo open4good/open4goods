@@ -98,7 +98,7 @@ const messages: Record<string, unknown> = {
   'home.hero.search.partnerLinkFallback': 'our partners',
   'home.hero.eyebrow': 'Responsible shopping',
   'home.hero.title': 'Responsible choices are not a luxury',
-  'home.hero.subtitle': 'Save time, stay true to your values.',
+
   'home.hero.imageAlt': 'Hero illustration',
   'home.problems.title': 'Too many labels, not enough clarity?',
   'home.problems.items.labelsOverload':

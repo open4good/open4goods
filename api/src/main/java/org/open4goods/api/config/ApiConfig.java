@@ -182,18 +182,13 @@ public class ApiConfig {
 							 RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
 	}
 
-	@Bean
-	@Qualifier("openAiCustomApi")
-	OpenAiApi openAiCustomApi(ApiProperties apiConfig) {
-		return new OpenAiApi(apiConfig.getGenAiConfig().getOpenaiApiKey());
-	}
+//	@Bean
+//	@Qualifier("openAiCustomApi")
+//	OpenAiApi openAiCustomApi(ApiProperties apiConfig) {
+//		return new OpenAiApi(apiConfig.getGenAiConfig().getOpenaiApiKey());
+//	}
 
-	@Bean
-	@Qualifier("geminiApi")
-	OpenAiApi geminiApi(ApiProperties apiConfig) {
-		return new OpenAiApi("https://generativelanguage.googleapis.com/v1beta/openai/",
-				apiConfig.getGenAiConfig().getGeminiApiKey());
-	}
+
 
 //	@Bean
 //	PromptService genAiService (@Autowired @Qualifier("perplexityChatModel") OpenAiApi perplexityApi,

@@ -436,20 +436,20 @@ watch(
 
   &__card {
     text-align: center;
-    padding: 16px 14px;
+    padding: 12px 10px;
     height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    width: 240px;
+    width: 220px;
     box-shadow: none;
     background: transparent !important;
     border: none !important;
 
     @media (max-width: 960px) {
-      width: 180px;
+      width: 160px;
     }
   }
 
@@ -466,7 +466,7 @@ watch(
   }
 
   &__image {
-    width: 96px; /* Increased for medium image */
+    width: 64px; /* Reduced from 96px for compact height */
     aspect-ratio: 1 / 1;
     border-radius: 12px;
     overflow: hidden;

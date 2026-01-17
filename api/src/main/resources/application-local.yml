@@ -51,5 +51,5 @@ genAiConfig:
   perplexityBaseUrl: https://api.perplexity.ai
   perplexityApiKey: mock
   perplexityCompletionsPath: /chat/completions
-  geminiApiKey: mock
+
 

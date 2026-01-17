@@ -12,6 +12,17 @@
 
   <artifactId>prompt</artifactId>
 
+  <repositories>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <dependencies>
     <!-- OpenAI Spring Boot Starter -->
     <dependency>
@@ -20,13 +31,12 @@
       <version>1.0.0-M6</version>
     </dependency>
     <!-- Vertex AI removed, adding generic Google Gemini if available, or relying on OpenAI bridge -->
-    <!-- <dependency>
+    <!-- Vertex AI Native Grounding Starter -->
+    <dependency>
       <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-google-gemini-spring-boot-starter</artifactId>
+      <artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
       <version>1.0.0-M6</version>
-    </dependency> --> 
-    <!-- Actually, simplest is to use OpenAI starter for now and configure it for Gemini, 
-         OR just keep the OpenAI one which is already there. -->
+    </dependency>
     <!-- Commons Codec -->
     <dependency>
       <groupId>commons-codec</groupId>
@@ -42,6 +52,11 @@
     <dependency>
       <groupId>org.open4goods</groupId>
       <artifactId>evaluation</artifactId>
+      <version>${global.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.open4goods</groupId>
+      <artifactId>googlesearch</artifactId>
       <version>${global.version}</version>
     </dependency>
     <dependency>

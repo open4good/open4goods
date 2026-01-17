@@ -8,7 +8,7 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
-import AnimatedSubtitle from '~/components/shared/ui/AnimatedSubtitle.vue'
+
 import {
   resolveThemedAssetUrl,
   useHeroBackgroundAsset,
@@ -439,7 +439,8 @@ const applyProductsCategoriesPlaceholder = (items: HeroHelperItem[]) => {
 
     return {
       ...item,
-      segments: segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
+      segments:
+        segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
     }
   })
 }
@@ -572,19 +573,12 @@ useHead({
       <div class="home-hero__inner">
         <v-row class="home-hero__layout" align="stretch" justify="center">
           <v-col cols="12" class="home-hero__content">
-            <h1 id="home-hero-title" class="home-hero__title">
+            <h1 id="home-hero-title" class="mt-8 home-hero__title">
               {{ heroTitle }}
             </h1>
             <p v-if="heroTitleSubtitle" class="home-hero__title-subtitle">
               {{ heroTitleSubtitle }}
             </p>
-            <AnimatedSubtitle
-              class="home-hero__title-animated-subtitle"
-              i18n-key="home.hero.subtitle"
-              animation="fade"
-              :delay="600"
-              :duration-ms="420"
-            />
           </v-col>
         </v-row>
         <v-row justify="center">

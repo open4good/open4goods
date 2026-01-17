@@ -14,6 +14,7 @@
       'nudge-wizard--compact': compact,
     }"
     :selectable="false"
+    ref="wizardRef"
   >
     <template #corner>
       <div
@@ -878,12 +879,36 @@ const { height: viewportHeight } = useWindowSize()
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
 const WIZARD_MIN_HEIGHT = 300
-
 const lockedLayoutHeight = ref<number | null>(null)
 const lockedWindowHeight = ref<number | null>(null)
 
+const wizardRef = ref<HTMLElement>()
+const { height: currentWizardHeight } = useElementSize(wizardRef)
+
+const fixedContentHeight = ref<number | null>(null)
+
+watch(
+  activeStepKey,
+  (next, previous) => {
+    // When moving from category to content steps, lock the height
+    if (previous === 'category' && next !== 'category') {
+      // Calculate target height: Current (Category) Height - 200px
+      const targetHeight = currentWizardHeight.value - 200
+      // Ensure we don't go too small (minimum 300px + wiggle room, or WIZARD_MIN_HEIGHT)
+      fixedContentHeight.value = Math.max(targetHeight, WIZARD_MIN_HEIGHT)
+    } else if (next === 'category') {
+      // Reset when going back to category
+      fixedContentHeight.value = null
+      lockedLayoutHeight.value = null
+      lockedWindowHeight.value = null
+    }
+  },
+  { flush: 'pre' } // Capture height before update
+)
+
+// Legacy lock logic - only run if we haven't set a fixed content height
 const attemptLockHeights = () => {
-  if (props.compact) {
+  if (props.compact || fixedContentHeight.value !== null) {
     return
   }
 
@@ -916,6 +941,14 @@ watch(
 )
 
 const wizardStyle = computed(() => {
+  if (fixedContentHeight.value !== null) {
+    return {
+      height: `${fixedContentHeight.value}px`,
+      minHeight: `${fixedContentHeight.value}px`,
+      overflow: 'hidden',
+    }
+  }
+
   if (!lockedLayoutHeight.value) {
     return undefined
   }
@@ -924,6 +957,11 @@ const wizardStyle = computed(() => {
 })
 
 const windowWrapperStyle = computed(() => {
+  // If we have a fixed total height, let flexbox handle the window wrapper height
+  if (fixedContentHeight.value !== null) {
+    return undefined
+  }
+
   if (props.compact) {
     const reservedSpace = headerHeight.value + footerHeight.value + 64
     const availableHeight = Math.max(
@@ -1103,6 +1141,8 @@ const cornerIconDimensions = computed(() => {
     align-items: center;
     justify-content: center;
     padding: clamp(0.5rem, 1vw, 1rem) 0;
+    flex-grow: 1; /* Allow it to fill the fixed height */
+    min-height: 0; /* Enable shrinking below content size */
   }
 
   &__footer {
