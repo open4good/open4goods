@@ -54,7 +54,6 @@ public record ProductDto(
                 datasources,
                 scores,
                 aiReview,
-                aiTexts,
                 eprel,
                 offers,
                 timeline
