@@ -36,9 +36,9 @@ The API currently exposes:
 ```ts
 const { refreshQuota, getRemaining, getUsed } = useIpQuota()
 
-await refreshQuota(IpQuotaCategory.FeedbackVote)
-const remaining = getRemaining(IpQuotaCategory.FeedbackVote)
-const used = getUsed(IpQuotaCategory.FeedbackVote)
+await refreshQuota(IpQuotaStatusDtoCategoryEnum.FeedbackVote)
+const remaining = getRemaining(IpQuotaStatusDtoCategoryEnum.FeedbackVote)
+const used = getUsed(IpQuotaStatusDtoCategoryEnum.FeedbackVote)
 ```
 
 The composable intentionally keeps read APIs (`getUsed`, `getRemaining`,

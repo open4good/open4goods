@@ -19,7 +19,6 @@
       </div>
     </div>
 
-
     <v-divider class="my-4" />
 
     <div class="account-privacy-card__section">
@@ -51,7 +50,9 @@
                     />
                   </template>
                   <span>{{
-                    t('siteIdentity.menu.account.privacy.quotas.aiRemainingTooltip')
+                    t(
+                      'siteIdentity.menu.account.privacy.quotas.aiRemainingTooltip'
+                    )
                   }}</span>
                 </v-tooltip>
               </div>
@@ -126,7 +127,9 @@
                   <span>{{ userAgentFull }}</span>
                 </v-tooltip>
                 <span v-else class="account-privacy-card__meta-value">
-                  {{ t('siteIdentity.menu.account.privacy.userAgent.unavailable') }}
+                  {{
+                    t('siteIdentity.menu.account.privacy.userAgent.unavailable')
+                  }}
                 </span>
               </div>
             </div>
@@ -267,12 +270,7 @@
     <div class="account-privacy-card__cta">
       <v-divider class="my-3" />
       <div class="d-flex flex-wrap justify-space-between ga-2">
-        <v-btn
-          :to="openSourcePath"
-          color="primary"
-          variant="flat"
-          size="small"
-        >
+        <v-btn :to="openSourcePath" color="primary" variant="flat" size="small">
           {{ t('siteIdentity.menu.account.privacy.ctas.openSource') }}
         </v-btn>
         <v-btn
@@ -290,7 +288,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { IpQuotaCategory } from '~~/shared/api-client'
+import { IpQuotaStatusDtoCategoryEnum } from '~~/shared/api-client'
 import { storeToRefs } from 'pinia'
 import { computed, ref, onMounted } from 'vue'
 import { useIpQuota } from '~/composables/useIpQuota'
@@ -323,8 +321,8 @@ const ipLabel = computed(() => {
 // --- Quota Logic ---
 const { getRemaining, refreshQuota } = useIpQuota()
 
-const aiQuotaCategory = IpQuotaCategory.ReviewGeneration
-const voteQuotaCategory = IpQuotaCategory.FeedbackVote
+const aiQuotaCategory = IpQuotaStatusDtoCategoryEnum.ReviewGeneration
+const voteQuotaCategory = IpQuotaStatusDtoCategoryEnum.FeedbackVote
 
 const aiQuota = computed(() => getRemaining(aiQuotaCategory))
 const voteQuota = computed(() => getRemaining(voteQuotaCategory))

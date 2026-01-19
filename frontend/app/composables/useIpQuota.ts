@@ -1,5 +1,8 @@
 import { useStorage } from '@vueuse/core'
-import type { IpQuotaCategory, IpQuotaStatusDto } from '~~/shared/api-client'
+import type {
+  IpQuotaStatusDto,
+  IpQuotaStatusDtoCategoryEnum,
+} from '~~/shared/api-client'
 
 const STORAGE_KEY = 'nudger-ip-quota-v1'
 
@@ -29,10 +32,13 @@ export const useIpQuota = () => {
     {}
   )
 
-  const getEntry = (category: IpQuotaCategory) =>
+  const getEntry = (category: IpQuotaStatusDtoCategoryEnum) =>
     quotaStorage.value[category] ?? null
 
-  const setEntry = (category: IpQuotaCategory, entry: IpQuotaStorageEntry) => {
+  const setEntry = (
+    category: IpQuotaStatusDtoCategoryEnum,
+    entry: IpQuotaStorageEntry
+  ) => {
     quotaStorage.value = {
       ...quotaStorage.value,
       [category]: entry,
@@ -40,7 +46,7 @@ export const useIpQuota = () => {
   }
 
   const applyQuotaStatus = (
-    category: IpQuotaCategory,
+    category: IpQuotaStatusDtoCategoryEnum,
     status: IpQuotaStatusDto
   ) => {
     setEntry(category, {
@@ -52,28 +58,25 @@ export const useIpQuota = () => {
     })
   }
 
-  const refreshQuota = async (category: IpQuotaCategory) => {
+  const refreshQuota = async (category: IpQuotaStatusDtoCategoryEnum) => {
     if (!import.meta.client) {
       return null
     }
 
-    const response = await $fetch<IpQuotaStatusDto>(
-      `/api/quotas/${category}`,
-      {
-        headers: {
-          'cache-control': 'no-cache',
-        },
-        query: {
-          cacheBuster: String(Date.now()),
-        },
-      }
-    )
+    const response = await $fetch<IpQuotaStatusDto>(`/api/quotas/${category}`, {
+      headers: {
+        'cache-control': 'no-cache',
+      },
+      query: {
+        cacheBuster: String(Date.now()),
+      },
+    })
 
     applyQuotaStatus(category, response)
     return response
   }
 
-  const recordUsage = (category: IpQuotaCategory, count = 1) => {
+  const recordUsage = (category: IpQuotaStatusDtoCategoryEnum, count = 1) => {
     const current = getEntry(category)
     if (!current) {
       setEntry(category, {
@@ -99,14 +102,15 @@ export const useIpQuota = () => {
     })
   }
 
-  const getUsed = (category: IpQuotaCategory) => getEntry(category)?.used ?? null
-  const getRemaining = (category: IpQuotaCategory) =>
+  const getUsed = (category: IpQuotaStatusDtoCategoryEnum) =>
+    getEntry(category)?.used ?? null
+  const getRemaining = (category: IpQuotaStatusDtoCategoryEnum) =>
     getEntry(category)?.remaining ?? null
-  const getLimit = (category: IpQuotaCategory) =>
+  const getLimit = (category: IpQuotaStatusDtoCategoryEnum) =>
     getEntry(category)?.limit ?? null
-  const getWindowSeconds = (category: IpQuotaCategory) =>
+  const getWindowSeconds = (category: IpQuotaStatusDtoCategoryEnum) =>
     getEntry(category)?.windowSeconds ?? null
-  const getLastSync = (category: IpQuotaCategory) =>
+  const getLastSync = (category: IpQuotaStatusDtoCategoryEnum) =>
     getEntry(category)?.lastSync ?? null
 
   return {

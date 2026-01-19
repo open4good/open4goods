@@ -1,4 +1,8 @@
-import { GetQuotaStatusDomainLanguageEnum, IpQuotaCategory, QuotaApi } from '..'
+import {
+  GetQuotaStatusDomainLanguageEnum,
+  IpQuotaStatusDtoCategoryEnum,
+  QuotaApi,
+} from '..'
 import type { IpQuotaStatusDto } from '..'
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
@@ -35,7 +39,7 @@ export const useQuotaService = (domainLanguage: DomainLanguage) => {
   }
 
   const getQuotaStatus = async (
-    category: IpQuotaCategory
+    category: IpQuotaStatusDtoCategoryEnum
   ): Promise<IpQuotaStatusDto> => {
     return resolveApi().getQuotaStatus({
       category,

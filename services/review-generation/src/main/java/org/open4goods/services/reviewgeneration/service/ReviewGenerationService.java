@@ -292,6 +292,8 @@ public class ReviewGenerationService implements HealthIndicator {
 				if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
 					reviewResponse = genAiService.objectPromptStream(promptKey, promptVariables, AiReview.class,
 							event -> handleProviderEvent(status, event));
+					// TODO : Log
+					
 				} else {
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
 				}
