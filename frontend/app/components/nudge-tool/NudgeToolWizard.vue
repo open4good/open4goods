@@ -5,8 +5,8 @@
     rounded="xl"
     :elevation="3"
     :hover-elevation="3"
-    :accent-corner="isCategoryStep ? undefined : 'top-left'"
-    corner-variant="custom"
+    :accent-corner="'top-left'"
+    :corner-variant="isCategoryStep ? 'none' : 'custom'"
     :corner-size="resolvedCornerSize"
     :style="wizardStyle"
     :class="[
@@ -68,24 +68,26 @@
         </v-btn>
       </div>
     </template>
-    <div ref="headerRef">
-      <NudgeWizardHeader
-        :title="currentStepTitle"
-        :subtitle="currentStepSubtitle"
-        :title-icon="currentStepIcon"
-        :accent-corner="isCategoryStep ? undefined : 'top-left'"
-        :corner-size="resolvedCornerSize"
-      >
-        <template #append-title>
-          <NudgeToolAnimatedIcon
-            v-if="isCategoryStep"
-            class="ms-2"
-            :frequency-range="[1000, 2500]"
-            :max-scale="1.4"
-          />
-        </template>
-      </NudgeWizardHeader>
-    </div>
+    <template #header>
+      <div ref="headerRef">
+        <NudgeWizardHeader
+          :title="currentStepTitle"
+          :subtitle="currentStepSubtitle"
+          :title-icon="currentStepIcon"
+          :accent-corner="isCategoryStep ? undefined : 'top-left'"
+          :corner-size="resolvedCornerSize"
+        >
+          <template #append-title>
+            <NudgeToolAnimatedIcon
+              v-if="isCategoryStep"
+              class="ms-2"
+              :frequency-range="[1000, 2500]"
+              :max-scale="1.4"
+            />
+          </template>
+        </NudgeWizardHeader>
+      </div>
+    </template>
 
     <div
       ref="progressRef"
@@ -135,110 +137,115 @@
         </v-window-item>
       </v-window>
     </div>
-    <div ref="footerRef" class="nudge-wizard__footer">
-      <!-- Left: Previous -->
-      <div class="nudge-wizard__footer-left d-flex align-center">
-        <transition name="rapid-fade">
-          <v-btn
-            v-if="hasPreviousStep"
-            key="wizard-prev-btn"
-            variant="text"
-            icon="mdi-chevron-left"
-            class="nudge-wizard__footer-btn"
-            :disabled="!hasPreviousStep"
-            :aria-label="$t('nudge-tool.actions.previous')"
-            @click="goToPrevious"
-          />
-        </transition>
-      </div>
 
-      <!-- Center: Steppers -->
-      <div
-        class="nudge-wizard__footer-center d-flex justify-start flex-grow-1 ps-4"
-      >
+    <template #actions>
+      <div ref="footerRef" class="nudge-wizard__footer w-100">
+        <!-- Left: Previous -->
+        <div class="nudge-wizard__footer-left d-flex align-center">
+          <transition name="rapid-fade">
+            <v-btn
+              v-if="hasPreviousStep"
+              key="wizard-prev-btn"
+              variant="text"
+              prepend-icon="mdi-chevron-left"
+              class="nudge-wizard__footer-btn"
+              :disabled="!hasPreviousStep"
+              @click="goToPrevious"
+            >
+              {{ $t('nudge-tool.actions.previous') }}
+            </v-btn>
+          </transition>
+        </div>
+
+        <!-- Center: Steppers -->
         <div
-          v-if="progressSteps.length > 1"
-          class="nudge-wizard__progress-bubbles"
+          class="nudge-wizard__footer-center d-flex justify-start flex-grow-1 ps-4"
         >
-          <v-tooltip
-            v-for="step in progressSteps"
-            :key="step.key"
-            location="top"
-            :text="step.key === 'category' ? step.subtitle : step.title"
+          <div
+            v-if="progressSteps.length > 1"
+            class="nudge-wizard__progress-bubbles"
           >
-            <template #activator="{ props: tooltipProps }">
-              <span
-                class="nudge-wizard__progress-bubble-wrapper"
-                v-bind="tooltipProps"
-              >
-                <v-btn
-                  class="nudge-wizard__progress-bubble"
-                  :variant="step.key === activeStepKey ? 'flat' : 'text'"
-                  :color="step.key === activeStepKey ? 'primary' : undefined"
-                  :aria-label="step.title"
-                  :disabled="!canAccessStep(step.key)"
-                  icon
-                  size="44"
-                  @click="() => handleProgressClick(step.key)"
+            <v-tooltip
+              v-for="step in progressSteps"
+              :key="step.key"
+              location="top"
+              :text="step.key === 'category' ? step.subtitle : step.title"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <span
+                  class="nudge-wizard__progress-bubble-wrapper"
+                  v-bind="tooltipProps"
                 >
-                  <span class="nudge-wizard__progress-index">{{
-                    step.index
-                  }}</span>
-                </v-btn>
-              </span>
-            </template>
-          </v-tooltip>
+                  <v-btn
+                    class="nudge-wizard__progress-bubble"
+                    :variant="step.key === activeStepKey ? 'flat' : 'text'"
+                    :color="step.key === activeStepKey ? 'primary' : undefined"
+                    :aria-label="step.title"
+                    :disabled="!canAccessStep(step.key)"
+                    icon
+                    size="44"
+                    @click="() => handleProgressClick(step.key)"
+                  >
+                    <span class="nudge-wizard__progress-index">{{
+                      step.index
+                    }}</span>
+                  </v-btn>
+                </span>
+              </template>
+            </v-tooltip>
+          </div>
         </div>
-      </div>
 
-      <!-- Right: Result Count + Next -->
-      <div
-        class="nudge-wizard__footer-right d-flex align-center justify-end gap-2"
-      >
-        <!-- Result Count -->
+        <!-- Right: Result Count + Next -->
         <div
-          v-if="!isCategoryStep && categoryNavigationTarget"
-          class="nudge-wizard__reco-count-wrapper px-2"
+          class="nudge-wizard__footer-right d-flex align-center justify-end gap-2"
         >
-          <NuxtLink
-            :to="categoryNavigationTarget"
-            :aria-label="cornerSummaryLabel"
-            class="nudge-wizard__reco-count"
+          <!-- Result Count -->
+          <div
+            v-if="!isCategoryStep && categoryNavigationTarget"
+            class="nudge-wizard__reco-count-wrapper px-2"
           >
-            {{
-              $t('nudge-tool.steps.recommendations.total', {
-                count: animatedMatches,
-              })
-            }}
-            <v-icon icon="mdi-arrow-right" size="small" class="ms-1" />
-          </NuxtLink>
-        </div>
-        <div
-          v-else-if="!isCategoryStep"
-          class="nudge-wizard__reco-count-wrapper px-2"
-        >
-          <p class="nudge-wizard__reco-count">
-            {{
-              $t('nudge-tool.steps.recommendations.total', {
-                count: animatedMatches,
-              })
-            }}
-          </p>
-        </div>
+            <NuxtLink
+              :to="categoryNavigationTarget"
+              :aria-label="cornerSummaryLabel"
+              class="nudge-wizard__reco-count"
+            >
+              {{
+                $t('nudge-tool.steps.recommendations.total', {
+                  count: animatedMatches,
+                })
+              }}
+              <v-icon icon="mdi-arrow-right" size="small" class="ms-1" />
+            </NuxtLink>
+          </div>
+          <div
+            v-else-if="!isCategoryStep"
+            class="nudge-wizard__reco-count-wrapper px-2"
+          >
+            <p class="nudge-wizard__reco-count">
+              {{
+                $t('nudge-tool.steps.recommendations.total', {
+                  count: animatedMatches,
+                })
+              }}
+            </p>
+          </div>
 
-        <!-- Next Button -->
-        <v-btn
-          v-if="hasNextStep"
-          color="primary"
-          variant="flat"
-          :disabled="isNextDisabled"
-          icon="mdi-chevron-right"
-          class="nudge-wizard__footer-btn ms-2"
-          :aria-label="$t('nudge-tool.actions.next')"
-          @click="goToNext"
-        />
+          <!-- Next Button -->
+          <v-btn
+            v-if="hasNextStep"
+            color="primary"
+            variant="flat"
+            :disabled="isNextDisabled"
+            append-icon="mdi-chevron-right"
+            class="nudge-wizard__footer-btn ms-2"
+            @click="goToNext"
+          >
+            {{ $t('nudge-tool.actions.next') }}
+          </v-btn>
+        </div>
       </div>
-    </div>
+    </template>
   </RoundedCornerCard>
 </template>
 
@@ -423,9 +430,25 @@ const filterRequest = computed<FilterRequestDto>(() => {
 
 const isCategoryStep = computed(() => activeStepKey.value === 'category')
 
-const windowTransition = computed(() => 'slide-x-transition')
+const windowTransition = computed(() => {
+  if (
+    activeStepKey.value === 'category' ||
+    previousStepKey.value === 'category'
+  ) {
+    return 'fade-transition'
+  }
+  return 'slide-x-transition'
+})
 
-const windowReverseTransition = computed(() => 'slide-x-reverse-transition')
+const windowReverseTransition = computed(() => {
+  if (
+    activeStepKey.value === 'category' ||
+    previousStepKey.value === 'category'
+  ) {
+    return 'fade-transition'
+  }
+  return 'slide-x-reverse-transition'
+})
 
 const categorySummary = computed(() => {
   if (!selectedCategory.value || activeStepKey.value === 'category') {
@@ -923,8 +946,8 @@ const { height: activeStepHeight } = useElementSize(activeStepRef)
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
 const WIZARD_MIN_HEIGHT = 300
-const CATEGORY_HEIGHT_OFFSET = 200
-const WINDOW_MIN_HEIGHT = 220
+const CATEGORY_HEIGHT_OFFSET = 275
+const WINDOW_MIN_HEIGHT = 370
 const VIEWPORT_PADDING = 32
 
 const wizardRef = ref<HTMLElement>()
@@ -1255,7 +1278,7 @@ const cornerIconDimensions = computed(() => {
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 12px;
-    margin-top: 16px;
+    margin-top: 4px;
     align-items: center;
 
     @media (max-width: 960px) {

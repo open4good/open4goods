@@ -47,7 +47,8 @@ public class GeminiConfig implements org.springframework.context.EnvironmentAwar
             logger.info("Configuring VertexAI with inline JSON credentials for project {} in {}", projectId, location);
             logger.info("JSON Prefix: {}", googleApiJson.trim().substring(0, Math.min(20, googleApiJson.trim().length())));
             GoogleCredentials credentials = GoogleCredentials.fromStream(
-                    new ByteArrayInputStream(googleApiJson.getBytes(StandardCharsets.UTF_8)));
+                    new ByteArrayInputStream(googleApiJson.getBytes(StandardCharsets.UTF_8)))
+                    .createScoped("https://www.googleapis.com/auth/cloud-platform");
             
             return new VertexAI.Builder()
                 .setProjectId(projectId)

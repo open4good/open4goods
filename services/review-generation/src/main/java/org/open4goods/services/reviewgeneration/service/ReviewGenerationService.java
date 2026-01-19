@@ -210,17 +210,16 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param preProcessingFuture an optional external preprocessing future.
 	 * @return the product UPC used to track generation status.
 	 */
-	public long generateReviewAsync(Product product, VerticalConfig verticalConfig,
-			CompletableFuture<Void> preProcessingFuture) {
+	public long generateReviewAsync(Product product, VerticalConfig verticalConfig,	CompletableFuture<Void> preProcessingFuture, boolean force) {
 		long upc = product.getId();
-		if (!shouldGenerateReview(product)) {
+		if (!force && !shouldGenerateReview(product)) {
 			logger.info(
 					"Skipping asynchronous AI review generation for UPC {} because an up-to-date review already exists.",
 					upc);
 			ReviewGenerationStatus status = new ReviewGenerationStatus();
 			status.setUpc(upc);
 			status.setGtin(product.gtin());
-			status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
+			status.setStatus(ReviewGenerationStatus.Status.ALREADY_PROCESSED);
 			status.addMessage("Existing valid AI review found. Skipping generation.");
 			status.setStartTime(Instant.now().toEpochMilli());
 			status.setEndTime(Instant.now().toEpochMilli());

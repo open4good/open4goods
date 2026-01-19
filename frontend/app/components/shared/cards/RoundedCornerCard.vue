@@ -333,6 +333,8 @@ const hasHeader = computed(() =>
     box-shadow 180ms ease,
     transform 180ms ease,
     border-color 180ms ease;
+  display: flex !important;
+  flex-direction: column;
 
   &::before {
     content: '';
@@ -412,6 +414,8 @@ const hasHeader = computed(() =>
     flex-direction: column;
     gap: clamp(0.7rem, 1.8vw, 0.95rem);
     z-index: 1;
+    height: 100%;
+    flex: 1;
   }
 
   &__header {
@@ -446,14 +450,23 @@ const hasHeader = computed(() =>
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    flex: 1;
+    min-height: 300px;
+    overflow-y: auto;
+    /* Custom scrollbar to look nice inside the card */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--v-theme-on-surface), 0.3) transparent;
   }
 
   &__actions {
-    margin-top: 0.35rem;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 0.75rem;
+    width: 100%;
+    max-height: 150px;
+    margin-top: auto;
+    flex-shrink: 0;
   }
 
   &__corner {

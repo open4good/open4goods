@@ -62,7 +62,14 @@ public class ReviewGenerationController {
             parameters = {
                     @Parameter(name = "id", in = ParameterIn.PATH, required = true,
                             description = "Product UPC used to request review generation.",
-                            schema = @Schema(type = "integer", format = "int64", minimum = "0"))
+                            schema = @Schema(type = "integer", format = "int64", minimum = "0")),
+
+// TODO(P1, security)  : enforce this parameter, tight to an admin role
+                    @Parameter(name = "required", in = ParameterIn.PATH, required = false,
+                    description = "Force the review generation, even if already processed",
+                    schema = @Schema(type = "boolean", format = "bool", minimum = "0", defaultValue = "false")
+
+                    		)
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Generation scheduled",
@@ -70,11 +77,10 @@ public class ReviewGenerationController {
                                     schema = @Schema(implementation = Long.class))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             })
-    public ResponseEntity<Long> generateReview(@PathVariable("id") long upc) throws ResourceNotFoundException {
+    public ResponseEntity<Long> generateReview(@PathVariable("id") long upc, @PathVariable( required = false, name = "force") boolean force) throws ResourceNotFoundException {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigById(product.getVertical());
-        long scheduledUpc = reviewGenerationService.generateReviewAsync(product, verticalConfig,
-                CompletableFuture.completedFuture(null));
+        long scheduledUpc = reviewGenerationService.generateReviewAsync(product, verticalConfig, CompletableFuture.completedFuture(null), force);
         return ResponseEntity.ok(scheduledUpc);
     }
 

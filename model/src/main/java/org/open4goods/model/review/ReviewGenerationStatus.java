@@ -22,6 +22,7 @@ public class ReviewGenerationStatus {
         ANALYSING,
         SUCCESS,
         PREPROCESSING,
+        ALREADY_PROCESSED,
         FAILED;
     }
 

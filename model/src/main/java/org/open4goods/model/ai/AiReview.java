@@ -74,6 +74,7 @@ public class AiReview {
 
     /** The sources providing the information for this review. */
     @JsonProperty(required = true, value = "sources")
+    @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = AiSourcesDeserializer.class)
     private List<AiSource> sources = new ArrayList<>();
 
     /** The attributes related to the product. */
@@ -239,6 +240,22 @@ public class AiReview {
             String value = node.has("value") && !node.get("value").isNull() ? node.get("value").asText() : "";
             Integer number = node.has("number") && !node.get("number").isNull() ? node.get("number").asInt() : null;
             return new AiAttribute(name, value, number);
+        }
+    }
+
+    public static class AiSourcesDeserializer extends com.fasterxml.jackson.databind.JsonDeserializer<List<AiSource>> {
+        @Override
+        public List<AiSource> deserialize(com.fasterxml.jackson.core.JsonParser p, com.fasterxml.jackson.databind.DeserializationContext ctxt) throws java.io.IOException {
+            com.fasterxml.jackson.databind.JsonNode node = p.getCodec().readTree(p);
+            List<AiSource> sources = new ArrayList<>();
+            if (node.isArray()) {
+                for (com.fasterxml.jackson.databind.JsonNode element : node) {
+                    sources.add(p.getCodec().treeToValue(element, AiSource.class));
+                }
+            } else if (node.isObject()) {
+                sources.add(p.getCodec().treeToValue(node, AiSource.class));
+            }
+            return sources;
         }
     }
 }
