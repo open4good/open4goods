@@ -25,7 +25,6 @@ import org.joda.time.format.PeriodFormatter;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.StandardiserService;
-import org.open4goods.model.ai.AiDescriptions;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
@@ -133,10 +132,6 @@ public class Product implements Standardisable {
 	private Set<Resource> resources = new HashSet<>();
 
 	private String coverImagePath;
-
-	/** The ai generated texts, keyed by language **/
-	// TODO : Deprecated
-	private Localisable<String, AiDescriptions> genaiTexts = new Localisable<>();
 
 	/**
 	 * Informations and resources related to the gtin
@@ -917,14 +912,6 @@ public class Product implements Standardisable {
 
 	public void setOffersCount(Integer offersCount) {
 		this.offersCount = offersCount;
-	}
-
-	public Localisable<String, AiDescriptions> getGenaiTexts() {
-		return genaiTexts;
-	}
-
-	public void setGenaiTexts(Localisable<String, AiDescriptions> genaiDescriptions) {
-		this.genaiTexts = genaiDescriptions;
 	}
 
 	public Integer getGoogleTaxonomyId() {
