@@ -47,6 +47,7 @@
           grow
           density="comfortable"
           :aria-label="t('feedback.tabs.ariaLabel')"
+          @update:model-value="handleTabChange"
         >
           <v-tab
             v-for="tab in tabs"
@@ -189,6 +190,7 @@ import FeedbackSubmissionForm, {
 import FeedbackOpenSourceSection from '~/components/domains/feedback/FeedbackOpenSourceSection.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import { IpQuotaCategory } from '~~/shared/api-client'
+import { useAnalytics } from '~/composables/useAnalytics'
 import type {
   FeedbackIssueDto,
   FeedbackSubmissionResponseDto,
@@ -203,6 +205,7 @@ const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const localePath = useLocalePath()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+const { trackTabClick } = useAnalytics()
 
 const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
 const currentUrl = computed(() => requestURL.href)
@@ -250,6 +253,19 @@ const tabs = computed(() => [
 type FeedbackCategory = 'IDEA' | 'BUG'
 
 const selectedTab = ref<FeedbackCategory>('IDEA')
+
+const handleTabChange = (value: FeedbackCategory) => {
+  if (value === selectedTab.value) {
+    return
+  }
+
+  const tab = tabs.value.find(item => item.value === value)
+  trackTabClick({
+    tab: value,
+    context: 'feedback',
+    label: tab?.label ?? null,
+  })
+}
 
 const loadErrorLabel = computed(() => String(t('feedback.issues.loadError')))
 

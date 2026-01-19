@@ -39,6 +39,7 @@ import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.resource.ImageInfo;
@@ -221,7 +222,9 @@ public class ProductMappingService {
 
         ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product, domainLanguage, locale)
                 : null;
-        ProductIdentityDto identity = components.contains(ProductDtoComponent.identity) ? mapIdentity(product) : null;
+        ProductIdentityDto identity = components.contains(ProductDtoComponent.identity)
+                ? mapIdentity(product, domainLanguage, locale)
+                : null;
         ProductNamesDto names = components.contains(ProductDtoComponent.names)
                 ? mapNames(product, domainLanguage, locale)
                 : null;
@@ -388,6 +391,7 @@ public class ProductMappingService {
         if (referencedProduct == null) {
             return null;
         }
+        String preferredName = resolvePreferredName(referencedProduct, domainLanguage, locale);
         String slug = null;
         if (referencedProduct.getNames() != null) {
             slug = resolveLocalisedString(referencedProduct.getNames().getUrl(), domainLanguage, locale);
@@ -409,7 +413,7 @@ public class ProductMappingService {
         return new ProductReferenceDto(
                 referencedProduct.getId(),
                 fullSlug,
-                referencedProduct.bestName(),
+                preferredName,
                 referencedProduct.brand(),
                 referencedProduct.model(),
                 scores);
@@ -490,6 +494,7 @@ public class ProductMappingService {
      */
     private ProductBaseDto mapBase(Product product, DomainLanguage domainLanguage, Locale locale) {
         Score ecoscore = product.ecoscore();
+        String preferredName = resolvePreferredName(product, domainLanguage, locale);
         return new ProductBaseDto(
                 product.getId(),
                 product.getCreationDate(),
@@ -502,14 +507,22 @@ public class ProductMappingService {
                         : new LinkedHashSet<>(product.getExcludedCauses()),
                 mapGtinInfo(product.getGtinInfos(), domainLanguage, locale),
                 resolveCoverImageUrl(product.getCoverImagePath()),
-                product.bestName(),
+                preferredName,
                 ecoscore == null ? null : ecoscore.getValue());
     }
 
     /**
      * Map identity information such as alternate brand/model names.
      */
-    private ProductIdentityDto mapIdentity(Product product) {
+    /**
+     * Map identity information such as alternate brand/model names.
+     *
+     * @param product product being mapped
+     * @param domainLanguage requested domain language
+     * @param locale requested locale
+     * @return mapped identity dto
+     */
+    private ProductIdentityDto mapIdentity(Product product, DomainLanguage domainLanguage, Locale locale) {
         Map<String, String> akaBrandsByDatasource = product.getAkaBrands() == null
                 ? Collections.emptyMap()
                 : new LinkedHashMap<>(product.getAkaBrands());
@@ -523,7 +536,7 @@ public class ProductMappingService {
         return new ProductIdentityDto(
                 product.brand(),
                 product.model(),
-                product.bestName(),
+                resolvePreferredName(product, domainLanguage, locale),
                 safeCall(product::randomModel),
                 safeCall(product::shortestModel),
                 akaModels,
@@ -552,6 +565,69 @@ public class ProductMappingService {
                 product.getOfferNames() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getOfferNames()),
                 safeCall(product::longestOfferName),
                 safeCall(product::shortestOfferName));
+    }
+
+    /**
+     * Resolve the preferred localized name for the product using the requested
+     * language and locale.
+     *
+     * @param product product to resolve
+     * @param domainLanguage requested domain language
+     * @param locale requested locale
+     * @return resolved name, or {@code null} when none exists
+     */
+    private String resolvePreferredName(Product product, DomainLanguage domainLanguage, Locale locale) {
+        if (product == null) {
+            return null;
+        }
+
+        ProductTexts names = product.getNames();
+        String resolved = resolvePreferredName(names, domainLanguage, locale);
+        if (StringUtils.hasText(resolved)) {
+            return resolved;
+        }
+
+        String languageKey = domainLanguage != null ? domainLanguage.languageTag() : null;
+        if (languageKey == null && locale != null) {
+            languageKey = locale.toLanguageTag();
+        }
+        return product.preferredName(languageKey);
+    }
+
+    /**
+     * Resolve the preferred localized name from the product names block.
+     *
+     * @param names product names container
+     * @param domainLanguage requested domain language
+     * @param locale requested locale
+     * @return resolved name or {@code null} when not available
+     */
+    private String resolvePreferredName(ProductTexts names, DomainLanguage domainLanguage, Locale locale) {
+        if (names == null) {
+            return null;
+        }
+
+        String resolved = resolveLocalisedString(names.getShortName(), domainLanguage, locale);
+        if (StringUtils.hasText(resolved)) {
+            return resolved;
+        }
+
+        resolved = resolveLocalisedString(names.getLongName(), domainLanguage, locale);
+        if (StringUtils.hasText(resolved)) {
+            return resolved;
+        }
+
+        resolved = resolveLocalisedString(names.getH1Title(), domainLanguage, locale);
+        if (StringUtils.hasText(resolved)) {
+            return resolved;
+        }
+
+        resolved = resolveLocalisedString(names.getPrettyName(), domainLanguage, locale);
+        if (StringUtils.hasText(resolved)) {
+            return resolved;
+        }
+
+        return null;
     }
 
     /**

@@ -584,6 +584,62 @@ public class Product implements Standardisable {
 	}
 
 	/**
+	 * Returns the preferred localized name for this product.
+	 * <p>
+	 * Resolution order:
+	 * <ol>
+	 *     <li>short name</li>
+	 *     <li>long name</li>
+	 *     <li>H1 title</li>
+	 *     <li>pretty name</li>
+	 *     <li>{@link #bestName()}</li>
+	 * </ol>
+	 * </p>
+	 *
+	 * @param language language key (e.g. "en", "fr", or {@code null} for default)
+	 * @return the preferred name, never {@code null}
+	 */
+	public String preferredName(final String language) {
+		String resolved = resolveLocalisedName(names == null ? null : names.getShortName(), language);
+		if (StringUtils.isNotBlank(resolved)) {
+			return resolved;
+		}
+
+		resolved = resolveLocalisedName(names == null ? null : names.getLongName(), language);
+		if (StringUtils.isNotBlank(resolved)) {
+			return resolved;
+		}
+
+		resolved = resolveLocalisedName(names == null ? null : names.getH1Title(), language);
+		if (StringUtils.isNotBlank(resolved)) {
+			return resolved;
+		}
+
+		resolved = resolveLocalisedName(names == null ? null : names.getPrettyName(), language);
+		if (StringUtils.isNotBlank(resolved)) {
+			return resolved;
+		}
+
+		return bestName();
+	}
+
+	/**
+	 * Resolve a localized string from the provided {@link Localisable} container.
+	 *
+	 * @param localisable localized content
+	 * @param language language key (e.g. "en" or "fr")
+	 * @return resolved string or empty when missing
+	 */
+	private String resolveLocalisedName(final Localisable<String, String> localisable, final String language) {
+		if (localisable == null || localisable.isEmpty()) {
+			return "";
+		}
+
+		String resolved = localisable.i18n(language);
+		return resolved == null ? "" : resolved.trim();
+	}
+
+	/**
 	 *
 	 * @return All categories in an IHM purpose, without the shortest one
 	 */

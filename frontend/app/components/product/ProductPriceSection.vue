@@ -490,8 +490,13 @@ const props = defineProps({
 })
 
 const { locale, n, t } = useI18n()
-const { trackProductRedirect, extractTokenFromLink, isClientContribLink } =
-  useAnalytics()
+const {
+  trackProductRedirect,
+  trackAffiliateClick,
+  trackSectionView,
+  extractTokenFromLink,
+  isClientContribLink,
+} = useAnalytics()
 
 type HistoryEntry = { timestamp: number; price: number }
 
@@ -503,6 +508,10 @@ const isTestEnvironment = Boolean(import.meta.vitest ?? process.env.VITEST)
 const chartVisibility = ref({
   new: isTestEnvironment,
   occasion: isTestEnvironment,
+})
+const chartTrackedVisibility = ref({
+  new: false,
+  occasion: false,
 })
 let chartObserver: IntersectionObserver | null = null
 
@@ -589,6 +598,22 @@ const observeCharts = () => {
   if (typeof IntersectionObserver === 'undefined') {
     chartVisibility.value.new = hasNewHistory.value
     chartVisibility.value.occasion = hasOccasionHistory.value
+    if (hasNewHistory.value && !chartTrackedVisibility.value.new) {
+      chartTrackedVisibility.value.new = true
+      trackSectionView({
+        sectionId: `${props.sectionId}-new-history`,
+        page: 'product',
+        label: 'new-history',
+      })
+    }
+    if (hasOccasionHistory.value && !chartTrackedVisibility.value.occasion) {
+      chartTrackedVisibility.value.occasion = true
+      trackSectionView({
+        sectionId: `${props.sectionId}-occasion-history`,
+        page: 'product',
+        label: 'occasion-history',
+      })
+    }
     return
   }
 
@@ -602,11 +627,27 @@ const observeCharts = () => {
         if (entry.target === newChartCardRef.value) {
           chartVisibility.value.new = true
           chartObserver?.unobserve(entry.target)
+          if (!chartTrackedVisibility.value.new) {
+            chartTrackedVisibility.value.new = true
+            trackSectionView({
+              sectionId: `${props.sectionId}-new-history`,
+              page: 'product',
+              label: 'new-history',
+            })
+          }
         }
 
         if (entry.target === occasionChartCardRef.value) {
           chartVisibility.value.occasion = true
           chartObserver?.unobserve(entry.target)
+          if (!chartTrackedVisibility.value.occasion) {
+            chartTrackedVisibility.value.occasion = true
+            trackSectionView({
+              sectionId: `${props.sectionId}-occasion-history`,
+              page: 'product',
+              label: 'occasion-history',
+            })
+          }
         }
       })
     },
@@ -691,6 +732,13 @@ const handleOfferRedirectClick = (
     placement,
     source: offer?.datasourceName ?? null,
     url: link,
+  })
+
+  trackAffiliateClick({
+    token: extractTokenFromLink(link),
+    url: link,
+    partner: offer?.datasourceName ?? null,
+    placement,
   })
 }
 

@@ -27,6 +27,49 @@ type OpenDataDownloadContext = {
   href?: string
 }
 
+type AffiliateClickContext = {
+  token?: string | null
+  url?: string | null
+  partner?: string | null
+  placement?: string | null
+  productId?: string | number | null
+}
+
+type TabClickContext = {
+  tab: string
+  context: string
+  label?: string | null
+  productId?: string | number | null
+}
+
+type SearchFocusContext = {
+  location: string
+  queryLength?: number
+}
+
+type FileDownloadContext = {
+  fileType: string
+  url?: string | null
+  label?: string | null
+  context?: string | null
+}
+
+type SectionViewContext = {
+  sectionId: string
+  page?: string | null
+  label?: string | null
+}
+
+type FilterChangeContext = {
+  categoryId?: string | number | null
+  categorySlug?: string | null
+  action: string
+  source?: string | null
+  filtersCount?: number
+  filterFields?: string[]
+  subsetIds?: string[]
+}
+
 type SearchContext = {
   query: string
   source: SearchSource
@@ -69,6 +112,111 @@ export const useAnalytics = () => {
 
     const plausible = nuxtApp.$plausible as PlausibleTracker | undefined
     plausible?.trackEvent(eventName, options)
+  }
+
+  const trackAffiliateClick = ({
+    token,
+    url,
+    partner,
+    placement,
+    productId,
+  }: AffiliateClickContext) => {
+    const resolvedToken = token ?? extractTokenFromLink(url)
+
+    if (!resolvedToken) {
+      return
+    }
+
+    trackEvent('affiliate-click', {
+      props: {
+        token: resolvedToken,
+        url,
+        partner,
+        placement,
+        productId,
+      },
+    })
+  }
+
+  const trackTabClick = ({
+    tab,
+    context,
+    label,
+    productId,
+  }: TabClickContext) => {
+    if (!tab) {
+      return
+    }
+
+    trackEvent('tab-click', {
+      props: {
+        tab,
+        context,
+        label,
+        productId,
+      },
+    })
+  }
+
+  const trackSearchFocus = ({ location, queryLength }: SearchFocusContext) => {
+    trackEvent('search-focus', {
+      props: {
+        location,
+        queryLength,
+      },
+    })
+  }
+
+  const trackFileDownload = ({
+    fileType,
+    url,
+    label,
+    context,
+  }: FileDownloadContext) => {
+    trackEvent('file-download', {
+      props: {
+        fileType,
+        url,
+        label,
+        context,
+      },
+    })
+  }
+
+  const trackSectionView = ({ sectionId, page, label }: SectionViewContext) => {
+    if (!sectionId) {
+      return
+    }
+
+    trackEvent('section-view', {
+      props: {
+        sectionId,
+        page,
+        label,
+      },
+    })
+  }
+
+  const trackFilterChange = ({
+    categoryId,
+    categorySlug,
+    action,
+    source,
+    filtersCount,
+    filterFields,
+    subsetIds,
+  }: FilterChangeContext) => {
+    trackEvent('category-filter-change', {
+      props: {
+        categoryId,
+        categorySlug,
+        action,
+        source,
+        filtersCount,
+        filterFields,
+        subsetIds,
+      },
+    })
   }
 
   const trackOpenDataDownload = ({
@@ -128,6 +276,12 @@ export const useAnalytics = () => {
     trackOpenDataDownload,
     trackProductRedirect,
     trackSearch,
+    trackAffiliateClick,
+    trackTabClick,
+    trackSearchFocus,
+    trackFileDownload,
+    trackSectionView,
+    trackFilterChange,
     isAnalyticsEnabled: isEnabled,
     extractTokenFromLink,
     isClientContribLink,

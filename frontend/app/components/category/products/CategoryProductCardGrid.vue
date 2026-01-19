@@ -9,10 +9,7 @@
   >
     <v-col
       v-for="product in products"
-      :key="
-        resolveProductTitle(product, undefined, { preferCardTitle: true }) ??
-        Math.random()
-      "
+      :key="product.gtin ?? resolveCardProductName(product) ?? Math.random()"
       cols="12"
       :sm="normalizedSize === 'small' ? 6 : 6"
       :md="normalizedSize === 'small' ? 4 : normalizedSize === 'big' ? 4 : 6"
@@ -56,8 +53,7 @@
             <v-img
               :src="resolveImage(product)"
               :alt="
-                product.identity?.bestName ??
-                product.identity?.model ??
+                resolveCardProductName(product) ||
                 $t('category.products.untitledProduct')
               "
               contain
@@ -69,16 +65,12 @@
             </v-img>
 
             <div class="category-product-card-grid__title-overlay">
-              <component
-                :is="normalizedSize === 'big' ? 'h2' : 'h3'"
-                class="category-product-card-grid__title"
-              >
-                {{
-                  resolveProductTitle(product, undefined, {
-                    preferCardTitle: true,
-                  })
-                }}
-              </component>
+              <ProductDesignation
+                :product="product"
+                variant="card"
+                :title-tag="normalizedSize === 'big' ? 'h2' : 'h3'"
+                title-class="category-product-card-grid__title"
+              />
             </div>
 
             <div class="category-product-card-grid__corner" role="presentation">
@@ -188,13 +180,14 @@ import { ProductPriceTrendDtoTrendEnum } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
 import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
+import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
-import { resolveProductTitle } from '~/utils/_product-title-resolver'
+import { resolveProductShortName } from '~/utils/_product-title-resolver'
 
 const props = defineProps<{
   products: ProductDto[]
@@ -207,8 +200,11 @@ const props = defineProps<{
   nofollowLinks?: boolean
 }>()
 
-const { t, n } = useI18n()
+const { t, n, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
+
+const resolveCardProductName = (product: ProductDto) =>
+  resolveProductShortName(product, locale.value)
 
 const currencySymbolCache = new Map<string, string>()
 const NBSP = '\u00A0'
