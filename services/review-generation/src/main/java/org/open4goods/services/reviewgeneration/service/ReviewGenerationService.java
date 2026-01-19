@@ -274,6 +274,19 @@ public class ReviewGenerationService implements HealthIndicator {
 					status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
 					promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig, status);
 				}
+
+				// Validation of critical variables
+				List<String> requiredVars = List.of("PRODUCT_BRAND", "PRODUCT_MODEL", "VERTICAL_NAME", "OFFER_NAMES", "IMPACTSCORE_POSITION", "COMMON_ATTRIBUTES");
+				for (String var : requiredVars) {
+					if (!promptVariables.containsKey(var)) {
+						throw new IllegalStateException("Missing required prompt variable: " + var);
+					}
+					// Also check for nulls if strict validation is required
+					if (promptVariables.get(var) == null) {
+						throw new IllegalStateException("Required prompt variable is null: " + var);
+					}
+				}
+
 				status.addEvent(ReviewGenerationStatus.ProgressEventType.STARTED, "AI generation started", null);
 				PromptResponse<AiReview> reviewResponse;
 				if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {

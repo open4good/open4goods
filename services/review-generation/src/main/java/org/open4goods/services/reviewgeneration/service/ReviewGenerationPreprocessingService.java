@@ -253,6 +253,13 @@ public class ReviewGenerationPreprocessingService {
 		}
 		promptVariables.put("COMMON_ATTRIBUTES", commonAttributesStr);
 
+		// Inject OFFER_NAMES
+		String offerNamesStr = "";
+		if (product.getOfferNames() != null && !product.getOfferNames().isEmpty()) {
+			offerNamesStr = String.join("\n", product.getOfferNames());
+		}
+		promptVariables.put("OFFER_NAMES", offerNamesStr);
+
 		return promptVariables;
 	}
 
