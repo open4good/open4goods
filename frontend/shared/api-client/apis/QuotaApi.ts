@@ -15,15 +15,18 @@
 
 import * as runtime from '../runtime';
 import type {
+  IpQuotaCategory,
   IpQuotaStatusDto,
 } from '../models/index';
 import {
+    IpQuotaCategoryFromJSON,
+    IpQuotaCategoryToJSON,
     IpQuotaStatusDtoFromJSON,
     IpQuotaStatusDtoToJSON,
 } from '../models/index';
 
 export interface GetQuotaStatusRequest {
-    category: GetQuotaStatusCategoryEnum;
+    category: IpQuotaCategory;
     domainLanguage: GetQuotaStatusDomainLanguageEnum;
 }
 
@@ -92,15 +95,6 @@ export class QuotaApi extends runtime.BaseAPI {
 
 }
 
-/**
- * @export
- */
-export const GetQuotaStatusCategoryEnum = {
-    FeedbackVote: 'FEEDBACK_VOTE',
-    ReviewGeneration: 'REVIEW_GENERATION',
-    ContactMessage: 'CONTACT_MESSAGE'
-} as const;
-export type GetQuotaStatusCategoryEnum = typeof GetQuotaStatusCategoryEnum[keyof typeof GetQuotaStatusCategoryEnum];
 /**
  * @export
  */

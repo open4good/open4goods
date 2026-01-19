@@ -80,6 +80,7 @@ models/GlobalSearchVerticalGroupDto.ts
 models/GoogleCategoryDto.ts
 models/ImpactScoreConfigDto.ts
 models/ImpactScoreTexts.ts
+models/IpQuotaCategory.ts
 models/IpQuotaStatusDto.ts
 models/IssueCommentDto.ts
 models/LegacyPromptConfig.ts

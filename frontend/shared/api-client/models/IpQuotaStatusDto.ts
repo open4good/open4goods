@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { IpQuotaCategory } from './IpQuotaCategory';
+import {
+    IpQuotaCategoryFromJSON,
+    IpQuotaCategoryFromJSONTyped,
+    IpQuotaCategoryToJSON,
+    IpQuotaCategoryToJSONTyped,
+} from './IpQuotaCategory';
+
 /**
  * 
  * @export
@@ -21,10 +29,10 @@ import { mapValues } from '../runtime';
 export interface IpQuotaStatusDto {
     /**
      * Category associated with the quota.
-     * @type {string}
+     * @type {IpQuotaCategory}
      * @memberof IpQuotaStatusDto
      */
-    category?: IpQuotaStatusDtoCategoryEnum;
+    category?: IpQuotaCategory;
     /**
      * Maximum number of actions allowed per quota window.
      * @type {number}
@@ -52,16 +60,6 @@ export interface IpQuotaStatusDto {
 }
 
 
-/**
- * @export
- */
-export const IpQuotaStatusDtoCategoryEnum = {
-    FeedbackVote: 'FEEDBACK_VOTE',
-    ReviewGeneration: 'REVIEW_GENERATION',
-    ContactMessage: 'CONTACT_MESSAGE'
-} as const;
-export type IpQuotaStatusDtoCategoryEnum = typeof IpQuotaStatusDtoCategoryEnum[keyof typeof IpQuotaStatusDtoCategoryEnum];
-
 
 /**
  * Check if a given object implements the IpQuotaStatusDto interface.
@@ -80,7 +78,7 @@ export function IpQuotaStatusDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
     }
     return {
         
-        'category': json['category'] == null ? undefined : json['category'],
+        'category': json['category'] == null ? undefined : IpQuotaCategoryFromJSON(json['category']),
         'limit': json['limit'] == null ? undefined : json['limit'],
         'used': json['used'] == null ? undefined : json['used'],
         'remaining': json['remaining'] == null ? undefined : json['remaining'],
@@ -99,7 +97,7 @@ export function IpQuotaStatusDtoToJSONTyped(value?: IpQuotaStatusDto | null, ign
 
     return {
         
-        'category': value['category'],
+        'category': IpQuotaCategoryToJSON(value['category']),
         'limit': value['limit'],
         'used': value['used'],
         'remaining': value['remaining'],
