@@ -15,6 +15,8 @@ export interface ProductSuggestionItem {
   gtin: string | null
   verticalId: string | null
   ecoscoreValue: number | null
+  bestPrice: number | null
+  bestPriceCurrency: string | null
 }
 
 export type SuggestionItem = CategorySuggestionItem | ProductSuggestionItem
