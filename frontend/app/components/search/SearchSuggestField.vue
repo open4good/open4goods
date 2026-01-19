@@ -158,6 +158,12 @@
               <v-list-item-title class="search-suggest-field__product-title">
                 {{ item.title }}
               </v-list-item-title>
+              <v-list-item-subtitle
+                v-if="item.bestPrice !== null"
+                class="search-suggest-field__product-price"
+              >
+                {{ formatSuggestionPrice(item) }}
+              </v-list-item-subtitle>
               <template #append>
                 <ImpactScore
                   v-if="item.ecoscoreValue !== null"
@@ -317,7 +323,7 @@ const emit = defineEmits<{
   (event: 'select-product', value: ProductSuggestionItem): void
 }>()
 
-const { t, locale } = useI18n()
+const { t, locale, n } = useI18n()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const display = useDisplay()
@@ -626,7 +632,33 @@ const normalizeProduct = (
     ecoscoreValue: Number.isFinite(match.ecoscoreValue)
       ? Number(match.ecoscoreValue)
       : null,
+    bestPrice: Number.isFinite(match.bestPrice)
+      ? Number(match.bestPrice)
+      : null,
+    bestPriceCurrency: match.bestPriceCurrency ?? null,
   }
+}
+
+const formatSuggestionPrice = (item: ProductSuggestionItem): string | null => {
+  if (item.bestPrice == null) {
+    return null
+  }
+
+  if (item.bestPriceCurrency) {
+    try {
+      return n(item.bestPrice, {
+        style: 'currency',
+        currency: item.bestPriceCurrency,
+      })
+    } catch {
+      return `${n(item.bestPrice, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} ${item.bestPriceCurrency}`.trim()
+    }
+  }
+
+  return n(item.bestPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 const resetSuggestions = () => {
@@ -1067,6 +1099,11 @@ const handleScannerDecode = (rawValue: string | null) => {
   font-size: 0.95rem
   font-weight: 600
   color: rgb(var(--v-theme-text-neutral-strong))
+
+.search-suggest-field__product-price
+  font-size: 0.85rem
+  font-weight: 500
+  color: rgb(var(--v-theme-text-neutral-soft))
 
 .search-suggest-field__impact
   margin-inline-start: 0.5rem

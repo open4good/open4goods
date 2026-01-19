@@ -12,6 +12,8 @@ interface ComponentVM {
   categories: CategorySuggestionItem[]
   products: ProductSuggestionItem[]
   internalSearch: string
+  menu: boolean
+  isFieldFocused: boolean
   handleSelection: (item: SuggestionItem) => Promise<void>
   loadSuggestions: (query: string) => Promise<void>
 }
@@ -23,6 +25,15 @@ vi.stubGlobal('$fetch', fetchMock)
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string): string => key,
+    n: (
+      value: number,
+      options?: Intl.NumberFormatOptions
+    ): string => {
+      if (options?.style === 'currency' && options.currency) {
+        return `${value} ${options.currency}`
+      }
+      return String(value)
+    },
     locale: { value: 'en-US' },
   }),
 }))
@@ -137,5 +148,46 @@ describe('SearchSuggestField', () => {
 
     expect(pushMock).toHaveBeenCalledWith('/123456')
     expect(vm.internalSearch).toBe('bread') // Input remains
+  })
+
+  it('renders formatted best price when provided', async () => {
+    const wrapper = await mountSuspended(SearchSuggestField, {
+      props: {
+        modelValue: 'tv',
+        label: 'Search',
+        placeholder: 'Search...',
+        ariaLabel: 'Search',
+      },
+    })
+
+    fetchMock.mockResolvedValue({
+      categoryMatches: [],
+      productMatches: [
+        {
+          title: 'Smart TV',
+          gtin: '987654',
+          image: '/tv.jpg',
+          brand: 'BrandX',
+          model: 'ModelY',
+          prettyName: 'Smart TV',
+          ecoscoreValue: 75,
+          bestPrice: 499.99,
+          bestPriceCurrency: 'EUR',
+        },
+      ],
+    })
+
+    const vm = wrapper.vm as unknown as ComponentVM
+    await vm.loadSuggestions('tv')
+    await nextTick()
+
+    expect(vm.products[0]?.bestPrice).toBe(499.99)
+    expect(vm.products[0]?.bestPriceCurrency).toBe('EUR')
+
+    const formatSuggestionPrice = (wrapper.vm as {
+      formatSuggestionPrice: (item: ProductSuggestionItem) => string | null
+    }).formatSuggestionPrice
+
+    expect(formatSuggestionPrice(vm.products[0])).toBe('499.99 EUR')
   })
 })
