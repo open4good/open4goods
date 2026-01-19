@@ -49,6 +49,12 @@ popularAttributes:
   - DIAGONALE_POUCES
   - DISPLAY_TECHNOLOGY
 
+# Attributes that are common to the category, used to guide the LLM extraction
+commonAttributes:
+  - FREQUENCY_RATE
+  - VOICE_AVAILABLE
+  - HDMI_PORTS_QUANTITY
+
 # GenAiConfig for this vertical
 genAiConfig:
   # If false, will bypass the generativ ia texts generation
@@ -58,9 +64,6 @@ genAiConfig:
 # ImpacScore configuration.
 # Auto generated, see /prompts/impactscore-generation.yml
 #####################################################################################################################################
-
-
-
 
 # The scores that are available to build the impact score. They come from scored attributes.
 # Scores from _default.yml are merged
@@ -323,7 +326,7 @@ nudgeToolConfig:
         fr: "Les TV dont le prix est supérieur à 1000€."
       title:
         en: "> 1000 €"
-        fr: "> 1000 €"        
+        fr: "> 1000 €"
       description:
         en: "TVs priced over €1000."
         fr: "Les TV dont le prix est supérieur à 1000€."
@@ -343,7 +346,7 @@ nudgeToolConfig:
         fr: "petits-ecrans"
       caption:
         en: 'Small screens (< 32")'
-        fr: 'Diagonale < 32 pouces'
+        fr: "Diagonale < 32 pouces"
       title:
         en: "Small Screen TVs"
         fr: "Petits écrans"
@@ -366,7 +369,7 @@ nudgeToolConfig:
         fr: "ecrans-moyens"
       caption:
         en: 'Medium screens (32" - 55")'
-        fr: 'Diagonale entre 32 et 55 pouces'
+        fr: "Diagonale entre 32 et 55 pouces"
       title:
         en: "Medium Screen TVs"
         fr: "Écrans moyens"
@@ -386,7 +389,7 @@ nudgeToolConfig:
         fr: "grands-ecrans"
       caption:
         en: 'Large screens (> 55")'
-        fr: 'Diagonale > 55 pouces'
+        fr: "Diagonale > 55 pouces"
       title:
         en: "Large Screen TVs"
         fr: "Grands écrans"

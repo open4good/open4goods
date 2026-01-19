@@ -3197,7 +3197,7 @@
       "viewCategoryResults": "Ouvrir {category} avec vos filtres"
     },
     "wizard": {
-      "welcome": "🤘",
+      "welcome": "Impact Score : 🤘 Etape par étape",
       "title": "Assistant",
       "description": "Quelques questions pour des choix éco personnalisés.",
       "badge": "Nouveau"
@@ -3572,11 +3572,11 @@
     },
     "browser": {
       "title": "Navigateur de documentation",
-      "description": "Parcourez l’arborescence et lisez les pages sans quitter la vue.",
+      "description": "Parcourez l'arborescence et lisez les pages sans quitter la vue.",
       "treeToggle": "Ouvrir la navigation",
       "seo": {
         "title": "Navigateur de documentation",
-        "description": "Explorez l’arborescence, recherchez des pages et lisez les contenus en inline."
+        "description": "Explorez l'arborescence, recherchez des pages et lisez les contenus en inline."
       }
     }
   }

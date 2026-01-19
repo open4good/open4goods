@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, toRefs, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import SearchSuggestField, {
@@ -140,7 +140,10 @@ const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Ensure the DOM is fully mounted and initial state (opacity: 0) is rendered
+  await nextTick()
+
   window.setTimeout(() => {
     if (!isHeroImageLoaded.value) {
       isHeroImageLoaded.value = true
@@ -153,9 +156,15 @@ onMounted(() => {
     return
   }
 
+  // Set ready state (transition enabled, but still hidden)
   heroRevealReady.value = true
+
+  // Wait for the next frame to ensure the browser registers the 'ready' state
   window.requestAnimationFrame(() => {
-    heroRevealVisible.value = true
+    // And another frame to trigger the transition
+    window.requestAnimationFrame(() => {
+      heroRevealVisible.value = true
+    })
   })
 })
 
@@ -217,7 +226,10 @@ useHead({
       <div class="home-hero__background-overlay" />
     </div>
     <v-container fluid class="home-hero__container">
-      <div class="home-hero__inner home-reveal-group" :class="heroRevealClasses">
+      <div
+        class="home-hero__inner home-reveal-group"
+        :class="heroRevealClasses"
+      >
         <v-row class="home-hero__layout" align="stretch" justify="center">
           <v-col cols="12" class="home-hero__content">
             <h1

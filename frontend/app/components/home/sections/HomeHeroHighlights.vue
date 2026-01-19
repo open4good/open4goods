@@ -7,6 +7,7 @@ import {
   EVENT_PACK_I18N_BASE_KEY,
 } from '~~/config/theme/event-packs'
 import RoundedCornerCard from '~/components/shared/cards/RoundedCornerCard.vue'
+import SectionReveal from '~/components/shared/ui/SectionReveal.vue'
 
 type HeroHighlightSegment = {
   text: string
@@ -391,44 +392,59 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
         md="4"
         class="home-hero-highlights__col"
       >
-        <RoundedCornerCard
-          class="home-hero-highlights__card"
-          surface="strong"
-          accent-corner="bottom-right"
-          corner-variant="none"
-          corner-size="lg"
-          rounded="lg"
-          :selectable="false"
-          :elevation="10"
-          :hover-elevation="14"
+        <SectionReveal
+          class="home-hero-highlights__reveal"
+          transition="fade"
+          :style="{ transitionDelay: `${index * 150}ms` }"
         >
-          <div class="home-hero-highlights__card-content" role="listitem">
-            <p class="home-hero-highlights__title">{{ item.title }}</p>
-            <p class="home-hero-highlights__description">
-              <template
-                v-for="(segment, segmentIndex) in item.segments"
-                :key="`hero-highlight-${index}-segment-${segmentIndex}`"
-              >
-                <NuxtLink
-                  v-if="segment.to"
-                  class="home-hero-highlights__link"
-                  :to="segment.to"
+          <RoundedCornerCard
+            class="home-hero-highlights__card"
+            surface="strong"
+            accent-corner="bottom-right"
+            corner-variant="none"
+            corner-size="lg"
+            rounded="lg"
+            :selectable="false"
+            :elevation="10"
+            :hover-elevation="14"
+          >
+            <div class="home-hero-highlights__card-content" role="listitem">
+              <p class="home-hero-highlights__title">{{ item.title }}</p>
+              <p class="home-hero-highlights__description">
+                <template
+                  v-for="(segment, segmentIndex) in item.segments"
+                  :key="`hero-highlight-${index}-segment-${segmentIndex}`"
                 >
-                  {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
-                </NuxtLink>
-                <span v-else>
-                  {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
-                </span>
-              </template>
-            </p>
-          </div>
-        </RoundedCornerCard>
+                  <NuxtLink
+                    v-if="segment.to"
+                    class="home-hero-highlights__link"
+                    :to="segment.to"
+                  >
+                    {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                  </NuxtLink>
+                  <span v-else>
+                    {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                  </span>
+                </template>
+              </p>
+            </div>
+          </RoundedCornerCard>
+        </SectionReveal>
       </v-col>
     </v-row>
   </div>
 </template>
 
 <style scoped lang="sass">
+
+
+.home-hero-highlights__reveal
+  width: 100%
+  height: 100%
+  display: flex
+
+  & > div
+    height: 100%
 
 
 .home-hero-highlights__col

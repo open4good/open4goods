@@ -236,6 +236,23 @@ public class ReviewGenerationPreprocessingService {
         promptVariables.put("SOURCE_TOKENS", new HashMap<>());
 
 		promptVariables.put("ATTRIBUTES", attributesList);
+
+		// Inject IMPACTSCORE_POSITION
+		String impactScorePosition = "Non classé";
+		if (product.getRanking() != null && product.getRanking().getGlobalPosition() > 0 && product.getRanking().getGlobalCount() > 0) {
+			impactScorePosition = String.format("Ce produit se classe %dème sur %d produits de la catégorie %s",
+					product.getRanking().getGlobalPosition(), product.getRanking().getGlobalCount(), verticalConfig.i18n("fr").getH1Title().getPrefix());
+		}
+		promptVariables.put("IMPACTSCORE_POSITION", impactScorePosition);
+
+		// Inject COMMON_ATTRIBUTES
+		List<String> commonAttributes = verticalConfig.getCommonAttributes();
+		String commonAttributesStr = "";
+		if (commonAttributes != null && !commonAttributes.isEmpty()) {
+			commonAttributesStr = String.join("\n", commonAttributes);
+		}
+		promptVariables.put("COMMON_ATTRIBUTES", commonAttributesStr);
+
 		return promptVariables;
 	}
 

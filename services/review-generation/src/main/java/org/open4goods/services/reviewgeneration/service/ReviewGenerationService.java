@@ -630,6 +630,9 @@ public class ReviewGenerationService implements HealthIndicator {
 	 */
 	private AiReview updateAiReviewReferences(AiReview review) {
 		String description = replaceReferences(review.getDescription());
+		String technicalOneline = replaceReferences(review.getTechnicalOneline());
+		String ecologicalOneline = replaceReferences(review.getEcologicalOneline());
+		String communityOneline = replaceReferences(review.getCommunityOneline());
 		String shortDescription = replaceReferences(review.getShortDescription());
 		String mediumTitle = replaceReferences(review.getMediumTitle());
 		String shortTitle = replaceReferences(review.getShortTitle());
@@ -655,8 +658,8 @@ public class ReviewGenerationService implements HealthIndicator {
 				.map(attr -> new AiReview.AiAttribute(replaceReferences(attr.getName()),
 						replaceReferences(attr.getValue()), attr.getNumber()))
 				.toList();
-		return new AiReview(description, shortDescription, mediumTitle, shortTitle, technicalReview, ecologicalReview,
-				summary, pros, cons, sources, attributes, dataQuality);
+		return new AiReview(description, technicalOneline, ecologicalOneline, communityOneline, shortDescription, mediumTitle, shortTitle, technicalReview, ecologicalReview,
+				summary, pros, cons, sources, attributes, dataQuality, review.getRatings());
 	}
 
 	@Override
@@ -699,10 +702,10 @@ public class ReviewGenerationService implements HealthIndicator {
 		int maxSourceNumber = sources == null ? 0 : sources.size();
 		ReferenceNormalization normalization = normalizeReferences(review, sources, maxSourceNumber);
 		String dataQuality = normalization.dataQuality();
-		return new AiReview(normalization.description(), normalization.shortDescription(), normalization.mediumTitle(),
+		return new AiReview(normalization.description(), normalization.technicalOneline(), normalization.ecologicalOneline(), normalization.communityOneline(), normalization.shortDescription(), normalization.mediumTitle(),
 				normalization.shortTitle(), normalization.technicalReview(), normalization.ecologicalReview(),
 				normalization.summary(), normalization.pros(), normalization.cons(), sources, normalization.attributes(),
-				dataQuality);
+				dataQuality, review.getRatings());
 	}
 
 	private List<AiReview.AiSource> resolveSourcesFromMetadata(Map<String, Object> metadata) {
@@ -754,6 +757,10 @@ public class ReviewGenerationService implements HealthIndicator {
 						normalizer.normalize(attr.getValue()), attr.getNumber()))
 				.toList();
 
+		String technicalOneline = normalizer.normalize(review.getTechnicalOneline());
+		String ecologicalOneline = normalizer.normalize(review.getEcologicalOneline());
+		String communityOneline = normalizer.normalize(review.getCommunityOneline());
+
 		if (maxSourceNumber == 0) {
 			dataQuality = appendDataQuality(dataQuality, "Aucune source fiable n'a été trouvée.");
 		} else if (normalizer.hasRemovedReferences()) {
@@ -761,7 +768,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					"Certaines références ont été retirées car elles ne correspondaient à aucune source.");
 		}
 		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle, technicalReview,
-				ecologicalReview, summary, pros, cons, attributes, dataQuality);
+				ecologicalReview, summary, pros, cons, attributes, dataQuality, technicalOneline, ecologicalOneline, communityOneline);
 	}
 
 	private String appendDataQuality(String dataQuality, String note) {
@@ -776,7 +783,8 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	private record ReferenceNormalization(String description, String shortDescription, String mediumTitle,
 			String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros,
-			List<String> cons, List<AiReview.AiAttribute> attributes, String dataQuality) {
+			List<String> cons, List<AiReview.AiAttribute> attributes, String dataQuality,
+			String technicalOneline, String ecologicalOneline, String communityOneline) {
 	}
 
 	private static class ReferenceNormalizer {

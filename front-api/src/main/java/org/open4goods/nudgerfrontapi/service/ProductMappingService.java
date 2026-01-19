@@ -777,7 +777,10 @@ public class ProductMappingService {
                 cons,
                 sources,
                 attributes,
-                review.getDataQuality());
+                review.getDataQuality(),
+                review.getTechnicalOneline(),
+                review.getEcologicalOneline(),
+                review.getCommunityOneline());
     }
 
     /**

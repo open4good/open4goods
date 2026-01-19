@@ -187,9 +187,9 @@ const handleSecondaryCta = () => {
 }
 
 const handleIntersection = (
+  isIntersecting: boolean,
   _entries: unknown,
-  _observer: unknown,
-  isIntersecting: boolean
+  _observer: unknown
 ) => {
   emit('intersection', isIntersecting)
 }

@@ -115,6 +115,11 @@ public class VerticalConfig {
 	private List<String> globalTechnicalFilters = new ArrayList<>();
 
 	/**
+	 * The list of attributes considered common/standard for this vertical (to be extracted by AI).
+	 */
+	private List<String> commonAttributes = new ArrayList<>();
+
+	/**
 	 * The categories that MUST BE PRESENT to associate to this vertical. Prefixed
 	 * by datasource on which it applies, using "all" for all datasources
 	 */
@@ -796,6 +801,14 @@ public class VerticalConfig {
 
 	public void setEcoFilters(List<String> ecoFilters) {
 		this.ecoFilters = ecoFilters;
+	}
+
+	public List<String> getCommonAttributes() {
+		return commonAttributes;
+	}
+
+	public void setCommonAttributes(List<String> commonAttributes) {
+		this.commonAttributes = commonAttributes;
 	}
 
 	public List<String> getTechnicalFilters() {

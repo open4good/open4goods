@@ -109,7 +109,9 @@ const { prefersReducedMotionOverride } = storeToRefs(accessibilityStore)
 const display = useDisplay()
 
 const shouldReduceMotion = computed(
-  () => prefersReducedMotionOverride.value || prefersReducedMotion.value === 'reduce'
+  () =>
+    prefersReducedMotionOverride.value ||
+    prefersReducedMotion.value === 'reduce'
 )
 
 const isMounted = ref(false)

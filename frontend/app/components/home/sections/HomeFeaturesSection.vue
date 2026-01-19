@@ -28,12 +28,7 @@ const isVisible = computed(() => Boolean(props.reveal))
         />
         <!-- eslint-enable vue/no-v-html -->
       </header>
-      <v-row
-        class="home-features__grid home-reveal-group"
-        :class="{ 'is-ready': true, 'is-visible': isVisible }"
-        align="stretch"
-        justify="center"
-      >
+      <v-row class="home-features__grid" align="stretch" justify="center">
         <v-col
           v-for="(feature, index) in props.features"
           :key="feature.title"
@@ -41,24 +36,27 @@ const isVisible = computed(() => Boolean(props.reveal))
           sm="6"
           lg="4"
         >
-          <NudgerCard
-            class="home-features__card home-hover-card home-reveal-item home-reveal-item--blur"
-            :style="{ '--reveal-delay': `${index * 90}ms` }"
-          >
-            <div class="text-center">
-              <v-icon
-                class="home-features__icon"
-                :icon="feature.icon"
-                size="100"
-              />
-            </div>
-            <h3 class="home-hero__subtitle home-features__card-title">
-              {{ feature.title }}
-            </h3>
-            <p class="home-features__card-description">
-              {{ feature.description }}
-            </p>
-          </NudgerCard>
+          <v-slide-y-transition>
+            <NudgerCard
+              v-show="isVisible"
+              class="home-features__card home-hover-card"
+              :style="{ transitionDelay: `${index * 100}ms` }"
+            >
+              <div class="text-center">
+                <v-icon
+                  class="home-features__icon"
+                  :icon="feature.icon"
+                  size="100"
+                />
+              </div>
+              <h3 class="home-hero__subtitle home-features__card-title">
+                {{ feature.title }}
+              </h3>
+              <p class="home-features__card-description">
+                {{ feature.description }}
+              </p>
+            </NudgerCard>
+          </v-slide-y-transition>
         </v-col>
       </v-row>
     </div>

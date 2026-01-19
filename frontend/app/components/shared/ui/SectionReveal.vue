@@ -76,9 +76,9 @@ watch(
 )
 
 const handleIntersect = (
+  isIntersecting: boolean,
   _entries: IntersectionObserverEntry[],
-  observer: IntersectionObserver,
-  isIntersecting: boolean
+  observer: IntersectionObserver
 ) => {
   if (isVisible.value) {
     return
@@ -94,11 +94,7 @@ const handleIntersect = (
 </script>
 
 <template>
-  <component
-    :is="props.tag"
-    v-bind="attrs"
-    v-intersect="handleIntersect"
-  >
+  <component :is="props.tag" v-bind="attrs" v-intersect="handleIntersect">
     <component
       :is="transitionComponent || 'div'"
       :disabled="shouldReduceMotion || !transitionComponent"

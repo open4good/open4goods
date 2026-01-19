@@ -45,6 +45,15 @@ public record AiReviewDto(
         List<AiReviewAttributeDto> attributes,
 
         @Schema(description = "Assessment of the data quality available for the product", example = "High quality data with multiple independent tests")
-        String dataQuality
+        String dataQuality,
+
+        @Schema(description = "Short technical summary of the product (max 20 words)")
+        String technicalOneline,
+
+        @Schema(description = "Short ecological summary of the product (max 20 words)")
+        String ecologicalOneline,
+
+        @Schema(description = "Short community summary of the product (max 20 words)")
+        String communityOneline
 ) {
 }

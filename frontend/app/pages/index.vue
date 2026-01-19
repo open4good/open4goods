@@ -886,7 +886,10 @@ useHead(() => ({
               transition="slide-x-reverse"
             >
               <template #default="{ reveal }">
-                <HomeObjectionsSection :items="objectionItems" :reveal="reveal" />
+                <HomeObjectionsSection
+                  :items="objectionItems"
+                  :reveal="reveal"
+                />
               </template>
             </SectionReveal>
           </section>
@@ -903,25 +906,33 @@ useHead(() => ({
           :data-i18n-pack-key="parallaxBackgroundKeys.cta"
           content-align="center"
         >
-          <section
-            id="home-cta"
-            class="home-page__section-wrapper home-page__stack home-page__stack--compact"
-          >
-            <SectionReveal class="home-page__section" transition="fade">
-              <HomeFaqSection :items="faqPanels" />
-            </SectionReveal>
+          <v-container fluid class="max_large mx-auto px-4">
+            <v-row>
+              <v-col cols="12" md="8">
+                <SectionReveal class="home-page__section" transition="fade">
+                  <template #default="{ reveal }">
+                    <HomeFaqSection :items="faqPanels" :reveal="reveal" />
+                  </template>
+                </SectionReveal>
+              </v-col>
 
-            <SectionReveal class="home-page__section" transition="slide-y">
-              <HomeCtaSection
-                v-model:search-query="searchQuery"
-                :categories-landing-url="categoriesLandingUrl"
-                :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-                @submit="handleSearchSubmit"
-                @select-category="handleCategorySuggestion"
-                @select-product="handleProductSuggestion"
-              />
-            </SectionReveal>
-          </section>
+              <v-col cols="12" md="4">
+                <SectionReveal class="home-page__section" transition="slide-y">
+                  <template #default="{ reveal }">
+                    <HomeCtaSection
+                      v-model:search-query="searchQuery"
+                      :categories-landing-url="categoriesLandingUrl"
+                      :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+                      :reveal="reveal"
+                      @submit="handleSearchSubmit"
+                      @select-category="handleCategorySuggestion"
+                      @select-product="handleProductSuggestion"
+                    />
+                  </template>
+                </SectionReveal>
+              </v-col>
+            </v-row>
+          </v-container>
         </ParallaxWidget>
       </div>
     </div>
