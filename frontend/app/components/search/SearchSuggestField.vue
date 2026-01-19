@@ -271,6 +271,7 @@ import type {
   SearchSuggestResponseDto,
   SuggestionItem,
 } from '~/shared/api-client'
+import { useAnalytics } from '~/composables/useAnalytics'
 import type {
   CategorySuggestionItem,
   ProductSuggestionItem,
@@ -301,6 +302,7 @@ const props = withDefaults(
     suggestDesktop?: boolean
     voiceMobile?: boolean
     voiceDesktop?: boolean
+    analyticsContext?: string
   }>(),
   {
     minChars: 2,
@@ -313,6 +315,7 @@ const props = withDefaults(
     suggestDesktop: true,
     voiceMobile: true,
     voiceDesktop: false,
+    analyticsContext: '',
   }
 )
 
@@ -328,6 +331,8 @@ const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const display = useDisplay()
 const router = useRouter()
+const route = useRoute()
+const { trackSearchFocus } = useAnalytics()
 const isMobile = computed(() => display.smAndDown.value)
 
 const internalSearch = ref(props.modelValue ?? '')
@@ -350,6 +355,9 @@ const speechRecognition = ref<SpeechRecognition | null>(null)
 const isHydrated = ref(false)
 const menu = ref(false)
 const highlightedIndex = ref(-1)
+const resolvedAnalyticsContext = computed(
+  () => props.analyticsContext?.trim() || route.path || 'unknown'
+)
 
 onMounted(() => {
   isHydrated.value = true
@@ -829,6 +837,10 @@ const handleBlur = () => {
 
 const handleFocus = () => {
   isFieldFocused.value = true
+  trackSearchFocus({
+    location: resolvedAnalyticsContext.value,
+    queryLength: internalSearch.value.trim().length,
+  })
 
   // If we have existing results, reopen the menu on focus
   if (

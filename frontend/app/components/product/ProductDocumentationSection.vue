@@ -117,6 +117,7 @@
               target="_blank"
               rel="noopener"
               class="product-docs__download"
+              @click="handleDownloadClick"
             >
               <v-icon
                 icon="mdi-file-pdf-box"
@@ -207,6 +208,7 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductPdfDto } from '~~/shared/api-client'
+import { useAnalytics } from '~/composables/useAnalytics'
 
 type VuePdfEmbedComponent = (typeof import('vue-pdf-embed'))['default']
 
@@ -241,6 +243,7 @@ const props = defineProps({
 })
 
 const { locale, n, t, te } = useI18n()
+const { trackTabClick, trackFileDownload } = useAnalytics()
 
 const pdfs = computed(() => props.pdfs ?? [])
 
@@ -303,6 +306,12 @@ const selectPdf = (index: number) => {
     return
   }
 
+  const pdf = pdfs.value[index]
+  trackTabClick({
+    tab: String(index),
+    context: 'product-docs',
+    label: pdf ? pdfTitle(pdf) : null,
+  })
   activePdfIndex.value = index
 }
 
@@ -550,6 +559,20 @@ const activePdfMetaLeft = computed(() =>
 const activePdfMetaRight = computed(() =>
   activePdf.value ? joinMetaParts(getTabRightMeta(activePdf.value)) : ''
 )
+
+const handleDownloadClick = () => {
+  const pdf = activePdf.value
+  if (!pdf?.url) {
+    return
+  }
+
+  trackFileDownload({
+    fileType: 'pdf',
+    url: pdf.url,
+    label: pdfTitle(pdf),
+    context: 'product-docs',
+  })
+}
 
 watch(
   activePdf,
