@@ -112,23 +112,9 @@ public class GeminiProvider implements GenAiProvider {
              builder.model("gemini-1.5-flash-001");
         }
 
-		// Enable Google Search grounding when requested for interactive prompts.
+            // Enable Google Search grounding when requested for interactive prompts.
 		if (retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch) {
-            // VertexAiGeminiChatOptions uses different method for grounding
-            // Often it's withTools or similar.
-            // For now, let's look for googleSearchRetrieval equivalent.
-            // In spring-ai 1.0.0 M1:
-			// builder.withGoogleSearchRetrieval(true);
-            // I'll try to use the same method name, if it fails I'll check available methods.
-            // Wait, looking at docs, it might be `.withTool(new GoogleSearchRetrievalTool())` or `withGoogleSearchRetrieval(true)`
-            // I'll stick to property naming convention from previous usage if possible, 
-            // but usually builders use `with` prefix in this library version.
-            // I'll try `withGoogleSearchRetrieval` if available, or just leave it for now and fix compilation later.
-            // To be safe and avoid compilation error if method missing, I will comment it out or try standard `with`.
-            // The previous code used `builder.googleSearchRetrieval(true)`.
-            // I will try `builder.withGoogleSearchRetrieval(true)`. 
-            // NOTE: I am guessing the method name.
-             // builder.withGoogleSearchRetrieval(true); 
+            builder.googleSearchRetrieval(true);
 		}
 		return builder.build();
 	}

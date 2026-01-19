@@ -387,8 +387,7 @@ const props = defineProps({
   },
 })
 
-const { t, n, locale } = useI18n()
-const runtimeConfig = useRuntimeConfig()
+const { t, n } = useI18n()
 const { isLoggedIn } = useAuth()
 
 const searchTerm = ref('')
@@ -416,12 +415,6 @@ const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
 })
 
 const timeline = computed(() => props.product?.timeline ?? null)
-
-const staticServerBase = computed(() => {
-  const fallback = 'https://static.nudger.fr'
-  const base = runtimeConfig.public?.staticServer ?? fallback
-  return base.endsWith('/') ? base.slice(0, -1) : base
-})
 
 const toStringList = (input: unknown): string[] => {
   if (!input) {

@@ -159,4 +159,54 @@ class ReviewGenerationServiceTest {
     private boolean invokeShouldGenerateReview(Product product) {
         return ReflectionTestUtils.invokeMethod(reviewGenerationService, "shouldGenerateReview", product);
     }
+
+    @Test
+    void testGenerateReviewAsync_MissingVariable_ShouldFail() throws Exception {
+        // Setup
+        Product product = new Product();
+        product.setId(123L);
+        // Create a basic gtin to avoid NPE in isActiveForGtin or other checks if accessed
+        // Product uses id for upc, and gtin() usually returns something or null
+        // Let's assume default is null, but the service might access it. 
+        // We will assert failure anyway.
+        
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
+
+        org.open4goods.services.prompt.config.PromptConfig promptConfig = new org.open4goods.services.prompt.config.PromptConfig();
+        promptConfig.setRetrievalMode(org.open4goods.services.prompt.config.RetrievalMode.EXTERNAL_SOURCES);
+        org.mockito.Mockito.when(genAiService.getPromptConfig(org.mockito.ArgumentMatchers.anyString())).thenReturn(promptConfig);
+
+        // Mock preprocessing to return incomplete variables
+        java.util.Map<String, Object> variables = new java.util.HashMap<>();
+        variables.put("PRODUCT_BRAND", "Brand");
+        // Missing PRODUCT_MODEL, VERTICAL_NAME, etc.
+        org.mockito.Mockito.when(preprocessingService.preparePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(variables);
+
+        // Execute
+        reviewGenerationService.generateReviewAsync(product, verticalConfig, null, true);
+
+        // Wait for execution (1s should be enough for local thread pool)
+        long start = System.currentTimeMillis();
+        org.open4goods.model.review.ReviewGenerationStatus status = null;
+        while (System.currentTimeMillis() - start < 2000) {
+             status = reviewGenerationService.getProcessStatus(123L);
+             if (status != null && (status.getStatus() == org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED || status.getStatus() == org.open4goods.model.review.ReviewGenerationStatus.Status.SUCCESS)) {
+                 break;
+             }
+             Thread.sleep(100);
+        }
+
+        // Check status
+        if (status == null) {
+            throw new RuntimeException("Status is null");
+        }
+        
+        if (status.getStatus() != org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED) {
+             throw new RuntimeException("Expected FAILED status but got " + status.getStatus() + ". Error: " + status.getErrorMessage());
+        }
+        
+        if (!status.getErrorMessage().contains("Missing required prompt variable")) {
+            throw new RuntimeException("Expected error message to contain 'Missing required prompt variable', but got: " + status.getErrorMessage());
+        }
+    }
 }

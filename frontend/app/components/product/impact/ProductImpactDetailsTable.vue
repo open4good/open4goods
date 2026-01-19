@@ -9,11 +9,11 @@
         variant="text"
         density="compact"
         class="impact-details__virtual-toggle"
+        color="primary"
         :prepend-icon="
           showVirtualScores ? 'mdi-check-circle-outline' : 'mdi-circle-outline'
         "
         @click="showVirtualScores = !showVirtualScores"
-        color="primary"
       >
         {{ $t('product.impact.showVirtualScores') }}
       </v-btn>

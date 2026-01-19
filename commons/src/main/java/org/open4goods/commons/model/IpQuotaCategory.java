@@ -1,5 +1,7 @@
 package org.open4goods.commons.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Enumerates the supported IP-based quota categories shared across services.
  * <p>
@@ -7,6 +9,7 @@ package org.open4goods.commons.model;
  * so that independent services can read and write the same counters.
  * </p>
  */
+@Schema(enumAsRef = true)
 public enum IpQuotaCategory
 {
     FEEDBACK_VOTE("feedback.vote"),
