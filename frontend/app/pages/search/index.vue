@@ -41,6 +41,40 @@
         </SearchSuggestField>
       </form>
 
+      <div class="search-hero__filters">
+        <div class="search-hero__filters-header">
+          <p class="search-hero__filters-title">
+            {{ t('category.filters.title') }}
+          </p>
+          <v-btn
+            v-if="!mdAndUp"
+            variant="tonal"
+            color="primary"
+            prepend-icon="mdi-filter-variant"
+            @click="filtersOpen = true"
+          >
+            {{ t('category.filters.title') }}
+            <v-badge
+              v-if="activeFilters.length"
+              :content="activeFilters.length"
+              color="primary"
+              inline
+              class="ms-2"
+            />
+          </v-btn>
+        </div>
+        <CategoryFilterList
+          v-if="mdAndUp"
+          :fields="filterFields"
+          :aggregations="productAggregations"
+          :baseline-aggregations="baselineAggregations"
+          :active-filters="activeFilters"
+          class="search-hero__filters-content"
+          @update-range="updateRangeFilter"
+          @update-terms="updateTermsFilter"
+        />
+      </div>
+
       <p
         v-if="showInitialState"
         class="search-hero__helper mt-4 text-medium-emphasis"
@@ -80,6 +114,7 @@
         <CategoryFilterList
           :fields="filterFields"
           :aggregations="productAggregations"
+          :baseline-aggregations="baselineAggregations"
           :active-filters="activeFilters"
           @update-range="updateRangeFilter"
           @update-terms="updateTermsFilter"
@@ -88,7 +123,7 @@
     </v-navigation-drawer>
 
     <v-progress-linear
-      v-if="pending || productsPending"
+      v-if="pending || productsPending || baselinePending"
       class="search-page__loader"
       indeterminate
       color="primary"
@@ -97,12 +132,12 @@
     />
 
     <v-container
-      v-if="hasMinimumLength"
+      v-if="shouldShowResults"
       class="search-page__results py-10 px-4 mx-auto"
       max-width="xl"
     >
       <v-alert
-        v-if="error || productsError"
+        v-if="error || productsError || baselineError"
         type="error"
         variant="tonal"
         border="start"
@@ -122,7 +157,13 @@
           <v-btn
             color="primary"
             variant="text"
-            @click="isFiltered ? refreshProducts() : refresh()"
+            @click="
+              showLatestProducts
+                ? refreshBaseline()
+                : isFiltered
+                  ? refreshProducts()
+                  : refresh()
+            "
           >
             {{ t('common.actions.retry') }}
           </v-btn>
@@ -198,10 +239,9 @@
                         />
                       </v-btn>
                     </div>
-                    <CategoryProductCardGrid
+                    <CategoryProductListView
                       :products="group.products"
                       :popular-attributes="group.popularAttributes"
-                      size="compact"
                     />
                   </v-expansion-panel-text>
                 </v-expansion-panel>
@@ -235,40 +275,8 @@
                     class="search-page__sort-select"
                     prepend-inner-icon="mdi-sort"
                   />
-                  <v-btn
-                    v-if="!showInitialState"
-                    prepend-icon="mdi-filter-variant"
-                    variant="tonal"
-                    color="primary"
-                    @click="handleFiltersToggle"
-                  >
-                    {{ t('category.filters.title') }}
-                    <v-badge
-                      v-if="activeFilters.length"
-                      :content="activeFilters.length"
-                      color="primary"
-                      inline
-                      class="ms-2"
-                    />
-                  </v-btn>
                 </div>
               </div>
-
-              <v-expand-transition>
-                <div
-                  v-if="mdAndUp"
-                  v-show="filtersPanelOpen"
-                  class="search-page__filters-panel"
-                >
-                  <CategoryFilterList
-                    :fields="filterFields"
-                    :aggregations="productAggregations"
-                    :active-filters="activeFilters"
-                    @update-range="updateRangeFilter"
-                    @update-terms="updateTermsFilter"
-                  />
-                </div>
-              </v-expand-transition>
 
               <div
                 v-if="!rightColumnProducts.length && !rightColumnPending"
@@ -295,10 +303,9 @@
                 </v-btn>
               </div>
 
-              <CategoryProductCardGrid
+              <CategoryProductListView
                 v-else
                 :products="rightColumnProducts"
-                size="medium"
               />
             </section>
           </v-col>
@@ -329,7 +336,7 @@ import SearchSuggestField, {
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import PageHeader from '~/components/shared/header/PageHeader.vue'
-import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
+import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryFilterList from '~/components/category/filters/CategoryFilterList.vue'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { useAnalytics } from '~/composables/useAnalytics'
@@ -358,7 +365,6 @@ const searchInput = ref(routeQuery.value)
 const requestedSearchType = ref<'semantic'>('semantic')
 
 const filtersOpen = ref(false)
-const filtersPanelOpen = ref(true)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
 const sortOption = ref<string>('impact')
 const openPanels = ref<number[]>([0])
@@ -381,21 +387,17 @@ watch(
   { immediate: true }
 )
 
-watch(
-  mdAndUp,
-  value => {
-    filtersPanelOpen.value = value
-  },
-  { immediate: true }
-)
-
 const normalizedQuery = computed(() => routeQuery.value.trim())
 const trimmedInput = computed(() => searchInput.value.trim())
 const hasMinimumLength = computed(
   () => normalizedQuery.value.length >= MIN_QUERY_LENGTH
 )
+const showLatestProducts = computed(() => normalizedQuery.value.length === 0)
+const shouldShowResults = computed(
+  () => hasMinimumLength.value || showLatestProducts.value
+)
 const showInitialState = computed(
-  () => trimmedInput.value.length === 0 && normalizedQuery.value.length === 0
+  () => !shouldShowResults.value && trimmedInput.value.length === 0
 )
 const showMinimumNotice = computed(
   () =>
@@ -405,10 +407,6 @@ const showMinimumNotice = computed(
 
 const activeFilters = computed(() => filterRequest.value.filters ?? [])
 const isFiltered = computed(() => activeFilters.value.length > 0)
-const filtersVisible = computed(() =>
-  mdAndUp.value ? filtersPanelOpen.value : filtersOpen.value
-)
-
 // Global Search Data
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(
@@ -440,18 +438,28 @@ const { data, pending, error, refresh } =
 const manualFields: FieldMetadataDto[] = [
   {
     mapping: 'price.minPrice.price',
-    title: 'Price', // Will be localized by resolveFilterFieldTitle if keys match
+    title: '',
     valueType: 'numeric',
   },
   {
     mapping: 'scores.ECOSCORE.value',
-    title: 'Eco-score',
+    title: '',
     valueType: 'numeric',
   },
   {
     mapping: 'price.conditions', // backend mapping for condition
-    title: 'Condition',
+    title: '',
     valueType: 'keyword',
+  },
+  {
+    mapping: 'creationDate',
+    title: '',
+    valueType: 'numeric',
+  },
+  {
+    mapping: 'lastChange',
+    title: '',
+    valueType: 'numeric',
   },
 ]
 
@@ -469,19 +477,62 @@ const currentSort = computed<SortDto[]>(() => {
   }
 })
 
+const aggregationDefinition = computed(() => ({
+  aggs: [
+    { name: 'price', field: 'price.minPrice.price', type: 'range' },
+    { name: 'ecoscore', field: 'scores.ECOSCORE.value', type: 'range' },
+    { name: 'condition', field: 'price.conditions', type: 'terms' },
+    { name: 'creationDate', field: 'creationDate', type: 'range' },
+    { name: 'lastChange', field: 'lastChange', type: 'range' },
+  ],
+}))
+
 const requestBody = computed<ProductSearchRequestDto>(() => ({
   filters: filterRequest.value,
   sort: {
     sorts: currentSort.value,
   },
-  aggs: {
-    aggs: [
-      { name: 'price', field: 'price.minPrice.price', type: 'range' },
-      { name: 'ecoscore', field: 'scores.ECOSCORE.value', type: 'range' },
-      { name: 'condition', field: 'price.conditions', type: 'terms' },
-    ],
-  },
+  aggs: aggregationDefinition.value,
+  semanticSearch: hasMinimumLength.value ? true : undefined,
 }))
+
+const latestProductsSort = computed<SortDto[]>(() => [
+  { field: 'creationDate', order: 'desc' },
+])
+
+const baselinePayload = computed(() => ({
+  query: hasMinimumLength.value ? normalizedQuery.value : undefined,
+  aggs: aggregationDefinition.value,
+  sort: showLatestProducts.value ? { sorts: latestProductsSort.value } : undefined,
+  semanticSearch: hasMinimumLength.value ? true : undefined,
+}))
+
+const {
+  data: baselineSearchData,
+  pending: baselinePending,
+  error: baselineError,
+  refresh: refreshBaseline,
+} = await useAsyncData<ProductSearchResponseDto | null>(
+  'search-baseline',
+  async () => {
+    if (!shouldShowResults.value) {
+      return null
+    }
+
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+      method: 'POST',
+      headers: requestHeaders,
+      body: baselinePayload.value,
+    })
+  },
+  {
+    watch: [
+      () => normalizedQuery.value,
+      () => showLatestProducts.value,
+    ],
+    immediate: true,
+  }
+)
 
 const {
   data: productSearchData,
@@ -495,30 +546,23 @@ const {
     // To support "taillés sur les resultats", we need to fetch aggregations EVEN IF no filter is applied
     // IF the user opens the filter drawer.
     // OR if filters are active.
-    if (!hasMinimumLength.value) return null
+    if (!hasMinimumLength.value && !showLatestProducts.value) return null
 
-    // If global search is active and no filters, skip unless drawer is open?
-    // Let's simplified: If isFiltered is true, we fetch.
-    // If IS NOT filtered, we rely on Global Search.
-    // BUT we need aggregations to show in the drawer.
-    // So if drawer is OPEN, we need to fetch aggregations.
-    if (!isFiltered.value && !filtersVisible.value) return null
+    if (!isFiltered.value) return null
 
-    return await $fetch<ProductSearchResponseDto>('/api/products', {
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
-      params: {
-        query: normalizedQuery.value,
-        domainLanguage: locale.value,
+      body: {
+        query: hasMinimumLength.value ? normalizedQuery.value : undefined,
+        ...requestBody.value,
       },
-      body: requestBody.value,
     })
   },
   {
     watch: [
       () => normalizedQuery.value,
       () => filterRequest.value,
-      () => filtersVisible.value, // Fetch when filters are visible to get aggs
     ],
     immediate: false, // Wait for interaction
   }
@@ -527,9 +571,27 @@ const {
 const productResults = computed(
   () => productSearchData.value?.products?.content ?? []
 )
+const baselineResults = computed(
+  () => baselineSearchData.value?.products?.content ?? []
+)
+const baselineAggregations = computed<Record<string, AggregationResponseDto>>(
+  () => {
+    const aggs = baselineSearchData.value?.aggregations ?? []
+    return aggs.reduce(
+      (acc, curr) => {
+        if (curr.field) acc[curr.field] = curr
+        return acc
+      },
+      {} as Record<string, AggregationResponseDto>
+    )
+  }
+)
 const productAggregations = computed<Record<string, AggregationResponseDto>>(
   () => {
-    const aggs = productSearchData.value?.aggregations ?? []
+    const activeSource = isFiltered.value
+      ? productSearchData.value
+      : baselineSearchData.value
+    const aggs = activeSource?.aggregations ?? []
     return aggs.reduce(
       (acc, curr) => {
         if (curr.field) acc[curr.field] = curr
@@ -575,15 +637,6 @@ const clearFilters = () => {
   if (!mdAndUp.value) {
     filtersOpen.value = false
   }
-}
-
-const handleFiltersToggle = () => {
-  if (mdAndUp.value) {
-    filtersPanelOpen.value = !filtersPanelOpen.value
-    return
-  }
-
-  filtersOpen.value = true
 }
 
 const { data: verticalsData } = await useAsyncData<VerticalConfigDto[]>(
@@ -710,13 +763,29 @@ const missingVerticalProducts = computed(() =>
   extractProducts(data.value?.missingVerticalResults ?? [])
 )
 
-const rightColumnProducts = computed(() =>
-  isFiltered.value ? productResults.value : missingVerticalProducts.value
-)
+const rightColumnProducts = computed(() => {
+  if (isFiltered.value) {
+    return productResults.value
+  }
 
-const rightColumnPending = computed(() =>
-  isFiltered.value ? productsPending.value : pending.value
-)
+  if (showLatestProducts.value) {
+    return baselineResults.value
+  }
+
+  return missingVerticalProducts.value
+})
+
+const rightColumnPending = computed(() => {
+  if (isFiltered.value) {
+    return productsPending.value
+  }
+
+  if (showLatestProducts.value) {
+    return baselinePending.value
+  }
+
+  return pending.value
+})
 
 const handleSearchSubmit = () => {
   const value = searchInput.value.trim()
@@ -926,12 +995,6 @@ function formatFallbackVerticalTitle(verticalId: string): string {
     gap: 0.75rem
     align-items: center
 
-  &__filters-panel
-    padding: 1.25rem
-    border-radius: 1rem
-    background: rgba(var(--v-theme-surface-muted), 0.7)
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
-
   &__panels
     border-radius: 1rem
     overflow: hidden
@@ -1074,4 +1137,32 @@ function formatFallbackVerticalTitle(verticalId: string): string {
 
     &--warning
       color: rgba(var(--v-theme-hero-overlay-soft), 0.95)
+
+  &__filters
+    margin-top: 1rem
+    padding: 1.25rem
+    border-radius: 1.25rem
+    background: rgba(var(--v-theme-hero-overlay-soft), 0.12)
+    border: 1px solid rgba(var(--v-theme-hero-overlay-soft), 0.25)
+    backdrop-filter: blur(6px)
+    display: flex
+    flex-direction: column
+    gap: 1rem
+
+  &__filters-header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    flex-wrap: wrap
+    gap: 0.75rem
+
+  &__filters-title
+    margin: 0
+    font-weight: 600
+    font-size: 1rem
+    color: rgba(var(--v-theme-hero-overlay-soft), 0.9)
+
+  &__filters-content
+    :deep(.category-filter-list)
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr))
 </style>

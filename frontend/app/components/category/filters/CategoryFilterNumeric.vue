@@ -122,7 +122,7 @@ const chartContainer = ref<HTMLElement | null>(null)
 const { width } = useElementSize(chartContainer)
 const canRenderChart = computed(() => width.value > 0)
 
-const { t, n } = useI18n()
+const { t, n, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
 const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
@@ -143,7 +143,12 @@ const parseNumericBound = (
   }
 
   const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : undefined
+  if (Number.isFinite(parsed)) {
+    return parsed
+  }
+
+  const parsedDate = Date.parse(String(value))
+  return Number.isFinite(parsedDate) ? parsedDate : undefined
 }
 
 const resolveAggregationBounds = (
@@ -188,10 +193,17 @@ const numericBounds = computed(() => {
 })
 
 const priceField = computed(() => isPriceField(props.field.mapping))
+const dateField = computed(() =>
+  ['creationDate', 'lastChange'].includes(props.field.mapping ?? '')
+)
+const DATE_SLIDER_STEP = 24 * 60 * 60 * 1000
 
 const sliderStep = computed(() => {
   if (priceField.value) {
     return 1
+  }
+  if (dateField.value) {
+    return DATE_SLIDER_STEP
   }
 
   const buckets = props.aggregation?.buckets ?? []
@@ -246,6 +258,14 @@ const formatSliderValue = (value: number): string => {
     return '–'
   }
 
+  if (dateField.value) {
+    return new Intl.DateTimeFormat(locale.value, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(new Date(value))
+  }
+
   const resolvedValue = priceField.value ? sliderValueToPrice(value) : value
   return formatNumericRangeValue(resolvedValue, n, {
     isPrice: priceField.value,
@@ -253,6 +273,19 @@ const formatSliderValue = (value: number): string => {
 }
 
 const formatBoundary = (value: number | string | null | undefined): string => {
+  if (dateField.value) {
+    const parsed =
+      typeof value === 'number' ? value : Date.parse(String(value ?? ''))
+    if (!Number.isFinite(parsed)) {
+      return '–'
+    }
+    return new Intl.DateTimeFormat(locale.value, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(new Date(parsed))
+  }
+
   return formatNumericRangeValue(value, n, { isPrice: priceField.value })
 }
 

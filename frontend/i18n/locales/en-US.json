@@ -869,8 +869,11 @@
         "brand": "Brand",
         "condition": "Offer condition",
         "country": "GTIN country code",
+        "creationDate": "Creation date",
         "datasource": "Data sources",
+        "ecoscore": "Impact score",
         "googleTaxonomyId": "Google product category",
+        "lastChange": "Last updated",
         "offersCount": "Number of offers",
         "price": "Price range"
       },
@@ -891,6 +894,11 @@
       "showMoreTechnical": "Show more technical filters",
       "technicalTitle": "Technical filters",
       "options": {
+        "price.conditions": {
+          "NEW": "New",
+          "OCCASION": "Used",
+          "USED": "Used"
+        },
         "excludedCauses": {
           "ES-UNKNOWN": "Unknown cause"
         }
