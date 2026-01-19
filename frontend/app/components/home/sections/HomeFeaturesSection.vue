@@ -42,7 +42,7 @@ const isVisible = computed(() => Boolean(props.reveal))
           lg="4"
         >
           <NudgerCard
-            class="home-features__card home-hover-card home-reveal-item"
+            class="home-features__card home-hover-card home-reveal-item home-reveal-item--blur"
             :style="{ '--reveal-delay': `${index * 90}ms` }"
           >
             <div class="text-center">

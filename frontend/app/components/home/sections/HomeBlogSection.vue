@@ -65,7 +65,7 @@ const fallbackIconSize = 48
               cols="12"
               sm="6"
               md="4"
-              class="home-blog__col home-reveal-item"
+              class="home-blog__col home-reveal-item home-reveal-item--blur"
               :style="{ '--reveal-delay': `${240 + index * 90}ms` }"
             >
               <NuxtLink :to="article.link" class="home-blog__item">
