@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ReviewGenerationEvent } from './ReviewGenerationEvent';
+import {
+    ReviewGenerationEventFromJSON,
+    ReviewGenerationEventFromJSONTyped,
+    ReviewGenerationEventToJSON,
+    ReviewGenerationEventToJSONTyped,
+} from './ReviewGenerationEvent';
 import type { AiReviewHolder } from './AiReviewHolder';
 import {
     AiReviewHolderFromJSON,
@@ -77,6 +84,12 @@ export interface ReviewGenerationStatus {
     messages?: Array<string>;
     /**
      * 
+     * @type {Array<ReviewGenerationEvent>}
+     * @memberof ReviewGenerationStatus
+     */
+    events?: Array<ReviewGenerationEvent>;
+    /**
+     * 
      * @type {number}
      * @memberof ReviewGenerationStatus
      */
@@ -107,6 +120,7 @@ export const ReviewGenerationStatusStatusEnum = {
     Analysing: 'ANALYSING',
     Success: 'SUCCESS',
     Preprocessing: 'PREPROCESSING',
+    AlreadyProcessed: 'ALREADY_PROCESSED',
     Failed: 'FAILED'
 } as const;
 export type ReviewGenerationStatusStatusEnum = typeof ReviewGenerationStatusStatusEnum[keyof typeof ReviewGenerationStatusStatusEnum];
@@ -137,6 +151,7 @@ export function ReviewGenerationStatusFromJSONTyped(json: any, ignoreDiscriminat
         'errorMessage': json['errorMessage'] == null ? undefined : json['errorMessage'],
         'percent': json['percent'] == null ? undefined : json['percent'],
         'messages': json['messages'] == null ? undefined : json['messages'],
+        'events': json['events'] == null ? undefined : ((json['events'] as Array<any>).map(ReviewGenerationEventFromJSON)),
         'duration': json['duration'] == null ? undefined : json['duration'],
         'remaining': json['remaining'] == null ? undefined : json['remaining'],
         'gtin': json['gtin'] == null ? undefined : json['gtin'],
@@ -162,6 +177,7 @@ export function ReviewGenerationStatusToJSONTyped(value?: ReviewGenerationStatus
         'errorMessage': value['errorMessage'],
         'percent': value['percent'],
         'messages': value['messages'],
+        'events': value['events'] == null ? undefined : ((value['events'] as Array<any>).map(ReviewGenerationEventToJSON)),
         'duration': value['duration'],
         'remaining': value['remaining'],
         'gtin': value['gtin'],

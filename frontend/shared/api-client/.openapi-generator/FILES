@@ -12,6 +12,7 @@ apis/FeedbackApi.ts
 apis/OpenDataApi.ts
 apis/PartnerApi.ts
 apis/ProductApi.ts
+apis/QuotaApi.ts
 apis/ShareApi.ts
 apis/StatsApi.ts
 apis/TeamApi.ts
@@ -78,6 +79,7 @@ models/GlobalSearchVerticalGroupDto.ts
 models/GoogleCategoryDto.ts
 models/ImpactScoreConfigDto.ts
 models/ImpactScoreTexts.ts
+models/IpQuotaStatusDto.ts
 models/IssueCommentDto.ts
 models/LegacyPromptConfig.ts
 models/LoginRequest.ts
@@ -137,6 +139,7 @@ models/RecommandationChoice.ts
 models/RecommandationCriteria.ts
 models/RecommandationsConfig.ts
 models/ResourcesAggregationConfig.ts
+models/ReviewGenerationEvent.ts
 models/ReviewGenerationStatus.ts
 models/ScoringAggregationConfig.ts
 models/SearchSuggestCategoryDto.ts

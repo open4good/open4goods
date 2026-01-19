@@ -369,7 +369,7 @@ const solutionBenefits = computed(() => [
 
 const featureCards = computed(() => [
   {
-    icon: 'mdi-leaf-circle',
+    icon: 'mdi-star',
     title: String(t('home.features.cards.impactScore.title')),
     description: String(t('home.features.cards.impactScore.description')),
   },

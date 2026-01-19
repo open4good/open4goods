@@ -14,7 +14,6 @@
     >
       <template #prev="prevArrowProps">
         <v-btn
-          v-if="!prevArrowProps.disabled"
           v-bind="prevArrowProps"
           class="nudge-step-category__arrow nudge-step-category__arrow--prev"
           icon="mdi-chevron-left"
@@ -26,7 +25,6 @@
 
       <template #next="nextArrowProps">
         <v-btn
-          v-if="!nextArrowProps.disabled"
           v-bind="nextArrowProps"
           class="nudge-step-category__arrow nudge-step-category__arrow--next"
           icon="mdi-chevron-right"
@@ -392,11 +390,19 @@ watch(
     margin-inline: auto;
     max-width: 1050px;
     width: 100%;
+    overflow: visible; /* Fix cropping */
 
     :deep(.v-slide-group__container) {
       align-items: stretch;
-      /* Ensure the container doesn't overflow its parent in a way that hides arrows */
-      contain: content;
+      contain: none; /* Allow overflow */
+      overflow: visible; /* Fix cropping */
+    }
+
+    /* Hide disabled arrows */
+    :deep(.v-slide-group__prev--disabled),
+    :deep(.v-slide-group__next--disabled) {
+      opacity: 0;
+      pointer-events: none;
     }
 
     :deep(.v-slide-group__content) {
@@ -416,7 +422,7 @@ watch(
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3) !important;
     transition: all 0.3s ease;
-    z-index: 10;
+    z-index: 20;
     width: 40px !important;
     height: 40px !important;
 
@@ -426,11 +432,11 @@ watch(
     }
 
     &--prev {
-      margin-right: -8px;
+      margin-right: -16px;
     }
 
     &--next {
-      margin-left: -8px;
+      margin-left: -16px;
     }
   }
 

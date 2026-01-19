@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { SearchSuggestCategoryDto } from './SearchSuggestCategoryDto';
+import {
+    SearchSuggestCategoryDtoFromJSON,
+    SearchSuggestCategoryDtoFromJSONTyped,
+    SearchSuggestCategoryDtoToJSON,
+    SearchSuggestCategoryDtoToJSONTyped,
+} from './SearchSuggestCategoryDto';
 import type { GlobalSearchVerticalGroupDto } from './GlobalSearchVerticalGroupDto';
 import {
     GlobalSearchVerticalGroupDtoFromJSON,
@@ -53,6 +60,12 @@ export interface GlobalSearchResponseDto {
      */
     missingVerticalResults?: Array<GlobalSearchResultDto>;
     /**
+     * Category suggestion if a strict match is found
+     * @type {SearchSuggestCategoryDto}
+     * @memberof GlobalSearchResponseDto
+     */
+    verticalCta?: SearchSuggestCategoryDto;
+    /**
      * Flag indicating whether the fallback pass has been executed
      * @type {boolean}
      * @memberof GlobalSearchResponseDto
@@ -80,6 +93,7 @@ export function GlobalSearchResponseDtoFromJSONTyped(json: any, ignoreDiscrimina
         'verticalGroups': json['verticalGroups'] == null ? undefined : ((json['verticalGroups'] as Array<any>).map(GlobalSearchVerticalGroupDtoFromJSON)),
         'fallbackResults': json['fallbackResults'] == null ? undefined : ((json['fallbackResults'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
         'missingVerticalResults': json['missingVerticalResults'] == null ? undefined : ((json['missingVerticalResults'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
+        'verticalCta': json['verticalCta'] == null ? undefined : SearchSuggestCategoryDtoFromJSON(json['verticalCta']),
         'fallbackTriggered': json['fallbackTriggered'] == null ? undefined : json['fallbackTriggered'],
     };
 }
@@ -98,6 +112,8 @@ export function GlobalSearchResponseDtoToJSONTyped(value?: GlobalSearchResponseD
         'verticalGroups': value['verticalGroups'] == null ? undefined : ((value['verticalGroups'] as Array<any>).map(GlobalSearchVerticalGroupDtoToJSON)),
         'fallbackResults': value['fallbackResults'] == null ? undefined : ((value['fallbackResults'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
         'missingVerticalResults': value['missingVerticalResults'] == null ? undefined : ((value['missingVerticalResults'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
+        'verticalCta': SearchSuggestCategoryDtoToJSON(value['verticalCta']),
         'fallbackTriggered': value['fallbackTriggered'],
     };
 }
+

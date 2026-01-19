@@ -40,7 +40,7 @@ const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
     to: resolveLocalizedRoutePath('/impact-score', currentLocale.value),
-    icon: 'mdi-leaf-circle-outline',
+    icon: 'mdi-star',
   },
   {
     label: t('siteIdentity.footer.highlightLinks.allProducts'),
@@ -114,7 +114,7 @@ const footerLogo = useFooterLogoAsset()
       {{ t('siteIdentity.footer.accessibleTitle') }}
     </h2>
 
-    <v-row class="g-8 footer-upper">
+    <v-row class="g-8 footer-upper justify-center">
       <v-col cols="12" md="3">
         <div class="footer-panel d-flex flex-column ga-4">
           <div class="footer-section-title text-subtitle-1 font-weight-medium">
@@ -123,12 +123,6 @@ const footerLogo = useFooterLogoAsset()
 
           <div class="footer-action-title text-subtitle-1">
             <span>{{ t('siteIdentity.footer.feedback.cta') }}</span>
-            <v-icon
-              icon="mdi-arrow-right"
-              size="18"
-              class="ms-2"
-              aria-hidden="true"
-            />
           </div>
 
           <nav
@@ -167,12 +161,6 @@ const footerLogo = useFooterLogoAsset()
         <div class="footer-panel d-flex flex-column ga-4">
           <div class="footer-action-title text-subtitle-1">
             <span>{{ t('siteIdentity.footer.highlightLinks.title') }}</span>
-            <v-icon
-              icon="mdi-arrow-right"
-              size="18"
-              class="ms-2"
-              aria-hidden="true"
-            />
           </div>
           <nav
             class="d-flex flex-column ga-1 mt-2"
@@ -204,12 +192,6 @@ const footerLogo = useFooterLogoAsset()
 
           <div class="footer-action-title text-subtitle-1">
             <span>{{ t('siteIdentity.footer.comparator.title') }}</span>
-            <v-icon
-              icon="mdi-arrow-right"
-              size="18"
-              class="ms-2"
-              aria-hidden="true"
-            />
           </div>
           <nav
             class="d-flex flex-column ga-1 mt-2"

@@ -201,4 +201,22 @@ describe('Uncategorized Product Page', () => {
     expect(wizard.exists()).toBe(true)
     expect(wizard.attributes('initial-category-id')).toBe('cat-123')
   })
+
+  it('redirects to canonical URL when accessing via pure GTIN', async () => {
+    // START: Mock data setup
+    const gtin = '8427973010706'
+    const canonicalSlug =
+      '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50'
+
+    routeMock.params.slug = [gtin]
+    routeMock.path = `/${gtin}`
+    // END: Mock data setup
+
+    await mountProductPage()
+
+    expect(navigateTo).toHaveBeenCalledWith(`/${canonicalSlug}`, {
+      replace: true,
+      redirectCode: 301,
+    })
+  })
 })

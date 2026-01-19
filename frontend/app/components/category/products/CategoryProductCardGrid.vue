@@ -6,7 +6,6 @@
       `category-product-card-grid--variant-${variant}`,
       { 'category-product-card-grid--disabled': isDisabledCategory },
     ]"
-    dense
   >
     <v-col
       v-for="product in products"

@@ -78,7 +78,7 @@ export function CategoriesStatsDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'affiliationPartnersCount': json['affiliationPartnersCount'] == null ? undefined : json['affiliationPartnersCount'],
         'gtinOpenDataItemsCount': json['gtinOpenDataItemsCount'] == null ? undefined : json['gtinOpenDataItemsCount'],
         'isbnOpenDataItemsCount': json['isbnOpenDataItemsCount'] == null ? undefined : json['isbnOpenDataItemsCount'],
-        'productsCountByCategory': json['productsCountByCategory'] == null ? undefined : mapValues(json['productsCountByCategory'], (item) => item),
+        'productsCountByCategory': json['productsCountByCategory'] == null ? undefined : json['productsCountByCategory'],
         'productsCountSum': json['productsCountSum'] == null ? undefined : json['productsCountSum'],
     };
 }
@@ -98,7 +98,8 @@ export function CategoriesStatsDtoToJSONTyped(value?: CategoriesStatsDto | null,
         'affiliationPartnersCount': value['affiliationPartnersCount'],
         'gtinOpenDataItemsCount': value['gtinOpenDataItemsCount'],
         'isbnOpenDataItemsCount': value['isbnOpenDataItemsCount'],
-        'productsCountByCategory': value['productsCountByCategory'] == null ? undefined : mapValues(value['productsCountByCategory'], (item) => item),
+        'productsCountByCategory': value['productsCountByCategory'],
         'productsCountSum': value['productsCountSum'],
     };
 }
+

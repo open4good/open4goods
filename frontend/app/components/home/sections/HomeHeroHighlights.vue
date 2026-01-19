@@ -438,6 +438,9 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
   height: 100%
   width: 100%
 
+  :deep(.rounded-card__content)
+    min-height: auto
+
 .home-hero-highlights__card-content
   display: flex
   flex-direction: column

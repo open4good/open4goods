@@ -108,3 +108,4 @@ export function ProductSearchRequestDtoToJSONTyped(value?: ProductSearchRequestD
         'semanticSearch': value['semanticSearch'],
     };
 }
+

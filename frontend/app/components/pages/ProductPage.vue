@@ -426,7 +426,10 @@ if (product.value?.fullSlug) {
   // heuristic: if we have NO categorySlug matched in the route, we allow it (uncategorized view)
   const isUncategorizedRoute = !productRoute.categorySlug
 
-  if (targetPath !== currentPath && !isUncategorizedRoute) {
+  if (
+    targetPath !== currentPath &&
+    (!isUncategorizedRoute || !productRoute.slug)
+  ) {
     await navigateTo(targetPath, { replace: true, redirectCode: 301 })
   }
 }
