@@ -9,6 +9,7 @@ import java.util.List;
  * Represents an AI-generated review of a product, including descriptions, pros and cons,
  * data quality assessment, and sourced information.
  */
+@io.swagger.v3.oas.annotations.media.Schema(description = "Represents an AI-generated review of a product, including descriptions, pros and cons, data quality assessment, and sourced information.")
 public class AiReview {
 
     public AiReview(String description, String shortDescription, String mediumTitle, String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros, List<String> cons, List<AiSource> sources, List<AiAttribute> attributes, String dataQuality) {
@@ -30,60 +31,72 @@ public class AiReview {
 	/** A detailed description of the product. */
     @JsonProperty(required = true, value = "description")
     @AiGeneratedField(instruction = "Description du produit, 150 mots maximum")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Detailed description of the product")
     private String description;
 
     /** A brief summary of the product. */
     @JsonProperty(required = true, value = "short_description")
     @AiGeneratedField(instruction = "Description courte du produit, 50 mots maximum")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Brief summary of the product")
     private String shortDescription;
 
     /** A medium-length title summarizing the product. */
     @JsonProperty(required = true, value = "mediumTitle")
     @AiGeneratedField(instruction = "Titre de longueur moyenne, 10 mots maximum")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Medium-length title")
     private String mediumTitle;
 
     /** A short title for the product. */
     @JsonProperty(required = true, value = "shortTitle")
     @AiGeneratedField(instruction = "Titre court, 5 mots maximum")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Short title")
     private String shortTitle;
 
     /** The technical review of the product. */
     @JsonProperty(required = true, value = "technicalReview")
     @AiGeneratedField(instruction = "Revue technique approfondie du produit, axée sur les performances et les matériaux, uniquement basée sur le contenu des pages webs fournies.")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Technical review of the product")
     private String technicalReview;
 
     /** The ecological review of the product. */
     @JsonProperty(required = true, value = "ecologicalReview")
     @AiGeneratedField(instruction = "Revue écologique du produit, incluant réparabilité, durabilité, efficacité énergétique")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Ecological review of the product")
     private String ecologicalReview;
 
     /** A summary of the product review. */
     @JsonProperty(required = true, value = "summary")
     @AiGeneratedField(instruction = "Synthèse des évaluations et tests réalisés sur ce produit")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Summary of the product review")
     private String summary;
 
     /** The pros of the product. */
     @JsonProperty(required = true, value = "pros")
     @AiGeneratedField(instruction = "Les avantages du produit")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "List of pros")
     private List<String> pros = new ArrayList<>();
 
     /** The cons of the product. */
     @JsonProperty(required = true, value = "cons")
     @AiGeneratedField(instruction = "Les inconvénients du produit")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "List of cons")
     private List<String> cons = new ArrayList<>();
 
     /** The sources providing the information for this review. */
     @JsonProperty(required = true, value = "sources")
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = AiSourcesDeserializer.class)
+    @io.swagger.v3.oas.annotations.media.Schema(description = "List of sources used for the review")
     private List<AiSource> sources = new ArrayList<>();
 
     /** The attributes related to the product. */
     @JsonProperty(required = true, value = "attributes")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "List of product attributes")
     private List<AiAttribute> attributes = new ArrayList<>();
 
     /** The quality of data used for the review. */
     @JsonProperty(required = true, value = "dataQuality")
     @AiGeneratedField(instruction = "Analyse de la qualité et de la richesse des contenus webs qui te sont fournis")
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Quality of data used for the review")
     private String dataQuality;
 
     /** No-args constructor (required for deserialization) */
@@ -192,18 +205,23 @@ public class AiReview {
     /**
      * Represents a source of information for an AI-generated review.
      */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Source information for the review")
     public static record AiSource(
             @JsonProperty(required = true, value = "number")
             @AiGeneratedField(instruction = "Le numéro de la source documentaire fournie")
+            @io.swagger.v3.oas.annotations.media.Schema(description = "Source number")
             Integer number,
             @JsonProperty(required = true, value = "name")
             @AiGeneratedField(instruction = "Le nom de la source documentaire fournie")
+            @io.swagger.v3.oas.annotations.media.Schema(description = "Source name")
             String name,
             @JsonProperty(required = true, value = "description")
             @AiGeneratedField(instruction = "Courte description de la source documentaire fournie")
+            @io.swagger.v3.oas.annotations.media.Schema(description = "Source description")
             String description,
             @JsonProperty(required = true, value = "url")
             @AiGeneratedField(instruction = "URL de la source documentaire fournie")
+            @io.swagger.v3.oas.annotations.media.Schema(description = "Source URL")
             String url) {
 
         public Integer getNumber() { return number; }
@@ -216,15 +234,19 @@ public class AiReview {
      * Represents an attribute of the product.
      */
     @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = AiAttributeDeserializer.class)
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Product attribute derived from review")
     public static record AiAttribute(
             @JsonProperty(required = true, value = "name")
             @AiGeneratedField(instruction = "Le nom de l'attribut")
+            @io.swagger.v3.oas.annotations.media.Schema(description = "Attribute name")
             String name,
             @JsonProperty(required = true, value = "value")
             @AiGeneratedField(instruction = "La valeur de l'attribut")
+            @io.swagger.v3.oas.annotations.media.Schema(description = "Attribute value")
             String value,
             @JsonProperty(required = true, value = "number")
             @AiGeneratedField(instruction = "La référence de la source qui indique cet attribut")
+            @io.swagger.v3.oas.annotations.media.Schema(description = "Reference source number")
             Integer number) {
 
         public String getName() { return name; }

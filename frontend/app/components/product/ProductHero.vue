@@ -135,6 +135,17 @@
 
               <div class="product-hero__actions">
                 <v-btn
+                  class="product-hero__ai-button"
+                  :prepend-icon="
+                    hasAiReview ? 'mdi-check-circle-outline' : 'mdi-robot'
+                  "
+                  variant="flat"
+                  @click="handleAiReviewClick"
+                >
+                  {{ t('product.hero.aiReview.label', 'Synthèse IA') }}
+                </v-btn>
+
+                <v-btn
                   class="product-hero__compare-button"
                   :class="{
                     'product-hero__compare-button--active': isCompareSelected,
@@ -165,12 +176,28 @@
           <ProductHeroPricing :product="product" />
         </aside>
       </div>
+
+      <ClientOnly>
+        <v-dialog
+          v-model="showAiModal"
+          max-width="800"
+          content-class="product-hero__ai-modal"
+        >
+          <ProductAiReviewSection
+            :gtin="product.gtin"
+            :initial-review="aiReview?.review ?? null"
+            :review-created-at="aiReview?.createdMs ?? undefined"
+            :site-key="siteKey"
+            section-id="hero-ai-modal"
+          />
+        </v-dialog>
+      </ClientOnly>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, type PropType } from 'vue'
+import { computed, defineAsyncComponent, ref, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
@@ -223,6 +250,32 @@ const props = defineProps({
 })
 
 const { t, te, n, locale } = useI18n()
+const runtimeConfig = useRuntimeConfig()
+
+// AI Review Logic
+const ProductAiReviewSection = defineAsyncComponent(
+  () => import('~/components/product/ProductAiReviewSection.vue')
+)
+
+const showAiModal = ref(false)
+const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey as string)
+
+const aiReview = computed(() => props.product.aiReview)
+const hasAiReview = computed(() => Boolean(aiReview.value?.review))
+const aiDescription = computed(() => aiReview.value?.review?.description)
+
+const handleAiReviewClick = () => {
+  if (hasAiReview.value) {
+    const element = document.getElementById('synthese')
+    if (element) {
+      const offset = 120 // Adjust based on header height
+      const top = element.getBoundingClientRect().top + window.scrollY - offset
+      window.scrollTo({ top, behavior: 'smooth' })
+    }
+  } else {
+    showAiModal.value = true
+  }
+}
 
 const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''
@@ -308,20 +361,32 @@ const popularAttributes = computed<HeroAttribute[]>(() =>
 const heroAttributes = computed<HeroAttribute[]>(() => {
   const baseAttributes: HeroAttribute[] = [...popularAttributes.value]
 
-  if (
-    gtinCountry.value &&
-    !baseAttributes.some(
-      attribute => attribute.key === 'base.gtinInfo.countryName'
-    )
-  ) {
-    baseAttributes.push({
-      key: 'gtin-country',
-      label: '',
-      value: gtinCountry.value.name,
-      flag: gtinCountry.value.flag,
-      tooltip: t('product.hero.gtinTooltip'),
-      showLabel: false,
-    })
+  if (gtinCountry.value) {
+    // Inject AI Description before country if available
+    if (aiDescription.value) {
+      baseAttributes.push({
+        key: 'ai-description',
+        label: t('product.hero.aiDescription.label', 'Description IA'),
+        value: aiDescription.value,
+        showLabel: false,
+        enableTooltip: false,
+      })
+    }
+
+    if (
+      !baseAttributes.some(
+        attribute => attribute.key === 'base.gtinInfo.countryName'
+      )
+    ) {
+      baseAttributes.push({
+        key: 'gtin-country',
+        label: '',
+        value: gtinCountry.value.name,
+        flag: gtinCountry.value.flag,
+        tooltip: t('product.hero.gtinTooltip'),
+        showLabel: false,
+      })
+    }
   }
 
   return baseAttributes
@@ -733,6 +798,26 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
   transition: all 0.25s ease;
+}
+
+.product-hero__ai-button {
+  background: rgba(var(--v-theme-surface-glass-strong), 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(var(--v-theme-accent-primary-highlight), 0.2);
+  color: rgb(var(--v-theme-accent-primary-highlight));
+  padding: 0 1.25rem;
+  height: 48px;
+  border-radius: 14px;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  transition: all 0.25s ease;
+  margin-right: 0.75rem;
+}
+
+.product-hero__ai-button:hover {
+  background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
 }
 
 .product-hero__corner-fallback {

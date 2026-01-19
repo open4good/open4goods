@@ -9,11 +9,13 @@ import org.open4goods.model.product.AiReviewHolder;
 /**
  * DTO representing the status of a review generation process.
  */
+@io.swagger.v3.oas.annotations.media.Schema(description = "Status of a review generation process")
 public class ReviewGenerationStatus {
 
     /**
      * Possible states of a generation process.
      */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Possible states of a generation process")
     public enum Status {
         PENDING,
         QUEUED,
@@ -29,6 +31,7 @@ public class ReviewGenerationStatus {
     /**
      * Streaming progress events for review generation.
      */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Streaming progress events for review generation")
     public enum ProgressEventType {
         STARTED,
         SEARCHING,
@@ -45,40 +48,63 @@ public class ReviewGenerationStatus {
      * @param chunk     the streamed content chunk (if any)
      * @param timestamp the event timestamp in epoch milliseconds
      */
-    public record ReviewGenerationEvent(ProgressEventType type, String message, String chunk, long timestamp) {
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Event entry representing a progress update")
+    public record ReviewGenerationEvent(
+        @io.swagger.v3.oas.annotations.media.Schema(description = "Type of the progress event") ProgressEventType type,
+        @io.swagger.v3.oas.annotations.media.Schema(description = "Message associated with the event") String message,
+        @io.swagger.v3.oas.annotations.media.Schema(description = "Streamed content chunk, if any") String chunk,
+        @io.swagger.v3.oas.annotations.media.Schema(description = "Timestamp of the event in epoch milliseconds") long timestamp) {
     }
 
+    @io.swagger.v3.oas.annotations.media.Schema(description = "UPC/GTIN of the product")
     private long upc;
+
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Current status of the process")
     private Status status;
+
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Start time in epoch milliseconds")
     private Long startTime;
+
+    @io.swagger.v3.oas.annotations.media.Schema(description = "End time in epoch milliseconds")
     private Long endTime;
+
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Resulting AI review, present if successful")
     private AiReviewHolder result;
+
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Error message, present if failed")
     private String errorMessage;
+
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Progress percentage")
     private Integer percent = 0;
 
     /**
      * List of processing messages that track the internal state.
      */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "List of processing messages tracking internal state")
     private List<String> messages = new ArrayList<>();
 
     /**
      * List of progress events emitted during streaming.
      */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "List of progress events emitted during streaming")
     private List<ReviewGenerationEvent> events = new ArrayList<>();
 
     /**
      * Duration of the review generation process in milliseconds.
      */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Duration of the process in milliseconds")
     private long duration;
 
     /**
      * Remaining time (in milliseconds) computed as estimatedTime - duration.
      */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Estimated remaining time in milliseconds")
     private long remaining;
 
     /**
      * The product GTIN associated with the generation request.
      */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "The product GTIN associated with the generation request")
     private String gtin;
 
     // Getters and setters

@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 
 /**
  * Service in charge of mapping product categories to verticals
- * 
+ *
  * @author goulven
  *
  */
@@ -70,7 +70,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		data.setGoogleTaxonomyId(vConf.getGoogleTaxonomyId());
 //		if (data.getDatasourceCategories().size() != 0) {
 //			Integer taxonomy =   googleTaxonomy(data);
-//			if (null != taxonomy) {			
+//			if (null != taxonomy) {
 //				data.setGoogleTaxonomyId(taxonomy);
 //				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getDatasourceCategories());
 //			} else {
@@ -94,7 +94,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			// associated category.
 			data.setVertical(null);
 			data.setNames(new ProductTexts());
-			data.getGenaiTexts().clear();
 		}
 
 		/////////////////////////////////////
@@ -154,10 +153,10 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 //		} else {
 //			if (data.getDatasourceCategories().size() != 0) {
 //				Integer taxonomy =   googleTaxonomy(data);
-//				if (null != taxonomy) {			
+//				if (null != taxonomy) {
 //					data.setGoogleTaxonomyId(taxonomy);
 //					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
-//					
+//
 //				} else {
 //					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
 //				}
@@ -168,7 +167,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 
 	/**
 	 * Try to detect the google taxonomy id
-	 * 
+	 *
 	 * @param input
 	 * @return
 	 */
