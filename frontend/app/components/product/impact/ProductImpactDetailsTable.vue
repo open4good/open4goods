@@ -1,8 +1,23 @@
 <template>
   <article class="impact-details">
-    <h4 class="impact-details__title">
-      {{ $t('product.impact.detailsTitle') }}
-    </h4>
+    <header class="impact-details__header">
+      <h4 class="impact-details__title">
+        {{ $t('product.impact.detailsTitle') }}
+      </h4>
+      <v-btn
+        v-if="hasVirtualScores"
+        variant="text"
+        density="compact"
+        class="impact-details__virtual-toggle"
+        :prepend-icon="
+          showVirtualScores ? 'mdi-check-circle-outline' : 'mdi-circle-outline'
+        "
+        @click="showVirtualScores = !showVirtualScores"
+        color="primary"
+      >
+        {{ $t('product.impact.showVirtualScores') }}
+      </v-btn>
+    </header>
     <v-data-table
       v-if="hasRows"
       v-model:expanded="expandedSubscores"
@@ -257,6 +272,7 @@ const resolveCoefficientValue = (
 const { t } = useI18n()
 const expandedGroups = ref<Set<string>>(new Set())
 const expandedSubscores = ref<string[]>([])
+const showVirtualScores = ref(false)
 
 const lifecycleLabels = computed<Record<string, string>>(() => ({
   EXTRACTION: t('product.impact.lifecycle.EXTRACTION'),
@@ -289,7 +305,11 @@ const formatAttributeValue = (score: ScoreView) => {
 
 const displayScores = computed<DetailedScore[]>(() =>
   props.scores
-    .filter(score => score.id !== 'ECOSCORE')
+    .filter(score => {
+      if (score.id === 'ECOSCORE') return false
+      if (!showVirtualScores.value && score.virtual) return false
+      return true
+    })
     .map(score => ({
       ...score,
       displayValue: resolveScoreValue(score),
@@ -300,6 +320,10 @@ const displayScores = computed<DetailedScore[]>(() =>
           : null,
       virtual: score.virtual,
     }))
+)
+
+const hasVirtualScores = computed(() =>
+  props.scores.some(score => score.virtual && score.id !== 'ECOSCORE')
 )
 
 const groupedScores = computed(() =>
@@ -592,10 +616,25 @@ watch(
   overflow-x: auto;
 }
 
+.impact-details__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 .impact-details__title {
-  margin: 0 0 1rem;
+  margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.impact-details__virtual-toggle {
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: normal;
 }
 
 .impact-details__table {

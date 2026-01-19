@@ -2,21 +2,16 @@
   <article v-if="score" class="impact-ecoscore">
     <header class="impact-ecoscore__header">
       <div class="impact-ecoscore__header-actions">
-        <v-checkbox
-          v-model="showVirtualScores"
-          :label="$t('product.impact.showVirtualScores')"
-          hide-details
-          density="compact"
-        />
-
-        <NuxtLink
+        <v-btn
           :to="methodologyHref"
-          class="impact-ecoscore__cta"
+          variant="text"
+          class="text-none px-4"
+          color="primary"
           :aria-label="$t('product.impact.methodologyLinkAria')"
+          append-icon="mdi-arrow-top-right"
         >
-          <span>{{ $t('product.impact.methodologyLink') }}</span>
-          <v-icon icon="mdi-arrow-top-right" size="18" />
-        </NuxtLink>
+          {{ $t('product.impact.methodologyLink') }}
+        </v-btn>
       </div>
     </header>
 
@@ -37,7 +32,7 @@
         :class="{
           'impact-ecoscore__analysis-details--full': !shouldDisplayRadar,
         }"
-        :scores="filteredDetailScores"
+        :scores="detailScores"
         :product-name="productName"
         :product-brand="productBrand"
         :product-model="productModel"
@@ -77,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductImpactDetailsTable from './ProductImpactDetailsTable.vue'
@@ -115,8 +110,6 @@ const props = defineProps<{
 }>()
 
 const { locale, t: $t } = useI18n()
-const showVirtualScores = ref(false)
-
 const detailScores = computed(() => props.detailScores ?? [])
 const radarAxes = computed(() => props.radarAxes ?? [])
 const chartSeries = computed(() => props.chartSeries ?? [])
@@ -125,17 +118,6 @@ const productBrand = computed(() => props.productBrand ?? '')
 const productModel = computed(() => props.productModel ?? '')
 const productImage = computed(() => props.productImage ?? '')
 const verticalTitle = computed(() => props.verticalTitle ?? '')
-
-const filteredDetailScores = computed(() => {
-  return detailScores.value.filter(score => {
-    // Virtual score filter (hide virtual if toggle is off)
-    if (!showVirtualScores.value && score.virtual) {
-      return false
-    }
-
-    return true
-  })
-})
 const shouldDisplayRadar = computed(() =>
   Boolean(
     props.showRadar &&
@@ -181,9 +163,7 @@ const methodologyHref = computed(() => {
   return resolveLocalizedRoutePath('impact-score', locale.value)
 })
 
-defineExpose({
-  showVirtualScores,
-})
+defineExpose({})
 </script>
 
 <style scoped>

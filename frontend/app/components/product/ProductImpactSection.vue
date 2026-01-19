@@ -29,24 +29,22 @@
       </div>
     </header>
 
-    <v-expand-transition>
-      <div v-show="isEcoScoreExpanded" class="product-impact__primary">
-        <ProductImpactEcoScoreCard
-          :score="primaryScore"
-          :vertical-home-url="verticalHomeUrl"
-          :detail-scores="detailScores"
-          :show-radar="showRadar"
-          :radar-axes="radarAxes"
-          :chart-series="chartSeries"
-          :product-name="productName"
-          :product-brand="productBrand"
-          :product-model="productModel"
-          :product-image="productImage"
-          :vertical-title="verticalTitle"
-          :expanded-score-id="expandedScoreId"
-        />
-      </div>
-    </v-expand-transition>
+    <div class="product-impact__primary">
+      <ProductImpactEcoScoreCard
+        :score="primaryScore"
+        :vertical-home-url="verticalHomeUrl"
+        :detail-scores="detailScores"
+        :show-radar="showRadar"
+        :radar-axes="radarAxes"
+        :chart-series="chartSeries"
+        :product-name="productName"
+        :product-brand="productBrand"
+        :product-model="productModel"
+        :product-image="productImage"
+        :vertical-title="verticalTitle"
+        :expanded-score-id="expandedScoreId"
+      />
+    </div>
   </section>
 </template>
 
@@ -219,7 +217,10 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
 })
 
 const showRadar = computed(
-  () => radarAxes.value.length >= 3 && chartSeries.value.length > 0
+  () =>
+    isEcoScoreExpanded.value &&
+    radarAxes.value.length >= 3 &&
+    chartSeries.value.length > 0
 )
 </script>
 

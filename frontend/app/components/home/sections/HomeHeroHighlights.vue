@@ -443,12 +443,21 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
   height: 100%
   display: flex
 
-  :deep(> div)
+  /* Target component root (transition) and inner content */
+  :deep(> *)
     width: 100%
     height: 100%
+    display: flex
+    flex-direction: column
+    flex: 1
 
-  & > div
-    height: 100%
+    /* Target the inner div containing the slot */
+    > div
+      width: 100%
+      height: 100%
+      display: flex
+      flex-direction: column
+      flex: 1
 
 
 .home-hero-highlights__col
