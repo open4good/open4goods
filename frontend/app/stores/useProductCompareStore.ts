@@ -2,6 +2,7 @@ import { useLocalStorage } from '@vueuse/core'
 import { computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { ProductDto } from '~~/shared/api-client'
+import { resolveProductShortName } from '~/utils/_product-title-resolver'
 
 export const MAX_COMPARE_ITEMS = 4
 const STORAGE_KEY = 'open4goods:compare-list'
@@ -37,12 +38,8 @@ const getProductIdentifier = (product: ProductDto): string | null => {
 
 const resolveProductName = (product: ProductDto): string => {
   return (
-    product.identity?.bestName ??
-    product.base?.bestName ??
-    product.identity?.model ??
-    product.identity?.brand ??
-    product.names?.h1Title ??
-    product.names?.longestOfferName ??
+    resolveProductShortName(product) ||
+    product.names?.longestOfferName ||
     '#'
   )
 }

@@ -509,7 +509,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 
 		// Best computed name
-		String bestName = data.bestName();
+		String bestName = data.preferredName(null);
 		if (StringUtils.isNotBlank(bestName)) {
 			chunks.add(bestName);
 		}

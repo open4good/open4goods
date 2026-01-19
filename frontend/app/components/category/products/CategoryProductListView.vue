@@ -2,7 +2,7 @@
   <v-list class="category-product-list" lines="three" density="comfortable">
     <v-list-item
       v-for="product in products"
-      :key="product.gtin ?? product.identity?.bestName ?? Math.random()"
+      :key="product.gtin ?? resolveListProductName(product) ?? Math.random()"
       class="category-product-list__item"
       :to="productLink(product)"
       link
@@ -13,8 +13,7 @@
           <v-img
             :src="resolveImage(product)"
             :alt="
-              product.identity?.bestName ??
-              product.identity?.model ??
+              resolveListProductName(product) ||
               $t('category.products.untitledProduct')
             "
             cover
@@ -31,10 +30,10 @@
           <div class="category-product-list__header">
             <h3 class="category-product-list__title">
               {{
-                product.identity?.bestName ??
-                product.identity?.model ??
-                product.identity?.brand ??
-                '#' + product.gtin
+                resolveListProductName(product) ||
+                (product.gtin
+                  ? '#' + product.gtin
+                  : $t('category.products.untitledProduct'))
               }}
             </h3>
           </div>
@@ -113,16 +112,20 @@ import {
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
+import { resolveProductShortName } from '~/utils/_product-title-resolver'
 
 const props = defineProps<{
   products: ProductDto[]
   popularAttributes?: AttributeConfigDto[]
 }>()
 
-const { t, n } = useI18n()
+const { t, n, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
+
+const resolveListProductName = (product: ProductDto) =>
+  resolveProductShortName(product, locale.value)
 
 const resolveImage = (product: ProductDto) => {
   return (
