@@ -1,4 +1,7 @@
 <template>
+  <div class="text-h5 font-weight-bold lh-1 text-high-emphasis">
+    <span class="d-inline-block" :class="variantClass">🤘</span>
+  </div>
   <div
     class="nudge-tool-animated-icon d-flex align-center justify-center fill-height"
     :style="iconStyle"
@@ -10,10 +13,6 @@
     @focus="isHovered = true"
     @blur="isHovered = false"
   >
-    <div class="text-h5 font-weight-bold lh-1 text-high-emphasis">
-      <span class="d-inline-block" :class="variantClass">🤘</span>
-      <span> {{ $t('nudge-tool.wizard.welcome_text') }}</span>
-    </div>
   </div>
 </template>
 
