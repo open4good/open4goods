@@ -474,6 +474,7 @@ import {
 } from '~/constants/category'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
+import { useAnalytics } from '~/composables/useAnalytics'
 import {
   buildCategoryHash,
   deserializeCategoryHashState,
@@ -499,6 +500,7 @@ const router = useRouter()
 const { locale, t } = useI18n()
 const requestURL = useRequestURL()
 const { isLoggedIn, roles } = useAuth()
+const { trackFilterChange } = useAnalytics()
 const listComponents = [
   'base',
   'identity',
@@ -509,6 +511,8 @@ const listComponents = [
   'offers',
 ]
 const LISTING_COMPONENTS = listComponents.join(',')
+
+type FilterChangeOverrides = Partial<Parameters<typeof trackFilterChange>[0]>
 
 const isAdmin = computed(() => isLoggedIn.value && hasAdminAccess(roles.value))
 const ADMIN_EXCLUDED_FIELD = 'excludedCauses'
@@ -1155,6 +1159,27 @@ const areFiltersEqual = (
   return leftFilters.every((filter, index) => {
     const other = rightFilters[index]
     return JSON.stringify(filter) === JSON.stringify(other)
+  })
+}
+
+const extractFilterFields = (filters: FilterRequestDto): string[] => {
+  const fields = (filters.filters ?? [])
+    .map(filter => filter.field)
+    .filter((field): field is string => Boolean(field))
+
+  return Array.from(new Set(fields))
+}
+
+const emitFilterChange = (overrides: FilterChangeOverrides) => {
+  trackFilterChange({
+    categoryId: category.value?.id ?? null,
+    categorySlug: slug,
+    action: overrides.action ?? 'updated',
+    source: overrides.source ?? null,
+    filtersCount: overrides.filtersCount ?? manualFilters.value.filters?.length,
+    filterFields:
+      overrides.filterFields ?? extractFilterFields(manualFilters.value),
+    subsetIds: overrides.subsetIds ?? activeSubsetIds.value,
   })
 }
 
@@ -2080,13 +2105,24 @@ const onToggleSubset = (subsetId: string, active: boolean) => {
     next.delete(subsetId)
   }
 
-  activeSubsetIds.value = normalizeActiveSubsetIds(Array.from(next))
+  const nextActiveSubsets = normalizeActiveSubsetIds(Array.from(next))
+  activeSubsetIds.value = nextActiveSubsets
+  emitFilterChange({
+    action: active ? 'subset-enabled' : 'subset-disabled',
+    source: 'fast-filters',
+    subsetIds: nextActiveSubsets,
+  })
 }
 
 const onRemoveSubsetClause = (clause: CategorySubsetClause) => {
   activeSubsetIds.value = normalizeActiveSubsetIds(
     activeSubsetIds.value.filter(id => id !== clause.subsetId)
   )
+  emitFilterChange({
+    action: 'subset-removed',
+    source: 'active-filters',
+    subsetIds: activeSubsetIds.value,
+  })
 
   const subset = subsetMap.value.get(clause.subsetId)
   const remainingFilters = getRemainingSubsetFilters(subset, clause.index)
@@ -2122,6 +2158,11 @@ const onRemoveManualFilter = (
   })
 
   manualFilters.value = next.length ? { filters: next } : {}
+  emitFilterChange({
+    action: 'manual-removed',
+    source: 'active-filters',
+    filterFields: field ? [field] : undefined,
+  })
 }
 
 const onResetSubsets = () => {
@@ -2130,6 +2171,10 @@ const onResetSubsets = () => {
 
 const onFiltersChange = (filters: FilterRequestDto) => {
   manualFilters.value = filters
+  emitFilterChange({
+    action: 'manual-updated',
+    source: filtersDrawer.value ? 'drawer' : 'sidebar',
+  })
 }
 
 const onPageChange = (page: number) => {
@@ -2152,6 +2197,13 @@ const clearAllFilters = () => {
   technicalExpanded.value = false
   pageNumber.value = 0
   applyDefaultSort()
+  emitFilterChange({
+    action: 'cleared',
+    source: 'toolbar',
+    filtersCount: 0,
+    filterFields: [],
+    subsetIds: [],
+  })
 }
 </script>
 

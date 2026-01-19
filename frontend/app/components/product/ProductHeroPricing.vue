@@ -22,6 +22,7 @@
         class="mb-4 product-hero__tabs"
         hide-slider
         height="36"
+        @update:model-value="handleConditionTabChange"
       >
         <v-tab
           v-for="option in conditionOptions"
@@ -202,8 +203,13 @@ const props = defineProps({
 })
 
 const { n, t } = useI18n()
-const { trackProductRedirect, isClientContribLink, extractTokenFromLink } =
-  useAnalytics()
+const {
+  trackProductRedirect,
+  trackAffiliateClick,
+  trackTabClick,
+  isClientContribLink,
+  extractTokenFromLink,
+} = useAnalytics()
 
 type AggregatedOffer = NonNullable<
   NonNullable<ProductDto['offers']>['bestPrice']
@@ -282,6 +288,19 @@ const conditionOptions = computed(() =>
     selected: condition === activeCondition.value,
   }))
 )
+
+const handleConditionTabChange = (value: OfferCondition) => {
+  const option = conditionOptions.value.find(
+    candidate => candidate.value === value
+  )
+
+  trackTabClick({
+    tab: value,
+    context: 'product-hero-offer-condition',
+    label: option?.label ?? null,
+    productId: props.product.id ?? null,
+  })
+}
 
 const priceCurrencyCode = computed(
   () =>
@@ -453,6 +472,14 @@ const handleMerchantClick = () => {
     placement: 'product-hero',
     source: merchant?.name ?? null,
     url: link,
+  })
+
+  trackAffiliateClick({
+    token: extractTokenFromLink(link),
+    url: link,
+    partner: merchant?.name ?? null,
+    placement: 'product-hero',
+    productId: props.product.id ?? null,
   })
 }
 
