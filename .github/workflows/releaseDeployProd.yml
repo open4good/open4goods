@@ -166,6 +166,48 @@ jobs:
           cp RELEASE-NOTES.md "frontend/app/public/reports/releases/${SAFE_VERSION}.md"
           cp RELEASE-NOTES.md "frontend/app/public/reports/releases/latest.md"
 
+          
+          
+
+      ############################################
+      # Frontend (tests coverage -> copy -> build)
+      ############################################
+      - name: Setup Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - name: Setup pnpm cache
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Run frontend tests with coverage
+        working-directory: frontend
+        run: pnpm test:coverage
+
+      - name: 🧾 Copy frontend coverage into frontend/app/public/reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="frontend/app/artifacts/coverage/lcov-report"
+          if [[ -d "${SRC}" ]]; then
+            rsync -a --delete "${SRC}/" "frontend/app/public/reports/test-coverage/frontend/"
+          else
+            echo "No frontend coverage directory found at ${SRC}; skipping."
+          fi
+      
       ############################################
       # Java / Maven (build + site + jacoco aggregate)
       ############################################
@@ -242,45 +284,6 @@ jobs:
             rsync -a --delete "${JACOCO_SRC}/" "frontend/app/public/reports/test-coverage/backend/"
           else
             echo "No JaCoCo report directory found; skipping."
-          fi
-
-      ############################################
-      # Frontend (tests coverage -> copy -> build)
-      ############################################
-      - name: Setup Node 24
-        uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.28.0
-
-      - name: Setup pnpm cache
-        uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-          cache: "pnpm"
-          cache-dependency-path: frontend/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
-
-      - name: Run frontend tests with coverage
-        working-directory: frontend
-        run: pnpm test:coverage
-
-      - name: 🧾 Copy frontend coverage into frontend/app/public/reports
-        shell: bash
-        run: |
-          set -euo pipefail
-          SRC="frontend/app/artifacts/coverage/lcov-report"
-          if [[ -d "${SRC}" ]]; then
-            rsync -a --delete "${SRC}/" "frontend/app/public/reports/test-coverage/frontend/"
-          else
-            echo "No frontend coverage directory found at ${SRC}; skipping."
           fi
 
       - name: 🔎 Debug reports (what exists, where)
