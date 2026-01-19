@@ -390,7 +390,10 @@ public class ProductController {
         filterDto = filterValidation.value();
 
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
-        boolean semanticSearch = StringUtils.hasText(normalizedQuery);
+        Boolean requestedSemanticSearch = searchPayload != null ? searchPayload.semanticSearch() : null;
+        boolean semanticSearch = requestedSemanticSearch != null
+                ? requestedSemanticSearch.booleanValue()
+                : StringUtils.hasText(normalizedQuery);
         Set<String> requestedComponents = include == null ? Set.of() : include;
 
         ProductSearchResponseDto body = service.searchProducts(effectivePageable, locale, requestedComponents, aggDto,

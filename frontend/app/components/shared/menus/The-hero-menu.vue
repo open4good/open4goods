@@ -1,21 +1,22 @@
 <template>
-  <nav
-    id="container-main-menu"
-    class="d-none d-md-block"
-    :aria-label="t('siteIdentity.menu.ariaLabel')"
-  >
-    <!-- Desktop menu -->
-    <div class="d-flex justify-space-between align-center ga-4 w-100">
-      <div
-        class="flex-grow-1 d-flex justify-center px-4"
-        style="max-width: 100%"
-      >
+  <div class="the-hero-menu">
+    <nav
+      id="container-main-menu"
+      class="d-none d-md-block"
+      :aria-label="t('siteIdentity.menu.ariaLabel')"
+    >
+      <!-- Desktop menu -->
+      <div class="d-flex justify-space-between align-center ga-4 w-100">
         <div
-          v-if="showMenuSearch"
-          ref="menuSearchRef"
-          class="main-menu-search"
-          :class="{ 'main-menu-search--open': isSearchOpen }"
+          class="flex-grow-1 d-flex justify-center px-4"
+          style="max-width: 100%"
         >
+          <div
+            v-if="showMenuSearch"
+            ref="menuSearchRef"
+            class="main-menu-search"
+            :class="{ 'main-menu-search--open': isSearchOpen }"
+          >
           <v-btn
             v-if="!isSearchOpen"
             class="main-menu-search__activator"
@@ -642,28 +643,29 @@
           </v-card>
           </v-menu>
         </div>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-  <v-dialog
-    v-model="isNudgeWizardOpen"
-    max-width="980"
-    scrollable
-    transition="dialog-bottom-transition"
-  >
-    <NudgeToolWizard @navigate="isNudgeWizardOpen = false" />
-  </v-dialog>
-
-  <!-- Mobile menu command -->
-  <div class="d-flex justify-end d-md-none">
-    <v-btn
-      icon
-      :aria-label="t('siteIdentity.menu.openLabel')"
-      @click="$emit('toggle-drawer')"
+    <v-dialog
+      v-model="isNudgeWizardOpen"
+      max-width="980"
+      scrollable
+      transition="dialog-bottom-transition"
     >
-      <v-icon icon="mdi-menu" />
-    </v-btn>
+      <NudgeToolWizard @navigate="isNudgeWizardOpen = false" />
+    </v-dialog>
+
+    <!-- Mobile menu command -->
+    <div class="d-flex justify-end d-md-none">
+      <v-btn
+        icon
+        :aria-label="t('siteIdentity.menu.openLabel')"
+        @click="$emit('toggle-drawer')"
+      >
+        <v-icon icon="mdi-menu" />
+      </v-btn>
+    </div>
   </div>
 </template>
 
