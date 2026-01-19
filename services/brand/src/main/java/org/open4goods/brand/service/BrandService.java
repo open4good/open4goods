@@ -29,6 +29,8 @@ public class BrandService {
 
     private final Map<String, Long> missCounter = new ConcurrentHashMap<>();
     private final Map<String, Brand> brandsByName = new HashMap<>();
+    private Map<String, String> brandsAlias = new HashMap<>();
+
 
     public BrandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService)
             throws Exception {
@@ -37,7 +39,7 @@ public class BrandService {
         loadBrandMappings();
     }
 
-    private void loadBrandMappings() throws Exception {
+    protected void loadBrandMappings() throws Exception {
         try {
             String mappingUrl =
                     "https://raw.githubusercontent.com/open4good/brands-company-mapping/refs/heads/main/brands-company-mapping.json";
@@ -62,6 +64,13 @@ public class BrandService {
         String input = sanitizeBrand(brandName);
         LOGGER.info("Resolving brand {} ({})", brandName, input);
 
+        if (brandsAlias.containsKey(input) || brandsAlias.containsKey(brandName)) {
+             String key = brandsAlias.containsKey(input) ? input : brandName;
+             String alias = brandsAlias.get(key);
+             LOGGER.info("Alias found for {} : {}", key, alias);
+             input = sanitizeBrand(alias);
+        }
+
         Brand resolved = brandsByName.get(input);
         if (resolved == null) {
             resolved = new Brand(input);
@@ -85,6 +94,10 @@ public class BrandService {
 
     public boolean hasLogo(String upperCase) {
         return false;
+    }
+
+    public void setBrandsAlias(Map<String, String> brandsAlias) {
+        this.brandsAlias = brandsAlias;
     }
 
     public InputStream getLogo(String upperCase) {
