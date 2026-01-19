@@ -3179,14 +3179,15 @@
       "viewCategoryResults": "Open {category} with your filters"
     },
     "wizard": {
-      "welcome": "Welcome!"
+      "welcome": "Impact Score : 🤘 Etape par étape",
+      "welcome_text": "Step by step"
     },
     "meta": {
       "matches": "{count} products match your choices"
     },
     "steps": {
       "category": {
-        "title": "Nudger guides you, step by step.",
+        "title": "Impact Score:",
         "subtitle": "Choose a category",
         "step": "Step {step}"
       },

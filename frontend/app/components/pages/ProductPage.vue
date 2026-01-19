@@ -155,37 +155,6 @@
           />
         </section>
       </main>
-
-      <v-dialog
-        v-model="isNudgeWizardOpen"
-        max-width="980"
-        scrollable
-        transition="dialog-bottom-transition"
-      >
-        <NudgeToolWizard
-          v-if="categoryDetail"
-          :initial-category-id="categoryDetail.id"
-          @navigate="handleNudgeNavigate"
-        />
-      </v-dialog>
-
-      <v-tooltip
-        v-if="shouldShowNudgeWizard"
-        location="left"
-        :text="nudgeFabLabel"
-      >
-        <template #activator="{ props: tooltipProps }">
-          <v-fab
-            class="product-page__fab"
-            color="primary"
-            :aria-label="nudgeFabAriaLabel"
-            v-bind="tooltipProps"
-            @click="isNudgeWizardOpen = true"
-          >
-            <NudgeToolAnimatedIcon />
-          </v-fab>
-        </template>
-      </v-tooltip>
     </div>
   </div>
 </template>
@@ -256,13 +225,6 @@ const ProductDocumentationSection = defineAsyncComponent(
 const ProductAdminSection = defineAsyncComponent(
   () => import('~/components/product/ProductAdminSection.vue')
 )
-const NudgeToolWizard = defineAsyncComponent(
-  () => import('~/components/nudge-tool/NudgeToolWizard.vue')
-)
-
-const NudgeToolAnimatedIcon = defineAsyncComponent(
-  () => import('~/components/nudge-tool/NudgeToolAnimatedIcon.vue')
-)
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -273,7 +235,6 @@ const { isLoggedIn } = useAuth()
 const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
-const isNudgeWizardOpen = ref(false)
 
 const PRODUCT_COMPONENTS = [
   'base',
@@ -355,9 +316,6 @@ watch(
   },
   { immediate: true }
 )
-
-const nudgeFabLabel = computed(() => t('product.nudge.fabLabel'))
-const nudgeFabAriaLabel = computed(() => t('product.nudge.fabAriaLabel'))
 
 const props = defineProps<{
   productRoute: ProductRouteMatch
@@ -441,10 +399,6 @@ const categoryDetail = ref<Awaited<
 > | null>(null)
 const loadingAggregations = ref(false)
 const aggregations = ref<Record<string, AggregationResponseDto>>({})
-
-const shouldShowNudgeWizard = computed(() =>
-  Boolean(product.value && categoryDetail.value?.id)
-)
 
 const requestedScoreIds = computed(() => {
   const ids: string[] = []
@@ -682,33 +636,6 @@ const normalizedCategoryPath = computed(() => {
 
   return sanitized?.length ? sanitized : withLeadingSlash
 })
-
-const handleNudgeNavigate = (payload?: {
-  hash?: string
-  categorySlug?: string
-}) => {
-  isNudgeWizardOpen.value = false
-
-  const rawSlug =
-    payload?.categorySlug?.toString().trim() ??
-    categoryDetail.value?.verticalHomeUrl?.toString().trim() ??
-    categoryDetail.value?.id?.toString().trim() ??
-    ''
-
-  if (!rawSlug.length) {
-    return
-  }
-
-  const normalizedSlug = rawSlug.startsWith('/') ? rawSlug : `/${rawSlug}`
-  const normalizedHash = payload?.hash?.startsWith('#')
-    ? payload.hash.slice(1)
-    : (payload?.hash ?? '')
-
-  void navigateTo({
-    path: normalizedSlug,
-    hash: normalizedHash || undefined,
-  })
-}
 
 const handleAlternativesUpdated = (payload: {
   hasAlternatives: boolean
@@ -1932,12 +1859,6 @@ const observeSections = () => {
     })
   })
 }
-
-watch(shouldShowNudgeWizard, canShow => {
-  if (!canShow) {
-    isNudgeWizardOpen.value = false
-  }
-})
 
 /*
 watch(

@@ -11,87 +11,12 @@
 
     <div class="product-attributes__block">
       <div class="product-attributes__block-header">
-        <h3
-          id="attributes-main"
-          class="product-attributes__block-title"
-        >
+        <h3 id="attributes-main" class="product-attributes__block-title">
           {{ $t('product.attributes.main.title') }}
         </h3>
       </div>
 
       <div class="product-attributes__main-grid">
-        <v-card class="product-attributes__identity-card" variant="flat">
-          <div class="product-attributes__identity-heading">
-            <v-icon
-              icon="mdi-card-account-details-outline"
-              class="product-attributes__identity-icon"
-            />
-            <span>{{ $t('product.attributes.main.identity.title') }}</span>
-          </div>
-
-          <div
-            v-if="identityRows.length"
-            class="product-attributes__identity-table"
-          >
-            <div
-              v-for="row in identityRows"
-              :key="row.key"
-              class="product-attributes__identity-row"
-            >
-              <span class="product-attributes__identity-label">{{
-                row.label
-              }}</span>
-              <div class="product-attributes__identity-value">
-                <span>{{ row.value }}</span>
-                <div
-                  v-if="row.details?.length"
-                  class="product-attributes__identity-details"
-                >
-                  <div
-                    v-for="detail in row.details"
-                    :key="detail.key"
-                    class="product-attributes__identity-detail"
-                    :class="{
-                      'product-attributes__identity-detail--muted': detail.muted,
-                    }"
-                  >
-                    <span
-                      v-if="detail.label"
-                      class="product-attributes__identity-detail-label"
-                    >
-                      {{ detail.label }}
-                    </span>
-                    <ul class="product-attributes__identity-detail-list">
-                      <li v-for="value in detail.values" :key="value">
-                        {{ value }}
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <p
-            v-else-if="!gtinImageUrl"
-            class="product-attributes__empty product-attributes__identity-empty"
-          >
-            {{ $t('product.attributes.main.identity.empty') }}
-          </p>
-
-          <figure v-if="gtinImageUrl" class="product-attributes__gtin">
-            <v-img
-              :src="gtinImageUrl"
-              :alt="
-                $t('product.attributes.main.identity.gtinImageAlt', {
-                  gtin: gtinDisplay ?? '—',
-                })
-              "
-              class="product-attributes__gtin-image"
-              contain
-            />
-          </figure>
-        </v-card>
-
         <v-card class="product-attributes__main-card" variant="flat">
           <v-table
             v-if="mainAttributes.length"
@@ -233,10 +158,7 @@
       <div
         class="product-attributes__block-header product-attributes__block-header--detailed"
       >
-        <h3
-          id="attributes-details"
-          class="product-attributes__block-title"
-        >
+        <h3 id="attributes-details" class="product-attributes__block-title">
           {{ $t('product.attributes.detailed.title') }}
         </h3>
         <div class="product-attributes__detail-controls">
@@ -397,11 +319,7 @@
               </template>
             </v-data-table>
 
-            <v-row
-              v-else
-              class="product-attributes__details-grid"
-              dense
-            >
+            <v-row v-else class="product-attributes__details-grid" dense>
               <ProductAttributesDetailCard
                 v-for="group in filteredGroups"
                 :key="group.id"
@@ -497,10 +415,6 @@ const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
   return props.product?.attributes ?? null
 })
 
-const referentialAttributes = computed<Record<string, string>>(
-  () => resolvedAttributes.value?.referentialAttributes ?? {}
-)
-
 const timeline = computed(() => props.product?.timeline ?? null)
 
 const staticServerBase = computed(() => {
@@ -508,90 +422,6 @@ const staticServerBase = computed(() => {
   const base = runtimeConfig.public?.staticServer ?? fallback
   return base.endsWith('/') ? base.slice(0, -1) : base
 })
-
-const gtinDisplay = computed(() => {
-  const candidate = props.product?.gtin ?? props.product?.base?.gtin
-  if (candidate == null) {
-    return null
-  }
-
-  const value = typeof candidate === 'string' ? candidate : String(candidate)
-  const trimmed = value.trim()
-  return trimmed.length ? trimmed : null
-})
-
-const gtinImageUrl = computed(() => {
-  const gtin = gtinDisplay.value
-  if (!gtin) {
-    return null
-  }
-
-  return `${staticServerBase.value}/images/${gtin}-gtin.png`
-})
-
-const RELATIVE_TIME_UNITS: Array<{
-  unit: Intl.RelativeTimeFormatUnit
-  ms: number
-}> = [
-  { unit: 'year', ms: 1000 * 60 * 60 * 24 * 365 },
-  { unit: 'month', ms: 1000 * 60 * 60 * 24 * 30 },
-  { unit: 'week', ms: 1000 * 60 * 60 * 24 * 7 },
-  { unit: 'day', ms: 1000 * 60 * 60 * 24 },
-  { unit: 'hour', ms: 1000 * 60 * 60 },
-  { unit: 'minute', ms: 1000 * 60 },
-  { unit: 'second', ms: 1000 },
-]
-
-const formatRelativeTimeFromNow = (
-  timestamp?: number | null
-): string | null => {
-  if (typeof timestamp !== 'number' || !Number.isFinite(timestamp)) {
-    return null
-  }
-
-  const now = Date.now()
-  const diff = timestamp - now
-  const formatter = new Intl.RelativeTimeFormat(locale.value, {
-    numeric: 'auto',
-  })
-
-  for (const { unit, ms } of RELATIVE_TIME_UNITS) {
-    const value = diff / ms
-    if (Math.abs(value) >= 1 || unit === 'second') {
-      return formatter.format(Math.round(value), unit)
-    }
-  }
-
-  return null
-}
-
-const formatDateValue = (timestamp?: number | null): string | null => {
-  if (typeof timestamp !== 'number' || !Number.isFinite(timestamp)) {
-    return null
-  }
-
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-    }).format(new Date(timestamp))
-  } catch (error) {
-    console.warn('Failed to format product date', error)
-    return null
-  }
-}
-
-const firstNonEmptyString = (...values: Array<unknown>): string | null => {
-  for (const value of values) {
-    if (typeof value === 'string') {
-      const trimmed = value.trim()
-      if (trimmed.length) {
-        return trimmed
-      }
-    }
-  }
-
-  return null
-}
 
 const toStringList = (input: unknown): string[] => {
   if (!input) {
@@ -690,101 +520,6 @@ const buildSynonymTokenSet = (
   )
   return tokens.map(token => token.toLowerCase())
 }
-
-interface IdentityDetail {
-  key: string
-  label?: string
-  values: string[]
-  muted?: boolean
-}
-
-interface IdentityRow {
-  key: string
-  label: string
-  value: string
-  details?: IdentityDetail[]
-}
-
-const identityRows = computed<IdentityRow[]>(() => {
-  const rows: IdentityRow[] = []
-  const identity = props.product?.identity ?? null
-
-  const brand = firstNonEmptyString(
-    identity?.brand,
-    referentialAttributes.value.brand
-  )
-  if (brand) {
-    rows.push({
-      key: 'brand',
-      label: t('product.attributes.main.identity.brand'),
-      value: brand,
-    })
-  }
-
-  const alternativeBrands = toStringList(identity?.akaBrands)
-  const alternativeModels = toStringList(identity?.akaModels)
-
-  const model = firstNonEmptyString(
-    identity?.model,
-    referentialAttributes.value.model
-  )
-  if (model || alternativeBrands.length || alternativeModels.length) {
-    const details: IdentityDetail[] = []
-
-    if (alternativeBrands.length) {
-      details.push({
-        key: 'akaBrands',
-        label: t('product.attributes.main.identity.akaBrands'),
-        values: alternativeBrands,
-      })
-    }
-
-    if (alternativeModels.length) {
-      details.push({
-        key: 'akaModels',
-        values: alternativeModels,
-        muted: true,
-      })
-    }
-
-    rows.push({
-      key: 'model',
-      label: t('product.attributes.main.identity.model'),
-      value: model ?? '—',
-      details: details.length ? details : undefined,
-    })
-  }
-
-  const createdAt = formatDateValue(props.product?.base?.creationDate ?? null)
-  if (createdAt) {
-    rows.push({
-      key: 'knownSince',
-      label: t('product.attributes.main.identity.knownSince'),
-      value: createdAt,
-    })
-  }
-
-  const lastUpdated = formatRelativeTimeFromNow(
-    props.product?.base?.lastChange ?? null
-  )
-  if (lastUpdated) {
-    rows.push({
-      key: 'lastUpdated',
-      label: t('product.attributes.main.identity.lastUpdated'),
-      value: lastUpdated,
-    })
-  }
-
-  if (gtinDisplay.value) {
-    rows.push({
-      key: 'gtin',
-      label: t('product.attributes.main.identity.gtin'),
-      value: gtinDisplay.value,
-    })
-  }
-
-  return rows
-})
 
 interface MainAttributeRow {
   key: string

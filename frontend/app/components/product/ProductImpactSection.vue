@@ -1,35 +1,57 @@
 <template>
   <section :id="sectionId" class="product-impact">
     <header class="product-impact__header">
-      <h2 class="product-impact__title">
-        {{ $t('product.impact.title') }}
-      </h2>
-      <p class="product-impact__subtitle">
-        {{ $t('product.impact.subtitle', subtitleParams) }}
-      </p>
+      <div class="product-impact__header-content">
+        <h2 class="product-impact__title">
+          {{ $t('product.impact.title') }}
+        </h2>
+        <p class="product-impact__subtitle">
+          {{ $t('product.impact.subtitle', subtitleParams) }}
+        </p>
+      </div>
+
+      <div class="product-impact__header-actions">
+        <v-btn
+          variant="tonal"
+          color="primary"
+          class="product-impact__toggle"
+          append-icon="mdi-chevron-down"
+          :class="{ 'product-impact__toggle--active': isEcoScoreExpanded }"
+          @click="isEcoScoreExpanded = !isEcoScoreExpanded"
+        >
+          {{ $t('product.impact.toggle.positioning', 'Positionnement') }}
+          <template #append>
+            <v-icon
+              :icon="isEcoScoreExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            />
+          </template>
+        </v-btn>
+      </div>
     </header>
 
-    <div class="product-impact__primary">
-      <ProductImpactEcoScoreCard
-        :score="primaryScore"
-        :vertical-home-url="verticalHomeUrl"
-        :detail-scores="detailScores"
-        :show-radar="showRadar"
-        :radar-axes="radarAxes"
-        :chart-series="chartSeries"
-        :product-name="productName"
-        :product-brand="productBrand"
-        :product-model="productModel"
-        :product-image="productImage"
-        :vertical-title="verticalTitle"
-        :expanded-score-id="expandedScoreId"
-      />
-    </div>
+    <v-expand-transition>
+      <div v-show="isEcoScoreExpanded" class="product-impact__primary">
+        <ProductImpactEcoScoreCard
+          :score="primaryScore"
+          :vertical-home-url="verticalHomeUrl"
+          :detail-scores="detailScores"
+          :show-radar="showRadar"
+          :radar-axes="radarAxes"
+          :chart-series="chartSeries"
+          :product-name="productName"
+          :product-brand="productBrand"
+          :product-model="productModel"
+          :product-image="productImage"
+          :vertical-title="verticalTitle"
+          :expanded-score-id="expandedScoreId"
+        />
+      </div>
+    </v-expand-transition>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
+import { computed, ref, toRef } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProductImpactEcoScoreCard from './impact/ProductImpactEcoScoreCard.vue'
@@ -120,6 +142,8 @@ const subtitleParams = toRef(props, 'subtitleParams')
 const expandedScoreId = toRef(props, 'expandedScoreId')
 const { t } = useI18n()
 
+const isEcoScoreExpanded = ref(false)
+
 const primaryScore = computed(() => props.scores[0] ?? null)
 const detailScores = computed(() =>
   props.scores.filter(score => score.id?.toUpperCase() !== 'ECOSCORE')
@@ -203,27 +227,54 @@ const showRadar = computed(
 .product-impact {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
 .product-impact__header {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.product-impact__header-content {
+  display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  max-width: 60ch;
+}
+
+.product-impact__header-actions {
+  flex-shrink: 0;
 }
 
 .product-impact__title {
   font-size: clamp(1.6rem, 3vw, 2.4rem);
   font-weight: 700;
+  line-height: 1.1;
 }
 
 .product-impact__subtitle {
   font-size: 1rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+  line-height: 1.5;
 }
 
 .product-impact__primary {
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 600px) {
+  .product-impact__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .product-impact__toggle {
+    width: 100%;
+  }
 }
 </style>

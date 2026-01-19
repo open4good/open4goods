@@ -1,7 +1,6 @@
 <template>
   <div
     class="nudge-tool-animated-icon d-flex align-center justify-center fill-height"
-    :class="variantClass"
     :style="iconStyle"
     tabindex="0"
     role="img"
@@ -11,8 +10,9 @@
     @focus="isHovered = true"
     @blur="isHovered = false"
   >
-    <div class="text-h5 font-weight-bold text-white lh-1">
-      {{ $t('nudge-tool.wizard.welcome') }}
+    <div class="text-h5 font-weight-bold lh-1 text-high-emphasis">
+      <span class="d-inline-block" :class="variantClass">🤘</span>
+      <span> {{ $t('nudge-tool.wizard.welcome_text') }}</span>
     </div>
   </div>
 </template>
@@ -260,18 +260,18 @@ onBeforeUnmount(() => {
 watch(
   [isHovered, shouldReduceMotion, () => props.variant],
   ([hover, reduced]) => {
-  if (!isPulseVariant.value) {
-    clearTimers()
-    resetPulseState()
-    return
-  }
+    if (!isPulseVariant.value) {
+      clearTimers()
+      resetPulseState()
+      return
+    }
 
-  if (hover || reduced) {
-    clearTimers()
-    resetPulseState()
-  } else {
-    scheduleIdle()
-  }
+    if (hover || reduced) {
+      clearTimers()
+      resetPulseState()
+    } else {
+      scheduleIdle()
+    }
   }
 )
 

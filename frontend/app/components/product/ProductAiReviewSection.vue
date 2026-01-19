@@ -26,219 +26,155 @@
         }}</span>
       </div>
 
-      <article class="product-ai-review__article">
-        <div
-          v-if="reviewContent.mediumTitle || reviewContent.shortDescription"
-          class="product-ai-review__intro-card"
-        >
-          <div class="product-ai-review__intro-icon">
-            <v-icon icon="mdi-robot-outline" size="28" />
-          </div>
-          <div class="product-ai-review__intro-content">
-            <h3
-              v-if="reviewContent.mediumTitle"
-              class="product-ai-review__article-title"
-            >
-              {{ reviewContent.mediumTitle }}
-            </h3>
-            <p
-              v-if="reviewContent.shortDescription"
-              class="product-ai-review__summary"
-              itemprop="description"
-            >
-              {{ reviewContent.shortDescription }}
-            </p>
-          </div>
-        </div>
+      <div class="product-ai-review__grid">
+        <v-row>
+          <!-- Row 1: Summary & Pros/Cons -->
+          <v-col v-if="reviewContent.summary" cols="12" md="6">
+            <v-card class="product-ai-review__card h-100" elevation="0">
+              <v-card-text>
+                <header class="product-ai-review__card-header mb-4">
+                  <div class="product-ai-review__card-icon">
+                    <v-icon icon="mdi-lightbulb-on-outline" size="24" />
+                  </div>
+                  <h3 class="product-ai-review__card-title">
+                    {{ $t('product.aiReview.sections.overall') }}
+                  </h3>
+                </header>
+                <p class="product-ai-review__card-text">
+                  {{ reviewContent.summary }}
+                </p>
+              </v-card-text>
+            </v-card>
+          </v-col>
 
-        <div
-          v-if="hasAnalysisSections"
-          class="product-ai-review__analysis-grid"
-        >
-          <section
-            v-if="reviewContent.summary"
-            class="product-ai-review__card"
-            itemprop="reviewBody"
+          <v-col
+            v-if="reviewContent.pros?.length || reviewContent.cons?.length"
+            cols="12"
+            md="6"
           >
-            <header class="product-ai-review__card-header">
-              <div class="product-ai-review__card-icon">
-                <v-icon icon="mdi-lightbulb-on-outline" size="22" />
-              </div>
-              <h4 class="product-ai-review__card-title">
-                {{ $t('product.aiReview.sections.overall') }}
-              </h4>
-            </header>
-            <p class="product-ai-review__card-text">
-              {{ reviewContent.summary }}
-            </p>
-          </section>
+            <v-card class="product-ai-review__card h-100" elevation="0">
+              <v-card-text>
+                <div v-if="reviewContent.pros?.length" class="mb-6">
+                  <header
+                    class="product-ai-review__sub-header d-flex align-center mb-3"
+                  >
+                    <v-icon
+                      icon="mdi-thumb-up-outline"
+                      color="success"
+                      class="mr-2"
+                    />
+                    <h4 class="text-subtitle-1 font-weight-bold">
+                      {{ $t('product.aiReview.sections.pros') }}
+                    </h4>
+                  </header>
+                  <ul class="product-ai-review__list">
+                    <li
+                      v-for="pro in reviewContent.pros"
+                      :key="pro"
+                      class="product-ai-review__list-item"
+                    >
+                      <v-icon
+                        icon="mdi-check-circle-outline"
+                        size="18"
+                        color="success"
+                        class="product-ai-review__list-icon mt-1"
+                      />
+                      <!-- eslint-disable vue/no-v-html -->
+                      <span v-html="pro" />
+                      <!-- eslint-enable vue/no-v-html -->
+                    </li>
+                  </ul>
+                </div>
 
-          <section
-            v-if="reviewContent.description"
-            class="product-ai-review__card product-ai-review__card--wide"
-          >
-            <header class="product-ai-review__card-header">
-              <div
-                class="product-ai-review__card-icon product-ai-review__card-icon--accent"
-              >
-                <v-icon icon="mdi-text-box-outline" size="22" />
-              </div>
-              <h4 class="product-ai-review__card-title">
-                {{ $t('product.aiReview.sections.details') }}
-              </h4>
-            </header>
-            <div class="product-ai-review__card-body">
-              <!-- eslint-disable vue/no-v-html -->
-              <div
-                ref="descriptionRef"
-                class="product-ai-review__richtext"
-                v-html="reviewContent.description"
-              />
-              <!-- eslint-enable vue/no-v-html -->
-            </div>
-          </section>
+                <div v-if="reviewContent.cons?.length">
+                  <header
+                    class="product-ai-review__sub-header d-flex align-center mb-3"
+                  >
+                    <v-icon
+                      icon="mdi-alert-circle-outline"
+                      color="error"
+                      class="mr-2"
+                    />
+                    <h4 class="text-subtitle-1 font-weight-bold">
+                      {{ $t('product.aiReview.sections.cons') }}
+                    </h4>
+                  </header>
+                  <ul class="product-ai-review__list">
+                    <li
+                      v-for="con in reviewContent.cons"
+                      :key="con"
+                      class="product-ai-review__list-item"
+                    >
+                      <v-icon
+                        icon="mdi-close-circle-outline"
+                        size="18"
+                        color="error"
+                        class="product-ai-review__list-icon mt-1"
+                      />
+                      <!-- eslint-disable vue/no-v-html -->
+                      <span v-html="con" />
+                      <!-- eslint-enable vue/no-v-html -->
+                    </li>
+                  </ul>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
 
-          <section
-            v-if="reviewContent.technicalReview"
-            class="product-ai-review__card"
-          >
-            <header class="product-ai-review__card-header">
-              <div class="product-ai-review__card-icon">
-                <v-icon icon="mdi-cog-outline" size="22" />
-              </div>
-              <h4 class="product-ai-review__card-title">
-                {{ $t('product.aiReview.sections.technical') }}
-              </h4>
-            </header>
-            <!-- eslint-disable vue/no-v-html -->
-            <p
-              class="product-ai-review__card-text"
-              v-html="reviewContent.technicalReview"
-            />
-            <!-- eslint-enable vue/no-v-html -->
-          </section>
+        <v-row>
+          <!-- Row 2: Technical & Ecological -->
+          <v-col v-if="reviewContent.technicalReview" cols="12" md="6">
+            <v-card class="product-ai-review__card h-100" elevation="0">
+              <v-card-text>
+                <header class="product-ai-review__card-header mb-4">
+                  <div class="product-ai-review__card-icon">
+                    <v-icon icon="mdi-cog-outline" size="24" />
+                  </div>
+                  <h3 class="product-ai-review__card-title">
+                    {{ $t('product.aiReview.sections.technical') }}
+                  </h3>
+                </header>
+                <!-- eslint-disable vue/no-v-html -->
+                <div
+                  class="product-ai-review__card-text"
+                  v-html="reviewContent.technicalReview"
+                />
+                <!-- eslint-enable vue/no-v-html -->
+              </v-card-text>
+            </v-card>
+          </v-col>
 
-          <section
-            v-if="reviewContent.ecologicalReview"
-            class="product-ai-review__card"
-          >
-            <header class="product-ai-review__card-header">
-              <div
-                class="product-ai-review__card-icon product-ai-review__card-icon--eco"
-              >
-                <v-icon icon="mdi-leaf-outline" size="22" />
-              </div>
-              <h4 class="product-ai-review__card-title">
-                {{ $t('product.aiReview.sections.ecological') }}
-              </h4>
-            </header>
-            <!-- eslint-disable vue/no-v-html -->
-            <p
-              class="product-ai-review__card-text"
-              v-html="reviewContent.ecologicalReview"
-            />
-            <!-- eslint-enable vue/no-v-html -->
-          </section>
-        </div>
-      </article>
-
-      <div
-        v-if="reviewContent.pros?.length || reviewContent.cons?.length"
-        class="product-ai-review__insights"
-      >
-        <section
-          v-if="reviewContent.pros?.length"
-          class="product-ai-review__panel"
-        >
-          <header class="product-ai-review__panel-header">
-            <div
-              class="product-ai-review__panel-icon product-ai-review__panel-icon--pros"
-            >
-              <v-icon icon="mdi-thumb-up-outline" size="20" />
-            </div>
-            <h4 class="product-ai-review__panel-title">
-              {{ $t('product.aiReview.sections.pros') }}
-            </h4>
-          </header>
-          <ul class="product-ai-review__list">
-            <li
-              v-for="pro in reviewContent.pros"
-              :key="pro"
-              class="product-ai-review__list-item"
-            >
-              <v-icon
-                icon="mdi-check-circle-outline"
-                size="18"
-                class="product-ai-review__list-icon product-ai-review__list-icon--pros"
-              />
-              <!-- eslint-disable vue/no-v-html -->
-              <span v-html="pro" />
-              <!-- eslint-enable vue/no-v-html -->
-            </li>
-          </ul>
-        </section>
-
-        <section
-          v-if="reviewContent.cons?.length"
-          class="product-ai-review__panel"
-        >
-          <header class="product-ai-review__panel-header">
-            <div
-              class="product-ai-review__panel-icon product-ai-review__panel-icon--cons"
-            >
-              <v-icon icon="mdi-alert-circle-outline" size="20" />
-            </div>
-            <h4 class="product-ai-review__panel-title">
-              {{ $t('product.aiReview.sections.cons') }}
-            </h4>
-          </header>
-          <ul class="product-ai-review__list">
-            <li
-              v-for="con in reviewContent.cons"
-              :key="con"
-              class="product-ai-review__list-item"
-            >
-              <v-icon
-                icon="mdi-close-circle-outline"
-                size="18"
-                class="product-ai-review__list-icon product-ai-review__list-icon--cons"
-              />
-              <!-- eslint-disable vue/no-v-html -->
-              <span v-html="con" />
-              <!-- eslint-enable vue/no-v-html -->
-            </li>
-          </ul>
-        </section>
-      </div>
-
-      <div
-        v-if="reviewContent.attributes?.length"
-        class="product-ai-review__attributes"
-      >
-        <header class="product-ai-review__section-header">
-          <div class="product-ai-review__section-icon">
-            <v-icon icon="mdi-card-account-details-outline" size="20" />
-          </div>
-          <h4>{{ $t('product.aiReview.sections.identity') }}</h4>
-        </header>
-        <v-table density="comfortable" class="product-ai-review__table">
-          <tbody>
-            <tr
-              v-for="attribute in reviewContent.attributes"
-              :key="attribute.name"
-            >
-              <th scope="row">{{ attribute.name }}</th>
-              <td>{{ attribute.value }}</td>
-            </tr>
-          </tbody>
-        </v-table>
+          <v-col v-if="reviewContent.ecologicalReview" cols="12" md="6">
+            <v-card class="product-ai-review__card h-100" elevation="0">
+              <v-card-text>
+                <header class="product-ai-review__card-header mb-4">
+                  <div
+                    class="product-ai-review__card-icon product-ai-review__card-icon--eco"
+                  >
+                    <v-icon icon="mdi-leaf" size="24" />
+                  </div>
+                  <h3 class="product-ai-review__card-title">
+                    {{ $t('product.aiReview.sections.ecological') }}
+                  </h3>
+                </header>
+                <!-- eslint-disable vue/no-v-html -->
+                <div
+                  class="product-ai-review__card-text"
+                  v-html="reviewContent.ecologicalReview"
+                />
+                <!-- eslint-enable vue/no-v-html -->
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </div>
 
       <div
         v-if="reviewContent.sources?.length"
-        class="product-ai-review__sources"
+        class="product-ai-review__sources mt-4"
       >
-        <header class="product-ai-review__section-header">
+        <header class="product-ai-review__section-header mb-2">
           <div class="product-ai-review__section-icon">
             <v-icon icon="mdi-book-open-variant" size="20" />
           </div>
@@ -439,20 +375,6 @@ const captchaLocale = computed(() =>
 
 const reviewContent = computed(() => review.value)
 
-const hasAnalysisSections = computed(() => {
-  const content = reviewContent.value
-  if (!content) {
-    return false
-  }
-
-  return Boolean(
-    content.summary ||
-    content.description ||
-    content.technicalReview ||
-    content.ecologicalReview
-  )
-})
-
 const createdDate = computed(() => {
   if (!createdMs.value) {
     return null
@@ -531,12 +453,22 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     }))
     .filter(source => Boolean(source.url))
 
-  const attributes: AiReviewAttributeDto[] = (reviewData.attributes ?? [])
-    .map(attribute => ({
-      name: attribute.name ?? '',
-      value: attribute.value ?? '',
-      number: attribute.number ?? undefined,
-    }))
+  const rawAttributes = reviewData.attributes
+  const attributesList = Array.isArray(rawAttributes)
+    ? rawAttributes
+    : typeof rawAttributes === 'object' && rawAttributes !== null
+      ? Object.values(rawAttributes)
+      : []
+
+  const attributes: AiReviewAttributeDto[] = attributesList
+    .map((attribute: unknown) => {
+      const attr = attribute as AiReviewAttributeDto
+      return {
+        name: attr?.name ?? '',
+        value: attr?.value ?? '',
+        number: attr?.number ?? undefined,
+      }
+    })
     .filter(attribute => attribute.name.length > 0)
 
   return {
@@ -756,52 +688,6 @@ const handleReferenceClick = (event: Event) => {
   gap: 1.75rem;
 }
 
-.product-ai-review__article {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.product-ai-review__intro-card {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1rem;
-  align-items: flex-start;
-  padding: 1.4rem;
-  border-radius: 20px;
-  background: rgba(var(--v-theme-surface-primary-080), 0.9);
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.12);
-}
-
-.product-ai-review__intro-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 16px;
-  background: rgba(var(--v-theme-accent-primary-highlight), 0.16);
-  color: rgb(var(--v-theme-accent-primary-highlight));
-}
-
-.product-ai-review__article-title {
-  font-size: clamp(1.3rem, 2vw, 1.6rem);
-  font-weight: 600;
-  margin-bottom: 0.35rem;
-}
-
-.product-ai-review__summary {
-  margin: 0;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
-  line-height: 1.6;
-}
-
-.product-ai-review__analysis-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 1.25rem;
-}
-
 .product-ai-review__card {
   background: rgba(var(--v-theme-surface-glass-strong), 0.96);
   border-radius: 18px;
@@ -810,10 +696,6 @@ const handleReferenceClick = (event: Event) => {
   flex-direction: column;
   gap: 0.85rem;
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.06);
-}
-
-.product-ai-review__card--wide {
-  grid-column: span 1;
 }
 
 .product-ai-review__card-header {
@@ -833,10 +715,6 @@ const handleReferenceClick = (event: Event) => {
   color: rgb(var(--v-theme-accent-primary-highlight));
 }
 
-.product-ai-review__card-icon--accent {
-  background: rgba(var(--v-theme-surface-primary-100), 0.95);
-}
-
 .product-ai-review__card-icon--eco {
   background: rgba(var(--v-theme-accent-supporting), 0.18);
   color: rgb(var(--v-theme-accent-supporting));
@@ -852,75 +730,6 @@ const handleReferenceClick = (event: Event) => {
   margin: 0;
   line-height: 1.65;
   color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-ai-review__card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.product-ai-review__richtext {
-  line-height: 1.7;
-  display: grid;
-  gap: 0.65rem;
-}
-
-.product-ai-review__richtext p {
-  margin: 0;
-}
-
-.product-ai-review__richtext a {
-  color: rgb(var(--v-theme-accent-primary-highlight));
-  text-decoration: underline;
-}
-
-.product-ai-review__insights {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-}
-
-.product-ai-review__panel {
-  background: rgba(var(--v-theme-surface-glass-strong), 0.98);
-  border-radius: 18px;
-  padding: 1.3rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.product-ai-review__panel-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.product-ai-review__panel-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 999px;
-  background: rgba(var(--v-theme-surface-primary-080), 0.8);
-}
-
-.product-ai-review__panel-icon--pros {
-  color: rgb(var(--v-theme-accent-supporting));
-  background: rgba(var(--v-theme-accent-supporting), 0.16);
-}
-
-.product-ai-review__panel-icon--cons {
-  color: rgba(var(--v-theme-error), 0.8);
-  background: rgba(var(--v-theme-error), 0.18);
-}
-
-.product-ai-review__panel-title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin: 0;
 }
 
 .product-ai-review__list {
@@ -943,15 +752,6 @@ const handleReferenceClick = (event: Event) => {
   margin-top: 0.2rem;
 }
 
-.product-ai-review__list-icon--pros {
-  color: rgb(var(--v-theme-accent-supporting));
-}
-
-.product-ai-review__list-icon--cons {
-  color: rgba(var(--v-theme-error), 0.85);
-}
-
-.product-ai-review__attributes,
 .product-ai-review__sources {
   display: flex;
   flex-direction: column;
@@ -1050,25 +850,10 @@ const handleReferenceClick = (event: Event) => {
   gap: 0.5rem;
 }
 
-@media (min-width: 960px) {
-  .product-ai-review__card--wide {
-    grid-column: span 2;
-  }
-}
-
 @media (max-width: 768px) {
   .product-ai-review__content,
   .product-ai-review__empty {
     padding: 1.35rem;
-  }
-
-  .product-ai-review__intro-card {
-    grid-template-columns: 1fr;
-  }
-
-  .product-ai-review__intro-icon {
-    width: 2.75rem;
-    height: 2.75rem;
   }
 }
 </style>

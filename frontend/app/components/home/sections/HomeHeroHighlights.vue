@@ -443,6 +443,10 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
   height: 100%
   display: flex
 
+  :deep(> div)
+    width: 100%
+    height: 100%
+
   & > div
     height: 100%
 

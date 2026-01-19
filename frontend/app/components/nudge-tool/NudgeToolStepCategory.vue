@@ -436,7 +436,7 @@ watch(
     }
 
     &--next {
-      margin-left: -16px;
+      margin-left: 0;
     }
   }
 
