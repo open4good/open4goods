@@ -419,226 +419,229 @@
             </div>
           </template>
         </v-list>
-        <v-menu
-          location="bottom"
-          transition="fade-transition"
-          :offset="[0, 12]"
-          :close-on-content-click="true"
-          open-on-hover
-        >
-          <template #activator="{ props, isActive }">
-            <v-btn
-              v-bind="props"
-              variant="text"
-              class="accessibility-menu__activator"
-              :aria-label="accessibilityLabel"
-            >
-              <v-icon icon="mdi-sunglasses" start />
-              <span class="accessibility-menu__label">{{
-                accessibilityLabel
-              }}</span>
-              <v-icon
-                :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
-                size="18"
-                end
-              />
-            </v-btn>
-          </template>
-
-          <v-card
-            class="accessibility-menu"
-            color="surface-default"
-            elevation="8"
+        <div class="d-flex align-center ga-2">
+          <v-menu
+            location="bottom"
+            transition="fade-transition"
+            :offset="[0, 12]"
+            :close-on-content-click="true"
+            open-on-hover
           >
-            <p class="accessibility-menu__section-title">
-              {{ t('siteIdentity.menu.themeToggle') }}
-            </p>
-
-            <v-list density="compact" class="accessibility-menu__list" nav>
-              <v-list-item
-                :active="currentTheme === 'light'"
-                color="primary"
-                class="accessibility-menu__item"
-                data-testid="hero-theme-light"
-                @click="setTheme('light')"
+            <template #activator="{ props, isActive }">
+              <v-btn
+                v-bind="props"
+                variant="text"
+                class="accessibility-menu__activator"
+                :aria-label="accessibilityLabel"
               >
-                <template #prepend>
-                  <v-icon icon="mdi-white-balance-sunny" size="20" />
-                </template>
-                <v-list-item-title>Thème clair</v-list-item-title>
-              </v-list-item>
+                <v-icon icon="mdi-sunglasses" start />
+                <span class="accessibility-menu__label">{{
+                  accessibilityLabel
+                }}</span>
+                <v-icon
+                  :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                  size="18"
+                  end
+                />
+              </v-btn>
+            </template>
 
-              <v-list-item
-                :active="currentTheme === 'dark'"
-                color="primary"
-                class="accessibility-menu__item"
-                data-testid="hero-theme-dark"
-                @click="setTheme('dark')"
-              >
-                <template #prepend>
-                  <v-icon icon="mdi-weather-night" size="20" />
-                </template>
-                <v-list-item-title>Thème sombre</v-list-item-title>
-              </v-list-item>
-            </v-list>
-
-            <v-divider class="accessibility-menu__divider" />
-
-            <div
-              class="accessibility-menu__reading-row d-flex align-center px-4 py-2"
+            <v-card
+              class="accessibility-menu"
+              color="surface-default"
+              elevation="8"
             >
-              <v-switch
-                :model-value="isDyslexic"
-                inset
-                color="primary"
-                density="compact"
-                hide-details
-                class="mr-3"
-                :aria-label="readingModeAriaLabel"
-                :aria-pressed="isDyslexic"
-                @click.stop
-                @update:model-value="updateReadingMode"
-              />
-              <v-chip
-                class="accessibility-menu__reading-chip"
+              <p class="accessibility-menu__section-title">
+                {{ t('siteIdentity.menu.themeToggle') }}
+              </p>
+
+              <v-list density="compact" class="accessibility-menu__list" nav>
+                <v-list-item
+                  :active="currentTheme === 'light'"
+                  color="primary"
+                  class="accessibility-menu__item"
+                  data-testid="hero-theme-light"
+                  @click="setTheme('light')"
+                >
+                  <template #prepend>
+                    <v-icon icon="mdi-white-balance-sunny" size="20" />
+                  </template>
+                  <v-list-item-title>Thème clair</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item
+                  :active="currentTheme === 'dark'"
+                  color="primary"
+                  class="accessibility-menu__item"
+                  data-testid="hero-theme-dark"
+                  @click="setTheme('dark')"
+                >
+                  <template #prepend>
+                    <v-icon icon="mdi-weather-night" size="20" />
+                  </template>
+                  <v-list-item-title>Thème sombre</v-list-item-title>
+                </v-list-item>
+              </v-list>
+
+              <v-divider class="accessibility-menu__divider" />
+
+              <div
+                class="accessibility-menu__reading-row d-flex align-center px-4 py-2"
+              >
+                <v-switch
+                  :model-value="isDyslexic"
+                  inset
+                  color="primary"
+                  density="compact"
+                  hide-details
+                  class="mr-3"
+                  :aria-label="readingModeAriaLabel"
+                  :aria-pressed="isDyslexic"
+                  @click.stop
+                  @update:model-value="updateReadingMode"
+                />
+                <div class="accessibility-menu__reading-copy">
+                  <span class="text-body-2 font-weight-medium">
+                    {{ readingModeLabel }}
+                  </span>
+                  <v-chip
+                    class="accessibility-menu__reading-chip"
+                    color="surface-primary-080"
+                    size="small"
+                    label
+                  >
+                    {{ readingModeShortLabel }}
+                  </v-chip>
+                </div>
+              </div>
+
+              <v-divider class="accessibility-menu__divider" />
+
+              <div
+                class="accessibility-menu__zoom-row d-flex align-center px-4 py-2"
+              >
+                <v-switch
+                  :model-value="isZoomed"
+                  inset
+                  color="primary"
+                  density="compact"
+                  hide-details
+                  class="mr-3"
+                  :aria-label="t('siteIdentity.menu.zoom.label')"
+                  @click.stop
+                  @update:model-value="setZoomed"
+                />
+                <span class="text-body-2 font-weight-medium"
+                  >Mode Accessible</span
+                >
+              </div>
+            </v-card>
+          </v-menu>
+          <v-menu
+            location="bottom"
+            transition="fade-transition"
+            :min-width="isLoggedIn ? 260 : 360"
+            offset="8"
+            open-on-hover
+          >
+            <template #activator="{ props, isActive }">
+              <v-btn
+                v-if="isLoggedIn"
+                v-bind="props"
                 color="surface-primary-080"
-                size="small"
-                label
+                style="margin-right: 0px"
+                class="font-weight-bold account-menu-activator"
+                rounded="pill"
+                variant="flat"
+                data-testid="hero-account-menu-activator"
               >
-                {{ readingModeShortLabel }}
-              </v-chip>
-              <span class="text-body-2 font-weight-medium">
-                {{ readingModeLabel }}
-              </span>
-            </div>
-
-            <v-divider class="accessibility-menu__divider" />
-
-            <div
-              class="accessibility-menu__zoom-row d-flex align-center px-4 py-2"
-            >
-              <v-switch
-                :model-value="isZoomed"
-                inset
-                color="primary"
-                density="compact"
-                hide-details
-                class="mr-3"
-                :aria-label="t('siteIdentity.menu.zoom.label')"
-                @click.stop
-                @update:model-value="setZoomed"
-              />
-              <span class="text-body-2 font-weight-medium"
-                >Mode Accessible</span
+                <v-icon :icon="accountIcon" start />
+                <span class="account-username text-truncate">{{
+                  accountLabel
+                }}</span>
+                <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" end />
+              </v-btn>
+              <v-btn
+                v-else
+                v-bind="props"
+                class="account-menu-activator"
+                variant="text"
+                data-testid="hero-account-menu-activator-guest"
               >
-            </div>
-          </v-card>
-        </v-menu>
-        <v-menu
-          location="bottom"
-          transition="fade-transition"
-          :min-width="isLoggedIn ? 260 : 360"
-          offset="8"
-          open-on-hover
-        >
-          <template #activator="{ props, isActive }">
-            <v-btn
-              v-if="isLoggedIn"
-              v-bind="props"
-              color="surface-primary-080"
-              style="margin-right: 0px"
-              class="font-weight-bold account-menu-activator"
-              rounded="pill"
-              variant="flat"
-              data-testid="hero-account-menu-activator"
-            >
-              <v-icon :icon="accountIcon" start />
-              <span class="account-username text-truncate">{{
-                accountLabel
-              }}</span>
-              <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" end />
-            </v-btn>
-            <v-btn
+                <span class="account-menu-activator__guest-icons">
+                  <v-icon icon="mdi-incognito" />
+                  <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" />
+                </span>
+              </v-btn>
+            </template>
+            <AccountPrivacyCard v-if="!isLoggedIn" />
+
+            <v-card
               v-else
-              v-bind="props"
-              class="account-menu-activator"
-              variant="text"
-              data-testid="hero-account-menu-activator-guest"
+              class="account-menu"
+              color="surface-default"
+              elevation="4"
             >
-              <span class="account-menu-activator__guest-icons">
-                <v-icon icon="mdi-incognito" />
-                <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" />
-              </span>
-            </v-btn>
-          </template>
+              <v-list density="comfortable">
+                <v-list-item>
+                  <v-list-item-title class="font-weight-medium text-truncate">
+                    {{ displayName }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle v-if="hasRoles" class="mt-2">
+                    <div class="d-flex flex-wrap ga-2">
+                      <v-chip
+                        v-for="role in accountRoles"
+                        :key="role"
+                        color="surface-primary-100"
+                        size="small"
+                        variant="flat"
+                        class="role-chip"
+                      >
+                        {{ role }}
+                      </v-chip>
+                    </div>
+                  </v-list-item-subtitle>
+                  <v-list-item-subtitle v-else class="text-neutral-soft">
+                    {{ t('siteIdentity.menu.account.noRoles') }}
+                  </v-list-item-subtitle>
+                </v-list-item>
 
-          <AccountPrivacyCard v-if="!isLoggedIn" />
+                <v-divider class="my-2" />
 
-          <v-card
-            v-else
-            class="account-menu"
-            color="surface-default"
-            elevation="4"
-          >
-            <v-list density="comfortable">
-              <v-list-item>
-                <v-list-item-title class="font-weight-medium text-truncate">
-                  {{ displayName }}
-                </v-list-item-title>
-                <v-list-item-subtitle v-if="hasRoles" class="mt-2">
-                  <div class="d-flex flex-wrap ga-2">
-                    <v-chip
-                      v-for="role in accountRoles"
-                      :key="role"
-                      color="surface-primary-100"
-                      size="small"
-                      variant="flat"
-                      class="role-chip"
-                    >
-                      {{ role }}
-                    </v-chip>
-                  </div>
-                </v-list-item-subtitle>
-                <v-list-item-subtitle v-else class="text-neutral-soft">
-                  {{ t('siteIdentity.menu.account.noRoles') }}
-                </v-list-item-subtitle>
-              </v-list-item>
+                <v-list-item
+                  density="comfortable"
+                  data-testid="hero-clear-cache"
+                  :disabled="isClearingCache"
+                  @click="handleClearCache"
+                >
+                  <template #prepend>
+                    <v-icon icon="mdi-refresh" />
+                  </template>
+                  <v-list-item-title>
+                    {{
+                      isClearingCache
+                        ? t('siteIdentity.menu.account.clearingCache')
+                        : t('siteIdentity.menu.account.clearCache')
+                    }}
+                  </v-list-item-title>
+                </v-list-item>
 
-              <v-divider class="my-2" />
-
-              <v-list-item
-                density="comfortable"
-                data-testid="hero-clear-cache"
-                :disabled="isClearingCache"
-                @click="handleClearCache"
-              >
-                <template #prepend>
-                  <v-icon icon="mdi-refresh" />
-                </template>
-                <v-list-item-title>
-                  {{
-                    isClearingCache
-                      ? t('siteIdentity.menu.account.clearingCache')
-                      : t('siteIdentity.menu.account.clearCache')
-                  }}
-                </v-list-item-title>
-              </v-list-item>
-
-              <v-list-item
-                density="comfortable"
-                data-testid="hero-account-logout"
-                @click="handleLogout"
-              >
-                <template #prepend>
-                  <v-icon icon="mdi-logout" />
-                </template>
-                <v-list-item-title>
-                  {{ t('siteIdentity.menu.account.logout') }}
-                </v-list-item-title>
-              </v-list-item>
+                <v-list-item
+                  density="comfortable"
+                  data-testid="hero-account-logout"
+                  @click="handleLogout"
+                >
+                  <template #prepend>
+                    <v-icon icon="mdi-logout" />
+                  </template>
+                  <v-list-item-title>
+                    {{ t('siteIdentity.menu.account.logout') }}
+                  </v-list-item-title>
+                </v-list-item>
             </v-list>
           </v-card>
-        </v-menu>
+          </v-menu>
+        </div>
       </div>
     </div>
   </nav>
@@ -1759,6 +1762,11 @@ const isMenuItemActive = (item: MenuItem): boolean => {
 .accessibility-menu__reading-chip
   font-weight: 700
   letter-spacing: 0.05em
+
+.accessibility-menu__reading-copy
+  display: inline-flex
+  align-items: center
+  gap: 0.5rem
 
 @media (max-width: 1263px)
   .community-menu
