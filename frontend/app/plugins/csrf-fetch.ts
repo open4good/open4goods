@@ -1,6 +1,10 @@
 import { $fetch } from 'ofetch'
 
-import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME, isSafeMethod } from '~~/shared/utils/csrf'
+import {
+  CSRF_COOKIE_NAME,
+  CSRF_HEADER_NAME,
+  isSafeMethod,
+} from '~~/shared/utils/csrf'
 
 const API_PREFIX = '/api'
 
@@ -42,8 +46,14 @@ export default defineNuxtPlugin(nuxtApp => {
       const headers = new Headers(options.headers || {})
       if (!headers.has(CSRF_HEADER_NAME)) {
         headers.set(CSRF_HEADER_NAME, csrfCookie.value)
-        options.headers = headers
       }
+
+      // On server side, we need to manually pass the cookie so the middleware can verify it
+      if (import.meta.server) {
+        headers.append('Cookie', `${CSRF_COOKIE_NAME}=${csrfCookie.value}`)
+      }
+
+      options.headers = headers
     },
   })
 

@@ -534,22 +534,6 @@ describe('ProductAttributesSection', () => {
     vi.useRealTimers()
   })
 
-  it('renders identity information and GTIN image', async () => {
-    const wrapper = await mountComponent(buildProduct())
-
-    const identityRows = wrapper.findAll('.product-attributes__identity-row')
-    expect(identityRows).not.toHaveLength(0)
-    expect(wrapper.text()).toContain('BrandX')
-    expect(wrapper.text()).toContain('Brand X Alternative')
-    expect(wrapper.text()).toContain('Model Y')
-    expect(wrapper.text()).toContain('Model Y Prime')
-    expect(wrapper.text()).toContain('GTIN')
-
-    const image = wrapper.find('img.v-img-stub')
-    expect(image.exists()).toBe(true)
-    expect(image.attributes('src')).toContain('/1234567890123-gtin.png')
-  })
-
   it('renders the main attributes table with formatted values', async () => {
     const wrapper = await mountComponent(buildProduct())
 

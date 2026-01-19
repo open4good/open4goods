@@ -143,6 +143,34 @@ public class AiReview {
     @Schema(description = "List of ratings found in sources")
     private List<AiRating> ratings = new ArrayList<>();
 
+
+
+    /** The pdfs found in the sources. */
+    @JsonProperty(required = false, value = "pdfs")
+    @Schema(description = "List of PDF's url's for this product")
+    private List<String> pdfs = new ArrayList<>();
+
+
+
+    /** The pdfs found in the sources. */
+    @JsonProperty(required = false, value = "images")
+    @Schema(description = "List of quality images url's for this product")
+    private List<String> images = new ArrayList<>();
+
+
+    /** The pdfs found in the sources. */
+    @JsonProperty(required = false, value = "images")
+    @Schema(description = "List of product related videos (vide platform, like youtube, direct file, daylymotion, ... social networks, )")
+    private List<String> videos = new ArrayList<>();
+
+    /** The social network references */
+    @JsonProperty(required = false, value = "social")
+    @Schema(description = "List of social networks references")
+    private List<String> socialLinks = new ArrayList<>();
+
+
+
+
     /** No-args constructor (required for deserialization) */
     public AiReview() {}
 

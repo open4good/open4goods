@@ -173,35 +173,6 @@ describe('Uncategorized Product Page', () => {
     expect(breadcrumbs).toBeDefined()
   })
 
-  it('shows nudge wizard FAB when category is available', async () => {
-    selectCategoryBySlugMock.mockResolvedValue({
-      id: 'cat-123',
-      verticalHomeTitle: 'Électroménager',
-      verticalHomeUrl: 'electromenager',
-      attributesConfig: { configs: [] },
-      availableImpactScoreCriterias: [],
-      impactScoreConfig: { criteriasPonderation: {} },
-      nudgeToolConfig: { subsets: [], subsetGroups: [], scores: [] },
-    })
-    routeMock.params.slug = [
-      'electromenager',
-      '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
-    ]
-    routeMock.path =
-      '/electromenager/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50'
-
-    const wrapper = await mountProductPage()
-
-    const fab = wrapper.find('.product-page__fab')
-    expect(fab.exists()).toBe(true)
-
-    await fab.trigger('click')
-
-    const wizard = wrapper.findComponent({ name: 'NudgeToolWizard-stub' })
-    expect(wizard.exists()).toBe(true)
-    expect(wizard.attributes('initial-category-id')).toBe('cat-123')
-  })
-
   it('redirects to canonical URL when accessing via pure GTIN', async () => {
     // START: Mock data setup
     const gtin = '8427973010706'

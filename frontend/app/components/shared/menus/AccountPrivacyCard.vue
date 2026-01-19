@@ -288,7 +288,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { IpQuotaStatusDtoCategoryEnum } from '~~/shared/api-client'
+import { IpQuotaCategory } from '~~/shared/api-client'
 import { storeToRefs } from 'pinia'
 import { computed, ref, onMounted } from 'vue'
 import { useIpQuota } from '~/composables/useIpQuota'
@@ -321,8 +321,8 @@ const ipLabel = computed(() => {
 // --- Quota Logic ---
 const { getRemaining, refreshQuota } = useIpQuota()
 
-const aiQuotaCategory = IpQuotaStatusDtoCategoryEnum.ReviewGeneration
-const voteQuotaCategory = IpQuotaStatusDtoCategoryEnum.FeedbackVote
+const aiQuotaCategory = IpQuotaCategory.ReviewGeneration
+const voteQuotaCategory = IpQuotaCategory.FeedbackVote
 
 const aiQuota = computed(() => getRemaining(aiQuotaCategory))
 const voteQuota = computed(() => getRemaining(voteQuotaCategory))

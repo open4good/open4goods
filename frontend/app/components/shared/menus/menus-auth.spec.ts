@@ -180,6 +180,13 @@ vi.mock('~/stores/useProductCompareStore', () => ({
   }),
 }))
 
+vi.mock('~~/shared/api-client', () => ({
+  IpQuotaCategory: {
+    ReviewGeneration: 'REVIEW_GENERATION',
+    FeedbackVote: 'FEEDBACK_VOTE',
+  },
+}))
+
 const installPromptVisible = ref(false)
 const isInstallSupported = ref(false)
 const installInProgress = ref(false)
@@ -282,8 +289,26 @@ describe('Shared menu authentication controls', () => {
         Teleport: true,
         VMenu: vMenuStub,
         SearchSuggestField: {
-          template: '<div class="search-suggest-field-stub" />',
+          template:
+            '<div class="search-suggest-field-stub"><slot name="append-inner" /><slot /></div>',
         },
+        VCard: { template: '<div class="v-card-stub"><slot /></div>' },
+        VIcon: true,
+        VList: { template: '<div class="v-list-stub"><slot /></div>' },
+        VListItem: {
+          template:
+            '<div class="v-list-item-stub"><slot name="prepend" /><slot /><slot name="append" /></div>',
+        },
+        VAvatar: true,
+        VListItemAction: true,
+        VSwitch: true,
+        VBtn: true,
+        VProgressLinear: true,
+        VSelectionControl: true,
+        VInput: true,
+        VDefaultsProvider: { template: '<div><slot /></div>' },
+        Transition: { template: '<div><slot /></div>' },
+        VDivider: true,
       },
     },
   }
@@ -293,8 +318,26 @@ describe('Shared menu authentication controls', () => {
         Teleport: true,
         VMenu: vMenuStub,
         SearchSuggestField: {
-          template: '<div class="search-suggest-field-stub" />',
+          template:
+            '<div class="search-suggest-field-stub"><slot name="append-inner" /><slot /></div>',
         },
+        VCard: { template: '<div class="v-card-stub"><slot /></div>' },
+        VIcon: true,
+        VList: { template: '<div class="v-list-stub"><slot /></div>' },
+        VListItem: {
+          template:
+            '<div class="v-list-item-stub"><slot name="prepend" /><slot /><slot name="append" /></div>',
+        },
+        VAvatar: true,
+        VListItemAction: true,
+        VSwitch: true,
+        VBtn: true,
+        VProgressLinear: true,
+        VSelectionControl: true,
+        VInput: true,
+        VDefaultsProvider: { template: '<div><slot /></div>' },
+        Transition: { template: '<div><slot /></div>' },
+        VDivider: true,
       },
     },
   }

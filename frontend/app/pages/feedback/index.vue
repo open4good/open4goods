@@ -189,7 +189,7 @@ import FeedbackSubmissionForm, {
 } from '~/components/domains/feedback/FeedbackSubmissionForm.vue'
 import FeedbackOpenSourceSection from '~/components/domains/feedback/FeedbackOpenSourceSection.vue'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
-import { IpQuotaStatusDtoCategoryEnum } from '~~/shared/api-client'
+import { IpQuotaCategory } from '~~/shared/api-client'
 import { useAnalytics } from '~/composables/useAnalytics'
 import type {
   FeedbackIssueDto,
@@ -324,8 +324,7 @@ const loadIssuesForCategory = async (category: FeedbackCategory) => {
 }
 
 const { getRemaining, recordUsage, refreshQuota } = useIpQuota()
-const feedbackQuotaCategory: IpQuotaStatusDtoCategoryEnum =
-  IpQuotaStatusDtoCategoryEnum.FeedbackVote
+const feedbackQuotaCategory: IpQuotaCategory = IpQuotaCategory.FeedbackVote
 
 const loadFeedbackQuota = async () => {
   if (!import.meta.client) {

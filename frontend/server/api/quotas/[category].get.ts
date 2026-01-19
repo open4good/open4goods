@@ -1,8 +1,5 @@
 import { createError, defineEventHandler, getRouterParam } from 'h3'
-import {
-  IpQuotaStatusDtoCategoryEnum,
-  type IpQuotaStatusDto,
-} from '~~/shared/api-client'
+import { IpQuotaCategory, type IpQuotaStatusDto } from '~~/shared/api-client'
 import { useQuotaService } from '~~/shared/api-client/services/quota.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
@@ -12,12 +9,8 @@ import {
 } from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 
-const isQuotaCategory = (
-  value: string
-): value is IpQuotaStatusDtoCategoryEnum =>
-  Object.values(IpQuotaStatusDtoCategoryEnum).includes(
-    value as IpQuotaStatusDtoCategoryEnum
-  )
+const isQuotaCategory = (value: string): value is IpQuotaCategory =>
+  Object.values(IpQuotaCategory).includes(value as IpQuotaCategory)
 
 export default defineEventHandler(async (event): Promise<IpQuotaStatusDto> => {
   setDomainLanguageCacheHeaders(event, 'no-store')

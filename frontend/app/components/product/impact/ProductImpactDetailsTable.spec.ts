@@ -248,12 +248,14 @@ describe('ProductImpactDetailsTable', () => {
         id: 'REAL',
         label: 'Real score',
         value: 1,
+        relativeValue: 1,
         virtual: false,
       },
       {
         id: 'VIRTUAL',
         label: 'Virtual score',
         value: 2,
+        relativeValue: 2,
         virtual: true,
       },
     ]
@@ -270,6 +272,20 @@ describe('ProductImpactDetailsTable', () => {
     // Expand the DIVERS group to see the rows (since both are orphans)
     vm.toggleGroup('DIVERS')
     await nextTick()
+
+    // Toggle virtual scores to make sure they are included in tableItems
+    // Assuming there is a showVirtualScores ref or similar mechanism that filters them out by default
+    // We can simulate the toggle click or change the ref if exposed, but since we are testing VM computed logic which relies on props/state:
+    // The component filters virtual scores out by default. We need to enable them.
+    // Looking at the component, there is a v-btn that toggles `showVirtualScores`.
+    // We can interact with the DOM or directly with the component instance if available.
+    // Let's try finding the toggle button and clicking it.
+
+    // We need to look for the toggle button. It has class 'impact-details__virtual-toggle'.
+    const toggleBtn = wrapper.find('.impact-details__virtual-toggle')
+    if (toggleBtn.exists()) {
+      await toggleBtn.trigger('click')
+    }
 
     const realRow = vm.tableItems.find(row => row.id === 'REAL')
     const virtualRow = vm.tableItems.find(row => row.id === 'VIRTUAL')

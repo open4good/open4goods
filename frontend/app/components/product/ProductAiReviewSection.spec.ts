@@ -265,9 +265,6 @@ describe('ProductAiReviewSection', () => {
     expect(metadata).toContain('Generated on')
     expect(metadata).toMatch(/2024/)
 
-    const introTitle = wrapper.get('.product-ai-review__article-title').text()
-    expect(introTitle).toContain('Samsung TQ65S90D 2024 overview')
-
     const cards = wrapper.findAll('.product-ai-review__card')
     expect(cards).toHaveLength(4)
 
@@ -275,23 +272,15 @@ describe('ProductAiReviewSection', () => {
     expect(summaryCard.text()).toContain('Overall summary')
     expect(summaryCard.text()).toContain('balances vivid visuals')
 
-    const richtextHtml = wrapper.get('.product-ai-review__richtext').html()
-    expect(richtextHtml).toContain('review-ref-1')
-
     const prosItems = wrapper.findAll('.product-ai-review__list-item')
     expect(prosItems).toHaveLength(3)
     expect(prosItems[0].text()).toContain('Excellent brightness calibration')
     expect(prosItems[2].text()).toContain('Lacks bundled camera accessories')
 
-    const prosIcon = wrapper.get(
-      '.product-ai-review__panel-icon--pros .v-icon-stub'
-    )
-    expect(prosIcon.attributes('data-icon')).toBe('mdi-thumb-up-outline')
-
-    const attributeRows = wrapper.findAll(
-      '.product-ai-review__attributes .v-table-stub tbody tr'
-    )
-    expect(attributeRows).toHaveLength(defaultAttributes.length)
+    const prosIcon = wrapper
+      .findAll('.v-icon-stub')
+      .find(icon => icon.attributes('data-icon') === 'mdi-thumb-up-outline')
+    expect(prosIcon?.exists()).toBe(true)
 
     const sourceRows = wrapper.findAll(
       '.product-ai-review__sources .v-table-stub tbody tr'

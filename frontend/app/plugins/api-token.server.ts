@@ -1,7 +1,6 @@
 export default defineNuxtPlugin(() => {
   const globalObj = globalThis as typeof globalThis & {
     __apiTokenInstalled?: boolean
-    $fetch?: typeof $fetch
   }
   if (globalObj.__apiTokenInstalled) return
   globalObj.__apiTokenInstalled = true
@@ -23,20 +22,15 @@ export default defineNuxtPlugin(() => {
   }
   globalObj.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = toUrl(input)
+
+    // Allow internal relative URLs to be fetched serverside by resolving them to localhost
+    if (url.startsWith('/')) {
+      const { origin } = useRequestURL()
+      const absoluteUrl = `${origin}${url}`
+      return originalFetch(absoluteUrl, init)
+    }
+
     const opts = token && url.startsWith(apiUrl) ? withToken(init) : init
     return originalFetch(input, opts)
-  }
-
-  const original$fetch = globalObj.$fetch
-  if (original$fetch) {
-    const wrapped = ((input: unknown, init?: RequestInit) => {
-      const url = toUrl(input)
-      const opts = token && url.startsWith(apiUrl) ? withToken(init) : init
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return original$fetch(input as any, opts as any)
-    }) as unknown as typeof $fetch
-    wrapped.raw = original$fetch.raw
-    wrapped.create = original$fetch.create
-    globalObj.$fetch = wrapped
   }
 })
