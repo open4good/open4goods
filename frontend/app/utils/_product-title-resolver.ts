@@ -126,3 +126,22 @@ export const resolveProductTitle = (
 
   return ''
 }
+
+export const resolveProductShortName = (
+  product: ProductDto,
+  locale?: string
+): string =>
+  resolveProductTitle(product, locale, {
+    preferShortName: true,
+    preferPrettyName: true,
+  })
+
+export const resolveProductLongName = (
+  product: ProductDto,
+  locale?: string
+): string =>
+  resolveProductTitle(product, locale, {
+    preferLongName: true,
+    preferH1Title: true,
+    uppercaseBrand: true,
+  })

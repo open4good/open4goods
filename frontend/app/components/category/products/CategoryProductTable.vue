@@ -31,8 +31,8 @@
         <div class="category-product-table__model-name">
           {{
             value ??
-            item.product.identity?.bestName ??
-            '#' + (item.product.gtin ?? '')
+            (resolveTableProductName(item.product) ||
+              (item.product.gtin ? `#${item.product.gtin}` : ''))
           }}
         </div>
       </div>
@@ -85,6 +85,7 @@ import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
+import { resolveProductShortName } from '~/utils/_product-title-resolver'
 
 type AttributeCellValue = string | null
 
@@ -136,7 +137,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
-const { t, n } = useI18n()
+const { t, n, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
 const attributeConfigMap = computed<Record<string, AttributeConfigDto>>(
@@ -146,6 +147,9 @@ const attributeKeys = computed(() => props.attributeKeys ?? [])
 const fieldMetadataMap = computed<Record<string, FieldMetadataDto>>(
   () => props.fieldMetadata ?? {}
 )
+
+const resolveTableProductName = (product: ProductDto) =>
+  resolveProductShortName(product, locale.value)
 
 const extractAttributeKeyFromMapping = (
   mapping: string | undefined

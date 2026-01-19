@@ -492,6 +492,7 @@ import {
   resolveFilterFieldTitle,
   resolveSortFieldTitle,
 } from '~/utils/_field-localization'
+import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
 
 const route = useRoute()
@@ -1444,9 +1445,7 @@ const productListJsonLd = computed(() => {
 
   const items = products.slice(0, 20).map((product, index) => {
     const name =
-      product.identity?.bestName ??
-      product.identity?.model ??
-      product.identity?.brand ??
+      resolveProductShortName(product, locale.value) ||
       (product.gtin != null ? `GTIN ${product.gtin}` : undefined)
 
     if (!name) {

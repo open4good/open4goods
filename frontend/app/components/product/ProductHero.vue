@@ -2,7 +2,13 @@
   <section class="product-hero">
     <div class="product-hero__content">
       <header v-if="heroTitle" class="product-hero__heading">
-        <h1 class="product-hero__title text-center">{{ heroTitle }}</h1>
+        <ProductDesignation
+          :product="product"
+          variant="page"
+          title-tag="h1"
+          title-class="product-hero__title text-center"
+          description-class="product-hero__short-description text-center"
+        />
         <CategoryNavigationBreadcrumbs
           v-if="heroBreadcrumbs.length"
           v-bind="heroBreadcrumbProps"
@@ -202,6 +208,7 @@ import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
+import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -213,7 +220,10 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { resolveProductTitle } from '~/utils/_product-title-resolver'
+import {
+  resolveProductLongName,
+  resolveProductShortName,
+} from '~/utils/_product-title-resolver'
 
 import type {
   AttributeConfigDto,
@@ -281,11 +291,7 @@ const normalizeString = (value: string | null | undefined) =>
   typeof value === 'string' ? value.trim() : ''
 
 const heroTitle = computed(() => {
-  return resolveProductTitle(props.product, locale.value, {
-    preferLongName: true,
-    preferH1Title: true,
-    uppercaseBrand: true,
-  })
+  return resolveProductLongName(props.product, locale.value)
 })
 
 const productBrandName = computed(() =>
@@ -435,8 +441,8 @@ const compareButtonTitle = computed(() => {
 const compareButtonAriaLabel = computed(() => {
   const productName =
     heroTitle.value ||
-    props.product.identity?.bestName ||
-    props.product.base?.bestName
+    resolveProductShortName(props.product, locale.value) ||
+    ''
 
   if (isCompareSelected.value) {
     if (te('product.hero.compare.ariaSelected')) {
@@ -620,6 +626,14 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   margin: 0;
   color: rgb(var(--v-theme-text-neutral-strong));
   text-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.product-hero__short-description {
+  margin: 0.65rem auto 0;
+  max-width: 680px;
+  font-size: 1.05rem;
+  color: rgb(var(--v-theme-text-neutral-secondary));
+  text-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
 }
 
 .product-hero__breadcrumbs {

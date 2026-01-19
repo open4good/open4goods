@@ -5,6 +5,7 @@ import type {
   AiReviewDto,
 } from '~~/shared/api-client'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { resolveProductTitle } from '~/utils/_product-title-resolver'
 
 export interface CompareProductReview {
   description: string | null
@@ -91,12 +92,11 @@ const normaliseReview = (
 
 const resolveTitle = (product: ProductDto): string => {
   return (
-    product.identity?.bestName ??
-    product.base?.bestName ??
-    product.names?.h1Title ??
-    product.names?.longestOfferName ??
-    product.identity?.model ??
-    product.identity?.brand ??
+    resolveProductTitle(product, undefined, {
+      preferLongName: true,
+      preferH1Title: true,
+    }) ||
+    product.names?.longestOfferName ||
     '#'
   )
 }

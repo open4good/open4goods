@@ -46,9 +46,12 @@
         <div class="product-tile-card__content">
           <div class="product-tile-card__header">
             <div class="product-tile-card__header-top">
-              <h3 class="product-tile-card__title text-truncate">
-                {{ displayTitle }}
-              </h3>
+              <ProductDesignation
+                :product="product"
+                variant="card"
+                title-tag="h3"
+                title-class="product-tile-card__title text-truncate"
+              />
             </div>
             <div
               v-if="hasAttributes"
@@ -138,9 +141,12 @@
         >
           <div class="product-tile-card__header">
             <div class="product-tile-card__header-top">
-              <h3 class="product-tile-card__title text-truncate">
-                {{ displayTitle }}
-              </h3>
+              <ProductDesignation
+                :product="product"
+                variant="card"
+                title-tag="h3"
+                title-class="product-tile-card__title text-truncate"
+              />
             </div>
             <div
               v-if="hasAttributes"
@@ -254,7 +260,8 @@ import { computed } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CategoryProductCompareToggle from '~/components/category/products/CategoryProductCompareToggle.vue'
-import { resolveProductTitle } from '~/utils/_product-title-resolver'
+import ProductDesignation from '~/components/product/ProductDesignation.vue'
+import { resolveProductShortName } from '~/utils/_product-title-resolver'
 
 export type ProductTileAttribute = {
   key: string
@@ -299,16 +306,20 @@ const props = withDefaults(
   }
 )
 
+const { locale } = useI18n()
+
 const subtitle = computed(
   () =>
     props.product.identity?.model ??
-    props.product.identity?.bestName ??
+    props.product.identity?.brand ??
     (props.product.gtin ? `#${props.product.gtin}` : props.untitledLabel)
 )
 
 const hasAttributes = computed(() => props.attributes.length > 0)
 
-const displayTitle = computed(() => resolveProductTitle(props.product))
+const displayTitle = computed(() =>
+  resolveProductShortName(props.product, locale.value)
+)
 </script>
 
 <style scoped lang="scss">

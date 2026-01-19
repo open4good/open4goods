@@ -43,6 +43,7 @@ import {
   useProductCompareStore,
   type CompareListBlockReason,
 } from '~/stores/useProductCompareStore'
+import { resolveProductShortName } from '~/utils/_product-title-resolver'
 
 const props = withDefaults(
   defineProps<{
@@ -62,7 +63,7 @@ const emit = defineEmits<{
   (event: 'toggled', product: ProductDto, selected: boolean): void
 }>()
 
-const { t, te } = useI18n()
+const { t, te, locale } = useI18n()
 const compareStore = useProductCompareStore()
 
 const isSelected = computed(() => compareStore.hasProduct(props.product))
@@ -98,10 +99,7 @@ const reasonMessage = (reason: CompareListBlockReason | undefined) => {
 }
 
 const productDisplayName = (product: ProductDto) =>
-  product.identity?.bestName ??
-  product.base?.bestName ??
-  product.identity?.model ??
-  product.identity?.brand ??
+  resolveProductShortName(product, locale.value) ||
   t('category.products.untitledProduct')
 
 const eligibility = computed(() => compareStore.canAddProduct(props.product))
