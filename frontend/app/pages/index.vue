@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useTheme } from 'vuetify'
@@ -18,6 +18,7 @@ import HomeObjectionsSection from '~/components/home/sections/HomeObjectionsSect
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
 import ParallaxWidget from '~/components/shared/ui/ParallaxWidget.vue'
+import SectionReveal from '~/components/shared/ui/SectionReveal.vue'
 import type {
   CategorySuggestionItem,
   ProductSuggestionItem,
@@ -221,16 +222,6 @@ const parallaxAplatObjections = computed(() =>
   resolveAplatVariant(objectionsAplatSuffix.value)
 )
 
-type AnimatedSectionKey =
-  | 'problems'
-  | 'solution'
-  | 'features'
-  | 'blog'
-  | 'objections'
-  | 'faq'
-  | 'faq'
-  | 'cta'
-
 const prefersReducedMotion = usePreferredReducedMotion()
 const accessibilityStore = useAccessibilityStore()
 const { prefersReducedMotionOverride } = storeToRefs(accessibilityStore)
@@ -239,48 +230,6 @@ const shouldReduceMotion = computed(
     prefersReducedMotionOverride.value ||
     prefersReducedMotion.value === 'reduce'
 )
-
-const animatedSections = reactive<Record<AnimatedSectionKey, boolean>>({
-  problems: false,
-  solution: false,
-  features: false,
-  blog: false,
-  objections: false,
-  faq: false,
-  cta: false,
-})
-
-const markAllSectionsVisible = () => {
-  ;(Object.keys(animatedSections) as AnimatedSectionKey[]).forEach(key => {
-    animatedSections[key] = true
-  })
-}
-
-watch(
-  shouldReduceMotion,
-  shouldReduce => {
-    if (shouldReduce) {
-      markAllSectionsVisible()
-    }
-  },
-  { immediate: true }
-)
-
-const createIntersectHandler =
-  (key: AnimatedSectionKey) =>
-  (
-    _entries: IntersectionObserverEntry[],
-    _observer: IntersectionObserver,
-    isIntersecting: boolean
-  ) => {
-    if (animatedSections[key]) {
-      return
-    }
-
-    if (shouldReduceMotion.value || isIntersecting) {
-      animatedSections[key] = true
-    }
-  }
 
 const toSafeString = (value: unknown) => {
   if (typeof value === 'string') {
@@ -843,33 +792,23 @@ useHead(() => ({
             id="home-essentials"
             class="home-page__section-wrapper home-page__stack"
           >
-            <div
-              v-intersect="createIntersectHandler('problems')"
-              class="home-page__section"
-            >
-              <v-slide-y-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.problems">
-                  <HomeProblemsSection
-                    :items="problemItems"
-                    :reveal="animatedSections.problems"
-                  />
-                </div>
-              </v-slide-y-transition>
-            </div>
+            <SectionReveal class="home-page__section" transition="slide-y">
+              <template #default="{ reveal }">
+                <HomeProblemsSection :items="problemItems" :reveal="reveal" />
+              </template>
+            </SectionReveal>
 
-            <div
-              v-intersect="createIntersectHandler('solution')"
+            <SectionReveal
               class="home-page__section"
+              transition="slide-y-reverse"
             >
-              <v-slide-y-reverse-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.solution">
-                  <HomeSolutionSection
-                    :benefits="solutionBenefits"
-                    :reveal="animatedSections.solution"
-                  />
-                </div>
-              </v-slide-y-reverse-transition>
-            </div>
+              <template #default="{ reveal }">
+                <HomeSolutionSection
+                  :benefits="solutionBenefits"
+                  :reveal="reveal"
+                />
+              </template>
+            </SectionReveal>
           </section>
         </ParallaxWidget>
 
@@ -885,19 +824,14 @@ useHead(() => ({
           content-align="center"
         >
           <section id="home-features" class="home-page__section-wrapper">
-            <div
-              v-intersect="createIntersectHandler('features')"
-              class="home-page__section"
-            >
-              <v-scale-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.features">
-                  <HomeFeaturesSection
-                    :features="featureCards"
-                    :reveal="animatedSections.features"
-                  />
-                </div>
-              </v-scale-transition>
-            </div>
+            <SectionReveal class="home-page__section" transition="scale">
+              <template #default="{ reveal }">
+                <HomeFeaturesSection
+                  :features="featureCards"
+                  :reveal="reveal"
+                />
+              </template>
+            </SectionReveal>
           </section>
         </ParallaxWidget>
 
@@ -918,20 +852,15 @@ useHead(() => ({
             id="home-knowledge-blog"
             class="home-page__section-wrapper home-page__stack"
           >
-            <div
-              v-intersect="createIntersectHandler('blog')"
-              class="home-page__section"
-            >
-              <v-slide-x-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.blog">
-                  <HomeBlogSection
-                    :loading="blogLoading"
-                    :items="enrichedBlogItems"
-                    :reveal="animatedSections.blog"
-                  />
-                </div>
-              </v-slide-x-transition>
-            </div>
+            <SectionReveal class="home-page__section" transition="slide-x">
+              <template #default="{ reveal }">
+                <HomeBlogSection
+                  :loading="blogLoading"
+                  :items="enrichedBlogItems"
+                  :reveal="reveal"
+                />
+              </template>
+            </SectionReveal>
           </section>
         </ParallaxWidget>
 
@@ -952,19 +881,14 @@ useHead(() => ({
             id="home-knowledge-objections"
             class="home-page__section-wrapper home-page__stack"
           >
-            <div
-              v-intersect="createIntersectHandler('objections')"
+            <SectionReveal
               class="home-page__section"
+              transition="slide-x-reverse"
             >
-              <v-slide-x-reverse-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.objections">
-                  <HomeObjectionsSection
-                    :items="objectionItems"
-                    :reveal="animatedSections.objections"
-                  />
-                </div>
-              </v-slide-x-reverse-transition>
-            </div>
+              <template #default="{ reveal }">
+                <HomeObjectionsSection :items="objectionItems" :reveal="reveal" />
+              </template>
+            </SectionReveal>
           </section>
         </ParallaxWidget>
 
@@ -983,34 +907,20 @@ useHead(() => ({
             id="home-cta"
             class="home-page__section-wrapper home-page__stack home-page__stack--compact"
           >
-            <div
-              v-intersect="createIntersectHandler('faq')"
-              class="home-page__section"
-            >
-              <v-fade-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.faq">
-                  <HomeFaqSection :items="faqPanels" />
-                </div>
-              </v-fade-transition>
-            </div>
+            <SectionReveal class="home-page__section" transition="fade">
+              <HomeFaqSection :items="faqPanels" />
+            </SectionReveal>
 
-            <div
-              v-intersect="createIntersectHandler('cta')"
-              class="home-page__section"
-            >
-              <v-slide-y-transition :disabled="shouldReduceMotion">
-                <div v-show="animatedSections.cta">
-                  <HomeCtaSection
-                    v-model:search-query="searchQuery"
-                    :categories-landing-url="categoriesLandingUrl"
-                    :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-                    @submit="handleSearchSubmit"
-                    @select-category="handleCategorySuggestion"
-                    @select-product="handleProductSuggestion"
-                  />
-                </div>
-              </v-slide-y-transition>
-            </div>
+            <SectionReveal class="home-page__section" transition="slide-y">
+              <HomeCtaSection
+                v-model:search-query="searchQuery"
+                :categories-landing-url="categoriesLandingUrl"
+                :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+                @submit="handleSearchSubmit"
+                @select-category="handleCategorySuggestion"
+                @select-product="handleProductSuggestion"
+              />
+            </SectionReveal>
           </section>
         </ParallaxWidget>
       </div>

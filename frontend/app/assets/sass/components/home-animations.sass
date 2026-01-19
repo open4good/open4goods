@@ -3,7 +3,8 @@
     .home-reveal-item
       opacity: 0
       transform: var(--reveal-transform, translateY(14px))
-      transition: opacity 0.45s ease, transform 0.45s ease
+      filter: var(--reveal-filter, none)
+      transition: opacity 0.45s ease, transform 0.45s ease, filter 0.45s ease
       transition-delay: var(--reveal-delay, 0ms)
       will-change: opacity, transform
 
@@ -11,10 +12,15 @@
     .home-reveal-item
       opacity: 1
       transform: var(--reveal-transform-visible, translateY(0))
+      filter: var(--reveal-filter-visible, none)
 
 .home-reveal-item--scale
   --reveal-transform: translateY(12px) scale(0.98)
   --reveal-transform-visible: translateY(0) scale(1)
+
+.home-reveal-item--blur
+  --reveal-filter: blur(6px)
+  --reveal-filter-visible: blur(0)
 
 .home-hover-card
   transition: transform 0.25s ease, box-shadow 0.25s ease
@@ -30,6 +36,7 @@
     .home-reveal-item
       opacity: 1 !important
       transform: none !important
+      filter: none !important
       transition: none !important
 
   .home-hover-card
@@ -43,6 +50,7 @@
     .home-reveal-item
       opacity: 1 !important
       transform: none !important
+      filter: none !important
       transition: none !important
 
   .home-hover-card
