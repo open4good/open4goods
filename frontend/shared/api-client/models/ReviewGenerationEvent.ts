@@ -14,31 +14,31 @@
 
 import { mapValues } from '../runtime';
 /**
- * 
+ * Event entry representing a progress update
  * @export
  * @interface ReviewGenerationEvent
  */
 export interface ReviewGenerationEvent {
     /**
-     * 
+     * Type of the progress event
      * @type {string}
      * @memberof ReviewGenerationEvent
      */
     type?: ReviewGenerationEventTypeEnum;
     /**
-     * 
+     * Message associated with the event
      * @type {string}
      * @memberof ReviewGenerationEvent
      */
     message?: string;
     /**
-     * 
+     * Streamed content chunk, if any
      * @type {string}
      * @memberof ReviewGenerationEvent
      */
     chunk?: string;
     /**
-     * 
+     * Timestamp of the event in epoch milliseconds
      * @type {number}
      * @memberof ReviewGenerationEvent
      */

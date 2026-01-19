@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { AiRating } from './AiRating';
+import {
+    AiRatingFromJSON,
+    AiRatingFromJSONTyped,
+    AiRatingToJSON,
+    AiRatingToJSONTyped,
+} from './AiRating';
 import type { AiSource } from './AiSource';
 import {
     AiSourceFromJSON,
@@ -29,83 +36,107 @@ import {
 } from './AiAttribute';
 
 /**
- * 
+ * Represents an AI-generated review of a product, including descriptions, pros and cons, data quality assessment, and sourced information.
  * @export
  * @interface AiReview
  */
 export interface AiReview {
     /**
-     * 
+     * Detailed description of the product
      * @type {string}
      * @memberof AiReview
      */
     description: string;
     /**
-     * 
+     * Detailed description of the product
+     * @type {string}
+     * @memberof AiReview
+     */
+    technicalOneline: string;
+    /**
+     * Detailed description of the product
+     * @type {string}
+     * @memberof AiReview
+     */
+    ecologicalOneline: string;
+    /**
+     * Detailed description of the product
+     * @type {string}
+     * @memberof AiReview
+     */
+    communityOneline: string;
+    /**
+     * Brief summary of the product
      * @type {string}
      * @memberof AiReview
      */
     shortDescription: string;
     /**
-     * 
+     * Medium-length title
      * @type {string}
      * @memberof AiReview
      */
     mediumTitle: string;
     /**
-     * 
+     * Short title
      * @type {string}
      * @memberof AiReview
      */
     shortTitle: string;
     /**
-     * 
+     * Technical review of the product
      * @type {string}
      * @memberof AiReview
      */
     technicalReview: string;
     /**
-     * 
+     * Ecological review of the product
      * @type {string}
      * @memberof AiReview
      */
     ecologicalReview: string;
     /**
-     * 
+     * Summary of the product review
      * @type {string}
      * @memberof AiReview
      */
     summary: string;
     /**
-     * 
+     * List of pros
      * @type {Array<string>}
      * @memberof AiReview
      */
     pros: Array<string>;
     /**
-     * 
+     * List of cons
      * @type {Array<string>}
      * @memberof AiReview
      */
     cons: Array<string>;
     /**
-     * 
+     * List of sources used for the review
      * @type {Array<AiSource>}
      * @memberof AiReview
      */
     sources: Array<AiSource>;
     /**
-     * 
+     * List of product attributes
      * @type {Array<AiAttribute>}
      * @memberof AiReview
      */
     attributes: Array<AiAttribute>;
     /**
-     * 
+     * Quality of external data used for the review
      * @type {string}
      * @memberof AiReview
      */
     dataQuality: string;
+    /**
+     * List of ratings found in sources
+     * @type {Array<AiRating>}
+     * @memberof AiReview
+     */
+    ratings?: Array<AiRating>;
 }
 
 /**
@@ -113,6 +144,9 @@ export interface AiReview {
  */
 export function instanceOfAiReview(value: object): value is AiReview {
     if (!('description' in value) || value['description'] === undefined) return false;
+    if (!('technicalOneline' in value) || value['technicalOneline'] === undefined) return false;
+    if (!('ecologicalOneline' in value) || value['ecologicalOneline'] === undefined) return false;
+    if (!('communityOneline' in value) || value['communityOneline'] === undefined) return false;
     if (!('shortDescription' in value) || value['shortDescription'] === undefined) return false;
     if (!('mediumTitle' in value) || value['mediumTitle'] === undefined) return false;
     if (!('shortTitle' in value) || value['shortTitle'] === undefined) return false;
@@ -138,6 +172,9 @@ export function AiReviewFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
     return {
         
         'description': json['description'],
+        'technicalOneline': json['technicalOneline'],
+        'ecologicalOneline': json['ecologicalOneline'],
+        'communityOneline': json['communityOneline'],
         'shortDescription': json['short_description'],
         'mediumTitle': json['mediumTitle'],
         'shortTitle': json['shortTitle'],
@@ -149,6 +186,7 @@ export function AiReviewFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'sources': ((json['sources'] as Array<any>).map(AiSourceFromJSON)),
         'attributes': ((json['attributes'] as Array<any>).map(AiAttributeFromJSON)),
         'dataQuality': json['dataQuality'],
+        'ratings': json['ratings'] == null ? undefined : ((json['ratings'] as Array<any>).map(AiRatingFromJSON)),
     };
 }
 
@@ -164,6 +202,9 @@ export function AiReviewToJSONTyped(value?: AiReview | null, ignoreDiscriminator
     return {
         
         'description': value['description'],
+        'technicalOneline': value['technicalOneline'],
+        'ecologicalOneline': value['ecologicalOneline'],
+        'communityOneline': value['communityOneline'],
         'short_description': value['shortDescription'],
         'mediumTitle': value['mediumTitle'],
         'shortTitle': value['shortTitle'],
@@ -175,6 +216,7 @@ export function AiReviewToJSONTyped(value?: AiReview | null, ignoreDiscriminator
         'sources': ((value['sources'] as Array<any>).map(AiSourceToJSON)),
         'attributes': ((value['attributes'] as Array<any>).map(AiAttributeToJSON)),
         'dataQuality': value['dataQuality'],
+        'ratings': value['ratings'] == null ? undefined : ((value['ratings'] as Array<any>).map(AiRatingToJSON)),
     };
 }
 

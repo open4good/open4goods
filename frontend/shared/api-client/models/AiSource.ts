@@ -14,31 +14,31 @@
 
 import { mapValues } from '../runtime';
 /**
- * 
+ * Source information for the review
  * @export
  * @interface AiSource
  */
 export interface AiSource {
     /**
-     * 
+     * Source number
      * @type {number}
      * @memberof AiSource
      */
     number: number;
     /**
-     * 
+     * Source name
      * @type {string}
      * @memberof AiSource
      */
     name: string;
     /**
-     * 
+     * Source description
      * @type {string}
      * @memberof AiSource
      */
     description: string;
     /**
-     * 
+     * Source URL
      * @type {string}
      * @memberof AiSource
      */

@@ -33,6 +33,7 @@ models/AggregationRequestDto.ts
 models/AggregationResponseDto.ts
 models/AiAttribute.ts
 models/AiPromptsConfig.ts
+models/AiRating.ts
 models/AiReview.ts
 models/AiReviewAttributeDto.ts
 models/AiReviewDto.ts

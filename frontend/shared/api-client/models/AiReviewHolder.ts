@@ -22,37 +22,37 @@ import {
 } from './AiReview';
 
 /**
- * 
+ * Holder for AI generated review and metadata
  * @export
  * @interface AiReviewHolder
  */
 export interface AiReviewHolder {
     /**
-     * 
+     * The generated review
      * @type {AiReview}
      * @memberof AiReviewHolder
      */
     review?: AiReview;
     /**
-     * 
+     * Map of source URLs to estimated token counts
      * @type {{ [key: string]: number; }}
      * @memberof AiReviewHolder
      */
     sources?: { [key: string]: number; };
     /**
-     * 
+     * True if enough data was available to generate review
      * @type {boolean}
      * @memberof AiReviewHolder
      */
     enoughData?: boolean;
     /**
-     * 
+     * Total tokens used for generation
      * @type {number}
      * @memberof AiReviewHolder
      */
     totalTokens?: number;
     /**
-     * 
+     * Creation timestamp in epoch milliseconds
      * @type {number}
      * @memberof AiReviewHolder
      */

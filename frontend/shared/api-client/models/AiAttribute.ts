@@ -14,25 +14,25 @@
 
 import { mapValues } from '../runtime';
 /**
- * 
+ * Product attribute derived from review
  * @export
  * @interface AiAttribute
  */
 export interface AiAttribute {
     /**
-     * 
+     * Attribute name
      * @type {string}
      * @memberof AiAttribute
      */
     name: string;
     /**
-     * 
+     * Attribute value
      * @type {string}
      * @memberof AiAttribute
      */
     value: string;
     /**
-     * 
+     * Reference source number
      * @type {number}
      * @memberof AiAttribute
      */

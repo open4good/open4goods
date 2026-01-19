@@ -106,6 +106,24 @@ export interface AiReviewDto {
      * @memberof AiReviewDto
      */
     dataQuality?: string;
+    /**
+     * Short technical summary of the product (max 20 words)
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    technicalOneline?: string;
+    /**
+     * Short ecological summary of the product (max 20 words)
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    ecologicalOneline?: string;
+    /**
+     * Short community summary of the product (max 20 words)
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    communityOneline?: string;
 }
 
 /**
@@ -137,6 +155,9 @@ export function AiReviewDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'sources': json['sources'] == null ? undefined : ((json['sources'] as Array<any>).map(AiReviewSourceDtoFromJSON)),
         'attributes': json['attributes'] == null ? undefined : ((json['attributes'] as Array<any>).map(AiReviewAttributeDtoFromJSON)),
         'dataQuality': json['dataQuality'] == null ? undefined : json['dataQuality'],
+        'technicalOneline': json['technicalOneline'] == null ? undefined : json['technicalOneline'],
+        'ecologicalOneline': json['ecologicalOneline'] == null ? undefined : json['ecologicalOneline'],
+        'communityOneline': json['communityOneline'] == null ? undefined : json['communityOneline'],
     };
 }
 
@@ -163,6 +184,9 @@ export function AiReviewDtoToJSONTyped(value?: AiReviewDto | null, ignoreDiscrim
         'sources': value['sources'] == null ? undefined : ((value['sources'] as Array<any>).map(AiReviewSourceDtoToJSON)),
         'attributes': value['attributes'] == null ? undefined : ((value['attributes'] as Array<any>).map(AiReviewAttributeDtoToJSON)),
         'dataQuality': value['dataQuality'],
+        'technicalOneline': value['technicalOneline'],
+        'ecologicalOneline': value['ecologicalOneline'],
+        'communityOneline': value['communityOneline'],
     };
 }
 

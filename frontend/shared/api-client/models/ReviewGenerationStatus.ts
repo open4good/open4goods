@@ -29,79 +29,79 @@ import {
 } from './AiReviewHolder';
 
 /**
- * 
+ * Status of a review generation process
  * @export
  * @interface ReviewGenerationStatus
  */
 export interface ReviewGenerationStatus {
     /**
-     * 
+     * UPC/GTIN of the product
      * @type {number}
      * @memberof ReviewGenerationStatus
      */
     upc?: number;
     /**
-     * 
+     * Current status of the process
      * @type {string}
      * @memberof ReviewGenerationStatus
      */
     status?: ReviewGenerationStatusStatusEnum;
     /**
-     * 
+     * Start time in epoch milliseconds
      * @type {number}
      * @memberof ReviewGenerationStatus
      */
     startTime?: number;
     /**
-     * 
+     * End time in epoch milliseconds
      * @type {number}
      * @memberof ReviewGenerationStatus
      */
     endTime?: number;
     /**
-     * 
+     * Resulting AI review, present if successful
      * @type {AiReviewHolder}
      * @memberof ReviewGenerationStatus
      */
     result?: AiReviewHolder;
     /**
-     * 
+     * Error message, present if failed
      * @type {string}
      * @memberof ReviewGenerationStatus
      */
     errorMessage?: string;
     /**
-     * 
+     * Progress percentage
      * @type {number}
      * @memberof ReviewGenerationStatus
      */
     percent?: number;
     /**
-     * 
+     * List of processing messages tracking internal state
      * @type {Array<string>}
      * @memberof ReviewGenerationStatus
      */
     messages?: Array<string>;
     /**
-     * 
+     * List of progress events emitted during streaming
      * @type {Array<ReviewGenerationEvent>}
      * @memberof ReviewGenerationStatus
      */
     events?: Array<ReviewGenerationEvent>;
     /**
-     * 
+     * Duration of the process in milliseconds
      * @type {number}
      * @memberof ReviewGenerationStatus
      */
     duration?: number;
     /**
-     * 
+     * Estimated remaining time in milliseconds
      * @type {number}
      * @memberof ReviewGenerationStatus
      */
     remaining?: number;
     /**
-     * 
+     * The product GTIN associated with the generation request
      * @type {string}
      * @memberof ReviewGenerationStatus
      */
