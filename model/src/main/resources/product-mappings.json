@@ -174,10 +174,6 @@
       "type": "object",
       "dynamic": "false"
     },
-    "genaiTexts": {
-      "type": "object",
-      "enabled": false
-    },
     "categoriesByDatasources": {
       "type": "object",
       "enabled": false

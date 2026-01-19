@@ -817,7 +817,6 @@ export const ProductIncludeEnum = {
     Datasources: 'datasources',
     Scores: 'scores',
     AiReview: 'aiReview',
-    AiTexts: 'aiTexts',
     Eprel: 'eprel',
     Offers: 'offers',
     Timeline: 'timeline'
@@ -843,7 +842,6 @@ export const ProductsIncludeEnum = {
     Datasources: 'datasources',
     Scores: 'scores',
     AiReview: 'aiReview',
-    AiTexts: 'aiTexts',
     Eprel: 'eprel',
     Offers: 'offers',
     Timeline: 'timeline'
