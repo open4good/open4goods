@@ -67,7 +67,9 @@ public record ProductDto(
                 offersCount("offersCount"),
                 brand("attributes.referentielAttributes.BRAND"),
                 model("attributes.referentielAttributes.MODEL"),
-                ecoscore("scores.ECOSCORE.value");
+                ecoscore("scores.ECOSCORE.value"),
+                creationDate("creationDate"),
+                lastChange("lastChange");
 
 
                 private final String text;
@@ -105,7 +107,9 @@ public record ProductDto(
                 condition(FilterField.condition),
                 brand(FilterField.brand),
                 country(FilterField.country),
-                ecoscore(FilterField.ecoscore);
+                ecoscore(FilterField.ecoscore),
+                creationDate(FilterField.creationDate),
+                lastChange(FilterField.lastChange);
 
                 private final FilterField delegate;
 

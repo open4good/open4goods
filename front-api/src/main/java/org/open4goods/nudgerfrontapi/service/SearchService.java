@@ -135,6 +135,7 @@ public class SearchService {
 	private static final String EXCLUDED_CAUSES_FIELD = FilterField.excludedCauses.fieldPath();
 	private static final Set<String> BOOLEAN_AGGREGATION_FIELDS = Set.of();
 	private static final float MIN_SEMANTIC_SCORE = 0.9f;
+	private static final double OFFERS_COUNT_SEMANTIC_BOOST = 0.05d;
 
 	private final ProductRepository repository;
 	private final VerticalsConfigService verticalsConfigService;
@@ -351,7 +352,7 @@ public class SearchService {
 				}
 			} else if (mode == SearchMode.global) {
 				SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
-				List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage);
+				List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage, false);
 				if (fallback != null && !fallback.isEmpty()) {
 					return new GlobalSearchResult(List.of(), fallback, List.of(), verticalCta, mode, fallbackTriggered);
 				}
@@ -1170,7 +1171,7 @@ public class SearchService {
 
 			for (String verticalId : candidateVerticals) {
 				SearchHits<Product> hits = executeSemanticSearch(verticalId, embedding, null, true, pageable);
-				combined.addAll(mapHits(hits, domainLanguage));
+				combined.addAll(mapHits(hits, domainLanguage, true));
 			}
 		}
 
@@ -1194,7 +1195,7 @@ public class SearchService {
 		if (hits == null || hits.isEmpty()) {
 			return List.of();
 		}
-		return mapHits(hits, domainLanguage).stream()
+		return mapHits(hits, domainLanguage, true).stream()
 				.filter(hit -> !StringUtils.hasText(hit.verticalId()))
 				.limit(GLOBAL_SEARCH_LIMIT)
 				.toList();
@@ -1278,19 +1279,31 @@ public class SearchService {
 			throw e;
 		}
 
-		return hits.getSearchHits().stream().skip((long) pageNumber * pageSize).limit(pageSize)
-				.map(hit -> mapHit(hit, domainLanguage)).filter(Objects::nonNull).toList();
+		List<SearchHit<Product>> sortedHits = hits.getSearchHits().stream()
+				.sorted(Comparator.comparingDouble(this::resolveSemanticBoostedScore).reversed())
+				.toList();
+		return sortedHits.stream().skip((long) pageNumber * pageSize).limit(pageSize)
+				.map(hit -> mapHit(hit, domainLanguage, resolveSemanticBoostedScore(hit))).filter(Objects::nonNull)
+				.toList();
 	}
 
-	private List<GlobalSearchHit> mapHits(SearchHits<Product> hits, DomainLanguage domainLanguage) {
+	private List<GlobalSearchHit> mapHits(SearchHits<Product> hits, DomainLanguage domainLanguage,
+			boolean applyOffersCountBoost) {
 		if (hits == null || hits.isEmpty()) {
 			return List.of();
 		}
-		return hits.getSearchHits().stream().map(hit -> mapHit(hit, domainLanguage)).filter(Objects::nonNull)
+		return hits.getSearchHits().stream()
+				.map(hit -> mapHit(hit, domainLanguage,
+						applyOffersCountBoost ? resolveSemanticBoostedScore(hit) : hit.getScore()))
+				.filter(Objects::nonNull)
 				.sorted(Comparator.comparing(GlobalSearchHit::score).reversed()).toList();
 	}
 
 	private GlobalSearchHit mapHit(SearchHit<Product> hit, DomainLanguage domainLanguage) {
+		return mapHit(hit, domainLanguage, hit.getScore());
+	}
+
+	private GlobalSearchHit mapHit(SearchHit<Product> hit, DomainLanguage domainLanguage, double score) {
 		if (hit == null || hit.getContent() == null) {
 			return null;
 		}
@@ -1300,7 +1313,6 @@ public class SearchService {
 		if (productDto == null) {
 			return null;
 		}
-		double score = hit.getScore();
 		return new GlobalSearchHit(product.getVertical(), productDto, score);
 	}
 
@@ -1371,16 +1383,46 @@ public class SearchService {
 			return hits;
 		}
 
+		List<SearchHit<Product>> sortedHits = hits.getSearchHits().stream()
+				.sorted(Comparator.comparingDouble(this::resolveSemanticBoostedScore).reversed())
+				.toList();
+
 		int start = Math.toIntExact(pageable.getOffset());
-		int end = Math.min(start + pageable.getPageSize(), hits.getSearchHits().size());
-		if (start >= hits.getSearchHits().size()) {
+		int end = Math.min(start + pageable.getPageSize(), sortedHits.size());
+		if (start >= sortedHits.size()) {
 			return new SearchHitsImpl<>(hits.getTotalHits(), hits.getTotalHitsRelation(), hits.getMaxScore(),
 					Duration.ZERO, null, null, List.of(), hits.getAggregations(), hits.getSuggest(), null);
 		}
 
-		List<SearchHit<Product>> sliced = hits.getSearchHits().subList(start, end);
+		List<SearchHit<Product>> sliced = sortedHits.subList(start, end);
 		return new SearchHitsImpl<>(hits.getTotalHits(), hits.getTotalHitsRelation(), hits.getMaxScore(), Duration.ZERO,
 				null, null, sliced, hits.getAggregations(), hits.getSuggest(), null);
+	}
+
+	/**
+	 * Compute a lightly boosted semantic score based on the number of offers.
+	 *
+	 * @param hit semantic search hit to score
+	 * @return boosted score value
+	 */
+	private double resolveSemanticBoostedScore(SearchHit<Product> hit) {
+		if (hit == null) {
+			return 0.0d;
+		}
+
+		double baseScore = hit.getScore();
+		Product product = hit.getContent();
+		if (product == null || product.getOffersCount() == null) {
+			return baseScore;
+		}
+
+		int offersCount = Math.max(0, product.getOffersCount());
+		if (offersCount == 0) {
+			return baseScore;
+		}
+
+		double boost = Math.log10(offersCount + 1.0d) * OFFERS_COUNT_SEMANTIC_BOOST;
+		return baseScore + boost;
 	}
 
 	/**

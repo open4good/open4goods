@@ -880,8 +880,11 @@
         "brand": "Marque",
         "condition": "État des offres",
         "country": "Code pays du GTIN",
+        "creationDate": "Date de création",
         "datasource": "Sources de données",
+        "ecoscore": "Impact score",
         "googleTaxonomyId": "Catégorie produit Google",
+        "lastChange": "Dernière mise à jour",
         "offersCount": {
           "one": "{count} offre",
           "other": "{count} offres"
@@ -906,6 +909,11 @@
       "showMoreTechnical": "Plus de filtres",
       "technicalTitle": "Filtres techniques",
       "options": {
+        "price.conditions": {
+          "NEW": "Neuf",
+          "OCCASION": "Occasion",
+          "USED": "Occasion"
+        },
         "excludedCauses": {
           "ES-UNKNOWN": "Cause inconnue"
         }
