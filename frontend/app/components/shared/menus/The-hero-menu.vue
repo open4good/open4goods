@@ -7,642 +7,649 @@
     >
       <!-- Desktop menu -->
       <div class="d-flex justify-space-between align-center ga-4 w-100">
-        <div
-          class="flex-grow-1 d-flex justify-center px-4"
-          style="max-width: 100%"
-        >
+        <div class="flex-grow-1" />
+
+        <div class="d-flex align-center ga-4">
           <div
             v-if="showMenuSearch"
             ref="menuSearchRef"
             class="main-menu-search"
             :class="{ 'main-menu-search--open': isSearchOpen }"
           >
-          <v-btn
-            v-if="!isSearchOpen"
-            class="main-menu-search__activator"
-            icon="mdi-magnify"
-            variant="text"
-            :aria-label="t('siteIdentity.menu.search.openLabel')"
-            @click="openSearch"
-          />
+            <v-btn
+              v-if="!isSearchOpen"
+              class="main-menu-search__activator"
+              icon="mdi-magnify"
+              variant="text"
+              :aria-label="t('siteIdentity.menu.search.openLabel')"
+              @click="openSearch"
+            />
 
-          <v-expand-x-transition>
-            <div v-if="isSearchOpen" class="main-menu-search__field-wrapper">
-              <SearchSuggestField
-                v-model="searchQuery"
-                class="main-menu-search__field"
-                :label="t('siteIdentity.menu.search.label')"
-                :placeholder="t('siteIdentity.menu.search.placeholder')"
-                :aria-label="t('siteIdentity.menu.search.ariaLabel')"
-                :min-chars="MIN_SEARCH_QUERY_LENGTH"
-                @submit="handleSearchSubmit"
-                @select-category="handleCategorySuggestion"
-                @select-product="handleProductSuggestion"
-                @update:model-value="updateSearchQuery"
-                @clear="handleSearchClear"
-              >
-                <template #append-inner>
-                  <div class="main-menu-search__actions">
-                    <v-btn
-                      icon="mdi-arrow-right"
-                      variant="plain"
-                      rounded="0"
-                      size="small"
-                      :aria-label="t('siteIdentity.menu.search.submitLabel')"
-                      @click.prevent="handleSearchSubmit"
-                    />
-                    <v-btn
-                      icon="mdi-close"
-                      variant="text"
-                      color="text-neutral-secondary"
-                      size="small"
-                      :aria-label="t('siteIdentity.menu.search.closeLabel')"
-                      @click.prevent="closeSearch"
-                    />
-                  </div>
-                </template>
-              </SearchSuggestField>
-            </div>
-          </v-expand-x-transition>
-        </div>
-      </div>
-
-      <div class="d-flex align-center ga-4">
-        <v-list class="d-flex justify-end font-weight-bold" role="menubar">
-          <template v-for="item in menuItems" :key="item.id">
-            <v-list-item
-              v-if="item.type === 'link'"
-              class="main-menu-items"
-              :class="{ active: isMenuItemActive(item) }"
-              role="menuitem"
-              @click="navigateToPage(item.path)"
-            >
-              <v-list-item-title>{{ item.label }}</v-list-item-title>
-            </v-list-item>
-
-            <div
-              v-else-if="item.type === 'products'"
-              class="main-menu-item main-menu-item--products"
-            >
-              <v-menu
-                open-on-hover
-                location="bottom"
-                transition="fade-transition"
-                :offset="[0, 12]"
-              >
-                <template #activator="{ props, isActive }">
-                  <v-list-item
-                    v-bind="props"
-                    class="main-menu-items main-menu-items--products"
-                    :class="{ active: isMenuItemActive(item) || isActive }"
-                    role="menuitem"
-                  >
-                    <v-list-item-title>
-                      <span class="main-menu-items__label">
-                        <span>{{ item.label }}</span>
-                        <v-icon
-                          class="main-menu-items__toggle-icon"
-                          :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-
-                <v-card
-                  class="products-menu"
-                  color="surface-default"
-                  elevation="8"
+            <v-expand-x-transition>
+              <div v-if="isSearchOpen" class="main-menu-search__field-wrapper">
+                <SearchSuggestField
+                  v-model="searchQuery"
+                  class="main-menu-search__field"
+                  :label="t('siteIdentity.menu.search.label')"
+                  :placeholder="t('siteIdentity.menu.search.placeholder')"
+                  :aria-label="t('siteIdentity.menu.search.ariaLabel')"
+                  :min-chars="MIN_SEARCH_QUERY_LENGTH"
+                  @submit="handleSearchSubmit"
+                  @select-category="handleCategorySuggestion"
+                  @select-product="handleProductSuggestion"
+                  @update:model-value="updateSearchQuery"
+                  @clear="handleSearchClear"
                 >
-                  <div class="products-menu__header">
-                    <v-avatar
-                      class="products-menu__avatar"
-                      size="44"
-                      color="surface-primary-080"
-                    >
-                      <v-icon icon="mdi-storefront-outline" color="primary" />
-                    </v-avatar>
-                    <div>
-                      <p class="products-menu__title">
-                        {{ item.copy.headerTitle }}
-                      </p>
-                      <p class="products-menu__subtitle">
-                        {{ item.copy.headerSubtitle }}
-                      </p>
+                  <template #append-inner>
+                    <div class="main-menu-search__actions">
+                      <v-btn
+                        icon="mdi-arrow-right"
+                        variant="plain"
+                        rounded="0"
+                        size="small"
+                        :aria-label="t('siteIdentity.menu.search.submitLabel')"
+                        @click.prevent="handleSearchSubmit"
+                      />
+                      <v-btn
+                        icon="mdi-close"
+                        variant="text"
+                        color="text-neutral-secondary"
+                        size="small"
+                        :aria-label="t('siteIdentity.menu.search.closeLabel')"
+                        @click.prevent="closeSearch"
+                      />
                     </div>
-                  </div>
+                  </template>
+                </SearchSuggestField>
+              </div>
+            </v-expand-x-transition>
+          </div>
+          <v-list class="d-flex justify-end font-weight-bold" role="menubar">
+            <template v-for="item in menuItems" :key="item.id">
+              <v-list-item
+                v-if="item.type === 'link'"
+                class="main-menu-items"
+                :class="{ active: isMenuItemActive(item) }"
+                role="menuitem"
+                @click="navigateToPage(item.path)"
+              >
+                <v-list-item-title>{{ item.label }}</v-list-item-title>
+              </v-list-item>
 
-                  <v-divider class="products-menu__divider" />
-
-                  <v-row class="products-menu__sections" align="stretch">
-                    <v-col cols="12" sm="5" class="products-menu__section">
-                      <p class="products-menu__section-title">
-                        {{ item.copy.sections.popularTitle }}
-                      </p>
-                      <p class="products-menu__section-description">
-                        {{ item.copy.sections.popularDescription }}
-                      </p>
-
-                      <div
-                        v-if="item.loading"
-                        class="products-menu__skeleton-group"
-                      >
-                        <v-skeleton-loader
-                          v-for="skeletonIndex in 2"
-                          :key="`products-menu-popular-skeleton-${skeletonIndex}`"
-                          type="list-item-two-line"
-                          class="products-menu__skeleton"
-                        />
-                      </div>
-
-                      <div
-                        v-else-if="item.popularCategories.length"
-                        class="products-menu__popular-list"
-                      >
-                        <NuxtLink
-                          v-for="category in item.popularCategories"
-                          :key="category.id"
-                          :to="category.href"
-                          class="products-menu__popular-card"
-                          role="menuitem"
-                        >
-                          <v-avatar
-                            class="products-menu__popular-avatar"
-                            size="36"
-                          >
-                            <v-img
-                              v-if="category.image"
-                              :src="category.image"
-                              :alt="category.title"
-                              cover
-                            />
-                            <v-icon v-else icon="mdi-image-outline" size="28" />
-                          </v-avatar>
-                          <p class="products-menu__popular-title">
-                            {{ category.title }}
-                          </p>
+              <div
+                v-else-if="item.type === 'products'"
+                class="main-menu-item main-menu-item--products"
+              >
+                <v-menu
+                  open-on-hover
+                  location="bottom"
+                  transition="fade-transition"
+                  :offset="[0, 12]"
+                >
+                  <template #activator="{ props, isActive }">
+                    <v-list-item
+                      v-bind="props"
+                      class="main-menu-items main-menu-items--products"
+                      :class="{ active: isMenuItemActive(item) || isActive }"
+                      role="menuitem"
+                    >
+                      <v-list-item-title>
+                        <span class="main-menu-items__label">
+                          <span>{{ item.label }}</span>
                           <v-icon
-                            icon="mdi-arrow-top-right"
-                            size="18"
-                            class="products-menu__popular-icon"
+                            class="main-menu-items__toggle-icon"
+                            :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                            aria-hidden="true"
                           />
-                        </NuxtLink>
-                      </div>
+                        </span>
+                      </v-list-item-title>
+                    </v-list-item>
+                  </template>
 
-                      <p v-else class="products-menu__empty">
-                        {{ item.copy.sections.popularEmpty }}
-                      </p>
-
-                      <div class="products-menu__nudge">
-                        <div class="products-menu__nudge-copy">
-                          <p class="products-menu__nudge-title">
-                            {{ item.copy.nudgeCtaTitle }}
-                          </p>
-                          <p class="products-menu__nudge-description">
-                            {{ item.copy.nudgeCtaDescription }}
-                          </p>
-                        </div>
-                        <v-btn
-                          color="primary"
-                          variant="flat"
-                          prepend-icon="mdi-robot-love"
-                          size="small"
-                          class="products-menu__nudge-button"
-                          @click.stop="isNudgeWizardOpen = true"
-                        >
-                          {{ item.copy.nudgeCtaButton }}
-                        </v-btn>
-                      </div>
-                    </v-col>
-
-                    <v-col cols="12" sm="5" class="products-menu__section">
-                      <p class="products-menu__section-title">
-                        {{ item.copy.sections.taxonomyTitle }}
-                      </p>
-                      <p class="products-menu__section-description">
-                        {{ item.copy.sections.taxonomyDescription }}
-                      </p>
-
-                      <div
-                        v-if="item.taxonomyGroups.length"
-                        class="products-menu__taxonomy"
-                      >
-                        <div
-                          v-for="group in item.taxonomyGroups"
-                          :key="group.id"
-                          class="products-menu__taxonomy-group"
-                        >
-                          <p class="products-menu__taxonomy-label">
-                            {{ group.title }}
-                          </p>
-                          <v-list
-                            class="products-menu__taxonomy-list"
-                            bg-color="transparent"
-                            density="compact"
-                            nav
-                          >
-                            <v-list-item
-                              v-for="entry in group.entries"
-                              :key="entry.id"
-                              :to="entry.href"
-                              class="products-menu__taxonomy-link"
-                              role="menuitem"
-                            >
-                              <v-list-item-title>{{
-                                entry.title
-                              }}</v-list-item-title>
-                              <template #append>
-                                <v-icon icon="mdi-arrow-right" size="16" />
-                              </template>
-                            </v-list-item>
-                          </v-list>
-                          <NuxtLink
-                            v-if="group.showMoreHref"
-                            :to="group.showMoreHref"
-                            class="products-menu__show-more"
-                          >
-                            {{ item.copy.sections.taxonomyShowMore }}
-                          </NuxtLink>
-                        </div>
-                      </div>
-
-                      <p v-else class="products-menu__empty">
-                        {{ item.copy.sections.taxonomyEmpty }}
-                      </p>
-                    </v-col>
-                  </v-row>
-
-                  <v-divider
-                    class="products-menu__divider products-menu__divider--cta"
-                  />
-
-                  <div class="products-menu__cta-wrapper">
-                    <NuxtLink
-                      :to="item.ctaHref"
-                      class="products-menu__cta-action"
-                    >
-                      {{ item.copy.ctaLabel }}
-                      <v-icon icon="mdi-arrow-right" size="18" />
-                    </NuxtLink>
-                  </div>
-                </v-card>
-              </v-menu>
-            </div>
-
-            <div v-else class="main-menu-item main-menu-item--community">
-              <v-menu
-                open-on-hover
-                location="bottom"
-                transition="fade-transition"
-                :offset="[0, 12]"
-              >
-                <template #activator="{ props, isActive }">
-                  <v-list-item
-                    v-bind="props"
-                    class="main-menu-items main-menu-items--community"
-                    :class="{ active: isMenuItemActive(item) || isActive }"
-                    role="menuitem"
+                  <v-card
+                    class="products-menu"
+                    color="surface-default"
+                    elevation="8"
                   >
-                    <v-list-item-title>
-                      <span class="main-menu-items__label">
-                        <span>{{ item.label }}</span>
-                        <v-icon
-                          class="main-menu-items__toggle-icon"
-                          :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </v-list-item-title>
-                  </v-list-item>
-                </template>
-
-                <v-card
-                  class="community-menu"
-                  color="surface-default"
-                  elevation="8"
-                >
-                  <div class="community-menu__header">
-                    <v-avatar
-                      class="community-menu__avatar"
-                      size="44"
-                      color="surface-primary-080"
-                    >
-                      <v-icon icon="mdi-account-group" color="primary" />
-                    </v-avatar>
-                    <div>
-                      <p class="community-menu__title">{{ item.label }}</p>
-                      <p class="community-menu__subtitle">
-                        {{ t('siteIdentity.menu.community.tagline') }}
-                      </p>
+                    <div class="products-menu__header">
+                      <v-avatar
+                        class="products-menu__avatar"
+                        size="44"
+                        color="surface-primary-080"
+                      >
+                        <v-icon icon="mdi-storefront-outline" color="primary" />
+                      </v-avatar>
+                      <div>
+                        <p class="products-menu__title">
+                          {{ item.copy.headerTitle }}
+                        </p>
+                        <p class="products-menu__subtitle">
+                          {{ item.copy.headerSubtitle }}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <v-divider class="community-menu__divider" />
+                    <v-divider class="products-menu__divider" />
 
-                  <v-row
-                    class="community-menu__sections"
-                    justify="space-between"
-                    align="stretch"
-                  >
-                    <v-col
-                      v-for="section in item.sections"
-                      :key="section.id"
-                      cols="12"
-                      sm="5"
-                      class="community-menu__section"
-                    >
-                      <p class="community-menu__section-title">
-                        {{ section.title }}
-                      </p>
-                      <p class="community-menu__section-description">
-                        {{ section.description }}
-                      </p>
+                    <v-row class="products-menu__sections" align="stretch">
+                      <v-col cols="12" sm="5" class="products-menu__section">
+                        <p class="products-menu__section-title">
+                          {{ item.copy.sections.popularTitle }}
+                        </p>
+                        <p class="products-menu__section-description">
+                          {{ item.copy.sections.popularDescription }}
+                        </p>
 
-                      <v-list
-                        class="community-menu__section-list"
-                        bg-color="transparent"
-                        density="comfortable"
-                        nav
-                        lines="one"
-                      >
-                        <v-list-item
-                          v-for="link in section.links"
-                          :key="link.id"
-                          class="community-menu__link"
-                          :class="{
-                            'community-menu__link--external': link.external,
-                          }"
-                          :to="link.to"
-                          :href="link.href"
-                          :target="link.external ? '_blank' : undefined"
-                          :rel="
-                            link.external ? 'noopener noreferrer' : undefined
-                          "
-                          role="menuitem"
+                        <div
+                          v-if="item.loading"
+                          class="products-menu__skeleton-group"
                         >
-                          <template #prepend>
+                          <v-skeleton-loader
+                            v-for="skeletonIndex in 2"
+                            :key="`products-menu-popular-skeleton-${skeletonIndex}`"
+                            type="list-item-two-line"
+                            class="products-menu__skeleton"
+                          />
+                        </div>
+
+                        <div
+                          v-else-if="item.popularCategories.length"
+                          class="products-menu__popular-list"
+                        >
+                          <NuxtLink
+                            v-for="category in item.popularCategories"
+                            :key="category.id"
+                            :to="category.href"
+                            class="products-menu__popular-card"
+                            role="menuitem"
+                          >
                             <v-avatar
-                              size="34"
-                              class="community-menu__link-icon"
+                              class="products-menu__popular-avatar"
+                              size="36"
                             >
+                              <v-img
+                                v-if="category.image"
+                                :src="category.image"
+                                :alt="category.title"
+                                cover
+                              />
                               <v-icon
-                                :icon="link.icon"
-                                size="20"
-                                color="accent-primary-highlight"
+                                v-else
+                                icon="mdi-image-outline"
+                                size="28"
                               />
                             </v-avatar>
-                          </template>
-
-                          <v-list-item-title class="community-menu__link-label">
-                            {{ link.label }}
-                          </v-list-item-title>
-                          <v-list-item-subtitle
-                            v-if="link.description"
-                            class="community-menu__link-description"
-                          >
-                            {{ link.description }}
-                          </v-list-item-subtitle>
-
-                          <template v-if="link.external" #append>
+                            <p class="products-menu__popular-title">
+                              {{ category.title }}
+                            </p>
                             <v-icon
-                              icon="mdi-open-in-new"
+                              icon="mdi-arrow-top-right"
                               size="18"
-                              class="community-menu__external-icon"
+                              class="products-menu__popular-icon"
                             />
-                          </template>
-                        </v-list-item>
-                      </v-list>
-                    </v-col>
-                  </v-row>
-                </v-card>
-              </v-menu>
-            </div>
-          </template>
-        </v-list>
-        <div class="d-flex align-center ga-2">
-          <v-menu
-            location="bottom"
-            transition="fade-transition"
-            :offset="[0, 12]"
-            :close-on-content-click="true"
-            open-on-hover
-          >
-            <template #activator="{ props, isActive }">
-              <v-btn
-                v-bind="props"
-                variant="text"
-                class="accessibility-menu__activator"
-                :aria-label="accessibilityLabel"
-              >
-                <v-icon icon="mdi-sunglasses" start />
-                <span class="accessibility-menu__label">{{
-                  accessibilityLabel
-                }}</span>
-                <v-icon
-                  :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
-                  size="18"
-                  end
-                />
-              </v-btn>
-            </template>
+                          </NuxtLink>
+                        </div>
 
-            <v-card
-              class="accessibility-menu"
-              color="surface-default"
-              elevation="8"
-            >
-              <p class="accessibility-menu__section-title">
-                {{ t('siteIdentity.menu.themeToggle') }}
-              </p>
+                        <p v-else class="products-menu__empty">
+                          {{ item.copy.sections.popularEmpty }}
+                        </p>
 
-              <v-list density="compact" class="accessibility-menu__list" nav>
-                <v-list-item
-                  :active="currentTheme === 'light'"
-                  color="primary"
-                  class="accessibility-menu__item"
-                  data-testid="hero-theme-light"
-                  @click="setTheme('light')"
-                >
-                  <template #prepend>
-                    <v-icon icon="mdi-white-balance-sunny" size="20" />
-                  </template>
-                  <v-list-item-title>Thème clair</v-list-item-title>
-                </v-list-item>
+                        <div class="products-menu__nudge">
+                          <div class="products-menu__nudge-copy">
+                            <p class="products-menu__nudge-title">
+                              {{ item.copy.nudgeCtaTitle }}
+                            </p>
+                            <p class="products-menu__nudge-description">
+                              {{ item.copy.nudgeCtaDescription }}
+                            </p>
+                          </div>
+                          <v-btn
+                            color="primary"
+                            variant="flat"
+                            prepend-icon="mdi-robot-love"
+                            size="small"
+                            class="products-menu__nudge-button"
+                            @click.stop="isNudgeWizardOpen = true"
+                          >
+                            {{ item.copy.nudgeCtaButton }}
+                          </v-btn>
+                        </div>
+                      </v-col>
 
-                <v-list-item
-                  :active="currentTheme === 'dark'"
-                  color="primary"
-                  class="accessibility-menu__item"
-                  data-testid="hero-theme-dark"
-                  @click="setTheme('dark')"
-                >
-                  <template #prepend>
-                    <v-icon icon="mdi-weather-night" size="20" />
-                  </template>
-                  <v-list-item-title>Thème sombre</v-list-item-title>
-                </v-list-item>
-              </v-list>
+                      <v-col cols="12" sm="5" class="products-menu__section">
+                        <p class="products-menu__section-title">
+                          {{ item.copy.sections.taxonomyTitle }}
+                        </p>
+                        <p class="products-menu__section-description">
+                          {{ item.copy.sections.taxonomyDescription }}
+                        </p>
 
-              <v-divider class="accessibility-menu__divider" />
+                        <div
+                          v-if="item.taxonomyGroups.length"
+                          class="products-menu__taxonomy"
+                        >
+                          <div
+                            v-for="group in item.taxonomyGroups"
+                            :key="group.id"
+                            class="products-menu__taxonomy-group"
+                          >
+                            <p class="products-menu__taxonomy-label">
+                              {{ group.title }}
+                            </p>
+                            <v-list
+                              class="products-menu__taxonomy-list"
+                              bg-color="transparent"
+                              density="compact"
+                              nav
+                            >
+                              <v-list-item
+                                v-for="entry in group.entries"
+                                :key="entry.id"
+                                :to="entry.href"
+                                class="products-menu__taxonomy-link"
+                                role="menuitem"
+                              >
+                                <v-list-item-title>{{
+                                  entry.title
+                                }}</v-list-item-title>
+                                <template #append>
+                                  <v-icon icon="mdi-arrow-right" size="16" />
+                                </template>
+                              </v-list-item>
+                            </v-list>
+                            <NuxtLink
+                              v-if="group.showMoreHref"
+                              :to="group.showMoreHref"
+                              class="products-menu__show-more"
+                            >
+                              {{ item.copy.sections.taxonomyShowMore }}
+                            </NuxtLink>
+                          </div>
+                        </div>
 
-              <div
-                class="accessibility-menu__reading-row d-flex align-center px-4 py-2"
-              >
-                <v-switch
-                  :model-value="isDyslexic"
-                  inset
-                  color="primary"
-                  density="compact"
-                  hide-details
-                  class="mr-3"
-                  :aria-label="readingModeAriaLabel"
-                  :aria-pressed="isDyslexic"
-                  @click.stop
-                  @update:model-value="updateReadingMode"
-                />
-                <div class="accessibility-menu__reading-copy">
-                  <span class="text-body-2 font-weight-medium">
-                    {{ readingModeLabel }}
-                  </span>
-                  <v-chip
-                    class="accessibility-menu__reading-chip"
-                    color="surface-primary-080"
-                    size="small"
-                    label
-                  >
-                    {{ readingModeShortLabel }}
-                  </v-chip>
-                </div>
-              </div>
+                        <p v-else class="products-menu__empty">
+                          {{ item.copy.sections.taxonomyEmpty }}
+                        </p>
+                      </v-col>
+                    </v-row>
 
-              <v-divider class="accessibility-menu__divider" />
+                    <v-divider
+                      class="products-menu__divider products-menu__divider--cta"
+                    />
 
-              <div
-                class="accessibility-menu__zoom-row d-flex align-center px-4 py-2"
-              >
-                <v-switch
-                  :model-value="isZoomed"
-                  inset
-                  color="primary"
-                  density="compact"
-                  hide-details
-                  class="mr-3"
-                  :aria-label="t('siteIdentity.menu.zoom.label')"
-                  @click.stop
-                  @update:model-value="setZoomed"
-                />
-                <span class="text-body-2 font-weight-medium"
-                  >Mode Accessible</span
-                >
-              </div>
-            </v-card>
-          </v-menu>
-          <v-menu
-            location="bottom"
-            transition="fade-transition"
-            :min-width="isLoggedIn ? 260 : 360"
-            offset="8"
-            open-on-hover
-          >
-            <template #activator="{ props, isActive }">
-              <v-btn
-                v-if="isLoggedIn"
-                v-bind="props"
-                color="surface-primary-080"
-                style="margin-right: 0px"
-                class="font-weight-bold account-menu-activator"
-                rounded="pill"
-                variant="flat"
-                data-testid="hero-account-menu-activator"
-              >
-                <v-icon :icon="accountIcon" start />
-                <span class="account-username text-truncate">{{
-                  accountLabel
-                }}</span>
-                <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" end />
-              </v-btn>
-              <v-btn
-                v-else
-                v-bind="props"
-                class="account-menu-activator"
-                variant="text"
-                data-testid="hero-account-menu-activator-guest"
-              >
-                <span class="account-menu-activator__guest-icons">
-                  <v-icon icon="mdi-incognito" />
-                  <v-icon :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'" />
-                </span>
-              </v-btn>
-            </template>
-            <AccountPrivacyCard v-if="!isLoggedIn" />
-
-            <v-card
-              v-else
-              class="account-menu"
-              color="surface-default"
-              elevation="4"
-            >
-              <v-list density="comfortable">
-                <v-list-item>
-                  <v-list-item-title class="font-weight-medium text-truncate">
-                    {{ displayName }}
-                  </v-list-item-title>
-                  <v-list-item-subtitle v-if="hasRoles" class="mt-2">
-                    <div class="d-flex flex-wrap ga-2">
-                      <v-chip
-                        v-for="role in accountRoles"
-                        :key="role"
-                        color="surface-primary-100"
-                        size="small"
-                        variant="flat"
-                        class="role-chip"
+                    <div class="products-menu__cta-wrapper">
+                      <NuxtLink
+                        :to="item.ctaHref"
+                        class="products-menu__cta-action"
                       >
-                        {{ role }}
-                      </v-chip>
+                        {{ item.copy.ctaLabel }}
+                        <v-icon icon="mdi-arrow-right" size="18" />
+                      </NuxtLink>
                     </div>
-                  </v-list-item-subtitle>
-                  <v-list-item-subtitle v-else class="text-neutral-soft">
-                    {{ t('siteIdentity.menu.account.noRoles') }}
-                  </v-list-item-subtitle>
-                </v-list-item>
+                  </v-card>
+                </v-menu>
+              </div>
 
-                <v-divider class="my-2" />
-
-                <v-list-item
-                  density="comfortable"
-                  data-testid="hero-clear-cache"
-                  :disabled="isClearingCache"
-                  @click="handleClearCache"
+              <div v-else class="main-menu-item main-menu-item--community">
+                <v-menu
+                  open-on-hover
+                  location="bottom"
+                  transition="fade-transition"
+                  :offset="[0, 12]"
                 >
-                  <template #prepend>
-                    <v-icon icon="mdi-refresh" />
+                  <template #activator="{ props, isActive }">
+                    <v-list-item
+                      v-bind="props"
+                      class="main-menu-items main-menu-items--community"
+                      :class="{ active: isMenuItemActive(item) || isActive }"
+                      role="menuitem"
+                    >
+                      <v-list-item-title>
+                        <span class="main-menu-items__label">
+                          <span>{{ item.label }}</span>
+                          <v-icon
+                            class="main-menu-items__toggle-icon"
+                            :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </v-list-item-title>
+                    </v-list-item>
                   </template>
-                  <v-list-item-title>
-                    {{
-                      isClearingCache
-                        ? t('siteIdentity.menu.account.clearingCache')
-                        : t('siteIdentity.menu.account.clearCache')
-                    }}
-                  </v-list-item-title>
-                </v-list-item>
 
-                <v-list-item
-                  density="comfortable"
-                  data-testid="hero-account-logout"
-                  @click="handleLogout"
+                  <v-card
+                    class="community-menu"
+                    color="surface-default"
+                    elevation="8"
+                  >
+                    <div class="community-menu__header">
+                      <v-avatar
+                        class="community-menu__avatar"
+                        size="44"
+                        color="surface-primary-080"
+                      >
+                        <v-icon icon="mdi-account-group" color="primary" />
+                      </v-avatar>
+                      <div>
+                        <p class="community-menu__title">{{ item.label }}</p>
+                        <p class="community-menu__subtitle">
+                          {{ t('siteIdentity.menu.community.tagline') }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <v-divider class="community-menu__divider" />
+
+                    <v-row
+                      class="community-menu__sections"
+                      justify="space-between"
+                      align="stretch"
+                    >
+                      <v-col
+                        v-for="section in item.sections"
+                        :key="section.id"
+                        cols="12"
+                        sm="5"
+                        class="community-menu__section"
+                      >
+                        <p class="community-menu__section-title">
+                          {{ section.title }}
+                        </p>
+                        <p class="community-menu__section-description">
+                          {{ section.description }}
+                        </p>
+
+                        <v-list
+                          class="community-menu__section-list"
+                          bg-color="transparent"
+                          density="comfortable"
+                          nav
+                          lines="one"
+                        >
+                          <v-list-item
+                            v-for="link in section.links"
+                            :key="link.id"
+                            class="community-menu__link"
+                            :class="{
+                              'community-menu__link--external': link.external,
+                            }"
+                            :to="link.to"
+                            :href="link.href"
+                            :target="link.external ? '_blank' : undefined"
+                            :rel="
+                              link.external ? 'noopener noreferrer' : undefined
+                            "
+                            role="menuitem"
+                          >
+                            <template #prepend>
+                              <v-avatar
+                                size="34"
+                                class="community-menu__link-icon"
+                              >
+                                <v-icon
+                                  :icon="link.icon"
+                                  size="20"
+                                  color="accent-primary-highlight"
+                                />
+                              </v-avatar>
+                            </template>
+
+                            <v-list-item-title
+                              class="community-menu__link-label"
+                            >
+                              {{ link.label }}
+                            </v-list-item-title>
+                            <v-list-item-subtitle
+                              v-if="link.description"
+                              class="community-menu__link-description"
+                            >
+                              {{ link.description }}
+                            </v-list-item-subtitle>
+
+                            <template v-if="link.external" #append>
+                              <v-icon
+                                icon="mdi-open-in-new"
+                                size="18"
+                                class="community-menu__external-icon"
+                              />
+                            </template>
+                          </v-list-item>
+                        </v-list>
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </v-menu>
+              </div>
+            </template>
+          </v-list>
+          <div class="d-flex align-center ga-2">
+            <v-menu
+              location="bottom"
+              transition="fade-transition"
+              :offset="[0, 12]"
+              :close-on-content-click="true"
+              open-on-hover
+            >
+              <template #activator="{ props, isActive }">
+                <v-btn
+                  v-bind="props"
+                  variant="text"
+                  class="accessibility-menu__activator"
+                  :aria-label="accessibilityLabel"
                 >
-                  <template #prepend>
-                    <v-icon icon="mdi-logout" />
-                  </template>
-                  <v-list-item-title>
-                    {{ t('siteIdentity.menu.account.logout') }}
-                  </v-list-item-title>
-                </v-list-item>
-            </v-list>
-          </v-card>
-          </v-menu>
-        </div>
+                  <v-icon icon="mdi-sunglasses" start />
+                  <span class="accessibility-menu__label">{{
+                    accessibilityLabel
+                  }}</span>
+                  <v-icon
+                    :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                    size="18"
+                    end
+                  />
+                </v-btn>
+              </template>
+
+              <v-card
+                class="accessibility-menu"
+                color="surface-default"
+                elevation="8"
+              >
+                <p class="accessibility-menu__section-title">
+                  {{ t('siteIdentity.menu.themeToggle') }}
+                </p>
+
+                <v-list density="compact" class="accessibility-menu__list" nav>
+                  <v-list-item
+                    :active="currentTheme === 'light'"
+                    color="primary"
+                    class="accessibility-menu__item"
+                    data-testid="hero-theme-light"
+                    @click="setTheme('light')"
+                  >
+                    <template #prepend>
+                      <v-icon icon="mdi-white-balance-sunny" size="20" />
+                    </template>
+                    <v-list-item-title>Thème clair</v-list-item-title>
+                  </v-list-item>
+
+                  <v-list-item
+                    :active="currentTheme === 'dark'"
+                    color="primary"
+                    class="accessibility-menu__item"
+                    data-testid="hero-theme-dark"
+                    @click="setTheme('dark')"
+                  >
+                    <template #prepend>
+                      <v-icon icon="mdi-weather-night" size="20" />
+                    </template>
+                    <v-list-item-title>Thème sombre</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+
+                <v-divider class="accessibility-menu__divider" />
+
+                <div
+                  class="accessibility-menu__reading-row d-flex align-center px-4 py-2"
+                >
+                  <v-switch
+                    :model-value="isDyslexic"
+                    inset
+                    color="primary"
+                    density="compact"
+                    hide-details
+                    class="mr-3"
+                    :aria-label="readingModeAriaLabel"
+                    :aria-pressed="isDyslexic"
+                    @click.stop
+                    @update:model-value="updateReadingMode"
+                  />
+                  <div class="accessibility-menu__reading-copy">
+                    <span class="text-body-2 font-weight-medium">
+                      {{ readingModeLabel }}
+                    </span>
+                    <v-chip
+                      class="accessibility-menu__reading-chip"
+                      color="surface-primary-080"
+                      size="small"
+                      label
+                    >
+                      {{ readingModeShortLabel }}
+                    </v-chip>
+                  </div>
+                </div>
+
+                <v-divider class="accessibility-menu__divider" />
+
+                <div
+                  class="accessibility-menu__zoom-row d-flex align-center px-4 py-2"
+                >
+                  <v-switch
+                    :model-value="isZoomed"
+                    inset
+                    color="primary"
+                    density="compact"
+                    hide-details
+                    class="mr-3"
+                    :aria-label="t('siteIdentity.menu.zoom.label')"
+                    @click.stop
+                    @update:model-value="setZoomed"
+                  />
+                  <span class="text-body-2 font-weight-medium"
+                    >Mode Accessible</span
+                  >
+                </div>
+              </v-card>
+            </v-menu>
+            <v-menu
+              location="bottom"
+              transition="fade-transition"
+              :min-width="isLoggedIn ? 260 : 360"
+              offset="8"
+              open-on-hover
+            >
+              <template #activator="{ props, isActive }">
+                <v-btn
+                  v-if="isLoggedIn"
+                  v-bind="props"
+                  color="surface-primary-080"
+                  style="margin-right: 0px"
+                  class="font-weight-bold account-menu-activator"
+                  rounded="pill"
+                  variant="flat"
+                  data-testid="hero-account-menu-activator"
+                >
+                  <v-icon :icon="accountIcon" start />
+                  <span class="account-username text-truncate">{{
+                    accountLabel
+                  }}</span>
+                  <v-icon
+                    :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                    end
+                  />
+                </v-btn>
+                <v-btn
+                  v-else
+                  v-bind="props"
+                  class="account-menu-activator"
+                  variant="text"
+                  data-testid="hero-account-menu-activator-guest"
+                >
+                  <span class="account-menu-activator__guest-icons">
+                    <v-icon icon="mdi-incognito" />
+                    <v-icon
+                      :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                    />
+                  </span>
+                </v-btn>
+              </template>
+              <AccountPrivacyCard v-if="!isLoggedIn" />
+
+              <v-card
+                v-else
+                class="account-menu"
+                color="surface-default"
+                elevation="4"
+              >
+                <v-list density="comfortable">
+                  <v-list-item>
+                    <v-list-item-title class="font-weight-medium text-truncate">
+                      {{ displayName }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle v-if="hasRoles" class="mt-2">
+                      <div class="d-flex flex-wrap ga-2">
+                        <v-chip
+                          v-for="role in accountRoles"
+                          :key="role"
+                          color="surface-primary-100"
+                          size="small"
+                          variant="flat"
+                          class="role-chip"
+                        >
+                          {{ role }}
+                        </v-chip>
+                      </div>
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle v-else class="text-neutral-soft">
+                      {{ t('siteIdentity.menu.account.noRoles') }}
+                    </v-list-item-subtitle>
+                  </v-list-item>
+
+                  <v-divider class="my-2" />
+
+                  <v-list-item
+                    density="comfortable"
+                    data-testid="hero-clear-cache"
+                    :disabled="isClearingCache"
+                    @click="handleClearCache"
+                  >
+                    <template #prepend>
+                      <v-icon icon="mdi-refresh" />
+                    </template>
+                    <v-list-item-title>
+                      {{
+                        isClearingCache
+                          ? t('siteIdentity.menu.account.clearingCache')
+                          : t('siteIdentity.menu.account.clearCache')
+                      }}
+                    </v-list-item-title>
+                  </v-list-item>
+
+                  <v-list-item
+                    density="comfortable"
+                    data-testid="hero-account-logout"
+                    @click="handleLogout"
+                  >
+                    <template #prepend>
+                      <v-icon icon="mdi-logout" />
+                    </template>
+                    <v-list-item-title>
+                      {{ t('siteIdentity.menu.account.logout') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </v-menu>
+          </div>
         </div>
       </div>
     </nav>
@@ -1344,7 +1351,7 @@ const isMenuItemActive = (item: MenuItem): boolean => {
 
   &__field-wrapper
     width: 100%
-    max-width: 640px
+    max-width: 420px
 
   &__actions
     display: flex

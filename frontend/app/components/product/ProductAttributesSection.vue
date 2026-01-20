@@ -40,13 +40,16 @@
             {{ $t('product.attributes.main.attributes.empty') }}
           </p>
         </v-card>
-      </div>
 
-      <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
-        <v-col cols="12">
-          <ProductLifeTimeline id="attributes-timeline" :timeline="timeline" />
-        </v-col>
-      </v-row>
+        <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
+          <v-col cols="12">
+            <ProductLifeTimeline
+              id="attributes-timeline"
+              :timeline="timeline"
+            />
+          </v-col>
+        </v-row>
+      </div>
     </div>
 
     <div
@@ -158,10 +161,17 @@
       <div
         class="product-attributes__block-header product-attributes__block-header--detailed"
       >
-        <h3 id="attributes-details" class="product-attributes__block-title">
-          {{ $t('product.attributes.detailed.title') }}
-        </h3>
-        <div class="product-attributes__detail-controls">
+        <div
+          class="product-attributes__header-section product-attributes__header-section--left"
+        >
+          <h3 id="attributes-details" class="product-attributes__block-title">
+            {{ $t('product.attributes.detailed.title') }}
+          </h3>
+        </div>
+
+        <div
+          class="product-attributes__header-section product-attributes__header-section--center"
+        >
           <v-text-field
             v-model="searchTerm"
             :label="$t('product.attributes.searchPlaceholder')"
@@ -170,6 +180,11 @@
             clearable
             class="product-attributes__search"
           />
+        </div>
+
+        <div
+          class="product-attributes__header-section product-attributes__header-section--right"
+        >
           <v-btn-toggle
             v-model="detailViewMode"
             mandatory
@@ -1387,21 +1402,36 @@ const toggleDetailGroup = (id: string) => {
   margin-top: 1.5rem;
 }
 
+.product-attributes__header-section {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.product-attributes__header-section--left {
+  justify-content: flex-start;
+  width: auto;
+}
+
+.product-attributes__header-section--center {
+  justify-content: center;
+}
+
+.product-attributes__header-section--right {
+  justify-content: flex-end;
+  width: auto;
+}
+
 @media (min-width: 960px) {
   .product-attributes__main-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   }
 
   .product-attributes__block-header--detailed {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: auto minmax(260px, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-  }
-
-  .product-attributes__detail-controls {
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   .product-attributes__block-header--audit {
@@ -1415,7 +1445,7 @@ const toggleDetailGroup = (id: string) => {
   }
 
   .product-attributes__search {
-    max-width: 320px;
+    max-width: 420px;
   }
 
   .product-attributes__search--audit {
