@@ -2355,7 +2355,28 @@
       "sections": {
         "productJson": {
           "title": "Payload JSON du produit",
-          "helper": "Inspecter le ProductDto brut renvoyé par l'API."
+          "helper": "Inspecter le ProductDto brut renvoyé par l'API.",
+          "tab": "JSON du produit"
+        },
+        "payloadJson": {
+          "title": "Payload brut API",
+          "helper": "Données JSON brutes récupérées via l'API Nudger.",
+          "iframeTitle": "Aperçu du payload brut API",
+          "tab": "API brute"
+        },
+        "datasources": {
+          "title": "Datasources",
+          "helper": "Consultez les codes datasource et la configuration verticale associée.",
+          "tab": "Datasources",
+          "empty": "Aucun code datasource n'est disponible pour ce produit.",
+          "table": {
+            "name": "Datasource",
+            "code": "Code"
+          },
+          "yaml": {
+            "product": "Datasources produit",
+            "vertical": "Config verticale"
+          }
         }
       }
     },
@@ -2708,6 +2729,8 @@
         "title": "Outils d'administration",
         "helper": "Fonctionnalités restreintes visibles uniquement pour les membres authentifiés.",
         "items": {
+          "datasources": "Datasources",
+          "rawApi": "API brute",
           "productJson": "JSON du produit"
         }
       },
