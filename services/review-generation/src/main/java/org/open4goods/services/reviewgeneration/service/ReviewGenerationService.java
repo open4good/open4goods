@@ -77,6 +77,9 @@ import io.micrometer.core.instrument.MeterRegistry;
  * concurrently via UrlFetchingService, markdown sources and token counts are
  * aggregated, and prompt variables are composed.
  * </p>
+ *
+ * TODO : aDD code comment javadoc at method level
+ *
  */
 @Service
 public class ReviewGenerationService implements HealthIndicator {
@@ -324,10 +327,12 @@ public class ReviewGenerationService implements HealthIndicator {
 				AiReview newReview = applyCitationsAndNormalize(reviewResponse.getBody(), reviewResponse.getMetadata());
 				newReview = updateAiReviewReferences(newReview);
 
-				// Populate attributes
+				// Post-process to resolve URLs (handling redirects)
+				newReview = postProcess30x(newReview);
+				
+				// Populate attributes and resources
 				populateAttributes(product, newReview);
 				addResources(product, newReview);
-				newReview = postProcess30x(newReview);
 				logger.info("Completed review : \n {}",objectMapper.writeValueAsString(newReview));
 				holder.setReview(newReview);
 				holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS"));
@@ -371,30 +376,59 @@ public class ReviewGenerationService implements HealthIndicator {
 	// -------------------- Batch Review Generation Methods -------------------- //
 
 
+	/**
+	 * Adds resources (images, PDFs, videos) from the AI review to the product.
+	 * Only valid and reachable resources are added.
+	 * 
+	 * @param product the product to update
+	 * @param newReview the AI generated review containing potential resources
+	 */
 	private void addResources(Product product, AiReview newReview) {
 		if (newReview == null) return;
 
-		List<String> validImages = filterValidUrls(newReview.getImages());
+		logger.info("Processing resources for product {}", product.getId());
+
+		List<String> validImages = filterValidUrls(newReview.getImages(), "Image");
 		validImages.forEach(image -> safeAddResource(product, image));
 
-		List<String> validPdfs = filterValidUrls(newReview.getPdfs());
+		List<String> validPdfs = filterValidUrls(newReview.getPdfs(), "PDF");
 		validPdfs.forEach(pdf -> safeAddResource(product, pdf));
 
-		List<String> validVideos = filterValidUrls(newReview.getVideos());
+		List<String> validVideos = filterValidUrls(newReview.getVideos(), "Video");
 		validVideos.forEach(video -> safeAddResource(product, video));
 	}
 
+	/**
+	 * Safely adds a resource url to the product, catching validation exceptions.
+	 * 
+	 * @param product the product
+	 * @param url the resource url
+	 */
 	private void safeAddResource(Product product, String url) {
 		try {
 			product.addResource(new Resource(url));
+			logger.debug("Added resource {} to product {}", url, product.getId());
 		} catch (ValidationException e) {
 			logger.warn("Error while validating LLM returned resource: {}", url);
 		}
 	}
 
-	private List<String> filterValidUrls(List<String> urls) {
+	/**
+	 * Filters a list of URLs, retaining only those that are valid and reachable.
+	 * 
+	 * @param urls list of URLs to check
+	 * @param typeStr description of the resource type for logging
+	 * @return list of valid URLs
+	 */
+	private List<String> filterValidUrls(List<String> urls, String typeStr) {
 		if (urls == null) return List.of();
-		return urls.stream().filter(this::isValidUrl).toList();
+		return urls.stream().filter(url -> {
+			boolean valid = isValidUrl(url);
+			if (!valid) {
+				logger.warn("{} URL ignored (invalid or unreachable): {}", typeStr, url);
+			}
+			return valid;
+		}).toList();
 	}
 
 	private boolean isValidUrl(String urlString) {
@@ -627,10 +661,10 @@ public class ReviewGenerationService implements HealthIndicator {
 	}
 
 	/**
-	 * Extract attrbutes from the gen ai response and populate the AiReview object
+	 * Extract attributes from the gen ai response and populate the AiReview object.
 	 *
-	 * @param product
-	 * @param newReview
+	 * @param product the product to update
+	 * @param newReview the new AI review
 	 */
 	private void populateAttributes(Product product, AiReview newReview) {
 		// Handling attributes
@@ -667,13 +701,13 @@ public class ReviewGenerationService implements HealthIndicator {
 
 
 	private AiReview processBatchOutputToAiReview(BatchResultItem output) {
-
-
 		String jsonContent = output.content();
 		AiReview ret = outputConverter.convert(jsonContent);
 
 		ret = updateAiReviewReferences(ret);
 		ret = normalizeReviewText(ret);
+		
+		// Post-process to resolve URLs
 		ret = postProcess30x(ret);
 
 		return ret;
@@ -765,35 +799,68 @@ public class ReviewGenerationService implements HealthIndicator {
 		return urls.stream().map(this::resolveUrl).toList();
 	}
 
+	/**
+	 * Resolves a URL by following redirects (up to a limit).
+	 * 
+	 * @param urlString the URL to resolve
+	 * @return the final URL after following redirects, or the original if no redirect or error
+	 */
 	private String resolveUrl(String urlString) {
 		if (urlString == null || urlString.isBlank()) {
 			return urlString;
 		}
+		
+		String currentUrl = urlString;
+		int maxRedirects = 5;
+		int redirects = 0;
+		
 		try {
-			URL url = URI.create(urlString).toURL();
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setInstanceFollowRedirects(false);
-			connection.setRequestMethod("HEAD");
-			connection.setConnectTimeout(5000);
-			connection.setReadTimeout(5000);
+			while (redirects < maxRedirects) {
+				URL url = URI.create(currentUrl).toURL();
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				connection.setInstanceFollowRedirects(false); // Handle redirects manually
+				connection.setRequestMethod("HEAD");
+				connection.setConnectTimeout(5000);
+				connection.setReadTimeout(5000);
+				
+				// User Agent to avoid being blocked by some servers
+				connection.setRequestProperty("User-Agent",
+						"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
-			// User Agent to avoid being blocked by some servers
-			connection.setRequestProperty("User-Agent",
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-
-			int status = connection.getResponseCode();
-			if (status >= 300 && status < 400) {
-				String location = connection.getHeaderField("Location");
-				if (location != null && !location.isBlank()) {
-					URI baseUri = url.toURI();
-					URI resolvedUri = baseUri.resolve(location);
-					return resolvedUri.toString();
+				int status = connection.getResponseCode();
+				
+				if (status >= 300 && status < 400) {
+					String location = connection.getHeaderField("Location");
+					if (location != null && !location.isBlank()) {
+						// Handle relative URLs
+						URI baseUri = url.toURI();
+						URI resolvedUri = baseUri.resolve(location);
+						String nextUrl = resolvedUri.toString();
+						
+						logger.debug("Redirecting {} -> {}", currentUrl, nextUrl);
+						currentUrl = nextUrl;
+						redirects++;
+					} else {
+						// Redirect with no location?
+						logger.warn("Redirect response for {} but no Location header found.", currentUrl);
+						break;
+					}
+				} else {
+					// Not a redirect (2xx, 4xx, 5xx), stop here
+					break;
 				}
 			}
+			
+			if (redirects >= maxRedirects) {
+				logger.warn("Too many redirects for URL: {}", urlString);
+			}
+			
+			return currentUrl;
+			
 		} catch (Exception e) {
 			logger.warn("Failed to resolve URL {}: {}", urlString, e.getMessage());
+			return urlString; // Return original if failure
 		}
-		return urlString;
 	}
 
 	/**
