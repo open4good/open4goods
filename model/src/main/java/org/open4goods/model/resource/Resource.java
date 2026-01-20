@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * product or a DataFragment. They are also indexed externaly (in a dedicated
  * index) at the UI level, to be able to handle efficient caching, resizeing,
  * mimetype detection and conversions...
- * 
+ * TODO : Add systematic Source (datasourcename)
  * @author goulven
  *
  */
@@ -53,10 +53,10 @@ public class Resource implements Validable {
 
 	private ResourceType resourceType;
 
-	private ImageInfo imageInfo;	
-	
+	private ImageInfo imageInfo;
+
 	private PdfInfo pdfInfo;
-	
+
 
 	// The group (similarity based and popularity ranked) this resource belongs to
 	// TODO : Move into imageinfo
@@ -66,14 +66,14 @@ public class Resource implements Validable {
 	private String datasourceName;
 
 
-	
+
 	/**
 	 * From ResourceTagDictionary
 	 */
 	private Set<String> tags = new HashSet<>();
 
 	private Set<ResourceTag> hardTags = new HashSet<>();
-	
+
 	public Resource() {
 		super();
 	}
@@ -96,11 +96,11 @@ public class Resource implements Validable {
 //		tags.add(tag);
 //
 //	}
-	
+
 	public ResourceTag  firstHardTag() {
 		return hardTags.stream().findFirst().orElse(null);
 	}
-	
+
 
 	@Override
 	public String toString() {
@@ -136,7 +136,7 @@ public class Resource implements Validable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	public String bestNameFromTag() {
@@ -150,7 +150,7 @@ public class Resource implements Validable {
 	// UI Helper
 	public String path(Integer width) {
 		StringBuilder sb = new StringBuilder();
-		
+
 		// TODO : share const with the resourcecontroller
 
 		switch (resourceType) {
@@ -167,31 +167,31 @@ public class Resource implements Validable {
 //			TODO : better handling
 			return "/404";
 		}
-		
+
 		sb.append(fileName);
 		sb.append("_");
 		sb.append(cacheKey);
-		
+
 		// HAndling webp optimized resize
 		switch (resourceType) {
 		case IMAGE:
 			if (null != width) {
 				sb.append("-").append(width);
-			} 
+			}
 			sb.append(".");
 			sb.append("webp");
 			break;
-		
+
 		default:
 			sb.append(".");
 			sb.append(extension);
 		}
-		
+
 		return sb.toString();
 
 	}
-	
-	
+
+
 
 	public String nameFromUrl() {
 
@@ -385,5 +385,5 @@ public class Resource implements Validable {
 		this.pdfInfo = pdfInfo;
 	}
 
-	
+
 }

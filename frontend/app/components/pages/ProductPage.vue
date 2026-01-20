@@ -340,7 +340,8 @@ const {
   async () => {
     productLoadError.value = null
     try {
-      return await $fetch<ProductDto>(`/api/products/${gtin}`, {
+      const baseUrl = import.meta.server ? requestURL.origin : ''
+      return await $fetch<ProductDto>(`${baseUrl}/api/products/${gtin}`, {
         query: { include: PRODUCT_COMPONENTS },
       })
     } catch (fetchError) {

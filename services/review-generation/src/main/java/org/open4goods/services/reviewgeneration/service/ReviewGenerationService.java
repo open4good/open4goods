@@ -28,8 +28,10 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.resource.Resource;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.review.ReviewGenerationStatus.Status;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -317,10 +319,13 @@ public class ReviewGenerationService implements HealthIndicator {
 				}
 				AiReview newReview = applyCitationsAndNormalize(reviewResponse.getBody(), reviewResponse.getMetadata());
 				newReview = updateAiReviewReferences(newReview);
-				newReview = postProcess(newReview);
+				newReview = postProcess30x(newReview);
+
 
 				// Populate attributes
 				populateAttributes(product, newReview);
+				addResources(product, newReview);
+
 
 				holder.setReview(newReview);
 				holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS"));
@@ -362,6 +367,39 @@ public class ReviewGenerationService implements HealthIndicator {
 	}
 
 	// -------------------- Batch Review Generation Methods -------------------- //
+
+	private void addResources(Product product, AiReview newReview) {
+
+		Resource r = new Resource();
+
+		newReview.getImages().forEach(image -> {
+			try {
+				product.addResource(new Resource(image));
+			} catch (ValidationException e) {
+				logger.warn("Error while validating LLM returned image resource");
+			}
+		});
+
+		newReview.getPdfs().forEach(pdf -> {
+			try {
+				product.addResource(new Resource(pdf));
+			} catch (ValidationException e) {
+				logger.warn("Error while validating LLM returned image resource");
+			}
+		});
+
+		newReview.getVideos().forEach(video -> {
+			try {
+				product.addResource(new Resource(video));
+			} catch (ValidationException e) {
+				logger.warn("Error while validating LLM returned image resource");
+			}
+		});
+
+
+
+
+	}
 
 	/**
 	 * Submits a batch review generation request.
@@ -566,7 +604,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		AiReview ret = outputConverter.convert(jsonContent);
 
 		ret = updateAiReviewReferences(ret);
-		ret = postProcess(ret);
+		ret = postProcess30x(ret);
 
 //			AiReview ret = serialisationService.fromJson(jsonContent, AiReview.class);
 		return ret;
@@ -578,7 +616,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param review the review to process
 	 * @return the processed review
 	 */
-	private AiReview postProcess(AiReview review) {
+	private AiReview postProcess30x(AiReview review) {
 		if (!properties.isResolveUrl()) {
 			return review;
 		}

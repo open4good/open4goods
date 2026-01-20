@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.open4goods.services.urlfetching.config.FetchStrategy;

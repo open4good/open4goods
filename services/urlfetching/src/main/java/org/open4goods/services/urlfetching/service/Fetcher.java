@@ -1,6 +1,10 @@
 package org.open4goods.services.urlfetching.service;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import org.open4goods.services.urlfetching.dto.FetchResponse;
 
 /**
  * Interface for URL fetching strategies.

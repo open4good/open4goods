@@ -292,7 +292,39 @@ public class AiReview {
         return dataQuality;
     }
 
-    public void setDataQuality(String dataQuality) {
+    public List<String> getPdfs() {
+		return pdfs;
+	}
+
+	public void setPdfs(List<String> pdfs) {
+		this.pdfs = pdfs;
+	}
+
+	public List<String> getImages() {
+		return images;
+	}
+
+	public void setImages(List<String> images) {
+		this.images = images;
+	}
+
+	public List<String> getVideos() {
+		return videos;
+	}
+
+	public void setVideos(List<String> videos) {
+		this.videos = videos;
+	}
+
+	public List<String> getSocialLinks() {
+		return socialLinks;
+	}
+
+	public void setSocialLinks(List<String> socialLinks) {
+		this.socialLinks = socialLinks;
+	}
+
+	public void setDataQuality(String dataQuality) {
         this.dataQuality = dataQuality;
     }
 
