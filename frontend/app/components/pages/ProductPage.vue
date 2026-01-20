@@ -102,6 +102,7 @@
             :review-created-at="product.aiReview?.createdMs ?? undefined"
             :site-key="hcaptchaSiteKey"
             :title-params="aiTitleParams"
+            :product-name="productTitle"
           />
         </section>
 
