@@ -102,6 +102,12 @@
       "type": "java.lang.Boolean",
       "description": "Enable model-native web search prompt flow.",
       "defaultValue": false
+    },
+    {
+      "name": "review.generation.batch-poll-interval",
+      "type": "java.time.Duration",
+      "description": "Interval between batch status scans for review generation jobs.",
+      "defaultValue": "PT5M"
     }
   ]
 }

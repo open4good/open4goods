@@ -1,5 +1,6 @@
 package org.open4goods.services.reviewgeneration.config;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,6 +82,11 @@ public class ReviewGenerationConfig {
      * Flag to enable the grounded prompt flow.
      */
     private boolean useGroundedPrompt = false;
+
+    /**
+     * Interval between batch status scans for review generation jobs.
+     */
+    private Duration batchPollInterval = Duration.ofMinutes(5);
 
     // ---------------------- Getters/Setters ---------------------- //
 
@@ -191,6 +197,12 @@ public class ReviewGenerationConfig {
     }
     public void setUseGroundedPrompt(boolean useGroundedPrompt) {
         this.useGroundedPrompt = useGroundedPrompt;
+    }
+    public Duration getBatchPollInterval() {
+        return batchPollInterval;
+    }
+    public void setBatchPollInterval(Duration batchPollInterval) {
+        this.batchPollInterval = batchPollInterval;
     }
 	public int getMinGlobalTokens() {
 		return minGlobalTokens;
