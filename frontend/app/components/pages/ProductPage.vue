@@ -152,6 +152,8 @@
             :product="product"
             :panel-id="sectionIds.adminPanel"
             :json-section-id="sectionIds.adminJson"
+            :datasources-section-id="sectionIds.adminDatasources"
+            :vertical-config="categoryDetail"
           />
         </section>
       </main>
@@ -1640,6 +1642,8 @@ const sectionIds = {
   docs: 'documentation',
   adminPanel: 'admin-panel',
   adminJson: 'admin-json',
+  adminDatasources: 'admin-datasources',
+  adminRawApi: 'admin-raw-api',
 } as const
 
 const subSectionIds = {
@@ -1657,6 +1661,10 @@ type NavigableSection = {
   subsections?: Array<{ id: string; label: string; icon?: string }>
 }
 type ConditionalSection = NavigableSection & { condition: boolean }
+type AdminNavigableSection = NavigableSection & {
+  href?: string
+  target?: string
+}
 
 const impactSubsections = computed(() => {
   if (!impactScores.value.length) {
@@ -1771,7 +1779,14 @@ const primarySections = computed<NavigableSection[]>(() =>
     .map(({ condition: _condition, ...rest }) => rest)
 )
 
-const adminSections = computed<NavigableSection[]>(() => {
+const adminApiPayloadUrl = computed(() => {
+  const gtinValue = product.value?.gtin ?? gtin
+  return gtinValue
+    ? `https://api.nudger.fr/product/?gtin=${gtinValue}`
+    : 'https://api.nudger.fr/product/'
+})
+
+const adminSections = computed<AdminNavigableSection[]>(() => {
   if (!showAdminSection.value) {
     return []
   }
@@ -1783,16 +1798,32 @@ const adminSections = computed<NavigableSection[]>(() => {
       icon: 'mdi-format-list-bulleted',
     },
     {
+      id: sectionIds.adminDatasources,
+      label: t('product.navigation.adminPanel.items.datasources'),
+      icon: 'mdi-database-outline',
+    },
+    {
       id: sectionIds.adminJson,
       label: t('product.navigation.adminPanel.items.productJson'),
       icon: 'mdi-code-json',
     },
+    {
+      id: sectionIds.adminRawApi,
+      label: t('product.navigation.adminPanel.items.rawApi'),
+      icon: 'mdi-open-in-new',
+      href: adminApiPayloadUrl.value,
+      target: '_blank',
+    },
   ]
 })
 
+const adminScrollSections = computed<NavigableSection[]>(() =>
+  adminSections.value.filter(section => !section.href)
+)
+
 const sections = computed<NavigableSection[]>(() => [
   ...primarySections.value,
-  ...adminSections.value,
+  ...adminScrollSections.value,
 ])
 
 const navigableSections = computed(() => primarySections.value)

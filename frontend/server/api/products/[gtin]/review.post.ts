@@ -1,4 +1,10 @@
-import { createError, defineEventHandler, getRouterParam, readBody } from 'h3'
+import {
+  createError,
+  defineEventHandler,
+  getCookie,
+  getRouterParam,
+  readBody,
+} from 'h3'
 import { useProductService } from '~~/shared/api-client/services/products.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
@@ -27,10 +33,15 @@ export default defineEventHandler(async event => {
     })
   }
 
+  const runtimeConfig = useRuntimeConfig()
+  const authToken = getCookie(event, runtimeConfig.public.tokenCookieName)
+  const isAuthenticated = Boolean(authToken)
+
   const body = await readBody<TriggerReviewPayload | null>(event)
   const hcaptchaResponse = body?.hcaptchaResponse
+  const force = isAuthenticated
 
-  if (!hcaptchaResponse) {
+  if (!hcaptchaResponse && !isAuthenticated) {
     throw createError({
       statusCode: 400,
       statusMessage: 'hCaptcha response is required',
@@ -43,7 +54,10 @@ export default defineEventHandler(async event => {
   const productService = useProductService(domainLanguage)
 
   try {
-    await productService.triggerReviewGeneration(parsedGtin, hcaptchaResponse)
+    await productService.triggerReviewGeneration(parsedGtin, hcaptchaResponse, {
+      force,
+      authToken,
+    })
     event.node.res.statusCode = 202
     return { status: 'accepted' }
   } catch (error) {

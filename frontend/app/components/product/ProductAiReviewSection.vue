@@ -247,7 +247,7 @@
       </div>
       <ClientOnly>
         <VueHcaptcha
-          v-if="showCaptcha && hasSiteKey"
+          v-if="showCaptcha && hasSiteKey && requiresCaptcha"
           ref="captchaRef"
           :sitekey="siteKey"
           :theme="captchaTheme"
@@ -291,6 +291,7 @@ import type {
   AiReviewAttributeDto,
   ReviewGenerationStatus,
 } from '~~/shared/api-client'
+import { useAuth } from '~/composables/useAuth'
 
 interface ReviewContent {
   description?: string | null
@@ -336,6 +337,7 @@ const props = defineProps({
 
 const { locale, t } = useI18n()
 const theme = useTheme()
+const { isLoggedIn } = useAuth()
 const VueHcaptcha = defineAsyncComponent(
   () => import('@hcaptcha/vue3-hcaptcha')
 )
@@ -366,6 +368,7 @@ watch(
 )
 
 const hasSiteKey = computed(() => props.siteKey.length > 0)
+const requiresCaptcha = computed(() => !isLoggedIn.value)
 const captchaTheme = computed(() =>
   theme.global.current.value.dark ? 'dark' : 'light'
 )
@@ -489,6 +492,11 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
 
 const startRequest = () => {
   errorMessage.value = null
+  if (!requiresCaptcha.value) {
+    void triggerGeneration()
+    return
+  }
+
   showCaptcha.value = true
   captchaRef.value?.reset?.()
 }
@@ -508,7 +516,7 @@ const handleCaptchaError = () => {
 }
 
 const triggerGeneration = async () => {
-  if (!captchaToken.value) {
+  if (requiresCaptcha.value && !captchaToken.value) {
     errorMessage.value = t('product.aiReview.errors.captcha')
     return
   }
@@ -520,7 +528,7 @@ const triggerGeneration = async () => {
     await $fetch(`/api/products/${props.gtin}/review`, {
       method: 'POST',
       body: {
-        hcaptchaResponse: captchaToken.value,
+        hcaptchaResponse: captchaToken.value ?? undefined,
       },
     })
 

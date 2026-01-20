@@ -2340,7 +2340,28 @@
       "sections": {
         "productJson": {
           "title": "Product JSON payload",
-          "helper": "Inspect the raw ProductDto returned by the API."
+          "helper": "Inspect the raw ProductDto returned by the API.",
+          "tab": "Product JSON"
+        },
+        "payloadJson": {
+          "title": "Raw API payload",
+          "helper": "Raw JSON fetched directly from the Nudger API.",
+          "iframeTitle": "Raw API payload preview",
+          "tab": "API payload"
+        },
+        "datasources": {
+          "title": "Datasources",
+          "helper": "Review datasource codes and the vertical configuration used for mapping.",
+          "tab": "Datasources",
+          "empty": "No datasource codes are available for this product yet.",
+          "table": {
+            "name": "Datasource",
+            "code": "Code"
+          },
+          "yaml": {
+            "product": "Product datasources",
+            "vertical": "Vertical config"
+          }
         }
       }
     },
@@ -2692,6 +2713,8 @@
         "title": "Admin tools",
         "helper": "Restricted utilities visible only to authenticated teammates.",
         "items": {
+          "datasources": "Datasources",
+          "rawApi": "Raw API",
           "productJson": "Product JSON"
         }
       },

@@ -60,6 +60,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -1290,7 +1293,8 @@ public class ProductController {
     @PostMapping("/{gtin}/review")
     @Operation(
             summary = "Trigger AI review generation",
-            description = "Validate the provided hCaptcha token and forward the request to the back-office API.",
+            description = "Validate the provided hCaptcha token and forward the request to the back-office API. " +
+                    "Authenticated users may bypass captcha and force generation.",
             parameters = {
                     @Parameter(name = "gtin",
                             in = ParameterIn.PATH,
@@ -1299,9 +1303,14 @@ public class ProductController {
                             schema = @Schema(type = "integer", format = "int64", minimum = "0", example = "8806095491998")),
                     @Parameter(name = "hcaptchaResponse",
                             in = ParameterIn.QUERY,
-                            required = true,
-                            description = "hCaptcha token returned by the widget.",
+                            required = false,
+                            description = "hCaptcha token returned by the widget (required for anonymous users).",
                             schema = @Schema(type = "string")),
+                    @Parameter(name = "force",
+                            in = ParameterIn.QUERY,
+                            required = false,
+                            description = "Force review generation when the requester is authenticated.",
+                            schema = @Schema(type = "boolean")),
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
                             description = "Language driving localisation of textual fields (future use).",
                             schema = @Schema(implementation = DomainLanguage.class))
@@ -1321,14 +1330,30 @@ public class ProductController {
             }
     )
     public ResponseEntity<?> triggerReview(@PathVariable Long gtin,
-                                           @RequestParam(name = "hcaptchaResponse") String hcaptchaResponse,
+                                           @RequestParam(name = "hcaptchaResponse", required = false) String hcaptchaResponse,
+                                           @RequestParam(name = "force", defaultValue = "false") boolean force,
                                            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
                                            HttpServletRequest request)
             throws ResourceNotFoundException {
-        LOGGER.info("Entering triggerReview(gtin={}, domainLanguage={}, hasHcaptchaResponse={}, remoteAddr={})", gtin,
-                domainLanguage, StringUtils.hasText(hcaptchaResponse), request != null ? request.getRemoteAddr() : null);
+        boolean authenticatedUser = isAuthenticatedUser();
+        if (!authenticatedUser && !StringUtils.hasText(hcaptchaResponse)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "hCaptcha response is required for anonymous users");
+        }
+        if (force && !authenticatedUser) {
+            LOGGER.warn("Force review generation requested without authentication for product {}", gtin);
+        }
+        boolean forceGeneration = authenticatedUser;
+
+        LOGGER.info(
+                "Entering triggerReview(gtin={}, domainLanguage={}, hasHcaptchaResponse={}, force={}, authenticatedUser={}, remoteAddr={})",
+                gtin,
+                domainLanguage,
+                StringUtils.hasText(hcaptchaResponse),
+                forceGeneration,
+                authenticatedUser,
+                request != null ? request.getRemoteAddr() : null);
         try {
-            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request);
+            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request, authenticatedUser, forceGeneration);
             return ResponseEntity.ok()
                     .cacheControl(CacheControl.noCache())
                     .header("X-Locale", domainLanguage.languageTag())
@@ -1341,6 +1366,24 @@ public class ProductController {
                     .header("X-Locale", domainLanguage.languageTag())
                     .body(detail);
         }
+    }
+
+    /**
+     * Determine whether the current request comes from an authenticated user.
+     *
+     * @return {@code true} when a non-shared-token authentication is present
+     */
+    private boolean isAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        if (authentication instanceof JwtAuthenticationToken) {
+            return true;
+        }
+
+        return !"shared-token-user".equals(authentication.getName());
     }
 
     /**
