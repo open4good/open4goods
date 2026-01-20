@@ -1,17 +1,22 @@
 package org.open4goods.services.feedservice.service;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
+import org.open4goods.services.feedservice.dto.AffiliationKpis;
+import org.open4goods.services.feedservice.dto.AffiliationKpis.AffiliationKpisBreakdown;
 import org.open4goods.services.feedservice.model.AwinMerchant;
 import org.open4goods.services.remotefilecaching.config.CacheResourceConfig;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -27,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Feed service implementation for Awin.
@@ -191,5 +197,127 @@ public class AwinFeedService extends AbstractFeedService {
         }
         logger.info("Retrieved {} Awin merchant metadata entries", merchants.size());
         return merchants;
+    }
+
+    /**
+     * Retrieves aggregated KPIs for a date range.
+     *
+     * @param start start date (inclusive)
+     * @param end end date (inclusive)
+     * @return aggregated KPIs
+     * @throws Exception when the API call fails
+     */
+    public AffiliationKpis getKpis(LocalDate start, LocalDate end) throws Exception {
+        if (awinAccessToken == null || awinAccessToken.isBlank()) {
+            throw new IllegalStateException("Awin access token is missing");
+        }
+        if (advertiserId == null || advertiserId.isBlank()) {
+            throw new IllegalStateException("Awin advertiser id is missing");
+        }
+        JsonNode root = retrieveAwinPerformance(start, end);
+        JsonNode rows = extractRows(root);
+        if (rows == null || !rows.isArray()) {
+            throw new IllegalStateException("Awin performance payload is missing rows");
+        }
+
+        long clicks = 0;
+        long impressions = 0;
+        long transactionsTotal = 0;
+        long transactionsConfirmed = 0;
+        long transactionsPending = 0;
+        BigDecimal commissionTotal = BigDecimal.ZERO;
+        BigDecimal turnoverTotal = BigDecimal.ZERO;
+        Map<String, AffiliationKpisBreakdown> breakdown = new HashMap<>();
+
+        for (JsonNode row : rows) {
+            long rowClicks = row.path("clicks").asLong(0);
+            long rowImpressions = row.path("impressions").asLong(0);
+            long rowTransactions = row.path("transactions").asLong(row.path("transactionsTotal").asLong(0));
+            long rowConfirmed = row.path("transactionsConfirmed")
+                    .asLong(row.path("validatedTransactions").asLong(0));
+            long rowPending = row.path("transactionsPending").asLong(row.path("pendingTransactions").asLong(0));
+            BigDecimal rowCommission = readDecimal(row, "commission", "commissionAmount");
+            BigDecimal rowTurnover = readDecimal(row, "turnover", "saleAmount");
+
+            clicks += rowClicks;
+            impressions += rowImpressions;
+            transactionsTotal += rowTransactions;
+            transactionsConfirmed += rowConfirmed;
+            transactionsPending += rowPending;
+            commissionTotal = commissionTotal.add(rowCommission);
+            turnoverTotal = turnoverTotal.add(rowTurnover);
+
+            Optional<String> programName = resolveProgramName(row);
+            if (programName.isPresent()) {
+                breakdown.put(programName.get(), new AffiliationKpisBreakdown(
+                        rowClicks,
+                        rowImpressions,
+                        rowTransactions,
+                        rowConfirmed,
+                        rowPending,
+                        rowCommission,
+                        rowTurnover
+                ));
+            }
+        }
+
+        return new AffiliationKpis(
+                clicks,
+                impressions,
+                transactionsTotal,
+                transactionsConfirmed,
+                transactionsPending,
+                commissionTotal,
+                turnoverTotal,
+                breakdown.isEmpty() ? null : breakdown
+        );
+    }
+
+    private JsonNode retrieveAwinPerformance(LocalDate start, LocalDate end) throws Exception {
+        String endpoint = "https://api.awin.com/publishers/" + advertiserId
+                + "/reports/publisher/advertiser?startDate=" + start
+                + "&endDate=" + end
+                + "&accessToken=" + awinAccessToken;
+        logger.info("Retrieving Awin performance from endpoint: {}", endpoint);
+        File cachedResponse = remoteFileCachingService.getResource(endpoint, 1);
+        if (cachedResponse == null || !cachedResponse.exists()) {
+            throw new Exception("Awin performance cached response file not found");
+        }
+        String jsonResponse = new String(Files.readAllBytes(cachedResponse.toPath()), StandardCharsets.UTF_8);
+        return objectMapper.readTree(jsonResponse);
+    }
+
+    private JsonNode extractRows(JsonNode root) {
+        if (root == null) {
+            return null;
+        }
+        if (root.isArray()) {
+            return root;
+        }
+        if (root.has("data")) {
+            return root.path("data");
+        }
+        if (root.has("rows")) {
+            return root.path("rows");
+        }
+        return null;
+    }
+
+    private Optional<String> resolveProgramName(JsonNode row) {
+        String name = row.path("advertiser").asText(null);
+        if (name == null || name.isBlank()) {
+            name = row.path("advertiserName").asText(null);
+        }
+        return Optional.ofNullable(name);
+    }
+
+    private BigDecimal readDecimal(JsonNode row, String primary, String secondary) {
+        if (row.hasNonNull(primary)) {
+            return new BigDecimal(row.path(primary).asText("0"));
+        }
+        if (row.hasNonNull(secondary)) {
+            return new BigDecimal(row.path(secondary).asText("0"));
+        }
+        return BigDecimal.ZERO;
     }
 }

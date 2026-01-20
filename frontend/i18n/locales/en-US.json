@@ -40,7 +40,9 @@
         "hero": {
           "eyebrow": "Responsible shopping",
           "title": "Responsible choices aren’t a luxury",
-          "titleSubtitle": ["Buy better. Spend smarter."],
+          "titleSubtitle": [
+            "Buy better. Spend smarter."
+          ],
           "subtitles": [
             "Save time, stay true to your values. Compare effortlessly, choose freely.",
             "Shop smarter without compromise. Nudger balances planet and price.",
@@ -160,7 +162,9 @@
       },
       "hold": {
         "hero": {
-          "titleSubtitle": ["Legacy seasonal copy kept for testing."],
+          "titleSubtitle": [
+            "Legacy seasonal copy kept for testing."
+          ],
           "subtitles": [
             "Placeholder subtitles for the hold pack.",
             "Define hero copy for the event pack or rely on default."
@@ -181,7 +185,9 @@
         "hero": {
           "eyebrow": "Bastille Day special",
           "title": "Celebrate conscious choices on 14 July",
-          "titleSubtitle": ["Fireworks of fair prices and transparent impact."],
+          "titleSubtitle": [
+            "Fireworks of fair prices and transparent impact."
+          ],
           "subtitles": [
             "Shop with liberté, égalité, durabilité in mind.",
             "Switch to responsible picks while the skyline lights up."
@@ -238,9 +244,13 @@
       "eyebrow": "Responsible shopping",
       "title": "Responsible choices aren’t a luxury",
       "titleSubtitle": {
-        "default": ["Buy better. Spend smarter."],
+        "default": [
+          "Buy better. Spend smarter."
+        ],
         "events": {
-          "hold": ["Legacy seasonal copy kept for testing."],
+          "hold": [
+            "Legacy seasonal copy kept for testing."
+          ],
           "sdg": [
             "Everyday shopping aligned with the Sustainable Development Goals."
           ]
@@ -262,7 +272,6 @@
           ]
         }
       },
-
       "iconAlt": "Nudger PWA launcher icon",
       "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
       "search": {
@@ -3363,7 +3372,9 @@
       "hero": {
         "eyebrow": "Responsible shopping",
         "title": "Responsible choices aren't a luxury",
-        "titleSubtitle": ["Buy better. Spend smarter."],
+        "titleSubtitle": [
+          "Buy better. Spend smarter."
+        ],
         "subtitles": [
           "Save time, stay true to your values. Compare effortlessly, choose freely.",
           "Shop smarter without compromise. Nudger balances planet and price.",
@@ -3454,7 +3465,9 @@
       "hero": {
         "eyebrow": "Bastille Day special",
         "title": "Celebrate conscious choices on 14 July",
-        "titleSubtitle": ["Fireworks of fair prices and transparent impact."],
+        "titleSubtitle": [
+          "Fireworks of fair prices and transparent impact."
+        ],
         "subtitles": [
           "Shop with liberté, égalité, durabilité in mind.",
           "Switch to responsible picks while the skyline lights up."
@@ -3541,5 +3554,24 @@
         "description": "Explore the documentation tree, search pages, and read content inline."
       }
     }
+  },
+  "metriks": {
+    "table": {
+      "metric": "Metric",
+      "openExternal": "Open external link"
+    },
+    "page": {
+      "title": "Metriks report",
+      "description": "Weekly KPI snapshots across system, GitHub, and affiliation providers.",
+      "seo": {
+        "title": "Metriks report",
+        "description": "Weekly KPI snapshots across system, GitHub, and affiliation providers."
+      }
+    },
+    "controls": {
+      "includePayload": "Show payload on hover",
+      "limit": "Number of weeks"
+    },
+    "error": "Unable to load metriks report."
   }
 }

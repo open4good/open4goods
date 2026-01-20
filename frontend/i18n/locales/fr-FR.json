@@ -40,7 +40,9 @@
         "hero": {
           "eyebrow": "Comparateur responsable",
           "title": "Le comparateur de prix qui pense aussi à la planète.",
-          "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
+          "titleSubtitle": [
+            "Acheter mieux. Sans dépenser plus."
+          ],
           "subtitles": [
             "Gagne du temps. Choisis librement.",
             "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -164,7 +166,9 @@
       },
       "hold": {
         "hero": {
-          "titleSubtitle": ["Pack hérité pour les tests"],
+          "titleSubtitle": [
+            "Pack hérité pour les tests"
+          ],
           "subtitles": [
             "Texte placeholder pour le pack de rétention.",
             "Ajoute une déclinaison événementielle ou reste sur le défaut."
@@ -244,9 +248,13 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "titleSubtitle": {
-        "default": ["Acheter mieux. Sans dépenser plus."],
+        "default": [
+          "Acheter mieux. Sans dépenser plus."
+        ],
         "events": {
-          "hold": ["Des contenus hérités pour les tests."],
+          "hold": [
+            "Des contenus hérités pour les tests."
+          ],
           "sdg": [
             "Des achats du quotidien alignés sur les Objectifs de développement durable."
           ]
@@ -1494,8 +1502,8 @@
     },
     "examples": {
       "eyebrow": "Exemples de calcul",
-      "title": "Un \u00e9co-score lisible",
-      "subtitle": "Deux produits du quotidien pour illustrer l\u2019Impact Score.",
+      "title": "Un éco-score lisible",
+      "subtitle": "Deux produits du quotidien pour illustrer l’Impact Score.",
       "television": {
         "eyebrow": "Exemple 1",
         "title": "Téléviseur 55'' à dalle LED",
@@ -3370,8 +3378,12 @@
       "hero": {
         "eyebrow": "Saison de Noël",
         "title": "Un hiver tout en douceur",
-        "titleSubtitle": ["Des cadeaux qui ont du sens."],
-        "subtitles": ["Offrez, partagez, savourez."],
+        "titleSubtitle": [
+          "Des cadeaux qui ont du sens."
+        ],
+        "subtitles": [
+          "Offrez, partagez, savourez."
+        ],
         "search": {
           "helpers": [
             {
@@ -3475,7 +3487,9 @@
       "hero": {
         "eyebrow": "Nudger, c'est :",
         "title": "Le comparateur qui pense aussi à la planète",
-        "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
+        "titleSubtitle": [
+          "Acheter mieux. Sans dépenser plus."
+        ],
         "subtitles": [
           "Gagne du temps. Choisis librement.",
           "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -3588,5 +3602,24 @@
         "description": "Explorez l'arborescence, recherchez des pages et lisez les contenus en inline."
       }
     }
+  },
+  "metriks": {
+    "table": {
+      "metric": "Métrique",
+      "openExternal": "Ouvrir le lien externe"
+    },
+    "page": {
+      "title": "Rapport Metriks",
+      "description": "Instantanés hebdomadaires des KPI système, GitHub et affiliation.",
+      "seo": {
+        "title": "Rapport Metriks",
+        "description": "Instantanés hebdomadaires des KPI système, GitHub et affiliation."
+      }
+    },
+    "controls": {
+      "includePayload": "Afficher le payload au survol",
+      "limit": "Nombre de semaines"
+    },
+    "error": "Impossible de charger le rapport Metriks."
   }
 }

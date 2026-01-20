@@ -1,0 +1,24 @@
+{
+  "reportings": [
+    {
+      "programName": "Partner A",
+      "clicks": 7,
+      "impressions": 70,
+      "transactions": 2,
+      "transactionsConfirmed": 1,
+      "transactionsPending": 1,
+      "commission": "5.00",
+      "turnover": "80.00"
+    },
+    {
+      "name": "Partner B",
+      "clicks": 3,
+      "impressions": 20,
+      "transactionsTotal": 1,
+      "transactionsValidated": 1,
+      "transactionsPending": 0,
+      "commissionAmount": "1.50",
+      "turnoverAmount": "20.00"
+    }
+  ]
+}
