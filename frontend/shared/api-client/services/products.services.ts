@@ -253,7 +253,8 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
 
   const triggerReviewGeneration = async (
     gtin: string | number,
-    hcaptchaResponse: string
+    hcaptchaResponse?: string | null,
+    options: { force?: boolean; authToken?: string | null } = {}
   ): Promise<number> => {
     const parsedGtin =
       typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
@@ -262,7 +263,7 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
       throw new TypeError('GTIN must be a number.')
     }
 
-    if (!hcaptchaResponse) {
+    if (!hcaptchaResponse && !options.force) {
       throw new TypeError(
         'hCaptcha response is required to trigger review generation.'
       )
@@ -277,9 +278,13 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
         method: 'POST',
         headers: {
           ...(config.headers ?? {}),
+          ...(options.authToken
+            ? { Authorization: `Bearer ${options.authToken}` }
+            : {}),
         },
         query: {
-          hcaptchaResponse,
+          ...(hcaptchaResponse ? { hcaptchaResponse } : {}),
+          ...(options.force ? { force: true } : {}),
           domainLanguage,
         },
       })

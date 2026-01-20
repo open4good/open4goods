@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
@@ -357,9 +358,9 @@ class ProductMappingServiceTest {
                 eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(1);
         Product product = new Product(gtin);
         when(repository.getById(gtin)).thenReturn(product);
-        when(reviewGenerationClient.triggerGeneration(gtin)).thenReturn(gtin);
+        when(reviewGenerationClient.triggerGeneration(gtin, false)).thenReturn(gtin);
 
-        long scheduled = service.createReview(gtin, "token", httpServletRequest);
+        long scheduled = service.createReview(gtin, "token", httpServletRequest, false, false);
 
         verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
         verify(ipQuotaService).isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
@@ -367,7 +368,7 @@ class ProductMappingServiceTest {
         verify(ipQuotaService).increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
                 eq(reviewGenerationProperties.getQuota().getWindow()));
         verify(repository).getById(gtin);
-        verify(reviewGenerationClient).triggerGeneration(gtin);
+        verify(reviewGenerationClient).triggerGeneration(gtin, false);
         assertThat(scheduled).isEqualTo(gtin);
     }
 
@@ -380,14 +381,33 @@ class ProductMappingServiceTest {
         when(ipQuotaService.isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
                 eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(false);
 
-        assertThatThrownBy(() -> service.createReview(gtin, "token", httpServletRequest))
+        assertThatThrownBy(() -> service.createReview(gtin, "token", httpServletRequest, false, false))
                 .isInstanceOf(ReviewGenerationLimitExceededException.class)
                 .hasMessageContaining("Maximum 3 review generations");
 
         verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
         verify(ipQuotaService, never()).increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
                 eq(reviewGenerationProperties.getQuota().getWindow()));
-        verify(reviewGenerationClient, never()).triggerGeneration(gtin);
+        verify(reviewGenerationClient, never()).triggerGeneration(gtin, false);
+    }
+
+    @Test
+    void createReviewBypassesCaptchaForAuthenticatedUser() throws Exception {
+        long gtin = 42L;
+        when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
+        when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
+        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+        Product product = new Product(gtin);
+        when(repository.getById(gtin)).thenReturn(product);
+        when(reviewGenerationClient.triggerGeneration(gtin, true)).thenReturn(gtin);
+
+        long scheduled = service.createReview(gtin, null, httpServletRequest, true, true);
+
+        verifyNoInteractions(hcaptchaService);
+        verify(ipQuotaService, never()).isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
+                eq(reviewGenerationProperties.getQuota().getWindow()));
+        verify(reviewGenerationClient).triggerGeneration(gtin, true);
+        assertThat(scheduled).isEqualTo(gtin);
     }
 
     @Test

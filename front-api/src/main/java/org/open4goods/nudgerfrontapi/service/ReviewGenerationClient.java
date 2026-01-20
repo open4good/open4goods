@@ -61,8 +61,22 @@ public class ReviewGenerationClient {
      * @return echoed UPC once the job is scheduled
      */
     public long triggerGeneration(long upc) {
+        return triggerGeneration(upc, false);
+    }
+
+    /**
+     * Trigger review generation for the provided UPC with optional force flag.
+     *
+     * @param upc   product identifier forwarded to the back-office API
+     * @param force whether to force generation on the back-office side
+     * @return echoed UPC once the job is scheduled
+     */
+    public long triggerGeneration(long upc, boolean force) {
         Long response = restClient.post()
-                .uri(builder -> builder.path(properties.getReviewPath()).path("/{id}").build(upc))
+                .uri(builder -> builder.path(properties.getReviewPath())
+                        .path("/{id}")
+                        .queryParamIfPresent("force", force ? java.util.Optional.of(true) : java.util.Optional.empty())
+                        .build(upc))
                 .retrieve()
                 .body(Long.class);
         return response == null ? upc : response;

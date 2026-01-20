@@ -1030,30 +1030,46 @@ public class ProductMappingService {
      * Request AI review generation for the product after verifying captcha and
      * product existence.
      *
-     * @param gtin            product identifier used to trigger generation
-     * @param captchaResponse hCaptcha token provided by the caller
-     * @param request         HTTP request used to resolve the client IP address
+     * @param gtin               product identifier used to trigger generation
+     * @param captchaResponse    hCaptcha token provided by the caller
+     * @param request            HTTP request used to resolve the client IP address
+     * @param authenticatedUser  whether the requester is an authenticated user
+     * @param force              whether generation should be forced for authenticated users
      * @return UPC echoed back by the back-office API once the job is scheduled
      * @throws ResourceNotFoundException when the product cannot be found locally
      * @throws SecurityException         when captcha verification fails
      * @throws ReviewGenerationLimitExceededException when the IP exceeds the configured quota
      */
-    public long createReview(long gtin, String captchaResponse, HttpServletRequest request)
+    public long createReview(long gtin,
+                             String captchaResponse,
+                             HttpServletRequest request,
+                             boolean authenticatedUser,
+                             boolean force)
             throws ResourceNotFoundException, SecurityException {
         String clientIp = IpUtils.getIp(request);
-        hcaptchaService.verifyRecaptcha(clientIp, captchaResponse);
-        ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
-        int maxPerIp = quota.getMaxPerIp();
-        if (!ipQuotaService.isAllowed(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, maxPerIp, quota.getWindow())) {
-            logger.warn("IP {} reached review generation limit ({})", clientIp, maxPerIp);
-            throw new ReviewGenerationLimitExceededException(
-                    "Maximum " + maxPerIp + " review generations reached for this period");
+        if (!authenticatedUser) {
+            hcaptchaService.verifyRecaptcha(clientIp, captchaResponse);
+            ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
+            int maxPerIp = quota.getMaxPerIp();
+            if (!ipQuotaService.isAllowed(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, maxPerIp, quota.getWindow())) {
+                logger.warn("IP {} reached review generation limit ({})", clientIp, maxPerIp);
+                throw new ReviewGenerationLimitExceededException(
+                        "Maximum " + maxPerIp + " review generations reached for this period");
+            }
+            ipQuotaService.increment(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, quota.getWindow());
+        } else if (force) {
+            logger.info("Force review generation requested by authenticated user for product {}", gtin);
         }
-        int newUsage = ipQuotaService.increment(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, quota.getWindow());
         Product product = repository.getById(gtin);
-        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId());
-        int remaining = Math.max(0, maxPerIp - newUsage);
-        logger.info("AI review generation requested for product {} (remaining quota: {})", gtin, remaining);
+        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId(), force);
+        if (!authenticatedUser) {
+            ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
+            int remaining = Math.max(0, quota.getMaxPerIp()
+                    - ipQuotaService.getUsage(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, quota.getWindow()));
+            logger.info("AI review generation requested for product {} (remaining quota: {})", gtin, remaining);
+        } else {
+            logger.info("AI review generation requested for product {} by authenticated user", gtin);
+        }
         return scheduledUpc;
     }
 

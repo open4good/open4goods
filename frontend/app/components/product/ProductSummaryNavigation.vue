@@ -104,7 +104,25 @@
           :key="admin.id"
           class="product-summary-navigation__admin-item"
         >
+          <a
+            v-if="admin.href"
+            class="product-summary-navigation__admin-link"
+            :href="admin.href"
+            :target="admin.target"
+            :rel="resolveExternalRel(admin)"
+          >
+            <v-icon
+              v-if="admin.icon"
+              :icon="admin.icon"
+              size="18"
+              class="product-summary-navigation__admin-icon"
+            />
+            <span class="product-summary-navigation__admin-label">{{
+              admin.label
+            }}</span>
+          </a>
           <button
+            v-else
             type="button"
             class="product-summary-navigation__admin-link"
             :class="{
@@ -149,7 +167,13 @@ const _props = defineProps({
   },
   adminSections: {
     type: Array as PropType<
-      Array<{ id: string; label: string; icon?: string }>
+      Array<{
+        id: string
+        label: string
+        icon?: string
+        href?: string
+        target?: string
+      }>
     >,
     default: () => [],
   },
@@ -181,6 +205,14 @@ const openSectionId = ref<string | null>(null)
 
 const onNavigate = (sectionId: string) => {
   emit('navigate', sectionId)
+}
+
+const resolveExternalRel = (admin: { href?: string; target?: string }) => {
+  if (!admin.href) {
+    return undefined
+  }
+
+  return admin.target === '_blank' ? 'noopener' : undefined
 }
 
 const hasSubsections = (section: { subsections?: Array<{ id: string }> }) =>
@@ -389,13 +421,9 @@ watch(
 
 .product-summary-navigation__admin-panel {
   margin-top: 1.5rem;
-  padding: 1rem 0.875rem 1.25rem;
-  border-radius: 14px;
-  border: 1px solid rgba(var(--v-theme-error), 0.35);
-  background: rgba(var(--v-theme-error), 0.08);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .product-summary-navigation__admin-eyebrow {
@@ -419,7 +447,7 @@ watch(
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .product-summary-navigation__admin-item {
@@ -431,32 +459,33 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 0.75rem;
+  padding: 0.625rem 0.75rem;
   border-radius: 12px;
-  border: 1px solid rgba(var(--v-theme-error), 0.45);
-  background: rgba(var(--v-theme-error), 0.12);
+  border: 1px solid transparent;
+  background: transparent;
   color: rgb(var(--v-theme-error));
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.25s ease;
+  text-decoration: none;
 }
 
 .product-summary-navigation__admin-link:hover,
 .product-summary-navigation__admin-link:focus-visible {
-  background: rgba(var(--v-theme-error), 0.18);
-  border-color: rgba(var(--v-theme-error), 0.6);
+  background: rgba(var(--v-theme-error), 0.12);
+  border-color: rgba(var(--v-theme-error), 0.5);
 }
 
 .product-summary-navigation__admin-link--active {
-  background: rgba(var(--v-theme-error), 0.28);
-  color: rgb(var(--v-theme-surface-default));
-  border-color: rgba(var(--v-theme-error), 0.9);
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-error), 0.35);
+  background: rgba(var(--v-theme-error), 0.24);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  border-color: rgba(var(--v-theme-error), 0.7);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-error), 0.25);
 }
 
 .product-summary-navigation__admin-link--active
   .product-summary-navigation__admin-icon {
-  color: rgb(var(--v-theme-surface-default));
+  color: rgb(var(--v-theme-error));
 }
 
 .product-summary-navigation__admin-icon {
