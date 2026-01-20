@@ -169,7 +169,7 @@
         <v-btn
           color="primary"
           variant="flat"
-          @click="scrollToSelector('#offers-list', 136)"
+          @click="scrollToSelector('#prix', 136)"
         >
           {{ viewOffersLabel }}
         </v-btn>

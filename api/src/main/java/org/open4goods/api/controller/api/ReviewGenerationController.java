@@ -83,7 +83,7 @@ public class ReviewGenerationController {
             })
     public ResponseEntity<Long> generateReview(@PathVariable("id") long upc, @PathVariable( required = false, name = "force") boolean force, HttpServletRequest request) throws ResourceNotFoundException {
         Product product = productRepository.getById(upc);
-        VerticalConfig verticalConfig = verticalsConfigService.getConfigById(product.getVertical());
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
         
         Map<String, String> headers = new HashMap<>();
         String userAgent = request.getHeader("User-Agent");

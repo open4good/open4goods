@@ -368,9 +368,9 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	// -------------------- Batch Review Generation Methods -------------------- //
 
+	// TODO : Before adding url's, should either check valid http 200 or Location if 302
 	private void addResources(Product product, AiReview newReview) {
 
-		Resource r = new Resource();
 
 		newReview.getImages().forEach(image -> {
 			try {
@@ -605,8 +605,9 @@ public class ReviewGenerationService implements HealthIndicator {
 
 		ret = updateAiReviewReferences(ret);
 		ret = postProcess30x(ret);
+		// TODO : Anti tiret quadratin, or other conf files / tokens / formula.
 
-//			AiReview ret = serialisationService.fromJson(jsonContent, AiReview.class);
+
 		return ret;
 	}
 
@@ -644,7 +645,8 @@ public class ReviewGenerationService implements HealthIndicator {
 					review.getCommunityOneline(), review.getShortDescription(), review.getMediumTitle(),
 					review.getShortTitle(), review.getTechnicalReview(), review.getEcologicalReview(),
 					review.getSummary(), review.getPros(), review.getCons(), updatedSources, review.getAttributes(),
-					review.getDataQuality(), review.getRatings());
+					review.getDataQuality(), review.getRatings(),
+					review.getPdfs(), review.getImages(), review.getVideos(), review.getSocialLinks());
 		}
 
 		return review;
@@ -803,7 +805,8 @@ public class ReviewGenerationService implements HealthIndicator {
 						replaceReferences(attr.getValue()), attr.getNumber()))
 				.toList();
 		return new AiReview(description, technicalOneline, ecologicalOneline, communityOneline, shortDescription, mediumTitle, shortTitle, technicalReview, ecologicalReview,
-				summary, pros, cons, sources, attributes, dataQuality, review.getRatings());
+				summary, pros, cons, sources, attributes, dataQuality, review.getRatings(),
+				review.getPdfs(), review.getImages(), review.getVideos(), review.getSocialLinks());
 	}
 
 	@Override
@@ -849,7 +852,8 @@ public class ReviewGenerationService implements HealthIndicator {
 		return new AiReview(normalization.description(), normalization.technicalOneline(), normalization.ecologicalOneline(), normalization.communityOneline(), normalization.shortDescription(), normalization.mediumTitle(),
 				normalization.shortTitle(), normalization.technicalReview(), normalization.ecologicalReview(),
 				normalization.summary(), normalization.pros(), normalization.cons(), sources, normalization.attributes(),
-				dataQuality, review.getRatings());
+				dataQuality, review.getRatings(),
+				normalization.pdfs(), normalization.images(), normalization.videos(), normalization.socialLinks());
 	}
 
 	private List<AiReview.AiSource> resolveSourcesFromMetadata(Map<String, Object> metadata) {
@@ -912,7 +916,8 @@ public class ReviewGenerationService implements HealthIndicator {
 					"Certaines références ont été retirées car elles ne correspondaient à aucune source.");
 		}
 		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle, technicalReview,
-				ecologicalReview, summary, pros, cons, attributes, dataQuality, technicalOneline, ecologicalOneline, communityOneline);
+				ecologicalReview, summary, pros, cons, attributes, dataQuality, technicalOneline, ecologicalOneline, communityOneline,
+				review.getPdfs(), review.getImages(), review.getVideos(), review.getSocialLinks());
 	}
 
 	private String appendDataQuality(String dataQuality, String note) {
@@ -928,7 +933,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	private record ReferenceNormalization(String description, String shortDescription, String mediumTitle,
 			String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros,
 			List<String> cons, List<AiReview.AiAttribute> attributes, String dataQuality,
-			String technicalOneline, String ecologicalOneline, String communityOneline) {
+			String technicalOneline, String ecologicalOneline, String communityOneline,
+			List<String> pdfs, List<String> images, List<String> videos, List<String> socialLinks) {
 	}
 
 	private static class ReferenceNormalizer {

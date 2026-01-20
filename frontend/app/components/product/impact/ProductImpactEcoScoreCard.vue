@@ -25,6 +25,11 @@
       />
     </div>
 
+    <div v-if="aiImpactText" class="impact-ecoscore__ai-text">
+      <v-icon icon="mdi-robot" size="small" class="mr-2 text-primary" />
+      <span class="text-body-2">{{ aiImpactText }}</span>
+    </div>
+
     <div v-if="hasDetailContent" class="impact-ecoscore__analysis">
       <ProductImpactDetailsTable
         v-if="detailScores.length"
@@ -107,6 +112,7 @@ const props = defineProps<{
   productImage?: string
   verticalTitle?: string
   expandedScoreId?: string | null
+  aiImpactText?: string | null
 }>()
 
 const { locale, t: $t } = useI18n()
@@ -118,6 +124,7 @@ const productBrand = computed(() => props.productBrand ?? '')
 const productModel = computed(() => props.productModel ?? '')
 const productImage = computed(() => props.productImage ?? '')
 const verticalTitle = computed(() => props.verticalTitle ?? '')
+const aiImpactText = computed(() => props.aiImpactText ?? '')
 const shouldDisplayRadar = computed(() =>
   Boolean(
     props.showRadar &&

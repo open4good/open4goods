@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
+// TODO : Class level documentation / javadoc
 public class ReviewGenerationPreprocessingService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationPreprocessingService.class);
@@ -77,6 +78,7 @@ public class ReviewGenerationPreprocessingService {
 	 *                               NotEnoughDataException
 	 * @throws GoogleSearchException
 	 */
+
 	public Map<String, Object> preparePromptVariables(Product product, VerticalConfig verticalConfig,
 			ReviewGenerationStatus status) throws IOException, InterruptedException, ExecutionException,
 			ResourceNotFoundException, SerialisationException, NotEnoughDataException, GoogleSearchException {
@@ -104,7 +106,7 @@ public class ReviewGenerationPreprocessingService {
 		if (injectSites != null && !injectSites.isEmpty()) {
 			for (String site : injectSites) {
 				// Use the sane query template but restricted to the site
-				// Assuming query template is something like "%s %s avis" or similar, 
+				// Assuming query template is something like "%s %s avis" or similar,
 				// appending site:domain works well for Google.
 				queries.add(String.format(properties.getQueryTemplate() + " site:%s", brand, primaryModel, site));
 			}

@@ -128,6 +128,12 @@
                               height="24"
                               class="product-hero__flag"
                             />
+                            <v-icon
+                              v-if="attribute.icon"
+                              :icon="attribute.icon"
+                              size="small"
+                              class="product-hero__icon mr-2"
+                            />
                             <!-- eslint-disable-next-line vue/no-v-html -->
                             <span v-if="displayHtml" v-html="displayHtml" />
                             <span v-else>{{ displayValue }}</span>
@@ -156,7 +162,6 @@
                   :class="{
                     'product-hero__compare-button--active': isCompareSelected,
                   }"
-                  color="primary"
                   variant="flat"
                   :aria-pressed="isCompareSelected"
                   :aria-label="compareButtonAriaLabel"
@@ -182,28 +187,12 @@
           <ProductHeroPricing :product="product" />
         </aside>
       </div>
-
-      <ClientOnly>
-        <v-dialog
-          v-model="showAiModal"
-          max-width="800"
-          content-class="product-hero__ai-modal"
-        >
-          <ProductAiReviewSection
-            :gtin="product.gtin"
-            :initial-review="aiReview?.review ?? null"
-            :review-created-at="aiReview?.createdMs ?? undefined"
-            :site-key="siteKey"
-            section-id="hero-ai-modal"
-          />
-        </v-dialog>
-      </ClientOnly>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, type PropType } from 'vue'
+import { computed, defineAsyncComponent, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
@@ -260,30 +249,20 @@ const props = defineProps({
 })
 
 const { t, te, n, locale } = useI18n()
-const runtimeConfig = useRuntimeConfig()
 
 // AI Review Logic
-const ProductAiReviewSection = defineAsyncComponent(
-  () => import('~/components/product/ProductAiReviewSection.vue')
-)
-
-const showAiModal = ref(false)
-const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey as string)
 
 const aiReview = computed(() => props.product.aiReview)
 const hasAiReview = computed(() => Boolean(aiReview.value?.review))
-const aiDescription = computed(() => aiReview.value?.review?.description)
 
 const handleAiReviewClick = () => {
-  if (hasAiReview.value) {
-    const element = document.getElementById('synthese')
-    if (element) {
-      const offset = 120 // Adjust based on header height
-      const top = element.getBoundingClientRect().top + window.scrollY - offset
-      window.scrollTo({ top, behavior: 'smooth' })
-    }
-  } else {
-    showAiModal.value = true
+  const element =
+    document.getElementById('synthese') ||
+    document.querySelector('.product-ai-review')
+  if (element) {
+    const offset = 120 // Adjust based on header height
+    const top = element.getBoundingClientRect().top + window.scrollY - offset
+    window.scrollTo({ top, behavior: 'smooth' })
   }
 }
 
@@ -319,6 +298,7 @@ type HeroAttribute = DisplayedAttribute & {
   sourcing?: ProductAttributeSourceDto | null
   enableTooltip?: boolean
   showLabel?: boolean
+  icon?: string
 }
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
@@ -367,18 +347,40 @@ const popularAttributes = computed<HeroAttribute[]>(() =>
 const heroAttributes = computed<HeroAttribute[]>(() => {
   const baseAttributes: HeroAttribute[] = [...popularAttributes.value]
 
-  if (gtinCountry.value) {
-    // Inject AI Description before country if available
-    if (aiDescription.value) {
+  if (hasAiReview.value && aiReview.value) {
+    if (aiReview.value.technicalOneline) {
       baseAttributes.push({
-        key: 'ai-description',
-        label: t('product.hero.aiDescription.label', 'Description IA'),
-        value: aiDescription.value,
+        key: 'ai-technical',
+        label: t('product.hero.ai.technical', 'Technique'),
+        value: aiReview.value.technicalOneline,
+        icon: 'mdi-cog-outline',
         showLabel: false,
         enableTooltip: false,
       })
     }
+    if (aiReview.value.ecologicalOneline) {
+      baseAttributes.push({
+        key: 'ai-ecological',
+        label: t('product.hero.ai.ecological', 'Écologie'),
+        value: aiReview.value.ecologicalOneline,
+        icon: 'mdi-leaf',
+        showLabel: false,
+        enableTooltip: false,
+      })
+    }
+    if (aiReview.value.communityOneline) {
+      baseAttributes.push({
+        key: 'ai-community',
+        label: t('product.hero.ai.community', 'Avis communauté'),
+        value: aiReview.value.communityOneline,
+        icon: 'mdi-account-group-outline',
+        showLabel: false,
+        enableTooltip: false,
+      })
+    }
+  }
 
+  if (gtinCountry.value) {
     if (
       !baseAttributes.some(
         attribute => attribute.key === 'base.gtinInfo.countryName'
@@ -802,8 +804,8 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 .product-hero__compare-button {
   background: rgba(var(--v-theme-surface-glass-strong), 0.5);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2);
-  color: rgb(var(--v-theme-text-neutral-strong));
+  border: 1px solid rgba(var(--v-theme-accent-primary-highlight), 0.2);
+  color: rgb(var(--v-theme-accent-primary-highlight));
   padding: 0 1.25rem;
   height: 48px;
   border-radius: 14px;
@@ -812,6 +814,10 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
   transition: all 0.25s ease;
+}
+
+.product-hero__compare-button:hover {
+  background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
 }
 
 .product-hero__ai-button {
@@ -926,42 +932,6 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   align-items: flex-start;
   justify-content: flex-end;
   gap: 0.75rem;
-}
-
-.product-hero__compare-button {
-  text-transform: none;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding-inline: 1.4rem;
-  background: linear-gradient(
-    120deg,
-    rgba(var(--v-theme-surface-default), 0.98),
-    rgba(var(--v-theme-surface-glass-strong), 0.86)
-  );
-  color: rgb(var(--v-theme-text-neutral-strong));
-  box-shadow:
-    0 10px 28px rgba(15, 23, 42, 0.16),
-    0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.35) inset;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-
-.product-hero__compare-button:hover {
-  transform: translateY(-2px);
-  background-color: rgba(var(--v-theme-surface-default), 1);
-}
-
-.product-hero__compare-button:focus-visible {
-  box-shadow:
-    0 0 0 3px rgba(var(--v-theme-accent-primary-highlight), 0.45),
-    0 10px 28px rgba(15, 23, 42, 0.16);
 }
 
 .product-hero__compare-button--active {

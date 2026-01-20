@@ -77,12 +77,6 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
       >
         {{ t('home.cta.title') }}
       </p>
-      <p
-        class="home-section__subtitle text-center home-reveal-item"
-        :style="{ '--reveal-delay': '100ms' }"
-      >
-        {{ t('home.cta.subtitle') }}
-      </p>
       <form
         class="home-hero__search home-reveal-item"
         :style="{ '--reveal-delay': '200ms' }"

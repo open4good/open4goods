@@ -10,6 +10,7 @@
     </header>
 
     <div
+      id="price-history"
       class="product-price__charts"
       :class="{
         'product-price__charts--single': visibleChartsCount === 1,

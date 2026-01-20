@@ -981,7 +981,7 @@ onBeforeUnmount(() => {
   flex: 1 1 auto;
   aspect-ratio: 4 / 3;
   min-height: 0;
-  max-height: min(70vh, 720px);
+  max-height: min(50vh, 380px);
 }
 
 .product-gallery__stage-trigger {

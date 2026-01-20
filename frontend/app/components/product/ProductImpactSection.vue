@@ -127,6 +127,10 @@ const props = defineProps({
     type: String as PropType<string | null>,
     default: null,
   },
+  aiImpactText: {
+    type: String as PropType<string | null>,
+    default: null,
+  },
 })
 
 const radarData = toRef(props, 'radarData')
@@ -142,7 +146,10 @@ const { t } = useI18n()
 
 const isEcoScoreExpanded = ref(false)
 
-const primaryScore = computed(() => props.scores[0] ?? null)
+const primaryScore = computed(
+  () =>
+    props.scores.find(score => score.id?.toUpperCase() === 'ECOSCORE') ?? null
+)
 const detailScores = computed(() =>
   props.scores.filter(score => score.id?.toUpperCase() !== 'ECOSCORE')
 )

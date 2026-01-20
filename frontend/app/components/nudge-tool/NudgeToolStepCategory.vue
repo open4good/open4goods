@@ -390,12 +390,11 @@ watch(
     margin-inline: auto;
     max-width: 1050px;
     width: 100%;
-    overflow: visible; /* Fix cropping */
+    /* overflow: visible; removed to restore arrow visibility */
 
     :deep(.v-slide-group__container) {
       align-items: stretch;
-      contain: none; /* Allow overflow */
-      overflow: visible; /* Fix cropping */
+      /* overflow/contain removed to allow v-slide-group to detect scroll width */
     }
 
     /* Hide disabled arrows */

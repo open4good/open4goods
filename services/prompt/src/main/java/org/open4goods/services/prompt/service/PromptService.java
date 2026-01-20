@@ -321,7 +321,7 @@ public class PromptService implements HealthIndicator {
 
 
         PromptResponse<ProviderResult> nativ = promptNativ(promptKey, variables, jsonSchema, instructions);
-        String raw = nativ.getBody().getContent();
+        String raw = cleanJsonMarkdown(nativ.getBody().getContent());
         try {
             ret.setBody(outputConverter.convert(raw));
             ret.setRaw(raw);
@@ -451,7 +451,7 @@ public class PromptService implements HealthIndicator {
             throw e;
         }
 
-        String raw = accumulator.getContent();
+        String raw = cleanJsonMarkdown(accumulator.getContent());
         try {
             ret.setBody(outputConverter.convert(raw));
             logger.info("Raw LLM output : \n {}",raw);
@@ -497,7 +497,8 @@ public class PromptService implements HealthIndicator {
         ret.setMetadata(internal.getMetadata());
 
         // Clean up markdown formatting from the response
-        String response = internal.getBody().getContent().replace("```json", "").replace("```", "");
+        // Clean up markdown formatting from the response
+        String response = cleanJsonMarkdown(internal.getBody().getContent());
         ret.setRaw(response);
         try {
             ret.setBody(serialisationService.fromJsonTypeRef(response, new TypeReference<Map<String, Object>>() {}));
@@ -649,6 +650,18 @@ public class PromptService implements HealthIndicator {
         return true;
     }
 
+    private String cleanJsonMarkdown(String text) {
+        if (text == null) {
+            return null;
+        }
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("```(?:json)?\\s*([\\s\\S]*?)\\s*```");
+        java.util.regex.Matcher matcher = pattern.matcher(text);
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+        return text.trim();
+    }
+
     private String repairJson(String promptKey, String raw, String jsonSchema, PromptConfig promptConfig)
             throws SerialisationException {
         String systemPrompt = "You are a JSON repair assistant. Return only valid JSON.";
@@ -680,7 +693,7 @@ public class PromptService implements HealthIndicator {
                 logger.error("Error recording repaired prompt response for key {}: {}", promptKey, e.getMessage(), e);
             }
         }
-        return repairResult.getContent();
+        return cleanJsonMarkdown(repairResult.getContent());
     }
 
     private void recordPromptRequest(String promptKey, PromptConfig updatedConfig, String systemPromptEvaluated,

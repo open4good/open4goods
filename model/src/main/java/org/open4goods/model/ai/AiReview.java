@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Represents an AI-generated review of a product, including descriptions, pros and cons, data quality assessment, and sourced information.")
 public class AiReview {
 
-    public AiReview(String description, String technicalOneline, String ecologicalOneline, String communityOneline, String shortDescription, String mediumTitle, String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros, List<String> cons, List<AiSource> sources, List<AiAttribute> attributes, String dataQuality, List<AiRating> ratings) {
+    public AiReview(String description, String technicalOneline, String ecologicalOneline, String communityOneline, String shortDescription, String mediumTitle, String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros, List<String> cons, List<AiSource> sources, List<AiAttribute> attributes, String dataQuality, List<AiRating> ratings, List<String> pdfs, List<String> images, List<String> videos, List<String> socialLinks) {
         super();
         this.description = description;
         this.technicalOneline = technicalOneline;
@@ -39,6 +39,10 @@ public class AiReview {
         this.attributes = attributes;
         this.dataQuality = dataQuality;
         this.ratings = ratings;
+        this.pdfs = pdfs;
+        this.images = images;
+        this.videos = videos;
+        this.socialLinks = socialLinks;
     }
 
 	    /** A detailed description of the product. */
@@ -147,6 +151,7 @@ public class AiReview {
 
     /** The pdfs found in the sources. */
     @JsonProperty(required = false, value = "pdfs")
+    @AiGeneratedField(instruction = "Liste des urls des documents PDFs trouvés (manuels, fiches techniques, réparabilité ...)")
     @Schema(description = "List of PDF's url's for this product")
     private List<String> pdfs = new ArrayList<>();
 
@@ -154,17 +159,20 @@ public class AiReview {
 
     /** The pdfs found in the sources. */
     @JsonProperty(required = false, value = "images")
+    @AiGeneratedField(instruction = "Liste des urls des images produit trouvées (haute qualité de préférence)")
     @Schema(description = "List of quality images url's for this product")
     private List<String> images = new ArrayList<>();
 
 
     /** The pdfs found in the sources. */
     @JsonProperty(required = false, value = "videos")
+    @AiGeneratedField(instruction = "Liste des urls des vidéos trouvées (youtube, dailymotion, vimeo ...)")
     @Schema(description = "List of product related videos (vide platform, like youtube, direct file, daylymotion, ... social networks, )")
     private List<String> videos = new ArrayList<>();
 
     /** The social network references */
     @JsonProperty(required = false, value = "social")
+    @AiGeneratedField(instruction = "Liste des urls des posts réseaux sociaux trouvés (facebook, twitter, instagram ...)")
     @Schema(description = "List of social networks references")
     private List<String> socialLinks = new ArrayList<>();
 

@@ -68,6 +68,7 @@
             :vertical-title="normalizedVerticalTitle"
             :subtitle-params="impactSubtitleParams"
             :expanded-score-id="expandedScoreId"
+            :ai-impact-text="product.aiReview?.ecologicalOneline"
           />
         </section>
 
