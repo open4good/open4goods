@@ -12,8 +12,7 @@
     @mouseleave="isHovered = false"
     @focus="isHovered = true"
     @blur="isHovered = false"
-  >
-  </div>
+  ></div>
 </template>
 
 <script setup lang="ts">

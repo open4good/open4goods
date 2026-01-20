@@ -41,8 +41,9 @@ describe('NudgeToolAnimatedIcon', () => {
     const wrapper = mountIcon()
 
     expect(wrapper.exists()).toBe(true)
-    expect(wrapper.attributes('role')).toBe('img')
-    expect(wrapper.classes()).toContain('nudge-tool-animated-icon')
+    const el = wrapper.find('.nudge-tool-animated-icon')
+    expect(el.attributes('role')).toBe('img')
+    expect(el.classes()).toContain('nudge-tool-animated-icon')
   })
 
   it('respects reduced motion', async () => {
@@ -72,7 +73,7 @@ describe('NudgeToolAnimatedIcon', () => {
       },
     })
 
-    const style = wrapper.attributes('style')
+    const style = wrapper.find('.nudge-tool-animated-icon').attributes('style')
     expect(style).toContain('--nudge-icon-animation-duration: 2200ms')
   })
 })
