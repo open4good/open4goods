@@ -123,4 +123,21 @@ class AttributeRealtimeAggregationServiceTest {
 			}
 		});
 	}
+
+	@Test
+	void testDeleteTokensWithUpperCase() throws Exception {
+		// Arrange
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("DISPLAY_TECHNOLOGY");
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setDeleteTokens(java.util.List.of("TV", "_LCD"));
+		attrConfig.getParser().setNormalize(true);
+		attrConfig.getParser().setTrim(true);
+
+		// Act
+		String result = service.parseValue("LED_LCD", attrConfig, verticalConfig);
+
+		// Assert
+		assertThat(result).isEqualTo("LED");
+	}
 }
