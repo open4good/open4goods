@@ -64,15 +64,6 @@
               </template>
             </v-img>
 
-            <div class="category-product-card-grid__title-overlay">
-              <ProductDesignation
-                :product="product"
-                variant="card"
-                :title-tag="normalizedSize === 'big' ? 'h2' : 'h3'"
-                title-class="category-product-card-grid__title"
-              />
-            </div>
-
             <div class="category-product-card-grid__corner" role="presentation">
               <ImpactScore
                 v-if="impactScoreValue(product) != null"
@@ -89,6 +80,15 @@
               </span>
             </div>
           </div>
+        </div>
+
+        <div class="category-product-card-grid__title-wrapper">
+          <ProductDesignation
+            :product="product"
+            variant="card"
+            :title-tag="normalizedSize === 'big' ? 'h2' : 'h3'"
+            title-class="category-product-card-grid__title"
+          />
         </div>
 
         <v-card-item class="category-product-card-grid__body">
@@ -618,7 +618,7 @@ const getConditionCountLabel = (
     display: flex
     flex-direction: column
     gap: 0.25rem
-    padding: 0.75rem
+    padding: 0 0.75rem 0.75rem
     flex-grow: 1
 
   &__header
@@ -628,16 +628,8 @@ const getConditionCountLabel = (
     text-align: center
     gap: 0.25rem
 
-  &__title-overlay
-    position: absolute
-    top: 0
-    left: 56px /* Width of corner badge */
-    right: 0
-    padding: 0.5rem 2.5rem 0.5rem 0.75rem /* Right padding for compare toggle */
-    z-index: 2
-    display: flex
-    align-items: center
-    min-height: 56px /* Match corner height */
+  &__title-wrapper
+    padding: 0 0.75rem 0.5rem
 
   &__title
     font-size: 0.85rem
@@ -645,15 +637,9 @@ const getConditionCountLabel = (
     color: rgb(var(--v-theme-text-neutral-strong))
     margin: 0
     line-height: 1.2
-    display: -webkit-box
-    -webkit-line-clamp: 2
-    -webkit-box-orient: vertical
+    white-space: nowrap
     overflow: hidden
-    background: rgba(var(--v-theme-surface-default), 0.7)
-    backdrop-filter: blur(4px)
-    padding: 0.35rem 0.75rem
-    border-radius: 1rem
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05)
+    text-overflow: ellipsis
 
   &__attributes
     display: flex
