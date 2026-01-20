@@ -80,6 +80,12 @@ public class ReviewGenerationPreprocessingService {
 	public Map<String, Object> preparePromptVariables(Product product, VerticalConfig verticalConfig,
 			ReviewGenerationStatus status) throws IOException, InterruptedException, ExecutionException,
 			ResourceNotFoundException, SerialisationException, NotEnoughDataException, GoogleSearchException {
+		return preparePromptVariables(product, verticalConfig, status, null);
+	}
+
+	public Map<String, Object> preparePromptVariables(Product product, VerticalConfig verticalConfig,
+			ReviewGenerationStatus status, Map<String, String> customHeaders) throws IOException, InterruptedException, ExecutionException,
+			ResourceNotFoundException, SerialisationException, NotEnoughDataException, GoogleSearchException {
 		String brand = product.brand();
 		String primaryModel = product.model();
 		Set<String> alternateModels = product.getAkaModels();
@@ -90,6 +96,17 @@ public class ReviewGenerationPreprocessingService {
 		if (alternateModels != null) {
 			for (String akaModel : alternateModels) {
 				queries.add(String.format(properties.getQueryTemplate(), brand, akaModel));
+			}
+		}
+
+		// Add specific site queries if configured
+		List<String> injectSites = verticalConfig.getInjectSitesResults();
+		if (injectSites != null && !injectSites.isEmpty()) {
+			for (String site : injectSites) {
+				// Use the sane query template but restricted to the site
+				// Assuming query template is something like "%s %s avis" or similar, 
+				// appending site:domain works well for Google.
+				queries.add(String.format(properties.getQueryTemplate() + " site:%s", brand, primaryModel, site));
 			}
 		}
 
@@ -140,7 +157,7 @@ public class ReviewGenerationPreprocessingService {
 			String url = result.link();
 			CompletableFuture<FetchResponse> future = CompletableFuture.supplyAsync(() -> {
 				try {
-					return urlFetchingService.fetchUrlAsync(url).get();
+					return urlFetchingService.fetchUrlAsync(url, customHeaders).get();
 				} catch (Exception e) {
 					logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
 					return null;

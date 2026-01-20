@@ -454,6 +454,7 @@ public class PromptService implements HealthIndicator {
         String raw = accumulator.getContent();
         try {
             ret.setBody(outputConverter.convert(raw));
+            logger.info("Raw LLM output : \n {}",raw);
             ret.setRaw(raw);
         } catch (Exception e) {
             meterRegistry.counter("prompt.json.repair",

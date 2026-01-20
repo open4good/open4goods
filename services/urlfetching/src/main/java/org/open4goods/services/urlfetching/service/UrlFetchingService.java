@@ -66,6 +66,21 @@ public class UrlFetchingService {
      * @return a CompletableFuture of FetchResponse
      */
     public CompletableFuture<FetchResponse> fetchUrlAsync(String url) {
+        return fetchUrlAsync(url, null);
+    }
+
+    /**
+     * Fetches a URL using the appropriate strategy based on the domain, with custom headers.
+     * <p>
+     * If recording mode is enabled (i.e. {@code urlfetcher.record.enabled} is true), the fetch response
+     * is also recorded to a file for later playback in tests.
+     * </p>
+     *
+     * @param url the URL to fetch
+     * @param headers custom headers to add to the request
+     * @return a CompletableFuture of FetchResponse
+     */
+    public CompletableFuture<FetchResponse> fetchUrlAsync(String url, Map<String, String> headers) {
         logger.info("Initiating fetch for URL: {}", url);
         String domain = getDomainFromUrl(url);
         DomainConfig domainConfig = urlFetcherConfig.getDomains().get(domain);
@@ -77,7 +92,7 @@ public class UrlFetchingService {
         }
 
         Fetcher fetcher = getFetcherForStrategy(domainConfig);
-        CompletableFuture<FetchResponse> future = fetcher.fetchUrlAsync(url);
+        CompletableFuture<FetchResponse> future = fetcher.fetchUrlAsync(url, headers);
         return future.thenApply(response -> {
             // Recording mode: if enabled, record the fetch response to file.
             if (urlFetcherConfig.getRecord() != null && urlFetcherConfig.getRecord().isEnabled()) {

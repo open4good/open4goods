@@ -25,9 +25,18 @@ export default defineNuxtPlugin(() => {
 
     // Allow internal relative URLs to be fetched serverside by resolving them to localhost
     if (url.startsWith('/')) {
-      const { origin } = useRequestURL()
-      const absoluteUrl = `${origin}${url}`
-      return originalFetch(absoluteUrl, init)
+      try {
+        const { origin } = useRequestURL()
+        const absoluteUrl = `${origin}${url}`
+        return originalFetch(absoluteUrl, init)
+      } catch {
+        // If context is unavailable (e.g. call outside of request), fall back to localhost
+        // This prevents the "Nuxt instance" error and "Invalid URL" error
+        const port = process.env.PORT || process.env.NITRO_PORT || '3000'
+        const host = process.env.HOST || 'localhost'
+        const absoluteUrl = `http://${host}:${port}${url}`
+        return originalFetch(absoluteUrl, init)
+      }
     }
 
     const opts = token && url.startsWith(apiUrl) ? withToken(init) : init

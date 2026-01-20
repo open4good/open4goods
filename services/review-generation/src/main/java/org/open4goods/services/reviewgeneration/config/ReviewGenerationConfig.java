@@ -204,6 +204,18 @@ public class ReviewGenerationConfig {
 	public void setMinUrlCount(int minUrlCount) {
 		this.minUrlCount = minUrlCount;
 	}
+    /**
+     * Flag to enable URL resolution in post-processing.
+     * If true, the service will attempt to follow redirects (30x status) to resolve the final URL.
+     */
+    private boolean resolveUrl = true;
+
+	public boolean isResolveUrl() {
+		return resolveUrl;
+	}
+	public void setResolveUrl(boolean resolveUrl) {
+		this.resolveUrl = resolveUrl;
+	}
 	public String getBatchFolder() {
 		return batchFolder;
 	}

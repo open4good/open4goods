@@ -60,39 +60,6 @@ public class GenAiController {
 
 
 
-	@GetMapping("/prompt/json")
-	@Operation(summary="Launch prompt")
-	public Map<String, Object> promptJson(@RequestParam(defaultValue = "test") String key,
-			@RequestParam Map<String,Object> context) throws ResourceNotFoundException, SerialisationException {
-
-		return aiService.jsonPrompt(key, context).getBody();
-	}
-
-	@GetMapping("/prompt/text")
-	@Operation(summary="Launch prompt")
-	public String prompt(@RequestParam(defaultValue = "test") String key,
-			@RequestParam Map<String,Object> context) throws ResourceNotFoundException, SerialisationException {
-
-		return aiService.prompt(key, context).getRaw();
-	}
-
-	@GetMapping("/batch/request")
-	@Operation(summary = "Launch batch review generation")
-	public String batchReview(
-	        @RequestParam(defaultValue = "tv") String vertical,
-	        @RequestParam(defaultValue = "2") Integer numberOfProducts)
-	        throws ResourceNotFoundException, SerialisationException, IOException {
-
-	    VerticalConfig verticalConfig = verticalsConfigservice.getConfigById(vertical);
-	    Stream<Product> productsStream = repository.exportVerticalWithValidDate(verticalConfig, false);
-	    List<Product> products = productsStream.filter(e -> e.getReviews().size() == 0)
-	            .limit(numberOfProducts)
-	            .toList();
-	    // Now generate the batch job and return the tracking job id.
-	    return reviewGenerationService.generateReviewBatchRequest(products, verticalConfig);
-	}
-
-
 	/**
      * Endpoint to check the current status of a batch job.
      *

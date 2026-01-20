@@ -9,7 +9,6 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.Gs1PrefixService;
-import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.product.BarcodeType;
@@ -46,7 +45,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		/////////////////////////////
 		// Validating barcodes
 		/////////////////////////////
-		
+
 		if (null == output.getId()) {
 			// TODO(p2, features) : Should store the GTIN type when encountered in gtin infos, and then render with appropriate leading 0
 			output.setId(Long.valueOf(input.gtin()));
@@ -55,19 +54,19 @@ public class IdentityAggregationService extends AbstractAggregationService {
 				dedicatedLogger.error("GTIN Mismatch : product {], dataFragment {}", output.gtin(), input.gtin());
 			}
 		}
-		
+
 		/////////////////////////////
 		// Adding alternate models's
-		/////////////////////////////		
+		/////////////////////////////
 		output.getAkaModels().addAll(input.getAlternateIds());
 
 		/////////////////////////////
 		// Setting the dates
 		/////////////////////////////
-		
+
 		// The last update
 		output.setLastChange(System.currentTimeMillis());
-		
+
 		onProduct(output, vConf);
 		return null;
 	}
@@ -78,7 +77,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		if (StringUtils.isEmpty(output.gtin())) {
 			dedicatedLogger.warn("Skipping product aggregation, empty barcode");
 			throw new AggregationSkipException("Cannot proceed, empty barcode");
-		} 
+		}
 
 		SimpleEntry<BarcodeType, String> valResult = validationService.sanitize(output.gtin());
 
@@ -92,8 +91,8 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		output.setId(Long.valueOf(valResult.getValue()));
 
 
-	
-			
+
+
 		/////////////////////////////
 		// Adding country information
 		/////////////////////////////
@@ -111,7 +110,7 @@ public class IdentityAggregationService extends AbstractAggregationService {
 
 		// Setting barcode type
 		output.getGtinInfos().setUpcType(valResult.getKey());
-		
+
 	}
 
 }

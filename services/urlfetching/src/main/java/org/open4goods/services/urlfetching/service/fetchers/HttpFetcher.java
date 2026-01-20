@@ -65,6 +65,11 @@ public class HttpFetcher implements Fetcher {
      */
     @Override
     public CompletableFuture<FetchResponse> fetchUrlAsync(String url) {
+        return fetchUrlAsync(url, null);
+    }
+
+    @Override
+    public CompletableFuture<FetchResponse> fetchUrlAsync(String url, Map<String, String> headers) {
     	logger.info("Executor stats before fetchUrl: active={}, queued={}, poolSize={}",
     		    ((ThreadPoolExecutor) executor).getActiveCount(),
     		    ((ThreadPoolExecutor) executor).getQueue().size(),
@@ -75,9 +80,24 @@ public class HttpFetcher implements Fetcher {
                 .timeout(timeout)
                 .header("User-Agent", this.userAgent);
 
-        // Add custom headers if available
-        if (customHeaders != null) {
-            customHeaders.forEach(requestBuilder::header);
+        // Add configured custom headers if available
+        if (this.customHeaders != null) {
+            this.customHeaders.forEach(requestBuilder::header);
+        }
+        
+        // Add runtime headers if available (overriding user-agent if present in headers?)
+        // Headers from map will be added. HttpClient allows multiple values for same header name usually, 
+        // or we should be careful. 
+        // User-Agent: if passed in headers, it might duplicate. 
+        // Let's assume passed headers take precedence or just add them.
+        if (headers != null) {
+        	headers.forEach((k, v) -> {
+        		// Special handling for User-Agent to avoid duplication if policy requires, 
+        		// but HttpClient .header adds, .setHeader overwrites. Builder only has .header (add) and .setHeader (overwrite) ?
+        		// Java 11 HttpRequest.Builder has .header(k, v) which adds. .setHeader(k, v) sets (overwrites).
+        		// Let's use setHeader for passed headers to allow override.
+        		requestBuilder.setHeader(k, v);
+        	});
         }
 
         HttpRequest request = requestBuilder.build();

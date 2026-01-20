@@ -282,6 +282,20 @@ public class VerticalConfig {
 	// A local cache for token names
 	private Set<String> cacheTokenNames;
 
+	/**
+	 * List of domains/urls to restrict results on.
+	 */
+	@JsonMerge
+	private List<String> injectSitesResults = new ArrayList<>();
+
+	public List<String> getInjectSitesResults() {
+		return injectSitesResults;
+	}
+
+	public void setInjectSitesResults(List<String> injectSitesResults) {
+		this.injectSitesResults = injectSitesResults;
+	}
+
 
 
 	@Override

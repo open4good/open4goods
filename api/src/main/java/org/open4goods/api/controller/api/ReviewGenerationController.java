@@ -1,6 +1,9 @@
 package org.open4goods.api.controller.api;
 
 import java.util.concurrent.CompletableFuture;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
@@ -57,6 +60,7 @@ public class ReviewGenerationController {
      * @return the UPC echoed back once the generation has been scheduled
      * @throws ResourceNotFoundException when the product does not exist in the repository
      */
+
     @PostMapping("/review/{id}")
     @Operation(summary = "Schedule AI review generation", description = "Launch the asynchronous AI review pipeline for the given UPC.",
             parameters = {
@@ -77,10 +81,25 @@ public class ReviewGenerationController {
                                     schema = @Schema(implementation = Long.class))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             })
-    public ResponseEntity<Long> generateReview(@PathVariable("id") long upc, @PathVariable( required = false, name = "force") boolean force) throws ResourceNotFoundException {
+    public ResponseEntity<Long> generateReview(@PathVariable("id") long upc, @PathVariable( required = false, name = "force") boolean force, HttpServletRequest request) throws ResourceNotFoundException {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigById(product.getVertical());
-        long scheduledUpc = reviewGenerationService.generateReviewAsync(product, verticalConfig, CompletableFuture.completedFuture(null), force);
+        
+        Map<String, String> headers = new HashMap<>();
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent != null) {
+            headers.put("User-Agent", userAgent);
+        }
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null) {
+            headers.put("X-Forwarded-For", xForwardedFor);
+        }
+        String xForwardedIp = request.getHeader("X-Forwarded-IP"); // Also requested by user
+        if (xForwardedIp != null) {
+        	headers.put("X-Forwarded-IP", xForwardedIp);
+        }
+        
+        long scheduledUpc = reviewGenerationService.generateReviewAsync(product, verticalConfig, CompletableFuture.completedFuture(null), force, headers);
         return ResponseEntity.ok(scheduledUpc);
     }
 

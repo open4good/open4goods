@@ -19,6 +19,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
 
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.Attribute;
@@ -211,6 +214,21 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @return the product UPC used to track generation status.
 	 */
 	public long generateReviewAsync(Product product, VerticalConfig verticalConfig,	CompletableFuture<Void> preProcessingFuture, boolean force) {
+		return generateReviewAsync(product, verticalConfig, preProcessingFuture, force, new HashMap<>());
+	}
+
+	/**
+	 * Asynchronous review generation using the realtime prompt service. (Uses a
+	 * ThreadPoolExecutor to run the process asynchronously.)
+	 *
+	 * @param product             the product.
+	 * @param verticalConfig      the vertical configuration.
+	 * @param preProcessingFuture an optional external preprocessing future.
+	 * @param force               force generation even if valid review exists
+	 * @param customHeaders       custom headers (User-Agent, etc.) to use for fetching
+	 * @return the product UPC used to track generation status.
+	 */
+	public long generateReviewAsync(Product product, VerticalConfig verticalConfig,	CompletableFuture<Void> preProcessingFuture, boolean force, Map<String, String> customHeaders) {
 		long upc = product.getId();
 		if (!force && !shouldGenerateReview(product)) {
 			logger.info(
@@ -272,7 +290,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					promptVariables = preprocessingService.buildBasePromptVariables(product, verticalConfig);
 				} else {
 					status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
-					promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig, status);
+					promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig, status, customHeaders);
 				}
 
 				// Validation of critical variables
@@ -293,12 +311,13 @@ public class ReviewGenerationService implements HealthIndicator {
 					reviewResponse = genAiService.objectPromptStream(promptKey, promptVariables, AiReview.class,
 							event -> handleProviderEvent(status, event));
 					// TODO : Log
-					
+
 				} else {
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
 				}
 				AiReview newReview = applyCitationsAndNormalize(reviewResponse.getBody(), reviewResponse.getMetadata());
 				newReview = updateAiReviewReferences(newReview);
+				newReview = postProcess(newReview);
 
 				// Populate attributes
 				populateAttributes(product, newReview);
@@ -547,9 +566,81 @@ public class ReviewGenerationService implements HealthIndicator {
 		AiReview ret = outputConverter.convert(jsonContent);
 
 		ret = updateAiReviewReferences(ret);
+		ret = postProcess(ret);
 
 //			AiReview ret = serialisationService.fromJson(jsonContent, AiReview.class);
 		return ret;
+	}
+
+	/**
+	 * Post-process the review, e.g. resolving URLs.
+	 *
+	 * @param review the review to process
+	 * @return the processed review
+	 */
+	private AiReview postProcess(AiReview review) {
+		if (!properties.isResolveUrl()) {
+			return review;
+		}
+		if (review == null || review.getSources() == null || review.getSources().isEmpty()) {
+			return review;
+		}
+
+		List<AiReview.AiSource> updatedSources = new ArrayList<>();
+		boolean changed = false;
+
+		for (AiReview.AiSource source : review.getSources()) {
+			String originalUrl = source.getUrl();
+			String resolvedUrl = resolveUrl(originalUrl);
+
+			if (originalUrl != null && !originalUrl.equals(resolvedUrl)) {
+				updatedSources.add(new AiReview.AiSource(source.getNumber(), source.getName(), source.getDescription(), resolvedUrl));
+				changed = true;
+			} else {
+				updatedSources.add(source);
+			}
+		}
+
+		if (changed) {
+			return new AiReview(review.getDescription(), review.getTechnicalOneline(), review.getEcologicalOneline(),
+					review.getCommunityOneline(), review.getShortDescription(), review.getMediumTitle(),
+					review.getShortTitle(), review.getTechnicalReview(), review.getEcologicalReview(),
+					review.getSummary(), review.getPros(), review.getCons(), updatedSources, review.getAttributes(),
+					review.getDataQuality(), review.getRatings());
+		}
+
+		return review;
+	}
+
+	private String resolveUrl(String urlString) {
+		if (urlString == null || urlString.isBlank()) {
+			return urlString;
+		}
+		try {
+			URL url = new URL(urlString);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setInstanceFollowRedirects(false);
+			connection.setRequestMethod("HEAD");
+			connection.setConnectTimeout(5000);
+			connection.setReadTimeout(5000);
+
+			// User Agent to avoid being blocked by some servers
+			connection.setRequestProperty("User-Agent",
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+
+			int status = connection.getResponseCode();
+			if (status >= 300 && status < 400) {
+				String location = connection.getHeaderField("Location");
+				if (location != null && !location.isBlank()) {
+					URI baseUri = url.toURI();
+					URI resolvedUri = baseUri.resolve(location);
+					return resolvedUri.toString();
+				}
+			}
+		} catch (Exception e) {
+			logger.warn("Failed to resolve URL {}: {}", urlString, e.getMessage());
+		}
+		return urlString;
 	}
 
 	/**
