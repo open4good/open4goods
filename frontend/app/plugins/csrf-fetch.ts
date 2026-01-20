@@ -40,8 +40,14 @@ export default defineNuxtPlugin(nuxtApp => {
       }
 
       if (!csrfCookie.value) {
+        console.log('[CSRF-Plugin] No CSRF cookie found in plugin')
         return
       }
+
+      console.log(
+        '[CSRF-Plugin] Found cookie, adding header:',
+        csrfCookie.value
+      )
 
       const headers = new Headers(options.headers || {})
       if (!headers.has(CSRF_HEADER_NAME)) {

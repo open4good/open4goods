@@ -24,6 +24,6 @@ parser:
   lowerCase: false
   upperCase: true
   removeParenthesis: false
-deleteTokens:
-  - "TV"
-  - "_LCD"
+  deleteTokens:
+    - "TV"
+    - "_LCD"

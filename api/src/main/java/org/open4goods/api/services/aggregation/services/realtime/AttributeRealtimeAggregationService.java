@@ -682,7 +682,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		//////////////////////////////
 
 		if (null != attrConf.getParser().getDeleteTokens()) {
-			for (final String token : attrConf.getParser().getDeleteTokens()) {
+			for (String token : attrConf.getParser().getDeleteTokens()) {
+				if (Boolean.TRUE.equals(attrConf.getParser().getLowerCase())) {
+					token = token.toLowerCase();
+				}
+				if (Boolean.TRUE.equals(attrConf.getParser().getUpperCase())) {
+					token = token.toUpperCase();
+				}
 				string = string.replace(token, "");
 			}
 		}

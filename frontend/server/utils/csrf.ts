@@ -50,10 +50,12 @@ export const ensureCsrfCookie = (event: H3Event) => {
   const existingToken = getCookie(event, CSRF_COOKIE_NAME)
 
   if (existingToken) {
+    console.log('[CSRF] Existing token found:', existingToken)
     return existingToken
   }
 
   const token = randomUUID()
+  console.log('[CSRF] Generating new token:', token)
   setCookie(event, CSRF_COOKIE_NAME, token, {
     httpOnly: false,
     sameSite: 'lax',
@@ -102,10 +104,17 @@ export const assertCsrfToken = (event: H3Event) => {
   const csrfToken = getCookie(event, CSRF_COOKIE_NAME)
   const headerToken = getRequestHeader(event, CSRF_HEADER_NAME)
 
+  console.log(
+    '[CSRF] Asserting token. Cookie:',
+    csrfToken,
+    'Header:',
+    headerToken
+  )
+
   if (!csrfToken || !headerToken || csrfToken !== headerToken) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Invalid CSRF token',
+      statusMessage: `Invalid CSRF token. Cookie: '${csrfToken}', Header: '${headerToken}'`,
     })
   }
 }

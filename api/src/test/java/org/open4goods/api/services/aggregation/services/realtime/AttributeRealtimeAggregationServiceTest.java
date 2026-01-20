@@ -124,6 +124,7 @@ class AttributeRealtimeAggregationServiceTest {
 		});
 	}
 
+
 	@Test
 	void testDeleteTokensWithUpperCase() throws Exception {
 		// Arrange
@@ -140,4 +141,41 @@ class AttributeRealtimeAggregationServiceTest {
 		// Assert
 		assertThat(result).isEqualTo("LED");
 	}
+
+	@Test
+	void testDeleteTokensWithCaseMismatch() throws Exception {
+		// Arrange
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("DISPLAY_TECHNOLOGY");
+		attrConfig.getParser().setUpperCase(true);
+		// Token is mixed case, but input will be uppercased. 
+		// Ideally the parser should automatically handle the token casing to match the parser config.
+		attrConfig.getParser().setDeleteTokens(java.util.List.of("_Lcd"));
+		attrConfig.getParser().setNormalize(true);
+		attrConfig.getParser().setTrim(true);
+
+		// Act
+		// Input "LED_LCD". 
+		// 1. UpperCase -> "LED_LCD"
+		// 2. Delete "_Lcd" -> Should delete "_LCD" if logic is robust
+		String result = service.parseValue("LED_LCD", attrConfig, verticalConfig);
+
+		// Assert
+		assertThat(result).isEqualTo("LED");
+	}
+
+	@Test
+	void testPowerConsumptionOffParsing() throws Exception {
+		// Arrange
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("POWER_CONSUMPTION_OFF");
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setDeleteTokens(java.util.List.of("W"));
+		
+		// Act
+		String result = service.parseValue("0.5 W", attrConfig, verticalConfig);
+		// Assert
+		assertThat(result).isEqualTo("0.5");
+	}
 }
+
