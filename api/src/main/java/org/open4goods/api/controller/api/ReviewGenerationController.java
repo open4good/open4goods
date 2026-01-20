@@ -1,9 +1,13 @@
 package org.open4goods.api.controller.api;
 
-import java.util.concurrent.CompletableFuture;
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
@@ -18,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -125,5 +130,44 @@ public class ReviewGenerationController {
     public ResponseEntity<ReviewGenerationStatus> getReviewStatus(@PathVariable("id") long upc) {
         ReviewGenerationStatus status = reviewGenerationService.getProcessStatus(upc);
         return ResponseEntity.ok(status);
+    }
+
+    /**
+     * Trigger batch review generation for a vertical.
+     *
+     * @param verticalId the vertical identifier to batch
+     * @param top optional limit for the number of products to batch
+     * @return the batch job identifier
+     * @throws IOException when batch submission fails
+     */
+    @PostMapping("/review/batch")
+    @Operation(summary = "Schedule AI review generation batch",
+            description = "Launch a batch review generation job for a vertical.")
+    public ResponseEntity<String> generateReviewBatch(@RequestParam("verticalId") String verticalId,
+            @RequestParam(value = "top", required = false) Integer top) throws IOException {
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(verticalId);
+        List<Product> products;
+        try (Stream<Product> productStream = top == null
+                ? productRepository.exportVerticalWithValidDateOrderByEcoscore(verticalId, false)
+                : productRepository.exportVerticalWithValidDateOrderByEcoscore(verticalId, top, false)) {
+            products = productStream.toList();
+        }
+        String jobId = reviewGenerationService.generateReviewBatchRequest(products, verticalConfig);
+        return ResponseEntity.ok(jobId);
+    }
+
+    /**
+     * Trigger batch result handling for a given job identifier.
+     *
+     * @param jobId the batch job identifier
+     * @throws ResourceNotFoundException when the job does not exist
+     * @throws IOException when batch response processing fails
+     */
+    @PostMapping("/review/batch/process")
+    @Operation(summary = "Process batch review generation results",
+            description = "Trigger the handling of batch review generation results for a job.")
+    public void processBatchResults(@RequestParam("jobId") String jobId)
+            throws ResourceNotFoundException, IOException {
+        reviewGenerationService.triggerResponseHandling(jobId);
     }
 }

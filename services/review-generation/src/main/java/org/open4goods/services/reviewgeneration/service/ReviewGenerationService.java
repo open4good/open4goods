@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -409,7 +410,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * Then it submits a batch job via the BatchPromptService using the prompt key
 	 * "review-generation". Instead of using a future callback, a tracking file is
 	 * written to a designated folder so that a scheduled task can later check job
-	 * status and process the results.
+	 * status and process the results. Tracking metadata persists product IDs and
+	 * GTINs for traceability.
 	 * </p>
 	 *
 	 * @param products       the list of products to process.
@@ -419,7 +421,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	 */
 	public String generateReviewBatchRequest(List<Product> products, VerticalConfig verticalConfig) throws IOException {
 		List<Map<String, Object>> promptVariablesList = new ArrayList<>();
-		List<String> ids = new ArrayList<>();
+		List<String> productIds = new ArrayList<>();
+		List<String> gtins = new ArrayList<>();
 		String promptKey = resolvePromptKey();
 		PromptConfig promptConfig = genAiService.getPromptConfig(promptKey);
 		if (promptConfig != null && promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
@@ -443,7 +446,8 @@ public class ReviewGenerationService implements HealthIndicator {
 			processStatusMap.put(upc, status);
 			try {
 				promptVariablesList.add(preprocessingService.preparePromptVariables(product, verticalConfig, status));
-				ids.add(product.gtin());
+				productIds.add(String.valueOf(product.getId()));
+				gtins.add(product.gtin());
 			} catch (NotEnoughDataException e) {
 				logger.error("Not enough data while preparing prompt for UPC {}: {}", product.getId(), e.getMessage());
 				AiReviewHolder holder = new AiReviewHolder();
@@ -461,13 +465,16 @@ public class ReviewGenerationService implements HealthIndicator {
 		}
 		// Submit batch job using the updated batchPromptRequest method in
 		// BatchPromptService.
-		String jobId = batchAiService.batchPromptRequest(promptKey, promptVariablesList, ids, AiReview.class);
+		String jobId = batchAiService.batchPromptRequest(promptKey, promptVariablesList, productIds, AiReview.class);
 		logger.info("Launched batch review generation job with ID: {}", jobId);
-		// Write a tracking file (JSON) mapping the job ID to the list of product GTINs.
+		// Write a tracking file (JSON) mapping the job ID to the list of product IDs.
 		File trackingFile = new File(trackingFolder, "tracking_" + jobId + ".json");
 		Map<String, Object> trackingInfo = new HashMap<>();
 		trackingInfo.put("jobId", jobId);
-		trackingInfo.put("gtins", ids);
+		trackingInfo.put("productIds", productIds);
+		trackingInfo.put("gtins", gtins);
+		trackingInfo.put("verticalId", verticalConfig.getId());
+		trackingInfo.put("createdAt", Instant.now().toEpochMilli());
 		try (FileWriter writer = new FileWriter(trackingFile, StandardCharsets.UTF_8)) {
 			writer.write(objectMapper.writeValueAsString(trackingInfo));
 		} catch (Exception e) {
@@ -493,6 +500,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * TODO(p2,design) : separate the handle method
 	 * </p>
 	 */
+	@Scheduled(fixedDelayString = "${review.generation.batch-poll-interval:PT5M}")
 	public void checkBatchJobStatuses() {
 		File[] trackingFiles = trackingFolder
 				.listFiles((dir, name) -> name.startsWith("tracking_") && name.endsWith(".json"));
@@ -531,11 +539,11 @@ public class ReviewGenerationService implements HealthIndicator {
 			throws ResourceNotFoundException, IOException {
 		logger.info("Batch job {} completed. Processing {} outputs.", jobId, response.getBody().size());
 		// For each batch output (assumed to contain a customId that corresponds to the
-		// product GTIN)
+		// product ID)
 		for (BatchResultItem output : response.getBody()) {
-			String productGtin = output.customId();
+			String productId = output.customId();
 			// Retrieve the product from the repository.
-			Product product = productRepository.getById(Long.valueOf(productGtin));
+			Product product = productRepository.getById(Long.valueOf(productId));
 			if (product != null) {
 				// Process the batch result to convert it into an AiReview.
 				AiReview newReview = processBatchOutputToAiReview(output);
@@ -549,15 +557,51 @@ public class ReviewGenerationService implements HealthIndicator {
 					holder.setEnoughData(true);
 					product.getReviews().put("fr", holder);
 					productRepository.forceIndex(product);
-					logger.info("Updated review for product with GTIN {}", productGtin);
+					updateBatchStatus(product.getId(), ReviewGenerationStatus.Status.SUCCESS, null);
+					logger.info("Updated review for product with ID {}", productId);
 				} else {
-					logger.error("Null AI review returned for {}", productGtin);
+					updateBatchStatus(product.getId(), ReviewGenerationStatus.Status.FAILED,
+							"Null AI review returned from batch response.");
+					logger.error("Null AI review returned for {}", productId);
 				}
 			} else {
-				logger.warn("No product found with GTIN {}", productGtin);
+				updateBatchStatus(Long.valueOf(productId), ReviewGenerationStatus.Status.FAILED,
+						"No product found for batch response.");
+				logger.warn("No product found with ID {}", productId);
 			}
 		}
 
+	}
+
+	private void updateBatchStatus(long productId, ReviewGenerationStatus.Status status, String errorMessage) {
+		ReviewGenerationStatus currentStatus = processStatusMap.compute(productId, (key, existingStatus) -> {
+			if (existingStatus == null) {
+				ReviewGenerationStatus newStatus = new ReviewGenerationStatus();
+				newStatus.setUpc(productId);
+				newStatus.setStatus(status);
+				newStatus.setStartTime(Instant.now().toEpochMilli());
+				return newStatus;
+			}
+			return existingStatus;
+		});
+		currentStatus.setStatus(status);
+		if (errorMessage != null) {
+			currentStatus.setErrorMessage(errorMessage);
+			currentStatus.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR, errorMessage, null);
+		} else if (status == ReviewGenerationStatus.Status.SUCCESS) {
+			currentStatus.addEvent(ReviewGenerationStatus.ProgressEventType.COMPLETED,
+					"Batch review generation completed", null);
+		}
+		currentStatus.setEndTime(Instant.now().toEpochMilli());
+		computeTimings(currentStatus);
+		if (status == ReviewGenerationStatus.Status.SUCCESS) {
+			successfulCount.incrementAndGet();
+			totalProcessed.incrementAndGet();
+		} else if (status == ReviewGenerationStatus.Status.FAILED) {
+			failedCount.incrementAndGet();
+			totalProcessed.incrementAndGet();
+			lastGenerationFailed = true;
+		}
 	}
 
 	/**
