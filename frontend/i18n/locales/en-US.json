@@ -2383,6 +2383,19 @@
       },
       "generatedAt": "Summary generated on {date}",
       "requestButton": "Request the summary",
+      "request": {
+        "agreement": "I authorize Nudger to research and summarize information about {productName}. In a spirit of sobriety and sharing, I also agree that this data can be shared with all Nudger users.",
+        "bannerDescription": "Start a summary for {productName}.",
+        "bannerTitle": "AI summary",
+        "cancel": "Cancel",
+        "close": "Close",
+        "description": "blabla",
+        "eyebrow": "AI summary",
+        "productFallback": "this product",
+        "remainingUnknown": "Unavailable",
+        "submit": "Confirm",
+        "title": "Request an AI summary"
+      },
       "sections": {
         "cons": "Cons",
         "details": "In detail",

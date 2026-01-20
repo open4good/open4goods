@@ -229,34 +229,43 @@
     </div>
 
     <div v-else class="product-ai-review__empty">
-      <p class="product-ai-review__empty-message">
-        {{ $t('product.aiReview.empty') }}
-      </p>
-      <div class="product-ai-review__actions">
-        <v-btn
-          color="primary"
-          :loading="requesting"
-          :disabled="requesting"
-          @click="startRequest"
-        >
-          {{ $t('product.aiReview.requestButton') }}
-        </v-btn>
-        <v-alert v-if="errorMessage" type="error" class="mt-4" border="start">
-          {{ errorMessage }}
-        </v-alert>
+      <div class="product-ai-review__empty-banner">
+        <div class="product-ai-review__empty-content">
+          <p class="product-ai-review__empty-label">
+            {{ $t('product.aiReview.request.bannerTitle') }}
+          </p>
+          <p class="product-ai-review__empty-message">
+            {{
+              $t('product.aiReview.request.bannerDescription', {
+                productName: productLabel,
+              })
+            }}
+          </p>
+        </div>
+        <div class="product-ai-review__empty-cta">
+          <div class="product-ai-review__quota">
+            <span class="product-ai-review__quota-label">
+              {{ $t('siteIdentity.menu.account.privacy.quotas.aiRemaining') }}
+            </span>
+            <span class="product-ai-review__quota-value">
+              {{ remainingGenerationsLabel }}
+            </span>
+          </div>
+          <v-btn
+            color="primary"
+            size="x-large"
+            variant="flat"
+            :loading="requesting"
+            :disabled="requesting"
+            @click="openDialog"
+          >
+            {{ $t('product.aiReview.requestButton') }}
+          </v-btn>
+        </div>
       </div>
-      <ClientOnly>
-        <VueHcaptcha
-          v-if="showCaptcha && hasSiteKey && requiresCaptcha"
-          ref="captchaRef"
-          :sitekey="siteKey"
-          :theme="captchaTheme"
-          :language="captchaLocale"
-          @verify="handleCaptchaVerify"
-          @expired="handleCaptchaExpired"
-          @error="handleCaptchaError"
-        />
-      </ClientOnly>
+      <v-alert v-if="errorMessage" type="error" border="start">
+        {{ errorMessage }}
+      </v-alert>
       <div v-if="statusMessage" class="product-ai-review__status">
         <v-progress-linear
           v-if="isGenerating"
@@ -267,18 +276,32 @@
         />
         <p>{{ statusMessage }}</p>
       </div>
+      <ProductAiReviewRequestDialog
+        v-model="isDialogOpen"
+        v-model:agreement-accepted="agreementAccepted"
+        :product-name="productLabel"
+        :remaining-generations-label="remainingGenerationsLabel"
+        :requires-captcha="requiresCaptcha"
+        :site-key="siteKey"
+        :captcha-theme="captchaTheme"
+        :captcha-locale="captchaLocale"
+        :requesting="requesting"
+        :submit-disabled="submitDisabled"
+        :error-message="errorMessage"
+        :status-message="statusMessage"
+        :is-generating="isGenerating"
+        :status-percent="statusPercent"
+        @submit="startRequest"
+        @captcha-verify="handleCaptchaVerify"
+        @captcha-expired="handleCaptchaExpired"
+        @captcha-error="handleCaptchaError"
+      />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  defineAsyncComponent,
-  onBeforeUnmount,
-  ref,
-  watch,
-} from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
@@ -291,7 +314,10 @@ import type {
   AiReviewAttributeDto,
   ReviewGenerationStatus,
 } from '~~/shared/api-client'
+import { IpQuotaCategory } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
+import { useIpQuota } from '~/composables/useIpQuota'
+import ProductAiReviewRequestDialog from '~/components/product/ProductAiReviewRequestDialog.vue'
 
 interface ReviewContent {
   description?: string | null
@@ -333,14 +359,16 @@ const props = defineProps({
     type: Object as PropType<Record<string, string> | undefined>,
     default: undefined,
   },
+  productName: {
+    type: String,
+    default: '',
+  },
 })
 
 const { locale, t } = useI18n()
 const theme = useTheme()
 const { isLoggedIn } = useAuth()
-const VueHcaptcha = defineAsyncComponent(
-  () => import('@hcaptcha/vue3-hcaptcha')
-)
+const { getRemaining, refreshQuota, recordUsage } = useIpQuota()
 
 const review = ref<ReviewContent | null>(normalizeReview(props.initialReview))
 const createdMs = ref<number | null>(props.reviewCreatedAt ?? null)
@@ -348,10 +376,30 @@ const requesting = ref(false)
 const errorMessage = ref<string | null>(null)
 const status = ref<ReviewGenerationStatus | null>(null)
 const pollHandle = ref<number | null>(null)
-const showCaptcha = ref(false)
 const captchaToken = ref<string | null>(null)
-const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 const descriptionRef = ref<HTMLElement | null>(null)
+const isDialogOpen = ref(false)
+const agreementAccepted = ref(true)
+
+const quotaCategory = IpQuotaCategory.ReviewGeneration
+
+const remainingGenerations = computed(() => getRemaining(quotaCategory))
+const remainingGenerationsLabel = computed(() => {
+  if (
+    remainingGenerations.value === null ||
+    remainingGenerations.value === undefined
+  ) {
+    return t('product.aiReview.request.remainingUnknown')
+  }
+
+  return String(remainingGenerations.value)
+})
+
+const productLabel = computed(() =>
+  props.productName.length > 0
+    ? props.productName
+    : t('product.aiReview.request.productFallback')
+)
 
 watch(
   () => props.initialReview,
@@ -395,6 +443,17 @@ const isGenerating = computed(
     status.value.status !== 'FAILED'
 )
 const statusPercent = computed(() => Math.round(status.value?.percent ?? 0))
+const submitDisabled = computed(() => {
+  if (!agreementAccepted.value || requesting.value) {
+    return true
+  }
+
+  if (requiresCaptcha.value) {
+    return !hasSiteKey.value || !captchaToken.value
+  }
+
+  return false
+})
 
 const statusMessage = computed(() => {
   if (!status.value) {
@@ -492,18 +551,11 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
 
 const startRequest = () => {
   errorMessage.value = null
-  if (!requiresCaptcha.value) {
-    void triggerGeneration()
-    return
-  }
-
-  showCaptcha.value = true
-  captchaRef.value?.reset?.()
+  void triggerGeneration()
 }
 
 const handleCaptchaVerify = async (token: string) => {
   captchaToken.value = token
-  await triggerGeneration()
 }
 
 const handleCaptchaExpired = () => {
@@ -532,6 +584,7 @@ const triggerGeneration = async () => {
       },
     })
 
+    recordUsage(quotaCategory)
     startPolling()
   } catch (error) {
     console.error('Failed to trigger AI review', error)
@@ -625,9 +678,37 @@ watch(
   { immediate: true }
 )
 
+const openDialog = () => {
+  errorMessage.value = null
+  captchaToken.value = null
+  agreementAccepted.value = true
+  isDialogOpen.value = true
+}
+
+onMounted(() => {
+  if (import.meta.client) {
+    void refreshQuota(quotaCategory)
+  }
+})
+
 onBeforeUnmount(() => {
   stopPolling()
 })
+
+watch(
+  isDialogOpen,
+  value => {
+    if (value && import.meta.client) {
+      void refreshQuota(quotaCategory)
+      return
+    }
+
+    if (!value) {
+      captchaToken.value = null
+    }
+  },
+  { immediate: true }
+)
 
 const handleReferenceClick = (event: Event) => {
   const target = event.target as HTMLElement | null
@@ -841,14 +922,64 @@ const handleReferenceClick = (event: Event) => {
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
-  align-items: flex-start;
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
 }
 
+.product-ai-review__empty-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.product-ai-review__empty-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 32rem;
+}
+
+.product-ai-review__empty-label {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+}
+
 .product-ai-review__empty-message {
+  margin: 0;
   font-size: 1rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.92);
   line-height: 1.55;
+}
+
+.product-ai-review__empty-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.product-ai-review__quota {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.8);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  font-size: 0.85rem;
+}
+
+.product-ai-review__quota-label {
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+}
+
+.product-ai-review__quota-value {
+  font-weight: 700;
 }
 
 .product-ai-review__status {
@@ -862,6 +993,16 @@ const handleReferenceClick = (event: Event) => {
   .product-ai-review__content,
   .product-ai-review__empty {
     padding: 1.35rem;
+  }
+
+  .product-ai-review__empty-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-ai-review__empty-cta {
+    width: 100%;
+    align-items: stretch;
   }
 }
 </style>

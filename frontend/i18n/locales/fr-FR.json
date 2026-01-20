@@ -2398,6 +2398,19 @@
       },
       "generatedAt": "Synthèse générée le {date}",
       "requestButton": "Demander la synthèse",
+      "request": {
+        "agreement": "Je mandate Nudger pour rechercher et synthétiser les informations du {productName}. Dans une logique de sobriété et de partage, j'accepte également que ces données soient partagées à tous les utilisateurs de Nudger.",
+        "bannerDescription": "Démarrer une synthèse du {productName}.",
+        "bannerTitle": "Synthèse IA",
+        "cancel": "Annuler",
+        "close": "Fermer",
+        "description": "blabla",
+        "eyebrow": "Synthèse IA",
+        "productFallback": "ce produit",
+        "remainingUnknown": "Indisponible",
+        "submit": "Valider",
+        "title": "Demander une synthèse IA"
+      },
       "sections": {
         "cons": "Points faibles",
         "details": "En détail",
