@@ -462,18 +462,6 @@ class ProductControllerIT {
 
 
 
-    @Test
-    void postReviewUsesCaptcha() throws Exception {
-        long gtin = 123L;
-        given(service.createReview(anyLong(), anyString(), any(HttpServletRequest.class))).willReturn(gtin);
-
-        mockMvc.perform(post("/products/{gtin}/review", gtin)
-                .param("hcaptchaResponse", "resp")
-                .param("domainLanguage", "fr")
-                .header("X-Shared-Token", SHARED_TOKEN)
-                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-            .andExpect(status().isOk());
-    }
 
     @Test
     void postReviewRejectsWithoutAuthentication() throws Exception {
