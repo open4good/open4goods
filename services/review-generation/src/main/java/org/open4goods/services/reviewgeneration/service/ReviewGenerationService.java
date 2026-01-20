@@ -109,6 +109,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	private static final String AI_SOURCE_NAME = "AI";
 	private static final String CITATIONS_METADATA_KEY = "citations";
 
+	private final BeanOutputConverter<AiReview> outputConverter;
+
 	/**
 	 * Constructs a new ReviewGenerationService.
 	 *
@@ -141,6 +143,7 @@ public class ReviewGenerationService implements HealthIndicator {
 			this.trackingFolder.mkdirs();
 		}
 		this.objectMapper = new ObjectMapper();
+		this.outputConverter = new BeanOutputConverter<>(AiReview.class);
 	}
 
 	// -------------------- Preprocessing Logic -------------------- //
@@ -312,21 +315,19 @@ public class ReviewGenerationService implements HealthIndicator {
 				if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
 					reviewResponse = genAiService.objectPromptStream(promptKey, promptVariables, AiReview.class,
 							event -> handleProviderEvent(status, event));
-					// TODO : Log
+					logger.debug("Streaming review generation started for promptKey: {}", promptKey);
 
 				} else {
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
 				}
 				AiReview newReview = applyCitationsAndNormalize(reviewResponse.getBody(), reviewResponse.getMetadata());
 				newReview = updateAiReviewReferences(newReview);
-				newReview = postProcess30x(newReview);
-
 
 				// Populate attributes
 				populateAttributes(product, newReview);
 				addResources(product, newReview);
-
-
+				newReview = postProcess30x(newReview);
+				logger.info("Completed review : \n {}",objectMapper.writeValueAsString(newReview));
 				holder.setReview(newReview);
 				holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS"));
 				holder.setTotalTokens((Integer) promptVariables.get("TOTAL_TOKENS"));
@@ -368,37 +369,50 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	// -------------------- Batch Review Generation Methods -------------------- //
 
-	// TODO : Before adding url's, should either check valid http 200 or Location if 302
+
 	private void addResources(Product product, AiReview newReview) {
+		if (newReview == null) return;
 
+		List<String> validImages = filterValidUrls(newReview.getImages());
+		validImages.forEach(image -> safeAddResource(product, image));
 
-		newReview.getImages().forEach(image -> {
-			try {
-				product.addResource(new Resource(image));
-			} catch (ValidationException e) {
-				logger.warn("Error while validating LLM returned image resource");
-			}
-		});
+		List<String> validPdfs = filterValidUrls(newReview.getPdfs());
+		validPdfs.forEach(pdf -> safeAddResource(product, pdf));
 
-		newReview.getPdfs().forEach(pdf -> {
-			try {
-				product.addResource(new Resource(pdf));
-			} catch (ValidationException e) {
-				logger.warn("Error while validating LLM returned image resource");
-			}
-		});
+		List<String> validVideos = filterValidUrls(newReview.getVideos());
+		validVideos.forEach(video -> safeAddResource(product, video));
+	}
 
-		newReview.getVideos().forEach(video -> {
-			try {
-				product.addResource(new Resource(video));
-			} catch (ValidationException e) {
-				logger.warn("Error while validating LLM returned image resource");
-			}
-		});
+	private void safeAddResource(Product product, String url) {
+		try {
+			product.addResource(new Resource(url));
+		} catch (ValidationException e) {
+			logger.warn("Error while validating LLM returned resource: {}", url);
+		}
+	}
 
+	private List<String> filterValidUrls(List<String> urls) {
+		if (urls == null) return List.of();
+		return urls.stream().filter(this::isValidUrl).toList();
+	}
 
-
-
+	private boolean isValidUrl(String urlString) {
+		if (urlString == null || urlString.isBlank()) {
+			return false;
+		}
+		try {
+			URL url = URI.create(urlString).toURL();
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("HEAD");
+			connection.setConnectTimeout(3000);
+			connection.setReadTimeout(3000);
+			connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+			int status = connection.getResponseCode();
+			return status >= 200 && status < 400;
+		} catch (Exception e) {
+			logger.warn("URL validation failed for {}: {}", urlString, e.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -490,7 +504,6 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * checks the job status via batchPromptResponse (which will throw if not
 	 * complete), and if the job is complete, processes each batch result to update
 	 * the corresponding product review. Finally, the tracking file is deleted.
-	 * TODO(p2,design) : separate the handle method
 	 * </p>
 	 */
 	public void checkBatchJobStatuses() {
@@ -500,21 +513,30 @@ public class ReviewGenerationService implements HealthIndicator {
 			return;
 		}
 		for (File file : trackingFiles) {
-			try {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> trackingInfo = objectMapper.readValue(file, Map.class);
-				String jobId = (String) trackingInfo.get("jobId");
-				@SuppressWarnings("unchecked")
-				// Retrieve batch results; this method throws if the job is not yet complete.
-				PromptResponse<List<BatchResultItem>> response = batchAiService.batchPromptResponse(jobId);
-				if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
-					handleBatchResponse(jobId, response);
-					// Delete the tracking file after processing.
-					Files.deleteIfExists(file.toPath());
-				}
-			} catch (Exception e) {
-				logger.error("Error processing tracking file {}: {}", file.getName(), e.getMessage(), e);
+			handleTrackingFile(file);
+		}
+	}
+
+	/**
+	 * Processes a single tracking file.
+	 *
+	 * @param file the tracking file to process.
+	 */
+	private void handleTrackingFile(File file) {
+		try {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> trackingInfo = objectMapper.readValue(file, Map.class);
+			String jobId = (String) trackingInfo.get("jobId");
+			@SuppressWarnings("unchecked")
+			// Retrieve batch results; this method throws if the job is not yet complete.
+			PromptResponse<List<BatchResultItem>> response = batchAiService.batchPromptResponse(jobId);
+			if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
+				handleBatchResponse(jobId, response);
+				// Delete the tracking file after processing.
+				Files.deleteIfExists(file.toPath());
 			}
+		} catch (Exception e) {
+			logger.error("Error processing tracking file {}: {}", file.getName(), e.getMessage(), e);
 		}
 	}
 
@@ -568,6 +590,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	 */
 	private void populateAttributes(Product product, AiReview newReview) {
 		// Handling attributes
+		String providerName = determineProviderName();
+
 		newReview.getAttributes().stream().forEach(a -> {
 
 			ProductAttribute agg = product.getAttributes().getAll().get(a.getName());
@@ -577,12 +601,8 @@ public class ReviewGenerationService implements HealthIndicator {
 				agg.setName(a.getName());
 			}
 
-			String source;
-
 			try {
-				// TODO: Deduct provider name from source or config
-				source = AI_SOURCE_NAME;
-				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.getName(), a.getValue(), "fr"), source));
+				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.getName(), a.getValue(), "fr"), providerName));
 
 				// Replacing new AggAttribute in product
 				product.getAttributes().getAll().put(agg.getName(), agg);
@@ -593,22 +613,69 @@ public class ReviewGenerationService implements HealthIndicator {
 		});
 	}
 
+	private String determineProviderName() {
+		// Default to AI_SOURCE_NAME if no better info
+		// Could be enhanced to return "OpenAI" or specific model if context available
+		return AI_SOURCE_NAME;
+	}
+
 	// -------------------- Helper Methods -------------------- //
 
 
 	private AiReview processBatchOutputToAiReview(BatchResultItem output) {
-		// TODO(p2, perf) : instance variable
-		var outputConverter = new BeanOutputConverter<>(AiReview.class);
+
 
 		String jsonContent = output.content();
 		AiReview ret = outputConverter.convert(jsonContent);
 
 		ret = updateAiReviewReferences(ret);
+		ret = normalizeReviewText(ret);
 		ret = postProcess30x(ret);
-		// TODO : Anti tiret quadratin, or other conf files / tokens / formula.
-
 
 		return ret;
+	}
+
+	/**
+	 * Normalizes text content in the review (e.g. replacing em dashes).
+	 *
+	 * @param review the review to normalize
+	 * @return the normalized review
+	 */
+	private AiReview normalizeReviewText(AiReview review) {
+		if (review == null) return null;
+
+		String description = normalizeText(review.getDescription());
+		String technicalOneline = normalizeText(review.getTechnicalOneline());
+		String ecologicalOneline = normalizeText(review.getEcologicalOneline());
+		String communityOneline = normalizeText(review.getCommunityOneline());
+		String shortDescription = normalizeText(review.getShortDescription());
+		String mediumTitle = normalizeText(review.getMediumTitle());
+		String shortTitle = normalizeText(review.getShortTitle());
+		String technicalReview = normalizeText(review.getTechnicalReview());
+		String ecologicalReview = normalizeText(review.getEcologicalReview());
+		String summary = normalizeText(review.getSummary());
+		String dataQuality = normalizeText(review.getDataQuality());
+
+		List<String> pros = review.getPros() == null ? List.of() : review.getPros().stream().map(this::normalizeText).toList();
+		List<String> cons = review.getCons() == null ? List.of() : review.getCons().stream().map(this::normalizeText).toList();
+
+		List<AiReview.AiSource> sources = review.getSources() == null ? List.of() : review.getSources().stream()
+			.map(s -> new AiReview.AiSource(s.getNumber(), normalizeText(s.getName()), normalizeText(s.getDescription()), s.getUrl()))
+			.toList();
+
+		List<AiReview.AiAttribute> attributes = review.getAttributes() == null ? List.of() : review.getAttributes().stream()
+				.map(a -> new AiReview.AiAttribute(normalizeText(a.getName()), normalizeText(a.getValue()), a.getNumber()))
+				.toList();
+
+		return new AiReview(description, technicalOneline, ecologicalOneline, communityOneline, shortDescription, mediumTitle,
+				shortTitle, technicalReview, ecologicalReview, summary, pros, cons, sources, attributes, dataQuality,
+				review.getRatings(), review.getPdfs(), review.getImages(), review.getVideos(), review.getSocialLinks());
+	}
+
+	private String normalizeText(String text) {
+		if (text == null) return null;
+		// Replace em dash (—) with hyphen (-)
+		return text.replace("—", "-").trim();
 	}
 
 	/**
@@ -621,35 +688,37 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (!properties.isResolveUrl()) {
 			return review;
 		}
-		if (review == null || review.getSources() == null || review.getSources().isEmpty()) {
+		if (review == null) {
 			return review;
 		}
 
-		List<AiReview.AiSource> updatedSources = new ArrayList<>();
-		boolean changed = false;
-
-		for (AiReview.AiSource source : review.getSources()) {
+		List<AiReview.AiSource> updatedSources = review.getSources() == null ? List.of() : review.getSources().stream().map(source -> {
 			String originalUrl = source.getUrl();
 			String resolvedUrl = resolveUrl(originalUrl);
-
 			if (originalUrl != null && !originalUrl.equals(resolvedUrl)) {
-				updatedSources.add(new AiReview.AiSource(source.getNumber(), source.getName(), source.getDescription(), resolvedUrl));
-				changed = true;
-			} else {
-				updatedSources.add(source);
+				return new AiReview.AiSource(source.getNumber(), source.getName(), source.getDescription(), resolvedUrl);
 			}
-		}
+			return source;
+		}).toList();
 
-		if (changed) {
-			return new AiReview(review.getDescription(), review.getTechnicalOneline(), review.getEcologicalOneline(),
-					review.getCommunityOneline(), review.getShortDescription(), review.getMediumTitle(),
-					review.getShortTitle(), review.getTechnicalReview(), review.getEcologicalReview(),
-					review.getSummary(), review.getPros(), review.getCons(), updatedSources, review.getAttributes(),
-					review.getDataQuality(), review.getRatings(),
-					review.getPdfs(), review.getImages(), review.getVideos(), review.getSocialLinks());
-		}
+		List<String> updatedPdfs = resolveUrlList(review.getPdfs());
+		List<String> updatedImages = resolveUrlList(review.getImages());
+		List<String> updatedVideos = resolveUrlList(review.getVideos());
+		List<String> updatedSocialLinks = resolveUrlList(review.getSocialLinks());
 
-		return review;
+		return new AiReview(review.getDescription(), review.getTechnicalOneline(), review.getEcologicalOneline(),
+				review.getCommunityOneline(), review.getShortDescription(), review.getMediumTitle(),
+				review.getShortTitle(), review.getTechnicalReview(), review.getEcologicalReview(),
+				review.getSummary(), review.getPros(), review.getCons(), updatedSources, review.getAttributes(),
+				review.getDataQuality(), review.getRatings(),
+				updatedPdfs, updatedImages, updatedVideos, updatedSocialLinks);
+	}
+
+	private List<String> resolveUrlList(List<String> urls) {
+		if (urls == null || urls.isEmpty()) {
+			return List.of();
+		}
+		return urls.stream().map(this::resolveUrl).toList();
 	}
 
 	private String resolveUrl(String urlString) {
@@ -657,7 +726,7 @@ public class ReviewGenerationService implements HealthIndicator {
 			return urlString;
 		}
 		try {
-			URL url = new URL(urlString);
+			URL url = URI.create(urlString).toURL();
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setInstanceFollowRedirects(false);
 			connection.setRequestMethod("HEAD");

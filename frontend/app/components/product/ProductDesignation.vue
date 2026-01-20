@@ -9,9 +9,6 @@
       <component :is="titleTag" :class="titleClass">
         {{ displayTitle }}
       </component>
-      <p v-if="shouldShowDescription" :class="descriptionClass">
-        {{ shortDescription }}
-      </p>
     </slot>
   </div>
 </template>
@@ -57,17 +54,6 @@ const shortDescription = computed(() =>
 const displayTitle = computed(() =>
   props.variant === 'page' ? longName.value : shortName.value
 )
-
-const shouldShowDescription = computed(() => {
-  const hasDescription =
-    typeof shortDescription.value === 'string' &&
-    shortDescription.value.length > 0
-  if (props.showShortDescription !== undefined) {
-    return props.showShortDescription && hasDescription
-  }
-
-  return props.variant === 'page' && hasDescription
-})
 </script>
 
 <style scoped lang="scss">

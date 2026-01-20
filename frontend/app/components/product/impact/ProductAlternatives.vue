@@ -46,35 +46,13 @@
         class="product-alternatives__skeleton"
       />
       <template v-else>
-        <div v-if="alternatives.length" class="product-alternatives__scroller">
-          <v-slide-group show-arrows class="product-alternatives__slide-group">
-            <v-slide-group-item
-              v-for="alternative in alternatives"
-              :key="
-                alternative.gtin ??
-                alternative.fullSlug ??
-                alternative.slug ??
-                JSON.stringify(alternative.identity)
-              "
-              v-slot="{ toggle, selectedClass }"
-            >
-              <ProductTileCard
-                :product="alternative"
-                :product-link="productLink(alternative)"
-                :image-src="resolveImage(alternative)"
-                :attributes="popularAttributesByProduct(alternative)"
-                :impact-score="impactScoreValue(alternative)"
-                :offer-badges="offerBadges(alternative)"
-                :offers-count-label="offersCountLabel(alternative)"
-                :untitled-label="t('product.impact.alternatives.untitled')"
-                :not-rated-label="t('category.products.notRated')"
-                layout="horizontal"
-                class="product-alternatives__slide-item product-alternatives__card"
-                :class="selectedClass"
-                @click="toggle"
-              />
-            </v-slide-group-item>
-          </v-slide-group>
+        <div v-if="alternatives.length" class="product-alternatives__grid">
+          <CategoryProductCardGrid
+            :products="alternatives"
+            :popular-attributes="normalizedPopularAttributes"
+            size="medium"
+            variant="compact-tile"
+          />
         </div>
         <div
           v-else-if="errorMessage"
@@ -112,14 +90,8 @@ import type {
   ProductSearchResponseDto,
 } from '~~/shared/api-client'
 import { ProductsIncludeEnum } from '~~/shared/api-client'
-import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
-import {
-  formatAttributeValue,
-  resolveAttributeRawValueByKey,
-  resolvePopularAttributes,
-} from '~/utils/_product-attributes'
-import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
+import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
+import { resolveAttributeRawValueByKey } from '~/utils/_product-attributes'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
 const props = defineProps({
@@ -150,7 +122,6 @@ const emit = defineEmits<{
 }>()
 
 const { t, n } = useI18n()
-const { translatePlural } = usePluralizedTranslation()
 
 const alternatives = ref<ProductDto[]>([])
 const loading = ref(false)
@@ -169,192 +140,6 @@ const emitAlternativesState = (hydrated: boolean) => {
 const normalizedPopularAttributes = computed(
   () => props.popularAttributes ?? []
 )
-
-const currencySymbolCache = new Map<string, string>()
-const NBSP = '\u00A0'
-
-const resolveCurrencySymbol = (currency?: string | null): string | null => {
-  if (!currency) {
-    return null
-  }
-
-  const upperCaseCurrency = currency.toUpperCase()
-
-  if (currencySymbolCache.has(upperCaseCurrency)) {
-    return currencySymbolCache.get(upperCaseCurrency) ?? null
-  }
-
-  try {
-    const formatter = new Intl.NumberFormat('en', {
-      style: 'currency',
-      currency: upperCaseCurrency,
-    })
-    const symbol =
-      formatter.formatToParts(0).find(part => part.type === 'currency')
-        ?.value ?? upperCaseCurrency
-
-    currencySymbolCache.set(upperCaseCurrency, symbol)
-
-    return symbol
-  } catch {
-    currencySymbolCache.set(upperCaseCurrency, upperCaseCurrency)
-
-    return upperCaseCurrency
-  }
-}
-
-const resolveImage = (product: ProductDto) => {
-  return (
-    product.resources?.coverImagePath ??
-    product.resources?.externalCover ??
-    product.resources?.images?.[0]?.url ??
-    undefined
-  )
-}
-
-const productLink = (product: ProductDto) =>
-  product.fullSlug ?? product.slug ?? undefined
-
-const impactScoreValue = (product: ProductDto) =>
-  resolvePrimaryImpactScore(product)
-
-const offersCountLabel = (product: ProductDto) =>
-  formatOffersCount(product, translatePlural)
-
-type DisplayedAttribute = {
-  key: string
-  label: string
-  value: string
-  icon?: string | null
-}
-
-const popularAttributesByProduct = (
-  product: ProductDto
-): DisplayedAttribute[] => {
-  const attributes = resolvePopularAttributes(
-    product,
-    normalizedPopularAttributes.value
-  )
-  const entries: DisplayedAttribute[] = []
-
-  attributes.forEach(attribute => {
-    const value = formatAttributeValue(attribute, t, n)
-    if (!value) {
-      return
-    }
-
-    entries.push({
-      key: attribute.key,
-      label: attribute.label,
-      value,
-      icon: attribute.icon ?? null,
-    })
-  })
-
-  return entries
-}
-
-const formatOfferPrice = (
-  offer:
-    | { price?: number | null; shortPrice?: string | null }
-    | null
-    | undefined,
-  product: ProductDto
-): string | null => {
-  if (!offer) {
-    return null
-  }
-
-  const currency = product.offers?.bestPrice?.currency ?? null
-  const shortPrice = offer.shortPrice?.trim()
-
-  if (shortPrice) {
-    const symbol = resolveCurrencySymbol(currency)
-
-    if (!symbol) {
-      return shortPrice
-    }
-
-    const normalisedShortPrice = shortPrice.replace(/\s+/g, ' ').trim()
-    const containsSymbol =
-      normalisedShortPrice.includes(symbol) ||
-      normalisedShortPrice.toUpperCase().includes(currency?.toUpperCase() ?? '')
-
-    return containsSymbol
-      ? normalisedShortPrice
-      : `${normalisedShortPrice}${NBSP}${symbol}`
-  }
-
-  const price = offer.price
-
-  if (price == null) {
-    return null
-  }
-
-  if (currency) {
-    try {
-      return n(price, { style: 'currency', currency })
-    } catch {
-      return `${n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim()
-    }
-  }
-
-  return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-type OfferBadge = {
-  key: string
-  label: string
-  price: string
-  appearance: 'new' | 'occasion' | 'default'
-}
-
-const offerBadges = (product: ProductDto): OfferBadge[] => {
-  const entries: OfferBadge[] = []
-  const newOffer = product.offers?.bestNewOffer
-  const occasionOffer = product.offers?.bestOccasionOffer
-
-  if (newOffer) {
-    const formatted = formatOfferPrice(newOffer, product)
-
-    if (formatted) {
-      entries.push({
-        key: 'new',
-        label: t('category.products.pricing.newOfferLabel'),
-        price: formatted,
-        appearance: 'new',
-      })
-    }
-  }
-
-  if (occasionOffer) {
-    const formatted = formatOfferPrice(occasionOffer, product)
-
-    if (formatted) {
-      entries.push({
-        key: 'occasion',
-        label: t('category.products.pricing.occasionOfferLabel'),
-        price: formatted,
-        appearance: 'occasion',
-      })
-    }
-  }
-
-  if (!entries.length) {
-    const fallbackOffer = product.offers?.bestPrice
-    const formatted =
-      formatOfferPrice(fallbackOffer, product) ?? formatBestPrice(product, t, n)
-
-    entries.push({
-      key: 'best',
-      label: t('category.products.pricing.bestOfferLabel'),
-      price: formatted,
-      appearance: 'default',
-    })
-  }
-
-  return entries
-}
 
 const formatCurrency = (value: number, currency?: string | null) => {
   if (!Number.isFinite(value)) {
@@ -925,33 +710,11 @@ const retryFetch = () => {
   flex-direction: column;
 }
 
-.product-alternatives__scroller {
-  position: relative;
+.product-alternatives__grid {
   display: flex;
   justify-content: center;
   max-width: 100%;
   overflow: hidden;
-}
-
-.product-alternatives__slide-group {
-  width: 100%;
-  padding: 0.5rem 1rem;
-}
-
-.product-alternatives__slide-group :deep(.v-slide-group__content) {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 0.25rem;
-}
-
-.product-alternatives__slide-item {
-  padding: 0;
-}
-
-.product-alternatives__card {
-  width: 240px;
-  max-width: 100%;
 }
 
 .product-alternatives__skeleton {
@@ -1000,10 +763,6 @@ const retryFetch = () => {
 @media (max-width: 960px) {
   .product-alternatives {
     padding: 1.25rem;
-  }
-
-  .product-alternatives__card {
-    width: 220px;
   }
 }
 </style>

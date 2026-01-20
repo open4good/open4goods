@@ -6,17 +6,16 @@ import ProductAlternatives from './ProductAlternatives.vue'
 import { flushPromises } from '@vue/test-utils'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
-vi.mock('~/components/category/products/ProductTileCard.vue', () => ({
+vi.mock('~/components/category/products/CategoryProductCardGrid.vue', () => ({
   default: {
-    name: 'ProductTileCardStub',
+    name: 'CategoryProductCardGridStub',
     props: {
-      product: Object,
-      attributes: Array,
-      offerBadges: Array,
-      offersCountLabel: String,
-      impactScore: Number,
+      products: Array,
+      popularAttributes: Array,
+      size: String,
+      variant: String,
     },
-    template: '<div class="product-tile-card-stub"></div>',
+    template: '<div class="category-product-card-grid-stub"></div>',
   },
 }))
 

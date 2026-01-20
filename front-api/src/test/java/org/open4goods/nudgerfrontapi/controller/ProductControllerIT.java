@@ -209,14 +209,37 @@ class ProductControllerIT {
     }
 
     @Test
-    void productsEndpointRejectsAggregationWithoutVertical() throws Exception {
+    void productsEndpointAllowsGlobalAggregation() throws Exception {
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+                .willReturn(responseDto);
+
         mockMvc.perform(post("/products")
                         .content("{\"aggs\": {\"aggs\": [{\"name\":\"by_price\",\"field\":\"price.minPrice.price\",\"type\":\"range\"}]}}")
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
                         .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void productsEndpointAllowsEcoscoreGlobalAggregation() throws Exception {
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+                .willReturn(responseDto);
+
+        mockMvc.perform(post("/products")
+                        .content("{\"aggs\": {\"aggs\": [{\"name\":\"by_ecoscore\",\"field\":\"scores.ECOSCORE.value\",\"type\":\"range\"}]}}")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .param("domainLanguage", "fr")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk());
     }
 
     @Test

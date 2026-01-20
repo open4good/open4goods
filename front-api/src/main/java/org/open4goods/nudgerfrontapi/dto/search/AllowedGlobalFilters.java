@@ -20,7 +20,9 @@ public enum AllowedGlobalFilters {
     @Schema(description = "Filter on the product creation date (epoch millis)", example = "creationDate")
     creationDate("creationDate", FilterRequestDto.FilterValueType.numeric),
     @Schema(description = "Filter on the last product update date (epoch millis)", example = "lastChange")
-    lastChange("lastChange", FilterRequestDto.FilterValueType.numeric);
+    lastChange("lastChange", FilterRequestDto.FilterValueType.numeric),
+    @Schema(description = "Filter on the impact score", example = "scores.ECOSCORE.value")
+    ecoscore("scores.ECOSCORE.value", FilterRequestDto.FilterValueType.numeric);
 
     private final String fieldPath;
     private final FilterRequestDto.FilterValueType valueType;

@@ -835,9 +835,8 @@ public class ProductController {
         }
 
         if (normalizedVerticalId == null) {
-            LOGGER.warn("Aggregation request received without a verticalId");
-            return Validation.error(badRequest("Invalid aggregation parameter", "Aggregations require a verticalId"));
-        }
+             LOGGER.debug("Aggregation request received without a verticalId - strictly checking against allowed global aggregations");
+         }
 
         List<Agg> sanitized = new ArrayList<>();
         for (Agg aggregation : aggregations) {

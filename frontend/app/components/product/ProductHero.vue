@@ -69,7 +69,44 @@
                   }"
                   role="listitem"
                 >
-                  <template v-if="attribute.showLabel !== false">
+                  <template v-if="attribute.key === 'ai-summary'">
+                    <ul class="product-hero__ai-summary-list">
+                      <li
+                        v-if="aiReview?.technicalOneline"
+                        class="product-hero__ai-summary-item"
+                      >
+                        <v-icon
+                          icon="mdi-cog-outline"
+                          size="small"
+                          class="product-hero__ai-summary-icon"
+                        />
+                        <span>{{ aiReview.technicalOneline }}</span>
+                      </li>
+                      <li
+                        v-if="aiReview?.ecologicalOneline"
+                        class="product-hero__ai-summary-item"
+                      >
+                        <v-icon
+                          icon="mdi-leaf"
+                          size="small"
+                          class="product-hero__ai-summary-icon"
+                        />
+                        <span>{{ aiReview.ecologicalOneline }}</span>
+                      </li>
+                      <li
+                        v-if="aiReview?.communityOneline"
+                        class="product-hero__ai-summary-item"
+                      >
+                        <v-icon
+                          icon="mdi-account-group-outline"
+                          size="small"
+                          class="product-hero__ai-summary-icon"
+                        />
+                        <span>{{ aiReview.communityOneline }}</span>
+                      </li>
+                    </ul>
+                  </template>
+                  <template v-else-if="attribute.showLabel !== false">
                     <span class="product-hero__attribute-label">{{
                       attribute.label
                     }}</span>
@@ -79,7 +116,10 @@
                       >:</span
                     >
                   </template>
-                  <span class="product-hero__attribute-value">
+                  <span
+                    v-if="attribute.key !== 'ai-summary'"
+                    class="product-hero__attribute-value"
+                  >
                     <template v-if="attribute.tooltip">
                       <v-tooltip location="bottom" :text="attribute.tooltip">
                         <template #activator="{ props: tooltipProps }">
@@ -348,36 +388,13 @@ const heroAttributes = computed<HeroAttribute[]>(() => {
   const baseAttributes: HeroAttribute[] = [...popularAttributes.value]
 
   if (hasAiReview.value && aiReview.value) {
-    if (aiReview.value.technicalOneline) {
-      baseAttributes.push({
-        key: 'ai-technical',
-        label: t('product.hero.ai.technical', 'Technique'),
-        value: aiReview.value.technicalOneline,
-        icon: 'mdi-cog-outline',
-        showLabel: false,
-        enableTooltip: false,
-      })
-    }
-    if (aiReview.value.ecologicalOneline) {
-      baseAttributes.push({
-        key: 'ai-ecological',
-        label: t('product.hero.ai.ecological', 'Écologie'),
-        value: aiReview.value.ecologicalOneline,
-        icon: 'mdi-leaf',
-        showLabel: false,
-        enableTooltip: false,
-      })
-    }
-    if (aiReview.value.communityOneline) {
-      baseAttributes.push({
-        key: 'ai-community',
-        label: t('product.hero.ai.community', 'Avis communauté'),
-        value: aiReview.value.communityOneline,
-        icon: 'mdi-account-group-outline',
-        showLabel: false,
-        enableTooltip: false,
-      })
-    }
+    baseAttributes.push({
+      key: 'ai-summary',
+      label: '', // Not used
+      value: '', // Not used
+      showLabel: false,
+      enableTooltip: false,
+    })
   }
 
   if (gtinCountry.value) {
@@ -798,7 +815,27 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   margin-top: auto;
   display: flex;
   justify-content: flex-end;
-  padding-top: 1rem;
+}
+
+.product-hero__ai-summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.product-hero__ai-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-hero__ai-summary-icon {
+  color: rgb(var(--v-theme-primary));
 }
 
 .product-hero__compare-button {

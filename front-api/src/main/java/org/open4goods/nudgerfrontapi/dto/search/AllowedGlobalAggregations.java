@@ -16,7 +16,9 @@ public enum AllowedGlobalAggregations {
     @Schema(description = "Aggregate the minimum aggregated price", example = "price.minPrice.price")
     minPrice("price.minPrice.price", AggregationRequestDto.AggType.range),
     @Schema(description = "Aggregate the product condition (NEW, USED)", example = "price.conditions")
-    productCondition("price.conditions", AggregationRequestDto.AggType.terms);
+    productCondition("price.conditions", AggregationRequestDto.AggType.terms),
+    @Schema(description = "Aggregate the impact score", example = "scores.ECOSCORE.value")
+    ecoscore("scores.ECOSCORE.value", AggregationRequestDto.AggType.range);
 
     private final String fieldPath;
     private final AggregationRequestDto.AggType aggregationType;
