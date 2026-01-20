@@ -2588,6 +2588,11 @@
       },
       "offerConditionsToggleAria": "Choose which offer condition to highlight",
       "offersCount": "Number of offers",
+      "offersCountLabel": "{count} offers",
+      "noOffers": {
+        "new": "No new offers yet!",
+        "occasion": "No second-hand offers yet!"
+      },
       "openGalleryFallback": "Open product media gallery",
       "openGalleryImage": "View image \"{label}\" in fullscreen",
       "openGalleryVideo": "Play video \"{label}\"",
@@ -2597,6 +2602,10 @@
         "learnMore": "Learn more"
       },
       "priceMerchantPrefix": "At",
+      "trendTooltip": "Deviation of {deviation} over {period}",
+      "trendPeriodDays": "{count} day | {count} days",
+      "trendPeriodHours": "{count} hour | {count} hours",
+      "trendPeriodMinutes": "{count} minute | {count} minutes",
       "thumbnailLabel": "Select {type} {index} of {total}: {label}",
       "videoBadge": "Video",
       "viewOffersCount": "View the {count} offers",
