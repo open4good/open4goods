@@ -180,7 +180,7 @@ class ReviewGenerationServiceTest {
         java.util.Map<String, Object> variables = new java.util.HashMap<>();
         variables.put("PRODUCT_BRAND", "Brand");
         // Missing PRODUCT_MODEL, VERTICAL_NAME, etc.
-        org.mockito.Mockito.when(preprocessingService.preparePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(variables);
+        org.mockito.Mockito.when(preprocessingService.preparePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(variables);
 
         // Execute
         reviewGenerationService.generateReviewAsync(product, verticalConfig, null, true);
