@@ -2603,6 +2603,11 @@
       },
       "offerConditionsToggleAria": "Sélectionner le type d'offre à afficher",
       "offersCount": "Nombre d'offres",
+      "offersCountLabel": "{count} offres",
+      "noOffers": {
+        "new": "Pas d'offres neuves pour l'instant !",
+        "occasion": "Pas d'offres d'occasion pour l'instant !"
+      },
       "openGalleryFallback": "Ouvrir la galerie média du produit",
       "openGalleryImage": "Afficher l’image « {label} » en plein écran",
       "openGalleryVideo": "Lire la vidéo « {label} »",
@@ -2612,6 +2617,10 @@
         "learnMore": "En savoir plus"
       },
       "priceMerchantPrefix": "Chez",
+      "trendTooltip": "Écart de {deviation} sur {period}",
+      "trendPeriodDays": "{count} jour | {count} jours",
+      "trendPeriodHours": "{count} heure | {count} heures",
+      "trendPeriodMinutes": "{count} minute | {count} minutes",
       "thumbnailLabel": "Sélectionner {type} {index} sur {total} : {label}",
       "videoBadge": "Vidéo",
       "viewOffersCount": "Voir les {count} offres",
