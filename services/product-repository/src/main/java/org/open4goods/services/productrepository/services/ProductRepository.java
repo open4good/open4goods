@@ -478,6 +478,67 @@ public class ProductRepository {
 		return exportVerticalWithValidDateOrderByEcoscore(vertical, null, withExcluded);
 	}
 
+    /**
+     * Export all aggregated data for a vertical, ordered by impact score descending.
+     *
+     * @param vertical the vertical identifier
+     * @param max maximum number of products to fetch
+     * @param withExcluded whether to include excluded products
+     * @return stream of products ordered by impact score
+     */
+    public Stream<Product> exportVerticalWithValidDateOrderByImpactScore(String vertical, Integer max, boolean withExcluded)
+    {
+        Criteria criteria = new Criteria("vertical").is(vertical)
+                .and(getRecentPriceQuery());
+
+        if (!withExcluded) {
+            criteria = criteria.and(new Criteria("excluded").is(false));
+        }
+
+        criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
+
+        SortOptions impactScoreSort = new SortOptions.Builder()
+                .field(new FieldSort.Builder()
+                        .field("scores.IMPACTSCORE.value")
+                        .order(SortOrder.Desc)
+                        .unmappedType(FieldType.Float)
+                        .missing("_last")
+                        .build())
+                .build();
+
+        NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                .withQuery(new CriteriaQuery(criteria))
+                .withSort(impactScoreSort);
+
+        if (max != null) {
+            queryBuilder = queryBuilder.withMaxResults(max);
+        }
+
+        NativeQuery query = queryBuilder.build();
+
+        try {
+            return elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX)
+                    .stream()
+                    .map(SearchHit::getContent);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
+    }
+
+    /**
+     * Export all aggregated data for a vertical, ordered by impact score descending.
+     *
+     * @param vertical the vertical identifier
+     * @param withExcluded whether to include excluded products
+     * @return stream of products ordered by impact score
+     */
+    public Stream<Product> exportVerticalWithValidDateOrderByImpactScore(String vertical, boolean withExcluded)
+    {
+        return exportVerticalWithValidDateOrderByImpactScore(vertical, null, withExcluded);
+    }
+
 
 
 	public SearchHits<Product> search(Query query, final String indexName) {
