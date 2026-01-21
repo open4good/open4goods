@@ -19,8 +19,8 @@ Provided by the shared `embedding-djl` module in `org.open4goods.embedding.servi
 
 The embedding is computed during the product aggregation phase (`onProduct`).
 
-- **Trigger**: Only runs if the product has a valid `vertical` assigned.
-- **Input Text**: Construction of `Vertical Prefix (Category) + Product Name`.
+- **Trigger**: Runs whenever a product has enough descriptive text (vertical is optional).
+- **Input Text**: Construction of `Vertical Prefix (Category) + Product Name + Top Offer Names + Popular Attribute name/value pairs`.
 - **Throttling**: Text truncated to 1000 characters (model limit ~512 tokens).
 
 ### 3. Product Model & Storage

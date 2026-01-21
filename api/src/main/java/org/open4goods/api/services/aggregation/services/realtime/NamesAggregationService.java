@@ -251,23 +251,21 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 
 		// ---- Embedding computation  ----
-		// Keep behavior: attempt computation whenever vertical is present and name is non-empty.
-		if (StringUtils.isNotBlank(data.getVertical())) {
-			try {
-				String textToEmbed = buildEmbeddingText(data, resolvedVertical);
-				String prefixedText = applyEmbeddingPrefix(textToEmbed);
+		// Compute embeddings whenever enough descriptive text is available.
+		try {
+			String textToEmbed = buildEmbeddingText(data, resolvedVertical);
+			String prefixedText = applyEmbeddingPrefix(textToEmbed);
 
-				if (StringUtils.isNotBlank(prefixedText)) {
-					final float[] embedding = embeddingService.embed(prefixedText);
-					if (embedding != null) {
-						// Forcing to a 512 dims vector
-						float[] padded = IdHelper.to512(embedding);
-						data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
-					}
+			if (StringUtils.isNotBlank(prefixedText)) {
+				final float[] embedding = embeddingService.embed(prefixedText);
+				if (embedding != null) {
+					// Forcing to a 512 dims vector
+					float[] padded = IdHelper.to512(embedding);
+					data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
 				}
-			} catch (Exception ex) {
-				logger.error("Error computing embedding for product {}", data.getId(), ex);
 			}
+		} catch (Exception ex) {
+			logger.error("Error computing embedding for product {}", data.getId(), ex);
 		}
 	}
 
@@ -471,6 +469,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	 *     <li>brand and model (referential attributes)</li>
 	 *     <li>best computed name</li>
 	 *     <li>top offer names (deduplicated)</li>
+	 *     <li>popular attribute name/value pairs (vertical whitelists)</li>
 	 *     <li>vertical-localized prefixes (if configured)</li>
 	 * </ul>
 	 * The resulting text is length-limited to prevent tokenizer overload.
@@ -521,6 +520,30 @@ public class NamesAggregationService extends AbstractAggregationService {
 					.limit(5)
 					.collect(Collectors.toList());
 			chunks.addAll(offers);
+		}
+
+		// Popular attribute name/value pairs (whitelisted per vertical)
+		List<String> popularAttributeKeys = vConf != null ? vConf.getPopularAttributes() : List.of();
+		if (!popularAttributeKeys.isEmpty() && data.getAttributes() != null) {
+			for (String key : popularAttributeKeys.stream().filter(StringUtils::isNotBlank).limit(10).toList()) {
+				String value = data.getAttributes().val(key);
+				if (StringUtils.isBlank(value)) {
+					continue;
+				}
+
+				String label = key;
+				if (vConf != null && vConf.getAttributesConfig() != null) {
+					AttributeConfig attributeConfig = vConf.getAttributesConfig().getAttributeConfigByKey(key);
+					if (attributeConfig != null && attributeConfig.getName() != null) {
+						String localized = attributeConfig.getName().i18n("default");
+						if (StringUtils.isNotBlank(localized)) {
+							label = localized;
+						}
+					}
+				}
+
+				chunks.add(label + " " + value);
+			}
 		}
 
 		// Flatten and bound length

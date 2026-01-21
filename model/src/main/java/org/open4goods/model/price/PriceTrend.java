@@ -3,11 +3,7 @@ package org.open4goods.model.price;
 import java.util.List;
 import java.util.Locale;
 
-import org.joda.time.DurationFieldType;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
-import org.joda.time.format.PeriodFormat;
-import org.joda.time.format.PeriodFormatter;
+import org.open4goods.model.util.TimeAgoFormatter;
 
 /**
  * Represents the price trend of a product, including price variation,
@@ -64,7 +60,7 @@ public record PriceTrend(
 	 * @return A localized string describing the time since the last price change.
 	 */
         public String formatedDuration() {
-                return ago(Locale.FRANCE, period); // TODO: localize dynamically
+                return ago(Locale.getDefault(), period);
         }
 
 	/**
@@ -75,18 +71,7 @@ public record PriceTrend(
 	 * @return A localized string like "2 days", "3 minutes", etc.
 	 */
 	public String ago(Locale locale, long duration) {
-		Period period;
-
-		if (duration < 3_600_000) { // less than 1 hour
-			DurationFieldType[] min = { DurationFieldType.minutes(), DurationFieldType.seconds() };
-			period = new Period(duration, PeriodType.forFields(min)).normalizedStandard();
-		} else {
-			DurationFieldType[] full = { DurationFieldType.days(), DurationFieldType.hours() };
-			period = new Period(duration, PeriodType.forFields(full)).normalizedStandard();
-		}
-
-		PeriodFormatter formatter = PeriodFormat.wordBased(locale);
-		return formatter.print(period);
+		return TimeAgoFormatter.formatDuration(locale, duration);
 	}
 
 	/**
