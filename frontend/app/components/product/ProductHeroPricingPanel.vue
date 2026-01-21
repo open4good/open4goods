@@ -400,6 +400,14 @@ const emitViewOffers = () => {
   gap: 0.4rem;
   font-weight: 700;
   color: var(--product-hero-panel-accent);
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(var(--v-theme-surface-default), 0.9);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
 }
 
 .product-hero__pricing-panel-title-icon {

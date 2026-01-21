@@ -39,6 +39,9 @@ const createI18nInstance = () =>
             breadcrumbAriaLabel: 'Breadcrumb',
             missingBreadcrumbTitle: 'Missing',
             gtinTooltip: 'GTIN country',
+            aiReview: {
+              label: 'AI summary',
+            },
             compare: {
               add: 'Add to compare',
               label: 'Add to compare',
@@ -48,6 +51,11 @@ const createI18nInstance = () =>
               differentCategory: 'Different',
               missingIdentifier: 'Missing identifier',
             },
+          },
+        },
+        category: {
+          products: {
+            notRated: 'Not rated',
           },
         },
       },
@@ -190,7 +198,7 @@ describe('ProductHero', () => {
     expect(wrapper.get('.product-hero__title').text()).toContain(
       'Television ORBIT 43 pouces lcd'
     )
-    expect(wrapper.find('.product-hero__panel--pricing').exists()).toBe(true)
+    expect(wrapper.find('.product-hero__section--pricing').exists()).toBe(true)
     expect(wrapper.find('.product-hero__details-section').exists()).toBe(true)
 
     expect(

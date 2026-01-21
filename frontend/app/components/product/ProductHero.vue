@@ -16,216 +16,258 @@
         />
       </header>
 
-      <div class="product-hero__grid">
-        <div class="product-hero__panel product-hero__panel--main">
-          <div class="product-hero__main-content">
-            <div class="product-hero__gallery-section">
-              <ProductHeroGallery
-                class="product-hero__gallery"
-                :product="product"
-                :title="heroTitle"
+      <div class="product-hero__card">
+        <svg
+          class="product-hero__card-gradient"
+          viewBox="0 0 1200 800"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <defs>
+            <radialGradient
+              id="product-hero-radial"
+              cx="0%"
+              cy="0%"
+              r="120%"
+            >
+              <stop
+                offset="0%"
+                stop-color="rgb(var(--v-theme-secondary))"
+                stop-opacity="0.75"
               />
-              <div class="product-hero__corner" role="presentation">
-                <ImpactScore
-                  v-if="impactScoreOn20 !== null"
-                  :score="impactScoreOn20"
-                  :max="5"
-                  size="xxlarge"
-                  mode="badge"
-                  badge-layout="stacked"
-                  badge-variant="corner"
-                  flat
+              <stop
+                offset="100%"
+                stop-color="rgb(var(--v-theme-secondary))"
+                stop-opacity="0"
+              />
+            </radialGradient>
+          </defs>
+          <rect
+            x="0"
+            y="0"
+            width="1200"
+            height="800"
+            fill="url(#product-hero-radial)"
+          />
+        </svg>
+
+        <div class="product-hero__grid">
+          <div class="product-hero__section product-hero__section--main">
+            <div class="product-hero__main-content">
+              <div class="product-hero__gallery-section">
+                <ProductHeroGallery
+                  class="product-hero__gallery"
+                  :product="product"
+                  :title="heroTitle"
                 />
-                <span v-else class="product-hero__corner-fallback">
-                  {{ t('category.products.notRated') }}
-                </span>
-              </div>
-            </div>
-
-            <div class="product-hero__details-section">
-              <div v-if="hasBrandOrModel" class="product-hero__heading-group">
-                <span
-                  v-if="productBrandName"
-                  class="product-hero__brand-name"
-                  >{{ productBrandName }}</span
-                >
-                <span v-if="productModelName" class="product-hero__subtitle">{{
-                  productModelName
-                }}</span>
-              </div>
-
-              <ul
-                v-if="heroAttributes.length"
-                class="product-hero__attributes"
-                role="list"
-              >
-                <li
-                  v-for="attribute in heroAttributes"
-                  :key="attribute.key"
-                  class="product-hero__attribute"
-                  :class="{
-                    'product-hero__attribute--country':
-                      attribute.key === 'gtin-country',
-                  }"
-                  role="listitem"
-                >
-                  <template v-if="attribute.key === 'ai-summary'">
-                    <ul class="product-hero__ai-summary-list">
-                      <li
-                        v-if="aiReview?.technicalOneline"
-                        class="product-hero__ai-summary-item"
-                      >
-                        <v-icon
-                          icon="mdi-cog-outline"
-                          size="small"
-                          class="product-hero__ai-summary-icon"
-                        />
-                        <span>{{ aiReview.technicalOneline }}</span>
-                      </li>
-                      <li
-                        v-if="aiReview?.ecologicalOneline"
-                        class="product-hero__ai-summary-item"
-                      >
-                        <v-icon
-                          icon="mdi-leaf"
-                          size="small"
-                          class="product-hero__ai-summary-icon"
-                        />
-                        <span>{{ aiReview.ecologicalOneline }}</span>
-                      </li>
-                      <li
-                        v-if="aiReview?.communityOneline"
-                        class="product-hero__ai-summary-item"
-                      >
-                        <v-icon
-                          icon="mdi-account-group-outline"
-                          size="small"
-                          class="product-hero__ai-summary-icon"
-                        />
-                        <span>{{ aiReview.communityOneline }}</span>
-                      </li>
-                    </ul>
-                  </template>
-                  <template v-else-if="attribute.showLabel !== false">
-                    <span class="product-hero__attribute-label">{{
-                      attribute.label
-                    }}</span>
-                    <span
-                      class="product-hero__attribute-separator"
-                      aria-hidden="true"
-                      >:</span
-                    >
-                  </template>
-                  <span
-                    v-if="attribute.key !== 'ai-summary'"
-                    class="product-hero__attribute-value"
-                  >
-                    <template v-if="attribute.tooltip">
-                      <v-tooltip location="bottom" :text="attribute.tooltip">
-                        <template #activator="{ props: tooltipProps }">
-                          <ProductAttributeSourcingLabel
-                            class="product-hero__attribute-value-label"
-                            :sourcing="attribute.sourcing"
-                            :value="attribute.value"
-                            :enable-tooltip="attribute.enableTooltip !== false"
-                          >
-                            <template #default="{ displayValue, displayHtml }">
-                              <span
-                                class="product-hero__attribute-value-content"
-                                v-bind="tooltipProps"
-                              >
-                                <NuxtImg
-                                  v-if="attribute.flag"
-                                  :src="attribute.flag"
-                                  :alt="displayValue"
-                                  width="32"
-                                  height="24"
-                                  class="product-hero__flag"
-                                />
-                                <!-- eslint-disable-next-line vue/no-v-html -->
-                                <span v-if="displayHtml" v-html="displayHtml" />
-                                <span v-else>{{ displayValue }}</span>
-                              </span>
-                            </template>
-                          </ProductAttributeSourcingLabel>
-                        </template>
-                      </v-tooltip>
-                    </template>
-                    <template v-else>
-                      <ProductAttributeSourcingLabel
-                        class="product-hero__attribute-value-label"
-                        :sourcing="attribute.sourcing"
-                        :value="attribute.value"
-                        :enable-tooltip="attribute.enableTooltip !== false"
-                      >
-                        <template #default="{ displayValue, displayHtml }">
-                          <span class="product-hero__attribute-value-content">
-                            <NuxtImg
-                              v-if="attribute.flag"
-                              :src="attribute.flag"
-                              :alt="displayValue"
-                              width="32"
-                              height="24"
-                              class="product-hero__flag"
-                            />
-                            <v-icon
-                              v-if="attribute.icon"
-                              :icon="attribute.icon"
-                              size="small"
-                              class="product-hero__icon mr-2"
-                            />
-                            <!-- eslint-disable-next-line vue/no-v-html -->
-                            <span v-if="displayHtml" v-html="displayHtml" />
-                            <span v-else>{{ displayValue }}</span>
-                          </span>
-                        </template>
-                      </ProductAttributeSourcingLabel>
-                    </template>
-                  </span>
-                </li>
-              </ul>
-
-              <div class="product-hero__actions">
-                <v-btn
-                  class="product-hero__ai-button"
-                  :prepend-icon="
-                    hasAiReview ? 'mdi-check-circle-outline' : 'mdi-robot'
-                  "
-                  variant="flat"
-                  @click="handleAiReviewClick"
-                >
-                  {{ t('product.hero.aiReview.label', 'Synthèse IA') }}
-                </v-btn>
-
-                <v-btn
-                  class="product-hero__compare-button"
-                  :class="{
-                    'product-hero__compare-button--active': isCompareSelected,
-                  }"
-                  variant="flat"
-                  :aria-pressed="isCompareSelected"
-                  :aria-label="compareButtonAriaLabel"
-                  :title="compareButtonTitle"
-                  :disabled="isCompareDisabled"
-                  @click="toggleCompare"
-                >
-                  <v-icon
-                    :icon="compareButtonIcon"
-                    size="20"
-                    class="product-hero__compare-icon"
+                <div class="product-hero__corner" role="presentation">
+                  <ImpactScore
+                    v-if="impactScoreOn20 !== null"
+                    :score="impactScoreOn20"
+                    :max="5"
+                    size="xxlarge"
+                    mode="badge"
+                    badge-layout="stacked"
+                    badge-variant="corner"
+                    flat
                   />
-                  <span class="product-hero__compare-label">{{
-                    compareButtonText
+                  <span v-else class="product-hero__corner-fallback">
+                    {{ t('category.products.notRated') }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="product-hero__details-section">
+                <div v-if="hasBrandOrModel" class="product-hero__heading-group">
+                  <span
+                    v-if="productBrandName"
+                    class="product-hero__brand-name"
+                    >{{ productBrandName }}</span
+                  >
+                  <span v-if="productModelName" class="product-hero__subtitle">{{
+                    productModelName
                   }}</span>
-                </v-btn>
+                </div>
+
+                <ul
+                  v-if="heroAttributes.length"
+                  class="product-hero__attributes"
+                  role="list"
+                >
+                  <li
+                    v-for="attribute in heroAttributes"
+                    :key="attribute.key"
+                    class="product-hero__attribute"
+                    :class="{
+                      'product-hero__attribute--country':
+                        attribute.key === 'gtin-country',
+                    }"
+                    role="listitem"
+                  >
+                    <template v-if="attribute.key === 'ai-summary'">
+                      <ul class="product-hero__ai-summary-list">
+                        <li
+                          v-if="aiReview?.technicalOneline"
+                          class="product-hero__ai-summary-item"
+                        >
+                          <v-icon
+                            icon="mdi-cog-outline"
+                            size="small"
+                            class="product-hero__ai-summary-icon"
+                          />
+                          <span>{{ aiReview.technicalOneline }}</span>
+                        </li>
+                        <li
+                          v-if="aiReview?.ecologicalOneline"
+                          class="product-hero__ai-summary-item"
+                        >
+                          <v-icon
+                            icon="mdi-leaf"
+                            size="small"
+                            class="product-hero__ai-summary-icon"
+                          />
+                          <span>{{ aiReview.ecologicalOneline }}</span>
+                        </li>
+                        <li
+                          v-if="aiReview?.communityOneline"
+                          class="product-hero__ai-summary-item"
+                        >
+                          <v-icon
+                            icon="mdi-account-group-outline"
+                            size="small"
+                            class="product-hero__ai-summary-icon"
+                          />
+                          <span>{{ aiReview.communityOneline }}</span>
+                        </li>
+                      </ul>
+                    </template>
+                    <template v-else-if="attribute.showLabel !== false">
+                      <span class="product-hero__attribute-label">{{
+                        attribute.label
+                      }}</span>
+                      <span
+                        class="product-hero__attribute-separator"
+                        aria-hidden="true"
+                        >:</span
+                      >
+                    </template>
+                    <span
+                      v-if="attribute.key !== 'ai-summary'"
+                      class="product-hero__attribute-value"
+                    >
+                      <template v-if="attribute.tooltip">
+                        <v-tooltip location="bottom" :text="attribute.tooltip">
+                          <template #activator="{ props: tooltipProps }">
+                            <ProductAttributeSourcingLabel
+                              class="product-hero__attribute-value-label"
+                              :sourcing="attribute.sourcing"
+                              :value="attribute.value"
+                              :enable-tooltip="attribute.enableTooltip !== false"
+                            >
+                              <template
+                                #default="{ displayValue, displayHtml }"
+                              >
+                                <span
+                                  class="product-hero__attribute-value-content"
+                                  v-bind="tooltipProps"
+                                >
+                                  <NuxtImg
+                                    v-if="attribute.flag"
+                                    :src="attribute.flag"
+                                    :alt="displayValue"
+                                    width="32"
+                                    height="24"
+                                    class="product-hero__flag"
+                                  />
+                                  <!-- eslint-disable-next-line vue/no-v-html -->
+                                  <span
+                                    v-if="displayHtml"
+                                    v-html="displayHtml"
+                                  />
+                                  <span v-else>{{ displayValue }}</span>
+                                </span>
+                              </template>
+                            </ProductAttributeSourcingLabel>
+                          </template>
+                        </v-tooltip>
+                      </template>
+                      <template v-else>
+                        <ProductAttributeSourcingLabel
+                          class="product-hero__attribute-value-label"
+                          :sourcing="attribute.sourcing"
+                          :value="attribute.value"
+                          :enable-tooltip="attribute.enableTooltip !== false"
+                        >
+                          <template #default="{ displayValue, displayHtml }">
+                            <span class="product-hero__attribute-value-content">
+                              <NuxtImg
+                                v-if="attribute.flag"
+                                :src="attribute.flag"
+                                :alt="displayValue"
+                                width="32"
+                                height="24"
+                                class="product-hero__flag"
+                              />
+                              <v-icon
+                                v-if="attribute.icon"
+                                :icon="attribute.icon"
+                                size="small"
+                                class="product-hero__icon mr-2"
+                              />
+                              <!-- eslint-disable-next-line vue/no-v-html -->
+                              <span v-if="displayHtml" v-html="displayHtml" />
+                              <span v-else>{{ displayValue }}</span>
+                            </span>
+                          </template>
+                        </ProductAttributeSourcingLabel>
+                      </template>
+                    </span>
+                  </li>
+                </ul>
+
+                <div class="product-hero__actions">
+                  <v-btn
+                    class="product-hero__ai-button"
+                    :prepend-icon="
+                      hasAiReview ? 'mdi-check-circle-outline' : 'mdi-robot'
+                    "
+                    variant="flat"
+                    @click="handleAiReviewClick"
+                  >
+                    {{ t('product.hero.aiReview.label', 'Synthèse IA') }}
+                  </v-btn>
+
+                  <v-btn
+                    class="product-hero__compare-button"
+                    :class="{
+                      'product-hero__compare-button--active': isCompareSelected,
+                    }"
+                    variant="flat"
+                    :aria-pressed="isCompareSelected"
+                    :aria-label="compareButtonAriaLabel"
+                    :title="compareButtonTitle"
+                    :disabled="isCompareDisabled"
+                    @click="toggleCompare"
+                  >
+                    <v-icon
+                      :icon="compareButtonIcon"
+                      size="20"
+                      class="product-hero__compare-icon"
+                    />
+                    <span class="product-hero__compare-label">{{
+                      compareButtonText
+                    }}</span>
+                  </v-btn>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <aside class="product-hero__panel product-hero__panel--pricing">
-          <ProductHeroPricing :product="product" />
-        </aside>
+          <aside class="product-hero__section product-hero__section--pricing">
+            <ProductHeroPricing :product="product" />
+          </aside>
+        </div>
       </div>
     </div>
   </section>
@@ -680,29 +722,40 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   align-items: stretch;
 }
 
-@media (max-width: 960px) {
-  .product-hero__grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
-  }
-}
-
-.product-hero__panel {
+.product-hero__card {
   position: relative;
-  height: 100%;
-  padding: clamp(1.25rem, 2.2vw, 1.75rem);
-  border-radius: 24px;
-  background: rgba(var(--v-theme-surface-glass-strong), 0.66);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
-  backdrop-filter: blur(16px);
+  padding: clamp(1.5rem, 3vw, 2.6rem);
+  border-radius: 28px;
+  background: rgba(var(--v-theme-surface-default), 0.9);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
 }
 
-.product-hero__panel--main {
-  background: rgba(var(--v-theme-surface-glass), 0.7);
-  overflow: hidden;
+.product-hero__card-gradient {
+  position: absolute;
+  inset: -30%;
+  width: 160%;
+  height: 160%;
+  opacity: 0.9;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.product-hero__grid {
+  position: relative;
+  z-index: 1;
+}
+
+.product-hero__section {
+  position: relative;
+  min-width: 0;
+}
+
+.product-hero__section--main {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .product-hero__main-content {
@@ -730,19 +783,21 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   flex-direction: column;
   gap: 1.25rem;
   padding: 1rem 0;
+  height: 100%;
 }
 
-.product-hero__panel--pricing {
-  padding: clamp(1rem, 1.8vw, 1.5rem);
+.product-hero__section--pricing {
+  padding: clamp(1.1rem, 2vw, 1.6rem);
+  border-radius: 22px;
   background:
     linear-gradient(
       135deg,
-      rgba(var(--v-theme-hero-gradient-start), 0.12),
-      rgba(var(--v-theme-hero-gradient-end), 0.1)
+      rgba(var(--v-theme-secondary), 0.14),
+      rgba(var(--v-theme-secondary), 0.04)
     ),
-    rgba(var(--v-theme-surface-default), 0.86);
-  border: 1px solid rgba(var(--v-theme-accent-primary-highlight), 0.35);
-  box-shadow: 0 24px 52px rgba(var(--v-theme-shadow-primary-600), 0.18);
+    rgba(var(--v-theme-surface-glass-strong), 0.92);
+  border: 1px solid rgba(var(--v-theme-accent-primary-highlight), 0.3);
+  box-shadow: 0 20px 44px rgba(var(--v-theme-shadow-primary-600), 0.16);
 }
 
 .product-hero__gallery {
@@ -766,14 +821,6 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   backdrop-filter: blur(6px);
   z-index: 2;
   pointer-events: none;
-}
-
-.product-hero__details-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 1rem 0;
-  height: 100%;
 }
 
 .product-hero__heading-group {
@@ -815,6 +862,8 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   margin-top: auto;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .product-hero__ai-summary-list {
@@ -886,37 +935,6 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   text-align: center;
   line-height: 1.1;
   transform: rotate(-12deg);
-}
-
-.product-hero__brand-line {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  margin: 0;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-hero__brand-name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgb(var(--v-theme-text-neutral-secondary));
-}
-
-.product-hero__model-name {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-hero__attributes {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0;
-  margin: 0;
-  list-style: none;
 }
 
 .product-hero__attribute {
@@ -997,21 +1015,12 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   );
 }
 
-.product-hero--classic .product-hero__background {
-  display: none;
-}
-
-.product-hero--classic .product-hero__panel {
-  background: rgba(var(--v-theme-surface-default), 0.82);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
-}
-
 @media (max-width: 1400px) {
   .product-hero__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .product-hero__panel--pricing {
+  .product-hero__section--pricing {
     grid-column: span 2;
   }
 }
@@ -1025,12 +1034,19 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
     grid-template-columns: 1fr;
   }
 
-  .product-hero__panel--pricing {
+  .product-hero__section--pricing {
     grid-column: auto;
   }
 
   .product-hero__bg-image {
     background-attachment: scroll;
+  }
+}
+
+@media (max-width: 960px) {
+  .product-hero__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
   }
 }
 </style>
