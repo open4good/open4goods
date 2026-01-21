@@ -107,7 +107,19 @@
       "name": "review.generation.batch-poll-interval",
       "type": "java.time.Duration",
       "description": "Interval between batch status scans for review generation jobs.",
-      "defaultValue": "PT5M"
+      "defaultValue": "PT1H"
+    },
+    {
+      "name": "review.generation.batch-schedule-cron",
+      "type": "java.lang.String",
+      "description": "Cron expression for scheduled batch review generation.",
+      "defaultValue": "0 0 6 * * *"
+    },
+    {
+      "name": "review.generation.batch-schedule-size",
+      "type": "java.lang.Integer",
+      "description": "Number of products to include in scheduled batch review generation.",
+      "defaultValue": 20
     }
   ]
 }

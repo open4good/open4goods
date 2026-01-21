@@ -21,6 +21,7 @@ import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -42,6 +43,7 @@ class ReviewGenerationReproductionTest {
     @Mock private PromptService genAiService;
     @Mock private BatchPromptService batchAiService;
     @Mock private ProductRepository productRepository;
+    @Mock private VerticalsConfigService verticalsConfigService;
     private MeterRegistry meterRegistry;
 
     // We can use a real TemplateEngine to verify the template expression evaluation
@@ -72,7 +74,8 @@ class ReviewGenerationReproductionTest {
                 batchAiService,
                 meterRegistry,
                 productRepository,
-                preprocessingService
+                preprocessingService,
+                verticalsConfigService
         );
 
         // Setup template engine similar to production

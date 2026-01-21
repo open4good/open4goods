@@ -53,6 +53,7 @@ import co.elastic.clients.elasticsearch._types.KnnSearch;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.ExtendedStatsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.mapping.FieldType;
@@ -478,6 +479,67 @@ public class ProductRepository {
 		return exportVerticalWithValidDateOrderByEcoscore(vertical, null, withExcluded);
 	}
 
+    /**
+     * Export all aggregated data for a vertical, ordered by impact score descending.
+     *
+     * @param vertical the vertical identifier
+     * @param max maximum number of products to fetch
+     * @param withExcluded whether to include excluded products
+     * @return stream of products ordered by impact score
+     */
+    public Stream<Product> exportVerticalWithValidDateOrderByImpactScore(String vertical, Integer max, boolean withExcluded)
+    {
+        Criteria criteria = new Criteria("vertical").is(vertical)
+                .and(getRecentPriceQuery());
+
+        if (!withExcluded) {
+            criteria = criteria.and(new Criteria("excluded").is(false));
+        }
+
+        criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
+
+        SortOptions impactScoreSort = new SortOptions.Builder()
+                .field(new FieldSort.Builder()
+                        .field("scores.IMPACTSCORE.value")
+                        .order(SortOrder.Desc)
+                        .unmappedType(FieldType.Float)
+                        .missing("_last")
+                        .build())
+                .build();
+
+        NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                .withQuery(new CriteriaQuery(criteria))
+                .withSort(impactScoreSort);
+
+        if (max != null) {
+            queryBuilder = queryBuilder.withMaxResults(max);
+        }
+
+        NativeQuery query = queryBuilder.build();
+
+        try {
+            return elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX)
+                    .stream()
+                    .map(SearchHit::getContent);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
+    }
+
+    /**
+     * Export all aggregated data for a vertical, ordered by impact score descending.
+     *
+     * @param vertical the vertical identifier
+     * @param withExcluded whether to include excluded products
+     * @return stream of products ordered by impact score
+     */
+    public Stream<Product> exportVerticalWithValidDateOrderByImpactScore(String vertical, boolean withExcluded)
+    {
+        return exportVerticalWithValidDateOrderByImpactScore(vertical, null, withExcluded);
+    }
+
 
 
 	public SearchHits<Product> search(Query query, final String indexName) {
@@ -776,6 +838,75 @@ public class ProductRepository {
         public Long countMainIndexHavingScore(String scoreName, String vertical) {
                 CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Compute absolute cardinality statistics for a score within a vertical.
+         *
+         * @param scoreName score name to aggregate
+         * @param vertical  vertical identifier
+         * @return cardinality statistics or {@code null} if the score is missing
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public org.open4goods.model.rating.Cardinality scoreAbsoluteCardinality(String scoreName, String vertical) {
+                return scoreCardinalityForField(scoreName, vertical, "scores." + scoreName + ".absolute.value");
+        }
+
+        /**
+         * Compute relative cardinality statistics for a score within a vertical.
+         *
+         * @param scoreName score name to aggregate
+         * @param vertical  vertical identifier
+         * @return cardinality statistics or {@code null} if the score is missing
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public org.open4goods.model.rating.Cardinality scoreRelativCardinality(String scoreName, String vertical) {
+                return scoreCardinalityForField(scoreName, vertical, "scores." + scoreName + ".relativ.value");
+        }
+
+        /**
+         * Aggregate score values for the given field path using Elasticsearch extended stats.
+         *
+         * @param scoreName score name used for logging
+         * @param vertical  vertical identifier
+         * @param fieldPath Elasticsearch field path to aggregate
+         * @return cardinality statistics or {@code null} if the aggregation is empty
+         */
+        private org.open4goods.model.rating.Cardinality scoreCardinalityForField(String scoreName, String vertical, String fieldPath) {
+                Criteria criteria = getRecentPriceQuery()
+                                .and(new Criteria("vertical").is(vertical))
+                                .and(new Criteria(fieldPath).exists());
+
+                String aggregationName = "score_stats";
+                NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                                .withQuery(new CriteriaQuery(criteria))
+                                .withAggregation(aggregationName, Aggregation.of(a -> a.extendedStats(e -> e.field(fieldPath))))
+                                .withPageable(PageRequest.of(0, 1));
+
+                SearchHits<Product> results = search(queryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
+                if (results == null || results.getAggregations() == null) {
+                        logger.debug("No aggregation results for score {} in vertical {}", scoreName, vertical);
+                        return null;
+                }
+
+                if (!(results.getAggregations() instanceof ElasticsearchAggregations aggregations)) {
+                        logger.debug("Unexpected aggregation container for score {} in vertical {}", scoreName, vertical);
+                        return null;
+                }
+
+                ExtendedStatsAggregate stats = aggregations.get(aggregationName).aggregation().getAggregate().extendedStats();
+                if (stats == null || stats.count() == 0) {
+                        return null;
+                }
+
+                org.open4goods.model.rating.Cardinality cardinality = new org.open4goods.model.rating.Cardinality();
+                cardinality.setMin(stats.min());
+                cardinality.setMax(stats.max());
+                cardinality.setAvg(stats.avg());
+                cardinality.setSum(stats.sum());
+                cardinality.setSumOfSquares(stats.sumOfSquares());
+                cardinality.setCount(Math.toIntExact(stats.count()));
+                return cardinality;
         }
 
 

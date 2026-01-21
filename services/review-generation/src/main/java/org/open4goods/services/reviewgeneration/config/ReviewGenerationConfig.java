@@ -86,7 +86,17 @@ public class ReviewGenerationConfig {
     /**
      * Interval between batch status scans for review generation jobs.
      */
-    private Duration batchPollInterval = Duration.ofMinutes(5);
+    private Duration batchPollInterval = Duration.ofHours(1);
+
+    /**
+     * Cron schedule for daily batch review generation.
+     */
+    private String batchScheduleCron = "0 0 6 * * *";
+
+    /**
+     * Number of products to include in the scheduled batch.
+     */
+    private int batchScheduleSize = 20;
 
     // ---------------------- Getters/Setters ---------------------- //
 
@@ -203,6 +213,18 @@ public class ReviewGenerationConfig {
     }
     public void setBatchPollInterval(Duration batchPollInterval) {
         this.batchPollInterval = batchPollInterval;
+    }
+    public String getBatchScheduleCron() {
+        return batchScheduleCron;
+    }
+    public void setBatchScheduleCron(String batchScheduleCron) {
+        this.batchScheduleCron = batchScheduleCron;
+    }
+    public int getBatchScheduleSize() {
+        return batchScheduleSize;
+    }
+    public void setBatchScheduleSize(int batchScheduleSize) {
+        this.batchScheduleSize = batchScheduleSize;
     }
 	public int getMinGlobalTokens() {
 		return minGlobalTokens;
