@@ -101,12 +101,12 @@ class ProductControllerTest {
         config.setId("tv");
 
         AttributeConfig attributeConfig = new AttributeConfig();
-        attributeConfig.setKey("BRAND_SUSTAINABILITY");
+        attributeConfig.setKey("BRAND_SUSTAINALYTICS_SCORING");
         config.setAttributesConfig(new AttributesConfig(List.of(attributeConfig)));
 
         when(verticalsConfigService.getConfigById("tv")).thenReturn(config);
 
-        Filter filter = new Filter("attributes.indexed.BRAND_SUSTAINABILITY.value", FilterOperator.term,
+        Filter filter = new Filter("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value", FilterOperator.term,
                 List.of("AA"), null, null);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
                 new FilterRequestDto(List.of(filter), List.of()), null);
@@ -127,6 +127,6 @@ class ProductControllerTest {
                 filterCaptor.capture(), anyBoolean());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
-                .contains("attributes.indexed.BRAND_SUSTAINABILITY.value");
+                .contains("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value");
     }
 }

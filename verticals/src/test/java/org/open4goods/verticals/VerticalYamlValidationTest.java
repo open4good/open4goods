@@ -71,7 +71,7 @@ class VerticalYamlValidationTest {
         for (Resource resource : verticalResources) {
             try (InputStream inputStream = resource.getInputStream()) {
                 VerticalConfig config = verticalsConfigService.getConfig(inputStream, verticalsConfigService.getDefaultConfig());
-                
+
                 // Inject impact score config from the already loaded service instance
                 // This simulates the loading process which now separates vertical and impact score configs
                 VerticalConfig loadedConfig = verticalsConfigService.getConfigById(config.getId());
@@ -114,7 +114,7 @@ class VerticalYamlValidationTest {
 
         assertThat(tvConfig.getAvailableImpactScoreCriterias())
             .as("Default impact score criteria should be merged into the TV config")
-            .contains("BRAND_SUSTAINABILITY", "DATA_QUALITY");
+            .contains("BRAND_SUSTAINALYTICS_SCORING", "DATA_QUALITY");
 
         List<String> attributeKeys = tvConfig.getAttributesConfig().getConfigs().stream()
             .map(AttributeConfig::getKey)
