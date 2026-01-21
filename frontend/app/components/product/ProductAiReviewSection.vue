@@ -234,15 +234,6 @@
           <p class="product-ai-review__empty-label">
             {{ $t('product.aiReview.request.bannerTitle') }}
           </p>
-          <p class="product-ai-review__empty-message">
-            {{
-              $t('product.aiReview.request.bannerDescription', {
-                productName: productLabel,
-              })
-            }}
-          </p>
-        </div>
-        <div class="product-ai-review__empty-cta">
           <div class="product-ai-review__quota">
             <span class="product-ai-review__quota-label">
               {{ $t('siteIdentity.menu.account.privacy.quotas.aiRemaining') }}
@@ -251,6 +242,15 @@
               {{ remainingGenerationsLabel }}
             </span>
           </div>
+        </div>
+        <div class="product-ai-review__empty-cta">
+          <p class="product-ai-review__empty-message">
+            {{
+              $t('product.aiReview.request.bannerDescription', {
+                productName: productLabel,
+              })
+            }}
+          </p>
           <v-btn
             color="primary"
             size="x-large"

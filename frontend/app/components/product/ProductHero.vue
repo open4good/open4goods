@@ -44,14 +44,12 @@
 
             <div class="product-hero__details-section">
               <div v-if="hasBrandOrModel" class="product-hero__heading-group">
-                <span
-                  v-if="productBrandName"
-                  class="product-hero__brand-name"
-                  >{{ productBrandName }}</span
-                >
-                <span v-if="productModelName" class="product-hero__subtitle">{{
-                  productModelName
-                }}</span>
+                <span v-if="productBrandName" class="product-hero__brand-name">
+                  {{ productBrandName }}
+                </span>
+                <span v-if="productModelName" class="product-hero__subtitle">
+                  {{ productModelName }}
+                </span>
               </div>
 
               <ul
@@ -778,8 +776,9 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 
 .product-hero__heading-group {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
 }
 
 .product-hero__brand-name {

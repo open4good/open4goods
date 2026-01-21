@@ -17,6 +17,113 @@
       </div>
 
       <div class="product-attributes__main-grid">
+        <v-card class="product-attributes__identity-card" variant="flat">
+          <div class="product-attributes__identity-heading">
+            <v-icon
+              icon="mdi-card-account-details-outline"
+              size="20"
+              class="product-attributes__identity-icon"
+            />
+            <span>{{ $t('product.attributes.main.identity.title') }}</span>
+          </div>
+
+          <div v-if="hasIdentityData" class="product-attributes__identity-table">
+            <div
+              v-if="identityBrand"
+              class="product-attributes__identity-row"
+            >
+              <span class="product-attributes__identity-label">
+                {{ $t('product.attributes.main.identity.brand') }}
+              </span>
+              <div class="product-attributes__identity-value">
+                <span>{{ identityBrand }}</span>
+                <div
+                  v-if="akaBrands.length"
+                  class="product-attributes__identity-details"
+                >
+                  <span class="product-attributes__identity-detail-label">
+                    {{ $t('product.attributes.main.identity.akaBrands') }}
+                  </span>
+                  <ul class="product-attributes__identity-detail-list">
+                    <li v-for="brand in akaBrands" :key="brand">
+                      {{ brand }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="identityModel"
+              class="product-attributes__identity-row"
+            >
+              <span class="product-attributes__identity-label">
+                {{ $t('product.attributes.main.identity.model') }}
+              </span>
+              <div class="product-attributes__identity-value">
+                <span>{{ identityModel }}</span>
+                <div
+                  v-if="akaModels.length"
+                  class="product-attributes__identity-details"
+                >
+                  <span class="product-attributes__identity-detail-label">
+                    {{ $t('product.attributes.main.identity.akaModels') }}
+                  </span>
+                  <ul class="product-attributes__identity-detail-list">
+                    <li v-for="model in akaModels" :key="model">
+                      {{ model }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="gtin" class="product-attributes__identity-row">
+              <span class="product-attributes__identity-label">
+                {{ $t('product.attributes.main.identity.gtin') }}
+              </span>
+              <div class="product-attributes__identity-value product-attributes__gtin">
+                <span>{{ gtin }}</span>
+                <span class="product-attributes__gtin-caption">
+                  {{ $t('product.attributes.main.identity.gtinLabel') }}
+                </span>
+              </div>
+            </div>
+
+            <div
+              v-if="knownSince"
+              class="product-attributes__identity-row"
+            >
+              <span class="product-attributes__identity-label">
+                {{ $t('product.attributes.main.identity.knownSince') }}
+              </span>
+              <span
+                class="product-attributes__identity-value product-attributes__identity-detail--muted"
+              >
+                {{ knownSince }}
+              </span>
+            </div>
+
+            <div
+              v-if="lastUpdated"
+              class="product-attributes__identity-row"
+            >
+              <span class="product-attributes__identity-label">
+                {{ $t('product.attributes.main.identity.lastUpdated') }}
+              </span>
+              <span
+                class="product-attributes__identity-value product-attributes__identity-detail--muted"
+              >
+                {{ lastUpdated }}
+              </span>
+            </div>
+          </div>
+
+          <p v-else class="product-attributes__empty product-attributes__identity-empty">
+            {{ $t('product.attributes.main.identity.empty') }}
+          </p>
+        </v-card>
+
         <v-card class="product-attributes__main-card" variant="flat">
           <v-table
             v-if="mainAttributes.length"
@@ -40,16 +147,13 @@
             {{ $t('product.attributes.main.attributes.empty') }}
           </p>
         </v-card>
-
-        <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
-          <v-col cols="12">
-            <ProductLifeTimeline
-              id="attributes-timeline"
-              :timeline="timeline"
-            />
-          </v-col>
-        </v-row>
       </div>
+
+      <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
+        <v-col cols="12">
+          <ProductLifeTimeline id="attributes-timeline" :timeline="timeline" />
+        </v-col>
+      </v-row>
     </div>
 
     <div
@@ -219,120 +323,360 @@
       <div class="product-attributes__detailed-layout">
         <div class="product-attributes__details-panel">
           <template v-if="filteredGroups.length">
-            <v-data-table
-              v-if="detailViewMode === 'table'"
-              v-model:expanded="expandedDetailGroups"
-              :headers="detailTableHeaders"
-              :items="detailTableItems"
-              item-value="id"
-              :items-per-page="detailItemsPerPage"
-              class="product-attributes__details-table"
-              density="comfortable"
-              hide-default-footer
-            >
-              <template #[`item.name`]="{ item }">
-                <div class="product-attributes__details-label">
-                  <v-btn
-                    class="product-attributes__details-toggle"
-                    icon
+            <template v-if="detailViewMode === 'table'">
+              <v-row
+                v-if="shouldSplitDetailTables"
+                class="product-attributes__details-table-grid"
+                dense
+              >
+                <v-col cols="12" md="6">
+                  <v-data-table
+                    v-model:expanded="expandedDetailGroups"
+                    :headers="detailTableHeaders"
+                    :items="detailTableItemsLeft"
+                    item-value="id"
+                    :items-per-page="detailItemsPerPage"
+                    class="product-attributes__details-table"
                     density="comfortable"
-                    variant="text"
-                    :aria-label="
-                      isDetailGroupExpanded(item.id)
-                        ? $t('product.attributes.detailed.hideDetails')
-                        : $t('product.attributes.detailed.showDetails')
-                    "
-                    @click="toggleDetailGroup(item.id)"
+                    hide-default-footer
                   >
-                    <v-icon
-                      :icon="
+                    <template #[`item.name`]="{ item }">
+                      <div class="product-attributes__details-label">
+                        <v-btn
+                          class="product-attributes__details-toggle"
+                          icon
+                          density="comfortable"
+                          variant="text"
+                          :aria-label="
+                            isDetailGroupExpanded(item.id)
+                              ? $t('product.attributes.detailed.hideDetails')
+                              : $t('product.attributes.detailed.showDetails')
+                          "
+                          @click="toggleDetailGroup(item.id)"
+                        >
+                          <v-icon
+                            :icon="
+                              isDetailGroupExpanded(item.id)
+                                ? 'mdi-chevron-up'
+                                : 'mdi-chevron-down'
+                            "
+                            size="18"
+                          />
+                        </v-btn>
+                        <span>{{ item.name }}</span>
+                      </div>
+                    </template>
+                    <template #[`item.totalCount`]="{ item }">
+                      <v-chip size="small" variant="tonal" color="primary">
+                        {{ item.totalCount }}
+                      </v-chip>
+                    </template>
+                    <template #expanded-row="{ columns, item }">
+                      <tr class="product-attributes__details-expanded-row">
+                        <td :colspan="columns.length">
+                          <div class="product-attributes__details-expanded-content">
+                            <div
+                              v-if="item.features.length"
+                              class="product-attributes__chip-list product-attributes__chip-list--positive"
+                            >
+                              <ul>
+                                <li
+                                  v-for="feature in item.features"
+                                  :key="feature.key"
+                                >
+                                  <v-icon
+                                    icon="mdi-check-circle"
+                                    size="18"
+                                    class="product-attributes__chip-icon product-attributes__chip-icon--positive"
+                                  />
+                                  <span class="product-attributes__chip-label">{{
+                                    feature.name
+                                  }}</span>
+                                </li>
+                              </ul>
+                            </div>
+
+                            <div
+                              v-if="item.unFeatures.length"
+                              class="product-attributes__chip-list product-attributes__chip-list--negative"
+                            >
+                              <ul>
+                                <li
+                                  v-for="feature in item.unFeatures"
+                                  :key="feature.key"
+                                >
+                                  <v-icon
+                                    icon="mdi-close-octagon-outline"
+                                    size="18"
+                                    class="product-attributes__chip-icon product-attributes__chip-icon--negative"
+                                  />
+                                  <span class="product-attributes__chip-label">{{
+                                    feature.name
+                                  }}</span>
+                                </li>
+                              </ul>
+                            </div>
+
+                            <v-table
+                              v-if="item.attributes.length"
+                              density="comfortable"
+                              class="product-attributes__table product-attributes__details-attributes-table"
+                            >
+                              <tbody>
+                                <tr
+                                  v-for="attribute in item.attributes"
+                                  :key="attribute.key"
+                                >
+                                  <th scope="row">{{ attribute.name }}</th>
+                                  <td>
+                                    <ProductAttributeSourcingLabel
+                                      class="product-attributes__table-value"
+                                      :sourcing="attribute.sourcing"
+                                      :value="attribute.value"
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </v-table>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-col>
+
+                <v-col cols="12" md="6">
+                  <v-data-table
+                    v-model:expanded="expandedDetailGroups"
+                    :headers="detailTableHeaders"
+                    :items="detailTableItemsRight"
+                    item-value="id"
+                    :items-per-page="detailItemsPerPage"
+                    class="product-attributes__details-table"
+                    density="comfortable"
+                    hide-default-footer
+                  >
+                    <template #[`item.name`]="{ item }">
+                      <div class="product-attributes__details-label">
+                        <v-btn
+                          class="product-attributes__details-toggle"
+                          icon
+                          density="comfortable"
+                          variant="text"
+                          :aria-label="
+                            isDetailGroupExpanded(item.id)
+                              ? $t('product.attributes.detailed.hideDetails')
+                              : $t('product.attributes.detailed.showDetails')
+                          "
+                          @click="toggleDetailGroup(item.id)"
+                        >
+                          <v-icon
+                            :icon="
+                              isDetailGroupExpanded(item.id)
+                                ? 'mdi-chevron-up'
+                                : 'mdi-chevron-down'
+                            "
+                            size="18"
+                          />
+                        </v-btn>
+                        <span>{{ item.name }}</span>
+                      </div>
+                    </template>
+                    <template #[`item.totalCount`]="{ item }">
+                      <v-chip size="small" variant="tonal" color="primary">
+                        {{ item.totalCount }}
+                      </v-chip>
+                    </template>
+                    <template #expanded-row="{ columns, item }">
+                      <tr class="product-attributes__details-expanded-row">
+                        <td :colspan="columns.length">
+                          <div class="product-attributes__details-expanded-content">
+                            <div
+                              v-if="item.features.length"
+                              class="product-attributes__chip-list product-attributes__chip-list--positive"
+                            >
+                              <ul>
+                                <li
+                                  v-for="feature in item.features"
+                                  :key="feature.key"
+                                >
+                                  <v-icon
+                                    icon="mdi-check-circle"
+                                    size="18"
+                                    class="product-attributes__chip-icon product-attributes__chip-icon--positive"
+                                  />
+                                  <span class="product-attributes__chip-label">{{
+                                    feature.name
+                                  }}</span>
+                                </li>
+                              </ul>
+                            </div>
+
+                            <div
+                              v-if="item.unFeatures.length"
+                              class="product-attributes__chip-list product-attributes__chip-list--negative"
+                            >
+                              <ul>
+                                <li
+                                  v-for="feature in item.unFeatures"
+                                  :key="feature.key"
+                                >
+                                  <v-icon
+                                    icon="mdi-close-octagon-outline"
+                                    size="18"
+                                    class="product-attributes__chip-icon product-attributes__chip-icon--negative"
+                                  />
+                                  <span class="product-attributes__chip-label">{{
+                                    feature.name
+                                  }}</span>
+                                </li>
+                              </ul>
+                            </div>
+
+                            <v-table
+                              v-if="item.attributes.length"
+                              density="comfortable"
+                              class="product-attributes__table product-attributes__details-attributes-table"
+                            >
+                              <tbody>
+                                <tr
+                                  v-for="attribute in item.attributes"
+                                  :key="attribute.key"
+                                >
+                                  <th scope="row">{{ attribute.name }}</th>
+                                  <td>
+                                    <ProductAttributeSourcingLabel
+                                      class="product-attributes__table-value"
+                                      :sourcing="attribute.sourcing"
+                                      :value="attribute.value"
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </v-table>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-col>
+              </v-row>
+
+              <v-data-table
+                v-else
+                v-model:expanded="expandedDetailGroups"
+                :headers="detailTableHeaders"
+                :items="detailTableItems"
+                item-value="id"
+                :items-per-page="detailItemsPerPage"
+                class="product-attributes__details-table"
+                density="comfortable"
+                hide-default-footer
+              >
+                <template #[`item.name`]="{ item }">
+                  <div class="product-attributes__details-label">
+                    <v-btn
+                      class="product-attributes__details-toggle"
+                      icon
+                      density="comfortable"
+                      variant="text"
+                      :aria-label="
                         isDetailGroupExpanded(item.id)
-                          ? 'mdi-chevron-up'
-                          : 'mdi-chevron-down'
+                          ? $t('product.attributes.detailed.hideDetails')
+                          : $t('product.attributes.detailed.showDetails')
                       "
-                      size="18"
-                    />
-                  </v-btn>
-                  <span>{{ item.name }}</span>
-                </div>
-              </template>
-              <template #[`item.totalCount`]="{ item }">
-                <v-chip size="small" variant="tonal" color="primary">
-                  {{ item.totalCount }}
-                </v-chip>
-              </template>
-              <template #expanded-row="{ columns, item }">
-                <tr class="product-attributes__details-expanded-row">
-                  <td :colspan="columns.length">
-                    <div class="product-attributes__details-expanded-content">
-                      <div
-                        v-if="item.features.length"
-                        class="product-attributes__chip-list product-attributes__chip-list--positive"
-                      >
-                        <ul>
-                          <li
-                            v-for="feature in item.features"
-                            :key="feature.key"
-                          >
-                            <v-icon
-                              icon="mdi-check-circle"
-                              size="18"
-                              class="product-attributes__chip-icon product-attributes__chip-icon--positive"
-                            />
-                            <span class="product-attributes__chip-label">{{
-                              feature.name
-                            }}</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div
-                        v-if="item.unFeatures.length"
-                        class="product-attributes__chip-list product-attributes__chip-list--negative"
-                      >
-                        <ul>
-                          <li
-                            v-for="feature in item.unFeatures"
-                            :key="feature.key"
-                          >
-                            <v-icon
-                              icon="mdi-close-octagon-outline"
-                              size="18"
-                              class="product-attributes__chip-icon product-attributes__chip-icon--negative"
-                            />
-                            <span class="product-attributes__chip-label">{{
-                              feature.name
-                            }}</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <v-table
-                        v-if="item.attributes.length"
-                        density="comfortable"
-                        class="product-attributes__table product-attributes__details-attributes-table"
-                      >
-                        <tbody>
-                          <tr
-                            v-for="attribute in item.attributes"
-                            :key="attribute.key"
-                          >
-                            <th scope="row">{{ attribute.name }}</th>
-                            <td>
-                              <ProductAttributeSourcingLabel
-                                class="product-attributes__table-value"
-                                :sourcing="attribute.sourcing"
-                                :value="attribute.value"
+                      @click="toggleDetailGroup(item.id)"
+                    >
+                      <v-icon
+                        :icon="
+                          isDetailGroupExpanded(item.id)
+                            ? 'mdi-chevron-up'
+                            : 'mdi-chevron-down'
+                        "
+                        size="18"
+                      />
+                    </v-btn>
+                    <span>{{ item.name }}</span>
+                  </div>
+                </template>
+                <template #[`item.totalCount`]="{ item }">
+                  <v-chip size="small" variant="tonal" color="primary">
+                    {{ item.totalCount }}
+                  </v-chip>
+                </template>
+                <template #expanded-row="{ columns, item }">
+                  <tr class="product-attributes__details-expanded-row">
+                    <td :colspan="columns.length">
+                      <div class="product-attributes__details-expanded-content">
+                        <div
+                          v-if="item.features.length"
+                          class="product-attributes__chip-list product-attributes__chip-list--positive"
+                        >
+                          <ul>
+                            <li
+                              v-for="feature in item.features"
+                              :key="feature.key"
+                            >
+                              <v-icon
+                                icon="mdi-check-circle"
+                                size="18"
+                                class="product-attributes__chip-icon product-attributes__chip-icon--positive"
                               />
-                            </td>
-                          </tr>
-                        </tbody>
-                      </v-table>
-                    </div>
-                  </td>
-                </tr>
-              </template>
-            </v-data-table>
+                              <span class="product-attributes__chip-label">{{
+                                feature.name
+                              }}</span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div
+                          v-if="item.unFeatures.length"
+                          class="product-attributes__chip-list product-attributes__chip-list--negative"
+                        >
+                          <ul>
+                            <li
+                              v-for="feature in item.unFeatures"
+                              :key="feature.key"
+                            >
+                              <v-icon
+                                icon="mdi-close-octagon-outline"
+                                size="18"
+                                class="product-attributes__chip-icon product-attributes__chip-icon--negative"
+                              />
+                              <span class="product-attributes__chip-label">{{
+                                feature.name
+                              }}</span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <v-table
+                          v-if="item.attributes.length"
+                          density="comfortable"
+                          class="product-attributes__table product-attributes__details-attributes-table"
+                        >
+                          <tbody>
+                            <tr
+                              v-for="attribute in item.attributes"
+                              :key="attribute.key"
+                            >
+                              <th scope="row">{{ attribute.name }}</th>
+                              <td>
+                                <ProductAttributeSourcingLabel
+                                  class="product-attributes__table-value"
+                                  :sourcing="attribute.sourcing"
+                                  :value="attribute.value"
+                                />
+                              </td>
+                            </tr>
+                          </tbody>
+                        </v-table>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </template>
 
             <v-row v-else class="product-attributes__details-grid" dense>
               <ProductAttributesDetailCard
@@ -402,7 +746,7 @@ const props = defineProps({
   },
 })
 
-const { t, n } = useI18n()
+const { t, n, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 
 const searchTerm = ref('')
@@ -430,6 +774,59 @@ const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
 })
 
 const timeline = computed(() => props.product?.timeline ?? null)
+const identity = computed(() => props.product?.identity ?? null)
+const gtin = computed(() => props.product?.gtin ?? props.product?.base?.gtin ?? null)
+
+const normalizeIdentityValue = (value: string | null | undefined): string | null => {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed : null
+}
+
+const identityBrand = computed(() =>
+  normalizeIdentityValue(identity.value?.brand ?? null)
+)
+const identityModel = computed(() =>
+  normalizeIdentityValue(identity.value?.model ?? null)
+)
+
+const akaBrands = computed(() =>
+  toStringList(identity.value?.akaBrands).sort((a, b) =>
+    a.localeCompare(b, locale.value)
+  )
+)
+const akaModels = computed(() =>
+  toStringList(identity.value?.akaModels).sort((a, b) =>
+    a.localeCompare(b, locale.value)
+  )
+)
+
+const formatIdentityDate = (timestamp?: number | null) => {
+  if (typeof timestamp !== 'number' || Number.isNaN(timestamp)) {
+    return null
+  }
+
+  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }).format(
+    new Date(timestamp)
+  )
+}
+
+const knownSince = computed(() => formatIdentityDate(props.product?.base?.creationDate))
+const lastUpdated = computed(() => formatIdentityDate(props.product?.base?.lastChange))
+
+const hasIdentityData = computed(
+  () =>
+    Boolean(identityBrand.value) ||
+    Boolean(identityModel.value) ||
+    akaBrands.value.length > 0 ||
+    akaModels.value.length > 0 ||
+    Boolean(gtin.value) ||
+    Boolean(knownSince.value) ||
+    Boolean(lastUpdated.value)
+)
 
 const toStringList = (input: unknown): string[] => {
   if (!input) {
@@ -1029,6 +1426,26 @@ const expandedDetailGroups = ref<string[]>([])
 
 const detailTableItems = computed(() => filteredGroups.value)
 
+const shouldSplitDetailTables = computed(
+  () => detailViewMode.value === 'table' && filteredGroups.value.length > 10
+)
+const detailTableItemsLeft = computed(() => {
+  if (!shouldSplitDetailTables.value) {
+    return detailTableItems.value
+  }
+
+  const midpoint = Math.ceil(filteredGroups.value.length / 2)
+  return filteredGroups.value.slice(0, midpoint)
+})
+const detailTableItemsRight = computed(() => {
+  if (!shouldSplitDetailTables.value) {
+    return []
+  }
+
+  const midpoint = Math.ceil(filteredGroups.value.length / 2)
+  return filteredGroups.value.slice(midpoint)
+})
+
 const isDetailGroupExpanded = (id: string) =>
   expandedDetailGroups.value.includes(id)
 
@@ -1338,6 +1755,11 @@ const toggleDetailGroup = (id: string) => {
   margin: 0 -0.75rem;
 }
 
+.product-attributes__details-table-grid {
+  margin: 0 -0.75rem;
+  row-gap: 1.5rem;
+}
+
 .product-attributes__details-table {
   border-radius: 16px;
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5);
@@ -1424,7 +1846,7 @@ const toggleDetailGroup = (id: string) => {
 
 @media (min-width: 960px) {
   .product-attributes__main-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
   .product-attributes__block-header--detailed {
