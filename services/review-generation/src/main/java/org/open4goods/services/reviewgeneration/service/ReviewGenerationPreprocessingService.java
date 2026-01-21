@@ -213,7 +213,7 @@ public class ReviewGenerationPreprocessingService {
 			finalTokensMap.put(url, tokenCount);
 			accumulatedTokens += tokenCount;
 			try {
-				String domain = new URL(url).getHost();
+				String domain = URI.create(url).toURL().getHost();
 				status.addMessage("Analysing " + domain);
 			} catch (Exception e) {
 				status.addMessage("Analysing " + url);
