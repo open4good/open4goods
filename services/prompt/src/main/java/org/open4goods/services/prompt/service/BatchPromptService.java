@@ -23,6 +23,7 @@ import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
 import org.open4goods.services.prompt.dto.openai.BatchOutput;
 import org.open4goods.services.prompt.dto.openai.BatchRequestEntry;
 import org.open4goods.services.prompt.exceptions.BatchTokenLimitExceededException;
+import org.open4goods.services.prompt.exceptions.BatchJobFailedException;
 import org.open4goods.services.prompt.model.BatchJob;
 import org.open4goods.services.prompt.model.BatchJobStatus;
 import org.slf4j.Logger;
@@ -444,6 +445,13 @@ public class BatchPromptService implements HealthIndicator {
                         job.setStatus(BatchJobStatus.COMPLETED);
                         jobStore.save(job);
                         activeBatchJobs.remove(jobId);
+                    } else if ("failed".equalsIgnoreCase(batchStatus.status())
+                            || "expired".equalsIgnoreCase(batchStatus.status())
+                            || "cancelled".equalsIgnoreCase(batchStatus.status())) {
+                        job.setStatus(BatchJobStatus.FAILED);
+                        job.setErrorMessage(String.valueOf(batchStatus.errors()));
+                        jobStore.save(job);
+                        activeBatchJobs.remove(jobId);
                     } else if ("in_progress".equalsIgnoreCase(batchStatus.status())
                             || "running".equalsIgnoreCase(batchStatus.status())) {
                         job.setStatus(BatchJobStatus.RUNNING);
@@ -504,6 +512,14 @@ public class BatchPromptService implements HealthIndicator {
         BatchJobResponse batchStatus = openAiBatchClient.getBatchStatus(job.getRemoteJobId());
         logger.debug("Batch job {} status: {}", job.getRemoteJobId(), batchStatus.status());
         if (!"completed".equalsIgnoreCase(batchStatus.status())) {
+            if ("failed".equalsIgnoreCase(batchStatus.status())
+                    || "expired".equalsIgnoreCase(batchStatus.status())
+                    || "cancelled".equalsIgnoreCase(batchStatus.status())) {
+                job.setStatus(BatchJobStatus.FAILED);
+                job.setErrorMessage(String.valueOf(batchStatus.errors()));
+                jobStore.save(job);
+                throw new BatchJobFailedException("Batch job " + job.getRemoteJobId() + " failed with status " + batchStatus.status());
+            }
             throw new IllegalStateException("Batch job " + job.getRemoteJobId() + " is not completed yet");
         }
         job.setStatus(BatchJobStatus.COMPLETED);
@@ -543,6 +559,12 @@ public class BatchPromptService implements HealthIndicator {
         JsonNode status = vertexGeminiBatchClient.getJobStatus(job.getRemoteJobId());
         String state = status.path("state").asText();
         if (!"JOB_STATE_SUCCEEDED".equalsIgnoreCase(state)) {
+            if ("JOB_STATE_FAILED".equalsIgnoreCase(state) || "JOB_STATE_CANCELLED".equalsIgnoreCase(state)) {
+                job.setStatus(BatchJobStatus.FAILED);
+                job.setErrorMessage(status.path("error").path("message").asText());
+                jobStore.save(job);
+                throw new BatchJobFailedException("Vertex batch job " + job.getRemoteJobId() + " failed with state " + state);
+            }
             throw new IllegalStateException("Vertex batch job " + job.getRemoteJobId() + " is not completed yet");
         }
         job.setStatus(BatchJobStatus.COMPLETED);

@@ -157,6 +157,28 @@ public class ReviewGenerationController {
     }
 
     /**
+     * Trigger batch review generation for the next top impact score products.
+     *
+     * @param verticalId optional vertical identifier; when omitted, all enabled verticals are processed
+     * @param limit number of products to include in each batch
+     * @return list of batch job identifiers
+     * @throws IOException when batch submission fails
+     */
+    @PostMapping("/review/batch/impactscore")
+    @Operation(summary = "Schedule AI review generation for top impact score products",
+            description = "Launch a batch review generation job for the next top impact score products without existing AI reviews.")
+    public ResponseEntity<List<String>> generateImpactScoreBatch(
+            @RequestParam(value = "verticalId", required = false) String verticalId,
+            @RequestParam(value = "limit", defaultValue = "20") int limit) throws IOException {
+        if (verticalId != null && !verticalId.isBlank()) {
+            String jobId = reviewGenerationService.triggerNextTopImpactScoreBatch(verticalId, limit);
+            return ResponseEntity.ok(List.of(jobId));
+        }
+        List<String> jobIds = reviewGenerationService.triggerNextTopImpactScoreBatches(limit);
+        return ResponseEntity.ok(jobIds);
+    }
+
+    /**
      * Trigger batch result handling for a given job identifier.
      *
      * @param jobId the batch job identifier

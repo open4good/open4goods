@@ -1,9 +1,17 @@
 package org.open4goods.services.reviewgeneration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,10 +24,13 @@ import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.prompt.exceptions.BatchJobFailedException;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
+import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.boot.actuate.health.Status;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -37,6 +48,7 @@ class ReviewGenerationServiceTest {
     @Mock private BatchPromptService batchAiService;
     @Mock private ProductRepository productRepository;
     @Mock private ReviewGenerationPreprocessingService preprocessingService;
+    @Mock private VerticalsConfigService verticalsConfigService;
     private MeterRegistry meterRegistry;
 
     @BeforeEach
@@ -56,7 +68,8 @@ class ReviewGenerationServiceTest {
                 batchAiService,
                 meterRegistry,
                 productRepository,
-                preprocessingService
+                preprocessingService,
+                verticalsConfigService
         );
     }
 
@@ -208,5 +221,63 @@ class ReviewGenerationServiceTest {
         if (!status.getErrorMessage().contains("Missing required prompt variable")) {
             throw new RuntimeException("Expected error message to contain 'Missing required prompt variable', but got: " + status.getErrorMessage());
         }
+    }
+
+    @Test
+    void loadNextTopImpactScoreProducts_FiltersExistingReviews() {
+        Product withReview = new Product();
+        withReview.setId(1L);
+        Localisable<String, AiReviewHolder> reviews = new Localisable<>();
+        AiReviewHolder holder = new AiReviewHolder();
+        holder.setReview(new AiReview());
+        reviews.put("fr", holder);
+        withReview.setReviews(reviews);
+
+        Product withoutReview = new Product();
+        withoutReview.setId(2L);
+        withoutReview.setReviews(new Localisable<>());
+
+        when(productRepository.exportVerticalWithValidDateOrderByImpactScore(eq("tv"), anyInt(), eq(false)))
+                .thenReturn(Stream.of(withReview, withoutReview));
+
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
+        verticalConfig.setId("tv");
+
+        List<Product> results = ReflectionTestUtils.invokeMethod(
+                reviewGenerationService,
+                "loadNextTopImpactScoreProducts",
+                verticalConfig,
+                1
+        );
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getId()).isEqualTo(2L);
+    }
+
+    @Test
+    void handleTrackingFile_MarksFailureWhenBatchJobFails() throws Exception {
+        Path trackingDir = Path.of(properties.getBatchFolder(), "tracking");
+        Files.createDirectories(trackingDir);
+        Path trackingFile = trackingDir.resolve("tracking_test.json");
+        Map<String, Object> trackingInfo = Map.of(
+                "jobId", "job-123",
+                "productIds", List.of("10", "11"),
+                "gtins", List.of("gtin-10", "gtin-11"),
+                "verticalId", "tv",
+                "createdAt", Instant.now().toEpochMilli()
+        );
+        Files.writeString(trackingFile, new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(trackingInfo));
+
+        when(batchAiService.batchPromptResponse("job-123"))
+                .thenThrow(new BatchJobFailedException("provider failure"));
+
+        ReflectionTestUtils.invokeMethod(reviewGenerationService, "handleTrackingFile", trackingFile.toFile());
+
+        assertThat(reviewGenerationService.getProcessStatus(10L).getStatus())
+                .isEqualTo(org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED);
+        assertThat(reviewGenerationService.getProcessStatus(11L).getStatus())
+                .isEqualTo(org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED);
+        assertThat(reviewGenerationService.health().getStatus()).isEqualTo(Status.DOWN);
+        assertThat(Files.exists(trackingFile)).isFalse();
     }
 }

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.stream.Stream;
 
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.Attribute;
@@ -41,11 +43,13 @@ import org.open4goods.services.prompt.config.PromptConfig;
 import org.open4goods.services.prompt.config.RetrievalMode;
 import org.open4goods.services.prompt.dto.BatchResultItem;
 import org.open4goods.services.prompt.dto.PromptResponse;
+import org.open4goods.services.prompt.exceptions.BatchJobFailedException;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.prompt.service.provider.ProviderEvent;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.converter.BeanOutputConverter;
@@ -94,6 +98,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	private final MeterRegistry meterRegistry;
 	private final ProductRepository productRepository;
 	private final ReviewGenerationPreprocessingService preprocessingService;
+    private final VerticalsConfigService verticalsConfigService;
 
 	// Thread pool executors.
 	private final ThreadPoolExecutor executorService;
@@ -112,6 +117,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	private final ObjectMapper objectMapper;
 	private static final String AI_SOURCE_NAME = "AI";
 	private static final String CITATIONS_METADATA_KEY = "citations";
+    private static final int DEFAULT_SELECTION_MULTIPLIER = 5;
 
 	private final BeanOutputConverter<AiReview> outputConverter;
 
@@ -126,16 +132,19 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param meterRegistry       the actuator MeterRegistry.
 	 * @param productRepository   the product repository service.
 	 * @param preprocessingService the preprocessing service.
+     * @param verticalsConfigService the verticals configuration service.
 	 */
 	public ReviewGenerationService(ReviewGenerationConfig properties, GoogleSearchService googleSearchService,
 			UrlFetchingService urlFetchingService, PromptService genAiService, BatchPromptService batchAiService,
-			MeterRegistry meterRegistry, ProductRepository productRepository, ReviewGenerationPreprocessingService preprocessingService) {
+			MeterRegistry meterRegistry, ProductRepository productRepository, ReviewGenerationPreprocessingService preprocessingService,
+            VerticalsConfigService verticalsConfigService) {
 		this.properties = properties;
 		this.genAiService = genAiService;
 		this.batchAiService = batchAiService;
 		this.meterRegistry = meterRegistry;
 		this.productRepository = productRepository;
 		this.preprocessingService = preprocessingService;
+        this.verticalsConfigService = verticalsConfigService;
 		this.executorService = new ThreadPoolExecutor(properties.getThreadPoolSize(), properties.getThreadPoolSize(),
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
 				new ThreadPoolExecutor.AbortPolicy());
@@ -375,6 +384,109 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	// -------------------- Batch Review Generation Methods -------------------- //
 
+    /**
+     * Scheduled batch trigger that runs every morning at 6 AM.
+     */
+    @Scheduled(cron = "${review.generation.batch-schedule-cron:0 0 6 * * *}")
+    public void scheduleDailyBatchReviewGeneration()
+    {
+        triggerNextTopImpactScoreBatches(properties.getBatchScheduleSize());
+    }
+
+    /**
+     * Trigger next-top impact score batch generation for all enabled verticals.
+     *
+     * @param limit number of products to include per vertical
+     * @return list of batch job identifiers
+     */
+    public List<String> triggerNextTopImpactScoreBatches(int limit)
+    {
+        int effectiveLimit = Math.max(limit, 1);
+        List<String> jobIds = new ArrayList<>();
+        for (VerticalConfig verticalConfig : verticalsConfigService.getConfigsWithoutDefault(true)) {
+            try {
+                String jobId = generateNextTopImpactScoreBatch(verticalConfig, effectiveLimit);
+                if (!"NoBatchJob".equals(jobId)) {
+                    jobIds.add(jobId);
+                }
+            } catch (Exception e) {
+                lastGenerationFailed = true;
+                logger.error("Failed to schedule batch review generation for vertical {}: {}",
+                        verticalConfig.getId(), e.getMessage(), e);
+            }
+        }
+        return jobIds;
+    }
+
+    /**
+     * Trigger next-top impact score batch generation for a specific vertical.
+     *
+     * @param verticalId vertical identifier
+     * @param limit number of products to include
+     * @return batch job identifier
+     * @throws IOException when batch submission fails
+     */
+    public String triggerNextTopImpactScoreBatch(String verticalId, int limit) throws IOException
+    {
+        Objects.requireNonNull(verticalId, "verticalId is required");
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(verticalId);
+        return generateNextTopImpactScoreBatch(verticalConfig, limit);
+    }
+
+    /**
+     * Build and submit a batch job for the next top impact score products.
+     *
+     * @param verticalConfig vertical configuration
+     * @param limit number of products to include
+     * @return batch job identifier
+     * @throws IOException when batch submission fails
+     */
+    public String generateNextTopImpactScoreBatch(VerticalConfig verticalConfig, int limit) throws IOException
+    {
+        Objects.requireNonNull(verticalConfig, "verticalConfig is required");
+        int effectiveLimit = Math.max(limit, 1);
+        List<Product> products = loadNextTopImpactScoreProducts(verticalConfig, effectiveLimit);
+        if (products.isEmpty()) {
+            logger.info("No eligible products found for impact score batch in vertical {}", verticalConfig.getId());
+            return "NoBatchJob";
+        }
+        return generateReviewBatchRequest(products, verticalConfig);
+    }
+
+    private List<Product> loadNextTopImpactScoreProducts(VerticalConfig verticalConfig, int limit)
+    {
+        int selectionLimit = Math.max(limit * DEFAULT_SELECTION_MULTIPLIER, limit);
+        try (Stream<Product> productStream =
+                productRepository.exportVerticalWithValidDateOrderByImpactScore(verticalConfig.getId(), selectionLimit, false)) {
+            return productStream
+                    .filter(this::isMissingAiReview)
+                    .filter(product -> !isActiveForBatch(product))
+                    .limit(limit)
+                    .toList();
+        }
+    }
+
+    private boolean isMissingAiReview(Product product)
+    {
+        if (product == null || product.getReviews() == null) {
+            return true;
+        }
+        AiReviewHolder holder = product.getReviews().i18n("fr");
+        return holder == null || holder.getReview() == null;
+    }
+
+    private boolean isActiveForBatch(Product product)
+    {
+        if (product == null) {
+            return false;
+        }
+        ReviewGenerationStatus status = processStatusMap.get(product.getId());
+        if (status != null && status.getStatus() != Status.SUCCESS && status.getStatus() != Status.FAILED) {
+            return true;
+        }
+        return isActiveForGtin(product.gtin());
+    }
+
 
 	/**
 	 * Adds resources (images, PDFs, videos) from the AI review to the product.
@@ -547,7 +659,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * the corresponding product review. Finally, the tracking file is deleted.
 	 * </p>
 	 */
-	@Scheduled(fixedDelayString = "${review.generation.batch-poll-interval:PT5M}")
+	@Scheduled(fixedDelayString = "${review.generation.batch-poll-interval:PT1H}")
 	public void checkBatchJobStatuses() {
 		File[] trackingFiles = trackingFolder
 				.listFiles((dir, name) -> name.startsWith("tracking_") && name.endsWith(".json"));
@@ -565,10 +677,13 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param file the tracking file to process.
 	 */
 	private void handleTrackingFile(File file) {
+        Map<String, Object> trackingInfo = null;
+        String jobId = null;
 		try {
 			@SuppressWarnings("unchecked")
-			Map<String, Object> trackingInfo = objectMapper.readValue(file, Map.class);
-			String jobId = (String) trackingInfo.get("jobId");
+			Map<String, Object> parsedInfo = objectMapper.readValue(file, Map.class);
+            trackingInfo = parsedInfo;
+			jobId = (String) trackingInfo.get("jobId");
 			@SuppressWarnings("unchecked")
 			// Retrieve batch results; this method throws if the job is not yet complete.
 			PromptResponse<List<BatchResultItem>> response = batchAiService.batchPromptResponse(jobId);
@@ -577,10 +692,43 @@ public class ReviewGenerationService implements HealthIndicator {
 				// Delete the tracking file after processing.
 				Files.deleteIfExists(file.toPath());
 			}
+		} catch (BatchJobFailedException e) {
+            if (trackingInfo != null && jobId != null) {
+                handleBatchFailure(jobId, trackingInfo, e.getMessage());
+                deleteTrackingFile(file, jobId);
+            }
+            logger.error("Batch job {} failed for tracking file {}: {}", jobId, file.getName(), e.getMessage(), e);
 		} catch (Exception e) {
 			logger.error("Error processing tracking file {}: {}", file.getName(), e.getMessage(), e);
 		}
 	}
+
+    private void handleBatchFailure(String jobId, Map<String, Object> trackingInfo, String errorMessage)
+    {
+        Object productIds = trackingInfo.get("productIds");
+        if (productIds instanceof List<?> list) {
+            for (Object productId : list) {
+                if (productId == null) {
+                    continue;
+                }
+                try {
+                    updateBatchStatus(Long.parseLong(productId.toString()), ReviewGenerationStatus.Status.FAILED, errorMessage);
+                } catch (NumberFormatException e) {
+                    logger.warn("Invalid product id in tracking file for job {}: {}", jobId, productId);
+                }
+            }
+        }
+        lastGenerationFailed = true;
+    }
+
+    private void deleteTrackingFile(File file, String jobId)
+    {
+        try {
+            Files.deleteIfExists(file.toPath());
+        } catch (IOException e) {
+            logger.warn("Failed to delete tracking file for job {}: {}", jobId, e.getMessage());
+        }
+    }
 
 	public void triggerResponseHandling(String jobId) throws ResourceNotFoundException, IOException {
 
