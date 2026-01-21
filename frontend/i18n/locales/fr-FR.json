@@ -2900,6 +2900,7 @@
       "items": {
         "blog": "Blog",
         "contact": "Plus",
+        "community": "Curieux ?",
         "impactScore": "Impact Score",
         "products": "Les produits"
       },
@@ -2996,7 +2997,12 @@
         "submitLabel": "Lancer la recherche"
       },
       "community": {
+        "headerTitle": "aller plus loin",
         "tagline": "Nudger est une aventure collective",
+        "cta": {
+          "title": "Passer à l'action",
+          "description": "Partagez vos retours ou contactez-nous directement."
+        },
         "sections": {
           "connect": {
             "title": "Rester en lien",

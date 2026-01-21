@@ -136,6 +136,16 @@ export const useCommunityMenu = (
 
     return [
       {
+        id: 'resources',
+        title: String(
+          t('siteIdentity.menu.community.sections.resources.title')
+        ),
+        description: String(
+          t('siteIdentity.menu.community.sections.resources.description')
+        ),
+        links: [openDataLink, openSourceLink],
+      },
+      {
         id: 'connect',
         title: String(t('siteIdentity.menu.community.sections.connect.title')),
         description: String(
@@ -152,16 +162,6 @@ export const useCommunityMenu = (
           t('siteIdentity.menu.community.sections.collaborate.description')
         ),
         links: [teamLink, partnersLink],
-      },
-      {
-        id: 'resources',
-        title: String(
-          t('siteIdentity.menu.community.sections.resources.title')
-        ),
-        description: String(
-          t('siteIdentity.menu.community.sections.resources.description')
-        ),
-        links: [openDataLink, openSourceLink],
       },
     ]
   })
