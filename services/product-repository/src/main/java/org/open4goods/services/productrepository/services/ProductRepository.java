@@ -559,9 +559,9 @@ public class ProductRepository {
         }
 
         criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
-        
+
         // Filter products that DON'T have a review in the specified locale
-        criteria = criteria.and(new Criteria("reviews." + locale + ".review").exists().not());
+    //    criteria = criteria.and(new Criteria("reviews." + locale + ".review").exists().not());
 
         SortOptions impactScoreSort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()

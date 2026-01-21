@@ -447,7 +447,7 @@ public class ReviewGenerationService implements HealthIndicator {
         int effectiveLimit = Math.max(limit, 1);
         List<Product> products = loadNextTopImpactScoreProducts(verticalConfig, effectiveLimit);
         if (products.isEmpty()) {
-            logger.info("No eligible products found for impact score batch in vertical {}", verticalConfig.getId());
+            logger.warn("No eligible products found for impact score batch in vertical {}", verticalConfig.getId());
             return "NoBatchJob";
         }
         return generateReviewBatchRequest(products, verticalConfig);

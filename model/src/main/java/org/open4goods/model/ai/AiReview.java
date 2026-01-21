@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * data quality assessment, and sourced information.
  */
 @Schema(description = "Represents an AI-generated review of a product, including descriptions, pros and cons, data quality assessment, and sourced information.")
+// TODO : Could we convert to record ?
 public class AiReview {
 
     public AiReview(String description, String technicalOneline, String ecologicalOneline, String communityOneline, String shortDescription, String mediumTitle, String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros, List<String> cons, List<AiSource> sources, List<AiAttribute> attributes, String dataQuality, List<AiRating> ratings, List<String> pdfs, List<String> images, List<String> videos, List<String> socialLinks) {
@@ -77,7 +78,7 @@ public class AiReview {
 
     /** A brief summary of the product. */
     @JsonProperty(required = true, value = "short_description")
-    @AiGeneratedField(instruction = "Description générale du produit, bilan objectif performances et impact environnemental")
+    @AiGeneratedField(instruction = "Deux ou trois phrases dur la description générale du produit, un bilan objectif de ses performances, de son impact environnemental et des retours utilisateurs et / ou sites spécialisés")
     @Schema(description = "Brief summary of the product")
     private String shortDescription;
 
@@ -95,13 +96,13 @@ public class AiReview {
 
     /** The technical review of the product. */
     @JsonProperty(required = true, value = "technicalReview")
-    @AiGeneratedField(instruction = "Revue technique approfondie du produit, axée sur les performances et les matériaux, uniquement basée sur le contenu des pages webs fournies.")
+    @AiGeneratedField(instruction = "Revue technique approfondie du produit, axée sur les performances et la qualité.")
     @Schema(description = "Technical review of the product")
     private String technicalReview;
 
     /** The ecological review of the product. */
     @JsonProperty(required = true, value = "ecologicalReview")
-    @AiGeneratedField(instruction = "Revue écologique du produit, incluant réparabilité, durabilité, efficacité énergétique")
+    @AiGeneratedField(instruction = "Revue écologique du produit, incluant réparabilité, durabilité, efficacité énergétique et toutes informations contenues dans les sources ou dans les scores fournis permettant d'orienter le jugement. ")
     @Schema(description = "Ecological review of the product")
     private String ecologicalReview;
 
@@ -138,7 +139,7 @@ public class AiReview {
 
     /** The quality of data used for the review. */
     @JsonProperty(required = true, value = "dataQuality")
-    @AiGeneratedField(instruction = "Analyse de la qualité et de la richesse des contenus externes  webs qui te sont fournis")
+    @AiGeneratedField(instruction = "Analyse de la qualité et de la richesse des contenus, références, évaluations externes qui te sont fournis")
     @Schema(description = "Quality of external data used for the review")
     private String dataQuality;
 

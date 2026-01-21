@@ -22,6 +22,7 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
+import org.open4goods.services.googlesearch.exception.GoogleSearchException;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.exceptions.BatchJobFailedException;
@@ -63,7 +64,7 @@ class ReviewGenerationServiceTest {
         reviewGenerationService = new ReviewGenerationService(
                 properties,
                 googleSearchService,
-                urlFetchingService,
+                (org.open4goods.services.urlfetching.service.UrlFetchingService) urlFetchingService,
                 genAiService,
                 batchAiService,
                 meterRegistry,

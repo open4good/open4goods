@@ -63,8 +63,12 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			Score score = scores.get(config);
 
 			if (null == score) {
-				dedicatedLogger.warn("EcoScore rating cannot proceed, missing subscore : {}", config);
-				return null;
+				Double weight = Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
+				if (weight > 0.0) {
+					dedicatedLogger.warn("EcoScore rating cannot proceed, missing subscore with positive weight : {}", config);
+					return null;
+				}
+				continue;
 			}
 
 			Double value = resolveRelativeValue(config, score);

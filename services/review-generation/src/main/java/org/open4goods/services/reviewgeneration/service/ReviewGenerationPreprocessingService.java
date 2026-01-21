@@ -1,6 +1,7 @@
 package org.open4goods.services.reviewgeneration.service;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.serialisation.exception.SerialisationException;
+import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.slf4j.Logger;
@@ -46,14 +48,17 @@ public class ReviewGenerationPreprocessingService {
 	private final GoogleSearchService googleSearchService;
 	private final UrlFetchingService urlFetchingService;
 	private final PromptService genAiService;
+	private final SerialisationService serialisationService;
 	private final ThreadPoolExecutor fetchExecutor;
 
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
-			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService) {
+			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
+			SerialisationService serialisationService) {
 		this.properties = properties;
 		this.googleSearchService = googleSearchService;
 		this.urlFetchingService = urlFetchingService;
 		this.genAiService = genAiService;
+		this.serialisationService = serialisationService;
 		this.fetchExecutor = new ThreadPoolExecutor(properties.getMaxConcurrentFetch(), properties.getMaxQueueSize(),
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize() * 10),
 				new ThreadPoolExecutor.AbortPolicy());
@@ -137,7 +142,7 @@ public class ReviewGenerationPreprocessingService {
 				.filter(r -> r.link() != null && !r.link().isEmpty()).filter(r -> !r.link().endsWith(".pdf"))
 				.filter(distinctByKey(r -> {
 					try {
-						return new URL(r.link()).getHost();
+						return URI.create(r.link()).toURL().getHost();
 					} catch (Exception e) {
 						return r.link();
 					}
@@ -278,6 +283,21 @@ public class ReviewGenerationPreprocessingService {
 			offerNamesStr = String.join("\n", product.getOfferNames());
 		}
 		promptVariables.put("OFFER_NAMES", offerNamesStr);
+		
+		// Inject Ecoscore and Scores as JSON
+		try {
+			promptVariables.put("PRODUCT_ECOSCORE_JSON", serialisationService.toJson(product.ecoscore()));
+			
+			List<String> criteriaKeys = verticalConfig.getAvailableImpactScoreCriterias();
+			Map<String, org.open4goods.model.product.Score> filteredScores = product.getScores().entrySet().stream()
+					.filter(entry -> criteriaKeys.contains(entry.getKey()))
+					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+			promptVariables.put("PRODUCT_SCORES_JSON", serialisationService.toJson(filteredScores));
+		} catch (Exception e) {
+			logger.error("Error serializing product scores for UPC {}: {}", product.getId(), e.getMessage());
+			promptVariables.put("PRODUCT_ECOSCORE_JSON", "{}");
+			promptVariables.put("PRODUCT_SCORES_JSON", "{}");
+		}
 
 		return promptVariables;
 	}
