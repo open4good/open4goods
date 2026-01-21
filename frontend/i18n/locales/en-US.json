@@ -2884,6 +2884,7 @@
       "items": {
         "blog": "Blog",
         "contact": "Community",
+        "community": "Curious?",
         "impactScore": "Impact Score",
         "products": "Products"
       },
@@ -2980,7 +2981,12 @@
         "submitLabel": "Search"
       },
       "community": {
+        "headerTitle": "Go further",
         "tagline": "Connect with the people and open resources behind Nudger.",
+        "cta": {
+          "title": "Take action",
+          "description": "Share feedback or reach out to the team."
+        },
         "sections": {
           "connect": {
             "title": "Stay in touch",
