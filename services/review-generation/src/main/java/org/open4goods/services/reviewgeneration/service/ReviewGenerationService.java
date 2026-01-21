@@ -338,7 +338,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
 				// Post-process to resolve URLs (handling redirects)
 				newReview = postProcess30x(newReview);
-				
+
 				// Populate attributes and resources
 				populateAttributes(product, newReview);
 				addResources(product, newReview);
@@ -456,24 +456,16 @@ public class ReviewGenerationService implements HealthIndicator {
     private List<Product> loadNextTopImpactScoreProducts(VerticalConfig verticalConfig, int limit)
     {
         int selectionLimit = Math.max(limit * DEFAULT_SELECTION_MULTIPLIER, limit);
+
         try (Stream<Product> productStream =
-                productRepository.exportVerticalWithValidDateOrderByImpactScore(verticalConfig.getId(), selectionLimit, false)) {
+                productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(verticalConfig.getId(), "fr", selectionLimit, false)) {
             return productStream
-                    .filter(this::isMissingAiReview)
                     .filter(product -> !isActiveForBatch(product))
                     .limit(limit)
                     .toList();
         }
     }
 
-    private boolean isMissingAiReview(Product product)
-    {
-        if (product == null || product.getReviews() == null) {
-            return true;
-        }
-        AiReviewHolder holder = product.getReviews().i18n("fr");
-        return holder == null || holder.getReview() == null;
-    }
 
     private boolean isActiveForBatch(Product product)
     {
@@ -491,7 +483,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	/**
 	 * Adds resources (images, PDFs, videos) from the AI review to the product.
 	 * Only valid and reachable resources are added.
-	 * 
+	 *
 	 * @param product the product to update
 	 * @param newReview the AI generated review containing potential resources
 	 */
@@ -512,7 +504,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	/**
 	 * Safely adds a resource url to the product, catching validation exceptions.
-	 * 
+	 *
 	 * @param product the product
 	 * @param url the resource url
 	 */
@@ -527,7 +519,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	/**
 	 * Filters a list of URLs, retaining only those that are valid and reachable.
-	 * 
+	 *
 	 * @param urls list of URLs to check
 	 * @param typeStr description of the resource type for logging
 	 * @return list of valid URLs
@@ -816,13 +808,13 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * Extract attributes from the gen ai response and populate the AiReview object.
 	 *
 	 * @param product the product to update
-	 * @param newReview the new AI review
+	 * @param review the new AI review
 	 */
-	private void populateAttributes(Product product, AiReview newReview) {
+	private void populateAttributes(Product product, AiReview review) {
 		// Handling attributes
 		String providerName = determineProviderName();
 
-		newReview.getAttributes().stream().forEach(a -> {
+		review.getAttributes().stream().forEach(a -> {
 
 			ProductAttribute agg = product.getAttributes().getAll().get(a.getName());
 			if (null == agg) {
@@ -858,7 +850,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
 		ret = updateAiReviewReferences(ret);
 		ret = normalizeReviewText(ret);
-		
+
 		// Post-process to resolve URLs
 		ret = postProcess30x(ret);
 
@@ -953,7 +945,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	/**
 	 * Resolves a URL by following redirects (up to a limit).
-	 * 
+	 *
 	 * @param urlString the URL to resolve
 	 * @return the final URL after following redirects, or the original if no redirect or error
 	 */
@@ -961,11 +953,11 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (urlString == null || urlString.isBlank()) {
 			return urlString;
 		}
-		
+
 		String currentUrl = urlString;
 		int maxRedirects = 5;
 		int redirects = 0;
-		
+
 		try {
 			while (redirects < maxRedirects) {
 				URL url = URI.create(currentUrl).toURL();
@@ -974,13 +966,13 @@ public class ReviewGenerationService implements HealthIndicator {
 				connection.setRequestMethod("HEAD");
 				connection.setConnectTimeout(5000);
 				connection.setReadTimeout(5000);
-				
+
 				// User Agent to avoid being blocked by some servers
 				connection.setRequestProperty("User-Agent",
 						"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
 
 				int status = connection.getResponseCode();
-				
+
 				if (status >= 300 && status < 400) {
 					String location = connection.getHeaderField("Location");
 					if (location != null && !location.isBlank()) {
@@ -988,7 +980,7 @@ public class ReviewGenerationService implements HealthIndicator {
 						URI baseUri = url.toURI();
 						URI resolvedUri = baseUri.resolve(location);
 						String nextUrl = resolvedUri.toString();
-						
+
 						logger.debug("Redirecting {} -> {}", currentUrl, nextUrl);
 						currentUrl = nextUrl;
 						redirects++;
@@ -1002,13 +994,13 @@ public class ReviewGenerationService implements HealthIndicator {
 					break;
 				}
 			}
-			
+
 			if (redirects >= maxRedirects) {
 				logger.warn("Too many redirects for URL: {}", urlString);
 			}
-			
+
 			return currentUrl;
-			
+
 		} catch (Exception e) {
 			logger.warn("Failed to resolve URL {}: {}", urlString, e.getMessage());
 			return urlString; // Return original if failure

@@ -331,9 +331,7 @@
                         <v-icon icon="mdi-account-group" color="primary" />
                       </v-avatar>
                       <div>
-                        <p class="community-menu__title">
-                          {{ communityHeaderTitle }}
-                        </p>
+                        <p class="community-menu__title">{{ item.label }}</p>
                         <p class="community-menu__subtitle">
                           {{ t('siteIdentity.menu.community.tagline') }}
                         </p>
@@ -342,237 +340,81 @@
 
                     <v-divider class="community-menu__divider" />
 
-                    <v-row class="community-menu__sections" align="stretch">
-                      <v-col cols="12" sm="6" class="community-menu__section">
-                        <template v-if="communitySectionsById.resources">
-                          <p class="community-menu__section-title">
-                            {{ communitySectionsById.resources.title }}
-                          </p>
-                          <p class="community-menu__section-description">
-                            {{ communitySectionsById.resources.description }}
-                          </p>
-
-                          <v-list
-                            class="community-menu__section-list"
-                            bg-color="transparent"
-                            density="comfortable"
-                            nav
-                            lines="one"
-                          >
-                            <v-list-item
-                              v-for="link in communitySectionsById.resources
-                                .links"
-                              :key="link.id"
-                              class="community-menu__link"
-                              :class="{
-                                'community-menu__link--external': link.external,
-                              }"
-                              :to="link.to"
-                              :href="link.href"
-                              :target="link.external ? '_blank' : undefined"
-                              :rel="
-                                link.external ? 'noopener noreferrer' : undefined
-                              "
-                              role="menuitem"
-                            >
-                              <template #prepend>
-                                <v-avatar
-                                  size="34"
-                                  class="community-menu__link-icon"
-                                >
-                                  <v-icon
-                                    :icon="link.icon"
-                                    size="20"
-                                    color="accent-primary-highlight"
-                                  />
-                                </v-avatar>
-                              </template>
-
-                              <v-list-item-title
-                                class="community-menu__link-label"
-                              >
-                                {{ link.label }}
-                              </v-list-item-title>
-                              <v-list-item-subtitle
-                                v-if="link.description"
-                                class="community-menu__link-description"
-                              >
-                                {{ link.description }}
-                              </v-list-item-subtitle>
-
-                              <template v-if="link.external" #append>
-                                <v-icon
-                                  icon="mdi-open-in-new"
-                                  size="18"
-                                  class="community-menu__external-icon"
-                                />
-                              </template>
-                            </v-list-item>
-                          </v-list>
-                        </template>
-                      </v-col>
-
-                      <v-col cols="12" sm="6" class="community-menu__section">
-                        <template v-if="communitySectionsById.connect">
-                          <p class="community-menu__section-title">
-                            {{ communitySectionsById.connect.title }}
-                          </p>
-                          <p class="community-menu__section-description">
-                            {{ communitySectionsById.connect.description }}
-                          </p>
-
-                          <v-list
-                            class="community-menu__section-list"
-                            bg-color="transparent"
-                            density="comfortable"
-                            nav
-                            lines="one"
-                          >
-                            <v-list-item
-                              v-for="link in communitySectionsById.connect
-                                .links"
-                              :key="link.id"
-                              class="community-menu__link"
-                              :class="{
-                                'community-menu__link--external': link.external,
-                              }"
-                              :to="link.to"
-                              :href="link.href"
-                              :target="link.external ? '_blank' : undefined"
-                              :rel="
-                                link.external ? 'noopener noreferrer' : undefined
-                              "
-                              role="menuitem"
-                            >
-                              <template #prepend>
-                                <v-avatar
-                                  size="34"
-                                  class="community-menu__link-icon"
-                                >
-                                  <v-icon
-                                    :icon="link.icon"
-                                    size="20"
-                                    color="accent-primary-highlight"
-                                  />
-                                </v-avatar>
-                              </template>
-
-                              <v-list-item-title
-                                class="community-menu__link-label"
-                              >
-                                {{ link.label }}
-                              </v-list-item-title>
-                              <v-list-item-subtitle
-                                v-if="link.description"
-                                class="community-menu__link-description"
-                              >
-                                {{ link.description }}
-                              </v-list-item-subtitle>
-
-                              <template v-if="link.external" #append>
-                                <v-icon
-                                  icon="mdi-open-in-new"
-                                  size="18"
-                                  class="community-menu__external-icon"
-                                />
-                              </template>
-                            </v-list-item>
-                          </v-list>
-                        </template>
-                      </v-col>
-
-                      <v-col cols="12" sm="6" class="community-menu__section">
-                        <template v-if="communitySectionsById.collaborate">
-                          <p class="community-menu__section-title">
-                            {{ communitySectionsById.collaborate.title }}
-                          </p>
-                          <p class="community-menu__section-description">
-                            {{ communitySectionsById.collaborate.description }}
-                          </p>
-
-                          <v-list
-                            class="community-menu__section-list"
-                            bg-color="transparent"
-                            density="comfortable"
-                            nav
-                            lines="one"
-                          >
-                            <v-list-item
-                              v-for="link in communitySectionsById.collaborate
-                                .links"
-                              :key="link.id"
-                              class="community-menu__link"
-                              :class="{
-                                'community-menu__link--external': link.external,
-                              }"
-                              :to="link.to"
-                              :href="link.href"
-                              :target="link.external ? '_blank' : undefined"
-                              :rel="
-                                link.external ? 'noopener noreferrer' : undefined
-                              "
-                              role="menuitem"
-                            >
-                              <template #prepend>
-                                <v-avatar
-                                  size="34"
-                                  class="community-menu__link-icon"
-                                >
-                                  <v-icon
-                                    :icon="link.icon"
-                                    size="20"
-                                    color="accent-primary-highlight"
-                                  />
-                                </v-avatar>
-                              </template>
-
-                              <v-list-item-title
-                                class="community-menu__link-label"
-                              >
-                                {{ link.label }}
-                              </v-list-item-title>
-                              <v-list-item-subtitle
-                                v-if="link.description"
-                                class="community-menu__link-description"
-                              >
-                                {{ link.description }}
-                              </v-list-item-subtitle>
-
-                              <template v-if="link.external" #append>
-                                <v-icon
-                                  icon="mdi-open-in-new"
-                                  size="18"
-                                  class="community-menu__external-icon"
-                                />
-                              </template>
-                            </v-list-item>
-                          </v-list>
-                        </template>
-                      </v-col>
-
+                    <v-row
+                      class="community-menu__sections"
+                      justify="space-between"
+                      align="stretch"
+                    >
                       <v-col
+                        v-for="section in item.sections"
+                        :key="section.id"
                         cols="12"
-                        sm="6"
-                        class="community-menu__section community-menu__cta"
+                        sm="5"
+                        class="community-menu__section"
                       >
                         <p class="community-menu__section-title">
-                          {{ communityCtaTitle }}
+                          {{ section.title }}
                         </p>
                         <p class="community-menu__section-description">
-                          {{ communityCtaDescription }}
+                          {{ section.description }}
                         </p>
-                        <div class="community-menu__cta-actions">
-                          <v-btn
-                            v-for="link in communityCtaLinks"
+
+                        <v-list
+                          class="community-menu__section-list"
+                          bg-color="transparent"
+                          density="comfortable"
+                          nav
+                          lines="one"
+                        >
+                          <v-list-item
+                            v-for="link in section.links"
                             :key="link.id"
-                            color="primary"
-                            variant="flat"
-                            class="community-menu__cta-action"
-                            @click="navigateToPage(link.to ?? '/')"
+                            class="community-menu__link"
+                            :class="{
+                              'community-menu__link--external': link.external,
+                            }"
+                            :to="link.to"
+                            :href="link.href"
+                            :target="link.external ? '_blank' : undefined"
+                            :rel="
+                              link.external ? 'noopener noreferrer' : undefined
+                            "
+                            role="menuitem"
                           >
-                            {{ link.label }}
-                          </v-btn>
-                        </div>
+                            <template #prepend>
+                              <v-avatar
+                                size="34"
+                                class="community-menu__link-icon"
+                              >
+                                <v-icon
+                                  :icon="link.icon"
+                                  size="20"
+                                  color="accent-primary-highlight"
+                                />
+                              </v-avatar>
+                            </template>
+
+                            <v-list-item-title
+                              class="community-menu__link-label"
+                            >
+                              {{ link.label }}
+                            </v-list-item-title>
+                            <v-list-item-subtitle
+                              v-if="link.description"
+                              class="community-menu__link-description"
+                            >
+                              {{ link.description }}
+                            </v-list-item-subtitle>
+
+                            <template v-if="link.external" #append>
+                              <v-icon
+                                icon="mdi-open-in-new"
+                                size="18"
+                                class="community-menu__external-icon"
+                              />
+                            </template>
+                          </v-list-item>
+                        </v-list>
                       </v-col>
                     </v-row>
                   </v-card>
@@ -1404,38 +1246,6 @@ interface CommunityMenuItem {
 type MenuItem = LinkMenuItem | CommunityMenuItem | ProductsMenuItem
 const { sections: communitySections, activePaths: communityActivePaths } =
   useCommunityMenu(t, currentLocale)
-const communitySectionsById = computed(() => {
-  const byId: Record<string, CommunitySection | undefined> = {}
-
-  communitySections.value.forEach(section => {
-    byId[section.id] = section
-  })
-
-  return {
-    connect: byId.connect,
-    collaborate: byId.collaborate,
-    resources: byId.resources,
-  }
-})
-const communityCtaTitle = computed(() =>
-  t('siteIdentity.menu.community.cta.title')
-)
-const communityCtaDescription = computed(() =>
-  t('siteIdentity.menu.community.cta.description')
-)
-const communityHeaderTitle = computed(() =>
-  t('siteIdentity.menu.community.headerTitle')
-)
-const communityCtaLinks = computed(() => {
-  const connect = communitySectionsById.value.connect
-  if (!connect) {
-    return []
-  }
-
-  return connect.links.filter(link =>
-    ['feedback', 'contact'].includes(link.id)
-  )
-})
 
 const baseMenuItems: MenuItemDefinition[] = [
   {
@@ -1459,7 +1269,7 @@ const baseMenuItems: MenuItemDefinition[] = [
   {
     id: 'community',
     type: 'community',
-    labelKey: 'siteIdentity.menu.items.community',
+    labelKey: 'siteIdentity.menu.items.contact',
   },
 ]
 
@@ -1669,23 +1479,6 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     padding: 0
     background: transparent
 
-  &__cta
-    background: rgba(var(--v-theme-surface-glass-strong), 0.8)
-    border-radius: 1rem
-    padding: 0.75rem
-    display: flex
-    flex-direction: column
-    gap: 0.75rem
-
-  &__cta-actions
-    display: flex
-    flex-wrap: wrap
-    gap: 0.75rem
-
-  &__cta-action
-    text-transform: none
-    box-shadow: 0 10px 24px rgba(var(--v-theme-shadow-primary-600), 0.18)
-
   &__link
     border-radius: 0.75rem
     transition: background-color 0.2s ease, transform 0.2s ease
@@ -1774,6 +1567,7 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     border-radius: 1rem
     text-decoration: none
     background: rgba(var(--v-theme-surface-primary-080), 0.85)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
     color: rgb(var(--v-theme-text-neutral-strong))
     transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease
 
@@ -1813,6 +1607,7 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     padding: 0.75rem
     border-radius: 1rem
     background: rgba(var(--v-theme-surface-primary-080), 0.5)
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2)
 
   &__taxonomy-label
     margin: 0 0 0.35rem
@@ -1851,6 +1646,7 @@ const isMenuItemActive = (item: MenuItem): boolean => {
     margin-top: 0.75rem
     padding: 0.85rem
     border-radius: 1rem
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18)
     background: rgba(var(--v-theme-surface-primary-080), 0.65)
     display: flex
     flex-direction: column

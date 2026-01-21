@@ -61,7 +61,7 @@ public class Product implements Standardisable {
 	 * Name of the ecoscore
 	 */
 	private static final String ECOSCORE_NAME = "ECOSCORE";
-	private static final int GTIN_PAD_LENGTH = Integer.getInteger("open4goods.product.gtin.pad-length", 14);
+	private static final int GTIN_PAD_LENGTH = Integer.getInteger("open4goods.product.gtin.pad-length", 0);
 	private static final int MODEL_MIN_LENGTH = Integer.getInteger("open4goods.product.model.min-length", 3);
 	private static final String MODEL_SPLITTER_REGEX = System
 			.getProperty("open4goods.product.model.splitters-regex", "/|\\\\|\\.|-");

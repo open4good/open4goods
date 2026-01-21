@@ -180,11 +180,17 @@ Then, we have subsetsgroups.subsets, defining exaustiv range of the criterias us
 > Configure the same way the attributes you decided to use for this category
 
 
-### subsetsGroups subsets
+### subsets
 
 At the root, we have also the subsets field, that is similar to  subsetsgroups.subsets but is the one used to present "fast filters" on the categories specific pages)
 
 Update the same way than for have subsetsgroups.subsets. You can add one or more petrinenet grouping for this category
+
+Note than the first is always IMPACT_SCORE, as defined in the inherited
+ /verticals/src/main/resources/verticals/_default.yml
+
+
+ Should redefine it with the same "30%" grouping and adaptated texts
 
 
 Create a plan. Ask for any clarifications or additional data

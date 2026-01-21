@@ -272,8 +272,8 @@ class ReviewGenerationServiceTest {
         withoutReview.setId(2L);
         withoutReview.setReviews(new Localisable<>());
 
-        when(productRepository.exportVerticalWithValidDateOrderByImpactScore(eq("tv"), anyInt(), eq(false)))
-                .thenReturn(Stream.of(withReview, withoutReview));
+        when(productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(eq("tv"), eq("fr"), anyInt(), eq(false)))
+                .thenReturn(Stream.of(withoutReview));
 
         org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
         verticalConfig.setId("tv");

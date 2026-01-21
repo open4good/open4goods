@@ -381,7 +381,7 @@ const {
 const { sections: communitySections, activePaths: communityActivePaths } =
   useCommunityMenu(t, currentLocale)
 const communityLabel = computed(() =>
-  String(t('siteIdentity.menu.items.community'))
+  String(t('siteIdentity.menu.items.contact'))
 )
 const isCommunityExpanded = ref(false)
 

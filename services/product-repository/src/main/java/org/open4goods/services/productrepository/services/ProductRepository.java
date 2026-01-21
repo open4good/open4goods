@@ -540,6 +540,59 @@ public class ProductRepository {
         return exportVerticalWithValidDateOrderByImpactScore(vertical, null, withExcluded);
     }
 
+    /**
+     * Export all aggregated data for a vertical that are missing an AI review, ordered by impact score descending.
+     *
+     * @param vertical the vertical identifier
+     * @param locale the locale to check for missing review (e.g. "fr")
+     * @param max maximum number of products to fetch
+     * @param withExcluded whether to include excluded products
+     * @return stream of products ordered by impact score
+     */
+    public Stream<Product> exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(String vertical, String locale, Integer max, boolean withExcluded)
+    {
+        Criteria criteria = new Criteria("vertical").is(vertical)
+                .and(getRecentPriceQuery());
+
+        if (!withExcluded) {
+            criteria = criteria.and(new Criteria("excluded").is(false));
+        }
+
+        criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
+        
+        // Filter products that DON'T have a review in the specified locale
+        criteria = criteria.and(new Criteria("reviews." + locale + ".review").exists().not());
+
+        SortOptions impactScoreSort = new SortOptions.Builder()
+                .field(new FieldSort.Builder()
+                        .field("scores.IMPACTSCORE.value")
+                        .order(SortOrder.Desc)
+                        .unmappedType(FieldType.Float)
+                        .missing("_last")
+                        .build())
+                .build();
+
+        NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                .withQuery(new CriteriaQuery(criteria))
+                .withSort(impactScoreSort);
+
+        if (max != null) {
+            queryBuilder = queryBuilder.withMaxResults(max);
+        }
+
+        NativeQuery query = queryBuilder.build();
+
+        try {
+            return elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX)
+                    .stream()
+                    .map(SearchHit::getContent);
+        } catch (Exception e) {
+            elasticLog(e);
+            throw e;
+        }
+    }
+
 
 
 	public SearchHits<Product> search(Query query, final String indexName) {
