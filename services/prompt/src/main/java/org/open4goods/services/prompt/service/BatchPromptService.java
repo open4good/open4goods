@@ -109,9 +109,7 @@ public class BatchPromptService implements HealthIndicator {
         if (promptConfig == null) {
             throw new IllegalStateException("Prompt config not found for " + promptKey);
         }
-        if (promptConfig.getRetrievalMode() == org.open4goods.services.prompt.config.RetrievalMode.MODEL_WEB_SEARCH) {
-            throw new IllegalStateException("Batch does not support model-native web search/grounding. Use EXTERNAL_SOURCES and inject sources.");
-        }
+        
         int totalEstimatedTokens = 0;
         List<Object> requestEntries = new ArrayList<>();
         for (int index = 0; index < variablesList.size(); index++) {
@@ -220,66 +218,6 @@ public class BatchPromptService implements HealthIndicator {
         return status;
     }
 
-//
-//    /**
-//     * Submits a batch prompt request with a list of variable maps.
-//     * <p>
-//     * Each prompt is fully evaluated and mapped into a NDJSON entry according to the OpenAI Batch API.
-//     * The NDJSON file is saved (for recovery) and then submitted via the OpenAiBatchClient.
-//     * </p>
-//     *
-//     * @param promptKey     The key of the prompt template to use.
-//     * @param variablesList A list of variable maps for prompt evaluation.
-//     * @param customIds     A list of custom IDs corresponding to each prompt entry.
-//     * @return a BatchPromptResponse holding the jobId and a Future that will complete when the batch response is available.
-//     */
-//    public BatchPromptResponse<List<BatchOutput>> batchPrompt(String promptKey, List<Map<String, Object>> variablesList, List<String> customIds) {
-//        List<BatchRequestEntry> requestEntries = new ArrayList<>();
-//        int totalEstimatedTokens = 0;
-//        int index = 0;
-//        for (Map<String, Object> vars : variablesList) {
-//            BatchRequestEntry entry = createBatchRequestEntry(promptKey, vars, index, customIds.get(index));
-//            requestEntries.add(entry);
-//            totalEstimatedTokens += estimateTokensFromBatchEntry(entry);
-//            index++;
-//        }
-//        logger.info("Batch prompt {} submitted with total estimated tokens: {}", promptKey, totalEstimatedTokens);
-//        if (totalEstimatedTokens > config.getBatchMaxTokens()) {
-//            throw new BatchTokenLimitExceededException("Total tokens " + totalEstimatedTokens +
-//                    " exceed maximum allowed " + config.getBatchMaxTokens());
-//        }
-//
-//        // Generate a unique internal jobId for this batch submission.
-//        String jobId = UUID.randomUUID().toString();
-//
-//        // Write NDJSON file: one JSON object per request.
-//        File batchFolder = new File(config.getBatchFolder());
-//        if (!batchFolder.exists() && !batchFolder.mkdirs()) {
-//            logger.error("Failed to create batch folder at {}", config.getBatchFolder());
-//            throw new IllegalStateException("Cannot create batch folder");
-//        }
-//        File submissionFile = new File(batchFolder, "batch-" + jobId + "-submission.jsonl");
-//        try (FileWriter writer = new FileWriter(submissionFile, Charset.defaultCharset())) {
-//            for (BatchRequestEntry entry : requestEntries) {
-//                String line = objectMapper.writeValueAsString(entry);
-//                writer.write(line + System.lineSeparator());
-//            }
-//        } catch (Exception e) {
-//            logger.error("Error writing batch submission file: {}", e.getMessage(), e);
-//            throw new IllegalStateException(e);
-//        }
-//
-//        // Submit the batch job via the OpenAI Batch API.
-//        BatchJobResponse batchJobResponse = openAiBatchClient.submitBatch(submissionFile);
-//        logger.info("Submitted batch job to OpenAI: {}", batchJobResponse.id());
-//
-//        // Create a CompletableFuture to be completed when a response is found.
-//        CompletableFuture<PromptResponse<List<BatchOutput>>> futureResponse = new CompletableFuture<>();
-//        activeBatchJobs.put(jobId, futureResponse);
-//
-//        return new BatchPromptResponse<>(jobId, futureResponse);
-//    }
-
     private BatchRequestEntry createBatchRequestEntry(String promptKey, Map<String, Object> variables, int index, String customId, Class type) {
         var promptConfig = promptService.getPromptConfig(promptKey);
         if (promptConfig == null) {
@@ -363,16 +301,30 @@ public class BatchPromptService implements HealthIndicator {
             systemEvaluated += jsonSchema + "\n\n";
         }
 
-        return Map.of(
-                "custom_id", customId,
-                "contents", List.of(Map.of(
-                        "role", "user",
-                        "parts", List.of(Map.of("text", userEvaluated))
-                )),
-                "system_instruction", Map.of(
-                        "parts", List.of(Map.of("text", systemEvaluated))
-                )
+        Map<String, Object> toolMap = null;
+        if (promptConfig.getRetrievalMode() == org.open4goods.services.prompt.config.RetrievalMode.MODEL_WEB_SEARCH) {
+             toolMap = Map.of("google_search", Map.of());
+        }
+
+        Map<String, Object> contentMap = Map.of(
+                "role", "user",
+                "parts", List.of(Map.of("text", userEvaluated))
         );
+
+        Map<String, Object> systemMap = Map.of(
+                 "parts", List.of(Map.of("text", systemEvaluated))
+        );
+
+        Map<String, Object> requestMap = new java.util.HashMap<>();
+        requestMap.put("custom_id", customId);
+        requestMap.put("contents", List.of(contentMap));
+        requestMap.put("system_instruction", systemMap);
+        
+        if (toolMap != null) {
+            requestMap.put("tools", List.of(toolMap));
+        }
+
+        return requestMap;
     }
 
     private int estimateTokensFromBatchEntry(org.open4goods.services.prompt.dto.openai.BatchRequestEntry entry) {

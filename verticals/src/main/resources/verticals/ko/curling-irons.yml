@@ -90,7 +90,7 @@ i18n:
 #ecoscoreConfig:
 #   CLASSE_ENERGY : 0.3
 #   WEIGHT: 0.3
-#   BRAND_SUSTAINABILITY: 0.3
+#   BRAND_SUSTAINALYTICS_SCORING: 0.3
 #   DATA_QUALITY: 0.1
 
 ##############################################################################

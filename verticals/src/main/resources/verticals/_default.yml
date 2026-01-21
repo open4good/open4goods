@@ -46,7 +46,7 @@ excludingTokensFromCategoriesMatching:
 availableImpactScoreCriterias:
 #  - ESG
   - DATA_QUALITY
-  - BRAND_SUSTAINABILITY
+  - BRAND_SUSTAINALYTICS_SCORING
 
 #####################################################################################################################################
 # Impact score normalization safeguards
@@ -384,7 +384,7 @@ attributesConfig:
     - key: "POWER_CONSUMPTION_TYPICAL"
     - key: "POWER_CONSUMPTION_OFF"
     - key: "FEATURES"
-    - key: "BRAND_SUSTAINABILITY"
+    - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "DATA_QUALITY"
     - key: "WARRANTY"
     - key: "ESG"

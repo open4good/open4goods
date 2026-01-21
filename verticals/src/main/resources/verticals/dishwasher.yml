@@ -53,7 +53,7 @@ genAiConfig:
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
   - WARRANTY
-  - BRAND_SUSTAINABILITY
+  - BRAND_SUSTAINALYTICS_SCORING
   - WEIGHT
   - REPAIRABILITY_INDEX
   - MINAVAILABILITYSPAREPARTSYEARS
@@ -155,7 +155,7 @@ nudgeToolConfig:
         en: "dishwashers with a good reparability"
         fr: "Lave-vaisselles avec une bonne réparabilité"
 
-    - scoreName: "BRAND_SUSTAINABILITY"
+    - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
       scoreMinValue: 4
       mdiIcon: "mdi-scale-balance"
       title:
@@ -260,7 +260,7 @@ aggregationConfiguration:
   "scores.WEIGHT.value":
     interval: 2
     buckets: 12
-  "scores.BRAND_SUSTAINABILITY.value":
+  "scores.BRAND_SUSTAINALYTICS_SCORING.value":
     interval: 1
     buckets: 5
   "scores.CLASSE_ENERGY.value":
@@ -324,7 +324,7 @@ attributesConfig:
     - key: "YEAR"
     - key: "COLOR"
     - key: "FEATURES"
-    - key: "BRAND_SUSTAINABILITY"
+    - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "DATA_QUALITY"
     - key: "ENERGY_CONSUMPTION_ANNUAL"
     - key: "WATER_CONSUMPTION_ANNUAL"

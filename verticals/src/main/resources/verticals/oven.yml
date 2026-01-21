@@ -52,7 +52,7 @@ availableImpactScoreCriterias:
   - WEIGHT
   - WARRANTY
   - REPAIRABILITY_INDEX
-  - BRAND_SUSTAINABILITY
+  - BRAND_SUSTAINALYTICS_SCORING
   - DATA_QUALITY
 
 #####################################################################################################################################
@@ -152,7 +152,7 @@ nudgeToolConfig:
         en: "Ovens with a good reparability"
         fr: "Fours avec une bonne réparabilité"
 
-    - scoreName: "BRAND_SUSTAINABILITY"
+    - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
       scoreMinValue: 4
       mdiIcon: "mdi-scale-balance"
       title:
@@ -257,7 +257,7 @@ aggregationConfiguration:
   "scores.WEIGHT.value":
     interval: 2
     buckets: 12
-  "scores.BRAND_SUSTAINABILITY.value":
+  "scores.BRAND_SUSTAINALYTICS_SCORING.value":
     interval: 1
     buckets: 5
   "scores.CLASSE_ENERGY.value":
@@ -324,7 +324,7 @@ attributesConfig:
     - key: "YEAR"
     - key: "COLOR"
     - key: "FEATURES"
-    - key: "BRAND_SUSTAINABILITY"
+    - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "DATA_QUALITY"
     - key: "WIDTH"
     - key: "HEIGHT"

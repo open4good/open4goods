@@ -388,7 +388,7 @@ watch(
 
     /* Center the slider and limit width to show max 4 items (4 * 240px + gaps) */
     margin-inline: auto;
-    max-width: 1050px;
+    max-width: 980px;
     width: 100%;
     /* overflow: visible; removed to restore arrow visibility */
 
@@ -435,7 +435,7 @@ watch(
     }
 
     &--next {
-      margin-left: 0;
+      margin-left: -16px;
     }
   }
 

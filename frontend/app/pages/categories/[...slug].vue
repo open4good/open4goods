@@ -180,9 +180,20 @@ const filteredCategories = computed(() => {
   )
 })
 
-const highlightedVerticals = computed(
-  () => navigationData.value?.descendantVerticals ?? []
-)
+const highlightedVerticals = computed(() => {
+  const verticals = navigationData.value?.descendantVerticals ?? []
+  if (!searchTerm.value.trim()) {
+    return verticals
+  }
+
+  const query = searchTerm.value.trim().toLowerCase()
+  return verticals.filter(
+    vertical =>
+      (vertical.title?.toLowerCase().includes(query) ?? false) ||
+      (vertical.vertical?.verticalHomeTitle?.toLowerCase().includes(query) ??
+        false)
+  )
+})
 
 const resultSummary = computed(() =>
   translatePlural(

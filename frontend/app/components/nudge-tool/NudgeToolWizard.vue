@@ -1,7 +1,7 @@
 <template>
   <RoundedCornerCard
     ref="wizardRef"
-    surface="hero"
+    surface="strong"
     rounded="xl"
     :elevation="3"
     :hover-elevation="3"

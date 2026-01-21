@@ -41,40 +41,6 @@
         </SearchSuggestField>
       </form>
 
-      <div class="search-hero__filters">
-        <div class="search-hero__filters-header">
-          <p class="search-hero__filters-title">
-            {{ t('category.filters.title') }}
-          </p>
-          <v-btn
-            v-if="!mdAndUp"
-            variant="tonal"
-            color="primary"
-            prepend-icon="mdi-filter-variant"
-            @click="filtersOpen = true"
-          >
-            {{ t('category.filters.title') }}
-            <v-badge
-              v-if="activeFilters.length"
-              :content="activeFilters.length"
-              color="primary"
-              inline
-              class="ms-2"
-            />
-          </v-btn>
-        </div>
-        <CategoryFilterList
-          v-if="mdAndUp"
-          :fields="filterFields"
-          :aggregations="productAggregations"
-          :baseline-aggregations="baselineAggregations"
-          :active-filters="activeFilters"
-          class="search-hero__filters-content"
-          @update-range="updateRangeFilter"
-          @update-terms="updateTermsFilter"
-        />
-      </div>
-
       <p
         v-if="showInitialState"
         class="search-hero__helper mt-4 text-medium-emphasis"
@@ -88,6 +54,40 @@
         {{ t('search.states.minimum', { min: MIN_QUERY_LENGTH }) }}
       </p>
     </PageHeader>
+
+    <v-container
+      v-if="shouldShowResults"
+      class="search-page__actions py-2 px-4 mx-auto d-flex align-center"
+      max-width="xl"
+    >
+      <v-btn
+        v-if="!mdAndUp"
+        variant="tonal"
+        color="primary"
+        prepend-icon="mdi-filter-variant"
+        @click="filtersOpen = true"
+      >
+        {{ t('category.filters.title') }}
+        <v-badge
+          v-if="activeFilters.length"
+          :content="activeFilters.length"
+          color="primary"
+          inline
+          class="ms-2"
+        />
+      </v-btn>
+
+      <CategoryFilterList
+        v-else
+        :fields="filterFields"
+        :aggregations="productAggregations"
+        :baseline-aggregations="baselineAggregations"
+        :active-filters="activeFilters"
+        mode="row"
+        @update-range="updateRangeFilter"
+        @update-terms="updateTermsFilter"
+      />
+    </v-container>
 
     <v-navigation-drawer
       v-model="filtersOpen"
@@ -303,10 +303,7 @@
                 </v-btn>
               </div>
 
-              <CategoryProductListView
-                v-else
-                :products="rightColumnProducts"
-              />
+              <CategoryProductListView v-else :products="rightColumnProducts" />
             </section>
           </v-col>
         </v-row>
@@ -426,10 +423,7 @@ const { data, pending, error, refresh } =
       })
     },
     {
-      watch: [
-        () => normalizedQuery.value,
-        () => requestedSearchType.value,
-      ],
+      watch: [() => normalizedQuery.value, () => requestedSearchType.value],
       immediate: hasMinimumLength.value,
     }
   )
@@ -503,7 +497,9 @@ const latestProductsSort = computed<SortDto[]>(() => [
 const baselinePayload = computed(() => ({
   query: hasMinimumLength.value ? normalizedQuery.value : undefined,
   aggs: aggregationDefinition.value,
-  sort: showLatestProducts.value ? { sorts: latestProductsSort.value } : undefined,
+  sort: showLatestProducts.value
+    ? { sorts: latestProductsSort.value }
+    : undefined,
   semanticSearch: hasMinimumLength.value ? true : undefined,
 }))
 
@@ -526,10 +522,7 @@ const {
     })
   },
   {
-    watch: [
-      () => normalizedQuery.value,
-      () => showLatestProducts.value,
-    ],
+    watch: [() => normalizedQuery.value, () => showLatestProducts.value],
     immediate: true,
   }
 )
@@ -560,10 +553,7 @@ const {
     })
   },
   {
-    watch: [
-      () => normalizedQuery.value,
-      () => filterRequest.value,
-    ],
+    watch: [() => normalizedQuery.value, () => filterRequest.value],
     immediate: false, // Wait for interaction
   }
 )

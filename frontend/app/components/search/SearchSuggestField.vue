@@ -666,7 +666,10 @@ const formatSuggestionPrice = (item: ProductSuggestionItem): string | null => {
     }
   }
 
-  return n(item.bestPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return n(item.bestPrice, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
 }
 
 const resetSuggestions = () => {

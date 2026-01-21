@@ -327,7 +327,7 @@ nudgeToolConfig:
       description:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
-    - scoreName: "BRAND_SUSTAINABILITY"
+    - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
       scoreMinValue: 2.6
       mdiIcon: "mdi-scale-balance"
       title:
@@ -654,7 +654,7 @@ aggregationConfiguration:
   "scores.WEIGHT.value":
     interval: 1
     buckets: 5
-  "scores.BRAND_SUSTAINABILITY.value":
+  "scores.BRAND_SUSTAINALYTICS_SCORING.value":
     interval: 1
     buckets: 5
   "scores.CLASSE_ENERGY.value":

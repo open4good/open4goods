@@ -1351,7 +1351,7 @@ const isMenuItemActive = (item: MenuItem): boolean => {
 
   &__field-wrapper
     width: 100%
-    max-width: 420px
+    max-width: 800px
 
   &__actions
     display: flex

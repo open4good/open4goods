@@ -654,7 +654,7 @@ public class ProductController {
      * Add every attribute declared in the vertical configuration to the list of allowed
      * filter mappings, even when the attribute is not explicitly listed as a filter. This
      * keeps the validation layer aligned with the vertical definition so attributes such
-     * as {@code BRAND_SUSTAINABILITY} remain usable as filters.
+     * as {@code BRAND_SUSTAINALYTICS_SCORING} remain usable as filters.
      *
      * @param target collection of allowed filter mappings to update
      * @param config vertical configuration providing attribute definitions

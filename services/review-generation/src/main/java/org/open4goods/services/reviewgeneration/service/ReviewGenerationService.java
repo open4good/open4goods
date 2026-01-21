@@ -474,7 +474,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		String promptKey = resolvePromptKey();
 		PromptConfig promptConfig = genAiService.getPromptConfig(promptKey);
 		if (promptConfig != null && promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
-			throw new IllegalStateException("Batch review generation is not supported for model-native search.");
+			logger.info("Batch review generation with model-native search enabled.");
 		}
 		for (Product product : products) {
 			long upc = product.getId();
@@ -493,7 +493,11 @@ public class ReviewGenerationService implements HealthIndicator {
 			status.setStartTime(Instant.now().toEpochMilli());
 			processStatusMap.put(upc, status);
 			try {
-				promptVariablesList.add(preprocessingService.preparePromptVariables(product, verticalConfig, status));
+				if (promptConfig != null && promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
+					promptVariablesList.add(preprocessingService.buildBasePromptVariables(product, verticalConfig));
+				} else {
+					promptVariablesList.add(preprocessingService.preparePromptVariables(product, verticalConfig, status));
+				}
 				productIds.add(String.valueOf(product.getId()));
 				gtins.add(product.gtin());
 			} catch (NotEnoughDataException e) {

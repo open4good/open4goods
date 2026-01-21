@@ -22,7 +22,7 @@ import org.slf4j.Logger;
  */
 public class SustainalyticsAggregationService extends AbstractScoreAggregationService {
 
-	private static final String BRAND_SUSTAINABILITY_SCORENAME = "BRAND_SUSTAINABILITY";
+	private static final String BRAND_SUSTAINABILITY_SCORENAME = "BRAND_SUSTAINALYTICS_SCORING";
 
 	public static final String RATING = "rating";
 
