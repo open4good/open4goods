@@ -12,6 +12,7 @@ import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -56,6 +57,19 @@ class AttributeRealtimeAggregationServiceTest {
 
                 assertThat(product.isExcluded()).isTrue();
                 assertThat(product.getExcludedCauses()).containsExactly("missing_attr_required_attr");
+        }
+
+        @Test
+        void handleReferentielAttributesCapturesRawGtin() throws Exception {
+                Product product = new Product(123456789012L);
+                DataFragment fragment = new DataFragment();
+                fragment.getReferentielAttributes().put(ReferentielKey.GTIN, "0123456789012");
+
+                Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("handleReferentielAttributes", DataFragment.class, Product.class, VerticalConfig.class);
+                method.setAccessible(true);
+                method.invoke(service, fragment, product, verticalConfig);
+
+                assertThat(product.getGtinInfos().getGtinStrings()).containsExactly("0123456789012");
         }
 
         private Product buildBaseProduct() {
@@ -178,4 +192,3 @@ class AttributeRealtimeAggregationServiceTest {
 		assertThat(result).isEqualTo("0.5");
 	}
 }
-

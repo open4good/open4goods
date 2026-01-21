@@ -335,6 +335,10 @@
         "country": {
           "type": "keyword"
         },
+        "gtinStrings": {
+          "type": "object",
+          "enabled": false
+        },
         "upcType": {
           "type": "keyword",
           "index": false
