@@ -180,9 +180,9 @@ class ReviewGenerationServiceTest {
         product.setId(123L);
         // Create a basic gtin to avoid NPE in isActiveForGtin or other checks if accessed
         // Product uses id for upc, and gtin() usually returns something or null
-        // Let's assume default is null, but the service might access it. 
+        // Let's assume default is null, but the service might access it.
         // We will assert failure anyway.
-        
+
         org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
 
         org.open4goods.services.prompt.config.PromptConfig promptConfig = new org.open4goods.services.prompt.config.PromptConfig();
@@ -213,18 +213,17 @@ class ReviewGenerationServiceTest {
         if (status == null) {
             throw new RuntimeException("Status is null");
         }
-        
+
         if (status.getStatus() != org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED) {
              throw new RuntimeException("Expected FAILED status but got " + status.getStatus() + ". Error: " + status.getErrorMessage());
         }
-        
+
         if (!status.getErrorMessage().contains("Missing required prompt variable")) {
             throw new RuntimeException("Expected error message to contain 'Missing required prompt variable', but got: " + status.getErrorMessage());
         }
     }
 
     @Test
-<<<<<<< HEAD
     void shouldGenerateReviewBatch_WithGrounding_DoesNotThrowException() throws Exception {
         // Setup
         Product product = new Product();
@@ -245,7 +244,7 @@ class ReviewGenerationServiceTest {
         java.util.Map<String, Object> variables = new java.util.HashMap<>();
         variables.put("VAR", "VALUE");
         org.mockito.Mockito.when(preprocessingService.buildBasePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(variables);
-        
+
         // Mock BatchPromptService to return a dummy job ID
         org.mockito.Mockito.when(batchAiService.batchPromptRequest(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn("job-123");
 
@@ -257,7 +256,9 @@ class ReviewGenerationServiceTest {
         // Verify that buildBasePromptVariables was called (and not preparePromptVariables)
         org.mockito.Mockito.verify(preprocessingService).buildBasePromptVariables(org.mockito.ArgumentMatchers.eq(product), org.mockito.ArgumentMatchers.eq(verticalConfig));
         org.mockito.Mockito.verify(preprocessingService, org.mockito.Mockito.never()).preparePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
-=======
+    }
+
+    @Test
     void loadNextTopImpactScoreProducts_FiltersExistingReviews() {
         Product withReview = new Product();
         withReview.setId(1L);
@@ -313,6 +314,5 @@ class ReviewGenerationServiceTest {
                 .isEqualTo(org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED);
         assertThat(reviewGenerationService.health().getStatus()).isEqualTo(Status.DOWN);
         assertThat(Files.exists(trackingFile)).isFalse();
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     }
 }

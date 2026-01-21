@@ -327,7 +327,7 @@ nudgeToolConfig:
       description:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
-    - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
+    - scoreName: "ESG"
       scoreMinValue: 2.6
       mdiIcon: "mdi-scale-balance"
       title:
@@ -344,7 +344,7 @@ nudgeToolConfig:
         en: "Budget"
         fr: "Budget"
       description:
-        en: "Pick a price comfort zone."
+        en: "Pick a price comfort zone."##
         fr: "Votre budget"
       ctaLabel:
         en: "Continue"

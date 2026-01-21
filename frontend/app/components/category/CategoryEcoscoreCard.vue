@@ -3,33 +3,41 @@
     v-if="ecoscoreUrl"
     :to="ecoscoreUrl"
     class="category-ecoscore-card"
-    variant="tonal"
-    elevation="0"
-    rounded="xl"
+    variant="text"
+    :ripple="false"
+    rounded="lg"
     data-test="category-ecoscore-card"
     :aria-label="t('category.filters.ecoscore.ariaLabel')"
   >
-    <div class="category-ecoscore-card__icon">
-      <v-icon icon="mdi-star" size="32" />
+    <div class="category-ecoscore-card__icon-wrapper">
+      <v-icon icon="mdi-leaf" size="24" class="category-ecoscore-card__icon" />
     </div>
 
     <div class="category-ecoscore-card__content">
       <p class="category-ecoscore-card__title">
         {{ t('category.filters.ecoscore.title') }}
       </p>
-      <span class="category-ecoscore-card__cta">
+      <p class="category-ecoscore-card__subtitle">
         {{
           t('category.filters.ecoscore.cta', {
             category: normalizedCategoryName,
           })
         }}
-        <v-icon icon="mdi-arrow-top-right" size="18" />
-      </span>
+      </p>
     </div>
+
+    <v-icon
+      icon="mdi-arrow-right"
+      class="category-ecoscore-card__arrow"
+      size="20"
+    />
   </v-card>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 const props = defineProps<{
   verticalHomeUrl?: string | null
   categoryName?: string | null
@@ -61,51 +69,61 @@ const ecoscoreUrl = computed(() => {
 <style scoped lang="sass">
 .category-ecoscore-card
   display: flex
-  align-items: flex-start
+  align-items: center
   gap: 1rem
-  padding: 1.5rem
-  min-height: 160px
-  background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-080), 0.95), rgba(var(--v-theme-surface-primary-120), 0.9))
+  padding: 0.75rem 1rem
+  width: 100%
+  min-height: auto
+  background-color: transparent
+  border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
+  transition: all 0.2s ease
+  cursor: pointer
   color: rgb(var(--v-theme-text-neutral-strong))
-  text-decoration: none
-  transition: transform 0.3s ease, box-shadow 0.3s ease
 
   &:hover
-    transform: translateY(-2px)
-    box-shadow: 0 18px 28px -24px rgba(var(--v-theme-shadow-primary-600), 0.45)
+    background-color: rgba(var(--v-theme-surface-active), 0.4)
+    border-color: rgba(var(--v-theme-primary), 0.3)
+    transform: translateY(-1px)
 
-  &:focus-visible
-    outline: 2px solid rgba(var(--v-theme-accent-primary-highlight), 0.8)
-    outline-offset: 3px
-
-  &__icon
-    display: inline-flex
+  &__icon-wrapper
+    display: flex
     align-items: center
     justify-content: center
-    width: 48px
-    height: 48px
-    min-width: 48px
-    border-radius: 999px
-    background: rgba(var(--v-theme-primary), 0.12)
+    width: 40px
+    height: 40px
+    border-radius: 8px
+    background: rgba(var(--v-theme-primary), 0.1)
     color: rgb(var(--v-theme-primary))
+    flex-shrink: 0
 
   &__content
     display: flex
     flex-direction: column
-    gap: 0.35rem
-    flex: 1 1 auto
-    min-height: 0
+    gap: 0.125rem
+    flex: 1
+    min-width: 0
 
   &__title
-    font-size: 1rem
+    font-size: 0.95rem
     font-weight: 600
+    line-height: 1.2
     margin: 0
+    color: rgb(var(--v-theme-text-neutral-strong))
 
-  &__cta
-    display: inline-flex
-    align-items: center
-    gap: 0.35rem
-    font-size: 0.875rem
-    font-weight: 600
+  &__subtitle
+    font-size: 0.8rem
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+    margin: 0
+    font-weight: 500
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+  &__arrow
+    color: rgba(var(--v-theme-text-neutral-disabled), 0.8)
+    transition: transform 0.2s ease, color 0.2s ease
+
+  &:hover &__arrow
+    transform: translateX(2px)
     color: rgb(var(--v-theme-primary))
 </style>

@@ -1,10 +1,12 @@
-Note :  {CATEGORY} with : tv
+# Context
+Note :  replace {CATEGORY} with : tv
 
+You are a software developper, aiming at creating nice configuration files, with maximum use of the possibilities, to custom and humanize at maximum the products categories.
 
 You will work on updating yaml categories config for {CATEGORY}.
 
-
-As a sample, you will have the sample {CATEGORY} category config : /verticals/src/main/resources/verticals/{CATEGORY}.yml
+As input, you will have the  {CATEGORY} category config : /verticals/src/main/resources/verticals/{CATEGORY}.yml
+For reference, the best commented, the most humanly manualy reviewed, the reference sample category file" is the one for televisions, at  : /verticals/src/main/resources/verticals/tv.yml
 All verticals inherits the default vertical config : /verticals/src/main/resources/verticals/_default.yml
 
 
@@ -15,7 +17,7 @@ You will update the vertical
 ## Task 1
 - Check for errors, adjust texts if needed (translations in i18n, (the base, correct texts is fr) to be semantically correct with the vertical title)
 
-## Task 2 - Attributes génération
+## Task 2 - Attributes generation
 
 Generate or update attributes definitions (reuse existing ones if possible, but you can create new definitions in /verticals/src/main/resources/attributes/*). Only for attributes specific to the category,  and having a correct coverage
 
@@ -23,7 +25,7 @@ Generate or update attributes definitions (reuse existing ones if possible, but 
 As input data, you have access to :
 
 > The sample files
-> Existing attributes  (/open4goods/verticals/src/main/resources/attributes)
+> Existing attributes  (/verticals/src/main/resources/attributes)
 
 And also, live datas provided through the local api
 API on localhost, to fetch the following datas :
@@ -88,8 +90,7 @@ You will Dismiss all CUSTOM_ * attributes, and "Themss, or non product category 
 
 # Categories mapping.
 
-You will get good probabilities of categories mapping using, in a matchingCategories: yaml fragment ready to paste in destination vertical file ready to
-
+You will update categories mapping, using actual possibilities (yaml matchingCategories attribbute format)  from :
 
 curl -X 'GET' \
   'http://localhost:8081/{CATEGORY}/categories/?minOffersCount=2' \
@@ -97,10 +98,7 @@ curl -X 'GET' \
   -H 'Authorization: open4goods'
 
 Remove errors (removes unrelated categories, or too large mapping)
-Then replace or merge with existing categories
-
-
-
+Replace or merge with existing categories definitions
 
 
 
@@ -111,8 +109,82 @@ You will also generate or update availableImpactScoreCriterias :
 * Then  write them in availableImpactScoreCriterias
 
 
-------------- ATTRIBUTES COVERAGE (result of api project, on /{vertical}/attributes/)
-: Availlable on /verticals/src/main/resources/verticals/attribute-coverage.txt
+## Task 4 - Assistant configuration : nudgeToolConfig
+
+You will set the relevant assistant scoring configurations. Sample :
+
+
+nudgeToolConfig:
+  scores:
+    - scoreName: "ENERGY_CONSUMPTION"
+      scoreMinValue: 2.6
+      mdiIcon: "mdi-lightning-bolt"
+      title:
+        en: "Energy consumption"
+        fr: "Consommation énergétique"
+      description:
+        en: "Televisions with a low energy consumption"
+        fr: "Téléviseurs avec une faible consommation énergétique"
+
+
+
+This scores are always aggregated, meaning their
+It always relates  to  /model/src/main/java/org/open4goods/model/product/Score.java.aggregates
+is not null / not empty.
+
+This aggegated / participant relationship  is operated in scores definition, with participateInScores attributes. Sample in /verticals/src/main/resources/attributes/CLASSE_ENERGY.yml :
+
+participateInScores:
+  - ENERGY_CONSUMPTION
+
+
+You will :
+
+-- Reuse existing aggregated scores if they have at least one participant
+
+-- Update the scoreMinValue, in order to them to trigger the best 33%. Be aware that we have sigma scoring, that "compress" scores.
+
+You will deeply investigate the scores statistics at :
+
+in order to set the correct 30% filters
+
+
+### subsetsGroups
+The criterias are packed into groups. You will update them :
+
+- First group is always price.
+Update by setting usual price ranges for this product category. Update texts to be neutral.
+
+- Then, create the "really popular" big filters for this product category. 2/3 MAX
+
+See sample for TV :
+
+    - id: "screen_size"
+      mdiIcon: "mdi-television-classic"
+      layout: "grid"
+      title:
+        en: "Screen size"
+        fr: "Taille d'écran"
+      description:
+        en: "Find the diagonal that fits your space."
+        fr: "Trouvez la diagonale adaptée à votre espace."
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+
+
+
+Then, we have subsetsgroups.subsets, defining exaustiv range of the criterias used in groups :
+
+> Configure for prices (by setting usual price ranges for the {CATEGORY}  category. Update texts to be neutral.
+> Configure the same way the attributes you decided to use for this category
+
+
+### subsetsGroups subsets
+
+At the root, we have also the subsets field, that is similar to  subsetsgroups.subsets but is the one used to present "fast filters" on the categories specific pages)
+
+Update the same way than for have subsetsgroups.subsets. You can add one or more petrinenet grouping for this category
 
 
 Create a plan. Ask for any clarifications or additional data
