@@ -624,6 +624,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////////
 		String gtin = fragment.gtin();
 		if (!StringUtils.isEmpty(gtin)) {
+            output.getGtinInfos().addGtinString(gtin);
 			String existing = output.gtin();
 
 			if (!existing.equals(gtin)) {

@@ -46,6 +46,11 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		// Validating barcodes
 		/////////////////////////////
 
+        if (StringUtils.isNotBlank(input.gtin()))
+        {
+            output.getGtinInfos().addGtinString(input.gtin());
+        }
+
 		if (null == output.getId()) {
 			// TODO(p2, features) : Should store the GTIN type when encountered in gtin infos, and then render with appropriate leading 0
 			output.setId(Long.valueOf(input.gtin()));
