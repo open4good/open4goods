@@ -351,7 +351,7 @@ public class SearchService {
 					return new GlobalSearchResult(groups, List.of(), List.of(), verticalCta, mode, fallbackTriggered);
 				}
 			} else if (mode == SearchMode.global) {
-				SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, true);
+				SearchHits<Product> fallbackHits = executeGlobalSearch(sanitizedQuery, false, false);
 				List<GlobalSearchHit> fallback = mapHits(fallbackHits, domainLanguage, false);
 				if (fallback != null && !fallback.isEmpty()) {
 					return new GlobalSearchResult(List.of(), fallback, List.of(), verticalCta, mode, fallbackTriggered);

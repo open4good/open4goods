@@ -4,18 +4,16 @@ package org.open4goods.model.price;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
-import org.joda.time.DurationFieldType;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
-import org.joda.time.format.PeriodFormat;
-import org.joda.time.format.PeriodFormatter;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.util.TimeAgoFormatter;
 import org.springframework.data.annotation.Transient;
 
 public class AggregatedPrice extends Price {
 
-	//TODO : shared, ugly
+	/**
+	 * Shared formatter for prices with a single decimal (max).
+	 */
 	public static final DecimalFormat numberFormater = new DecimalFormat("0.#");
 
 	private String datasourceName;
@@ -26,7 +24,6 @@ public class AggregatedPrice extends Price {
 	/**
 	 * The state of the product (new, occasion, ...)
 	 */
-	//TODO : Rename to productCondition
 	private ProductCondition productState;
 
 	/**
@@ -81,36 +78,16 @@ public class AggregatedPrice extends Price {
 	}
 
 	/**
-	 * TODO : merge with the one on price()
 	 * @return a localised formated duration of when the product was last indexed
 	 */
 	public String ago(Locale locale) {
 
 		long duration = System.currentTimeMillis() - getTimeStamp();
-
-
-
-		Period period;
-		if (duration < 3600000) {
-			DurationFieldType[] min = { DurationFieldType.minutes(), DurationFieldType.seconds() };
-			period = new Period(duration, PeriodType.forFields(min)).normalizedStandard();
-		} else {
-			DurationFieldType[] full = { DurationFieldType.days(), DurationFieldType.hours() };
-			period = new Period(duration, PeriodType.forFields(full)).normalizedStandard();
-
-		}
-
-		PeriodFormatter formatter = PeriodFormat.wordBased();
-
-		String ret = (formatter. print(period));
-
-
-		return ret;
+		return TimeAgoFormatter.formatDuration(locale, duration);
 	}
 
 	public String formatedDuration() {
-		// TODO : LOCALIZE
-		return ago(Locale.FRANCE);
+		return ago(Locale.getDefault());
 	}
 
 

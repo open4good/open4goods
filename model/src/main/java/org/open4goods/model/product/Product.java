@@ -3,6 +3,7 @@ package org.open4goods.model.product;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
@@ -17,11 +18,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DurationFieldType;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
-import org.joda.time.format.PeriodFormat;
-import org.joda.time.format.PeriodFormatter;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.StandardiserService;
@@ -36,9 +32,11 @@ import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
+import org.open4goods.model.util.TimeAgoFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Dynamic;
 import org.springframework.data.elasticsearch.annotations.Mapping;
@@ -63,6 +61,13 @@ public class Product implements Standardisable {
 	 * Name of the ecoscore
 	 */
 	private static final String ECOSCORE_NAME = "ECOSCORE";
+	private static final int GTIN_PAD_LENGTH = Integer.getInteger("open4goods.product.gtin.pad-length", 14);
+	private static final int MODEL_MIN_LENGTH = Integer.getInteger("open4goods.product.model.min-length", 3);
+	private static final String MODEL_SPLITTER_REGEX = System
+			.getProperty("open4goods.product.model.splitters-regex", "/|\\\\|\\.|-");
+	private static final String IMAGE_EXTENSIONS_PROPERTY = "open4goods.product.image.extensions";
+	private static final Set<String> DEFAULT_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
+	private static final Set<String> IMAGE_EXTENSIONS = loadImageExtensions();
 
 	// Should not be used
 	// If true, the referentiel attribute will be updated if a shortest version
@@ -176,6 +181,12 @@ public class Product implements Standardisable {
 	////////////////////
 	/** number of commercial offers **/
 	private Integer offersCount = 0;
+
+	@Transient
+	private List<Resource> cachedImages;
+
+	@Transient
+	private int cachedImagesSignature;
 
 	// /**
 	// * Informations about participant datas and aggegation process
@@ -423,9 +434,12 @@ public class Product implements Standardisable {
 	}
 
 	public List<Resource> unprocessedimages() {
+		if (resources == null || resources.isEmpty()) {
+			return List.of();
+		}
 		return resources.stream().filter(e -> e.getUrl() != null)
-				// TODO : Extension from conf
-				.filter(e -> e.getUrl().endsWith(".jpg") || e.getUrl().endsWith(".png") || e.getUrl().endsWith(".jpeg") || e.getUrl().endsWith(".webp")).toList();
+				.filter(this::isSupportedImageResource)
+				.toList();
 	}
 
 	// Helper for ui
@@ -434,8 +448,15 @@ public class Product implements Standardisable {
 		return ret;
 	}
 
-	// TODO(p2,perf) : Should be cached
 	public List<Resource> images() {
+		if (resources == null || resources.isEmpty()) {
+			return List.of();
+		}
+		int signature = resources.hashCode();
+		if (cachedImages != null && cachedImagesSignature == signature) {
+			return cachedImages;
+		}
+
 		Map<Integer, List<Resource>> imagesByGroup = new HashMap<>();
 		Map<Integer, Resource> bestByGroup = new HashMap<>();
 		Set<Integer> coverGroups = new HashSet<>();
@@ -487,7 +508,9 @@ public class Product implements Standardisable {
 
 		ret.addAll(otherNoGroup);
 
-		return ret;
+		cachedImagesSignature = signature;
+		cachedImages = List.copyOf(ret);
+		return cachedImages;
 	}
 
 	private int pixels(Resource resource) {
@@ -533,8 +556,17 @@ public class Product implements Standardisable {
 	 */
 	public String gtin() {
 		try {
-			// TODO(p2, features) : Should render with appropriate leading 0
-			return String.valueOf(id);
+			String referentialGtin = attributes != null && attributes.getReferentielAttributes() != null
+					? attributes.getReferentielAttributes().get(ReferentielKey.GTIN)
+					: null;
+			if (StringUtils.isNotBlank(referentialGtin)) {
+				return referentialGtin.trim();
+			}
+			String rawId = String.valueOf(id);
+			if (rawId.length() >= GTIN_PAD_LENGTH) {
+				return rawId;
+			}
+			return StringUtils.leftPad(rawId, GTIN_PAD_LENGTH, '0');
 		} catch (final Exception e) {
 			System.err.println("NOT A INTEGER GTIN");
 			return "-1";
@@ -692,29 +724,12 @@ public class Product implements Standardisable {
 	}
 
 	/**
-	 * TODO : merge with the one on price()
-	 *
 	 * @return a localised formated duration of when the product was last indexed
 	 */
 	public String ago(Locale locale) {
 
 		long duration = System.currentTimeMillis() - lastChange;
-
-		Period period;
-		if (duration < 3600000) {
-			DurationFieldType[] min = { DurationFieldType.minutes(), DurationFieldType.seconds() };
-			period = new Period(duration, PeriodType.forFields(min)).normalizedStandard();
-		} else {
-			DurationFieldType[] full = { DurationFieldType.days(), DurationFieldType.hours() };
-			period = new Period(duration, PeriodType.forFields(full)).normalizedStandard();
-
-		}
-
-		PeriodFormatter formatter = PeriodFormat.wordBased();
-
-		String ret = (formatter.print(period));
-
-		return ret;
+		return TimeAgoFormatter.formatDuration(locale, duration);
 	}
 
 	/**
@@ -754,6 +769,7 @@ public class Product implements Standardisable {
 			resources.remove(resource);
 			resources.add(existing);
 		}
+		invalidateImageCache();
 
 	}
 
@@ -779,13 +795,11 @@ public class Product implements Standardisable {
 
 		String model = StringUtils.normalizeSpace(value).toUpperCase();
 
-		// TODO(conf,p2) : Eviction size from conf
-		if (StringUtils.isEmpty(model) || model.length() < 3) {
+		if (StringUtils.isEmpty(model) || model.length() < MODEL_MIN_LENGTH) {
 			return;
 		}
 		// Splitting on conventionnal suffixes (/ - .)
-		// TODO(conf,p2) : splitters from Const / conf
-		String[] frags = model.split("/|\\|.|-");
+		String[] frags = model.split(MODEL_SPLITTER_REGEX);
 
 		if (!model.equals(model())) {
 			akaModels.add(model);
@@ -928,6 +942,7 @@ public class Product implements Standardisable {
 
 	public void setResources(Set<Resource> resources) {
 		this.resources = resources;
+		invalidateImageCache();
 	}
 
 	public EcoScoreRanking getRanking() {
@@ -968,6 +983,36 @@ public class Product implements Standardisable {
 
 	public void setOffersCount(Integer offersCount) {
 		this.offersCount = offersCount;
+	}
+
+	private void invalidateImageCache() {
+		cachedImages = null;
+		cachedImagesSignature = 0;
+	}
+
+	private boolean isSupportedImageResource(Resource resource) {
+		if (resource == null || StringUtils.isBlank(resource.getUrl())) {
+			return false;
+		}
+		String url = resource.getUrl().toLowerCase(Locale.ROOT);
+		int dotIndex = url.lastIndexOf('.');
+		if (dotIndex < 0 || dotIndex == url.length() - 1) {
+			return false;
+		}
+		String extension = url.substring(dotIndex + 1);
+		return IMAGE_EXTENSIONS.contains(extension);
+	}
+
+	private static Set<String> loadImageExtensions() {
+		String configured = System.getProperty(IMAGE_EXTENSIONS_PROPERTY);
+		if (StringUtils.isBlank(configured)) {
+			return DEFAULT_IMAGE_EXTENSIONS;
+		}
+		return Arrays.stream(configured.split(","))
+				.map(String::trim)
+				.filter(StringUtils::isNotBlank)
+				.map(String::toLowerCase)
+				.collect(Collectors.toSet());
 	}
 
 	public Integer getGoogleTaxonomyId() {

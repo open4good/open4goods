@@ -327,6 +327,7 @@ import type {
   FieldMetadataDto,
   AggregationResponseDto,
   SortDto,
+  SearchType,
 } from '~~/shared/api-client'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -359,7 +360,7 @@ const routeQuery = computed(() =>
   typeof route.query.q === 'string' ? route.query.q : ''
 )
 const searchInput = ref(routeQuery.value)
-const requestedSearchType = ref<'semantic'>('semantic')
+const requestedSearchType = ref<SearchType>('auto')
 
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
