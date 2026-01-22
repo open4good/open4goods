@@ -847,6 +847,7 @@ public class ProductMappingService {
                 review.getMediumTitle(),
                 review.getShortTitle(),
                 review.getTechnicalReview(),
+                review.getTechnicalShortReview(),
                 review.getEcologicalReview(),
                 review.getSummary(),
                 pros,

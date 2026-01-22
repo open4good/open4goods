@@ -24,6 +24,9 @@ public record AiReviewDto(
         @Schema(description = "Technical analysis extracted from trustworthy sources")
         String technicalReview,
 
+        @Schema(description = "Short technical summary in 2-3 sentences")
+        String technicalShortReview,
+
         @Schema(description = "Ecological assessment derived from the available documentation")
         String ecologicalReview,
 

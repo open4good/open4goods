@@ -53,7 +53,19 @@ export const resolveProductTitle = (
   const finalizeTitle = (title: string): string =>
     uppercaseBrand ? applyBrandCasing(title, brand, locale) : title
 
-  // 1. New Fields Priorities
+  const aiShortTitle = normalizeString(product.aiReview?.review?.shortTitle)
+  const aiMediumTitle = normalizeString(product.aiReview?.review?.mediumTitle)
+
+  // 1. AI Titles (highest priority)
+  if (preferLongName || preferH1Title) {
+    if (aiMediumTitle) return finalizeTitle(aiMediumTitle)
+  }
+
+  if (preferCardTitle || preferShortName || preferPrettyName) {
+    if (aiShortTitle) return finalizeTitle(aiShortTitle)
+  }
+
+  // 2. New Fields Priorities
   if (preferCardTitle) {
     const cardTitle = normalizeString(product.names?.cardTitle)
     if (cardTitle) return finalizeTitle(cardTitle)
@@ -89,9 +101,8 @@ export const resolveProductTitle = (
     if (prettyName) return finalizeTitle(prettyName)
   }
 
-  // 4. AI Title
-  const aiTitle = normalizeString(product.aiReview?.review?.mediumTitle)
-  if (aiTitle) return finalizeTitle(aiTitle)
+  // 4. AI Title (fallback)
+  if (aiMediumTitle) return finalizeTitle(aiMediumTitle)
 
   // 5. Best Name (Identity -> Base)
   const identityBestName = normalizeString(product.identity?.bestName)

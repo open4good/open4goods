@@ -78,7 +78,14 @@
                           size="small"
                           class="product-hero__ai-summary-icon"
                         />
-                        <span>{{ aiReview.technicalOneline }}</span>
+                        <div class="product-hero__ai-summary-content">
+                          <span class="product-hero__ai-summary-label">
+                            {{ t('product.hero.aiSummary.technical') }}
+                          </span>
+                          <span class="product-hero__ai-summary-text">
+                            {{ aiReview.technicalOneline }}
+                          </span>
+                        </div>
                       </li>
                       <li
                         v-if="aiReview?.ecologicalOneline"
@@ -89,7 +96,14 @@
                           size="small"
                           class="product-hero__ai-summary-icon"
                         />
-                        <span>{{ aiReview.ecologicalOneline }}</span>
+                        <div class="product-hero__ai-summary-content">
+                          <span class="product-hero__ai-summary-label">
+                            {{ t('product.hero.aiSummary.ecological') }}
+                          </span>
+                          <span class="product-hero__ai-summary-text">
+                            {{ aiReview.ecologicalOneline }}
+                          </span>
+                        </div>
                       </li>
                       <li
                         v-if="aiReview?.communityOneline"
@@ -100,7 +114,14 @@
                           size="small"
                           class="product-hero__ai-summary-icon"
                         />
-                        <span>{{ aiReview.communityOneline }}</span>
+                        <div class="product-hero__ai-summary-content">
+                          <span class="product-hero__ai-summary-label">
+                            {{ t('product.hero.aiSummary.community') }}
+                          </span>
+                          <span class="product-hero__ai-summary-text">
+                            {{ aiReview.communityOneline }}
+                          </span>
+                        </div>
                       </li>
                     </ul>
                   </template>
@@ -118,67 +139,45 @@
                     v-if="attribute.key !== 'ai-summary'"
                     class="product-hero__attribute-value"
                   >
-                    <template v-if="attribute.tooltip">
-                      <v-tooltip location="bottom" :text="attribute.tooltip">
-                        <template #activator="{ props: tooltipProps }">
-                          <ProductAttributeSourcingLabel
-                            class="product-hero__attribute-value-label"
-                            :sourcing="attribute.sourcing"
-                            :value="attribute.value"
-                            :enable-tooltip="attribute.enableTooltip !== false"
-                          >
-                            <template #default="{ displayValue, displayHtml }">
-                              <span
-                                class="product-hero__attribute-value-content"
-                                v-bind="tooltipProps"
-                              >
-                                <NuxtImg
-                                  v-if="attribute.flag"
-                                  :src="attribute.flag"
-                                  :alt="displayValue"
-                                  width="32"
-                                  height="24"
-                                  class="product-hero__flag"
-                                />
-                                <!-- eslint-disable-next-line vue/no-v-html -->
-                                <span v-if="displayHtml" v-html="displayHtml" />
-                                <span v-else>{{ displayValue }}</span>
-                              </span>
-                            </template>
-                          </ProductAttributeSourcingLabel>
-                        </template>
-                      </v-tooltip>
-                    </template>
-                    <template v-else>
-                      <ProductAttributeSourcingLabel
-                        class="product-hero__attribute-value-label"
-                        :sourcing="attribute.sourcing"
-                        :value="attribute.value"
-                        :enable-tooltip="attribute.enableTooltip !== false"
-                      >
-                        <template #default="{ displayValue, displayHtml }">
-                          <span class="product-hero__attribute-value-content">
-                            <NuxtImg
-                              v-if="attribute.flag"
-                              :src="attribute.flag"
-                              :alt="displayValue"
-                              width="32"
-                              height="24"
-                              class="product-hero__flag"
-                            />
-                            <v-icon
-                              v-if="attribute.icon"
-                              :icon="attribute.icon"
-                              size="small"
-                              class="product-hero__icon mr-2"
-                            />
-                            <!-- eslint-disable-next-line vue/no-v-html -->
-                            <span v-if="displayHtml" v-html="displayHtml" />
-                            <span v-else>{{ displayValue }}</span>
-                          </span>
-                        </template>
-                      </ProductAttributeSourcingLabel>
-                    </template>
+                    <ProductAttributeSourcingLabel
+                      class="product-hero__attribute-value-label"
+                      :sourcing="attribute.sourcing"
+                      :value="attribute.value"
+                      :enable-tooltip="attribute.enableTooltip !== false"
+                    >
+                      <template #default="{ displayValue, displayHtml }">
+                        <v-tooltip
+                          location="bottom"
+                          :text="attribute.tooltip"
+                          :disabled="!attribute.tooltip"
+                        >
+                          <template #activator="{ props: tooltipProps }">
+                            <span
+                              class="product-hero__attribute-value-content"
+                              v-bind="tooltipProps"
+                            >
+                              <NuxtImg
+                                v-if="attribute.flag"
+                                :src="attribute.flag"
+                                :alt="displayValue"
+                                width="32"
+                                height="24"
+                                class="product-hero__flag"
+                              />
+                              <v-icon
+                                v-if="attribute.icon"
+                                :icon="attribute.icon"
+                                size="small"
+                                class="product-hero__icon mr-2"
+                              />
+                              <!-- eslint-disable-next-line vue/no-v-html -->
+                              <span v-if="displayHtml" v-html="displayHtml" />
+                              <span v-else>{{ displayValue }}</span>
+                            </span>
+                          </template>
+                        </v-tooltip>
+                      </template>
+                    </ProductAttributeSourcingLabel>
                   </span>
                 </li>
               </ul>
@@ -290,8 +289,8 @@ const { t, te, n, locale } = useI18n()
 
 // AI Review Logic
 
-const aiReview = computed(() => props.product.aiReview)
-const hasAiReview = computed(() => Boolean(aiReview.value?.review))
+const aiReview = computed(() => props.product.aiReview?.review ?? null)
+const hasAiReview = computed(() => Boolean(aiReview.value))
 
 const handleAiReviewClick = () => {
   const element =
@@ -827,7 +826,7 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 
 .product-hero__ai-summary-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   font-size: 0.95rem;
   color: rgb(var(--v-theme-text-neutral-strong));
@@ -835,6 +834,25 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 
 .product-hero__ai-summary-icon {
   color: rgb(var(--v-theme-primary));
+}
+
+.product-hero__ai-summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.product-hero__ai-summary-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+}
+
+.product-hero__ai-summary-text {
+  font-size: 0.95rem;
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__compare-button {

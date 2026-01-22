@@ -65,6 +65,12 @@ export interface AiReviewDto {
      */
     technicalReview?: string;
     /**
+     * Short technical summary in 2-3 sentences
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    technicalShortReview?: string;
+    /**
      * Ecological assessment derived from the available documentation
      * @type {string}
      * @memberof AiReviewDto
@@ -148,6 +154,7 @@ export function AiReviewDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'mediumTitle': json['mediumTitle'] == null ? undefined : json['mediumTitle'],
         'shortTitle': json['shortTitle'] == null ? undefined : json['shortTitle'],
         'technicalReview': json['technicalReview'] == null ? undefined : json['technicalReview'],
+        'technicalShortReview': json['technicalShortReview'] == null ? undefined : json['technicalShortReview'],
         'ecologicalReview': json['ecologicalReview'] == null ? undefined : json['ecologicalReview'],
         'summary': json['summary'] == null ? undefined : json['summary'],
         'pros': json['pros'] == null ? undefined : json['pros'],
@@ -177,6 +184,7 @@ export function AiReviewDtoToJSONTyped(value?: AiReviewDto | null, ignoreDiscrim
         'mediumTitle': value['mediumTitle'],
         'shortTitle': value['shortTitle'],
         'technicalReview': value['technicalReview'],
+        'technicalShortReview': value['technicalShortReview'],
         'ecologicalReview': value['ecologicalReview'],
         'summary': value['summary'],
         'pros': value['pros'],
@@ -189,4 +197,3 @@ export function AiReviewDtoToJSONTyped(value?: AiReviewDto | null, ignoreDiscrim
         'communityOneline': value['communityOneline'],
     };
 }
-
