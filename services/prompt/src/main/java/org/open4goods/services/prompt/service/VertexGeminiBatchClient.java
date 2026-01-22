@@ -63,6 +63,7 @@ public class VertexGeminiBatchClient {
                     )
             );
             String payload = objectMapper.writeValueAsString(requestBody);
+            logger.info("Submitting Vertex batch job payload: {}", payload);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(batchEndpoint()))
                     .header("Authorization", "Bearer " + accessToken())
@@ -71,7 +72,9 @@ public class VertexGeminiBatchClient {
                     .build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 300) {
-                throw new IllegalStateException("Vertex batch submission failed with status " + response.statusCode());
+                String responseBody = response.body();
+                logger.error("Vertex batch submission failed. Status: {}, Body: {}", response.statusCode(), responseBody);
+                throw new IllegalStateException("Vertex batch submission failed with status " + response.statusCode() + " body: " + responseBody);
             }
             JsonNode root = objectMapper.readTree(response.body());
             String name = root.path("name").asText();
