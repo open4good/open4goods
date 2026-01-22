@@ -1,7 +1,8 @@
 package org.open4goods.api.services.store;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.open4goods.model.datafragment.DataFragment;
 import org.slf4j.Logger;
@@ -42,35 +43,30 @@ public class DataFragmentAggregationWorker implements Runnable {
 		this.workerName = workerName;
 	}
 
-        @Override
-        public void run() {
+	@Override
+	public void run() {
 
-                while (!service.getServiceShutdown().get()) {
-                        try {
-				if (!service.getQueue().isEmpty()) {
-					// There is data to consume and queue consummation is enabled
-					final Set<DataFragment> buffer = new HashSet<>();	
-					
-					for (int i = 0; i < dequeuePageSize; i++) {
-							buffer.add(service.getQueue().take());
-					}
-					
-					// Aggregating
-					service.aggregateAndstore(buffer);
-					
-					logger.info("{} has handled {} DataFragments. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
-
-				} else {
-					try {
-						logger.debug("No DataFragments to dequeue. Will sleep {}ms",pauseDuration);
-						Thread.sleep(pauseDuration + (int) (Math.random() * 1000));
-					} catch (final InterruptedException e) {
-					}
+		while (!service.getServiceShutdown().get()) {
+			try {
+				List<DataFragment> buffer = new ArrayList<>(dequeuePageSize);
+				DataFragment first = service.getQueue().poll(pauseDuration, TimeUnit.MILLISECONDS);
+				if (first == null) {
+					continue;
 				}
+
+				buffer.add(first);
+				service.getQueue().drainTo(buffer, dequeuePageSize - buffer.size());
+
+				service.aggregateAndstore(buffer);
+				logger.info("{} has handled {} DataFragments. {} Remaining in queue", workerName, buffer.size(),
+						service.getQueue().size());
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				break;
 			} catch (final Exception e) {
-                                logger.error("Error while dequeing DataFragments",e);
-                        }
-                }
-                logger.info("{} thread terminated", workerName);
-        }
+				logger.error("Error while dequeing DataFragments", e);
+			}
+		}
+		logger.info("{} thread terminated", workerName);
+	}
 }

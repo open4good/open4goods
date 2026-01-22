@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.AggregationPipelineProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
@@ -301,9 +302,9 @@ public class ApiConfig {
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
 			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, DjlTextEmbeddingService embeddingService,
-			DjlEmbeddingProperties embeddingProperties) {
+			DjlEmbeddingProperties embeddingProperties, AggregationPipelineProperties aggregationPipelineProperties) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
-				serialisationService, brandScoreService, embeddingService, embeddingProperties);
+				serialisationService, brandScoreService, embeddingService, embeddingProperties, aggregationPipelineProperties);
 	}
 
 	//////////////////////////////////////////////////////////

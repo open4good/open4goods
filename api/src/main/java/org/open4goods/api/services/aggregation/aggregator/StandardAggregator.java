@@ -1,5 +1,7 @@
 package org.open4goods.api.services.aggregation.aggregator;
 
+import java.util.Collection;
+
 import java.util.List;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -80,5 +82,34 @@ public class StandardAggregator extends AbstractAggregator {
 			}
 		}
 		return data;
+	}
+
+	/**
+	 * Batch processing entry point that respects lifecycle hooks.
+	 *
+	 * @param datas products to sanitize
+	 * @param vConf vertical configuration to apply when provided
+	 * @throws AggregationSkipException when a service explicitly skips aggregation
+	 */
+	public void onProducts(final Collection<Product> datas, final VerticalConfig vConf) throws AggregationSkipException
+	{
+		logger.debug("Updating {} products using {} services", datas.size(), services.size());
+
+		for (final AbstractAggregationService service : services) {
+			service.init(datas);
+			for (final Product data : datas) {
+				try {
+					VerticalConfig resolvedConfig = vConf != null ? vConf
+							: verticalConfigService.getConfigByIdOrDefault(data.getVertical());
+					service.onProduct(data, resolvedConfig);
+				} catch (AggregationSkipException e) {
+					throw e;
+				} catch (final Exception e) {
+					logger.error("AggregationFacadeService {} throw an exception while processing data {}",
+							service.getClass().getName(), data, e);
+				}
+			}
+			service.done(datas, vConf);
+		}
 	}
 }

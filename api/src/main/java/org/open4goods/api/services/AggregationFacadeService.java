@@ -4,8 +4,10 @@ package org.open4goods.api.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.AggregationPipelineProperties;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -49,13 +51,26 @@ import jakarta.annotation.PreDestroy;
 
 /**
  * This service is in charge of building Product in realtime mode
- * TODO : Maintain a state machine to disable multiple launching
  * @author goulven
  *
  */
 public class AggregationFacadeService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(AggregationFacadeService.class);
+
+	private static final Set<String> SUPPORTED_SERVICE_IDS = Set.of(
+			"identity",
+			"taxonomy",
+			"attributes",
+			"names",
+			"price",
+			"media",
+			"clean-score",
+			"attribute-score",
+			"sustainalytics",
+			"data-quality",
+			"eco-score",
+			"participating");
 
 	private EvaluationService evaluationService;
 
@@ -92,6 +107,8 @@ public class AggregationFacadeService {
 
 	private SerialisationService serialisationService;
 
+	private AggregationPipelineProperties aggregationPipelineProperties;
+
 	public AggregationFacadeService(EvaluationService evaluationService,
 			StandardiserService standardiserService,
 			AutowireCapableBeanFactory autowireBeanFactory, ProductRepository aggregatedDataRepository,
@@ -105,7 +122,8 @@ public class AggregationFacadeService {
 			SerialisationService serialisationService,
 			BrandScoreService brandScoreService,
 			DjlTextEmbeddingService embeddingService,
-			DjlEmbeddingProperties embeddingProperties
+			DjlEmbeddingProperties embeddingProperties,
+			AggregationPipelineProperties aggregationPipelineProperties
 			) {
 		super();
 		this.evaluationService = evaluationService;
@@ -123,6 +141,8 @@ public class AggregationFacadeService {
 		this.icecatFeatureService = icecatFeatureService;
 		this.embeddingService = embeddingService;
 		this.embeddingProperties = embeddingProperties;
+		this.aggregationPipelineProperties = aggregationPipelineProperties;
+		validatePipelineConfiguration();
 		this.realtimeAggregator = getStandardAggregator("realtime");
 		this.serialisationService = serialisationService;
 		this.brandScoreService = brandScoreService;
@@ -187,13 +207,12 @@ public class AggregationFacadeService {
 	 */
 	public void sanitizeAll()  {
 
-			logger.info("started : Sanitisation batching for all items");
-			StandardAggregator batchAgg = getStandardAggregator();
+		logger.info("started : Sanitisation batching for all items");
+		StandardAggregator batchAgg = getStandardAggregator();
 
-			// TODO : Performance, could parallelize
-			dataRepository.exportAll().forEach(p -> {
-				if (toBeDeleted(p)) {
-					logger.warn("Deleting item : {}",p);
+		dataRepository.exportAll().forEach(p -> {
+			if (toBeDeleted(p)) {
+				logger.warn("Deleting item : {}",p);
 					dataRepository.delete(p);
 				} else {
 					try {
@@ -234,20 +253,18 @@ public class AggregationFacadeService {
 	 */
 	public void sanitizeVertical(VerticalConfig vertical)  {
 
-			logger.info("started : Sanitisation batching for vertical : {}",vertical);
-			StandardAggregator batchAgg = getStandardAggregator();
+		logger.info("started : Sanitisation batching for vertical : {}",vertical);
+		StandardAggregator batchAgg = getStandardAggregator();
 
-			// TODO : Performance, could parallelize
-			// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
-			dataRepository.getProductsMatchingCategoriesOrVerticalId(vertical) .forEach(p -> {
-                try {
-					batchAgg.onProduct(p);
-					dataRepository.index(p);
-				} catch (AggregationSkipException e) {
-					logger.error("Skipping product during batched sanitisation : ",e);
-				}
-            });
-			logger.info("done: Sanitisation batching for all items");
+		// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
+		Set<Product> products = dataRepository.getProductsMatchingCategoriesOrVerticalId(vertical).collect(Collectors.toSet());
+		try {
+			batchAgg.onProducts(products, vertical);
+			products.forEach(dataRepository::index);
+		} catch (AggregationSkipException e) {
+			logger.error("Skipping product during batched sanitisation : ",e);
+		}
+		logger.info("done: Sanitisation batching for all items");
 	}
 
 
@@ -261,15 +278,12 @@ public class AggregationFacadeService {
 		logger.info("started : Sanitisation batching for {} products in vertical : {}",products.size(),  vertical);
 		StandardAggregator batchAgg = getStandardAggregator();
 
-		// TODO : Performance, could parallelize
 		// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
-		products.forEach(p -> {
-            try {
-				batchAgg.onProduct(p);
-			} catch (AggregationSkipException e) {
-				logger.error("Skipping product during batched sanitisation : ",e);
-			}
-        });
+		try {
+			batchAgg.onProducts(products, vertical);
+		} catch (AggregationSkipException e) {
+			logger.error("Skipping product during batched sanitisation : ",e);
+		}
 		logger.info("done: Sanitisation batching for all items");
 }
 
@@ -283,15 +297,12 @@ public class AggregationFacadeService {
 		logger.info("started : Sanitisation batching for {} products in vertical : {}",products.size(),  vertical);
 		StandardAggregator batchAgg = getCategorieClassificationAggregator();
 
-		// TODO : Performance, could parallelize
 		// Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items
-		products.forEach(p -> {
-            try {
-				batchAgg.onProduct(p);
-			} catch (AggregationSkipException e) {
-				logger.error("Skipping product during batched sanitisation : ",e);
-			}
-        });
+		try {
+			batchAgg.onProducts(products, vertical);
+		} catch (AggregationSkipException e) {
+			logger.error("Skipping product during batched sanitisation : ",e);
+		}
 		logger.info("done: classification");
 }
 
@@ -302,7 +313,6 @@ public class AggregationFacadeService {
 	 * @param product
 	 * @throws AggregationSkipException
 	 */
-	// TODO(p3,design) : not a good design
 	public void sanitizeAndSave(Product product) throws AggregationSkipException {
 		aggregate(product);
 	    dataRepository.forceIndex(product);
@@ -352,21 +362,8 @@ public class AggregationFacadeService {
 
 		Logger logger = GenericFileLogger.initLogger(name, apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation");
 
-		final List<AbstractAggregationService> services = new ArrayList<>();
-
-		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
-		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
-		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger,icecatFeatureService));
-		services.add(new NamesAggregationService( logger, verticalConfigService, evaluationService, blablaService, embeddingService,
-				embeddingProperties));
-		//		services.add(new CategoryService( taxonomyService));
-		//		services.add(new UrlsAggregationService(evaluationService,
-		//				config.getNamings().getProductUrlTemplates()));
-		services.add(new PriceAggregationService( logger));
-		//		services.add(new CommentsAggregationService( config.getCommentsConfig()));
-		//		services.add(new ProsAndConsAggregationService(apiProperties.logsFolder()));
-		//		services.add(new QuestionsAggregationService(apiProperties.logsFolder()));
-		services.add(new MediaAggregationService(logger));
+		List<String> pipeline = resolveStandardPipeline(name);
+		final List<AbstractAggregationService> services = buildPipeline(pipeline, logger);
 
 		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);
 		autowireBeanFactory.autowireBean(ret);
@@ -383,10 +380,9 @@ public class AggregationFacadeService {
 
 		Logger logger = GenericFileLogger.initLogger("categores_classif", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation");
 
-		final List<AbstractAggregationService> services = new ArrayList<>();
-
-		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
-		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
+		final List<AbstractAggregationService> services = buildPipeline(
+				aggregationPipelineProperties.getPipelines().getClassification(),
+				logger);
 
 		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);
 		autowireBeanFactory.autowireBean(ret);
@@ -403,16 +399,11 @@ public class AggregationFacadeService {
 	 * @return
 	 */
 	public ScoringBatchedAggregator getScoringAggregator() {
-		final List<AbstractAggregationService> services = new ArrayList<>();
-
 		Logger logger = GenericFileLogger.initLogger("score", apiProperties.aggLogLevel(), apiProperties.logsFolder()+"/aggregation");
 
-		services.add(new CleanScoreAggregationService(logger));
-                services.add(new Attribute2ScoreAggregationService(logger));
-                services.add(new SustainalyticsAggregationService( logger, brandService, verticalConfigService,brandScoreService));
-                services.add(new DataCompletion2ScoreAggregationService(logger));
-                services.add(new EcoScoreAggregationService( logger));
-                services.add(new ParticipatingScoresAggregationService(logger));
+		final List<AbstractAggregationService> services = buildPipeline(
+				aggregationPipelineProperties.getPipelines().getScoring(),
+				logger);
 
 		final ScoringBatchedAggregator ret = new ScoringBatchedAggregator(services);
 		autowireBeanFactory.autowireBean(ret);
@@ -428,6 +419,71 @@ public class AggregationFacadeService {
 	 */
 	public StandardAggregator getStandardAggregator() {
 		return getStandardAggregator("sanitisation");
+	}
+
+	private void validatePipelineConfiguration()
+	{
+		AggregationPipelineProperties.Pipelines pipelines = aggregationPipelineProperties.getPipelines();
+		validatePipeline("realtime", pipelines.getRealtime());
+		validatePipeline("sanitisation", pipelines.getSanitisation());
+		validatePipeline("classification", pipelines.getClassification());
+		validatePipeline("scoring", pipelines.getScoring());
+	}
+
+	private void validatePipeline(String pipelineName, List<String> serviceIds)
+	{
+		if (serviceIds == null || serviceIds.isEmpty()) {
+			throw new IllegalStateException("Aggregation pipeline '" + pipelineName + "' must not be empty.");
+		}
+		List<String> invalid = serviceIds.stream()
+				.filter(id -> id == null || id.isBlank() || !SUPPORTED_SERVICE_IDS.contains(id))
+				.toList();
+		if (!invalid.isEmpty()) {
+			throw new IllegalStateException("Aggregation pipeline '" + pipelineName + "' contains unsupported services: "
+					+ invalid);
+		}
+	}
+
+	private List<String> resolveStandardPipeline(String name)
+	{
+		if ("sanitisation".equalsIgnoreCase(name)) {
+			return aggregationPipelineProperties.getPipelines().getSanitisation();
+		}
+		return aggregationPipelineProperties.getPipelines().getRealtime();
+	}
+
+	private List<AbstractAggregationService> buildPipeline(List<String> serviceIds, Logger logger)
+	{
+		if (serviceIds == null) {
+			throw new IllegalArgumentException("Aggregation pipeline configuration is missing.");
+		}
+		List<AbstractAggregationService> services = new ArrayList<>();
+		for (String serviceId : serviceIds) {
+			services.add(buildService(serviceId, logger));
+		}
+		return services;
+	}
+
+	private AbstractAggregationService buildService(String serviceId, Logger logger)
+	{
+		return switch (serviceId) {
+			case "identity" -> new IdentityAggregationService(logger, gs1prefixService, barcodeValidationService);
+			case "taxonomy" -> new TaxonomyRealTimeAggregationService(logger, verticalConfigService, taxonomyService);
+			case "attributes" -> new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger,
+					icecatFeatureService);
+			case "names" -> new NamesAggregationService(logger, verticalConfigService, evaluationService, blablaService,
+					embeddingService, embeddingProperties);
+			case "price" -> new PriceAggregationService(logger);
+			case "media" -> new MediaAggregationService(logger);
+			case "clean-score" -> new CleanScoreAggregationService(logger);
+			case "attribute-score" -> new Attribute2ScoreAggregationService(logger);
+			case "sustainalytics" -> new SustainalyticsAggregationService(logger, brandService, verticalConfigService,
+					brandScoreService);
+			case "data-quality" -> new DataCompletion2ScoreAggregationService(logger);
+			case "eco-score" -> new EcoScoreAggregationService(logger);
+			case "participating" -> new ParticipatingScoresAggregationService(logger);
+			default -> throw new IllegalArgumentException("Unsupported aggregation service id: " + serviceId);
+		};
 	}
 
 }

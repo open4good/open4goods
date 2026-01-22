@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.AggregationPipelineProperties;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -84,7 +85,8 @@ class AggregationFacadeServiceParticipatingScoresIT {
                 mock(SerialisationService.class),
                 mock(BrandScoreService.class),
                 mock(DjlTextEmbeddingService.class),
-                new DjlEmbeddingProperties());
+                new DjlEmbeddingProperties(),
+                new AggregationPipelineProperties());
     }
 
     private VerticalConfig verticalConfig() {

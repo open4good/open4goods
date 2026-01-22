@@ -23,6 +23,34 @@ logging:
 
 aggregationLogLevel: warn
 
+open4goods:
+  aggregation:
+    pipelines:
+      realtime:
+        - identity
+        - taxonomy
+        - attributes
+        - names
+        - price
+        - media
+      sanitisation:
+        - identity
+        - taxonomy
+        - attributes
+        - names
+        - price
+        - media
+      classification:
+        - identity
+        - taxonomy
+      scoring:
+        - clean-score
+        - attribute-score
+        - sustainalytics
+        - data-quality
+        - eco-score
+        - participating
+
 
 management:
   health:
@@ -85,5 +113,4 @@ remote-file-caching:
 google-taxonomy:
   fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
   en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
-
 
