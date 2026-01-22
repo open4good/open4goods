@@ -10,6 +10,9 @@ const moduleLoaders = {
   RadarChart: async () =>
     (await import(/* webpackChunkName: "vendor-echarts" */ 'echarts/charts'))
       .RadarChart,
+  CustomChart: async () =>
+    (await import(/* webpackChunkName: "vendor-echarts" */ 'echarts/charts'))
+      .CustomChart,
   GridComponent: async () =>
     (
       await import(

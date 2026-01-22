@@ -43,7 +43,7 @@ class EcoScoreResilienceTest {
     }
 
     @Test
-    void ecoscoreIsSkippedIfNonZeroWeightSubscoreIsMissing() {
+    void ecoscoreIsComputedIfNonZeroWeightSubscoreIsMissing() {
         Product product = new Product(101L);
         product.getScores().put("REAL_SCORE", new Score("REAL_SCORE", 4.0));
 
@@ -66,7 +66,9 @@ class EcoScoreResilienceTest {
 
         Score ecoscore = product.ecoscore();
 
-        // This is the current behavior (fails)
-        assertThat(ecoscore).isNull();
+        // This is the new behavior (resilient)
+        assertThat(ecoscore).isNotNull();
+        // 4.0 * 0.5 + 0.0 (missing) * 0.5 = 2.0
+        assertThat(ecoscore.getAbsolute().getValue()).isEqualTo(2.0);
     }
 }

@@ -327,6 +327,17 @@ class ReviewGenerationServiceTest {
         review.setCons(List.of("Con — [2]"));
         review.setAttributes(List.of(new AiReview.AiAttribute("Attr —", "Val —", 1)));
         
+        // Set new fields
+        review.setTechnicalReviewNovice("Tech Novice — [1]");
+        review.setTechnicalReviewIntermediate("Tech Intermediate — [2]");
+        review.setTechnicalReviewAdvanced("Tech Advanced — [3]");
+        review.setEcologicalReviewNovice("Eco Novice — [1]");
+        review.setEcologicalReviewIntermediate("Eco Intermediate — [2]");
+        review.setEcologicalReviewAdvanced("Eco Advanced — [3]");
+        review.setCommunityReviewNovice("Comm Novice — [1]");
+        review.setCommunityReviewIntermediate("Comm Intermediate — [2]");
+        review.setCommunityReviewAdvanced("Comm Advanced — [3]");
+        
         AiReview.AiSource source1 = new AiReview.AiSource(1, "Source —", "Desc —", "http://example.com/1");
         review.setSources(List.of(source1));
 
@@ -340,5 +351,16 @@ class ReviewGenerationServiceTest {
         assertThat(processed.getAttributes().get(0).getValue()).isEqualTo("Val -");
         assertThat(processed.getSources().get(0).getName()).isEqualTo("Source -");
         assertThat(processed.getSources().get(0).getDescription()).isEqualTo("Desc -");
+        
+        // Assert new fields
+        assertThat(processed.getTechnicalReviewNovice()).isEqualTo("Tech Novice - <a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
+        assertThat(processed.getTechnicalReviewIntermediate()).isEqualTo("Tech Intermediate - <a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
+        assertThat(processed.getTechnicalReviewAdvanced()).isEqualTo("Tech Advanced - <a class=\"review-ref\" href=\"#review-ref-3\">[3]</a>");
+        assertThat(processed.getEcologicalReviewNovice()).isEqualTo("Eco Novice - <a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
+        assertThat(processed.getEcologicalReviewIntermediate()).isEqualTo("Eco Intermediate - <a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
+        assertThat(processed.getEcologicalReviewAdvanced()).isEqualTo("Eco Advanced - <a class=\"review-ref\" href=\"#review-ref-3\">[3]</a>");
+        assertThat(processed.getCommunityReviewNovice()).isEqualTo("Comm Novice - <a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
+        assertThat(processed.getCommunityReviewIntermediate()).isEqualTo("Comm Intermediate - <a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
+        assertThat(processed.getCommunityReviewAdvanced()).isEqualTo("Comm Advanced - <a class=\"review-ref\" href=\"#review-ref-3\">[3]</a>");
     }
 }

@@ -662,8 +662,9 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * the corresponding product review. Finally, the tracking file is deleted.
 	 * </p>
 	 */
-	@Scheduled(fixedDelayString = "${review.generation.batch-poll-interval:PT1H}")
+	@Scheduled(fixedDelayString = "${review.generation.batch-poll-interval:PT5M}")
 	public void checkBatchJobStatuses() {
+		// TODO : ADD LOG
 		File[] trackingFiles = trackingFolder
 				.listFiles((dir, name) -> name.startsWith("tracking_") && name.endsWith(".json"));
 		if (trackingFiles == null || trackingFiles.length == 0) {
@@ -920,10 +921,17 @@ public class ReviewGenerationService implements HealthIndicator {
 				normalization.shortDescription(),
 				normalization.mediumTitle(),
 				normalization.shortTitle(),
+				original.getBaseLine(),
 				original.getManufacturingCountry(),
-				normalization.technicalReview(),
-				normalization.ecologicalReview(),
-				original.getCommunityReview(),
+				normalization.technicalReviewNovice(),
+				normalization.technicalReviewIntermediate(),
+				normalization.technicalReviewAdvanced(),
+				normalization.ecologicalReviewNovice(),
+				normalization.ecologicalReviewIntermediate(),
+				normalization.ecologicalReviewAdvanced(),
+				normalization.communityReviewNovice(),
+				normalization.communityReviewIntermediate(),
+				normalization.communityReviewAdvanced(),
 				normalization.summary(),
 				normalization.pros(),
 				normalization.cons(),
@@ -952,8 +960,6 @@ public class ReviewGenerationService implements HealthIndicator {
 				normalizeText(review.getShortDescription()),
 				normalizeText(review.getMediumTitle()),
 				normalizeText(review.getShortTitle()),
-				normalizeText(review.getTechnicalReview()),
-				normalizeText(review.getEcologicalReview()),
 				normalizeText(review.getSummary()),
 				review.getPros() == null ? List.of() : review.getPros().stream().map(this::normalizeText).toList(),
 				review.getCons() == null ? List.of() : review.getCons().stream().map(this::normalizeText).toList(),
@@ -968,7 +974,16 @@ public class ReviewGenerationService implements HealthIndicator {
 				resolveUrlList(review.getPdfs()),
 				resolveUrlList(review.getImages()),
 				resolveUrlList(review.getVideos()),
-				resolveUrlList(review.getSocialLinks())
+				resolveUrlList(review.getSocialLinks()),
+				normalizeText(review.getTechnicalReviewNovice()),
+				normalizeText(review.getTechnicalReviewIntermediate()),
+				normalizeText(review.getTechnicalReviewAdvanced()),
+				normalizeText(review.getEcologicalReviewNovice()),
+				normalizeText(review.getEcologicalReviewIntermediate()),
+				normalizeText(review.getEcologicalReviewAdvanced()),
+				normalizeText(review.getCommunityReviewNovice()),
+				normalizeText(review.getCommunityReviewIntermediate()),
+				normalizeText(review.getCommunityReviewAdvanced())
 		);
 
 		List<AiReview.AiSource> normalizedSources = review.getSources() == null ? List.of() : review.getSources().stream()
@@ -1009,8 +1024,6 @@ public class ReviewGenerationService implements HealthIndicator {
 				review.getShortDescription(),
 				review.getMediumTitle(),
 				review.getShortTitle(),
-				review.getTechnicalReview(),
-				review.getEcologicalReview(),
 				review.getSummary(),
 				review.getPros(),
 				review.getCons(),
@@ -1023,7 +1036,16 @@ public class ReviewGenerationService implements HealthIndicator {
 				resolveUrlList(review.getPdfs()),
 				resolveUrlList(review.getImages()),
 				resolveUrlList(review.getVideos()),
-				resolveUrlList(review.getSocialLinks())
+				resolveUrlList(review.getSocialLinks()),
+				review.getTechnicalReviewNovice(),
+				review.getTechnicalReviewIntermediate(),
+				review.getTechnicalReviewAdvanced(),
+				review.getEcologicalReviewNovice(),
+				review.getEcologicalReviewIntermediate(),
+				review.getEcologicalReviewAdvanced(),
+				review.getCommunityReviewNovice(),
+				review.getCommunityReviewIntermediate(),
+				review.getCommunityReviewAdvanced()
 		);
 
 		return copyWithNewData(review, normalization, updatedSources);
@@ -1199,8 +1221,6 @@ public class ReviewGenerationService implements HealthIndicator {
 				replaceReferences(review.getShortDescription()),
 				replaceReferences(review.getMediumTitle()),
 				replaceReferences(review.getShortTitle()),
-				replaceReferences(review.getTechnicalReview()),
-				replaceReferences(review.getEcologicalReview()),
 				replaceReferences(review.getSummary()),
 				review.getPros() == null ? List.of() : review.getPros().stream().map(this::replaceReferences).toList(),
 				review.getCons() == null ? List.of() : review.getCons().stream().map(this::replaceReferences).toList(),
@@ -1216,7 +1236,16 @@ public class ReviewGenerationService implements HealthIndicator {
 				review.getPdfs(),
 				review.getImages(),
 				review.getVideos(),
-				review.getSocialLinks()
+				review.getSocialLinks(),
+				replaceReferences(review.getTechnicalReviewNovice()),
+				replaceReferences(review.getTechnicalReviewIntermediate()),
+				replaceReferences(review.getTechnicalReviewAdvanced()),
+				replaceReferences(review.getEcologicalReviewNovice()),
+				replaceReferences(review.getEcologicalReviewIntermediate()),
+				replaceReferences(review.getEcologicalReviewAdvanced()),
+				replaceReferences(review.getCommunityReviewNovice()),
+				replaceReferences(review.getCommunityReviewIntermediate()),
+				replaceReferences(review.getCommunityReviewAdvanced())
 		);
 
 		List<AiReview.AiSource> sources = review.getSources() == null ? List.of() : review.getSources().stream()
@@ -1291,38 +1320,44 @@ public class ReviewGenerationService implements HealthIndicator {
 		String shortDescription = normalizer.normalize(review.getShortDescription());
 		String mediumTitle = normalizer.normalize(review.getMediumTitle());
 		String shortTitle = normalizer.normalize(review.getShortTitle());
-		String technicalReview = normalizer.normalize(review.getTechnicalReview());
-		String ecologicalReview = normalizer.normalize(review.getEcologicalReview());
-		String summary = normalizer.normalize(review.getSummary());
-		String dataQuality = review.getDataQuality();
-		List<String> pros = review.getPros() == null
-				? List.of()
-				: review.getPros().stream().map(normalizer::normalize).toList();
-		List<String> cons = review.getCons() == null
-				? List.of()
-				: review.getCons().stream().map(normalizer::normalize).toList();
-		List<AiReview.AiAttribute> attributes = review.getAttributes() == null
-				? List.of()
-				: review.getAttributes().stream()
-				.map(attr -> new AiReview.AiAttribute(normalizer.normalize(attr.getName()),
-						normalizer.normalize(attr.getValue()), attr.getNumber()))
-				.toList();
+		String technicalReviewNovice = normalizer.normalize(review.getTechnicalReviewNovice());
+		String technicalReviewIntermediate = normalizer.normalize(review.getTechnicalReviewIntermediate());
+		String technicalReviewAdvanced = normalizer.normalize(review.getTechnicalReviewAdvanced());
+		
+		String ecologicalReviewNovice = normalizer.normalize(review.getEcologicalReviewNovice());
+		String ecologicalReviewIntermediate = normalizer.normalize(review.getEcologicalReviewIntermediate());
+		String ecologicalReviewAdvanced = normalizer.normalize(review.getEcologicalReviewAdvanced());
+		
+		String communityReviewNovice = normalizer.normalize(review.getCommunityReviewNovice());
+		String communityReviewIntermediate = normalizer.normalize(review.getCommunityReviewIntermediate());
 
+		String communityReviewAdvanced = normalizer.normalize(review.getCommunityReviewAdvanced());
+		
+		String summary = normalizer.normalize(review.getSummary());
 		String technicalOneline = normalizer.normalize(review.getTechnicalOneline());
 		String technicalShortReview = normalizer.normalize(review.getTechnicalShortReview());
 		String ecologicalOneline = normalizer.normalize(review.getEcologicalOneline());
 		String communityOneline = normalizer.normalize(review.getCommunityOneline());
+		String dataQuality = normalizer.normalize(review.getDataQuality());
 
+		List<String> pros = review.getPros() == null ? List.of() : review.getPros().stream().map(normalizer::normalize).toList();
+		List<String> cons = review.getCons() == null ? List.of() : review.getCons().stream().map(normalizer::normalize).toList();
+		List<AiReview.AiAttribute> attributes = review.getAttributes() == null ? List.of() : review.getAttributes().stream()
+				.map(a -> new AiReview.AiAttribute(normalizer.normalize(a.getName()), normalizer.normalize(a.getValue()), a.getNumber()))
+				.toList();
 		if (maxSourceNumber == 0) {
 			dataQuality = appendDataQuality(dataQuality, "Aucune source fiable n'a été trouvée.");
 		} else if (normalizer.hasRemovedReferences()) {
 			dataQuality = appendDataQuality(dataQuality,
 					"Certaines références ont été retirées car elles ne correspondaient à aucune source.");
 		}
-		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle, technicalReview,
-				ecologicalReview, summary, pros, cons, attributes, dataQuality, technicalOneline, technicalShortReview,
+		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle, 
+				summary, pros, cons, attributes, dataQuality, technicalOneline, technicalShortReview,
 				ecologicalOneline, communityOneline, review.getPdfs(), review.getImages(), review.getVideos(),
-				review.getSocialLinks());
+				review.getSocialLinks(),
+				technicalReviewNovice, technicalReviewIntermediate, technicalReviewAdvanced,
+				ecologicalReviewNovice, ecologicalReviewIntermediate, ecologicalReviewAdvanced,
+				communityReviewNovice, communityReviewIntermediate, communityReviewAdvanced);
 	}
 
 	private String appendDataQuality(String dataQuality, String note) {
@@ -1336,10 +1371,13 @@ public class ReviewGenerationService implements HealthIndicator {
 	}
 
 	private record ReferenceNormalization(String description, String shortDescription, String mediumTitle,
-			String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros,
+			String shortTitle, String summary, List<String> pros,
 			List<String> cons, List<AiReview.AiAttribute> attributes, String dataQuality,
 			String technicalOneline, String technicalShortReview, String ecologicalOneline, String communityOneline,
-			List<String> pdfs, List<String> images, List<String> videos, List<String> socialLinks) {
+			List<String> pdfs, List<String> images, List<String> videos, List<String> socialLinks,
+			String technicalReviewNovice, String technicalReviewIntermediate, String technicalReviewAdvanced,
+			String ecologicalReviewNovice, String ecologicalReviewIntermediate, String ecologicalReviewAdvanced,
+			String communityReviewNovice, String communityReviewIntermediate, String communityReviewAdvanced) {
 	}
 
 	private static class ReferenceNormalizer {

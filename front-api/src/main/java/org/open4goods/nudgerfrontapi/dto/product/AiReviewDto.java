@@ -21,14 +21,41 @@ public record AiReviewDto(
         @Schema(description = "Short title highlighting the product", example = "Versatile OLED smartphone")
         String shortTitle,
 
-        @Schema(description = "Technical analysis extracted from trustworthy sources")
+        @Schema(description = "Technical analysis extracted from trustworthy sources (Legacy - equivalent to Intermediate)")
         String technicalReview,
+
+        @Schema(description = "Technical analysis for novice users")
+        String technicalReviewNovice,
+
+        @Schema(description = "Technical analysis for intermediate users")
+        String technicalReviewIntermediate,
+
+        @Schema(description = "Technical analysis for advanced users")
+        String technicalReviewAdvanced,
 
         @Schema(description = "Short technical summary in 2-3 sentences")
         String technicalShortReview,
 
-        @Schema(description = "Ecological assessment derived from the available documentation")
+        @Schema(description = "Ecological assessment derived from the available documentation (Legacy - equivalent to Intermediate)")
         String ecologicalReview,
+
+        @Schema(description = "Ecological assessment for novice users")
+        String ecologicalReviewNovice,
+
+        @Schema(description = "Ecological assessment for intermediate users")
+        String ecologicalReviewIntermediate,
+
+        @Schema(description = "Ecological assessment for advanced users")
+        String ecologicalReviewAdvanced,
+
+        @Schema(description = "Community feedback summary for novice users")
+        String communityReviewNovice,
+
+        @Schema(description = "Community feedback summary for intermediate users")
+        String communityReviewIntermediate,
+
+        @Schema(description = "Community feedback summary for advanced users")
+        String communityReviewAdvanced,
 
         @Schema(description = "Concise summary mixing technical and ecological highlights")
         String summary,

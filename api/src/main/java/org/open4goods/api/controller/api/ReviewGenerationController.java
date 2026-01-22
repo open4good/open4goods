@@ -170,7 +170,7 @@ public class ReviewGenerationController {
     public ResponseEntity<List<String>> generateImpactScoreBatch(
             @RequestParam(value = "verticalId", required = false) String verticalId,
             @RequestParam(value = "limit", defaultValue = "2") int limit,
-            @RequestParam(value = "sortOnImpactScore", defaultValue = "false") boolean sortOnImpactScore
+            @RequestParam(value = "sortOnImpactScore", defaultValue = "true") boolean sortOnImpactScore
 
 
 
