@@ -1164,13 +1164,13 @@ public class SearchService {
 	 * @return grouped semantic hits and missing-vertical results
 	 */
 	private SemanticGlobalSearchResult executeSemanticGlobalSearch(String sanitizedQuery, DomainLanguage domainLanguage) {
-		float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
-		if (embedding == null) {
+		List<String> candidateVerticals = resolveSemanticVerticalCandidates(sanitizedQuery, domainLanguage);
+		if (candidateVerticals.isEmpty()) {
 			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
 		}
 
-		List<String> candidateVerticals = resolveSemanticVerticalCandidates(sanitizedQuery, domainLanguage);
-		if (candidateVerticals.isEmpty()) {
+		float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
+		if (embedding == null) {
 			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
 		}
 		List<GlobalSearchHit> combined = new ArrayList<>();
@@ -1375,10 +1375,11 @@ public class SearchService {
 			queryVector.add(value);
 		}
 
+		final Query finalScopedFilter = scopedFilter;
 		co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch
 				.of(knn -> knn.field("embedding").queryVector(queryVector).k(knnLimit)
 						.numCandidates(Math.max(knnLimit * 2, 50))
-						.filter(scopedFilter == null ? List.of() : List.of(scopedFilter)));
+						.filter(finalScopedFilter == null ? List.of() : List.of(finalScopedFilter)));
 
 		NativeQueryBuilder builder = new NativeQueryBuilder().withQuery(scopedFilter).withKnnSearches(knnSearch)
 				.withPageable(PageRequest.of(0, knnLimit))

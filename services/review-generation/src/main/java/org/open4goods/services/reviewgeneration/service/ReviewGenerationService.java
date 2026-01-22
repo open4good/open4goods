@@ -392,7 +392,7 @@ public class ReviewGenerationService implements HealthIndicator {
     @Scheduled(cron = "${review.generation.batch-schedule-cron:0 0 6 * * *}")
     public void scheduleDailyBatchReviewGeneration()
     {
-        triggerNextTopImpactScoreBatches(properties.getBatchScheduleSize());
+        triggerNextTopImpactScoreBatches(properties.getBatchScheduleSize(), true);
     }
 
     /**
@@ -401,13 +401,13 @@ public class ReviewGenerationService implements HealthIndicator {
      * @param limit number of products to include per vertical
      * @return list of batch job identifiers
      */
-    public List<String> triggerNextTopImpactScoreBatches(int limit)
+    public List<String> triggerNextTopImpactScoreBatches(int limit, boolean sortOnImpactScore)
     {
         int effectiveLimit = Math.max(limit, 1);
         List<String> jobIds = new ArrayList<>();
         for (VerticalConfig verticalConfig : verticalsConfigService.getConfigsWithoutDefault(true)) {
             try {
-                String jobId = generateNextTopImpactScoreBatch(verticalConfig, effectiveLimit);
+                String jobId = generateNextTopImpactScoreBatch(verticalConfig, effectiveLimit, sortOnImpactScore);
                 if (!"NoBatchJob".equals(jobId)) {
                     jobIds.add(jobId);
                 }
@@ -428,11 +428,11 @@ public class ReviewGenerationService implements HealthIndicator {
      * @return batch job identifier
      * @throws IOException when batch submission fails
      */
-    public String triggerNextTopImpactScoreBatch(String verticalId, int limit) throws IOException
+    public String triggerNextTopImpactScoreBatch(String verticalId, int limit, boolean sortOnImpactScore) throws IOException
     {
         Objects.requireNonNull(verticalId, "verticalId is required");
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(verticalId);
-        return generateNextTopImpactScoreBatch(verticalConfig, limit);
+        return generateNextTopImpactScoreBatch(verticalConfig, limit, sortOnImpactScore);
     }
 
     /**
@@ -443,11 +443,11 @@ public class ReviewGenerationService implements HealthIndicator {
      * @return batch job identifier
      * @throws IOException when batch submission fails
      */
-    public String generateNextTopImpactScoreBatch(VerticalConfig verticalConfig, int limit) throws IOException
+    public String generateNextTopImpactScoreBatch(VerticalConfig verticalConfig, int limit, boolean sortOnImpactScore) throws IOException
     {
         Objects.requireNonNull(verticalConfig, "verticalConfig is required");
         int effectiveLimit = Math.max(limit, 1);
-        List<Product> products = loadNextTopImpactScoreProducts(verticalConfig, effectiveLimit);
+        List<Product> products = loadNextTopImpactScoreProducts(verticalConfig, effectiveLimit, sortOnImpactScore);
         if (products.isEmpty()) {
             logger.warn("No eligible products found for impact score batch in vertical {}", verticalConfig.getId());
             return "NoBatchJob";
@@ -455,12 +455,12 @@ public class ReviewGenerationService implements HealthIndicator {
         return generateReviewBatchRequest(products, verticalConfig);
     }
 
-    private List<Product> loadNextTopImpactScoreProducts(VerticalConfig verticalConfig, int limit)
+    private List<Product> loadNextTopImpactScoreProducts(VerticalConfig verticalConfig, int limit, boolean sortOnImpactScore)
     {
         int selectionLimit = Math.max(limit * DEFAULT_SELECTION_MULTIPLIER, limit);
 
         try (Stream<Product> productStream =
-                productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(verticalConfig.getId(), "fr", selectionLimit, false)) {
+                productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(verticalConfig.getId(), "fr", selectionLimit, false, sortOnImpactScore)) {
             return productStream
                     .filter(product -> !isActiveForBatch(product))
                     .limit(limit)

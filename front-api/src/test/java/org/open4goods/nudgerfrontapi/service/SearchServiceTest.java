@@ -131,8 +131,7 @@ class SearchServiceTest {
         // Setup repository to return empty for first call (exact_vertical)
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
-        // For semantic search, we need textEmbeddingService to return a vector
-        when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f, 0.2f});
+
 
         // WHEN
         GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, SearchType.auto);
@@ -179,7 +178,7 @@ class SearchServiceTest {
                 .thenReturn(emptyHits, semanticHits, semanticHits);
         when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f, 0.2f});
         when(productMappingService.mapProduct(any(), any(), any(), any(), eq(false)))
-                .thenReturn(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null));
+                .thenReturn(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null));
 
         GlobalSearchResult result = searchService.globalSearch("bras articule", DomainLanguage.fr, SearchType.semantic);
 
@@ -187,6 +186,6 @@ class SearchServiceTest {
         assertThat(result.searchMode()).isEqualTo(SearchMode.semantic);
         assertThat(result.diagnostics()).isNotNull();
         assertThat(result.diagnostics().resultCount()).isEqualTo(1);
-        assertThat(result.diagnostics().topScore()).isEqualTo(1.2d);
+        assertThat(result.diagnostics().topScore()).isCloseTo(1.2d, org.assertj.core.data.Offset.offset(0.0001d));
     }
 }

@@ -2,6 +2,7 @@ package org.open4goods.services.reviewgeneration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -272,7 +273,7 @@ class ReviewGenerationServiceTest {
         withoutReview.setId(2L);
         withoutReview.setReviews(new Localisable<>());
 
-        when(productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(eq("tv"), eq("fr"), anyInt(), eq(false)))
+        when(productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(eq("tv"), eq("fr"), anyInt(), eq(false), anyBoolean()))
                 .thenReturn(Stream.of(withoutReview));
 
         org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
@@ -282,7 +283,8 @@ class ReviewGenerationServiceTest {
                 reviewGenerationService,
                 "loadNextTopImpactScoreProducts",
                 verticalConfig,
-                1
+                1,
+                true
         );
 
         assertThat(results).hasSize(1);

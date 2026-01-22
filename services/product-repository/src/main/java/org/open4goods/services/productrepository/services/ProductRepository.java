@@ -549,7 +549,7 @@ public class ProductRepository {
      * @param withExcluded whether to include excluded products
      * @return stream of products ordered by impact score
      */
-    public Stream<Product> exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(String vertical, String locale, Integer max, boolean withExcluded)
+    public Stream<Product> exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(String vertical, String locale, Integer max, boolean withExcluded, boolean sortOnImpactScore)
     {
         Criteria criteria = new Criteria("vertical").is(vertical)
                 .and(getRecentPriceQuery());
@@ -558,7 +558,9 @@ public class ProductRepository {
             criteria = criteria.and(new Criteria("excluded").is(false));
         }
 
-        criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
+        if (sortOnImpactScore) {
+        	criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
+        }
 
         // Filter products that DON'T have a review in the specified locale
     //    criteria = criteria.and(new Criteria("reviews." + locale + ".review").exists().not());

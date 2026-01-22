@@ -89,7 +89,7 @@ public class ReviewGenerationController {
     public ResponseEntity<Long> generateReview(@PathVariable("id") long upc, @PathVariable( required = false, name = "force") boolean force, HttpServletRequest request) throws ResourceNotFoundException {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
-        
+
         Map<String, String> headers = new HashMap<>();
         String userAgent = request.getHeader("User-Agent");
         if (userAgent != null) {
@@ -103,7 +103,7 @@ public class ReviewGenerationController {
         if (xForwardedIp != null) {
         	headers.put("X-Forwarded-IP", xForwardedIp);
         }
-        
+
         long scheduledUpc = reviewGenerationService.generateReviewAsync(product, verticalConfig, CompletableFuture.completedFuture(null), force, headers);
         return ResponseEntity.ok(scheduledUpc);
     }
@@ -169,12 +169,17 @@ public class ReviewGenerationController {
             description = "Launch a batch review generation job for the next top impact score products without existing AI reviews.")
     public ResponseEntity<List<String>> generateImpactScoreBatch(
             @RequestParam(value = "verticalId", required = false) String verticalId,
-            @RequestParam(value = "limit", defaultValue = "20") int limit) throws IOException {
+            @RequestParam(value = "limit", defaultValue = "2") int limit,
+            @RequestParam(value = "sortOnImpactScore", defaultValue = "false") boolean sortOnImpactScore
+
+
+
+    		) throws IOException {
         if (verticalId != null && !verticalId.isBlank()) {
-            String jobId = reviewGenerationService.triggerNextTopImpactScoreBatch(verticalId, limit);
+            String jobId = reviewGenerationService.triggerNextTopImpactScoreBatch(verticalId, limit, sortOnImpactScore);
             return ResponseEntity.ok(List.of(jobId));
         }
-        List<String> jobIds = reviewGenerationService.triggerNextTopImpactScoreBatches(limit);
+        List<String> jobIds = reviewGenerationService.triggerNextTopImpactScoreBatches(limit, sortOnImpactScore);
         return ResponseEntity.ok(jobIds);
     }
 
