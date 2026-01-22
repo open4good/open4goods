@@ -126,7 +126,7 @@ class BatchPromptServiceTest {
         // Execute
         List<Map<String, Object>> variables = List.of(Map.of("var", "val"));
         List<String> customIds = List.of("123");
-        String jobId = batchPromptService.batchPromptRequest(promptKey, variables, customIds, String.class);
+        String jobId = batchPromptService.batchPromptRequest(promptKey, variables, customIds, Object.class);
 
         // Verify
         File batchFolder = new File(System.getProperty("java.io.tmpdir") + "/batch-test");
@@ -138,6 +138,8 @@ class BatchPromptServiceTest {
         assertThat(jsonNode.has("request")).isTrue();
         JsonNode request = jsonNode.get("request");
         assertThat(request.has("tools")).isFalse();
+        assertThat(request.has("generation_config")).isTrue();
+        assertThat(request.get("generation_config").get("response_mime_type").asText()).isEqualTo("application/json");
     }
     
     @Test

@@ -93,7 +93,7 @@ public class AiReview {
 
     /** A medium-length title summarizing the product. */
     @JsonProperty(required = true, value = "mediumTitle")
-    @AiGeneratedField(instruction = "Titre de longueur moyenne, 10 mots maximum")
+    @AiGeneratedField(instruction = "Titre de longueur moyenne, 6 / 7 mots maximum. Doit être neutre et factuel.")
     @Schema(description = "Medium-length title")
     private String mediumTitle;
 

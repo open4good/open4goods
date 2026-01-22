@@ -324,6 +324,10 @@ public class BatchPromptService implements HealthIndicator {
             payloadMap.put("tools", List.of(toolMap));
         }
 
+        if (type != String.class) {
+            payloadMap.put("generation_config", Map.of("response_mime_type", "application/json"));
+        }
+
         Map<String, Object> requestMap = new java.util.HashMap<>();
         requestMap.put("custom_id", customId);
         requestMap.put("request", payloadMap);
@@ -537,9 +541,38 @@ public class BatchPromptService implements HealthIndicator {
             List<String> lines = Files.readAllLines(outputFile.toPath(), Charset.defaultCharset());
             for (String line : lines) {
                 if (StringUtils.hasText(line)) {
+                    logger.debug("Processing Vertex batch output line: {}", line);
                     JsonNode node = objectMapper.readTree(line);
                     String customId = node.path("custom_id").asText();
-                    String content = node.path("predictions").path(0).path("content").asText();
+                    JsonNode predictions = node.path("predictions");
+                    JsonNode firstPrediction = predictions.path(0);
+                    JsonNode contentNode = firstPrediction.path("content");
+                    String content = contentNode.asText();
+                    
+                    if (content == null || content.isEmpty()) {
+                        // try fallback to candidates within predictions
+                        JsonNode candidates = firstPrediction.path("candidates");
+                        if (candidates.isArray() && candidates.size() > 0) {
+                             JsonNode firstCandidate = candidates.get(0);
+                             content = firstCandidate.path("content").path("parts").path(0).path("text").asText();
+                        }
+                    }
+                    
+                    if (content == null || content.isEmpty()) {
+                        // try fallback to top-level response.candidates (seen in logs)
+                        JsonNode responseNode = node.path("response");
+                        JsonNode candidates = responseNode.path("candidates");
+                        if (candidates.isArray() && candidates.size() > 0) {
+                             JsonNode firstCandidate = candidates.get(0);
+                             content = firstCandidate.path("content").path("parts").path(0).path("text").asText();
+                        }
+                    }
+
+                    if (content == null || content.isEmpty()) {
+                        logger.warn("Extracted empty content for customId {}. Node structure: {}", customId, node);
+                    } else {
+                         logger.debug("Extracted content for customId {}: {}...", customId, StringUtils.truncate(content, 100));
+                    }
                     outputs.add(new BatchResultItem(customId, content, line, Map.of()));
                 }
             }

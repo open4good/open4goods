@@ -855,7 +855,13 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	private AiReview processAiReview(BatchResultItem output) {
 		String jsonContent = output.content();
-		AiReview ret = outputConverter.convert(jsonContent);
+        if (jsonContent == null || jsonContent.isBlank()) {
+            logger.warn("Empty content for customId {}. Raw line: {}", output.customId(), output.raw());
+            return null;
+        }
+        String sanitizedContent = jsonContent.replace("```json", "").replace("```", "").trim();
+        logger.debug("Processing content for customId {}: {}", output.customId(), sanitizedContent);
+		AiReview ret = outputConverter.convert(sanitizedContent);
 		return processAiReview(ret, null);
 	}
 
