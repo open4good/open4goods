@@ -429,6 +429,21 @@ const { data, pending, error, refresh } =
     }
   )
 
+const semanticDiagnostics = computed(() => data.value?.semanticDiagnostics)
+
+watch(
+  semanticDiagnostics,
+  diagnostics => {
+    if (!diagnostics) {
+      return
+    }
+    if (import.meta.client) {
+      console.info('[search] Semantic diagnostics', diagnostics)
+    }
+  },
+  { immediate: true }
+)
+
 // Filtered Product Search Data
 const manualFields: FieldMetadataDto[] = [
   {

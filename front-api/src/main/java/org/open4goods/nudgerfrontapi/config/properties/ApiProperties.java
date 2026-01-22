@@ -20,6 +20,11 @@ public class ApiProperties {
      */
     private Integer maxPageSize = 50;
 
+    /**
+     * Enable semantic score diagnostics in global search responses.
+     */
+    private boolean semanticDiagnosticsEnabled;
+
     public String getResourceRootPath() {
         return resourceRootPath;
     }
@@ -34,6 +39,14 @@ public class ApiProperties {
 
     public void setMaxPageSize(Integer maxPageSize) {
         this.maxPageSize = maxPageSize;
+    }
+
+    public boolean isSemanticDiagnosticsEnabled() {
+        return semanticDiagnosticsEnabled;
+    }
+
+    public void setSemanticDiagnosticsEnabled(boolean semanticDiagnosticsEnabled) {
+        this.semanticDiagnosticsEnabled = semanticDiagnosticsEnabled;
     }
 
 }
