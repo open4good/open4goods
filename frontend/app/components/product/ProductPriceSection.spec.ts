@@ -46,6 +46,14 @@ const i18nMessages = {
           highest: 'Prix le plus haut',
           viewOffer: "Ouvrir l'offre chez {source}",
         },
+        events: {
+          detailsTitle: 'Événement commercial',
+          clearSelection: 'Effacer la sélection',
+          dateLabel: 'Dates :',
+          dateRange: '{start} au {end}',
+          singleDay: '{date}',
+          untitled: 'Événement commercial',
+        },
         noHistory:
           "L'historique des prix n'est pas encore disponible pour ce produit.",
         headers: {
@@ -86,6 +94,14 @@ const i18nMessages = {
           average: 'Average price',
           highest: 'Highest price',
           viewOffer: 'Open offer from {source}',
+        },
+        events: {
+          detailsTitle: 'Commercial event',
+          clearSelection: 'Clear selection',
+          dateLabel: 'Dates:',
+          dateRange: '{start} to {end}',
+          singleDay: '{date}',
+          untitled: 'Commercial event',
         },
         noHistory: 'Price history is not yet available for this product.',
         headers: {
@@ -271,12 +287,18 @@ describe('ProductPriceSection', () => {
 
     const chart = wrapper.find('.echart-stub')
     const option = JSON.parse(chart.attributes('data-option') ?? '{}')
-    const markAreaLabel =
-      option?.series?.[0]?.markArea?.data?.[0]?.[1]?.label?.formatter
-    expect(markAreaLabel).toBe('Summer sales')
-    expect(option?.series?.[0]?.type).toBe('line')
-    expect(option?.series?.[0]?.showSymbol).toBe(false)
-    expect(option?.series?.[0]?.smooth).toBe(true)
+    const lineSeries = option?.series?.find(
+      (series: { type?: string }) => series.type === 'line'
+    )
+    const eventSeries = option?.series?.find(
+      (series: { type?: string }) => series.type === 'custom'
+    )
+    expect(option?.grid?.length).toBe(2)
+    expect(option?.xAxis?.length).toBe(2)
+    expect(eventSeries?.data?.[0]?.value?.[3]).toBe('Summer sales')
+    expect(lineSeries?.type).toBe('line')
+    expect(lineSeries?.showSymbol).toBe(false)
+    expect(lineSeries?.smooth).toBe(true)
 
     await wrapper.unmount()
   })

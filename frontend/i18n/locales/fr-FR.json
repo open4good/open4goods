@@ -2807,6 +2807,14 @@
         "viewOffer": "Ouvrir l'offre chez {source}",
         "unknownSource": "Source inconnue"
       },
+      "events": {
+        "detailsTitle": "Événement commercial",
+        "clearSelection": "Effacer la sélection",
+        "dateLabel": "Dates :",
+        "dateRange": "{start} au {end}",
+        "singleDay": "{date}",
+        "untitled": "Événement commercial"
+      },
       "historyTitle": "Historique des prix",
       "noHistory": "Pas assez de données pour afficher l'historique des prix.",
       "subtitle": "Suivez l’évolution des prix et comparez les offres.",

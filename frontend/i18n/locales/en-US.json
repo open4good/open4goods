@@ -2791,6 +2791,14 @@
         "viewOffer": "Open offer from {source}",
         "unknownSource": "Unknown source"
       },
+      "events": {
+        "detailsTitle": "Commercial event",
+        "clearSelection": "Clear selection",
+        "dateLabel": "Dates:",
+        "dateRange": "{start} to {end}",
+        "singleDay": "{date}",
+        "untitled": "Commercial event"
+      },
       "historyTitle": "Price history",
       "noHistory": "Price history is not yet available for this product.",
       "subtitle": "Track price evolution and compare offers.",

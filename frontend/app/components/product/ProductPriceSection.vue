@@ -37,6 +37,7 @@
               :option="newChartOption"
               :autoresize="true"
               class="product-price__chart"
+              @click="handleNewChartClick"
             />
             <div v-else class="product-price__chart-placeholder" />
           </template>
@@ -52,6 +53,36 @@
           ></div>
           <div v-else class="product-price__chart-placeholder" />
         </template>
+        <v-card
+          v-if="selectedCommercialEvent"
+          class="product-price__event-card"
+          variant="tonal"
+        >
+          <div class="product-price__event-card-header">
+            <div>
+              <p class="product-price__event-card-title">
+                {{ $t('product.price.events.detailsTitle') }}
+              </p>
+              <p class="product-price__event-card-label">
+                {{ selectedCommercialEvent.label }}
+              </p>
+            </div>
+            <v-btn
+              variant="text"
+              size="small"
+              class="product-price__event-card-clear"
+              @click="clearSelectedCommercialEvent"
+            >
+              {{ $t('product.price.events.clearSelection') }}
+            </v-btn>
+          </div>
+          <p class="product-price__event-card-dates">
+            <span class="product-price__event-card-dates-label">
+              {{ $t('product.price.events.dateLabel') }}
+            </span>
+            {{ formatEventDateRange(selectedCommercialEvent) }}
+          </p>
+        </v-card>
         <footer
           v-if="newStats"
           class="product-price__metrics"
@@ -450,10 +481,10 @@ const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {
     const echarts = await ensureECharts([
       'LineChart',
+      'CustomChart',
       'GridComponent',
       'TooltipComponent',
       'DataZoomComponent',
-      'MarkAreaComponent',
       'CanvasRenderer',
     ])
 
@@ -551,29 +582,113 @@ const hasOccasionHistory = computed(
   () => occasionHistory.value.length >= MIN_HISTORY_POINTS
 )
 
-const resolvedEvents = computed(() =>
+type ResolvedCommercialEvent = {
+  id: string
+  label: string
+  start: number
+  end: number
+  color: string
+}
+
+type PackedCommercialEvent = ResolvedCommercialEvent & { rowIndex: number }
+
+const EVENT_COLOR_PALETTE = ['#0ea5e9', '#14b8a6', '#f97316', '#a855f7']
+const EVENT_ROW_HEIGHT = 18
+const EVENT_BAND_PADDING = 6
+const EVENT_BAND_GAP = 10
+const EVENT_MIN_WIDTH = 2
+
+const hashLabel = (label: string) =>
+  label
+    .split('')
+    .reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) | 0, 0)
+
+const resolveEventColor = (label: string, index: number) => {
+  if (!label) {
+    return EVENT_COLOR_PALETTE[index % EVENT_COLOR_PALETTE.length]
+  }
+
+  const hash = Math.abs(hashLabel(label))
+  return EVENT_COLOR_PALETTE[hash % EVENT_COLOR_PALETTE.length]
+}
+
+const formatAxisLabel = (value: number) => {
+  const numericValue = Number(value)
+  if (!Number.isFinite(numericValue)) {
+    return ''
+  }
+
+  return format(numericValue, 'dd MMM', {
+    locale: locale.value.startsWith('fr') ? fr : enUS,
+  })
+}
+
+const resolvedEvents = computed<ResolvedCommercialEvent[]>(() =>
   props.commercialEvents
-    .map(event => ({
-      label: event.label,
-      start: event.startDate ? new Date(event.startDate).getTime() : Number.NaN,
-      end: event.endDate ? new Date(event.endDate).getTime() : Number.NaN,
-    }))
-    .filter(
-      event =>
-        Number.isFinite(event.start) &&
-        Number.isFinite(event.end) &&
-        event.start <= event.end
-    )
+    .map((event, index) => {
+      const start = event.startDate
+        ? new Date(event.startDate).getTime()
+        : Number.NaN
+      const end = event.endDate ? new Date(event.endDate).getTime() : Number.NaN
+      const label = event.label?.trim() || t('product.price.events.untitled')
+
+      if (
+        !Number.isFinite(start) ||
+        !Number.isFinite(end) ||
+        start > end
+      ) {
+        return null
+      }
+
+      return {
+        id: `${label}-${start}-${end}-${index}`,
+        label,
+        start,
+        end,
+        color: resolveEventColor(label, index),
+      }
+    })
+    .filter((event): event is ResolvedCommercialEvent => event !== null)
 )
+
+const selectedCommercialEventId = ref<string | null>(null)
+const selectedCommercialEvent = computed(() =>
+  resolvedEvents.value.find(event => event.id === selectedCommercialEventId.value)
+)
+
+const formatEventDate = (value: number) =>
+  format(value, 'dd MMM', {
+    locale: locale.value.startsWith('fr') ? fr : enUS,
+  })
+
+const formatEventDateRange = (event: ResolvedCommercialEvent) => {
+  if (event.start === event.end) {
+    return t('product.price.events.singleDay', {
+      date: formatEventDate(event.start),
+    })
+  }
+
+  return t('product.price.events.dateRange', {
+    start: formatEventDate(event.start),
+    end: formatEventDate(event.end),
+  })
+}
+
+const clearSelectedCommercialEvent = () => {
+  selectedCommercialEventId.value = null
+}
 
 const newChartOption = computed(() =>
   hasNewHistory.value
-    ? buildChartOption(newHistory.value, resolvedEvents.value)
+    ? buildChartOption(newHistory.value, resolvedEvents.value, {
+        enableEventBand: true,
+        selectedEventId: selectedCommercialEventId.value,
+      })
     : null
 )
 const occasionChartOption = computed(() =>
   hasOccasionHistory.value
-    ? buildChartOption(occasionHistory.value, resolvedEvents.value)
+    ? buildChartOption(occasionHistory.value, [], { enableEventBand: false })
     : null
 )
 
@@ -777,67 +892,57 @@ const newTrendLabel = computed(() => {
   return t('product.price.trend.stable')
 })
 
+const packCommercialEvents = (events: ResolvedCommercialEvent[]) => {
+  const sorted = [...events].sort((first, second) => {
+    if (first.start !== second.start) {
+      return first.start - second.start
+    }
+
+    const firstDuration = first.end - first.start
+    const secondDuration = second.end - second.start
+    return secondDuration - firstDuration
+  })
+
+  const rowEndTimes: number[] = []
+  const packed: PackedCommercialEvent[] = []
+
+  sorted.forEach(event => {
+    const rowIndex = rowEndTimes.findIndex(endTime => endTime <= event.start)
+
+    if (rowIndex === -1) {
+      rowEndTimes.push(event.end)
+      packed.push({ ...event, rowIndex: rowEndTimes.length - 1 })
+    } else {
+      rowEndTimes[rowIndex] = event.end
+      packed.push({ ...event, rowIndex })
+    }
+  })
+
+  return { packed, rowCount: rowEndTimes.length }
+}
+
 const buildChartOption = (
   entries: HistoryEntry[],
-  events: Array<{ start: number; end: number; label?: string }>
+  events: ResolvedCommercialEvent[],
+  config: { enableEventBand: boolean; selectedEventId?: string | null }
 ) => {
   if (entries.length < MIN_HISTORY_POINTS) {
     return null
   }
 
   const data = entries.map(entry => [entry.timestamp, entry.price])
-  const markArea = events.map(event => [
-    {
-      xAxis: event.start,
-      itemStyle: { color: 'rgba(59, 130, 246, 0.08)' },
-      label: { show: false },
-    },
-    {
-      xAxis: event.end,
-      label: {
-        formatter: event.label ?? '',
-        position: 'insideTop',
-      },
-    },
-  ])
+  const currency = props.offers?.bestPrice?.currency ?? 'EUR'
 
-  return {
+  const baseOption = {
     tooltip: {
       trigger: 'axis',
       valueFormatter: (value: number | string) =>
         n(Number(value), {
           style: 'currency',
-          currency: props.offers?.bestPrice?.currency ?? 'EUR',
+          currency,
           maximumFractionDigits: 2,
         }),
       axisPointer: { type: 'line' },
-    },
-    grid: { left: 40, right: 24, top: 48, bottom: 48 },
-    xAxis: {
-      type: 'time',
-      axisLabel: {
-        formatter: (value: number) => {
-          const numericValue = Number(value)
-          if (!Number.isFinite(numericValue)) {
-            return ''
-          }
-
-          return format(numericValue, 'dd MMM', {
-            locale: locale.value.startsWith('fr') ? fr : enUS,
-          })
-        },
-      },
-    },
-    yAxis: {
-      type: 'value',
-      axisLabel: {
-        formatter: (value: number) =>
-          n(Number(value), {
-            style: 'currency',
-            currency: props.offers?.bestPrice?.currency ?? 'EUR',
-            maximumFractionDigits: 0,
-          }),
-      },
     },
     dataZoom: [
       {
@@ -867,24 +972,263 @@ const buildChartOption = (
         },
       },
     ],
-    series: [
+  }
+
+  const lineSeries = {
+    type: 'line',
+    data,
+    smooth: true,
+    showSymbol: false,
+    lineStyle: {
+      width: 3,
+      color: '#2563eb',
+    },
+    areaStyle: {
+      color: 'rgba(37, 99, 235, 0.12)',
+    },
+    emphasis: { focus: 'series' },
+  }
+
+  if (!config.enableEventBand || events.length === 0) {
+    return {
+      ...baseOption,
+      grid: { left: 40, right: 24, top: 48, bottom: 48 },
+      xAxis: {
+        type: 'time',
+        axisLabel: { formatter: formatAxisLabel },
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: (value: number) =>
+            n(Number(value), {
+              style: 'currency',
+              currency,
+              maximumFractionDigits: 0,
+            }),
+        },
+      },
+      series: [lineSeries],
+    }
+  }
+
+  const { packed, rowCount } = packCommercialEvents(events)
+  const eventBandHeight =
+    Math.max(rowCount, 1) * EVENT_ROW_HEIGHT + EVENT_BAND_PADDING * 2
+  const eventBandTop = 18
+  const mainChartTop = eventBandTop + eventBandHeight + EVENT_BAND_GAP
+
+  const eventSeriesData = packed.map(event => ({
+    value: [
+      event.start,
+      event.end,
+      event.rowIndex,
+      event.label,
+      event.color,
+      event.id,
+    ],
+  }))
+
+  return {
+    ...baseOption,
+    grid: [
+      { left: 40, right: 24, top: eventBandTop, height: eventBandHeight },
+      { left: 40, right: 24, top: mainChartTop, bottom: 48 },
+    ],
+    xAxis: [
       {
-        type: 'line',
-        data,
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          width: 3,
+        type: 'time',
+        gridIndex: 1,
+        axisLabel: { formatter: formatAxisLabel },
+      },
+      {
+        type: 'time',
+        gridIndex: 0,
+        axisLabel: { show: false },
+        axisTick: { show: false },
+        axisLine: { show: false },
+        splitLine: { show: false },
+      },
+    ],
+    yAxis: [
+      {
+        type: 'value',
+        gridIndex: 1,
+        axisLabel: {
+          formatter: (value: number) =>
+            n(Number(value), {
+              style: 'currency',
+              currency,
+              maximumFractionDigits: 0,
+            }),
+        },
+      },
+      {
+        type: 'value',
+        gridIndex: 0,
+        min: 0,
+        max: rowCount,
+        inverse: true,
+        axisLabel: { show: false },
+        axisTick: { show: false },
+        axisLine: { show: false },
+        splitLine: { show: false },
+      },
+    ],
+    dataZoom: [
+      {
+        type: 'inside',
+        xAxisIndex: [0, 1],
+      },
+      {
+        type: 'slider',
+        height: 18,
+        backgroundColor: 'transparent',
+        fillerColor: 'rgba(37, 99, 235, 0)',
+        borderColor: 'rgba(148, 163, 184, 0.38)',
+        handleStyle: {
+          color: '#ffffff',
+          borderColor: '#2563eb',
+          borderWidth: 2,
+        },
+        moveHandleStyle: {
           color: '#2563eb',
         },
-        areaStyle: {
-          color: 'rgba(37, 99, 235, 0.12)',
+        dataBackground: {
+          lineStyle: {
+            color: 'rgba(59, 130, 246, 0.35)',
+          },
+          areaStyle: {
+            color: 'rgba(59, 130, 246, 0)',
+          },
         },
-        emphasis: { focus: 'series' },
-        markArea: markArea.length ? { data: markArea } : undefined,
+        xAxisIndex: [0, 1],
+      },
+    ],
+    series: [
+      {
+        ...lineSeries,
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+      },
+      {
+        type: 'custom',
+        name: 'commercial-events',
+        renderItem: (params, api) => {
+          const start = Number(api.value(0))
+          const end = Number(api.value(1))
+          const rowIndex = Number(api.value(2))
+          const label = String(api.value(3))
+          const color = String(api.value(4))
+          const eventId = String(api.value(5))
+          const isSelected = eventId === config.selectedEventId
+
+          const startCoord = api.coord([start, rowIndex + 0.5])
+          const endCoord = api.coord([end, rowIndex + 0.5])
+          const bandHeight = api.size([0, 1])[1]
+          const rowHeight = Math.max(12, bandHeight - 6)
+          const rectWidth = Math.max(endCoord[0] - startCoord[0], EVENT_MIN_WIDTH)
+          const rectX = startCoord[0]
+          const rectY = startCoord[1] - rowHeight / 2
+
+          const clipX = Math.max(rectX, params.coordSys.x)
+          const clipRight = Math.min(
+            rectX + rectWidth,
+            params.coordSys.x + params.coordSys.width
+          )
+          const clipWidth = clipRight - clipX
+
+          if (clipWidth <= 0) {
+            return null
+          }
+
+          const rectShape = {
+            x: clipX,
+            y: rectY,
+            width: clipWidth,
+            height: rowHeight,
+            r: 4,
+          }
+
+          const fillOpacity = isSelected ? 0.25 : 0.15
+          const borderOpacity = isSelected ? 0.95 : 0.6
+
+          return {
+            type: 'group',
+            children: [
+              {
+                type: 'rect',
+                shape: rectShape,
+                style: {
+                  fill: `rgba(${hexToRgb(color)}, ${fillOpacity})`,
+                  stroke: `rgba(${hexToRgb(color)}, ${borderOpacity})`,
+                  lineWidth: isSelected ? 2 : 1,
+                },
+              },
+              {
+                type: 'text',
+                style: {
+                  text: label,
+                  fill: color,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  width: Math.max(0, rectShape.width - 8),
+                  overflow: 'truncate',
+                  ellipsis: '…',
+                },
+                position: [rectShape.x + 4, rectShape.y + rectShape.height / 2],
+                textAlign: 'left',
+                textVerticalAlign: 'middle',
+              },
+            ],
+          }
+        },
+        data: eventSeriesData,
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        tooltip: {
+          trigger: 'item',
+          formatter: (params: { value: Array<string | number> }) => {
+            const label = String(params.value?.[3] ?? '')
+            const start = Number(params.value?.[0])
+            const end = Number(params.value?.[1])
+            const dateRange =
+              Number.isFinite(start) && Number.isFinite(end)
+                ? formatEventDateRange({
+                    id: '',
+                    label,
+                    start,
+                    end,
+                    color: '',
+                  })
+                : ''
+            return `<strong>${label}</strong><br/>${dateRange}`
+          },
+        },
       },
     ],
   }
+}
+
+const hexToRgb = (hexColor: string) => {
+  const normalized = hexColor.replace('#', '')
+  const parsed = parseInt(normalized, 16)
+  const r = (parsed >> 16) & 255
+  const g = (parsed >> 8) & 255
+  const b = parsed & 255
+  return `${r}, ${g}, ${b}`
+}
+
+const handleNewChartClick = (params: {
+  seriesType?: string
+  value?: Array<string | number>
+}) => {
+  if (params.seriesType !== 'custom') {
+    return
+  }
+
+  const eventId = String(params.value?.[5] ?? '')
+  selectedCommercialEventId.value = eventId || null
 }
 
 const formatCurrency = (value?: number | null, currency: string = 'EUR') => {
@@ -978,6 +1322,53 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.product-price__event-card {
+  padding: 1rem;
+  background: rgba(var(--v-theme-surface-glass), 0.85);
+  border-radius: 16px;
+}
+
+.product-price__event-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.product-price__event-card-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.8);
+}
+
+.product-price__event-card-label {
+  margin: 0.2rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-price__event-card-clear {
+  align-self: flex-start;
+}
+
+.product-price__event-card-dates {
+  margin: 0.75rem 0 0;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  font-size: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.product-price__event-card-dates-label {
+  font-weight: 600;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
 }
 
 .product-price__trend {
