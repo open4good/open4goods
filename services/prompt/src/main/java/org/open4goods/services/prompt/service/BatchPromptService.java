@@ -558,10 +558,14 @@ public class BatchPromptService implements HealthIndicator {
     }
 
     private String resolveModel(org.open4goods.services.prompt.config.PromptOptions options) {
+        String model = "gemini-1.5-flash-001";
         if (options != null && StringUtils.hasText(options.getModel())) {
-            return options.getModel();
+            model = options.getModel();
         }
-        return "publishers/google/models/gemini-1.5-flash-001";
+        if (!model.startsWith("projects/") && !model.startsWith("publishers/")) {
+            return "publishers/google/models/" + model;
+        }
+        return model;
     }
 
     private void validateVertexBatchConfig() {
