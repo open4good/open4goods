@@ -24,15 +24,16 @@ public class AiReview {
 
 
 
-	    public AiReview(String description, String technicalOneline, String ecologicalOneline, String communityOneline,
-			String shortDescription, String mediumTitle, String shortTitle, String manufacturingCountry,
-			String technicalReview, String ecologicalReview, String communityReview, String summary, List<String> pros,
-			List<String> cons, List<AiSource> sources, List<AiAttribute> attributes, String dataQuality,
-			List<AiRating> ratings, List<String> pdfs, List<String> images, List<String> videos,
-			List<String> socialLinks) {
+	    public AiReview(String description, String technicalOneline, String technicalShortReview, String ecologicalOneline,
+			String communityOneline, String shortDescription, String mediumTitle, String shortTitle,
+			String manufacturingCountry, String technicalReview, String ecologicalReview, String communityReview,
+			String summary, List<String> pros, List<String> cons, List<AiSource> sources,
+			List<AiAttribute> attributes, String dataQuality, List<AiRating> ratings, List<String> pdfs,
+			List<String> images, List<String> videos, List<String> socialLinks) {
 		super();
 		this.description = description;
 		this.technicalOneline = technicalOneline;
+		this.technicalShortReview = technicalShortReview;
 		this.ecologicalOneline = ecologicalOneline;
 		this.communityOneline = communityOneline;
 		this.shortDescription = shortDescription;
@@ -57,21 +58,27 @@ public class AiReview {
 
 		/** A detailed description of the product. */
     @JsonProperty(required = true, value = "description")
-    @AiGeneratedField(instruction = "Description du produit, 150 mots maximum")
+    @AiGeneratedField(instruction = "Write a neutral product overview (max 150 words). Use complete sentences, avoid marketing tone, and do not use lists or markdown.")
     @Schema(description = "Detailed description of the product")
     private String description;
 
 
     /** A detailed description of the product. */
     @JsonProperty(required = true, value = "technicalOneline")
-    @AiGeneratedField(instruction = "Description technique du produit, aux vues de ces caracteristiques principales. 20 mots maximum")
+    @AiGeneratedField(instruction = "One sentence (max 20 words) summarising the key technical specs. Plain text only.")
     @Schema(description = "Detailed description of the product")
     private String technicalOneline;
+
+    /** A short technical summary of the product. */
+    @JsonProperty(required = true, value = "technicalShortReview")
+    @AiGeneratedField(instruction = "Short technical summary in 2–3 sentences. Mention the most important specs and performance. Minimal HTML is allowed (<strong>, <em>, <br>), no lists or markdown.")
+    @Schema(description = "Short technical summary of the product")
+    private String technicalShortReview;
 
 
     /** A detailed description of the product. */
     @JsonProperty(required = true, value = "ecologicalOneline")
-    @AiGeneratedField(instruction = "Description de l'impact écologique et du positionnement du téléviseur, au regard des informations environnementales et du positionnement de ce produit le classement obtenu grâce à l'impactscore, 20 mots maximum")
+    @AiGeneratedField(instruction = "One sentence (max 20 words) describing environmental impact, repairability, and energy class if available. Plain text only.")
     @Schema(description = "Detailed description of the product")
     private String ecologicalOneline;
 
@@ -79,7 +86,7 @@ public class AiReview {
 
     /** A detailed description of the product. */
     @JsonProperty(required = true, value = "communityOneline")
-    @AiGeneratedField(instruction = "Retours d'utilisateurs, synthèse d'avis. 20 mots maximum")
+    @AiGeneratedField(instruction = "One sentence (max 20 words) summarising user and expert feedback. Plain text only.")
     @Schema(description = "Detailed description of the product")
     private String communityOneline;
 
@@ -87,45 +94,49 @@ public class AiReview {
 
     /** A brief summary of the product. */
     @JsonProperty(required = true, value = "short_description")
-    @AiGeneratedField(instruction = "Deux ou trois phrases dur la description générale du produit, un bilan objectif de ses performances, de son impact environnemental et des retours utilisateurs et / ou sites spécialisés")
+    @AiGeneratedField(instruction = "Write 2–3 sentences covering performance, environmental impact, and feedback. Minimal HTML is allowed (<strong>, <em>, <br>), no lists or markdown.")
     @Schema(description = "Brief summary of the product")
     private String shortDescription;
 
     /** A medium-length title summarizing the product. */
     @JsonProperty(required = true, value = "mediumTitle")
+<<<<<<< HEAD
     @AiGeneratedField(instruction = "Titre de longueur moyenne, 6 / 7 mots maximum. Doit être neutre et factuel.")
+=======
+    @AiGeneratedField(instruction = "Medium-length factual title (max 10 words). No quotes or ending punctuation.")
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     @Schema(description = "Medium-length title")
     private String mediumTitle;
 
     /** A short title for the product. */
     @JsonProperty(required = true, value = "shortTitle")
-    @AiGeneratedField(instruction = "Titre court, 5 mots maximum")
+    @AiGeneratedField(instruction = "Short factual title (max 5 words). No quotes or ending punctuation.")
     @Schema(description = "Short title")
     private String shortTitle;
 
 
     @JsonProperty(required = true, value = "manufacturingCountry")
-    @AiGeneratedField(instruction = "Le ou les lieux de fabrication si connus, séparés par des virgules")
+    @AiGeneratedField(instruction = "Comma-separated manufacturing countries if known (e.g., \"France, Germany\"). Return an empty string when unknown.")
     @Schema(description = "Probable manufacturing countries of this product")
     private String manufacturingCountry;
 
 
     /** The technical review of the product. */
     @JsonProperty(required = true, value = "technicalReview")
-    @AiGeneratedField(instruction = "Revue technique approfondie du produit, axée sur les performances et la qualité.")
+    @AiGeneratedField(instruction = "Detailed technical review in 2–4 paragraphs. Cite sources as [n] for specific claims. Minimal HTML allowed (<strong>, <em>, <br>, <p>), no lists or markdown.")
     @Schema(description = "Technical review of the product")
     private String technicalReview;
 
     /** The ecological review of the product. */
     @JsonProperty(required = true, value = "ecologicalReview")
-    @AiGeneratedField(instruction = "Revue écologique du produit, incluant réparabilité, durabilité, efficacité énergétique et toutes informations contenues dans les sources ou dans les scores fournis permettant d'orienter le jugement. ")
+    @AiGeneratedField(instruction = "Environmental review in 2–4 paragraphs: repairability, durability, energy efficiency, and sustainability signals. Cite sources as [n]. Minimal HTML allowed (<strong>, <em>, <br>, <p>), no lists or markdown.")
     @Schema(description = "Ecological review of the product")
     private String ecologicalReview;
 
 
     /** The ecological review of the product. */
     @JsonProperty(required = true, value = "communityReview")
-    @AiGeneratedField(instruction = "Synthèse des retours de sites experts et utilisateurs")
+    @AiGeneratedField(instruction = "Synthesis of expert and user feedback in 1–2 paragraphs. Cite sources as [n]. Minimal HTML allowed (<strong>, <em>, <br>), no lists or markdown.")
     @Schema(description = "Community review of the product")
     private String communityReview;
 
@@ -134,19 +145,19 @@ public class AiReview {
     /** A summary of the product review. */
     // TODO : Remove
     @JsonProperty(required = true, value = "summary")
-    @AiGeneratedField(instruction = "Synthèse des évaluations et tests réalisés sur ce produit")
+    @AiGeneratedField(instruction = "Concise overall summary in 2–3 sentences. Include key takeaways and cite sources as [n]. Minimal HTML allowed (<strong>, <em>, <br>), no lists or markdown.")
     @Schema(description = "Summary of the product review")
     private String summary;
 
     /** The pros of the product. */
     @JsonProperty(required = true, value = "pros")
-    @AiGeneratedField(instruction = "Les avantages du produit")
+    @AiGeneratedField(instruction = "List 3–6 short pros. Each entry is a concise phrase. Minimal HTML allowed (<strong>, <em>), no numbering or markdown.")
     @Schema(description = "List of pros")
     private List<String> pros = new ArrayList<>();
 
     /** The cons of the product. */
     @JsonProperty(required = true, value = "cons")
-    @AiGeneratedField(instruction = "Les inconvénients du produit")
+    @AiGeneratedField(instruction = "List 3–6 short cons. Each entry is a concise phrase. Minimal HTML allowed (<strong>, <em>), no numbering or markdown.")
     @Schema(description = "List of cons")
     private List<String> cons = new ArrayList<>();
 
@@ -164,7 +175,7 @@ public class AiReview {
 
     /** The quality of data used for the review. */
     @JsonProperty(required = true, value = "dataQuality")
-    @AiGeneratedField(instruction = "Analyse de la qualité et de la richesse des contenus, références, évaluations externes qui te sont fournis")
+    @AiGeneratedField(instruction = "1–2 sentences describing data coverage, reliability, and gaps. Plain text only.")
     @Schema(description = "Quality of external data used for the review")
     private String dataQuality;
 
@@ -177,7 +188,7 @@ public class AiReview {
 
     /** The pdfs found in the sources. */
     @JsonProperty(required = false, value = "pdfs")
-    @AiGeneratedField(instruction = "Liste des urls des documents PDFs trouvés (manuels, fiches techniques, réparabilité ...)")
+    @AiGeneratedField(instruction = "List of PDF URLs only (manuals, datasheets, repairability docs). No extra text.")
     @Schema(description = "List of PDF's url's for this product")
     private List<String> pdfs = new ArrayList<>();
 
@@ -185,20 +196,20 @@ public class AiReview {
 
     /** The pdfs found in the sources. */
     @JsonProperty(required = false, value = "images")
-    @AiGeneratedField(instruction = "Liste des urls des images produit trouvées (haute qualité de préférence)")
+    @AiGeneratedField(instruction = "List of product image URLs only (prefer high quality). No extra text.")
     @Schema(description = "List of quality images url's for this product")
     private List<String> images = new ArrayList<>();
 
 
     /** The pdfs found in the sources. */
     @JsonProperty(required = false, value = "videos")
-    @AiGeneratedField(instruction = "Liste des urls des vidéos trouvées (youtube, dailymotion, vimeo ...)")
+    @AiGeneratedField(instruction = "List of video URLs only (YouTube, Vimeo, Dailymotion, direct files). No extra text.")
     @Schema(description = "List of product related videos (vide platform, like youtube, direct file, daylymotion, ... social networks, )")
     private List<String> videos = new ArrayList<>();
 
     /** The social network references */
     @JsonProperty(required = false, value = "social")
-    @AiGeneratedField(instruction = "Liste des urls des posts réseaux sociaux trouvés (facebook, twitter, instagram ...)")
+    @AiGeneratedField(instruction = "List of social post URLs only (Facebook, X/Twitter, Instagram, etc.). No extra text.")
     @Schema(description = "List of social networks references")
     private List<String> socialLinks = new ArrayList<>();
 
@@ -232,6 +243,14 @@ public class AiReview {
 
     public void setEcologicalOneline(String ecologicalOneline) {
         this.ecologicalOneline = ecologicalOneline;
+    }
+
+    public String getTechnicalShortReview() {
+        return technicalShortReview;
+    }
+
+    public void setTechnicalShortReview(String technicalShortReview) {
+        this.technicalShortReview = technicalShortReview;
     }
 
     public String getCommunityOneline() {
@@ -394,19 +413,19 @@ public class AiReview {
     @Schema(description = "Source information for the review")
     public static record AiSource(
             @JsonProperty(required = true, value = "number")
-            @AiGeneratedField(instruction = "Le numéro de la source documentaire fournie")
+            @AiGeneratedField(instruction = "Source number (must match provided sources). Plain text only.")
             @Schema(description = "Source number")
             Integer number,
             @JsonProperty(required = true, value = "name")
-            @AiGeneratedField(instruction = "Le nom de la source documentaire fournie")
+            @AiGeneratedField(instruction = "Source name as provided. Plain text only.")
             @Schema(description = "Source name")
             String name,
             @JsonProperty(required = true, value = "description")
-            @AiGeneratedField(instruction = "Courte description de la source documentaire fournie")
+            @AiGeneratedField(instruction = "Short description of the source as provided. Plain text only.")
             @Schema(description = "Source description")
             String description,
             @JsonProperty(required = true, value = "url")
-            @AiGeneratedField(instruction = "URL de la source documentaire fournie")
+            @AiGeneratedField(instruction = "Source URL as provided. No extra text.")
             @Schema(description = "Source URL")
             String url) {
 
@@ -423,15 +442,15 @@ public class AiReview {
     @Schema(description = "Product attribute derived from review")
     public static record AiAttribute(
             @JsonProperty(required = true, value = "name")
-            @AiGeneratedField(instruction = "Le nom de l'attribut")
+            @AiGeneratedField(instruction = "Attribute name. Plain text only.")
             @Schema(description = "Attribute name")
             String name,
             @JsonProperty(required = true, value = "value")
-            @AiGeneratedField(instruction = "La valeur de l'attribut")
+            @AiGeneratedField(instruction = "Attribute value. Plain text only (no HTML).")
             @Schema(description = "Attribute value")
             String value,
             @JsonProperty(required = true, value = "number")
-            @AiGeneratedField(instruction = "La référence de la source qui indique cet attribut")
+            @AiGeneratedField(instruction = "Source number that supports this attribute.")
             @Schema(description = "Reference source number")
             Integer number) {
 
@@ -446,23 +465,23 @@ public class AiReview {
     @Schema(description = "Rating found in a source")
     public static record AiRating(
             @JsonProperty(required = true, value = "source")
-            @AiGeneratedField(instruction = "Le nom de la source qui donne la note")
+            @AiGeneratedField(instruction = "Name of the source that provides the rating.")
             @Schema(description = "Source providing the rating")
             String source,
             @JsonProperty(required = true, value = "score")
-            @AiGeneratedField(instruction = "La note donnée")
+            @AiGeneratedField(instruction = "Score value exactly as stated by the source.")
             @Schema(description = "The score value")
             String score,
             @JsonProperty(required = true, value = "max")
-            @AiGeneratedField(instruction = "La note maximale possible (ex: 5, 10, 20)")
+            @AiGeneratedField(instruction = "Maximum possible score (e.g., 5, 10, 20).")
             @Schema(description = "The maximum possible score")
             String max,
              @JsonProperty(required = true, value = "comment")
-            @AiGeneratedField(instruction = "Court commentaire associé à la note, si disponible")
+            @AiGeneratedField(instruction = "Short comment associated with the rating if available. Plain text only.")
             @Schema(description = "Short comment associated with the rating")
             String comment,
             @JsonProperty(required = true, value = "number")
-            @AiGeneratedField(instruction = "Le numéro de la source documentaire correspondante")
+            @AiGeneratedField(instruction = "Source number that supports this rating.")
             @Schema(description = "Reference source number")
             Integer number) {
     }

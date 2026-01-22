@@ -5,7 +5,7 @@
         {{ $t('product.aiReview.title', titleParams) }}
       </h2>
       <p class="product-ai-review__subtitle">
-        {{ $t('product.aiReview.subtitle') }}
+        {{ subtitleLabel }}
       </p>
     </header>
 
@@ -317,6 +317,7 @@ import type {
 import { IpQuotaCategory } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
 import { useIpQuota } from '~/composables/useIpQuota'
+import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import ProductAiReviewRequestDialog from '~/components/product/ProductAiReviewRequestDialog.vue'
 
 interface ReviewContent {
@@ -365,10 +366,11 @@ const props = defineProps({
   },
 })
 
-const { locale, t } = useI18n()
+const { locale, t, n } = useI18n()
 const theme = useTheme()
 const { isLoggedIn } = useAuth()
 const { getRemaining, refreshQuota, recordUsage } = useIpQuota()
+const { translatePlural } = usePluralizedTranslation()
 
 const review = ref<ReviewContent | null>(normalizeReview(props.initialReview))
 const createdMs = ref<number | null>(props.reviewCreatedAt ?? null)
@@ -425,6 +427,12 @@ const captchaLocale = computed(() =>
 )
 
 const reviewContent = computed(() => review.value)
+const sourcesCount = computed(() => reviewContent.value?.sources?.length ?? 0)
+const subtitleLabel = computed(() =>
+  translatePlural('product.aiReview.subtitle', sourcesCount.value, {
+    count: n(sourcesCount.value),
+  })
+)
 
 const createdDate = computed(() => {
   if (!createdMs.value) {

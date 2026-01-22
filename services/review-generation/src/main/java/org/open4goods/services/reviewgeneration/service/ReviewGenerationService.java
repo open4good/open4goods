@@ -909,6 +909,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		return new AiReview(
 				normalization.description(),
 				normalization.technicalOneline(),
+				normalization.technicalShortReview(),
 				normalization.ecologicalOneline(),
 				normalization.communityOneline(),
 				normalization.shortDescription(),
@@ -956,6 +957,7 @@ public class ReviewGenerationService implements HealthIndicator {
 						.toList(),
 				normalizeText(review.getDataQuality()),
 				normalizeText(review.getTechnicalOneline()),
+				normalizeText(review.getTechnicalShortReview()),
 				normalizeText(review.getEcologicalOneline()),
 				normalizeText(review.getCommunityOneline()),
 				resolveUrlList(review.getPdfs()),
@@ -1300,6 +1302,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				.toList();
 
 		String technicalOneline = normalizer.normalize(review.getTechnicalOneline());
+		String technicalShortReview = normalizer.normalize(review.getTechnicalShortReview());
 		String ecologicalOneline = normalizer.normalize(review.getEcologicalOneline());
 		String communityOneline = normalizer.normalize(review.getCommunityOneline());
 
@@ -1310,8 +1313,9 @@ public class ReviewGenerationService implements HealthIndicator {
 					"Certaines références ont été retirées car elles ne correspondaient à aucune source.");
 		}
 		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle, technicalReview,
-				ecologicalReview, summary, pros, cons, attributes, dataQuality, technicalOneline, ecologicalOneline, communityOneline,
-				review.getPdfs(), review.getImages(), review.getVideos(), review.getSocialLinks());
+				ecologicalReview, summary, pros, cons, attributes, dataQuality, technicalOneline, technicalShortReview,
+				ecologicalOneline, communityOneline, review.getPdfs(), review.getImages(), review.getVideos(),
+				review.getSocialLinks());
 	}
 
 	private String appendDataQuality(String dataQuality, String note) {
@@ -1327,7 +1331,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	private record ReferenceNormalization(String description, String shortDescription, String mediumTitle,
 			String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros,
 			List<String> cons, List<AiReview.AiAttribute> attributes, String dataQuality,
-			String technicalOneline, String ecologicalOneline, String communityOneline,
+			String technicalOneline, String technicalShortReview, String ecologicalOneline, String communityOneline,
 			List<String> pdfs, List<String> images, List<String> videos, List<String> socialLinks) {
 	}
 

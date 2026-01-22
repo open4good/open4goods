@@ -4,7 +4,12 @@
       <h2 class="product-attributes__title">
         {{ $t('product.attributes.title', titleParams) }}
       </h2>
-      <p class="product-attributes__subtitle">
+      <p
+        v-if="technicalShortReviewHtml"
+        class="product-attributes__subtitle"
+        v-html="technicalShortReviewHtml"
+      />
+      <p v-else class="product-attributes__subtitle">
         {{ $t('product.attributes.subtitle') }}
       </p>
     </header>
@@ -713,6 +718,7 @@ import { useAuth } from '~/composables/useAuth'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
 import ProductLifeTimeline from '~/components/product/ProductLifeTimeline.vue'
+import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 import type {
   AttributeConfigDto,
   ProductAttributeDto,
@@ -776,6 +782,17 @@ const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
 const timeline = computed(() => props.product?.timeline ?? null)
 const identity = computed(() => props.product?.identity ?? null)
 const gtin = computed(() => props.product?.gtin ?? props.product?.base?.gtin ?? null)
+const technicalShortReview = computed(() =>
+  props.product?.aiReview?.review?.technicalShortReview?.trim() ?? ''
+)
+const technicalShortReviewHtml = computed(() => {
+  if (!technicalShortReview.value) {
+    return ''
+  }
+
+  const { sanitizedHtml } = _sanitizeHtml(technicalShortReview.value)
+  return sanitizedHtml.value || technicalShortReview.value
+})
 
 const normalizeIdentityValue = (value: string | null | undefined): string | null => {
   if (typeof value !== 'string') {

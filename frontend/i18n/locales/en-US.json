@@ -2416,7 +2416,10 @@
         "running": "Generation in progress ({step})",
         "success": "Summary available"
       },
-      "subtitle": "An AI-written synthesis built from verified sources.",
+      "subtitle": {
+        "one": "An AI-written synthesis built from {count} verified source.",
+        "other": "An AI-written synthesis built from {count} verified sources."
+      },
       "title": "Test & review summary"
     },
     "attributes": {
@@ -2565,6 +2568,11 @@
       }
     },
     "hero": {
+      "aiSummary": {
+        "community": "Experts say",
+        "ecological": "Environmentally",
+        "technical": "Technically"
+      },
       "bestPriceTitle": "Best price",
       "breadcrumbAriaLabel": "Product breadcrumb",
       "compare": {
