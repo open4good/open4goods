@@ -31,7 +31,6 @@ import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.springframework.boot.actuate.health.Status;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -313,7 +312,31 @@ class ReviewGenerationServiceTest {
                 .isEqualTo(org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED);
         assertThat(reviewGenerationService.getProcessStatus(11L).getStatus())
                 .isEqualTo(org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED);
-        assertThat(reviewGenerationService.health().getStatus()).isEqualTo(Status.DOWN);
+        assertThat(reviewGenerationService.health().getStatus()).isEqualTo(org.springframework.boot.actuate.health.Status.DOWN);
         assertThat(Files.exists(trackingFile)).isFalse();
+    }
+
+    @Test
+    void processAiReview_ShouldApplyNormalizationAndReferences() {
+        AiReview review = new AiReview();
+        review.setDescription("This is a product — with an em dash [1].");
+        review.setShortDescription("Short — [2]");
+        review.setPros(List.of("Pro — [1]"));
+        review.setCons(List.of("Con — [2]"));
+        review.setAttributes(List.of(new AiReview.AiAttribute("Attr —", "Val —", 1)));
+        
+        AiReview.AiSource source1 = new AiReview.AiSource(1, "Source —", "Desc —", "http://example.com/1");
+        review.setSources(List.of(source1));
+
+        AiReview processed = ReflectionTestUtils.invokeMethod(reviewGenerationService, "processAiReview", review, null);
+
+        assertThat(processed.getDescription()).isEqualTo("This is a product - with an em dash <a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>.");
+        assertThat(processed.getShortDescription()).isEqualTo("Short - <a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
+        assertThat(processed.getPros().get(0)).isEqualTo("Pro - <a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
+        assertThat(processed.getCons().get(0)).isEqualTo("Con - <a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
+        assertThat(processed.getAttributes().get(0).getName()).isEqualTo("Attr -");
+        assertThat(processed.getAttributes().get(0).getValue()).isEqualTo("Val -");
+        assertThat(processed.getSources().get(0).getName()).isEqualTo("Source -");
+        assertThat(processed.getSources().get(0).getDescription()).isEqualTo("Desc -");
     }
 }

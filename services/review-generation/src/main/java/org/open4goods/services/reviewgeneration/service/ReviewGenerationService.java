@@ -332,20 +332,22 @@ public class ReviewGenerationService implements HealthIndicator {
 
 				} else {
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
+				reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
 				}
-				AiReview newReview = applyCitationsAndNormalize(reviewResponse.getBody(), reviewResponse.getMetadata());
-				newReview = updateAiReviewReferences(newReview);
-
-				// Post-process to resolve URLs (handling redirects)
-				newReview = postProcess30x(newReview);
+				AiReview newReview = processAiReview(reviewResponse.getBody(), reviewResponse.getMetadata());
 
 				// Populate attributes and resources
 				populateAttributes(product, newReview);
 				addResources(product, newReview);
-				logger.info("Completed review : \n {}",objectMapper.writeValueAsString(newReview));
+				logger.info("Completed review for UPC {}: {}", upc, objectMapper.writeValueAsString(newReview));
 				holder.setReview(newReview);
-				holder.setSources((Map<String, Integer>) promptVariables.get("SOURCE_TOKENS"));
-				holder.setTotalTokens((Integer) promptVariables.get("TOTAL_TOKENS"));
+
+				// Safely extract token info
+				@SuppressWarnings("unchecked")
+				Map<String, Integer> sourceTokens = (Map<String, Integer>) promptVariables.getOrDefault("SOURCE_TOKENS", new HashMap<>());
+				holder.setSources(sourceTokens);
+				holder.setTotalTokens((Integer) promptVariables.getOrDefault("TOTAL_TOKENS", 0));
+
 				holder.setEnoughData(true);
 				status.setResult(holder);
 				status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
@@ -680,7 +682,6 @@ public class ReviewGenerationService implements HealthIndicator {
 			Map<String, Object> parsedInfo = objectMapper.readValue(file, Map.class);
             trackingInfo = parsedInfo;
 			jobId = (String) trackingInfo.get("jobId");
-			@SuppressWarnings("unchecked")
 			// Retrieve batch results; this method throws if the job is not yet complete.
 			PromptResponse<List<BatchResultItem>> response = batchAiService.batchPromptResponse(jobId);
 			if (response != null && response.getBody() != null && !response.getBody().isEmpty()) {
@@ -746,7 +747,7 @@ public class ReviewGenerationService implements HealthIndicator {
 			Product product = productRepository.getById(Long.valueOf(productId));
 			if (product != null) {
 				// Process the batch result to convert it into an AiReview.
-				AiReview newReview = processBatchOutputToAiReview(output);
+				AiReview newReview = processAiReview(output);
 				if (null != newReview) {
 					// Populate attributes
 					populateAttributes(product, newReview);
@@ -812,7 +813,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	 */
 	private void populateAttributes(Product product, AiReview review) {
 		// Handling attributes
-		String providerName = determineProviderName();
+		String providerName = determineProviderName(null); // Metadata not available here for batch yet or should be passed
 
 		review.getAttributes().stream().forEach(a -> {
 
@@ -835,26 +836,94 @@ public class ReviewGenerationService implements HealthIndicator {
 		});
 	}
 
-	private String determineProviderName() {
-		// Default to AI_SOURCE_NAME if no better info
-		// Could be enhanced to return "OpenAI" or specific model if context available
+	private String determineProviderName(Map<String, Object> metadata) {
+		if (metadata != null) {
+			Object provider = metadata.get("provider");
+			if (provider != null) {
+				return provider.toString();
+			}
+			Object model = metadata.get("model");
+			if (model != null) {
+				return model.toString();
+			}
+		}
 		return AI_SOURCE_NAME;
 	}
 
 	// -------------------- Helper Methods -------------------- //
 
 
-	private AiReview processBatchOutputToAiReview(BatchResultItem output) {
+	private AiReview processAiReview(BatchResultItem output) {
 		String jsonContent = output.content();
 		AiReview ret = outputConverter.convert(jsonContent);
+		return processAiReview(ret, null);
+	}
 
-		ret = updateAiReviewReferences(ret);
-		ret = normalizeReviewText(ret);
+	/**
+	 * Consolidates post-processing of an AI review: normalization, references, and URL resolution.
+	 *
+	 * @param review   the AI review to process
+	 * @param metadata optional metadata from the AI provider
+	 * @return the processed AI review
+	 */
+	private AiReview processAiReview(AiReview review, Map<String, Object> metadata) {
+		if (review == null) return null;
 
-		// Post-process to resolve URLs
-		ret = postProcess30x(ret);
+		// 1. Apply citations from metadata if available (for grounded prompts)
+		AiReview processed = applyCitations(review, metadata);
 
-		return ret;
+		// 2. Normalize text (e.g. em dashes)
+		processed = normalizeReviewText(processed);
+
+		// 3. Replace numeric references with HTML links
+		processed = updateAiReviewReferences(processed);
+
+		// 4. Resolve URLs (redirects)
+		processed = postProcess30x(processed);
+
+		return processed;
+	}
+
+	private AiReview applyCitations(AiReview review, Map<String, Object> metadata) {
+		if (metadata == null || metadata.isEmpty()) {
+			return review;
+		}
+		List<AiReview.AiSource> metadataSources = resolveSourcesFromMetadata(metadata);
+		if (metadataSources.isEmpty()) {
+			return review;
+		}
+
+		int maxSourceNumber = metadataSources.size();
+		ReferenceNormalization normalization = normalizeReferences(review, metadataSources, maxSourceNumber);
+
+		return copyWithNewData(review, normalization, metadataSources);
+	}
+
+	private AiReview copyWithNewData(AiReview original, ReferenceNormalization normalization, List<AiReview.AiSource> sources) {
+		return new AiReview(
+				normalization.description(),
+				normalization.technicalOneline(),
+				normalization.ecologicalOneline(),
+				normalization.communityOneline(),
+				normalization.shortDescription(),
+				normalization.mediumTitle(),
+				normalization.shortTitle(),
+				original.getManufacturingCountry(),
+				normalization.technicalReview(),
+				normalization.ecologicalReview(),
+				original.getCommunityReview(),
+				normalization.summary(),
+				normalization.pros(),
+				normalization.cons(),
+				sources,
+				normalization.attributes(),
+				normalization.dataQuality(),
+				original.getRatings(),
+				normalization.pdfs(),
+				normalization.images(),
+				normalization.videos(),
+				normalization.socialLinks()
+		);
 	}
 
 	/**
@@ -866,32 +935,34 @@ public class ReviewGenerationService implements HealthIndicator {
 	private AiReview normalizeReviewText(AiReview review) {
 		if (review == null) return null;
 
-		String description = normalizeText(review.getDescription());
-		String technicalOneline = normalizeText(review.getTechnicalOneline());
-		String ecologicalOneline = normalizeText(review.getEcologicalOneline());
-		String communityOneline = normalizeText(review.getCommunityOneline());
-		String shortDescription = normalizeText(review.getShortDescription());
-		String mediumTitle = normalizeText(review.getMediumTitle());
-		String shortTitle = normalizeText(review.getShortTitle());
-		String technicalReview = normalizeText(review.getTechnicalReview());
-		String ecologicalReview = normalizeText(review.getEcologicalReview());
-		String summary = normalizeText(review.getSummary());
-		String dataQuality = normalizeText(review.getDataQuality());
+		ReferenceNormalization normalization = new ReferenceNormalization(
+				normalizeText(review.getDescription()),
+				normalizeText(review.getShortDescription()),
+				normalizeText(review.getMediumTitle()),
+				normalizeText(review.getShortTitle()),
+				normalizeText(review.getTechnicalReview()),
+				normalizeText(review.getEcologicalReview()),
+				normalizeText(review.getSummary()),
+				review.getPros() == null ? List.of() : review.getPros().stream().map(this::normalizeText).toList(),
+				review.getCons() == null ? List.of() : review.getCons().stream().map(this::normalizeText).toList(),
+				review.getAttributes() == null ? List.of() : review.getAttributes().stream()
+						.map(a -> new AiReview.AiAttribute(normalizeText(a.getName()), normalizeText(a.getValue()), a.getNumber()))
+						.toList(),
+				normalizeText(review.getDataQuality()),
+				normalizeText(review.getTechnicalOneline()),
+				normalizeText(review.getEcologicalOneline()),
+				normalizeText(review.getCommunityOneline()),
+				resolveUrlList(review.getPdfs()),
+				resolveUrlList(review.getImages()),
+				resolveUrlList(review.getVideos()),
+				resolveUrlList(review.getSocialLinks())
+		);
 
-		List<String> pros = review.getPros() == null ? List.of() : review.getPros().stream().map(this::normalizeText).toList();
-		List<String> cons = review.getCons() == null ? List.of() : review.getCons().stream().map(this::normalizeText).toList();
-
-		List<AiReview.AiSource> sources = review.getSources() == null ? List.of() : review.getSources().stream()
-			.map(s -> new AiReview.AiSource(s.getNumber(), normalizeText(s.getName()), normalizeText(s.getDescription()), s.getUrl()))
-			.toList();
-
-		List<AiReview.AiAttribute> attributes = review.getAttributes() == null ? List.of() : review.getAttributes().stream()
-				.map(a -> new AiReview.AiAttribute(normalizeText(a.getName()), normalizeText(a.getValue()), a.getNumber()))
+		List<AiReview.AiSource> normalizedSources = review.getSources() == null ? List.of() : review.getSources().stream()
+				.map(s -> new AiReview.AiSource(s.getNumber(), normalizeText(s.getName()), normalizeText(s.getDescription()), s.getUrl()))
 				.toList();
 
-		return new AiReview(description, technicalOneline, ecologicalOneline, communityOneline, shortDescription, mediumTitle,
-				shortTitle, technicalReview, ecologicalReview, summary, pros, cons, sources, attributes, dataQuality,
-				review.getRatings(), review.getPdfs(), review.getImages(), review.getVideos(), review.getSocialLinks());
+		return copyWithNewData(review, normalization, normalizedSources);
 	}
 
 	private String normalizeText(String text) {
@@ -907,10 +978,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @return the processed review
 	 */
 	private AiReview postProcess30x(AiReview review) {
-		if (!properties.isResolveUrl()) {
-			return review;
-		}
-		if (review == null) {
+		if (!properties.isResolveUrl() || review == null) {
 			return review;
 		}
 
@@ -923,17 +991,28 @@ public class ReviewGenerationService implements HealthIndicator {
 			return source;
 		}).toList();
 
-		List<String> updatedPdfs = resolveUrlList(review.getPdfs());
-		List<String> updatedImages = resolveUrlList(review.getImages());
-		List<String> updatedVideos = resolveUrlList(review.getVideos());
-		List<String> updatedSocialLinks = resolveUrlList(review.getSocialLinks());
+		ReferenceNormalization normalization = new ReferenceNormalization(
+				review.getDescription(),
+				review.getShortDescription(),
+				review.getMediumTitle(),
+				review.getShortTitle(),
+				review.getTechnicalReview(),
+				review.getEcologicalReview(),
+				review.getSummary(),
+				review.getPros(),
+				review.getCons(),
+				review.getAttributes(),
+				review.getDataQuality(),
+				review.getTechnicalOneline(),
+				review.getEcologicalOneline(),
+				review.getCommunityOneline(),
+				resolveUrlList(review.getPdfs()),
+				resolveUrlList(review.getImages()),
+				resolveUrlList(review.getVideos()),
+				resolveUrlList(review.getSocialLinks())
+		);
 
-		return new AiReview(review.getDescription(), review.getTechnicalOneline(), review.getEcologicalOneline(),
-				review.getCommunityOneline(), review.getShortDescription(), review.getMediumTitle(),
-				review.getShortTitle(), review.getTechnicalReview(), review.getEcologicalReview(),
-				review.getSummary(), review.getPros(), review.getCons(), updatedSources, review.getAttributes(),
-				review.getDataQuality(), review.getRatings(),
-				updatedPdfs, updatedImages, updatedVideos, updatedSocialLinks);
+		return copyWithNewData(review, normalization, updatedSources);
 	}
 
 	private List<String> resolveUrlList(List<String> urls) {
@@ -1099,38 +1178,38 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @return a new AiReview with updated text fields.
 	 */
 	private AiReview updateAiReviewReferences(AiReview review) {
-		String description = replaceReferences(review.getDescription());
-		String technicalOneline = replaceReferences(review.getTechnicalOneline());
-		String ecologicalOneline = replaceReferences(review.getEcologicalOneline());
-		String communityOneline = replaceReferences(review.getCommunityOneline());
-		String shortDescription = replaceReferences(review.getShortDescription());
-		String mediumTitle = replaceReferences(review.getMediumTitle());
-		String shortTitle = replaceReferences(review.getShortTitle());
-		String technicalReview = replaceReferences(review.getTechnicalReview());
-		String ecologicalReview = replaceReferences(review.getEcologicalReview());
-		String summary = replaceReferences(review.getSummary());
-		String dataQuality = replaceReferences(review.getDataQuality());
-		List<String> pros = review.getPros() == null
-				? List.of()
-				: review.getPros().stream().map(this::replaceReferences).toList();
-		List<String> cons = review.getCons() == null
-				? List.of()
-				: review.getCons().stream().map(this::replaceReferences).toList();
-		List<AiReview.AiSource> sources = review.getSources() == null
-				? List.of()
-				: review.getSources().stream()
+		if (review == null) return null;
+
+		ReferenceNormalization normalization = new ReferenceNormalization(
+				replaceReferences(review.getDescription()),
+				replaceReferences(review.getShortDescription()),
+				replaceReferences(review.getMediumTitle()),
+				replaceReferences(review.getShortTitle()),
+				replaceReferences(review.getTechnicalReview()),
+				replaceReferences(review.getEcologicalReview()),
+				replaceReferences(review.getSummary()),
+				review.getPros() == null ? List.of() : review.getPros().stream().map(this::replaceReferences).toList(),
+				review.getCons() == null ? List.of() : review.getCons().stream().map(this::replaceReferences).toList(),
+				review.getAttributes() == null ? List.of() : review.getAttributes().stream()
+						.map(attr -> new AiReview.AiAttribute(replaceReferences(attr.getName()),
+								replaceReferences(attr.getValue()), attr.getNumber()))
+						.toList(),
+				replaceReferences(review.getDataQuality()),
+				replaceReferences(review.getTechnicalOneline()),
+				replaceReferences(review.getEcologicalOneline()),
+				replaceReferences(review.getCommunityOneline()),
+				review.getPdfs(),
+				review.getImages(),
+				review.getVideos(),
+				review.getSocialLinks()
+		);
+
+		List<AiReview.AiSource> sources = review.getSources() == null ? List.of() : review.getSources().stream()
 				.map(source -> new AiReview.AiSource(source.getNumber(), replaceReferences(source.getName()),
 						replaceReferences(source.getDescription()), source.getUrl()))
 				.toList();
-		List<AiReview.AiAttribute> attributes = review.getAttributes() == null
-				? List.of()
-				: review.getAttributes().stream()
-				.map(attr -> new AiReview.AiAttribute(replaceReferences(attr.getName()),
-						replaceReferences(attr.getValue()), attr.getNumber()))
-				.toList();
-		return new AiReview(description, technicalOneline, ecologicalOneline, communityOneline, shortDescription, mediumTitle, shortTitle, technicalReview, ecologicalReview,
-				summary, pros, cons, sources, attributes, dataQuality, review.getRatings(),
-				review.getPdfs(), review.getImages(), review.getVideos(), review.getSocialLinks());
+
+		return copyWithNewData(review, normalization, sources);
 	}
 
 	@Override
@@ -1162,22 +1241,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	}
 
 	private AiReview applyCitationsAndNormalize(AiReview review, Map<String, Object> metadata) {
-		if (review == null) {
-			return null;
-		}
-		List<AiReview.AiSource> sources = review.getSources() == null ? List.of() : review.getSources();
-		List<AiReview.AiSource> metadataSources = resolveSourcesFromMetadata(metadata);
-		if (!metadataSources.isEmpty()) {
-			sources = metadataSources;
-		}
-		int maxSourceNumber = sources == null ? 0 : sources.size();
-		ReferenceNormalization normalization = normalizeReferences(review, sources, maxSourceNumber);
-		String dataQuality = normalization.dataQuality();
-		return new AiReview(normalization.description(), normalization.technicalOneline(), normalization.ecologicalOneline(), normalization.communityOneline(), normalization.shortDescription(), normalization.mediumTitle(),
-				normalization.shortTitle(), normalization.technicalReview(), normalization.ecologicalReview(),
-				normalization.summary(), normalization.pros(), normalization.cons(), sources, normalization.attributes(),
-				dataQuality, review.getRatings(),
-				normalization.pdfs(), normalization.images(), normalization.videos(), normalization.socialLinks());
+		return processAiReview(review, metadata);
 	}
 
 	private List<AiReview.AiSource> resolveSourcesFromMetadata(Map<String, Object> metadata) {

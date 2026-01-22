@@ -22,31 +22,40 @@ import io.swagger.v3.oas.annotations.media.Schema;
 // TODO : Could we convert to record ?
 public class AiReview {
 
-    public AiReview(String description, String technicalOneline, String ecologicalOneline, String communityOneline, String shortDescription, String mediumTitle, String shortTitle, String technicalReview, String ecologicalReview, String summary, List<String> pros, List<String> cons, List<AiSource> sources, List<AiAttribute> attributes, String dataQuality, List<AiRating> ratings, List<String> pdfs, List<String> images, List<String> videos, List<String> socialLinks) {
-        super();
-        this.description = description;
-        this.technicalOneline = technicalOneline;
-        this.ecologicalOneline = ecologicalOneline;
-        this.communityOneline = communityOneline;
-        this.shortDescription = shortDescription;
-        this.mediumTitle = mediumTitle;
-        this.shortTitle = shortTitle;
-        this.technicalReview = technicalReview;
-        this.ecologicalReview = ecologicalReview;
-        this.summary = summary;
-        this.pros = pros;
-        this.cons = cons;
-        this.sources = sources;
-        this.attributes = attributes;
-        this.dataQuality = dataQuality;
-        this.ratings = ratings;
-        this.pdfs = pdfs;
-        this.images = images;
-        this.videos = videos;
-        this.socialLinks = socialLinks;
-    }
 
-	    /** A detailed description of the product. */
+
+	    public AiReview(String description, String technicalOneline, String ecologicalOneline, String communityOneline,
+			String shortDescription, String mediumTitle, String shortTitle, String manufacturingCountry,
+			String technicalReview, String ecologicalReview, String communityReview, String summary, List<String> pros,
+			List<String> cons, List<AiSource> sources, List<AiAttribute> attributes, String dataQuality,
+			List<AiRating> ratings, List<String> pdfs, List<String> images, List<String> videos,
+			List<String> socialLinks) {
+		super();
+		this.description = description;
+		this.technicalOneline = technicalOneline;
+		this.ecologicalOneline = ecologicalOneline;
+		this.communityOneline = communityOneline;
+		this.shortDescription = shortDescription;
+		this.mediumTitle = mediumTitle;
+		this.shortTitle = shortTitle;
+		this.manufacturingCountry = manufacturingCountry;
+		this.technicalReview = technicalReview;
+		this.ecologicalReview = ecologicalReview;
+		this.communityReview = communityReview;
+		this.summary = summary;
+		this.pros = pros;
+		this.cons = cons;
+		this.sources = sources;
+		this.attributes = attributes;
+		this.dataQuality = dataQuality;
+		this.ratings = ratings;
+		this.pdfs = pdfs;
+		this.images = images;
+		this.videos = videos;
+		this.socialLinks = socialLinks;
+	}
+
+		/** A detailed description of the product. */
     @JsonProperty(required = true, value = "description")
     @AiGeneratedField(instruction = "Description du produit, 150 mots maximum")
     @Schema(description = "Detailed description of the product")
@@ -94,6 +103,13 @@ public class AiReview {
     @Schema(description = "Short title")
     private String shortTitle;
 
+
+    @JsonProperty(required = true, value = "manufacturingCountry")
+    @AiGeneratedField(instruction = "Le ou les lieux de fabrication si connus, séparés par des virgules")
+    @Schema(description = "Probable manufacturing countries of this product")
+    private String manufacturingCountry;
+
+
     /** The technical review of the product. */
     @JsonProperty(required = true, value = "technicalReview")
     @AiGeneratedField(instruction = "Revue technique approfondie du produit, axée sur les performances et la qualité.")
@@ -105,6 +121,15 @@ public class AiReview {
     @AiGeneratedField(instruction = "Revue écologique du produit, incluant réparabilité, durabilité, efficacité énergétique et toutes informations contenues dans les sources ou dans les scores fournis permettant d'orienter le jugement. ")
     @Schema(description = "Ecological review of the product")
     private String ecologicalReview;
+
+
+    /** The ecological review of the product. */
+    @JsonProperty(required = true, value = "communityReview")
+    @AiGeneratedField(instruction = "Synthèse des retours de sites experts et utilisateurs")
+    @Schema(description = "Community review of the product")
+    private String communityReview;
+
+
 
     /** A summary of the product review. */
     // TODO : Remove
@@ -241,6 +266,14 @@ public class AiReview {
         this.shortTitle = shortTitle;
     }
 
+    public String getManufacturingCountry() {
+        return manufacturingCountry;
+    }
+
+    public void setManufacturingCountry(String manufacturingCountry) {
+        this.manufacturingCountry = manufacturingCountry;
+    }
+
     public String getTechnicalReview() {
         return technicalReview;
     }
@@ -255,6 +288,14 @@ public class AiReview {
 
     public void setEcologicalReview(String ecologicalReview) {
         this.ecologicalReview = ecologicalReview;
+    }
+
+    public String getCommunityReview() {
+        return communityReview;
+    }
+
+    public void setCommunityReview(String communityReview) {
+        this.communityReview = communityReview;
     }
 
     public String getSummary() {

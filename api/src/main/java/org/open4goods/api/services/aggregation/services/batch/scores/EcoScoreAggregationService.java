@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 
 /**
  * Create an ecoscore based on existing scores, (see yaml config files)
- *
+ * TODO : Remove generic logger
  * @author goulven
  *
  */
@@ -118,7 +118,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		List<Product> productsWithRealEcoScore = datas.stream().filter(this::hasRealEcoScore).toList();
 
 		if (productsWithRealEcoScore.isEmpty()) {
-			dedicatedLogger.warn("{} -> No real ecoscore computed, skipping ranking", this.getClass().getSimpleName());
+			dedicatedLogger.error("{} -> No real ecoscore computed, skipping ranking", this.getClass().getSimpleName());
 			return;
 		}
 
