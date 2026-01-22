@@ -18,12 +18,9 @@
     </header>
 
     <div class="product-hero__pricing-panel-body">
-      <div
-        v-if="hasOffer"
-        class="product-hero__pricing-panel-main"
-        :class="{ 'product-hero__pricing-panel-main--stacked': showMerchantName }"
-      >
-        <div v-if="merchant" class="product-hero__pricing-panel-merchant">
+      <template v-if="hasOffer">
+        <div class="product-hero__pricing-panel-main">
+          <div v-if="merchant" class="product-hero__pricing-panel-merchant">
           <v-tooltip v-if="offerName" :text="offerName" location="bottom">
             <template #activator="{ props: tooltipProps }">
               <div v-bind="tooltipProps">
@@ -203,20 +200,85 @@
           </template>
         </div>
 
-        <div class="product-hero__pricing-panel-price">
-          <p class="product-hero__pricing-panel-price-label">
-            {{ priceTitle }}
-          </p>
-          <div class="product-hero__pricing-panel-price-value">
-            <span class="product-hero__pricing-panel-price-amount">
-              {{ priceLabel }}
-            </span>
-            <span v-if="priceCurrency" class="product-hero__pricing-panel-price-currency">
-              {{ priceCurrency }}
-            </span>
+          <div class="product-hero__pricing-panel-price">
+            <p class="product-hero__pricing-panel-price-label">
+              {{ priceTitle }}
+            </p>
+            <div class="product-hero__pricing-panel-price-value">
+              <span class="product-hero__pricing-panel-price-amount">
+                {{ priceLabel }}
+              </span>
+              <span
+                v-if="priceCurrency"
+                class="product-hero__pricing-panel-price-currency"
+              >
+                {{ priceCurrency }}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+
+        <v-select
+          v-if="alternativeOffers?.length"
+          v-model="selectedAlternative"
+          class="product-hero__pricing-panel-select"
+          :items="alternativeOffers"
+          :label="alternativeOffersLabel"
+          :placeholder="alternativeOffersPlaceholder"
+          item-title="label"
+          item-value="id"
+          return-object
+          variant="outlined"
+          density="comfortable"
+          hide-details
+          menu-icon="mdi-chevron-down"
+        >
+          <template #selection="{ item }">
+            <div class="product-hero__pricing-panel-select-value">
+              <img
+                v-if="item.raw.favicon"
+                :src="item.raw.favicon"
+                :alt="item.raw.label"
+                width="20"
+                height="20"
+                class="product-hero__pricing-panel-select-avatar"
+              />
+              <span class="product-hero__pricing-panel-select-name">
+                {{ item.raw.label }}
+              </span>
+              <span class="product-hero__pricing-panel-select-price">
+                {{ item.raw.priceLabel }}
+              </span>
+            </div>
+          </template>
+          <template #item="{ item, props: itemProps }">
+            <v-list-item v-bind="itemProps">
+              <template #prepend>
+                <img
+                  v-if="item.raw.favicon"
+                  :src="item.raw.favicon"
+                  :alt="item.raw.label"
+                  width="24"
+                  height="24"
+                  class="product-hero__pricing-panel-select-avatar"
+                />
+                <v-icon v-else icon="mdi-storefront-outline" size="20" />
+              </template>
+              <v-list-item-title>
+                {{ item.raw.label }}
+              </v-list-item-title>
+              <v-list-item-subtitle v-if="item.raw.offerName">
+                {{ item.raw.offerName }}
+              </v-list-item-subtitle>
+              <template #append>
+                <span class="product-hero__pricing-panel-select-price">
+                  {{ item.raw.priceLabel }}
+                </span>
+              </template>
+            </v-list-item>
+          </template>
+        </v-select>
+      </template>
 
       <div v-else class="product-hero__pricing-panel-empty">
         <v-icon icon="mdi-basket-off-outline" size="20" />
@@ -264,7 +326,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 type OfferCondition = 'occasion' | 'new'
 
@@ -274,6 +336,14 @@ type MerchantInfo = {
   favicon: string | null
   isInternal: boolean
   clientOnly: boolean
+}
+
+type AlternativeOfferOption = {
+  id: string
+  label: string
+  offerName: string | null
+  priceLabel: string
+  favicon: string | null
 }
 
 const props = defineProps({
@@ -341,6 +411,18 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  alternativeOffers: {
+    type: Array as () => AlternativeOfferOption[] | null,
+    default: null,
+  },
+  alternativeOffersLabel: {
+    type: String,
+    default: null,
+  },
+  alternativeOffersPlaceholder: {
+    type: String,
+    default: null,
+  },
 })
 
 const emit = defineEmits<{
@@ -366,6 +448,8 @@ const emitTrendClick = () => {
 const emitViewOffers = () => {
   emit('view-offers')
 }
+
+const selectedAlternative = ref<AlternativeOfferOption | null>(null)
 </script>
 
 <style scoped>
@@ -423,11 +507,7 @@ const emitViewOffers = () => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.product-hero__pricing-panel-main--stacked {
-  flex-direction: column;
-  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .product-hero__pricing-panel-merchant-link,
@@ -462,6 +542,7 @@ const emitViewOffers = () => {
 
 .product-hero__pricing-panel-price {
   text-align: right;
+  margin-left: auto;
 }
 
 .product-hero__pricing-panel-price-label {
@@ -497,6 +578,33 @@ const emitViewOffers = () => {
   background: rgba(var(--v-theme-surface-primary-050), 0.8);
   color: rgb(var(--v-theme-text-neutral-secondary));
   font-weight: 600;
+}
+
+.product-hero__pricing-panel-select {
+  width: 100%;
+}
+
+.product-hero__pricing-panel-select-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.product-hero__pricing-panel-select-name {
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-hero__pricing-panel-select-price {
+  margin-left: auto;
+  font-weight: 700;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-hero__pricing-panel-select-avatar {
+  border-radius: 6px;
+  object-fit: cover;
 }
 
 .product-hero__pricing-panel-footer {

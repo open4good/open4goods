@@ -44,11 +44,28 @@
 
       <main class="product-page__content">
         <section :id="sectionIds.hero" class="product-page__section">
-          <ProductHero
-            :product="product"
-            :breadcrumbs="productBreadcrumbs"
-            :popular-attributes="heroPopularAttributes"
-          />
+          <div class="product-page__hero">
+            <ProductHero
+              :product="product"
+              :breadcrumbs="productBreadcrumbs"
+              :popular-attributes="heroPopularAttributes"
+            />
+            <div class="product-page__hero-corner" role="presentation">
+              <ImpactScore
+                v-if="impactScoreOn20 !== null"
+                :score="impactScoreOn20"
+                :max="5"
+                size="xxlarge"
+                mode="badge"
+                badge-layout="stacked"
+                badge-variant="corner"
+                flat
+              />
+              <span v-else class="product-page__hero-corner-fallback">
+                {{ $t('category.products.notRated') }}
+              </span>
+            </div>
+          </div>
         </section>
 
         <section
@@ -198,6 +215,7 @@ import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigat
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
+import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
@@ -2221,6 +2239,40 @@ useHead(() => {
 
 .product-page__section {
   scroll-margin-top: 108px; /* Match sticky nav + banner */
+}
+
+.product-page__hero {
+  position: relative;
+}
+
+.product-page__hero-corner {
+  position: absolute;
+  top: -1.75rem; /* Adjust based on panel padding */
+  left: -1.75rem; /* Adjust based on panel padding */
+  width: 100px;
+  height: 100px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 0 54% 0;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.92);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(6px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.product-page__hero-corner-fallback {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  text-align: center;
+  line-height: 1.1;
+  transform: rotate(-12deg);
 }
 
 .product-page__fab {

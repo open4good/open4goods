@@ -2404,12 +2404,15 @@
         "overall": "Overall summary",
         "pros": "Pros",
         "sources": "Consulted sources",
+        "sourcesCount": "{count} sources consulted",
         "technical": "Technical analysis"
       },
       "sources": {
         "description": "Description",
         "index": "Ref.",
-        "source": "Source"
+        "source": "Source",
+        "showLess": "See fewer sources",
+        "showMore": "See more sources"
       },
       "status": {
         "failed": "Generation failed",
@@ -2600,6 +2603,11 @@
       "noOffers": {
         "new": "No new offers yet!",
         "occasion": "No second-hand offers yet!"
+      },
+      "alternativeOffers": {
+        "label": "Alternative offers",
+        "placeholder": "Select another offer",
+        "unknownMerchant": "Unknown merchant"
       },
       "openGalleryFallback": "Open product media gallery",
       "openGalleryImage": "View image \"{label}\" in fullscreen",

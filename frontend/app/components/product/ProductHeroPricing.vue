@@ -27,6 +27,9 @@
         :merchant="panel.merchant"
         :offer-name="panel.offerName"
         :show-merchant-name="true"
+        :alternative-offers="panel.alternativeOffers"
+        :alternative-offers-label="panel.alternativeOffersLabel"
+        :alternative-offers-placeholder="panel.alternativeOffersPlaceholder"
         :trend-label="panel.trendLabel"
         :trend-tooltip="panel.trendTooltip"
         :trend-tone-class="panel.trendToneClass"
@@ -72,6 +75,15 @@ type AggregatedOffer = NonNullable<
   NonNullable<ProductDto['offers']>['bestPrice']
 >
 
+type AlternativeOfferOption = {
+  id: string
+  label: string
+  offerName: string | null
+  priceLabel: string
+  favicon: string | null
+  url: string | null
+}
+
 const aggregatedBestOffer = computed<AggregatedOffer | null>(
   () => props.product.offers?.bestPrice ?? null
 )
@@ -107,6 +119,73 @@ const conditionOrder: OfferCondition[] = ['new', 'occasion']
 const defaultCurrencyCode = computed(
   () => aggregatedBestOffer.value?.currency ?? 'EUR'
 )
+
+const offersByCondition = computed(
+  () => props.product.offers?.offersByCondition ?? {}
+)
+
+const resolveOffersForCondition = (condition: OfferCondition) => {
+  const normalized = condition.toLowerCase()
+  const entries = Object.entries(offersByCondition.value)
+  return entries.flatMap(([key, offers]) => {
+    if (key.toLowerCase() !== normalized || !Array.isArray(offers)) {
+      return []
+    }
+
+    return offers
+  })
+}
+
+const offersCountByCondition = computed(() => ({
+  new: resolveOffersForCondition('new').length,
+  occasion: resolveOffersForCondition('occasion').length,
+}))
+
+const isSameOffer = (
+  offer: AggregatedOffer,
+  bestOffer: AggregatedOffer | null
+) => {
+  if (!bestOffer) {
+    return false
+  }
+
+  return (
+    offer.url === bestOffer.url &&
+    offer.price === bestOffer.price &&
+    offer.datasourceName === bestOffer.datasourceName
+  )
+}
+
+const buildAlternativeOffers = (condition: OfferCondition) => {
+  const bestOffer = bestOffersByCondition.value[condition]
+  return resolveOffersForCondition(condition)
+    .filter(offer => !isSameOffer(offer, bestOffer))
+    .map((offer, index) => {
+      const currency = offer.currency ?? defaultCurrencyCode.value
+      const priceLabel = formatPriceLabel(
+        typeof offer.price === 'number' ? offer.price : null,
+        currency
+      )
+
+      return {
+        id: `${condition}-${offer.datasourceName ?? 'offer'}-${offer.price ?? index}-${index}`,
+        label:
+          offer.datasourceName ??
+          t('product.hero.alternativeOffers.unknownMerchant'),
+        offerName: offer.offerName ?? null,
+        priceLabel,
+        favicon: offer.favicon ?? null,
+        url: offer.url ?? null,
+      }
+    })
+}
+
+const alternativeOffersByCondition = computed<
+  Record<OfferCondition, AlternativeOfferOption[]>
+>(() => ({
+  new: buildAlternativeOffers('new'),
+  occasion: buildAlternativeOffers('occasion'),
+}))
 
 const priceRangesByCondition = computed<
   Record<
@@ -496,7 +575,12 @@ const conditionPanels = computed(() => {
     return {
       condition,
       conditionLabel: t(`product.hero.offerConditions.${condition}`),
-      offersCountLabel: offersCount.value ? offersCountLabel.value : null,
+      offersCountLabel:
+        offersCountByCondition.value[condition] > 0
+          ? t('product.hero.offersCountLabel', {
+              count: n(offersCountByCondition.value[condition]),
+            })
+          : null,
       priceTitle: t('product.hero.bestPriceTitle'),
       priceLabel,
       priceCurrency,
@@ -504,6 +588,9 @@ const conditionPanels = computed(() => {
       emptyStateLabel: t(`product.hero.noOffers.${condition}`),
       merchant: createMerchant(offer),
       offerName: offer?.offerName ?? null,
+      alternativeOffers: alternativeOffersByCondition.value[condition],
+      alternativeOffersLabel: t('product.hero.alternativeOffers.label'),
+      alternativeOffersPlaceholder: t('product.hero.alternativeOffers.placeholder'),
       trendLabel,
       trendTooltip,
       trendToneClass: `product-hero__price-trend--${trendTone}`,

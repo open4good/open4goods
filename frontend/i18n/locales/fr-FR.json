@@ -2419,12 +2419,15 @@
         "overall": "Résumé général",
         "pros": "Points forts",
         "sources": "Sources consultées",
+        "sourcesCount": "{count} sources consultées",
         "technical": "Analyse technique"
       },
       "sources": {
         "description": "Description",
         "index": "Réf.",
-        "source": "Source"
+        "source": "Source",
+        "showLess": "Voir moins de sources",
+        "showMore": "Voir plus de sources"
       },
       "status": {
         "failed": "La génération a échoué",
@@ -2615,6 +2618,11 @@
       "noOffers": {
         "new": "Pas d'offres neuves pour l'instant !",
         "occasion": "Pas d'offres d'occasion pour l'instant !"
+      },
+      "alternativeOffers": {
+        "label": "Offres alternatives",
+        "placeholder": "Choisir une autre offre",
+        "unknownMerchant": "Marchand inconnu"
       },
       "openGalleryFallback": "Ouvrir la galerie média du produit",
       "openGalleryImage": "Afficher l’image « {label} » en plein écran",

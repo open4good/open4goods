@@ -7,14 +7,6 @@
       <p class="product-ai-review__subtitle">
         {{ subtitleLabel }}
       </p>
-    </header>
-
-    <div
-      v-if="reviewContent"
-      class="product-ai-review__content"
-      itemscope
-      itemtype="https://schema.org/Review"
-    >
       <div v-if="createdDate" class="product-ai-review__metadata">
         <v-icon
           icon="mdi-calendar-clock"
@@ -25,7 +17,14 @@
           $t('product.aiReview.generatedAt', { date: createdDate })
         }}</span>
       </div>
+    </header>
 
+    <div
+      v-if="reviewContent"
+      class="product-ai-review__content"
+      itemscope
+      itemtype="https://schema.org/Review"
+    >
       <div class="product-ai-review__grid">
         <v-row>
           <!-- Row 1: Summary & Pros/Cons -->
@@ -178,7 +177,7 @@
           <div class="product-ai-review__section-icon">
             <v-icon icon="mdi-book-open-variant" size="20" />
           </div>
-          <h4>{{ $t('product.aiReview.sections.sources') }}</h4>
+          <h4>{{ sourcesTitle }}</h4>
         </header>
         <v-table
           density="compact"
@@ -195,7 +194,7 @@
           </thead>
           <tbody>
             <tr
-              v-for="source in reviewContent.sources"
+              v-for="source in visibleSources"
               :id="`review-ref-${source.number}`"
               :key="source.number"
             >
@@ -221,6 +220,23 @@
                 <a :href="source.url" target="_blank" rel="noopener">
                   {{ source.description }}
                 </a>
+              </td>
+            </tr>
+            <tr v-if="hasMoreSources" class="product-ai-review__sources-toggle">
+              <td :colspan="3">
+                <button
+                  type="button"
+                  class="product-ai-review__sources-toggle-btn"
+                  @click="toggleSources"
+                >
+                  <v-icon
+                    :icon="
+                      showAllSources ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                    "
+                    size="18"
+                  />
+                  <span>{{ sourcesToggleLabel }}</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -382,6 +398,7 @@ const captchaToken = ref<string | null>(null)
 const descriptionRef = ref<HTMLElement | null>(null)
 const isDialogOpen = ref(false)
 const agreementAccepted = ref(true)
+const showAllSources = ref(false)
 
 const quotaCategory = IpQuotaCategory.ReviewGeneration
 
@@ -407,6 +424,7 @@ watch(
   () => props.initialReview,
   value => {
     review.value = normalizeReview(value)
+    showAllSources.value = false
   }
 )
 
@@ -428,10 +446,26 @@ const captchaLocale = computed(() =>
 
 const reviewContent = computed(() => review.value)
 const sourcesCount = computed(() => reviewContent.value?.sources?.length ?? 0)
+const maxVisibleSources = 5
+const visibleSources = computed(() => {
+  const sources = reviewContent.value?.sources ?? []
+  return showAllSources.value ? sources : sources.slice(0, maxVisibleSources)
+})
+const hasMoreSources = computed(
+  () => sourcesCount.value > maxVisibleSources
+)
 const subtitleLabel = computed(() =>
   translatePlural('product.aiReview.subtitle', sourcesCount.value, {
     count: n(sourcesCount.value),
   })
+)
+const sourcesTitle = computed(() =>
+  t('product.aiReview.sections.sourcesCount', { count: n(sourcesCount.value) })
+)
+const sourcesToggleLabel = computed(() =>
+  showAllSources.value
+    ? t('product.aiReview.sources.showLess')
+    : t('product.aiReview.sources.showMore')
 )
 
 const createdDate = computed(() => {
@@ -555,6 +589,10 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     attributes,
     dataQuality: reviewData.dataQuality ?? null,
   }
+}
+
+const toggleSources = () => {
+  showAllSources.value = !showAllSources.value
 }
 
 const startRequest = () => {
@@ -911,6 +949,29 @@ const handleReferenceClick = (event: Event) => {
 .product-ai-review__table--compact :deep(th),
 .product-ai-review__table--compact :deep(td) {
   padding: 0.65rem 0.75rem;
+}
+
+.product-ai-review__sources-toggle td {
+  padding: 0;
+}
+
+.product-ai-review__sources-toggle-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border: none;
+  background: rgba(var(--v-theme-surface-primary-050), 0.7);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.product-ai-review__sources-toggle-btn:hover,
+.product-ai-review__sources-toggle-btn:focus-visible {
+  background: rgba(var(--v-theme-surface-primary-080), 0.9);
 }
 
 .product-ai-review__source-info {

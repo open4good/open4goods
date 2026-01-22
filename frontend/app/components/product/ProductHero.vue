@@ -35,21 +35,6 @@
                 :product="product"
                 :title="heroTitle"
               />
-              <div class="product-hero__corner" role="presentation">
-                <ImpactScore
-                  v-if="impactScoreOn20 !== null"
-                  :score="impactScoreOn20"
-                  :max="5"
-                  size="xxlarge"
-                  mode="badge"
-                  badge-layout="stacked"
-                  badge-variant="corner"
-                  flat
-                />
-                <span v-else class="product-hero__corner-fallback">
-                  {{ t('category.products.notRated') }}
-                </span>
-              </div>
             </div>
 
             <div class="product-hero__details-section">
@@ -242,7 +227,6 @@
 import { computed, defineAsyncComponent, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
-import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import {
@@ -255,7 +239,6 @@ import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
-import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import {
   resolveProductLongName,
   resolveProductShortName,
@@ -607,7 +590,6 @@ const gtinCountry = computed(() => {
   }
 })
 
-const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 </script>
 
 <style scoped>
@@ -780,24 +762,6 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   min-width: 0;
 }
 
-.product-hero__corner {
-  position: absolute;
-  top: -1.75rem; /* Adjust based on panel padding */
-  left: -1.75rem; /* Adjust based on panel padding */
-  width: 100px;
-  height: 100px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0 0 54% 0;
-  background: rgba(var(--v-theme-surface-glass-strong), 0.92);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
-  color: rgb(var(--v-theme-text-neutral-strong));
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
-  backdrop-filter: blur(6px);
-  z-index: 2;
-  pointer-events: none;
-}
 
 .product-hero__details-section {
   display: flex;
@@ -823,10 +787,10 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 }
 
 .product-hero__subtitle {
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
-  line-height: 1.2;
+  line-height: 1.4;
 }
 
 .product-hero__attributes {
@@ -928,16 +892,6 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
 }
 
-.product-hero__corner-fallback {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-  text-align: center;
-  line-height: 1.1;
-  transform: rotate(-12deg);
-}
 
 .product-hero__brand-line {
   display: flex;
