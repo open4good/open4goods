@@ -473,6 +473,8 @@ public class ProductController {
         GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups, fallback,
                 missingVerticalResults,
                 toCategoryDto(result.verticalCta()),
+                result.searchMode(),
+                result.diagnostics(),
                 result.fallbackTriggered());
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)

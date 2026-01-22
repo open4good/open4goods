@@ -24,13 +24,14 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchMode;
 import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchHitsImpl;
@@ -120,7 +121,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void globalSearch_shouldFallbackToSemantic_whenExactVerticalFails() {
+    void globalSearch_shouldSkipSemantic_whenNoVerticalCandidates() {
         // GIVEN initial setup
         when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(Collections.emptyList());
         searchService.initializeSuggestIndex();
@@ -128,9 +129,6 @@ class SearchServiceTest {
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
 
         // Setup repository to return empty for first call (exact_vertical)
-        // And then we expect a call for semantic (which involves embedding)
-        // Then we can assume semantic returns something or empty.
-
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
         // For semantic search, we need textEmbeddingService to return a vector
@@ -140,13 +138,55 @@ class SearchServiceTest {
         GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, SearchType.auto);
 
         // THEN
-        // We verify that textEmbeddingService was called, which implies semantic search was attempted.
-        // Since we return empty hits for everything, it should go: Exact -> Semantic -> Global
-        verify(textEmbeddingService, times(1)).embed("iphone");
+        // We verify that textEmbeddingService was not called, which implies semantic search was skipped.
+        verify(textEmbeddingService, times(0)).embed("iphone");
 
         // We can also check that the result has mode Global (since all failed/empty) or Semantic if we mocked hits?
         // If all fail/empty, it returns the start mode but with empty lists.
         // Actually the logic is: loops through sequence. If hits found, returns with that mode.
         // If loop finishes, returns empty result with startMode.
+    }
+
+    @Test
+    void globalSearch_shouldExposeSemanticDiagnostics_whenEnabled() {
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("bras");
+        ProductI18nElements frElements = new ProductI18nElements();
+        frElements.setVerticalHomeTitle("Bras articulés");
+        frElements.setVerticalHomeUrl("bras-articules");
+        verticalConfig.setI18n(Map.of("fr", frElements));
+
+        when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(verticalConfig));
+        when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
+        when(apiProperties.isSemanticDiagnosticsEnabled()).thenReturn(true);
+
+        searchService.initializeSuggestIndex();
+
+        SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
+                java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
+        @SuppressWarnings("unchecked")
+        SearchHits<Product> semanticHits = mock(SearchHits.class);
+        @SuppressWarnings("unchecked")
+        SearchHit<Product> searchHit = mock(SearchHit.class);
+        Product product = new Product();
+
+        when(semanticHits.isEmpty()).thenReturn(false);
+        when(semanticHits.getSearchHits()).thenReturn(List.of(searchHit));
+        when(searchHit.getContent()).thenReturn(product);
+        when(searchHit.getScore()).thenReturn(1.2f);
+
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME)))
+                .thenReturn(emptyHits, semanticHits, semanticHits);
+        when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f, 0.2f});
+        when(productMappingService.mapProduct(any(), any(), any(), any(), eq(false)))
+                .thenReturn(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null));
+
+        GlobalSearchResult result = searchService.globalSearch("bras articule", DomainLanguage.fr, SearchType.semantic);
+
+        assertThat(result).isNotNull();
+        assertThat(result.searchMode()).isEqualTo(SearchMode.semantic);
+        assertThat(result.diagnostics()).isNotNull();
+        assertThat(result.diagnostics().resultCount()).isEqualTo(1);
+        assertThat(result.diagnostics().topScore()).isEqualTo(1.2d);
     }
 }

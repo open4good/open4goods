@@ -60,6 +60,7 @@ export * from './GlobalSearchResponseDto';
 export * from './GlobalSearchResultDto';
 export * from './GlobalSearchVerticalGroupDto';
 export * from './GoogleCategoryDto';
+export * from './SemanticScoreDiagnosticsDto';
 export * from './ImpactScoreConfigDto';
 export * from './ImpactScoreTexts';
 export * from './IpQuotaCategory';

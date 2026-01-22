@@ -46,6 +46,12 @@
       "type": "java.lang.Boolean",
       "description": "Enable semantic fallback for product suggestions when prefix search yields no results.",
       "defaultValue": true
+    },
+    {
+      "name": "front.semantic-diagnostics-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable semantic score diagnostics in global search responses.",
+      "defaultValue": false
     }
   ]
 }
