@@ -1,5 +1,15 @@
 <template>
   <section class="product-hero">
+    <div class="product-hero__background" aria-hidden="true">
+      <img
+        class="product-hero__background-media"
+        :src="heroBackground"
+        alt=""
+        decoding="async"
+        loading="eager"
+      />
+      <div class="product-hero__background-overlay" />
+    </div>
     <div class="product-hero__content">
       <header v-if="heroTitle" class="product-hero__heading">
         <ProductDesignation
@@ -250,6 +260,7 @@ import {
   resolveProductLongName,
   resolveProductShortName,
 } from '~/utils/_product-title-resolver'
+import { useThemedAsset } from '~/composables/useThemedAsset'
 
 import type {
   AttributeConfigDto,
@@ -286,6 +297,7 @@ const props = defineProps({
 })
 
 const { t, te, n, locale } = useI18n()
+const heroBackground = useThemedAsset('product/product-hero-background.svg')
 
 // AI Review Logic
 
@@ -605,6 +617,42 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   padding: clamp(1.5rem, 4vw, 3rem);
 }
 
+.product-hero__background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.product-hero__background-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-hero__background-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      circle at 18% 22%,
+      rgba(var(--v-theme-hero-gradient-start), 0.18),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 82% 18%,
+      rgba(var(--v-theme-hero-gradient-end), 0.2),
+      transparent 40%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(var(--v-theme-surface-default), 0.08) 0%,
+      rgba(var(--v-theme-surface-default), 0.2) 40%,
+      rgba(var(--v-theme-surface-default), 0.65) 100%
+    );
+}
+
 .product-hero__content {
   position: relative;
   display: flex;
@@ -688,15 +736,14 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   position: relative;
   height: 100%;
   padding: clamp(1.25rem, 2.2vw, 1.75rem);
-  border-radius: 24px;
-  background: rgba(var(--v-theme-surface-glass-strong), 0.66);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
-  backdrop-filter: blur(16px);
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .product-hero__panel--main {
-  background: rgba(var(--v-theme-surface-glass), 0.7);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -722,24 +769,11 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   min-width: 0;
 }
 
-.product-hero__details-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 1rem 0;
-}
-
 .product-hero__panel--pricing {
   padding: clamp(1rem, 1.8vw, 1.5rem);
-  background:
-    linear-gradient(
-      135deg,
-      rgba(var(--v-theme-hero-gradient-start), 0.12),
-      rgba(var(--v-theme-hero-gradient-end), 0.1)
-    ),
-    rgba(var(--v-theme-surface-default), 0.86);
-  border: 1px solid rgba(var(--v-theme-accent-primary-highlight), 0.35);
-  box-shadow: 0 24px 52px rgba(var(--v-theme-shadow-primary-600), 0.18);
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .product-hero__gallery {
@@ -913,27 +947,10 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.product-hero__brand-name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgb(var(--v-theme-text-neutral-secondary));
-}
-
 .product-hero__model-name {
   font-size: 1.2rem;
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-hero__attributes {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0;
-  margin: 0;
-  list-style: none;
 }
 
 .product-hero__attribute {
@@ -1019,8 +1036,8 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 }
 
 .product-hero--classic .product-hero__panel {
-  background: rgba(var(--v-theme-surface-default), 0.82);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  background: transparent;
+  box-shadow: none;
 }
 
 @media (max-width: 1400px) {
@@ -1044,10 +1061,6 @@ const impactScoreOn20 = computed(() => resolvePrimaryImpactScore(props.product))
 
   .product-hero__panel--pricing {
     grid-column: auto;
-  }
-
-  .product-hero__bg-image {
-    background-attachment: scroll;
   }
 }
 </style>
