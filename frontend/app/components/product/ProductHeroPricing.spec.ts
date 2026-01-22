@@ -25,6 +25,11 @@ describe('ProductHeroPricing', () => {
               new: 'No new offers yet!',
               occasion: 'No second-hand offers yet!',
             },
+            alternativeOffers: {
+              label: 'Alternative offers',
+              placeholder: 'Select another offer',
+              unknownMerchant: 'Unknown merchant',
+            },
             trendTooltip: 'Deviation of {deviation} over {period}',
             trendPeriodDays: '{count} day | {count} days',
             trendPeriodHours: '{count} hour | {count} hours',

@@ -188,7 +188,7 @@ describe('ProductHero', () => {
     const wrapper = await mountComponent()
 
     expect(wrapper.get('.product-hero__title').text()).toContain(
-      'Television ORBIT 43 pouces lcd'
+      'Next-gen ORBIT X1'
     )
     expect(wrapper.find('.product-hero__panel--pricing').exists()).toBe(true)
     expect(wrapper.find('.product-hero__details-section').exists()).toBe(true)

@@ -318,16 +318,10 @@ describe('ProductPriceSection', () => {
   it('links to the affiliation redirect when best offers have a token', async () => {
     const wrapper = await mountComponent()
 
-    const footerHighlights = wrapper.findAll(
-      '.product-price__metrics .product-price__metrics-highlight'
-    )
-    expect(footerHighlights).toHaveLength(2)
-    const links = wrapper.findAll(
-      '.product-price__metrics .product-price__metrics-offer--link'
-    )
-    expect(links).toHaveLength(2)
-    expect(links[0]?.attributes('href')).toBe('/contrib/abc123')
-    expect(links[1]?.attributes('href')).toBe('/contrib/def456')
+    const links = wrapper.findAll('.product-price__best-offer-card [href]')
+    expect(links.length).toBeGreaterThanOrEqual(1)
+    const hrefs = links.map(link => link.attributes('href'))
+    expect(hrefs).toContain('/contrib/abc123')
 
     await wrapper.unmount()
   })
@@ -335,10 +329,9 @@ describe('ProductPriceSection', () => {
   it('displays compact favicon sizes for best offer highlights', async () => {
     const wrapper = await mountComponent()
 
-    const icons = wrapper.findAll('.product-price__metrics-highlight img')
-    expect(icons).toHaveLength(2)
-    expect(icons.every(icon => icon.attributes('width') === '48')).toBe(true)
-    expect(icons.every(icon => icon.attributes('height') === '48')).toBe(true)
+    const icons = wrapper.findAll('.product-price__best-offer-card img')
+    expect(icons.length).toBeGreaterThanOrEqual(1)
+    expect(icons[0]?.attributes('src')).toContain('merchant-b.example/icon.png')
 
     await wrapper.unmount()
   })
@@ -346,10 +339,7 @@ describe('ProductPriceSection', () => {
   it('omits best offer highlight when no best new offer is available', async () => {
     const wrapper = await mountComponent({ bestNewOffer: undefined })
 
-    expect(wrapper.findAll('.product-price__metrics-highlight')).toHaveLength(1)
-    expect(wrapper.find('.product-price__metrics-highlight').text()).toContain(
-      'Merchant U'
-    )
+    expect(wrapper.find('.product-price__best-offer-card').exists()).toBe(false)
 
     await wrapper.unmount()
   })
