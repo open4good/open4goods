@@ -2431,7 +2431,10 @@
         "running": "Génération en cours ({step})",
         "success": "Synthèse disponible"
       },
-      "subtitle": "Une synthèse rédigée par notre IA à partir de sources vérifiées.",
+      "subtitle": {
+        "one": "Une synthèse rédigée par notre IA à partir de {count} source vérifiée.",
+        "other": "Une synthèse rédigée par notre IA à partir de {count} sources vérifiées."
+      },
       "title": "Synthèse des tests et avis"
     },
     "attributes": {
@@ -2580,6 +2583,11 @@
       }
     },
     "hero": {
+      "aiSummary": {
+        "community": "Les experts",
+        "ecological": "Écologiquement",
+        "technical": "Techniquement"
+      },
       "bestPriceTitle": "Meilleur prix",
       "breadcrumbAriaLabel": "Fil d'Ariane du produit",
       "compare": {
