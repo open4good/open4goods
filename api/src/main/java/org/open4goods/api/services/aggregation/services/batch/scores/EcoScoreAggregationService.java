@@ -66,8 +66,9 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			if (null == score) {
 				Double weight = Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
 				if (weight > 0.0) {
-					LOGGER.warn("EcoScore rating for product {} cannot proceed, missing subscore with positive weight : {}", product.getId(), config);
-					return null;
+					LOGGER.warn("EcoScore rating for product {} missing subscore with positive weight : {}. Defaulting to 0.0 for this criteria.", product.getId(), config);
+					// Continue with 0.0 contribution for this missing criteria. 
+					// This fallback is required when NO products in the batch have this score, preventing virtualization (average calculation).
 				}
 				continue;
 			}

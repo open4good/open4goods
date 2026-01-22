@@ -331,13 +331,16 @@ public class ReviewGenerationService implements HealthIndicator {
 					logger.debug("Streaming review generation started for promptKey: {}", promptKey);
 
 				} else {
+                    System.out.println("DEBUG: Calling objectPrompt");
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
-				reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
+                    System.out.println("DEBUG: Returned from objectPrompt: " + reviewResponse);
 				}
 				AiReview newReview = processAiReview(reviewResponse.getBody(), reviewResponse.getMetadata());
+                System.out.println("DEBUG: Processed review");
 
 				// Populate attributes and resources
-				populateAttributes(product, newReview);
+				populateAttributes(product, newReview, reviewResponse.getMetadata());
+                System.out.println("DEBUG: Populated attributes");
 				addResources(product, newReview);
 				logger.info("Completed review for UPC {}: {}", upc, objectMapper.writeValueAsString(newReview));
 				holder.setReview(newReview);
@@ -362,7 +365,9 @@ public class ReviewGenerationService implements HealthIndicator {
 				status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR, status.getErrorMessage(), null);
 				meterRegistry.counter("review.generation.failed").increment();
 				lastGenerationFailed = true;
-			} catch (Exception e) {
+				lastGenerationFailed = true;
+			} catch (Throwable e) {
+                e.printStackTrace();
 				logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
 				status.setStatus(ReviewGenerationStatus.Status.FAILED);
 				status.setErrorMessage(e.getMessage());
@@ -750,7 +755,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				AiReview newReview = processAiReview(output);
 				if (null != newReview) {
 					// Populate attributes
-					populateAttributes(product, newReview);
+					populateAttributes(product, newReview, response.getMetadata());
 
 					AiReviewHolder holder = new AiReviewHolder();
 					holder.setCreatedMs(Instant.now().toEpochMilli());
@@ -811,9 +816,9 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param product the product to update
 	 * @param review the new AI review
 	 */
-	private void populateAttributes(Product product, AiReview review) {
+	private void populateAttributes(Product product, AiReview review, Map<String, Object> metadata) {
 		// Handling attributes
-		String providerName = determineProviderName(null); // Metadata not available here for batch yet or should be passed
+		String providerName = determineProviderName(metadata);
 
 		review.getAttributes().stream().forEach(a -> {
 
@@ -1012,6 +1017,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				review.getAttributes(),
 				review.getDataQuality(),
 				review.getTechnicalOneline(),
+				review.getTechnicalShortReview(),
 				review.getEcologicalOneline(),
 				review.getCommunityOneline(),
 				resolveUrlList(review.getPdfs()),
@@ -1204,6 +1210,7 @@ public class ReviewGenerationService implements HealthIndicator {
 						.toList(),
 				replaceReferences(review.getDataQuality()),
 				replaceReferences(review.getTechnicalOneline()),
+				replaceReferences(review.getTechnicalShortReview()),
 				replaceReferences(review.getEcologicalOneline()),
 				replaceReferences(review.getCommunityOneline()),
 				review.getPdfs(),

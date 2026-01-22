@@ -40,7 +40,7 @@
               :key="month.key"
               class="product-life-timeline__month-group"
             >
-              <span class="product-life-timeline__month-label">
+              <span class="product-life-timeline__month-label mt-4">
                 {{ month.monthLabel }}
               </span>
               <div class="product-life-timeline__event-list">

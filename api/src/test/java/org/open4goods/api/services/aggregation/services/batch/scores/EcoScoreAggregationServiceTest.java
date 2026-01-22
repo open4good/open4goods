@@ -87,4 +87,29 @@ class EcoScoreAggregationServiceTest {
         assertThat(ecoscore).isNotNull();
         assertThat(ecoscore.getAbsolute().getValue()).isEqualTo(2.0);
     }
+    @Test
+    void ecoscoreComputedWithDefaultWhenSubScoreMissing() {
+        Product product = new Product(4L);
+        // Product has NO scores initially
+
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        // Configuration expects "MISSING_CRITERIA" with weight 1.0
+        impactScoreConfig.setCriteriasPonderation(Map.of("MISSING_CRITERIA", 1.0));
+        VerticalConfig vConf = new VerticalConfig();
+        vConf.setImpactScoreConfig(impactScoreConfig);
+
+        EcoScoreAggregationService ecoScoreService =
+                new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
+
+        List<Product> dataset = List.of(product);
+        ecoScoreService.init(dataset);
+        ecoScoreService.onProduct(product, vConf); // onProduct does nothing for EcoScore, but calling for consistency
+        ecoScoreService.done(dataset, vConf);
+
+        Score ecoscore = product.ecoscore();
+
+        // Previously this would be null. Now we expect it to be 0.0 (missing score = 0 contribution)
+        assertThat(ecoscore).isNotNull();
+        assertThat(ecoscore.getAbsolute().getValue()).isEqualTo(0.0);
+    }
 }

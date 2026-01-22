@@ -2,108 +2,31 @@
   <section :id="sectionId" class="product-price">
     <header class="product-price__header">
       <h2 class="product-price__title">
-        {{ $t('product.price.title', titleParams) }}
+        {{ $t('product.price.title') }}
       </h2>
-      <p class="product-price__subtitle">
-        {{ $t('product.price.subtitle') }}
-      </p>
     </header>
 
-    <div
-      id="price-history"
-      class="product-price__charts"
-      :class="{
-        'product-price__charts--single': visibleChartsCount === 1,
-        'product-price__charts--empty': visibleChartsCount === 0,
-      }"
-    >
-      <article
-        v-if="hasNewHistory"
-        ref="newChartCardRef"
-        class="product-price__chart-card"
-      >
-        <header class="product-price__chart-header">
-          <div class="product-price__chart-heading">
-            <h3>{{ $t('product.price.newOffers') }}</h3>
-            <p v-if="newTrendLabel" class="product-price__trend">
-              {{ newTrendLabel }}
-            </p>
-          </div>
-        </header>
-        <ClientOnly v-if="!isTestEnvironment">
-          <template #default>
-            <VueECharts
-              v-if="newChartOption && chartVisibility.new"
-              :option="newChartOption"
-              :autoresize="true"
-              class="product-price__chart"
-              @click="handleNewChartClick"
-            />
-            <div v-else class="product-price__chart-placeholder" />
-          </template>
-          <template #fallback>
-            <div class="product-price__chart-placeholder" />
-          </template>
-        </ClientOnly>
-        <template v-else>
-          <div
-            v-if="newChartOption"
-            class="echart-stub"
-            :data-option="JSON.stringify(newChartOption)"
-          ></div>
-          <div v-else class="product-price__chart-placeholder" />
-        </template>
+    <div class="product-price__content">
+      <!-- Best Offers Section -->
+      <div class="product-price__section">
+        <h3 class="product-price__subtitle-h3">
+          {{ $t('product.price.bestOffers', 'Les meilleurs offres') }}
+        </h3>
+
+        <!-- Primary Best Offer Card -->
         <v-card
-          v-if="selectedCommercialEvent"
-          class="product-price__event-card"
-          variant="tonal"
+          v-if="bestNewOffer"
+          class="product-price__best-offer-card my-4"
+          color="primary"
+          variant="flat"
         >
-          <div class="product-price__event-card-header">
-            <div>
-              <p class="product-price__event-card-title">
-                {{ $t('product.price.events.detailsTitle') }}
-              </p>
-              <p class="product-price__event-card-label">
-                {{ selectedCommercialEvent.label }}
-              </p>
-            </div>
-            <v-btn
-              variant="text"
-              size="small"
-              class="product-price__event-card-clear"
-              @click="clearSelectedCommercialEvent"
-            >
-              {{ $t('product.price.events.clearSelection') }}
-            </v-btn>
-          </div>
-          <p class="product-price__event-card-dates">
-            <span class="product-price__event-card-dates-label">
-              {{ $t('product.price.events.dateLabel') }}
-            </span>
-            {{ formatEventDateRange(selectedCommercialEvent) }}
-          </p>
-        </v-card>
-        <footer
-          v-if="newStats"
-          class="product-price__metrics"
-          :class="
-            bestNewOffer
-              ? 'product-price__metrics--with-offer'
-              : 'product-price__metrics--solo'
-          "
-        >
-          <ClientOnly>
+          <div
+            class="d-flex align-center justify-space-between w-100 flex-wrap gap-4 px-2 py-1"
+          >
             <NuxtLink
-              v-if="bestNewOffer && bestNewOfferLink"
+              v-if="bestNewOfferLink"
               :to="bestNewOfferLink"
-              class="product-price__metrics-highlight product-price__metrics-offer-card product-price__metrics-offer--link"
-              :aria-label="
-                $t('product.price.metrics.viewOffer', {
-                  source:
-                    bestNewOffer?.datasourceName ??
-                    $t('product.price.metrics.unknownSource'),
-                })
-              "
+              class="d-flex align-center gap-4 text-decoration-none text-white flex-grow-1"
               @click="
                 handleOfferRedirectClick(
                   bestNewOffer,
@@ -112,345 +35,407 @@
                 )
               "
             >
-              <span class="product-price__metrics-label">
-                {{ $t('product.price.metrics.bestOffer') }}
-              </span>
-              <div class="product-price__metrics-offer">
+              <v-avatar
+                size="64"
+                rounded="lg"
+                color="white"
+                class="pa-1 elevation-1"
+              >
                 <img
-                  v-if="bestNewOffer?.favicon"
+                  v-if="bestNewOffer.favicon"
                   :src="bestNewOffer.favicon"
                   :alt="bestNewOffer.datasourceName ?? ''"
-                  width="48"
-                  height="48"
+                  style="object-fit: contain; width: 100%; height: 100%"
                 />
-                <div class="product-price__metrics-offer-text">
-                  <p class="product-price__metrics-price">
-                    {{
-                      formatCurrency(
-                        bestNewOffer?.price,
-                        bestNewOffer?.currency
-                      )
-                    }}
-                  </p>
-                  <p class="product-price__metrics-source">
-                    {{
-                      bestNewOffer?.datasourceName ??
-                      $t('product.price.metrics.unknownSource')
-                    }}
-                  </p>
+                <v-icon v-else icon="mdi-store" color="grey" />
+              </v-avatar>
+              <div>
+                <div class="text-h4 font-weight-bold product-price__best-price">
+                  {{
+                    formatCurrency(bestNewOffer.price, bestNewOffer.currency)
+                  }}
                 </div>
-                <v-icon
-                  icon="mdi-open-in-new"
-                  size="18"
-                  class="product-price__metrics-offer-icon"
-                  aria-hidden="true"
-                />
+                <div class="text-subtitle-1 opacity-90">
+                  {{ bestNewOffer.datasourceName }}
+                </div>
               </div>
             </NuxtLink>
-            <div
-              v-else-if="bestNewOffer"
-              class="product-price__metrics-highlight product-price__metrics-offer-card"
-            >
-              <span class="product-price__metrics-label">
-                {{ $t('product.price.metrics.bestOffer') }}
-              </span>
-              <div class="product-price__metrics-offer">
+            <div v-else class="d-flex align-center gap-4 flex-grow-1">
+              <v-avatar
+                size="64"
+                rounded="lg"
+                color="white"
+                class="pa-1 elevation-1"
+              >
                 <img
-                  v-if="bestNewOffer?.favicon"
+                  v-if="bestNewOffer.favicon"
                   :src="bestNewOffer.favicon"
                   :alt="bestNewOffer.datasourceName ?? ''"
-                  width="48"
-                  height="48"
+                  style="object-fit: contain; width: 100%; height: 100%"
                 />
-                <div class="product-price__metrics-offer-text">
-                  <p class="product-price__metrics-price">
-                    {{
-                      formatCurrency(
-                        bestNewOffer?.price,
-                        bestNewOffer?.currency
-                      )
-                    }}
-                  </p>
-                  <p class="product-price__metrics-source">
-                    {{
-                      bestNewOffer?.datasourceName ??
-                      $t('product.price.metrics.unknownSource')
-                    }}
-                  </p>
+                <v-icon v-else icon="mdi-store" color="grey" />
+              </v-avatar>
+              <div>
+                <div class="text-h4 font-weight-bold product-price__best-price">
+                  {{
+                    formatCurrency(bestNewOffer.price, bestNewOffer.currency)
+                  }}
+                </div>
+                <div class="text-subtitle-1 opacity-90">
+                  {{ bestNewOffer.datasourceName }}
                 </div>
               </div>
             </div>
-          </ClientOnly>
-          <div class="product-price__metrics-summary">
-            <dl>
-              <div class="product-price__metrics-row">
-                <v-icon
-                  icon="mdi-trending-down"
-                  size="20"
-                  class="product-price__metrics-stat-icon"
-                  aria-hidden="true"
-                />
-                <div class="product-price__metrics-stat-text">
-                  <dt>{{ $t('product.price.metrics.lowest') }}</dt>
-                  <dd>
-                    {{
-                      formatStat(
-                        newStats.min,
-                        bestNewOffer?.currency ??
-                          props.offers?.bestPrice?.currency
-                      )
-                    }}
-                  </dd>
-                </div>
-              </div>
-              <div class="product-price__metrics-row">
-                <v-icon
-                  icon="mdi-chart-line"
-                  size="20"
-                  class="product-price__metrics-stat-icon"
-                  aria-hidden="true"
-                />
-                <div class="product-price__metrics-stat-text">
-                  <dt>{{ $t('product.price.metrics.average') }}</dt>
-                  <dd>
-                    {{
-                      formatStat(
-                        newStats.average,
-                        bestNewOffer?.currency ??
-                          props.offers?.bestPrice?.currency
-                      )
-                    }}
-                  </dd>
-                </div>
-              </div>
-              <div class="product-price__metrics-row">
-                <v-icon
-                  icon="mdi-trending-up"
-                  size="20"
-                  class="product-price__metrics-stat-icon"
-                  aria-hidden="true"
-                />
-                <div class="product-price__metrics-stat-text">
-                  <dt>{{ $t('product.price.metrics.highest') }}</dt>
-                  <dd>
-                    {{
-                      formatStat(
-                        newStats.max,
-                        bestNewOffer?.currency ??
-                          props.offers?.bestPrice?.currency
-                      )
-                    }}
-                  </dd>
-                </div>
-              </div>
-            </dl>
-          </div>
-        </footer>
-      </article>
 
-      <article
-        v-if="hasOccasionHistory"
-        ref="occasionChartCardRef"
-        class="product-price__chart-card"
-      >
-        <header class="product-price__chart-header">
-          <div class="product-price__chart-heading">
-            <h3>{{ $t('product.price.occasionOffers') }}</h3>
-          </div>
-        </header>
-        <ClientOnly v-if="!isTestEnvironment">
-          <template #default>
-            <VueECharts
-              v-if="occasionChartOption && chartVisibility.occasion"
-              :option="occasionChartOption"
-              :autoresize="true"
-              class="product-price__chart"
-            />
-            <div v-else class="product-price__chart-placeholder" />
-          </template>
-          <template #fallback>
-            <div class="product-price__chart-placeholder" />
-          </template>
-        </ClientOnly>
-        <template v-else>
-          <div
-            v-if="occasionChartOption"
-            class="echart-stub"
-            :data-option="JSON.stringify(occasionChartOption)"
-          ></div>
-          <div v-else class="product-price__chart-placeholder" />
-        </template>
-        <footer
-          v-if="occasionStats"
-          class="product-price__metrics"
-          :class="
-            bestOccasionOffer
-              ? 'product-price__metrics--with-offer'
-              : 'product-price__metrics--solo'
-          "
-        >
-          <ClientOnly>
-            <NuxtLink
-              v-if="bestOccasionOffer && bestOccasionOfferLink"
-              :to="bestOccasionOfferLink"
-              class="product-price__metrics-highlight product-price__metrics-offer-card product-price__metrics-offer--link"
-              :aria-label="
-                $t('product.price.metrics.viewOffer', {
-                  source:
-                    bestOccasionOffer?.datasourceName ??
-                    $t('product.price.metrics.unknownSource'),
-                })
-              "
+            <v-btn
+              v-if="bestNewOfferLink"
+              :href="bestNewOfferLink"
+              target="_blank"
+              variant="flat"
+              color="surface"
+              class="product-price__cta-btn text-primary font-weight-bold px-6"
+              height="48"
               @click="
                 handleOfferRedirectClick(
-                  bestOccasionOffer,
-                  'best-occasion-offer',
-                  bestOccasionOfferLink
+                  bestNewOffer,
+                  'best-new-offer',
+                  bestNewOfferLink
                 )
               "
             >
-              <span class="product-price__metrics-label">
-                {{ $t('product.price.metrics.bestOffer') }}
-              </span>
-              <div class="product-price__metrics-offer">
-                <img
-                  v-if="bestOccasionOffer?.favicon"
-                  :src="bestOccasionOffer.favicon"
-                  :alt="bestOccasionOffer.datasourceName ?? ''"
-                  width="48"
-                  height="48"
-                />
-                <div class="product-price__metrics-offer-text">
-                  <p class="product-price__metrics-price">
-                    {{
-                      formatCurrency(
-                        bestOccasionOffer?.price,
-                        bestOccasionOffer?.currency
-                      )
-                    }}
-                  </p>
-                  <p class="product-price__metrics-source">
-                    {{
-                      bestOccasionOffer?.datasourceName ??
-                      $t('product.price.metrics.unknownSource')
-                    }}
-                  </p>
-                </div>
-                <v-icon
-                  icon="mdi-open-in-new"
-                  size="18"
-                  class="product-price__metrics-offer-icon"
-                  aria-hidden="true"
-                />
-              </div>
-            </NuxtLink>
-            <div
-              v-else-if="bestOccasionOffer"
-              class="product-price__metrics-highlight product-price__metrics-offer-card"
-            >
-              <span class="product-price__metrics-label">
-                {{ $t('product.price.metrics.bestOffer') }}
-              </span>
-              <div class="product-price__metrics-offer">
-                <img
-                  v-if="bestOccasionOffer?.favicon"
-                  :src="bestOccasionOffer.favicon"
-                  :alt="bestOccasionOffer.datasourceName ?? ''"
-                  width="48"
-                  height="48"
-                />
-                <div class="product-price__metrics-offer-text">
-                  <p class="product-price__metrics-price">
-                    {{
-                      formatCurrency(
-                        bestOccasionOffer?.price,
-                        bestOccasionOffer?.currency
-                      )
-                    }}
-                  </p>
-                  <p class="product-price__metrics-source">
-                    {{
-                      bestOccasionOffer?.datasourceName ??
-                      $t('product.price.metrics.unknownSource')
-                    }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </ClientOnly>
-          <div class="product-price__metrics-summary">
-            <dl>
-              <div class="product-price__metrics-row">
-                <v-icon
-                  icon="mdi-trending-down"
-                  size="20"
-                  class="product-price__metrics-stat-icon"
-                  aria-hidden="true"
-                />
-                <div class="product-price__metrics-stat-text">
-                  <dt>{{ $t('product.price.metrics.lowest') }}</dt>
-                  <dd>
-                    {{
-                      formatStat(
-                        occasionStats.min,
-                        bestOccasionOffer?.currency ??
-                          props.offers?.bestPrice?.currency
-                      )
-                    }}
-                  </dd>
-                </div>
-              </div>
-              <div class="product-price__metrics-row">
-                <v-icon
-                  icon="mdi-chart-line"
-                  size="20"
-                  class="product-price__metrics-stat-icon"
-                  aria-hidden="true"
-                />
-                <div class="product-price__metrics-stat-text">
-                  <dt>{{ $t('product.price.metrics.average') }}</dt>
-                  <dd>
-                    {{
-                      formatStat(
-                        occasionStats.average,
-                        bestOccasionOffer?.currency ??
-                          props.offers?.bestPrice?.currency
-                      )
-                    }}
-                  </dd>
-                </div>
-              </div>
-              <div class="product-price__metrics-row">
-                <v-icon
-                  icon="mdi-trending-up"
-                  size="20"
-                  class="product-price__metrics-stat-icon"
-                  aria-hidden="true"
-                />
-                <div class="product-price__metrics-stat-text">
-                  <dt>{{ $t('product.price.metrics.highest') }}</dt>
-                  <dd>
-                    {{
-                      formatStat(
-                        occasionStats.max,
-                        bestOccasionOffer?.currency ??
-                          props.offers?.bestPrice?.currency
-                      )
-                    }}
-                  </dd>
-                </div>
-              </div>
-            </dl>
+              {{ $t('product.price.viewDeal', "Voir l'offre") }}
+              <v-icon end icon="mdi-open-in-new" />
+            </v-btn>
           </div>
-        </footer>
-      </article>
+        </v-card>
 
-      <p
-        v-if="visibleChartsCount === 0"
-        class="product-price__charts-empty-message"
-      >
-        {{ $t('product.price.noHistory') }}
-      </p>
+        <!-- Offers Table -->
+        <v-data-table
+          v-if="allOffers.length"
+          :headers="offersHeaders"
+          :items="allOffers"
+          class="mt-6 rounded-xl border product-price__offers-table"
+          density="comfortable"
+          :items-per-page="5"
+        >
+          <template #[`item.merchant`]="{ item }">
+            <div class="d-flex align-center gap-2">
+              <img
+                v-if="item.favicon"
+                :src="item.favicon"
+                width="24"
+                height="24"
+                class="rounded"
+                :alt="item.datasourceName"
+              />
+              <span class="font-weight-medium">{{ item.datasourceName }}</span>
+            </div>
+          </template>
+          <template #[`item.price`]="{ item }">
+            <span class="font-weight-bold text-body-1">{{
+              formatCurrency(item.price, item.currency)
+            }}</span>
+          </template>
+          <template #[`item.condition`]="{ item }">
+            <v-chip
+              size="small"
+              :color="item.condition === 'NEW' ? 'success' : 'warning'"
+              variant="tonal"
+              class="font-weight-medium"
+            >
+              {{
+                $t(`product.price.condition.${item.condition}`, item.condition)
+              }}
+            </v-chip>
+          </template>
+          <template #[`item.actions`]="{ item }">
+            <v-btn
+              :href="resolveOfferLink(item)"
+              target="_blank"
+              icon
+              variant="text"
+              size="small"
+              color="primary"
+              @click="
+                handleOfferRedirectClick(
+                  item,
+                  'offers-table',
+                  resolveOfferLink(item)
+                )
+              "
+            >
+              <v-icon icon="mdi-open-in-new" />
+            </v-btn>
+          </template>
+        </v-data-table>
+      </div>
+
+      <!-- History Section -->
+      <div class="product-price__section mt-10">
+        <h3 class="product-price__subtitle-h3 mb-4">
+          {{ $t('product.price.history', 'Historique') }}
+        </h3>
+
+        <div
+          id="price-history"
+          class="product-price__charts"
+          :class="{
+            'product-price__charts--single': visibleChartsCount === 1,
+            'product-price__charts--empty': visibleChartsCount === 0,
+          }"
+        >
+          <article
+            v-if="hasNewHistory"
+            ref="newChartCardRef"
+            class="product-price__chart-card"
+          >
+            <header class="product-price__chart-header">
+              <div class="product-price__chart-heading">
+                <h4>{{ $t('product.price.newOffers') }}</h4>
+                <p v-if="newTrendLabel" class="product-price__trend">
+                  {{ newTrendLabel }}
+                </p>
+              </div>
+            </header>
+            <ClientOnly v-if="!isTestEnvironment">
+              <template #default>
+                <VueECharts
+                  v-if="newChartOption && chartVisibility.new"
+                  :option="newChartOption"
+                  :autoresize="true"
+                  class="product-price__chart"
+                  @click="handleNewChartClick"
+                />
+                <div v-else class="product-price__chart-placeholder" />
+              </template>
+              <template #fallback>
+                <div class="product-price__chart-placeholder" />
+              </template>
+            </ClientOnly>
+            <template v-else>
+              <div
+                v-if="newChartOption"
+                class="echart-stub"
+                :data-option="JSON.stringify(newChartOption)"
+              ></div>
+              <div v-else class="product-price__chart-placeholder" />
+            </template>
+            <!-- Commercial Events Card Support -->
+            <v-card
+              v-if="selectedCommercialEvent"
+              class="product-price__event-card"
+              variant="tonal"
+            >
+              <div class="product-price__event-card-header">
+                <div>
+                  <p class="product-price__event-card-title">
+                    {{ $t('product.price.events.detailsTitle') }}
+                  </p>
+                  <p class="product-price__event-card-label">
+                    {{ selectedCommercialEvent.label }}
+                  </p>
+                </div>
+                <v-btn
+                  variant="text"
+                  size="small"
+                  class="product-price__event-card-clear"
+                  @click="clearSelectedCommercialEvent"
+                >
+                  {{ $t('product.price.events.clearSelection') }}
+                </v-btn>
+              </div>
+              <p class="product-price__event-card-dates">
+                <span class="product-price__event-card-dates-label">
+                  {{ $t('product.price.events.dateLabel') }}
+                </span>
+                {{ formatEventDateRange(selectedCommercialEvent) }}
+              </p>
+            </v-card>
+
+            <!-- Metrics Footer (Stats only) -->
+            <footer
+              v-if="newStats"
+              class="product-price__metrics product-price__metrics--solo"
+            >
+              <div class="product-price__metrics-summary">
+                <dl>
+                  <div class="product-price__metrics-row">
+                    <v-icon
+                      icon="mdi-trending-down"
+                      size="20"
+                      class="product-price__metrics-stat-icon"
+                      aria-hidden="true"
+                    />
+                    <div class="product-price__metrics-stat-text">
+                      <dt>{{ $t('product.price.metrics.lowest') }}</dt>
+                      <dd>
+                        {{
+                          formatStat(
+                            newStats.min,
+                            bestNewOffer?.currency ??
+                              props.offers?.bestPrice?.currency
+                          )
+                        }}
+                      </dd>
+                    </div>
+                  </div>
+                  <div class="product-price__metrics-row">
+                    <v-icon
+                      icon="mdi-chart-line"
+                      size="20"
+                      class="product-price__metrics-stat-icon"
+                      aria-hidden="true"
+                    />
+                    <div class="product-price__metrics-stat-text">
+                      <dt>{{ $t('product.price.metrics.average') }}</dt>
+                      <dd>
+                        {{
+                          formatStat(
+                            newStats.average,
+                            bestNewOffer?.currency ??
+                              props.offers?.bestPrice?.currency
+                          )
+                        }}
+                      </dd>
+                    </div>
+                  </div>
+                  <div class="product-price__metrics-row">
+                    <v-icon
+                      icon="mdi-trending-up"
+                      size="20"
+                      class="product-price__metrics-stat-icon"
+                      aria-hidden="true"
+                    />
+                    <div class="product-price__metrics-stat-text">
+                      <dt>{{ $t('product.price.metrics.highest') }}</dt>
+                      <dd>
+                        {{
+                          formatStat(
+                            newStats.max,
+                            bestNewOffer?.currency ??
+                              props.offers?.bestPrice?.currency
+                          )
+                        }}
+                      </dd>
+                    </div>
+                  </div>
+                </dl>
+              </div>
+            </footer>
+          </article>
+
+          <article
+            v-if="hasOccasionHistory"
+            ref="occasionChartCardRef"
+            class="product-price__chart-card"
+          >
+            <header class="product-price__chart-header">
+              <div class="product-price__chart-heading">
+                <h4>{{ $t('product.price.occasionOffers') }}</h4>
+              </div>
+            </header>
+            <ClientOnly v-if="!isTestEnvironment">
+              <template #default>
+                <VueECharts
+                  v-if="occasionChartOption && chartVisibility.occasion"
+                  :option="occasionChartOption"
+                  :autoresize="true"
+                  class="product-price__chart"
+                />
+                <div v-else class="product-price__chart-placeholder" />
+              </template>
+              <template #fallback>
+                <div class="product-price__chart-placeholder" />
+              </template>
+            </ClientOnly>
+            <template v-else>
+              <div
+                v-if="occasionChartOption"
+                class="echart-stub"
+                :data-option="JSON.stringify(occasionChartOption)"
+              ></div>
+              <div v-else class="product-price__chart-placeholder" />
+            </template>
+
+            <footer
+              v-if="occasionStats"
+              class="product-price__metrics product-price__metrics--solo"
+            >
+              <div class="product-price__metrics-summary">
+                <dl>
+                  <div class="product-price__metrics-row">
+                    <v-icon
+                      icon="mdi-trending-down"
+                      size="20"
+                      class="product-price__metrics-stat-icon"
+                      aria-hidden="true"
+                    />
+                    <div class="product-price__metrics-stat-text">
+                      <dt>{{ $t('product.price.metrics.lowest') }}</dt>
+                      <dd>
+                        {{
+                          formatStat(
+                            occasionStats.min,
+                            bestOccasionOffer?.currency ??
+                              props.offers?.bestPrice?.currency
+                          )
+                        }}
+                      </dd>
+                    </div>
+                  </div>
+                  <div class="product-price__metrics-row">
+                    <v-icon
+                      icon="mdi-chart-line"
+                      size="20"
+                      class="product-price__metrics-stat-icon"
+                      aria-hidden="true"
+                    />
+                    <div class="product-price__metrics-stat-text">
+                      <dt>{{ $t('product.price.metrics.average') }}</dt>
+                      <dd>
+                        {{
+                          formatStat(
+                            occasionStats.average,
+                            bestOccasionOffer?.currency ??
+                              props.offers?.bestPrice?.currency
+                          )
+                        }}
+                      </dd>
+                    </div>
+                  </div>
+                  <div class="product-price__metrics-row">
+                    <v-icon
+                      icon="mdi-trending-up"
+                      size="20"
+                      class="product-price__metrics-stat-icon"
+                      aria-hidden="true"
+                    />
+                    <div class="product-price__metrics-stat-text">
+                      <dt>{{ $t('product.price.metrics.highest') }}</dt>
+                      <dd>
+                        {{
+                          formatStat(
+                            occasionStats.max,
+                            bestOccasionOffer?.currency ??
+                              props.offers?.bestPrice?.currency
+                          )
+                        }}
+                      </dd>
+                    </div>
+                  </div>
+                </dl>
+              </div>
+            </footer>
+          </article>
+
+          <p
+            v-if="visibleChartsCount === 0"
+            class="product-price__charts-empty-message"
+          >
+            {{ $t('product.price.noHistory') }}
+          </p>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -599,9 +584,7 @@ const EVENT_BAND_GAP = 10
 const EVENT_MIN_WIDTH = 2
 
 const hashLabel = (label: string) =>
-  label
-    .split('')
-    .reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) | 0, 0)
+  label.split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) | 0, 0)
 
 const resolveEventColor = (label: string, index: number) => {
   if (!label) {
@@ -632,11 +615,7 @@ const resolvedEvents = computed<ResolvedCommercialEvent[]>(() =>
       const end = event.endDate ? new Date(event.endDate).getTime() : Number.NaN
       const label = event.label?.trim() || t('product.price.events.untitled')
 
-      if (
-        !Number.isFinite(start) ||
-        !Number.isFinite(end) ||
-        start > end
-      ) {
+      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {
         return null
       }
 
@@ -653,7 +632,9 @@ const resolvedEvents = computed<ResolvedCommercialEvent[]>(() =>
 
 const selectedCommercialEventId = ref<string | null>(null)
 const selectedCommercialEvent = computed(() =>
-  resolvedEvents.value.find(event => event.id === selectedCommercialEventId.value)
+  resolvedEvents.value.find(
+    event => event.id === selectedCommercialEventId.value
+  )
 )
 
 const formatEventDate = (value: number) =>
@@ -830,9 +811,41 @@ const resolveOfferLink = (
 }
 
 const bestNewOfferLink = computed(() => resolveOfferLink(bestNewOffer.value))
-const bestOccasionOfferLink = computed(() =>
-  resolveOfferLink(bestOccasionOffer.value)
-)
+
+const allOffers = computed(() => {
+  const byCondition = props.offers?.offersByCondition ?? {}
+  const list: Array<ProductAggregatedPriceDto & { condition: string }> = []
+
+  for (const [condition, offers] of Object.entries(byCondition)) {
+    if (Array.isArray(offers)) {
+      offers.forEach(offer => {
+        list.push({ ...offer, condition })
+      })
+    }
+  }
+
+  // Sort by price ascending
+  return list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
+})
+
+const offersHeaders = [
+  {
+    title: t('product.price.table.merchant', 'Marchand'),
+    key: 'merchant',
+    sortable: true,
+  },
+  {
+    title: t('product.price.table.price', 'Prix'),
+    key: 'price',
+    sortable: true,
+  },
+  {
+    title: t('product.price.table.condition', 'Etat'),
+    key: 'condition',
+    sortable: true,
+  },
+  { title: '', key: 'actions', sortable: false, align: 'end' },
+]
 
 const handleOfferRedirectClick = (
   offer: ProductAggregatedPriceDto | null,
@@ -1127,7 +1140,10 @@ const buildChartOption = (
           const endCoord = api.coord([end, rowIndex + 0.5])
           const bandHeight = api.size([0, 1])[1]
           const rowHeight = Math.max(12, bandHeight - 6)
-          const rectWidth = Math.max(endCoord[0] - startCoord[0], EVENT_MIN_WIDTH)
+          const rectWidth = Math.max(
+            endCoord[0] - startCoord[0],
+            EVENT_MIN_WIDTH
+          )
           const rectX = startCoord[0]
           const rectY = startCoord[1] - rowHeight / 2
 
@@ -1251,31 +1267,36 @@ onBeforeUnmount(() => {
   gap: 2rem;
 }
 
-.product-price__header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
 .product-price__title {
   font-size: clamp(1.6rem, 2.4vw, 2.2rem);
   font-weight: 700;
 }
 
-.product-price__subtitle {
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
-}
-
-.product-price__history {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.product-price__history-title {
-  font-size: 1.2rem;
-  font-weight: 600;
+.product-price__subtitle-h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
   color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-price__best-offer-card {
+  border-radius: 24px;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.product-price__best-offer-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(var(--v-theme-primary), 0.25);
+}
+
+.product-price__cta-btn {
+  border-radius: 12px;
+}
+
+.product-price__offers-table {
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12);
 }
 
 .product-price__charts {
@@ -1288,32 +1309,6 @@ onBeforeUnmount(() => {
   grid-template-columns: 1fr;
 }
 
-.product-price__charts--empty {
-  display: block;
-}
-
-.product-price__chart-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.product-price__chart-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  flex: 1 1 220px;
-  min-width: min(220px, 100%);
-}
-
-.product-price__chart-heading h4 {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
 .product-price__chart-card {
   background: rgba(var(--v-theme-surface-glass), 0.92);
   border-radius: 24px;
@@ -1322,6 +1317,73 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.product-price__chart-heading h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-price__trend {
+  font-size: 0.95rem;
+  color: rgba(var(--v-theme-accent-supporting), 0.9);
+}
+
+.product-price__chart {
+  height: 300px;
+}
+
+.product-price__chart-placeholder {
+  height: 300px;
+  border-radius: 18px;
+  background: rgba(148, 163, 184, 0.14);
+}
+
+/* Reusing existing metric styles for history cards */
+.product-price__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12);
+  align-items: center;
+}
+
+.product-price__metrics-summary {
+  background: rgba(var(--v-theme-surface-primary-080), 0.65);
+  border-radius: 20px;
+  padding: 1rem 1.25rem;
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
+  width: min(100%, 520px);
+}
+
+.product-price__metrics-summary dl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.product-price__metrics-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.product-price__metrics-stat-text dt {
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.product-price__metrics-stat-text dd {
+  margin: 0;
+  font-weight: 600;
+  color: rgba(var(--v-theme-text-neutral-strong), 1);
 }
 
 .product-price__event-card {
@@ -1353,182 +1415,10 @@ onBeforeUnmount(() => {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.product-price__event-card-clear {
-  align-self: flex-start;
-}
-
 .product-price__event-card-dates {
   margin: 0.75rem 0 0;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   font-size: 0.9rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.product-price__event-card-dates-label {
-  font-weight: 600;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
-}
-
-.product-price__trend {
-  font-size: 0.95rem;
-  color: rgba(var(--v-theme-accent-supporting), 0.9);
-}
-
-.product-price__chart {
-  height: 300px;
-}
-
-.product-price__chart-placeholder {
-  height: 300px;
-  border-radius: 18px;
-  background: rgba(148, 163, 184, 0.14);
-}
-
-.product-price__metrics {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12);
-  align-items: stretch;
-}
-
-.product-price__metrics--solo {
-  align-items: center;
-}
-
-.product-price__metrics--with-offer {
-  gap: 1.5rem;
-}
-
-.product-price__metrics-highlight {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  background: rgba(var(--v-theme-surface-primary-080), 0.82);
-  border-radius: 20px;
-  padding: 1rem 1.25rem;
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
-  width: 100%;
-}
-
-.product-price__metrics-offer-card {
-  flex: 1 1 0%;
-}
-
-.product-price__metrics-summary {
-  flex: 1 1 0%;
-  background: rgba(var(--v-theme-surface-primary-080), 0.65);
-  border-radius: 20px;
-  padding: 1rem 1.25rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.product-price__metrics--solo .product-price__metrics-summary {
-  width: min(100%, 520px);
-  margin-inline: auto;
-}
-
-.product-price__metrics-summary dl {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  margin: 0;
-}
-
-.product-price__metrics-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.85rem;
-  align-items: center;
-}
-
-.product-price__metrics-label {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
-}
-
-.product-price__metrics-offer {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.product-price__metrics-offer--link {
-  text-decoration: none;
-  color: inherit;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.product-price__metrics-offer--link:hover,
-.product-price__metrics-offer--link:focus-visible {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
-}
-
-.product-price__metrics-offer--link:focus-visible {
-  outline: 2px solid rgba(var(--v-theme-accent-primary-highlight), 0.8);
-  outline-offset: 4px;
-}
-
-.product-price__metrics-offer img {
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
-  object-fit: contain;
-}
-
-.product-price__metrics-offer-icon {
-  color: rgba(var(--v-theme-accent-supporting), 0.9);
-  margin-left: auto;
-}
-
-.product-price__metrics-offer-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.product-price__metrics-price {
-  font-size: clamp(1.2rem, 2vw, 1.6rem);
-  font-weight: 700;
-  color: rgba(var(--v-theme-text-neutral-strong), 1);
-}
-
-.product-price__metrics-source {
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-}
-
-.product-price__metrics-stat-icon {
-  color: rgba(var(--v-theme-accent-supporting), 0.9);
-}
-
-.product-price__metrics-stat-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.product-price__metrics-stat-text dt {
-  font-size: 0.85rem;
-  color: rgba(var(--v-theme-text-neutral-soft), 0.9);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.product-price__metrics-stat-text dd {
-  margin: 0;
-  font-weight: 600;
-  color: rgba(var(--v-theme-text-neutral-strong), 1);
 }
 
 .product-price__charts-empty-message {
@@ -1539,56 +1429,9 @@ onBeforeUnmount(() => {
   border: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.4);
 }
 
-.product-price__offers {
-  background: rgba(var(--v-theme-surface-glass-strong), 0.94);
-  border-radius: 24px;
-  padding: 1.5rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.product-price__source {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.product-price__source img {
-  border-radius: 4px;
-}
-
-@media (min-width: 960px) {
-  .product-price__metrics--with-offer {
-    flex-direction: row;
-    align-items: stretch;
-  }
-}
-
 @media (max-width: 768px) {
   .product-price__chart-header {
-    flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
-  }
-
-  .product-price__chart {
-    height: 240px;
-  }
-
-  .product-price__metrics {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .product-price__metrics--solo {
-    align-items: stretch;
-  }
-
-  .product-price__metrics-summary,
-  .product-price__metrics-offer-card {
-    max-width: 100%;
   }
 }
 </style>

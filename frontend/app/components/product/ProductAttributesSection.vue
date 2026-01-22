@@ -32,11 +32,11 @@
             <span>{{ $t('product.attributes.main.identity.title') }}</span>
           </div>
 
-          <div v-if="hasIdentityData" class="product-attributes__identity-table">
-            <div
-              v-if="identityBrand"
-              class="product-attributes__identity-row"
-            >
+          <div
+            v-if="hasIdentityData"
+            class="product-attributes__identity-table"
+          >
+            <div v-if="identityBrand" class="product-attributes__identity-row">
               <span class="product-attributes__identity-label">
                 {{ $t('product.attributes.main.identity.brand') }}
               </span>
@@ -58,10 +58,7 @@
               </div>
             </div>
 
-            <div
-              v-if="identityModel"
-              class="product-attributes__identity-row"
-            >
+            <div v-if="identityModel" class="product-attributes__identity-row">
               <span class="product-attributes__identity-label">
                 {{ $t('product.attributes.main.identity.model') }}
               </span>
@@ -83,22 +80,9 @@
               </div>
             </div>
 
-            <div v-if="gtin" class="product-attributes__identity-row">
-              <span class="product-attributes__identity-label">
-                {{ $t('product.attributes.main.identity.gtin') }}
-              </span>
-              <div class="product-attributes__identity-value product-attributes__gtin">
-                <span>{{ gtin }}</span>
-                <span class="product-attributes__gtin-caption">
-                  {{ $t('product.attributes.main.identity.gtinLabel') }}
-                </span>
-              </div>
-            </div>
+          
 
-            <div
-              v-if="knownSince"
-              class="product-attributes__identity-row"
-            >
+            <div v-if="knownSince" class="product-attributes__identity-row">
               <span class="product-attributes__identity-label">
                 {{ $t('product.attributes.main.identity.knownSince') }}
               </span>
@@ -109,10 +93,7 @@
               </span>
             </div>
 
-            <div
-              v-if="lastUpdated"
-              class="product-attributes__identity-row"
-            >
+            <div v-if="lastUpdated" class="product-attributes__identity-row">
               <span class="product-attributes__identity-label">
                 {{ $t('product.attributes.main.identity.lastUpdated') }}
               </span>
@@ -122,9 +103,34 @@
                 {{ lastUpdated }}
               </span>
             </div>
+
+
+  <div v-if="gtin" class="product-attributes__identity-row">
+              <span class="product-attributes__identity-label">
+                {{ $t('product.attributes.main.identity.gtin') }}
+              </span>
+              <div
+                class="product-attributes__identity-value product-attributes__gtin"
+              >
+                <img
+                  v-if="gtinBarcodeUrl"
+                  :src="gtinBarcodeUrl"
+                  :alt="gtin"
+                  class="product-attributes__gtin-image"
+                />
+                <span>{{ gtin }}</span>
+                <span class="product-attributes__gtin-caption">
+                  {{ $t('product.attributes.main.identity.gtinLabel') }}
+                </span>
+              </div>
+            </div>
+
           </div>
 
-          <p v-else class="product-attributes__empty product-attributes__identity-empty">
+          <p
+            v-else
+            class="product-attributes__empty product-attributes__identity-empty"
+          >
             {{ $t('product.attributes.main.identity.empty') }}
           </p>
         </v-card>
@@ -379,7 +385,9 @@
                     <template #expanded-row="{ columns, item }">
                       <tr class="product-attributes__details-expanded-row">
                         <td :colspan="columns.length">
-                          <div class="product-attributes__details-expanded-content">
+                          <div
+                            class="product-attributes__details-expanded-content"
+                          >
                             <div
                               v-if="item.features.length"
                               class="product-attributes__chip-list product-attributes__chip-list--positive"
@@ -394,9 +402,10 @@
                                     size="18"
                                     class="product-attributes__chip-icon product-attributes__chip-icon--positive"
                                   />
-                                  <span class="product-attributes__chip-label">{{
-                                    feature.name
-                                  }}</span>
+                                  <span
+                                    class="product-attributes__chip-label"
+                                    >{{ feature.name }}</span
+                                  >
                                 </li>
                               </ul>
                             </div>
@@ -415,9 +424,10 @@
                                     size="18"
                                     class="product-attributes__chip-icon product-attributes__chip-icon--negative"
                                   />
-                                  <span class="product-attributes__chip-label">{{
-                                    feature.name
-                                  }}</span>
+                                  <span
+                                    class="product-attributes__chip-label"
+                                    >{{ feature.name }}</span
+                                  >
                                 </li>
                               </ul>
                             </div>
@@ -495,7 +505,9 @@
                     <template #expanded-row="{ columns, item }">
                       <tr class="product-attributes__details-expanded-row">
                         <td :colspan="columns.length">
-                          <div class="product-attributes__details-expanded-content">
+                          <div
+                            class="product-attributes__details-expanded-content"
+                          >
                             <div
                               v-if="item.features.length"
                               class="product-attributes__chip-list product-attributes__chip-list--positive"
@@ -510,9 +522,10 @@
                                     size="18"
                                     class="product-attributes__chip-icon product-attributes__chip-icon--positive"
                                   />
-                                  <span class="product-attributes__chip-label">{{
-                                    feature.name
-                                  }}</span>
+                                  <span
+                                    class="product-attributes__chip-label"
+                                    >{{ feature.name }}</span
+                                  >
                                 </li>
                               </ul>
                             </div>
@@ -531,9 +544,10 @@
                                     size="18"
                                     class="product-attributes__chip-icon product-attributes__chip-icon--negative"
                                   />
-                                  <span class="product-attributes__chip-label">{{
-                                    feature.name
-                                  }}</span>
+                                  <span
+                                    class="product-attributes__chip-label"
+                                    >{{ feature.name }}</span
+                                  >
                                 </li>
                               </ul>
                             </div>
@@ -781,9 +795,11 @@ const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
 
 const timeline = computed(() => props.product?.timeline ?? null)
 const identity = computed(() => props.product?.identity ?? null)
-const gtin = computed(() => props.product?.gtin ?? props.product?.base?.gtin ?? null)
-const technicalShortReview = computed(() =>
-  props.product?.aiReview?.review?.technicalShortReview?.trim() ?? ''
+const gtin = computed(
+  () => props.product?.gtin ?? props.product?.base?.gtin ?? null
+)
+const technicalShortReview = computed(
+  () => props.product?.aiReview?.review?.technicalShortReview?.trim() ?? ''
 )
 const technicalShortReviewHtml = computed(() => {
   if (!technicalShortReview.value) {
@@ -794,7 +810,17 @@ const technicalShortReviewHtml = computed(() => {
   return sanitizedHtml.value || technicalShortReview.value
 })
 
-const normalizeIdentityValue = (value: string | null | undefined): string | null => {
+const gtinBarcodeUrl = computed(() => {
+  if (!gtin.value) {
+    return null
+  }
+
+  return `https://bwipjs-api.metafloor.com/?bcid=ean13&text=${gtin.value}&scale=3&height=10&includetext`
+})
+
+const normalizeIdentityValue = (
+  value: string | null | undefined
+): string | null => {
   if (typeof value !== 'string') {
     return null
   }
@@ -831,8 +857,12 @@ const formatIdentityDate = (timestamp?: number | null) => {
   )
 }
 
-const knownSince = computed(() => formatIdentityDate(props.product?.base?.creationDate))
-const lastUpdated = computed(() => formatIdentityDate(props.product?.base?.lastChange))
+const knownSince = computed(() =>
+  formatIdentityDate(props.product?.base?.creationDate)
+)
+const lastUpdated = computed(() =>
+  formatIdentityDate(props.product?.base?.lastChange)
+)
 
 const hasIdentityData = computed(
   () =>
