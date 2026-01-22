@@ -77,7 +77,7 @@ public class BatchPromptService implements HealthIndicator {
         this.openAiBatchClient = openAiBatchClient;
         this.vertexGeminiBatchClient = vertexGeminiBatchClient;
         this.promptService = promptService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         File batchFolder = new File(config.getBatchFolder());
         if (!batchFolder.exists() && !batchFolder.mkdirs()) {
             logger.warn("Failed to create batch folder at {}", batchFolder.getAbsolutePath());
@@ -304,7 +304,7 @@ public class BatchPromptService implements HealthIndicator {
 
         Map<String, Object> toolMap = null;
         if (promptConfig.getRetrievalMode() == org.open4goods.services.prompt.config.RetrievalMode.MODEL_WEB_SEARCH) {
-             toolMap = Map.of("google_search", Map.of());
+             toolMap = Map.of("google_search", Map.of("exclude_domains", List.of()));
         }
 
         Map<String, Object> contentMap = Map.of(
@@ -316,14 +316,17 @@ public class BatchPromptService implements HealthIndicator {
                  "parts", List.of(Map.of("text", systemEvaluated))
         );
 
-        Map<String, Object> requestMap = new java.util.HashMap<>();
-        requestMap.put("custom_id", customId);
-        requestMap.put("contents", List.of(contentMap));
-        requestMap.put("system_instruction", systemMap);
+        Map<String, Object> payloadMap = new java.util.HashMap<>();
+        payloadMap.put("contents", List.of(contentMap));
+        payloadMap.put("system_instruction", systemMap);
         
         if (toolMap != null) {
-            requestMap.put("tools", List.of(toolMap));
+            payloadMap.put("tools", List.of(toolMap));
         }
+
+        Map<String, Object> requestMap = new java.util.HashMap<>();
+        requestMap.put("custom_id", customId);
+        requestMap.put("request", payloadMap);
 
         return requestMap;
     }
@@ -554,7 +557,12 @@ public class BatchPromptService implements HealthIndicator {
     }
 
     private BatchJob loadJob(String jobId) {
-        return jobStore.load(jobId).orElseThrow(() -> new IllegalStateException("Batch job not found: " + jobId));
+        String lookupId = jobId;
+        if (lookupId != null && lookupId.startsWith("batch-")) {
+            lookupId = lookupId.substring(6);
+        }
+        final String finalId = lookupId;
+        return jobStore.load(finalId).orElseThrow(() -> new IllegalStateException("Batch job not found: " + finalId));
     }
 
     private String resolveModel(org.open4goods.services.prompt.config.PromptOptions options) {

@@ -1164,75 +1164,25 @@ public class SearchService {
 	 * @return grouped semantic hits and missing-vertical results
 	 */
 	private SemanticGlobalSearchResult executeSemanticGlobalSearch(String sanitizedQuery, DomainLanguage domainLanguage) {
-		List<String> candidateVerticals = resolveSemanticVerticalCandidates(sanitizedQuery, domainLanguage);
-		if (candidateVerticals.isEmpty()) {
-			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
-		}
-
 		float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
 		if (embedding == null) {
 			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
 		}
-		List<GlobalSearchHit> combined = new ArrayList<>();
-		if (!candidateVerticals.isEmpty()) {
-			int perVerticalLimit = Math.max(1, GLOBAL_SEARCH_LIMIT / Math.max(1, candidateVerticals.size()));
-			Pageable pageable = PageRequest.of(0, perVerticalLimit);
 
-			for (String verticalId : candidateVerticals) {
-				SearchHits<Product> hits = executeSemanticSearch(verticalId, embedding, null, true, pageable,
-						sanitizedQuery);
-				combined.addAll(mapHits(hits, domainLanguage, true));
-			}
-		}
-
-		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(combined);
-		List<GlobalSearchHit> missingVerticalResults = executeSemanticMissingVerticalSearch(embedding, domainLanguage,
-				sanitizedQuery);
+		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
+		SearchHits<Product> hits = executeSemanticSearch(null, embedding, null, true, pageable, sanitizedQuery);
+		
+		List<GlobalSearchHit> allHits = mapHits(hits, domainLanguage, true);
+		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(allHits);
+		List<GlobalSearchHit> missingVerticalResults = allHits.stream()
+				.filter(hit -> !StringUtils.hasText(hit.verticalId()))
+				.toList();
 
 		return new SemanticGlobalSearchResult(grouped, missingVerticalResults, true,
 				buildSemanticDiagnostics(grouped, missingVerticalResults));
 	}
 
-	/**
-	 * Execute semantic search on products missing a vertical.
-	 *
-	 * @param embedding      normalized embedding vector
-	 * @param domainLanguage localisation hint
-	 * @param sanitizedQuery sanitized query string
-	 * @return semantic hits without a vertical assignment
-	 */
-	private List<GlobalSearchHit> executeSemanticMissingVerticalSearch(float[] embedding, DomainLanguage domainLanguage,
-			String sanitizedQuery) {
-		Query filterQuery = buildMissingVerticalSearchQuery(true);
-		SearchHits<Product> hits = executeSemanticSearchWithFilter(embedding, filterQuery,
-				PageRequest.of(0, GLOBAL_SEARCH_LIMIT), sanitizedQuery);
-		if (hits == null || hits.isEmpty()) {
-			return List.of();
-		}
-		return mapHits(hits, domainLanguage, true).stream()
-				.filter(hit -> !StringUtils.hasText(hit.verticalId()))
-				.limit(GLOBAL_SEARCH_LIMIT)
-				.toList();
-	}
 
-	/**
-	 * Build a filter query for products without a vertical identifier.
-	 *
-	 * @param applyDefaultExclusion whether exclusion filters should be applied
-	 * @return filter query for missing-vertical products
-	 */
-	private Query buildMissingVerticalSearchQuery(boolean applyDefaultExclusion) {
-		Long expiration = repository.expirationClause();
-		return Query.of(q -> q.bool(b -> {
-			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
-			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
-			if (applyDefaultExclusion) {
-				b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
-			}
-			b.mustNot(m -> m.exists(e -> e.field("vertical")));
-			return b;
-		}));
-	}
 
 	/**
 	 * Execute a semantic KNN search within a vertical using the same recency and
@@ -1448,26 +1398,7 @@ public class SearchService {
 		return baseScore + boost;
 	}
 
-	/**
-	 * Resolve candidate vertical identifiers for semantic fallback.
-	 *
-	 * @param sanitizedQuery sanitized query string
-	 * @param domainLanguage localisation hint
-	 * @return list of distinct vertical identifiers to query
-	 */
-	private List<String> resolveSemanticVerticalCandidates(String sanitizedQuery, DomainLanguage domainLanguage) {
-		if (!StringUtils.hasText(sanitizedQuery)) {
-			return List.of();
-		}
 
-		List<String> tokens = normalizedTokens(normalizeForComparison(sanitizedQuery));
-		if (tokens.isEmpty()) {
-			return List.of();
-		}
-
-		return findCategoryMatches(tokens, domainLanguage).stream().map(CategorySuggestion::verticalId)
-				.distinct().toList();
-	}
 
 	/**
 	 * Builds and normalizes the embedding vector for a query.

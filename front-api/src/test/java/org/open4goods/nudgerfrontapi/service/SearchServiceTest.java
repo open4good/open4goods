@@ -121,7 +121,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void globalSearch_shouldSkipSemantic_whenNoVerticalCandidates() {
+    void globalSearch_shouldPerformSemantic_whenNoVerticalCandidates() {
         // GIVEN initial setup
         when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(Collections.emptyList());
         searchService.initializeSuggestIndex();
@@ -130,6 +130,8 @@ class SearchServiceTest {
 
         // Setup repository to return empty for first call (exact_vertical)
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
+        
+        when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f});
 
 
 
@@ -138,7 +140,7 @@ class SearchServiceTest {
 
         // THEN
         // We verify that textEmbeddingService was not called, which implies semantic search was skipped.
-        verify(textEmbeddingService, times(0)).embed("iphone");
+        verify(textEmbeddingService, times(1)).embed("iphone");
 
         // We can also check that the result has mode Global (since all failed/empty) or Semantic if we mocked hits?
         // If all fail/empty, it returns the start mode but with empty lists.
@@ -175,7 +177,7 @@ class SearchServiceTest {
         when(searchHit.getScore()).thenReturn(1.2f);
 
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME)))
-                .thenReturn(emptyHits, semanticHits, semanticHits);
+                .thenReturn(semanticHits, semanticHits);
         when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f, 0.2f});
         when(productMappingService.mapProduct(any(), any(), any(), any(), eq(false)))
                 .thenReturn(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null));

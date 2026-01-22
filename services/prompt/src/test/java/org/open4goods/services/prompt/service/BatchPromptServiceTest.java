@@ -42,12 +42,12 @@ class BatchPromptServiceTest {
     @Mock private VertexGeminiBatchClient vertexGeminiBatchClient;
     @Mock private PromptService promptService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
     @BeforeEach
     void setUp() {
         when(config.getBatchFolder()).thenReturn(System.getProperty("java.io.tmpdir") + "/batch-test");
-        when(config.getBatchMaxTokens()).thenReturn(100000);
+        org.mockito.Mockito.lenient().when(config.getBatchMaxTokens()).thenReturn(100000);
         
         batchPromptService = new BatchPromptService(config, vertexBatchConfig, evaluationService, openAiBatchClient, vertexGeminiBatchClient, promptService);
     }
@@ -91,10 +91,16 @@ class BatchPromptServiceTest {
         assertThat(lines).hasSize(1);
         
         JsonNode jsonNode = objectMapper.readTree(lines.get(0));
-        assertThat(jsonNode.has("tools")).isTrue();
-        JsonNode tools = jsonNode.get("tools");
+        assertThat(jsonNode.has("request")).isTrue();
+        JsonNode request = jsonNode.get("request");
+        
+        assertThat(request.has("tools")).isTrue();
+        JsonNode tools = request.get("tools");
         assertThat(tools.isArray()).isTrue();
         assertThat(tools.get(0).has("google_search")).isTrue();
+        JsonNode googleSearch = tools.get(0).get("google_search");
+        assertThat(googleSearch.has("exclude_domains")).isTrue();
+        assertThat(googleSearch.get("exclude_domains").isArray()).isTrue();
     }
     
     @Test
@@ -129,6 +135,42 @@ class BatchPromptServiceTest {
         List<String> lines = Files.readAllLines(submissionFile.toPath());
         JsonNode jsonNode = objectMapper.readTree(lines.get(0));
         
-        assertThat(jsonNode.has("tools")).isFalse();
+        assertThat(jsonNode.has("request")).isTrue();
+        JsonNode request = jsonNode.get("request");
+        assertThat(request.has("tools")).isFalse();
+    }
+    
+    @Test
+    void checkStatus_WithBatchPrefix_ShouldStripPrefix() {
+        // Setup
+        String jobId = "12345-abcde";
+        BatchJob job = new BatchJob();
+        job.setId(jobId);
+        job.setProvider(GenAiServiceType.OPEN_AI);
+        job.setRemoteJobId("remote-id");
+        job.setStatus(org.open4goods.services.prompt.model.BatchJobStatus.SUBMITTED);
+        
+        File batchFolder = new File(System.getProperty("java.io.tmpdir") + "/batch-test");
+        batchFolder.mkdirs();
+        
+        try {
+            // Manually save the job file
+            File file = new File(batchFolder, "batch-job-" + jobId + ".json");
+            objectMapper.writeValue(file, job);
+            
+            // Mock OpenAI client
+            when(openAiBatchClient.getBatchStatus("remote-id")).thenReturn(new org.open4goods.services.prompt.dto.openai.BatchJobResponse("id", "batch", "/v1/chat/completions", null, "input-file-id", "24h", "completed", "output-file-id", null, null, null, null, null, null, null, null, null, null, null, null));
+            
+            // Execute with prefix
+            var status = batchPromptService.checkStatus("batch-" + jobId);
+            
+            assertThat(status).isNotNull();
+            assertThat(status.status()).isEqualTo("completed");
+            
+            // Cleanup
+            file.delete();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

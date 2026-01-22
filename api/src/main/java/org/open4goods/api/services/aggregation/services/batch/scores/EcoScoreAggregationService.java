@@ -16,7 +16,10 @@ import org.slf4j.Logger;
 
 /**
  * Create an ecoscore based on existing scores, (see yaml config files)
- * TODO : Remove generic logger
+ * TODO : Remove generic logger, log in classical one
+ * TODO : Heavy documentation : javadoc (class and method level), inline comments when complex code
+ * TODO : Aims at simplify, 
+ * TODO : enhance audit 
  * @author goulven
  *
  */
@@ -73,6 +76,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 			Double value = resolveRelativeValue(config, score);
 			if (value == null) {
+				// TODO : log
 				return null;
 			}
 
