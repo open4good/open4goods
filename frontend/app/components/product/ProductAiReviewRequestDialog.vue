@@ -64,6 +64,15 @@
         </div>
 
         <v-alert
+          variant="tonal"
+          type="info"
+          class="product-ai-review-request__agreement mt-4"
+          density="compact"
+        >
+          {{ t('product.aiReview.request.agreement') }}
+        </v-alert>
+
+        <v-alert
           v-if="errorMessage"
           type="error"
           class="product-ai-review-request__alert"
@@ -189,6 +198,11 @@ const VueHcaptcha = defineAsyncComponent(
 )
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 
+const dialogModel = computed({
+  get: () => props.modelValue,
+  set: value => emit('update:modelValue', value),
+})
+
 const agreementModel = computed({
   get: () => props.agreementAccepted,
   set: value => emit('update:agreementAccepted', value),
@@ -230,7 +244,11 @@ const submitDisabled = computed(() => {
 })
 
 const showSubmitButton = computed(() => {
-  return !props.requiresCaptcha
+  if (props.requiresCaptcha) {
+    // Show button only if captcha is verified (fallback for auto-submit)
+    return !submitDisabled.value
+  }
+  return true
 })
 
 const handleCaptchaVerify = (token: string) => {

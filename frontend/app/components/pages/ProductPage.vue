@@ -52,8 +52,8 @@
             />
             <div class="product-page__hero-corner" role="presentation">
               <ImpactScore
-                v-if="impactScoreOn20 !== null"
-                :score="impactScoreOn20"
+                v-if="impactScoreValue != null"
+                :score="impactScoreValue"
                 :max="5"
                 size="xxlarge"
                 mode="badge"
@@ -2149,7 +2149,7 @@ const impactScoreOn20 = computed(() => {
   const ecoScore = impactScores.value.find(
     s => s.id?.toUpperCase() === 'ECOSCORE'
   )
-  return ecoScore?.on20 != null ? Math.round(ecoScore.on20) : null
+  return ecoScore?.on20 != null ? ecoScore.on20 : null
 })
 
 const metaTitle = computed(() => {

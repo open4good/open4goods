@@ -10,7 +10,7 @@
       <!-- Best Offers Section -->
       <div class="product-price__section">
         <h3 class="product-price__subtitle-h3">
-          {{ $t('product.price.bestOffers', 'Les meilleurs offres') }}
+          {{ offersTitle }}
         </h3>
 
         <!-- Primary Best Offer Card -->
@@ -39,7 +39,7 @@
                 size="64"
                 rounded="lg"
                 color="white"
-                class="pa-1 elevation-1"
+                class="p-4 pa-1 elevation-1"
               >
                 <img
                   v-if="bestNewOffer.favicon"
@@ -49,13 +49,15 @@
                 />
                 <v-icon v-else icon="mdi-store" color="grey" />
               </v-avatar>
-              <div>
-                <div class="text-h4 font-weight-bold product-price__best-price">
+              <div mm>
+                <div
+                  class="ml-6 text-h4 font-weight-bold product-price__best-price"
+                >
                   {{
                     formatCurrency(bestNewOffer.price, bestNewOffer.currency)
                   }}
                 </div>
-                <div class="text-subtitle-1 opacity-90">
+                <div class="ml-8 text-subtitle-1 opacity-90">
                   {{ bestNewOffer.datasourceName }}
                 </div>
               </div>
@@ -826,6 +828,25 @@ const allOffers = computed(() => {
 
   // Sort by price ascending
   return list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
+})
+
+const offersTitle = computed(() => {
+  if (!allOffers.value.length) {
+    return t('product.price.bestOffers', 'Les meilleures offres')
+  }
+
+  const conditions = new Set(allOffers.value.map(o => o.condition))
+  const hasNew = conditions.has('NEW')
+  // If we have NEW and nothing else
+  if (hasNew && conditions.size === 1) {
+    return t('product.price.newOffersOnly', 'Les offres neuves')
+  }
+  // If we don't have NEW but have others (USED, REFURBISHED...)
+  if (!hasNew && conditions.size > 0) {
+    return t('product.price.usedOffersOnly', "Les offres d'occasion")
+  }
+
+  return t('product.price.bestOffers', 'Les meilleures offres')
 })
 
 const offersHeaders = [

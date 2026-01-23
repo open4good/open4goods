@@ -18,5 +18,9 @@ export const resolvePrimaryImpactScore = (
     return null
   }
 
+  if (value > 5) {
+    return clampScore(value / 4)
+  }
+
   return clampScore(value)
 }

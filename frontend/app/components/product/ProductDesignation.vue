@@ -72,6 +72,10 @@ const rootClass = computed(() =>
     margin: 0;
   }
 
+  &--card {
+    align-items: center;
+  }
+
   &--card &__title {
     text-align: center;
   }

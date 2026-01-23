@@ -9,24 +9,6 @@
           {{ $t('product.impact.subtitle', subtitleParams) }}
         </p>
       </div>
-
-      <div class="product-impact__header-actions">
-        <v-btn
-          variant="tonal"
-          color="primary"
-          class="product-impact__toggle"
-          append-icon="mdi-chevron-down"
-          :class="{ 'product-impact__toggle--active': isEcoScoreExpanded }"
-          @click="isEcoScoreExpanded = !isEcoScoreExpanded"
-        >
-          {{ $t('product.impact.toggle.positioning', 'Positionnement') }}
-          <template #append>
-            <v-icon
-              :icon="isEcoScoreExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-            />
-          </template>
-        </v-btn>
-      </div>
     </header>
 
     <div class="product-impact__primary">
@@ -49,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, toRef } from 'vue'
+import { computed, toRef } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProductImpactEcoScoreCard from './impact/ProductImpactEcoScoreCard.vue'
@@ -144,8 +126,6 @@ const subtitleParams = toRef(props, 'subtitleParams')
 const expandedScoreId = toRef(props, 'expandedScoreId')
 const { t } = useI18n()
 
-const isEcoScoreExpanded = ref(false)
-
 const primaryScore = computed(
   () =>
     props.scores.find(score => score.id?.toUpperCase() === 'ECOSCORE') ?? null
@@ -224,10 +204,7 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
 })
 
 const showRadar = computed(
-  () =>
-    isEcoScoreExpanded.value &&
-    radarAxes.value.length >= 3 &&
-    chartSeries.value.length > 0
+  () => radarAxes.value.length >= 3 && chartSeries.value.length > 0
 )
 </script>
 

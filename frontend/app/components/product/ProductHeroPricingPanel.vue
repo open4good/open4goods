@@ -215,10 +215,10 @@
         </div>
 
         <v-select
-          v-if="alternativeOffers?.length"
+          v-if="filteredAlternativeOffers?.length"
           v-model="selectedAlternative"
           class="product-hero__pricing-panel-select"
-          :items="alternativeOffers"
+          :items="filteredAlternativeOffers"
           :label="alternativeOffersLabel"
           :placeholder="alternativeOffersPlaceholder"
           item-title="label"
@@ -256,16 +256,22 @@
                   :alt="item.raw.label"
                   width="24"
                   height="24"
-                  class="product-hero__pricing-panel-select-avatar"
+                  class="product-hero__pricing-panel-select-avatar mr-3"
                 />
-                <v-icon v-else icon="mdi-storefront-outline" size="20" />
+                <v-icon
+                  v-else
+                  icon="mdi-storefront-outline"
+                  size="20"
+                  class="mr-3"
+                />
               </template>
               <v-list-item-title>
                 {{ item.raw.label }}
               </v-list-item-title>
               <v-list-item-subtitle
                 v-if="
-                  item.raw.offerName && item.raw.offerName !== item.raw.label
+                  item.raw.offerName &&
+                  item.raw.offerName.trim() !== item.raw.label.trim()
                 "
               >
                 {{ item.raw.offerName }}
@@ -446,6 +452,17 @@ const emit = defineEmits<{
   (event: 'trend-click' | 'view-offers'): void
 }>()
 
+const filteredAlternativeOffers = computed(() => {
+  if (!props.alternativeOffers) return []
+  return props.alternativeOffers.filter(offer => {
+    // Filter out the offer if it matches the main displayed offer (name and price)
+    // This removes the "best price" which is already shown in the main panel
+    const isSameName = offer.label === props.merchant?.name
+    const isSamePrice = offer.priceLabel === props.priceLabel
+    return !(isSameName && isSamePrice)
+  })
+})
+
 const conditionIcon = computed(() =>
   props.condition === 'new' ? 'mdi-tag-outline' : 'mdi-recycle-variant'
 )
@@ -468,7 +485,7 @@ const emitViewOffers = () => {
 const selectedAlternative = ref<AlternativeOfferOption | null>(null)
 
 watch(
-  () => props.alternativeOffers,
+  () => filteredAlternativeOffers.value,
   offers => {
     if (offers?.length && !selectedAlternative.value) {
       selectedAlternative.value = offers[0]

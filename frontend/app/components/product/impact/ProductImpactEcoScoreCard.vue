@@ -1,28 +1,25 @@
 <template>
   <article v-if="score" class="impact-ecoscore">
-    <header class="impact-ecoscore__header">
-      <div class="impact-ecoscore__header-actions">
-        <v-btn
-          :to="methodologyHref"
-          variant="text"
-          class="text-none px-4"
-          color="primary"
-          :aria-label="$t('product.impact.methodologyLinkAria')"
-          append-icon="mdi-arrow-top-right"
-        >
-          {{ $t('product.impact.methodologyLink') }}
-        </v-btn>
-      </div>
-    </header>
-
-    <div class="impact-ecoscore__score">
+    <div class="d-flex justify-space-between align-center flex-wrap gap-4 mb-6">
       <ImpactScore
         :score="normalizedScore"
-        :max="5"
+        :max="maxScore"
         size="xxlarge"
         mode="badge"
         badge-layout="stacked"
       />
+
+      <v-btn
+        :to="methodologyHref"
+        variant="flat"
+        class="text-none px-6 font-weight-bold"
+        color="primary"
+        rounded="pill"
+        :aria-label="$t('product.impact.methodologyLinkAria')"
+        append-icon="mdi-arrow-right"
+      >
+        {{ $t('product.impact.methodologyLink') }}
+      </v-btn>
     </div>
 
     <div v-if="aiImpactText" class="impact-ecoscore__ai-text">
@@ -136,7 +133,24 @@ const hasDetailContent = computed(
   () => shouldDisplayRadar.value || detailScores.value.length > 0
 )
 
+const maxScore = computed(() => {
+  if (Number.isFinite(props.score?.on20)) {
+    return 20
+  }
+  const val = Number(props.score?.value)
+  if (Number.isFinite(val) && val > 5) {
+    return 20
+  }
+  return 5
+})
+
 const normalizedScore = computed(() => {
+  // Prefer on20 if valid
+  if (Number.isFinite(props.score?.on20)) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return props.score!.on20!
+  }
+
   const rawValue = Number.isFinite(props.score?.value)
     ? Number(props.score?.value)
     : null
@@ -145,6 +159,13 @@ const normalizedScore = computed(() => {
     return 0
   }
 
+  // If value > 5, assume it's already on 20 (or at least > 5) so do not clamp to 5.
+  // We clamp to 20 just in case.
+  if (rawValue > 5) {
+    return Math.min(rawValue, 20)
+  }
+
+  // Otherwise assum scale 5
   return Math.max(0, Math.min(rawValue, 5))
 })
 

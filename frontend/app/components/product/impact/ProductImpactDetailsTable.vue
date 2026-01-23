@@ -330,6 +330,19 @@ const groupedScores = computed(() =>
   buildImpactScoreGroups(displayScores.value, t)
 )
 
+watch(
+  groupedScores,
+  groups => {
+    const next = new Set<string>()
+    groups.groups.forEach(g => next.add(g.id))
+    if (groups.divers) {
+      next.add(groups.divers.id)
+    }
+    expandedGroups.value = next
+  },
+  { immediate: true }
+)
+
 const headers = computed(() => [
   {
     key: 'label',

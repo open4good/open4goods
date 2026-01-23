@@ -95,47 +95,47 @@
               class="category-page__filters-drawer"
               temporary
             >
-            <CategoryFiltersSidebar
-              :filter-options="filterOptions"
-              :aggregations="currentAggregations"
-              :baseline-aggregations="baselineAggregations"
-              :filters="manualFilters"
-              :impact-expanded="impactExpanded"
-              :technical-expanded="technicalExpanded"
-              :show-mobile-actions="true"
-              :has-documentation="hasDocumentation"
-              :wiki-pages="category?.wikiPages ?? []"
-              :related-posts="category?.relatedPosts ?? []"
-              :show-admin-panel="showAdminFilters"
-              :admin-filter-fields="adminFilterFields"
-              @update:filters="onFiltersChange"
-              @update:impact-expanded="
-                (value: boolean) => (impactExpanded = value)
-              "
-              @update:technical-expanded="
-                (value: boolean) => (technicalExpanded = value)
-              "
-              @apply-mobile="applyMobileFilters"
-              @clear-mobile="clearAllFilters"
-            >
-              <template #extra>
-                <div class="category-page__filters-cta">
-                  <CategoryEcoscoreCard
-                    :vertical-home-url="category?.verticalHomeUrl"
-                    :category-name="categoryDisplayName"
-                  />
-                  <CategoryCtaCard
-                    class="category-page__assistant-cta"
-                    icon="mdi-robot-outline"
-                    :title="$t('category.filters.assistant.title')"
-                    :subtitle="$t('category.filters.assistant.description')"
-                    :aria-label="$t('category.filters.assistant.ariaLabel')"
-                    clickable
-                    @click="isNudgeWizardOpen = true"
-                  />
-                </div>
-              </template>
-            </CategoryFiltersSidebar>
+              <CategoryFiltersSidebar
+                :filter-options="filterOptions"
+                :aggregations="currentAggregations"
+                :baseline-aggregations="baselineAggregations"
+                :filters="manualFilters"
+                :impact-expanded="impactExpanded"
+                :technical-expanded="technicalExpanded"
+                :show-mobile-actions="true"
+                :has-documentation="hasDocumentation"
+                :wiki-pages="category?.wikiPages ?? []"
+                :related-posts="category?.relatedPosts ?? []"
+                :show-admin-panel="showAdminFilters"
+                :admin-filter-fields="adminFilterFields"
+                @update:filters="onFiltersChange"
+                @update:impact-expanded="
+                  (value: boolean) => (impactExpanded = value)
+                "
+                @update:technical-expanded="
+                  (value: boolean) => (technicalExpanded = value)
+                "
+                @apply-mobile="applyMobileFilters"
+                @clear-mobile="clearAllFilters"
+              >
+                <template #extra>
+                  <div class="category-page__filters-cta">
+                    <CategoryEcoscoreCard
+                      :vertical-home-url="category?.verticalHomeUrl"
+                      :category-name="categoryDisplayName"
+                    />
+                    <CategoryCtaCard
+                      class="category-page__assistant-cta"
+                      icon="mdi-robot-outline"
+                      :title="$t('category.filters.assistant.title')"
+                      :subtitle="$t('category.filters.assistant.description')"
+                      :aria-label="$t('category.filters.assistant.ariaLabel')"
+                      clickable
+                      @click="isNudgeWizardOpen = true"
+                    />
+                  </div>
+                </template>
+              </CategoryFiltersSidebar>
             </v-navigation-drawer>
           </ClientOnly>
         </template>
@@ -850,7 +850,7 @@ const { data: filterOptionsData, execute: loadFilterOptions } =
         `/api/products/fields/filters/${encodeURIComponent(verticalId.value)}`
       )
     },
-    { server: false, immediate: false }
+    { server: false, immediate: true, watch: [verticalId] }
   )
 
 const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
@@ -864,7 +864,7 @@ const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
       `/api/products/fields/sortable/${encodeURIComponent(verticalId.value)}`
     )
   },
-  { server: false, immediate: false }
+  { server: false, immediate: true, watch: [verticalId] }
 )
 
 const filterOptions = computed(() => filterOptionsData.value ?? null)
@@ -1388,8 +1388,8 @@ const hasSortOptions = computed(() => {
   const options = sortOptions.value
   return Boolean(
     options?.global?.length ||
-      options?.impact?.length ||
-      options?.technical?.length
+    options?.impact?.length ||
+    options?.technical?.length
   )
 })
 
@@ -2554,4 +2554,14 @@ const clearAllFilters = () => {
 
   .category-page__filters-actions
     padding: 0.5rem 0
+</style>
+
+<style scoped lang="scss">
+.category-page {
+  &__assistant-cta {
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
 </style>
