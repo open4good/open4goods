@@ -1249,6 +1249,26 @@ const handleGlobalScrollEvent = (event: Event) => {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
+.product-ai-review__card-text :deep(.review-ref) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.9);
+  color: rgb(var(--v-theme-accent-primary-highlight));
+  font-size: 1.05em;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.product-ai-review__card-text :deep(.review-ref:hover),
+.product-ai-review__card-text :deep(.review-ref:focus-visible) {
+  background: rgba(var(--v-theme-surface-primary-100), 0.95);
+  color: rgb(var(--v-theme-accent-primary-highlight));
+  box-shadow: 0 4px 10px rgba(var(--v-theme-shadow-primary-600), 0.18);
+}
+
 .product-ai-review__list {
   list-style: none;
   margin: 0;
