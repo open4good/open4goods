@@ -126,45 +126,128 @@
         </v-row>
 
         <v-row>
-          <!-- Row 2: Technical & Ecological -->
-          <v-col v-if="reviewContent.technicalReview" cols="12" md="6">
+          <!-- Row 2: Technical, Ecological & Community -->
+          <v-col v-if="technicalContent" cols="12" md="4">
             <v-card class="product-ai-review__card h-100" elevation="0">
               <v-card-text>
-                <header class="product-ai-review__card-header mb-4">
-                  <div class="product-ai-review__card-icon">
-                    <v-icon icon="mdi-cog-outline" size="24" />
+                <header class="product-ai-review__card-heading mb-4">
+                  <div class="product-ai-review__card-header">
+                    <div class="product-ai-review__card-icon">
+                      <v-icon icon="mdi-cog-outline" size="24" />
+                    </div>
+                    <h3 class="product-ai-review__card-title">
+                      {{ $t('product.aiReview.sections.technical') }}
+                    </h3>
                   </div>
-                  <h3 class="product-ai-review__card-title">
-                    {{ $t('product.aiReview.sections.technical') }}
-                  </h3>
+                  <v-btn-toggle
+                    v-model="technicalLevel"
+                    mandatory
+                    density="compact"
+                    class="product-ai-review__level-toggle"
+                    :aria-label="$t('product.aiReview.levels.label')"
+                  >
+                    <v-btn
+                      v-for="option in levelOptions"
+                      :key="option.value"
+                      :value="option.value"
+                      size="small"
+                      variant="tonal"
+                      :aria-label="option.label"
+                    >
+                      <v-icon :icon="option.icon" size="18" />
+                    </v-btn>
+                  </v-btn-toggle>
                 </header>
                 <!-- eslint-disable vue/no-v-html -->
                 <div
                   class="product-ai-review__card-text"
-                  v-html="reviewContent.technicalReview"
+                  v-html="technicalContent"
                 />
                 <!-- eslint-enable vue/no-v-html -->
               </v-card-text>
             </v-card>
           </v-col>
 
-          <v-col v-if="reviewContent.ecologicalReview" cols="12" md="6">
+          <v-col v-if="ecologicalContent" cols="12" md="4">
             <v-card class="product-ai-review__card h-100" elevation="0">
               <v-card-text>
-                <header class="product-ai-review__card-header mb-4">
-                  <div
-                    class="product-ai-review__card-icon product-ai-review__card-icon--eco"
-                  >
-                    <v-icon icon="mdi-leaf" size="24" />
+                <header class="product-ai-review__card-heading mb-4">
+                  <div class="product-ai-review__card-header">
+                    <div
+                      class="product-ai-review__card-icon product-ai-review__card-icon--eco"
+                    >
+                      <v-icon icon="mdi-leaf" size="24" />
+                    </div>
+                    <h3 class="product-ai-review__card-title">
+                      {{ $t('product.aiReview.sections.ecological') }}
+                    </h3>
                   </div>
-                  <h3 class="product-ai-review__card-title">
-                    {{ $t('product.aiReview.sections.ecological') }}
-                  </h3>
+                  <v-btn-toggle
+                    v-model="ecologicalLevel"
+                    mandatory
+                    density="compact"
+                    class="product-ai-review__level-toggle"
+                    :aria-label="$t('product.aiReview.levels.label')"
+                  >
+                    <v-btn
+                      v-for="option in levelOptions"
+                      :key="option.value"
+                      :value="option.value"
+                      size="small"
+                      variant="tonal"
+                      :aria-label="option.label"
+                    >
+                      <v-icon :icon="option.icon" size="18" />
+                    </v-btn>
+                  </v-btn-toggle>
                 </header>
                 <!-- eslint-disable vue/no-v-html -->
                 <div
                   class="product-ai-review__card-text"
-                  v-html="reviewContent.ecologicalReview"
+                  v-html="ecologicalContent"
+                />
+                <!-- eslint-enable vue/no-v-html -->
+              </v-card-text>
+            </v-card>
+          </v-col>
+
+          <v-col v-if="communityContent" cols="12" md="4">
+            <v-card class="product-ai-review__card h-100" elevation="0">
+              <v-card-text>
+                <header class="product-ai-review__card-heading mb-4">
+                  <div class="product-ai-review__card-header">
+                    <div
+                      class="product-ai-review__card-icon product-ai-review__card-icon--community"
+                    >
+                      <v-icon icon="mdi-account-group-outline" size="24" />
+                    </div>
+                    <h3 class="product-ai-review__card-title">
+                      {{ $t('product.aiReview.sections.community') }}
+                    </h3>
+                  </div>
+                  <v-btn-toggle
+                    v-model="communityLevel"
+                    mandatory
+                    density="compact"
+                    class="product-ai-review__level-toggle"
+                    :aria-label="$t('product.aiReview.levels.label')"
+                  >
+                    <v-btn
+                      v-for="option in levelOptions"
+                      :key="option.value"
+                      :value="option.value"
+                      size="small"
+                      variant="tonal"
+                      :aria-label="option.label"
+                    >
+                      <v-icon :icon="option.icon" size="18" />
+                    </v-btn>
+                  </v-btn-toggle>
+                </header>
+                <!-- eslint-disable vue/no-v-html -->
+                <div
+                  class="product-ai-review__card-text"
+                  v-html="communityContent"
                 />
                 <!-- eslint-enable vue/no-v-html -->
               </v-card-text>
@@ -335,7 +418,16 @@ interface ReviewContent {
   mediumTitle?: string | null
   shortTitle?: string | null
   technicalReview?: string | null
+  technicalReviewNovice?: string | null
+  technicalReviewIntermediate?: string | null
+  technicalReviewAdvanced?: string | null
   ecologicalReview?: string | null
+  ecologicalReviewNovice?: string | null
+  ecologicalReviewIntermediate?: string | null
+  ecologicalReviewAdvanced?: string | null
+  communityReviewNovice?: string | null
+  communityReviewIntermediate?: string | null
+  communityReviewAdvanced?: string | null
   summary?: string | null
   pros?: string[]
   cons?: string[]
@@ -343,6 +435,8 @@ interface ReviewContent {
   attributes?: AiReviewAttributeDto[]
   dataQuality?: string | null
 }
+
+type ReviewLevel = 'novice' | 'intermediate' | 'advanced'
 
 const props = defineProps({
   sectionId: {
@@ -397,6 +491,9 @@ const descriptionRef = ref<HTMLElement | null>(null)
 // const isDialogOpen = ref(false)
 const agreementAccepted = ref(true)
 const showAllSources = ref(false)
+const technicalLevel = ref<ReviewLevel>('intermediate')
+const ecologicalLevel = ref<ReviewLevel>('intermediate')
+const communityLevel = ref<ReviewLevel>('intermediate')
 
 const quotaCategory = IpQuotaCategory.ReviewGeneration
 
@@ -464,6 +561,24 @@ const sourcesToggleLabel = computed(() =>
     : t('product.aiReview.sources.showMore')
 )
 
+const levelOptions = computed(() => [
+  {
+    value: 'novice',
+    icon: 'mdi-signal-cellular-1',
+    label: t('product.aiReview.levels.simple'),
+  },
+  {
+    value: 'intermediate',
+    icon: 'mdi-signal-cellular-2',
+    label: t('product.aiReview.levels.intermediate'),
+  },
+  {
+    value: 'advanced',
+    icon: 'mdi-signal-cellular-3',
+    label: t('product.aiReview.levels.advanced'),
+  },
+])
+
 const createdDate = computed(() => {
   if (!createdMs.value) {
     return null
@@ -511,6 +626,32 @@ const statusMessage = computed(() => {
   })
 })
 
+const technicalContent = computed(() =>
+  selectReviewContent(technicalLevel.value, {
+    novice: reviewContent.value?.technicalReviewNovice,
+    intermediate: reviewContent.value?.technicalReviewIntermediate,
+    advanced: reviewContent.value?.technicalReviewAdvanced,
+    legacy: reviewContent.value?.technicalReview,
+  })
+)
+
+const ecologicalContent = computed(() =>
+  selectReviewContent(ecologicalLevel.value, {
+    novice: reviewContent.value?.ecologicalReviewNovice,
+    intermediate: reviewContent.value?.ecologicalReviewIntermediate,
+    advanced: reviewContent.value?.ecologicalReviewAdvanced,
+    legacy: reviewContent.value?.ecologicalReview,
+  })
+)
+
+const communityContent = computed(() =>
+  selectReviewContent(communityLevel.value, {
+    novice: reviewContent.value?.communityReviewNovice,
+    intermediate: reviewContent.value?.communityReviewIntermediate,
+    advanced: reviewContent.value?.communityReviewAdvanced,
+  })
+)
+
 function sanitizeHtml(content: string | null): string | null {
   if (!content) {
     return null
@@ -519,6 +660,39 @@ function sanitizeHtml(content: string | null): string | null {
   return DOMPurify.sanitize(content, {
     ADD_ATTR: ['target', 'rel', 'class'],
   })
+}
+
+function selectReviewContent(
+  level: ReviewLevel,
+  content: {
+    novice?: string | null
+    intermediate?: string | null
+    advanced?: string | null
+    legacy?: string | null
+  }
+): string | null {
+  const selected =
+    level === 'novice'
+      ? content.novice
+      : level === 'advanced'
+        ? content.advanced
+        : content.intermediate
+
+  if (selected) {
+    return selected
+  }
+
+  if (level === 'intermediate' && content.legacy) {
+    return content.legacy
+  }
+
+  return (
+    content.intermediate ??
+    content.legacy ??
+    content.novice ??
+    content.advanced ??
+    null
+  )
 }
 
 function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
@@ -577,7 +751,24 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     mediumTitle: reviewData.mediumTitle ?? null,
     shortTitle: reviewData.shortTitle ?? null,
     technicalReview: sanitizeHtml(reviewData.technicalReview ?? null),
+    technicalReviewNovice: sanitizeHtml(reviewData.technicalReviewNovice ?? null),
+    technicalReviewIntermediate: sanitizeHtml(
+      reviewData.technicalReviewIntermediate ?? null
+    ),
+    technicalReviewAdvanced: sanitizeHtml(reviewData.technicalReviewAdvanced ?? null),
     ecologicalReview: sanitizeHtml(reviewData.ecologicalReview ?? null),
+    ecologicalReviewNovice: sanitizeHtml(reviewData.ecologicalReviewNovice ?? null),
+    ecologicalReviewIntermediate: sanitizeHtml(
+      reviewData.ecologicalReviewIntermediate ?? null
+    ),
+    ecologicalReviewAdvanced: sanitizeHtml(
+      reviewData.ecologicalReviewAdvanced ?? null
+    ),
+    communityReviewNovice: sanitizeHtml(reviewData.communityReviewNovice ?? null),
+    communityReviewIntermediate: sanitizeHtml(
+      reviewData.communityReviewIntermediate ?? null
+    ),
+    communityReviewAdvanced: sanitizeHtml(reviewData.communityReviewAdvanced ?? null),
     summary: sanitizeHtml(reviewData.summary ?? null),
     pros,
     cons,
@@ -846,6 +1037,14 @@ const handleReferenceClick = async (event: Event) => {
   gap: 0.75rem;
 }
 
+.product-ai-review__card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .product-ai-review__card-icon {
   display: inline-flex;
   align-items: center;
@@ -862,10 +1061,25 @@ const handleReferenceClick = async (event: Event) => {
   color: rgb(var(--v-theme-accent-supporting));
 }
 
+.product-ai-review__card-icon--community {
+  background: rgba(var(--v-theme-accent-primary-highlight), 0.15);
+  color: rgb(var(--v-theme-accent-primary-highlight));
+}
+
 .product-ai-review__card-title {
   font-size: 1.05rem;
   font-weight: 600;
   margin: 0;
+}
+
+.product-ai-review__level-toggle {
+  background: rgba(var(--v-theme-surface-primary-080), 0.7);
+  border-radius: 999px;
+  padding: 0.1rem;
+}
+
+.product-ai-review__level-toggle :deep(.v-btn) {
+  min-width: 2.25rem;
 }
 
 .product-ai-review__card-text {
