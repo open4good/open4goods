@@ -232,7 +232,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "technicalReviewNovice")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Technical review for NOVICE readers: 1–2 short paragraphs, simple vocabulary. Explain jargon briefly. "
+            "Write in FRENCH. Technical review for NOVICE readers: 2-3 short paragraphs, simple vocabulary. Explain jargon briefly. "
           + "Focus on real-world use: performance, key features, reliability/repairability when stated in sources. "
           + "no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
           + "Never mention prices, dates, or product condition (new/used). "
@@ -242,7 +242,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "technicalReviewIntermediate")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Technical review for INTERMEDIATE readers: 2–3 paragraphs. Standard technical vocabulary allowed (avoid heavy jargon). "
+            "Write in FRENCH. Technical review for INTERMEDIATE readers: 3-4 paragraphs. Standard technical vocabulary allowed (avoid heavy jargon). "
           + "Include strengths, limits, and any repairability/reliability signals from sources. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
@@ -252,7 +252,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "technicalReviewAdvanced")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Technical review for ADVANCED readers: 2–4 paragraphs, nuanced. Discuss trade-offs and constraints only if sources provide evidence. "
+            "Write in FRENCH. Technical review for ADVANCED readers: 6-8 advanced paragraphs, nuanced. Discuss trade-offs and constraints only if sources provide evidence. "
           + "Benchmarks/tests must come from sources; do not invent numbers. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
@@ -266,7 +266,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "ecologicalReviewNovice")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Environmental review for NOVICE readers: 1–2 short paragraphs, simple wording. "
+            "Write in FRENCH. Environmental review for NOVICE readers: 2-3 short paragraphs, simple wording. "
           + "Cover durability signals, repairability, energy use/efficiency, materials/recycling ONLY if sourced. "
           + "If ecoscore/subscores are provided, use them ONLY for broad positioning (e.g., bien noté / contrasté / mal noté). Never mention rank/position numbers. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
@@ -277,7 +277,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "ecologicalReviewIntermediate")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Environmental review for INTERMEDIATE readers: 2–3 paragraphs. "
+            "Write in FRENCH. Environmental review for INTERMEDIATE readers: 3-4 paragraphs. "
           + "Discuss repairability, durability, energy efficiency, and sustainability evidence from sources. "
           + "Use ecoscore/subscores only for macro positioning; never mention ranks/precise positions. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
@@ -288,7 +288,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "ecologicalReviewAdvanced")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Environmental review for ADVANCED readers: 2–4 paragraphs, include nuance and uncertainty. "
+            "Write in FRENCH. Environmental review for ADVANCED readers: 6-8 advanced paragraphs, include nuance and uncertainty. "
           + "Explicitly distinguish sourced facts vs cautious interpretation; never invent lifecycle data. "
           + "Use ecoscore/subscores only for broad interpretation; never mention ranks/precise positions. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
@@ -303,7 +303,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "communityReviewNovice")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Community review for NOVICE readers: 1 short paragraph summarising the main consensus points from users and experts. "
+            "Write in FRENCH. Community review for NOVICE readers: 2-3 short paragraph summarising the main consensus points from users and experts. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each concrete praise/criticism; avoid vague generalities.")
@@ -312,7 +312,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "communityReviewIntermediate")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Community review for INTERMEDIATE readers: 1–2 paragraphs, include recurring themes and notable disagreements if sources show them. "
+            "Write in FRENCH. Community review for INTERMEDIATE readers: 3-4 paragraphs, include recurring themes and notable disagreements if sources show them. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: cite [n] after each concrete statement (e.g., reliability complaints, UX praise).")
@@ -321,7 +321,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "communityReviewAdvanced")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Community review for ADVANCED readers: max 2 paragraphs. "
+            "Write in FRENCH. Community review for ADVANCED readers: 6-8 advanced paragraphs. "
           + "You may discuss evidence strength (reviewer bias, sample size) ONLY if sources provide it. Do not speculate. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "

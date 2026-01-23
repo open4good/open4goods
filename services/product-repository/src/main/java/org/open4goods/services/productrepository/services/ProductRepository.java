@@ -57,6 +57,8 @@ import co.elastic.clients.elasticsearch._types.aggregations.ExtendedStatsAggrega
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.mapping.FieldType;
+import co.elastic.clients.elasticsearch._types.ScriptSortType;
+
 
 /**
  * The Elastic Data Access Object for products TODO : Could maintain the elastic
@@ -601,6 +603,40 @@ public class ProductRepository {
 		return elasticsearchOperations.search(query, Product.class, IndexCoordinates.of(indexName));
 
 	}
+
+    /**
+     * Get random products for a vertical
+     * @param vertical
+     * @param limit
+     * @return
+     */
+    public List<Product> getRandomProducts(String vertical, int limit) {
+
+        Criteria c = new Criteria("vertical").is(vertical)
+                .and(new Criteria("scores.ECOSCORE.value").exists());
+
+        // Script sort for random
+        SortOptions sortOptions = new SortOptions.Builder()
+                .script(s -> s
+                        .script(sc -> sc
+                                .inline(i -> i.source("Math.random()"))
+                        )
+                        .type(ScriptSortType.Number)
+                        .order(SortOrder.Asc)
+                )
+                .build();
+
+        NativeQuery query = new NativeQueryBuilder()
+                .withQuery(new CriteriaQuery(c))
+                .withSort(sortOptions)
+                .withMaxResults(limit)
+                .build();
+
+        return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX)
+                .stream()
+                .map(SearchHit::getContent)
+                .collect(Collectors.toList());
+    }
 
 
 

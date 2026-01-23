@@ -59,4 +59,11 @@ public class LegacyApiProductController {
 
 		return  productNameSelectionService.selectBestNameIndustrial(names).orElse(null);
 	}
+
+	@GetMapping(path="/product/random", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary="Get random products")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public List<Product> getRandom( @RequestParam(defaultValue = "5") final int number, @RequestParam(defaultValue = "tv") final String vertical) {
+		return repository.getRandomProducts(vertical, number);
+	}
 }

@@ -1,39 +1,70 @@
 <template>
   <section :id="sectionId" ref="rootRef" class="product-ai-review">
     <header class="product-ai-review__header">
-      <h2 class="product-ai-review__title">
-        {{ $t('product.aiReview.title', titleParams) }}
-      </h2>
-      <p class="product-ai-review__subtitle">
-        {{
-          $t(
-            sourcesCount === 1
-              ? 'product.aiReview.subtitle.one'
-              : 'product.aiReview.subtitle.other',
-            { count: sourcesCount }
-          )
-        }}
-      </p>
+      <v-row>
+        <!-- Left Column: Product Image -->
+        <v-col cols="4" class="d-flex align-center justify-center">
+          <img
+            v-if="productImage"
+            :src="productImage"
+            :alt="productName"
+            class="product-ai-review__product-image"
+          />
+          <v-icon
+            v-else
+            icon="mdi-image-off-outline"
+            size="64"
+            class="text-disabled"
+          />
+        </v-col>
 
-      <div v-if="createdDate" class="product-ai-review__metadata mt-1 mb-2">
-        <v-icon
-          icon="mdi-calendar-clock"
-          size="18"
-          class="product-ai-review__metadata-icon"
-        />
-        <span>{{
-          $t('product.aiReview.generatedAt', { date: createdDate })
-        }}</span>
-      </div>
+        <!-- Right Column: Title, Metadata, Summary -->
+        <v-col cols="8">
+          <h2 class="product-ai-review__title">
+            {{ $t('product.aiReview.title', titleParams) }}
+          </h2>
 
-      <div
-        v-if="reviewContent?.summary"
-        class="product-ai-review__summary mt-4 mb-6"
-      >
-        <!-- eslint-disable vue/no-v-html -->
-        <p class="text-body-1" v-html="reviewContent.summary" />
-        <!-- eslint-enable vue/no-v-html -->
-      </div>
+          <div class="product-ai-review__badge mb-2">
+            <v-chip
+              color="primary"
+              variant="tonal"
+              size="small"
+              class="font-weight-bold"
+            >
+              <v-icon start icon="mdi-robot" size="16" />
+              Synthèse IA
+            </v-chip>
+          </div>
+
+          <div v-if="createdDate" class="product-ai-review__metadata mb-4">
+            <v-icon
+              icon="mdi-calendar-clock"
+              size="16"
+              class="product-ai-review__metadata-icon mr-1"
+            />
+            <span class="text-caption text-medium-emphasis">{{
+              $t('product.aiReview.generatedAt', { date: createdDate })
+            }}</span>
+          </div>
+
+          <p class="product-ai-review__subtitle mb-4">
+            {{
+              $t(
+                sourcesCount === 1
+                  ? 'product.aiReview.subtitle.one'
+                  : 'product.aiReview.subtitle.other',
+                { count: sourcesCount }
+              )
+            }}
+          </p>
+
+          <div v-if="reviewContent?.summary" class="product-ai-review__summary">
+            <!-- eslint-disable vue/no-v-html -->
+            <p class="text-body-1" v-html="reviewContent.summary" />
+            <!-- eslint-enable vue/no-v-html -->
+          </div>
+        </v-col>
+      </v-row>
     </header>
 
     <div
@@ -394,27 +425,47 @@
     </div>
 
     <div v-else class="product-ai-review__empty">
-      <v-expansion-panels class="product-ai-review__expansion-panels">
-        <v-expansion-panel
-          elevation="0"
-          bg-color="transparent"
-          class="product-ai-review__expansion-panel"
-        >
-          <v-expansion-panel-title
-            class="product-ai-review__expansion-panel-title"
-          >
-            <div class="d-flex flex-column align-start gap-2">
-              <span class="text-h6 font-weight-bold">
-                {{ $t('product.aiReview.requestButton') }}
-              </span>
-              <span class="text-caption text-medium-emphasis">
-                {{
-                  $t('siteIdentity.menu.account.privacy.quotas.aiRemaining')
-                }}: {{ remainingGenerationsLabel }}
-              </span>
+      <v-card class="product-ai-review__cta-card" elevation="0" border>
+        <v-card-text class="d-flex align-center justify-space-between pa-6">
+          <div class="d-flex align-center gap-4">
+            <v-avatar color="primary" variant="tonal" size="56" class="mr-4">
+              <v-icon icon="mdi-robot-outline" size="32" />
+            </v-avatar>
+            <div>
+              <h3 class="text-h6 font-weight-bold mb-1">
+                {{ $t('product.aiReview.request.callToAction.title') }}
+              </h3>
+              <p class="text-body-2 text-medium-emphasis">
+                {{ $t('product.aiReview.request.callToAction.subtitle') }}
+              </p>
             </div>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
+          </div>
+          <v-btn
+            color="primary"
+            size="large"
+            prepend-icon="mdi-sparkles"
+            @click="isDialogOpen = true"
+          >
+            {{ $t('product.aiReview.requestButton') }}
+          </v-btn>
+        </v-card-text>
+      </v-card>
+
+      <v-dialog v-model="isDialogOpen" max-width="600" scrollable>
+        <v-card class="product-ai-review__dialog-card">
+          <v-card-title class="d-flex justify-space-between align-center pa-4">
+            <span class="text-h6">{{
+              $t('product.aiReview.request.title')
+            }}</span>
+            <v-btn
+              icon="mdi-close"
+              variant="text"
+              density="comfortable"
+              @click="isDialogOpen = false"
+            />
+          </v-card-title>
+          <v-divider />
+          <v-card-text class="pa-4">
             <ProductAiReviewRequestPanel
               v-model:agreement-accepted="agreementAccepted"
               :product-name="productLabel"
@@ -434,22 +485,9 @@
               @captcha-expired="handleCaptchaExpired"
               @captcha-error="handleCaptchaError"
             />
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
-      <v-alert v-if="errorMessage" type="error" border="start">
-        {{ errorMessage }}
-      </v-alert>
-      <div v-if="statusMessage" class="product-ai-review__status">
-        <v-progress-linear
-          v-if="isGenerating"
-          color="primary"
-          :model-value="statusPercent"
-          rounded
-          height="6"
-        />
-        <p>{{ statusMessage }}</p>
-      </div>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
     </div>
   </section>
 </template>
@@ -549,8 +587,7 @@ const status = ref<ReviewGenerationStatus | null>(null)
 const pollHandle = ref<number | null>(null)
 const captchaToken = ref<string | null>(null)
 const rootRef = ref<HTMLElement | null>(null)
-// isDialogOpen no longer needed
-// const isDialogOpen = ref(false)
+const isDialogOpen = ref(false)
 const agreementAccepted = ref(true)
 const showAllSources = ref(false)
 const technicalLevel = ref<ReviewLevel>('intermediate')
@@ -714,9 +751,17 @@ function sanitizeHtml(content: string | null): string | null {
     return null
   }
 
-  return DOMPurify.sanitize(content, {
+  const sanitized = DOMPurify.sanitize(content, {
     ADD_ATTR: ['target', 'rel', 'class'],
   })
+
+  // Ensure we don't return empty HTML tags or whitespace
+  const textContent = sanitized.replace(/<[^>]*>/g, '').trim()
+  if (textContent.length === 0) {
+    return null
+  }
+
+  return sanitized
 }
 
 function selectReviewContent(

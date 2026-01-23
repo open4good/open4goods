@@ -1,5 +1,7 @@
-# Context
+# Preprocessing
 Note :  replace {CATEGORY} with : tv
+
+# Context
 
 You are a software developper, aiming at creating nice configuration files, with maximum use of the possibilities, to custom and humanize at maximum the products categories.
 
@@ -86,7 +88,7 @@ sample result :
 
 
 
-You will Dismiss all CUSTOM_ * attributes, and "Themss, or non product category specific / meaning less attributes), then map
+You will Dismiss all CUSTOM_ * attributes, and "Themes", or non product specific / meaningless attributes).
 
 # Categories mapping.
 
@@ -128,11 +130,9 @@ nudgeToolConfig:
 
 
 
-This scores are always aggregated, meaning their
-It always relates  to  /model/src/main/java/org/open4goods/model/product/Score.java.aggregates
-is not null / not empty.
+This scores are always aggregated, meaning the relates  to  /model/src/main/java/org/open4goods/model/product/Score.java.aggregates
 
-This aggegated / participant relationship  is operated in scores definition, with participateInScores attributes. Sample in /verticals/src/main/resources/attributes/CLASSE_ENERGY.yml :
+This aggegated / participant relationship  is operated in scores definition, with participateInScores attributes. Sample from /verticals/src/main/resources/attributes/CLASSE_ENERGY.yml :
 
 participateInScores:
   - ENERGY_CONSUMPTION
@@ -141,12 +141,14 @@ participateInScores:
 You will :
 
 -- Reuse existing aggregated scores if they have at least one participant
-
 -- Update the scoreMinValue, in order to them to trigger the best 33%. Be aware that we have sigma scoring, that "compress" scores.
 
-You will deeply investigate the scores statistics at :
+You will deeply investigate the scores statistics, in order to set the the correct 33% filters steps
 
-in order to set the correct 30% filters
+
+To get the ranges, you will study the cardinalities for those scores, against the API :
+
+
 
 
 ### subsetsGroups

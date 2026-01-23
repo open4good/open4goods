@@ -310,6 +310,10 @@ const i18nMessages = {
           remainingUnknown: 'Unavailable',
           submit: 'Confirm',
           title: 'Request an AI summary',
+          callToAction: {
+            title: 'Request an AI review',
+            subtitle: 'Start a summary for this product.',
+          },
         },
         empty: 'No AI review is available for this product yet.',
         sections: {
@@ -501,14 +505,27 @@ describe('ProductAiReviewSection', () => {
   it('renders the empty state when no review content is available', async () => {
     const wrapper = await mountComponent({ initialReview: null })
 
-    expect(wrapper.get('.v-expansion-panel-title .text-h6').text()).toBe(
+    // Check for CTA card content
+    expect(wrapper.get('.product-ai-review__cta-card').text()).toContain(
       'Request an AI review'
     )
-    expect(
-      wrapper.get('.v-expansion-panel-title .text-caption').text()
-    ).toContain('Unavailable')
+    expect(wrapper.get('.product-ai-review__cta-card').text()).toContain(
+      'Start a summary for this product.'
+    )
 
-    expect(wrapper.find('.product-ai-review__content').exists()).toBe(false)
+    // Check dialog is initially closed (based on internal state, though stub renders content)
+    // We can check if the dialog component exists
+    expect(wrapper.findComponent({ name: 'VDialogStub' }).exists()).toBe(true)
+
+    // Simulate click on CTA button
+    await wrapper.find('.product-ai-review__cta-card button').trigger('click')
+    await nextTick()
+
+    // Since we use stubs, checking if it's "open" is tricky without checking props
+    // but we can verify the request panel is present in the DOM
+    expect(
+      wrapper.findComponent({ name: 'ProductAiReviewRequestPanel' }).exists()
+    ).toBe(true)
   })
 
   it('expands the sources list when clicking on a hidden reference', async () => {

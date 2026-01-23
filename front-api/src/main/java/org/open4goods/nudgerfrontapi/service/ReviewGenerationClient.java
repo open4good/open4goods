@@ -96,6 +96,10 @@ public class ReviewGenerationClient {
                     .retrieve()
                     .body(String.class);
 
+            if (body == null || body.trim().isEmpty()) {
+                return null;
+            }
+
             ReviewGenerationStatus response = jsonBuilder.readValue(body, ReviewGenerationStatus.class);
 
             return response;
