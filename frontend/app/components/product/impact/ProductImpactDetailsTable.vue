@@ -115,32 +115,6 @@
         </span>
       </template>
 
-      <template #[`item.lifecycle`]="{ item }">
-        <div
-          class="impact-details__lifecycle"
-          :class="{
-            'impact-details__cell--child': item.rowType === 'subscore',
-          }"
-        >
-          <template v-if="item.lifecycle?.length">
-            <v-chip
-              v-for="stage in item.lifecycle"
-              :key="`${item.id}-${stage}`"
-              :color="lifecycleColors[stage] ?? 'surface-ice-100'"
-              size="x-small"
-              variant="tonal"
-            >
-              {{ lifecycleLabels[stage] ?? stage }}
-            </v-chip>
-          </template>
-          <span
-            v-else-if="item.rowType !== 'aggregate'"
-            class="impact-details__coefficient-empty"
-            >—</span
-          >
-        </div>
-      </template>
-
       <template #[`item.scoreOn20`]="{ item }">
         <div
           class="impact-details__score-on-20"
@@ -232,7 +206,7 @@ type TableRow = {
   displayValue: number | null
   coefficient: number | null
   scoreOn20: number | null
-  lifecycle: string[]
+
   virtual?: boolean
   rowType: 'aggregate' | 'subscore' | 'standalone'
   parentId?: string
@@ -273,22 +247,6 @@ const { t } = useI18n()
 const expandedGroups = ref<Set<string>>(new Set())
 const expandedSubscores = ref<string[]>([])
 const showVirtualScores = ref(false)
-
-const lifecycleLabels = computed<Record<string, string>>(() => ({
-  EXTRACTION: t('product.impact.lifecycle.EXTRACTION'),
-  MANUFACTURING: t('product.impact.lifecycle.MANUFACTURING'),
-  TRANSPORTATION: t('product.impact.lifecycle.TRANSPORTATION'),
-  USE: t('product.impact.lifecycle.USE'),
-  END_OF_LIFE: t('product.impact.lifecycle.END_OF_LIFE'),
-}))
-
-const lifecycleColors: Record<string, string> = {
-  EXTRACTION: 'warning',
-  MANUFACTURING: 'secondary',
-  TRANSPORTATION: 'info',
-  USE: 'primary',
-  END_OF_LIFE: 'success',
-}
 
 const formatAttributeValue = (score: ScoreView) => {
   const raw = score.attributeValue?.toString().trim()
@@ -347,11 +305,6 @@ const headers = computed(() => [
     title: t('product.impact.tableHeaders.attributeValue'),
     sortable: false,
   },
-  {
-    key: 'lifecycle',
-    title: t('product.impact.tableHeaders.lifecycle'),
-    sortable: false,
-  },
 ])
 
 const buildTableRow = (
@@ -367,7 +320,7 @@ const buildTableRow = (
   displayValue: score.displayValue,
   coefficient: score.coefficient,
   scoreOn20: score.scoreOn20,
-  lifecycle: score.participateInACV ?? [],
+
   virtual: score.virtual,
   rowType,
   parentId,
@@ -457,7 +410,7 @@ const buildAggregateRow = (
     displayValue: displayValue,
     coefficient: aggregateScore?.coefficient ?? null,
     scoreOn20: scoreOn20,
-    lifecycle: aggregateScore?.participateInACV ?? [],
+
     virtual: aggregateScore?.virtual,
     rowType: 'aggregate',
   }
@@ -690,6 +643,9 @@ watch(
 
 .impact-details__label--child {
   padding-left: 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: rgba(var(--v-theme-text-neutral-strong), 0.85);
 }
 
 .impact-details__toggle {

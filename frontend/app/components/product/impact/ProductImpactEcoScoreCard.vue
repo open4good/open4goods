@@ -95,6 +95,7 @@ interface RadarSeriesEntry {
   lineColor: string
   areaColor: string
   symbolColor: string
+  rawValues?: Array<number | null>
 }
 
 const props = defineProps<{

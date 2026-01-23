@@ -677,6 +677,17 @@ public class ProductController {
             String mapping = "scores." + score.trim()+".value";
             target.add(mapping);
         }
+
+        if (config.getCompositeScores() == null) {
+            return;
+        }
+        for (String score : config.getCompositeScores()) {
+            if (!StringUtils.hasText(score)) {
+                continue;
+            }
+            String mapping = "scores." + score.trim()+".value";
+            target.add(mapping);
+        }
     }
 
     /**

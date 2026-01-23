@@ -1434,6 +1434,7 @@ interface RadarSeriesEntry {
   key: RadarSeriesKey
   name: string
   values: Array<number | null>
+  rawValues?: Array<number | null>
 }
 
 interface RadarDataset {
@@ -1508,6 +1509,46 @@ const radarData = computed<RadarDataset>(() => {
   const bestValues = axesDetails.map(entry => entry.bestValue ?? null)
   const worstValues = axesDetails.map(entry => entry.worstValue ?? null)
 
+  const transformValuesIfNeeded = (values: (number | null)[]) => {
+    return values.map((val, index) => {
+      const scoreId = axesDetails[index].id
+      const score = selectedProductScores.value.find(
+        s => s.id?.trim() === scoreId
+      )
+
+      // Check if "lower is better"
+      if (
+        score?.impactBetterIs === 'LOWER' &&
+        typeof val === 'number' &&
+        Number.isFinite(val)
+      ) {
+        // Calculate max observed for this axis to determine the scale flip
+        // We use the same padded max logic as the chart component: max * 1.1
+        const axisValues = [
+          productValues[index],
+          bestValues[index],
+          worstValues[index],
+        ].filter(
+          (v): v is number => typeof v === 'number' && Number.isFinite(v)
+        )
+
+        const maxObserved = axisValues.length ? Math.max(...axisValues) : 5
+        const paddedMax = maxObserved > 0 ? maxObserved * 1.1 : 5
+
+        // Invert: plotted = paddedMax - original
+        return Math.max(0, paddedMax - val)
+      }
+      return val
+    })
+  }
+
+  const productPlottedValues = transformValuesIfNeeded(
+    productValues,
+    productValues
+  )
+  const bestPlottedValues = transformValuesIfNeeded(bestValues, bestValues)
+  const worstPlottedValues = transformValuesIfNeeded(worstValues, worstValues)
+
   const series: RadarSeriesEntry[] = []
 
   const productSeriesLabel = formatBrandModelLabel(
@@ -1524,7 +1565,10 @@ const radarData = computed<RadarDataset>(() => {
     series.push({
       key: 'current',
       name: productSeriesLabel,
-      values: productValues,
+      key: 'current',
+      name: productSeriesLabel,
+      values: productPlottedValues,
+      rawValues: productValues,
     })
   }
 
@@ -1546,7 +1590,10 @@ const radarData = computed<RadarDataset>(() => {
     series.push({
       key: 'best',
       name: bestLabel,
-      values: bestValues,
+      key: 'best',
+      name: bestLabel,
+      values: bestPlottedValues,
+      rawValues: bestValues,
     })
   }
 
@@ -1568,7 +1615,10 @@ const radarData = computed<RadarDataset>(() => {
     series.push({
       key: 'worst',
       name: worstLabel,
-      values: worstValues,
+      key: 'worst',
+      name: worstLabel,
+      values: worstPlottedValues,
+      rawValues: worstValues,
     })
   }
 
@@ -1675,6 +1725,9 @@ const subSectionIds = {
   attributesMain: 'attributes-main',
   attributesTimeline: 'attributes-timeline',
   attributesDetails: 'attributes-details',
+  aiTechnical: 'ai-review-technical',
+  aiEcological: 'ai-review-ecological',
+  aiCommunity: 'ai-review-community',
 } as const
 
 type NavigableSection = {
@@ -1733,6 +1786,29 @@ const attributesSubsections = computed(() => {
   return entries
 })
 
+const aiSubsections = computed(() => {
+  const review = product.value?.aiReview?.review
+  if (!review) {
+    return []
+  }
+
+  // We add all sections as they are generally available when a review exists
+  return [
+    {
+      id: subSectionIds.aiTechnical,
+      label: t('product.aiReview.sections.technical'),
+    },
+    {
+      id: subSectionIds.aiEcological,
+      label: t('product.aiReview.sections.ecological'),
+    },
+    {
+      id: subSectionIds.aiCommunity,
+      label: t('product.aiReview.sections.community'),
+    },
+  ]
+})
+
 const shouldShowAlternativesNavigation = computed(
   () =>
     showAlternativesSection.value &&
@@ -1758,6 +1834,7 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
     label: t('product.navigation.ai'),
     icon: 'mdi-robot-outline',
     condition: showAiReviewSection.value,
+    subsections: aiSubsections.value,
   },
   {
     id: sectionIds.price,

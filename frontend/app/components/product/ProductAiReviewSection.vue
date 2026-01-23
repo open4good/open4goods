@@ -4,10 +4,8 @@
       <h2 class="product-ai-review__title">
         {{ $t('product.aiReview.title', titleParams) }}
       </h2>
-      <p class="product-ai-review__subtitle">
-        {{ subtitleLabel }}
-      </p>
-      <div v-if="createdDate" class="product-ai-review__metadata">
+
+      <div v-if="createdDate" class="product-ai-review__metadata mt-1 mb-2">
         <v-icon
           icon="mdi-calendar-clock"
           size="18"
@@ -16,6 +14,15 @@
         <span>{{
           $t('product.aiReview.generatedAt', { date: createdDate })
         }}</span>
+      </div>
+
+      <div
+        v-if="reviewContent?.summary"
+        class="product-ai-review__summary mt-4 mb-6"
+      >
+        <!-- eslint-disable vue/no-v-html -->
+        <p class="text-body-1" v-html="reviewContent.summary" />
+        <!-- eslint-enable vue/no-v-html -->
       </div>
     </header>
 
@@ -26,123 +33,112 @@
       itemscope
       itemtype="https://schema.org/Review"
     >
-      <div class="product-ai-review__grid">
-        <v-row>
-          <!-- Row 1: Summary & Pros/Cons -->
-          <v-col v-if="reviewContent.summary" cols="12" md="6">
-            <v-card class="product-ai-review__card h-100" elevation="0">
+      <div class="product-ai-review__grid" @click="handleContentClick">
+        <!-- Row 1: Pros & Cons -->
+        <v-row v-if="reviewContent.pros?.length || reviewContent.cons?.length">
+          <v-col cols="12" md="6">
+            <v-card
+              v-if="reviewContent.pros?.length"
+              class="product-ai-review__card h-100"
+              elevation="0"
+            >
               <v-card-text>
-                <header class="product-ai-review__card-header mb-4">
-                  <div class="product-ai-review__card-icon">
-                    <v-icon icon="mdi-lightbulb-on-outline" size="24" />
-                  </div>
-                  <h3 class="product-ai-review__card-title">
-                    {{ $t('product.aiReview.sections.overall') }}
-                  </h3>
+                <header
+                  class="product-ai-review__sub-header d-flex align-center mb-3"
+                >
+                  <v-icon
+                    icon="mdi-thumb-up-outline"
+                    color="success"
+                    class="mr-2"
+                  />
+                  <h4 class="text-subtitle-1 font-weight-bold">
+                    {{ $t('product.aiReview.sections.pros') }}
+                  </h4>
                 </header>
-                <!-- eslint-disable vue/no-v-html -->
-                <p
-                  class="product-ai-review__card-text"
-                  v-html="reviewContent.summary"
-                />
-                <!-- eslint-enable vue/no-v-html -->
+                <ul class="product-ai-review__list">
+                  <li
+                    v-for="pro in reviewContent.pros"
+                    :key="pro"
+                    class="product-ai-review__list-item"
+                  >
+                    <v-icon
+                      icon="mdi-check-circle-outline"
+                      size="18"
+                      color="success"
+                      class="product-ai-review__list-icon mt-1"
+                    />
+                    <!-- eslint-disable vue/no-v-html -->
+                    <span v-html="pro" />
+                    <!-- eslint-enable vue/no-v-html -->
+                  </li>
+                </ul>
               </v-card-text>
             </v-card>
           </v-col>
 
-          <v-col
-            v-if="reviewContent.pros?.length || reviewContent.cons?.length"
-            cols="12"
-            md="6"
-          >
-            <v-card class="product-ai-review__card h-100" elevation="0">
+          <v-col cols="12" md="6">
+            <v-card
+              v-if="reviewContent.cons?.length"
+              class="product-ai-review__card h-100"
+              elevation="0"
+            >
               <v-card-text>
-                <div v-if="reviewContent.pros?.length" class="mb-6">
-                  <header
-                    class="product-ai-review__sub-header d-flex align-center mb-3"
+                <header
+                  class="product-ai-review__sub-header d-flex align-center mb-3"
+                >
+                  <v-icon
+                    icon="mdi-alert-circle-outline"
+                    color="error"
+                    class="mr-2"
+                  />
+                  <h4 class="text-subtitle-1 font-weight-bold">
+                    {{ $t('product.aiReview.sections.cons') }}
+                  </h4>
+                </header>
+                <ul class="product-ai-review__list">
+                  <li
+                    v-for="con in reviewContent.cons"
+                    :key="con"
+                    class="product-ai-review__list-item"
                   >
                     <v-icon
-                      icon="mdi-thumb-up-outline"
-                      color="success"
-                      class="mr-2"
-                    />
-                    <h4 class="text-subtitle-1 font-weight-bold">
-                      {{ $t('product.aiReview.sections.pros') }}
-                    </h4>
-                  </header>
-                  <ul class="product-ai-review__list">
-                    <li
-                      v-for="pro in reviewContent.pros"
-                      :key="pro"
-                      class="product-ai-review__list-item"
-                    >
-                      <v-icon
-                        icon="mdi-check-circle-outline"
-                        size="18"
-                        color="success"
-                        class="product-ai-review__list-icon mt-1"
-                      />
-                      <!-- eslint-disable vue/no-v-html -->
-                      <span v-html="pro" />
-                      <!-- eslint-enable vue/no-v-html -->
-                    </li>
-                  </ul>
-                </div>
-
-                <div v-if="reviewContent.cons?.length">
-                  <header
-                    class="product-ai-review__sub-header d-flex align-center mb-3"
-                  >
-                    <v-icon
-                      icon="mdi-alert-circle-outline"
+                      icon="mdi-close-circle-outline"
+                      size="18"
                       color="error"
-                      class="mr-2"
+                      class="product-ai-review__list-icon mt-1"
                     />
-                    <h4 class="text-subtitle-1 font-weight-bold">
-                      {{ $t('product.aiReview.sections.cons') }}
-                    </h4>
-                  </header>
-                  <ul class="product-ai-review__list">
-                    <li
-                      v-for="con in reviewContent.cons"
-                      :key="con"
-                      class="product-ai-review__list-item"
-                    >
-                      <v-icon
-                        icon="mdi-close-circle-outline"
-                        size="18"
-                        color="error"
-                        class="product-ai-review__list-icon mt-1"
-                      />
-                      <!-- eslint-disable vue/no-v-html -->
-                      <span v-html="con" />
-                      <!-- eslint-enable vue/no-v-html -->
-                    </li>
-                  </ul>
-                </div>
+                    <!-- eslint-disable vue/no-v-html -->
+                    <span v-html="con" />
+                    <!-- eslint-enable vue/no-v-html -->
+                  </li>
+                </ul>
               </v-card-text>
             </v-card>
           </v-col>
         </v-row>
 
-        <v-row>
-          <!-- Row 2: Technical, Ecological & Community -->
-          <v-col v-if="technicalContent" cols="12" md="4">
-            <v-card class="product-ai-review__card h-100" elevation="0">
+        <!-- Technical Analysis -->
+        <v-row v-if="technicalContent" id="ai-review-technical">
+          <v-col cols="12">
+            <v-card class="product-ai-review__card" elevation="0">
               <v-card-text>
-                <header class="product-ai-review__card-heading mb-4">
-                  <div class="product-ai-review__card-header">
-                    <div class="product-ai-review__card-icon">
+                <header
+                  class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
+                >
+                  <div
+                    class="product-ai-review__card-header d-flex align-center"
+                  >
+                    <div class="product-ai-review__card-icon mr-3">
                       <v-icon icon="mdi-cog-outline" size="24" />
                     </div>
-                    <h3 class="product-ai-review__card-title">
+                    <h3 class="product-ai-review__card-title text-h6">
                       {{ $t('product.aiReview.sections.technical') }}
                     </h3>
                   </div>
                   <v-btn-toggle
                     v-model="technicalLevel"
                     mandatory
-                    density="compact"
+                    density="comfortable"
                     class="product-ai-review__level-toggle"
                     :aria-label="$t('product.aiReview.levels.label')"
                   >
@@ -150,11 +146,13 @@
                       v-for="option in levelOptions"
                       :key="option.value"
                       :value="option.value"
-                      size="small"
+                      size="default"
                       variant="tonal"
                       :aria-label="option.label"
+                      class="px-4"
                     >
-                      <v-icon :icon="option.icon" size="18" />
+                      <v-icon :icon="option.icon" size="20" class="mr-2" />
+                      {{ option.label }}
                     </v-btn>
                   </v-btn-toggle>
                 </header>
@@ -167,25 +165,32 @@
               </v-card-text>
             </v-card>
           </v-col>
+        </v-row>
 
-          <v-col v-if="ecologicalContent" cols="12" md="4">
-            <v-card class="product-ai-review__card h-100" elevation="0">
+        <!-- Ecological Analysis -->
+        <v-row v-if="ecologicalContent" id="ai-review-ecological">
+          <v-col cols="12">
+            <v-card class="product-ai-review__card" elevation="0">
               <v-card-text>
-                <header class="product-ai-review__card-heading mb-4">
-                  <div class="product-ai-review__card-header">
+                <header
+                  class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
+                >
+                  <div
+                    class="product-ai-review__card-header d-flex align-center"
+                  >
                     <div
-                      class="product-ai-review__card-icon product-ai-review__card-icon--eco"
+                      class="product-ai-review__card-icon product-ai-review__card-icon--eco mr-3"
                     >
                       <v-icon icon="mdi-leaf" size="24" />
                     </div>
-                    <h3 class="product-ai-review__card-title">
+                    <h3 class="product-ai-review__card-title text-h6">
                       {{ $t('product.aiReview.sections.ecological') }}
                     </h3>
                   </div>
                   <v-btn-toggle
                     v-model="ecologicalLevel"
                     mandatory
-                    density="compact"
+                    density="comfortable"
                     class="product-ai-review__level-toggle"
                     :aria-label="$t('product.aiReview.levels.label')"
                   >
@@ -193,11 +198,13 @@
                       v-for="option in levelOptions"
                       :key="option.value"
                       :value="option.value"
-                      size="small"
+                      size="default"
                       variant="tonal"
                       :aria-label="option.label"
+                      class="px-4"
                     >
-                      <v-icon :icon="option.icon" size="18" />
+                      <v-icon :icon="option.icon" size="20" class="mr-2" />
+                      {{ option.label }}
                     </v-btn>
                   </v-btn-toggle>
                 </header>
@@ -210,25 +217,32 @@
               </v-card-text>
             </v-card>
           </v-col>
+        </v-row>
 
-          <v-col v-if="communityContent" cols="12" md="4">
-            <v-card class="product-ai-review__card h-100" elevation="0">
+        <!-- Community Analysis -->
+        <v-row v-if="communityContent" id="ai-review-community">
+          <v-col cols="12">
+            <v-card class="product-ai-review__card" elevation="0">
               <v-card-text>
-                <header class="product-ai-review__card-heading mb-4">
-                  <div class="product-ai-review__card-header">
+                <header
+                  class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
+                >
+                  <div
+                    class="product-ai-review__card-header d-flex align-center"
+                  >
                     <div
-                      class="product-ai-review__card-icon product-ai-review__card-icon--community"
+                      class="product-ai-review__card-icon product-ai-review__card-icon--community mr-3"
                     >
                       <v-icon icon="mdi-account-group-outline" size="24" />
                     </div>
-                    <h3 class="product-ai-review__card-title">
+                    <h3 class="product-ai-review__card-title text-h6">
                       {{ $t('product.aiReview.sections.community') }}
                     </h3>
                   </div>
                   <v-btn-toggle
                     v-model="communityLevel"
                     mandatory
-                    density="compact"
+                    density="comfortable"
                     class="product-ai-review__level-toggle"
                     :aria-label="$t('product.aiReview.levels.label')"
                   >
@@ -236,11 +250,13 @@
                       v-for="option in levelOptions"
                       :key="option.value"
                       :value="option.value"
-                      size="small"
+                      size="default"
                       variant="tonal"
                       :aria-label="option.label"
+                      class="px-4"
                     >
-                      <v-icon :icon="option.icon" size="18" />
+                      <v-icon :icon="option.icon" size="20" class="mr-2" />
+                      {{ option.label }}
                     </v-btn>
                   </v-btn-toggle>
                 </header>
@@ -547,11 +563,6 @@ const visibleSources = computed(() => {
   return showAllSources.value ? sources : sources.slice(0, maxVisibleSources)
 })
 const hasMoreSources = computed(() => sourcesCount.value > maxVisibleSources)
-const subtitleLabel = computed(() =>
-  translatePlural('product.aiReview.subtitle', sourcesCount.value, {
-    count: n(sourcesCount.value),
-  })
-)
 const sourcesTitle = computed(() =>
   t('product.aiReview.sections.sourcesCount', { count: n(sourcesCount.value) })
 )
@@ -751,24 +762,34 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     mediumTitle: reviewData.mediumTitle ?? null,
     shortTitle: reviewData.shortTitle ?? null,
     technicalReview: sanitizeHtml(reviewData.technicalReview ?? null),
-    technicalReviewNovice: sanitizeHtml(reviewData.technicalReviewNovice ?? null),
+    technicalReviewNovice: sanitizeHtml(
+      reviewData.technicalReviewNovice ?? null
+    ),
     technicalReviewIntermediate: sanitizeHtml(
       reviewData.technicalReviewIntermediate ?? null
     ),
-    technicalReviewAdvanced: sanitizeHtml(reviewData.technicalReviewAdvanced ?? null),
+    technicalReviewAdvanced: sanitizeHtml(
+      reviewData.technicalReviewAdvanced ?? null
+    ),
     ecologicalReview: sanitizeHtml(reviewData.ecologicalReview ?? null),
-    ecologicalReviewNovice: sanitizeHtml(reviewData.ecologicalReviewNovice ?? null),
+    ecologicalReviewNovice: sanitizeHtml(
+      reviewData.ecologicalReviewNovice ?? null
+    ),
     ecologicalReviewIntermediate: sanitizeHtml(
       reviewData.ecologicalReviewIntermediate ?? null
     ),
     ecologicalReviewAdvanced: sanitizeHtml(
       reviewData.ecologicalReviewAdvanced ?? null
     ),
-    communityReviewNovice: sanitizeHtml(reviewData.communityReviewNovice ?? null),
+    communityReviewNovice: sanitizeHtml(
+      reviewData.communityReviewNovice ?? null
+    ),
     communityReviewIntermediate: sanitizeHtml(
       reviewData.communityReviewIntermediate ?? null
     ),
-    communityReviewAdvanced: sanitizeHtml(reviewData.communityReviewAdvanced ?? null),
+    communityReviewAdvanced: sanitizeHtml(
+      reviewData.communityReviewAdvanced ?? null
+    ),
     summary: sanitizeHtml(reviewData.summary ?? null),
     pros,
     cons,
@@ -798,6 +819,50 @@ const handleCaptchaExpired = () => {
 const handleCaptchaError = () => {
   captchaToken.value = null
   errorMessage.value = t('product.aiReview.errors.captcha')
+}
+
+const handleContentClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  const link = target.closest('a.review-ref') as HTMLAnchorElement | null
+
+  if (!link) {
+    return
+  }
+
+  event.preventDefault()
+  const href = link.getAttribute('href')
+  if (!href) {
+    return
+  }
+
+  const id = href.replace('#', '')
+  const element = document.getElementById(id)
+
+  // If the target is a source reference row
+  if (id.startsWith('review-ref-')) {
+    const refNumber = parseInt(id.replace('review-ref-', ''), 10)
+
+    // If we have a valid number and it might be hidden
+    if (
+      !isNaN(refNumber) &&
+      refNumber > maxVisibleSources &&
+      !showAllSources.value
+    ) {
+      showAllSources.value = true
+      // Wait for DOM update
+      nextTick(() => {
+        const revealedElement = document.getElementById(id)
+        if (revealedElement) {
+          scrollToElement(revealedElement)
+        }
+      })
+      return
+    }
+  }
+
+  if (element) {
+    scrollToElement(element)
+  }
 }
 
 const triggerGeneration = async () => {
@@ -923,11 +988,21 @@ const openDialog = () => {
 onMounted(() => {
   if (import.meta.client) {
     void refreshQuota(quotaCategory)
+    window.addEventListener(
+      'ai-review:scroll-to-source',
+      handleGlobalScrollEvent as EventListener
+    )
   }
 })
 
 onBeforeUnmount(() => {
   stopPolling()
+  if (import.meta.client) {
+    window.removeEventListener(
+      'ai-review:scroll-to-source',
+      handleGlobalScrollEvent as EventListener
+    )
+  }
 })
 
 /*
@@ -956,17 +1031,58 @@ const handleReferenceClick = async (event: Event) => {
   const anchor = target.closest('.review-ref') as HTMLAnchorElement | null
   if (anchor?.hash) {
     event.preventDefault()
-    let element = document.querySelector(anchor.hash) as HTMLElement | null
+    const id = anchor.hash.replace('#', '')
+    await scrollToSourceId(id)
+  }
+}
 
-    if (!element && hasMoreSources.value && !showAllSources.value) {
+const scrollToSourceId = async (id: string) => {
+  let element = document.getElementById(id)
+
+  if (id.startsWith('review-ref-')) {
+    const refNumber = parseInt(id.replace('review-ref-', ''), 10)
+    // If we have a valid number and it might be hidden
+    if (
+      !isNaN(refNumber) &&
+      refNumber > maxVisibleSources &&
+      !showAllSources.value
+    ) {
       showAllSources.value = true
       await nextTick()
-      element = document.querySelector(anchor.hash) as HTMLElement | null
+      element = document.getElementById(id)
     }
+  }
 
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-    }
+  if (element) {
+    scrollToElement(element)
+  }
+}
+
+const scrollToElement = (element: HTMLElement) => {
+  const headerOffset = 120 // Adjust as needed for sticky header
+  const bodyRect = document.body.getBoundingClientRect().top
+  const elementRect = element.getBoundingClientRect().top
+  const elementPosition = elementRect - bodyRect
+  const offsetPosition = elementPosition - headerOffset
+
+  window.scrollTo({
+    top: offsetPosition,
+    behavior: 'smooth',
+  })
+
+  // Highlight effect
+  element.classList.add('review-ref--highlight')
+  setTimeout(() => {
+    element.classList.remove('review-ref--highlight')
+  }, 2000)
+}
+
+const handleGlobalScrollEvent = (event: Event) => {
+  const customEvent = event as CustomEvent<{ id: string }>
+  if (customEvent.detail?.id) {
+    // Remove # if present
+    const id = customEvent.detail.id.replace('#', '')
+    void scrollToSourceId(id)
   }
 }
 </script>

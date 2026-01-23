@@ -40,6 +40,7 @@ interface RadarSeriesEntry {
   lineColor: string
   areaColor: string
   symbolColor: string
+  rawValues?: Array<number | null>
 }
 
 const props = defineProps<{
@@ -134,7 +135,16 @@ const option = computed<EChartsOption | null>(() => {
             typeof entryValue === 'number' && Number.isFinite(entryValue)
               ? entryValue
               : null
-          const renderedValue = numericValue != null ? numericValue : '–'
+
+          // Use raw value if available (for inverse scales), otherwise use the plotted value
+          const rawValue = props.series.find(s => s.label === seriesName)
+            ?.rawValues?.[index]
+          const displayValue =
+            rawValue !== undefined && rawValue !== null
+              ? rawValue
+              : numericValue
+
+          const renderedValue = displayValue != null ? displayValue : '–'
           const attributeLabel = axis?.attributeValue
             ? ` (${axis.attributeValue})`
             : ''
@@ -165,6 +175,7 @@ const option = computed<EChartsOption | null>(() => {
           color: ['rgba(33, 150, 243, 0.12)', 'rgba(33, 150, 243, 0.05)'],
         },
       },
+      center: ['50%', '40%'],
     },
     series: [
       {

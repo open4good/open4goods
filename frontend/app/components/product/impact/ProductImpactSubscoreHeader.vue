@@ -1,7 +1,20 @@
 <template>
   <header class="impact-subscore-header">
     <div class="impact-subscore-header__info">
-      <h4 class="impact-subscore-header__title">{{ title }}</h4>
+      <h4 class="impact-subscore-header__title">
+        {{ title }}
+        <div v-if="lifecycle?.length" class="impact-subscore-header__chips">
+          <v-chip
+            v-for="stage in lifecycle"
+            :key="stage"
+            :color="lifecycleColors[stage] ?? 'surface-ice-100'"
+            size="x-small"
+            variant="tonal"
+          >
+            {{ lifecycleLabels[stage] ?? stage }}
+          </v-chip>
+        </div>
+      </h4>
       <p v-if="subtitle" class="impact-subscore-header__subtitle">
         {{ subtitle }}
       </p>
@@ -26,9 +39,10 @@ const props = defineProps<{
   subtitle?: string
   on20?: number | null
   percent?: number | null
+  lifecycle?: string[]
 }>()
 
-const { n } = useI18n()
+const { n, t } = useI18n()
 const on20Value = computed(() => {
   if (typeof props.on20 !== 'number' || Number.isNaN(props.on20)) {
     return null
@@ -36,6 +50,22 @@ const on20Value = computed(() => {
 
   return n(props.on20, { maximumFractionDigits: 1, minimumFractionDigits: 0 })
 })
+
+const lifecycleLabels = computed<Record<string, string>>(() => ({
+  EXTRACTION: t('product.impact.lifecycle.EXTRACTION'),
+  MANUFACTURING: t('product.impact.lifecycle.MANUFACTURING'),
+  TRANSPORTATION: t('product.impact.lifecycle.TRANSPORTATION'),
+  USE: t('product.impact.lifecycle.USE'),
+  END_OF_LIFE: t('product.impact.lifecycle.END_OF_LIFE'),
+}))
+
+const lifecycleColors: Record<string, string> = {
+  EXTRACTION: 'warning',
+  MANUFACTURING: 'secondary',
+  TRANSPORTATION: 'info',
+  USE: 'primary',
+  END_OF_LIFE: 'success',
+}
 </script>
 
 <style scoped>
@@ -53,10 +83,20 @@ const on20Value = computed(() => {
 }
 
 .impact-subscore-header__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore-header__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .impact-subscore-header__subtitle {

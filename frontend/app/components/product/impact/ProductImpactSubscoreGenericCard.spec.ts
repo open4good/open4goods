@@ -6,7 +6,18 @@ import ProductImpactSubscoreGenericCard from './ProductImpactSubscoreGenericCard
 
 import type { ScoreView } from './impact-types'
 
+const VChipStub = defineComponent({
+  name: 'VChipStub',
+  setup(_props, { slots }) {
+    return () => h('span', { class: 'v-chip-stub' }, slots.default?.())
+  },
+})
+
 describe('ProductImpactSubscoreGenericCard', () => {
+  // ... existing i18n setup ...
+
+  //...
+
   const i18n = createI18n({
     legacy: false,
     locale: 'en-US',
@@ -19,6 +30,10 @@ describe('ProductImpactSubscoreGenericCard', () => {
             importanceTitle: 'Why it matters',
             tableHeaders: {
               ranking: 'Rank',
+            },
+            lifecycle: {
+              USE: 'Use',
+              END_OF_LIFE: 'End of life',
             },
             subscores: {
               default: {
@@ -192,5 +207,37 @@ describe('ProductImpactSubscoreGenericCard', () => {
     })
 
     expect(wrapper.text()).toContain('Repairability indicator guidance')
+  })
+
+  it('renders lifecycle badges in the header when available', () => {
+    const scoreWithLifecycle: ScoreView = {
+      ...score,
+      participateInACV: ['USE', 'end_of_life'],
+    }
+
+    const wrapper = mount(ProductImpactSubscoreGenericCard, {
+      props: {
+        score: scoreWithLifecycle,
+        productName: 'Demo Product',
+        productBrand: 'EcoCorp',
+        productModel: 'Air 2000',
+        productImage: '/cover.png',
+        verticalTitle: 'televisions',
+      },
+      global: {
+        plugins: [i18n],
+        stubs: {
+          ProductImpactSubscoreChart: true,
+          ImpactCoefficientBadge: true,
+          ClientOnly: true,
+          'v-chip': VChipStub,
+        },
+      },
+    })
+
+    const header = wrapper.find('.impact-subscore-header')
+    expect(header.exists()).toBe(true)
+    expect(header.text()).toContain('Use')
+    expect(header.text()).toContain('end_of_life')
   })
 })

@@ -64,7 +64,10 @@
                   role="listitem"
                 >
                   <template v-if="attribute.key === 'ai-summary'">
-                    <ul class="product-hero__ai-summary-list">
+                    <ul
+                      class="product-hero__ai-summary-list"
+                      @click="handleAiSummaryClick"
+                    >
                       <li
                         v-if="technicalOnelineHtml"
                         class="product-hero__ai-summary-item"
@@ -327,6 +330,24 @@ const handleAiReviewClick = () => {
     const top = element.getBoundingClientRect().top + window.scrollY - offset
     window.scrollTo({ top, behavior: 'smooth' })
   }
+}
+
+const handleAiSummaryClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  const link = target.closest('a.review-ref') as HTMLAnchorElement | null
+
+  if (!link || !link.hash) {
+    return
+  }
+
+  event.preventDefault()
+
+  // Dispatch event for ProductAiReviewSection to handle
+  window.dispatchEvent(
+    new CustomEvent('ai-review:scroll-to-source', {
+      detail: { id: link.hash },
+    })
+  )
 }
 
 const normalizeString = (value: string | null | undefined) =>
@@ -620,7 +641,6 @@ const gtinCountry = computed(() => {
     flag: info.countryFlagUrl ?? null,
   }
 })
-
 </script>
 
 <style scoped>
@@ -648,7 +668,8 @@ const gtinCountry = computed(() => {
 .product-hero__background-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 18% 22%,
       rgba(var(--v-theme-hero-gradient-start), 0.18),
       transparent 42%
@@ -793,7 +814,6 @@ const gtinCountry = computed(() => {
   min-width: 0;
 }
 
-
 .product-hero__details-section {
   display: flex;
   flex-direction: column;
@@ -922,7 +942,6 @@ const gtinCountry = computed(() => {
 .product-hero__ai-button:hover {
   background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
 }
-
 
 .product-hero__brand-line {
   display: flex;

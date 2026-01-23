@@ -1,6 +1,10 @@
 <template>
   <article class="impact-subscore">
-    <ProductImpactSubscoreHeader :title="score.label" :on20="score.on20" />
+    <ProductImpactSubscoreHeader
+      :title="score.label"
+      :on20="score.on20"
+      :lifecycle="score.participateInACV ?? []"
+    />
 
     <div class="impact-subscore__value">
       <div class="impact-subscore__value-primary">
@@ -126,9 +130,7 @@ const energyClassImage = computed(
 )
 
 const energyClassImageSrc = computed(() =>
-  energyClassImage.value.length
-    ? `/images/eprel/${energyClassImage.value}`
-    : ''
+  energyClassImage.value.length ? `/images/eprel/${energyClassImage.value}` : ''
 )
 
 const hasEnergyClass = computed(

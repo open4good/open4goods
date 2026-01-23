@@ -49,6 +49,7 @@ interface RadarSeriesEntry {
   key: RadarSeriesKey
   name: string
   values: Array<number | null>
+  rawValues?: Array<number | null>
 }
 
 interface RadarDataset {
@@ -59,6 +60,7 @@ interface RadarDataset {
 interface ChartSeriesEntry {
   label: string
   values: Array<number | null>
+  rawValues?: Array<number | null>
   lineColor: string
   areaColor: string
   symbolColor: string
@@ -180,6 +182,8 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
           : null
       })
 
+      const rawValues = 'rawValues' in entry ? entry.rawValues : undefined
+
       const hasRenderableValue = values.some(value => value !== null)
       if (!hasRenderableValue) {
         return null
@@ -193,6 +197,7 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
       return {
         label,
         values,
+        rawValues,
         lineColor: style.line,
         areaColor: style.area,
         symbolColor: style.symbol,

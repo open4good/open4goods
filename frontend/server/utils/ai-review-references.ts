@@ -44,6 +44,16 @@ const replaceIfString = (
   return replaceReferences(content, available)
 }
 
+export const stripReferences = (
+  content: string | null | undefined
+): string | undefined => {
+  if (typeof content !== 'string') {
+    return content ?? undefined
+  }
+
+  return content.replace(referencePattern, '')
+}
+
 const replaceArray = (
   values: Array<string> | null | undefined,
   available: Set<number>
@@ -114,8 +124,11 @@ export const applyAiReviewReferenceLinks = (
   )
   review.summary = replaceIfString(review.summary, available)
   review.dataQuality = replaceIfString(review.dataQuality, available)
-  review.technicalOneline = replaceIfString(review.technicalOneline, available)
-  review.ecologicalOneline = replaceIfString(review.ecologicalOneline, available)
+  review.technicalOneline = stripReferences(review.technicalOneline)
+  review.ecologicalOneline = replaceIfString(
+    review.ecologicalOneline,
+    available
+  )
   review.communityOneline = replaceIfString(review.communityOneline, available)
   review.pros = replaceArray(review.pros, available)
   review.cons = replaceArray(review.cons, available)
