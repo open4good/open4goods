@@ -113,6 +113,29 @@ const VBtnStub = defineComponent({
   },
 })
 
+const VBtnToggleStub = defineComponent({
+  name: 'VBtnToggleStub',
+  inheritAttrs: false,
+  props: {
+    modelValue: { type: [String, Number], default: '' },
+  },
+  emits: ['update:modelValue'],
+  setup(props, { attrs, slots }) {
+    const { class: className, ...rest } = attrs
+
+    return () =>
+      h(
+        'div',
+        {
+          ...rest,
+          class: ['v-btn-toggle-stub', className].filter(Boolean).join(' '),
+          'data-value': props.modelValue ?? '',
+        },
+        slots.default?.()
+      )
+  },
+})
+
 const VAlertStub = defineComponent({
   name: 'VAlertStub',
   inheritAttrs: false,
@@ -294,11 +317,18 @@ const i18nMessages = {
           details: 'Details and highlights',
           technical: 'Technical analysis',
           ecological: 'Ecological impact',
+          community: 'Community feedback',
           pros: 'Strengths',
           cons: 'Limitations',
           identity: 'Identity card',
           sources: 'Sources',
           sourcesCount: '{count} sources consulted',
+        },
+        levels: {
+          label: 'Reading level',
+          simple: 'Simple',
+          intermediate: 'Intermediate',
+          advanced: 'Advanced',
         },
         sources: {
           index: '#',
@@ -375,6 +405,8 @@ const mountComponent = (
         'v-table': VTableStub,
         VBtn: VBtnStub,
         'v-btn': VBtnStub,
+        VBtnToggle: VBtnToggleStub,
+        'v-btn-toggle': VBtnToggleStub,
         VAlert: VAlertStub,
         'v-alert': VAlertStub,
         VDialog: VDialogStub,
@@ -406,10 +438,18 @@ describe('ProductAiReviewSection', () => {
         'The product balances vivid visuals with smart integrations for a seamless living room experience.',
       description:
         '<p>The TQ65S90D focuses on brightness control and a <a class="review-ref" href="#review-ref-1">detailed contrast engine</a>.</p>',
-      technicalReview:
+      technicalReviewNovice: '<p>Simple technical recap.</p>',
+      technicalReviewIntermediate:
         '<p>HDMI 2.1 ports, Wi-Fi 6 support and a 120 Hz panel provide future-proof connectivity.</p>',
-      ecologicalReview:
+      technicalReviewAdvanced: '<p>Advanced technical breakdown.</p>',
+      ecologicalReviewNovice: '<p>Simple ecological summary.</p>',
+      ecologicalReviewIntermediate:
         '<p>Packaging uses recycled fibres and the standby consumption stays below 0.5W.</p>',
+      ecologicalReviewAdvanced: '<p>Advanced ecological breakdown.</p>',
+      communityReviewNovice: '<p>Community quick take.</p>',
+      communityReviewIntermediate:
+        '<p>Community feedback highlights balanced brightness.</p>',
+      communityReviewAdvanced: '<p>Community deep dive.</p>',
       pros: ['Excellent brightness calibration', 'Robust gaming features'],
       cons: ['Lacks bundled camera accessories'],
       attributes: defaultAttributes,
@@ -431,7 +471,7 @@ describe('ProductAiReviewSection', () => {
     expect(metadata).toMatch(/2024/)
 
     const cards = wrapper.findAll('.product-ai-review__card')
-    expect(cards).toHaveLength(4)
+    expect(cards).toHaveLength(5)
 
     const summaryCard = cards[0]
     expect(summaryCard.text()).toContain('Overall summary')
@@ -441,6 +481,10 @@ describe('ProductAiReviewSection', () => {
     expect(prosItems).toHaveLength(3)
     expect(prosItems[0].text()).toContain('Excellent brightness calibration')
     expect(prosItems[2].text()).toContain('Lacks bundled camera accessories')
+
+    expect(wrapper.text()).toContain('HDMI 2.1 ports, Wi-Fi 6 support')
+    expect(wrapper.text()).toContain('Packaging uses recycled fibres')
+    expect(wrapper.text()).toContain('Community feedback highlights balanced')
 
     const prosIcon = wrapper
       .findAll('.v-icon-stub')

@@ -2424,6 +2424,7 @@
       "sections": {
         "cons": "Points faibles",
         "details": "En détail",
+        "community": "Analyse communautaire",
         "ecological": "Analyse écologique",
         "identity": "Fiche d'identité",
         "overall": "Résumé général",
@@ -2431,6 +2432,12 @@
         "sources": "Sources consultées",
         "sourcesCount": "{count} sources consultées",
         "technical": "Analyse technique"
+      },
+      "levels": {
+        "label": "Niveau de lecture",
+        "simple": "Simple",
+        "intermediate": "Intermédiaire",
+        "advanced": "Avancé"
       },
       "sources": {
         "description": "Description",

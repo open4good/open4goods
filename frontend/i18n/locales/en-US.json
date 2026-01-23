@@ -2409,6 +2409,7 @@
       "sections": {
         "cons": "Cons",
         "details": "In detail",
+        "community": "Community analysis",
         "ecological": "Environmental analysis",
         "identity": "Identity card",
         "overall": "Overall summary",
@@ -2416,6 +2417,12 @@
         "sources": "Consulted sources",
         "sourcesCount": "{count} sources consulted",
         "technical": "Technical analysis"
+      },
+      "levels": {
+        "label": "Reading level",
+        "simple": "Simple",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
       },
       "sources": {
         "description": "Description",
