@@ -937,6 +937,25 @@ const gtinCountry = computed(() => {
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
+.product-hero__ai-summary-text :deep(.review-ref) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.9);
+  color: rgb(var(--v-theme-accent-primary-highlight));
+  font-size: 1.05em;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.product-hero__ai-summary-text :deep(.review-ref:hover),
+.product-hero__ai-summary-text :deep(.review-ref:focus-visible) {
+  background: rgba(var(--v-theme-surface-primary-100), 0.95);
+  box-shadow: 0 4px 10px rgba(var(--v-theme-shadow-primary-600), 0.18);
+}
+
 .product-hero__compare-button {
   background: rgba(var(--v-theme-surface-glass-strong), 0.5);
   backdrop-filter: blur(8px);

@@ -197,10 +197,10 @@
         <!-- Replaced by the block above -->
 
         <v-select
-          v-if="filteredAlternativeOffers?.length"
+          v-if="alternativeOffersToDisplay.length > 1"
           v-model="selectedAlternative"
           class="product-hero__pricing-panel-select"
-          :items="filteredAlternativeOffers"
+          :items="alternativeOffersToDisplay"
           :label="alternativeOffersLabel"
           :placeholder="alternativeOffersPlaceholder"
           item-title="label"
@@ -222,7 +222,7 @@
                 class="product-hero__pricing-panel-select-avatar"
               />
               <span class="product-hero__pricing-panel-select-name ml-4">
-                {{ truncateString(item.raw.label, 40) }}
+                {{ item.raw.label }}
               </span>
               <span class="product-hero__pricing-panel-select-price">
                 {{ item.raw.priceLabel }}
@@ -252,7 +252,7 @@
                 />
               </template>
               <v-list-item-title>
-                {{ truncateString(item.raw.label, 40) }}
+                {{ item.raw.label }}
               </v-list-item-title>
               <v-list-item-subtitle
                 v-if="
@@ -260,7 +260,7 @@
                   item.raw.offerName.trim() !== item.raw.label.trim()
                 "
               >
-                {{ item.raw.offerName }}
+                {{ truncateString(item.raw.offerName, 50) }}
               </v-list-item-subtitle>
               <template #append>
                 <span class="product-hero__pricing-panel-select-price">
@@ -447,16 +447,9 @@ const truncateString = (str: string, length: number) => {
   return str.slice(0, length) + '...'
 }
 
-const filteredAlternativeOffers = computed(() => {
-  if (!props.alternativeOffers) return []
-  return props.alternativeOffers.filter(offer => {
-    // Filter out the offer if it matches the main displayed offer (name and price)
-    // This removes the "best price" which is already shown in the main panel
-    const isSameName = offer.label === props.merchant?.name
-    const isSamePrice = offer.priceLabel === props.priceLabel
-    return !(isSameName && isSamePrice)
-  })
-})
+const alternativeOffersToDisplay = computed(
+  () => props.alternativeOffers ?? []
+)
 
 const conditionIcon = computed(() =>
   props.condition === 'new' ? 'mdi-tag-outline' : 'mdi-recycle-variant'
@@ -496,7 +489,7 @@ const onAlternativeSelected = (item: AlternativeOfferOption) => {
 const selectedAlternative = ref<AlternativeOfferOption | null>(null)
 
 watch(
-  () => filteredAlternativeOffers.value,
+  () => alternativeOffersToDisplay.value,
   offers => {
     if (offers?.length && !selectedAlternative.value) {
       selectedAlternative.value = offers[0]
