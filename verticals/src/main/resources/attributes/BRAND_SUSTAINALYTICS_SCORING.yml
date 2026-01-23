@@ -1,11 +1,25 @@
 key: "BRAND_SUSTAINALYTICS_SCORING"
 betterIs: "GREATER"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
 faIcon: "mdi-web"
 #    attributePath: attributes.features
 name:
   default: "Evaluation ESG (Sustainalytics) de la marque"
   fr: "Evaluation ESG de la marque (Sustainalytics)"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreUtility:
   fr: "Reflète les engagements globaux de la marque qui influencent l’empreinte de ses produits."
   en: "Reflects brand-wide commitments that influence the footprint of its products."

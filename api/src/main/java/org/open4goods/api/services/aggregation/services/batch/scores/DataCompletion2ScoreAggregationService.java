@@ -38,7 +38,7 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
                         Double score = generateScoreFromDataquality(data.getScores());
 
                         // Processing cardinality
-                        incrementCardinality(DATA_QUALITY_SCORENAME,score);
+                        incrementCardinality(DATA_QUALITY_SCORENAME, score, vConf);
                         Score s = new Score(DATA_QUALITY_SCORENAME, score);
                         // Saving in product
                         data.getScores().put(s.getName(),s);

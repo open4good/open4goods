@@ -69,7 +69,7 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 			Double score = brandResult.getNormalized();
 			
 			// Processing cardinality
-			incrementCardinality(BRAND_SUSTAINABILITY_SCORENAME,score);			
+			incrementCardinality(BRAND_SUSTAINABILITY_SCORENAME, score, vConf);			
 			Score s = new Score(BRAND_SUSTAINABILITY_SCORENAME, score);
 			
 			// Setting metadatas

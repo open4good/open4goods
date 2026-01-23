@@ -14,6 +14,8 @@ import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.vertical.lifecycle.LifecycleStage;
+import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
+import org.open4goods.model.vertical.scoring.ScoreStatsScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,6 +115,21 @@ public class AttributeConfig {
          * desirable value when comparing products.
          */
         private AttributeComparisonRule betterIs = AttributeComparisonRule.GREATER;
+
+        /**
+         * Comparison rule describing which values are preferred by users.
+         */
+        private AttributeComparisonRule userBetterIs;
+
+        /**
+         * Comparison rule describing which values are preferred for impact scoring.
+         */
+        private AttributeComparisonRule impactBetterIs;
+
+        /**
+         * Scoring configuration used when this attribute is translated into a score.
+         */
+        private ScoreScoringConfig scoring;
 
 	/**
 	 * The ordering that must be applied to this attributes values after aggregations. (ie rendered in search attributes selection)
@@ -500,6 +517,72 @@ public class AttributeConfig {
          */
         public void setBetterIs(AttributeComparisonRule betterIs) {
                 this.betterIs = betterIs == null ? AttributeComparisonRule.GREATER : betterIs;
+        }
+
+        /**
+         * Gets the comparison rule describing which values are preferred by users.
+         *
+         * @return the user preference comparison rule, defaults to {@link AttributeComparisonRule#GREATER}.
+         */
+        public AttributeComparisonRule getUserBetterIs() {
+                return userBetterIs == null ? getBetterIs() : userBetterIs;
+        }
+
+        /**
+         * Sets the comparison rule describing which values are preferred by users.
+         *
+         * @param userBetterIs the comparison rule to apply for user-facing comparisons.
+         */
+        public void setUserBetterIs(AttributeComparisonRule userBetterIs) {
+                this.userBetterIs = userBetterIs;
+        }
+
+        /**
+         * Gets the comparison rule describing which values are preferred for impact scoring.
+         *
+         * @return the impact comparison rule, defaults to {@link AttributeComparisonRule#GREATER}.
+         */
+        public AttributeComparisonRule getImpactBetterIs() {
+                return impactBetterIs == null ? getBetterIs() : impactBetterIs;
+        }
+
+        /**
+         * Sets the comparison rule describing which values are preferred for impact scoring.
+         *
+         * @param impactBetterIs the comparison rule to apply for impact scoring.
+         */
+        public void setImpactBetterIs(AttributeComparisonRule impactBetterIs) {
+                this.impactBetterIs = impactBetterIs;
+        }
+
+        /**
+         * Gets the scoring configuration block for this attribute.
+         *
+         * @return scoring configuration or {@code null} if none configured.
+         */
+        public ScoreScoringConfig getScoring() {
+                return scoring;
+        }
+
+        /**
+         * Sets the scoring configuration block for this attribute.
+         *
+         * @param scoring scoring configuration to use
+         */
+        public void setScoring(ScoreScoringConfig scoring) {
+                this.scoring = scoring;
+        }
+
+        /**
+         * Returns the configured stats scope population.
+         *
+         * @return stats scope population, defaults to {@link ScoreStatsScope#VERTICAL}.
+         */
+        public ScoreStatsScope getStatsScopePopulation() {
+                if (scoring == null || scoring.getStatsScope() == null || scoring.getStatsScope().getPopulation() == null) {
+                        return ScoreStatsScope.VERTICAL;
+                }
+                return scoring.getStatsScope().getPopulation();
         }
 
         public Localisable<String, String> getUnit() {

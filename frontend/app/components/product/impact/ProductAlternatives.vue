@@ -376,7 +376,7 @@ const attributeFilterDefinitions = computed<AlternativeFilterDefinition[]>(
         return accumulator
       }
 
-      const betterRule = config.betterIs ?? null
+      const betterRule = config.impactBetterIs ?? config.betterIs ?? null
       const readableLabel = config.name ?? key
 
       if (betterRule) {

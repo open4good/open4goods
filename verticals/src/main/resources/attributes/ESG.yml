@@ -1,10 +1,24 @@
 key: "ESG"
 betterIs: "GREATER"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
 faIcon: "mdi-scale-balance"
 name:
   default: "ESG score"
   fr: "Score ESG"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreTitle:
   default: "ESG performance"
   fr: "Performance ESG"

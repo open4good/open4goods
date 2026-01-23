@@ -172,6 +172,13 @@ class VerticalYamlValidationTest {
                 assertThat(isCollectionDefined(attribute.getParticipateInACV()))
                     .as("participateInACV must be empty when asScore is false for %s", attribute.getKey())
                     .isFalse();
+                assertThat(attribute.getScoring())
+                    .as("scoring must be absent when asScore is false for %s", attribute.getKey())
+                    .isNull();
+            } else {
+                assertThat(attribute.getScoring())
+                    .as("scoring must be defined when asScore is true for %s", attribute.getKey())
+                    .isNotNull();
             }
         });
     }

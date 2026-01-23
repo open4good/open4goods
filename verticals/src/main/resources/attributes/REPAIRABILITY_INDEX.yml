@@ -1,11 +1,26 @@
 key: "REPAIRABILITY_INDEX"
 betterIs: "GREATER"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
 faIcon: "mdi-tools"
 name:
   default: "Repairability index"
   fr: "Indice de réparabilité"
 filteringType: "NUMERIC"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 0.0
+      fixedMax: 10.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreTitle:
   fr: "Indice de réparabilité"
 scoreDescription:

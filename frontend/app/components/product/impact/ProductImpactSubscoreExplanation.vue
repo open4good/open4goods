@@ -96,7 +96,13 @@ const translationBaseKey = computed(
 )
 const translationFallbackBase = 'product.impact.subscores.default'
 
-const betterIsLower = computed(() => props.score.betterIs === 'LOWER')
+const impactBetterIsLower = computed(
+  () =>
+    (props.score.impactBetterIs ?? props.score.betterIs ?? null) === 'LOWER'
+)
+const userBetterIsLower = computed(
+  () => (props.score.userBetterIs ?? props.score.betterIs ?? null) === 'LOWER'
+)
 
 const resolveTranslation = (
   suffix: string,
@@ -111,7 +117,7 @@ const resolveTranslation = (
 }
 
 const readIndicatorOrientationKey = computed(() =>
-  betterIsLower.value ? 'lower' : 'higher'
+  impactBetterIsLower.value ? 'lower' : 'higher'
 )
 
 const resolveReadIndicatorTranslation = (
@@ -258,10 +264,10 @@ const populationValue = computed(() => {
 })
 
 const worstRawValue = computed(() =>
-  betterIsLower.value ? absoluteStats.value?.max : absoluteStats.value?.min
+  impactBetterIsLower.value ? absoluteStats.value?.max : absoluteStats.value?.min
 )
 const bestRawValue = computed(() =>
-  betterIsLower.value ? absoluteStats.value?.min : absoluteStats.value?.max
+  impactBetterIsLower.value ? absoluteStats.value?.min : absoluteStats.value?.max
 )
 
 const worstValue = computed(() => formatNumber(worstRawValue.value))
@@ -269,9 +275,49 @@ const worstValue = computed(() => formatNumber(worstRawValue.value))
 const bestValue = computed(() => formatNumber(bestRawValue.value))
 const averageValue = computed(() => formatNumber(absoluteStats.value?.avg))
 
+const normalizationMethod = computed(
+  () => props.score.scoring?.normalization?.method ?? 'SIGMA'
+)
+const normalizationParams = computed(
+  () => props.score.scoring?.normalization?.params ?? null
+)
+const scaleMin = computed(() => props.score.scoring?.scale?.min ?? 0)
+const scaleMax = computed(() => props.score.scoring?.scale?.max ?? 5)
+
 const averageOn20Value = computed(() => {
-  // Sigma scoring definition: Average is always the pivot at 10/20 (2.5/5)
+  if (normalizationMethod.value !== 'SIGMA') {
+    return null
+  }
   return formatNumber(10, { maximumFractionDigits: 0 })
+})
+
+const sigmaKValue = computed(() => normalizationParams.value?.sigmaK ?? 2)
+const sigmaLowerBound = computed(() => {
+  if (!absoluteStats.value?.avg || absoluteStats.value?.stdDev == null) {
+    return null
+  }
+  return formatNumber(
+    absoluteStats.value.avg - sigmaKValue.value * absoluteStats.value.stdDev
+  )
+})
+const sigmaUpperBound = computed(() => {
+  if (!absoluteStats.value?.avg || absoluteStats.value?.stdDev == null) {
+    return null
+  }
+  return formatNumber(
+    absoluteStats.value.avg + sigmaKValue.value * absoluteStats.value.stdDev
+  )
+})
+const percentileValue = computed(() => {
+  if (normalizationMethod.value !== 'PERCENTILE') {
+    return null
+  }
+  if (typeof props.score.relativeValue !== 'number') {
+    return null
+  }
+  return formatNumber((props.score.relativeValue / 5) * 100, {
+    maximumFractionDigits: 0,
+  })
 })
 
 const productAbsoluteValue = computed(() => {
@@ -322,6 +368,13 @@ const readIndicatorParams = computed(() => ({
   ranking: rankingValue.value,
   unit: props.score.unit ?? '',
   sigma: formatNumber(absoluteStats.value?.stdDev),
+  sigmaK: formatNumber(sigmaKValue.value, { maximumFractionDigits: 1 }),
+  sigmaLower: sigmaLowerBound.value,
+  sigmaUpper: sigmaUpperBound.value,
+  percentile: percentileValue.value,
+  scaleMin: formatNumber(scaleMin.value),
+  scaleMax: formatNumber(scaleMax.value),
+  userBetterIs: userBetterIsLower.value ? 'lower' : 'higher',
 }))
 
 const readIndicatorTitle = computed(() =>
@@ -346,6 +399,21 @@ const readIndicatorParagraphs = computed(() => {
 
   if (productAbsoluteValue.value && productOn20Value.value) {
     paragraphs.push(resolveReadIndicatorTranslation('product', params))
+  }
+
+  if (normalizationMethod.value === 'SIGMA' && sigmaLowerBound.value) {
+    paragraphs.push(resolveReadIndicatorTranslation('sigmaBounds', params))
+  }
+
+  if (normalizationMethod.value === 'PERCENTILE' && percentileValue.value) {
+    paragraphs.push(resolveReadIndicatorTranslation('percentile', params))
+  }
+
+  const methodKey = normalizationMethod.value?.toLowerCase() ?? 'sigma'
+  const methodTranslationKey = `${translationBaseKey.value}.readIndicator.method.${methodKey}`
+  const fallbackMethodKey = `${translationFallbackBase}.readIndicator.method.${methodKey}`
+  if (te(methodTranslationKey) || te(fallbackMethodKey)) {
+    paragraphs.push(resolveReadIndicatorTranslation(`method.${methodKey}`, params))
   }
 
   if (absoluteStats.value?.stdDev != null && absoluteStats.value.avg != null) {

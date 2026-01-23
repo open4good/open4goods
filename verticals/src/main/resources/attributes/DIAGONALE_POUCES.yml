@@ -3,6 +3,8 @@
 ##################################
 key: "DIAGONALE_POUCES"
 betterIs: "GREATER"
+userBetterIs: "GREATER"
+impactBetterIs: "LOWER"
 icecatFeaturesIds:
   - 944
 eprelFeatureNames:
@@ -16,6 +18,18 @@ suffix:
   fr: "\""
 filteringType: "NUMERIC"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreUtility:
   fr: "La diagonale influe sur matériaux et énergie : plus elle est grande, plus l’impact de fabrication, transport et usage augmente."
   en: "Screen size drives materials and energy; larger sizes usually raise manufacturing, transport, and use impacts."

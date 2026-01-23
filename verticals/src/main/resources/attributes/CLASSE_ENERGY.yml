@@ -1,11 +1,26 @@
 key: "CLASSE_ENERGY"
 betterIs: "GREATER"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
 faIcon: "mdi-flash"
 name:
   default: "Energy class"
   fr: "Classe énergétique"
 filteringType: "TEXT"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 0.0
+      fixedMax: 18.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreTitle:
   fr: "Classe énergétique"
 scoreDescription:

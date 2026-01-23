@@ -3,6 +3,8 @@
 ################################################################################
 key: "CLASSE_ENERGY_SDR"
 betterIs: "GREATER"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
 eprelFeatureNames:
   - energyClassSDR
 faIcon: "mdi-flash"
@@ -11,6 +13,19 @@ name:
   fr: "Classe énergétique (SDR)"
 filteringType: "TEXT"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 0.0
+      fixedMax: 18.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreTitle:
   fr: "Classe énergétique (SDR)"
 scoreDescription:

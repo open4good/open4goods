@@ -11,7 +11,6 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
-import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -59,16 +58,18 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 
 				if (attrConfig.isAsScore()) {
 					try {
-						Double score = generateScoresFromAttribute(attrConfig.getKey(), aga, vConf.getAttributesConfig());
+						Double rawScore = generateScoresFromAttribute(attrConfig.getKey(), aga, vConf.getAttributesConfig());
+						Double score = applyTransform(rawScore, attrConfig);
+						storeAbsoluteOverride(data, attrConfig.getKey(), rawScore, score);
 
 						// Processing cardinality
-						incrementCardinality(attrConfig.getKey(), score);
+						incrementCardinality(attrConfig.getKey(), score, vConf);
 
 						Score s = new Score(attrConfig.getKey(), score);
 						// Saving in product
 						data.getScores().put(s.getName(), s);
 					} catch (ValidationException e) {
-						dedicatedLogger.warn("Attribute to score fail for {}", aga, e);
+						handleMissingScore(data, attrConfig, aga, vConf, e);
 					}
 
 				}
@@ -113,6 +114,84 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 
 	}
 
+	private Double applyTransform(Double value, AttributeConfig attributeConfig) throws ValidationException {
+		if (value == null) {
+			return null;
+		}
+		if (attributeConfig == null || attributeConfig.getScoring() == null) {
+			return value;
+		}
+		return switch (attributeConfig.getScoring().getTransform()) {
+			case LOG -> {
+				if (value < 0) {
+					throw new ValidationException("Cannot apply LOG transform to negative value " + value);
+				}
+				yield Math.log1p(value);
+			}
+			case SQRT -> {
+				if (value < 0) {
+					throw new ValidationException("Cannot apply SQRT transform to negative value " + value);
+				}
+				yield Math.sqrt(value);
+			}
+			case NONE -> value;
+		};
+	}
+
+	private void storeAbsoluteOverride(Product data, String scoreName, Double rawScore, Double transformedScore) {
+		if (rawScore == null || transformedScore == null) {
+			return;
+		}
+		if (!rawScore.equals(transformedScore)) {
+			absoluteValuesOverrides.computeIfAbsent(data.getId(), id -> new HashMap<>()).put(scoreName, rawScore);
+		}
+	}
+
+	private void handleMissingScore(Product data, AttributeConfig attrConfig, IndexedAttribute aga, VerticalConfig vConf,
+			ValidationException e) {
+		if (attrConfig == null || attrConfig.getScoring() == null) {
+			dedicatedLogger.warn("Attribute to score fail for {}", aga, e);
+			return;
+		}
+
+		switch (attrConfig.getScoring().getMissingValuePolicy()) {
+			case EXCLUDE -> {
+				dedicatedLogger.warn("Attribute to score excluded for {}", aga, e);
+				return;
+			}
+			case WORST, NEUTRAL -> {
+				Double fallback = resolveMissingValueFallback(attrConfig);
+				if (fallback == null) {
+					dedicatedLogger.warn("Attribute to score fail for {}", aga, e);
+					return;
+				}
+				try {
+					incrementCardinality(attrConfig.getKey(), fallback, vConf);
+					Score s = new Score(attrConfig.getKey(), fallback);
+					s.setVirtual(true);
+					data.getScores().put(s.getName(), s);
+				} catch (ValidationException validationException) {
+					dedicatedLogger.warn("Attribute missing value fallback failed for {}", aga, validationException);
+				}
+			}
+		}
+	}
+
+	private Double resolveMissingValueFallback(AttributeConfig attrConfig) {
+		if (attrConfig == null || attrConfig.getScoring() == null || attrConfig.getScoring().getScale() == null) {
+			return null;
+		}
+		Double min = attrConfig.getScoring().getScale().getMin();
+		Double max = attrConfig.getScoring().getScale().getMax();
+		if (min == null || max == null) {
+			return null;
+		}
+		return switch (attrConfig.getScoring().getMissingValuePolicy()) {
+			case WORST -> min;
+			case NEUTRAL -> (min + max) / 2.0;
+			case EXCLUDE -> null;
+		};
+	}
 	/**
 	 * Reverses the configured scores (so that "lower is better" criteria can be
 	 * compared) and recalculates the batch cardinalities before delegating to the

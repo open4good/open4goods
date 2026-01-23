@@ -43,6 +43,12 @@ public record AttributeConfigDto(
         Set<LifecycleStage> participateInACV,
         @Schema(description = "Comparison rule applied to determine which values are considered better.")
         AttributeComparisonRule betterIs,
+        @Schema(description = "Comparison rule applied for user-facing explanations.")
+        AttributeComparisonRule userBetterIs,
+        @Schema(description = "Comparison rule applied for impact scoring.")
+        AttributeComparisonRule impactBetterIs,
+        @Schema(description = "Scoring configuration used for this attribute.")
+        ScoreScoringConfigDto scoring,
         @Schema(description = "Ordering applied when displaying attribute values.")
         Order attributeValuesOrdering,
         @Schema(description = "When true, the attribute values ordering is reversed.")

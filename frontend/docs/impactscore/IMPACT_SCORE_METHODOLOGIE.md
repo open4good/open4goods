@@ -7,6 +7,8 @@
 L’**Impact Score** (souvent nommé `ECOSCORE` côté backend) est un score composite visant à comparer des produits sur un axe « impact » (environnemental / durabilité, selon la définition produit).  
 Il est calculé par **agrégation pondérée** de plusieurs **sous-scores** (critères) dérivés d’attributs produit (consommation, poids, réparabilité, garantie, etc.).
 
+**Convention produit** : un score plus élevé indique un **meilleur impact** (donc un impact environnemental plus faible). Cette convention est obtenue en appliquant `impactBetterIs` lors de la normalisation.
+
 ## 2. Concepts
 
 ### 2.1 Sous-score (score critère)
@@ -50,7 +52,8 @@ Pendant le traitement batch, le système maintient pour chaque sous-score :
 
 ### 3.3 Normalisation (relativisation) en 0..5
 
-Chaque sous-score est normalisé via une méthode **déclarée dans le YAML** (objectif du refactor), puis éventuellement inversé selon `impactBetterIs`.
+Chaque sous-score est normalisé via une méthode **déclarée dans le YAML**, puis éventuellement inversé selon `impactBetterIs`.  
+Par défaut, la population statistique est la **verticale** (`statsScope.population = VERTICAL`).
 
 Voir la documentation statistique pour les formules.
 

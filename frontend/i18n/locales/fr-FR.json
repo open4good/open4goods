@@ -2303,6 +2303,7 @@
     "title": "Comparateur de produits",
     "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.",
     "hero": {
+      "eyebrow": "Comparaison",
       "title": "Comparateur de {verticalTitle}",
       "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des {verticalTitle} sélectionnés.",
       "backToCategory": "Retour aux {verticalTitle}",
@@ -2694,6 +2695,8 @@
       "subscoreChart": {
         "markerAverage": "La moyenne de {scoreLabel} se positionne ici.",
         "markerProduct": "{productName} se positionne ici.",
+        "toggleAbsolute": "Valeurs",
+        "toggleNormalized": "Scores",
         "unknownProduct": "Ce produit"
       },
       "importanceTitle": "Pourquoi c'est important ?",
@@ -2707,6 +2710,8 @@
               "best": "Le meilleur {scoreLabelLower} constaté parmi les {count} {verticalTitle} atteint {best}{unit}.",
               "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}{unit}.",
               "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}{unit}, obtient la note de {productOn20}/20.",
+              "sigmaBounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
+              "percentile": "Ce produit se situe autour du {percentile}ᵉ percentile de la distribution.",
               "distribution": "La notation utilise l'écart-type ({sigma}{unit}) pour s'assurer que les valeurs extrêmes n'écrasent pas les différences entre produits courants."
             },
             "lower": {
@@ -2714,7 +2719,18 @@
               "best": "Le {scoreLabelLower} le plus faible constaté parmi les {count} {verticalTitle} atteint {best}{unit}.",
               "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}{unit}.",
               "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}{unit}, obtient la note de {productOn20}/20.",
+              "sigmaBounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
+              "percentile": "Ce produit se situe autour du {percentile}ᵉ percentile de la distribution.",
               "distribution": "La notation utilise l'écart-type ({sigma}{unit}) pour s'assurer que les valeurs extrêmes n'écrasent pas les différences entre produits courants."
+            },
+            "method": {
+              "sigma": "La note est calculée en comparant la valeur aux bornes ±{sigmaK}σ autour de la moyenne.",
+              "percentile": "La note est calculée à partir du rang (percentile) de la valeur dans la distribution.",
+              "minmax_fixed": "La note est ramenée à une échelle commune via des bornes fixes.",
+              "minmax_quantile": "La note est calculée via des bornes par quantiles pour limiter l'effet des valeurs extrêmes.",
+              "fixed_mapping": "La note suit un barème fixe défini dans la configuration.",
+              "binary": "La note est binaire selon un seuil défini.",
+              "constant": "La note est fixée à une valeur constante définie par la configuration."
             }
           }
         },

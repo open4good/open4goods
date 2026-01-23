@@ -3,6 +3,8 @@
 ##################################
 key: "WARRANTY"
 betterIs: "GREATER"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
 eprelFeatureNames:
   - minGuaranteedGuarantee
 faIcon: "mdi-shield-check"
@@ -14,6 +16,18 @@ suffix:
   fr: "An(s)"
 filteringType: "NUMERIC"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreTitle:
   fr: "Garantie"
 scoreDescription:

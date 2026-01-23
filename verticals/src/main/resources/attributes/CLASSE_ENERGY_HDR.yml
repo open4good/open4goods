@@ -3,6 +3,8 @@
 ################################################################################
 key: "CLASSE_ENERGY_HDR"
 betterIs: "GREATER"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
 eprelFeatureNames:
   - energyClassHDR
 faIcon: "mdi-flash"
@@ -11,6 +13,19 @@ name:
   fr: "Classe énergétique (HDR)"
 filteringType: "TEXT"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 0.0
+      fixedMax: 18.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreTitle:
   fr: "Classe énergétique (HDR)"
 scoreDescription:

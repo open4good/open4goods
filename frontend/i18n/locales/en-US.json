@@ -2289,6 +2289,7 @@
     "title": "Product comparison",
     "subtitle": "Contrast specifications, pricing and ecological indicators across the products you selected.",
     "hero": {
+      "eyebrow": "Comparison",
       "title": "Comparing {verticalTitle}",
       "subtitle": "Contrast specifications, pricing and ecological indicators across the selected {verticalTitle}.",
       "backToCategory": "Back to {verticalTitle}",
@@ -2676,6 +2677,8 @@
       "subscoreChart": {
         "markerAverage": "Average for {scoreLabel} sits here.",
         "markerProduct": "{productName} sits here.",
+        "toggleAbsolute": "Values",
+        "toggleNormalized": "Scores",
         "unknownProduct": "This product"
       },
       "importanceTitle": "Why it matters",
@@ -2689,6 +2692,8 @@
               "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}{unit}.",
               "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}{unit}.",
               "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}{unit}, which converts to {productOn20}/20.",
+              "sigmaBounds": "Normalization spans [{sigmaLower}{unit} ; {sigmaUpper}{unit}] based on {sigmaK}σ around the mean.",
+              "percentile": "This product sits around the {percentile}th percentile of the distribution.",
               "distribution": "The scoring uses standard deviation ({sigma}{unit}) to ensure extreme values do not overshadow differences between common products."
             },
             "lower": {
@@ -2696,7 +2701,18 @@
               "best": "The lowest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}{unit}.",
               "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}{unit}.",
               "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}{unit}, which converts to {productOn20}/20.",
+              "sigmaBounds": "Normalization spans [{sigmaLower}{unit} ; {sigmaUpper}{unit}] based on {sigmaK}σ around the mean.",
+              "percentile": "This product sits around the {percentile}th percentile of the distribution.",
               "distribution": "The scoring uses standard deviation ({sigma}{unit}) to ensure extreme values do not overshadow differences between common products."
+            },
+            "method": {
+              "sigma": "The score is computed relative to the ±{sigmaK}σ bounds around the average.",
+              "percentile": "The score is computed from the percentile rank within the distribution.",
+              "minmax_fixed": "The score is scaled using fixed bounds.",
+              "minmax_quantile": "The score is scaled using quantile bounds to reduce outlier impact.",
+              "fixed_mapping": "The score follows a fixed mapping defined in configuration.",
+              "binary": "The score is binary based on a threshold.",
+              "constant": "The score is set to a constant value defined in configuration."
             }
           }
         },
