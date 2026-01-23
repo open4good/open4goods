@@ -66,7 +66,7 @@
                   <template v-if="attribute.key === 'ai-summary'">
                     <ul class="product-hero__ai-summary-list">
                       <li
-                        v-if="aiReview?.technicalOneline"
+                        v-if="technicalOnelineHtml"
                         class="product-hero__ai-summary-item"
                       >
                         <v-icon
@@ -78,13 +78,16 @@
                           <span class="product-hero__ai-summary-label">
                             {{ t('product.hero.aiSummary.technical') }}
                           </span>
-                          <span class="product-hero__ai-summary-text">
-                            {{ aiReview.technicalOneline }}
-                          </span>
+                          <!-- eslint-disable vue/no-v-html -->
+                          <span
+                            class="product-hero__ai-summary-text"
+                            v-html="technicalOnelineHtml"
+                          />
+                          <!-- eslint-enable vue/no-v-html -->
                         </div>
                       </li>
                       <li
-                        v-if="aiReview?.ecologicalOneline"
+                        v-if="ecologicalOnelineHtml"
                         class="product-hero__ai-summary-item"
                       >
                         <v-icon
@@ -96,13 +99,16 @@
                           <span class="product-hero__ai-summary-label">
                             {{ t('product.hero.aiSummary.ecological') }}
                           </span>
-                          <span class="product-hero__ai-summary-text">
-                            {{ aiReview.ecologicalOneline }}
-                          </span>
+                          <!-- eslint-disable vue/no-v-html -->
+                          <span
+                            class="product-hero__ai-summary-text"
+                            v-html="ecologicalOnelineHtml"
+                          />
+                          <!-- eslint-enable vue/no-v-html -->
                         </div>
                       </li>
                       <li
-                        v-if="aiReview?.communityOneline"
+                        v-if="communityOnelineHtml"
                         class="product-hero__ai-summary-item"
                       >
                         <v-icon
@@ -114,9 +120,12 @@
                           <span class="product-hero__ai-summary-label">
                             {{ t('product.hero.aiSummary.community') }}
                           </span>
-                          <span class="product-hero__ai-summary-text">
-                            {{ aiReview.communityOneline }}
-                          </span>
+                          <!-- eslint-disable vue/no-v-html -->
+                          <span
+                            class="product-hero__ai-summary-text"
+                            v-html="communityOnelineHtml"
+                          />
+                          <!-- eslint-enable vue/no-v-html -->
                         </div>
                       </li>
                     </ul>
@@ -226,6 +235,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, type PropType } from 'vue'
+import DOMPurify from 'isomorphic-dompurify'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
@@ -287,6 +297,26 @@ const heroBackground = useThemedAsset('product/product-hero-background.svg')
 
 const aiReview = computed(() => props.product.aiReview?.review ?? null)
 const hasAiReview = computed(() => Boolean(aiReview.value))
+
+const sanitizeAiReviewHtml = (content: string | null | undefined): string => {
+  if (!content) {
+    return ''
+  }
+
+  return DOMPurify.sanitize(content, {
+    ADD_ATTR: ['class', 'target', 'rel'],
+  })
+}
+
+const technicalOnelineHtml = computed(() =>
+  sanitizeAiReviewHtml(aiReview.value?.technicalOneline ?? null)
+)
+const ecologicalOnelineHtml = computed(() =>
+  sanitizeAiReviewHtml(aiReview.value?.ecologicalOneline ?? null)
+)
+const communityOnelineHtml = computed(() =>
+  sanitizeAiReviewHtml(aiReview.value?.communityOneline ?? null)
+)
 
 const handleAiReviewClick = () => {
   const element =
