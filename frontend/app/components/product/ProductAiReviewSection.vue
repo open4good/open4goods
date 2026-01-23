@@ -139,31 +139,39 @@
                       {{ $t('product.aiReview.sections.technical') }}
                     </h3>
                   </div>
-                  <v-btn-toggle
-                    v-model="technicalLevel"
-                    mandatory
-                    density="compact"
-                    class="product-ai-review__level-toggle"
-                    :aria-label="$t('product.aiReview.levels.label')"
-                  >
-                    <v-btn
-                      v-for="option in levelOptions"
-                      :key="option.value"
-                      :value="option.value"
-                      size="small"
-                      variant="tonal"
-                      :aria-label="option.label"
+                  <div class="product-ai-review__level-toggle-wrap">
+                    <v-btn-toggle
+                      v-model="technicalLevel"
+                      mandatory
+                      density="comfortable"
+                      class="product-ai-review__level-toggle"
+                      :aria-label="$t('product.aiReview.levels.label')"
                     >
-                      <v-icon :icon="option.icon" size="18" />
-                    </v-btn>
-                  </v-btn-toggle>
+                      <v-btn
+                        v-for="option in levelOptions"
+                        :key="option.value"
+                        :value="option.value"
+                        size="small"
+                        :variant="
+                          technicalLevel === option.value ? 'tonal' : 'outlined'
+                        "
+                        :color="
+                          technicalLevel === option.value
+                            ? 'primary'
+                            : 'secondary'
+                        "
+                        :aria-label="option.label"
+                      >
+                        <v-icon :icon="option.icon" size="18" />
+                      </v-btn>
+                    </v-btn-toggle>
+                  </div>
                 </header>
-                <!-- eslint-disable vue/no-v-html -->
-                <div
-                  class="product-ai-review__card-text"
-                  v-html="technicalContent"
+                <ProductAiReviewInsightBlock
+                  :content-html="technicalContent ?? ''"
+                  image-src="/images/product/ai-review-technical.svg"
+                  :image-alt="$t('product.aiReview.illustrations.technicalAlt')"
                 />
-                <!-- eslint-enable vue/no-v-html -->
               </v-card-text>
             </v-card>
           </v-col>
@@ -182,31 +190,42 @@
                       {{ $t('product.aiReview.sections.ecological') }}
                     </h3>
                   </div>
-                  <v-btn-toggle
-                    v-model="ecologicalLevel"
-                    mandatory
-                    density="compact"
-                    class="product-ai-review__level-toggle"
-                    :aria-label="$t('product.aiReview.levels.label')"
-                  >
-                    <v-btn
-                      v-for="option in levelOptions"
-                      :key="option.value"
-                      :value="option.value"
-                      size="small"
-                      variant="tonal"
-                      :aria-label="option.label"
+                  <div class="product-ai-review__level-toggle-wrap">
+                    <v-btn-toggle
+                      v-model="ecologicalLevel"
+                      mandatory
+                      density="comfortable"
+                      class="product-ai-review__level-toggle"
+                      :aria-label="$t('product.aiReview.levels.label')"
                     >
-                      <v-icon :icon="option.icon" size="18" />
-                    </v-btn>
-                  </v-btn-toggle>
+                      <v-btn
+                        v-for="option in levelOptions"
+                        :key="option.value"
+                        :value="option.value"
+                        size="small"
+                        :variant="
+                          ecologicalLevel === option.value
+                            ? 'tonal'
+                            : 'outlined'
+                        "
+                        :color="
+                          ecologicalLevel === option.value
+                            ? 'primary'
+                            : 'secondary'
+                        "
+                        :aria-label="option.label"
+                      >
+                        <v-icon :icon="option.icon" size="18" />
+                      </v-btn>
+                    </v-btn-toggle>
+                  </div>
                 </header>
-                <!-- eslint-disable vue/no-v-html -->
-                <div
-                  class="product-ai-review__card-text"
-                  v-html="ecologicalContent"
+                <ProductAiReviewInsightBlock
+                  :content-html="ecologicalContent ?? ''"
+                  image-src="/images/product/ai-review-ecological.svg"
+                  :image-alt="$t('product.aiReview.illustrations.ecologicalAlt')"
+                  image-position="right"
                 />
-                <!-- eslint-enable vue/no-v-html -->
               </v-card-text>
             </v-card>
           </v-col>
@@ -225,31 +244,41 @@
                       {{ $t('product.aiReview.sections.community') }}
                     </h3>
                   </div>
-                  <v-btn-toggle
-                    v-model="communityLevel"
-                    mandatory
-                    density="compact"
-                    class="product-ai-review__level-toggle"
-                    :aria-label="$t('product.aiReview.levels.label')"
-                  >
-                    <v-btn
-                      v-for="option in levelOptions"
-                      :key="option.value"
-                      :value="option.value"
-                      size="small"
-                      variant="tonal"
-                      :aria-label="option.label"
+                  <div class="product-ai-review__level-toggle-wrap">
+                    <v-btn-toggle
+                      v-model="communityLevel"
+                      mandatory
+                      density="comfortable"
+                      class="product-ai-review__level-toggle"
+                      :aria-label="$t('product.aiReview.levels.label')"
                     >
-                      <v-icon :icon="option.icon" size="18" />
-                    </v-btn>
-                  </v-btn-toggle>
+                      <v-btn
+                        v-for="option in levelOptions"
+                        :key="option.value"
+                        :value="option.value"
+                        size="small"
+                        :variant="
+                          communityLevel === option.value
+                            ? 'tonal'
+                            : 'outlined'
+                        "
+                        :color="
+                          communityLevel === option.value
+                            ? 'primary'
+                            : 'secondary'
+                        "
+                        :aria-label="option.label"
+                      >
+                        <v-icon :icon="option.icon" size="18" />
+                      </v-btn>
+                    </v-btn-toggle>
+                  </div>
                 </header>
-                <!-- eslint-disable vue/no-v-html -->
-                <div
-                  class="product-ai-review__card-text"
-                  v-html="communityContent"
+                <ProductAiReviewInsightBlock
+                  :content-html="communityContent ?? ''"
+                  image-src="/images/product/ai-review-community.svg"
+                  :image-alt="$t('product.aiReview.illustrations.communityAlt')"
                 />
-                <!-- eslint-enable vue/no-v-html -->
               </v-card-text>
             </v-card>
           </v-col>
@@ -286,7 +315,11 @@
               :key="source.number"
             >
               <td>
-                <a :href="source.url" target="_blank" rel="noopener">
+                <a
+                  :href="source.url"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                >
                   [{{ source.number }}]
                 </a>
               </td>
@@ -304,7 +337,11 @@
                 </div>
               </td>
               <td>
-                <a :href="source.url" target="_blank" rel="noopener">
+                <a
+                  :href="source.url"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                >
                   {{ source.description }}
                 </a>
               </td>
@@ -410,6 +447,7 @@ import { IpQuotaCategory } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
 import { useIpQuota } from '~/composables/useIpQuota'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
+import ProductAiReviewInsightBlock from '~/components/product/ProductAiReviewInsightBlock.vue'
 import ProductAiReviewRequestPanel from '~/components/product/ProductAiReviewRequestPanel.vue'
 
 interface ReviewContent {
@@ -1039,10 +1077,9 @@ const handleReferenceClick = async (event: Event) => {
 
 .product-ai-review__card-heading {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: column;
   gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
 .product-ai-review__card-icon {
@@ -1072,10 +1109,16 @@ const handleReferenceClick = async (event: Event) => {
   margin: 0;
 }
 
+.product-ai-review__level-toggle-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .product-ai-review__level-toggle {
-  background: rgba(var(--v-theme-surface-primary-080), 0.7);
   border-radius: 999px;
-  padding: 0.1rem;
+  padding: 0.2rem;
+  gap: 0.35rem;
 }
 
 .product-ai-review__level-toggle :deep(.v-btn) {
@@ -1085,6 +1128,7 @@ const handleReferenceClick = async (event: Event) => {
 .product-ai-review__card-text {
   margin: 0;
   line-height: 1.65;
+  font-size: 1.2em;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
@@ -1102,6 +1146,10 @@ const handleReferenceClick = async (event: Event) => {
   gap: 0.6rem;
   align-items: flex-start;
   color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-ai-review__list-item span {
+  font-size: 1.2em;
 }
 
 .product-ai-review__list-icon {
