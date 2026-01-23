@@ -21,6 +21,7 @@
 
     <div
       v-if="reviewContent"
+      ref="descriptionRef"
       class="product-ai-review__content"
       itemscope
       itemtype="https://schema.org/Review"
@@ -39,9 +40,12 @@
                     {{ $t('product.aiReview.sections.overall') }}
                   </h3>
                 </header>
-                <p class="product-ai-review__card-text">
-                  {{ reviewContent.summary }}
-                </p>
+                <!-- eslint-disable vue/no-v-html -->
+                <p
+                  class="product-ai-review__card-text"
+                  v-html="reviewContent.summary"
+                />
+                <!-- eslint-enable vue/no-v-html -->
               </v-card-text>
             </v-card>
           </v-col>
@@ -306,7 +310,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from 'vuetify'
@@ -574,7 +578,7 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     shortTitle: reviewData.shortTitle ?? null,
     technicalReview: sanitizeHtml(reviewData.technicalReview ?? null),
     ecologicalReview: sanitizeHtml(reviewData.ecologicalReview ?? null),
-    summary: reviewData.summary ?? null,
+    summary: sanitizeHtml(reviewData.summary ?? null),
     pros,
     cons,
     sources,
@@ -752,7 +756,7 @@ watch(
 )
 */
 
-const handleReferenceClick = (event: Event) => {
+const handleReferenceClick = async (event: Event) => {
   const target = event.target as HTMLElement | null
   if (!target) {
     return
@@ -761,7 +765,14 @@ const handleReferenceClick = (event: Event) => {
   const anchor = target.closest('.review-ref') as HTMLAnchorElement | null
   if (anchor?.hash) {
     event.preventDefault()
-    const element = document.querySelector(anchor.hash) as HTMLElement | null
+    let element = document.querySelector(anchor.hash) as HTMLElement | null
+
+    if (!element && hasMoreSources.value && !showAllSources.value) {
+      showAllSources.value = true
+      await nextTick()
+      element = document.querySelector(anchor.hash) as HTMLElement | null
+    }
+
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
     }
