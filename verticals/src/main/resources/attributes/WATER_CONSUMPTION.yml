@@ -1,5 +1,4 @@
 key: "WATER_CONSUMPTION"
-betterIs: "LOWER"
 faIcon: "mdi-water"
 name:
   default: "Water consumption per cycle"

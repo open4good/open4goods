@@ -48,6 +48,10 @@ availableImpactScoreCriterias:
   - DATA_QUALITY
   - BRAND_SUSTAINALYTICS_SCORING
 
+# Composite scores that are computed by the aggregation pipeline.
+compositeScores:
+  - ECOSCORE
+
 #####################################################################################################################################
 # Impact score normalization safeguards
 #####################################################################################################################################

@@ -457,7 +457,6 @@ public class CategoryMappingService {
                 localise(attributeConfig.getScoreUtility(), domainLanguage),
                 defaultSet(attributeConfig.getParticipateInScores()),
                 defaultSet(attributeConfig.getParticipateInACV()),
-                attributeConfig.getBetterIs(),
                 attributeConfig.getUserBetterIs(),
                 attributeConfig.getImpactBetterIs(),
                 mapScoreScoringConfig(attributeConfig),
@@ -499,8 +498,7 @@ public class CategoryMappingService {
                 normalizationDto,
                 scoring.getTransform(),
                 scoring.getMissingValuePolicy(),
-                scoring.getDegenerateDistributionPolicy(),
-                scoring.getStatsScope() == null ? null : scoring.getStatsScope().getPopulation());
+                scoring.getDegenerateDistributionPolicy());
     }
 
     /**

@@ -56,7 +56,7 @@
       :normalization-method="score.scoring?.normalization?.method ?? null"
       :normalization-params="score.scoring?.normalization?.params ?? null"
       :scale="score.scoring?.scale ?? null"
-      :impact-better-is="score.impactBetterIs ?? score.betterIs ?? null"
+      :impact-better-is="score.impactBetterIs ?? null"
       :std-dev="score.absolute?.stdDev ?? null"
       :product-name="productName"
     />

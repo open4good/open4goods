@@ -15,8 +15,6 @@ public class ScoreScoringConfig {
 
     private ScoreDegeneratePolicy degenerateDistributionPolicy = ScoreDegeneratePolicy.NEUTRAL;
 
-    private ScoreStatsScopeConfig statsScope = new ScoreStatsScopeConfig();
-
     public ScoreScaleConfig getScale() {
         return scale;
     }
@@ -59,11 +57,4 @@ public class ScoreScoringConfig {
                 : degenerateDistributionPolicy;
     }
 
-    public ScoreStatsScopeConfig getStatsScope() {
-        return statsScope;
-    }
-
-    public void setStatsScope(ScoreStatsScopeConfig statsScope) {
-        this.statsScope = statsScope == null ? new ScoreStatsScopeConfig() : statsScope;
-    }
 }

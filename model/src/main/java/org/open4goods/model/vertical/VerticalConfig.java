@@ -216,6 +216,13 @@ public class VerticalConfig {
 	@JsonMerge
     private List<String> availableImpactScoreCriterias = new ArrayList<>();
 
+        /**
+         * Keys identifying composite scores that are computed by the scoring pipeline
+         * and do not have a backing attribute definition.
+         */
+        @JsonMerge
+        private List<String> compositeScores = new ArrayList<>();
+
 	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName
 	 * -> Ponderation (0.1 = 10%) NOTE : No json merge, since default score has to
@@ -928,6 +935,14 @@ public class VerticalConfig {
 
         public void setAvailableImpactScoreCriterias(List<String> availableImpactScoreCriterias) {
                 this.availableImpactScoreCriterias = availableImpactScoreCriterias;
+        }
+
+        public List<String> getCompositeScores() {
+                return compositeScores;
+        }
+
+        public void setCompositeScores(List<String> compositeScores) {
+                this.compositeScores = compositeScores;
         }
 
 

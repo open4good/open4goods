@@ -1,5 +1,4 @@
 key: "PLACE_SETTINGS"
-betterIs: "GREATER"
 faIcon: "mdi-silverware-fork-knife"
 name:
   default: "Place settings"

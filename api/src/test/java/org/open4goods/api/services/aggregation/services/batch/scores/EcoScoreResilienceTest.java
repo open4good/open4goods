@@ -34,6 +34,7 @@ class EcoScoreResilienceTest {
         VerticalConfig vConf = new VerticalConfig();
         vConf.setImpactScoreConfig(impactScoreConfig);
         vConf.setAttributesConfig(buildAttributesConfig());
+        vConf.setCompositeScores(List.of("ECOSCORE"));
 
         EcoScoreAggregationService ecoScoreService =
                 new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreResilienceTest.class));
@@ -63,6 +64,7 @@ class EcoScoreResilienceTest {
         VerticalConfig vConf = new VerticalConfig();
         vConf.setImpactScoreConfig(impactScoreConfig);
         vConf.setAttributesConfig(buildAttributesConfig());
+        vConf.setCompositeScores(List.of("ECOSCORE"));
 
         EcoScoreAggregationService ecoScoreService =
                 new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreResilienceTest.class));
@@ -95,7 +97,7 @@ class EcoScoreResilienceTest {
         ScoreNormalizationConfig missingNormalization = new ScoreNormalizationConfig();
         missingNormalization.setMethod(ScoreNormalizationMethod.SIGMA);
         missingScoring.setNormalization(missingNormalization);
-        missingScoring.setMissingValuePolicy(ScoreMissingValuePolicy.EXCLUDE);
+        missingScoring.setMissingValuePolicy(ScoreMissingValuePolicy.WORST);
         missing.setScoring(missingScoring);
 
         AttributesConfig attributesConfig = new AttributesConfig();

@@ -1,5 +1,4 @@
 key: "WASHING_CAPACITY"
-betterIs: "GREATER"
 faIcon: "mdi-weight-kilogram"
 name:
   default: "Washing capacity"

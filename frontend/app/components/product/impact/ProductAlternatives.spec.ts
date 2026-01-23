@@ -105,7 +105,7 @@ describe('ProductAlternatives', () => {
       key: 'POWER_CONSUMPTION',
       name: 'Power consumption',
       filteringType: 'NUMERIC',
-      betterIs: 'LOWER',
+      impactBetterIs: 'LOWER',
     } as AttributeConfigDto,
   ]
 

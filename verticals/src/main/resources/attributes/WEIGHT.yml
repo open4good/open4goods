@@ -1,5 +1,4 @@
 key: "WEIGHT"
-betterIs: "LOWER"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
 icecatFeaturesIds:
@@ -22,10 +21,8 @@ scoring:
     method: "SIGMA"
     params:
       sigmaK: 2.0
-  missingValuePolicy: "EXCLUDE"
+  missingValuePolicy: "WORST"
   degenerateDistributionPolicy: "FALLBACK"
-  statsScope:
-    population: "VERTICAL"
 scoreTitle:
   fr: "Poids de l'objet"
 scoreDescription:

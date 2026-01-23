@@ -140,7 +140,8 @@ class Attribute2ScoreAggregationServiceTest {
         AttributeConfig attributeConfig = new AttributeConfig();
         attributeConfig.setKey(key);
         attributeConfig.setAsScore(true);
-        attributeConfig.setBetterIs(lowerIsBetter ? AttributeComparisonRule.LOWER : AttributeComparisonRule.GREATER);
+        attributeConfig.setImpactBetterIs(lowerIsBetter ? AttributeComparisonRule.LOWER : AttributeComparisonRule.GREATER);
+        attributeConfig.setUserBetterIs(lowerIsBetter ? AttributeComparisonRule.LOWER : AttributeComparisonRule.GREATER);
         attributeConfig.setFilteringType(AttributeType.NUMERIC);
         if (synonym != null) {
             Map<String, Set<String>> synonyms = new HashMap<>();

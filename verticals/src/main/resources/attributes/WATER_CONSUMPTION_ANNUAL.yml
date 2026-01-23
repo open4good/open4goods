@@ -1,5 +1,4 @@
 key: "WATER_CONSUMPTION_ANNUAL"
-betterIs: "LOWER"
 faIcon: "mdi-water"
 name:
   default: "Annual water consumption"

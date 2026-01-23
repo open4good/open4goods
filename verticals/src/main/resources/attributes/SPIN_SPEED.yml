@@ -1,5 +1,4 @@
 key: "SPIN_SPEED"
-betterIs: "GREATER"
 faIcon: "mdi-fan"
 name:
   default: "Spin speed"

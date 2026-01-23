@@ -9,7 +9,6 @@
 #     - 0, 3 W (2 items)
 ##################################
 key: "POWER_CONSUMPTION_HDR"
-betterIs: "LOWER"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
 eprelFeatureNames:
@@ -24,10 +23,8 @@ scoring:
     method: "SIGMA"
     params:
       sigmaK: 2.0
-  missingValuePolicy: "EXCLUDE"
+  missingValuePolicy: "WORST"
   degenerateDistributionPolicy: "FALLBACK"
-  statsScope:
-    population: "VERTICAL"
 scoreTitle:
   fr: "Consommation électrique (HDR)"
 scoreDescription:

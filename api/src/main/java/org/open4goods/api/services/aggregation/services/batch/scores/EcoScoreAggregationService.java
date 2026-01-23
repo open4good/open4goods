@@ -284,9 +284,6 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	}
 
 	private Double resolveMissingScoreFallback(String config, VerticalConfig vConf, ScoreMissingValuePolicy policy) {
-		if (ScoreMissingValuePolicy.EXCLUDE.equals(policy)) {
-			return null;
-		}
 		AttributeConfig attributeConfig = vConf == null || vConf.getAttributesConfig() == null
 				? null
 				: vConf.getAttributesConfig().getAttributeConfigByKey(config);

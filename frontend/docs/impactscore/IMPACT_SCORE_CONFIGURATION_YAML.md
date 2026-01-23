@@ -58,22 +58,16 @@ scoring:
 
   transform: NONE | LOG | SQRT
 
-  missingValuePolicy: NEUTRAL | WORST | EXCLUDE
+  missingValuePolicy: NEUTRAL | WORST
 
   degenerateDistributionPolicy: NEUTRAL | ERROR | FALLBACK
 
-  statsScope:
-    population: VERTICAL | CATEGORY
 ```
 
 ## 3) Compatibilité
 
-- Si l’ancien champ `betterIs` est présent et que les nouveaux champs sont absents :
-  - `userBetterIs = impactBetterIs = betterIs`
 - Si `scoring.normalization.method` absent :
   - utiliser legacy behavior (sigma + fallback percentile) le temps de migrer, avec un log de warning.
-- Si `statsScope.population` absent :
-  - défaut : `VERTICAL`.
 
 ## 4) Exemples
 
@@ -89,7 +83,7 @@ scoring:
     method: SIGMA
     params:
       sigmaK: 2.0
-  missingValuePolicy: EXCLUDE
+  missingValuePolicy: WORST
 ```
 
 ### 4.2 Classe énergétique (bornes fixes via mapping numérique)

@@ -2,7 +2,6 @@
 # FREQUENCY_RATE
 ##################################
 key: "FREQUENCY_RATE"
-betterIs: "GREATER"
 eprelFeatureNames:
   - frequencyRate
 faIcon: "mdi-refresh-auto"

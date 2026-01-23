@@ -1,5 +1,4 @@
 key: "BRAND_SUSTAINALYTICS_SCORING"
-betterIs: "GREATER"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
 faIcon: "mdi-web"
@@ -16,10 +15,8 @@ scoring:
     method: "SIGMA"
     params:
       sigmaK: 2.0
-  missingValuePolicy: "EXCLUDE"
+  missingValuePolicy: "WORST"
   degenerateDistributionPolicy: "FALLBACK"
-  statsScope:
-    population: "VERTICAL"
 scoreUtility:
   fr: "Reflète les engagements globaux de la marque qui influencent l’empreinte de ses produits."
   en: "Reflects brand-wide commitments that influence the footprint of its products."

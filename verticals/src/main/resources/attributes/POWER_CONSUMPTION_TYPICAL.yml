@@ -1,6 +1,5 @@
 ##################################
 key: "POWER_CONSUMPTION_TYPICAL"
-betterIs: "LOWER"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
 filteringType: "NUMERIC"
@@ -13,10 +12,8 @@ scoring:
     method: "SIGMA"
     params:
       sigmaK: 2.0
-  missingValuePolicy: "EXCLUDE"
+  missingValuePolicy: "WORST"
   degenerateDistributionPolicy: "FALLBACK"
-  statsScope:
-    population: "VERTICAL"
 scoreTitle:
   fr: "Consommation électrique (en marche)"
 scoreDescription:

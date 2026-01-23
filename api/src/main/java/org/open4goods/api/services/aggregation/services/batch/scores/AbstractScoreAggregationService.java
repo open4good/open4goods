@@ -176,7 +176,9 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		if (vConf != null && vConf.getAttributesConfig() != null) {
 			AttributeConfig attrConfig = vConf.getAttributesConfig().getAttributeConfigByKey(score.getName());
 			if (attrConfig == null) {
-				dedicatedLogger.warn("Scoring inversion check failed: No AttributeConfig found for score '{}'. Check vertical config.", score.getName());
+				if (!isCompositeScore(score.getName(), vConf)) {
+					dedicatedLogger.warn("Scoring inversion check failed: No AttributeConfig found for score '{}'. Check vertical config.", score.getName());
+				}
 			} else if (AttributeComparisonRule.LOWER.equals(attrConfig.getImpactBetterIs())) {
 				relValue = resolveScaleMax(attrConfig) + resolveScaleMin(attrConfig) - relValue;
 			}
@@ -400,6 +402,21 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                 if (legacyScoringLogged.add(scoreName)) {
                         dedicatedLogger.warn("Legacy scoring applied for score '{}'. Please migrate to scoring.normalization.method.", scoreName);
                 }
+        }
+
+        /**
+         * Determines whether a score is declared as composite for the provided vertical.
+         *
+         * @param scoreName score identifier to check
+         * @param vConf vertical configuration containing composite score declarations
+         * @return {@code true} when the score is listed as composite
+         */
+        private boolean isCompositeScore(String scoreName, VerticalConfig vConf) {
+                if (vConf == null || vConf.getCompositeScores() == null || scoreName == null) {
+                        return false;
+                }
+                return vConf.getCompositeScores().stream()
+                        .anyMatch(name -> name != null && name.equalsIgnoreCase(scoreName));
         }
 
         private double resolveScaleMax(AttributeConfig attributeConfig) {
