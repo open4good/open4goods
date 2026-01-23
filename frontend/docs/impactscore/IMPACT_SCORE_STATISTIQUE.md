@@ -1,6 +1,6 @@
-# Impact Score — Normalisation statistique (référence)
+# Impact Score - Normalisation statistique (référence)
 
-> Version de travail — 2026-01-23
+> Version de travail - 2026-01-23
 
 ## 1) Notation
 

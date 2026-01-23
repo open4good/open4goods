@@ -111,11 +111,7 @@
             </p>
 
             <div class="product-admin__yaml">
-              <v-tabs
-                v-model="yamlTab"
-                bg-color="transparent"
-                color="primary"
-              >
+              <v-tabs v-model="yamlTab" bg-color="transparent" color="primary">
                 <v-tab value="product">{{
                   $t('product.admin.sections.datasources.yaml.product')
                 }}</v-tab>
@@ -123,6 +119,7 @@
                   $t('product.admin.sections.datasources.yaml.vertical')
                 }}</v-tab>
               </v-tabs>
+              <!-- eslint-disable vue/no-v-html -->
               <v-window v-model="yamlTab">
                 <v-window-item value="product">
                   <pre class="product-admin__code" aria-live="polite">
@@ -153,6 +150,7 @@
                   </pre>
                 </v-window-item>
               </v-window>
+              <!-- eslint-enable vue/no-v-html -->
             </div>
           </article>
         </v-window-item>

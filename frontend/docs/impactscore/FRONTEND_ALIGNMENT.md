@@ -1,6 +1,6 @@
-# Frontend — Alignement explications & graphiques (Impact Subscores)
+# Frontend - Alignement explications & graphiques (Impact Subscores)
 
-> Version de travail — 2026-01-23
+> Version de travail - 2026-01-23
 
 ## 1) Constat (code actuel)
 

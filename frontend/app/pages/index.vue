@@ -259,7 +259,7 @@ const sanitizeBlogSummary = (value: unknown) =>
 const hasRenderableImage = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
 
-const { execute: executeCategoriesFetch } = await useAsyncData(
+const { execute: _executeCategoriesFetch } = await useAsyncData(
   'home-categories-data',
   async () => {
     if (rawCategories.value.length === 0) {
@@ -272,7 +272,7 @@ const { execute: executeCategoriesFetch } = await useAsyncData(
   }
 )
 
-const { execute: executeBlogFetch } = await useAsyncData(
+const { execute: _executeBlogFetch } = await useAsyncData(
   'home-blog-data',
   async () => {
     if (paginatedArticles.value.length === 0) {

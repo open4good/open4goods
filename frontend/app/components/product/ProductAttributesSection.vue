@@ -4,11 +4,13 @@
       <h2 class="product-attributes__title">
         {{ $t('product.attributes.title', titleParams) }}
       </h2>
+      <!-- eslint-disable vue/no-v-html -->
       <p
         v-if="technicalShortReviewHtml"
         class="product-attributes__subtitle"
         v-html="technicalShortReviewHtml"
       />
+      <!-- eslint-enable vue/no-v-html -->
       <p v-else class="product-attributes__subtitle">
         {{ $t('product.attributes.subtitle') }}
       </p>
@@ -80,8 +82,6 @@
               </div>
             </div>
 
-          
-
             <div v-if="knownSince" class="product-attributes__identity-row">
               <span class="product-attributes__identity-label">
                 {{ $t('product.attributes.main.identity.knownSince') }}
@@ -104,8 +104,7 @@
               </span>
             </div>
 
-
-  <div v-if="gtin" class="product-attributes__identity-row">
+            <div v-if="gtin" class="product-attributes__identity-row">
               <span class="product-attributes__identity-label">
                 {{ $t('product.attributes.main.identity.gtin') }}
               </span>
@@ -124,7 +123,6 @@
                 </span>
               </div>
             </div>
-
           </div>
 
           <p

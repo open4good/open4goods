@@ -1,6 +1,6 @@
-# Impact Score — Spécification YAML (proposition)
+# Impact Score - Spécification YAML (proposition)
 
-> Version de travail — 2026-01-23
+> Version de travail - 2026-01-23
 
 ## 1) Objectif
 

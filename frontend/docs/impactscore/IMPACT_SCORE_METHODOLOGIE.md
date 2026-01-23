@@ -1,6 +1,6 @@
-# Impact Score (EcoScore) — Méthodologie complète
+# Impact Score (EcoScore) - Méthodologie complète
 
-> Version de travail — 2026-01-23
+> Version de travail - 2026-01-23
 
 ## 1. Objet
 
