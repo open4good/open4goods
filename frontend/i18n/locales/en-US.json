@@ -2407,6 +2407,10 @@
         "notEnoughData": "Not enough reliable data was found to generate a summary."
       },
       "generatedAt": "Summary generated on {date}",
+      "dataQuality": {
+        "title": "Data quality",
+        "description": "Assessment of the reliability and completeness of the sources used for this AI summary."
+      },
       "requestButton": "Request the summary",
       "request": {
         "agreement": "I authorize Nudger to research and summarize information about {productName}. In a spirit of sobriety and sharing, I also agree that this data can be shared with all Nudger users.",

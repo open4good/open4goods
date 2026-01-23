@@ -24,6 +24,14 @@
           v-bind="heroBreadcrumbProps"
           class="product-hero__breadcrumbs text-center"
         />
+        <v-fade-transition>
+          <p
+            v-if="aiBaseline"
+            class="product-hero__baseline text-center"
+          >
+            {{ aiBaseline }}
+          </p>
+        </v-fade-transition>
       </header>
 
       <div class="product-hero__grid">
@@ -320,6 +328,11 @@ const ecologicalOnelineHtml = computed(() =>
 const communityOnelineHtml = computed(() =>
   sanitizeAiReviewHtml(aiReview.value?.communityOneline ?? null)
 )
+const aiBaseline = computed(() => {
+  const baseline = (aiReview.value as { baseLine?: string | null } | null)
+    ?.baseLine
+  return typeof baseline === 'string' ? baseline.trim() : ''
+})
 
 const handleAiReviewClick = () => {
   const element =
@@ -750,6 +763,26 @@ const gtinCountry = computed(() => {
   width: fit-content;
   max-width: 100%;
   margin-inline: auto;
+}
+
+.product-hero__baseline {
+  margin: 0.6rem auto 0;
+  max-width: 680px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(var(--v-theme-text-neutral-strong), 0.9);
+  animation: baselineFadeIn 0.6s ease 0.2s both;
+}
+
+@keyframes baselineFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .product-hero__grid {
