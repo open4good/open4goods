@@ -75,10 +75,10 @@
               },
               {
                 "icon": "🛡️",
-                "label": "100% indépendant. Plus de {millions}M de produits en données ouvertes et logiciel libre",
+                "label": "100% indépendant. Fait en france, hébergé en europe. Plus de {millions}M de produits en données ouvertes et logiciel libre",
                 "segments": [
                   {
-                    "text": "100% indépendant. Plus de {millions}M de produits en "
+                    "text": "100% indépendant. Fait en France, hébergé en Europe.  Plus de {millions}M de produits en "
                   },
                   {
                     "text": "données ouvertes",
@@ -88,7 +88,7 @@
                     "text": " et "
                   },
                   {
-                    "text": "logiciel libre",
+                    "text": "logiciel libre. Aucune donnée personnelle collectée",
                     "to": "/opensource"
                   }
                 ]
