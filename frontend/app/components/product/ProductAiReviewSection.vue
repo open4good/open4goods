@@ -1,9 +1,19 @@
 <template>
-  <section :id="sectionId" class="product-ai-review">
+  <section :id="sectionId" ref="rootRef" class="product-ai-review">
     <header class="product-ai-review__header">
       <h2 class="product-ai-review__title">
         {{ $t('product.aiReview.title', titleParams) }}
       </h2>
+      <p class="product-ai-review__subtitle">
+        {{
+          $t(
+            sourcesCount === 1
+              ? 'product.aiReview.subtitle.one'
+              : 'product.aiReview.subtitle.other',
+            { count: sourcesCount }
+          )
+        }}
+      </p>
 
       <div v-if="createdDate" class="product-ai-review__metadata mt-1 mb-2">
         <v-icon
@@ -28,12 +38,11 @@
 
     <div
       v-if="reviewContent"
-      ref="descriptionRef"
       class="product-ai-review__content"
       itemscope
       itemtype="https://schema.org/Review"
     >
-      <div class="product-ai-review__grid" @click="handleContentClick">
+      <div class="product-ai-review__grid">
         <!-- Row 1: Pros & Cons -->
         <v-row v-if="reviewContent.pros?.length || reviewContent.cons?.length">
           <v-col cols="12" md="6">
@@ -135,23 +144,6 @@
                       {{ $t('product.aiReview.sections.technical') }}
                     </h3>
                   </div>
-<<<<<<< HEAD
-                  <v-btn-toggle
-                    v-model="technicalLevel"
-                    mandatory
-                    density="comfortable"
-                    class="product-ai-review__level-toggle"
-                    :aria-label="$t('product.aiReview.levels.label')"
-                  >
-                    <v-btn
-                      v-for="option in levelOptions"
-                      :key="option.value"
-                      :value="option.value"
-                      size="default"
-                      variant="tonal"
-                      :aria-label="option.label"
-                      class="px-4"
-=======
                   <div class="product-ai-review__level-toggle-wrap">
                     <v-btn-toggle
                       v-model="technicalLevel"
@@ -159,19 +151,12 @@
                       density="comfortable"
                       class="product-ai-review__level-toggle"
                       :aria-label="$t('product.aiReview.levels.label')"
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
                     >
-<<<<<<< HEAD
-                      <v-icon :icon="option.icon" size="20" class="mr-2" />
-                      {{ option.label }}
-                    </v-btn>
-                  </v-btn-toggle>
-=======
                       <v-btn
                         v-for="option in levelOptions"
                         :key="option.value"
                         :value="option.value"
-                        size="small"
+                        size="default"
                         :variant="
                           technicalLevel === option.value ? 'tonal' : 'outlined'
                         "
@@ -181,12 +166,13 @@
                             : 'secondary'
                         "
                         :aria-label="option.label"
+                        class="px-4"
                       >
-                        <v-icon :icon="option.icon" size="18" />
+                        <v-icon :icon="option.icon" size="20" class="mr-2" />
+                        {{ option.label }}
                       </v-btn>
                     </v-btn-toggle>
                   </div>
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
                 </header>
                 <ProductAiReviewInsightBlock
                   :content-html="technicalContent ?? ''"
@@ -218,23 +204,6 @@
                       {{ $t('product.aiReview.sections.ecological') }}
                     </h3>
                   </div>
-<<<<<<< HEAD
-                  <v-btn-toggle
-                    v-model="ecologicalLevel"
-                    mandatory
-                    density="comfortable"
-                    class="product-ai-review__level-toggle"
-                    :aria-label="$t('product.aiReview.levels.label')"
-                  >
-                    <v-btn
-                      v-for="option in levelOptions"
-                      :key="option.value"
-                      :value="option.value"
-                      size="default"
-                      variant="tonal"
-                      :aria-label="option.label"
-                      class="px-4"
-=======
                   <div class="product-ai-review__level-toggle-wrap">
                     <v-btn-toggle
                       v-model="ecologicalLevel"
@@ -242,19 +211,12 @@
                       density="comfortable"
                       class="product-ai-review__level-toggle"
                       :aria-label="$t('product.aiReview.levels.label')"
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
                     >
-<<<<<<< HEAD
-                      <v-icon :icon="option.icon" size="20" class="mr-2" />
-                      {{ option.label }}
-                    </v-btn>
-                  </v-btn-toggle>
-=======
                       <v-btn
                         v-for="option in levelOptions"
                         :key="option.value"
                         :value="option.value"
-                        size="small"
+                        size="default"
                         :variant="
                           ecologicalLevel === option.value
                             ? 'tonal'
@@ -266,17 +228,20 @@
                             : 'secondary'
                         "
                         :aria-label="option.label"
+                        class="px-4"
                       >
-                        <v-icon :icon="option.icon" size="18" />
+                        <v-icon :icon="option.icon" size="20" class="mr-2" />
+                        {{ option.label }}
                       </v-btn>
                     </v-btn-toggle>
                   </div>
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
                 </header>
                 <ProductAiReviewInsightBlock
                   :content-html="ecologicalContent ?? ''"
                   image-src="/images/product/ai-review-ecological.svg"
-                  :image-alt="$t('product.aiReview.illustrations.ecologicalAlt')"
+                  :image-alt="
+                    $t('product.aiReview.illustrations.ecologicalAlt')
+                  "
                   image-position="right"
                 />
               </v-card-text>
@@ -304,23 +269,6 @@
                       {{ $t('product.aiReview.sections.community') }}
                     </h3>
                   </div>
-<<<<<<< HEAD
-                  <v-btn-toggle
-                    v-model="communityLevel"
-                    mandatory
-                    density="comfortable"
-                    class="product-ai-review__level-toggle"
-                    :aria-label="$t('product.aiReview.levels.label')"
-                  >
-                    <v-btn
-                      v-for="option in levelOptions"
-                      :key="option.value"
-                      :value="option.value"
-                      size="default"
-                      variant="tonal"
-                      :aria-label="option.label"
-                      class="px-4"
-=======
                   <div class="product-ai-review__level-toggle-wrap">
                     <v-btn-toggle
                       v-model="communityLevel"
@@ -328,23 +276,14 @@
                       density="comfortable"
                       class="product-ai-review__level-toggle"
                       :aria-label="$t('product.aiReview.levels.label')"
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
                     >
-<<<<<<< HEAD
-                      <v-icon :icon="option.icon" size="20" class="mr-2" />
-                      {{ option.label }}
-                    </v-btn>
-                  </v-btn-toggle>
-=======
                       <v-btn
                         v-for="option in levelOptions"
                         :key="option.value"
                         :value="option.value"
-                        size="small"
+                        size="default"
                         :variant="
-                          communityLevel === option.value
-                            ? 'tonal'
-                            : 'outlined'
+                          communityLevel === option.value ? 'tonal' : 'outlined'
                         "
                         :color="
                           communityLevel === option.value
@@ -352,12 +291,13 @@
                             : 'secondary'
                         "
                         :aria-label="option.label"
+                        class="px-4"
                       >
-                        <v-icon :icon="option.icon" size="18" />
+                        <v-icon :icon="option.icon" size="20" class="mr-2" />
+                        {{ option.label }}
                       </v-btn>
                     </v-btn-toggle>
                   </div>
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
                 </header>
                 <ProductAiReviewInsightBlock
                   :content-html="communityContent ?? ''"
@@ -531,7 +471,7 @@ import type {
 import { IpQuotaCategory } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
 import { useIpQuota } from '~/composables/useIpQuota'
-import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
+
 import ProductAiReviewInsightBlock from '~/components/product/ProductAiReviewInsightBlock.vue'
 import ProductAiReviewRequestPanel from '~/components/product/ProductAiReviewRequestPanel.vue'
 
@@ -600,7 +540,6 @@ const { locale, t, n } = useI18n()
 const theme = useTheme()
 const { isLoggedIn } = useAuth()
 const { getRemaining, refreshQuota, recordUsage } = useIpQuota()
-const { translatePlural } = usePluralizedTranslation()
 
 const review = ref<ReviewContent | null>(normalizeReview(props.initialReview))
 const createdMs = ref<number | null>(props.reviewCreatedAt ?? null)
@@ -609,7 +548,7 @@ const errorMessage = ref<string | null>(null)
 const status = ref<ReviewGenerationStatus | null>(null)
 const pollHandle = ref<number | null>(null)
 const captchaToken = ref<string | null>(null)
-const descriptionRef = ref<HTMLElement | null>(null)
+const rootRef = ref<HTMLElement | null>(null)
 // isDialogOpen no longer needed
 // const isDialogOpen = ref(false)
 const agreementAccepted = ref(true)
@@ -928,50 +867,6 @@ const handleCaptchaError = () => {
   errorMessage.value = t('product.aiReview.errors.captcha')
 }
 
-const handleContentClick = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  const link = target.closest('a.review-ref') as HTMLAnchorElement | null
-
-  if (!link) {
-    return
-  }
-
-  event.preventDefault()
-  const href = link.getAttribute('href')
-  if (!href) {
-    return
-  }
-
-  const id = href.replace('#', '')
-  const element = document.getElementById(id)
-
-  // If the target is a source reference row
-  if (id.startsWith('review-ref-')) {
-    const refNumber = parseInt(id.replace('review-ref-', ''), 10)
-
-    // If we have a valid number and it might be hidden
-    if (
-      !isNaN(refNumber) &&
-      refNumber > maxVisibleSources &&
-      !showAllSources.value
-    ) {
-      showAllSources.value = true
-      // Wait for DOM update
-      nextTick(() => {
-        const revealedElement = document.getElementById(id)
-        if (revealedElement) {
-          scrollToElement(revealedElement)
-        }
-      })
-      return
-    }
-  }
-
-  if (element) {
-    scrollToElement(element)
-  }
-}
-
 const triggerGeneration = async () => {
   if (requiresCaptcha.value && !captchaToken.value) {
     errorMessage.value = t('product.aiReview.errors.captcha')
@@ -1067,7 +962,7 @@ const stopPolling = () => {
 }
 
 watch(
-  descriptionRef,
+  rootRef,
   (element, _, onCleanup) => {
     if (!element) {
       return

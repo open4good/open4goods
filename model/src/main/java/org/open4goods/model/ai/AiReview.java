@@ -135,7 +135,7 @@ public class AiReview {
     @JsonProperty(required = true, value = "description")
     @AiGeneratedField(instruction =
             "Write in FRENCH. Neutral product overview (max 150 words). Complete sentences only. "
-          + "No marketing tone, no lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No marketing tone, No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add Wikipedia-style citations [n] immediately after each specific factual claim (spec, feature, certification, etc.). "
           + "If a claim is not supported by sources, omit it.")
@@ -184,7 +184,7 @@ public class AiReview {
     @JsonProperty(required = true, value = "short_description")
     @AiGeneratedField(instruction =
             "Write in FRENCH. 2–3 sentences covering (1) performance/use, (2) environmental signals, (3) feedback. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each concrete claim.")
     @Schema(description = "Brief summary of the product")
@@ -234,7 +234,7 @@ public class AiReview {
     @AiGeneratedField(instruction =
             "Write in FRENCH. Technical review for NOVICE readers: 1–2 short paragraphs, simple vocabulary. Explain jargon briefly. "
           + "Focus on real-world use: performance, key features, reliability/repairability when stated in sources. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each concrete claim (specs, tested results, limitations). Omit anything unsourced.")
     @Schema(description = "Technical review (novice)")
@@ -244,7 +244,7 @@ public class AiReview {
     @AiGeneratedField(instruction =
             "Write in FRENCH. Technical review for INTERMEDIATE readers: 2–3 paragraphs. Standard technical vocabulary allowed (avoid heavy jargon). "
           + "Include strengths, limits, and any repairability/reliability signals from sources. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each concrete claim; do not infer beyond sources.")
     @Schema(description = "Technical review (intermediate)")
@@ -254,7 +254,7 @@ public class AiReview {
     @AiGeneratedField(instruction =
             "Write in FRENCH. Technical review for ADVANCED readers: 2–4 paragraphs, nuanced. Discuss trade-offs and constraints only if sources provide evidence. "
           + "Benchmarks/tests must come from sources; do not invent numbers. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each technical claim; if uncertain, omit.")
     @Schema(description = "Technical review (advanced)")
@@ -269,7 +269,7 @@ public class AiReview {
             "Write in FRENCH. Environmental review for NOVICE readers: 1–2 short paragraphs, simple wording. "
           + "Cover durability signals, repairability, energy use/efficiency, materials/recycling ONLY if sourced. "
           + "If ecoscore/subscores are provided, use them ONLY for broad positioning (e.g., bien noté / contrasté / mal noté). Never mention rank/position numbers. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each concrete claim; omit unsourced statements.")
     @Schema(description = "Ecological review (novice)")
@@ -280,7 +280,7 @@ public class AiReview {
             "Write in FRENCH. Environmental review for INTERMEDIATE readers: 2–3 paragraphs. "
           + "Discuss repairability, durability, energy efficiency, and sustainability evidence from sources. "
           + "Use ecoscore/subscores only for macro positioning; never mention ranks/precise positions. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each claim; do not infer beyond sources.")
     @Schema(description = "Ecological review (intermediate)")
@@ -291,7 +291,7 @@ public class AiReview {
             "Write in FRENCH. Environmental review for ADVANCED readers: 2–4 paragraphs, include nuance and uncertainty. "
           + "Explicitly distinguish sourced facts vs cautious interpretation; never invent lifecycle data. "
           + "Use ecoscore/subscores only for broad interpretation; never mention ranks/precise positions. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each statement; omit unsupported claims.")
     @Schema(description = "Ecological review (advanced)")
@@ -304,7 +304,7 @@ public class AiReview {
     @JsonProperty(required = true, value = "communityReviewNovice")
     @AiGeneratedField(instruction =
             "Write in FRENCH. Community review for NOVICE readers: 1 short paragraph summarising the main consensus points from users and experts. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each concrete praise/criticism; avoid vague generalities.")
     @Schema(description = "Community review (novice)")
@@ -313,7 +313,7 @@ public class AiReview {
     @JsonProperty(required = true, value = "communityReviewIntermediate")
     @AiGeneratedField(instruction =
             "Write in FRENCH. Community review for INTERMEDIATE readers: 1–2 paragraphs, include recurring themes and notable disagreements if sources show them. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: cite [n] after each concrete statement (e.g., reliability complaints, UX praise).")
     @Schema(description = "Community review (intermediate)")
@@ -323,7 +323,7 @@ public class AiReview {
     @AiGeneratedField(instruction =
             "Write in FRENCH. Community review for ADVANCED readers: max 2 paragraphs. "
           + "You may discuss evidence strength (reviewer bias, sample size) ONLY if sources provide it. Do not speculate. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: cite [n] after each statement; omit any uncertain claim.")
     @Schema(description = "Community review (advanced)")
@@ -333,7 +333,7 @@ public class AiReview {
     @JsonProperty(required = true, value = "summary")
     @AiGeneratedField(instruction =
             "Write in FRENCH. Concise overall summary in 2–3 sentences. Include key takeaways and trade-offs. "
-          + "No lists, no Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>). "
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "MAXIMUM SOURCING: add [n] after each concrete claim.")
     @Schema(description = "Summary of the product review")
@@ -342,7 +342,7 @@ public class AiReview {
     /** The pros of the product. */
     @JsonProperty(required = true, value = "pros")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. List 3–6 short pros. Each entry is a concise phrase. "
+            "Write in FRENCH. maximum 6 short pros. Each entry is a concise phrase. "
           + "No numbering, no Markdown. Minimal HTML allowed (<strong>, <em>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "SOURCING RULE: only add citations [n] when an entry contains a concrete claim (spec, measured result, explicit praise from a source). "
@@ -353,7 +353,7 @@ public class AiReview {
     /** The cons of the product. */
     @JsonProperty(required = true, value = "cons")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. List 3–6 short cons. Each entry is a concise phrase. "
+            "Write in FRENCH. maximum 6 short cons. Each entry is a concise phrase. "
           + "No numbering, no Markdown. Minimal HTML allowed (<strong>, <em>). "
           + "Never mention prices, dates, or product condition (new/used). "
           + "SOURCING RULE: only add citations [n] when an entry contains a concrete claim (explicit criticism, limitation, defect, measurable downside). "

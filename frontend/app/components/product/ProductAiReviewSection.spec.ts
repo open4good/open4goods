@@ -470,12 +470,12 @@ describe('ProductAiReviewSection', () => {
     expect(metadata).toContain('Generated on')
     expect(metadata).toMatch(/2024/)
 
+    const summary = wrapper.find('.product-ai-review__summary')
+    expect(summary.exists()).toBe(true)
+    expect(summary.text()).toContain('balances vivid visuals')
+
     const cards = wrapper.findAll('.product-ai-review__card')
     expect(cards).toHaveLength(5)
-
-    const summaryCard = cards[0]
-    expect(summaryCard.text()).toContain('Overall summary')
-    expect(summaryCard.text()).toContain('balances vivid visuals')
 
     const prosItems = wrapper.findAll('.product-ai-review__list-item')
     expect(prosItems).toHaveLength(3)
