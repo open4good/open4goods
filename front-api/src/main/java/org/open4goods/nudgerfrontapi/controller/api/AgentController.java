@@ -59,7 +59,13 @@ public class AgentController {
     }
 
     @PostMapping
-    @Operation(summary = "Submit a request to an agent", responses = {
+    @Operation(summary = "Submit a request to an agent", 
+    requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Agent request payload",
+        required = true,
+        content = @Content(schema = @Schema(implementation = AgentRequestDto.class))
+    ),
+    responses = {
         @ApiResponse(responseCode = "201", description = "Request submitted successfully", 
             content = @Content(schema = @Schema(implementation = AgentRequestResponseDto.class))),
         @ApiResponse(responseCode = "400", description = "Invalid request parameters"),

@@ -117,13 +117,13 @@ export interface AttributeConfigDto {
      * @type {string}
      * @memberof AttributeConfigDto
      */
-    userBetterIs?: AttributeConfigDtoBetterIsEnum;
+    userBetterIs?: AttributeConfigDtoUserBetterIsEnum;
     /**
      * Comparison rule applied for impact scoring.
      * @type {string}
      * @memberof AttributeConfigDto
      */
-    impactBetterIs?: AttributeConfigDtoBetterIsEnum;
+    impactBetterIs?: AttributeConfigDtoImpactBetterIsEnum;
     /**
      * Scoring configuration used for this attribute.
      * @type {ScoreScoringConfigDto}
@@ -194,11 +194,20 @@ export type AttributeConfigDtoParticipateInACVEnum = typeof AttributeConfigDtoPa
 /**
  * @export
  */
-export const AttributeConfigDtoBetterIsEnum = {
+export const AttributeConfigDtoUserBetterIsEnum = {
     Greater: 'GREATER',
     Lower: 'LOWER'
 } as const;
-export type AttributeConfigDtoBetterIsEnum = typeof AttributeConfigDtoBetterIsEnum[keyof typeof AttributeConfigDtoBetterIsEnum];
+export type AttributeConfigDtoUserBetterIsEnum = typeof AttributeConfigDtoUserBetterIsEnum[keyof typeof AttributeConfigDtoUserBetterIsEnum];
+
+/**
+ * @export
+ */
+export const AttributeConfigDtoImpactBetterIsEnum = {
+    Greater: 'GREATER',
+    Lower: 'LOWER'
+} as const;
+export type AttributeConfigDtoImpactBetterIsEnum = typeof AttributeConfigDtoImpactBetterIsEnum[keyof typeof AttributeConfigDtoImpactBetterIsEnum];
 
 /**
  * @export
@@ -288,3 +297,4 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'mappings': value['mappings'],
     };
 }
+

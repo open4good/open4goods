@@ -117,13 +117,23 @@
                   :alt="gtin"
                   class="product-attributes__gtin-image"
                 />
-                <span>{{ gtin }}</span>
-                <span class="product-attributes__gtin-caption">
-                  {{ $t('product.attributes.main.identity.gtinLabel') }}
-                </span>
+                <div>
+                  <span v-if="gtinType">{{ gtinType }}&nbsp;</span>
+                  <span>{{ gtin }}</span>
+                  <v-tooltip
+                    activator="parent"
+                    location="bottom"
+                    :text="$t('product.attributes.main.identity.gtinLabel')"
+                  />
+                </div>
               </div>
             </div>
           </div>
+
+          // ... (Logic for script part, must be careful with
+          replace_file_content and large chunks) // Actually I need to split
+          this into chunks for replace_file_content or use multi_replace. //
+          I'll use multi_replace_file_content.
 
           <p
             v-else
@@ -796,6 +806,7 @@ const identity = computed(() => props.product?.identity ?? null)
 const gtin = computed(
   () => props.product?.gtin ?? props.product?.base?.gtin ?? null
 )
+const gtinType = computed(() => props.product?.base?.gtinInfo?.upcType ?? null)
 const technicalShortReview = computed(
   () => props.product?.aiReview?.review?.technicalShortReview?.trim() ?? ''
 )
@@ -1646,7 +1657,7 @@ const toggleDetailGroup = (id: string) => {
   max-width: 200px;
   max-height: 80px;
   height: auto;
-  align-self: center;
+  align-self: flex-start;
 }
 
 .product-attributes__gtin-caption {

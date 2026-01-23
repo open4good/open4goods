@@ -143,7 +143,6 @@ class ReviewGenerationServiceReproductionTest {
         assertThat(attr.getSource()).isNotEmpty();
         
         SourcedAttribute sourcedAttr = attr.getSource().iterator().next();
-        // This assertion is expected to fail currently, as it returns "AI" instead of "gemini"
         assertThat(sourcedAttr.getDataSourcename()).isEqualTo("gemini");
     }
 

@@ -245,40 +245,49 @@
     </div>
 
     <div v-else class="product-ai-review__empty">
-      <div class="product-ai-review__empty-banner">
-        <div class="product-ai-review__empty-content">
-          <p class="product-ai-review__empty-label">
-            {{ $t('product.aiReview.request.bannerTitle') }}
-          </p>
-          <div class="product-ai-review__quota">
-            <span class="product-ai-review__quota-label">
-              {{ $t('siteIdentity.menu.account.privacy.quotas.aiRemaining') }}
-            </span>
-            <span class="product-ai-review__quota-value">
-              {{ remainingGenerationsLabel }}
-            </span>
-          </div>
-        </div>
-        <div class="product-ai-review__empty-cta">
-          <p class="product-ai-review__empty-message">
-            {{
-              $t('product.aiReview.request.bannerDescription', {
-                productName: productLabel,
-              })
-            }}
-          </p>
-          <v-btn
-            color="primary"
-            size="x-large"
-            variant="flat"
-            :loading="requesting"
-            :disabled="requesting"
-            @click="openDialog"
+      <v-expansion-panels class="product-ai-review__expansion-panels">
+        <v-expansion-panel
+          elevation="0"
+          bg-color="transparent"
+          class="product-ai-review__expansion-panel"
+        >
+          <v-expansion-panel-title
+            class="product-ai-review__expansion-panel-title"
           >
-            {{ $t('product.aiReview.requestButton') }}
-          </v-btn>
-        </div>
-      </div>
+            <div class="d-flex flex-column align-start gap-2">
+              <span class="text-h6 font-weight-bold">
+                {{ $t('product.aiReview.requestButton') }}
+              </span>
+              <span class="text-caption text-medium-emphasis">
+                {{
+                  $t('siteIdentity.menu.account.privacy.quotas.aiRemaining')
+                }}: {{ remainingGenerationsLabel }}
+              </span>
+            </div>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <ProductAiReviewRequestPanel
+              v-model:agreement-accepted="agreementAccepted"
+              :product-name="productLabel"
+              :remaining-generations-label="remainingGenerationsLabel"
+              :requires-captcha="requiresCaptcha"
+              :site-key="siteKey"
+              :captcha-theme="captchaTheme"
+              :captcha-locale="captchaLocale"
+              :requesting="requesting"
+              :submit-disabled="submitDisabled"
+              :error-message="errorMessage"
+              :status-message="statusMessage"
+              :is-generating="isGenerating"
+              :status-percent="statusPercent"
+              @submit="startRequest"
+              @captcha-verify="handleCaptchaVerify"
+              @captcha-expired="handleCaptchaExpired"
+              @captcha-error="handleCaptchaError"
+            />
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
       <v-alert v-if="errorMessage" type="error" border="start">
         {{ errorMessage }}
       </v-alert>
@@ -292,26 +301,6 @@
         />
         <p>{{ statusMessage }}</p>
       </div>
-      <ProductAiReviewRequestDialog
-        v-model="isDialogOpen"
-        v-model:agreement-accepted="agreementAccepted"
-        :product-name="productLabel"
-        :remaining-generations-label="remainingGenerationsLabel"
-        :requires-captcha="requiresCaptcha"
-        :site-key="siteKey"
-        :captcha-theme="captchaTheme"
-        :captcha-locale="captchaLocale"
-        :requesting="requesting"
-        :submit-disabled="submitDisabled"
-        :error-message="errorMessage"
-        :status-message="statusMessage"
-        :is-generating="isGenerating"
-        :status-percent="statusPercent"
-        @submit="startRequest"
-        @captcha-verify="handleCaptchaVerify"
-        @captcha-expired="handleCaptchaExpired"
-        @captcha-error="handleCaptchaError"
-      />
     </div>
   </section>
 </template>
@@ -334,7 +323,7 @@ import { IpQuotaCategory } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
 import { useIpQuota } from '~/composables/useIpQuota'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
-import ProductAiReviewRequestDialog from '~/components/product/ProductAiReviewRequestDialog.vue'
+import ProductAiReviewRequestPanel from '~/components/product/ProductAiReviewRequestPanel.vue'
 
 interface ReviewContent {
   description?: string | null
@@ -400,7 +389,8 @@ const status = ref<ReviewGenerationStatus | null>(null)
 const pollHandle = ref<number | null>(null)
 const captchaToken = ref<string | null>(null)
 const descriptionRef = ref<HTMLElement | null>(null)
-const isDialogOpen = ref(false)
+// isDialogOpen no longer needed
+// const isDialogOpen = ref(false)
 const agreementAccepted = ref(true)
 const showAllSources = ref(false)
 
@@ -726,12 +716,14 @@ watch(
   { immediate: true }
 )
 
+/*
 const openDialog = () => {
   errorMessage.value = null
   captchaToken.value = null
   agreementAccepted.value = true
   isDialogOpen.value = true
 }
+*/
 
 onMounted(() => {
   if (import.meta.client) {
@@ -743,6 +735,7 @@ onBeforeUnmount(() => {
   stopPolling()
 })
 
+/*
 watch(
   isDialogOpen,
   value => {
@@ -757,6 +750,7 @@ watch(
   },
   { immediate: true }
 )
+*/
 
 const handleReferenceClick = (event: Event) => {
   const target = event.target as HTMLElement | null

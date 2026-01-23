@@ -69,3 +69,13 @@
 
 html, body, .v-application
     line-height: $line-height-root !important
+
+
+// Fix hCaptcha challenge appearing behind Vuetify dialogs
+iframe[src*="hcaptcha.com"]
+    z-index: 999999!important
+    position: relative
+
+div[style*="z-index: 2147483647"]
+    z-index: 9999999!important
+

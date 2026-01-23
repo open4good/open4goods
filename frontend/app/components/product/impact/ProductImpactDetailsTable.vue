@@ -330,20 +330,13 @@ const groupedScores = computed(() =>
   buildImpactScoreGroups(displayScores.value, t)
 )
 
-watch(
-  groupedScores,
-  groups => {
-    const next = new Set<string>()
-    groups.groups.forEach(g => next.add(g.id))
-    if (groups.divers) {
-      next.add(groups.divers.id)
-    }
-    expandedGroups.value = next
-  },
-  { immediate: true }
-)
-
 const headers = computed(() => [
+  {
+    key: 'scoreOn20',
+    title: t('product.impact.tableHeaders.scoreOn20'),
+    align: 'start', // Changed align to start since it's now first column
+    sortable: false,
+  },
   {
     key: 'label',
     title: t('product.impact.tableHeaders.scoreName'),
@@ -354,16 +347,9 @@ const headers = computed(() => [
     title: t('product.impact.tableHeaders.attributeValue'),
     sortable: false,
   },
-
   {
     key: 'lifecycle',
     title: t('product.impact.tableHeaders.lifecycle'),
-    sortable: false,
-  },
-  {
-    key: 'scoreOn20',
-    title: t('product.impact.tableHeaders.scoreOn20'),
-    align: 'end',
     sortable: false,
   },
 ])
@@ -608,6 +594,21 @@ const expandScore = (scoreId: string) => {
     }
   }
 }
+
+watch(
+  groupedScores,
+  files => {
+    const groups = files.groups.map(g => g.id)
+
+    if (files.divers) {
+      groups.push(files.divers.id)
+    }
+
+    // Expand all groups (Level 1)
+    expandedGroups.value = new Set([...expandedGroups.value, ...groups])
+  },
+  { immediate: true }
+)
 
 watch(
   () => props.expandedScoreId,

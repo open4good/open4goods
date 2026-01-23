@@ -196,11 +196,11 @@ describe('ProductImpactDetailsTable', () => {
       expandedGroups: Set<string>
     }
 
-    expect(vm.tableItems).toHaveLength(2)
+    expect(vm.tableItems).toHaveLength(4)
     const diversRow = vm.tableItems.find(row => row.id === 'DIVERS')
     expect(diversRow?.rowType).toBe('aggregate')
     expect(diversRow?.displayValue).toBeCloseTo(2.4)
-    expect(vm.expandedGroups.size).toBe(0)
+    expect(vm.expandedGroups.size).toBe(2)
   })
 
   it('duplicates scores across aggregates and computes aggregate values from children when missing', async () => {
@@ -231,8 +231,7 @@ describe('ProductImpactDetailsTable', () => {
     expect(agg1?.displayValue).toBeCloseTo(3)
     expect(agg2?.displayValue).toBeCloseTo(4.6)
 
-    vm.toggleGroup('AGG1')
-    vm.toggleGroup('AGG2')
+    // Groups are expanded by default
     await nextTick()
 
     const childRows = vm.tableItems.filter(row => row.rowType === 'subscore')
@@ -269,8 +268,7 @@ describe('ProductImpactDetailsTable', () => {
       toggleGroup: (id: string) => void
     }
 
-    // Expand the DIVERS group to see the rows (since both are orphans)
-    vm.toggleGroup('DIVERS')
+    // DIVERS group is expanded by default
     await nextTick()
 
     // Toggle virtual scores to make sure they are included in tableItems

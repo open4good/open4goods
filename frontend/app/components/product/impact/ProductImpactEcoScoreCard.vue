@@ -3,7 +3,7 @@
     <div class="d-flex justify-space-between align-center flex-wrap gap-4 mb-6">
       <ImpactScore
         :score="normalizedScore"
-        :max="maxScore"
+        :max="5"
         size="xxlarge"
         mode="badge"
         badge-layout="stacked"
@@ -27,31 +27,32 @@
       <span class="text-body-2">{{ aiImpactText }}</span>
     </div>
 
-    <div v-if="hasDetailContent" class="impact-ecoscore__analysis">
-      <ProductImpactDetailsTable
-        v-if="detailScores.length"
-        class="impact-ecoscore__analysis-details"
-        :class="{
-          'impact-ecoscore__analysis-details--full': !shouldDisplayRadar,
-        }"
-        :scores="detailScores"
-        :product-name="productName"
-        :product-brand="productBrand"
-        :product-model="productModel"
-        :product-image="productImage"
-        :vertical-title="verticalTitle"
-        :expanded-score-id="expandedScoreId"
-      />
-    </div>
+    <v-row v-if="hasDetailContent" class="ma-n2">
+      <v-col :cols="shouldDisplayRadar ? 8 : 12" class="pa-2">
+        <ProductImpactDetailsTable
+          v-if="detailScores.length"
+          class="impact-ecoscore__analysis-details h-100"
+          :scores="detailScores"
+          :product-name="productName"
+          :product-brand="productBrand"
+          :product-model="productModel"
+          :product-image="productImage"
+          :vertical-title="verticalTitle"
+          :expanded-score-id="expandedScoreId"
+        />
+      </v-col>
 
-    <div v-if="shouldDisplayRadar" class="impact-ecoscore__analysis-radar">
-      <ProductImpactRadarChart
-        class="impact-ecoscore__analysis-radar-chart"
-        :axes="radarAxes"
-        :series="chartSeries"
-        :product-name="productName"
-      />
-    </div>
+      <v-col v-if="shouldDisplayRadar" cols="4" class="pa-2">
+        <div class="impact-ecoscore__analysis-radar">
+          <ProductImpactRadarChart
+            class="impact-ecoscore__analysis-radar-chart"
+            :axes="radarAxes"
+            :series="chartSeries"
+            :product-name="productName"
+          />
+        </div>
+      </v-col>
+    </v-row>
   </article>
   <article v-else class="impact-ecoscore impact-ecoscore--empty">
     <div class="impact-ecoscore__empty-content">
@@ -133,24 +134,7 @@ const hasDetailContent = computed(
   () => shouldDisplayRadar.value || detailScores.value.length > 0
 )
 
-const maxScore = computed(() => {
-  if (Number.isFinite(props.score?.on20)) {
-    return 20
-  }
-  const val = Number(props.score?.value)
-  if (Number.isFinite(val) && val > 5) {
-    return 20
-  }
-  return 5
-})
-
 const normalizedScore = computed(() => {
-  // Prefer on20 if valid
-  if (Number.isFinite(props.score?.on20)) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return props.score!.on20!
-  }
-
   const rawValue = Number.isFinite(props.score?.value)
     ? Number(props.score?.value)
     : null
@@ -159,13 +143,11 @@ const normalizedScore = computed(() => {
     return 0
   }
 
-  // If value > 5, assume it's already on 20 (or at least > 5) so do not clamp to 5.
-  // We clamp to 20 just in case.
+  // If value > 5, it means it's on a scale of 20. Normalize to 5.
   if (rawValue > 5) {
-    return Math.min(rawValue, 20)
+    return Math.max(0, Math.min(rawValue / 4, 5))
   }
 
-  // Otherwise assum scale 5
   return Math.max(0, Math.min(rawValue, 5))
 })
 

@@ -1960,7 +1960,7 @@ const impactAnchorToScoreIdMap = computed(() => {
   return map
 })
 
-const scrollToSection = (sectionId: string) => {
+const scrollToSection = async (sectionId: string) => {
   if (!import.meta.client) {
     return
   }
@@ -1970,7 +1970,12 @@ const scrollToSection = (sectionId: string) => {
 
   if (scoreId) {
     expandedScoreId.value = scoreId
-    targetId = sectionIds.impact
+    await nextTick()
+    if (document.getElementById(sectionId)) {
+      targetId = sectionId
+    } else {
+      targetId = sectionIds.impact
+    }
   }
 
   const element = document.getElementById(targetId)

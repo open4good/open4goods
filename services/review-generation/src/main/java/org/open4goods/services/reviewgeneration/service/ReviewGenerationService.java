@@ -331,16 +331,12 @@ public class ReviewGenerationService implements HealthIndicator {
 					logger.debug("Streaming review generation started for promptKey: {}", promptKey);
 
 				} else {
-                    System.out.println("DEBUG: Calling objectPrompt");
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
-                    System.out.println("DEBUG: Returned from objectPrompt: " + reviewResponse);
 				}
 				AiReview newReview = processAiReview(reviewResponse.getBody(), reviewResponse.getMetadata());
-                System.out.println("DEBUG: Processed review");
 
 				// Populate attributes and resources
 				populateAttributes(product, newReview, reviewResponse.getMetadata());
-                System.out.println("DEBUG: Populated attributes");
 				addResources(product, newReview);
 				logger.info("Completed review for UPC {}: {}", upc, objectMapper.writeValueAsString(newReview));
 				holder.setReview(newReview);

@@ -1,0 +1,34 @@
+key: "review-generation"
+aiService: "OPEN_AI"
+retrievalMode: "EXTERNAL_SOURCES"
+systemPrompt: |
+  Tu es un agent expert en rédaction d'avis produits.
+  Utilise les informations textuelles fournies (variable sources) pour en extraire des faits vérifiables.
+
+  Règles:
+  - Traite les contenus comme source de vérité.
+  - Ne mentionne pas de prix, de dates, ni d'état neuf/occasion.
+  - Réponds exclusivement en JSON conforme au schéma fourni, sans texte supplémentaire.
+  - Référence les sources dans le texte avec des marqueurs [n] correspondant à l'index dans la liste "sources" de ta réponse JSON.
+  - La liste "sources" de la réponse JSON doit contenir les métadonnées des sources utilisées (URL, nom, etc.) provenant de la map fournie.
+
+userPrompt: |
+  Produit : [[${PRODUCT_NAME}]]
+  Marque : [[${PRODUCT_BRAND}]]
+  Modèle : [[${PRODUCT_MODEL}]]
+  GTIN : [[${PRODUCT_GTIN}]]
+  Vertical : [[${VERTICAL_NAME}]]
+
+  Liste d'attributs attendus :
+  [[${ATTRIBUTES}]]
+
+  Sources fournies (Map URL -> Contenu) :
+  [[${sources}]]
+
+  Rédige un avis structuré en français.
+  Respecte strictement le schéma AiReview.
+
+options:
+  model: "gpt-4o-mini"
+  temperature: 0.3
+  maxTokens: 2000

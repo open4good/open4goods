@@ -147,6 +147,10 @@ models/ResourcesAggregationConfig.ts
 models/ReviewGenerationEvent.ts
 models/ReviewGenerationStatus.ts
 models/ScoreCardinalityDto.ts
+models/ScoreNormalizationConfigDto.ts
+models/ScoreNormalizationParamsDto.ts
+models/ScoreScaleDto.ts
+models/ScoreScoringConfigDto.ts
 models/ScoringAggregationConfig.ts
 models/SearchSuggestCategoryDto.ts
 models/SearchSuggestProductDto.ts

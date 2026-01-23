@@ -37,6 +37,7 @@ import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
+import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.ProductTexts;
@@ -1115,16 +1116,19 @@ public class ProductMappingService {
         if (gtinInfo == null) {
             return null;
         }
+        
+        BarcodeType upcType = gtinInfo.detectOriginalBarcodeType().orElse(gtinInfo.getUpcType());
+        
         String countryCode = gtinInfo.getCountry();
         if (!StringUtils.hasText(countryCode)) {
-            return new ProductGtinInfoDto(gtinInfo.getUpcType(), null, null, null);
+            return new ProductGtinInfoDto(upcType, null, null, null);
         }
 
         ULocale displayLocale = resolveDisplayLocale(domainLanguage, locale);
         String countryName = new ULocale("", countryCode).getDisplayCountry(displayLocale);
         String countryFlagUrl = "/images/flags/" + countryCode.toLowerCase(Locale.ROOT) + ".webp";
 
-        return new ProductGtinInfoDto(gtinInfo.getUpcType(), countryCode, countryName, countryFlagUrl);
+        return new ProductGtinInfoDto(upcType, countryCode, countryName, countryFlagUrl);
     }
 
     /**
