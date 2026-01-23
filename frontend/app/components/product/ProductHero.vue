@@ -42,6 +42,7 @@
                 <span v-if="productBrandName" class="product-hero__brand-name">
                   {{ productBrandName }}
                 </span>
+                -
                 <span v-if="productModelName" class="product-hero__subtitle">
                   {{ productModelName }}
                 </span>

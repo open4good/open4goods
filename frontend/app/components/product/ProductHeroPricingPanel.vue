@@ -21,184 +21,180 @@
       <template v-if="hasOffer">
         <div class="product-hero__pricing-panel-main">
           <div v-if="merchant" class="product-hero__pricing-panel-merchant">
-          <v-tooltip v-if="offerName" :text="offerName" location="bottom">
-            <template #activator="{ props: tooltipProps }">
-              <div v-bind="tooltipProps">
-                <ClientOnly v-if="merchant.clientOnly">
-                  <template #default>
-                    <NuxtLink
-                      :to="merchant.url"
-                      class="product-hero__pricing-panel-merchant-link"
-                      :target="merchant.isInternal ? undefined : '_blank'"
-                      :rel="
-                        merchant.isInternal ? undefined : 'nofollow noopener'
-                      "
-                      :prefetch="false"
-                      @click="emitMerchantClick"
+            <v-tooltip v-if="offerName" :text="offerName" location="bottom">
+              <template #activator="{ props: tooltipProps }">
+                <div v-bind="tooltipProps">
+                  <ClientOnly v-if="merchant.clientOnly">
+                    <template #default>
+                      <NuxtLink
+                        :to="merchant.url"
+                        class="product-hero__pricing-panel-merchant-link"
+                        :target="merchant.isInternal ? undefined : '_blank'"
+                        :rel="
+                          merchant.isInternal ? undefined : 'nofollow noopener'
+                        "
+                        :prefetch="false"
+                        @click="emitMerchantClick"
+                      >
+                        <img
+                          v-if="merchant.favicon"
+                          :src="merchant.favicon"
+                          :alt="merchant.name"
+                          width="52"
+                          height="52"
+                          class="product-hero__pricing-panel-merchant-favicon"
+                        />
+                        <span
+                          v-if="showMerchantName"
+                          class="product-hero__pricing-panel-merchant-name ml-2"
+                          >{{ merchant.name }}</span
+                        >
+                      </NuxtLink>
+                    </template>
+                    <template #fallback>
+                      <div class="product-hero__pricing-panel-merchant-static">
+                        <img
+                          v-if="merchant.favicon"
+                          :src="merchant.favicon"
+                          :alt="merchant.name"
+                          width="52"
+                          height="52"
+                          class="product-hero__pricing-panel-merchant-favicon"
+                        />
+                        <span
+                          v-if="showMerchantName"
+                          class="product-hero__pricing-panel-merchant-name ml-2"
+                          >{{ merchant.name }}</span
+                        >
+                      </div>
+                    </template>
+                  </ClientOnly>
+                  <NuxtLink
+                    v-else-if="merchant.url"
+                    :to="merchant.url"
+                    class="product-hero__pricing-panel-merchant-link"
+                    :target="merchant.isInternal ? undefined : '_blank'"
+                    :rel="merchant.isInternal ? undefined : 'nofollow noopener'"
+                    :prefetch="false"
+                    @click="emitMerchantClick"
+                  >
+                    <img
+                      v-if="merchant.favicon"
+                      :src="merchant.favicon"
+                      :alt="merchant.name"
+                      width="52"
+                      height="52"
+                      class="product-hero__pricing-panel-merchant-favicon"
+                    />
+                    <span
+                      v-if="showMerchantName"
+                      class="product-hero__pricing-panel-merchant-name ml-2"
+                      >{{ merchant.name }}</span
                     >
-                      <img
-                        v-if="merchant.favicon"
-                        :src="merchant.favicon"
-                        :alt="merchant.name"
-                        width="52"
-                        height="52"
-                        class="product-hero__pricing-panel-merchant-favicon"
-                      />
-                      <span
-                        v-if="showMerchantName"
-                        class="product-hero__pricing-panel-merchant-name ml-2"
-                      >{{
-                        merchant.name
-                      }}</span>
-                    </NuxtLink>
-                  </template>
-                  <template #fallback>
-                    <div class="product-hero__pricing-panel-merchant-static">
-                      <img
-                        v-if="merchant.favicon"
-                        :src="merchant.favicon"
-                        :alt="merchant.name"
-                        width="52"
-                        height="52"
-                        class="product-hero__pricing-panel-merchant-favicon"
-                      />
-                      <span
-                        v-if="showMerchantName"
-                        class="product-hero__pricing-panel-merchant-name ml-2"
-                      >{{
-                        merchant.name
-                      }}</span>
-                    </div>
-                  </template>
-                </ClientOnly>
-                <NuxtLink
-                  v-else-if="merchant.url"
-                  :to="merchant.url"
-                  class="product-hero__pricing-panel-merchant-link"
-                  :target="merchant.isInternal ? undefined : '_blank'"
-                  :rel="merchant.isInternal ? undefined : 'nofollow noopener'"
-                  :prefetch="false"
-                  @click="emitMerchantClick"
-                >
-                  <img
-                    v-if="merchant.favicon"
-                    :src="merchant.favicon"
-                    :alt="merchant.name"
-                    width="52"
-                    height="52"
-                    class="product-hero__pricing-panel-merchant-favicon"
-                  />
-                  <span
-                    v-if="showMerchantName"
-                    class="product-hero__pricing-panel-merchant-name ml-2"
-                  >{{
-                    merchant.name
-                  }}</span>
-                </NuxtLink>
-                <div v-else class="product-hero__pricing-panel-merchant-static">
-                  <img
-                    v-if="merchant.favicon"
-                    :src="merchant.favicon"
-                    :alt="merchant.name"
-                    width="52"
-                    height="52"
-                    class="product-hero__pricing-panel-merchant-favicon"
-                  />
-                  <span
-                    v-if="showMerchantName"
-                    class="product-hero__pricing-panel-merchant-name ml-2"
-                  >{{
-                    merchant.name
-                  }}</span>
+                  </NuxtLink>
+                  <div
+                    v-else
+                    class="product-hero__pricing-panel-merchant-static"
+                  >
+                    <img
+                      v-if="merchant.favicon"
+                      :src="merchant.favicon"
+                      :alt="merchant.name"
+                      width="52"
+                      height="52"
+                      class="product-hero__pricing-panel-merchant-favicon"
+                    />
+                    <span
+                      v-if="showMerchantName"
+                      class="product-hero__pricing-panel-merchant-name ml-2"
+                      >{{ merchant.name }}</span
+                    >
+                  </div>
                 </div>
+              </template>
+            </v-tooltip>
+            <template v-else>
+              <ClientOnly v-if="merchant.clientOnly">
+                <template #default>
+                  <NuxtLink
+                    :to="merchant.url"
+                    class="product-hero__pricing-panel-merchant-link"
+                    :target="merchant.isInternal ? undefined : '_blank'"
+                    :rel="merchant.isInternal ? undefined : 'nofollow noopener'"
+                    :prefetch="false"
+                    @click="emitMerchantClick"
+                  >
+                    <img
+                      v-if="merchant.favicon"
+                      :src="merchant.favicon"
+                      :alt="merchant.name"
+                      width="52"
+                      height="52"
+                      class="product-hero__pricing-panel-merchant-favicon"
+                    />
+                    <span
+                      v-if="showMerchantName"
+                      class="product-hero__pricing-panel-merchant-name ml-2"
+                      >{{ merchant.name }}</span
+                    >
+                  </NuxtLink>
+                </template>
+                <template #fallback>
+                  <div class="product-hero__pricing-panel-merchant-static">
+                    <img
+                      v-if="merchant.favicon"
+                      :src="merchant.favicon"
+                      :alt="merchant.name"
+                      width="52"
+                      height="52"
+                      class="product-hero__pricing-panel-merchant-favicon"
+                    />
+                    <span v-if="showMerchantName" class="ml-2">{{
+                      merchant.name
+                    }}</span>
+                  </div>
+                </template>
+              </ClientOnly>
+              <NuxtLink
+                v-else-if="merchant.url"
+                :to="merchant.url"
+                class="product-hero__pricing-panel-merchant-link"
+                :target="merchant.isInternal ? undefined : '_blank'"
+                :rel="merchant.isInternal ? undefined : 'nofollow noopener'"
+                :prefetch="false"
+                @click="emitMerchantClick"
+              >
+                <img
+                  v-if="merchant.favicon"
+                  :src="merchant.favicon"
+                  :alt="merchant.name"
+                  width="52"
+                  height="52"
+                  class="product-hero__pricing-panel-merchant-favicon"
+                />
+                <span
+                  v-if="showMerchantName"
+                  class="product-hero__pricing-panel-merchant-name ml-2"
+                  >{{ merchant.name }}</span
+                >
+              </NuxtLink>
+              <div v-else class="product-hero__pricing-panel-merchant-static">
+                <img
+                  v-if="merchant.favicon"
+                  :src="merchant.favicon"
+                  :alt="merchant.name"
+                  width="52"
+                  height="52"
+                  class="product-hero__pricing-panel-merchant-favicon"
+                />
+                <span
+                  v-if="showMerchantName"
+                  class="product-hero__pricing-panel-merchant-name ml-2"
+                  >{{ merchant.name }}</span
+                >
               </div>
             </template>
-          </v-tooltip>
-          <template v-else>
-            <ClientOnly v-if="merchant.clientOnly">
-              <template #default>
-                <NuxtLink
-                  :to="merchant.url"
-                  class="product-hero__pricing-panel-merchant-link"
-                  :target="merchant.isInternal ? undefined : '_blank'"
-                  :rel="merchant.isInternal ? undefined : 'nofollow noopener'"
-                  :prefetch="false"
-                  @click="emitMerchantClick"
-                >
-                  <img
-                    v-if="merchant.favicon"
-                    :src="merchant.favicon"
-                    :alt="merchant.name"
-                    width="52"
-                    height="52"
-                    class="product-hero__pricing-panel-merchant-favicon"
-                  />
-                  <span
-                    v-if="showMerchantName"
-                    class="product-hero__pricing-panel-merchant-name ml-2"
-                  >{{
-                    merchant.name
-                  }}</span>
-                </NuxtLink>
-              </template>
-              <template #fallback>
-                <div class="product-hero__pricing-panel-merchant-static">
-                  <img
-                    v-if="merchant.favicon"
-                    :src="merchant.favicon"
-                    :alt="merchant.name"
-                    width="52"
-                    height="52"
-                    class="product-hero__pricing-panel-merchant-favicon"
-                  />
-                  <span v-if="showMerchantName" class="ml-2">{{
-                    merchant.name
-                  }}</span>
-                </div>
-              </template>
-            </ClientOnly>
-            <NuxtLink
-              v-else-if="merchant.url"
-              :to="merchant.url"
-              class="product-hero__pricing-panel-merchant-link"
-              :target="merchant.isInternal ? undefined : '_blank'"
-              :rel="merchant.isInternal ? undefined : 'nofollow noopener'"
-              :prefetch="false"
-              @click="emitMerchantClick"
-            >
-              <img
-                v-if="merchant.favicon"
-                :src="merchant.favicon"
-                :alt="merchant.name"
-                width="52"
-                height="52"
-                class="product-hero__pricing-panel-merchant-favicon"
-              />
-              <span
-                v-if="showMerchantName"
-                class="product-hero__pricing-panel-merchant-name ml-2"
-              >{{
-                merchant.name
-              }}</span>
-            </NuxtLink>
-            <div v-else class="product-hero__pricing-panel-merchant-static">
-              <img
-                v-if="merchant.favicon"
-                :src="merchant.favicon"
-                :alt="merchant.name"
-                width="52"
-                height="52"
-                class="product-hero__pricing-panel-merchant-favicon"
-              />
-              <span
-                v-if="showMerchantName"
-                class="product-hero__pricing-panel-merchant-name ml-2"
-              >{{
-                merchant.name
-              }}</span>
-            </div>
-          </template>
-        </div>
+          </div>
 
           <div class="product-hero__pricing-panel-price">
             <p class="product-hero__pricing-panel-price-label">
@@ -243,7 +239,7 @@
                 height="20"
                 class="product-hero__pricing-panel-select-avatar"
               />
-              <span class="product-hero__pricing-panel-select-name">
+              <span class="product-hero__pricing-panel-select-name ml-4">
                 {{ item.raw.label }}
               </span>
               <span class="product-hero__pricing-panel-select-price">
@@ -267,7 +263,11 @@
               <v-list-item-title>
                 {{ item.raw.label }}
               </v-list-item-title>
-              <v-list-item-subtitle v-if="item.raw.offerName">
+              <v-list-item-subtitle
+                v-if="
+                  item.raw.offerName && item.raw.offerName !== item.raw.label
+                "
+              >
                 {{ item.raw.offerName }}
               </v-list-item-subtitle>
               <template #append>
@@ -300,7 +300,11 @@
             v-bind="tooltipProps"
             @click="emitTrendClick"
           >
-            <v-icon :icon="trendIcon" size="18" class="product-hero__price-trend-icon" />
+            <v-icon
+              :icon="trendIcon"
+              size="18"
+              class="product-hero__price-trend-icon"
+            />
             <span>{{ trendLabel }}</span>
           </button>
         </template>
@@ -312,12 +316,21 @@
         :class="trendToneClass"
         @click="emitTrendClick"
       >
-        <v-icon :icon="trendIcon" size="18" class="product-hero__price-trend-icon" />
+        <v-icon
+          :icon="trendIcon"
+          size="18"
+          class="product-hero__price-trend-icon"
+        />
         <span>{{ trendLabel }}</span>
       </button>
 
       <div class="product-hero__price-actions">
-        <v-btn color="primary" variant="flat" @click="emitViewOffers">
+        <v-btn
+          v-if="hasOffer"
+          color="primary"
+          variant="flat"
+          @click="emitViewOffers"
+        >
           {{ viewOffersLabel }}
         </v-btn>
       </div>
@@ -326,7 +339,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 type OfferCondition = 'occasion' | 'new'
 
@@ -426,7 +439,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  (event: 'merchant-click', payload: { name: string | null; url: string | null }): void
+  (
+    event: 'merchant-click',
+    payload: { name: string | null; url: string | null }
+  ): void
   (event: 'trend-click' | 'view-offers'): void
 }>()
 
@@ -450,6 +466,16 @@ const emitViewOffers = () => {
 }
 
 const selectedAlternative = ref<AlternativeOfferOption | null>(null)
+
+watch(
+  () => props.alternativeOffers,
+  offers => {
+    if (offers?.length && !selectedAlternative.value) {
+      selectedAlternative.value = offers[0]
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>

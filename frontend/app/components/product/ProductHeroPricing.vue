@@ -162,10 +162,11 @@ const buildAlternativeOffers = (condition: OfferCondition) => {
     .filter(offer => !isSameOffer(offer, bestOffer))
     .map((offer, index) => {
       const currency = offer.currency ?? defaultCurrencyCode.value
-      const priceLabel = formatPriceLabel(
-        typeof offer.price === 'number' ? offer.price : null,
-        currency
-      )
+      const priceLabel = n(offer.price ?? 0, {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 2,
+      })
 
       return {
         id: `${condition}-${offer.datasourceName ?? 'offer'}-${offer.price ?? index}-${index}`,
@@ -262,16 +263,6 @@ const animatedPrices = ref<Record<OfferCondition, number | null>>({
 })
 
 const offersCount = computed(() => props.product.offers?.offersCount ?? 0)
-
-const offersCountLabel = computed(() =>
-  t('product.hero.offersCountLabel', { count: n(offersCount.value) })
-)
-
-const viewOffersLabel = computed(() =>
-  offersCount.value <= 1
-    ? t('product.hero.viewSingleOffer')
-    : t('product.hero.viewOffersCount', { count: offersCountLabel.value })
-)
 
 const isSingleOffer = computed(() => offersCount.value === 1)
 
@@ -572,14 +563,26 @@ const conditionPanels = computed(() => {
     const trendIcon = resolveTrendIcon(trendTone)
     const trendTooltip = formatTrendTooltip(trend, currency)
 
+    const count = offersCountByCondition.value[condition]
+
+    let viewOffersLabel = ''
+    if (count <= 1) {
+      viewOffersLabel = t('product.hero.viewSingleOffer')
+    } else if (condition === 'new') {
+      viewOffersLabel = t('product.hero.viewOffersNew', count)
+    } else {
+      viewOffersLabel = t('product.hero.viewOffersOccasion', count)
+    }
+
     return {
       condition,
       conditionLabel: t(`product.hero.offerConditions.${condition}`),
       offersCountLabel:
         offersCountByCondition.value[condition] > 0
-          ? t('product.hero.offersCountLabel', {
-              count: n(offersCountByCondition.value[condition]),
-            })
+          ? t(
+              'product.hero.offersCountLabel',
+              offersCountByCondition.value[condition]
+            )
           : null,
       priceTitle: t('product.hero.bestPriceTitle'),
       priceLabel,
@@ -590,12 +593,14 @@ const conditionPanels = computed(() => {
       offerName: offer?.offerName ?? null,
       alternativeOffers: alternativeOffersByCondition.value[condition],
       alternativeOffersLabel: t('product.hero.alternativeOffers.label'),
-      alternativeOffersPlaceholder: t('product.hero.alternativeOffers.placeholder'),
+      alternativeOffersPlaceholder: t(
+        'product.hero.alternativeOffers.placeholder'
+      ),
       trendLabel,
       trendTooltip,
       trendToneClass: `product-hero__price-trend--${trendTone}`,
       trendIcon,
-      viewOffersLabel: viewOffersLabel.value,
+      viewOffersLabel,
     }
   })
 })

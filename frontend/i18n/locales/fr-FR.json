@@ -2614,7 +2614,7 @@
       },
       "offerConditionsToggleAria": "Sélectionner le type d'offre à afficher",
       "offersCount": "Nombre d'offres",
-      "offersCountLabel": "{count} offres",
+      "offersCountLabel": "{count} offre | {count} offres",
       "noOffers": {
         "new": "Pas d'offres neuves pour l'instant !",
         "occasion": "Pas d'offres d'occasion pour l'instant !"
@@ -2640,6 +2640,8 @@
       "thumbnailLabel": "Sélectionner {type} {index} sur {total} : {label}",
       "videoBadge": "Vidéo",
       "viewOffersCount": "Voir les {count} offres",
+      "viewOffersNew": "Voir l'offre neuve | Voir les {count} offres neuves",
+      "viewOffersOccasion": "Voir l'offre d'occasion | Voir les {count} offres d'occasion",
       "viewSingleOffer": "Voir l'offre"
     },
     "impact": {
