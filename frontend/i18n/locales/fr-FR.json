@@ -761,6 +761,7 @@
       "navigation": {
         "aiAudit": "Audit IA",
         "ariaLabel": "Navigation des sections Impact Score",
+        "availableCriteria": "Critères disponibles",
         "criteria": "Critères retenus",
         "overview": "Présentation",
         "purpose": "Objectif & données",
@@ -783,6 +784,10 @@
           "title": "Critères retenus et pondérations",
           "coefficientPrefix": "Compte pour",
           "coefficientSuffix": "dans la note globale"
+        },
+        "availableCriteria": {
+          "title": "Critères disponibles pour {category}",
+          "subtitle": "Chaque verticale Impact Score dispose d’une sélection de critères adaptés."
         },
         "overview": {
           "card": {
@@ -1476,6 +1481,11 @@
           "weight": "10 %"
         }
       }
+    },
+    "availableCriteria": {
+      "eyebrow": "Critères",
+      "title": "Critères disponibles",
+      "subtitle": "Explorez les critères utilisés selon chaque verticale Impact Score."
     },
     "principles": {
       "eyebrow": "Nos principes",
@@ -3650,6 +3660,19 @@
         }
       }
     }
+  },
+  "impactScoreCriteriaPanel": {
+    "filters": {
+      "label": "Afficher par verticale",
+      "all": "Tous les critères"
+    },
+    "table": {
+      "name": "Nom",
+      "utility": "Utilité",
+      "icon": "Icône"
+    },
+    "utilityFallback": "Utilité à préciser",
+    "empty": "Aucun critère disponible pour le moment."
   },
   "docs": {
     "labels": {

@@ -30,6 +30,46 @@
 
           <main class="category-ecoscore__sections" role="main">
             <section
+              :id="sectionIds.availableCriteria"
+              class="category-ecoscore__section"
+              role="region"
+              :aria-labelledby="`${sectionIds.availableCriteria}-title`"
+            >
+              <v-sheet
+                class="category-ecoscore__surface"
+                elevation="0"
+                rounded="xl"
+              >
+                <header class="category-ecoscore__header">
+                  <h2
+                    :id="`${sectionIds.availableCriteria}-title`"
+                    class="category-ecoscore__title"
+                  >
+                    {{
+                      t(
+                        'category.ecoscorePage.sections.availableCriteria.title',
+                        { category: categoryLabel }
+                      )
+                    }}
+                  </h2>
+                  <p class="category-ecoscore__subtitle">
+                    {{
+                      t(
+                        'category.ecoscorePage.sections.availableCriteria.subtitle',
+                        { category: categoryLabel }
+                      )
+                    }}
+                  </p>
+                </header>
+
+                <ImpactScoreCriteriaPanel
+                  variant="table"
+                  :vertical-id="category?.id ?? null"
+                />
+              </v-sheet>
+            </section>
+
+            <section
               :id="sectionIds.overview"
               class="category-ecoscore__section"
               role="region"
@@ -709,6 +749,7 @@ import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryImpactScoreOrbit from '~/components/category/CategoryImpactScoreOrbit.vue'
 import AiAuditDisplay from '~/components/category/AiAuditDisplay.vue'
 import TextContent from '~/components/domains/content/TextContent.vue'
+import ImpactScoreCriteriaPanel from '~/components/impact-score/ImpactScoreCriteriaPanel.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 import { loadHighlightJs } from '~/utils/highlight-loader'
 import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
@@ -1065,6 +1106,7 @@ const navAriaLabel = computed(() =>
 )
 
 const sectionIds = {
+  availableCriteria: 'category-impact-available-criteria',
   overview: 'category-impact-overview',
   purpose: 'category-impact-purpose',
   criteria: 'category-impact-criteria',
@@ -1075,6 +1117,11 @@ const sectionIds = {
 type SectionId = (typeof sectionIds)[keyof typeof sectionIds]
 
 const navigationSections = computed(() => [
+  {
+    id: sectionIds.availableCriteria as SectionId,
+    label: t('category.ecoscorePage.navigation.availableCriteria'),
+    icon: 'mdi-format-list-checks',
+  },
   {
     id: sectionIds.overview as SectionId,
     label: t('category.ecoscorePage.navigation.overview'),
@@ -1359,6 +1406,11 @@ useSeoMeta({
   font-size: clamp(1.65rem, 1.5vw + 1.1rem, 2.25rem)
   line-height: 1.2
   font-weight: 700
+
+.category-ecoscore__subtitle
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+  line-height: 1.6
 
 .category-ecoscore__text-block
   margin-bottom: clamp(1.5rem, 3vw, 2.5rem)

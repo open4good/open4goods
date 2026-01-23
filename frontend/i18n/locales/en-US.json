@@ -749,6 +749,7 @@
       "navigation": {
         "aiAudit": "AI audit",
         "ariaLabel": "Impact Score section navigation",
+        "availableCriteria": "Available criteria",
         "criteria": "Criteria",
         "overview": "Overview",
         "purpose": "Purpose & data",
@@ -770,6 +771,10 @@
           "title": "Selected criteria and weights",
           "coefficientPrefix": "Counts for",
           "coefficientSuffix": "in the overall score"
+        },
+        "availableCriteria": {
+          "title": "Available criteria for {category}",
+          "subtitle": "Each Impact Score vertical uses criteria tailored to its products."
         },
         "overview": {
           "card": {
@@ -1462,6 +1467,11 @@
           "weight": "10%"
         }
       }
+    },
+    "availableCriteria": {
+      "eyebrow": "Criteria",
+      "title": "Available criteria",
+      "subtitle": "Explore the criteria used for each Impact Score vertical."
     },
     "principles": {
       "eyebrow": "Our principles",
@@ -3602,6 +3612,19 @@
         "aplat": "parallax-aplats.svg"
       }
     }
+  },
+  "impactScoreCriteriaPanel": {
+    "filters": {
+      "label": "Filter by vertical",
+      "all": "All criteria"
+    },
+    "table": {
+      "name": "Name",
+      "utility": "Utility",
+      "icon": "Icon"
+    },
+    "utilityFallback": "Utility to be clarified",
+    "empty": "No criteria available yet."
   },
   "docs": {
     "labels": {

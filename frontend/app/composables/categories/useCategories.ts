@@ -119,6 +119,44 @@ export const useCategories = () => {
     })
   }
 
+  const fetchCategoryById = async (
+    id: string,
+    options?: { forceRefresh?: boolean }
+  ): Promise<VerticalConfigFullDto> => {
+    const forceRefresh = options?.forceRefresh ?? false
+    const cachedDetail = categoryDetailCache.value[id]
+
+    if (
+      !forceRefresh &&
+      cachedDetail &&
+      Date.now() - cachedDetail.timestamp < TWO_HOURS_MS
+    ) {
+      return cachedDetail.data
+    }
+
+    loading.value = true
+
+    try {
+      const detailHeaders = buildRequestHeaders()
+      const detail = await $fetch<VerticalConfigFullDto>(
+        `/api/categories/${encodeURIComponent(id)}`,
+        detailHeaders ? { headers: detailHeaders } : undefined
+      )
+
+      categoryDetailCache.value[id] = {
+        data: detail,
+        timestamp: Date.now(),
+      }
+      return detail
+    } catch (err) {
+      error.value =
+        err instanceof Error ? err.message : 'Failed to resolve category detail'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   /**
    * Select a category based on its slug and load its details
    * @param slug - Category slug to match against verticalHomeUrl
@@ -154,41 +192,12 @@ export const useCategories = () => {
       throw notFoundError
     }
 
-    loading.value = true
-
-    try {
-      activeCategoryId.value = matchingCategory.id
-
-      const cachedDetail =
-        categoryDetailCache.value[matchingCategory.id] ??
-        categoryDetailCache.value[slug]
-
-      if (cachedDetail && Date.now() - cachedDetail.timestamp < TWO_HOURS_MS) {
-        currentCategory.value = cachedDetail.data
-        return cachedDetail.data
-      }
-
-      const detailHeaders = buildRequestHeaders()
-      const detail = await $fetch<VerticalConfigFullDto>(
-        `/api/categories/${encodeURIComponent(matchingCategory.id)}`,
-        detailHeaders ? { headers: detailHeaders } : undefined
-      )
-
-      currentCategory.value = detail
-      categoryDetailCache.value[matchingCategory.id] = {
-        data: detail,
-        timestamp: Date.now(),
-      }
-      categoryDetailCache.value[slug] =
-        categoryDetailCache.value[matchingCategory.id]
-      return detail
-    } catch (err) {
-      error.value =
-        err instanceof Error ? err.message : 'Failed to resolve category detail'
-      throw err
-    } finally {
-      loading.value = false
-    }
+    const detail = await fetchCategoryById(matchingCategory.id)
+    activeCategoryId.value = matchingCategory.id
+    currentCategory.value = detail
+    categoryDetailCache.value[slug] =
+      categoryDetailCache.value[matchingCategory.id]
+    return detail
   }
 
   /**
@@ -216,6 +225,7 @@ export const useCategories = () => {
 
     // Actions
     fetchCategories,
+    fetchCategoryById,
     selectCategoryBySlug,
     clearError,
     resetCategorySelection,
