@@ -57,7 +57,7 @@
 
     <v-container
       v-if="shouldShowResults"
-      class="search-page__actions py-2 px-4 mx-auto d-flex align-center"
+      class="search-page__actions py-2 px-4 mx-auto d-flex align-center justify-center"
       max-width="xl"
     >
       <v-btn
@@ -262,20 +262,6 @@
                     {{ t('search.columns.products.subtitle') }}
                   </p>
                 </div>
-                <div class="search-page__column-actions">
-                  <v-select
-                    v-if="isFiltered"
-                    v-model="sortOption"
-                    :items="sortOptions"
-                    item-title="label"
-                    item-value="value"
-                    density="compact"
-                    variant="outlined"
-                    hide-details
-                    class="search-page__sort-select"
-                    prepend-inner-icon="mdi-sort"
-                  />
-                </div>
               </div>
 
               <div
@@ -327,7 +313,6 @@ import type {
   FieldMetadataDto,
   AggregationResponseDto,
   SortDto,
-  SearchType,
 } from '~~/shared/api-client'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -339,7 +324,7 @@ import CategoryFilterList from '~/components/category/filters/CategoryFilterList
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { useAnalytics } from '~/composables/useAnalytics'
 
-const MIN_QUERY_LENGTH = 2
+const MIN_QUERY_LENGTH = 3
 const VERTICAL_RESULTS_LIMIT = 4
 
 definePageMeta({
@@ -360,18 +345,9 @@ const routeQuery = computed(() =>
   typeof route.query.q === 'string' ? route.query.q : ''
 )
 const searchInput = ref(routeQuery.value)
-const requestedSearchType = ref<SearchType>('auto')
-
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
-const sortOption = ref<string>('impact')
 const openPanels = ref<number[]>([0])
-
-const sortOptions = computed(() => [
-  { label: t('category.sorting.score'), value: 'impact' },
-  { label: t('category.sorting.priceAsc'), value: 'price_asc' },
-  { label: t('category.sorting.priceDesc'), value: 'price_desc' },
-])
 
 watch(
   routeQuery,
@@ -419,12 +395,11 @@ const { data, pending, error, refresh } =
         headers: requestHeaders,
         body: {
           query: normalizedQuery.value,
-          searchType: requestedSearchType.value,
         },
       })
     },
     {
-      watch: [() => normalizedQuery.value, () => requestedSearchType.value],
+      watch: [() => normalizedQuery.value],
       immediate: hasMinimumLength.value,
     }
   )
@@ -452,56 +427,23 @@ const manualFields: FieldMetadataDto[] = [
     valueType: 'numeric',
   },
   {
-    mapping: 'scores.ECOSCORE.value',
-    title: '',
-    valueType: 'numeric',
-  },
-  {
     mapping: 'price.conditions', // backend mapping for condition
     title: '',
     valueType: 'keyword',
-  },
-  {
-    mapping: 'creationDate',
-    title: '',
-    valueType: 'numeric',
-  },
-  {
-    mapping: 'lastChange',
-    title: '',
-    valueType: 'numeric',
   },
 ]
 
 const filterFields = computed(() => manualFields)
 
-const currentSort = computed<SortDto[]>(() => {
-  switch (sortOption.value) {
-    case 'price_asc':
-      return [{ field: 'price.minPrice.price', order: 'asc' }]
-    case 'price_desc':
-      return [{ field: 'price.minPrice.price', order: 'desc' }]
-    case 'impact':
-    default:
-      return [{ field: 'scores.ECOSCORE.value', order: 'desc' }] // Default Sort: Impact Score DESC
-  }
-})
-
 const aggregationDefinition = computed(() => ({
   aggs: [
     { name: 'price', field: 'price.minPrice.price', type: 'range' },
-    { name: 'ecoscore', field: 'scores.ECOSCORE.value', type: 'range' },
     { name: 'condition', field: 'price.conditions', type: 'terms' },
-    { name: 'creationDate', field: 'creationDate', type: 'range' },
-    { name: 'lastChange', field: 'lastChange', type: 'range' },
   ],
 }))
 
 const requestBody = computed<ProductSearchRequestDto>(() => ({
   filters: filterRequest.value,
-  sort: {
-    sorts: currentSort.value,
-  },
   aggs: aggregationDefinition.value,
   semanticSearch: hasMinimumLength.value ? true : undefined,
 }))

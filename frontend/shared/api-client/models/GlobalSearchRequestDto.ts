@@ -25,25 +25,7 @@ export interface GlobalSearchRequestDto {
      * @memberof GlobalSearchRequestDto
      */
     query?: string;
-    /**
-     * Search type controlling the starting mode. Defaults to auto when omitted.
-     * @type {string}
-     * @memberof GlobalSearchRequestDto
-     */
-    searchType?: GlobalSearchRequestDtoSearchTypeEnum;
 }
-
-
-/**
- * @export
- */
-export const GlobalSearchRequestDtoSearchTypeEnum = {
-    Auto: 'auto',
-    ExactVertical: 'exact_vertical',
-    Global: 'global',
-    Semantic: 'semantic'
-} as const;
-export type GlobalSearchRequestDtoSearchTypeEnum = typeof GlobalSearchRequestDtoSearchTypeEnum[keyof typeof GlobalSearchRequestDtoSearchTypeEnum];
 
 
 /**
@@ -64,7 +46,6 @@ export function GlobalSearchRequestDtoFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'query': json['query'] == null ? undefined : json['query'],
-        'searchType': json['searchType'] == null ? undefined : json['searchType'],
     };
 }
 
@@ -80,7 +61,5 @@ export function GlobalSearchRequestDtoToJSONTyped(value?: GlobalSearchRequestDto
     return {
         
         'query': value['query'],
-        'searchType': value['searchType'],
     };
 }
-

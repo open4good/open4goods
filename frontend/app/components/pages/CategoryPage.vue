@@ -124,16 +124,15 @@
                     :vertical-home-url="category?.verticalHomeUrl"
                     :category-name="categoryDisplayName"
                   />
-                  <v-btn
-                    block
-                    color="primary"
-                    variant="flat"
-                    prepend-icon="mdi-robot-love"
-                    class="category-page__nudge-cta"
+                  <CategoryCtaCard
+                    class="category-page__assistant-cta"
+                    icon="mdi-robot-outline"
+                    :title="$t('category.filters.assistant.title')"
+                    :subtitle="$t('category.filters.assistant.description')"
+                    :aria-label="$t('category.filters.assistant.ariaLabel')"
+                    clickable
                     @click="isNudgeWizardOpen = true"
-                  >
-                    {{ $t('category.hero.nudge.cta') }}
-                  </v-btn>
+                  />
                 </div>
               </template>
             </CategoryFiltersSidebar>
@@ -181,16 +180,15 @@
                     :vertical-home-url="category?.verticalHomeUrl"
                     :category-name="categoryDisplayName"
                   />
-                  <v-btn
-                    block
-                    color="primary"
-                    variant="flat"
-                    prepend-icon="mdi-robot-love"
-                    class="category-page__nudge-cta"
+                  <CategoryCtaCard
+                    class="category-page__assistant-cta"
+                    icon="mdi-robot-outline"
+                    :title="$t('category.filters.assistant.title')"
+                    :subtitle="$t('category.filters.assistant.description')"
+                    :aria-label="$t('category.filters.assistant.ariaLabel')"
+                    clickable
                     @click="isNudgeWizardOpen = true"
-                  >
-                    {{ $t('category.hero.nudge.cta') }}
-                  </v-btn>
+                  />
                 </div>
               </template>
             </CategoryFiltersSidebar>
@@ -250,6 +248,7 @@
                         item-title="title"
                         item-value="value"
                         clearable
+                        :disabled="sortItems.length === 0"
                         hide-details
                         density="comfortable"
                       />
@@ -468,10 +467,12 @@ import CategoryProductCardGrid from '~/components/category/products/CategoryProd
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
+import CategoryCtaCard from '~/components/category/CategoryCtaCard.vue'
 import {
   CATEGORY_DEFAULT_VIEW_MODE,
   CATEGORY_PAGE_SIZES,
 } from '~/constants/category'
+import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useAnalytics } from '~/composables/useAnalytics'
@@ -1134,9 +1135,12 @@ const onToggleFiltersVisibility = () => {
 const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
 const pageNumber = ref(0)
 const searchTerm = ref('')
-const shouldUseSemanticSearch = computed(
-  () => searchTerm.value.trim().length > 0
+const MIN_QUERY_LENGTH = 3
+const normalizedSearchTerm = computed(() => searchTerm.value.trim())
+const hasMinimumSearchLength = computed(
+  () => normalizedSearchTerm.value.length >= MIN_QUERY_LENGTH
 )
+const shouldUseSemanticSearch = computed(() => hasMinimumSearchLength.value)
 const sortField = ref<string | null>(null)
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const activeSubsetIds = ref<string[]>([])
@@ -1380,13 +1384,26 @@ const combinedFilters = computed<FilterRequestDto | undefined>(() =>
 
 const pageSize = computed(() => CATEGORY_PAGE_SIZES[viewMode.value])
 
+const hasSortOptions = computed(() => {
+  const options = sortOptions.value
+  return Boolean(
+    options?.global?.length ||
+      options?.impact?.length ||
+      options?.technical?.length
+  )
+})
+
 const defaultSortField = computed<string | null>(() => {
   const impactFields = sortOptions.value?.impact ?? []
   const candidate = impactFields.find(
     field => typeof field.mapping === 'string'
   )
 
-  return candidate?.mapping ? String(candidate.mapping) : null
+  if (candidate?.mapping) {
+    return String(candidate.mapping)
+  }
+
+  return hasSortOptions.value ? null : ECOSCORE_RELATIVE_FIELD
 })
 
 const applyDefaultSort = () => {
@@ -1411,16 +1428,29 @@ const sortItems = computed(() => {
   ]
 
   const seen = new Set<string>()
-
-  return fields
-    .filter(field => field.mapping && !seen.has(field.mapping))
+  const options = fields
+    .filter(
+      field => typeof field.mapping === 'string' && !seen.has(field.mapping)
+    )
     .map(field => {
-      seen.add(field.mapping as string)
+      const mapping = field.mapping as string
+      seen.add(mapping)
       return {
-        value: field.mapping as string,
+        value: mapping,
         title: resolveSortFieldTitle(field, t),
       }
     })
+
+  if (options.length) {
+    return options
+  }
+
+  return [
+    {
+      value: ECOSCORE_RELATIVE_FIELD,
+      title: t('category.products.sort.fields.impactScore'),
+    },
+  ]
 })
 
 watch(defaultSortField, (value, previous) => {
@@ -1851,7 +1881,9 @@ const fetchProducts = async () => {
           verticalId: verticalId.value,
           pageNumber: pageNumber.value,
           pageSize: pageSize.value,
-          query: searchTerm.value || undefined,
+          query: hasMinimumSearchLength.value
+            ? normalizedSearchTerm.value
+            : undefined,
           semanticSearch: shouldUseSemanticSearch.value ? true : undefined,
           sort: sortRequest.value,
           filters: combinedFilters.value,
@@ -2435,7 +2467,7 @@ const clearAllFilters = () => {
     flex-direction: column
     gap: 0.75rem
 
-  &__nudge-cta
+  &__assistant-cta
     box-shadow: 0 14px 28px -22px rgba(var(--v-theme-shadow-primary-600), 0.45)
 
   &__results

@@ -34,29 +34,12 @@ export interface GlobalSearchVerticalGroupDto {
      */
     verticalId?: string;
     /**
-     * Effective search mode that produced the group
-     * @type {string}
-     * @memberof GlobalSearchVerticalGroupDto
-     */
-    searchMode?: GlobalSearchVerticalGroupDtoSearchModeEnum;
-    /**
      * Ordered results belonging to the vertical
      * @type {Array<GlobalSearchResultDto>}
      * @memberof GlobalSearchVerticalGroupDto
      */
     results?: Array<GlobalSearchResultDto>;
 }
-
-
-/**
- * @export
- */
-export const GlobalSearchVerticalGroupDtoSearchModeEnum = {
-    ExactVertical: 'exact_vertical',
-    Global: 'global',
-    Semantic: 'semantic'
-} as const;
-export type GlobalSearchVerticalGroupDtoSearchModeEnum = typeof GlobalSearchVerticalGroupDtoSearchModeEnum[keyof typeof GlobalSearchVerticalGroupDtoSearchModeEnum];
 
 
 /**
@@ -77,7 +60,6 @@ export function GlobalSearchVerticalGroupDtoFromJSONTyped(json: any, ignoreDiscr
     return {
         
         'verticalId': json['verticalId'] == null ? undefined : json['verticalId'],
-        'searchMode': json['searchMode'] == null ? undefined : json['searchMode'],
         'results': json['results'] == null ? undefined : ((json['results'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
     };
 }
@@ -94,8 +76,6 @@ export function GlobalSearchVerticalGroupDtoToJSONTyped(value?: GlobalSearchVert
     return {
         
         'verticalId': value['verticalId'],
-        'searchMode': value['searchMode'],
         'results': value['results'] == null ? undefined : ((value['results'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
     };
 }
-
