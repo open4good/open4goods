@@ -12,6 +12,18 @@ const VChipStub = defineComponent({
     return () => h('span', { class: 'v-chip-stub' }, slots.default?.())
   },
 })
+const VIconStub = defineComponent({
+  name: 'VIconStub',
+  props: ['icon'],
+  setup(props) {
+    return () =>
+      h(
+        'span',
+        { class: 'v-icon-stub', 'data-icon': props.icon },
+        props.icon
+      )
+  },
+})
 
 describe('ProductImpactSubscoreGenericCard', () => {
   // ... existing i18n setup ...
@@ -117,6 +129,8 @@ describe('ProductImpactSubscoreGenericCard', () => {
         plugins: [i18n],
         stubs: {
           ProductImpactSubscoreChart: true,
+          VChip: VChipStub,
+          VIcon: VIconStub,
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
             props: [
@@ -178,6 +192,8 @@ describe('ProductImpactSubscoreGenericCard', () => {
         plugins: [i18n],
         stubs: {
           ProductImpactSubscoreChart: true,
+          VChip: VChipStub,
+          VIcon: VIconStub,
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
             props: [
@@ -228,9 +244,10 @@ describe('ProductImpactSubscoreGenericCard', () => {
         plugins: [i18n],
         stubs: {
           ProductImpactSubscoreChart: true,
+          VChip: VChipStub,
+          VIcon: VIconStub,
           ImpactCoefficientBadge: true,
           ClientOnly: true,
-          'v-chip': VChipStub,
         },
       },
     })

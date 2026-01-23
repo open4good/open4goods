@@ -3,18 +3,18 @@
     <div class="impact-subscore-header__info">
       <h4 class="impact-subscore-header__title">
         {{ title }}
-        <div v-if="lifecycle?.length" class="impact-subscore-header__chips">
-          <v-chip
-            v-for="stage in lifecycle"
-            :key="stage"
-            :color="lifecycleColors[stage] ?? 'surface-ice-100'"
-            size="x-small"
-            variant="tonal"
-          >
-            {{ lifecycleLabels[stage] ?? stage }}
-          </v-chip>
-        </div>
       </h4>
+      <div v-if="lifecycle?.length" class="impact-subscore-header__chips">
+        <v-chip
+          v-for="stage in lifecycle"
+          :key="stage"
+          :color="lifecycleColors[stage] ?? 'surface-ice-100'"
+          size="x-small"
+          variant="tonal"
+        >
+          {{ lifecycleLabels[stage] ?? stage }}
+        </v-chip>
+      </div>
       <p v-if="subtitle" class="impact-subscore-header__subtitle">
         {{ subtitle }}
       </p>
@@ -83,10 +83,6 @@ const lifecycleColors: Record<string, string> = {
 }
 
 .impact-subscore-header__title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;

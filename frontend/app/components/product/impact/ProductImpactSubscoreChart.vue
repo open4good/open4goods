@@ -1,5 +1,8 @@
 <template>
   <div v-if="hasData" class="impact-subscore-chart">
+    <p class="impact-subscore-chart__title">
+      {{ t('product.impact.subscoreChart.title') }}
+    </p>
     <v-btn-toggle
       v-if="hasNormalizedView"
       v-model="viewMode"
@@ -85,6 +88,9 @@ const filteredDistribution = computed(() =>
 
 const hasData = computed(() => filteredDistribution.value.length > 0)
 const hasNormalizedView = computed(() => resolveNormalizationAvailability().supported)
+const normalizationMethod = computed(
+  () => (props.normalizationMethod ?? 'SIGMA').toUpperCase()
+)
 
 type BucketRange = {
   min?: number
@@ -340,7 +346,7 @@ const chartOption = computed<EChartsOption | null>(() => {
 })
 
 const resolveNormalizationAvailability = () => {
-  const method = (props.normalizationMethod ?? 'SIGMA').toUpperCase()
+  const method = normalizationMethod.value
   if (method === 'SIGMA') {
     return {
       supported:
@@ -353,6 +359,13 @@ const resolveNormalizationAvailability = () => {
       supported:
         typeof props.normalizationParams?.fixedMin === 'number' &&
         typeof props.normalizationParams?.fixedMax === 'number',
+    }
+  }
+  if (method === 'MINMAX_QUANTILE') {
+    return {
+      supported:
+        typeof props.normalizationParams?.quantileLow === 'number' &&
+        typeof props.normalizationParams?.quantileHigh === 'number',
     }
   }
   if (method === 'FIXED_MAPPING') {
@@ -370,6 +383,11 @@ const resolveNormalizationAvailability = () => {
       supported: typeof props.normalizationParams?.constantValue === 'number',
     }
   }
+  if (method === 'PERCENTILE') {
+    return {
+      supported: hasData.value,
+    }
+  }
 
   return { supported: false }
 }
@@ -382,7 +400,7 @@ const normalizeValue = (value: number | null | undefined): number | null => {
     return null
   }
 
-  const method = (props.normalizationMethod ?? 'SIGMA').toUpperCase()
+  const method = normalizationMethod.value
   if (method === 'SIGMA') {
     if (
       typeof props.averageValue !== 'number' ||
@@ -404,6 +422,17 @@ const normalizeValue = (value: number | null | undefined): number | null => {
   if (method === 'MINMAX_FIXED') {
     const min = props.normalizationParams?.fixedMin
     const max = props.normalizationParams?.fixedMax
+    if (typeof min !== 'number' || typeof max !== 'number') {
+      return null
+    }
+    const normalized = (value - min) / (max - min)
+    const scaled = normalized * resolveScaleMax()
+    return applyImpactDirection(clampValue(scaled))
+  }
+
+  if (method === 'MINMAX_QUANTILE') {
+    const min = props.normalizationParams?.quantileLow
+    const max = props.normalizationParams?.quantileHigh
     if (typeof min !== 'number' || typeof max !== 'number') {
       return null
     }
@@ -459,8 +488,29 @@ const applyImpactDirection = (value: number) => {
   return resolveScaleMax() - value + resolveScaleMin()
 }
 
-const buildNormalizedDistribution = () =>
-  filteredDistribution.value.map(bucket => {
+const buildNormalizedDistribution = () => {
+  if (normalizationMethod.value === 'PERCENTILE') {
+    const total = filteredDistribution.value.reduce(
+      (sum, bucket) => sum + bucket.value,
+      0
+    )
+    if (!total) {
+      return filteredDistribution.value
+    }
+    let cumulative = 0
+    return filteredDistribution.value.map(bucket => {
+      const percentile = (cumulative + 0.5 * bucket.value) / total
+      cumulative += bucket.value
+      const scaled = percentile * resolveScaleMax()
+      const normalized = applyImpactDirection(clampValue(scaled))
+      return {
+        ...bucket,
+        label: formatBucketValue(normalized),
+      }
+    })
+  }
+
+  return filteredDistribution.value.map(bucket => {
     const range = parseBucketRange(bucket.label)
     if (!range) {
       return bucket
@@ -499,6 +549,7 @@ const buildNormalizedDistribution = () =>
 
     return bucket
   })
+}
 
 const formatBucketValue = (value: number) =>
   new Intl.NumberFormat(undefined, {
@@ -506,7 +557,12 @@ const formatBucketValue = (value: number) =>
     minimumFractionDigits: 0,
   }).format(value)
 
-const resolveNormalizedAverage = () => normalizeValue(props.averageValue)
+const resolveNormalizedAverage = () => {
+  if (normalizationMethod.value === 'PERCENTILE') {
+    return null
+  }
+  return normalizeValue(props.averageValue)
+}
 </script>
 
 <style scoped>
@@ -515,6 +571,13 @@ const resolveNormalizedAverage = () => normalizeValue(props.averageValue)
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.impact-subscore-chart__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .impact-subscore-chart__toggle {

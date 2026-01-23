@@ -6,7 +6,7 @@
       :lifecycle="score.participateInACV ?? []"
     />
 
-    <div class="impact-subscore__value">
+    <div class="impact-subscore__value mt-8">
       <div class="impact-subscore__value-primary">
         <slot
           name="visual"

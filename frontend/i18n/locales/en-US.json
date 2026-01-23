@@ -2703,6 +2703,7 @@
       "subscoreChart": {
         "markerAverage": "Average for {scoreLabel} sits here.",
         "markerProduct": "{productName} sits here.",
+        "title": "Criteria distribution",
         "toggleAbsolute": "Values",
         "toggleNormalized": "Scores",
         "unknownProduct": "This product"
@@ -2739,6 +2740,34 @@
               "fixed_mapping": "The score follows a fixed mapping defined in configuration.",
               "binary": "The score is binary based on a threshold.",
               "constant": "The score is set to a constant value defined in configuration."
+            }
+          },
+          "statisticalMethod": {
+            "title": "Statistical method",
+            "sigma": {
+              "bounds": "Normalization spans [{sigmaLower}{unit} ; {sigmaUpper}{unit}] based on {sigmaK}σ around the mean.",
+              "scoring": "The score is computed by comparing the value with the ±{sigmaK}σ bounds around the mean.",
+              "distribution": "Standard deviation ({sigma}{unit}) is used so extreme values do not overshadow common products."
+            },
+            "percentile": {
+              "scoring": "The score is derived from the percentile rank within the distribution.",
+              "value": "This product sits around the {percentile}th percentile."
+            },
+            "minmax_fixed": {
+              "scoring": "The score is scaled between the fixed bounds [{fixedMin}{unit} ; {fixedMax}{unit}]."
+            },
+            "minmax_quantile": {
+              "scoring": "The score is scaled using quantile bounds [{quantileLow}{unit} ; {quantileHigh}{unit}] to limit outliers."
+            },
+            "fixed_mapping": {
+              "scoring": "The score follows a fixed mapping defined in configuration."
+            },
+            "binary": {
+              "scoring_greater": "The score is set to {scaleMax} when the value is ≥ {threshold}{unit}, otherwise {scaleMin}.",
+              "scoring_lower": "The score is set to {scaleMax} when the value is ≤ {threshold}{unit}, otherwise {scaleMin}."
+            },
+            "constant": {
+              "scoring": "The score is fixed at {constantValue} regardless of the value."
             }
           }
         },
