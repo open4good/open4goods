@@ -6,6 +6,7 @@ import type {
   ProductIndexedAttributeDto,
   ProductSourcedAttributeDto,
 } from '~~/shared/api-client'
+import { applyAiReviewReferenceLinks } from './ai-review-references'
 
 const normaliseSourcesSet = (
   sourcing: ProductAttributeSourceDto | null | undefined
@@ -69,6 +70,10 @@ export const normaliseProductDto = <T extends ProductDto | null | undefined>(
 ): T => {
   if (!product) {
     return product
+  }
+
+  if (product.aiReview?.review) {
+    applyAiReviewReferenceLinks(product.aiReview.review)
   }
 
   const { attributes } = product

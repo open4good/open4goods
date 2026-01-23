@@ -1,7 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, nextTick } from 'vue'
 import ProductAiReviewSection from './ProductAiReviewSection.vue'
 import type {
   AiReviewAttributeDto,
@@ -469,5 +469,35 @@ describe('ProductAiReviewSection', () => {
       'Unavailable'
     )
     expect(wrapper.find('.product-ai-review__content').exists()).toBe(false)
+  })
+
+  it('expands the sources list when clicking on a hidden reference', async () => {
+    const sources = Array.from({ length: 6 }, (_, index) => ({
+      number: index + 1,
+      name: `Source ${index + 1}`,
+      description: `Source ${index + 1} description`,
+      url: `https://example.com/source-${index + 1}`,
+    }))
+
+    const review: AiReviewDto = {
+      summary:
+        'See details <a class="review-ref" href="#review-ref-6">[6]</a>.',
+      pros: ['Good image'],
+      cons: ['Limited ports'],
+      technicalReview: '<p>Specs</p>',
+      ecologicalReview: '<p>Eco</p>',
+      sources,
+    }
+
+    const wrapper = await mountComponent({ initialReview: review })
+    await nextTick()
+
+    expect(wrapper.find('#review-ref-6').exists()).toBe(false)
+
+    await wrapper.find('a.review-ref').trigger('click')
+    await nextTick()
+    await nextTick()
+
+    expect(wrapper.find('#review-ref-6').exists()).toBe(true)
   })
 })
