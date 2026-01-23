@@ -8,10 +8,12 @@
 - \(\mu\) : moyenne des valeurs dans la population de référence
 - \(\sigma\) : écart-type
 - \(N\) : nombre d’observations
+- \(S_{min}\) : score minimum (par défaut 0)
 - \(S_{max}\) : score maximum (par défaut 5)
 - `impactBetterIs` : sens « meilleur » pour le score impact
+- `statsScope.population` : population statistique (par défaut `VERTICAL`)
 
-On suppose que la normalisation produit un score \(s\in[0,S_{max}]\).
+On suppose que la normalisation produit un score \(s\in[S_{min},S_{max}]\).
 
 ## 2) Sigma scoring (standard deviation)
 
@@ -97,7 +99,7 @@ Ex : classe énergétique {A,B,C,D,E,F,G}
 Après calcul du score \(s\) :
 - si `impactBetterIs = LOWER` :
 \[
-s' = S_{max} - s
+s' = S_{max} + S_{min} - s
 \]
 - sinon : \(s'=s\)
 

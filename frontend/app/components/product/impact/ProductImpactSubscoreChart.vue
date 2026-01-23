@@ -1,5 +1,19 @@
 <template>
   <div v-if="hasData" class="impact-subscore-chart">
+    <v-btn-toggle
+      v-if="hasNormalizedView"
+      v-model="viewMode"
+      density="compact"
+      class="impact-subscore-chart__toggle"
+      mandatory
+    >
+      <v-btn value="absolute" variant="text" size="small">
+        {{ t('product.impact.subscoreChart.toggleAbsolute') }}
+      </v-btn>
+      <v-btn value="normalized" variant="text" size="small">
+        {{ t('product.impact.subscoreChart.toggleNormalized') }}
+      </v-btn>
+    </v-btn-toggle>
     <ClientOnly>
       <VueECharts
         v-if="chartOption"
@@ -15,10 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { EChartsOption } from 'echarts'
-import type { DistributionBucket } from './impact-types'
+import type { DistributionBucket, ScoreNormalizationParams } from './impact-types'
 import { ensureECharts } from '~/utils/echarts-loader'
 
 let echartsRegistered = false
@@ -28,10 +42,17 @@ const props = defineProps<{
   label: string
   averageValue?: number | null
   currentValue?: number | null
+  normalizedCurrentValue?: number | null
+  normalizationMethod?: string | null
+  normalizationParams?: ScoreNormalizationParams | null
+  scale?: { min?: number | null; max?: number | null } | null
+  impactBetterIs?: 'GREATER' | 'LOWER' | null
+  stdDev?: number | null
   productName?: string
 }>()
 
 const { t } = useI18n()
+const viewMode = ref<'absolute' | 'normalized'>('absolute')
 
 const VueECharts = defineAsyncComponent(async () => {
   if (import.meta.client) {
@@ -63,6 +84,7 @@ const filteredDistribution = computed(() =>
 )
 
 const hasData = computed(() => filteredDistribution.value.length > 0)
+const hasNormalizedView = computed(() => resolveNormalizationAvailability().supported)
 
 type BucketRange = {
   min?: number
@@ -217,17 +239,23 @@ const chartOption = computed<EChartsOption | null>(() => {
     return null
   }
 
-  const dataValues = filteredDistribution.value.map(bucket => bucket.value)
+  const displayDistribution =
+    viewMode.value === 'normalized' && hasNormalizedView.value
+      ? buildNormalizedDistribution()
+      : filteredDistribution.value
+  const dataValues = displayDistribution.map(bucket => bucket.value)
   const maxValue = Math.max(0, ...dataValues)
   const yAxisMax = Math.max(1, Math.ceil(maxValue * 1.2))
-  const productIndex = resolveBucketIndex(
-    props.currentValue,
-    filteredDistribution.value
-  )
-  const averageIndex = resolveBucketIndex(
-    props.averageValue,
-    filteredDistribution.value
-  )
+  const productValue =
+    viewMode.value === 'normalized' && hasNormalizedView.value
+      ? props.normalizedCurrentValue ?? null
+      : props.currentValue
+  const averageValue =
+    viewMode.value === 'normalized' && hasNormalizedView.value
+      ? resolveNormalizedAverage()
+      : props.averageValue
+  const productIndex = resolveBucketIndex(productValue, displayDistribution)
+  const averageIndex = resolveBucketIndex(averageValue, displayDistribution)
 
   const buildMarkerSeries = (
     name: string,
@@ -292,7 +320,7 @@ const chartOption = computed<EChartsOption | null>(() => {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: {
       type: 'category',
-      data: filteredDistribution.value.map(bucket => bucket.label),
+      data: displayDistribution.map(bucket => bucket.label),
       axisLabel: { rotate: 35 },
     },
     yAxis: { type: 'value', max: yAxisMax },
@@ -310,11 +338,187 @@ const chartOption = computed<EChartsOption | null>(() => {
     ],
   }
 })
+
+const resolveNormalizationAvailability = () => {
+  const method = (props.normalizationMethod ?? 'SIGMA').toUpperCase()
+  if (method === 'SIGMA') {
+    return {
+      supported:
+        typeof props.averageValue === 'number' &&
+        typeof props.stdDev === 'number',
+    }
+  }
+  if (method === 'MINMAX_FIXED') {
+    return {
+      supported:
+        typeof props.normalizationParams?.fixedMin === 'number' &&
+        typeof props.normalizationParams?.fixedMax === 'number',
+    }
+  }
+  if (method === 'FIXED_MAPPING') {
+    return {
+      supported: Boolean(props.normalizationParams?.mapping),
+    }
+  }
+  if (method === 'BINARY') {
+    return {
+      supported: typeof props.normalizationParams?.threshold === 'number',
+    }
+  }
+  if (method === 'CONSTANT') {
+    return {
+      supported: typeof props.normalizationParams?.constantValue === 'number',
+    }
+  }
+
+  return { supported: false }
+}
+
+const resolveScaleMin = () => props.scale?.min ?? 0
+const resolveScaleMax = () => props.scale?.max ?? 5
+
+const normalizeValue = (value: number | null | undefined): number | null => {
+  if (value == null || !Number.isFinite(value)) {
+    return null
+  }
+
+  const method = (props.normalizationMethod ?? 'SIGMA').toUpperCase()
+  if (method === 'SIGMA') {
+    if (
+      typeof props.averageValue !== 'number' ||
+      typeof props.stdDev !== 'number'
+    ) {
+      return null
+    }
+    const sigmaK = props.normalizationParams?.sigmaK ?? 2
+    const lowerBound = props.averageValue - sigmaK * props.stdDev
+    const upperBound = props.averageValue + sigmaK * props.stdDev
+    if (Math.abs(upperBound - lowerBound) < 0.000001) {
+      return (resolveScaleMin() + resolveScaleMax()) / 2
+    }
+    const normalized = (value - lowerBound) / (upperBound - lowerBound)
+    const scaled = normalized * resolveScaleMax()
+    return applyImpactDirection(clampValue(scaled))
+  }
+
+  if (method === 'MINMAX_FIXED') {
+    const min = props.normalizationParams?.fixedMin
+    const max = props.normalizationParams?.fixedMax
+    if (typeof min !== 'number' || typeof max !== 'number') {
+      return null
+    }
+    const normalized = (value - min) / (max - min)
+    const scaled = normalized * resolveScaleMax()
+    return applyImpactDirection(clampValue(scaled))
+  }
+
+  if (method === 'FIXED_MAPPING') {
+    const mapping = props.normalizationParams?.mapping
+    if (!mapping) {
+      return null
+    }
+    const key = Number.isFinite(value) ? String(value) : ''
+    const mapped = mapping[key] ?? mapping[String(value)]
+    if (typeof mapped !== 'number') {
+      return null
+    }
+    return applyImpactDirection(clampValue(mapped))
+  }
+
+  if (method === 'BINARY') {
+    const threshold = props.normalizationParams?.threshold
+    if (typeof threshold !== 'number') {
+      return null
+    }
+    const greaterIsPass = props.normalizationParams?.greaterIsPass ?? true
+    const pass = greaterIsPass ? value >= threshold : value <= threshold
+    return applyImpactDirection(pass ? resolveScaleMax() : resolveScaleMin())
+  }
+
+  if (method === 'CONSTANT') {
+    const constantValue = props.normalizationParams?.constantValue
+    if (typeof constantValue !== 'number') {
+      return null
+    }
+    return applyImpactDirection(clampValue(constantValue))
+  }
+
+  return null
+}
+
+const clampValue = (value: number) => {
+  const min = resolveScaleMin()
+  const max = resolveScaleMax()
+  return Math.max(min, Math.min(max, value))
+}
+
+const applyImpactDirection = (value: number) => {
+  if (props.impactBetterIs !== 'LOWER') {
+    return value
+  }
+  return resolveScaleMax() - value + resolveScaleMin()
+}
+
+const buildNormalizedDistribution = () =>
+  filteredDistribution.value.map(bucket => {
+    const range = parseBucketRange(bucket.label)
+    if (!range) {
+      return bucket
+    }
+
+    if (range.exact != null) {
+      const normalized = normalizeValue(range.exact)
+      return {
+        ...bucket,
+        label: normalized != null ? formatBucketValue(normalized) : bucket.label,
+      }
+    }
+
+    const min = range.min != null ? normalizeValue(range.min) : null
+    const max = range.max != null ? normalizeValue(range.max) : null
+    if (min != null && max != null) {
+      return {
+        ...bucket,
+        label: `${formatBucketValue(min)}–${formatBucketValue(max)}`,
+      }
+    }
+
+    if (min != null) {
+      return {
+        ...bucket,
+        label: `≥ ${formatBucketValue(min)}`,
+      }
+    }
+
+    if (max != null) {
+      return {
+        ...bucket,
+        label: `≤ ${formatBucketValue(max)}`,
+      }
+    }
+
+    return bucket
+  })
+
+const formatBucketValue = (value: number) =>
+  new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+  }).format(value)
+
+const resolveNormalizedAverage = () => normalizeValue(props.averageValue)
 </script>
 
 <style scoped>
 .impact-subscore-chart {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.impact-subscore-chart__toggle {
+  align-self: flex-start;
 }
 
 .impact-subscore-chart__echart {

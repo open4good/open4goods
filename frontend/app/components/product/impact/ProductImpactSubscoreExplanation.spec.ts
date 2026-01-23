@@ -25,6 +25,14 @@ describe('ProductImpactSubscoreExplanation', () => {
     relativeValue: 3.5,
     on20: 14,
     betterIs: 'GREATER',
+    impactBetterIs: 'GREATER',
+    scoring: {
+      normalization: {
+        method: 'SIGMA',
+        params: { sigmaK: 2 },
+      },
+      scale: { min: 0, max: 5 },
+    },
     absolute: {
       min: 1.0,
       max: 5.0,
@@ -104,7 +112,7 @@ describe('ProductImpactSubscoreExplanation', () => {
   it('handles "betterIs LOWER" correctly (Worst is High, Best is Low)', () => {
     const scoreLower: ScoreView = {
       ...baseScore,
-      betterIs: 'LOWER',
+      impactBetterIs: 'LOWER',
       absolute: { ...baseScore.absolute!, min: 10, max: 50, avg: 30 },
     }
 

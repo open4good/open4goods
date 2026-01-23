@@ -10,10 +10,24 @@
 ##################################
 key: "POWER_CONSUMPTION_SDR"
 betterIs: "LOWER"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
 eprelFeatureNames:
   - powerOnModeSDR
 filteringType: "NUMERIC"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreTitle:
   fr: "Consommation électrique (SDR)"
 scoreDescription:

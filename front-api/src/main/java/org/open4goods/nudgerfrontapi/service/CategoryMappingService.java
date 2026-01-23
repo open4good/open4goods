@@ -36,6 +36,10 @@ import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolScoreDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolSubsetGroupDto;
+import org.open4goods.nudgerfrontapi.dto.category.ScoreNormalizationConfigDto;
+import org.open4goods.nudgerfrontapi.dto.category.ScoreNormalizationParamsDto;
+import org.open4goods.nudgerfrontapi.dto.category.ScoreScaleDto;
+import org.open4goods.nudgerfrontapi.dto.category.ScoreScoringConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.SiteNamingDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
@@ -454,12 +458,49 @@ public class CategoryMappingService {
                 defaultSet(attributeConfig.getParticipateInScores()),
                 defaultSet(attributeConfig.getParticipateInACV()),
                 attributeConfig.getBetterIs(),
+                attributeConfig.getUserBetterIs(),
+                attributeConfig.getImpactBetterIs(),
+                mapScoreScoringConfig(attributeConfig),
                 attributeConfig.getAttributeValuesOrdering(),
                 attributeConfig.getAttributeValuesReverseOrder(),
                 defaultMap(attributeConfig.getSynonyms()),
                 attributeConfig.getParser(),
                 defaultMap(attributeConfig.getNumericMapping()),
                 defaultMap(attributeConfig.getMappings()));
+    }
+
+    private ScoreScoringConfigDto mapScoreScoringConfig(AttributeConfig attributeConfig) {
+        if (attributeConfig == null || attributeConfig.getScoring() == null) {
+            return null;
+        }
+        var scoring = attributeConfig.getScoring();
+        var scale = scoring.getScale();
+        ScoreScaleDto scaleDto = scale == null ? null : new ScoreScaleDto(scale.getMin(), scale.getMax());
+        var normalization = scoring.getNormalization();
+        ScoreNormalizationConfigDto normalizationDto = null;
+        if (normalization != null) {
+            var params = normalization.getParams();
+            ScoreNormalizationParamsDto paramsDto = params == null
+                    ? null
+                    : new ScoreNormalizationParamsDto(
+                            params.getSigmaK(),
+                            params.getFixedMin(),
+                            params.getFixedMax(),
+                            params.getQuantileLow(),
+                            params.getQuantileHigh(),
+                            defaultMap(params.getMapping()),
+                            params.getConstantValue(),
+                            params.getThreshold(),
+                            params.getGreaterIsPass());
+            normalizationDto = new ScoreNormalizationConfigDto(normalization.getMethod(), paramsDto);
+        }
+        return new ScoreScoringConfigDto(
+                scaleDto,
+                normalizationDto,
+                scoring.getTransform(),
+                scoring.getMissingValuePolicy(),
+                scoring.getDegenerateDistributionPolicy(),
+                scoring.getStatsScope() == null ? null : scoring.getStatsScope().getPopulation());
     }
 
     /**

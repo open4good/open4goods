@@ -1564,7 +1564,10 @@ const resolveAttributeRow = (
   label?: string
 ): AttributeRow => {
   const icon = config?.icon ?? 'mdi-tune'
-  const betterIs = config?.betterIs === 'LOWER' ? 'lower' : 'higher'
+  const betterIs =
+    config?.userBetterIs === 'LOWER' || config?.betterIs === 'LOWER'
+      ? 'lower'
+      : 'higher'
 
   const rawValues = productEntries.value.map(entry =>
     resolveAttributeRawValueByKey(entry.product, key)
@@ -1708,8 +1711,9 @@ const classifiedAttributeGroups = computed<ClassifiedGroup[]>(() => {
           normalizeNumericValue(value)
         )
         const preference =
-          attributeConfigMap.value.get(attributeName ?? '')?.betterIs ===
-          'LOWER'
+          (attributeConfigMap.value.get(attributeName ?? '')?.userBetterIs ??
+            attributeConfigMap.value.get(attributeName ?? '')?.betterIs) ===
+            'LOWER'
             ? 'lower'
             : 'higher'
         row.highlight = computeHighlightSet(numericValues, preference)

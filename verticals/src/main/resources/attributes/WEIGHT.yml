@@ -1,5 +1,7 @@
 key: "WEIGHT"
 betterIs: "LOWER"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
 icecatFeaturesIds:
   - 94
   - 33015
@@ -12,6 +14,18 @@ suffix:
   fr: "kg"
 filteringType: "NUMERIC"
 asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
+  missingValuePolicy: "EXCLUDE"
+  degenerateDistributionPolicy: "FALLBACK"
+  statsScope:
+    population: "VERTICAL"
 scoreTitle:
   fr: "Poids de l'objet"
 scoreDescription:

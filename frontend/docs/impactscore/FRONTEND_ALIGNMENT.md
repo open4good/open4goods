@@ -44,6 +44,14 @@ Optionnel (si métadonnées dispo) :
 - SIGMA : afficher bande ±kσ (markArea) ou deux lignes (µ−kσ, µ+kσ)
 - PERCENTILE : afficher médiane (p50) et quartiles (p25/p75)
 
+### 2.3 Ajouter un toggle “valeurs absolues” / “scores normalisés”
+
+Objectif : permettre au même graphe d’explorer :
+- la distribution en **valeurs absolues** (unités, données brutes)
+- la distribution en **scores normalisés** (0..5) pour comparer les critères
+
+Le toggle doit être visible dès que la normalisation est connue (méthode + stats suffisantes).
+
 ## 3) Données nécessaires côté API
 
 Pour permettre ces variations, le backend doit exposer (par sous-score) :

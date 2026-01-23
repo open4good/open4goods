@@ -7,8 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreNormalizationConfig;
+import org.open4goods.model.vertical.scoring.ScoreNormalizationMethod;
+import org.open4goods.model.vertical.scoring.ScoreNormalizationParams;
+import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 import org.slf4j.LoggerFactory;
 
 class AbstractScoreAggregationServiceTest {
@@ -19,8 +25,8 @@ class AbstractScoreAggregationServiceTest {
             super(LoggerFactory.getLogger(AbstractScoreAggregationServiceTest.class));
         }
 
-        void registerValue(String scoreName, Double value) throws ValidationException {
-            incrementCardinality(scoreName, value);
+        void registerValue(String scoreName, Double value, VerticalConfig config) throws ValidationException {
+            incrementCardinality(scoreName, value, config);
         }
 
         Cardinality getAbsoluteCardinality(String scoreName) {
@@ -88,21 +94,17 @@ class AbstractScoreAggregationServiceTest {
     }
 
     @Test
-    void relativizeUsesPercentileWhenDistinctValuesAreBelowThreshold() throws Exception {
+    void relativizeUsesPercentileWhenConfigured() throws Exception {
         TestScoreAggregationService service = new TestScoreAggregationService();
         String scoreName = "POWER_CONSUMPTION_STANDBY_NETWORKD";
+        VerticalConfig config = buildConfigWithMethod(scoreName, ScoreNormalizationMethod.PERCENTILE);
 
-        service.registerValue(scoreName, 0d);
-        service.registerValue(scoreName, 0d);
-        service.registerValue(scoreName, 0d);
-        service.registerValue(scoreName, 1d);
-        service.registerValue(scoreName, 1d);
-        service.registerValue(scoreName, 2d);
-
-        VerticalConfig config = new VerticalConfig();
-        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
-        impactScoreConfig.setMinDistinctValuesForSigma(4);
-        config.setImpactScoreConfig(impactScoreConfig);
+        service.registerValue(scoreName, 0d, config);
+        service.registerValue(scoreName, 0d, config);
+        service.registerValue(scoreName, 0d, config);
+        service.registerValue(scoreName, 1d, config);
+        service.registerValue(scoreName, 1d, config);
+        service.registerValue(scoreName, 2d, config);
 
         Cardinality absolute = service.getAbsoluteCardinality(scoreName);
         Double percentileScore = service.relativizeWithConfig(scoreName, 2d, absolute, config);
@@ -111,21 +113,17 @@ class AbstractScoreAggregationServiceTest {
     }
 
     @Test
-    void relativizeUsesSigmaWhenDistinctValuesMeetThreshold() throws Exception {
+    void relativizeUsesSigmaWhenConfigured() throws Exception {
         TestScoreAggregationService service = new TestScoreAggregationService();
         String scoreName = "POWER_CONSUMPTION_STANDBY_NETWORKD";
+        VerticalConfig config = buildConfigWithMethod(scoreName, ScoreNormalizationMethod.SIGMA);
 
-        service.registerValue(scoreName, 0d);
-        service.registerValue(scoreName, 0d);
-        service.registerValue(scoreName, 0d);
-        service.registerValue(scoreName, 1d);
-        service.registerValue(scoreName, 1d);
-        service.registerValue(scoreName, 2d);
-
-        VerticalConfig config = new VerticalConfig();
-        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
-        impactScoreConfig.setMinDistinctValuesForSigma(3);
-        config.setImpactScoreConfig(impactScoreConfig);
+        service.registerValue(scoreName, 0d, config);
+        service.registerValue(scoreName, 0d, config);
+        service.registerValue(scoreName, 0d, config);
+        service.registerValue(scoreName, 1d, config);
+        service.registerValue(scoreName, 1d, config);
+        service.registerValue(scoreName, 2d, config);
 
         Cardinality absolute = service.getAbsoluteCardinality(scoreName);
         Double sigmaScore = service.relativizeWithConfig(scoreName, 2d, absolute, config);
@@ -139,6 +137,23 @@ class AbstractScoreAggregationServiceTest {
         double expected = normalized * StandardiserService.DEFAULT_MAX_RATING;
 
         assertThat(sigmaScore).isCloseTo(expected, within(1e-6));
+    }
+
+    @Test
+    void relativizeUsesFixedBoundsWhenConfigured() throws Exception {
+        TestScoreAggregationService service = new TestScoreAggregationService();
+        String scoreName = "REPAIRABILITY_INDEX";
+
+        VerticalConfig config = buildConfigWithMethod(scoreName, ScoreNormalizationMethod.MINMAX_FIXED);
+        AttributeConfig attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(scoreName);
+        attributeConfig.getScoring().getNormalization().getParams().setFixedMin(0.0);
+        attributeConfig.getScoring().getNormalization().getParams().setFixedMax(10.0);
+
+        service.registerValue(scoreName, 5d, config);
+        Cardinality absolute = service.getAbsoluteCardinality(scoreName);
+        Double normalized = service.relativizeWithConfig(scoreName, 5d, absolute, config);
+
+        assertThat(normalized).isEqualTo(2.5);
     }
     @Test
     void relativizePreservesStdDev() throws Exception {
@@ -184,6 +199,24 @@ class AbstractScoreAggregationServiceTest {
         
         assertThat(score.getRelativ()).isNotNull();
         assertThat(score.getRelativ().getStdDev()).isEqualTo(5.0);
+    }
+
+    private VerticalConfig buildConfigWithMethod(String scoreName, ScoreNormalizationMethod method) {
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey(scoreName);
+        ScoreScoringConfig scoringConfig = new ScoreScoringConfig();
+        ScoreNormalizationConfig normalizationConfig = new ScoreNormalizationConfig();
+        normalizationConfig.setMethod(method);
+        normalizationConfig.setParams(new ScoreNormalizationParams());
+        scoringConfig.setNormalization(normalizationConfig);
+        attributeConfig.setScoring(scoringConfig);
+
+        AttributesConfig attributesConfig = new AttributesConfig();
+        attributesConfig.setConfigs(java.util.List.of(attributeConfig));
+        VerticalConfig config = new VerticalConfig();
+        config.setAttributesConfig(attributesConfig);
+        config.setImpactScoreConfig(new ImpactScoreConfig());
+        return config;
     }
 
 }

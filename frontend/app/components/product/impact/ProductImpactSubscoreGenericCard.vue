@@ -51,7 +51,13 @@
       :distribution="score.distribution ?? []"
       :label="score.label"
       :average-value="score.absolute?.avg ?? null"
-      :current-value="score.value ?? null"
+      :current-value="score.absolute?.value ?? null"
+      :normalized-current-value="score.relativeValue ?? null"
+      :normalization-method="score.scoring?.normalization?.method ?? null"
+      :normalization-params="score.scoring?.normalization?.params ?? null"
+      :scale="score.scoring?.scale ?? null"
+      :impact-better-is="score.impactBetterIs ?? score.betterIs ?? null"
+      :std-dev="score.absolute?.stdDev ?? null"
       :product-name="productName"
     />
 

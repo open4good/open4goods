@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.model.StandardiserService;
@@ -11,8 +13,17 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreNormalizationMethod;
+import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 import org.slf4j.Logger;
+
+import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationContext;
+import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationResult;
+import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationStrategy;
+import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationStrategyFactory;
 
 /**
  * Base class for batch score aggregation services. It manages lifecycle hooks,
@@ -28,6 +39,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
         protected Map<String, Map<Double, Integer>> valueFrequencies = new HashMap<>();
 
+        private final Set<String> legacyScoringLogged = ConcurrentHashMap.newKeySet();
 
         public AbstractScoreAggregationService(Logger logger) {
                 super(logger);
@@ -40,6 +52,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                 batchDatas.clear();
                 absoluteCardinalities.clear();
                 valueFrequencies.clear();
+                legacyScoringLogged.clear();
         }
 
 
@@ -160,14 +173,12 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		
 		Double relValue = relativizeScoreValue(score.getName(), score.getValue(), score.getAbsolute(), vConf);
 		
-		if (vConf != null) {
-			org.open4goods.model.vertical.AttributeConfig attrConfig = vConf.getAttributesConfig().getAttributeConfigByKey(score.getName());
+		if (vConf != null && vConf.getAttributesConfig() != null) {
+			AttributeConfig attrConfig = vConf.getAttributesConfig().getAttributeConfigByKey(score.getName());
 			if (attrConfig == null) {
 				dedicatedLogger.warn("Scoring inversion check failed: No AttributeConfig found for score '{}'. Check vertical config.", score.getName());
-			} else if (org.open4goods.model.vertical.AttributeComparisonRule.LOWER.equals(attrConfig.getBetterIs())) {
-				relValue = StandardiserService.DEFAULT_MAX_RATING - relValue;
-			} else {
-				dedicatedLogger.warn("Should have a vertical config ! ");
+			} else if (AttributeComparisonRule.LOWER.equals(attrConfig.getImpactBetterIs())) {
+				relValue = resolveScaleMax(attrConfig) + resolveScaleMin(attrConfig) - relValue;
 			}
 		}
 
@@ -179,11 +190,28 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
 	protected Double relativizeScoreValue(String scoreName, Double value, Cardinality abs, VerticalConfig vConf)
 			throws ValidationException {
-		if (shouldUsePercentileScoring(scoreName, vConf)) {
-			return relativizeUsingPercentile(scoreName, value, abs);
+		AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+		ScoreNormalizationMethod method = resolveNormalizationMethod(attributeConfig);
+		if (method == null) {
+			if (shouldUsePercentileScoring(scoreName, vConf)) {
+				logLegacyScoring(scoreName);
+				return relativizeUsingPercentile(scoreName, value, abs);
+			}
+			logLegacyScoring(scoreName);
+			return relativize(value, abs);
 		}
 
-		return relativize(value, abs);
+		NormalizationStrategy strategy = NormalizationStrategyFactory.strategyFor(method);
+		if (strategy == null) {
+			throw new ValidationException("Unknown normalization method for score " + scoreName);
+		}
+
+		NormalizationContext context = new NormalizationContext(abs, valueFrequencies.get(scoreName));
+		NormalizationResult result = strategy.normalize(value, context, attributeConfig);
+		if (result.legacy()) {
+			logLegacyScoring(scoreName);
+		}
+		return result.value();
 	}
 
 	private boolean shouldUsePercentileScoring(String scoreName, VerticalConfig vConf) {
@@ -299,7 +327,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
          * @param scoreName the score identifier
          * @param value the value to register
          */
-        protected void incrementCardinality(String scoreName, Double value) throws ValidationException {
+        protected void incrementCardinality(String scoreName, Double value, VerticalConfig vConf) throws ValidationException {
 
 
                 if (null == value) {
@@ -318,7 +346,9 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
                 absolute.increment(value);
                 relative.increment(value);
-                incrementValueFrequency(scoreName, value);
+                if (shouldTrackFrequencies(scoreName, vConf)) {
+                        incrementValueFrequency(scoreName, value);
+                }
 
                 absoluteCardinalities.put(scoreName, absolute);
                 batchDatas.put(scoreName, relative);
@@ -332,6 +362,62 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                         return;
                 }
                 frequencies.put(value, current + 1);
+        }
+
+        private boolean shouldTrackFrequencies(String scoreName, VerticalConfig vConf) {
+                AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+                ScoreNormalizationMethod method = resolveNormalizationMethod(attributeConfig);
+                if (method == null) {
+                        if (vConf == null || vConf.getImpactScoreConfig() == null) {
+                                return false;
+                        }
+                        Integer minDistinctValues = vConf.getImpactScoreConfig().getMinDistinctValuesForSigma();
+                        return minDistinctValues != null && minDistinctValues > 0;
+                }
+                return ScoreNormalizationMethod.PERCENTILE.equals(method)
+                        || ScoreNormalizationMethod.MINMAX_QUANTILE.equals(method);
+        }
+
+        private AttributeConfig resolveAttributeConfig(String scoreName, VerticalConfig vConf) {
+                if (vConf == null || vConf.getAttributesConfig() == null) {
+                        return null;
+                }
+                return vConf.getAttributesConfig().getAttributeConfigByKey(scoreName);
+        }
+
+        private ScoreNormalizationMethod resolveNormalizationMethod(AttributeConfig attributeConfig) {
+                if (attributeConfig == null) {
+                        return null;
+                }
+                ScoreScoringConfig scoring = attributeConfig.getScoring();
+                if (scoring == null || scoring.getNormalization() == null) {
+                        return null;
+                }
+                return scoring.getNormalization().getMethod();
+        }
+
+        private void logLegacyScoring(String scoreName) {
+                if (legacyScoringLogged.add(scoreName)) {
+                        dedicatedLogger.warn("Legacy scoring applied for score '{}'. Please migrate to scoring.normalization.method.", scoreName);
+                }
+        }
+
+        private double resolveScaleMax(AttributeConfig attributeConfig) {
+                if (attributeConfig == null || attributeConfig.getScoring() == null
+                        || attributeConfig.getScoring().getScale() == null
+                        || attributeConfig.getScoring().getScale().getMax() == null) {
+                        return StandardiserService.DEFAULT_MAX_RATING;
+                }
+                return attributeConfig.getScoring().getScale().getMax();
+        }
+
+        private double resolveScaleMin(AttributeConfig attributeConfig) {
+                if (attributeConfig == null || attributeConfig.getScoring() == null
+                        || attributeConfig.getScoring().getScale() == null
+                        || attributeConfig.getScoring().getScale().getMin() == null) {
+                        return 0.0;
+                }
+                return attributeConfig.getScoring().getScale().getMin();
         }
 
 

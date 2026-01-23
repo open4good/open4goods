@@ -20,6 +20,13 @@ import {
     AttributeParserConfigToJSON,
     AttributeParserConfigToJSONTyped,
 } from './AttributeParserConfig';
+import type { ScoreScoringConfigDto } from './ScoreScoringConfigDto';
+import {
+    ScoreScoringConfigDtoFromJSON,
+    ScoreScoringConfigDtoFromJSONTyped,
+    ScoreScoringConfigDtoToJSON,
+    ScoreScoringConfigDtoToJSONTyped,
+} from './ScoreScoringConfigDto';
 
 /**
  * 
@@ -111,6 +118,24 @@ export interface AttributeConfigDto {
      * @memberof AttributeConfigDto
      */
     betterIs?: AttributeConfigDtoBetterIsEnum;
+    /**
+     * Comparison rule applied for user-facing explanations.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    userBetterIs?: AttributeConfigDtoBetterIsEnum;
+    /**
+     * Comparison rule applied for impact scoring.
+     * @type {string}
+     * @memberof AttributeConfigDto
+     */
+    impactBetterIs?: AttributeConfigDtoBetterIsEnum;
+    /**
+     * Scoring configuration used for this attribute.
+     * @type {ScoreScoringConfigDto}
+     * @memberof AttributeConfigDto
+     */
+    scoring?: ScoreScoringConfigDto;
     /**
      * Ordering applied when displaying attribute values.
      * @type {string}
@@ -223,6 +248,9 @@ export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'participateInScores': json['participateInScores'] == null ? undefined : new Set(json['participateInScores']),
         'participateInACV': json['participateInACV'] == null ? undefined : new Set(json['participateInACV']),
         'betterIs': json['betterIs'] == null ? undefined : json['betterIs'],
+        'userBetterIs': json['userBetterIs'] == null ? undefined : json['userBetterIs'],
+        'impactBetterIs': json['impactBetterIs'] == null ? undefined : json['impactBetterIs'],
+        'scoring': json['scoring'] == null ? undefined : ScoreScoringConfigDtoFromJSON(json['scoring']),
         'attributeValuesOrdering': json['attributeValuesOrdering'] == null ? undefined : json['attributeValuesOrdering'],
         'attributeValuesReverseOrder': json['attributeValuesReverseOrder'] == null ? undefined : json['attributeValuesReverseOrder'],
         'synonyms': json['synonyms'] == null ? undefined : json['synonyms'],
@@ -257,6 +285,9 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'participateInScores': value['participateInScores'] == null ? undefined : Array.from(value['participateInScores'] as Set<any>),
         'participateInACV': value['participateInACV'] == null ? undefined : Array.from(value['participateInACV'] as Set<any>),
         'betterIs': value['betterIs'],
+        'userBetterIs': value['userBetterIs'],
+        'impactBetterIs': value['impactBetterIs'],
+        'scoring': ScoreScoringConfigDtoToJSON(value['scoring']),
         'attributeValuesOrdering': value['attributeValuesOrdering'],
         'attributeValuesReverseOrder': value['attributeValuesReverseOrder'],
         'synonyms': value['synonyms'],
@@ -265,4 +296,3 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'mappings': value['mappings'],
     };
 }
-

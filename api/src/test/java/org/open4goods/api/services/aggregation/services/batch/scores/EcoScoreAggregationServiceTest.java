@@ -47,7 +47,7 @@ class EcoScoreAggregationServiceTest {
         assertThat(ecoscore).isNotNull();
         assertThat(ecoscore.getRelativ()).isNotNull();
         assertThat(ecoscore.getRelativ().getValue())
-                .isEqualTo(product.getScores().get("DATA_QUALITY").getRelativ().getValue());
+                .isEqualTo(product.getScores().get("DATA_QUALITY").getRelativ().getValue() * 4.0);
     }
 
     @Test
@@ -85,7 +85,7 @@ class EcoScoreAggregationServiceTest {
         Score ecoscore = product.ecoscore();
 
         assertThat(ecoscore).isNotNull();
-        assertThat(ecoscore.getAbsolute().getValue()).isEqualTo(2.0);
+        assertThat(ecoscore.getAbsolute().getValue()).isEqualTo(8.0);
     }
     @Test
     void ecoscoreComputedWithDefaultWhenSubScoreMissing() {

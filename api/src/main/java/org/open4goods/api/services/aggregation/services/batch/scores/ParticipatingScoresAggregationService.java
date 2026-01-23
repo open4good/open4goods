@@ -40,10 +40,10 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 			return;
 		}
 
-		aggregates.forEach((aggregateName, participants) -> handleAggregate(data, aggregateName, participants));
+		aggregates.forEach((aggregateName, participants) -> handleAggregate(data, aggregateName, participants, vConf));
 	}
 
-	private void handleAggregate(Product product, String aggregateName, Map<String, Double> participants) {
+	private void handleAggregate(Product product, String aggregateName, Map<String, Double> participants, VerticalConfig vConf) {
 		Double aggregatedValue = computeAggregatedValue(product, participants);
 		if (aggregatedValue == null) {
 			dedicatedLogger.warn("Skipping aggregate {} for {} due to missing sub-scores", aggregateName,
@@ -52,7 +52,7 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 		}
 
 		try {
-			incrementCardinality(aggregateName, aggregatedValue);
+			incrementCardinality(aggregateName, aggregatedValue, vConf);
 		} catch (ValidationException e) {
 			dedicatedLogger.warn("Cannot increment cardinality for {}", aggregateName, e);
 			return;

@@ -14,6 +14,32 @@ export type ScoreAbsoluteStats = {
   stdDev?: number | null
 }
 
+export type ScoreNormalizationParams = {
+  sigmaK?: number | null
+  fixedMin?: number | null
+  fixedMax?: number | null
+  quantileLow?: number | null
+  quantileHigh?: number | null
+  mapping?: Record<string, number> | null
+  constantValue?: number | null
+  threshold?: number | null
+  greaterIsPass?: boolean | null
+}
+
+export type ScoreNormalizationConfig = {
+  method?: string | null
+  params?: ScoreNormalizationParams | null
+}
+
+export type ScoreScoringConfig = {
+  scale?: { min?: number | null; max?: number | null } | null
+  normalization?: ScoreNormalizationConfig | null
+  transform?: string | null
+  missingValuePolicy?: string | null
+  degenerateDistributionPolicy?: string | null
+  statsScope?: string | null
+}
+
 export type ScoreView = {
   id: string
   label: string
@@ -40,6 +66,9 @@ export type ScoreView = {
   unit?: string | null
   aggregates?: Record<string, number> | null
   betterIs?: 'GREATER' | 'LOWER' | null
+  userBetterIs?: 'GREATER' | 'LOWER' | null
+  impactBetterIs?: 'GREATER' | 'LOWER' | null
+  scoring?: ScoreScoringConfig | null
   importanceDescription?: string | null
   virtual?: boolean
 }

@@ -5,15 +5,20 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.open4goods.model.StandardiserService;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreMissingValuePolicy;
 import org.slf4j.Logger;
 
 /**
@@ -28,6 +33,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EcoScoreAggregationService.class);
 	private static final String ECOSCORE_SCORENAME = "ECOSCORE";
+	private static final double ECOSCORE_TARGET_SCALE = 20.0;
 
 	public EcoScoreAggregationService(final Logger logger) {
 		super(LOGGER);
@@ -55,7 +61,8 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	 * @return The computed EcoScore, or null if a required sub-score is missing
 	 * @throws ValidationException
 	 */
-	private Double generateEcoScore(Product product, VerticalConfig vConf) throws ValidationException {
+	private Double generateEcoScore(Product product, VerticalConfig vConf, Map<String, Double> normalizedWeights,
+			Set<String> missingScoresInBatch) throws ValidationException {
 
 		double ecoscoreVal = 0.0;
 		Map<String, Score> scores = product.getScores();
@@ -64,12 +71,16 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			Score score = scores.get(config);
 
 			if (null == score) {
-				Double weight = Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
-				if (weight > 0.0) {
-					LOGGER.warn("EcoScore rating for product {} missing subscore with positive weight : {}. Defaulting to 0.0 for this criteria.", product.getId(), config);
-					// Continue with 0.0 contribution for this missing criteria. 
-					// This fallback is required when NO products in the batch have this score, preventing virtualization (average calculation).
+				ScoreMissingValuePolicy policy = resolveMissingValuePolicy(config, vConf);
+				Double fallback = resolveMissingScoreFallback(config, vConf, policy);
+				if (fallback == null) {
+					continue;
 				}
+				Double weight = normalizedWeights.get(config);
+				if (weight == null) {
+					continue;
+				}
+				ecoscoreVal += fallback * weight;
 				continue;
 			}
 
@@ -79,7 +90,12 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 				return null;
 			}
 
-			ecoscoreVal += value * Double.valueOf(vConf.getImpactScoreConfig().getCriteriasPonderation().get(config));
+			Double weight = normalizedWeights.get(config);
+			if (weight == null) {
+				continue;
+			}
+
+			ecoscoreVal += value * weight;
 		}
 
 		return ecoscoreVal;
@@ -138,17 +154,27 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			return;
 		}
 
+		Map<String, Double> normalizedWeights = normalizeWeights(vConf);
+		if (normalizedWeights.isEmpty()) {
+			LOGGER.error("EcoScore weights sum to zero for vertical {}", vConf.getId());
+			return;
+		}
+
+		Set<String> missingScoresInBatch = resolveMissingScoresInBatch(datas, vConf);
+		missingScoresInBatch.forEach(scoreName ->
+				LOGGER.warn("EcoScore criteria '{}' is missing in batch. Applying missing-value policy.", scoreName));
+
 		// Compute the ecoscore from existing scores
 		for (Product data : datas) {
 			try {
-				Double score = generateEcoScore(data, vConf);
+				Double score = generateEcoScore(data, vConf, normalizedWeights, missingScoresInBatch);
 				if (score == null) {
 					LOGGER.warn("EcoScore rating skipped for {} due to missing sub-scores", data.getId());
 					continue;
 				}
 
 				// Processing cardinality
-				incrementCardinality(ECOSCORE_SCORENAME, score);
+				incrementCardinality(ECOSCORE_SCORENAME, score, vConf);
 
 				// Saving the actual score in the product, it will be relativized after this
 				// batch (see super().done())
@@ -214,6 +240,68 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		}
 		LOGGER.info("EcoScore done() finished.");
 
+	}
+
+	private Map<String, Double> normalizeWeights(VerticalConfig vConf) {
+		Map<String, Double> weights = vConf.getImpactScoreConfig().getCriteriasPonderation();
+		if (weights == null || weights.isEmpty()) {
+			return Map.of();
+		}
+		double sum = weights.values().stream()
+				.filter(value -> value != null)
+				.mapToDouble(Double::doubleValue)
+				.sum();
+		if (sum == 0.0) {
+			return Map.of();
+		}
+		double factor = (ECOSCORE_TARGET_SCALE / StandardiserService.DEFAULT_MAX_RATING) / sum;
+		Map<String, Double> normalized = new HashMap<>();
+		weights.forEach((key, value) -> {
+			if (value != null) {
+				normalized.put(key, value * factor);
+			}
+		});
+		return normalized;
+	}
+
+	private Set<String> resolveMissingScoresInBatch(Collection<Product> datas, VerticalConfig vConf) {
+		if (vConf == null || vConf.getImpactScoreConfig() == null || datas == null) {
+			return Set.of();
+		}
+		return vConf.getImpactScoreConfig().getCriteriasPonderation().keySet().stream()
+				.filter(scoreName -> datas.stream().noneMatch(product -> product.getScores().containsKey(scoreName)))
+				.collect(java.util.stream.Collectors.toSet());
+	}
+
+	private ScoreMissingValuePolicy resolveMissingValuePolicy(String config, VerticalConfig vConf) {
+		AttributeConfig attributeConfig = vConf == null || vConf.getAttributesConfig() == null
+				? null
+				: vConf.getAttributesConfig().getAttributeConfigByKey(config);
+		if (attributeConfig == null || attributeConfig.getScoring() == null) {
+			return ScoreMissingValuePolicy.WORST;
+		}
+		return attributeConfig.getScoring().getMissingValuePolicy();
+	}
+
+	private Double resolveMissingScoreFallback(String config, VerticalConfig vConf, ScoreMissingValuePolicy policy) {
+		if (ScoreMissingValuePolicy.EXCLUDE.equals(policy)) {
+			return null;
+		}
+		AttributeConfig attributeConfig = vConf == null || vConf.getAttributesConfig() == null
+				? null
+				: vConf.getAttributesConfig().getAttributeConfigByKey(config);
+		if (attributeConfig == null || attributeConfig.getScoring() == null || attributeConfig.getScoring().getScale() == null) {
+			return ScoreMissingValuePolicy.WORST.equals(policy) ? 0.0 : StandardiserService.DEFAULT_MAX_RATING / 2.0;
+		}
+		Double min = attributeConfig.getScoring().getScale().getMin();
+		Double max = attributeConfig.getScoring().getScale().getMax();
+		if (min == null || max == null) {
+			return ScoreMissingValuePolicy.WORST.equals(policy) ? 0.0 : StandardiserService.DEFAULT_MAX_RATING / 2.0;
+		}
+		if (ScoreMissingValuePolicy.WORST.equals(policy)) {
+			return min;
+		}
+		return (min + max) / 2.0;
 	}
 
 	private EcoScoreRanking ensureRanking(Product product) {

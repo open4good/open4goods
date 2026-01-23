@@ -52,14 +52,15 @@ scoring:
       # CONSTANT
       constantValue: 2.5
 
-  transform:
-    type: NONE | LOG | SQRT
+      # BINARY
+      threshold: 1.0
+      greaterIsPass: true
 
-  missingValue:
-    policy: NEUTRAL | WORST | EXCLUDE
+  transform: NONE | LOG | SQRT
 
-  degenerateDistribution:
-    policy: NEUTRAL | ERROR | FALLBACK
+  missingValuePolicy: NEUTRAL | WORST | EXCLUDE
+
+  degenerateDistributionPolicy: NEUTRAL | ERROR | FALLBACK
 
   statsScope:
     population: VERTICAL | CATEGORY
@@ -71,6 +72,8 @@ scoring:
   - `userBetterIs = impactBetterIs = betterIs`
 - Si `scoring.normalization.method` absent :
   - utiliser legacy behavior (sigma + fallback percentile) le temps de migrer, avec un log de warning.
+- Si `statsScope.population` absent :
+  - défaut : `VERTICAL`.
 
 ## 4) Exemples
 
@@ -86,11 +89,10 @@ scoring:
     method: SIGMA
     params:
       sigmaK: 2.0
-  missingValue:
-    policy: EXCLUDE
+  missingValuePolicy: EXCLUDE
 ```
 
-### 4.2 Classe énergétique (barème fixe)
+### 4.2 Classe énergétique (bornes fixes via mapping numérique)
 
 ```yaml
 key: CLASSE_ENERGETIQUE
@@ -99,16 +101,10 @@ userBetterIs: GREATER
 impactBetterIs: GREATER
 scoring:
   normalization:
-    method: FIXED_MAPPING
+    method: MINMAX_FIXED
     params:
-      mapping:
-        A: 5
-        B: 4
-        C: 3
-        D: 2
-        E: 1
-        F: 0.5
-        G: 0
+      fixedMin: 0
+      fixedMax: 18
 ```
 
 ### 4.3 Réparabilité (0..10 borné)
