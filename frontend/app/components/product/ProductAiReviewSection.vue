@@ -314,82 +314,115 @@
         v-if="reviewContent.sources?.length"
         class="product-ai-review__sources mt-4"
       >
-        <header class="product-ai-review__section-header mb-2">
-          <div class="product-ai-review__section-icon">
-            <v-icon icon="mdi-book-open-variant" size="20" />
-          </div>
-          <h4>{{ sourcesTitle }}</h4>
-        </header>
-        <v-table
-          density="compact"
-          class="product-ai-review__table product-ai-review__table--compact"
-        >
-          <thead>
-            <tr>
-              <th scope="col">{{ $t('product.aiReview.sources.index') }}</th>
-              <th scope="col">{{ $t('product.aiReview.sources.source') }}</th>
-              <th scope="col">
-                {{ $t('product.aiReview.sources.description') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="source in visibleSources"
-              :id="`review-ref-${source.number}`"
-              :key="source.number"
+        <v-row class="product-ai-review__sources-row">
+          <v-col cols="12" :md="dataQualityValue ? 8 : 12">
+            <header class="product-ai-review__section-header mb-2">
+              <div class="product-ai-review__section-icon">
+                <v-icon icon="mdi-book-open-variant" size="20" />
+              </div>
+              <h4>{{ sourcesTitle }}</h4>
+            </header>
+            <v-table
+              density="compact"
+              class="product-ai-review__table product-ai-review__table--compact"
             >
-              <td>
-                <a
-                  :href="source.url"
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
+              <thead>
+                <tr>
+                  <th scope="col">{{ $t('product.aiReview.sources.index') }}</th>
+                  <th scope="col">
+                    {{ $t('product.aiReview.sources.source') }}
+                  </th>
+                  <th scope="col">
+                    {{ $t('product.aiReview.sources.description') }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="source in visibleSources"
+                  :id="`review-ref-${source.number}`"
+                  :key="source.number"
                 >
-                  [{{ source.number }}]
-                </a>
-              </td>
-              <td>
-                <div class="product-ai-review__source-info">
-                  <img
-                    v-if="source.favicon"
-                    :src="source.favicon"
-                    :alt="source.name"
-                    class="product-ai-review__source-favicon"
-                    width="16"
-                    height="16"
-                  />
-                  <span>{{ source.name }}</span>
-                </div>
-              </td>
-              <td>
-                <a
-                  :href="source.url"
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
+                  <td>
+                    <a
+                      :href="source.url"
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                    >
+                      [{{ source.number }}]
+                    </a>
+                  </td>
+                  <td>
+                    <div class="product-ai-review__source-info">
+                      <img
+                        v-if="source.favicon"
+                        :src="source.favicon"
+                        :alt="source.name"
+                        class="product-ai-review__source-favicon"
+                        width="16"
+                        height="16"
+                      />
+                      <span>{{ source.name }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <a
+                      :href="source.url"
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                    >
+                      {{ source.description }}
+                    </a>
+                  </td>
+                </tr>
+                <tr
+                  v-if="hasMoreSources"
+                  class="product-ai-review__sources-toggle"
                 >
-                  {{ source.description }}
-                </a>
-              </td>
-            </tr>
-            <tr v-if="hasMoreSources" class="product-ai-review__sources-toggle">
-              <td :colspan="3">
-                <button
-                  type="button"
-                  class="product-ai-review__sources-toggle-btn"
-                  @click="toggleSources"
+                  <td :colspan="3">
+                    <button
+                      type="button"
+                      class="product-ai-review__sources-toggle-btn"
+                      @click="toggleSources"
+                    >
+                      <v-icon
+                        :icon="
+                          showAllSources ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                        "
+                        size="18"
+                      />
+                      <span>{{ sourcesToggleLabel }}</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-col>
+          <v-col v-if="dataQualityValue" cols="12" md="4">
+            <v-card class="product-ai-review__quality" elevation="0">
+              <v-card-text>
+                <header
+                  class="product-ai-review__quality-header d-flex align-center mb-3"
                 >
                   <v-icon
-                    :icon="
-                      showAllSources ? 'mdi-chevron-up' : 'mdi-chevron-down'
-                    "
-                    size="18"
+                    icon="mdi-shield-check-outline"
+                    size="22"
+                    class="mr-2"
                   />
-                  <span>{{ sourcesToggleLabel }}</span>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
+                  <h3 class="text-subtitle-1 font-weight-bold">
+                    {{ $t('product.aiReview.dataQuality.title') }}
+                  </h3>
+                </header>
+                <p class="text-body-2 mb-4">
+                  {{ $t('product.aiReview.dataQuality.description') }}
+                </p>
+                <div class="product-ai-review__quality-value">
+                  {{ dataQualityValue }}
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </div>
     </div>
 
@@ -603,6 +636,10 @@ const captchaLocale = computed(() =>
 
 const reviewContent = computed(() => review.value)
 const sourcesCount = computed(() => reviewContent.value?.sources?.length ?? 0)
+const dataQualityValue = computed(() => {
+  const value = reviewContent.value?.dataQuality
+  return typeof value === 'string' ? value.trim() : ''
+})
 const maxVisibleSources = 5
 const visibleSources = computed(() => {
   const sources = reviewContent.value?.sources ?? []
@@ -1242,6 +1279,10 @@ const handleGlobalScrollEvent = (event: Event) => {
   gap: 0.9rem;
 }
 
+.product-ai-review__sources-row {
+  margin: 0;
+}
+
 .product-ai-review__section-header {
   display: flex;
   align-items: center;
@@ -1331,6 +1372,26 @@ const handleGlobalScrollEvent = (event: Event) => {
 
 .product-ai-review__source-favicon {
   border-radius: 4px;
+}
+
+.product-ai-review__quality {
+  border-radius: 20px;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.94);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+}
+
+.product-ai-review__quality-header {
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-ai-review__quality-value {
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.95);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  font-weight: 600;
+  width: fit-content;
 }
 
 .product-ai-review__empty {
