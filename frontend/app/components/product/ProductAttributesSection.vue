@@ -60,12 +60,15 @@
               </div>
             </div>
 
-            <div v-if="identityModel" class="product-attributes__identity-row">
+            <div
+              v-if="identityModel || akaModels.length"
+              class="product-attributes__identity-row"
+            >
               <span class="product-attributes__identity-label">
                 {{ $t('product.attributes.main.identity.model') }}
               </span>
               <div class="product-attributes__identity-value">
-                <span>{{ identityModel }}</span>
+                <span v-if="identityModel">{{ identityModel }}</span>
                 <div
                   v-if="akaModels.length"
                   class="product-attributes__identity-details"
@@ -1525,6 +1528,8 @@ const toggleDetailGroup = (id: string) => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: center;
+  text-align: center;
 }
 
 .product-attributes__title {
