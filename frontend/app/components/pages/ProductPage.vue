@@ -120,6 +120,7 @@
             :site-key="hcaptchaSiteKey"
             :title-params="aiTitleParams"
             :product-name="productTitle"
+            :product-image="resolvedProductImageSource"
           />
         </section>
 

@@ -41,7 +41,6 @@ export interface GlobalSearchResultDto {
     score?: number;
 }
 
-
 /**
  * Check if a given object implements the GlobalSearchResultDto interface.
  */
@@ -79,3 +78,4 @@ export function GlobalSearchResultDtoToJSONTyped(value?: GlobalSearchResultDto |
         'score': value['score'],
     };
 }
+

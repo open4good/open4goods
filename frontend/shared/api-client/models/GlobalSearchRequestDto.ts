@@ -27,7 +27,6 @@ export interface GlobalSearchRequestDto {
     query?: string;
 }
 
-
 /**
  * Check if a given object implements the GlobalSearchRequestDto interface.
  */
@@ -63,3 +62,4 @@ export function GlobalSearchRequestDtoToJSONTyped(value?: GlobalSearchRequestDto
         'query': value['query'],
     };
 }
+

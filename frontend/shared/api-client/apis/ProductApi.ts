@@ -101,8 +101,9 @@ export interface SuggestRequest {
 
 export interface TriggerReviewRequest {
     gtin: number;
-    hcaptchaResponse: string;
     domainLanguage: TriggerReviewDomainLanguageEnum;
+    hcaptchaResponse?: string;
+    force?: boolean;
 }
 
 /**
@@ -269,7 +270,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Runs a multi-step search strategy. Results are first attempted in the requested search type and fall back to subsequent modes (global, semantic) when no results are found.
+     * Runs a semantic-only search strategy powered by embeddings.
      * Execute a global search
      */
     async globalSearchRaw(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GlobalSearchResponseDto>> {
@@ -320,7 +321,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Runs a multi-step search strategy. Results are first attempted in the requested search type and fall back to subsequent modes (global, semantic) when no results are found.
+     * Runs a semantic-only search strategy powered by embeddings.
      * Execute a global search
      */
     async globalSearch(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GlobalSearchResponseDto> {
@@ -691,7 +692,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Validate the provided hCaptcha token and forward the request to the back-office API.
+     * Validate the provided hCaptcha token and forward the request to the back-office API. Authenticated users may bypass captcha and force generation.
      * Trigger AI review generation
      */
     async triggerReviewRaw(requestParameters: TriggerReviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<number>> {
@@ -699,13 +700,6 @@ export class ProductApi extends runtime.BaseAPI {
             throw new runtime.RequiredError(
                 'gtin',
                 'Required parameter "gtin" was null or undefined when calling triggerReview().'
-            );
-        }
-
-        if (requestParameters['hcaptchaResponse'] == null) {
-            throw new runtime.RequiredError(
-                'hcaptchaResponse',
-                'Required parameter "hcaptchaResponse" was null or undefined when calling triggerReview().'
             );
         }
 
@@ -720,6 +714,10 @@ export class ProductApi extends runtime.BaseAPI {
 
         if (requestParameters['hcaptchaResponse'] != null) {
             queryParameters['hcaptchaResponse'] = requestParameters['hcaptchaResponse'];
+        }
+
+        if (requestParameters['force'] != null) {
+            queryParameters['force'] = requestParameters['force'];
         }
 
         if (requestParameters['domainLanguage'] != null) {
@@ -755,7 +753,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Validate the provided hCaptcha token and forward the request to the back-office API.
+     * Validate the provided hCaptcha token and forward the request to the back-office API. Authenticated users may bypass captcha and force generation.
      * Trigger AI review generation
      */
     async triggerReview(requestParameters: TriggerReviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<number> {

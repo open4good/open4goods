@@ -41,7 +41,6 @@ export interface GlobalSearchVerticalGroupDto {
     results?: Array<GlobalSearchResultDto>;
 }
 
-
 /**
  * Check if a given object implements the GlobalSearchVerticalGroupDto interface.
  */
@@ -79,3 +78,4 @@ export function GlobalSearchVerticalGroupDtoToJSONTyped(value?: GlobalSearchVert
         'results': value['results'] == null ? undefined : ((value['results'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
     };
 }
+

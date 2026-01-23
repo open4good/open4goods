@@ -15,15 +15,30 @@
 
 import * as runtime from '../runtime';
 import type {
+  CategoriesScoreStatsDto,
+  CategoriesScoresStatsDto,
   CategoriesStatsDto,
 } from '../models/index';
 import {
+    CategoriesScoreStatsDtoFromJSON,
+    CategoriesScoreStatsDtoToJSON,
+    CategoriesScoresStatsDtoFromJSON,
+    CategoriesScoresStatsDtoToJSON,
     CategoriesStatsDtoFromJSON,
     CategoriesStatsDtoToJSON,
 } from '../models/index';
 
 export interface CategoriesRequest {
     domainLanguage: CategoriesDomainLanguageEnum;
+}
+
+export interface CategoriesScoreRequest {
+    scoreName: string;
+    domainLanguage: CategoriesScoreDomainLanguageEnum;
+}
+
+export interface CategoriesScoresRequest {
+    domainLanguage: CategoriesScoresDomainLanguageEnum;
 }
 
 /**
@@ -81,6 +96,114 @@ export class StatsApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * Return per-category score cardinalities for a single impact score criteria.
+     * Get category score cardinalities for a score
+     */
+    async categoriesScoreRaw(requestParameters: CategoriesScoreRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoriesScoreStatsDto>> {
+        if (requestParameters['scoreName'] == null) {
+            throw new runtime.RequiredError(
+                'scoreName',
+                'Required parameter "scoreName" was null or undefined when calling categoriesScore().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling categoriesScore().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stats/categories/scores/{scoreName}`;
+        urlPath = urlPath.replace(`{${"scoreName"}}`, encodeURIComponent(String(requestParameters['scoreName'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CategoriesScoreStatsDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Return per-category score cardinalities for a single impact score criteria.
+     * Get category score cardinalities for a score
+     */
+    async categoriesScore(requestParameters: CategoriesScoreRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoriesScoreStatsDto> {
+        const response = await this.categoriesScoreRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Return per-category score cardinalities for each available impact score criteria.
+     * Get categories score cardinalities
+     */
+    async categoriesScoresRaw(requestParameters: CategoriesScoresRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoriesScoresStatsDto>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling categoriesScores().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stats/categories/scores`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CategoriesScoresStatsDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Return per-category score cardinalities for each available impact score criteria.
+     * Get categories score cardinalities
+     */
+    async categoriesScores(requestParameters: CategoriesScoresRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoriesScoresStatsDto> {
+        const response = await this.categoriesScoresRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
 }
 
 /**
@@ -91,3 +214,19 @@ export const CategoriesDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type CategoriesDomainLanguageEnum = typeof CategoriesDomainLanguageEnum[keyof typeof CategoriesDomainLanguageEnum];
+/**
+ * @export
+ */
+export const CategoriesScoreDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type CategoriesScoreDomainLanguageEnum = typeof CategoriesScoreDomainLanguageEnum[keyof typeof CategoriesScoreDomainLanguageEnum];
+/**
+ * @export
+ */
+export const CategoriesScoresDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type CategoriesScoresDomainLanguageEnum = typeof CategoriesScoresDomainLanguageEnum[keyof typeof CategoriesScoresDomainLanguageEnum];

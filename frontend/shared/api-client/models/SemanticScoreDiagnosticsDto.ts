@@ -13,9 +13,8 @@
  */
 
 import { mapValues } from '../runtime';
-
 /**
- * Diagnostics about semantic score distributions for debugging relevance.
+ * 
  * @export
  * @interface SemanticScoreDiagnosticsDto
  */
@@ -95,3 +94,4 @@ export function SemanticScoreDiagnosticsDtoToJSONTyped(value?: SemanticScoreDiag
         'scoreStdDev': value['scoreStdDev'],
     };
 }
+

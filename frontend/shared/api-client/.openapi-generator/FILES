@@ -47,9 +47,12 @@ models/AuthTokensDto.ts
 models/BarcodeAggregationProperties.ts
 models/BlogPostDto.ts
 models/BlogTagDto.ts
+models/CategoriesScoreStatsDto.ts
+models/CategoriesScoresStatsDto.ts
 models/CategoriesStatsDto.ts
 models/CategoryBreadcrumbItemDto.ts
 models/CategoryNavigationDto.ts
+models/CategoryScoreCardinalitiesDto.ts
 models/CommercialEvent.ts
 models/ContactDetails.ts
 models/ContactRequestDto.ts
@@ -143,10 +146,12 @@ models/RecommandationsConfig.ts
 models/ResourcesAggregationConfig.ts
 models/ReviewGenerationEvent.ts
 models/ReviewGenerationStatus.ts
+models/ScoreCardinalityDto.ts
 models/ScoringAggregationConfig.ts
 models/SearchSuggestCategoryDto.ts
 models/SearchSuggestProductDto.ts
 models/SearchSuggestResponseDto.ts
+models/SemanticScoreDiagnosticsDto.ts
 models/ShareCandidateDto.ts
 models/ShareExtractionDto.ts
 models/ShareResolutionRequestDto.ts

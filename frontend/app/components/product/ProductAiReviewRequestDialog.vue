@@ -3,13 +3,25 @@
     <v-card class="product-ai-review-request">
       <v-card-text class="product-ai-review-request__body">
         <header class="product-ai-review-request__header">
-          <div>
-            <p class="product-ai-review-request__eyebrow">
-              {{ t('product.aiReview.request.eyebrow') }}
-            </p>
-            <h3 class="product-ai-review-request__headline">
-              {{ t('product.aiReview.request.title') }}
-            </h3>
+          <div class="product-ai-review-request__product-info">
+            <div
+              v-if="productImage"
+              class="product-ai-review-request__image-wrapper"
+            >
+              <img
+                :src="productImage"
+                :alt="productLabel"
+                class="product-ai-review-request__image"
+              />
+            </div>
+            <div>
+              <p class="product-ai-review-request__eyebrow">
+                {{ t('product.aiReview.request.eyebrow') }}
+              </p>
+              <h3 class="product-ai-review-request__headline">
+                {{ productLabel }}
+              </h3>
+            </div>
           </div>
           <v-btn
             variant="text"
@@ -23,50 +35,33 @@
           {{ t('product.aiReview.request.description') }}
         </p>
 
-        <div class="product-ai-review-request__quota">
-          <div>
-            <p class="product-ai-review-request__quota-label">
-              {{ t('siteIdentity.menu.account.privacy.quotas.aiRemaining') }}
-            </p>
-            <p class="product-ai-review-request__quota-value">
-              {{ remainingGenerationsLabel }}
-            </p>
+        <div class="product-ai-review-request__controls">
+          <div class="product-ai-review-request__quota">
+            <div>
+              <p class="product-ai-review-request__quota-label">
+                {{ t('siteIdentity.menu.account.privacy.quotas.aiRemaining') }}
+              </p>
+              <p class="product-ai-review-request__quota-value">
+                {{ remainingGenerationsLabel }}
+              </p>
+            </div>
+            <v-icon icon="mdi-sparkles" size="22" />
           </div>
-          <v-icon icon="mdi-sparkles" size="22" />
+
+          <ClientOnly>
+            <div v-if="showCaptcha" class="product-ai-review-request__captcha">
+              <VueHcaptcha
+                ref="captchaRef"
+                :sitekey="siteKey"
+                :theme="captchaTheme"
+                :language="captchaLocale"
+                @verify="handleCaptchaVerify"
+                @expired="emit('captcha-expired')"
+                @error="emit('captcha-error')"
+              />
+            </div>
+          </ClientOnly>
         </div>
-
-        <v-checkbox
-          v-model="agreementModel"
-          color="primary"
-          class="product-ai-review-request__checkbox"
-        >
-          <template #label>
-            <span>
-              {{
-                t('product.aiReview.request.agreement', {
-                  productName: productLabel,
-                })
-              }}
-            </span>
-          </template>
-        </v-checkbox>
-
-        <ClientOnly>
-          <div
-            v-if="showCaptcha"
-            class="product-ai-review-request__captcha"
-          >
-            <VueHcaptcha
-              ref="captchaRef"
-              :sitekey="siteKey"
-              :theme="captchaTheme"
-              :language="captchaLocale"
-              @verify="handleCaptchaVerify"
-              @expired="emit('captcha-expired')"
-              @error="emit('captcha-error')"
-            />
-          </div>
-        </ClientOnly>
 
         <v-alert
           v-if="errorMessage"
@@ -97,6 +92,7 @@
         </v-btn>
         <v-spacer />
         <v-btn
+          v-if="showSubmitButton"
           color="primary"
           size="large"
           variant="flat"
@@ -172,6 +168,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  productImage: {
+    type: String,
+    default: null,
+  },
 })
 
 const emit = defineEmits<{
@@ -188,11 +188,6 @@ const VueHcaptcha = defineAsyncComponent(
   () => import('@hcaptcha/vue3-hcaptcha')
 )
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
-
-const dialogModel = computed({
-  get: () => props.modelValue,
-  set: value => emit('update:modelValue', value),
-})
 
 const agreementModel = computed({
   get: () => props.agreementAccepted,
@@ -217,8 +212,30 @@ watch(
   }
 )
 
+const submitDisabled = computed(() => {
+  if (!agreementModel.value || props.requesting) {
+    return true
+  }
+
+  if (props.requiresCaptcha) {
+    // If captcha is required, valid captcha token is needed
+    // But if we have a token, we should have auto-submitted.
+    // So the button is effectively only for non-captcha or retry?
+    // User requested "Removing Validate button".
+    // I will hide the button if captcha is required.
+    return true
+  }
+
+  return false
+})
+
+const showSubmitButton = computed(() => {
+  return !props.requiresCaptcha
+})
+
 const handleCaptchaVerify = (token: string) => {
   emit('captcha-verify', token)
+  emit('submit')
 }
 </script>
 
@@ -240,6 +257,30 @@ const handleCaptchaVerify = (token: string) => {
   gap: 1rem;
 }
 
+.product-ai-review-request__product-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.product-ai-review-request__image-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(var(--v-theme-outline), 0.1);
+  background-color: rgb(var(--v-theme-surface-primary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-ai-review-request__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .product-ai-review-request__eyebrow {
   margin: 0;
   font-size: 0.85rem;
@@ -250,10 +291,11 @@ const handleCaptchaVerify = (token: string) => {
 }
 
 .product-ai-review-request__headline {
-  margin: 0.35rem 0 0;
-  font-size: 1.4rem;
+  margin: 0.15rem 0 0;
+  font-size: 1.25rem;
   font-weight: 700;
   color: rgb(var(--v-theme-text-neutral-strong));
+  line-height: 1.3;
 }
 
 .product-ai-review-request__description {
@@ -262,14 +304,21 @@ const handleCaptchaVerify = (token: string) => {
   line-height: 1.6;
 }
 
-.product-ai-review-request__quota {
+.product-ai-review-request__controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.9rem 1.1rem;
+  padding: 0.75rem 1rem;
   border-radius: 16px;
   background: rgba(var(--v-theme-surface-primary-080), 0.6);
+  flex-wrap: wrap;
+}
+
+.product-ai-review-request__quota {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
@@ -291,7 +340,7 @@ const handleCaptchaVerify = (token: string) => {
 
 .product-ai-review-request__captcha {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .product-ai-review-request__alert {

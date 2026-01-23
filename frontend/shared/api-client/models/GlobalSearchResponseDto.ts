@@ -115,3 +115,4 @@ export function GlobalSearchResponseDtoToJSONTyped(value?: GlobalSearchResponseD
         'semanticDiagnostics': SemanticScoreDiagnosticsDtoToJSON(value['semanticDiagnostics']),
     };
 }
+

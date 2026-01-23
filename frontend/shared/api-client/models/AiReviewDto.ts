@@ -59,11 +59,29 @@ export interface AiReviewDto {
      */
     shortTitle?: string;
     /**
-     * Technical analysis extracted from trustworthy sources
+     * Technical analysis extracted from trustworthy sources (Legacy - equivalent to Intermediate)
      * @type {string}
      * @memberof AiReviewDto
      */
     technicalReview?: string;
+    /**
+     * Technical analysis for novice users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    technicalReviewNovice?: string;
+    /**
+     * Technical analysis for intermediate users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    technicalReviewIntermediate?: string;
+    /**
+     * Technical analysis for advanced users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    technicalReviewAdvanced?: string;
     /**
      * Short technical summary in 2-3 sentences
      * @type {string}
@@ -71,11 +89,47 @@ export interface AiReviewDto {
      */
     technicalShortReview?: string;
     /**
-     * Ecological assessment derived from the available documentation
+     * Ecological assessment derived from the available documentation (Legacy - equivalent to Intermediate)
      * @type {string}
      * @memberof AiReviewDto
      */
     ecologicalReview?: string;
+    /**
+     * Ecological assessment for novice users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    ecologicalReviewNovice?: string;
+    /**
+     * Ecological assessment for intermediate users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    ecologicalReviewIntermediate?: string;
+    /**
+     * Ecological assessment for advanced users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    ecologicalReviewAdvanced?: string;
+    /**
+     * Community feedback summary for novice users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    communityReviewNovice?: string;
+    /**
+     * Community feedback summary for intermediate users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    communityReviewIntermediate?: string;
+    /**
+     * Community feedback summary for advanced users
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    communityReviewAdvanced?: string;
     /**
      * Concise summary mixing technical and ecological highlights
      * @type {string}
@@ -154,8 +208,17 @@ export function AiReviewDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'mediumTitle': json['mediumTitle'] == null ? undefined : json['mediumTitle'],
         'shortTitle': json['shortTitle'] == null ? undefined : json['shortTitle'],
         'technicalReview': json['technicalReview'] == null ? undefined : json['technicalReview'],
+        'technicalReviewNovice': json['technicalReviewNovice'] == null ? undefined : json['technicalReviewNovice'],
+        'technicalReviewIntermediate': json['technicalReviewIntermediate'] == null ? undefined : json['technicalReviewIntermediate'],
+        'technicalReviewAdvanced': json['technicalReviewAdvanced'] == null ? undefined : json['technicalReviewAdvanced'],
         'technicalShortReview': json['technicalShortReview'] == null ? undefined : json['technicalShortReview'],
         'ecologicalReview': json['ecologicalReview'] == null ? undefined : json['ecologicalReview'],
+        'ecologicalReviewNovice': json['ecologicalReviewNovice'] == null ? undefined : json['ecologicalReviewNovice'],
+        'ecologicalReviewIntermediate': json['ecologicalReviewIntermediate'] == null ? undefined : json['ecologicalReviewIntermediate'],
+        'ecologicalReviewAdvanced': json['ecologicalReviewAdvanced'] == null ? undefined : json['ecologicalReviewAdvanced'],
+        'communityReviewNovice': json['communityReviewNovice'] == null ? undefined : json['communityReviewNovice'],
+        'communityReviewIntermediate': json['communityReviewIntermediate'] == null ? undefined : json['communityReviewIntermediate'],
+        'communityReviewAdvanced': json['communityReviewAdvanced'] == null ? undefined : json['communityReviewAdvanced'],
         'summary': json['summary'] == null ? undefined : json['summary'],
         'pros': json['pros'] == null ? undefined : json['pros'],
         'cons': json['cons'] == null ? undefined : json['cons'],
@@ -184,8 +247,17 @@ export function AiReviewDtoToJSONTyped(value?: AiReviewDto | null, ignoreDiscrim
         'mediumTitle': value['mediumTitle'],
         'shortTitle': value['shortTitle'],
         'technicalReview': value['technicalReview'],
+        'technicalReviewNovice': value['technicalReviewNovice'],
+        'technicalReviewIntermediate': value['technicalReviewIntermediate'],
+        'technicalReviewAdvanced': value['technicalReviewAdvanced'],
         'technicalShortReview': value['technicalShortReview'],
         'ecologicalReview': value['ecologicalReview'],
+        'ecologicalReviewNovice': value['ecologicalReviewNovice'],
+        'ecologicalReviewIntermediate': value['ecologicalReviewIntermediate'],
+        'ecologicalReviewAdvanced': value['ecologicalReviewAdvanced'],
+        'communityReviewNovice': value['communityReviewNovice'],
+        'communityReviewIntermediate': value['communityReviewIntermediate'],
+        'communityReviewAdvanced': value['communityReviewAdvanced'],
         'summary': value['summary'],
         'pros': value['pros'],
         'cons': value['cons'],
@@ -197,3 +269,4 @@ export function AiReviewDtoToJSONTyped(value?: AiReviewDto | null, ignoreDiscrim
         'communityOneline': value['communityOneline'],
     };
 }
+

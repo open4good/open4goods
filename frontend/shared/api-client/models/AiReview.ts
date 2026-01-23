@@ -48,19 +48,25 @@ export interface AiReview {
      */
     description: string;
     /**
-     * Detailed description of the product
+     * One-line technical summary
      * @type {string}
      * @memberof AiReview
      */
     technicalOneline: string;
     /**
-     * Detailed description of the product
+     * Short technical summary of the product
+     * @type {string}
+     * @memberof AiReview
+     */
+    technicalShortReview: string;
+    /**
+     * One-line ecological summary
      * @type {string}
      * @memberof AiReview
      */
     ecologicalOneline: string;
     /**
-     * Detailed description of the product
+     * One-line community summary
      * @type {string}
      * @memberof AiReview
      */
@@ -84,17 +90,71 @@ export interface AiReview {
      */
     shortTitle: string;
     /**
-     * Technical review of the product
+     * Ultra-synthetic baseline under the title
      * @type {string}
      * @memberof AiReview
      */
-    technicalReview: string;
+    baseLine: string;
     /**
-     * Ecological review of the product
+     * Probable manufacturing countries of this product
      * @type {string}
      * @memberof AiReview
      */
-    ecologicalReview: string;
+    manufacturingCountry: string;
+    /**
+     * Technical review (novice)
+     * @type {string}
+     * @memberof AiReview
+     */
+    technicalReviewNovice: string;
+    /**
+     * Technical review (intermediate)
+     * @type {string}
+     * @memberof AiReview
+     */
+    technicalReviewIntermediate: string;
+    /**
+     * Technical review (advanced)
+     * @type {string}
+     * @memberof AiReview
+     */
+    technicalReviewAdvanced: string;
+    /**
+     * Ecological review (novice)
+     * @type {string}
+     * @memberof AiReview
+     */
+    ecologicalReviewNovice: string;
+    /**
+     * Ecological review (intermediate)
+     * @type {string}
+     * @memberof AiReview
+     */
+    ecologicalReviewIntermediate: string;
+    /**
+     * Ecological review (advanced)
+     * @type {string}
+     * @memberof AiReview
+     */
+    ecologicalReviewAdvanced: string;
+    /**
+     * Community review (novice)
+     * @type {string}
+     * @memberof AiReview
+     */
+    communityReviewNovice: string;
+    /**
+     * Community review (intermediate)
+     * @type {string}
+     * @memberof AiReview
+     */
+    communityReviewIntermediate: string;
+    /**
+     * Community review (advanced)
+     * @type {string}
+     * @memberof AiReview
+     */
+    communityReviewAdvanced: string;
     /**
      * Summary of the product review
      * @type {string}
@@ -137,6 +197,30 @@ export interface AiReview {
      * @memberof AiReview
      */
     ratings?: Array<AiRating>;
+    /**
+     * List of PDF's url's for this product
+     * @type {Array<string>}
+     * @memberof AiReview
+     */
+    pdfs?: Array<string>;
+    /**
+     * List of quality images url's for this product
+     * @type {Array<string>}
+     * @memberof AiReview
+     */
+    images?: Array<string>;
+    /**
+     * List of product related videos
+     * @type {Array<string>}
+     * @memberof AiReview
+     */
+    videos?: Array<string>;
+    /**
+     * List of social networks references
+     * @type {Array<string>}
+     * @memberof AiReview
+     */
+    social?: Array<string>;
 }
 
 /**
@@ -145,13 +229,23 @@ export interface AiReview {
 export function instanceOfAiReview(value: object): value is AiReview {
     if (!('description' in value) || value['description'] === undefined) return false;
     if (!('technicalOneline' in value) || value['technicalOneline'] === undefined) return false;
+    if (!('technicalShortReview' in value) || value['technicalShortReview'] === undefined) return false;
     if (!('ecologicalOneline' in value) || value['ecologicalOneline'] === undefined) return false;
     if (!('communityOneline' in value) || value['communityOneline'] === undefined) return false;
     if (!('shortDescription' in value) || value['shortDescription'] === undefined) return false;
     if (!('mediumTitle' in value) || value['mediumTitle'] === undefined) return false;
     if (!('shortTitle' in value) || value['shortTitle'] === undefined) return false;
-    if (!('technicalReview' in value) || value['technicalReview'] === undefined) return false;
-    if (!('ecologicalReview' in value) || value['ecologicalReview'] === undefined) return false;
+    if (!('baseLine' in value) || value['baseLine'] === undefined) return false;
+    if (!('manufacturingCountry' in value) || value['manufacturingCountry'] === undefined) return false;
+    if (!('technicalReviewNovice' in value) || value['technicalReviewNovice'] === undefined) return false;
+    if (!('technicalReviewIntermediate' in value) || value['technicalReviewIntermediate'] === undefined) return false;
+    if (!('technicalReviewAdvanced' in value) || value['technicalReviewAdvanced'] === undefined) return false;
+    if (!('ecologicalReviewNovice' in value) || value['ecologicalReviewNovice'] === undefined) return false;
+    if (!('ecologicalReviewIntermediate' in value) || value['ecologicalReviewIntermediate'] === undefined) return false;
+    if (!('ecologicalReviewAdvanced' in value) || value['ecologicalReviewAdvanced'] === undefined) return false;
+    if (!('communityReviewNovice' in value) || value['communityReviewNovice'] === undefined) return false;
+    if (!('communityReviewIntermediate' in value) || value['communityReviewIntermediate'] === undefined) return false;
+    if (!('communityReviewAdvanced' in value) || value['communityReviewAdvanced'] === undefined) return false;
     if (!('summary' in value) || value['summary'] === undefined) return false;
     if (!('pros' in value) || value['pros'] === undefined) return false;
     if (!('cons' in value) || value['cons'] === undefined) return false;
@@ -173,13 +267,23 @@ export function AiReviewFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         
         'description': json['description'],
         'technicalOneline': json['technicalOneline'],
+        'technicalShortReview': json['technicalShortReview'],
         'ecologicalOneline': json['ecologicalOneline'],
         'communityOneline': json['communityOneline'],
         'shortDescription': json['short_description'],
         'mediumTitle': json['mediumTitle'],
         'shortTitle': json['shortTitle'],
-        'technicalReview': json['technicalReview'],
-        'ecologicalReview': json['ecologicalReview'],
+        'baseLine': json['baseLine'],
+        'manufacturingCountry': json['manufacturingCountry'],
+        'technicalReviewNovice': json['technicalReviewNovice'],
+        'technicalReviewIntermediate': json['technicalReviewIntermediate'],
+        'technicalReviewAdvanced': json['technicalReviewAdvanced'],
+        'ecologicalReviewNovice': json['ecologicalReviewNovice'],
+        'ecologicalReviewIntermediate': json['ecologicalReviewIntermediate'],
+        'ecologicalReviewAdvanced': json['ecologicalReviewAdvanced'],
+        'communityReviewNovice': json['communityReviewNovice'],
+        'communityReviewIntermediate': json['communityReviewIntermediate'],
+        'communityReviewAdvanced': json['communityReviewAdvanced'],
         'summary': json['summary'],
         'pros': json['pros'],
         'cons': json['cons'],
@@ -187,6 +291,10 @@ export function AiReviewFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'attributes': ((json['attributes'] as Array<any>).map(AiAttributeFromJSON)),
         'dataQuality': json['dataQuality'],
         'ratings': json['ratings'] == null ? undefined : ((json['ratings'] as Array<any>).map(AiRatingFromJSON)),
+        'pdfs': json['pdfs'] == null ? undefined : json['pdfs'],
+        'images': json['images'] == null ? undefined : json['images'],
+        'videos': json['videos'] == null ? undefined : json['videos'],
+        'social': json['social'] == null ? undefined : json['social'],
     };
 }
 
@@ -203,13 +311,23 @@ export function AiReviewToJSONTyped(value?: AiReview | null, ignoreDiscriminator
         
         'description': value['description'],
         'technicalOneline': value['technicalOneline'],
+        'technicalShortReview': value['technicalShortReview'],
         'ecologicalOneline': value['ecologicalOneline'],
         'communityOneline': value['communityOneline'],
         'short_description': value['shortDescription'],
         'mediumTitle': value['mediumTitle'],
         'shortTitle': value['shortTitle'],
-        'technicalReview': value['technicalReview'],
-        'ecologicalReview': value['ecologicalReview'],
+        'baseLine': value['baseLine'],
+        'manufacturingCountry': value['manufacturingCountry'],
+        'technicalReviewNovice': value['technicalReviewNovice'],
+        'technicalReviewIntermediate': value['technicalReviewIntermediate'],
+        'technicalReviewAdvanced': value['technicalReviewAdvanced'],
+        'ecologicalReviewNovice': value['ecologicalReviewNovice'],
+        'ecologicalReviewIntermediate': value['ecologicalReviewIntermediate'],
+        'ecologicalReviewAdvanced': value['ecologicalReviewAdvanced'],
+        'communityReviewNovice': value['communityReviewNovice'],
+        'communityReviewIntermediate': value['communityReviewIntermediate'],
+        'communityReviewAdvanced': value['communityReviewAdvanced'],
         'summary': value['summary'],
         'pros': value['pros'],
         'cons': value['cons'],
@@ -217,6 +335,10 @@ export function AiReviewToJSONTyped(value?: AiReview | null, ignoreDiscriminator
         'attributes': ((value['attributes'] as Array<any>).map(AiAttributeToJSON)),
         'dataQuality': value['dataQuality'],
         'ratings': value['ratings'] == null ? undefined : ((value['ratings'] as Array<any>).map(AiRatingToJSON)),
+        'pdfs': value['pdfs'],
+        'images': value['images'],
+        'videos': value['videos'],
+        'social': value['social'],
     };
 }
 

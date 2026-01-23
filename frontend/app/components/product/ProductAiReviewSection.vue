@@ -380,6 +380,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  productImage: {
+    type: String,
+    default: null,
+  },
 })
 
 const { locale, t, n } = useI18n()
@@ -451,9 +455,7 @@ const visibleSources = computed(() => {
   const sources = reviewContent.value?.sources ?? []
   return showAllSources.value ? sources : sources.slice(0, maxVisibleSources)
 })
-const hasMoreSources = computed(
-  () => sourcesCount.value > maxVisibleSources
-)
+const hasMoreSources = computed(() => sourcesCount.value > maxVisibleSources)
 const subtitleLabel = computed(() =>
   translatePlural('product.aiReview.subtitle', sourcesCount.value, {
     count: n(sourcesCount.value),
