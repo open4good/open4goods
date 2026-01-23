@@ -14,11 +14,16 @@ const messages: Record<string, string> = {
   'category.ecoscorePage.breadcrumbLeaf': 'impactscore',
   'category.ecoscorePage.navigation.ariaLabel':
     'Impact Score section navigation',
+  'category.ecoscorePage.navigation.availableCriteria': 'Available criteria',
   'category.ecoscorePage.navigation.overview': 'Overview',
   'category.ecoscorePage.navigation.purpose': 'Purpose & data',
   'category.ecoscorePage.navigation.criteria': 'Criteria',
   'category.ecoscorePage.navigation.transparency': 'Transparency',
   'category.ecoscorePage.navigation.aiAudit': 'AI audit',
+  'category.ecoscorePage.sections.availableCriteria.title':
+    'Available criteria for {category}',
+  'category.ecoscorePage.sections.availableCriteria.subtitle':
+    'Each Impact Score vertical uses criteria tailored to its products.',
   'category.ecoscorePage.sections.overview.title':
     'Impact Score for {category}',
   'category.ecoscorePage.sections.overview.card.title': 'Nudger Impact Score',
@@ -357,6 +362,9 @@ const vuetifyStubs = {
   }),
   'v-divider': { template: '<hr class="v-divider-stub" />' },
   'v-skeleton-loader': { template: '<div class="v-skeleton-loader-stub" />' },
+  ImpactScoreCriteriaPanel: {
+    template: '<div class="impact-score-criteria-panel-stub" />',
+  },
 }
 
 const mountPage = async () => {
@@ -403,8 +411,9 @@ describe('Category ecosystem Impact Score page', () => {
     expect(breadcrumbText).toContain('impactscore')
 
     const navItems = wrapper.findAll('.sticky-nav-stub__item')
-    expect(navItems).toHaveLength(5)
+    expect(navItems).toHaveLength(6)
     expect(navItems.map(item => item.text())).toEqual([
+      'Available criteria',
       'Overview',
       'Purpose & data',
       'Criteria',
