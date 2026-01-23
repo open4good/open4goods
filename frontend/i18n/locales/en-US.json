@@ -890,6 +890,10 @@
       "noMatch": "No matching options",
       "rangeAriaSuffix": "range selection",
       "searchOptions": "Search options",
+      "condition": {
+        "new": "New",
+        "used": "Used"
+      },
       "showMoreImpact": "Show more impact filters",
       "showMoreTechnical": "Show more technical filters",
       "technicalTitle": "Technical filters",

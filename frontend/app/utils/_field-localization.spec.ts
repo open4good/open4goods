@@ -5,24 +5,16 @@ import { resolveFilterFieldTitle } from './_field-localization'
 describe('resolveFilterFieldTitle', () => {
   const t = (key: string) =>
     ({
-      'category.filters.fields.creationDate': 'Creation date',
-      'category.filters.fields.lastChange': 'Last updated',
+      'category.filters.fields.condition': 'Offer condition',
     })[key] ?? key
 
-  it('uses i18n mappings for date filters', () => {
-    const creationField: FieldMetadataDto = {
-      mapping: 'creationDate',
+  it('uses i18n mappings for condition filters', () => {
+    const conditionField: FieldMetadataDto = {
+      mapping: 'price.conditions',
       title: '',
-      valueType: 'numeric',
+      valueType: 'keyword',
     }
 
-    const lastChangeField: FieldMetadataDto = {
-      mapping: 'lastChange',
-      title: '',
-      valueType: 'numeric',
-    }
-
-    expect(resolveFilterFieldTitle(creationField, t)).toBe('Creation date')
-    expect(resolveFilterFieldTitle(lastChangeField, t)).toBe('Last updated')
+    expect(resolveFilterFieldTitle(conditionField, t)).toBe('Offer condition')
   })
 })

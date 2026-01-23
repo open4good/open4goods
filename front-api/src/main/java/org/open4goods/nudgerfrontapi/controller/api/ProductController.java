@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 
 import org.open4goods.model.Localisable;
@@ -36,11 +35,9 @@ import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResultDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchVerticalGroupDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
-import org.open4goods.nudgerfrontapi.dto.search.SearchMode;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestResponseDto;
-import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
@@ -111,7 +108,6 @@ public class ProductController {
     private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
     private static final String KEYWORD_VALUE_SUFFIX = ".value";
     private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
-    private static final String ECOSCORE_RELATIVE_FIELD = "scores.ECOSCORE.value";
     private static final String ADMIN_EXCLUDED_CAUSES_FIELD = FilterField.excludedCauses.fieldPath();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
@@ -393,10 +389,7 @@ public class ProductController {
         filterDto = filterValidation.value();
 
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
-        Boolean requestedSemanticSearch = searchPayload != null ? searchPayload.semanticSearch() : null;
-        boolean semanticSearch = requestedSemanticSearch != null
-                ? requestedSemanticSearch.booleanValue()
-                : StringUtils.hasText(normalizedQuery);
+        boolean semanticSearch = StringUtils.hasText(normalizedQuery);
         Set<String> requestedComponents = include == null ? Set.of() : include;
 
         ProductSearchResponseDto body = service.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
@@ -406,7 +399,7 @@ public class ProductController {
     }
 
     /**
-     * Execute a global search based on the requested search type.
+     * Execute a semantic-only global search.
      *
      * <p>Error codes:</p>
      * <ul>
@@ -418,8 +411,7 @@ public class ProductController {
     @PostMapping("/search")
     @Operation(
             summary = "Execute a global search",
-            description = "Runs a multi-step search strategy. Results are first attempted in the requested search type and "
-                    + "fall back to subsequent modes (global, semantic) when no results are found.",
+            description = "Runs a semantic-only search strategy powered by embeddings.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
@@ -427,7 +419,7 @@ public class ProductController {
                             schema = @Schema(implementation = DomainLanguage.class))
             },
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Global search payload containing the query and search type.",
+                    description = "Global search payload containing the query.",
                     required = true,
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = GlobalSearchRequestDto.class))
@@ -450,32 +442,25 @@ public class ProductController {
             @RequestBody GlobalSearchRequestDto request) {
         LOGGER.info("Entering globalSearch(domainLanguage={}, request={})", domainLanguage, request);
         String query = request != null ? request.query() : null;
-        SearchType searchType = request != null ? request.searchType() : SearchType.auto;
-        SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, searchType);
+        SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage);
 
         List<GlobalSearchVerticalGroupDto> groups = result.verticalGroups().stream()
                 .map(group -> new GlobalSearchVerticalGroupDto(
                         group.verticalId(),
-                        result.searchMode(),
-                        group.results().stream().map(hit -> toDto(hit, result.searchMode())).toList()))
-                .toList();
-        List<GlobalSearchResultDto> fallback = result.fallbackResults().stream()
-                .map(hit -> toDto(hit, result.searchMode()))
+                        group.results().stream().map(this::toDto).toList()))
                 .toList();
         List<GlobalSearchResultDto> missingVerticalResults = result.missingVerticalResults().stream()
-                .map(hit -> toDto(hit, result.searchMode()))
+                .map(this::toDto)
                 .toList();
 
         if (result.verticalCta() != null) {
             LOGGER.info("Vertical CTA found for query '{}': {}", query, result.verticalCta().verticalId());
         }
 
-        GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups, fallback,
+        GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups,
                 missingVerticalResults,
                 toCategoryDto(result.verticalCta()),
-                result.searchMode(),
-                result.diagnostics(),
-                result.fallbackTriggered());
+                result.diagnostics());
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .header("X-Locale", domainLanguage.languageTag())
@@ -599,11 +584,7 @@ public class ProductController {
 
         List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(immutableGlobal, config);
         List<FieldMetadataDto> impactFields = new ArrayList<>();
-        FieldMetadataDto ecoscore = buildEcoscoreField(config);
-        impactFields.add(ecoscore);
-        mapImpactScores(config, domainLanguage).stream()
-                .filter(field -> !Objects.equals(field.mapping(), ecoscore.mapping()))
-                .forEach(impactFields::add);
+        mapImpactScores(config, domainLanguage).forEach(impactFields::add);
 
         List<FieldMetadataDto> technicalFields = new ArrayList<>();
         technicalFields.addAll(mapVerticalAttributeFilters(config.getEcoFilters(), config, domainLanguage));
@@ -1134,13 +1115,6 @@ public class ProductController {
         }
     }
 
-    private FieldMetadataDto buildEcoscoreField(VerticalConfig config) {
-        LOGGER.info("Entering buildEcoscoreField(config={})", config);
-        String mapping = ECOSCORE_RELATIVE_FIELD;
-        FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, "ECOSCORE");
-        return new FieldMetadataDto(mapping, "impactscore", null, VALUE_TYPE_NUMERIC, aggregation);
-    }
-
     /**
      * Resolve the localised attribute title for the provided key.
      *
@@ -1251,15 +1225,12 @@ public class ProductController {
     /**
      * Map a global search hit to the API DTO.
      *
-     * @param hit        hit returned by the search service
-     * @param searchMode search mode used to generate the hit
+     * @param hit hit returned by the search service
      * @return mapped global search result DTO
      */
-    private GlobalSearchResultDto toDto(GlobalSearchHit hit, SearchMode searchMode) {
-        return new GlobalSearchResultDto(hit.product(), hit.score(), searchMode);
+    private GlobalSearchResultDto toDto(GlobalSearchHit hit) {
+        return new GlobalSearchResultDto(hit.product(), hit.score());
     }
-
-
 
     /**
      * Map a product suggestion hit to its DTO representation.

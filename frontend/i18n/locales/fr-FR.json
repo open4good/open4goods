@@ -904,6 +904,10 @@
       "noMatch": "Aucune option correspondante",
       "rangeAriaSuffix": "sélection d'intervalle",
       "searchOptions": "Rechercher dans les options",
+      "condition": {
+        "new": "Neuf",
+        "used": "Occasion"
+      },
       "showMoreImpact": "Plus de filtres",
       "showMoreTechnical": "Plus de filtres",
       "technicalTitle": "Filtres techniques",

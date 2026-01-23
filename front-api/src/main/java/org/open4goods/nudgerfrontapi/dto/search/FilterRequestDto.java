@@ -74,13 +74,7 @@ public record FilterRequestDto(
         @Schema(description = "Filter on the datasources contributing to the aggregation", example = "datasource")
         datasource("datasourceCodes", FilterValueType.keyword),
         @Schema(description = "Filter on the moderation causes applied to the product", example = "excludedCauses")
-        excludedCauses("excludedCauses", FilterValueType.keyword),
-        @Schema(description = "Filter on the product impact score", example = "ecoscore")
-        ecoscore("scores.ECOSCORE.value", FilterValueType.numeric),
-        @Schema(description = "Filter on the product creation date (epoch millis)", example = "1704067200000")
-        creationDate("creationDate", FilterValueType.numeric),
-        @Schema(description = "Filter on the last modification date (epoch millis)", example = "1706659200000")
-        lastChange("lastChange", FilterValueType.numeric);
+        excludedCauses("excludedCauses", FilterValueType.keyword);
 
         private final String fieldPath;
         private final FilterValueType valueType;
