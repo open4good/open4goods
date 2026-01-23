@@ -25,8 +25,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
-import org.open4goods.nudgerfrontapi.dto.search.SearchMode;
-import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -80,17 +78,14 @@ class SearchServiceTest {
 
         searchService.initializeSuggestIndex();
 
-        // Mock empty results for product searches to avoid NPEs logic down the line if it tries to map hits
-        // But here we return early on vertical match? No, findExactVerticalMatch just sets validity.
-        // The service continues to execute searches.
-        // Sequence: exact_vertical -> semantic -> global.
-
-        // For this test, we just want to check CTA.
+        // Mock empty results for product searches while we focus on the CTA resolution.
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
         // WHEN
-        GlobalSearchResult result = searchService.globalSearch("téléviseurs", DomainLanguage.fr, SearchType.global);
+        when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f});
+
+        GlobalSearchResult result = searchService.globalSearch("téléviseurs", DomainLanguage.fr);
 
         // THEN
         assertThat(result).isNotNull();
@@ -114,7 +109,9 @@ class SearchServiceTest {
         searchService.initializeSuggestIndex();
 
         // WHEN
-        GlobalSearchResult result = searchService.globalSearch("something else", DomainLanguage.fr, SearchType.global);
+        when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f});
+
+        GlobalSearchResult result = searchService.globalSearch("something else", DomainLanguage.fr);
 
         // THEN
         assertThat(result.verticalCta()).isNull();
@@ -128,7 +125,7 @@ class SearchServiceTest {
 
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
 
-        // Setup repository to return empty for first call (exact_vertical)
+        // Setup repository to return empty semantic search results
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
         
         when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f});
@@ -136,16 +133,11 @@ class SearchServiceTest {
 
 
         // WHEN
-        GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, SearchType.auto);
+        GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr);
 
         // THEN
-        // We verify that textEmbeddingService was not called, which implies semantic search was skipped.
+        // We verify that semantic embeddings were requested once.
         verify(textEmbeddingService, times(1)).embed("iphone");
-
-        // We can also check that the result has mode Global (since all failed/empty) or Semantic if we mocked hits?
-        // If all fail/empty, it returns the start mode but with empty lists.
-        // Actually the logic is: loops through sequence. If hits found, returns with that mode.
-        // If loop finishes, returns empty result with startMode.
     }
 
     @Test
@@ -182,10 +174,9 @@ class SearchServiceTest {
         when(productMappingService.mapProduct(any(), any(), any(), any(), eq(false)))
                 .thenReturn(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null));
 
-        GlobalSearchResult result = searchService.globalSearch("bras articule", DomainLanguage.fr, SearchType.semantic);
+        GlobalSearchResult result = searchService.globalSearch("bras articule", DomainLanguage.fr);
 
         assertThat(result).isNotNull();
-        assertThat(result.searchMode()).isEqualTo(SearchMode.semantic);
         assertThat(result.diagnostics()).isNotNull();
         assertThat(result.diagnostics().resultCount()).isEqualTo(1);
         assertThat(result.diagnostics().topScore()).isCloseTo(1.2d, org.assertj.core.data.Offset.offset(0.0001d));

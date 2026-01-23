@@ -1135,9 +1135,12 @@ const onToggleFiltersVisibility = () => {
 const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
 const pageNumber = ref(0)
 const searchTerm = ref('')
-const shouldUseSemanticSearch = computed(
-  () => searchTerm.value.trim().length > 0
+const MIN_QUERY_LENGTH = 3
+const normalizedSearchTerm = computed(() => searchTerm.value.trim())
+const hasMinimumSearchLength = computed(
+  () => normalizedSearchTerm.value.length >= MIN_QUERY_LENGTH
 )
+const shouldUseSemanticSearch = computed(() => hasMinimumSearchLength.value)
 const sortField = ref<string | null>(null)
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const activeSubsetIds = ref<string[]>([])
@@ -1878,7 +1881,9 @@ const fetchProducts = async () => {
           verticalId: verticalId.value,
           pageNumber: pageNumber.value,
           pageSize: pageSize.value,
-          query: searchTerm.value || undefined,
+          query: hasMinimumSearchLength.value
+            ? normalizedSearchTerm.value
+            : undefined,
           semanticSearch: shouldUseSemanticSearch.value ? true : undefined,
           sort: sortRequest.value,
           filters: combinedFilters.value,

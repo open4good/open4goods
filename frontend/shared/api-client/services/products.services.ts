@@ -20,8 +20,6 @@ import type {
 import type { DomainLanguage } from '../../utils/domain-language'
 import { createBackendApiConfig } from './createBackendApiConfig'
 
-export type GlobalSearchType = 'auto' | 'exact_vertical' | 'global' | 'semantic'
-
 export const useProductService = (domainLanguage: DomainLanguage) => {
   const isVitest =
     typeof process !== 'undefined' && process.env?.VITEST === 'true'
@@ -156,8 +154,7 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
   }
 
   const searchGlobalProducts = async (
-    query: string,
-    searchType: GlobalSearchType = 'auto'
+    query: string
   ): Promise<GlobalSearchResponseDto> => {
     const normalizedQuery = query?.trim()
 
@@ -180,13 +177,12 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
         },
         body: {
           query: normalizedQuery,
-          searchType,
         },
       })
     } catch (error) {
       console.error(
         'Error executing global search',
-        { query: normalizedQuery, domainLanguage, searchType },
+        { query: normalizedQuery, domainLanguage },
         error
       )
       throw error

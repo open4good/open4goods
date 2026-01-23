@@ -55,12 +55,6 @@ export interface GlobalSearchResponseDto {
      */
     verticalGroups?: Array<GlobalSearchVerticalGroupDto>;
     /**
-     * Fallback results when no vertical match is found
-     * @type {Array<GlobalSearchResultDto>}
-     * @memberof GlobalSearchResponseDto
-     */
-    fallbackResults?: Array<GlobalSearchResultDto>;
-    /**
      * Semantic results that have no vertical assigned
      * @type {Array<GlobalSearchResultDto>}
      * @memberof GlobalSearchResponseDto
@@ -73,34 +67,12 @@ export interface GlobalSearchResponseDto {
      */
     verticalCta?: SearchSuggestCategoryDto;
     /**
-     * Effective search mode that produced the response
-     * @type {string}
-     * @memberof GlobalSearchResponseDto
-     */
-    searchMode?: GlobalSearchResponseDtoSearchModeEnum;
-    /**
      * Semantic score diagnostics when enabled
      * @type {SemanticScoreDiagnosticsDto}
      * @memberof GlobalSearchResponseDto
      */
     semanticDiagnostics?: SemanticScoreDiagnosticsDto;
-    /**
-     * Flag indicating whether the fallback pass has been executed
-     * @type {boolean}
-     * @memberof GlobalSearchResponseDto
-     */
-    fallbackTriggered?: boolean;
 }
-
-/**
- * @export
- */
-export const GlobalSearchResponseDtoSearchModeEnum = {
-    ExactVertical: 'exact_vertical',
-    Global: 'global',
-    Semantic: 'semantic'
-} as const;
-export type GlobalSearchResponseDtoSearchModeEnum = typeof GlobalSearchResponseDtoSearchModeEnum[keyof typeof GlobalSearchResponseDtoSearchModeEnum];
 
 /**
  * Check if a given object implements the GlobalSearchResponseDto interface.
@@ -120,12 +92,9 @@ export function GlobalSearchResponseDtoFromJSONTyped(json: any, ignoreDiscrimina
     return {
         
         'verticalGroups': json['verticalGroups'] == null ? undefined : ((json['verticalGroups'] as Array<any>).map(GlobalSearchVerticalGroupDtoFromJSON)),
-        'fallbackResults': json['fallbackResults'] == null ? undefined : ((json['fallbackResults'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
         'missingVerticalResults': json['missingVerticalResults'] == null ? undefined : ((json['missingVerticalResults'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
         'verticalCta': json['verticalCta'] == null ? undefined : SearchSuggestCategoryDtoFromJSON(json['verticalCta']),
-        'searchMode': json['searchMode'] == null ? undefined : json['searchMode'],
         'semanticDiagnostics': json['semanticDiagnostics'] == null ? undefined : SemanticScoreDiagnosticsDtoFromJSON(json['semanticDiagnostics']),
-        'fallbackTriggered': json['fallbackTriggered'] == null ? undefined : json['fallbackTriggered'],
     };
 }
 
@@ -141,11 +110,8 @@ export function GlobalSearchResponseDtoToJSONTyped(value?: GlobalSearchResponseD
     return {
         
         'verticalGroups': value['verticalGroups'] == null ? undefined : ((value['verticalGroups'] as Array<any>).map(GlobalSearchVerticalGroupDtoToJSON)),
-        'fallbackResults': value['fallbackResults'] == null ? undefined : ((value['fallbackResults'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
         'missingVerticalResults': value['missingVerticalResults'] == null ? undefined : ((value['missingVerticalResults'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
         'verticalCta': SearchSuggestCategoryDtoToJSON(value['verticalCta']),
-        'searchMode': value['searchMode'],
         'semanticDiagnostics': SemanticScoreDiagnosticsDtoToJSON(value['semanticDiagnostics']),
-        'fallbackTriggered': value['fallbackTriggered'],
     };
 }

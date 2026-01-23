@@ -7,13 +7,10 @@ const FILTER_FIELD_TRANSLATION_KEYS: Record<string, string> = {
   'price.minPrice.price': 'category.filters.fields.price',
   offersCount: 'category.filters.fields.offersCount',
   'price.conditions': 'category.filters.fields.condition',
-  creationDate: 'category.filters.fields.creationDate',
-  lastChange: 'category.filters.fields.lastChange',
   googleTaxonomyId: 'category.filters.fields.googleTaxonomyId',
   'attributes.referentielAttributes.BRAND': 'category.filters.fields.brand',
   'gtinInfos.country': 'category.filters.fields.country',
   datasourceCodes: 'category.filters.fields.datasource',
-  'scores.ECOSCORE.value': 'category.filters.fields.ecoscore',
 }
 
 const SORT_FIELD_TRANSLATION_KEYS: Record<string, string> = {

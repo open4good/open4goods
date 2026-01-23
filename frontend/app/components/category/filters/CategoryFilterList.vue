@@ -68,6 +68,7 @@ import type {
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 
 import CategoryFilterNumeric from './CategoryFilterNumeric.vue'
+import CategoryFilterCondition from './CategoryFilterCondition.vue'
 import CategoryFilterTerms from './CategoryFilterTerms.vue'
 
 const props = withDefaults(
@@ -92,6 +93,10 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const resolveComponent = (field: FieldMetadataDto) => {
+  if (field.mapping === 'price.conditions') {
+    return CategoryFilterCondition
+  }
+
   return field.valueType === 'numeric'
     ? CategoryFilterNumeric
     : CategoryFilterTerms

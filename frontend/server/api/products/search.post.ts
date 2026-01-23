@@ -7,10 +7,7 @@ import type {
   SortRequestDto,
   ProductsIncludeEnum,
 } from '~~/shared/api-client'
-import {
-  useProductService,
-  type GlobalSearchType,
-} from '~~/shared/api-client/services/products.services'
+import { useProductService } from '~~/shared/api-client/services/products.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
@@ -31,13 +28,24 @@ interface ProductsSearchPayload {
 
 interface GlobalSearchPayload {
   query?: string
-  searchType?: GlobalSearchType
 }
 
 const isGlobalSearchPayload = (
   payload: ProductsSearchPayload | GlobalSearchPayload
 ): payload is GlobalSearchPayload =>
-  typeof payload === 'object' && payload !== null && 'searchType' in payload
+  typeof payload === 'object' &&
+  payload !== null &&
+  'query' in payload &&
+  !(
+    'verticalId' in payload ||
+    'pageNumber' in payload ||
+    'pageSize' in payload ||
+    'sort' in payload ||
+    'aggs' in payload ||
+    'filters' in payload ||
+    'semanticSearch' in payload ||
+    'include' in payload
+  )
 
 export default defineEventHandler(
   async (event): Promise<ProductSearchResponseDto | GlobalSearchResponseDto> => {
@@ -60,10 +68,7 @@ export default defineEventHandler(
 
     if (isGlobalSearchPayload(payload)) {
       try {
-        return await productService.searchGlobalProducts(
-          payload.query ?? '',
-          payload.searchType ?? 'auto'
-        )
+        return await productService.searchGlobalProducts(payload.query ?? '')
       } catch (error) {
         const backendError = await extractBackendErrorDetails(error)
         console.error(

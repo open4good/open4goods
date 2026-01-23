@@ -30,7 +30,6 @@ import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
-import org.open4goods.nudgerfrontapi.dto.search.SearchType;
 import org.open4goods.nudgerfrontapi.service.exception.InvalidAffiliationTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +218,7 @@ public class ShareResolutionService {
      * @return ordered list of candidates
      */
     private List<ShareCandidateDto> searchByQuery(String query, DomainLanguage domainLanguage) {
-        GlobalSearchResult searchResult = searchService.globalSearch(query, domainLanguage, SearchType.auto);
+        GlobalSearchResult searchResult = searchService.globalSearch(query, domainLanguage);
         List<ShareCandidateDto> mapped = new ArrayList<>();
 
         searchResult.verticalGroups().forEach(group -> group.results().stream()
@@ -227,7 +226,7 @@ public class ShareResolutionService {
                 .map(hit -> toCandidate(hit.product(), hit.score()))
                 .forEach(mapped::add));
 
-        searchResult.fallbackResults().stream()
+        searchResult.missingVerticalResults().stream()
                 .sorted(Comparator.comparingDouble(GlobalSearchHit::score).reversed())
                 .map(hit -> toCandidate(hit.product(), hit.score()))
                 .forEach(mapped::add);
