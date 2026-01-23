@@ -5,9 +5,7 @@
     icon="mdi-leaf"
     :title="t('category.filters.ecoscore.title')"
     :subtitle="
-      t('category.filters.ecoscore.cta', {
-        category: normalizedCategoryName,
-      })
+      t('category.filters.ecoscore.cta', { category: normalizedCategoryName })
     "
     :aria-label="t('category.filters.ecoscore.ariaLabel')"
     data-test="category-ecoscore-card"
