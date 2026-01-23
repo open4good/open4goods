@@ -2388,32 +2388,6 @@ useHead(() => {
   scroll-margin-top: 108px; /* Match sticky nav + banner */
 }
 
-.product-page__ai-review-row {
-  margin: 0;
-}
-
-.product-page__ai-review-quality {
-  border-radius: 24px;
-  background: rgba(var(--v-theme-surface-glass-strong), 0.92);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
-  position: sticky;
-  top: 124px;
-}
-
-.product-page__ai-review-quality-header {
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-page__ai-review-quality-value {
-  padding: 0.75rem 1rem;
-  border-radius: 999px;
-  background: rgba(var(--v-theme-surface-primary-080), 0.95);
-  color: rgb(var(--v-theme-text-neutral-strong));
-  font-weight: 600;
-  text-transform: none;
-  width: fit-content;
-}
 
 .product-page__hero {
   position: relative;
@@ -2478,9 +2452,6 @@ useHead(() => {
     scroll-margin-top: 140px;
   }
 
-  .product-page__ai-review-quality {
-    position: static;
-  }
 }
 
 @media (max-width: 960px) {
