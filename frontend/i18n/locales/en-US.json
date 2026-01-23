@@ -912,6 +912,11 @@
         "description": "Understand how the eco-score is calculated for {category}",
         "cta": "Methodology {category}",
         "ariaLabel": "Open the Eco-score guide"
+      },
+      "assistant": {
+        "title": "Our assistant",
+        "description": "Let us guide you",
+        "ariaLabel": "Open the Nudger assistant"
       }
     },
     "admin": {

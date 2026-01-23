@@ -926,6 +926,11 @@
         "description": "Comprendre comment est calculé l'écoscore des {category}",
         "cta": "Méthodologie {category}",
         "ariaLabel": "Ouvrir le guide Eco-score"
+      },
+      "assistant": {
+        "title": "Notre assistant",
+        "description": "Laissez vous guider",
+        "ariaLabel": "Ouvrir l'assistant Nudger"
       }
     },
     "admin": {

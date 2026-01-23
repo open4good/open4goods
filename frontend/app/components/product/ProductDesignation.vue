@@ -1,5 +1,5 @@
 <template>
-  <div class="product-designation">
+  <div class="product-designation" :class="rootClass">
     <slot
       :short-name="shortName"
       :long-name="longName"
@@ -54,6 +54,12 @@ const shortDescription = computed(() =>
 const displayTitle = computed(() =>
   props.variant === 'page' ? longName.value : shortName.value
 )
+
+const rootClass = computed(() =>
+  props.variant === 'card'
+    ? 'product-designation--card'
+    : 'product-designation--page'
+)
 </script>
 
 <style scoped lang="scss">
@@ -64,6 +70,10 @@ const displayTitle = computed(() =>
 
   &__title {
     margin: 0;
+  }
+
+  &--card &__title {
+    text-align: center;
   }
 
   &__description {
