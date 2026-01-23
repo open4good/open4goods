@@ -113,15 +113,43 @@
           :id="sectionIds.ai"
           class="product-page__section"
         >
-          <ProductAiReviewSection
-            :gtin="product.gtin ?? gtin"
-            :initial-review="product.aiReview?.review ?? null"
-            :review-created-at="product.aiReview?.createdMs ?? undefined"
-            :site-key="hcaptchaSiteKey"
-            :title-params="aiTitleParams"
-            :product-name="productTitle"
-            :product-image="resolvedProductImageSource"
-          />
+          <v-row class="product-page__ai-review-row">
+            <v-col cols="12" :md="aiReviewDataQuality ? 8 : 12">
+              <ProductAiReviewSection
+                :gtin="product.gtin ?? gtin"
+                :initial-review="product.aiReview?.review ?? null"
+                :review-created-at="product.aiReview?.createdMs ?? undefined"
+                :site-key="hcaptchaSiteKey"
+                :title-params="aiTitleParams"
+                :product-name="productTitle"
+                :product-image="resolvedProductImageSource"
+              />
+            </v-col>
+            <v-col v-if="aiReviewDataQuality" cols="12" md="4">
+              <v-card class="product-page__ai-review-quality" elevation="0">
+                <v-card-text>
+                  <header
+                    class="product-page__ai-review-quality-header d-flex align-center mb-3"
+                  >
+                    <v-icon
+                      icon="mdi-shield-check-outline"
+                      size="22"
+                      class="mr-2"
+                    />
+                    <h3 class="text-subtitle-1 font-weight-bold">
+                      {{ $t('product.aiReview.dataQuality.title') }}
+                    </h3>
+                  </header>
+                  <p class="text-body-2 mb-4">
+                    {{ $t('product.aiReview.dataQuality.description') }}
+                  </p>
+                  <div class="product-page__ai-review-quality-value">
+                    {{ aiReviewDataQuality }}
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
         </section>
 
         <section :id="sectionIds.price" class="product-page__section">
@@ -1704,6 +1732,10 @@ const showAlternativesSection = computed(() =>
 const alternativesHydrated = ref(false)
 const hasAlternatives = ref(true)
 const showAiReviewSection = computed(() => Boolean(categoryDetail.value))
+const aiReviewDataQuality = computed(() => {
+  const value = product.value?.aiReview?.review?.dataQuality
+  return typeof value === 'string' ? value.trim() : ''
+})
 
 const sectionIds = {
   hero: 'hero',
@@ -2293,7 +2325,37 @@ useHead(() => {
 
 <style scoped>
 .product-page {
+  position: relative;
   padding: 2rem 0;
+}
+
+.product-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(var(--v-theme-hero-overlay-strong), 0.95) 0%,
+      rgba(var(--v-theme-hero-overlay-strong), 0) 60%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(var(--v-theme-hero-overlay-strong), 0.9) 0%,
+      rgba(var(--v-theme-hero-overlay-strong), 0) 55%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(var(--v-theme-hero-gradient-start), 0.18),
+      rgba(var(--v-theme-hero-gradient-end), 0.2)
+    );
+}
+
+.product-page > * {
+  position: relative;
+  z-index: 1;
 }
 
 .product-page__layout {
@@ -2324,6 +2386,33 @@ useHead(() => {
 
 .product-page__section {
   scroll-margin-top: 108px; /* Match sticky nav + banner */
+}
+
+.product-page__ai-review-row {
+  margin: 0;
+}
+
+.product-page__ai-review-quality {
+  border-radius: 24px;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.92);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+  position: sticky;
+  top: 124px;
+}
+
+.product-page__ai-review-quality-header {
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-page__ai-review-quality-value {
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-surface-primary-080), 0.95);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  font-weight: 600;
+  text-transform: none;
+  width: fit-content;
 }
 
 .product-page__hero {
@@ -2387,6 +2476,10 @@ useHead(() => {
 
   .product-page__section {
     scroll-margin-top: 140px;
+  }
+
+  .product-page__ai-review-quality {
+    position: static;
   }
 }
 
