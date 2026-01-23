@@ -2721,6 +2721,7 @@
       "subscoreChart": {
         "markerAverage": "La moyenne de {scoreLabel} se positionne ici.",
         "markerProduct": "{productName} se positionne ici.",
+        "title": "Répartition des critères",
         "toggleAbsolute": "Valeurs",
         "toggleNormalized": "Scores",
         "unknownProduct": "Ce produit"
@@ -2757,6 +2758,34 @@
               "fixed_mapping": "La note suit un barème fixe défini dans la configuration.",
               "binary": "La note est binaire selon un seuil défini.",
               "constant": "La note est fixée à une valeur constante définie par la configuration."
+            }
+          },
+          "statisticalMethod": {
+            "title": "Méthode statistique",
+            "sigma": {
+              "bounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
+              "scoring": "La note est calculée en comparant la valeur aux bornes ±{sigmaK}σ autour de la moyenne.",
+              "distribution": "La notation utilise l'écart-type ({sigma}{unit}) pour s'assurer que les valeurs extrêmes n'écrasent pas les différences entre produits courants."
+            },
+            "percentile": {
+              "scoring": "La note est calculée à partir du rang percentile dans la distribution.",
+              "value": "Ce produit se situe autour du {percentile}ᵉ percentile."
+            },
+            "minmax_fixed": {
+              "scoring": "La note est ramenée à une échelle commune via les bornes fixes [{fixedMin}{unit} ; {fixedMax}{unit}]."
+            },
+            "minmax_quantile": {
+              "scoring": "La note est calculée via des bornes par quantiles [{quantileLow}{unit} ; {quantileHigh}{unit}] pour limiter l'effet des valeurs extrêmes."
+            },
+            "fixed_mapping": {
+              "scoring": "La note suit un barème fixe défini dans la configuration."
+            },
+            "binary": {
+              "scoring_greater": "La note est fixée à {scaleMax} lorsque la valeur est ≥ {threshold}{unit}, sinon {scaleMin}.",
+              "scoring_lower": "La note est fixée à {scaleMax} lorsque la valeur est ≤ {threshold}{unit}, sinon {scaleMin}."
+            },
+            "constant": {
+              "scoring": "La note est fixée à {constantValue} quelle que soit la valeur."
             }
           }
         },

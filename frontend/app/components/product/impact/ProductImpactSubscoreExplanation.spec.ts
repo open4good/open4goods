@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
+import { defineComponent, h } from 'vue'
 import ProductImpactSubscoreExplanation from './ProductImpactSubscoreExplanation.vue'
 import type { ScoreView } from './impact-types'
 import enUS from '../../../../../i18n/locales/en-US.json'
@@ -13,6 +14,26 @@ describe('ProductImpactSubscoreExplanation', () => {
       'en-US': enUS,
     },
   })
+
+  const VIconStub = defineComponent({
+    name: 'VIconStub',
+    props: ['icon'],
+    setup(props) {
+      return () =>
+        h(
+          'span',
+          { class: 'v-icon-stub', 'data-icon': props.icon },
+          props.icon
+        )
+    },
+  })
+
+  const globalOptions = {
+    plugins: [i18n],
+    stubs: {
+      VIcon: VIconStub,
+    },
+  }
 
   // Mock global Nudger objects if needed, or just rely on i18n
   // The component imports 'useI18n' from 'vue-i18n'
@@ -53,9 +74,7 @@ describe('ProductImpactSubscoreExplanation', () => {
   it('renders the explanation title', () => {
     const wrapper = mount(ProductImpactSubscoreExplanation, {
       props: defaultProps,
-      global: {
-        plugins: [i18n],
-      },
+      global: globalOptions,
     })
     expect(wrapper.text()).toContain('How to read this indicator')
   })
@@ -63,9 +82,7 @@ describe('ProductImpactSubscoreExplanation', () => {
   it('displays the average as a pivot score of 10/20 (Sigma scoring)', () => {
     const wrapper = mount(ProductImpactSubscoreExplanation, {
       props: defaultProps,
-      global: {
-        plugins: [i18n],
-      },
+      global: globalOptions,
     })
 
     // Check for the updated text structure
@@ -76,9 +93,7 @@ describe('ProductImpactSubscoreExplanation', () => {
   it('displays the product score on 20 scale using the provided on20 value', () => {
     const wrapper = mount(ProductImpactSubscoreExplanation, {
       props: defaultProps,
-      global: {
-        plugins: [i18n],
-      },
+      global: globalOptions,
     })
 
     const text = wrapper.text()
@@ -90,9 +105,7 @@ describe('ProductImpactSubscoreExplanation', () => {
   it('displays min and max values without claiming they are 0/20 or 20/20', () => {
     const wrapper = mount(ProductImpactSubscoreExplanation, {
       props: defaultProps,
-      global: {
-        plugins: [i18n],
-      },
+      global: globalOptions,
     })
 
     const text = wrapper.text()
@@ -117,9 +130,7 @@ describe('ProductImpactSubscoreExplanation', () => {
 
     const wrapper = mount(ProductImpactSubscoreExplanation, {
       props: { ...defaultProps, score: scoreLower },
-      global: {
-        plugins: [i18n],
-      },
+      global: globalOptions,
     })
 
     const text = wrapper.text()
@@ -137,9 +148,7 @@ describe('ProductImpactSubscoreExplanation', () => {
 
     const wrapper = mount(ProductImpactSubscoreExplanation, {
       props: { ...defaultProps, score: scoreWithUnit },
-      global: {
-        plugins: [i18n],
-      },
+      global: globalOptions,
     })
 
     const text = wrapper.text()
@@ -159,12 +168,10 @@ describe('ProductImpactSubscoreExplanation', () => {
 
     const wrapper = mount(ProductImpactSubscoreExplanation, {
       props: { ...defaultProps, score: scoreWithSigma },
-      global: {
-        plugins: [i18n],
-      },
+      global: globalOptions,
     })
 
     const text = wrapper.text()
-    expect(text).toContain('standard deviation (1.5W)')
+    expect(text).toContain('Standard deviation (1.5W)')
   })
 })

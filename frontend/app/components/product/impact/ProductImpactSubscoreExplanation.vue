@@ -2,7 +2,7 @@
   <section v-if="hasContent" class="impact-subscore-explanation">
     <div
       v-if="hasImportance"
-      class="impact-subscore-explanation__card impact-subscore-explanation__card--importance"
+      class="impact-subscore-explanation__section impact-subscore-explanation__section--importance"
     >
       <h5 class="impact-subscore-explanation__title">
         {{ t('product.impact.importanceTitle') }}
@@ -13,15 +13,32 @@
     </div>
 
     <div
-      v-if="readIndicatorParagraphs.length || score.description"
-      class="impact-subscore-explanation__card"
+      v-if="hasReadIndicatorContent"
+      class="impact-subscore-explanation__section"
     >
       <h5 class="impact-subscore-explanation__title">
         {{ readIndicatorTitle }}
       </h5>
+      <ul
+        v-if="readIndicatorHighlights.length"
+        class="impact-subscore-explanation__bullet-list"
+      >
+        <li
+          v-for="item in readIndicatorHighlights"
+          :key="item.id"
+          class="impact-subscore-explanation__bullet-item"
+        >
+          <v-icon
+            icon="mdi-check-circle-outline"
+            size="18"
+            class="impact-subscore-explanation__bullet-icon"
+          />
+          <span>{{ item.text }}</span>
+        </li>
+      </ul>
       <p
-        v-for="(paragraph, index) in readIndicatorParagraphs"
-        :key="`paragraph-${index}`"
+        v-for="(paragraph, index) in readIndicatorDetails"
+        :key="`detail-${index}`"
         class="impact-subscore-explanation__paragraph"
       >
         {{ paragraph }}
@@ -32,6 +49,29 @@
       >
         {{ score.description }}
       </p>
+    </div>
+
+    <div
+      v-if="statisticalMethodItems.length"
+      class="impact-subscore-explanation__section"
+    >
+      <h5 class="impact-subscore-explanation__title">
+        {{ statisticalMethodTitle }}
+      </h5>
+      <ul class="impact-subscore-explanation__bullet-list">
+        <li
+          v-for="(item, index) in statisticalMethodItems"
+          :key="`method-${index}`"
+          class="impact-subscore-explanation__bullet-item"
+        >
+          <v-icon
+            icon="mdi-chart-bell-curve"
+            size="18"
+            class="impact-subscore-explanation__bullet-icon"
+          />
+          <span>{{ item }}</span>
+        </li>
+      </ul>
     </div>
 
     <dl v-if="infoItems.length" class="impact-subscore-explanation__list">
@@ -318,6 +358,34 @@ const percentileValue = computed(() => {
     maximumFractionDigits: 0,
   })
 })
+const fixedMinValue = computed(() =>
+  formatNumber(normalizationParams.value?.fixedMin ?? null)
+)
+const fixedMaxValue = computed(() =>
+  formatNumber(normalizationParams.value?.fixedMax ?? null)
+)
+const quantileLowValue = computed(() =>
+  formatNumber(normalizationParams.value?.quantileLow ?? null)
+)
+const quantileHighValue = computed(() =>
+  formatNumber(normalizationParams.value?.quantileHigh ?? null)
+)
+const thresholdValue = computed(() =>
+  formatNumber(normalizationParams.value?.threshold ?? null)
+)
+const constantValue = computed(() =>
+  formatNumber(normalizationParams.value?.constantValue ?? null)
+)
+const mappingCount = computed(() => {
+  const mapping = normalizationParams.value?.mapping
+  if (!mapping) {
+    return null
+  }
+  return Object.keys(mapping).length
+})
+const binaryUsesGreater = computed(
+  () => normalizationParams.value?.greaterIsPass ?? true
+)
 
 const productAbsoluteValue = computed(() => {
   if (
@@ -373,6 +441,13 @@ const readIndicatorParams = computed(() => ({
   percentile: percentileValue.value,
   scaleMin: formatNumber(scaleMin.value),
   scaleMax: formatNumber(scaleMax.value),
+  fixedMin: fixedMinValue.value,
+  fixedMax: fixedMaxValue.value,
+  quantileLow: quantileLowValue.value,
+  quantileHigh: quantileHighValue.value,
+  threshold: thresholdValue.value,
+  constantValue: constantValue.value,
+  mappingCount: mappingCount.value,
   userBetterIs: userBetterIsLower.value ? 'lower' : 'higher',
 }))
 
@@ -380,52 +455,120 @@ const readIndicatorTitle = computed(() =>
   resolveTranslation('readIndicator.title', readIndicatorParams.value)
 )
 
-const readIndicatorParagraphs = computed(() => {
-  const paragraphs: string[] = []
+const readIndicatorHighlights = computed(() => {
+  const items: Array<{ id: string; text: string }> = []
   const params = readIndicatorParams.value
 
   if (worstValue.value) {
-    paragraphs.push(resolveReadIndicatorTranslation('worst', params))
+    items.push({
+      id: 'worst',
+      text: resolveReadIndicatorTranslation('worst', params),
+    })
   }
 
   if (bestValue.value && populationValue.value) {
-    paragraphs.push(resolveReadIndicatorTranslation('best', params))
+    items.push({
+      id: 'best',
+      text: resolveReadIndicatorTranslation('best', params),
+    })
   }
 
-  if (averageValue.value && populationValue.value && averageOn20Value.value) {
-    paragraphs.push(resolveReadIndicatorTranslation('average', params))
+  if (averageValue.value && populationValue.value) {
+    items.push({
+      id: 'average',
+      text: resolveReadIndicatorTranslation('average', params),
+    })
   }
+
+  return items.filter(item => item.text?.toString().trim().length)
+})
+
+const readIndicatorDetails = computed(() => {
+  const paragraphs: string[] = []
+  const params = readIndicatorParams.value
 
   if (productAbsoluteValue.value && productOn20Value.value) {
     paragraphs.push(resolveReadIndicatorTranslation('product', params))
   }
 
-  if (normalizationMethod.value === 'SIGMA' && sigmaLowerBound.value) {
-    paragraphs.push(resolveReadIndicatorTranslation('sigmaBounds', params))
-  }
-
-  if (normalizationMethod.value === 'PERCENTILE' && percentileValue.value) {
-    paragraphs.push(resolveReadIndicatorTranslation('percentile', params))
-  }
-
-  const methodKey = normalizationMethod.value?.toLowerCase() ?? 'sigma'
-  const methodTranslationKey = `${translationBaseKey.value}.readIndicator.method.${methodKey}`
-  const fallbackMethodKey = `${translationFallbackBase}.readIndicator.method.${methodKey}`
-  if (te(methodTranslationKey) || te(fallbackMethodKey)) {
-    paragraphs.push(resolveReadIndicatorTranslation(`method.${methodKey}`, params))
-  }
-
-  if (absoluteStats.value?.stdDev != null && absoluteStats.value.avg != null) {
-    paragraphs.push(resolveReadIndicatorTranslation('distribution', params))
-  }
-
   return paragraphs.filter(paragraph => paragraph?.toString().trim().length)
 })
 
+const resolveStatisticalMethodTranslation = (
+  suffix: string,
+  params: Record<string, unknown>
+) => {
+  const candidate = `${translationBaseKey.value}.statisticalMethod.${suffix}`
+  if (te(candidate)) {
+    return t(candidate, params)
+  }
+
+  return t(`${translationFallbackBase}.statisticalMethod.${suffix}`, params)
+}
+
+const statisticalMethodTitle = computed(() =>
+  resolveStatisticalMethodTranslation('title', readIndicatorParams.value)
+)
+
+const statisticalMethodItems = computed(() => {
+  const items: string[] = []
+  const params = readIndicatorParams.value
+  const methodKey = normalizationMethod.value?.toUpperCase() ?? 'SIGMA'
+
+  if (methodKey === 'SIGMA') {
+    if (sigmaLowerBound.value && sigmaUpperBound.value) {
+      items.push(resolveStatisticalMethodTranslation('sigma.bounds', params))
+    }
+    if (sigmaKValue.value != null) {
+      items.push(resolveStatisticalMethodTranslation('sigma.scoring', params))
+    }
+    if (absoluteStats.value?.stdDev != null) {
+      items.push(
+        resolveStatisticalMethodTranslation('sigma.distribution', params)
+      )
+    }
+  } else if (methodKey === 'PERCENTILE') {
+    items.push(resolveStatisticalMethodTranslation('percentile.scoring', params))
+    if (percentileValue.value) {
+      items.push(resolveStatisticalMethodTranslation('percentile.value', params))
+    }
+  } else if (methodKey === 'MINMAX_FIXED') {
+    if (fixedMinValue.value && fixedMaxValue.value) {
+      items.push(resolveStatisticalMethodTranslation('minmax_fixed.scoring', params))
+    }
+  } else if (methodKey === 'MINMAX_QUANTILE') {
+    if (quantileLowValue.value && quantileHighValue.value) {
+      items.push(
+        resolveStatisticalMethodTranslation('minmax_quantile.scoring', params)
+      )
+    }
+  } else if (methodKey === 'FIXED_MAPPING') {
+    items.push(resolveStatisticalMethodTranslation('fixed_mapping.scoring', params))
+  } else if (methodKey === 'BINARY') {
+    const binaryKey = binaryUsesGreater.value
+      ? 'binary.scoring_greater'
+      : 'binary.scoring_lower'
+    items.push(resolveStatisticalMethodTranslation(binaryKey, params))
+  } else if (methodKey === 'CONSTANT') {
+    if (constantValue.value) {
+      items.push(resolveStatisticalMethodTranslation('constant.scoring', params))
+    }
+  }
+
+  return items.filter(item => item?.toString().trim().length)
+})
+
+const hasReadIndicatorContent = computed(
+  () =>
+    readIndicatorHighlights.value.length > 0 ||
+    readIndicatorDetails.value.length > 0 ||
+    Boolean(props.score.description)
+)
+
 const hasContent = computed(
   () =>
-    readIndicatorParagraphs.value.length > 0 ||
-    Boolean(props.score.description) ||
+    hasReadIndicatorContent.value ||
+    statisticalMethodItems.value.length > 0 ||
     infoItems.value.length > 0 ||
     metadataItems.value.length > 0 ||
     hasImportance.value
@@ -453,14 +596,10 @@ function formatMetadataLabel(rawKey: string): string {
   gap: 0.75rem;
 }
 
-.impact-subscore-explanation__card {
+.impact-subscore-explanation__section {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  border-radius: 18px;
-  background: rgba(var(--v-theme-surface-glass), 0.9);
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.05);
 }
 
 .impact-subscore-explanation__title {
@@ -468,6 +607,27 @@ function formatMetadataLabel(rawKey: string): string {
   font-size: 0.95rem;
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore-explanation__bullet-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.impact-subscore-explanation__bullet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  line-height: 1.6;
+}
+
+.impact-subscore-explanation__bullet-icon {
+  color: rgba(var(--v-theme-accent-supporting), 0.9);
 }
 
 .impact-subscore-explanation__paragraph {
