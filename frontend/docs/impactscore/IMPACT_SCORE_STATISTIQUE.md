@@ -11,7 +11,6 @@
 - \(S_{min}\) : score minimum (par défaut 0)
 - \(S_{max}\) : score maximum (par défaut 5)
 - `impactBetterIs` : sens « meilleur » pour le score impact
-- `statsScope.population` : population statistique (par défaut `VERTICAL`)
 
 On suppose que la normalisation produit un score \(s\in[S_{min},S_{max}]\).
 

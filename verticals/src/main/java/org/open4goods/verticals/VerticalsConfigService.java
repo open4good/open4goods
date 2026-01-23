@@ -333,6 +333,8 @@ public class VerticalsConfigService {
 
 		config.setAvailableImpactScoreCriterias(
 				mergeStringList(defaults.getAvailableImpactScoreCriterias(), config.getAvailableImpactScoreCriterias()));
+		config.setCompositeScores(
+				mergeStringList(defaults.getCompositeScores(), config.getCompositeScores()));
 		config.setExcludingTokensFromCategoriesMatching(mergeStringSet(defaults.getExcludingTokensFromCategoriesMatching(),
 				config.getExcludingTokensFromCategoriesMatching()));
 		config.setGenerationExcludedFromCategoriesMatching(mergeStringSet(defaults.getGenerationExcludedFromCategoriesMatching(),
@@ -496,14 +498,6 @@ public class VerticalsConfigService {
 		if (attributeConfig == null) {
 			return;
 		}
-
-		if (attributeConfig.getUserBetterIs() == null && attributeConfig.getImpactBetterIs() == null) {
-			AttributeComparisonRule legacyBetterIs = attributeConfig.getBetterIs();
-			if (legacyBetterIs != null) {
-				attributeConfig.setUserBetterIs(legacyBetterIs);
-				attributeConfig.setImpactBetterIs(legacyBetterIs);
-			}
-		}
 	}
 
 	private boolean isKeyOnly(AttributeConfig attributeConfig) {
@@ -521,8 +515,6 @@ public class VerticalsConfigService {
 				&& attributeConfig.getNumericMapping().isEmpty()
 				&& attributeConfig.getMappings().isEmpty()
 				&& (attributeConfig.getFaIcon() == null || "fa-wrench".equals(attributeConfig.getFaIcon()))
-				&& (attributeConfig.getBetterIs() == null
-						|| AttributeComparisonRule.GREATER.equals(attributeConfig.getBetterIs()))
 				&& AttributeComparisonRule.GREATER.equals(attributeConfig.getUserBetterIs())
 				&& AttributeComparisonRule.GREATER.equals(attributeConfig.getImpactBetterIs())
 				&& attributeConfig.getScoring() == null

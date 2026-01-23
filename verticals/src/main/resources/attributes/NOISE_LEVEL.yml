@@ -1,5 +1,4 @@
 key: "NOISE_LEVEL"
-betterIs: "LOWER"
 faIcon: "mdi-volume-high"
 name:
   default: "Noise level"

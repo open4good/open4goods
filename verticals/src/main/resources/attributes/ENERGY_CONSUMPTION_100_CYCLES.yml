@@ -1,5 +1,4 @@
 key: "ENERGY_CONSUMPTION_100_CYCLES"
-betterIs: "LOWER"
 faIcon: "mdi-flash"
 name:
   default: "Energy consumption per 100 cycles"

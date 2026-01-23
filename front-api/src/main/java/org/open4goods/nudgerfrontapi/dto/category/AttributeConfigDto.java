@@ -41,8 +41,6 @@ public record AttributeConfigDto(
         Set<String> participateInScores,
         @Schema(description = "Lifecycle stages (ACV) represented by this score.")
         Set<LifecycleStage> participateInACV,
-        @Schema(description = "Comparison rule applied to determine which values are considered better.")
-        AttributeComparisonRule betterIs,
         @Schema(description = "Comparison rule applied for user-facing explanations.")
         AttributeComparisonRule userBetterIs,
         @Schema(description = "Comparison rule applied for impact scoring.")

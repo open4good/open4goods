@@ -31,7 +31,7 @@ Implication :
 - L’UI (explication) peut s’appuyer sur **les deux** pour contextualiser (« confortable mais plus impactant »).
 
 Compatibilité :
-- si `betterIs` existait historiquement, on peut initialiser `userBetterIs = impactBetterIs = betterIs`.
+- les champs `userBetterIs` et `impactBetterIs` sont requis pour expliciter le sens des comparaisons.
 
 ## 3. Pipeline de calcul (batch)
 
@@ -53,8 +53,6 @@ Pendant le traitement batch, le système maintient pour chaque sous-score :
 ### 3.3 Normalisation (relativisation) en 0..5
 
 Chaque sous-score est normalisé via une méthode **déclarée dans le YAML**, puis éventuellement inversé selon `impactBetterIs`.  
-Par défaut, la population statistique est la **verticale** (`statsScope.population = VERTICAL`).
-
 Voir la documentation statistique pour les formules.
 
 ### 3.4 Agrégation : calcul de l’Impact Score global
@@ -83,10 +81,9 @@ ImpactScore_{0..20} = \sum_i (SubScore_i \times Weight'_i)
 Une politique explicite doit exister :
 - **NEUTRAL** (ex : 2.5/5)
 - **WORST** (0/5)
-- **EXCLUDE** (ne pas compter le critère pour le produit)
 
 Recommandation fréquente :
-- EXCLUDE par sous-score + pénalisation globale via un critère `DATA_QUALITY`, pour éviter que l’absence de donnée « améliore » artificiellement.
+- Utiliser **WORST** pour éviter qu’une donnée manquante améliore artificiellement le score, et compenser via un critère `DATA_QUALITY`.
 
 ## 4. Points de cohérence à vérifier (backend)
 

@@ -24,7 +24,6 @@ describe('ProductImpactSubscoreExplanation', () => {
     value: 3.5,
     relativeValue: 3.5,
     on20: 14,
-    betterIs: 'GREATER',
     impactBetterIs: 'GREATER',
     scoring: {
       normalization: {
@@ -98,18 +97,18 @@ describe('ProductImpactSubscoreExplanation', () => {
 
     const text = wrapper.text()
 
-    // Worst (Lowest for HIGHER betterIs)
+    // Worst (Lowest for HIGHER impactBetterIs)
     expect(text).toContain('The lowest test score recorded is 1.')
     expect(text).not.toContain('corresponds to a 0/20 score')
 
-    // Best (Highest for HIGHER betterIs)
+    // Best (Highest for HIGHER impactBetterIs)
     expect(text).toContain(
       'The highest test score observed among the 100 ovens is 5.'
     )
     expect(text).not.toContain('worth 20/20')
   })
 
-  it('handles "betterIs LOWER" correctly (Worst is High, Best is Low)', () => {
+  it('handles "impactBetterIs LOWER" correctly (Worst is High, Best is Low)', () => {
     const scoreLower: ScoreView = {
       ...baseScore,
       impactBetterIs: 'LOWER',
@@ -124,7 +123,7 @@ describe('ProductImpactSubscoreExplanation', () => {
     })
 
     const text = wrapper.text()
-    // Best (Lowest for LOWER betterIs)
+    // Best (Lowest for LOWER impactBetterIs)
     expect(text).toContain(
       'The lowest test score observed among the 100 ovens is 10.'
     )

@@ -2,7 +2,6 @@
 # MINGUARANTEEDSUPPORTYEARS
 ##################################
 key: "MINGUARANTEEDSUPPORTYEARS"
-betterIs: "GREATER"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
 eprelFeatureNames:
@@ -24,10 +23,8 @@ scoring:
     method: "SIGMA"
     params:
       sigmaK: 2.0
-  missingValuePolicy: "EXCLUDE"
+  missingValuePolicy: "WORST"
   degenerateDistributionPolicy: "FALLBACK"
-  statsScope:
-    population: "VERTICAL"
 scoreTitle:
   fr: "Support garanti"
 scoreDescription:

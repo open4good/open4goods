@@ -1,5 +1,4 @@
 key: "ENERGY_CONSUMPTION_PER_CYCLE"
-betterIs: "LOWER"
 faIcon: "mdi-flash"
 name:
   default: "Energy consumption per cycle"

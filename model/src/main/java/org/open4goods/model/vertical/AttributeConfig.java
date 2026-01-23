@@ -15,7 +15,6 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.vertical.lifecycle.LifecycleStage;
 import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
-import org.open4goods.model.vertical.scoring.ScoreStatsScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,12 +108,6 @@ public class AttributeConfig {
          * Lifecycle stages (ACV) represented by this attribute when used as a score.
          */
         private Set<LifecycleStage> participateInACV = new HashSet<>();
-
-        /**
-         * Indicates which comparison rule should be applied to determine the most
-         * desirable value when comparing products.
-         */
-        private AttributeComparisonRule betterIs = AttributeComparisonRule.GREATER;
 
         /**
          * Comparison rule describing which values are preferred by users.
@@ -500,32 +493,12 @@ public class AttributeConfig {
 	}
 
         /**
-         * Gets the comparison rule describing which values are considered better for
-         * this attribute.
-         *
-         * @return the configured comparison rule, defaults to {@link AttributeComparisonRule#GREATER}.
-         */
-        public AttributeComparisonRule getBetterIs() {
-                return betterIs;
-        }
-
-        /**
-         * Sets the comparison rule describing which values are considered better for
-         * this attribute.
-         *
-         * @param betterIs the comparison rule to apply when comparing values.
-         */
-        public void setBetterIs(AttributeComparisonRule betterIs) {
-                this.betterIs = betterIs == null ? AttributeComparisonRule.GREATER : betterIs;
-        }
-
-        /**
          * Gets the comparison rule describing which values are preferred by users.
          *
          * @return the user preference comparison rule, defaults to {@link AttributeComparisonRule#GREATER}.
          */
         public AttributeComparisonRule getUserBetterIs() {
-                return userBetterIs == null ? getBetterIs() : userBetterIs;
+                return userBetterIs == null ? AttributeComparisonRule.GREATER : userBetterIs;
         }
 
         /**
@@ -543,7 +516,7 @@ public class AttributeConfig {
          * @return the impact comparison rule, defaults to {@link AttributeComparisonRule#GREATER}.
          */
         public AttributeComparisonRule getImpactBetterIs() {
-                return impactBetterIs == null ? getBetterIs() : impactBetterIs;
+                return impactBetterIs == null ? AttributeComparisonRule.GREATER : impactBetterIs;
         }
 
         /**
@@ -571,18 +544,6 @@ public class AttributeConfig {
          */
         public void setScoring(ScoreScoringConfig scoring) {
                 this.scoring = scoring;
-        }
-
-        /**
-         * Returns the configured stats scope population.
-         *
-         * @return stats scope population, defaults to {@link ScoreStatsScope#VERTICAL}.
-         */
-        public ScoreStatsScope getStatsScopePopulation() {
-                if (scoring == null || scoring.getStatsScope() == null || scoring.getStatsScope().getPopulation() == null) {
-                        return ScoreStatsScope.VERTICAL;
-                }
-                return scoring.getStatsScope().getPopulation();
         }
 
         public Localisable<String, String> getUnit() {

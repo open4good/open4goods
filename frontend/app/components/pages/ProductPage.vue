@@ -1247,7 +1247,6 @@ const impactScores = computed(() => {
       metadatas: score.metadatas ?? null,
       unit: attributeConfig?.unit ?? attributeConfig?.suffix ?? null,
       aggregates,
-      betterIs: attributeConfig?.betterIs ?? null,
       userBetterIs: attributeConfig?.userBetterIs ?? null,
       impactBetterIs: attributeConfig?.impactBetterIs ?? null,
       scoring: attributeConfig?.scoring ?? null,

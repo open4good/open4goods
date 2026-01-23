@@ -1,5 +1,4 @@
 key: "ENERGY_CONSUMPTION_ANNUAL"
-betterIs: "LOWER"
 faIcon: "mdi-flash"
 name:
   default: "Annual energy consumption"

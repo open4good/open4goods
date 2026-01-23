@@ -113,12 +113,6 @@ export interface AttributeConfigDto {
      */
     participateInACV?: Set<AttributeConfigDtoParticipateInACVEnum>;
     /**
-     * Comparison rule applied to determine which values are considered better.
-     * @type {string}
-     * @memberof AttributeConfigDto
-     */
-    betterIs?: AttributeConfigDtoBetterIsEnum;
-    /**
      * Comparison rule applied for user-facing explanations.
      * @type {string}
      * @memberof AttributeConfigDto
@@ -247,7 +241,6 @@ export function AttributeConfigDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'scoreUtility': json['scoreUtility'] == null ? undefined : json['scoreUtility'],
         'participateInScores': json['participateInScores'] == null ? undefined : new Set(json['participateInScores']),
         'participateInACV': json['participateInACV'] == null ? undefined : new Set(json['participateInACV']),
-        'betterIs': json['betterIs'] == null ? undefined : json['betterIs'],
         'userBetterIs': json['userBetterIs'] == null ? undefined : json['userBetterIs'],
         'impactBetterIs': json['impactBetterIs'] == null ? undefined : json['impactBetterIs'],
         'scoring': json['scoring'] == null ? undefined : ScoreScoringConfigDtoFromJSON(json['scoring']),
@@ -284,7 +277,6 @@ export function AttributeConfigDtoToJSONTyped(value?: AttributeConfigDto | null,
         'scoreUtility': value['scoreUtility'],
         'participateInScores': value['participateInScores'] == null ? undefined : Array.from(value['participateInScores'] as Set<any>),
         'participateInACV': value['participateInACV'] == null ? undefined : Array.from(value['participateInACV'] as Set<any>),
-        'betterIs': value['betterIs'],
         'userBetterIs': value['userBetterIs'],
         'impactBetterIs': value['impactBetterIs'],
         'scoring': ScoreScoringConfigDtoToJSON(value['scoring']),

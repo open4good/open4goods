@@ -155,10 +155,6 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		}
 
 		switch (attrConfig.getScoring().getMissingValuePolicy()) {
-			case EXCLUDE -> {
-				dedicatedLogger.warn("Attribute to score excluded for {}", aga, e);
-				return;
-			}
 			case WORST, NEUTRAL -> {
 				Double fallback = resolveMissingValueFallback(attrConfig);
 				if (fallback == null) {
@@ -189,7 +185,6 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		return switch (attrConfig.getScoring().getMissingValuePolicy()) {
 			case WORST -> min;
 			case NEUTRAL -> (min + max) / 2.0;
-			case EXCLUDE -> null;
 		};
 	}
 	/**

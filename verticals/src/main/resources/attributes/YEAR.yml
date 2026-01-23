@@ -1,5 +1,4 @@
 key: "YEAR"
-betterIs: "GREATER"
 faIcon: "mdi-calendar"
 name:
   default: "Year"

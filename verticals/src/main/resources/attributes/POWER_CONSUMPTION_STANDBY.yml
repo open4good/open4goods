@@ -2,7 +2,6 @@
 # POWER_CONSUMPTION_STANDBY
 ##################################
 key: "POWER_CONSUMPTION_STANDBY"
-betterIs: "LOWER"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
 eprelFeatureNames:
@@ -24,10 +23,8 @@ scoring:
     method: "SIGMA"
     params:
       sigmaK: 2.0
-  missingValuePolicy: "EXCLUDE"
+  missingValuePolicy: "WORST"
   degenerateDistributionPolicy: "FALLBACK"
-  statsScope:
-    population: "VERTICAL"
 scoreTitle:
   fr: "Consommation électrique (mode veille)"
 scoreDescription:

@@ -1,5 +1,4 @@
 key: "PROGRAM_DURATION_ECO"
-betterIs: "LOWER"
 faIcon: "mdi-timer-outline"
 name:
   default: "Eco program duration"

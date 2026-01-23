@@ -97,11 +97,10 @@ const translationBaseKey = computed(
 const translationFallbackBase = 'product.impact.subscores.default'
 
 const impactBetterIsLower = computed(
-  () =>
-    (props.score.impactBetterIs ?? props.score.betterIs ?? null) === 'LOWER'
+  () => (props.score.impactBetterIs ?? null) === 'LOWER'
 )
 const userBetterIsLower = computed(
-  () => (props.score.userBetterIs ?? props.score.betterIs ?? null) === 'LOWER'
+  () => (props.score.userBetterIs ?? null) === 'LOWER'
 )
 
 const resolveTranslation = (

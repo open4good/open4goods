@@ -1,5 +1,4 @@
 key: "OVEN_ENERGY_CONSUMPTION_CYCLE"
-betterIs: "LOWER"
 faIcon: "mdi-flash"
 name:
   default: "Energy consumption per cycle"

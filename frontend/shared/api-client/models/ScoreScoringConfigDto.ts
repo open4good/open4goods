@@ -63,12 +63,6 @@ export interface ScoreScoringConfigDto {
      * @memberof ScoreScoringConfigDto
      */
     degenerateDistributionPolicy?: ScoreScoringConfigDtoDegenerateDistributionPolicyEnum;
-    /**
-     * Population scope used to compute stats.
-     * @type {string}
-     * @memberof ScoreScoringConfigDto
-     */
-    statsScope?: ScoreScoringConfigDtoStatsScopeEnum;
 }
 
 /**
@@ -86,8 +80,7 @@ export type ScoreScoringConfigDtoTransformEnum = typeof ScoreScoringConfigDtoTra
  */
 export const ScoreScoringConfigDtoMissingValuePolicyEnum = {
     Neutral: 'NEUTRAL',
-    Worst: 'WORST',
-    Exclude: 'EXCLUDE'
+    Worst: 'WORST'
 } as const;
 export type ScoreScoringConfigDtoMissingValuePolicyEnum = typeof ScoreScoringConfigDtoMissingValuePolicyEnum[keyof typeof ScoreScoringConfigDtoMissingValuePolicyEnum];
 
@@ -104,11 +97,6 @@ export type ScoreScoringConfigDtoDegenerateDistributionPolicyEnum = typeof Score
 /**
  * @export
  */
-export const ScoreScoringConfigDtoStatsScopeEnum = {
-    Vertical: 'VERTICAL',
-    Category: 'CATEGORY'
-} as const;
-export type ScoreScoringConfigDtoStatsScopeEnum = typeof ScoreScoringConfigDtoStatsScopeEnum[keyof typeof ScoreScoringConfigDtoStatsScopeEnum];
 
 /**
  * Check if a given object implements the ScoreScoringConfigDto interface.
@@ -131,7 +119,6 @@ export function ScoreScoringConfigDtoFromJSONTyped(json: any, ignoreDiscriminato
         'transform': json['transform'] == null ? undefined : json['transform'],
         'missingValuePolicy': json['missingValuePolicy'] == null ? undefined : json['missingValuePolicy'],
         'degenerateDistributionPolicy': json['degenerateDistributionPolicy'] == null ? undefined : json['degenerateDistributionPolicy'],
-        'statsScope': json['statsScope'] == null ? undefined : json['statsScope'],
     };
 }
 
@@ -150,6 +137,5 @@ export function ScoreScoringConfigDtoToJSONTyped(value?: ScoreScoringConfigDto |
         'transform': value['transform'],
         'missingValuePolicy': value['missingValuePolicy'],
         'degenerateDistributionPolicy': value['degenerateDistributionPolicy'],
-        'statsScope': value['statsScope'],
     };
 }

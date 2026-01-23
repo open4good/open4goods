@@ -37,7 +37,6 @@ export type ScoreScoringConfig = {
   transform?: string | null
   missingValuePolicy?: string | null
   degenerateDistributionPolicy?: string | null
-  statsScope?: string | null
 }
 
 export type ScoreView = {
@@ -65,7 +64,6 @@ export type ScoreView = {
   metadatas?: Record<string, string> | null
   unit?: string | null
   aggregates?: Record<string, number> | null
-  betterIs?: 'GREATER' | 'LOWER' | null
   userBetterIs?: 'GREATER' | 'LOWER' | null
   impactBetterIs?: 'GREATER' | 'LOWER' | null
   scoring?: ScoreScoringConfig | null

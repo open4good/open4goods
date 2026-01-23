@@ -5,6 +5,5 @@ package org.open4goods.model.vertical.scoring;
  */
 public enum ScoreMissingValuePolicy {
     NEUTRAL,
-    WORST,
-    EXCLUDE
+    WORST
 }

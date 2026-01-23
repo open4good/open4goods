@@ -1,5 +1,4 @@
 key: "SPIN_CLASS"
-betterIs: "GREATER"
 faIcon: "mdi-alphabetical"
 name:
   default: "Spin class"

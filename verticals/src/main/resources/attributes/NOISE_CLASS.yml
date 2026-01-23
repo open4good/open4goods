@@ -1,5 +1,4 @@
 key: "NOISE_CLASS"
-betterIs: "GREATER"
 faIcon: "mdi-volume-medium"
 name:
   default: "Noise class"

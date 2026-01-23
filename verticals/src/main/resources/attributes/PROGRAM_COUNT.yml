@@ -1,5 +1,4 @@
 key: "PROGRAM_COUNT"
-betterIs: "GREATER"
 faIcon: "mdi-format-list-numbered"
 name:
   default: "Program count"
