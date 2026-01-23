@@ -130,11 +130,6 @@
             </div>
           </div>
 
-          // ... (Logic for script part, must be careful with
-          replace_file_content and large chunks) // Actually I need to split
-          this into chunks for replace_file_content or use multi_replace. //
-          I'll use multi_replace_file_content.
-
           <p
             v-else
             class="product-attributes__empty product-attributes__identity-empty"

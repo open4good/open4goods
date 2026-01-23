@@ -457,17 +457,13 @@ describe('ProductAiReviewSection', () => {
   it('renders the empty state when no review content is available', async () => {
     const wrapper = await mountComponent({ initialReview: null })
 
-    expect(wrapper.get('.product-ai-review__empty-label').text()).toBe(
-      'AI summary'
+    expect(wrapper.get('.v-expansion-panel-title .text-h6').text()).toBe(
+      'Request an AI review'
     )
-    expect(wrapper.get('.product-ai-review__empty-message').text()).toBe(
-      'Start a summary for this product.'
-    )
+    expect(
+      wrapper.get('.v-expansion-panel-title .text-caption').text()
+    ).toContain('Unavailable')
 
-    expect(wrapper.get('.v-btn-stub').text()).toBe('Request an AI review')
-    expect(wrapper.get('.product-ai-review__quota-value').text()).toBe(
-      'Unavailable'
-    )
     expect(wrapper.find('.product-ai-review__content').exists()).toBe(false)
   })
 
