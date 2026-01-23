@@ -2422,6 +2422,10 @@
         "notEnoughData": "Pas assez de données fiables pour générer une synthèse."
       },
       "generatedAt": "Synthèse générée le {date}",
+      "dataQuality": {
+        "title": "Qualité des données",
+        "description": "Évaluation de la fiabilité et de la complétude des sources utilisées pour cette synthèse IA."
+      },
       "requestButton": "Demander la synthèse",
       "request": {
         "agreement": "Je mandate Nudger pour rechercher et synthétiser les informations du {productName}. Dans une logique de sobriété et de partage, j'accepte également que ces données soient partagées à tous les utilisateurs de Nudger.",
