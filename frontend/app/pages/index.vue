@@ -74,7 +74,6 @@ const { data: categoriesStats } = await useAsyncData<CategoriesStatsDto | null>(
   {
     default: () => null,
     server: true,
-    lazy: true,
   }
 )
 
@@ -89,7 +88,6 @@ const { data: affiliationPartners } = await useAsyncData<
   {
     default: () => [],
     server: true,
-    lazy: true,
   }
 )
 
@@ -261,13 +259,22 @@ const sanitizeBlogSummary = (value: unknown) =>
 const hasRenderableImage = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0
 
-useAsyncData(
-  'home-heavy-data',
+const { execute: executeCategoriesFetch } = await useAsyncData(
+  'home-categories-data',
   async () => {
     if (rawCategories.value.length === 0) {
       await fetchCategories()
     }
+    return true
+  },
+  {
+    server: true,
+  }
+)
 
+const { execute: executeBlogFetch } = await useAsyncData(
+  'home-blog-data',
+  async () => {
     if (paginatedArticles.value.length === 0) {
       await fetchArticles(1, BLOG_ARTICLES_LIMIT, null)
     }
@@ -275,6 +282,7 @@ useAsyncData(
   },
   {
     lazy: true,
+    server: false,
   }
 )
 
