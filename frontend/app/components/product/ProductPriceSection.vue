@@ -12,6 +12,14 @@
         <h3 class="product-price__subtitle-h3">
           {{ offersTitle }}
         </h3>
+        <v-alert
+          v-if="showNoOffersBanner"
+          type="info"
+          variant="tonal"
+          class="product-price__no-offers"
+        >
+          {{ $t('product.price.noOffersBanner') }}
+        </v-alert>
 
         <!-- Primary Best Offer Card -->
         <v-card
@@ -830,6 +838,10 @@ const allOffers = computed(() => {
   return list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
 })
 
+const showNoOffersBanner = computed(
+  () => !allOffers.value.length && !bestNewOffer.value
+)
+
 const offersTitle = computed(() => {
   if (!allOffers.value.length) {
     return t('product.price.bestOffers', 'Les meilleures offres')
@@ -1318,6 +1330,11 @@ onBeforeUnmount(() => {
 
 .product-price__offers-table {
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12);
+}
+
+.product-price__no-offers {
+  margin-top: 1rem;
+  border-radius: 16px;
 }
 
 .product-price__charts {

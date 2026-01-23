@@ -2411,6 +2411,11 @@
     "partners_link": "nos partenaires",
     "aiReview": {
       "empty": "Synthèse non encore demandée.",
+      "illustrations": {
+        "technicalAlt": "Illustration de l'analyse technique",
+        "ecologicalAlt": "Illustration de l'analyse écologique",
+        "communityAlt": "Illustration de l'analyse communautaire"
+      },
       "errors": {
         "captcha": "Merci de valider le captcha avant de continuer.",
         "generic": "Une erreur est survenue lors de la génération.",
@@ -2848,6 +2853,7 @@
         "unknown": "Inconnu",
         "used": "Occasion"
       },
+      "noOffersBanner": "Pas d'offres actuellement !",
       "headers": {
         "condition": "État",
         "offer": "Offre",

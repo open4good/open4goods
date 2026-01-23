@@ -83,6 +83,7 @@
 import { computed, ref, watch } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { FetchError } from 'ofetch'
 import type {
   AttributeConfigDto,
   Filter,
@@ -515,6 +516,23 @@ const syncActiveFilters = (preserveSelection: boolean) => {
   activeFilterKeys.value = next
 }
 
+const resolveFetchErrorStatus = (error: unknown): number | null => {
+  if (error instanceof FetchError) {
+    return error.statusCode ?? error.response?.status ?? null
+  }
+
+  return null
+}
+
+const resolveFetchErrorMessage = (error: unknown): string | null => {
+  const status = resolveFetchErrorStatus(error)
+  if (status !== null && status < 500) {
+    return null
+  }
+
+  return t('product.impact.alternatives.error')
+}
+
 watch(
   () => props.product?.gtin ?? null,
   () => {
@@ -596,8 +614,23 @@ const fetchAlternatives = async () => {
       return
     }
 
-    console.error('Failed to fetch product alternatives', error)
-    errorMessage.value = t('product.impact.alternatives.error')
+    const status = resolveFetchErrorStatus(error)
+    const data =
+      error instanceof FetchError
+        ? {
+            statusMessage: error.data?.statusMessage,
+            message: error.data?.message,
+          }
+        : null
+
+    console.error('Failed to fetch product alternatives', {
+      error,
+      status,
+      data,
+      verticalId: props.verticalId,
+      productGtin: props.product?.gtin ?? null,
+    })
+    errorMessage.value = resolveFetchErrorMessage(error)
     alternatives.value = []
     emitAlternativesState(true)
   } finally {

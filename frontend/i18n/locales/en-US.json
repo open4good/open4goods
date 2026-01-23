@@ -2396,6 +2396,11 @@
     "partners_link": "our partners",
     "aiReview": {
       "empty": "Summary not requested yet.",
+      "illustrations": {
+        "technicalAlt": "Illustration of the technical analysis",
+        "ecologicalAlt": "Illustration of the environmental analysis",
+        "communityAlt": "Illustration of the community analysis"
+      },
       "errors": {
         "captcha": "Please validate the captcha before continuing.",
         "generic": "An error occurred while generating the summary.",
@@ -2830,6 +2835,7 @@
         "unknown": "Unknown",
         "used": "Second-hand"
       },
+      "noOffersBanner": "No offers available right now!",
       "headers": {
         "condition": "Condition",
         "offer": "Offer",
