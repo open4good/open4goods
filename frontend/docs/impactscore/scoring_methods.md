@@ -16,6 +16,7 @@ La méthode est définie dans `scoring.normalization.method` :
 - `SIGMA`
 - `PERCENTILE`
 - `MINMAX_FIXED`
+- `MINMAX_OBSERVED`
 - `MINMAX_QUANTILE`
 - `FIXED_MAPPING`
 - `BINARY`
@@ -77,7 +78,26 @@ La méthode est définie dans `scoring.normalization.method` :
 
 ---
 
-### 2.4 MINMAX_QUANTILE (bornes par quantiles)
+### 2.4 MINMAX_OBSERVED (bornes observées)
+
+**Principe**
+- Projection linéaire entre les bornes observées dans le batch `[min, max]`.
+- Les valeurs hors bornes sont clampées aux extrêmes de l'échelle.
+
+**Paramètres**
+- Aucun paramètre obligatoire.
+
+**À utiliser quand**
+- On veut une relativisation « marché » stricte (meilleur produit = score max, pire = score min).
+- Les bornes fixes sont inconnues, mais la couverture est suffisante.
+
+**À éviter quand**
+- Trop peu de valeurs ou distribution instable (risque d'effet “yoyo” dans le temps).
+- Présence d’outliers forts (préférer `MINMAX_QUANTILE`).
+
+---
+
+### 2.5 MINMAX_QUANTILE (bornes par quantiles)
 
 **Principe**
 - Projection linéaire entre deux quantiles (ex : p5/p95) pour limiter l'effet des outliers.
@@ -92,7 +112,7 @@ La méthode est définie dans `scoring.normalization.method` :
 
 ---
 
-### 2.5 FIXED_MAPPING (barème fixe)
+### 2.6 FIXED_MAPPING (barème fixe)
 
 **Principe**
 - Mapping direct d'une valeur discrète vers un score.
@@ -105,7 +125,7 @@ La méthode est définie dans `scoring.normalization.method` :
 
 ---
 
-### 2.6 BINARY (seuil)
+### 2.7 BINARY (seuil)
 
 **Principe**
 - Score min ou max selon un seuil.
@@ -119,7 +139,7 @@ La méthode est définie dans `scoring.normalization.method` :
 
 ---
 
-### 2.7 CONSTANT (score constant)
+### 2.8 CONSTANT (score constant)
 
 **Principe**
 - Score constant (ou neutre par défaut).
@@ -146,7 +166,7 @@ Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiqua
 
 ### Durabilité / support / disponibilité
 
-- `MINAVAILABILITYSOFTWAREUPDATESYEARS` (SIGMA) : proposer `MINMAX_FIXED` avec bornes marché (ex: 0–10 ans) si ces bornes sont connues.
+- `MINAVAILABILITYSOFTWAREUPDATESYEARS` (SIGMA) : proposer `MINMAX_FIXED` avec bornes marché (ex: 0–10 ans) si ces bornes sont connues, ou `MINMAX_OBSERVED` si l’on veut un score relatif au marché actuel.
 - `MINAVAILABILITYSPAREPARTSYEARS` (SIGMA) : même recommandation.
 - `MINGUARANTEEDSUPPORTYEARS` (SIGMA) : même recommandation.
 - `WARRANTY` (SIGMA) : même recommandation.
@@ -202,4 +222,4 @@ Le champ `Score.relativ` est calculé dans le batch à partir des méthodes ci-d
 - sinon un comportement legacy SIGMA (ou PERCENTILE si la distribution est trop discrète).
 
 Autrement dit : **la relativisation est déjà “calculée” via ces méthodes**.
-Pour obtenir un score « relatif au marché » avec bornes fixes (ex: 0–100), privilégier `MINMAX_FIXED` + `impactBetterIs`.
+Pour obtenir un score « relatif au marché », privilégier `MINMAX_OBSERVED` (bornes observées) ou `MINMAX_QUANTILE` si la distribution contient des outliers.

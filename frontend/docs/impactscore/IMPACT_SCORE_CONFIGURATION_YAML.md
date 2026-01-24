@@ -26,7 +26,7 @@ scoring:
     max: 5.0
 
   normalization:
-    method: SIGMA | PERCENTILE | MINMAX_FIXED | MINMAX_QUANTILE | FIXED_MAPPING | BINARY | CONSTANT
+    method: SIGMA | PERCENTILE | MINMAX_FIXED | MINMAX_OBSERVED | MINMAX_QUANTILE | FIXED_MAPPING | BINARY | CONSTANT
     params:
       # SIGMA
       sigmaK: 2.0
@@ -114,6 +114,19 @@ scoring:
     params:
       fixedMin: 0
       fixedMax: 10
+```
+
+### 4.4 Garantie (bornes observées)
+
+```yaml
+key: WARRANTY
+asScore: true
+userBetterIs: GREATER
+impactBetterIs: GREATER
+scoring:
+  normalization:
+    method: MINMAX_OBSERVED
+  missingValuePolicy: WORST
 ```
 
 ## 5) Validation à implémenter

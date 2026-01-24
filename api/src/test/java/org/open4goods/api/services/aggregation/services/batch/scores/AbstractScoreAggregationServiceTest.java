@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
 import org.junit.jupiter.api.Test;
@@ -154,6 +155,38 @@ class AbstractScoreAggregationServiceTest {
         Double normalized = service.relativizeWithConfig(scoreName, 5d, absolute, config);
 
         assertThat(normalized).isEqualTo(2.5);
+    }
+
+    @Test
+    void relativizeUsesObservedBoundsWhenConfigured() throws Exception {
+        TestScoreAggregationService service = new TestScoreAggregationService();
+        String scoreName = "WARRANTY";
+
+        VerticalConfig config = buildConfigWithMethod(scoreName, ScoreNormalizationMethod.MINMAX_OBSERVED);
+
+        service.registerValue(scoreName, 0d, config);
+        service.registerValue(scoreName, 10d, config);
+
+        Cardinality absolute = service.getAbsoluteCardinality(scoreName);
+        Double normalized = service.relativizeWithConfig(scoreName, 5d, absolute, config);
+
+        assertThat(normalized).isEqualTo(2.5);
+    }
+
+    @Test
+    void relativizeFailsWhenObservedBoundsAreInvalid() throws Exception {
+        TestScoreAggregationService service = new TestScoreAggregationService();
+        String scoreName = "MINPARTSAVAILLABILITY";
+
+        VerticalConfig config = buildConfigWithMethod(scoreName, ScoreNormalizationMethod.MINMAX_OBSERVED);
+
+        service.registerValue(scoreName, 3d, config);
+
+        Cardinality absolute = service.getAbsoluteCardinality(scoreName);
+
+        assertThatThrownBy(() -> service.relativizeWithConfig(scoreName, 3d, absolute, config))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Invalid observed bounds");
     }
     @Test
     void relativizePreservesStdDev() throws Exception {
