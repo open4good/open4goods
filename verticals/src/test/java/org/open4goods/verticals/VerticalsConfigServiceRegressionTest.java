@@ -70,4 +70,15 @@ class VerticalsConfigServiceRegressionTest {
             .as(attributeKey + " FR name should be present in " + verticalId)
             .isNotBlank();
     }
+
+
+    @Test
+    void shouldInheritCompositeScoresFromDefault() {
+        VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
+        assertThat(tvConfig).isNotNull();
+        
+        assertThat(tvConfig.getCompositeScores())
+            .as("TV vertical should inherit composite scores from _default.yml")
+            .contains("ECOSCORE");
+    }
 }

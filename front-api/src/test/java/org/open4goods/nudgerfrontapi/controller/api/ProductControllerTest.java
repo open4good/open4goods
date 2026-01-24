@@ -129,4 +129,29 @@ class ProductControllerTest {
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value");
     }
+
+
+    @Test
+    void compositeScoreFiltersArePermitted() {
+        VerticalConfig config = new VerticalConfig();
+        config.setId("tv");
+        config.setCompositeScores(List.of("ECOSCORE"));
+
+        when(verticalsConfigService.getConfigById("tv")).thenReturn(config);
+
+        Filter filter = new Filter("scores.ECOSCORE.value", FilterOperator.range, null, 0.0, 100.0);
+        ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
+                new FilterRequestDto(List.of(filter), List.of()), null);
+
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
+                anyBoolean()))
+                .thenReturn(responseDto);
+
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
+                "tv", null, DomainLanguage.fr, Locale.FRANCE, searchRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 }
