@@ -11,11 +11,11 @@
       <div class="product-hero__background-overlay" />
     </div>
     <div class="product-hero__content">
-      <header v-if="heroTitle" class="product-hero__heading">
+      <header class="product-hero__heading">
         <ProductDesignation
           :product="product"
           variant="page"
-          title-tag="h1"
+          title-tag="h3"
           title-class="product-hero__title text-center"
           description-class="product-hero__short-description text-center"
         />
@@ -25,10 +25,7 @@
           class="product-hero__breadcrumbs text-center"
         />
         <v-fade-transition>
-          <p
-            v-if="aiBaseline"
-            class="product-hero__baseline text-center"
-          >
+          <p v-if="aiBaseline" class="product-hero__baseline text-center">
             {{ aiBaseline }}
           </p>
         </v-fade-transition>
@@ -442,7 +439,7 @@ const popularAttributes = computed<HeroAttribute[]>(() =>
 )
 
 const heroAttributes = computed<HeroAttribute[]>(() => {
-  const baseAttributes: HeroAttribute[] = [...popularAttributes.value]
+  const baseAttributes: HeroAttribute[] = []
 
   if (hasAiReview.value && aiReview.value) {
     baseAttributes.push({
@@ -452,6 +449,8 @@ const heroAttributes = computed<HeroAttribute[]>(() => {
       showLabel: false,
       enableTooltip: false,
     })
+  } else {
+    baseAttributes.push(...popularAttributes.value)
   }
 
   if (gtinCountry.value) {
@@ -731,7 +730,7 @@ const gtinCountry = computed(() => {
 }
 
 .product-hero__title {
-  font-size: clamp(2.1rem, 3vw, 3.25rem);
+  font-size: clamp(1.5rem, 2vw, 2.2rem);
   font-weight: 800;
   line-height: 1.05;
   margin: 0;
@@ -903,7 +902,7 @@ const gtinCountry = computed(() => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1rem;
 }
 
 .product-hero__ai-summary-item {

@@ -2,24 +2,8 @@
   <section :id="sectionId" ref="rootRef" class="product-ai-review">
     <header class="product-ai-review__header">
       <v-row>
-        <!-- Left Column: Product Image -->
-        <v-col cols="4" class="d-flex align-center justify-center">
-          <img
-            v-if="productImage"
-            :src="productImage"
-            :alt="productName"
-            class="product-ai-review__product-image"
-          />
-          <v-icon
-            v-else
-            icon="mdi-image-off-outline"
-            size="64"
-            class="text-disabled"
-          />
-        </v-col>
-
         <!-- Right Column: Title, Metadata, Summary -->
-        <v-col cols="8">
+        <v-col cols="12">
           <h2 class="product-ai-review__title">
             {{ $t('product.aiReview.title', titleParams) }}
           </h2>
@@ -359,7 +343,9 @@
             >
               <thead>
                 <tr>
-                  <th scope="col">{{ $t('product.aiReview.sources.index') }}</th>
+                  <th scope="col">
+                    {{ $t('product.aiReview.sources.index') }}
+                  </th>
                   <th scope="col">
                     {{ $t('product.aiReview.sources.source') }}
                   </th>
@@ -733,7 +719,7 @@ const submitDisabled = computed(() => {
   }
 
   if (requiresCaptcha.value) {
-    return !hasSiteKey.value || !captchaToken.value
+    return !hasSiteKey.value
   }
 
   return false

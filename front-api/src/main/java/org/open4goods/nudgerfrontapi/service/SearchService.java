@@ -283,7 +283,7 @@ public class SearchService {
 				b.filter(f -> f.term(t -> t.field("vertical").value(normalizedVerticalId)));
 			}
 			if (StringUtils.hasText(sanitizedQuery)) {
-				b.must(m -> m.match(mq -> mq.field("offerNames").query(sanitizedQuery)));
+				b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(sanitizedQuery)));
 			}
 			if (filters != null) {
 				applyFilterRequest(filters, b);
@@ -320,12 +320,21 @@ public class SearchService {
 
 		CategorySuggestion verticalCta = findExactVerticalMatch(sanitizedQuery, domainLanguage);
 		SemanticGlobalSearchResult semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage);
-		if (!semanticResult.hasResults()) {
-			return new GlobalSearchResult(List.of(), List.of(), verticalCta, semanticResult.diagnostics());
+		if (semanticResult.hasResults()) {
+			return new GlobalSearchResult(semanticResult.verticalGroups(),
+					semanticResult.missingVerticalResults(),
+					verticalCta,
+					semanticResult.diagnostics());
 		}
 
-		return new GlobalSearchResult(semanticResult.verticalGroups(),
-				semanticResult.missingVerticalResults(),
+		List<GlobalSearchHit> lexicalHits = executeLexicalGlobalSearch(sanitizedQuery, domainLanguage);
+		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(lexicalHits);
+		List<GlobalSearchHit> missingVerticalResults = lexicalHits.stream()
+				.filter(hit -> !StringUtils.hasText(hit.verticalId()))
+				.toList();
+
+		return new GlobalSearchResult(grouped,
+				missingVerticalResults,
 				verticalCta,
 				semanticResult.diagnostics());
 	}
@@ -998,6 +1007,26 @@ public class SearchService {
 
 		return new SemanticGlobalSearchResult(grouped, missingVerticalResults, true,
 				buildSemanticDiagnostics(grouped, missingVerticalResults));
+	}
+
+	private List<GlobalSearchHit> executeLexicalGlobalSearch(String sanitizedQuery, DomainLanguage domainLanguage) {
+		List<String> tokens = tokenizeForScript(sanitizedQuery);
+		Query query = buildSuggestProductQuery(sanitizedQuery, tokens);
+		
+		org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder builder = new org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder()
+				.withQuery(query)
+				.withPageable(PageRequest.of(0, GLOBAL_SEARCH_LIMIT))
+				.withSourceFilter(new FetchSourceFilter(true, SUGGEST_SOURCE_INCLUDES, null));
+
+		SearchHits<Product> hits;
+		try {
+			hits = repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+		} catch (Exception e) {
+			elasticLog(e);
+			return List.of();
+		}
+
+		return mapHits(hits, domainLanguage, false);
 	}
 
 

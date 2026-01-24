@@ -1968,7 +1968,7 @@
     "hero": {
       "eyebrow": "Explorer le catalogue",
       "title": "Les produits disponibles",
-      "subtitle": "Trouvez des produits, des marques et des références sélectionnés par Nudger dans chaque verticale."
+      "subtitle": "Rechercher dans nos produits évalués ou dans les autres."
     },
     "form": {
       "label": "Rechercher dans le catalogue",
@@ -2170,6 +2170,10 @@
         "agreement": "Je mandate Nudger pour rechercher et synthétiser les informations du {productName}. Dans une logique de sobriété et de partage, j'accepte également que ces données soient partagées à tous les utilisateurs de Nudger.",
         "bannerDescription": "Démarrer une synthèse du {productName}.",
         "bannerTitle": "Synthèse IA",
+        "callToAction": {
+          "title": "Aucune synthèse disponible",
+          "subtitle": "Demandez à notre IA de générer une synthèse pour ce produit."
+        },
         "cancel": "Annuler",
         "close": "Fermer",
         "description": "Nous utilisons des outils puissants d'IA, d'analyse et d'aggrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est couteuse (financièrement et énergétiquement). N'utilisez que si vous portez un intéret réel à ce produit, et si vous voulez nous aider, faîtes vos achats en passant par Nudger 😊",
@@ -2503,6 +2507,15 @@
           },
           "statisticalMethod": {
             "title": "Méthode statistique",
+            "titles": {
+              "sigma": "Méthode statistique : Distribution Normale (Sigma)",
+              "percentile": "Méthode statistique : Percentile",
+              "minmax_fixed": "Méthode statistique : Bornes Fixes",
+              "minmax_quantile": "Méthode statistique : Bornes Quantiles",
+              "fixed_mapping": "Méthode statistique : Barème Fixe",
+              "binary": "Méthode statistique : Binaire",
+              "constant": "Méthode statistique : Constante"
+            },
             "sigma": {
               "bounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
               "scoring": "La note est calculée en comparant la valeur aux bornes ±{sigmaK}σ autour de la moyenne.",
@@ -2531,13 +2544,13 @@
           },
           "statisticalMethodInfo": {
             "title": "Pourquoi cette méthode ?",
-            "sigma": "Cette méthode est définie dans la configuration de l'attribut pour comparer des valeurs continues. σ est l’écart-type et {sigmaK}σ décrit l’intervalle autour de la moyenne qui couvre la plupart des valeurs.",
-            "percentile": "Cette méthode est choisie quand les valeurs sont peu nombreuses ou très discrètes. La configuration privilégie alors un classement relatif dans la distribution.",
-            "minmax_fixed": "Cette méthode est appliquée quand l'attribut possède des bornes stables définies dans la configuration. Elle convient bien aux valeurs normées.",
-            "minmax_quantile": "Cette méthode est utilisée quand il faut limiter l'effet des valeurs extrêmes. La configuration s'appuie sur des quantiles pour conserver une comparaison relative.",
-            "fixed_mapping": "Cette méthode est choisie pour des valeurs catégorielles avec un barème fixe défini dans la configuration.",
-            "binary": "Cette méthode s'applique lorsque l'attribut est évalué par seuil. La configuration définit la valeur de passage.",
-            "constant": "Cette méthode est un fallback défini dans la configuration lorsque l'attribut doit rester stable."
+            "sigma": "Choisie pour les données continues qui suivent une courbe en cloche. Contrairement aux bornes fixes, elle s'adapte automatiquement à la distribution réelle des produits.",
+            "percentile": "Privilégiée quand les valeurs sont dispersées ou peu nombreuses. Elle classe les produits les uns par rapport aux autres plutôt que sur une échelle absolue.",
+            "minmax_fixed": "Utilisée quand les bornes (min/max) sont connues et stables (ex: normes officielles). Contrairement à l'approche Sigma, elle ne dépend pas de la distribution des autres produits.",
+            "minmax_quantile": "Alternative à l'approche Sigma pour réduire l'impact des valeurs extrêmes. Elle se concentre sur le cœur de la distribution pour une comparaison plus juste.",
+            "fixed_mapping": "Idéale pour les critères qualitatifs (ex: classe énergétique). Elle permet d'attribuer une note précise à chaque valeur possible, sans calcul statistique.",
+            "binary": "La méthode la plus simple : ça passe ou ça casse. Utilisée pour les critères binaires (présence/absence) où aucune nuance n'est nécessaire.",
+            "constant": "Méthode de repli utilisée rarement, pour attribuer une note fixe indépendamment des caractéristiques du produit."
           }
         },
         "repairability_index": {
@@ -3274,7 +3287,6 @@
     }
   },
   "packs": {
-
     "default": {
       "assets": {
         "illustration": "placeholders/illustration.svg",

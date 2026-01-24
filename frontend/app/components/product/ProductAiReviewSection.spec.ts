@@ -21,7 +21,12 @@ vi.mock('@hcaptcha/vue3-hcaptcha', () => ({
   default: defineComponent({
     name: 'VueHcaptchaStub',
     emits: ['verify', 'expired', 'error'],
-    setup(_, { attrs }) {
+    setup(_, { attrs, expose, emit }) {
+      // Mock execute to simulate successful verification for testing flow
+      const execute = () => {
+        emit('verify', 'mock-token')
+      }
+      expose({ execute })
       return () => h('div', { class: 'vue-hcaptcha-stub', ...attrs })
     },
   }),

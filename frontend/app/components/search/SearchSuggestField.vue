@@ -638,7 +638,9 @@ const normalizeProduct = (
     gtin,
     verticalId: match.verticalId ?? null,
     ecoscoreValue: Number.isFinite(match.ecoscoreValue)
-      ? Number(match.ecoscoreValue)
+      ? Number(match.ecoscoreValue) > 5
+        ? Number(match.ecoscoreValue) / 4
+        : Number(match.ecoscoreValue)
       : null,
     bestPrice: Number.isFinite(match.bestPrice)
       ? Number(match.bestPrice)
@@ -1007,8 +1009,8 @@ const handleScannerDecode = (rawValue: string | null) => {
   &--active
     :deep(.v-field)
       background-color: rgb(var(--v-theme-surface))
-      transform: scale(1.02)
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)
+      // Removed transform scale to prevent layout shifting
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)
 
 .search-suggest-field__voice-button,
 .search-suggest-field__scanner-button

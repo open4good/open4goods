@@ -2416,6 +2416,10 @@
         "agreement": "I authorize Nudger to research and summarize information about {productName}. In a spirit of sobriety and sharing, I also agree that this data can be shared with all Nudger users.",
         "bannerDescription": "Start a summary for {productName}.",
         "bannerTitle": "AI summary",
+        "callToAction": {
+          "title": "No summary available",
+          "subtitle": "Ask our AI to generate a summary for this product."
+        },
         "cancel": "Cancel",
         "close": "Close",
         "description": "blabla",
