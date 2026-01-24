@@ -5,7 +5,7 @@
       class="impact-subscore-explanation__section impact-subscore-explanation__section--importance"
     >
       <h5 class="impact-subscore-explanation__title">
-        {{ t('product.impact.importanceTitle') }}
+        {{ importanceTitle }}
       </h5>
       <p class="impact-subscore-explanation__paragraph">
         {{ importanceDescription }}
@@ -55,6 +55,20 @@
       v-if="statisticalMethodItems.length"
       class="impact-subscore-explanation__section"
     >
+      <v-card
+        v-if="statisticalMethodInfo"
+        variant="tonal"
+        class="impact-subscore-explanation__info-card"
+      >
+        <div class="impact-subscore-explanation__info-card-content">
+          <p class="impact-subscore-explanation__info-title">
+            {{ statisticalMethodInfo.title }}
+          </p>
+          <p class="impact-subscore-explanation__info-body">
+            {{ statisticalMethodInfo.body }}
+          </p>
+        </div>
+      </v-card>
       <h5 class="impact-subscore-explanation__title">
         {{ statisticalMethodTitle }}
       </h5>
@@ -98,6 +112,15 @@
         <dd class="impact-subscore-explanation__value">{{ item.value }}</dd>
       </div>
     </dl>
+
+    <div
+      v-if="rankingBadgeText"
+      class="impact-subscore-explanation__ranking"
+    >
+      <v-chip size="x-small" color="primary" variant="tonal">
+        {{ rankingBadgeText }}
+      </v-chip>
+    </div>
   </section>
 </template>
 
@@ -215,6 +238,12 @@ const importanceDescription = computed(() => {
   return explicitDescription || scoreDescription
 })
 
+const importanceTitle = computed(() =>
+  t('product.impact.importanceTitle', {
+    scoreName: props.score.label ?? '',
+  })
+)
+
 const hasImportance = computed(() => importanceDescription.value.length > 0)
 
 const scoreLabelLower = computed(() => {
@@ -251,19 +280,6 @@ const formatNumber = (
 
 const infoItems = computed(() => {
   const items: Array<{ label: string; value: string }> = []
-
-  if (
-    props.score.ranking != null &&
-    Number.isFinite(Number(props.score.ranking))
-  ) {
-    items.push({
-      label: t('product.impact.tableHeaders.ranking'),
-      value: n(Number(props.score.ranking), {
-        maximumFractionDigits: 0,
-        minimumFractionDigits: 0,
-      }),
-    })
-  }
 
   return items
 })
@@ -451,6 +467,23 @@ const readIndicatorParams = computed(() => ({
   userBetterIs: userBetterIsLower.value ? 'lower' : 'higher',
 }))
 
+const rankingBadgeText = computed(() => {
+  if (!rankingValue.value) {
+    return null
+  }
+
+  if (populationValue.value?.formatted) {
+    return t('product.impact.rankingBadge', {
+      ranking: rankingValue.value,
+      count: populationValue.value.formatted,
+    })
+  }
+
+  return t('product.impact.rankingBadgeSingle', {
+    ranking: rankingValue.value,
+  })
+})
+
 const readIndicatorTitle = computed(() =>
   resolveTranslation('readIndicator.title', readIndicatorParams.value)
 )
@@ -509,6 +542,34 @@ const resolveStatisticalMethodTranslation = (
 const statisticalMethodTitle = computed(() =>
   resolveStatisticalMethodTranslation('title', readIndicatorParams.value)
 )
+
+const resolveStatisticalMethodInfoTranslation = (
+  suffix: string,
+  params: Record<string, unknown>
+) => {
+  const candidate = `${translationBaseKey.value}.statisticalMethodInfo.${suffix}`
+  if (te(candidate)) {
+    return t(candidate, params)
+  }
+
+  return t(`${translationFallbackBase}.statisticalMethodInfo.${suffix}`, params)
+}
+
+const statisticalMethodInfo = computed(() => {
+  const params = readIndicatorParams.value
+  const methodKey = normalizationMethod.value?.toLowerCase() ?? 'sigma'
+  const methodKeyCandidate = `${translationBaseKey.value}.statisticalMethodInfo.${methodKey}`
+  const fallbackKey = `${translationFallbackBase}.statisticalMethodInfo.${methodKey}`
+
+  if (!te(methodKeyCandidate) && !te(fallbackKey)) {
+    return null
+  }
+
+  return {
+    title: resolveStatisticalMethodInfoTranslation('title', params),
+    body: resolveStatisticalMethodInfoTranslation(methodKey, params),
+  }
+})
 
 const statisticalMethodItems = computed(() => {
   const items: string[] = []
@@ -571,6 +632,7 @@ const hasContent = computed(
     statisticalMethodItems.value.length > 0 ||
     infoItems.value.length > 0 ||
     metadataItems.value.length > 0 ||
+    Boolean(rankingBadgeText.value) ||
     hasImportance.value
 )
 
@@ -643,6 +705,33 @@ function formatMetadataLabel(rawKey: string): string {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
 }
 
+.impact-subscore-explanation__info-card {
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: rgba(var(--v-theme-surface-primary-050), 0.9);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
+}
+
+.impact-subscore-explanation__info-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.impact-subscore-explanation__info-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore-explanation__info-body {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
+  line-height: 1.5;
+}
+
 .impact-subscore-explanation__list {
   margin: 0;
   display: grid;
@@ -671,6 +760,11 @@ function formatMetadataLabel(rawKey: string): string {
   font-size: 0.9rem;
   font-weight: 600;
   color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore-explanation__ranking {
+  display: flex;
+  justify-content: flex-end;
 }
 
 @media (max-width: 640px) {
