@@ -2461,11 +2461,13 @@
         "markerAverage": "La moyenne de {scoreLabel} se positionne ici.",
         "markerProduct": "{productName} se positionne ici.",
         "title": "Répartition des critères",
-        "toggleAbsolute": "Valeurs",
-        "toggleNormalized": "Scores",
+        "toggleAbsolute": "Valeures absolues",
+        "toggleNormalized": "Indices relatifs",
         "unknownProduct": "Ce produit"
       },
-      "importanceTitle": "Pourquoi c'est important ?",
+      "importanceTitle": "{scoreName} : pourquoi c'est important ?",
+      "rankingBadge": "Classement {ranking}/{count}",
+      "rankingBadgeSingle": "Classement {ranking}",
       "subscores": {
         "default": {
           "ranking": "Classe {ranking} sur {count}.",
@@ -2526,6 +2528,16 @@
             "constant": {
               "scoring": "La note est fixée à {constantValue} quelle que soit la valeur."
             }
+          },
+          "statisticalMethodInfo": {
+            "title": "Pourquoi cette méthode ?",
+            "sigma": "Cette méthode est définie dans la configuration de l'attribut pour comparer des valeurs continues. σ est l’écart-type et {sigmaK}σ décrit l’intervalle autour de la moyenne qui couvre la plupart des valeurs.",
+            "percentile": "Cette méthode est choisie quand les valeurs sont peu nombreuses ou très discrètes. La configuration privilégie alors un classement relatif dans la distribution.",
+            "minmax_fixed": "Cette méthode est appliquée quand l'attribut possède des bornes stables définies dans la configuration. Elle convient bien aux valeurs normées.",
+            "minmax_quantile": "Cette méthode est utilisée quand il faut limiter l'effet des valeurs extrêmes. La configuration s'appuie sur des quantiles pour conserver une comparaison relative.",
+            "fixed_mapping": "Cette méthode est choisie pour des valeurs catégorielles avec un barème fixe défini dans la configuration.",
+            "binary": "Cette méthode s'applique lorsque l'attribut est évalué par seuil. La configuration définit la valeur de passage.",
+            "constant": "Cette méthode est un fallback défini dans la configuration lorsque l'attribut doit rester stable."
           }
         },
         "repairability_index": {

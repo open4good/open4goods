@@ -237,20 +237,23 @@ const coefficientValue = computed(() => {
 .impact-subscore__value {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
+  text-align: center;
 }
 
 .impact-subscore__value-primary {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  justify-content: center;
   gap: 0.5rem 0.75rem;
 }
 
 .impact-subscore__value-default {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.15rem;
 }
 
@@ -271,7 +274,7 @@ const coefficientValue = computed(() => {
 }
 
 .impact-subscore__coefficient {
-  align-self: flex-start;
+  align-self: center;
 }
 
 .impact-subscore__badge {

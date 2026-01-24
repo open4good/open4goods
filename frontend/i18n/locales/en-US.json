@@ -2704,11 +2704,13 @@
         "markerAverage": "Average for {scoreLabel} sits here.",
         "markerProduct": "{productName} sits here.",
         "title": "Criteria distribution",
-        "toggleAbsolute": "Values",
-        "toggleNormalized": "Scores",
+        "toggleAbsolute": "Absolute values",
+        "toggleNormalized": "Relative indexes",
         "unknownProduct": "This product"
       },
-      "importanceTitle": "Why it matters",
+      "importanceTitle": "{scoreName}: why it matters",
+      "rankingBadge": "Rank {ranking}/{count}",
+      "rankingBadgeSingle": "Rank {ranking}",
       "subscores": {
         "default": {
           "ranking": "Rank {ranking} out of {count}.",
@@ -2769,6 +2771,16 @@
             "constant": {
               "scoring": "The score is fixed at {constantValue} regardless of the value."
             }
+          },
+          "statisticalMethodInfo": {
+            "title": "Why this method?",
+            "sigma": "This method is set in the attribute configuration for continuous values. σ is the standard deviation and {sigmaK}σ represents the interval around the mean that contains most values.",
+            "percentile": "This method is used when values are sparse or highly discrete. The configuration favors a relative ranking within the distribution.",
+            "minmax_fixed": "This method applies when the attribute has stable bounds defined in configuration. It fits well for standardized ranges.",
+            "minmax_quantile": "This method is used to reduce the impact of extreme values. The configuration relies on quantiles to keep comparisons relative.",
+            "fixed_mapping": "This method is selected for categorical values with a fixed mapping defined in configuration.",
+            "binary": "This method applies when the attribute is evaluated against a threshold. The configuration defines the pass value.",
+            "constant": "This method is a configuration fallback when the attribute must remain stable."
           }
         },
         "repairability_index": {
