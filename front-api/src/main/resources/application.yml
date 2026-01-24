@@ -67,6 +67,20 @@ front:
     quota:
       max-per-ip: ${FRONT_REVIEW_GENERATION_MAX_PER_IP:3}
       window: ${FRONT_REVIEW_GENERATION_WINDOW:24h}
+  google-indexing:
+    enabled: ${FRONT_GOOGLE_INDEXING_ENABLED:false}
+    site-base-url: ${FRONT_GOOGLE_INDEXING_SITE_BASE_URL:https://nudger.fr}
+    api-endpoint: ${FRONT_GOOGLE_INDEXING_API_ENDPOINT:https://indexing.googleapis.com/v3/urlNotifications:publish}
+    service-account-json: ${FRONT_GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON:}
+    service-account-path: ${FRONT_GOOGLE_INDEXING_SERVICE_ACCOUNT_PATH:}
+    batch-size: ${FRONT_GOOGLE_INDEXING_BATCH_SIZE:50}
+    retry-delay: ${FRONT_GOOGLE_INDEXING_RETRY_DELAY:30m}
+    max-attempts: ${FRONT_GOOGLE_INDEXING_MAX_ATTEMPTS:5}
+    realtime-enabled: ${FRONT_GOOGLE_INDEXING_REALTIME_ENABLED:true}
+    history-retention: ${FRONT_GOOGLE_INDEXING_HISTORY_RETENTION:7d}
+    max-queue-size: ${FRONT_GOOGLE_INDEXING_MAX_QUEUE_SIZE:500}
+    max-success-age: ${FRONT_GOOGLE_INDEXING_MAX_SUCCESS_AGE:7d}
+    queue-file-name: ${FRONT_GOOGLE_INDEXING_QUEUE_FILE_NAME:google-indexing-queue.json}
   search:
     suggest:
       semantic-fallback-enabled: true

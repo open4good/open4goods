@@ -500,15 +500,12 @@
           <v-divider />
           <v-card-text class="pa-4">
             <ProductAiReviewRequestPanel
-              v-model:agreement-accepted="agreementAccepted"
               :product-name="productLabel"
               :remaining-generations-label="remainingGenerationsLabel"
               :requires-captcha="requiresCaptcha"
               :site-key="siteKey"
               :captcha-theme="captchaTheme"
               :captcha-locale="captchaLocale"
-              :requesting="requesting"
-              :submit-disabled="submitDisabled"
               :error-message="errorMessage"
               :status-message="statusMessage"
               :is-generating="isGenerating"
@@ -621,7 +618,6 @@ const pollHandle = ref<number | null>(null)
 const captchaToken = ref<string | null>(null)
 const rootRef = ref<HTMLElement | null>(null)
 const isDialogOpen = ref(false)
-const agreementAccepted = ref(true)
 const showAllSources = ref(false)
 const technicalLevel = ref<ReviewLevel>('intermediate')
 const ecologicalLevel = ref<ReviewLevel>('intermediate')
@@ -662,7 +658,6 @@ watch(
   }
 )
 
-const hasSiteKey = computed(() => props.siteKey.length > 0)
 const requiresCaptcha = computed(() => !isLoggedIn.value)
 const captchaTheme = computed(() =>
   theme.global.current.value.dark ? 'dark' : 'light'
@@ -727,18 +722,6 @@ const isGenerating = computed(
     status.value.status !== 'FAILED'
 )
 const statusPercent = computed(() => Math.round(status.value?.percent ?? 0))
-const submitDisabled = computed(() => {
-  if (!agreementAccepted.value || requesting.value) {
-    return true
-  }
-
-  if (requiresCaptcha.value) {
-    return !hasSiteKey.value || !captchaToken.value
-  }
-
-  return false
-})
-
 const statusMessage = computed(() => {
   if (!status.value) {
     return null
@@ -1060,15 +1043,6 @@ watch(
   { immediate: true }
 )
 
-/*
-const openDialog = () => {
-  errorMessage.value = null
-  captchaToken.value = null
-  agreementAccepted.value = true
-  isDialogOpen.value = true
-}
-*/
-
 onMounted(() => {
   if (import.meta.client) {
     void refreshQuota(quotaCategory)
@@ -1088,23 +1062,6 @@ onBeforeUnmount(() => {
     )
   }
 })
-
-/*
-watch(
-  isDialogOpen,
-  value => {
-    if (value && import.meta.client) {
-      void refreshQuota(quotaCategory)
-      return
-    }
-
-    if (!value) {
-      captchaToken.value = null
-    }
-  },
-  { immediate: true }
-)
-*/
 
 const handleReferenceClick = async (event: Event) => {
   const target = event.target as HTMLElement | null
@@ -1169,6 +1126,19 @@ const handleGlobalScrollEvent = (event: Event) => {
     void scrollToSourceId(id)
   }
 }
+
+watch(
+  () => isDialogOpen.value,
+  value => {
+    if (!value) {
+      return
+    }
+
+    if (!requiresCaptcha.value && !requesting.value && !isGenerating.value) {
+      startRequest()
+    }
+  }
+)
 </script>
 
 <style scoped>

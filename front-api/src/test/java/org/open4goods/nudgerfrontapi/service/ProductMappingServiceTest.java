@@ -73,6 +73,7 @@ class ProductMappingServiceTest {
     private ReviewGenerationProperties reviewGenerationProperties;
     private IpQuotaService ipQuotaService;
     private HttpServletRequest httpServletRequest;
+    private GoogleIndexingService googleIndexingService;
 
     @BeforeEach
     void setUp() {
@@ -93,13 +94,14 @@ class ProductMappingServiceTest {
         reviewGenerationProperties.setApiKey("review-key");
         ipQuotaService = mock(IpQuotaService.class);
         httpServletRequest = mock(HttpServletRequest.class);
+        googleIndexingService = mock(GoogleIndexingService.class);
         CaffeineCache referenceCache = new CaffeineCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
                 Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
                 reviewGenerationClient, hcaptchaService, productTimelineService, reviewGenerationProperties,
-                ipQuotaService);
+                ipQuotaService, googleIndexingService);
     }
 
     @Test
@@ -417,9 +419,54 @@ class ProductMappingServiceTest {
         status.setUpc(gtin);
         when(reviewGenerationClient.getStatus(gtin)).thenReturn(status);
 
-        ReviewGenerationStatus returned = service.getReviewStatus(gtin);
+        ReviewGenerationStatus returned = service.getReviewStatus(gtin, DomainLanguage.fr, Locale.FRANCE);
 
         assertThat(returned).isEqualTo(status);
+    }
+
+    @Test
+    void getReviewStatusEnqueuesIndexingOnSuccess() {
+        long gtin = 88L;
+        ReviewGenerationStatus status = new ReviewGenerationStatus();
+        status.setUpc(gtin);
+        status.setStatus(ReviewGenerationStatus.Status.SUCCESS);
+        when(reviewGenerationClient.getStatus(gtin)).thenReturn(status);
+
+        Product product = new Product(gtin);
+        product.setVertical("phones");
+        ProductTexts names = new ProductTexts();
+        Localisable<String, String> url = new Localisable<>();
+        url.put("fr", "fairphone-4");
+        names.setUrl(url);
+        product.setNames(names);
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("phones");
+        when(repository.getById(gtin)).thenReturn(product);
+        when(verticalsConfigService.getConfigById("phones")).thenReturn(verticalConfig);
+
+        VerticalConfigDto verticalConfigDto = new VerticalConfigDto(
+                "phones",
+                true,
+                false,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "phones",
+                List.of(),
+                Set.of(),
+                null);
+        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.fr)).thenReturn(verticalConfigDto);
+
+        service.getReviewStatus(gtin, DomainLanguage.fr, Locale.FRANCE);
+
+        verify(googleIndexingService).enqueuePath("/phones/fairphone-4");
     }
 
     /**

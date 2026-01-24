@@ -154,6 +154,7 @@ public class ProductMappingService {
     private final ProductTimelineService productTimelineService;
     private final ReviewGenerationProperties reviewGenerationProperties;
     private final IpQuotaService ipQuotaService;
+    private final GoogleIndexingService googleIndexingService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -167,7 +168,8 @@ public class ProductMappingService {
             HcaptchaService hcaptchaService,
             ProductTimelineService productTimelineService,
             ReviewGenerationProperties reviewGenerationProperties,
-            IpQuotaService ipQuotaService) {
+            IpQuotaService ipQuotaService,
+            GoogleIndexingService googleIndexingService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
@@ -181,6 +183,7 @@ public class ProductMappingService {
         this.productTimelineService = productTimelineService;
         this.reviewGenerationProperties = reviewGenerationProperties;
         this.ipQuotaService = ipQuotaService;
+        this.googleIndexingService = googleIndexingService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -255,19 +258,8 @@ public class ProductMappingService {
                 ? productTimelineService.mapTimeline(product)
                 : null;
 
-        String slug = null;
-        if (product.getNames() != null) {
-            // Slug is derived from the vertical specific URL mapping defined in the product
-            // names block.
-            slug = resolveLocalisedString(product.getNames().getUrl(), domainLanguage, locale);
-        }
-        String fullSlug = null;
-        if (StringUtils.hasText(slug)) {
-            String verticalHomeUrl = resolveVerticalHomeUrl(product.getVertical(), domainLanguage, vConfig);
-            if (StringUtils.hasText(verticalHomeUrl)) {
-                fullSlug = "/" + verticalHomeUrl + "/" + slug;
-            }
-        }
+        String slug = resolveProductSlug(product, domainLanguage, locale);
+        String fullSlug = resolveFullSlug(product, domainLanguage, locale, vConfig);
 
         return new ProductDto(
                 product.getId(),
@@ -393,18 +385,8 @@ public class ProductMappingService {
             return null;
         }
         String preferredName = resolvePreferredName(referencedProduct, domainLanguage, locale);
-        String slug = null;
-        if (referencedProduct.getNames() != null) {
-            slug = resolveLocalisedString(referencedProduct.getNames().getUrl(), domainLanguage, locale);
-        }
-        String fullSlug = null;
-        if (StringUtils.hasText(slug)) {
-            VerticalConfig config = resolveVerticalConfig(referencedProduct.getVertical());
-            String verticalHomeUrl = resolveVerticalHomeUrl(referencedProduct.getVertical(), domainLanguage, config);
-            if (StringUtils.hasText(verticalHomeUrl)) {
-                fullSlug = "/" + verticalHomeUrl + "/" + slug;
-            }
-        }
+        VerticalConfig config = resolveVerticalConfig(referencedProduct.getVertical());
+        String fullSlug = resolveFullSlug(referencedProduct, domainLanguage, locale, config);
 
         ProductScoresDto scores = null;
         if (referencedProduct.getScores().size() > 0) {
@@ -418,6 +400,42 @@ public class ProductMappingService {
                 referencedProduct.brand(),
                 referencedProduct.model(),
                 scores);
+    }
+
+    /**
+     * Resolve the product slug using localisation rules.
+     *
+     * @param product        product to resolve
+     * @param domainLanguage requested domain language
+     * @param locale         display locale
+     * @return resolved slug or {@code null}
+     */
+    private String resolveProductSlug(Product product, DomainLanguage domainLanguage, Locale locale) {
+        if (product == null || product.getNames() == null) {
+            return null;
+        }
+        return resolveLocalisedString(product.getNames().getUrl(), domainLanguage, locale);
+    }
+
+    /**
+     * Resolve the full slug for a product by combining vertical home URL and slug.
+     *
+     * @param product        product to resolve
+     * @param domainLanguage requested domain language
+     * @param locale         display locale
+     * @param verticalConfig vertical configuration
+     * @return full slug or {@code null}
+     */
+    private String resolveFullSlug(Product product, DomainLanguage domainLanguage, Locale locale, VerticalConfig verticalConfig) {
+        String slug = resolveProductSlug(product, domainLanguage, locale);
+        if (!StringUtils.hasText(slug)) {
+            return null;
+        }
+        String verticalHomeUrl = resolveVerticalHomeUrl(product.getVertical(), domainLanguage, verticalConfig);
+        if (!StringUtils.hasText(verticalHomeUrl)) {
+            return null;
+        }
+        return "/" + verticalHomeUrl + "/" + slug;
     }
 
     /**
@@ -1088,11 +1106,39 @@ public class ProductMappingService {
      * Retrieve the status of an AI review generation process.
      *
      * @param gtin product identifier used when the generation was triggered
+     * @param domainLanguage requested domain language
+     * @param locale locale resolved from the request
      * @return status returned by the back-office API or {@code null} when the UPC
      *         is unknown upstream
      */
-    public ReviewGenerationStatus getReviewStatus(long gtin) {
-        return reviewGenerationClient.getStatus(gtin);
+    public ReviewGenerationStatus getReviewStatus(long gtin, DomainLanguage domainLanguage, Locale locale) {
+        ReviewGenerationStatus status = reviewGenerationClient.getStatus(gtin);
+        if (status != null && ReviewGenerationStatus.Status.SUCCESS.equals(status.getStatus())) {
+            enqueueReviewIndexing(gtin, domainLanguage, locale);
+        }
+        return status;
+    }
+
+    /**
+     * Enqueue the product review URL after a successful AI review generation.
+     *
+     * @param gtin           product identifier
+     * @param domainLanguage requested domain language
+     * @param locale         display locale
+     */
+    private void enqueueReviewIndexing(long gtin, DomainLanguage domainLanguage, Locale locale) {
+        try {
+            Product product = repository.getById(gtin);
+            VerticalConfig verticalConfig = resolveVerticalConfig(product.getVertical());
+            String fullSlug = resolveFullSlug(product, domainLanguage, locale, verticalConfig);
+            if (StringUtils.hasText(fullSlug)) {
+                googleIndexingService.enqueuePath(fullSlug);
+            } else {
+                logger.warn("Unable to resolve product slug for Google indexing (gtin={})", gtin);
+            }
+        } catch (Exception ex) {
+            logger.warn("Failed to enqueue Google indexing for product {}: {}", gtin, ex.getMessage());
+        }
     }
 
     /**

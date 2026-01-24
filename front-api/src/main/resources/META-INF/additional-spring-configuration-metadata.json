@@ -42,6 +42,82 @@
       "defaultValue": "24h"
     },
     {
+      "name": "front.google-indexing.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable the Google Indexing API integration.",
+      "defaultValue": false
+    },
+    {
+      "name": "front.google-indexing.site-base-url",
+      "type": "java.lang.String",
+      "description": "Public base URL of the Nuxt frontend used to build canonical product URLs.",
+      "defaultValue": "https://nudger.fr"
+    },
+    {
+      "name": "front.google-indexing.api-endpoint",
+      "type": "java.lang.String",
+      "description": "Endpoint used to publish URL notifications.",
+      "defaultValue": "https://indexing.googleapis.com/v3/urlNotifications:publish"
+    },
+    {
+      "name": "front.google-indexing.service-account-json",
+      "type": "java.lang.String",
+      "description": "Service account JSON payload used to authenticate with Google APIs."
+    },
+    {
+      "name": "front.google-indexing.service-account-path",
+      "type": "java.lang.String",
+      "description": "Path to a service account JSON file used to authenticate with Google APIs."
+    },
+    {
+      "name": "front.google-indexing.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of URLs processed per batch execution.",
+      "defaultValue": 50
+    },
+    {
+      "name": "front.google-indexing.retry-delay",
+      "type": "java.time.Duration",
+      "description": "Duration to wait before retrying a failed URL.",
+      "defaultValue": "30m"
+    },
+    {
+      "name": "front.google-indexing.max-attempts",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of retry attempts before discarding a URL.",
+      "defaultValue": 5
+    },
+    {
+      "name": "front.google-indexing.realtime-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable immediate processing when a URL is enqueued.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.google-indexing.history-retention",
+      "type": "java.time.Duration",
+      "description": "Retention window for indexed and failed URL history.",
+      "defaultValue": "7d"
+    },
+    {
+      "name": "front.google-indexing.max-queue-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum queue size before the health indicator reports a degraded status.",
+      "defaultValue": 500
+    },
+    {
+      "name": "front.google-indexing.max-success-age",
+      "type": "java.time.Duration",
+      "description": "Maximum age for the last successful indexing event before health degrades.",
+      "defaultValue": "7d"
+    },
+    {
+      "name": "front.google-indexing.queue-file-name",
+      "type": "java.lang.String",
+      "description": "File name used to persist pending queue entries on disk.",
+      "defaultValue": "google-indexing-queue.json"
+    },
+    {
       "name": "front.search.suggest.semantic-fallback-enabled",
       "type": "java.lang.Boolean",
       "description": "Enable semantic fallback for product suggestions when prefix search yields no results.",

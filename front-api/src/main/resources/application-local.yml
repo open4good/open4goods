@@ -28,3 +28,7 @@ front:
     quota:
       max-per-ip: 3
       window: 24h
+  google-indexing:
+    enabled: false
+    site-base-url: "https://nudger.fr"
+    service-account-json: ""
