@@ -1498,31 +1498,55 @@
     },
     "examples": {
       "eyebrow": "Calculation examples",
-      "title": "A readable eco-score",
-      "subtitle": "Two everyday products to illustrate the Impact Score.",
-      "television": {
+      "title": "Real product snapshots",
+      "subtitle": "Impact Score examples taken from actual oven listings on the site.",
+      "whirlpoolOven": {
         "eyebrow": "Example 1",
-        "title": "55'' LED television",
-        "description": "Energy label A, recycled aluminium frame, spare parts available for 7 years.",
+        "title": "Whirlpool OMSR58RU1SB built-in oven",
+        "description": "A+ energy class, 71 L cavity and multiple retailer sources.",
         "breakdown": {
-          "energy": "Optimised consumption (eco mode, light sensor)",
-          "materials": "60% recycled metals in the frame and stand",
-          "repairability": "High repairability index with accessible tutorials",
-          "transport": "Mostly sea freight with pooled shipments"
+          "energy": {
+            "label": "Energy class",
+            "value": "A+ (EPREL)"
+          },
+          "consumption": {
+            "label": "Energy per cycle",
+            "value": "0.89 kWh/cycle"
+          },
+          "capacity": {
+            "label": "Oven capacity",
+            "value": "71 L"
+          },
+          "sources": {
+            "label": "Data sources",
+            "value": "Cdiscount, Darty, Fnac, Rakuten"
+          }
         },
-        "conclusion": "High score thanks to efficiency and repairability, with logistics still accounted for."
+        "conclusion": "Impact Score 2.2/5 based on energy data, capacity and the available product sources."
       },
-      "washingMachine": {
+      "samsungOven": {
         "eyebrow": "Example 2",
-        "title": "9 kg low-consumption washing machine",
-        "description": "Direct-drive motor, parts guaranteed 10 years, eco program enabled by default.",
+        "title": "Samsung NV7B41307AK built-in oven",
+        "description": "A+ label, 76 L cavity, with energy usage sourced from EPREL.",
         "breakdown": {
-          "energy": "Low yearly consumption and A++ label",
-          "water": "Water volume optimised by sensors",
-          "durability": "Reinforced drum with long-term spare parts",
-          "logistics": "Compact packaging and grouped delivery"
+          "energy": {
+            "label": "Energy class",
+            "value": "A+ (EPREL)"
+          },
+          "consumption": {
+            "label": "Energy per cycle",
+            "value": "1.05 kWh/cycle"
+          },
+          "capacity": {
+            "label": "Oven capacity",
+            "value": "76 L"
+          },
+          "sources": {
+            "label": "Data sources",
+            "value": "EPREL, Darty, Cdiscount, Rakuten"
+          }
         },
-        "conclusion": "Solid score driven by use-phase efficiency and durable parts, with controlled logistics."
+        "conclusion": "Impact Score 2.1/5, reflecting energy performance and the coverage of product information."
       }
     },
     "summary": {
