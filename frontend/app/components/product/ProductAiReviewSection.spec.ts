@@ -562,4 +562,32 @@ describe('ProductAiReviewSection', () => {
 
     expect(wrapper.find('#review-ref-6').exists()).toBe(true)
   })
+
+  it('automatically transforms [n] reference into a link', async () => {
+    const review: AiReviewDto = {
+      summary: 'Details in [1].',
+      sources: defaultSources,
+    }
+
+    const wrapper = await mountComponent({ initialReview: review })
+    const summary = wrapper.find('.product-ai-review__summary')
+
+    expect(summary.html()).toContain(
+      '<a href="#review-ref-1" class="review-ref" data-source-id="1">1</a>'
+    )
+  })
+
+  it('automatically transforms [n, m] references into links', async () => {
+    const review: AiReviewDto = {
+      summary: 'Details in [1, 2].',
+      sources: defaultSources,
+    }
+
+    const wrapper = await mountComponent({ initialReview: review })
+    const summary = wrapper.find('.product-ai-review__summary')
+
+    expect(summary.html()).toContain(
+      '[<a href="#review-ref-1" class="review-ref" data-source-id="1">1</a>, <a href="#review-ref-2" class="review-ref" data-source-id="2">2</a>]'
+    )
+  })
 })

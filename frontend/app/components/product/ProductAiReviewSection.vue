@@ -331,7 +331,10 @@
       >
         <v-row class="product-ai-review__sources-row">
           <v-col cols="12" :md="dataQualityValue ? 8 : 12">
-            <header class="product-ai-review__section-header mb-2">
+            <header
+              id="ai-review-sources-header"
+              class="product-ai-review__section-header mb-2"
+            >
               <div class="product-ai-review__section-icon">
                 <v-icon icon="mdi-book-open-variant" size="20" />
               </div>
@@ -820,14 +823,40 @@ function selectReviewContent(
   )
 }
 
+function transformReferences(content: string | null): string | null {
+  if (!content) {
+    return null
+  }
+
+  // Regex to match [1] or [1, 2] or [1, 2, 3] etc.
+  // It captures the numbers part inside the brackets
+  return content.replace(/\[(\d+(?:,\s*\d+)*)\]/g, (_match, numbers) => {
+    // Split the numbers by comma
+    const refs = (numbers as string).split(',').map((n: string) => {
+      const num = n.trim()
+      // Create a link for each number
+      // We use data-source-id to help with event handling if needed,
+      // and href to allow standard navigation/hover behavior
+      return `<a href="#review-ref-${num}" class="review-ref" data-source-id="${num}">${num}</a>`
+    })
+
+    // Reconstruct the string with links inside brackets
+    return `[${refs.join(', ')}]`
+  })
+}
+
 function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
   if (!reviewData) {
     return null
   }
 
+  const sanitizeAndTransform = (text: string | null | undefined) => {
+    return transformReferences(sanitizeHtml(text ?? null))
+  }
+
   const pros = Array.isArray(reviewData.pros)
     ? reviewData.pros
-        .map(entry => sanitizeHtml(String(entry)))
+        .map(entry => sanitizeAndTransform(String(entry)))
         .filter(
           (entry): entry is string =>
             typeof entry === 'string' && entry.length > 0
@@ -835,7 +864,7 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     : []
   const cons = Array.isArray(reviewData.cons)
     ? reviewData.cons
-        .map(entry => sanitizeHtml(String(entry)))
+        .map(entry => sanitizeAndTransform(String(entry)))
         .filter(
           (entry): entry is string =>
             typeof entry === 'string' && entry.length > 0
@@ -871,40 +900,40 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     .filter(attribute => attribute.name.length > 0)
 
   return {
-    description: sanitizeHtml(reviewData.description ?? null),
+    description: sanitizeAndTransform(reviewData.description),
     shortDescription: reviewData.shortDescription ?? null,
     mediumTitle: reviewData.mediumTitle ?? null,
     shortTitle: reviewData.shortTitle ?? null,
-    technicalReview: sanitizeHtml(reviewData.technicalReview ?? null),
-    technicalReviewNovice: sanitizeHtml(
-      reviewData.technicalReviewNovice ?? null
+    technicalReview: sanitizeAndTransform(reviewData.technicalReview),
+    technicalReviewNovice: sanitizeAndTransform(
+      reviewData.technicalReviewNovice
     ),
-    technicalReviewIntermediate: sanitizeHtml(
-      reviewData.technicalReviewIntermediate ?? null
+    technicalReviewIntermediate: sanitizeAndTransform(
+      reviewData.technicalReviewIntermediate
     ),
-    technicalReviewAdvanced: sanitizeHtml(
-      reviewData.technicalReviewAdvanced ?? null
+    technicalReviewAdvanced: sanitizeAndTransform(
+      reviewData.technicalReviewAdvanced
     ),
-    ecologicalReview: sanitizeHtml(reviewData.ecologicalReview ?? null),
-    ecologicalReviewNovice: sanitizeHtml(
-      reviewData.ecologicalReviewNovice ?? null
+    ecologicalReview: sanitizeAndTransform(reviewData.ecologicalReview),
+    ecologicalReviewNovice: sanitizeAndTransform(
+      reviewData.ecologicalReviewNovice
     ),
-    ecologicalReviewIntermediate: sanitizeHtml(
-      reviewData.ecologicalReviewIntermediate ?? null
+    ecologicalReviewIntermediate: sanitizeAndTransform(
+      reviewData.ecologicalReviewIntermediate
     ),
-    ecologicalReviewAdvanced: sanitizeHtml(
-      reviewData.ecologicalReviewAdvanced ?? null
+    ecologicalReviewAdvanced: sanitizeAndTransform(
+      reviewData.ecologicalReviewAdvanced
     ),
-    communityReviewNovice: sanitizeHtml(
-      reviewData.communityReviewNovice ?? null
+    communityReviewNovice: sanitizeAndTransform(
+      reviewData.communityReviewNovice
     ),
-    communityReviewIntermediate: sanitizeHtml(
-      reviewData.communityReviewIntermediate ?? null
+    communityReviewIntermediate: sanitizeAndTransform(
+      reviewData.communityReviewIntermediate
     ),
-    communityReviewAdvanced: sanitizeHtml(
-      reviewData.communityReviewAdvanced ?? null
+    communityReviewAdvanced: sanitizeAndTransform(
+      reviewData.communityReviewAdvanced
     ),
-    summary: sanitizeHtml(reviewData.summary ?? null),
+    summary: sanitizeAndTransform(reviewData.summary),
     pros,
     cons,
     sources,
@@ -1107,24 +1136,32 @@ const handleReferenceClick = async (event: Event) => {
 }
 
 const scrollToSourceId = async (id: string) => {
-  let element = document.getElementById(id)
-
-  if (id.startsWith('review-ref-')) {
-    const refNumber = parseInt(id.replace('review-ref-', ''), 10)
-    // If we have a valid number and it might be hidden
-    if (
-      !isNaN(refNumber) &&
-      refNumber > maxVisibleSources &&
-      !showAllSources.value
-    ) {
-      showAllSources.value = true
-      await nextTick()
-      element = document.getElementById(id)
-    }
+  // 1. Ensure the sources table is fully visible
+  if (!showAllSources.value) {
+    showAllSources.value = true
+    await nextTick()
   }
 
-  if (element) {
-    scrollToElement(element)
+  // 2. Scroll to the section header "Sources"
+  const headerElement = document.getElementById('ai-review-sources-header')
+  if (headerElement) {
+    scrollToElement(headerElement)
+  }
+
+  // 3. Highlight the specific row if it's a reference navigation
+  if (id.startsWith('review-ref-')) {
+    // Small delay to ensure smooth scroll to header starts first/finishes mainly
+    // or just execute immediately, the eye will see it.
+    // We already waited for nextTick if we expanded sources.
+    const element = document.getElementById(id)
+    if (element) {
+      // We do NOT call scrollToElement here because we want to show the whole table context
+      // starting from the header. We just highlight the row.
+      element.classList.add('review-ref--highlight')
+      setTimeout(() => {
+        element.classList.remove('review-ref--highlight')
+      }, 2000)
+    }
   }
 }
 
