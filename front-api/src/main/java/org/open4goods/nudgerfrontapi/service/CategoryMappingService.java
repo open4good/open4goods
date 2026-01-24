@@ -543,6 +543,7 @@ public class CategoryMappingService {
                 score.getScoreName(),
                 score.getScoreMinValue(),
                 score.getMdiIcon(),
+                score.getDisabled(),
                 localise(score.getTitle(), domainLanguage),
                 localise(score.getDescription(), domainLanguage));
     }

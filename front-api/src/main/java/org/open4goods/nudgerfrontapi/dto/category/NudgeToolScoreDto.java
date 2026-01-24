@@ -12,6 +12,8 @@ public record NudgeToolScoreDto(
         Double scoreMinValue,
         @Schema(description = "Material Design icon representing the score.", example = "leaf")
         String mdiIcon,
+        @Schema(description = "Whether the score should be disabled in the UI.", example = "true")
+        Boolean disabled,
         @Schema(description = "Localised title of the nudge.")
         String title,
         @Schema(description = "Localised description for the nudge.")
