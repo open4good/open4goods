@@ -489,38 +489,6 @@
                 <v-divider class="accessibility-menu__divider" />
 
                 <div
-                  class="accessibility-menu__reading-row d-flex align-center px-4 py-2"
-                >
-                  <v-switch
-                    :model-value="isDyslexic"
-                    inset
-                    color="primary"
-                    density="compact"
-                    hide-details
-                    class="mr-3"
-                    :aria-label="readingModeAriaLabel"
-                    :aria-pressed="isDyslexic"
-                    @click.stop
-                    @update:model-value="updateReadingMode"
-                  />
-                  <div class="accessibility-menu__reading-copy">
-                    <span class="text-body-2 font-weight-medium">
-                      {{ readingModeLabel }}
-                    </span>
-                    <v-chip
-                      class="accessibility-menu__reading-chip"
-                      color="surface-primary-080"
-                      size="small"
-                      label
-                    >
-                      {{ readingModeShortLabel }}
-                    </v-chip>
-                  </div>
-                </div>
-
-                <v-divider class="accessibility-menu__divider" />
-
-                <div
                   class="accessibility-menu__zoom-row d-flex align-center px-4 py-2"
                 >
                   <v-switch
@@ -704,7 +672,6 @@ import {
   resolveThemeName,
   type ThemeName,
 } from '~~/shared/constants/theme'
-import { useReadingMode } from '~/composables/useReadingMode'
 
 const SearchSuggestField = defineAsyncComponent({
   loader: () => import('~/components/search/SearchSuggestField.vue'),
@@ -726,19 +693,6 @@ const accessibilityStore = useAccessibilityStore()
 const { isZoomed } = storeToRefs(accessibilityStore)
 const { setZoomed } = accessibilityStore
 const accessibilityLabel = computed(() => t('siteIdentity.menu.zoom.label'))
-const { isDyslexic, setMode: setReadingMode } = useReadingMode()
-const readingModeLabel = computed(() =>
-  t('siteIdentity.menu.readingMode.label')
-)
-const readingModeShortLabel = computed(() =>
-  t('siteIdentity.menu.readingMode.shortLabel')
-)
-const readingModeAriaLabel = computed(() =>
-  t('siteIdentity.menu.readingMode.ariaLabel')
-)
-const updateReadingMode = (value: boolean) => {
-  setReadingMode(value ? 'dyslexic' : 'default')
-}
 
 // Theme logic
 const theme = useTheme()

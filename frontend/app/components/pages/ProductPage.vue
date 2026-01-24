@@ -113,43 +113,15 @@
           :id="sectionIds.ai"
           class="product-page__section"
         >
-          <v-row class="product-page__ai-review-row">
-            <v-col cols="12" :md="aiReviewDataQuality ? 8 : 12">
-              <ProductAiReviewSection
-                :gtin="product.gtin ?? gtin"
-                :initial-review="product.aiReview?.review ?? null"
-                :review-created-at="product.aiReview?.createdMs ?? undefined"
-                :site-key="hcaptchaSiteKey"
-                :title-params="aiTitleParams"
-                :product-name="productTitle"
-                :product-image="resolvedProductImageSource"
-              />
-            </v-col>
-            <v-col v-if="aiReviewDataQuality" cols="12" md="4">
-              <v-card class="product-page__ai-review-quality" elevation="0">
-                <v-card-text>
-                  <header
-                    class="product-page__ai-review-quality-header d-flex align-center mb-3"
-                  >
-                    <v-icon
-                      icon="mdi-shield-check-outline"
-                      size="22"
-                      class="mr-2"
-                    />
-                    <h3 class="text-subtitle-1 font-weight-bold">
-                      {{ $t('product.aiReview.dataQuality.title') }}
-                    </h3>
-                  </header>
-                  <p class="text-body-2 mb-4">
-                    {{ $t('product.aiReview.dataQuality.description') }}
-                  </p>
-                  <div class="product-page__ai-review-quality-value">
-                    {{ aiReviewDataQuality }}
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
+          <ProductAiReviewSection
+            :gtin="product.gtin ?? gtin"
+            :initial-review="product.aiReview?.review ?? null"
+            :review-created-at="product.aiReview?.createdMs ?? undefined"
+            :site-key="hcaptchaSiteKey"
+            :title-params="aiTitleParams"
+            :product-name="productTitle"
+            :product-image="resolvedProductImageSource"
+          />
         </section>
 
         <section :id="sectionIds.price" class="product-page__section">
@@ -1732,10 +1704,6 @@ const showAlternativesSection = computed(() =>
 const alternativesHydrated = ref(false)
 const hasAlternatives = ref(true)
 const showAiReviewSection = computed(() => Boolean(categoryDetail.value))
-const aiReviewDataQuality = computed(() => {
-  const value = product.value?.aiReview?.review?.dataQuality
-  return typeof value === 'string' ? value.trim() : ''
-})
 
 const sectionIds = {
   hero: 'hero',
@@ -2388,7 +2356,6 @@ useHead(() => {
   scroll-margin-top: 108px; /* Match sticky nav + banner */
 }
 
-
 .product-page__hero {
   position: relative;
 }
@@ -2451,7 +2418,6 @@ useHead(() => {
   .product-page__section {
     scroll-margin-top: 140px;
   }
-
 }
 
 @media (max-width: 960px) {
