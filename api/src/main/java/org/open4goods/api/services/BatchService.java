@@ -285,6 +285,13 @@ public class BatchService {
 
     // TODO(p3,design) : remove
 	public void clean() {
+
+		// Cleaning data
+		cleanAiData();
+
+
+
+
 		AtomicInteger counter = new AtomicInteger();
 		dataRepository.exportAll().forEach(p -> {
 			int i = counter.incrementAndGet();
@@ -298,6 +305,7 @@ public class BatchService {
 					logger.error("Will remove {}", p);
 					dataRepository.delete(p);
 				}
+
 
 			} catch (SerialisationException e) {
 				e.printStackTrace();
