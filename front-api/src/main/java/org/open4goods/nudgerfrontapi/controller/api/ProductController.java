@@ -1398,10 +1398,11 @@ public class ProductController {
             }
     )
     public ResponseEntity<ReviewGenerationStatus> reviewStatus(@PathVariable Long gtin,
-                                                               @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        LOGGER.info("Entering reviewStatus(gtin={}, domainLanguage={})", gtin, domainLanguage);
+                                                               @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
+                                                               Locale locale) {
+        LOGGER.info("Entering reviewStatus(gtin={}, domainLanguage={}, locale={})", gtin, domainLanguage, locale);
         try {
-            ReviewGenerationStatus status = service.getReviewStatus(gtin);
+            ReviewGenerationStatus status = service.getReviewStatus(gtin, domainLanguage, locale);
             return ResponseEntity.ok()
                     .cacheControl(CacheControl.noCache())
                     .header("X-Locale", domainLanguage.languageTag())

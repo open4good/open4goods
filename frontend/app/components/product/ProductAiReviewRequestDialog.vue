@@ -99,18 +99,6 @@
         <v-btn variant="text" @click="dialogModel = false">
           {{ t('product.aiReview.request.cancel') }}
         </v-btn>
-        <v-spacer />
-        <v-btn
-          v-if="showSubmitButton"
-          color="primary"
-          size="large"
-          variant="flat"
-          :loading="requesting"
-          :disabled="submitDisabled"
-          @click="emit('submit')"
-        >
-          {{ t('product.aiReview.request.submit') }}
-        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -133,10 +121,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  agreementAccepted: {
-    type: Boolean,
-    default: true,
-  },
   requiresCaptcha: {
     type: Boolean,
     default: false,
@@ -152,14 +136,6 @@ const props = defineProps({
   captchaLocale: {
     type: String,
     default: 'en',
-  },
-  requesting: {
-    type: Boolean,
-    default: false,
-  },
-  submitDisabled: {
-    type: Boolean,
-    default: false,
   },
   errorMessage: {
     type: String,
@@ -184,11 +160,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  (
-    event: 'update:modelValue' | 'update:agreementAccepted',
-    value: boolean
-  ): void
-  (event: 'submit' | 'captcha-expired' | 'captcha-error'): void
+  (event: 'update:modelValue', value: boolean): void
+  (event: 'captcha-expired' | 'captcha-error'): void
   (event: 'captcha-verify', token: string): void
 }>()
 
@@ -201,11 +174,6 @@ const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 const dialogModel = computed({
   get: () => props.modelValue,
   set: value => emit('update:modelValue', value),
-})
-
-const agreementModel = computed({
-  get: () => props.agreementAccepted,
-  set: value => emit('update:agreementAccepted', value),
 })
 
 const hasSiteKey = computed(() => props.siteKey.length > 0)
@@ -226,34 +194,8 @@ watch(
   }
 )
 
-const submitDisabled = computed(() => {
-  if (!agreementModel.value || props.requesting) {
-    return true
-  }
-
-  if (props.requiresCaptcha) {
-    // If captcha is required, valid captcha token is needed
-    // But if we have a token, we should have auto-submitted.
-    // So the button is effectively only for non-captcha or retry?
-    // User requested "Removing Validate button".
-    // I will hide the button if captcha is required.
-    return true
-  }
-
-  return false
-})
-
-const showSubmitButton = computed(() => {
-  if (props.requiresCaptcha) {
-    // Show button only if captcha is verified (fallback for auto-submit)
-    return !submitDisabled.value
-  }
-  return true
-})
-
 const handleCaptchaVerify = (token: string) => {
   emit('captcha-verify', token)
-  emit('submit')
 }
 </script>
 

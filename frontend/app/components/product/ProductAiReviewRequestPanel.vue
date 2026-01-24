@@ -81,23 +81,6 @@
         <p>{{ statusMessage }}</p>
       </div>
     </div>
-
-    <v-divider class="my-4" />
-
-    <div class="product-ai-review-request-panel__actions">
-      <v-spacer />
-      <v-btn
-        v-if="showSubmitButton"
-        color="primary"
-        size="large"
-        variant="flat"
-        :loading="requesting"
-        :disabled="submitDisabled"
-        @click="emit('submit')"
-      >
-        {{ t('product.aiReview.request.submit') }}
-      </v-btn>
-    </div>
   </div>
 </template>
 
@@ -114,10 +97,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  agreementAccepted: {
-    type: Boolean,
-    default: true,
-  },
   requiresCaptcha: {
     type: Boolean,
     default: false,
@@ -133,14 +112,6 @@ const props = defineProps({
   captchaLocale: {
     type: String,
     default: 'en',
-  },
-  requesting: {
-    type: Boolean,
-    default: false,
-  },
-  submitDisabled: {
-    type: Boolean,
-    default: false,
   },
   errorMessage: {
     type: String,
@@ -161,7 +132,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  (event: 'update:agreementAccepted', value: boolean): void
   (event: 'submit' | 'captcha-expired' | 'captcha-error'): void
   (event: 'captcha-verify', token: string): void
 }>()
@@ -172,11 +142,6 @@ const VueHcaptcha = defineAsyncComponent(
 )
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
 
-const agreementModel = computed({
-  get: () => props.agreementAccepted,
-  set: value => emit('update:agreementAccepted', value),
-})
-
 const hasSiteKey = computed(() => props.siteKey.length > 0)
 const showCaptcha = computed(() => props.requiresCaptcha && hasSiteKey.value)
 
@@ -186,40 +151,8 @@ const productLabel = computed(() =>
     : t('product.aiReview.request.productFallback')
 )
 
-const submitDisabled = computed(() => {
-  if (!agreementModel.value || props.requesting) {
-    return true
-  }
-
-  if (props.requiresCaptcha) {
-    // If captcha is required, valid captcha token is needed
-    // The parent controls 'submitDisabled' based on token presence too,
-    // but here we double check or rely on parent.
-    // Actually prop `submitDisabled` should supervise everything.
-    return props.submitDisabled
-  }
-
-  return false
-})
-
-const showSubmitButton = computed(() => {
-  // Always show submit button, it will be disabled if captcha not verified
-  return true
-})
-
 const handleCaptchaVerify = (token: string) => {
   emit('captcha-verify', token)
-  // Auto submit can happen here if desired, or user clicks button.
-  // emit('submit') // Let's wait for user click or make it consistent with previous UX?
-  // Previous Code: emit('submit') immediately.
-  // Refactor request: "User requested: Removing Validate button" logic was confusing in previous file.
-  // Let's keep manual submit for better UX in a panel, or auto if preferred.
-  // If hCaptcha is the only barrier, auto-submit is nice.
-  // But let's stick to manual submit for stability unless requested.
-  // Wait, the previous code had:
-  // "User requested Removing Validate button... I will hide the button if captcha is required."
-  // effectively auto-submitting.
-  // Let's reproduce that behavior:
   emit('submit')
 }
 </script>
@@ -311,10 +244,5 @@ const handleCaptchaVerify = (token: string) => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.product-ai-review-request-panel__actions {
-  display: flex;
-  justify-content: flex-end;
 }
 </style>

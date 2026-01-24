@@ -42,6 +42,34 @@ Requests are limited using an in-memory token bucket. Defaults can be changed in
 
 When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
 
+## Google Indexing integration
+
+The front API can submit product review URLs to the Google Indexing API after
+AI review generation completes. The integration is disabled by default and
+relies on a Google service account with the Indexing API enabled.
+
+Configure the credentials and queue behavior in `application.yml`:
+
+```yaml
+front:
+  google-indexing:
+    enabled: true
+    site-base-url: https://nudger.fr
+    service-account-json: ${FRONT_GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON:}
+    # Alternative: service-account-path: /path/to/service-account.json
+    batch-size: 50
+    retry-delay: 30m
+```
+
+Required credentials:
+
+- `FRONT_GOOGLE_INDEXING_SERVICE_ACCOUNT_JSON` – the JSON service account payload
+  (paste the full JSON).
+- `FRONT_GOOGLE_INDEXING_SITE_BASE_URL` – public base URL used to build product URLs.
+
+The integration runs every 30 minutes and can also push immediately when new
+URLs are enqueued if `realtime-enabled` is set to `true`.
+
 ## API documentation
 
 Access to the Swagger UI (`/swagger-ui.html`) and the raw OpenAPI specification
