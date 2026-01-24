@@ -20,7 +20,7 @@
             <div>
               <p class="impact-score-examples__card-eyebrow">{{ example.eyebrow }}</p>
               <h3 class="impact-score-examples__card-title">{{ example.title }}</h3>
-              <p class="impact-score-examples__card-text">{{ example.description }}</p>
+              
             </div>
             <div class="impact-score-examples__score">
               <ImpactScore :score="example.score" :max="5" size="medium" />

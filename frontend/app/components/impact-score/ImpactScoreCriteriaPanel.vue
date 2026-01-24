@@ -1,9 +1,6 @@
 <template>
   <section class="impact-score-criteria-panel">
     <div v-if="showFilters" class="impact-score-criteria-panel__filters">
-      <span class="impact-score-criteria-panel__filters-label">
-        {{ t('impactScoreCriteriaPanel.filters.label') }}
-      </span>
       <v-chip-group
         v-model="selectedFilter"
         class="impact-score-criteria-panel__filters-group"

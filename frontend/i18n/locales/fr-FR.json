@@ -1224,7 +1224,7 @@
     "availableCriteria": {
       "eyebrow": "Critères",
       "title": "Critères disponibles",
-      "subtitle": "Explorez les critères utilisés selon chaque verticale Impact Score."
+      "subtitle": "Explorez les critères utilisés selon chaque catégorie."
     },
     "principles": {
       "eyebrow": "Nos principes",
@@ -3274,7 +3274,6 @@
     }
   },
   "packs": {
-
     "default": {
       "assets": {
         "illustration": "placeholders/illustration.svg",

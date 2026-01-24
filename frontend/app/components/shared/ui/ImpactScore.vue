@@ -56,23 +56,6 @@
           </span>
         </div>
 
-        <div v-if="shouldDisplayStars" class="impact-score-combined__rating">
-          <v-rating
-            class="impact-score__rating"
-            :model-value="normalizedScore"
-            :length="length"
-            :size="ratingSize"
-            :color="ratingColor"
-            :bg-color="ratingBackgroundColor"
-            :density="ratingDensity"
-            half-increments
-            readonly
-            aria-hidden="true"
-          />
-          <span v-if="showValue" class="impact-score__value">{{
-            formattedScore
-          }}</span>
-        </div>
       </div>
 
       <!-- Badge Mode -->
