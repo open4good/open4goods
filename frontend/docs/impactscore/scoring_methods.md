@@ -1,4 +1,4 @@
-# Impact Score — Méthodes de scoring disponibles
+# Impact Score - Méthodes de scoring disponibles
 
 Ce document décrit les méthodes de normalisation disponibles dans le système et leurs usages recommandés.
 Il complète :
