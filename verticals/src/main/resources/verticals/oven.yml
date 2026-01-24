@@ -87,11 +87,11 @@ i18n:
     verticalHomeDescription: "Comparez les fours encastrables ou posables (chaleur tournante, pyrolyse, vapeur…) selon l’éco-score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages
-#    wikiPages:
-#      - wikiUrl: verticals:ovens:guide-achat-fours:WebHome
-#        verticalUrl: "guide-achat-four-encastrable"
-#        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
-#        faIcon: "mdi-star"
+  #    wikiPages:
+  #      - wikiUrl: verticals:ovens:guide-achat-fours:WebHome
+  #        verticalUrl: "guide-achat-four-encastrable"
+  #        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
+  #        faIcon: "mdi-star"
 
   en:
     url:
@@ -380,7 +380,7 @@ attributesConfig:
     - key: "OVEN_ENERGY_CONSUMPTION_CYCLE"
     - key: "WARRANTY"
     - key: "YEAR"
-    - key: "COLOUR"
+    - key: "COLOR"
     - key: "FEATURES"
     - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "DATA_QUALITY"
