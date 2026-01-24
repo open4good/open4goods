@@ -107,6 +107,7 @@
         <module>services/contribution</module>
         <module>services/eprel-service</module>
         <module>services/exposed-docs</module>
+        <module>scripts/metriks</module>
 
 
 

@@ -1,0 +1,128 @@
+[
+  {
+    "event_provider": "github",
+    "event_id": "github_prs_merged_count",
+    "eventName": "PR mergées",
+    "eventDescription": "Nombre de pull requests mergées sur la période"
+  },
+  {
+    "event_provider": "github",
+    "event_id": "github_prs_merged_additions",
+    "eventName": "Lignes ajoutées (PR mergées)",
+    "eventDescription": "Nombre de lignes ajoutées sur les pull requests mergées"
+  },
+  {
+    "event_provider": "github",
+    "event_id": "github_prs_merged_deletions",
+    "eventName": "Lignes supprimées (PR mergées)",
+    "eventDescription": "Nombre de lignes supprimées sur les pull requests mergées"
+  },
+  {
+    "event_provider": "github",
+    "event_id": "github_issues_open_total",
+    "eventName": "Issues ouvertes (total)",
+    "eventDescription": "Nombre total d'issues ouvertes dans le dépôt"
+  },
+  {
+    "event_provider": "github",
+    "event_id": "github_issues_opened_count",
+    "eventName": "Issues créées",
+    "eventDescription": "Nombre d'issues créées sur la période"
+  },
+  {
+    "event_provider": "github",
+    "event_id": "github_issues_closed_count",
+    "eventName": "Issues fermées",
+    "eventDescription": "Nombre d'issues fermées sur la période"
+  },
+  {
+    "event_provider": "system",
+    "event_id": "disk_total_bytes_prod_root",
+    "eventName": "Disque total PROD /",
+    "eventDescription": "Capacité disque totale (prod, /)",
+    "params": { "server": "prod", "mount": "/", "metric": "total_bytes" }
+  },
+  {
+    "event_provider": "system",
+    "event_id": "disk_free_bytes_prod_root",
+    "eventName": "Disque libre PROD /",
+    "eventDescription": "Espace disque libre (prod, /)",
+    "params": { "server": "prod", "mount": "/", "metric": "free_bytes" }
+  },
+  {
+    "event_provider": "system",
+    "event_id": "disk_used_percent_prod_root",
+    "eventName": "Disque utilisé PROD /",
+    "eventDescription": "Pourcentage disque utilisé (prod, /)",
+    "params": { "server": "prod", "mount": "/", "metric": "used_percent" }
+  },
+  {
+    "event_provider": "system",
+    "event_id": "disk_total_bytes_staging_root",
+    "eventName": "Disque total STAGING /",
+    "eventDescription": "Capacité disque totale (staging, /)",
+    "params": { "server": "staging", "mount": "/", "metric": "total_bytes" }
+  },
+  {
+    "event_provider": "system",
+    "event_id": "disk_free_bytes_staging_root",
+    "eventName": "Disque libre STAGING /",
+    "eventDescription": "Espace disque libre (staging, /)",
+    "params": { "server": "staging", "mount": "/", "metric": "free_bytes" }
+  },
+  {
+    "event_provider": "system",
+    "event_id": "disk_used_percent_staging_root",
+    "eventName": "Disque utilisé STAGING /",
+    "eventDescription": "Pourcentage disque utilisé (staging, /)",
+    "params": { "server": "staging", "mount": "/", "metric": "used_percent" }
+  },
+  {
+    "event_provider": "awin",
+    "event_id": "awin_clicks",
+    "eventName": "Awin clics",
+    "eventDescription": "Nombre de clics Awin sur la période"
+  },
+  {
+    "event_provider": "awin",
+    "event_id": "awin_impressions",
+    "eventName": "Awin impressions",
+    "eventDescription": "Nombre d'impressions Awin sur la période"
+  },
+  {
+    "event_provider": "awin",
+    "event_id": "awin_transactions_total",
+    "eventName": "Awin transactions",
+    "eventDescription": "Nombre de transactions Awin sur la période"
+  },
+  {
+    "event_provider": "awin",
+    "event_id": "awin_commission_total",
+    "eventName": "Awin commissions",
+    "eventDescription": "Commissions Awin sur la période"
+  },
+  {
+    "event_provider": "effiliation",
+    "event_id": "effiliation_clicks",
+    "eventName": "Effiliation clics",
+    "eventDescription": "Nombre de clics Effiliation sur la période"
+  },
+  {
+    "event_provider": "effiliation",
+    "event_id": "effiliation_impressions",
+    "eventName": "Effiliation impressions",
+    "eventDescription": "Nombre d'impressions Effiliation sur la période"
+  },
+  {
+    "event_provider": "effiliation",
+    "event_id": "effiliation_transactions_total",
+    "eventName": "Effiliation transactions",
+    "eventDescription": "Nombre de transactions Effiliation sur la période"
+  },
+  {
+    "event_provider": "effiliation",
+    "event_id": "effiliation_commission_total",
+    "eventName": "Effiliation commissions",
+    "eventDescription": "Commissions Effiliation sur la période"
+  }
+]

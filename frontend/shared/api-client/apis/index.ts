@@ -11,6 +11,7 @@ export * from './ContactApi';
 export * from './ContentApi';
 export * from './ExposedDocsApi';
 export * from './FeedbackApi';
+export * from './MetriksApi';
 export * from './OpenDataApi';
 export * from './PartnerApi';
 export * from './ProductApi';

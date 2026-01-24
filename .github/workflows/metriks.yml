@@ -1,0 +1,77 @@
+name: Metriks Weekly Snapshot
+
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: 'Generate metrics without committing'
+        required: false
+        default: 'false'
+      lastPeriodInDays:
+        description: 'Number of days to include in the report'
+        required: false
+        default: '7'
+  schedule:
+    # 12:00 Europe/Paris corresponds to 11:00 UTC during standard time.
+    - cron: '0 11 * * 5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: metriks-weekly
+  cancel-in-progress: true
+
+jobs:
+  generate-metriks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build metriks CLI
+        run: mvn -pl scripts/metriks -am -DskipTests package
+
+      - name: Configure SSH
+        if: secrets.SSH_PRIVATE_KEY != ''
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Configure known hosts
+        if: secrets.SSH_KNOWN_HOSTS != ''
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+
+      - name: Run metriks generator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWIN_ACCESS_TOKEN: ${{ secrets.AWIN_ACCESS_TOKEN }}
+          AWIN_ADVERTISER_ID: ${{ secrets.AWIN_ADVERTISER_ID }}
+          EFFILIATION_API_KEY: ${{ secrets.EFFILIATION_API_KEY }}
+        run: |
+          DRY_RUN="${{ inputs.dryRun }}"
+          if [ -z "$DRY_RUN" ]; then DRY_RUN=false; fi
+          LAST_PERIOD="${{ inputs.lastPeriodInDays }}"
+          if [ -z "$LAST_PERIOD" ]; then LAST_PERIOD=7; fi
+          java -jar scripts/metriks/target/metriks-cli.jar --dryRun="$DRY_RUN" --lastPeriodInDays="$LAST_PERIOD"
+
+      - name: Commit metriks history
+        if: github.event_name != 'workflow_dispatch' || inputs.dryRun != 'true'
+        run: |
+          if [ -n "$(git status --porcelain metriks/history)" ]; then
+            git add metriks/history
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git commit -m "chore(metriks): update weekly metrics"
+            git push
+          else
+            echo "No metriks changes to commit."
+          fi

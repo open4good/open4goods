@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "prod": {
+      "host": "prod.example",
+      "user": "deploy",
+      "port": 22
+    },
+    "staging": {
+      "host": "staging.example",
+      "user": "deploy",
+      "port": 22
+    }
+  },
+  "mounts": ["/", "/data"]
+}

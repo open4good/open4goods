@@ -1,0 +1,22 @@
+[
+  {
+    "advertiser": "Shop A",
+    "clicks": 10,
+    "impressions": 120,
+    "transactions": 3,
+    "transactionsConfirmed": 2,
+    "transactionsPending": 1,
+    "commission": "12.50",
+    "turnover": "200.00"
+  },
+  {
+    "advertiserName": "Shop B",
+    "clicks": 4,
+    "impressions": 30,
+    "transactions": 1,
+    "transactionsConfirmed": 1,
+    "transactionsPending": 0,
+    "commissionAmount": "3.75",
+    "saleAmount": "50.00"
+  }
+]
