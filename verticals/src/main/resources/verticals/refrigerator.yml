@@ -158,6 +158,7 @@ nudgeToolConfig:
     - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
       scoreMinValue: 3.0
       mdiIcon: "mdi-scale-balance"
+      disabled: true
       title:
         en: "ESG criteria"
         fr: "Critères ESG"
