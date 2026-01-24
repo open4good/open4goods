@@ -1,7 +1,5 @@
 # Preprocessing
-> **IMPORTANT**: Before starting, define your target category.
-> Replace `{TARGET_CATEGORY}` with the ID of the vertical you are updating (e.g., `dishwasher`).
-> The reference category is `{REFERENCE_CATEGORY}`
+> Replace `{TARGET_CATEGORY}` with : oven
 
 # Context
 You are a software developer responsible for creating high-quality, human-friendly configuration files for product categories in the Open4Goods project.
@@ -46,7 +44,7 @@ You have access to a local API (`localhost:8081`) to fetch live data.
     *   Ignore technical attributes coming from `standard` datasources if they are meaningless to a consumer (e.g., internal IDs).
     *   **DISMISS** custom attributes (starting with `CUSTOM_`) or "Themes".
 3.  **Update Configuration**:
-    *   Update `attributesConfig.configs` in your `{TARGET_CATEGORY}.yml` with the relevant attributes found.
+    *   Update `attributesConfig.configs` in your `{TARGET_CATEGORY}.yml` with the relevant attributes found, using comments ( **DISMISS** custom attributes (starting with `CUSTOM_`) or "Themes")
     *   Reuse defined attributes from `/verticals/src/main/resources/attributes/` if they exist.
     *   If a highly relevant attribute is missing from the files, create a new definition in `/verticals/src/main/resources/attributes/`.
 
@@ -66,6 +64,7 @@ You have access to a local API (`localhost:8081`) to fetch live data.
     *   Merge with existing definitions.
 
 ## Phase 4: Scoring & Nudge Configuration
+** Warning : if major changed were operated previously, those statistics may not be up to date, as batch that computes scores may have not run with updated config.
 **Goal**: Configure "Nudge" scores (Environmental, Durability, etc.) by analyzing the statistical distribution of products.
 
 ### 4.1 Define Impact Scores

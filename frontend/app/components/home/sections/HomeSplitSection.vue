@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import painImageSrc from '~/assets/homepage/pain/nudger-problem.webp'
+import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
+
 const gainImageSrc = '/homepage/gain/nudger-screaming.webp'
 
 defineOptions({ inheritAttrs: false })
@@ -95,31 +97,43 @@ const sectionClasses = computed(() => [
             class="home-split__col home-split__col--visual"
           >
             <div class="home-split__visual" role="presentation">
-              <slot name="visual">
-                <img
-                  v-if="resolvedImage?.src && isLocalAsset"
-                  :src="resolvedImage.src"
-                  :alt="resolvedImage.alt"
-                  :class="['home-split__image', resolvedImageClass]"
-                  :loading="resolvedImage.loading ?? 'lazy'"
-                  :width="resolvedImage.width"
-                  :height="resolvedImage.height"
-                  decoding="async"
-                />
-                <NuxtImg
-                  v-else-if="resolvedImage?.src"
-                  :src="resolvedImage.src"
-                  :alt="resolvedImage.alt"
-                  :class="['home-split__image', resolvedImageClass]"
-                  :sizes="
-                    resolvedImage.sizes ?? '(min-width: 960px) 320px, 70vw'
-                  "
-                  :loading="resolvedImage.loading ?? 'lazy'"
-                  :width="resolvedImage.width"
-                  :height="resolvedImage.height"
-                  decoding="async"
-                />
-              </slot>
+              <NudgerCard
+                :flat-corners="[]"
+                :accent-corners="[]"
+                base-radius="24px"
+                padding="0"
+                :border="false"
+                :shadow="false"
+                :hoverable="false"
+                background="transparent"
+                class="home-split__card"
+              >
+                <slot name="visual">
+                  <img
+                    v-if="resolvedImage?.src && isLocalAsset"
+                    :src="resolvedImage.src"
+                    :alt="resolvedImage.alt"
+                    :class="['home-split__image', resolvedImageClass]"
+                    :loading="resolvedImage.loading ?? 'lazy'"
+                    :width="resolvedImage.width"
+                    :height="resolvedImage.height"
+                    decoding="async"
+                  />
+                  <NuxtImg
+                    v-else-if="resolvedImage?.src"
+                    :src="resolvedImage.src"
+                    :alt="resolvedImage.alt"
+                    :class="['home-split__image', resolvedImageClass]"
+                    :sizes="
+                      resolvedImage.sizes ?? '(min-width: 960px) 320px, 70vw'
+                    "
+                    :loading="resolvedImage.loading ?? 'lazy'"
+                    :width="resolvedImage.width"
+                    :height="resolvedImage.height"
+                    decoding="async"
+                  />
+                </slot>
+              </NudgerCard>
             </div>
           </v-col>
         </v-row>
@@ -129,71 +143,71 @@ const sectionClasses = computed(() => [
 </template>
 
 <style scoped lang="sass">
-  .home-section
-    padding-block: clamp(1.5rem, 3vw, 2.75rem)
-    background: rgb(var(--v-theme-surface-default))
+.home-section
+  padding-block: clamp(1.5rem, 3vw, 2.75rem)
+  background: rgb(var(--v-theme-surface-default))
 
-  .home-section__container
-    padding-inline: clamp(1.5rem, 5vw, 4rem)
+.home-section__container
+  padding-inline: clamp(1.5rem, 5vw, 4rem)
 
-  .home-hero__subtitle
-    text-align: left
+.home-hero__subtitle
+  text-align: left
 
-  .home-section__inner
-    max-width: 1180px
-    margin: 0 auto
-    display: flex
-    flex-direction: column
-    gap: clamp(2rem, 5vw, 3.25rem)
+.home-section__inner
+  max-width: 1180px
+  margin: 0 auto
+  display: flex
+  flex-direction: column
+  gap: clamp(2rem, 5vw, 3.25rem)
 
-  .home-section__header
-    display: flex
-    flex-direction: column
-    gap: 0.75rem
+.home-section__header
+  display: flex
+  flex-direction: column
+  gap: 0.75rem
 
-  .home-section__subtitle
-    margin: 0
-    color: rgb(var(--v-theme-text-neutral-secondary))
+.home-section__subtitle
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
 
-  .home-section__body
-    display: flex
-    flex-direction: column
-    gap: clamp(1.5rem, 4vw, 2.5rem)
+.home-section__body
+  display: flex
+  flex-direction: column
+  gap: clamp(1.5rem, 4vw, 2.5rem)
 
-  .home-split__content
-    row-gap: clamp(2rem, 5vw, 3rem)
-    //background: rgb(var(--v-theme-hero-overlay-strong))
+.home-split__content
+  row-gap: clamp(2rem, 5vw, 3rem)
+  //background: rgb(var(--v-theme-hero-overlay-strong))
 
-  .home-split__col--copy
-    display: flex
-    flex-direction: column
-    gap: clamp(0.875rem, 2vw, 1.25rem)
+.home-split__col--copy
+  display: flex
+  flex-direction: column
+  gap: clamp(0.875rem, 2vw, 1.25rem)
 
+.home-split__col--visual
+  display: flex
+  justify-content: center
+  position: sticky;
+  top: 64px // hauteur header menu
+
+.home-split__visual
+  position: relative
+  width: min(100%, 460px)
+  display: flex
+  justify-content: center
+  align-items: center
+
+.home-split__image
+  position: relative
+  z-index: 1
+  width: min(66%, 320px)
+  height: auto
+  display: block
+  margin-inline: auto
+
+.home-split--visual-left .home-split__col--visual
+  order: -1
+
+@media (max-width: 959px)
   .home-split__col--visual
-    display: flex
-    justify-content: center
-    position: sticky;
-    top: 64px // hauteur header menu
-
-  .home-split__visual
-    position: relative
-    width: min(100%, 460px)
-    display: flex
-    justify-content: center
-    align-items: center
-
-  .home-split__image
-    position: relative
-    z-index: 1
-    width: min(66%, 320px)
-    height: auto
-    display: block
-    margin-inline: auto
-
-  .home-split--visual-left .home-split__col--visual
     order: -1
-
-  @media (max-width: 959px)
-    .home-split__col--visual
-      order: -1
 </style>

@@ -1,0 +1,1917 @@
+resourcesConfig:
+  overrideResources: true
+
+# Unique identifier for this vertical.
+# MUST contains only charracters
+# SHOULD be equal to the configuration file name, without the extension
+id: oven
+
+order: 2
+
+# The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
+# SHOULD be set, it will then force this taxonomy for all products in this vertical
+googleTaxonomyId: 683
+
+#The icecat category id. Set -1 if unknown
+icecatTaxonomyId: 2286
+
+# EPREL group code (correspond to url_code in /swagger-ui/index.html#/eprel-controller/eprel)
+eprelGroupNames:
+  - ovens
+
+# Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
+verticalImage: /images/verticals/ovens.png
+
+mdiIcon: mdi-stove
+
+# Indicates if the vertical must be UI / sitemap / search rendered
+enabled: true
+
+popular: true
+
+# The mainly presented attributes for this category
+popularAttributes:
+  - OVEN_CAPACITY
+  - OVEN_CLEANING_MODE
+
+# GenAiConfig for this vertical
+genAiConfig:
+  # If false, will bypass the generativ ia texts generation
+  enabled: false
+
+#####################################################################################################################################
+# ImpacScore configuration.
+# Must stay structurally present; content will be auto-generated later.
+#####################################################################################################################################
+
+# The scores that are available to build the impact score. They come from scored attributes.
+# Scores from _default.yml are merged
+availableImpactScoreCriterias:
+  - CLASSE_ENERGY
+  #  - POWER_CONSUMPTION_TYPICAL
+  - WEIGHT
+  - WARRANTY
+  - REPAIRABILITY_INDEX
+  - BRAND_SUSTAINALYTICS_SCORING
+  - DATA_QUALITY
+
+#####################################################################################################################################
+# I18N CONFIGURATION
+######################################################################################################################################
+i18n:
+  fr:
+    # Product URL & H1
+    url:
+      prefix: "|| four | fours ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "|| Four | Fours ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    # Product metas (generic templates reused)
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaOpenGraphType: "product"
+
+    # Vertical page elements
+    verticalHomeUrl: "fours"
+    verticalHomeTitle: "Fours"
+    verticalHomeDescription: "Comparez les fours encastrables ou posables (chaleur tournante, pyrolyse, vapeur…) selon l’éco-score et le prix."
+
+    # A mapping beetween custom page names behind this vertical and wiki pages (sample)
+  #    wikiPages:
+  #      - wikiUrl: verticals:ovens:guide-achat-fours:WebHome
+  #        verticalUrl: "guide-achat-four-encastrable"
+  #        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
+  #        faIcon: "mdi-star"
+
+  en:
+    url:
+      prefix: "|| oven | ovens ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "|| Oven | Ovens ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphType: "product"
+
+    verticalHomeUrl: "ovens"
+    verticalHomeTitle: "Ovens"
+    verticalHomeDescription: "Compare ovens (built-in or freestanding, convection, pyrolysis, steam…) by eco-score and price."
+
+#####################################################################################################################################
+# NUDGE TOOL CONFIGURATION
+#####################################################################################################################################
+nudgeToolConfig:
+  scores:
+    - scoreName: "ENERGY_CONSUMPTION"
+      scoreMinValue: 3
+      mdiIcon: "mdi-lightning-bolt"
+      title:
+        en: "Energy consumption"
+        fr: "Consommation énergétique"
+      description:
+        en: "Ovens with a low energy consumption"
+        fr: "Fours avec une faible consommation énergétique"
+
+    - scoreName: "DURABILITY"
+      scoreMinValue: 3
+      mdiIcon: "mdi-archive-outline"
+      title:
+        en: "Durability"
+        fr: "Durabilité"
+      description:
+        en: "Ovens with a good durability"
+        fr: "Fours avec une bonne durabilité"
+
+    - scoreName: "REPARABILITY"
+      scoreMinValue: 3
+      mdiIcon: "mdi-tools"
+      title:
+        en: "Reparability"
+        fr: "Réparabilité"
+      description:
+        en: "Ovens with a good reparability"
+        fr: "Fours avec une bonne réparabilité"
+
+    - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
+      scoreMinValue: 4
+      mdiIcon: "mdi-scale-balance"
+      title:
+        en: "ESG criterias"
+        fr: "Critères ESG"
+      description:
+        en: "Models with a brand having good ESG rating"
+        fr: "Modèles dont la marque dispose d'un bon indice ESG"
+
+  subsetGroups:
+    - id: "price"
+      mdiIcon: "mdi-currency-eur"
+      layout: "grid"
+      title:
+        en: "Budget"
+        fr: "Budget"
+      description:
+        en: "Pick a price comfort zone."
+        fr: "Votre budget"
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+
+  subsets:
+    - id: "price_lower_400"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "400"
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "0"
+      image: "example-image.png"
+      url:
+        en: "low-price"
+        fr: "petits-prix"
+      caption:
+        en: "< 400 €"
+        fr: "< 400 €"
+      title:
+        en: "Affordable ovens"
+        fr: "Fours pas chers"
+      description:
+        en: "Ovens priced under €400."
+        fr: "Les fours dont le prix est inférieur à 400€."
+
+    - id: "price_400_800"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "400"
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "800"
+      image: "example-image.png"
+      url:
+        en: "oven-400-800-euros"
+        fr: "four-400-800-euros"
+      caption:
+        en: "400 - 800 €"
+        fr: "400 - 800 €"
+      title:
+        en: "Mid-range ovens"
+        fr: "Fours milieu de gamme"
+      description:
+        en: "Ovens priced between €400 and €800."
+        fr: "Les fours dont le prix est compris entre 400€ et 800€."
+
+    - id: "price_greater_800"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "800"
+      image: "example-image.png"
+      url:
+        en: "premium-price"
+        fr: "haut-de-gamme"
+      caption:
+        en: "> 800 €"
+        fr: "> 800 €"
+      title:
+        en: "Premium ovens"
+        fr: "Fours haut de gamme"
+      description:
+        en: "Ovens priced over €800."
+        fr: "Les fours dont le prix est supérieur à 800€."
+
+##############################################################################
+# Custom search filters : the following filters
+# will also be availlable in search for this vertical (must be an attribute or a score)
+##############################################################################
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 5
+    buckets: 20
+  "scores.POWER_CONSUMPTION_TYPICAL.value":
+    interval: 250
+    buckets: 12
+  "scores.WEIGHT.value":
+    interval: 2
+    buckets: 12
+  "scores.BRAND_SUSTAINALYTICS_SCORING.value":
+    interval: 1
+    buckets: 5
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
+  "scores.DATA_QUALITY.value":
+    interval: 1
+    buckets: 5
+  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
+    interval: 250
+    buckets: 12
+  "attributes.indexed.WEIGHT":
+    interval: 2
+    buckets: 12
+  "attributes.indexed.OVEN_CAPACITY":
+    interval: 5
+    buckets: 12
+  "attributes.indexed.OVEN_POWER":
+    interval: 200
+    buckets: 12
+  "attributes.indexed.OVEN_CAVITY_COUNT":
+    interval: 1
+    buckets: 4
+  "attributes.indexed.OVEN_ENERGY_CONSUMPTION_CYCLE":
+    interval: 0.1
+    buckets: 12
+  "price.minPrice.price":
+    interval: 50
+    buckets: 30
+
+ecoFilters:
+  - "CLASSE_ENERGY"
+
+technicalFilters:
+  - "POWER_CONSUMPTION_TYPICAL"
+  - "WEIGHT"
+  - "OVEN_CAPACITY"
+  - "OVEN_INSTALLATION_TYPE"
+  - "OVEN_ENERGY_TYPE"
+  - "OVEN_CLEANING_MODE"
+  - "OVEN_COOKING_MODES"
+  - "OVEN_CAVITY_COUNT"
+  - "OVEN_POWER"
+  - "OVEN_ENERGY_CONSUMPTION_CYCLE"
+
+
+####################################################################################
+# ATTRIBUTES CONFIGURATION
+####################################################################################
+attributesConfig:
+  configs:
+
+  ################################################################################
+  #                         TITRE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 72% (1872/2579) . 
+  # TOP attributes values are :
+#     - vidaXL Rangement de poubelle à roulettes pour 3 poubelles Anthracite (21 items)
+#     - APPUIS DE FENÊTRE 2 PCS BOIS DE CHÊNE MASSIF NON TRAITÉ (11 items)
+#     - vidaXL Rangement de poubelle à roulettes pour 3 poubelles Argent (5 items)
+#     - Presse-agrumes électrique rétro 600 W avec levier (2 items)
+#     - FOUR ENCASTRABLE ELECTROLUX EDF4P46X2 (2 items)
+#     - Four Néerlandais Avec Accessoires Inclus (2 items)
+#     - vidaXL Cabinet à chaussures Sonoma 60 x 35 x 44 cm Bois d'ingénierie (2 items)
+#   
+  ##################################
+#   - key: "TITRE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "TITRE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CUSTOM_4
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 61% (1574/2579) . 
+  # TOP attributes values are :
+#     - ELECTROMENAGER (522 items)
+#     - Materiel CHR Pro (363 items)
+#     - 0.0 (51 items)
+#     - Super10Count (42 items)
+#     - $linkur (36 items)
+#     - ART DE LA TABLE - ARTICLES CULINAIRES (32 items)
+#     - Darty (21 items)
+#     - DROGUERIE (20 items)
+#     - Doctor Brandt (19 items)
+#     - Icoza (19 items)
+#     + 64 more attributes...
+#   
+  ##################################
+#   - key: "CUSTOM_4"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      backmarket.fr:
+#        - "CUSTOM_4"
+#      natureetdecouvertes.com:
+#        - "CUSTOM_4"
+#      joom.com:
+#        - "CUSTOM_4"
+#      darty.com:
+#        - "CUSTOM_4"
+#      fnac.com:
+#        - "CUSTOM_4"
+#      JoomFR:
+#        - "CUSTOM_4"
+#      cdiscount.com:
+#        - "CUSTOM_4"
+#      manomano.fr:
+#        - "CUSTOM_4"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CUSTOM_3
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 54% (1403/2579) . 
+  # TOP attributes values are :
+#     - 0 (567 items)
+#     - 0.00 (53 items)
+#     - 15 (6 items)
+#     - 3 (6 items)
+#     - 9 (6 items)
+#     - 1 (6 items)
+#     - 18 (5 items)
+#     - 41 (5 items)
+#     - 21 (5 items)
+#     - true (4 items)
+#     + 70 more attributes...
+#   
+  ##################################
+#   - key: "CUSTOM_3"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      natureetdecouvertes.com:
+#        - "CUSTOM_3"
+#      fnac.com:
+#        - "CUSTOM_3"
+#      cdiscount.com:
+#        - "CUSTOM_3"
+#      manomano.fr:
+#        - "CUSTOM_3"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CUSTOM_5
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 53% (1374/2579) . 
+  # TOP attributes values are :
+#     - 0 (848 items)
+#     - 10 euros offerts des 79 euros d'achat jusqu'au 01/12/2025 (34 items)
+#     - 25 euros offerts des 249 euros d'achat jusqu'au 09/01/2026 (32 items)
+#     - true (16 items)
+#     - 15 euros offerts des 129 euros d'achat jusqu'au 09/01/2026 (15 items)
+#     - 15 euros offerts des 129 euros d'achat jusqu'au 21/11/2025 (9 items)
+#     - 0.00 (7 items)
+#     - 15 euros offerts des 129 euros d'achat jusqu'au 08/10/2025 (4 items)
+#     - 11 euros offerts des 111 euros d'achat jusqu'au 11/11/2025 (4 items)
+#     - 15 euros offerts des 129 euros d'achat jusqu'au 27/11/2025 (3 items)
+#     + 7 more attributes...
+#   
+  ##################################
+#   - key: "CUSTOM_5"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      backmarket.fr:
+#        - "CUSTOM_5"
+#      joom.com:
+#        - "CUSTOM_5"
+#      darty.com:
+#        - "CUSTOM_5"
+#      fnac.com:
+#        - "CUSTOM_5"
+#      JoomFR:
+#        - "CUSTOM_5"
+#      cdiscount.com:
+#        - "CUSTOM_5"
+#      manomano.fr:
+#        - "CUSTOM_5"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CUSTOM_1
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 51% (1328/2579) . 
+  # TOP attributes values are :
+#     - G (510 items)
+#     - Produit MarketPlace (353 items)
+#     - bons plans (27 items)
+#     - Comme neuf (18 items)
+#     - A (18 items)
+#     - unisex (17 items)
+#     - Trés bon état (16 items)
+#     - Etat correct (16 items)
+#     - OFDARTY (11 items)
+#     - 34 (9 items)
+#     + 51 more attributes...
+#   
+  ##################################
+#   - key: "CUSTOM_1"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rueducommerce.fr:
+#        - "CUSTOM_1"
+#      backmarket.fr:
+#        - "CUSTOM_1"
+#      natureetdecouvertes.com:
+#        - "CUSTOM_1"
+#      joom.com:
+#        - "CUSTOM_1"
+#      darty.com:
+#        - "CUSTOM_1"
+#      fnac.com:
+#        - "CUSTOM_1"
+#      JoomFR:
+#        - "CUSTOM_1"
+#      underdog.shop:
+#        - "CUSTOM_1"
+#      UNDERDOGFR:
+#        - "CUSTOM_1"
+#      manomano.fr:
+#        - "CUSTOM_1"
+#      e.leclerc:
+#        - "CUSTOM_1"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TYPE DE PRODUIT
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 51% (1324/2579) . 
+  # TOP attributes values are :
+#     - Four (800 items)
+#     - Appareil de cuisson (219 items)
+#     - Mini four (87 items)
+#     - Micro-ondes (35 items)
+#     - Presse-agrumes électrique (33 items)
+#     - Wok électrique (15 items)
+#     - Crêpière (15 items)
+#     - Friteuse (13 items)
+#     - Brasero (8 items)
+#     - Machine à café (8 items)
+#     + 20 more attributes...
+#   
+  ##################################
+#   - key: "TYPE DE PRODUIT"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "TYPE DE PRODUIT"
+#      rakuten.com:
+#        - "TYPE DE PRODUIT"
+#      123comparer.fr:
+#        - "TYPE DE PRODUIT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CUSTOM_2
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 38% (988/2579) . 
+  # TOP attributes values are :
+#     - Marketplace (679 items)
+#     - Offre Propre (107 items)
+#     - adult (38 items)
+#     - Boys and Girls (7 items)
+#   
+  ##################################
+#   - key: "CUSTOM_2"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      natureetdecouvertes.com:
+#        - "CUSTOM_2"
+#      joom.com:
+#        - "CUSTOM_2"
+#      JoomFR:
+#        - "CUSTOM_2"
+#      cdiscount.com:
+#        - "CUSTOM_2"
+#      manomano.fr:
+#        - "CUSTOM_2"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TRANCHE DE POIDS
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 30% (785/2579) . 
+  # TOP attributes values are :
+#     - 3 à 10 kg (218 items)
+#     - 30 à 50 kg (190 items)
+#     - 500 g à 3 kg (183 items)
+#     - 250 à 500 g (49 items)
+#     - 10 à 15 kg (37 items)
+#     - 0 à 100 g (36 items)
+#     - 15 à 30 kg (29 items)
+#     - 100 à 250 g (13 items)
+#     - + de 100 kg (8 items)
+#     - 50 à 70 kg (5 items)
+#     + 2 more attributes...
+#   
+  ##################################
+#   - key: "TRANCHE DE POIDS"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "TRANCHE DE POIDS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CUSTOM_9
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 27% (699/2579) . 
+  # TOP attributes values are :
+#     - Acier inoxydable (inox) (9 items)
+#     - Verre (4 items)
+#     - Average (3 items)
+#   
+  ##################################
+#   - key: "CUSTOM_9"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      cdiscount.com:
+#        - "CUSTOM_9"
+#      manomano.fr:
+#        - "CUSTOM_9"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CUSTOM_8
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 23% (602/2579) . 
+  # TOP attributes values are :
+#     - Cdiscount (108 items)
+#     - Nouveaux Marchands (57 items)
+#     - Icoza (56 items)
+#     - Vpc Boost (38 items)
+#     - Restock System (36 items)
+#     - Super 10count (32 items)
+#     - Darty (28 items)
+#     - ASdiscount (18 items)
+#     - Electrolux FRANCE SAS (18 items)
+#     - ELECTRO DIRECT (11 items)
+#     + 38 more attributes...
+#   
+  ##################################
+#   - key: "CUSTOM_8"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      cdiscount.com:
+#        - "CUSTOM_8"
+#      manomano.fr:
+#        - "CUSTOM_8"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CUSTOM_6
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 22% (574/2579) . 
+  # TOP attributes values are :
+#     - Verre (145 items)
+#     - Acier inoxydable (inox) (116 items)
+#     - Bois d'ingénierie (49 items)
+#     - Acier (44 items)
+#     - Plastique (42 items)
+#     - Métal (39 items)
+#     - Bois (27 items)
+#     - Aluminium (18 items)
+#     - Choix durable (12 items)
+#     - Verre trempé (11 items)
+#     + 12 more attributes...
+#   
+  ##################################
+#   - key: "CUSTOM_6"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      darty.com:
+#        - "CUSTOM_6"
+#      manomano.fr:
+#        - "CUSTOM_6"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         DIMENSIONS
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 20% (516/2579) . 
+  # TOP attributes values are :
+#     - 57.00 cmx60.00 cmx59.00 cm (11 items)
+#     - 59.5000 cmx59.5000 cm (10 items)
+#     - 56.40 cmx59.50 cmx59.70 cm (9 items)
+#     - 54.00 cmx59.00 cmx45.50 cm (9 items)
+#     - 59.50 cmx57.00 cmx59.60 cm (7 items)
+#     - 55.10 cmx59.50 cmx59.50 cm (6 items)
+#     - 56.9000 cmx59.6000 cmx59.4000 cm (6 items)
+#     - 56.70 cmx59.40 cmx59.50 cm (6 items)
+#     - 32.0000 cm (6 items)
+#     - 54.60 cmx59.50 cmx45.50 cm (6 items)
+#     + 40 more attributes...
+#   
+  ##################################
+#   - key: "DIMENSIONS"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      fnac.com:
+#        - "DIMENSIONS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         EXPORTDATETS
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 18% (467/2579) . 
+  # TOP attributes values are :
+#     - 1761554112455 (14 items)
+#     - 1761570252984 (14 items)
+#     - 1761437658107 (11 items)
+#     - 1761568467578 (11 items)
+#     - 1761440046173 (10 items)
+#     - 1761554112454 (8 items)
+#     - 1761568467577 (8 items)
+#     - 1761554112462 (8 items)
+#     - 1761573851624 (7 items)
+#     - 1761561902267 (7 items)
+#     + 90 more attributes...
+#   
+  ##################################
+#   - key: "EXPORTDATETS"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "EXPORTDATETS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CAVITIES[0]-ORDERNUMBER
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 17% (452/2579) . 
+  # TOP attributes values are :
+#     - 1 (452 items)
+#   
+  ##################################
+#   - key: "CAVITIES[0]-ORDERNUMBER"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "CAVITIES[0]-ORDERNUMBER"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSRANGE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 17% (452/2579) . 
+  # TOP attributes values are :
+#     - APPP_D (452 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSRANGE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSRANGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CAVITIES[0]-ENERGYCLASSIMAGE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 17% (452/2579) . 
+  # TOP attributes values are :
+#     - AP-Left-LightGreen.png (254 items)
+#     - A-Left-Yellow.png (175 items)
+#     - APP-Left-MediumGreen.png (22 items)
+#   
+  ##################################
+#   - key: "CAVITIES[0]-ENERGYCLASSIMAGE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "CAVITIES[0]-ENERGYCLASSIMAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSIMAGE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 17% (452/2579) . 
+  # TOP attributes values are :
+#     - AP-Left-LightGreen.png (254 items)
+#     - A-Left-Yellow.png (175 items)
+#     - APP-Left-MediumGreen.png (22 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSIMAGE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSIMAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CAVITIES[0]-ENERGYEFFICIENCYINDEX
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 17% (452/2579) . 
+  # TOP attributes values are :
+#     - 81.2 (118 items)
+#     - 81.6 (40 items)
+#     - 95.3 (35 items)
+#     - 95.2 (33 items)
+#     - 81 (24 items)
+#     - 81.4 (23 items)
+#     - 95.1 (18 items)
+#     - 94.7 (18 items)
+#     - 94 (11 items)
+#     - 81.3 (9 items)
+#     + 23 more attributes...
+#   
+  ##################################
+#   - key: "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSIMAGEWITHSCALE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 17% (451/2579) . 
+  # TOP attributes values are :
+#     - AP-Left-LightGreen-WithAPPPDScale.svg (253 items)
+#     - A-Left-Yellow-WithAPPPDScale.svg (175 items)
+#     - APP-Left-MediumGreen-WithAPPPDScale.svg (22 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSIMAGEWITHSCALE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSIMAGEWITHSCALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 17% (451/2579) . 
+  # TOP attributes values are :
+#     - AP-Left-LightGreen-WithAPPPDScale.svg (253 items)
+#     - A-Left-Yellow-WithAPPPDScale.svg (175 items)
+#     - APP-Left-MediumGreen-WithAPPPDScale.svg (22 items)
+#   
+  ##################################
+#   - key: "CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "CAVITIES[0]-ENERGYCLASSIMAGEWITHSCALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         STORE_PRICE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 14% (386/2579) . 
+  # TOP attributes values are :
+#     - 29.99 (5 items)
+#     - 14.9 (3 items)
+#     - 599.0 (3 items)
+#     - 89.99 (3 items)
+#     - 374 (3 items)
+#     - 374.99 (3 items)
+#     - 274.99 (3 items)
+#     - 124.99 (3 items)
+#     - 299.00 (2 items)
+#     - 573 (2 items)
+#     + 21 more attributes...
+#   
+  ##################################
+#   - key: "STORE_PRICE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      UNDERDOGFR:
+#        - "STORE_PRICE"
+#      underdog.shop:
+#        - "STORE_PRICE"
+#      cdiscount.com:
+#        - "STORE_PRICE"
+#      SamsungFR:
+#        - "STORE_PRICE"
+#      manomano.fr:
+#        - "STORE_PRICE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ECHELLE D'EFFICACITE ENERGETIQUE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 12% (330/2579) . 
+  # TOP attributes values are :
+#     - A+++-D (324 items)
+#     - APPP_D (5 items)
+#   
+  ##################################
+#   - key: "ECHELLE D'EFFICACITE ENERGETIQUE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "ECHELLE D'EFFICACITE ENERGETIQUE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         DISPOSITIF DE SECURITE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 12% (313/2579) . 
+  # TOP attributes values are :
+#     - Porte froide (146 items)
+#     - Sécurité enfants (29 items)
+#     - Système de refroidissement par ventilateur (28 items)
+#     - Arrêt automatique (21 items)
+#     - Verrouillage (20 items)
+#     - Double porte vitrée (14 items)
+#     - Porte à quadruple vitrage (11 items)
+#     - Indicateur de chaleur résiduelle (8 items)
+#     - Porte refroidissante (8 items)
+#     - Thermostat de sécurité (3 items)
+#     + 6 more attributes...
+#   
+  ##################################
+#   - key: "DISPOSITIF DE SECURITE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "DISPOSITIF DE SECURITE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         COULEUR EXTERIEURE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 11% (307/2579) . 
+  # TOP attributes values are :
+#     - Acier inoxydable (77 items)
+#     - Noir (66 items)
+#     - Blanc (39 items)
+#     - Inox (16 items)
+#     - Argent (9 items)
+#     - Noir/inox (8 items)
+#     - Acier (4 items)
+#     - Noir propre (4 items)
+#     - Aluminium (4 items)
+#     - Inox/noir (4 items)
+#     + 16 more attributes...
+#   
+  ##################################
+#   - key: "COULEUR EXTERIEURE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "COULEUR EXTERIEURE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         COULEUR GENERIQUE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 11% (304/2579) . 
+  # TOP attributes values are :
+#     - Noir (200 items)
+#     - Argent (51 items)
+#     - Blanc (31 items)
+#     - Gris (11 items)
+#     - Rouge (4 items)
+#   
+  ##################################
+#   - key: "COULEUR GENERIQUE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "COULEUR GENERIQUE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         EPREL CERTIFICATION CODE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 11% (299/2579) . 
+  # TOP attributes values are :
+#     - 0 (8 items)
+#     - 552756 (2 items)
+#     - 1143399 (2 items)
+#   
+  ##################################
+#   - key: "EPREL CERTIFICATION CODE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "EPREL CERTIFICATION CODE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         EPREL CATEGORY
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 11% (291/2579) . 
+  # TOP attributes values are :
+#     - ovens (289 items)
+#     - rangehoods (2 items)
+#   
+  ##################################
+#   - key: "EPREL CATEGORY"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "EPREL CATEGORY"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         GAMME DE PRODUITS
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 10% (276/2579) . 
+  # TOP attributes values are :
+#     - SEVERIN (22 items)
+#     - Brandt (21 items)
+#     - Samsung Series 4 (7 items)
+#     - Moulinex Optimo (7 items)
+#     - Tristar (6 items)
+#     - Indesit (6 items)
+#     - Riviera & Bar (5 items)
+#     - Sauter (5 items)
+#     - Whirlpool (5 items)
+#     - Continental Edison (5 items)
+#     + 43 more attributes...
+#   
+  ##################################
+#   - key: "GAMME DE PRODUITS"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "GAMME DE PRODUITS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         STYLE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 10% (270/2579) . 
+  # TOP attributes values are :
+#     - null (270 items)
+#   
+  ##################################
+#   - key: "STYLE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      RektStandard:
+#        - "STYLE"
+#      LesPoulettes:
+#        - "STYLE"
+#      darty.com:
+#        - "STYLE"
+#      DartyProCashback:
+#        - "STYLE"
+#      ParapharmacieetmdicamentStandard:
+#        - "STYLE"
+#      VegaoopartyStandard:
+#        - "STYLE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         LARGEUR EMBALLEE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 10% (263/2579) . 
+  # TOP attributes values are :
+#     - 660 (34 items)
+#     - 66 (29 items)
+#     - 620 (19 items)
+#     - 64 (13 items)
+#     - 69.4 (11 items)
+#     - 62 (10 items)
+#     - 635 (9 items)
+#     - 670 (7 items)
+#     - 63 (7 items)
+#     - 69 (5 items)
+#     + 22 more attributes...
+#   
+  ##################################
+#   - key: "LARGEUR EMBALLEE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "LARGEUR EMBALLEE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         HAUTEUR EMBALLEE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 10% (263/2579) . 
+  # TOP attributes values are :
+#     - 675 (22 items)
+#     - 66 (18 items)
+#     - 67 (16 items)
+#     - 665 (16 items)
+#     - 65.5 (15 items)
+#     - 670 (14 items)
+#     - 655 (8 items)
+#     - 660 (7 items)
+#     - 55 (7 items)
+#     - 635 (5 items)
+#     + 27 more attributes...
+#   
+  ##################################
+#   - key: "HAUTEUR EMBALLEE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "HAUTEUR EMBALLEE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PROFONDEUR EMBALLEE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 10% (260/2579) . 
+  # TOP attributes values are :
+#     - 66 (39 items)
+#     - 690 (21 items)
+#     - 660 (14 items)
+#     - 646 (13 items)
+#     - 70 (12 items)
+#     - 64 (8 items)
+#     - 67 (8 items)
+#     - 670 (8 items)
+#     - 680 (7 items)
+#     - 65 (7 items)
+#     + 18 more attributes...
+#   
+  ##################################
+#   - key: "PROFONDEUR EMBALLEE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "PROFONDEUR EMBALLEE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ORIGINE_IMPORT
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 10% (259/2579) . 
+  # TOP attributes values are :
+#     - All-in-one (216 items)
+#     - Converter (40 items)
+#     - hightech_minimaliste (3 items)
+#   
+  ##################################
+#   - key: "ORIGINE_IMPORT"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "ORIGINE_IMPORT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POIDS EMBALLE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 9% (250/2579) . 
+  # TOP attributes values are :
+#     - 37,5 (5 items)
+#     - 38 (5 items)
+#     - 30 (5 items)
+#     - 36 (4 items)
+#     - 14 (4 items)
+#     - 2.5 (4 items)
+#     - 13.5 (4 items)
+#     - 31 (3 items)
+#     - 39 (3 items)
+#     - 36,3 (3 items)
+#     + 28 more attributes...
+#   
+  ##################################
+#   - key: "POIDS EMBALLE"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "POIDS EMBALLE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ECOLABEL
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 9% (239/2579) . 
+  # TOP attributes values are :
+#     - false (237 items)
+#     - true (2 items)
+#   
+  ##################################
+#   - key: "ECOLABEL"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ECOLABEL"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         NIVEAU SONORE MAXIMUM
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 1% (32/2579) . 
+  # TOP attributes values are :
+#     - 78 dB (7 items)
+#     - 79 dB (4 items)
+#     - 53 dB (3 items)
+#     - 47 dB (2 items)
+#     - 55 dB (2 items)
+#     - 59 dB (2 items)
+#     - 57 dB (2 items)
+#   
+  ##################################
+#   - key: "NIVEAU SONORE MAXIMUM"
+#     filteringType: "STRING"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "NIVEAU SONORE MAXIMUM"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         DIAGONALE
+  ################################################################################
+  # Generated on 24/01/2026 01:31, coverage was 0% (5/2579) . 
+  # TOP attributes values are :
+#     - 7 (5 items)
+#   
+  ##################################
+#   - key: "DIAGONALE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "DIAGONALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+    - key: "CLASSE_ENERGY"
+    - key: "POWER_CONSUMPTION_TYPICAL"
+    - key: "WEIGHT"
+    - key: "OVEN_CAPACITY"
+    - key: "OVEN_ENERGY_TYPE"
+    - key: "OVEN_INSTALLATION_TYPE"
+    - key: "OVEN_CLEANING_MODE"
+    - key: "OVEN_COOKING_MODES"
+    - key: "OVEN_CAVITY_COUNT"
+    - key: "OVEN_POWER"
+    - key: "OVEN_ENERGY_CONSUMPTION_CYCLE"
+    - key: "WARRANTY"
+    - key: "YEAR"
+    - key: "COLOR"
+    - key: "FEATURES"
+    - key: "BRAND_SUSTAINALYTICS_SCORING"
+    - key: "DATA_QUALITY"
+    - key: "WIDTH"
+    - key: "HEIGHT"
+    - key: "DEPTH"
+
+####################################################################################
+# Product classification from categories (samples, will be overridden post-generation)
+####################################################################################
+
+matchingCategories:
+  Electrodepot - Guides et Comparateurs:
+    - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+  rueducommerce.fr:
+    - "MINI-FOUR"
+    - "FOUR"
+  rakuten.com-csv.yml:
+    - "ELECTROMENAGER | FOUR"
+    - "ELECTROMENAGER"
+  E.Leclerc FR:
+    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"
+  darty.com:
+    - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
+  JPG - Flux Produits:
+    - "PETIT ELECTROMENAGER | FOURNITURES DE RESTAURATION"
+  Cdiscount FR:
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
+  RueDuCommerce FR:
+    - "MINI-FOUR"
+    - "FOUR"
+    - "ELECTROMENAGER > CUISSON > MINI-FOUR"
+    - "ELECTROMENAGER > CUISSON > FOUR"
+  ManoMano FR:
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR GRILL | MINI FOUR GRILL"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > MATERIEL PROFESSIONNEL DE CUISINE > APPAREILS DE CUISSON > FOUR MIXTE VAPEUR | FOUR MIXTE VAPEUR"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR TRADITIONNEL | FOUR TRADITIONNEL"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR VAPEUR | FOUR VAPEUR"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR CHALEUR TOURNANTE | MINI FOUR CHALEUR TOURNANTE"
+  cdiscount.com:
+    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
+  Référentiel produits Electro Depot:
+    - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+  Castorama FR:
+    - "FOUR ENCASTRABLE | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > FOUR ET MICRO-ONDES > FOUR ENCASTRABLE | CUISINE | GROS ELECTROMENAGER"
+  UNDERDOG FR:
+    - "367 | COOKERS & OVENS | FOUR"
+  R&eacute;f&eacute;rentiel produits - Darty Pro:
+    - "GROS ELECTROMENAGER | FOUR"
+  Darty FR:
+    - "PETIT ELECTROMENAGER CUISINE / MINI-FOUR / RECHAUD / FOUR POSABLE / MINI FOUR / FOUR POSABLE | PETIT ELECTROMENAGER CUISINE>MINI-FOUR / RECHAUD / FOUR POSABLE>MINI FOUR / FOUR POSABLE | MINI-FOUR / RECHAUD / FOUR POSABLE | MINI FOUR / FOUR POSABLE"
+    - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
+  manomano.fr:
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"

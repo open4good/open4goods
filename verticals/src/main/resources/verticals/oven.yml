@@ -86,12 +86,12 @@ i18n:
     verticalHomeTitle: "Fours"
     verticalHomeDescription: "Comparez les fours encastrables ou posables (chaleur tournante, pyrolyse, vapeur…) selon l’éco-score et le prix."
 
-    # A mapping beetween custom page names behind this vertical and wiki pages (sample)
-  #    wikiPages:
-  #      - wikiUrl: verticals:ovens:guide-achat-fours:WebHome
-  #        verticalUrl: "guide-achat-four-encastrable"
-  #        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
-  #        faIcon: "mdi-star"
+    # A mapping beetween custom page names behind this vertical and wiki pages
+#    wikiPages:
+#      - wikiUrl: verticals:ovens:guide-achat-fours:WebHome
+#        verticalUrl: "guide-achat-four-encastrable"
+#        title: "Four encastrable : comment choisir (pyrolyse, chaleur tournante, volume…)"
+#        faIcon: "mdi-star"
 
   en:
     url:
@@ -176,7 +176,23 @@ nudgeToolConfig:
         en: "Continue"
         fr: "Continuer"
 
+    - id: "capacity"
+      mdiIcon: "mdi-resize"
+      layout: "grid"
+      title:
+        en: "Capacity"
+        fr: "Volume"
+      description:
+        en: "Find the right volume for your cooking needs."
+        fr: "Trouvez le bon volume pour vos besoins."
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+
   subsets:
+    ################
+    # Price
+    ################
     - id: "price_lower_400"
       group: "price"
       criterias:
@@ -243,6 +259,49 @@ nudgeToolConfig:
         en: "Ovens priced over €800."
         fr: "Les fours dont le prix est supérieur à 800€."
 
+    ################
+    # Capacity
+    ################
+    - id: "capacity_standard"
+      group: "capacity"
+      criterias:
+        - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
+          operator: "GREATER_THAN"
+          value: "60"
+      image: "example-image.png"
+      url:
+        en: "standard-capacity"
+        fr: "grande-capacite"
+      caption:
+        en: "Standard (> 60L)"
+        fr: "Standard (> 60L)"
+      title:
+        en: "Standard Capacity"
+        fr: "Four standard"
+      description:
+        en: "Standard size ovens for family cooking."
+        fr: "Fours de taille standard pour cuisiner pour toute la famille."
+
+    - id: "capacity_compact"
+      group: "capacity"
+      criterias:
+        - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
+          operator: "LOWER_THAN"
+          value: "60"
+      image: "example-image.png"
+      url:
+        en: "compact-capacity"
+        fr: "fours-compacts"
+      caption:
+        en: "Compact (< 60L)"
+        fr: "Compact (< 60L)"
+      title:
+        en: "Compact Ovens"
+        fr: "Fours compacts"
+      description:
+        en: "Compact ovens for smaller spaces or occasional cooking."
+        fr: "Fours compacts pour les petits espaces."
+
 ##############################################################################
 # Custom search filters : the following filters
 # will also be availlable in search for this vertical (must be an attribute or a score)
@@ -303,7 +362,6 @@ technicalFilters:
   - "OVEN_POWER"
   - "OVEN_ENERGY_CONSUMPTION_CYCLE"
 
-
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
@@ -322,7 +380,7 @@ attributesConfig:
     - key: "OVEN_ENERGY_CONSUMPTION_CYCLE"
     - key: "WARRANTY"
     - key: "YEAR"
-    - key: "COLOR"
+    - key: "COLOUR"
     - key: "FEATURES"
     - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "DATA_QUALITY"
@@ -337,9 +395,6 @@ attributesConfig:
 matchingCategories:
   Electrodepot - Guides et Comparateurs:
     - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
-  rueducommerce.fr:
-    - "MINI-FOUR"
-    - "FOUR"
   rakuten.com-csv.yml:
     - "ELECTROMENAGER | FOUR"
     - "ELECTROMENAGER"
@@ -347,35 +402,41 @@ matchingCategories:
     - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"
   darty.com:
     - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
-  JPG - Flux Produits:
-    - "PETIT ELECTROMENAGER | FOURNITURES DE RESTAURATION"
+    - "GROS ELECTROMENAGER | FOUR"
+    - "GROS ELECTROMENAGER / CUISINIERES / GAZINIERE | GROS ELECTROMENAGER>CUISINIERES>GAZINIERE | CUISINIERES | GAZINIERE"
   Cdiscount FR:
     - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
+    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > CUISINIERE - PIANO DE CUISINE | GROS APPAREIL DE CUISSON | CUISINIERE - PIANO DE CUISINE"
   RueDuCommerce FR:
     - "MINI-FOUR"
     - "FOUR"
-    - "ELECTROMENAGER > CUISSON > MINI-FOUR"
+    - "CUISINIERE"
     - "ELECTROMENAGER > CUISSON > FOUR"
   ManoMano FR:
-    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR GRILL | MINI FOUR GRILL"
-    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"
-    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > MATERIEL PROFESSIONNEL DE CUISINE > APPAREILS DE CUISSON > FOUR MIXTE VAPEUR | FOUR MIXTE VAPEUR"
-    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR TRADITIONNEL | FOUR TRADITIONNEL"
-    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR VAPEUR | FOUR VAPEUR"
-    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR CHALEUR TOURNANTE | MINI FOUR CHALEUR TOURNANTE"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR GRILL | MINI FOUR GRILL"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR TRADITIONNEL | FOUR TRADITIONNEL"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR VAPEUR | FOUR VAPEUR"
   cdiscount.com:
-    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
     - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
-  Référentiel produits Electro Depot:
-    - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
   Castorama FR:
     - "FOUR ENCASTRABLE | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > FOUR ET MICRO-ONDES > FOUR ENCASTRABLE | CUISINE | GROS ELECTROMENAGER"
+    - "MINI FOUR | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > FOUR ET MICRO-ONDES > MINI FOUR | CUISINE | GROS ELECTROMENAGER"
   UNDERDOG FR:
     - "367 | COOKERS & OVENS | FOUR"
   R&eacute;f&eacute;rentiel produits - Darty Pro:
     - "GROS ELECTROMENAGER | FOUR"
+    - "PETIT ELECTROMENAGER CUISINE | MINI-FOUR / RECHAUD / FOUR POSABLE"
   Darty FR:
     - "PETIT ELECTROMENAGER CUISINE / MINI-FOUR / RECHAUD / FOUR POSABLE / MINI FOUR / FOUR POSABLE | PETIT ELECTROMENAGER CUISINE>MINI-FOUR / RECHAUD / FOUR POSABLE>MINI FOUR / FOUR POSABLE | MINI-FOUR / RECHAUD / FOUR POSABLE | MINI FOUR / FOUR POSABLE"
     - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
-  manomano.fr:
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"
+    - "GROS ELECTROMENAGER / CUISINIERES / GAZINIERE | GROS ELECTROMENAGER>CUISINIERES>GAZINIERE | CUISINIERES | GAZINIERE"
+  Back Market FR:
+    - "HOME & GARDEN > KITCHEN & DINING > KITCHEN APPLIANCES > OVENS"
+  Joom FR:
+    - "HOME APPLIANCES > KITCHEN ELECTRONICS > ELECTRIC STOVES"
+    - "HOME APPLIANCES > KITCHEN ELECTRONICS > ELECTRIC STOVES, OVENS & FRYERS"
+  e.leclerc:
+    - "HIGH TECH | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR > FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"

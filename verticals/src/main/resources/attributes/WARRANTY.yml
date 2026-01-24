@@ -42,6 +42,7 @@ synonyms:
     - "GARANTIE"
     - "WARRANTY"
     - "MINGUARANTEEDGUARANTEE"
+    - "GUARANTEEDURATION"
 parser:
   normalize: true
   trim: false

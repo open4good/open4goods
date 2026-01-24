@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.Iterator;
+
+import org.open4goods.model.attribute.IndexedAttribute;
+import org.open4goods.model.attribute.ProductAttribute;
 
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
@@ -302,6 +306,84 @@ public class BatchService {
 		});
 
 
+	}
+
+	/**
+	 * Clean AI data from all verticals
+	 */
+	public void cleanAiData() {
+		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
+			cleanAiData(vertical);
+		}
+	}
+
+	/**
+	 * Clean AI data from a specific vertical
+	 * @param vertical
+	 */
+	public void cleanAiData(VerticalConfig vertical) {
+		logger.info("Cleaning AI data for vertical {}", vertical);
+		dataRepository.getProductsMatchingVerticalId(vertical).forEach(p -> {
+			boolean changed = false;
+
+			// 1. Reset/Delete aireview field
+			if (p.getReviews() != null && !p.getReviews().isEmpty()) {
+				p.getReviews().clear();
+				changed = true;
+			}
+
+			// 2. Delete attribute sources having "ai" as datasourcename
+			// Check Indexed Attributes
+			Iterator<IndexedAttribute> itIndexed = p.getAttributes().getIndexed().values().iterator();
+			while (itIndexed.hasNext()) {
+				IndexedAttribute attr = itIndexed.next();
+				boolean attrChanged = attr.getSource().removeIf(s -> s.getDataSourcename() != null && s.getDataSourcename().toLowerCase().contains("ai"));
+				if (attrChanged) {
+					if (attr.getSource().isEmpty()) {
+						itIndexed.remove();
+					} else {
+						// Recompute value
+						String best = attr.bestValue();
+						attr.setValue(best);
+						attr.setNumericValue(parseNumericOrNull(best));
+						attr.setBoolValue(IndexedAttribute.getBool(best));
+					}
+					changed = true;
+				}
+			}
+
+			// Check All Attributes (ProductAttribute)
+			Iterator<ProductAttribute> itAll = p.getAttributes().getAll().values().iterator();
+			while (itAll.hasNext()) {
+				ProductAttribute attr = itAll.next();
+				boolean attrChanged = attr.getSource().removeIf(s -> s.getDataSourcename() != null && s.getDataSourcename().toLowerCase().contains("ai"));
+				if (attrChanged) {
+					if (attr.getSource().isEmpty()) {
+						itAll.remove();
+					} else {
+						// Recompute value
+						String best = attr.bestValue();
+						attr.setValue(best);
+					}
+					changed = true;
+				}
+			}
+
+			if (changed) {
+				dataRepository.index(p);
+			}
+		});
+	}
+
+	private Double parseNumericOrNull(String rawValue) {
+		if (rawValue == null) {
+			return null;
+		}
+		try {
+			return Double.valueOf(rawValue.trim().replace(",", "."));
+		} catch (NumberFormatException e) {
+			return null;
+		}
 	}
 
 

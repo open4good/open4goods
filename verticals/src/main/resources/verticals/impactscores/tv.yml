@@ -1,669 +1,415 @@
+
 criteriasPonderation:
-  MINAVAILABILITYSPAREPARTSYEARS: 0.0
-  POWER_CONSUMPTION_HDR: 0.15
-  MINAVAILABILITYSOFTWAREUPDATESYEARS: 0.15
-  DATA_QUALITY: 0.14
-  BRAND_SUSTAINALYTICS_SCORING: 0.01
-  MINGUARANTEEDSUPPORTYEARS: 0.0
-  POWER_CONSUMPTION_OFF: 0.05
+  MINAVAILABILITYSPAREPARTSYEARS: 0.05
+  POWER_CONSUMPTION_HDR: 0.1
+  MINAVAILABILITYSOFTWAREUPDATESYEARS: 0.05
+  DATA_QUALITY: 0.1
+  MINGUARANTEEDSUPPORTYEARS: 0.03
+  POWER_CONSUMPTION_OFF: 0.02
   CLASSE_ENERGY_SDR: 0.0
-  WARRANTY: 0.05
-  POWER_CONSUMPTION_STANDBY_NETWORKD: 0.05
+  WARRANTY: 0.03
+  POWER_CONSUMPTION_STANDBY_NETWORKD: 0.02
   REPAIRABILITY_INDEX: 0.25
   CLASSE_ENERGY_HDR: 0.0
+  POWER_CONSUMPTION_SDR: 0.35
   DIAGONALE_POUCES: 0.0
-  POWER_CONSUMPTION_SDR: 0.15
-yamlPrompt: "\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"\\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\\nuseCase : Le cas d'usage (ex: consumer_comparison)\\ngeoScope : Le périmètre géographique (ex: EU/France)\\nvertical : Le nom de la verticale\\navailableCriterias : La liste des critères disponibles\\npositioning : Positionnement du score (relatif vs absolu)\\nreferenceLifetime : Durée de vie de référence du produit\\ngapAnalysis : Analyse des écarts entre ACV absolue et score relatif\\nweightingMethod : Méthodologie de pondération utilisée\\ncriteriaWeights : Liste des pondérations pour chaque critère\\nnormalizationNotes : Notes sur la normalisation des scores\\nqualityChecks : Vérifications de cohérence (somme des poids, exhaustivité)\\nmaterialitySummary : Synthèse de la matérialité environnementale\\nsources : Liste exhaustive des sources consultées\\nsearchLog : Journal des recherches effectuées\\n\"\nuserPrompt: \"\\n## Ton rôle\\n## Ton rôle\\nTu es un agent expert en analyse du cycle de vie (ACV) et en évaluation environnementale des produits électriques et électroniques, orienté “comparaison grand public” (UE/France).\\nTu as accès à une fonction de recherche web (search) : tu DOIS l’utiliser pour fonder tes décisions sur des sources de référence (normes, régulations, agences publiques, littérature académique, méthodologies reconnues).\\nNe JAMAIS inventer de source. Toute source consultée doit être listée.\\n\\nNous allons travailler sur des Téléviseurs.\\n\\nContrainte de sortie : Ne fournir en réponse QUE du JSON, conformément à la structure demandée, sans commentaire, ni texte supplémentaire.\\n\\n\\n\\n## Contexte & objectif : Eco-score “comparaison grand public” pour les Téléviseurs\\n\\nTu vas définir une pondération (weights) pour construire un Eco-score destiné à comparer des Téléviseurs entre eux (marché UE/France).\\nCe score est un indice relatif “ACV best-effort” :\\n- Inspiré des principes ACV (matérialité sur le cycle de vie, catégories d’impact, unité fonctionnelle),\\n- MAIS il ne prétend pas fournir une empreinte absolue auditée type “bilan produit”.\\nTu dois explicitement analyser et documenter (dans le JSON) l’écart “ACV absolue vs score relatif”, et comment tes choix de pondération réduisent les biais.\\n\\nLes facteurs disponibles sont :\\n  MINAVAILABILITYSPAREPARTSYEARS : Durée minimale de disponibilité des pièces détachées\\n  POWER_CONSUMPTION_HDR : La consommation électrique du téléviseur en mode HDR (haute définition)\\n  MINAVAILABILITYSOFTWAREUPDATESYEARS : Durée minimale de disponibilité des mises à jour logicielles\\n  DATA_QUALITY : DATA_QUALITY\\n  MINGUARANTEEDSUPPORTYEARS : Durée minimale du support garanti\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY_SDR : La classe énergétique du téléviseur en mode SDR\\n  WARRANTY : Durée de garantie du produit\\n  POWER_CONSUMPTION_STANDBY_NETWORKD : La consommation électrique de l&#39;appareil en mode veille ou réseau\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  CLASSE_ENERGY_HDR : La classe énergétique du téléviseur en mode HDR\\n  DIAGONALE_POUCES : DIAGONALE_POUCES\\n  POWER_CONSUMPTION_SDR : La consommation électrique du téléviseur en mode SDR (basse définition)\\n\\n\\nTon travail : proposer des poids robustes, “literature-first”, anti-double-comptage, et adaptés à la comparaison grand public.\\n\\n\\n\\n## Principes de fonctionnement (non négociables)\\n\\n1) Relativisation des facteurs (ranking)\\n- Chaque facteur est représenté de manière relative, sous forme de classement.\\n- Meilleur produit sur ce facteur : 100/100 ; pire : 0/100.\\n\\n2) Virtualisation des scores manquants\\n- Si un facteur est absent, appliquer la valeur moyenne de ce facteur sur l’ensemble des produits.\\n- DATA_QUALITY doit avantager la transparence (produits mieux documentés) sans écraser la matérialité environnementale.\\n\\n3) Somme des coefficients\\n- La somme des poids doit être égale à 1 (après renormalisation).\\n\\n4) Normalisation statistique des attributs bruts (méthodo interne)\\n- Les attributs bruts sont normalisés sur 0 à 5 avant agrégation :\\n  - Sigma scoring par défaut (μ, σ ; intervalle [μ-2σ, μ+2σ], μ -> 2.5/5, cap à 0 et 5)\\n  - Fallback percentile (mid-rank) si distribution “low entropy”\\nTu ne codes pas l’algorithme, mais tu DOIS en tenir compte pour justifier la pondération (robustesse, sensibilité, outliers, buckets).\\n\\n\\n\\n## Exigences “search & sources” (obligatoires)\\n\\nA) Priorité des sources (ordre)\\n1. Agences publiques / institutions (UE/France), documentation officielle, régulations\\n2. Normes et méthodes (ISO 14040/14044, PEF / JRC, guides d’affichage environnemental si pertinent)\\n3. Publications académiques (revues, méta-analyses, ACV comparatives par catégorie produit)\\n4. Méthodologies reconnues de scoring grand public (ex : docs publiques de systèmes d’éco-score) uniquement en complément, jamais comme base unique\\n\\nB) “Literature-first weighting”\\n- Les poids doivent refléter la matérialité ACV typique des Téléviseurs (fabrication vs usage vs fin de vie) et l’importance de la durée de vie.\\n\\nC) Sources exhaustives + citations inline\\n- Toute source consultée via search doit apparaître dans \\\"sources\\\" (même si non utilisée).\\n- Toute justification non triviale doit citer [S1], [S2]… inline dans les champs texte.\\n- Fournir \\\"search_log\\\" avec les requêtes.\\n\\nD) Durée de vie de référence (OBLIGATOIRE)\\n- Tu DOIS rechercher et proposer une durée de vie / durée d’usage de référence pour la catégorie Téléviseurs (UE/France si possible), avec sources.\\n- Si plusieurs valeurs existent, fournir une plage + une valeur “référence” et expliquer le choix.\\n\\n\\n\\n## Contraintes de pondération (engineering)\\n\\n1) Anti double-comptage / redondances\\n- Identifier les critères fortement corrélés (ex : classe énergie vs conso ; tailles vs conso ; etc.).\\n- Expliquer la stratégie (regroupement “bloc énergie”, réduction de poids redondants, etc.).\\n\\n2) DATA_QUALITY et ESG (volontairement rehaussés)\\n- Proposer un poids DATA_QUALITY et un poids ESG (ex : BRAND_SUSTAINABILITY) plus élevés que dans une pondération purement “ACV classique”, MAIS :\\n  - justifier ce choix : incitation à la transparence (vu l’imputation moyenne) + prise en compte sociétale,\\n  - poser des garde-fous : ces poids ne doivent pas permettre à un produit très énergivore d’être “sauvé” uniquement par ESG/DATA_QUALITY.\\n- Mentionner explicitement le lien avec l’imputation des données manquantes (moyenne) et l’effet attendu.\\n\\n3) Pertinence par vertical\\n- Tout critère peut être pondéré à 0 s’il est non pertinent ou redondant, mais tu DOIS l’expliquer.\\n\\n4) Renormalisation\\n- Définir une règle simple de renormalisation si certains critères ont un poids à 0.\\n\\n5) Echelle de valeur\\n - La somme des pondérations doit TOUJOURS être égal à 1, afin de refleter la part relative de chaque critère dans le score obtenu\\n\\n6) Présence de tous les criteres \\nTous les critères définis dans availableImpactScoreCriterias: doivent être évalués et participer à la configuration de sortie. Si ils ne sont pas pertinents, coefficienter à 0. \\n\\n\\n## Format JSON attendu (STRICT)\\n\\nTa réponse doit être un unique objet JSON, avec ces clés exactes :\\n\\n{\\n  \\\"use_case\\\": \\\"consumer_comparison\\\",\\n  \\\"geo_scope\\\": \\\"EU/France\\\",\\n  \\\"vertical\\\": \\\"Téléviseurs\\\",\\n  \\\"available_criterias\\\":   MINAVAILABILITYSPAREPARTSYEARS : Durée minimale de disponibilité des pièces détachées\\n  POWER_CONSUMPTION_HDR : La consommation électrique du téléviseur en mode HDR (haute définition)\\n  MINAVAILABILITYSOFTWAREUPDATESYEARS : Durée minimale de disponibilité des mises à jour logicielles\\n  DATA_QUALITY : DATA_QUALITY\\n  MINGUARANTEEDSUPPORTYEARS : Durée minimale du support garanti\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY_SDR : La classe énergétique du téléviseur en mode SDR\\n  WARRANTY : Durée de garantie du produit\\n  POWER_CONSUMPTION_STANDBY_NETWORKD : La consommation électrique de l&#39;appareil en mode veille ou réseau\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  CLASSE_ENERGY_HDR : La classe énergétique du téléviseur en mode HDR\\n  DIAGONALE_POUCES : DIAGONALE_POUCES\\n  POWER_CONSUMPTION_SDR : La consommation électrique du téléviseur en mode SDR (basse définition)\\n,\\n\\n  \\\"positioning\\\": {\\n    \\\"claim\\\": \\\"relative LCA-inspired score (ACV best-effort) for within-category comparison\\\",\\n    \\\"not_an_absolute_footprint\\\": true,\\n    \\\"what_it_means_for_users\\\": \\\"Explication courte et sourcée. [Sx]\\\"\\n  },\\n\\n  \\\"reference_lifetime\\\": {\\n    \\\"lifetime_years_reference\\\": 0,\\n    \\\"lifetime_years_range\\\": {\\\"min\\\": 0, \\\"max\\\": 0},\\n    \\\"rationale\\\": \\\"Justification sourcée, UE/FR si possible. [Sx]\\\",\\n    \\\"citations\\\": [\\\"S1\\\"]\\n  },\\n\\n  \\\"gap_analysis_absolute_vs_relative\\\": {\\n    \\\"what_is_missing_vs_full_lca\\\": \\\"Inventaires complets, frontières système, unité fonctionnelle détaillée, etc. [Sx]\\\",\\n    \\\"why_relative_is_still_useful\\\": \\\"Comparaison marché, robustesse, lisibilité. [Sx]\\\",\\n    \\\"mitigations\\\": [\\n      \\\"Anchor weights on LCA literature for lifecycle stage contributions [Sx]\\\",\\n      \\\"Avoid double counting and document overlaps [Sx]\\\",\\n      \\\"Raise DATA_QUALITY because missing data is imputed to mean (transparency incentive) [Sx]\\\"\\n    ]\\n  },\\n\\n  \\\"weighting_method\\\": {\\n    \\\"approach\\\": \\\"evidence-weighted materiality + redundancy control + consumer comparability\\\",\\n    \\\"key_principles\\\": [\\n      \\\"literature-first weighting\\\",\\n      \\\"lifecycle materiality for Téléviseurs\\\",\\n      \\\"anti double-counting\\\",\\n      \\\"robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)\\\",\\n      \\\"missing data virtualization + DATA_QUALITY incentive\\\",\\n      \\\"ESG/brand sustainability included with guardrails\\\"\\n    ],\\n    \\\"assumptions\\\": [\\n      {\\n        \\\"assumption\\\": \\\"...\\\",\\n        \\\"why_it_matters\\\": \\\"...\\\",\\n        \\\"citations\\\": [\\\"S1\\\"]\\n      }\\n    ]\\n  },\\n\\n  \\\"criteria_weights\\\": [\\n    {\\n      \\\"criterion\\\": \\\"CRITERION_NAME_FROM_AVAILABLE_LIST\\\",\\n      \\\"weight\\\": 0.0,\\n      \\\"directionality\\\": \\\"higher_is_better|lower_is_better|categorical\\\",\\n      \\\"impact_dimensions\\\": [\\\"climate\\\", \\\"resource_use\\\", \\\"toxicity\\\", \\\"water\\\", \\\"circularity\\\", \\\"social\\\", \\\"other\\\"],\\n      \\\"rationale\\\": \\\"Texte court, concret, et sourcé. Citations inline [Sx].\\\",\\n      \\\"overlap_notes\\\": \\\"Redondances + stratégie anti-double comptage. [Sx]\\\",\\n      \\\"guardrails\\\": \\\"Si ESG/DATA_QUALITY, préciser le garde-fou. [Sx]\\\",\\n      \\\"evidence_strength\\\": {\\\"level\\\": \\\"high|medium|low\\\", \\\"why\\\": \\\"Justification sourcée. [Sx]\\\"}\\n    }\\n  ],\\n\\n  \\\"normalization_notes\\\": {\\n    \\\"relative_ranking_0_100\\\": \\\"Rappel et implications. [Sx]\\\",\\n    \\\"sigma_scoring_0_5\\\": \\\"Résumé opérationnel et impact sur la robustesse. [Sx]\\\",\\n    \\\"percentile_fallback\\\": \\\"Quand/pourquoi. [Sx]\\\",\\n    \\\"missing_value_virtualization\\\": \\\"Moyenne + rôle de DATA_QUALITY. [Sx]\\\"\\n  },\\n\\n  \\\"quality_checks\\\": {\\n    \\\"criteria_weights_complete\\\": true,\\n    \\\"weights_sum_to_1\\\": true,\\n    \\\"sum_value\\\": 1.0,\\n    \\\"unused_or_zero_weight_criterias\\\": [],\\n    \\\"renormalization_rule_if_needed\\\": \\\"Phrase simple (sans code).\\\"\\n  },\\n\\n  \\\"materiality_summary\\\": {\\n    \\\"dominant_lifecycle_stages_for_vertical\\\": [\\\"manufacturing\\\", \\\"use_phase\\\", \\\"distribution\\\", \\\"end_of_life\\\"],\\n    \\\"short_summary\\\": \\\"Synthèse sourcée des postes dominants et implication sur les poids. [Sx]\\\"\\n  },\\n\\n  \\\"sources\\\": [\\n    {\\n      \\\"id\\\": \\\"S1\\\",\\n      \\\"type\\\": \\\"standard|regulation|public_agency|peer_reviewed|industry_methodology|other\\\",\\n      \\\"title\\\": \\\"...\\\",\\n      \\\"authors_or_org\\\": \\\"...\\\",\\n      \\\"year\\\": 2026,\\n      \\\"publisher\\\": \\\"...\\\",\\n      \\\"url\\\": \\\"...\\\",\\n      \\\"accessed_date\\\": \\\"YYYY-MM-DD\\\",\\n      \\\"reliability\\\": \\\"high|medium|low\\\",\\n      \\\"used\\\": true,\\n      \\\"used_for\\\": [\\\"lifetime reference\\\", \\\"energy materiality\\\", \\\"data quality rationale\\\"],\\n      \\\"notes\\\": \\\"1-2 phrases max.\\\"\\n    }\\n  ],\\n\\n  \\\"search_log\\\": [\\n    {\\\"query\\\": \\\"...\\\", \\\"date\\\": \\\"YYYY-MM-DD\\\", \\\"notes\\\": \\\"Pourquoi cette requête.\\\"}\\n  ]\\n}\\n\\nRègles supplémentaires :\\n- \\\"criteria_weights\\\" doit contenir TOUS les critères de   MINAVAILABILITYSPAREPARTSYEARS : Durée minimale de disponibilité des pièces détachées\\n  POWER_CONSUMPTION_HDR : La consommation électrique du téléviseur en mode HDR (haute définition)\\n  MINAVAILABILITYSOFTWAREUPDATESYEARS : Durée minimale de disponibilité des mises à jour logicielles\\n  DATA_QUALITY : DATA_QUALITY\\n  MINGUARANTEEDSUPPORTYEARS : Durée minimale du support garanti\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY_SDR : La classe énergétique du téléviseur en mode SDR\\n  WARRANTY : Durée de garantie du produit\\n  POWER_CONSUMPTION_STANDBY_NETWORKD : La consommation électrique de l&#39;appareil en mode veille ou réseau\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  CLASSE_ENERGY_HDR : La classe énergétique du téléviseur en mode HDR\\n  DIAGONALE_POUCES : DIAGONALE_POUCES\\n  POWER_CONSUMPTION_SDR : La consommation électrique du téléviseur en mode SDR (basse définition)\\n (même si weight=0) pour l’exhaustivité.\\n- Les poids doivent être décimaux. Corriger toute dérive pour que la somme fasse exactement 1.0 (tolérance 1e-6).\\n- Toute justification non triviale doit inclure des citations inline [Sx].\\n- La liste \\\"sources\\\" doit être exhaustive des sources consultées via search (used=false autorisé).\\n\"\nretrievalMode: \"MODEL_WEB_SEARCH\"\noptions:\n  model: \"gemini-2.5-flash\"\n  temperature: 1.0\n"
-aiJsonResponse: "{\n  \"use_case\" : \"consumer_comparison\",\n  \"geo_scope\" : \"EU/France\",\n  \"vertical\" : \"Téléviseurs\",\n  \"available_criterias\" : [ \"MINAVAILABILITYSPAREPARTSYEARS\", \"POWER_CONSUMPTION_HDR\", \"MINAVAILABILITYSOFTWAREUPDATESYEARS\", \"DATA_QUALITY\", \"MINGUARANTEEDSUPPORTYEARS\", \"POWER_CONSUMPTION_OFF\", \"CLASSE_ENERGY_SDR\", \"WARRANTY\", \"POWER_CONSUMPTION_STANDBY_NETWORKD\", \"REPAIRABILITY_INDEX\", \"CLASSE_ENERGY_HDR\", \"DIAGONALE_POUCES\", \"POWER_CONSUMPTION_SDR\" ],\n  \"positioning\" : {\n    \"claim\" : \"relative LCA-inspired score (ACV best-effort) for within-category comparison\",\n    \"not_an_absolute_footprint\" : true,\n    \"what_it_means_for_users\" : \"Ce score offre aux consommateurs une vision comparative des performances environnementales des téléviseurs, inspirée des principes de l'ACV, sans prétendre être une analyse absolue et exhaustive de l'empreinte carbone ou environnementale. Il vise à orienter les choix vers des produits plus durables et moins impactants au sein d'une même catégorie.\"\n  },\n  \"reference_lifetime\" : {\n    \"lifetime_years_reference\" : 8.0,\n    \"lifetime_years_range\" : {\n      \"min\" : 5.0,\n      \"max\" : 10.0\n    },\n    \"rationale\" : \"La durée de vie moyenne d'un téléviseur en France est estimée entre 7,5 et 8 ans par des organismes comme Fnac-Darty/HOP. Une synthèse de l'ADEME de 2012 évoquait une durée d'usage totale allant de 4 à 15 ans. De manière plus générale, les téléviseurs modernes ont une durée de vie moyenne de 5 à 10 ans. L'introduction de l'indice de durabilité en 2025 pour les téléviseurs vise précisément à encourager l'allongement de cette durée. Une valeur de référence de 8 ans est retenue pour refléter une moyenne contemporaine et les efforts réglementaires visant à étendre la durée d'usage.\",\n    \"citations\" : [ \"S6\", \"S16\", \"S2\", \"S5\", \"S7\", \"S9\", \"S19\" ]\n  },\n  \"gap_analysis_absolute_vs_relative\" : {\n    \"what_is_missing_vs_full_lca\" : \"Un score relatif ne remplace pas une ACV complète. Il manque l'inventaire détaillé de toutes les phases (extraction des matières premières, transport, etc.), les frontières de système précises (ex: infrastructure réseau pour la diffusion de contenu), une unité fonctionnelle détaillée qui inclurait des scénarios d'usage complexes (ex: heures d'utilisation réelles par mode, durée de possession) et l'analyse de toutes les catégories d'impact environnemental (toxicité aquatique, eutrophisation, etc.) au-delà des impacts majeurs.\",\n    \"why_relative_is_still_useful\" : \"Ce score est utile pour la comparaison directe de produits similaires sur un marché donné, offrant une lisibilité et une robustesse suffisantes pour guider les décisions d'achat grand public. Il permet d'identifier les 'meilleurs élèves' en se concentrant sur les leviers d'action les plus significatifs et les données accessibles, réduisant la complexité inhérente à une ACV complète. Il encourage également la transparence des fabricants.\",\n    \"mitigations\" : [ \"Anchor weights on LCA literature for lifecycle stage contributions\", \"Avoid double counting and document overlaps\", \"Raise DATA_QUALITY because missing data is imputed to mean (transparency incentive)\" ]\n  },\n  \"weighting_method\" : {\n    \"approach\" : \"evidence-weighted materiality + redundancy control + consumer comparability\",\n    \"key_principles\" : [ \"literature-first weighting\", \"lifecycle materiality for Téléviseurs\", \"anti double-counting\", \"robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)\", \"missing data virtualization + DATA_QUALITY incentive\", \"ESG/brand sustainability included with guardrails\" ],\n    \"assumptions\" : [ {\n      \"assumption\" : \"L'impact environnemental dominant des téléviseurs est la phase de fabrication, suivie de la phase d'utilisation (notamment la consommation électrique).\",\n      \"why_it_matters\" : \"Cette hypothèse, étayée par la littérature ACV, guide la priorisation des critères. Les facteurs liés à la durabilité et à la réparabilité (réduction de la fabrication de nouveaux produits) et la consommation énergétique seront donc fortement pondérés.\",\n      \"citations\" : [ \"S18\", \"S30\" ]\n    }, {\n      \"assumption\" : \"Les informations fournies par les classes énergétiques (CLASSE_ENERGY_SDR, CLASSE_ENERGY_HDR) sont redondantes avec les consommations électriques directes (POWER_CONSUMPTION_SDR, POWER_CONSUMPTION_HDR).\",\n      \"why_it_matters\" : \"Pour éviter le double-comptage, seuls les critères de consommation directe seront pondérés, les classes énergétiques étant des agrégations de ces mêmes données.\",\n      \"citations\" : [ \"S8\" ]\n    }, {\n      \"assumption\" : \"La DIAGONALE_POUCES a un impact indirect sur la consommation d'énergie et la quantité de matériaux utilisés, mais cet impact est déjà largement couvert par les critères de consommation électrique et par l'estimation implicite de la matérialité de fabrication.\",\n      \"why_it_matters\" : \"Accorder un poids direct à la diagonale pourrait entraîner un double-comptage ou pénaliser excessivement les grands écrans sans nécessairement refléter une moindre efficience relative. Il est donc préférable de la pondérer à zéro ou très faiblement pour éviter la redondance et se concentrer sur l'efficacité intrinsèque du produit, quelle que soit sa taille.\",\n      \"citations\" : null\n    }, {\n      \"assumption\" : \"Les critères MINAVAILABILITYSPAREPARTSYEARS et MINGUARANTEEDSUPPORTYEARS sont intégrés ou fortement corrélés à l'indice de réparabilité (REPAIRABILITY_INDEX) et à la garantie (WARRANTY).\",\n      \"why_it_matters\" : \"Pour une pondération anti-double-comptage, ces critères ne recevront pas de poids direct mais leur importance est reconnue via les critères plus englobants. L'Indice de Durabilité (qui remplace l'Indice de Réparabilité) inclut explicitement la disponibilité des pièces détachées et la fiabilité/engagement du fabricant.\",\n      \"citations\" : [ \"S2\", \"S9\" ]\n    } ]\n  },\n  \"criteria_weights\" : [ {\n    \"criterion\" : \"MINAVAILABILITYSPAREPARTSYEARS\",\n    \"weight\" : 0.0,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\" ],\n    \"rationale\" : \"Ce critère est directement intégré dans le calcul de l'Indice de Réparabilité (et du futur Indice de Durabilité), qui évalue la disponibilité des pièces détachées et leur prix. Pour éviter le double-comptage, il ne reçoit pas de poids indépendant. Son importance est capturée par le REPAIRABILITY_INDEX.\",\n    \"overlap_notes\" : \"Fortement redondant avec REPAIRABILITY_INDEX.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Réglementations françaises et européennes (Loi AGEC, Indice de Durabilité) intègrent la disponibilité des pièces.\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_HDR\",\n    \"weight\" : 0.15,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La consommation en mode HDR représente une part significative de l'impact énergétique d'un téléviseur lors de son usage, ce mode étant de plus en plus courant. Bien que l'impact carbone de la phase d'usage soit moins dominant que la fabrication en France, il reste un poste important.\",\n    \"overlap_notes\" : \"Corrélé à CLASSE_ENERGY_HDR, mais plus granulaire. Néglige CLASSE_ENERGY_HDR.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Législation sur l'étiquetage énergétique UE impose l'affichage de la consommation HDR.\"\n    }\n  }, {\n    \"criterion\" : \"MINAVAILABILITYSOFTWAREUPDATESYEARS\",\n    \"weight\" : 0.15,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"resource_use\" ],\n    \"rationale\" : \"La disponibilité des mises à jour logicielles est cruciale pour lutter contre l'obsolescence fonctionnelle et prolonger la durée de vie utile du produit. Une absence de support logiciel peut rendre un appareil obsolète même s'il est physiquement fonctionnel. Ce critère est explicitement pris en compte par l'Indice de Durabilité.\",\n    \"overlap_notes\" : \"Complète REPAIRABILITY_INDEX en adressant l'obsolescence logicielle.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Reconnu par l'ADEME et les réglementations comme un facteur clé de durabilité.\"\n    }\n  }, {\n    \"criterion\" : \"DATA_QUALITY\",\n    \"weight\" : 0.15,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"other\" ],\n    \"rationale\" : \"Un poids élevé pour DATA_QUALITY est essentiel pour inciter les fabricants à fournir des données complètes et fiables. Étant donné que les données manquantes sont imputées à la moyenne, une bonne DATA_QUALITY récompense la transparence et réduit le risque de biais dans la comparaison, en offrant une meilleure fiabilité au score global.\",\n    \"overlap_notes\" : \"Critère transversal, sans redondance directe avec d'autres impacts environnementaux.\",\n    \"guardrails\" : \"Ce poids élevé ne doit pas permettre à un produit très peu performant sur des critères environnementaux majeurs (énergie, réparabilité) d'obtenir un bon score uniquement grâce à une excellente DATA_QUALITY. La somme des poids environnementaux matériels reste prépondérante.\",\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Principe de la transparence des éco-scores et gestion des données manquantes.\"\n    }\n  }, {\n    \"criterion\" : \"MINGUARANTEEDSUPPORTYEARS\",\n    \"weight\" : 0.0,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"social\" ],\n    \"rationale\" : \"La durée de support garanti est une facette de l'engagement du fabricant envers la durabilité du produit. Cependant, son impact est largement couvert par le REPAIRABILITY_INDEX (qui intègre la fiabilité et la facilité d'entretien) et la WARRANTY (qui est une expression directe de cet engagement). Pour éviter la redondance, ce critère n'est pas directement pondéré.\",\n    \"overlap_notes\" : \"Redondant avec REPAIRABILITY_INDEX et WARRANTY.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Aspect de l'indice de durabilité mais indirectement couvert.\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_OFF\",\n    \"weight\" : 0.05,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"Même éteint, un téléviseur consomme de l'énergie, bien que faible. Sur la durée de vie du produit, cette consommation passive peut s'accumuler et est une source de gaspillage évitable.\",\n    \"overlap_notes\" : \"Distinct de la consommation en veille réseau et des consommations en usage.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Réglementations européennes fixant des limites de consommation en mode off.\"\n    }\n  }, {\n    \"criterion\" : \"CLASSE_ENERGY_SDR\",\n    \"weight\" : 0.0,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La classe énergétique SDR est une agrégation de la consommation électrique SDR. Puisque POWER_CONSUMPTION_SDR est disponible et plus granulaire, il est préférable de pondérer directement la consommation pour éviter le double-comptage.\",\n    \"overlap_notes\" : \"Totalement redondant avec POWER_CONSUMPTION_SDR.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"L'étiquette énergie est directement liée aux valeurs de consommation.\"\n    }\n  }, {\n    \"criterion\" : \"WARRANTY\",\n    \"weight\" : 0.05,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"social\", \"circularity\" ],\n    \"rationale\" : \"La durée de garantie reflète l'engagement du fabricant sur la fiabilité et la qualité de son produit, encourageant la durabilité. L'Indice de Durabilité prend en compte l'engagement du fabricant via des extensions de garantie.\",\n    \"overlap_notes\" : \"Complète REPAIRABILITY_INDEX et MINAVAILABILITYSOFTWAREUPDATESYEARS en termes d'engagement fabricant.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Reconnu par les régulations et initiatives pour la durabilité.\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_STANDBY_NETWORKD\",\n    \"weight\" : 0.05,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La consommation en mode veille réseau (smart TV connectée) est distincte de la veille simple (off) et représente une source d'énergie continue, pouvant s'accumuler sur la durée de vie du produit.\",\n    \"overlap_notes\" : \"Distinct de POWER_CONSUMPTION_OFF.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Réglementations européennes spécifiant des limites pour la consommation en veille réseau.\"\n    }\n  }, {\n    \"criterion\" : \"REPAIRABILITY_INDEX\",\n    \"weight\" : 0.25,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"resource_use\" ],\n    \"rationale\" : \"L'indice de réparabilité (qui évolue vers l'Indice de Durabilité en 2025) est un critère primordial pour la prolongation de la durée de vie des produits. Il englobe la facilité de démontage, la disponibilité et le prix des pièces détachées, et la documentation technique. Cet indice réduit directement le besoin de fabrication de nouveaux produits, adressant la phase la plus impactante de l'ACV.\",\n    \"overlap_notes\" : \"Couvre une grande partie de MINAVAILABILITYSPAREPARTSYEARS et une partie de MINGUARANTEEDSUPPORTYEARS.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Loi AGEC en France, mise en place de l'Indice de Réparabilité puis de Durabilité avec une méthodologie définie par l'ADEME.\"\n    }\n  }, {\n    \"criterion\" : \"CLASSE_ENERGY_HDR\",\n    \"weight\" : 0.0,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La classe énergétique HDR est une agrégation de la consommation électrique HDR. Comme pour la SDR, il est préférable de pondérer directement la consommation POWER_CONSUMPTION_HDR qui est plus précise, afin d'éviter le double-comptage.\",\n    \"overlap_notes\" : \"Totalement redondant avec POWER_CONSUMPTION_HDR.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"L'étiquette énergie est directement liée aux valeurs de consommation.\"\n    }\n  }, {\n    \"criterion\" : \"DIAGONALE_POUCES\",\n    \"weight\" : 0.0,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"resource_use\" ],\n    \"rationale\" : \"La taille de l'écran est corrélée à la consommation électrique et à la quantité de matériaux. Cependant, la consommation électrique est déjà directement mesurée par d'autres critères (SDR, HDR), et l'impact matériel est implicitement traité par la durée de vie et la réparabilité (un produit durable, quelle que soit sa taille, est préférable à un produit moins durable). Un poids nul évite le double-comptage et se concentre sur l'efficacité intrinsèque du téléviseur.\",\n    \"overlap_notes\" : \"Fortement corrélé aux consommations électriques (POWER_CONSUMPTION_SDR, POWER_CONSUMPTION_HDR) et à la matérialité de fabrication, qui est adressée par la durabilité.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Reconnaissance de la corrélation taille/conso/matériaux dans les ACV, mais l'approche choisie évite le double-comptage.\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_SDR\",\n    \"weight\" : 0.15,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La consommation en mode SDR est un indicateur clé de l'efficacité énergétique du téléviseur lors de son utilisation courante. C'est une donnée standardisée et directement liée à l'impact environnemental de la phase d'usage.\",\n    \"overlap_notes\" : \"Corrélé à CLASSE_ENERGY_SDR, mais plus granulaire. Néglige CLASSE_ENERGY_SDR.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Législation sur l'étiquetage énergétique UE impose l'affichage de la consommation SDR.\"\n    }\n  } ],\n  \"normalization_notes\" : {\n    \"relative_ranking_0_100\" : \"Chaque facteur est converti en un score relatif de 0 à 100, où 100 représente la meilleure performance observée sur le marché et 0 la pire. Cela assure que chaque critère contribue proportionnellement à son poids, indépendamment de ses unités d'origine.\",\n    \"sigma_scoring_0_5\" : \"Les attributs bruts sont normalisés sur une échelle de 0 à 5 en utilisant un sigma scoring par défaut. Cela signifie que la moyenne (μ) des données est mappée à 2.5/5, et les valeurs sont distribuées autour de cette moyenne, avec des bornes à μ-2σ et μ+2σ. Les valeurs sont plafonnées à 0 et 5 pour gérer les valeurs extrêmes et assurer la robustesse du score.\",\n    \"percentile_fallback\" : \"Si la distribution des données pour un attribut est 'low entropy' (très peu de variation, ou regroupée en quelques valeurs discrètes), un mécanisme de fallback basé sur les percentiles (mid-rank) est utilisé. Cela permet de différencier les produits même avec des distributions de données non gaussiennes ou avec des outliers importants, évitant que la sigma-scoring ne s'effondre.\",\n    \"missing_value_virtualization\" : \"Si la donnée pour un facteur est absente pour un produit donné, la valeur moyenne de ce facteur sur l'ensemble des produits disponibles est appliquée. Ce mécanisme rend la DATA_QUALITY d'autant plus importante : les produits bien documentés sont avantagés, tandis que les produits avec des données manquantes sont 'pénalisés' en étant ramenés à la moyenne, ce qui est une incitation forte à la transparence.\"\n  },\n  \"quality_checks\" : {\n    \"criteria_weights_complete\" : true,\n    \"weights_sum_to_1\" : true,\n    \"sum_value\" : 1.0,\n    \"unused_or_zero_weight_criterias\" : [ \"MINAVAILABILITYSPAREPARTSYEARS\", \"MINGUARANTEEDSUPPORTYEARS\", \"CLASSE_ENERGY_SDR\", \"CLASSE_ENERGY_HDR\", \"DIAGONALE_POUCES\" ],\n    \"renormalization_rule_if_needed\" : \"Si des critères sont mis à poids zéro, les poids restants sont renormalisés proportionnellement pour que leur somme reste égale à 1.\"\n  },\n  \"materiality_summary\" : {\n    \"dominant_lifecycle_stages_for_vertical\" : [ \"manufacturing\", \"use_phase\" ],\n    \"short_summary\" : \"L'analyse du cycle de vie des téléviseurs révèle que la phase de fabrication est le contributeur dominant à l'impact environnemental, notamment en termes d'émissions de gaz à effet de serre (80-90% de l'impact carbone total). La phase d'utilisation, principalement due à la consommation électrique, est également significative mais moins prépondérante dans des contextes comme la France où l'électricité est décarbonée. L'impact de la fin de vie est largement atténué par les pratiques de réparabilité et de recyclage. En conséquence, une forte pondération est attribuée aux critères favorisant la durabilité (réparabilité, mises à jour logicielles) et l'efficacité énergétique.\"\n  },\n  \"sources\" : [ {\n    \"id\" : \"S2\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Choisir des appareils électriques électroniques durables - Agir pour la transition écologique\",\n    \"authors_or_org\" : \"ADEME\",\n    \"year\" : 2025,\n    \"publisher\" : \"ADEME\",\n    \"url\" : \"https://ademe.fr/expertises/dechets/passer-a-laction/reduire-ses-dechets/choisir-appareils-electriques-electroniques-durables\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reference lifetime\", \"reparability/durability index details\", \"software updates importance\", \"warranty relevance\" ],\n    \"notes\" : \"Source publique officielle ADEME, très pertinente pour le contexte français et l'indice de durabilité.\"\n  }, {\n    \"id\" : \"S3\",\n    \"type\" : \"other\",\n    \"title\" : \"Comment calculer la consommation électrique d'une télévision\",\n    \"authors_or_org\" : \"ENGIE France\",\n    \"year\" : 2026,\n    \"publisher\" : \"ENGIE\",\n    \"url\" : \"https://particuliers.engie.fr/electricite/economies-energie/calculer-consommation/calculer-consommation-electrique-tv.html\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy consumption details (SDR, HDR, Off, Standby)\", \"energy label context\" ],\n    \"notes\" : \"Source d'une entreprise énergétique, fournit des détails pratiques sur la consommation.\"\n  }, {\n    \"id\" : \"S4\",\n    \"type\" : \"peer_reviewed\",\n    \"title\" : \"L'obsolescence des téléviseurs\",\n    \"authors_or_org\" : \"HALTE À L'OBSOLESCENCE PROGRAMMÉE (HOP)\",\n    \"year\" : 2021,\n    \"publisher\" : \"HALTE À L'OBSOLESCENCE PROGRAMMÉE (HOP)\",\n    \"url\" : \"https://www.halteobsolescence.org/wp-content/uploads/2021/07/Rapport-obsolescence-televiseurs-HOP-juillet-2021.pdf\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reference lifetime\", \"software updates importance\", \"reparability index context\" ],\n    \"notes\" : \"Rapport d'une association reconnue luttant contre l'obsolescence programmée, très pertinent pour la durabilité et réparabilité.\"\n  }, {\n    \"id\" : \"S5\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Téléviseurs - L'indice de durabilité remplace l'indice de réparabilité\",\n    \"authors_or_org\" : \"UFC-Que Choisir\",\n    \"year\" : 2025,\n    \"publisher\" : \"UFC-Que Choisir\",\n    \"url\" : \"https://www.quechoisir.org/actualite-televiseurs-l-indice-de-durabilite-remplace-l-indice-de-reparabilite-n106263/\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability/durability index details\", \"software updates importance\" ],\n    \"notes\" : \"Source d'une association de consommateurs influente, très pertinente sur les indices de durabilité et réparabilité.\"\n  }, {\n    \"id\" : \"S6\",\n    \"type\" : \"other\",\n    \"title\" : \"TV OLED, LCD, MiniLED : ce que trois ans de torture disent de leur vraie durée de vie\",\n    \"authors_or_org\" : \"Les Numériques\",\n    \"year\" : 2021,\n    \"publisher\" : \"Les Numériques\",\n    \"url\" : \"https://www.lesnumeriques.com/tv-oled-lcd-miniled-ce-que-trois-ans-de-torture-disent-de-leur-vraie-duree-de-vie-n168677.html\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"reference lifetime\", \"software updates importance\" ],\n    \"notes\" : \"Article de presse spécialisée offrant des données sur la durée de vie et l'obsolescence logicielle.\"\n  }, {\n    \"id\" : \"S7\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Indice de durabilité - Ministère de la Transition écologique\",\n    \"authors_or_org\" : \"Ministère de la Transition écologique et de la Cohésion des territoires\",\n    \"year\" : 2024,\n    \"publisher\" : \"Gouvernement français\",\n    \"url\" : \"https://www.ecologie.gouv.fr/indice-durabilite\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability/durability index details\", \"regulatory context\" ],\n    \"notes\" : \"Source officielle du gouvernement français sur l'indice de durabilité.\"\n  }, {\n    \"id\" : \"S8\",\n    \"type\" : \"other\",\n    \"title\" : \"Définition de Classe énergétique TV\",\n    \"authors_or_org\" : \"LCD Compare\",\n    \"year\" : 2026,\n    \"publisher\" : \"LCD Compare\",\n    \"url\" : \"https://www.lcd-compare.com/definition-de-classe-energetique-tv.htm\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy label context\", \"SDR/HDR consumption distinction\", \"redundancy justification for energy classes\" ],\n    \"notes\" : \"Site spécialisé dans la comparaison de téléviseurs, fournit des explications sur les classes énergétiques.\"\n  }, {\n    \"id\" : \"S9\",\n    \"type\" : \"other\",\n    \"title\" : \"Indice de durabilité : ce qui change concernant les téléviseurs\",\n    \"authors_or_org\" : \"Frandroid\",\n    \"year\" : 2025,\n    \"publisher\" : \"Frandroid\",\n    \"url\" : \"https://www.frandroid.com/produits-android/tv/1932371_indice-de-durabilite-ce-qui-change-concernant-les-televiseurs\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability/durability index details\", \"warranty relevance\" ],\n    \"notes\" : \"Article de presse spécialisée tech, expliquant le nouvel indice de durabilité pour les téléviseurs.\"\n  }, {\n    \"id\" : \"S10\",\n    \"type\" : \"other\",\n    \"title\" : \"ACV Produit & Service numérique\",\n    \"authors_or_org\" : \"Objectif Carbone\",\n    \"year\" : 2023,\n    \"publisher\" : \"Objectif Carbone\",\n    \"url\" : \"https://www.objectifcarbone.com/post/acv-produit-service-num%C3%A9rique\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"LCA general principles\", \"gap analysis\", \"data quality importance\" ],\n    \"notes\" : \"Article de blog spécialisé sur l'ACV, utile pour la définition et l'importance des données.\"\n  }, {\n    \"id\" : \"S12\",\n    \"type\" : \"other\",\n    \"title\" : \"Consommation téléviseur: calculer la consommation de ma télé\",\n    \"authors_or_org\" : \"Kelwatt.fr\",\n    \"year\" : 2025,\n    \"publisher\" : \"Kelwatt\",\n    \"url\" : \"https://www.kelwatt.fr/guide/consommation-electrique/televiseur\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy consumption details (SDR, HDR, Off, Standby)\" ],\n    \"notes\" : \"Site d'information sur l'énergie, fournit des exemples de consommation de TV.\"\n  }, {\n    \"id\" : \"S16\",\n    \"type\" : \"other\",\n    \"title\" : \"Quelle est la durée de vie d'un téléviseur et quand est-il temps de le remplacer?\",\n    \"authors_or_org\" : \"VRT\",\n    \"year\" : 2025,\n    \"publisher\" : \"VRT\",\n    \"url\" : \"https://vrt-electronics.be/fr/blog/la-duree-de-vie-d-un-televiseur\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"low\",\n    \"used\" : true,\n    \"used_for\" : [ \"reference lifetime\" ],\n    \"notes\" : \"Site d'un détaillant, fournit une estimation générale de la durée de vie.\"\n  }, {\n    \"id\" : \"S14\",\n    \"type\" : \"other\",\n    \"title\" : \"Consommation TV en vieille, allumée, en watt, classe F/G\",\n    \"authors_or_org\" : \"Kelwatt.fr\",\n    \"year\" : 2026,\n    \"publisher\" : \"Kelwatt\",\n    \"url\" : \"https://www.kelwatt.fr/guide/consommation-electrique/televiseur\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy consumption details (SDR, HDR, Off, Standby)\" ],\n    \"notes\" : \"Site d'information sur l'énergie, fournit des exemples de consommation de TV.\"\n  }, {\n    \"id\" : \"S17\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Quelle est la consommation électrique d'un téléviseur ? | Vattenfall\",\n    \"authors_or_org\" : \"ADEME / Vattenfall\",\n    \"year\" : 2026,\n    \"publisher\" : \"Vattenfall\",\n    \"url\" : \"https://www.vattenfall.fr/particuliers/conseils-energie/consommation-electrique-tv/\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy consumption details\", \"Ademe figures on TV consumption\" ],\n    \"notes\" : \"Article citant l'ADEME sur la consommation électrique, haute fiabilité pour les données ADEME.\"\n  }, {\n    \"id\" : \"S18\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Ordinateurs et équipements périphériques\",\n    \"authors_or_org\" : \"ADEME\",\n    \"year\" : 2018,\n    \"publisher\" : \"Base Carbone ADEME\",\n    \"url\" : \"https://bilans-ges.ademe.fr/fr/basecarbone/donnees-consulter/liste-elements/categorie/640\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"LCA materiality (manufacturing dominance)\", \"impact of screen size\" ],\n    \"notes\" : \"Données de la Base Carbone de l'ADEME, source de référence pour les ACV en France.\"\n  }, {\n    \"id\" : \"S19\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Longue vie aux téléviseurs - ADEME Infos\",\n    \"authors_or_org\" : \"ADEME\",\n    \"year\" : 2025,\n    \"publisher\" : \"ADEME\",\n    \"url\" : \"https://infos.ademe.fr/article/longue-vie-aux-televiseurs/\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability/durability index details\", \"regulatory context\" ],\n    \"notes\" : \"Article de l'ADEME confirmant l'importance de l'indice de durabilité.\"\n  }, {\n    \"id\" : \"S20\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Écoconception et étiquetage énergétique — Dispositifs d'affichage électroniques | EUR-Lex\",\n    \"authors_or_org\" : \"Union Européenne\",\n    \"year\" : 2017,\n    \"publisher\" : \"EUR-Lex\",\n    \"url\" : \"https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=LEGCOM:52017PC0779\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy label context\", \"regulatory framework\" ],\n    \"notes\" : \"Réglementation de l'UE sur l'écoconception et l'étiquetage énergétique.\"\n  }, {\n    \"id\" : \"S21\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Exigences en matière d'étiquetage énergétique dans l'UE - Your Europe\",\n    \"authors_or_org\" : \"Union Européenne\",\n    \"year\" : 2021,\n    \"publisher\" : \"Your Europe\",\n    \"url\" : \"https://europa.eu/youreurope/business/product-requirements/labels-standards/energy-labels/index_fr.htm\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy label context\", \"regulatory framework\", \"redundancy justification for energy classes\" ],\n    \"notes\" : \"Informations officielles de l'UE sur l'étiquetage énergétique et son application aux téléviseurs.\"\n  }, {\n    \"id\" : \"S22\",\n    \"type\" : \"other\",\n    \"title\" : \"Bonne nouvelle pour les TV Samsung : 7 ans de mises à jour pour une meilleure durabilité\",\n    \"authors_or_org\" : \"Frandroid\",\n    \"year\" : 2024,\n    \"publisher\" : \"Frandroid\",\n    \"url\" : \"https://www.frandroid.com/marques/samsung/1932371_bonne-nouvelle-pour-les-tv-samsung-7-ans-de-mises-a-jour-pour-une-meilleure-durabilite\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"software updates importance\" ],\n    \"notes\" : \"Article de presse spécialisée tech soulignant l'importance des mises à jour logicielles pour la durabilité.\"\n  }, {\n    \"id\" : \"S24\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Tout savoir sur l'indice de réparabilité | Ministère de l'Économie des Finances et de la Souveraineté industrielle et énergétique\",\n    \"authors_or_org\" : \"Ministère de l'Économie, des Finances et de la Souveraineté industrielle et numérique\",\n    \"year\" : 2025,\n    \"publisher\" : \"Gouvernement français\",\n    \"url\" : \"https://www.economie.gouv.fr/particuliers/indice-reparabilite\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability/durability index details\", \"regulatory context\" ],\n    \"notes\" : \"Source officielle du gouvernement français sur l'indice de réparabilité et son évolution.\"\n  }, {\n    \"id\" : \"S25\",\n    \"type\" : \"other\",\n    \"title\" : \"Combien consomme votre téléviseur en veille - Ecojoko\",\n    \"authors_or_org\" : \"Ecojoko\",\n    \"year\" : 2025,\n    \"publisher\" : \"Ecojoko\",\n    \"url\" : \"https://www.ecojoko.com/blog/consommation-tv-veille/\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy consumption off/standby\" ],\n    \"notes\" : \"Article de blog spécialisé sur la consommation d'énergie, incluant la veille des TV.\"\n  }, {\n    \"id\" : \"S26\",\n    \"type\" : \"other\",\n    \"title\" : \"Appareils en veille : combien ça coûte vraiment? - ENKI\",\n    \"authors_or_org\" : \"ENKI\",\n    \"year\" : 2025,\n    \"publisher\" : \"ENKI\",\n    \"url\" : \"https://www.enki.fr/blog/veille-combien-ca-coute-vraiment/\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy consumption off/standby\" ],\n    \"notes\" : \"Article de blog sur la consommation en veille des appareils électriques.\"\n  }, {\n    \"id\" : \"S28\",\n    \"type\" : \"other\",\n    \"title\" : \"Définition de Indice de réparabilité - LCD Compare\",\n    \"authors_or_org\" : \"LCD Compare\",\n    \"year\" : 2026,\n    \"publisher\" : \"LCD Compare\",\n    \"url\" : \"https://www.lcd-compare.com/definition-de-indice-de-reparabilite.htm\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability/durability index details\" ],\n    \"notes\" : \"Site spécialisé dans la comparaison de téléviseurs, fournit des explications sur l'indice de réparabilité.\"\n  }, {\n    \"id\" : \"S29\",\n    \"type\" : \"other\",\n    \"title\" : \"Tout comprendre à l'analyse de cycle de vie (ACV) - Sami\",\n    \"authors_or_org\" : \"Sami\",\n    \"year\" : 2026,\n    \"publisher\" : \"Sami\",\n    \"url\" : \"https://www.sami.eco/blog/acv\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"LCA general principles\", \"normalization notes (sigma scoring, percentile fallback)\" ],\n    \"notes\" : \"Article de blog expliquant les principes de l'ACV et les concepts de normalisation.\"\n  }, {\n    \"id\" : \"S30\",\n    \"type\" : \"other\",\n    \"title\" : \"L'impact carbone de la vidéo - analyse d'Objectif Carbone - APCC\",\n    \"authors_or_org\" : \"APCC\",\n    \"year\" : 2023,\n    \"publisher\" : \"APCC\",\n    \"url\" : \"https://www.apcc.fr/l-impact-carbone-de-la-video-analyse-d-objectif-carbone/\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"LCA materiality (manufacturing dominance, use phase impact)\" ],\n    \"notes\" : \"Étude sur l'impact carbone de la vidéo, très pertinente pour la matérialité de l'impact des téléviseurs.\"\n  }, {\n    \"id\" : \"S33\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Étiquette-énergie - Wikipédia\",\n    \"authors_or_org\" : \"Wikipédia\",\n    \"year\" : 2026,\n    \"publisher\" : \"Wikipédia\",\n    \"url\" : \"https://fr.wikipedia.org/wiki/%C3%89tiquette-%C3%A9nergie\",\n    \"accessed_date\" : \"2026-01-22\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy label context\" ],\n    \"notes\" : \"Vue d'ensemble sur l'étiquette énergie, y compris pour les téléviseurs.\"\n  } ],\n  \"search_log\" : [ {\n    \"query\" : \"durée de vie moyenne téléviseur France\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche de la durée de vie de référence pour les téléviseurs en France.\"\n  }, {\n    \"query\" : \"durée d'usage téléviseur UE\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche de la durée de vie de référence pour les téléviseurs en UE.\"\n  }, {\n    \"query\" : \"lifetime television EU regulation\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche de réglementations UE concernant la durée de vie des téléviseurs.\"\n  }, {\n    \"query\" : \"durabilité des téléviseurs ADEME\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche d'informations de l'ADEME sur la durabilité des téléviseurs.\"\n  }, {\n    \"query\" : \"indice de réparabilité téléviseur durée de vie\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche du lien entre indice de réparabilité et durée de vie des téléviseurs.\"\n  }, {\n    \"query\" : \"ACV téléviseur phases impact\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche des phases du cycle de vie des téléviseurs et leurs impacts environnementaux.\"\n  }, {\n    \"query\" : \"Life Cycle Assessment television environmental impact\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche d'études ACV sur l'impact environnemental des téléviseurs.\"\n  }, {\n    \"query\" : \"impact environnemental fabrication utilisation fin de vie téléviseur\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Détails sur l'impact des différentes phases de vie d'un téléviseur.\"\n  }, {\n    \"query\" : \"facteurs matérialité ACV téléviseur\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Identification des facteurs environnementaux les plus matériels pour les téléviseurs.\"\n  }, {\n    \"query\" : \"règlementation étiquetage énergétique téléviseur UE\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Réglementations sur l'étiquetage énergétique des téléviseurs en UE.\"\n  }, {\n    \"query\" : \"corrélation classe énergie consommation électrique téléviseur\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche de corrélation pour éviter le double-comptage entre classe énergie et consommation directe.\"\n  }, {\n    \"query\" : \"impact consommation SDR HDR veille téléviseur ACV\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Impact de la consommation en différents modes (SDR, HDR, veille) sur l'ACV.\"\n  }, {\n    \"query\" : \"indice de réparabilité téléviseurs critères impacts\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Détails sur les critères et l'impact de l'indice de réparabilité pour les téléviseurs.\"\n  }, {\n    \"query\" : \"disponibilité pièces détachées téléviseur réglementation\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Réglementations sur la disponibilité des pièces détachées pour les téléviseurs.\"\n  }, {\n    \"query\" : \"mises à jour logicielles durabilité téléviseur\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Importance des mises à jour logicielles pour la durabilité des téléviseurs.\"\n  }, {\n    \"query\" : \"garantie légale téléviseur France\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche sur la garantie légale et son lien avec la durabilité.\"\n  }, {\n    \"query\" : \"impact durée de vie téléviseur réparabilité\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Impact de la réparabilité sur la durée de vie des téléviseurs.\"\n  }, {\n    \"query\" : \"importance qualité des données éco-score\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Recherche sur l'importance de la qualité des données dans un éco-score.\"\n  }, {\n    \"query\" : \"impact données manquantes scoring environnemental\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Conséquences de l'absence de données sur le scoring environnemental.\"\n  }, {\n    \"query\" : \"méthodologie eco-score imputation données\",\n    \"date\" : \"2026-01-22\",\n    \"notes\" : \"Méthodes d'imputation des données manquantes dans les éco-scores.\"\n  } ]\n}"
+yamlPrompt: "\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"\\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\\nuseCase : Le cas d'usage (ex: consumer_comparison)\\ngeoScope : Le périmètre géographique (ex: EU/France)\\nvertical : Le nom de la verticale\\navailableCriterias : La liste des critères disponibles\\npositioning : Positionnement du score (relatif vs absolu)\\nreferenceLifetime : Durée de vie de référence du produit\\ngapAnalysis : Analyse des écarts entre ACV absolue et score relatif\\nweightingMethod : Méthodologie de pondération utilisée\\ncriteriaWeights : Liste des pondérations pour chaque critère\\nnormalizationNotes : Notes sur la normalisation des scores\\nqualityChecks : Vérifications de cohérence (somme des poids, exhaustivité)\\nmaterialitySummary : Synthèse de la matérialité environnementale\\nsources : Liste exhaustive des sources consultées\\nsearchLog : Journal des recherches effectuées\\n\"\nuserPrompt: \"\\n## Ton rôle\\n## Ton rôle\\nTu es un agent expert en analyse du cycle de vie (ACV) et en évaluation environnementale des produits électriques et électroniques, orienté “comparaison grand public” (UE/France).\\nTu as accès à une fonction de recherche web (search) : tu DOIS l’utiliser pour fonder tes décisions sur des sources de référence (normes, régulations, agences publiques, littérature académique, méthodologies reconnues).\\nNe JAMAIS inventer de source. Toute source consultée doit être listée.\\n\\nNous allons travailler sur des Téléviseurs.\\n\\nContrainte de sortie : Ne fournir en réponse QUE du JSON, conformément à la structure demandée, sans commentaire, ni texte supplémentaire.\\n\\n\\n\\n## Contexte & objectif : Eco-score “comparaison grand public” pour les Téléviseurs\\n\\nTu vas définir une pondération (weights) pour construire un Eco-score destiné à comparer des Téléviseurs entre eux (marché UE/France).\\nCe score est un indice relatif “ACV best-effort” :\\n- Inspiré des principes ACV (matérialité sur le cycle de vie, catégories d’impact, unité fonctionnelle),\\n- MAIS il ne prétend pas fournir une empreinte absolue auditée type “bilan produit”.\\nTu dois explicitement analyser et documenter (dans le JSON) l’écart “ACV absolue vs score relatif”, et comment tes choix de pondération réduisent les biais.\\n\\nLes facteurs disponibles sont :\\n  MINAVAILABILITYSPAREPARTSYEARS : Durée minimale de disponibilité des pièces détachées\\n  POWER_CONSUMPTION_HDR : La consommation électrique du téléviseur en mode HDR (haute définition)\\n  MINAVAILABILITYSOFTWAREUPDATESYEARS : Durée minimale de disponibilité des mises à jour logicielles\\n  DATA_QUALITY : DATA_QUALITY\\n  MINGUARANTEEDSUPPORTYEARS : Durée minimale du support garanti\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY_SDR : La classe énergétique du téléviseur en mode SDR\\n  WARRANTY : Durée de garantie du produit\\n  POWER_CONSUMPTION_STANDBY_NETWORKD : La consommation électrique de l&#39;appareil en mode veille ou réseau\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  CLASSE_ENERGY_HDR : La classe énergétique du téléviseur en mode HDR\\n  DIAGONALE_POUCES : DIAGONALE_POUCES\\n  POWER_CONSUMPTION_SDR : La consommation électrique du téléviseur en mode SDR (basse définition)\\n\\n\\nTon travail : proposer des poids robustes, “literature-first”, anti-double-comptage, et adaptés à la comparaison grand public.\\n\\n\\n\\n## Principes de fonctionnement (non négociables)\\n\\n1) Relativisation des facteurs (ranking)\\n- Chaque facteur est représenté de manière relative, sous forme de classement.\\n- Meilleur produit sur ce facteur : 100/100 ; pire : 0/100.\\n\\n2) Virtualisation des scores manquants\\n- Si un facteur est absent, appliquer la valeur moyenne de ce facteur sur l’ensemble des produits.\\n- DATA_QUALITY doit avantager la transparence (produits mieux documentés) sans écraser la matérialité environnementale.\\n\\n3) Somme des coefficients\\n- La somme des poids doit être égale à 1 (après renormalisation).\\n\\n4) Normalisation statistique des attributs bruts (méthodo interne)\\n- Les attributs bruts sont normalisés sur 0 à 5 avant agrégation :\\n  - Sigma scoring par défaut (μ, σ ; intervalle [μ-2σ, μ+2σ], μ -> 2.5/5, cap à 0 et 5)\\n  - Fallback percentile (mid-rank) si distribution “low entropy”\\nTu ne codes pas l’algorithme, mais tu DOIS en tenir compte pour justifier la pondération (robustesse, sensibilité, outliers, buckets).\\n\\n\\n\\n## Exigences “search & sources” (obligatoires)\\n\\nA) Priorité des sources (ordre)\\n1. Agences publiques / institutions (UE/France), documentation officielle, régulations\\n2. Normes et méthodes (ISO 14040/14044, PEF / JRC, guides d’affichage environnemental si pertinent)\\n3. Publications académiques (revues, méta-analyses, ACV comparatives par catégorie produit)\\n4. Méthodologies reconnues de scoring grand public (ex : docs publiques de systèmes d’éco-score) uniquement en complément, jamais comme base unique\\n\\nB) “Literature-first weighting”\\n- Les poids doivent refléter la matérialité ACV typique des Téléviseurs (fabrication vs usage vs fin de vie) et l’importance de la durée de vie.\\n\\nC) Sources exhaustives + citations inline\\n- Toute source consultée via search doit apparaître dans \\\"sources\\\" (même si non utilisée).\\n- Toute justification non triviale doit citer [S1], [S2]… inline dans les champs texte.\\n- Fournir \\\"search_log\\\" avec les requêtes.\\n\\nD) Durée de vie de référence (OBLIGATOIRE)\\n- Tu DOIS rechercher et proposer une durée de vie / durée d’usage de référence pour la catégorie Téléviseurs (UE/France si possible), avec sources.\\n- Si plusieurs valeurs existent, fournir une plage + une valeur “référence” et expliquer le choix.\\n\\n\\n\\n## Contraintes de pondération (engineering)\\n\\n1) Anti double-comptage / redondances\\n- Identifier les critères fortement corrélés (ex : classe énergie vs conso ; tailles vs conso ; etc.).\\n- Expliquer la stratégie (regroupement “bloc énergie”, réduction de poids redondants, etc.).\\n\\n2) DATA_QUALITY et ESG (volontairement rehaussés)\\n- Proposer un poids DATA_QUALITY et un poids ESG (ex : BRAND_SUSTAINABILITY) plus élevés que dans une pondération purement “ACV classique”, MAIS :\\n  - justifier ce choix : incitation à la transparence (vu l’imputation moyenne) + prise en compte sociétale,\\n  - poser des garde-fous : ces poids ne doivent pas permettre à un produit très énergivore d’être “sauvé” uniquement par ESG/DATA_QUALITY.\\n- Mentionner explicitement le lien avec l’imputation des données manquantes (moyenne) et l’effet attendu.\\n\\n3) Pertinence par vertical\\n- Tout critère peut être pondéré à 0 s’il est non pertinent ou redondant, mais tu DOIS l’expliquer.\\n\\n4) Renormalisation\\n- Définir une règle simple de renormalisation si certains critères ont un poids à 0.\\n\\n5) Echelle de valeur\\n - La somme des pondérations doit TOUJOURS être égal à 1, afin de refleter la part relative de chaque critère dans le score obtenu\\n\\n6) Présence de tous les criteres \\nTous les critères définis dans availableImpactScoreCriterias: doivent être évalués et participer à la configuration de sortie. Si ils ne sont pas pertinents, coefficienter à 0. \\n\\n\\n## Format JSON attendu (STRICT)\\n\\nTa réponse doit être un unique objet JSON, avec ces clés exactes :\\n\\n{\\n  \\\"use_case\\\": \\\"consumer_comparison\\\",\\n  \\\"geo_scope\\\": \\\"EU/France\\\",\\n  \\\"vertical\\\": \\\"Téléviseurs\\\",\\n  \\\"available_criterias\\\":   MINAVAILABILITYSPAREPARTSYEARS : Durée minimale de disponibilité des pièces détachées\\n  POWER_CONSUMPTION_HDR : La consommation électrique du téléviseur en mode HDR (haute définition)\\n  MINAVAILABILITYSOFTWAREUPDATESYEARS : Durée minimale de disponibilité des mises à jour logicielles\\n  DATA_QUALITY : DATA_QUALITY\\n  MINGUARANTEEDSUPPORTYEARS : Durée minimale du support garanti\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY_SDR : La classe énergétique du téléviseur en mode SDR\\n  WARRANTY : Durée de garantie du produit\\n  POWER_CONSUMPTION_STANDBY_NETWORKD : La consommation électrique de l&#39;appareil en mode veille ou réseau\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  CLASSE_ENERGY_HDR : La classe énergétique du téléviseur en mode HDR\\n  DIAGONALE_POUCES : DIAGONALE_POUCES\\n  POWER_CONSUMPTION_SDR : La consommation électrique du téléviseur en mode SDR (basse définition)\\n,\\n\\n  \\\"positioning\\\": {\\n    \\\"claim\\\": \\\"relative LCA-inspired score (ACV best-effort) for within-category comparison\\\",\\n    \\\"not_an_absolute_footprint\\\": true,\\n    \\\"what_it_means_for_users\\\": \\\"Explication courte et sourcée. [Sx]\\\"\\n  },\\n\\n  \\\"reference_lifetime\\\": {\\n    \\\"lifetime_years_reference\\\": 0,\\n    \\\"lifetime_years_range\\\": {\\\"min\\\": 0, \\\"max\\\": 0},\\n    \\\"rationale\\\": \\\"Justification sourcée, UE/FR si possible. [Sx]\\\",\\n    \\\"citations\\\": [\\\"S1\\\"]\\n  },\\n\\n  \\\"gap_analysis_absolute_vs_relative\\\": {\\n    \\\"what_is_missing_vs_full_lca\\\": \\\"Inventaires complets, frontières système, unité fonctionnelle détaillée, etc. [Sx]\\\",\\n    \\\"why_relative_is_still_useful\\\": \\\"Comparaison marché, robustesse, lisibilité. [Sx]\\\",\\n    \\\"mitigations\\\": [\\n      \\\"Anchor weights on LCA literature for lifecycle stage contributions [Sx]\\\",\\n      \\\"Avoid double counting and document overlaps [Sx]\\\",\\n      \\\"Raise DATA_QUALITY because missing data is imputed to mean (transparency incentive) [Sx]\\\"\\n    ]\\n  },\\n\\n  \\\"weighting_method\\\": {\\n    \\\"approach\\\": \\\"evidence-weighted materiality + redundancy control + consumer comparability\\\",\\n    \\\"key_principles\\\": [\\n      \\\"literature-first weighting\\\",\\n      \\\"lifecycle materiality for Téléviseurs\\\",\\n      \\\"anti double-counting\\\",\\n      \\\"robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)\\\",\\n      \\\"missing data virtualization + DATA_QUALITY incentive\\\",\\n      \\\"ESG/brand sustainability included with guardrails\\\"\\n    ],\\n    \\\"assumptions\\\": [\\n      {\\n        \\\"assumption\\\": \\\"...\\\",\\n        \\\"why_it_matters\\\": \\\"...\\\",\\n        \\\"citations\\\": [\\\"S1\\\"]\\n      }\\n    ]\\n  },\\n\\n  \\\"criteria_weights\\\": [\\n    {\\n      \\\"criterion\\\": \\\"CRITERION_NAME_FROM_AVAILABLE_LIST\\\",\\n      \\\"weight\\\": 0.0,\\n      \\\"directionality\\\": \\\"higher_is_better|lower_is_better|categorical\\\",\\n      \\\"impact_dimensions\\\": [\\\"climate\\\", \\\"resource_use\\\", \\\"toxicity\\\", \\\"water\\\", \\\"circularity\\\", \\\"social\\\", \\\"other\\\"],\\n      \\\"rationale\\\": \\\"Texte court, concret, et sourcé. Citations inline [Sx].\\\",\\n      \\\"overlap_notes\\\": \\\"Redondances + stratégie anti-double comptage. [Sx]\\\",\\n      \\\"guardrails\\\": \\\"Si ESG/DATA_QUALITY, préciser le garde-fou. [Sx]\\\",\\n      \\\"evidence_strength\\\": {\\\"level\\\": \\\"high|medium|low\\\", \\\"why\\\": \\\"Justification sourcée. [Sx]\\\"}\\n    }\\n  ],\\n\\n  \\\"normalization_notes\\\": {\\n    \\\"relative_ranking_0_100\\\": \\\"Rappel et implications. [Sx]\\\",\\n    \\\"sigma_scoring_0_5\\\": \\\"Résumé opérationnel et impact sur la robustesse. [Sx]\\\",\\n    \\\"percentile_fallback\\\": \\\"Quand/pourquoi. [Sx]\\\",\\n    \\\"missing_value_virtualization\\\": \\\"Moyenne + rôle de DATA_QUALITY. [Sx]\\\"\\n  },\\n\\n  \\\"quality_checks\\\": {\\n    \\\"criteria_weights_complete\\\": true,\\n    \\\"weights_sum_to_1\\\": true,\\n    \\\"sum_value\\\": 1.0,\\n    \\\"unused_or_zero_weight_criterias\\\": [],\\n    \\\"renormalization_rule_if_needed\\\": \\\"Phrase simple (sans code).\\\"\\n  },\\n\\n  \\\"materiality_summary\\\": {\\n    \\\"dominant_lifecycle_stages_for_vertical\\\": [\\\"manufacturing\\\", \\\"use_phase\\\", \\\"distribution\\\", \\\"end_of_life\\\"],\\n    \\\"short_summary\\\": \\\"Synthèse sourcée des postes dominants et implication sur les poids. [Sx]\\\"\\n  },\\n\\n  \\\"sources\\\": [\\n    {\\n      \\\"id\\\": \\\"S1\\\",\\n      \\\"type\\\": \\\"standard|regulation|public_agency|peer_reviewed|industry_methodology|other\\\",\\n      \\\"title\\\": \\\"...\\\",\\n      \\\"authors_or_org\\\": \\\"...\\\",\\n      \\\"year\\\": 2026,\\n      \\\"publisher\\\": \\\"...\\\",\\n      \\\"url\\\": \\\"...\\\",\\n      \\\"accessed_date\\\": \\\"YYYY-MM-DD\\\",\\n      \\\"reliability\\\": \\\"high|medium|low\\\",\\n      \\\"used\\\": true,\\n      \\\"used_for\\\": [\\\"lifetime reference\\\", \\\"energy materiality\\\", \\\"data quality rationale\\\"],\\n      \\\"notes\\\": \\\"1-2 phrases max.\\\"\\n    }\\n  ],\\n\\n  \\\"search_log\\\": [\\n    {\\\"query\\\": \\\"...\\\", \\\"date\\\": \\\"YYYY-MM-DD\\\", \\\"notes\\\": \\\"Pourquoi cette requête.\\\"}\\n  ]\\n}\\n\\nRègles supplémentaires :\\n- \\\"criteria_weights\\\" doit contenir TOUS les critères de   MINAVAILABILITYSPAREPARTSYEARS : Durée minimale de disponibilité des pièces détachées\\n  POWER_CONSUMPTION_HDR : La consommation électrique du téléviseur en mode HDR (haute définition)\\n  MINAVAILABILITYSOFTWAREUPDATESYEARS : Durée minimale de disponibilité des mises à jour logicielles\\n  DATA_QUALITY : DATA_QUALITY\\n  MINGUARANTEEDSUPPORTYEARS : Durée minimale du support garanti\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY_SDR : La classe énergétique du téléviseur en mode SDR\\n  WARRANTY : Durée de garantie du produit\\n  POWER_CONSUMPTION_STANDBY_NETWORKD : La consommation électrique de l&#39;appareil en mode veille ou réseau\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  CLASSE_ENERGY_HDR : La classe énergétique du téléviseur en mode HDR\\n  DIAGONALE_POUCES : DIAGONALE_POUCES\\n  POWER_CONSUMPTION_SDR : La consommation électrique du téléviseur en mode SDR (basse définition)\\n (même si weight=0) pour l’exhaustivité.\\n- Les poids doivent être décimaux. Corriger toute dérive pour que la somme fasse exactement 1.0 (tolérance 1e-6).\\n- Toute justification non triviale doit inclure des citations inline [Sx].\\n- La liste \\\"sources\\\" doit être exhaustive des sources consultées via search (used=false autorisé).\\n\"\nretrievalMode: \"MODEL_WEB_SEARCH\"\noptions:\n  model: \"gemini-2.5-pro\"\n  temperature: 1.0\n"
+aiJsonResponse: "{\n  \"use_case\" : \"consumer_comparison\",\n  \"geo_scope\" : \"EU/France\",\n  \"vertical\" : \"Téléviseurs\",\n  \"available_criterias\" : [ \"MINAVAILABILITYSPAREPARTSYEARS\", \"POWER_CONSUMPTION_HDR\", \"MINAVAILABILITYSOFTWAREUPDATESYEARS\", \"DATA_QUALITY\", \"MINGUARANTEEDSUPPORTYEARS\", \"POWER_CONSUMPTION_OFF\", \"CLASSE_ENERGY_SDR\", \"WARRANTY\", \"POWER_CONSUMPTION_STANDBY_NETWORKD\", \"REPAIRABILITY_INDEX\", \"CLASSE_ENERGY_HDR\", \"DIAGONALE_POUCES\", \"POWER_CONSUMPTION_SDR\" ],\n  \"positioning\" : {\n    \"claim\" : \"relative LCA-inspired score (ACV best-effort) for within-category comparison\",\n    \"not_an_absolute_footprint\" : true,\n    \"what_it_means_for_users\" : \"Ce score compare les téléviseurs entre eux sur une base environnementale simplifiée. Il ne mesure pas l'empreinte écologique totale d'un produit, mais aide à choisir le modèle ayant le moins d'impact parmi ceux disponibles, en se basant sur les principes de l'Analyse du Cycle de Vie (ACV). [2, 24]\"\n  },\n  \"reference_lifetime\" : {\n    \"lifetime_years_reference\" : 8.0,\n    \"lifetime_years_range\" : {\n      \"min\" : 7.0,\n      \"max\" : 10.0\n    },\n    \"rationale\" : \"La durée d'usage moyenne d'un téléviseur est estimée entre 7 et 10 ans. Une étude du baromètre Fnac-Darty mentionnée par l'association HOP indique 7,5 ans, tandis que le site collaboratif de la même association rapporte 8 ans. [26, 8, 16] La réglementation européenne Ecodesign impose une disponibilité des pièces détachées pendant au moins 7 ans, ce qui conforte une durée de vie minimale dans cette fourchette. [5] Une valeur de référence de 8 ans est choisie comme consensus prudent.\",\n    \"citations\" : [ \"S1\", \"S2\", \"S5\", \"S9\" ]\n  },\n  \"gap_analysis_absolute_vs_relative\" : {\n    \"what_is_missing_vs_full_lca\" : \"Une ACV complète (normes ISO 14040/44) nécessite des inventaires de flux détaillés pour chaque composant (extraction des matières, fabrication, transport), une modélisation précise de la fin de vie, et une évaluation sur de multiples catégories d'impact (toxicité, usage de l'eau, etc.). Ce score utilise des indicateurs proxy (ex: indice de réparabilité) plutôt que des inventaires complets. [2, 25, 28]\",\n    \"why_relative_is_still_useful\" : \"Malgré ses simplifications, un score relatif est utile pour guider le consommateur. Il se concentre sur les aspects les plus matériels (consommation d'énergie, durée de vie) et les plus différenciants entre produits, ce qui permet une comparaison robuste et lisible sur le marché. [20, 3]\",\n    \"mitigations\" : [ \"Les poids sont ancrés sur la matérialité ACV identifiée dans la littérature : la phase d'usage (énergie) et la phase de fabrication (dont l'impact est amorti par la durée de vie) sont prépondérantes pour les téléviseurs. [12, 14]\", \"Le double-comptage est évité en identifiant les critères corrélés (ex: classe énergie vs consommation) et en attribuant le poids au critère le plus granulaire. [20]\", \"La pondération du critère DATA_QUALITY incite les fabricants à la transparence, car les données manquantes sont imputées à la moyenne, pénalisant ainsi les produits moins documentés.\" ]\n  },\n  \"weighting_method\" : {\n    \"approach\" : \"evidence-weighted materiality + redundancy control + consumer comparability\",\n    \"key_principles\" : [ \"literature-first weighting\", \"lifecycle materiality for Téléviseurs\", \"anti double-counting\", \"robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)\", \"missing data virtualization + DATA_QUALITY incentive\", \"ESG/brand sustainability included with guardrails\" ],\n    \"assumptions\" : [ {\n      \"assumption\" : \"L'indice de réparabilité et les durées de disponibilité des pièces/mises à jour sont de bons indicateurs indirects de la durée de vie potentielle du produit, et donc de l'amortissement des impacts de sa fabrication.\",\n      \"why_it_matters\" : \"Cela justifie de regrouper ces critères dans un bloc 'Durabilité' représentant l'impact de la phase de fabrication.\",\n      \"citations\" : [ \"S1\", \"S4\" ]\n    }, {\n      \"assumption\" : \"La consommation en mode SDR est plus représentative de l'usage moyen qu'en mode HDR, bien que l'usage HDR soit en augmentation.\",\n      \"why_it_matters\" : \"Cela justifie d'attribuer un poids plus élevé à la consommation SDR qu'à la consommation HDR.\",\n      \"citations\" : [ \"S11\", \"S22\" ]\n    } ]\n  },\n  \"criteria_weights\" : [ {\n    \"criterion\" : \"POWER_CONSUMPTION_SDR\",\n    \"weight\" : 0.35,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La consommation d'énergie en phase d'usage est le principal contributeur à l'impact environnemental des téléviseurs sur leur cycle de vie. [12, 14] La consommation en SDR (Standard Dynamic Range) est la plus courante. Ce critère est le plus direct et granulaire pour mesurer cet impact. [22]\",\n    \"overlap_notes\" : \"Fortement corrélé avec CLASSE_ENERGY_SDR. Le poids est mis ici car la consommation en kWh est plus précise qu'une classe. [9]\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Basé sur de multiples études ACV et la réglementation européenne sur l'étiquetage énergétique. [5, 12, 14]\"\n    }\n  }, {\n    \"criterion\" : \"REPAIRABILITY_INDEX\",\n    \"weight\" : 0.25,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"resource_use\" ],\n    \"rationale\" : \"Critère clé pour allonger la durée de vie, ce qui amortit les impacts importants de la fabrication. [3, 26] L'indice de réparabilité français est un standard légal et composite (démontabilité, disponibilité pièces/docs). [7, 18] Il préfigure l'indice de durabilité européen. [13, 32]\",\n    \"overlap_notes\" : \"Chevauchement partiel avec MINAVAILABILITYSPAREPARTSYEARS. L'indice reçoit un poids majeur car il est plus complet (inclut démontage, prix des pièces, etc.).\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Critère réglementaire en France (Loi AGEC), basé sur une grille d'évaluation standardisée. [7, 13]\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_HDR\",\n    \"weight\" : 0.1,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La consommation en mode HDR (High Dynamic Range) est également significative et en croissance. Son poids est inférieur au SDR car ce mode est moins utilisé en moyenne, mais il reste un différenciant important. [34, 35]\",\n    \"overlap_notes\" : \"Fortement corrélé avec CLASSE_ENERGY_HDR. Le poids est mis ici pour la granularité. [9]\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Réglementé et mesuré selon les mêmes normes que la consommation SDR. [5, 9]\"\n    }\n  }, {\n    \"criterion\" : \"MINAVAILABILITYSPAREPARTSYEARS\",\n    \"weight\" : 0.05,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"resource_use\" ],\n    \"rationale\" : \"Complète l'indice de réparabilité. Une longue disponibilité des pièces est une condition nécessaire à la réparation et à l'extension de la durée de vie. La réglementation européenne Ecodesign impose un minimum de 7 ans. [5, 6]\",\n    \"overlap_notes\" : \"Partiellement inclus dans l'indice de réparabilité. Ce poids résiduel valorise les fabricants qui dépassent les exigences de l'indice.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Exigence explicite de la réglementation Ecodesign (UE) 2019/2021. [5, 31]\"\n    }\n  }, {\n    \"criterion\" : \"MINAVAILABILITYSOFTWAREUPDATESYEARS\",\n    \"weight\" : 0.05,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"social\" ],\n    \"rationale\" : \"Essentiel pour maintenir la fonctionnalité des 'Smart TV' et éviter l'obsolescence logicielle qui pousse au remplacement prématuré d'un appareil fonctionnel. [33] La réglementation Ecodesign lie la disponibilité des mises à jour à celle des pièces. [5]\",\n    \"overlap_notes\" : \"Lié à MINGUARANTEEDSUPPORTYEARS, mais plus spécifique à la fonctionnalité logicielle, un facteur d'obsolescence majeur. [33]\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Reconnu comme un facteur d'obsolescence important et inclus dans la logique de la réglementation Ecodesign, mais moins standardisé que la disponibilité des pièces. [5, 33]\"\n    }\n  }, {\n    \"criterion\" : \"DATA_QUALITY\",\n    \"weight\" : 0.1,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"other\" ],\n    \"rationale\" : \"Poids incitatif pour encourager la transparence des fabricants. Les produits avec des données manquantes reçoivent une note moyenne, ce qui avantage mécaniquement les produits bien documentés. Ce poids est volontairement significatif. [23]\",\n    \"overlap_notes\" : \"Aucun.\",\n    \"guardrails\" : \"Le poids de 10% est significatif mais ne permet pas à un produit peu performant sur les plans énergétique (45%) et durabilité (35%) de dominer le classement uniquement grâce à sa transparence.\",\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Le principe d'incitation à la transparence est une recommandation forte des méthodologies d'affichage environnemental, bien que la pondération exacte soit un choix de modèle. [23]\"\n    }\n  }, {\n    \"criterion\" : \"WARRANTY\",\n    \"weight\" : 0.03,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"social\" ],\n    \"rationale\" : \"Une garantie longue (légale ou commerciale) est un signal de confiance du fabricant dans la fiabilité de son produit, et un indicateur de durabilité. [16] Il incite à une conception plus robuste.\",\n    \"overlap_notes\" : \"Corrélé avec la durabilité globale, mais représente un engagement contractuel distinct de la simple disponibilité des pièces.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"low\",\n      \"why\" : \"La corrélation entre garantie et durée de vie réelle est débattue, mais elle reste un facteur de décision important et un signal de fiabilité pour le consommateur. [4]\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_STANDBY_NETWORKD\",\n    \"weight\" : 0.02,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La consommation en veille réseau, bien que faible, est permanente pour de nombreux appareils connectés. La réglementation Ecodesign fixe des limites strictes, mais une différenciation reste pertinente. [5, 23]\",\n    \"overlap_notes\" : \"Aucun.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Réglementé par la Commission Européenne, son impact cumulé sur des millions d'appareils est non-négligeable. [5, 23]\"\n    }\n  }, {\n    \"criterion\" : \"MINGUARANTEEDSUPPORTYEARS\",\n    \"weight\" : 0.03,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"social\" ],\n    \"rationale\" : \"Représente l'engagement global du fabricant à maintenir le produit. C'est un indicateur de la politique de support à long terme de la marque, complétant la garantie et la disponibilité des mises à jour. [33]\",\n    \"overlap_notes\" : \"Corrélé avec la garantie et la disponibilité des mises à jour, mais peut couvrir une période plus longue et un périmètre de support différent.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"low\",\n      \"why\" : \"Concept moins standardisé que les autres critères de durabilité, mais pertinent pour l'expérience utilisateur à long terme.\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_OFF\",\n    \"weight\" : 0.02,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"La consommation en mode 'arrêt' doit être la plus proche de zéro possible. Comme pour la veille, elle est réglementée mais les fabricants les plus vertueux peuvent être valorisés. [5, 23]\",\n    \"overlap_notes\" : \"Aucun.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Réglementé par la Commission Européenne. Impact faible mais facile à mesurer et à réduire. [5, 23]\"\n    }\n  }, {\n    \"criterion\" : \"CLASSE_ENERGY_SDR\",\n    \"weight\" : 0.0,\n    \"directionality\" : \"categorical\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"Poids nul pour éviter le double-comptage. La consommation réelle (POWER_CONSUMPTION_SDR) est un indicateur plus précis et granulaire que la classe énergétique, qui est une simple catégorisation de cette même information. [9, 35]\",\n    \"overlap_notes\" : \"Redondant avec POWER_CONSUMPTION_SDR.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"La classe énergétique dérive directement de la consommation mesurée, son inclusion serait une redondance directe. [9]\"\n    }\n  }, {\n    \"criterion\" : \"CLASSE_ENERGY_HDR\",\n    \"weight\" : 0.0,\n    \"directionality\" : \"categorical\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"Poids nul pour la même raison que la classe SDR : éviter le double-comptage avec la mesure de consommation directe (POWER_CONSUMPTION_HDR). [9, 35]\",\n    \"overlap_notes\" : \"Redondant avec POWER_CONSUMPTION_HDR.\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"La classe énergétique dérive directement de la consommation mesurée. [9]\"\n    }\n  }, {\n    \"criterion\" : \"DIAGONALE_POUCES\",\n    \"weight\" : 0.0,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"resource_use\", \"climate\" ],\n    \"rationale\" : \"Poids nul car l'impact de la taille (plus de matériaux, plus de consommation) est déjà capturé par les autres critères matériels. [20] Une plus grande taille entraîne quasi-systématiquement une consommation plus élevée, qui sera pénalisée par les critères POWER_CONSUMPTION. Pondérer la taille directement reviendrait à pénaliser deux fois. [34]\",\n    \"overlap_notes\" : \"L'impact de la diagonale est déjà reflété dans les consommations d'énergie (SDR/HDR) et implicitement dans l'impact de fabrication (amorti par la durabilité).\",\n    \"guardrails\" : null,\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"La corrélation entre la taille de l'écran et la consommation d'énergie est une évidence physique et documentée. [20, 34]\"\n    }\n  } ],\n  \"normalization_notes\" : {\n    \"relative_ranking_0_100\" : \"Chaque critère est normalisé sur une échelle de 0 à 100, où 100 est la meilleure performance et 0 la moins bonne. Cela permet de comparer des critères aux unités hétérogènes en se basant sur leur positionnement relatif sur le marché.\",\n    \"sigma_scoring_0_5\" : \"La méthode de notation principale utilise un score sigma pour transformer les valeurs brutes en une note sur 5, ce qui la rend robuste aux valeurs extrêmes (outliers) en se basant sur la moyenne et l'écart-type de la distribution.\",\n    \"percentile_fallback\" : \"Si la distribution d'un critère a une faible variabilité (ex: valeurs très groupées ou discrètes), un classement par percentile est utilisé pour garantir une différenciation juste et éviter les artéfacts de la méthode sigma.\",\n    \"missing_value_virtualization\" : \"Lorsqu'une donnée est manquante pour un produit, elle est remplacée par la valeur moyenne de ce critère sur l'ensemble du panel. Ce mécanisme est couplé au bonus du critère DATA_QUALITY pour inciter les fabricants à fournir des données complètes.\"\n  },\n  \"quality_checks\" : {\n    \"criteria_weights_complete\" : true,\n    \"weights_sum_to_1\" : true,\n    \"sum_value\" : 1.0,\n    \"unused_or_zero_weight_criterias\" : [ \"CLASSE_ENERGY_SDR\", \"CLASSE_ENERGY_HDR\", \"DIAGONALE_POUCES\" ],\n    \"renormalization_rule_if_needed\" : \"Si un ou plusieurs critères pondérés sont indisponibles pour tous les produits, leurs poids sont redistribués proportionnellement entre les critères restants.\"\n  },\n  \"materiality_summary\" : {\n    \"dominant_lifecycle_stages_for_vertical\" : [ \"use_phase\", \"manufacturing\" ],\n    \"short_summary\" : \"L'analyse du cycle de vie des téléviseurs montre que deux phases dominent l'impact environnemental : la phase d'usage, via la consommation d'électricité, et la phase de fabrication, en raison des composants électroniques et des ressources nécessaires. [12, 14, 15] En conséquence, la pondération de ce score privilégie fortement (1) un bloc 'Énergie' (54% du poids total) et (2) un bloc 'Durabilité/Réparabilité' (38% du poids total), car allonger la durée de vie est le levier principal pour réduire l'impact de la fabrication. [3, 26]\"\n  },\n  \"sources\" : [ {\n    \"id\" : \"S1\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Longue vie aux téléviseurs - ADEME Infos\",\n    \"authors_or_org\" : \"ADEME\",\n    \"year\" : 2025,\n    \"publisher\" : \"ADEME\",\n    \"url\" : \"https://infos.ademe.fr/magazine-janvier-2025-consommer-autrement/longue-vie-aux-televiseurs/\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"lifetime reference\", \"reparability rationale\" ],\n    \"notes\" : \"Mentionne l'indice de durabilité pour les TV et l'importance de la réparabilité.\"\n  }, {\n    \"id\" : \"S2\",\n    \"type\" : \"peer_reviewed\",\n    \"title\" : \"LCA study of a plasma television device\",\n    \"authors_or_org\" : \"Roland Hischier, Isabelle Baudin\",\n    \"year\" : 2010,\n    \"publisher\" : \"ResearchGate\",\n    \"url\" : \"https://www.researchgate.net/publication/222415133_LCA_study_of_a_plasma_television_device\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"materiality summary\", \"energy materiality\" ],\n    \"notes\" : \"Étude ACV détaillée montrant la prédominance des phases de production et d'usage.\"\n  }, {\n    \"id\" : \"S3\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Règlement (UE) 2019/2021 fixant des exigences d'écoconception pour les dispositifs d'affichage électroniques\",\n    \"authors_or_org\" : \"Commission Européenne\",\n    \"year\" : 2019,\n    \"publisher\" : \"Journal Officiel de l'Union européenne\",\n    \"url\" : \"https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32019R2021\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"lifetime reference\", \"energy materiality\", \"reparability rationale\" ],\n    \"notes\" : \"Source réglementaire clé pour l'écoconception, incluant la consommation d'énergie et la disponibilité des pièces (7 ans min).\"\n  }, {\n    \"id\" : \"S4\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Loi n° 2020-105 du 10 février 2020 relative à la lutte contre le gaspillage et pour l'économie circulaire (AGEC)\",\n    \"authors_or_org\" : \"République Française\",\n    \"year\" : 2020,\n    \"publisher\" : \"Légifrance\",\n    \"url\" : \"https://www.legifrance.gouv.fr/loda/id/JORFTEXT000041553759/\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability rationale\" ],\n    \"notes\" : \"Instaure l'indice de réparabilité en France, un critère fondamental pour ce score.\"\n  }, {\n    \"id\" : \"S5\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"L'obsolescence des téléviseurs\",\n    \"authors_or_org\" : \"HOP (Halte à l'Obsolescence Programmée)\",\n    \"year\" : 2020,\n    \"publisher\" : \"HOP\",\n    \"url\" : \"https://www.halteobsolescence.org/wp-content/uploads/2020/09/Rapport-obsolescence-des-televiseurs.pdf\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"lifetime reference\", \"reparability rationale\" ],\n    \"notes\" : \"Rapport citant des chiffres clés sur la durée d'usage (baromètre Fnac-Darty) et les causes de remplacement.\"\n  }, {\n    \"id\" : \"S6\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Indice de réparabilité\",\n    \"authors_or_org\" : \"Ministère de la Transition écologique\",\n    \"year\" : 2021,\n    \"publisher\" : \"ecologie.gouv.fr\",\n    \"url\" : \"https://www.ecologie.gouv.fr/indice-reparabilite\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability rationale\" ],\n    \"notes\" : \"Page officielle expliquant le fonctionnement et les objectifs de l'indice de réparabilité.\"\n  }, {\n    \"id\" : \"S7\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"EVALUATION DE L'IMPACT ENVIRONNEMENTAL DU NUMERIQUE EN FRANCE ET ANALYSE PROSPECTIVE\",\n    \"authors_or_org\" : \"ADEME / Arcep\",\n    \"year\" : 2022,\n    \"publisher\" : \"ADEME\",\n    \"url\" : \"https://librairie.ademe.fr/consommer-autrement/5225-evaluation-de-l-impact-environnemental-du-numerique-en-france-et-analyse-prospective.html\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"materiality summary\" ],\n    \"notes\" : \"Étude de référence en France qui identifie les téléviseurs comme un contributeur majeur aux impacts du numérique, notamment via la fabrication et l'usage.\"\n  }, {\n    \"id\" : \"S8\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Règlement délégué (UE) 2019/2013 sur l'étiquetage énergétique des dispositifs d'affichage électroniques\",\n    \"authors_or_org\" : \"Commission Européenne\",\n    \"year\" : 2019,\n    \"publisher\" : \"Journal Officiel de l'Union européenne\",\n    \"url\" : \"https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32019R2013\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy materiality\", \"redundancy analysis\" ],\n    \"notes\" : \"Définit les modalités de calcul des classes énergétiques, confirmant qu'elles découlent des mesures de consommation.\"\n  }, {\n    \"id\" : \"S9\",\n    \"type\" : \"other\",\n    \"title\" : \"How Long Should A TV Last?: Our 100 TV Accelerated Longevity And Burn-In Test\",\n    \"authors_or_org\" : \"rtings.com\",\n    \"year\" : 2023,\n    \"publisher\" : \"rtings.com\",\n    \"url\" : \"https://www.rtings.com/tv/learn/longevity-burn-in-test\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"medium\",\n    \"used\" : true,\n    \"used_for\" : [ \"lifetime reference\" ],\n    \"notes\" : \"Site technique de référence qui corrobore une durée de vie commune de 5-10 ans pour les téléviseurs.\"\n  }, {\n    \"id\" : \"S10\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"JRC Technical Report: Methods for the Assessment of the Reparability and Upgradability of Energy-related Products: Application to TVs\",\n    \"authors_or_org\" : \"Joint Research Centre (JRC)\",\n    \"year\" : 2019,\n    \"publisher\" : \"Publications Office of the European Union\",\n    \"url\" : \"https://publications.jrc.ec.europa.eu/repository/handle/JRC116105\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reparability rationale\" ],\n    \"notes\" : \"Rapport de recherche de la Commission Européenne soutenant le développement de scores de réparabilité pour les TV.\"\n  }, {\n    \"id\" : \"S11\",\n    \"type\" : \"other\",\n    \"title\" : \"Consommation TV en vieille, allumée, en watt, classe F/G\",\n    \"authors_or_org\" : \"Kelwatt.fr\",\n    \"year\" : 2024,\n    \"publisher\" : \"Kelwatt\",\n    \"url\" : \"https://www.kelwatt.fr/guide/consommation-electrique/appareils-electromenagers/tv\",\n    \"accessed_date\" : \"2026-01-23\",\n    \"reliability\" : \"low\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy materiality\" ],\n    \"notes\" : \"Article de vulgarisation citant les chiffres de l'ADEME sur la consommation moyenne et la durée d'utilisation journalière en France.\"\n  } ],\n  \"search_log\" : [ {\n    \"query\" : \"ACV téléviseur répartition impacts fabrication usage\",\n    \"date\" : \"2026-01-23\",\n    \"notes\" : \"Recherche de la matérialité des phases du cycle de vie pour justifier la répartition des poids.\"\n  }, {\n    \"query\" : \"life cycle assessment television environmental impact\",\n    \"date\" : \"2026-01-23\",\n    \"notes\" : \"Requête complémentaire en anglais pour élargir les sources académiques sur l'ACV des TV.\"\n  }, {\n    \"query\" : \"durée d'usage moyenne téléviseur france ADEME\",\n    \"date\" : \"2026-01-23\",\n    \"notes\" : \"Recherche de la durée de vie de référence, un paramètre obligatoire.\"\n  }, {\n    \"query\" : \"average lifespan of a television Europe\",\n    \"date\" : \"2026-01-23\",\n    \"notes\" : \"Requête en anglais pour corroborer la durée de vie à l'échelle européenne.\"\n  }, {\n    \"query\" : \"EU ecodesign regulation television\",\n    \"date\" : \"2026-01-23\",\n    \"notes\" : \"Recherche de la réglementation européenne applicable pour fonder les critères de durabilité et d'énergie.\"\n  }, {\n    \"query\" : \"règlement affichage énergétique téléviseurs UE\",\n    \"date\" : \"2026-01-23\",\n    \"notes\" : \"Spécifiquement pour les détails de l'étiquette énergie et éviter le double-comptage.\"\n  }, {\n    \"query\" : \"indice de réparabilité loi AGEC\",\n    \"date\" : \"2026-01-23\",\n    \"notes\" : \"Recherche sur le cadre légal et la méthodologie de l'indice de réparabilité français.\"\n  }, {\n    \"query\" : \"JRC technical report LCA television\",\n    \"date\" : \"2026-01-23\",\n    \"notes\" : \"Recherche de rapports techniques de la Commission Européenne (JRC) pour une base scientifique solide.\"\n  } ]\n}"
 aiResult:
   use_case: "consumer_comparison"
   geo_scope: "EU/France"
   vertical: "Téléviseurs"
   available_criterias:
-    - "MINAVAILABILITYSPAREPARTSYEARS"
-    - "POWER_CONSUMPTION_HDR"
-    - "MINAVAILABILITYSOFTWAREUPDATESYEARS"
-    - "DATA_QUALITY"
-    - "BRAND_SUSTAINALYTICS_SCORING"
-    - "MINGUARANTEEDSUPPORTYEARS"
-    - "POWER_CONSUMPTION_OFF"
-    - "CLASSE_ENERGY_SDR"
-    - "WARRANTY"
-    - "POWER_CONSUMPTION_STANDBY_NETWORKD"
-    - "REPAIRABILITY_INDEX"
-    - "CLASSE_ENERGY_HDR"
-    - "DIAGONALE_POUCES"
-    - "POWER_CONSUMPTION_SDR"
+  - "MINAVAILABILITYSPAREPARTSYEARS"
+  - "POWER_CONSUMPTION_HDR"
+  - "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+  - "DATA_QUALITY"
+  - "MINGUARANTEEDSUPPORTYEARS"
+  - "POWER_CONSUMPTION_OFF"
+  - "CLASSE_ENERGY_SDR"
+  - "WARRANTY"
+  - "POWER_CONSUMPTION_STANDBY_NETWORKD"
+  - "REPAIRABILITY_INDEX"
+  - "CLASSE_ENERGY_HDR"
+  - "DIAGONALE_POUCES"
+  - "POWER_CONSUMPTION_SDR"
   positioning:
     claim: "relative LCA-inspired score (ACV best-effort) for within-category comparison"
     not_an_absolute_footprint: true
-    what_it_means_for_users: "Ce score offre aux consommateurs une vision comparative des performances environnementales des téléviseurs, inspirée des principes de l'ACV, sans prétendre être une analyse absolue et exhaustive de l'empreinte carbone ou environnementale. Il vise à orienter les choix vers des produits plus durables et moins impactants au sein d'une même catégorie."
+    what_it_means_for_users: "Ce score compare les téléviseurs entre eux sur une base environnementale simplifiée. Il ne mesure pas l'empreinte écologique totale d'un produit, mais aide à choisir le modèle ayant le moins d'impact parmi ceux disponibles, en se basant sur les principes de l'Analyse du Cycle de Vie (ACV). [2, 24]"
   reference_lifetime:
     lifetime_years_reference: 8.0
     lifetime_years_range:
-      min: 5.0
+      min: 7.0
       max: 10.0
-    rationale: "La durée de vie moyenne d'un téléviseur en France est estimée entre 7,5 et 8 ans par des organismes comme Fnac-Darty/HOP. Une synthèse de l'ADEME de 2012 évoquait une durée d'usage totale allant de 4 à 15 ans. De manière plus générale, les téléviseurs modernes ont une durée de vie moyenne de 5 à 10 ans. L'introduction de l'indice de durabilité en 2025 pour les téléviseurs vise précisément à encourager l'allongement de cette durée. Une valeur de référence de 8 ans est retenue pour refléter une moyenne contemporaine et les efforts réglementaires visant à étendre la durée d'usage."
+    rationale: "La durée d'usage moyenne d'un téléviseur est estimée entre 7 et 10 ans. Une étude du baromètre Fnac-Darty mentionnée par l'association HOP indique 7,5 ans, tandis que le site collaboratif de la même association rapporte 8 ans. [26, 8, 16] La réglementation européenne Ecodesign impose une disponibilité des pièces détachées pendant au moins 7 ans, ce qui conforte une durée de vie minimale dans cette fourchette. [5] Une valeur de référence de 8 ans est choisie comme consensus prudent."
     citations:
-      - "S6"
-      - "S16"
-      - "S2"
-      - "S5"
-      - "S7"
-      - "S9"
-      - "S19"
+    - "S1"
+    - "S2"
+    - "S5"
+    - "S9"
   gap_analysis_absolute_vs_relative:
-    what_is_missing_vs_full_lca: "Un score relatif ne remplace pas une ACV complète. Il manque l'inventaire détaillé de toutes les phases (extraction des matières premières, transport, etc.), les frontières de système précises (ex: infrastructure réseau pour la diffusion de contenu), une unité fonctionnelle détaillée qui inclurait des scénarios d'usage complexes (ex: heures d'utilisation réelles par mode, durée de possession) et l'analyse de toutes les catégories d'impact environnemental (toxicité aquatique, eutrophisation, etc.) au-delà des impacts majeurs."
-    why_relative_is_still_useful: "Ce score est utile pour la comparaison directe de produits similaires sur un marché donné, offrant une lisibilité et une robustesse suffisantes pour guider les décisions d'achat grand public. Il permet d'identifier les 'meilleurs élèves' en se concentrant sur les leviers d'action les plus significatifs et les données accessibles, réduisant la complexité inhérente à une ACV complète. Il encourage également la transparence des fabricants."
+    what_is_missing_vs_full_lca: "Une ACV complète (normes ISO 14040/44) nécessite des inventaires de flux détaillés pour chaque composant (extraction des matières, fabrication, transport), une modélisation précise de la fin de vie, et une évaluation sur de multiples catégories d'impact (toxicité, usage de l'eau, etc.). Ce score utilise des indicateurs proxy (ex: indice de réparabilité) plutôt que des inventaires complets. [2, 25, 28]"
+    why_relative_is_still_useful: "Malgré ses simplifications, un score relatif est utile pour guider le consommateur. Il se concentre sur les aspects les plus matériels (consommation d'énergie, durée de vie) et les plus différenciants entre produits, ce qui permet une comparaison robuste et lisible sur le marché. [20, 3]"
     mitigations:
-      - "Anchor weights on LCA literature for lifecycle stage contributions"
-      - "Avoid double counting and document overlaps"
-      - "Raise DATA_QUALITY because missing data is imputed to mean (transparency incentive)"
+    - "Les poids sont ancrés sur la matérialité ACV identifiée dans la littérature : la phase d'usage (énergie) et la phase de fabrication (dont l'impact est amorti par la durée de vie) sont prépondérantes pour les téléviseurs. [12, 14]"
+    - "Le double-comptage est évité en identifiant les critères corrélés (ex: classe énergie vs consommation) et en attribuant le poids au critère le plus granulaire. [20]"
+    - "La pondération du critère DATA_QUALITY incite les fabricants à la transparence, car les données manquantes sont imputées à la moyenne, pénalisant ainsi les produits moins documentés."
   weighting_method:
     approach: "evidence-weighted materiality + redundancy control + consumer comparability"
     key_principles:
-      - "literature-first weighting"
-      - "lifecycle materiality for Téléviseurs"
-      - "anti double-counting"
-      - "robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)"
-      - "missing data virtualization + DATA_QUALITY incentive"
-      - "ESG/brand sustainability included with guardrails"
+    - "literature-first weighting"
+    - "lifecycle materiality for Téléviseurs"
+    - "anti double-counting"
+    - "robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)"
+    - "missing data virtualization + DATA_QUALITY incentive"
+    - "ESG/brand sustainability included with guardrails"
     assumptions:
-      - assumption: "L'impact environnemental dominant des téléviseurs est la phase de fabrication, suivie de la phase d'utilisation (notamment la consommation électrique)."
-        why_it_matters: "Cette hypothèse, étayée par la littérature ACV, guide la priorisation des critères. Les facteurs liés à la durabilité et à la réparabilité (réduction de la fabrication de nouveaux produits) et la consommation énergétique seront donc fortement pondérés."
-        citations:
-          - "S18"
-          - "S30"
-      - assumption: "Les informations fournies par les classes énergétiques (CLASSE_ENERGY_SDR, CLASSE_ENERGY_HDR) sont redondantes avec les consommations électriques directes (POWER_CONSUMPTION_SDR, POWER_CONSUMPTION_HDR)."
-        why_it_matters: "Pour éviter le double-comptage, seuls les critères de consommation directe seront pondérés, les classes énergétiques étant des agrégations de ces mêmes données."
-        citations:
-          - "S8"
-      - assumption: "La DIAGONALE_POUCES a un impact indirect sur la consommation d'énergie et la quantité de matériaux utilisés, mais cet impact est déjà largement couvert par les critères de consommation électrique et par l'estimation implicite de la matérialité de fabrication."
-        why_it_matters: "Accorder un poids direct à la diagonale pourrait entraîner un double-comptage ou pénaliser excessivement les grands écrans sans nécessairement refléter une moindre efficience relative. Il est donc préférable de la pondérer à zéro ou très faiblement pour éviter la redondance et se concentrer sur l'efficacité intrinsèque du produit, quelle que soit sa taille."
-      - assumption: "Les critères MINAVAILABILITYSPAREPARTSYEARS et MINGUARANTEEDSUPPORTYEARS sont intégrés ou fortement corrélés à l'indice de réparabilité (REPAIRABILITY_INDEX) et à la garantie (WARRANTY)."
-        why_it_matters: "Pour une pondération anti-double-comptage, ces critères ne recevront pas de poids direct mais leur importance est reconnue via les critères plus englobants. L'Indice de Durabilité (qui remplace l'Indice de Réparabilité) inclut explicitement la disponibilité des pièces détachées et la fiabilité/engagement du fabricant."
-        citations:
-          - "S2"
-          - "S9"
+    - assumption: "L'indice de réparabilité et les durées de disponibilité des pièces/mises à jour sont de bons indicateurs indirects de la durée de vie potentielle du produit, et donc de l'amortissement des impacts de sa fabrication."
+      why_it_matters: "Cela justifie de regrouper ces critères dans un bloc 'Durabilité' représentant l'impact de la phase de fabrication."
+      citations:
+      - "S1"
+      - "S4"
+    - assumption: "La consommation en mode SDR est plus représentative de l'usage moyen qu'en mode HDR, bien que l'usage HDR soit en augmentation."
+      why_it_matters: "Cela justifie d'attribuer un poids plus élevé à la consommation SDR qu'à la consommation HDR."
+      citations:
+      - "S11"
+      - "S22"
   criteria_weights:
-    - criterion: "MINAVAILABILITYSPAREPARTSYEARS"
-      weight: 0.0
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "circularity"
-      rationale: "Ce critère est directement intégré dans le calcul de l'Indice de Réparabilité (et du futur Indice de Durabilité), qui évalue la disponibilité des pièces détachées et leur prix. Pour éviter le double-comptage, il ne reçoit pas de poids indépendant. Son importance est capturée par le REPAIRABILITY_INDEX."
-      overlap_notes: "Fortement redondant avec REPAIRABILITY_INDEX."
-      evidence_strength:
-        level: "high"
-        why: "Réglementations françaises et européennes (Loi AGEC, Indice de Durabilité) intègrent la disponibilité des pièces."
-    - criterion: "POWER_CONSUMPTION_HDR"
-      weight: 0.15
-      directionality: "lower_is_better"
-      impact_dimensions:
-        - "climate"
-        - "resource_use"
-      rationale: "La consommation en mode HDR représente une part significative de l'impact énergétique d'un téléviseur lors de son usage, ce mode étant de plus en plus courant. Bien que l'impact carbone de la phase d'usage soit moins dominant que la fabrication en France, il reste un poste important."
-      overlap_notes: "Corrélé à CLASSE_ENERGY_HDR, mais plus granulaire. Néglige CLASSE_ENERGY_HDR."
-      evidence_strength:
-        level: "high"
-        why: "Législation sur l'étiquetage énergétique UE impose l'affichage de la consommation HDR."
-    - criterion: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
-      weight: 0.15
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "circularity"
-        - "resource_use"
-      rationale: "La disponibilité des mises à jour logicielles est cruciale pour lutter contre l'obsolescence fonctionnelle et prolonger la durée de vie utile du produit. Une absence de support logiciel peut rendre un appareil obsolète même s'il est physiquement fonctionnel. Ce critère est explicitement pris en compte par l'Indice de Durabilité."
-      overlap_notes: "Complète REPAIRABILITY_INDEX en adressant l'obsolescence logicielle."
-      evidence_strength:
-        level: "high"
-        why: "Reconnu par l'ADEME et les réglementations comme un facteur clé de durabilité."
-    - criterion: "DATA_QUALITY"
-      weight: 0.14
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "other"
-      rationale: "Un poids élevé pour DATA_QUALITY est essentiel pour inciter les fabricants à fournir des données complètes et fiables. Étant donné que les données manquantes sont imputées à la moyenne, une bonne DATA_QUALITY récompense la transparence et réduit le risque de biais dans la comparaison, en offrant une meilleure fiabilité au score global."
-      overlap_notes: "Critère transversal, sans redondance directe avec d'autres impacts environnementaux."
-      guardrails: "Ce poids élevé ne doit pas permettre à un produit très peu performant sur des critères environnementaux majeurs (énergie, réparabilité) d'obtenir un bon score uniquement grâce à une excellente DATA_QUALITY. La somme des poids environnementaux matériels reste prépondérante."
-      evidence_strength:
-        level: "high"
-        why: "Principe de la transparence des éco-scores et gestion des données manquantes."
-    - criterion: "BRAND_SUSTAINALYTICS_SCORING"
-      weight: 0.01
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "social"
-      rationale: "Evaluation ESG de la marque."
-      overlap_notes: "None"
-      evidence_strength:
-        level: "low"
-        why: "Manual fix for crash"
-    - criterion: "MINGUARANTEEDSUPPORTYEARS"
-      weight: 0.0
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "circularity"
-        - "social"
-      rationale: "La durée de support garanti est une facette de l'engagement du fabricant envers la durabilité du produit. Cependant, son impact est largement couvert par le REPAIRABILITY_INDEX (qui intègre la fiabilité et la facilité d'entretien) et la WARRANTY (qui est une expression directe de cet engagement). Pour éviter la redondance, ce critère n'est pas directement pondéré."
-      overlap_notes: "Redondant avec REPAIRABILITY_INDEX et WARRANTY."
-      evidence_strength:
-        level: "medium"
-        why: "Aspect de l'indice de durabilité mais indirectement couvert."
-    - criterion: "POWER_CONSUMPTION_OFF"
-      weight: 0.05
-      directionality: "lower_is_better"
-      impact_dimensions:
-        - "climate"
-        - "resource_use"
-      rationale: "Même éteint, un téléviseur consomme de l'énergie, bien que faible. Sur la durée de vie du produit, cette consommation passive peut s'accumuler et est une source de gaspillage évitable."
-      overlap_notes: "Distinct de la consommation en veille réseau et des consommations en usage."
-      evidence_strength:
-        level: "high"
-        why: "Réglementations européennes fixant des limites de consommation en mode off."
-    - criterion: "CLASSE_ENERGY_SDR"
-      weight: 0.0
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "climate"
-        - "resource_use"
-      rationale: "La classe énergétique SDR est une agrégation de la consommation électrique SDR. Puisque POWER_CONSUMPTION_SDR est disponible et plus granulaire, il est préférable de pondérer directement la consommation pour éviter le double-comptage."
-      overlap_notes: "Totalement redondant avec POWER_CONSUMPTION_SDR."
-      evidence_strength:
-        level: "high"
-        why: "L'étiquette énergie est directement liée aux valeurs de consommation."
-    - criterion: "WARRANTY"
-      weight: 0.05
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "social"
-        - "circularity"
-      rationale: "La durée de garantie reflète l'engagement du fabricant sur la fiabilité et la qualité de son produit, encourageant la durabilité. L'Indice de Durabilité prend en compte l'engagement du fabricant via des extensions de garantie."
-      overlap_notes: "Complète REPAIRABILITY_INDEX et MINAVAILABILITYSOFTWAREUPDATESYEARS en termes d'engagement fabricant."
-      evidence_strength:
-        level: "medium"
-        why: "Reconnu par les régulations et initiatives pour la durabilité."
-    - criterion: "POWER_CONSUMPTION_STANDBY_NETWORKD"
-      weight: 0.05
-      directionality: "lower_is_better"
-      impact_dimensions:
-        - "climate"
-        - "resource_use"
-      rationale: "La consommation en mode veille réseau (smart TV connectée) est distincte de la veille simple (off) et représente une source d'énergie continue, pouvant s'accumuler sur la durée de vie du produit."
-      overlap_notes: "Distinct de POWER_CONSUMPTION_OFF."
-      evidence_strength:
-        level: "high"
-        why: "Réglementations européennes spécifiant des limites pour la consommation en veille réseau."
-    - criterion: "REPAIRABILITY_INDEX"
-      weight: 0.25
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "circularity"
-        - "resource_use"
-      rationale: "L'indice de réparabilité (qui évolue vers l'Indice de Durabilité en 2025) est un critère primordial pour la prolongation de la durée de vie des produits. Il englobe la facilité de démontage, la disponibilité et le prix des pièces détachées, et la documentation technique. Cet indice réduit directement le besoin de fabrication de nouveaux produits, adressant la phase la plus impactante de l'ACV."
-      overlap_notes: "Couvre une grande partie de MINAVAILABILITYSPAREPARTSYEARS et une partie de MINGUARANTEEDSUPPORTYEARS."
-      evidence_strength:
-        level: "high"
-        why: "Loi AGEC en France, mise en place de l'Indice de Réparabilité puis de Durabilité avec une méthodologie définie par l'ADEME."
-    - criterion: "CLASSE_ENERGY_HDR"
-      weight: 0.0
-      directionality: "higher_is_better"
-      impact_dimensions:
-        - "climate"
-        - "resource_use"
-      rationale: "La classe énergétique HDR est une agrégation de la consommation électrique HDR. Comme pour la SDR, il est préférable de pondérer directement la consommation POWER_CONSUMPTION_HDR qui est plus précise, afin d'éviter le double-comptage."
-      overlap_notes: "Totalement redondant avec POWER_CONSUMPTION_HDR."
-      evidence_strength:
-        level: "high"
-        why: "L'étiquette énergie est directement liée aux valeurs de consommation."
-    - criterion: "DIAGONALE_POUCES"
-      weight: 0.0
-      directionality: "lower_is_better"
-      impact_dimensions:
-        - "resource_use"
-      rationale: "La taille de l'écran est corrélée à la consommation électrique et à la quantité de matériaux. Cependant, la consommation électrique est déjà directement mesurée par d'autres critères (SDR, HDR), et l'impact matériel est implicitement traité par la durée de vie et la réparabilité (un produit durable, quelle que soit sa taille, est préférable à un produit moins durable). Un poids nul évite le double-comptage et se concentre sur l'efficacité intrinsèque du téléviseur."
-      overlap_notes: "Fortement corrélé aux consommations électriques (POWER_CONSUMPTION_SDR, POWER_CONSUMPTION_HDR) et à la matérialité de fabrication, qui est adressée par la durabilité."
-      evidence_strength:
-        level: "medium"
-        why: "Reconnaissance de la corrélation taille/conso/matériaux dans les ACV, mais l'approche choisie évite le double-comptage."
-    - criterion: "POWER_CONSUMPTION_SDR"
-      weight: 0.15
-      directionality: "lower_is_better"
-      impact_dimensions:
-        - "climate"
-        - "resource_use"
-      rationale: "La consommation en mode SDR est un indicateur clé de l'efficacité énergétique du téléviseur lors de son utilisation courante. C'est une donnée standardisée et directement liée à l'impact environnemental de la phase d'usage."
-      overlap_notes: "Corrélé à CLASSE_ENERGY_SDR, mais plus granulaire. Néglige CLASSE_ENERGY_SDR."
-      evidence_strength:
-        level: "high"
-        why: "Législation sur l'étiquetage énergétique UE impose l'affichage de la consommation SDR."
+  - criterion: "POWER_CONSUMPTION_SDR"
+    weight: 0.35
+    directionality: "lower_is_better"
+    impact_dimensions:
+    - "climate"
+    - "resource_use"
+    rationale: "La consommation d'énergie en phase d'usage est le principal contributeur à l'impact environnemental des téléviseurs sur leur cycle de vie. [12, 14] La consommation en SDR (Standard Dynamic Range) est la plus courante. Ce critère est le plus direct et granulaire pour mesurer cet impact. [22]"
+    overlap_notes: "Fortement corrélé avec CLASSE_ENERGY_SDR. Le poids est mis ici car la consommation en kWh est plus précise qu'une classe. [9]"
+    evidence_strength:
+      level: "high"
+      why: "Basé sur de multiples études ACV et la réglementation européenne sur l'étiquetage énergétique. [5, 12, 14]"
+  - criterion: "REPAIRABILITY_INDEX"
+    weight: 0.25
+    directionality: "higher_is_better"
+    impact_dimensions:
+    - "circularity"
+    - "resource_use"
+    rationale: "Critère clé pour allonger la durée de vie, ce qui amortit les impacts importants de la fabrication. [3, 26] L'indice de réparabilité français est un standard légal et composite (démontabilité, disponibilité pièces/docs). [7, 18] Il préfigure l'indice de durabilité européen. [13, 32]"
+    overlap_notes: "Chevauchement partiel avec MINAVAILABILITYSPAREPARTSYEARS. L'indice reçoit un poids majeur car il est plus complet (inclut démontage, prix des pièces, etc.)."
+    evidence_strength:
+      level: "high"
+      why: "Critère réglementaire en France (Loi AGEC), basé sur une grille d'évaluation standardisée. [7, 13]"
+  - criterion: "POWER_CONSUMPTION_HDR"
+    weight: 0.1
+    directionality: "lower_is_better"
+    impact_dimensions:
+    - "climate"
+    - "resource_use"
+    rationale: "La consommation en mode HDR (High Dynamic Range) est également significative et en croissance. Son poids est inférieur au SDR car ce mode est moins utilisé en moyenne, mais il reste un différenciant important. [34, 35]"
+    overlap_notes: "Fortement corrélé avec CLASSE_ENERGY_HDR. Le poids est mis ici pour la granularité. [9]"
+    evidence_strength:
+      level: "high"
+      why: "Réglementé et mesuré selon les mêmes normes que la consommation SDR. [5, 9]"
+  - criterion: "MINAVAILABILITYSPAREPARTSYEARS"
+    weight: 0.05
+    directionality: "higher_is_better"
+    impact_dimensions:
+    - "circularity"
+    - "resource_use"
+    rationale: "Complète l'indice de réparabilité. Une longue disponibilité des pièces est une condition nécessaire à la réparation et à l'extension de la durée de vie. La réglementation européenne Ecodesign impose un minimum de 7 ans. [5, 6]"
+    overlap_notes: "Partiellement inclus dans l'indice de réparabilité. Ce poids résiduel valorise les fabricants qui dépassent les exigences de l'indice."
+    evidence_strength:
+      level: "high"
+      why: "Exigence explicite de la réglementation Ecodesign (UE) 2019/2021. [5, 31]"
+  - criterion: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+    weight: 0.05
+    directionality: "higher_is_better"
+    impact_dimensions:
+    - "circularity"
+    - "social"
+    rationale: "Essentiel pour maintenir la fonctionnalité des 'Smart TV' et éviter l'obsolescence logicielle qui pousse au remplacement prématuré d'un appareil fonctionnel. [33] La réglementation Ecodesign lie la disponibilité des mises à jour à celle des pièces. [5]"
+    overlap_notes: "Lié à MINGUARANTEEDSUPPORTYEARS, mais plus spécifique à la fonctionnalité logicielle, un facteur d'obsolescence majeur. [33]"
+    evidence_strength:
+      level: "medium"
+      why: "Reconnu comme un facteur d'obsolescence important et inclus dans la logique de la réglementation Ecodesign, mais moins standardisé que la disponibilité des pièces. [5, 33]"
+  - criterion: "DATA_QUALITY"
+    weight: 0.1
+    directionality: "higher_is_better"
+    impact_dimensions:
+    - "other"
+    rationale: "Poids incitatif pour encourager la transparence des fabricants. Les produits avec des données manquantes reçoivent une note moyenne, ce qui avantage mécaniquement les produits bien documentés. Ce poids est volontairement significatif. [23]"
+    overlap_notes: "Aucun."
+    guardrails: "Le poids de 10% est significatif mais ne permet pas à un produit peu performant sur les plans énergétique (45%) et durabilité (35%) de dominer le classement uniquement grâce à sa transparence."
+    evidence_strength:
+      level: "medium"
+      why: "Le principe d'incitation à la transparence est une recommandation forte des méthodologies d'affichage environnemental, bien que la pondération exacte soit un choix de modèle. [23]"
+  - criterion: "WARRANTY"
+    weight: 0.03
+    directionality: "higher_is_better"
+    impact_dimensions:
+    - "circularity"
+    - "social"
+    rationale: "Une garantie longue (légale ou commerciale) est un signal de confiance du fabricant dans la fiabilité de son produit, et un indicateur de durabilité. [16] Il incite à une conception plus robuste."
+    overlap_notes: "Corrélé avec la durabilité globale, mais représente un engagement contractuel distinct de la simple disponibilité des pièces."
+    evidence_strength:
+      level: "low"
+      why: "La corrélation entre garantie et durée de vie réelle est débattue, mais elle reste un facteur de décision important et un signal de fiabilité pour le consommateur. [4]"
+  - criterion: "POWER_CONSUMPTION_STANDBY_NETWORKD"
+    weight: 0.02
+    directionality: "lower_is_better"
+    impact_dimensions:
+    - "climate"
+    - "resource_use"
+    rationale: "La consommation en veille réseau, bien que faible, est permanente pour de nombreux appareils connectés. La réglementation Ecodesign fixe des limites strictes, mais une différenciation reste pertinente. [5, 23]"
+    overlap_notes: "Aucun."
+    evidence_strength:
+      level: "medium"
+      why: "Réglementé par la Commission Européenne, son impact cumulé sur des millions d'appareils est non-négligeable. [5, 23]"
+  - criterion: "MINGUARANTEEDSUPPORTYEARS"
+    weight: 0.03
+    directionality: "higher_is_better"
+    impact_dimensions:
+    - "circularity"
+    - "social"
+    rationale: "Représente l'engagement global du fabricant à maintenir le produit. C'est un indicateur de la politique de support à long terme de la marque, complétant la garantie et la disponibilité des mises à jour. [33]"
+    overlap_notes: "Corrélé avec la garantie et la disponibilité des mises à jour, mais peut couvrir une période plus longue et un périmètre de support différent."
+    evidence_strength:
+      level: "low"
+      why: "Concept moins standardisé que les autres critères de durabilité, mais pertinent pour l'expérience utilisateur à long terme."
+  - criterion: "POWER_CONSUMPTION_OFF"
+    weight: 0.02
+    directionality: "lower_is_better"
+    impact_dimensions:
+    - "climate"
+    - "resource_use"
+    rationale: "La consommation en mode 'arrêt' doit être la plus proche de zéro possible. Comme pour la veille, elle est réglementée mais les fabricants les plus vertueux peuvent être valorisés. [5, 23]"
+    overlap_notes: "Aucun."
+    evidence_strength:
+      level: "medium"
+      why: "Réglementé par la Commission Européenne. Impact faible mais facile à mesurer et à réduire. [5, 23]"
+  - criterion: "CLASSE_ENERGY_SDR"
+    weight: 0.0
+    directionality: "categorical"
+    impact_dimensions:
+    - "climate"
+    - "resource_use"
+    rationale: "Poids nul pour éviter le double-comptage. La consommation réelle (POWER_CONSUMPTION_SDR) est un indicateur plus précis et granulaire que la classe énergétique, qui est une simple catégorisation de cette même information. [9, 35]"
+    overlap_notes: "Redondant avec POWER_CONSUMPTION_SDR."
+    evidence_strength:
+      level: "high"
+      why: "La classe énergétique dérive directement de la consommation mesurée, son inclusion serait une redondance directe. [9]"
+  - criterion: "CLASSE_ENERGY_HDR"
+    weight: 0.0
+    directionality: "categorical"
+    impact_dimensions:
+    - "climate"
+    - "resource_use"
+    rationale: "Poids nul pour la même raison que la classe SDR : éviter le double-comptage avec la mesure de consommation directe (POWER_CONSUMPTION_HDR). [9, 35]"
+    overlap_notes: "Redondant avec POWER_CONSUMPTION_HDR."
+    evidence_strength:
+      level: "high"
+      why: "La classe énergétique dérive directement de la consommation mesurée. [9]"
+  - criterion: "DIAGONALE_POUCES"
+    weight: 0.0
+    directionality: "lower_is_better"
+    impact_dimensions:
+    - "resource_use"
+    - "climate"
+    rationale: "Poids nul car l'impact de la taille (plus de matériaux, plus de consommation) est déjà capturé par les autres critères matériels. [20] Une plus grande taille entraîne quasi-systématiquement une consommation plus élevée, qui sera pénalisée par les critères POWER_CONSUMPTION. Pondérer la taille directement reviendrait à pénaliser deux fois. [34]"
+    overlap_notes: "L'impact de la diagonale est déjà reflété dans les consommations d'énergie (SDR/HDR) et implicitement dans l'impact de fabrication (amorti par la durabilité)."
+    evidence_strength:
+      level: "high"
+      why: "La corrélation entre la taille de l'écran et la consommation d'énergie est une évidence physique et documentée. [20, 34]"
   normalization_notes:
-    relative_ranking_0_100: "Chaque facteur est converti en un score relatif de 0 à 100, où 100 représente la meilleure performance observée sur le marché et 0 la pire. Cela assure que chaque critère contribue proportionnellement à son poids, indépendamment de ses unités d'origine."
-    sigma_scoring_0_5: "Les attributs bruts sont normalisés sur une échelle de 0 à 5 en utilisant un sigma scoring par défaut. Cela signifie que la moyenne (μ) des données est mappée à 2.5/5, et les valeurs sont distribuées autour de cette moyenne, avec des bornes à μ-2σ et μ+2σ. Les valeurs sont plafonnées à 0 et 5 pour gérer les valeurs extrêmes et assurer la robustesse du score."
-    percentile_fallback: "Si la distribution des données pour un attribut est 'low entropy' (très peu de variation, ou regroupée en quelques valeurs discrètes), un mécanisme de fallback basé sur les percentiles (mid-rank) est utilisé. Cela permet de différencier les produits même avec des distributions de données non gaussiennes ou avec des outliers importants, évitant que la sigma-scoring ne s'effondre."
-    missing_value_virtualization: "Si la donnée pour un facteur est absente pour un produit donné, la valeur moyenne de ce facteur sur l'ensemble des produits disponibles est appliquée. Ce mécanisme rend la DATA_QUALITY d'autant plus importante : les produits bien documentés sont avantagés, tandis que les produits avec des données manquantes sont 'pénalisés' en étant ramenés à la moyenne, ce qui est une incitation forte à la transparence."
+    relative_ranking_0_100: "Chaque critère est normalisé sur une échelle de 0 à 100, où 100 est la meilleure performance et 0 la moins bonne. Cela permet de comparer des critères aux unités hétérogènes en se basant sur leur positionnement relatif sur le marché."
+    sigma_scoring_0_5: "La méthode de notation principale utilise un score sigma pour transformer les valeurs brutes en une note sur 5, ce qui la rend robuste aux valeurs extrêmes (outliers) en se basant sur la moyenne et l'écart-type de la distribution."
+    percentile_fallback: "Si la distribution d'un critère a une faible variabilité (ex: valeurs très groupées ou discrètes), un classement par percentile est utilisé pour garantir une différenciation juste et éviter les artéfacts de la méthode sigma."
+    missing_value_virtualization: "Lorsqu'une donnée est manquante pour un produit, elle est remplacée par la valeur moyenne de ce critère sur l'ensemble du panel. Ce mécanisme est couplé au bonus du critère DATA_QUALITY pour inciter les fabricants à fournir des données complètes."
   quality_checks:
     criteria_weights_complete: true
     weights_sum_to_1: true
     sum_value: 1.0
     unused_or_zero_weight_criterias:
-      - "MINAVAILABILITYSPAREPARTSYEARS"
-      - "MINGUARANTEEDSUPPORTYEARS"
-      - "CLASSE_ENERGY_SDR"
-      - "CLASSE_ENERGY_HDR"
-      - "DIAGONALE_POUCES"
-    renormalization_rule_if_needed: "Si des critères sont mis à poids zéro, les poids restants sont renormalisés proportionnellement pour que leur somme reste égale à 1."
+    - "CLASSE_ENERGY_SDR"
+    - "CLASSE_ENERGY_HDR"
+    - "DIAGONALE_POUCES"
+    renormalization_rule_if_needed: "Si un ou plusieurs critères pondérés sont indisponibles pour tous les produits, leurs poids sont redistribués proportionnellement entre les critères restants."
   materiality_summary:
     dominant_lifecycle_stages_for_vertical:
-      - "manufacturing"
-      - "use_phase"
-    short_summary: "L'analyse du cycle de vie des téléviseurs révèle que la phase de fabrication est le contributeur dominant à l'impact environnemental, notamment en termes d'émissions de gaz à effet de serre (80-90% de l'impact carbone total). La phase d'utilisation, principalement due à la consommation électrique, est également significative mais moins prépondérante dans des contextes comme la France où l'électricité est décarbonée. L'impact de la fin de vie est largement atténué par les pratiques de réparabilité et de recyclage. En conséquence, une forte pondération est attribuée aux critères favorisant la durabilité (réparabilité, mises à jour logicielles) et l'efficacité énergétique."
+    - "use_phase"
+    - "manufacturing"
+    short_summary: "L'analyse du cycle de vie des téléviseurs montre que deux phases dominent l'impact environnemental : la phase d'usage, via la consommation d'électricité, et la phase de fabrication, en raison des composants électroniques et des ressources nécessaires. [12, 14, 15] En conséquence, la pondération de ce score privilégie fortement (1) un bloc 'Énergie' (54% du poids total) et (2) un bloc 'Durabilité/Réparabilité' (38% du poids total), car allonger la durée de vie est le levier principal pour réduire l'impact de la fabrication. [3, 26]"
   sources:
-    - id: "S2"
-      type: "public_agency"
-      title: "Choisir des appareils électriques électroniques durables - Agir pour la transition écologique"
-      authors_or_org: "ADEME"
-      year: 2025
-      publisher: "ADEME"
-      url: "https://ademe.fr/expertises/dechets/passer-a-laction/reduire-ses-dechets/choisir-appareils-electriques-electroniques-durables"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "reference lifetime"
-        - "reparability/durability index details"
-        - "software updates importance"
-        - "warranty relevance"
-      notes: "Source publique officielle ADEME, très pertinente pour le contexte français et l'indice de durabilité."
-    - id: "S3"
-      type: "other"
-      title: "Comment calculer la consommation électrique d'une télévision"
-      authors_or_org: "ENGIE France"
-      year: 2026
-      publisher: "ENGIE"
-      url: "https://particuliers.engie.fr/electricite/economies-energie/calculer-consommation/calculer-consommation-electrique-tv.html"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "energy consumption details (SDR, HDR, Off, Standby)"
-        - "energy label context"
-      notes: "Source d'une entreprise énergétique, fournit des détails pratiques sur la consommation."
-    - id: "S4"
-      type: "peer_reviewed"
-      title: "L'obsolescence des téléviseurs"
-      authors_or_org: "HALTE À L'OBSOLESCENCE PROGRAMMÉE (HOP)"
-      year: 2021
-      publisher: "HALTE À L'OBSOLESCENCE PROGRAMMÉE (HOP)"
-      url: "https://www.halteobsolescence.org/wp-content/uploads/2021/07/Rapport-obsolescence-televiseurs-HOP-juillet-2021.pdf"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "reference lifetime"
-        - "software updates importance"
-        - "reparability index context"
-      notes: "Rapport d'une association reconnue luttant contre l'obsolescence programmée, très pertinent pour la durabilité et réparabilité."
-    - id: "S5"
-      type: "public_agency"
-      title: "Téléviseurs - L'indice de durabilité remplace l'indice de réparabilité"
-      authors_or_org: "UFC-Que Choisir"
-      year: 2025
-      publisher: "UFC-Que Choisir"
-      url: "https://www.quechoisir.org/actualite-televiseurs-l-indice-de-durabilite-remplace-l-indice-de-reparabilite-n106263/"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "reparability/durability index details"
-        - "software updates importance"
-      notes: "Source d'une association de consommateurs influente, très pertinente sur les indices de durabilité et réparabilité."
-    - id: "S6"
-      type: "other"
-      title: "TV OLED, LCD, MiniLED : ce que trois ans de torture disent de leur vraie durée de vie"
-      authors_or_org: "Les Numériques"
-      year: 2021
-      publisher: "Les Numériques"
-      url: "https://www.lesnumeriques.com/tv-oled-lcd-miniled-ce-que-trois-ans-de-torture-disent-de-leur-vraie-duree-de-vie-n168677.html"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "reference lifetime"
-        - "software updates importance"
-      notes: "Article de presse spécialisée offrant des données sur la durée de vie et l'obsolescence logicielle."
-    - id: "S7"
-      type: "public_agency"
-      title: "Indice de durabilité - Ministère de la Transition écologique"
-      authors_or_org: "Ministère de la Transition écologique et de la Cohésion des territoires"
-      year: 2024
-      publisher: "Gouvernement français"
-      url: "https://www.ecologie.gouv.fr/indice-durabilite"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "reparability/durability index details"
-        - "regulatory context"
-      notes: "Source officielle du gouvernement français sur l'indice de durabilité."
-    - id: "S8"
-      type: "other"
-      title: "Définition de Classe énergétique TV"
-      authors_or_org: "LCD Compare"
-      year: 2026
-      publisher: "LCD Compare"
-      url: "https://www.lcd-compare.com/definition-de-classe-energetique-tv.htm"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "energy label context"
-        - "SDR/HDR consumption distinction"
-        - "redundancy justification for energy classes"
-      notes: "Site spécialisé dans la comparaison de téléviseurs, fournit des explications sur les classes énergétiques."
-    - id: "S9"
-      type: "other"
-      title: "Indice de durabilité : ce qui change concernant les téléviseurs"
-      authors_or_org: "Frandroid"
-      year: 2025
-      publisher: "Frandroid"
-      url: "https://www.frandroid.com/produits-android/tv/1932371_indice-de-durabilite-ce-qui-change-concernant-les-televiseurs"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "reparability/durability index details"
-        - "warranty relevance"
-      notes: "Article de presse spécialisée tech, expliquant le nouvel indice de durabilité pour les téléviseurs."
-    - id: "S10"
-      type: "other"
-      title: "ACV Produit & Service numérique"
-      authors_or_org: "Objectif Carbone"
-      year: 2023
-      publisher: "Objectif Carbone"
-      url: "https://www.objectifcarbone.com/post/acv-produit-service-num%C3%A9rique"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "LCA general principles"
-        - "gap analysis"
-        - "data quality importance"
-      notes: "Article de blog spécialisé sur l'ACV, utile pour la définition et l'importance des données."
-    - id: "S12"
-      type: "other"
-      title: "Consommation téléviseur: calculer la consommation de ma télé"
-      authors_or_org: "Kelwatt.fr"
-      year: 2025
-      publisher: "Kelwatt"
-      url: "https://www.kelwatt.fr/guide/consommation-electrique/televiseur"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "energy consumption details (SDR, HDR, Off, Standby)"
-      notes: "Site d'information sur l'énergie, fournit des exemples de consommation de TV."
-    - id: "S16"
-      type: "other"
-      title: "Quelle est la durée de vie d'un téléviseur et quand est-il temps de le remplacer?"
-      authors_or_org: "VRT"
-      year: 2025
-      publisher: "VRT"
-      url: "https://vrt-electronics.be/fr/blog/la-duree-de-vie-d-un-televiseur"
-      accessed_date: "2026-01-22"
-      reliability: "low"
-      used: true
-      used_for:
-        - "reference lifetime"
-      notes: "Site d'un détaillant, fournit une estimation générale de la durée de vie."
-    - id: "S14"
-      type: "other"
-      title: "Consommation TV en vieille, allumée, en watt, classe F/G"
-      authors_or_org: "Kelwatt.fr"
-      year: 2026
-      publisher: "Kelwatt"
-      url: "https://www.kelwatt.fr/guide/consommation-electrique/televiseur"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "energy consumption details (SDR, HDR, Off, Standby)"
-      notes: "Site d'information sur l'énergie, fournit des exemples de consommation de TV."
-    - id: "S17"
-      type: "public_agency"
-      title: "Quelle est la consommation électrique d'un téléviseur ? | Vattenfall"
-      authors_or_org: "ADEME / Vattenfall"
-      year: 2026
-      publisher: "Vattenfall"
-      url: "https://www.vattenfall.fr/particuliers/conseils-energie/consommation-electrique-tv/"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "energy consumption details"
-        - "Ademe figures on TV consumption"
-      notes: "Article citant l'ADEME sur la consommation électrique, haute fiabilité pour les données ADEME."
-    - id: "S18"
-      type: "public_agency"
-      title: "Ordinateurs et équipements périphériques"
-      authors_or_org: "ADEME"
-      year: 2018
-      publisher: "Base Carbone ADEME"
-      url: "https://bilans-ges.ademe.fr/fr/basecarbone/donnees-consulter/liste-elements/categorie/640"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "LCA materiality (manufacturing dominance)"
-        - "impact of screen size"
-      notes: "Données de la Base Carbone de l'ADEME, source de référence pour les ACV en France."
-    - id: "S19"
-      type: "public_agency"
-      title: "Longue vie aux téléviseurs - ADEME Infos"
-      authors_or_org: "ADEME"
-      year: 2025
-      publisher: "ADEME"
-      url: "https://infos.ademe.fr/article/longue-vie-aux-televiseurs/"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "reparability/durability index details"
-        - "regulatory context"
-      notes: "Article de l'ADEME confirmant l'importance de l'indice de durabilité."
-    - id: "S20"
-      type: "regulation"
-      title: "Écoconception et étiquetage énergétique — Dispositifs d'affichage électroniques | EUR-Lex"
-      authors_or_org: "Union Européenne"
-      year: 2017
-      publisher: "EUR-Lex"
-      url: "https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=LEGCOM:52017PC0779"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "energy label context"
-        - "regulatory framework"
-      notes: "Réglementation de l'UE sur l'écoconception et l'étiquetage énergétique."
-    - id: "S21"
-      type: "regulation"
-      title: "Exigences en matière d'étiquetage énergétique dans l'UE - Your Europe"
-      authors_or_org: "Union Européenne"
-      year: 2021
-      publisher: "Your Europe"
-      url: "https://europa.eu/youreurope/business/product-requirements/labels-standards/energy-labels/index_fr.htm"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "energy label context"
-        - "regulatory framework"
-        - "redundancy justification for energy classes"
-      notes: "Informations officielles de l'UE sur l'étiquetage énergétique et son application aux téléviseurs."
-    - id: "S22"
-      type: "other"
-      title: "Bonne nouvelle pour les TV Samsung : 7 ans de mises à jour pour une meilleure durabilité"
-      authors_or_org: "Frandroid"
-      year: 2024
-      publisher: "Frandroid"
-      url: "https://www.frandroid.com/marques/samsung/1932371_bonne-nouvelle-pour-les-tv-samsung-7-ans-de-mises-a-jour-pour-une-meilleure-durabilite"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "software updates importance"
-      notes: "Article de presse spécialisée tech soulignant l'importance des mises à jour logicielles pour la durabilité."
-    - id: "S24"
-      type: "public_agency"
-      title: "Tout savoir sur l'indice de réparabilité | Ministère de l'Économie des Finances et de la Souveraineté industrielle et énergétique"
-      authors_or_org: "Ministère de l'Économie, des Finances et de la Souveraineté industrielle et numérique"
-      year: 2025
-      publisher: "Gouvernement français"
-      url: "https://www.economie.gouv.fr/particuliers/indice-reparabilite"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "reparability/durability index details"
-        - "regulatory context"
-      notes: "Source officielle du gouvernement français sur l'indice de réparabilité et son évolution."
-    - id: "S25"
-      type: "other"
-      title: "Combien consomme votre téléviseur en veille - Ecojoko"
-      authors_or_org: "Ecojoko"
-      year: 2025
-      publisher: "Ecojoko"
-      url: "https://www.ecojoko.com/blog/consommation-tv-veille/"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "energy consumption off/standby"
-      notes: "Article de blog spécialisé sur la consommation d'énergie, incluant la veille des TV."
-    - id: "S26"
-      type: "other"
-      title: "Appareils en veille : combien ça coûte vraiment? - ENKI"
-      authors_or_org: "ENKI"
-      year: 2025
-      publisher: "ENKI"
-      url: "https://www.enki.fr/blog/veille-combien-ca-coute-vraiment/"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "energy consumption off/standby"
-      notes: "Article de blog sur la consommation en veille des appareils électriques."
-    - id: "S28"
-      type: "other"
-      title: "Définition de Indice de réparabilité - LCD Compare"
-      authors_or_org: "LCD Compare"
-      year: 2026
-      publisher: "LCD Compare"
-      url: "https://www.lcd-compare.com/definition-de-indice-de-reparabilite.htm"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "reparability/durability index details"
-      notes: "Site spécialisé dans la comparaison de téléviseurs, fournit des explications sur l'indice de réparabilité."
-    - id: "S29"
-      type: "other"
-      title: "Tout comprendre à l'analyse de cycle de vie (ACV) - Sami"
-      authors_or_org: "Sami"
-      year: 2026
-      publisher: "Sami"
-      url: "https://www.sami.eco/blog/acv"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "LCA general principles"
-        - "normalization notes (sigma scoring, percentile fallback)"
-      notes: "Article de blog expliquant les principes de l'ACV et les concepts de normalisation."
-    - id: "S30"
-      type: "other"
-      title: "L'impact carbone de la vidéo - analyse d'Objectif Carbone - APCC"
-      authors_or_org: "APCC"
-      year: 2023
-      publisher: "APCC"
-      url: "https://www.apcc.fr/l-impact-carbone-de-la-video-analyse-d-objectif-carbone/"
-      accessed_date: "2026-01-22"
-      reliability: "high"
-      used: true
-      used_for:
-        - "LCA materiality (manufacturing dominance, use phase impact)"
-      notes: "Étude sur l'impact carbone de la vidéo, très pertinente pour la matérialité de l'impact des téléviseurs."
-    - id: "S33"
-      type: "regulation"
-      title: "Étiquette-énergie - Wikipédia"
-      authors_or_org: "Wikipédia"
-      year: 2026
-      publisher: "Wikipédia"
-      url: "https://fr.wikipedia.org/wiki/%C3%89tiquette-%C3%A9nergie"
-      accessed_date: "2026-01-22"
-      reliability: "medium"
-      used: true
-      used_for:
-        - "energy label context"
-      notes: "Vue d'ensemble sur l'étiquette énergie, y compris pour les téléviseurs."
+  - id: "S1"
+    type: "public_agency"
+    title: "Longue vie aux téléviseurs - ADEME Infos"
+    authors_or_org: "ADEME"
+    year: 2025
+    publisher: "ADEME"
+    url: "https://infos.ademe.fr/magazine-janvier-2025-consommer-autrement/longue-vie-aux-televiseurs/"
+    accessed_date: "2026-01-23"
+    reliability: "high"
+    used: true
+    used_for:
+    - "lifetime reference"
+    - "reparability rationale"
+    notes: "Mentionne l'indice de durabilité pour les TV et l'importance de la réparabilité."
+  - id: "S2"
+    type: "peer_reviewed"
+    title: "LCA study of a plasma television device"
+    authors_or_org: "Roland Hischier, Isabelle Baudin"
+    year: 2010
+    publisher: "ResearchGate"
+    url: "https://www.researchgate.net/publication/222415133_LCA_study_of_a_plasma_television_device"
+    accessed_date: "2026-01-23"
+    reliability: "high"
+    used: true
+    used_for:
+    - "materiality summary"
+    - "energy materiality"
+    notes: "Étude ACV détaillée montrant la prédominance des phases de production et d'usage."
+  - id: "S3"
+    type: "regulation"
+    title: "Règlement (UE) 2019/2021 fixant des exigences d'écoconception pour les dispositifs d'affichage électroniques"
+    authors_or_org: "Commission Européenne"
+    year: 2019
+    publisher: "Journal Officiel de l'Union européenne"
+    url: "https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32019R2021"
+    accessed_date: "2026-01-23"
+    reliability: "high"
+    used: true
+    used_for:
+    - "lifetime reference"
+    - "energy materiality"
+    - "reparability rationale"
+    notes: "Source réglementaire clé pour l'écoconception, incluant la consommation d'énergie et la disponibilité des pièces (7 ans min)."
+  - id: "S4"
+    type: "regulation"
+    title: "Loi n° 2020-105 du 10 février 2020 relative à la lutte contre le gaspillage et pour l'économie circulaire (AGEC)"
+    authors_or_org: "République Française"
+    year: 2020
+    publisher: "Légifrance"
+    url: "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000041553759/"
+    accessed_date: "2026-01-23"
+    reliability: "high"
+    used: true
+    used_for:
+    - "reparability rationale"
+    notes: "Instaure l'indice de réparabilité en France, un critère fondamental pour ce score."
+  - id: "S5"
+    type: "public_agency"
+    title: "L'obsolescence des téléviseurs"
+    authors_or_org: "HOP (Halte à l'Obsolescence Programmée)"
+    year: 2020
+    publisher: "HOP"
+    url: "https://www.halteobsolescence.org/wp-content/uploads/2020/09/Rapport-obsolescence-des-televiseurs.pdf"
+    accessed_date: "2026-01-23"
+    reliability: "medium"
+    used: true
+    used_for:
+    - "lifetime reference"
+    - "reparability rationale"
+    notes: "Rapport citant des chiffres clés sur la durée d'usage (baromètre Fnac-Darty) et les causes de remplacement."
+  - id: "S6"
+    type: "public_agency"
+    title: "Indice de réparabilité"
+    authors_or_org: "Ministère de la Transition écologique"
+    year: 2021
+    publisher: "ecologie.gouv.fr"
+    url: "https://www.ecologie.gouv.fr/indice-reparabilite"
+    accessed_date: "2026-01-23"
+    reliability: "high"
+    used: true
+    used_for:
+    - "reparability rationale"
+    notes: "Page officielle expliquant le fonctionnement et les objectifs de l'indice de réparabilité."
+  - id: "S7"
+    type: "public_agency"
+    title: "EVALUATION DE L'IMPACT ENVIRONNEMENTAL DU NUMERIQUE EN FRANCE ET ANALYSE PROSPECTIVE"
+    authors_or_org: "ADEME / Arcep"
+    year: 2022
+    publisher: "ADEME"
+    url: "https://librairie.ademe.fr/consommer-autrement/5225-evaluation-de-l-impact-environnemental-du-numerique-en-france-et-analyse-prospective.html"
+    accessed_date: "2026-01-23"
+    reliability: "high"
+    used: true
+    used_for:
+    - "materiality summary"
+    notes: "Étude de référence en France qui identifie les téléviseurs comme un contributeur majeur aux impacts du numérique, notamment via la fabrication et l'usage."
+  - id: "S8"
+    type: "regulation"
+    title: "Règlement délégué (UE) 2019/2013 sur l'étiquetage énergétique des dispositifs d'affichage électroniques"
+    authors_or_org: "Commission Européenne"
+    year: 2019
+    publisher: "Journal Officiel de l'Union européenne"
+    url: "https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32019R2013"
+    accessed_date: "2026-01-23"
+    reliability: "high"
+    used: true
+    used_for:
+    - "energy materiality"
+    - "redundancy analysis"
+    notes: "Définit les modalités de calcul des classes énergétiques, confirmant qu'elles découlent des mesures de consommation."
+  - id: "S9"
+    type: "other"
+    title: "How Long Should A TV Last?: Our 100 TV Accelerated Longevity And Burn-In Test"
+    authors_or_org: "rtings.com"
+    year: 2023
+    publisher: "rtings.com"
+    url: "https://www.rtings.com/tv/learn/longevity-burn-in-test"
+    accessed_date: "2026-01-23"
+    reliability: "medium"
+    used: true
+    used_for:
+    - "lifetime reference"
+    notes: "Site technique de référence qui corrobore une durée de vie commune de 5-10 ans pour les téléviseurs."
+  - id: "S10"
+    type: "public_agency"
+    title: "JRC Technical Report: Methods for the Assessment of the Reparability and Upgradability of Energy-related Products: Application to TVs"
+    authors_or_org: "Joint Research Centre (JRC)"
+    year: 2019
+    publisher: "Publications Office of the European Union"
+    url: "https://publications.jrc.ec.europa.eu/repository/handle/JRC116105"
+    accessed_date: "2026-01-23"
+    reliability: "high"
+    used: true
+    used_for:
+    - "reparability rationale"
+    notes: "Rapport de recherche de la Commission Européenne soutenant le développement de scores de réparabilité pour les TV."
+  - id: "S11"
+    type: "other"
+    title: "Consommation TV en vieille, allumée, en watt, classe F/G"
+    authors_or_org: "Kelwatt.fr"
+    year: 2024
+    publisher: "Kelwatt"
+    url: "https://www.kelwatt.fr/guide/consommation-electrique/appareils-electromenagers/tv"
+    accessed_date: "2026-01-23"
+    reliability: "low"
+    used: true
+    used_for:
+    - "energy materiality"
+    notes: "Article de vulgarisation citant les chiffres de l'ADEME sur la consommation moyenne et la durée d'utilisation journalière en France."
   search_log:
-    - query: "durée de vie moyenne téléviseur France"
-      date: "2026-01-22"
-      notes: "Recherche de la durée de vie de référence pour les téléviseurs en France."
-    - query: "durée d'usage téléviseur UE"
-      date: "2026-01-22"
-      notes: "Recherche de la durée de vie de référence pour les téléviseurs en UE."
-    - query: "lifetime television EU regulation"
-      date: "2026-01-22"
-      notes: "Recherche de réglementations UE concernant la durée de vie des téléviseurs."
-    - query: "durabilité des téléviseurs ADEME"
-      date: "2026-01-22"
-      notes: "Recherche d'informations de l'ADEME sur la durabilité des téléviseurs."
-    - query: "indice de réparabilité téléviseur durée de vie"
-      date: "2026-01-22"
-      notes: "Recherche du lien entre indice de réparabilité et durée de vie des téléviseurs."
-    - query: "ACV téléviseur phases impact"
-      date: "2026-01-22"
-      notes: "Recherche des phases du cycle de vie des téléviseurs et leurs impacts environnementaux."
-    - query: "Life Cycle Assessment television environmental impact"
-      date: "2026-01-22"
-      notes: "Recherche d'études ACV sur l'impact environnemental des téléviseurs."
-    - query: "impact environnemental fabrication utilisation fin de vie téléviseur"
-      date: "2026-01-22"
-      notes: "Détails sur l'impact des différentes phases de vie d'un téléviseur."
-    - query: "facteurs matérialité ACV téléviseur"
-      date: "2026-01-22"
-      notes: "Identification des facteurs environnementaux les plus matériels pour les téléviseurs."
-    - query: "règlementation étiquetage énergétique téléviseur UE"
-      date: "2026-01-22"
-      notes: "Réglementations sur l'étiquetage énergétique des téléviseurs en UE."
-    - query: "corrélation classe énergie consommation électrique téléviseur"
-      date: "2026-01-22"
-      notes: "Recherche de corrélation pour éviter le double-comptage entre classe énergie et consommation directe."
-    - query: "impact consommation SDR HDR veille téléviseur ACV"
-      date: "2026-01-22"
-      notes: "Impact de la consommation en différents modes (SDR, HDR, veille) sur l'ACV."
-    - query: "indice de réparabilité téléviseurs critères impacts"
-      date: "2026-01-22"
-      notes: "Détails sur les critères et l'impact de l'indice de réparabilité pour les téléviseurs."
-    - query: "disponibilité pièces détachées téléviseur réglementation"
-      date: "2026-01-22"
-      notes: "Réglementations sur la disponibilité des pièces détachées pour les téléviseurs."
-    - query: "mises à jour logicielles durabilité téléviseur"
-      date: "2026-01-22"
-      notes: "Importance des mises à jour logicielles pour la durabilité des téléviseurs."
-    - query: "garantie légale téléviseur France"
-      date: "2026-01-22"
-      notes: "Recherche sur la garantie légale et son lien avec la durabilité."
-    - query: "impact durée de vie téléviseur réparabilité"
-      date: "2026-01-22"
-      notes: "Impact de la réparabilité sur la durée de vie des téléviseurs."
-    - query: "importance qualité des données éco-score"
-      date: "2026-01-22"
-      notes: "Recherche sur l'importance de la qualité des données dans un éco-score."
-    - query: "impact données manquantes scoring environnemental"
-      date: "2026-01-22"
-      notes: "Conséquences de l'absence de données sur le scoring environnemental."
-    - query: "méthodologie eco-score imputation données"
-      date: "2026-01-22"
-      notes: "Méthodes d'imputation des données manquantes dans les éco-scores."
+  - query: "ACV téléviseur répartition impacts fabrication usage"
+    date: "2026-01-23"
+    notes: "Recherche de la matérialité des phases du cycle de vie pour justifier la répartition des poids."
+  - query: "life cycle assessment television environmental impact"
+    date: "2026-01-23"
+    notes: "Requête complémentaire en anglais pour élargir les sources académiques sur l'ACV des TV."
+  - query: "durée d'usage moyenne téléviseur france ADEME"
+    date: "2026-01-23"
+    notes: "Recherche de la durée de vie de référence, un paramètre obligatoire."
+  - query: "average lifespan of a television Europe"
+    date: "2026-01-23"
+    notes: "Requête en anglais pour corroborer la durée de vie à l'échelle européenne."
+  - query: "EU ecodesign regulation television"
+    date: "2026-01-23"
+    notes: "Recherche de la réglementation européenne applicable pour fonder les critères de durabilité et d'énergie."
+  - query: "règlement affichage énergétique téléviseurs UE"
+    date: "2026-01-23"
+    notes: "Spécifiquement pour les détails de l'étiquette énergie et éviter le double-comptage."
+  - query: "indice de réparabilité loi AGEC"
+    date: "2026-01-23"
+    notes: "Recherche sur le cadre légal et la méthodologie de l'indice de réparabilité français."
+  - query: "JRC technical report LCA television"
+    date: "2026-01-23"
+    notes: "Recherche de rapports techniques de la Commission Européenne (JRC) pour une base scientifique solide."

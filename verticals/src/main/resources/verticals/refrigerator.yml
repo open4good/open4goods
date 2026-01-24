@@ -32,14 +32,18 @@ enabled: true
 popular: true
 
 # The mainly presented attributes for this category
+
+# The mainly presented attributes for this category
 popularAttributes:
   - CLASSE_ENERGY
-  - POWER_CONSUMPTION_TYPICAL
+  - TOTAL_VOLUME
+  - REPAIRABILITY_INDEX
+  - NOISE_LEVEL
 
 # GenAiConfig for this vertical
 genAiConfig:
   # If false, will bypass the generativ ia texts generation
-  enabled: false
+  enabled: true
 
 #####################################################################################################################################
 # ImpacScore configuration.
@@ -50,10 +54,9 @@ genAiConfig:
 # Scores from _default.yml are merged
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
-  - POWER_CONSUMPTION_TYPICAL
-  - WEIGHT
-  - WARRANTY
   - REPAIRABILITY_INDEX
+  - WARRANTY
+  - BRAND_SUSTAINALYTICS_SCORING
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -84,7 +87,7 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "refrigerators"
     verticalHomeTitle: "Réfrigérateurs"
-    verticalHomeDescription: "Comparez les réfrigérateurs"
+    verticalHomeDescription: "Comparez les réfrigérateurs selon leur impact environnemental, leur classe énergétique et leur prix. Trouvez le meilleur modèle pour vos besoins."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
   #    wikiPages:
@@ -115,7 +118,7 @@ i18n:
 
     verticalHomeUrl: "refrigerators"
     verticalHomeTitle: "Refrigerators"
-    verticalHomeDescription: "Compare refrigerators (built-in, low-noise, no-frost…) by eco-score and price."
+    verticalHomeDescription: "Compare refrigerators based on their environmental impact, energy class, and price. Find the best model for your needs."
 
 #####################################################################################################################################
 # NUDGE TOOL CONFIGURATION
@@ -123,44 +126,44 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 3
+      scoreMinValue: 2.0
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
-        fr: "Consommation énergétique"
+        fr: "Consommation"
       description:
-        en: "refrigerators with a low energy consumption"
-        fr: "Frigos avec une faible consommation énergétique"
-
-    - scoreName: "DURABILITY"
-      scoreMinValue: 3
-      mdiIcon: "mdi-archive-outline"
-      title:
-        en: "Durability"
-        fr: "Durabilité"
-      description:
-        en: "refrigerators with good durability"
-        fr: "Frigos avec une bonne durabilité"
+        en: "Energy-efficient refrigerators (Class A to E)"
+        fr: "Réfrigérateurs peu énergivores (Classe A à E)"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 3
+      scoreMinValue: 3.0
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
         fr: "Réparabilité"
       description:
-        en: "refrigerators with good repairability"
-        fr: "Frigos avec une bonne réparabilité"
+        en: "Refrigerators with a high repairability index"
+        fr: "Frigos avec un bon indice de réparabilité"
+
+    - scoreName: "DURABILITY"
+      scoreMinValue: 3.0
+      mdiIcon: "mdi-archive-outline"
+      title:
+        en: "Durability"
+        fr: "Durabilité"
+      description:
+        en: "Models built to last (warranty, support)"
+        fr: "Modèles durables (garantie, pièces détachées)"
 
     - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
-      scoreMinValue: 4
+      scoreMinValue: 3.0
       mdiIcon: "mdi-scale-balance"
       title:
         en: "ESG criteria"
         fr: "Critères ESG"
       description:
-        en: "Models with a brand having good ESG rating"
-        fr: "Modèles dont la marque dispose d'un bon indice ESG"
+        en: "Brands with good environmental and social practices"
+        fr: "Marques avec de bonnes pratiques ESG"
 
   subsetGroups:
     - id: "price"
@@ -170,13 +173,27 @@ nudgeToolConfig:
         en: "Budget"
         fr: "Budget"
       description:
-        en: "Pick a price comfort zone."
+        en: "Filter by price range"
         fr: "Votre budget"
       ctaLabel:
-        en: "Continue"
-        fr: "Continuer"
+        en: "See products"
+        fr: "Voir les produits"
+
+    - id: "volume"
+      mdiIcon: "mdi-fridge-outline"
+      layout: "grid"
+      title:
+        en: "Capacity"
+        fr: "Capacité"
+      description:
+        en: "Filter by total volume (Fridge + Freezer)"
+        fr: "Volume total (Réfrigérateur + Congélateur)"
+      ctaLabel:
+        en: "See products"
+        fr: "Voir les produits"
 
   subsets:
+    # Price Subsets
     - id: "price_lower_400"
       group: "price"
       criterias:
@@ -194,11 +211,11 @@ nudgeToolConfig:
         en: "< 400 €"
         fr: "< 400 €"
       title:
-        en: "Affordable refrigerators"
-        fr: "Frigos pas chers"
+        en: "Budget-friendly"
+        fr: "Petits prix"
       description:
-        en: "refrigerators priced under €400."
-        fr: "Les réfrigérateurs dont le prix est inférieur à 400€."
+        en: "Refrigerators under €400"
+        fr: "Réfrigérateurs à moins de 400 €"
 
     - id: "price_400_800"
       group: "price"
@@ -211,17 +228,17 @@ nudgeToolConfig:
           value: "800"
       image: "example-image.png"
       url:
-        en: "fridge-400-800-euros"
-        fr: "frigo-400-800-euros"
+        en: "mid-range-price"
+        fr: "milieu-de-gamme"
       caption:
         en: "400 - 800 €"
         fr: "400 - 800 €"
       title:
-        en: "Mid-range refrigerators"
-        fr: "Réfrigérateurs milieu de gamme"
+        en: "Standard range"
+        fr: "Milieu de gamme"
       description:
-        en: "refrigerators priced between €400 and €800."
-        fr: "Les réfrigérateurs dont le prix est compris entre 400€ et 800€."
+        en: "Refrigerators between €400 and €800"
+        fr: "Réfrigérateurs entre 400 € et 800 €"
 
     - id: "price_greater_800"
       group: "price"
@@ -237,11 +254,75 @@ nudgeToolConfig:
         en: "> 800 €"
         fr: "> 800 €"
       title:
-        en: "Premium refrigerators"
-        fr: "Réfrigérateurs haut de gamme"
+        en: "Premium"
+        fr: "Haut de gamme"
       description:
-        en: "refrigerators priced over €800."
-        fr: "Les frigos dont le prix est supérieur à 800€."
+        en: "Refrigerators over €800"
+        fr: "Réfrigérateurs à plus de 800 €"
+
+    # Volume Subsets
+    - id: "volume_small"
+      group: "volume"
+      criterias:
+        - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+          operator: "LOWER_THAN"
+          value: "250"
+      image: "example-image.png"
+      url:
+        en: "small-capacity"
+        fr: "petite-capacite"
+      caption:
+        en: "< 250 L"
+        fr: "< 250 L"
+      title:
+        en: "Small capacity"
+        fr: "Petite capacité"
+      description:
+        en: "Ideal for small spaces or couples"
+        fr: "Idéal pour les petits espaces ou les couples"
+
+    - id: "volume_medium"
+      group: "volume"
+      criterias:
+        - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+          operator: "GREATER_THAN"
+          value: "250"
+        - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+          operator: "LOWER_THAN"
+          value: "400"
+      image: "example-image.png"
+      url:
+        en: "medium-capacity"
+        fr: "capacite-standard"
+      caption:
+        en: "250 - 400 L"
+        fr: "250 - 400 L"
+      title:
+        en: "Standard capacity"
+        fr: "Capacité standard"
+      description:
+        en: "Standard size for families"
+        fr: "Taille standard pour les familles"
+
+    - id: "volume_large"
+      group: "volume"
+      criterias:
+        - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+          operator: "GREATER_THAN"
+          value: "400"
+      image: "example-image.png"
+      url:
+        en: "large-capacity"
+        fr: "grande-capacite"
+      caption:
+        en: "> 400 L"
+        fr: "> 400 L"
+      title:
+        en: "Large capacity"
+        fr: "Grande capacité"
+      description:
+        en: "Generous space for large families"
+        fr: "Espace généreux pour les grandes familles"
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -309,26 +390,26 @@ technicalFilters:
 attributesConfig:
   configs:
     - key: "CLASSE_ENERGY"
-    - key: "POWER_CONSUMPTION_TYPICAL"
-    - key: "ENERGY_CONSUMPTION_ANNUAL"
     - key: "TOTAL_VOLUME"
     - key: "FRIDGE_NET_CAPACITY"
     - key: "FREEZER_NET_CAPACITY"
-    - key: "WEIGHT"
+    - key: "REPAIRABILITY_INDEX"
     - key: "NOISE_LEVEL"
     - key: "NOISE_CLASS"
     - key: "INSTALLATION_TYPE"
     - key: "REFRIGERATOR_TYPE"
-    - key: "REPAIRABILITY_INDEX"
-    - key: "WARRANTY"
-    - key: "HEIGHT"
+    - key: "POWER_CONSUMPTION_TYPICAL"
+    - key: "ENERGY_CONSUMPTION_ANNUAL"
     - key: "WIDTH"
+    - key: "HEIGHT"
     - key: "DEPTH"
-    - key: "YEAR"
+    - key: "WEIGHT"
     - key: "COLOR"
-    - key: "FEATURES"
+    - key: "YEAR"
+    - key: "WARRANTY"
     - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "DATA_QUALITY"
+    - key: "FEATURES"
 
 ####################################################################################
 # Product classification from categories (samples, will be overridden post-generation)
