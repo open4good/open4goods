@@ -1139,10 +1139,15 @@
     }
   },
   "common": {
+    "count": {
+      "months": "{count} month | {count} months",
+      "years": "{count} year | {count} years"
+    },
     "actions": {
       "goHome": "Back to homepage",
       "retry": "Retry"
     },
+    "years": "years",
     "boolean": {
       "false": "No",
       "true": "Yes"
@@ -2771,8 +2776,16 @@
       "viewOffersCount": "View the {count} offers",
       "viewSingleOffer": "View the offer"
     },
+    "eprel": {
+      "detailsTitle": "European Registry for Energy Labelling",
+      "marketEndDate": "End of market date",
+      "minSoftwareUpdates": "Min. recurring software updates",
+      "minSpareParts": "Min. spare parts availability",
+      "outOfMarketDuration": "Out of market for",
+      "supportGuaranteedUntil": "Guaranteed support until"
+    },
     "impact": {
-      "endOfLife": "Product no longer officially marketed by {brand}! Legal support periods start from {onMarketEndDate}",
+      "endOfLife": "This product is no longer marketed by {brand}. Legal support durations started from {onMarketEndDate}.",
       "alternatives": {
         "title": "Greener alternatives",
         "subtitle": "Discover similar products with a better impact score or price.",

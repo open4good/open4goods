@@ -1,11 +1,13 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import ProductImpactEcoScoreCard from './ProductImpactEcoScoreCard.vue'
 import type { ScoreView } from './impact-types'
 
 describe('ProductImpactEcoScoreCard', () => {
+  vi.stubGlobal('$fetch', vi.fn())
+
   const i18n = createI18n({
     legacy: false,
     locale: 'en-US',

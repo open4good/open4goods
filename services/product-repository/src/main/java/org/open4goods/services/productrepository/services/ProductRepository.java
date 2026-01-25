@@ -1019,25 +1019,11 @@ public class ProductRepository {
          * @param locale locale to check (e.g. {@code fr}); defaults to {@code default} when blank
          * @return count of recent products with AI reviews
          */
-        /**
-         * Count recent products with offers, AI reviews in the given language, and not excluded from the catalogue.
-         *
-         * @param language the language to check for reviews (e.g. "fr")
-         * @return count of recent products with AI reviews
-         */
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-<<<<<<< HEAD
-        public Long countMainIndexValidAndReviewed(String language) {
-=======
         public Long countMainIndexValidAndReviewed(String locale) {
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
             CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
                     .and(new Criteria("excluded").is(false))
-<<<<<<< HEAD
-                    .and(new Criteria("reviews." + language + ".review").exists()));
-=======
                     .and(new Criteria(resolveReviewField(locale)).exists()));
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
@@ -1073,27 +1059,12 @@ public class ProductRepository {
          * @param locale locale to check (e.g. {@code fr}); defaults to {@code default} when blank
          * @return count of recent products with AI reviews for the vertical
          */
-        /**
-         * Count recent products with offers, AI reviews in the given language, and not excluded for a specific vertical.
-         *
-         * @param vertical vertical identifier
-         * @param language the language to check for reviews (e.g. "fr")
-         * @return count of recent products with AI reviews for the vertical
-         */
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-<<<<<<< HEAD
-        public Long countMainIndexValidAndReviewed(String vertical, String language) {
-=======
         public Long countMainIndexValidAndReviewed(String vertical, String locale) {
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
             CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
                     .and(new Criteria("vertical").is(vertical))
                     .and(new Criteria("excluded").is(false))
-<<<<<<< HEAD
-                    .and(new Criteria("reviews." + language + ".review").exists()));
-=======
                     .and(new Criteria(resolveReviewField(locale)).exists()));
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 

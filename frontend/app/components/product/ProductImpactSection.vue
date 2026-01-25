@@ -37,6 +37,13 @@
         })
       }}
     </v-alert>
+
+    <!-- EPREL Details Table -->
+    <EprelDetailsTable
+      v-if="hasEprelData"
+      :eprel-data="productEprelData"
+      class="mt-6"
+    />
   </section>
 </template>
 
@@ -46,8 +53,15 @@ import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
+
 import ProductImpactEcoScoreCard from './impact/ProductImpactEcoScoreCard.vue'
+import EprelDetailsTable from './EprelDetailsTable.vue'
 import type { ScoreView } from './impact/impact-types'
+import type { ProductEprelDto } from '~~/shared/api-client'
+
+interface EprelDataWrapper {
+  eprelDatas?: ProductEprelDto
+}
 
 type RadarSeriesKey = 'current' | 'best' | 'worst'
 
@@ -131,6 +145,10 @@ const props = defineProps({
     type: [String, Number, Date] as PropType<
       string | number | Date | null | undefined
     >,
+    default: null,
+  },
+  eprelData: {
+    type: Object as PropType<EprelDataWrapper>,
     default: null,
   },
 })
@@ -232,21 +250,26 @@ const showRadar = computed(
 )
 
 const isEndOfLife = computed(() => {
-  if (!onMarketEndDate.value) return false
-  const date = new Date(onMarketEndDate.value)
+  const normalized = normalizeTimestamp(onMarketEndDate.value)
+  if (!normalized) return false
+  const date = new Date(normalized)
   // Check if valid date
   if (isNaN(date.getTime())) return false
   return date < new Date()
 })
 
 const formattedOnMarketEndDate = computed(() => {
-  if (!onMarketEndDate.value) return ''
-  const date = new Date(onMarketEndDate.value)
+  const normalized = normalizeTimestamp(onMarketEndDate.value)
+  if (!normalized) return ''
+  const date = new Date(normalized)
   if (isNaN(date.getTime())) return ''
   return format(date, 'dd MMM yyyy', {
     locale: locale.value.startsWith('fr') ? fr : enUS,
   })
 })
+
+const productEprelData = toRef(props, 'eprelData')
+const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
 </script>
 
 <style scoped>

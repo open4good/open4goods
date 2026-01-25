@@ -52,10 +52,10 @@ describe('GET /api/team Nitro endpoint', () => {
     vi.stubGlobal('fetch', fetchMock)
     vi.stubGlobal('defineEventHandler', (fn: TeamRouteHandler) => fn)
 
-    runtimeConfig.apiUrl = 'https://backend.example.test'
+    runtimeConfig.apiUrl = 'https://backend.example.test/api'
     runtimeConfig.machineToken = 'test-token-123'
     setResponseHeaderMock.mockReset()
-    process.env.API_URL = 'https://backend.example.test'
+    process.env.API_URL = 'https://backend.example.test/api'
     process.env.MACHINE_TOKEN = 'test-token-123'
 
     handler = (await import('./team')).default
