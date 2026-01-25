@@ -41,7 +41,6 @@
             </div>
           </div>
 
-          <p class="impact-score-examples__footer">{{ example.conclusion }}</p>
         </v-card>
       </v-col>
     </v-row>
@@ -93,48 +92,46 @@ const examples = computed(() => [
         icon: 'mdi-database-outline',
       },
     ],
-    conclusion: t('impactScorePage.examples.whirlpoolOven.conclusion'),
   },
   {
-    key: 'samsung-oven',
-    eyebrow: t('impactScorePage.examples.samsungOven.eyebrow'),
-    title: t('impactScorePage.examples.samsungOven.title'),
-    score: 2.1,
+    key: 'samsung-tv',
+    eyebrow: t('impactScorePage.examples.samsungTv.eyebrow'),
+    title: t('impactScorePage.examples.samsungTv.title'),
+    score: 3.4,
     breakdown: [
       {
-        label: t('impactScorePage.examples.samsungOven.breakdown.energy.label'),
-        value: t('impactScorePage.examples.samsungOven.breakdown.energy.value'),
+        label: t('impactScorePage.examples.samsungTv.breakdown.energy.label'),
+        value: t('impactScorePage.examples.samsungTv.breakdown.energy.value'),
         icon: 'mdi-flash',
       },
       {
         label: t(
-          'impactScorePage.examples.samsungOven.breakdown.consumption.label'
+          'impactScorePage.examples.samsungTv.breakdown.size.label'
         ),
         value: t(
-          'impactScorePage.examples.samsungOven.breakdown.consumption.value'
+          'impactScorePage.examples.samsungTv.breakdown.size.value'
         ),
-        icon: 'mdi-speedometer',
+        icon: 'mdi-television',
       },
       {
         label: t(
-          'impactScorePage.examples.samsungOven.breakdown.capacity.label'
+          'impactScorePage.examples.samsungTv.breakdown.resolution.label'
         ),
         value: t(
-          'impactScorePage.examples.samsungOven.breakdown.capacity.value'
+          'impactScorePage.examples.samsungTv.breakdown.resolution.value'
         ),
-        icon: 'mdi-resize',
+        icon: 'mdi-image-size-select-large',
       },
       {
         label: t(
-          'impactScorePage.examples.samsungOven.breakdown.sources.label'
+          'impactScorePage.examples.samsungTv.breakdown.sources.label'
         ),
         value: t(
-          'impactScorePage.examples.samsungOven.breakdown.sources.value'
+          'impactScorePage.examples.samsungTv.breakdown.sources.value'
         ),
         icon: 'mdi-database-outline',
       },
     ],
-    conclusion: t('impactScorePage.examples.samsungOven.conclusion'),
   },
 ])
 </script>
@@ -241,12 +238,6 @@ const examples = computed(() => [
 .impact-score-examples__pill-value {
   font-weight: 600;
   color: rgb(var(--v-theme-accent-primary-highlight));
-}
-
-.impact-score-examples__footer {
-  margin: 0;
-  color: rgb(var(--v-theme-text-neutral-secondary));
-  line-height: 1.5;
 }
 
 @media (max-width: 960px) {
