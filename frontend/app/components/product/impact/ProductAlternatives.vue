@@ -32,6 +32,12 @@
               :disabled="filter.disabled"
               @click="toggleFilter(filter.key)"
             >
+              <v-icon
+                v-if="isFilterActive(filter.key)"
+                icon="mdi-check"
+                size="small"
+                class="mr-2"
+              />
               <span>{{ filter.label }}</span>
             </button>
           </template>
@@ -387,11 +393,17 @@ const attributeFilterDefinitions = computed<AlternativeFilterDefinition[]>(
         }
 
         const prefersGreater = betterRule === 'GREATER'
-        const symbol = prefersGreater ? '↑' : '↓'
+        // const symbol = prefersGreater ? '↑' : '↓'
 
         accumulator.push({
           key: `attribute:${key}`,
-          label: `${readableLabel} ${symbol}`,
+          label: prefersGreater
+            ? t('product.impact.alternatives.filters.attributeGreater', {
+                label: readableLabel,
+              })
+            : t('product.impact.alternatives.filters.attributeLower', {
+                label: readableLabel,
+              }),
           tooltip: prefersGreater
             ? t('product.impact.alternatives.tooltips.attributeBetter', {
                 label: readableLabel,
@@ -418,7 +430,9 @@ const attributeFilterDefinitions = computed<AlternativeFilterDefinition[]>(
 
       accumulator.push({
         key: `attribute:${key}`,
-        label: `${readableLabel} =`,
+        label: t('product.impact.alternatives.filters.attributeEqual', {
+          label: readableLabel,
+        }),
         tooltip: t('product.impact.alternatives.tooltips.attributeEqual', {
           label: readableLabel,
         }),
@@ -698,6 +712,7 @@ const retryFetch = () => {
 .product-alternatives__chips {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
 }
 
@@ -706,12 +721,12 @@ const retryFetch = () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0.9rem;
+  padding: 0.6rem 1.1rem;
   border-radius: 999px;
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18);
-  background-color: rgba(var(--v-theme-surface-default), 0.95);
+  background-color: transparent;
   color: rgb(var(--v-theme-text-neutral-strong));
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   font-weight: 600;
   transition:
     background-color 0.2s ease,
@@ -727,8 +742,8 @@ const retryFetch = () => {
 }
 
 .product-alternatives__chip--active {
-  background-color: rgba(var(--v-theme-primary), 0.12);
-  border-color: rgba(var(--v-theme-primary), 0.4);
+  background-color: rgba(var(--v-theme-surface-default), 0.5);
+  border-color: rgba(var(--v-theme-primary), 0.8);
   color: rgb(var(--v-theme-primary));
 }
 

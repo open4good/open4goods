@@ -172,7 +172,7 @@
         "title": "Synthèse IA communautaire",
         "creditsLabel": "Crédits restants : {count}",
         "creditsFallback": "Crédits restants : indisponible",
-        "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit. Gratuit, communautaire.",
+        "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit et qui le partage avec les autres utilisateurs. A utiliser à bon escient, ce n'est gratuit que pour vous. ",
         "reviewedProductsSuffix": "{reviewedProductsCount} fiches produits générées jusqu'à présent."
       },
       "example": {
@@ -2508,8 +2508,11 @@
         "untitled": "Produit sans nom",
         "viewProduct": "Voir la fiche {name}",
         "filters": {
-          "price": "Prix ≤ au vôtre",
-          "ecoscore": "Éco-score ≥ au vôtre"
+          "price": "Prix inférieur ou égal au produit actuel",
+          "ecoscore": "Éco-score supérieur ou égal au produit actuel",
+          "attributeGreater": "{label} supérieur ou égal à ce produit",
+          "attributeLower": "{label} inférieur ou égal à ce produit",
+          "attributeEqual": "{label} identique à ce produit"
         },
         "tooltips": {
           "price": "Afficher les produits dont le prix est inférieur ou égal à {value}.",

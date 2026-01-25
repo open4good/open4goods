@@ -80,8 +80,12 @@ describe('GET /api/team Nitro endpoint', () => {
 
     await handler(event)
 
-    expect(fetchMock).toHaveBeenCalledOnce()
-    const [, init] = fetchMock.mock.calls[0]
+    expect(fetchMock).toHaveBeenCalled()
+    const teamCall = fetchMock.mock.calls.find(([url]) =>
+      String(url).includes('/api/team')
+    )
+    expect(teamCall).toBeDefined()
+    const [, init] = teamCall!
     const headers = (init?.headers ?? {}) as Record<string, string>
 
     expect(headers['X-Shared-Token']).toBe('test-token-123')

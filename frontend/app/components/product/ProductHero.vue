@@ -11,24 +11,26 @@
       <div class="product-hero__background-overlay" />
     </div>
     <div class="product-hero__content">
-      <header class="product-hero__heading">
+      <header
+        class="product-hero__heading home-reveal-group"
+        :class="heroRevealClasses"
+      >
         <ProductDesignation
           :product="product"
           variant="page"
-          title-tag="h3"
+          title-tag="h1"
           title-class="product-hero__title text-center"
           description-class="product-hero__short-description text-center"
+          class="home-reveal-item"
+          :style="{ '--reveal-delay': '0ms' }"
         />
-        <CategoryNavigationBreadcrumbs
-          v-if="heroBreadcrumbs.length"
-          v-bind="heroBreadcrumbProps"
-          class="product-hero__breadcrumbs text-center"
-        />
-        <v-fade-transition>
-          <p v-if="aiBaseline" class="product-hero__baseline text-center">
-            {{ aiBaseline }}
-          </p>
-        </v-fade-transition>
+        <p
+          v-if="aiBaseline"
+          class="product-hero__baseline text-center home-reveal-item"
+          :style="{ '--reveal-delay': '120ms' }"
+        >
+          {{ aiBaseline }}
+        </p>
       </header>
 
       <div class="product-hero__grid">
@@ -42,8 +44,8 @@
                 <ImpactScore
                   mode="svg"
                   :score="impactScore"
-                  :min="0"
-                  :max="20"
+                  :min="impactScoreMin"
+                  :max="impactScoreMax"
                   svg-size="lg"
                 />
               </div>
@@ -64,6 +66,12 @@
                   {{ productModelName }}
                 </span>
               </div>
+              <CategoryNavigationBreadcrumbs
+                v-if="heroBreadcrumbs.length"
+                v-bind="heroBreadcrumbProps"
+                class="product-hero__breadcrumbs home-reveal-item"
+                :style="{ '--reveal-delay': '60ms' }"
+              />
 
               <ul
                 v-if="heroAttributes.length"
@@ -254,13 +262,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, type PropType } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+  type PropType,
+} from 'vue'
 import DOMPurify from 'isomorphic-dompurify'
 import { useI18n } from 'vue-i18n'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -309,10 +327,59 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  impactScoreMin: {
+    type: Number,
+    default: 0,
+  },
+  impactScoreMax: {
+    type: Number,
+    default: 20,
+  },
   image: {
     type: String,
     default: null,
   },
+})
+
+const prefersReducedMotion = usePreferredReducedMotion()
+const accessibilityStore = useAccessibilityStore()
+const shouldReduceMotion = computed(
+  () =>
+    accessibilityStore.prefersReducedMotionOverride ||
+    prefersReducedMotion.value === 'reduce'
+)
+
+const heroRevealReady = ref(false)
+const heroRevealVisible = ref(false)
+const heroRevealClasses = computed(() => ({
+  'is-ready': heroRevealReady.value,
+  'is-visible': heroRevealVisible.value,
+}))
+
+onMounted(async () => {
+  await nextTick()
+
+  if (shouldReduceMotion.value) {
+    heroRevealReady.value = true
+    heroRevealVisible.value = true
+    return
+  }
+
+  heroRevealReady.value = true
+  // Wait for the next frame to ensure the browser registers the 'ready' state
+  window.requestAnimationFrame(() => {
+    // And another frame to trigger the transition
+    window.requestAnimationFrame(() => {
+      heroRevealVisible.value = true
+    })
+  })
+})
+
+watch(shouldReduceMotion, value => {
+  if (value) {
+    heroRevealReady.value = true
+    heroRevealVisible.value = true
+  }
 })
 
 const { t, te, n, locale } = useI18n()
@@ -793,18 +860,6 @@ const gtinCountry = computed(() => {
   font-size: 1rem;
   font-weight: 500;
   color: rgba(var(--v-theme-text-neutral-strong), 0.9);
-  animation: baselineFadeIn 0.6s ease 0.2s both;
-}
-
-@keyframes baselineFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .product-hero__grid {

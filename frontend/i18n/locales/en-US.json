@@ -2782,8 +2782,11 @@
         "untitled": "Unnamed product",
         "viewProduct": "View product {name}",
         "filters": {
-          "price": "Price ≤ yours",
-          "ecoscore": "Eco-score ≥ yours"
+          "price": "Price lower or equal to current product",
+          "ecoscore": "Eco-score higher or equal to current product",
+          "attributeGreater": "{label} higher or equal to this product",
+          "attributeLower": "{label} lower or equal to this product",
+          "attributeEqual": "{label} same as this product"
         },
         "tooltips": {
           "price": "Show products priced at or below {value}.",

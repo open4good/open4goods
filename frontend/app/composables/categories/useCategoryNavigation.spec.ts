@@ -10,6 +10,7 @@ describe('useCategoryNavigation composable', () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.unstubAllGlobals()
   })
 
@@ -57,7 +58,14 @@ describe('useCategoryNavigation composable', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'))
 
-    const navigationResponse = {
+    // Prevent manifest fetching background task from interfering
+    fetchMock.mockImplementation((request: string) => {
+      if (typeof request === 'string' && request.includes('/builds/meta/')) {
+        return Promise.resolve({})
+      }
+      return Promise.reject(new Error(`Unexpected fetch call: ${request}`))
+    })
+
       category: { title: 'Cached root' },
       childCategories: [],
     }
