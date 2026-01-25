@@ -127,6 +127,6 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
   &__row-item
     display: flex
     flex-direction: column
-    flex: 1 1 280px
-    min-width: min(280px, 100%)
+    flex: 1 1 200px
+    min-width: min(200px, 100%)
 </style>
