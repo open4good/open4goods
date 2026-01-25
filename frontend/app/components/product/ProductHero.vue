@@ -19,6 +19,15 @@
           title-class="product-hero__title text-center"
           description-class="product-hero__short-description text-center"
         />
+        <div v-if="impactScore != null" class="product-hero__impact-score">
+          <ImpactScore
+            mode="svg"
+            :score="impactScore"
+            :min="0"
+            :max="20"
+            svg-size="lg"
+          />
+        </div>
         <CategoryNavigationBreadcrumbs
           v-if="heroBreadcrumbs.length"
           v-bind="heroBreadcrumbProps"
@@ -248,6 +257,7 @@ import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
+import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -291,6 +301,10 @@ const props = defineProps({
   popularAttributes: {
     type: Array as PropType<AttributeConfigDto[]>,
     default: () => [],
+  },
+  impactScore: {
+    type: Number,
+    default: null,
   },
   image: {
     type: String,
@@ -744,6 +758,12 @@ const gtinCountry = computed(() => {
   font-size: 1.05rem;
   color: rgb(var(--v-theme-text-neutral-secondary));
   text-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.product-hero__impact-score {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
 }
 
 .product-hero__breadcrumbs {

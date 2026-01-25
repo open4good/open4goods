@@ -1148,7 +1148,9 @@
     "impactScore": {
       "tooltip": "Impact quality rated at {value} out of {max}",
       "tooltipBadge": "Impact quality rated at {value} out of 20",
-      "outOf20": "/20"
+      "outOf20": "/20",
+      "scale": "Scale: {min}–{max}",
+      "svgAriaLabel": "Score {score} out of 20"
     },
     "pageLoadingOverlay": {
       "label": "Loading page content"
