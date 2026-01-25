@@ -31,6 +31,9 @@ const props = defineProps<{
   openDataMillions?: number
   productsCount?: number
   categoriesCount?: number
+  impactScoreProductsCount?: number
+  productsWithoutVerticalCount?: number
+  aiSummaryRemainingCredits?: number
   heroBackgroundI18nKey?: string
   shouldReduceMotion?: boolean
 }>()
@@ -320,6 +323,9 @@ useHead({
                     :open-data-millions="openDataMillions"
                     :products-count="productsCount"
                     :categories-count="categoriesCount"
+                    :impact-score-products-count="impactScoreProductsCount"
+                    :products-without-vertical-count="productsWithoutVerticalCount"
+                    :ai-summary-remaining-credits="aiSummaryRemainingCredits"
                   />
                 </div>
               </div>

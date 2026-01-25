@@ -44,6 +44,18 @@ export interface CategoriesStatsDto {
      */
     isbnOpenDataItemsCount?: number;
     /**
+     * Count of recent products with offers, a valid ImpactScore, and not excluded.
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    impactScoreProductsCount?: number;
+    /**
+     * Count of recent products with offers that are not mapped to any vertical.
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    productsWithoutVerticalCount?: number;
+    /**
      * Per-category product counts for recent products with offers, keyed by vertical id.
      * @type {{ [key: string]: number; }}
      * @memberof CategoriesStatsDto
@@ -78,6 +90,8 @@ export function CategoriesStatsDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'affiliationPartnersCount': json['affiliationPartnersCount'] == null ? undefined : json['affiliationPartnersCount'],
         'gtinOpenDataItemsCount': json['gtinOpenDataItemsCount'] == null ? undefined : json['gtinOpenDataItemsCount'],
         'isbnOpenDataItemsCount': json['isbnOpenDataItemsCount'] == null ? undefined : json['isbnOpenDataItemsCount'],
+        'impactScoreProductsCount': json['impactScoreProductsCount'] == null ? undefined : json['impactScoreProductsCount'],
+        'productsWithoutVerticalCount': json['productsWithoutVerticalCount'] == null ? undefined : json['productsWithoutVerticalCount'],
         'productsCountByCategory': json['productsCountByCategory'] == null ? undefined : json['productsCountByCategory'],
         'productsCountSum': json['productsCountSum'] == null ? undefined : json['productsCountSum'],
     };
@@ -98,8 +112,9 @@ export function CategoriesStatsDtoToJSONTyped(value?: CategoriesStatsDto | null,
         'affiliationPartnersCount': value['affiliationPartnersCount'],
         'gtinOpenDataItemsCount': value['gtinOpenDataItemsCount'],
         'isbnOpenDataItemsCount': value['isbnOpenDataItemsCount'],
+        'impactScoreProductsCount': value['impactScoreProductsCount'],
+        'productsWithoutVerticalCount': value['productsWithoutVerticalCount'],
         'productsCountByCategory': value['productsCountByCategory'],
         'productsCountSum': value['productsCountSum'],
     };
 }
-

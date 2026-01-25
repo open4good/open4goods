@@ -47,10 +47,24 @@ const messages: Record<string, unknown> = {
       title: '🌿 ImpactScore: guiding your purchases',
       segments: [
         {
-          text: 'An innovative ecological and environmental assessment for {products} products across',
+          text: 'Buy less harmful for the planet, thanks to our',
         },
         {
-          text: '{categories} categories',
+          text: 'environmental assessment',
+          to: '/impact-score',
+        },
+        {
+          text: 'covering',
+        },
+        {
+          text: '{impactScoreProducts}',
+          to: '/impact-score',
+        },
+        {
+          text: 'products across',
+        },
+        {
+          text: '{impactScoreCategories} categories',
           to: '/categories',
         },
       ],
@@ -59,15 +73,33 @@ const messages: Record<string, unknown> = {
       title: '🇫🇷 Open & ethical',
       segments: [
         {
-          text: '100% independent. Over {millions}M products in',
+          text: '100% independent. Made in France,',
+          icon: 'breton-flag',
+          iconPosition: 'after',
+        },
+        {
+          text: 'hosted in Europe. Over',
+        },
+        {
+          text: '{millions}M',
+          to: '/opendata',
+        },
+        {
+          text: 'products in',
         },
         {
           text: 'open data.',
           to: '/opendata',
         },
         {
-          text: 'Open-source software',
+          text: 'Nudger is also',
+        },
+        {
+          text: 'open source',
           to: '/opensource',
+        },
+        {
+          text: 'and collects no personal data.',
         },
       ],
     },
@@ -75,14 +107,21 @@ const messages: Record<string, unknown> = {
       title: 'Price comparison',
       segments: [
         {
-          text: 'Avoid price traps with',
+          text: 'Avoid price traps with the best offers from',
         },
         {
-          text: '{partnersLink}.',
+          text: '{partnersLink}',
           to: '/partners',
         },
         {
-          text: 'Best prices, new and used price history for {products} products',
+          text: 'merchants. Buy at the right time with new and used price history for',
+        },
+        {
+          text: '{priceHistoryProducts}',
+          to: '/categories',
+        },
+        {
+          text: 'products.',
         },
       ],
     },
@@ -143,10 +182,24 @@ const messages: Record<string, unknown> = {
       title: '🌿 ImpactScore: guiding your purchases',
       segments: [
         {
-          text: 'An innovative ecological and environmental assessment for {products} products across',
+          text: 'Buy less harmful for the planet, thanks to our',
         },
         {
-          text: '{categories} categories',
+          text: 'environmental assessment',
+          to: '/impact-score',
+        },
+        {
+          text: 'covering',
+        },
+        {
+          text: '{impactScoreProducts}',
+          to: '/impact-score',
+        },
+        {
+          text: 'products across',
+        },
+        {
+          text: '{impactScoreCategories} categories',
           to: '/categories',
         },
       ],
@@ -155,15 +208,33 @@ const messages: Record<string, unknown> = {
       title: '🇫🇷 Open & ethical',
       segments: [
         {
-          text: '100% independent. Over {millions}M products in',
+          text: '100% independent. Made in France,',
+          icon: 'breton-flag',
+          iconPosition: 'after',
+        },
+        {
+          text: 'hosted in Europe. Over',
+        },
+        {
+          text: '{millions}M',
+          to: '/opendata',
+        },
+        {
+          text: 'products in',
         },
         {
           text: 'open data.',
           to: '/opendata',
         },
         {
-          text: 'Open-source software',
+          text: 'Nudger is also',
+        },
+        {
+          text: 'open source',
           to: '/opensource',
+        },
+        {
+          text: 'and collects no personal data.',
         },
       ],
     },
@@ -171,18 +242,30 @@ const messages: Record<string, unknown> = {
       title: 'Price comparison',
       segments: [
         {
-          text: 'Avoid price traps with',
+          text: 'Avoid price traps with the best offers from',
         },
         {
-          text: '{partnersLink}.',
+          text: '{partnersLink}',
           to: '/partners',
         },
         {
-          text: 'Best prices, new and used price history for {products} products',
+          text: 'merchants. Buy at the right time with new and used price history for',
+        },
+        {
+          text: '{priceHistoryProducts}',
+          to: '/categories',
+        },
+        {
+          text: 'products.',
         },
       ],
     },
   ],
+  'home.hero.aiSummary.title': 'Community AI summary',
+  'home.hero.aiSummary.creditsLabel': 'Credits remaining: {count}',
+  'home.hero.aiSummary.creditsFallback': 'Credits remaining: unavailable',
+  'home.hero.aiSummary.description':
+    'A powerful tool with real AI inside, giving you a panoramic view of your product. Free and community-driven.',
   'home.hero.search.partnerLinkLabel':
     '{formattedCount} partner | {formattedCount} partners',
   'home.hero.search.partnerLinkFallback': 'our partners',
