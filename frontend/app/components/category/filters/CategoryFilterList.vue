@@ -1,16 +1,26 @@
 <template>
   <div :class="['category-filter-list', `category-filter-list--${mode}`]">
-    <div
-      class="category-filter-list__header d-flex align-center justify-end mb-2"
-    >
-      <v-switch
-        :model-value="searchType === 'TEXT'"
-        color="primary"
-        label="Recherche textuelle"
-        hide-details
-        density="compact"
-        @update:model-value="$emit('update:searchType', $event ? 'TEXT' : null)"
-      />
+    <div class="category-filter-list__header d-flex align-center">
+      <v-btn-toggle
+        class="category-filter-list__search-toggle"
+        :model-value="resolvedSearchType"
+        mandatory
+        rounded="pill"
+        density="comfortable"
+        @update:model-value="emit('update:searchType', $event)"
+      >
+        <v-btn
+          size="large"
+          value="SEMANTIC"
+          color="primary"
+          variant="outlined"
+        >
+          {{ t('category.filters.searchMode.semantic') }}
+        </v-btn>
+        <v-btn size="large" value="TEXT" color="primary" variant="outlined">
+          {{ t('category.filters.searchMode.text') }}
+        </v-btn>
+      </v-btn-toggle>
     </div>
     <template v-if="mode === 'grid'">
       <component
@@ -54,6 +64,8 @@ import CategoryFilterNumeric from './CategoryFilterNumeric.vue'
 import CategoryFilterCondition from './CategoryFilterCondition.vue'
 import CategoryFilterTerms from './CategoryFilterTerms.vue'
 
+const { t } = useI18n()
+
 const props = withDefaults(
   defineProps<{
     fields: FieldMetadataDto[]
@@ -75,6 +87,8 @@ const emit = defineEmits<{
   'update-terms': [field: string, terms: string[]]
   'update:searchType': [value: string | null]
 }>()
+
+const resolvedSearchType = computed(() => props.searchType ?? 'SEMANTIC')
 
 const resolveComponent = (field: FieldMetadataDto) => {
   if (field.mapping === 'price.conditions') {
@@ -115,7 +129,6 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
 </script>
 
 <style scoped lang="sass">
-
 .category-filter-list
   display: grid
   gap: 1.5rem
@@ -125,7 +138,10 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     align-items: stretch
 
   &--row
-    display: block
+    display: flex
+    align-items: center
+    gap: 1.5rem
+    flex-wrap: wrap
 
   &__item
     display: flex
@@ -138,10 +154,21 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     flex-wrap: wrap
     gap: 1rem
     align-items: stretch
+    flex: 1 1 auto
 
   &__row-item
     display: flex
     flex-direction: column
     flex: 1 1 200px
     min-width: min(200px, 100%)
+
+  &__header
+    justify-content: flex-start
+
+  &__search-toggle
+    align-items: center
+    :deep(.v-btn)
+      text-transform: none
+      font-weight: 600
+      padding-inline: 1.25rem
 </style>

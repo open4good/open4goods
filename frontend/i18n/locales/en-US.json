@@ -993,6 +993,10 @@
         "new": "New",
         "used": "Used"
       },
+      "searchMode": {
+        "semantic": "Semantic search",
+        "text": "Text search"
+      },
       "showMoreImpact": "Show more impact filters",
       "showMoreTechnical": "Show more technical filters",
       "technicalTitle": "Technical filters",
