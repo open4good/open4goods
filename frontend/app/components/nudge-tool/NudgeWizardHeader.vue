@@ -6,6 +6,7 @@
   >
     <div class="wizard-header__titles">
       <div class="wizard-header__title">
+        <slot name="prepend-title" />
         <v-icon
           v-if="titleIcon"
           :icon="titleIcon"
