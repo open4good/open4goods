@@ -301,6 +301,34 @@ public class SearchService {
 		}));
 	}
 
+	/**
+	 * Builds a lexical query targeting products without a vertical assignment.
+	 *
+	 * @param sanitizedQuery        sanitized query string
+	 * @param filters               optional filters to apply
+	 * @param applyDefaultExclusion whether to apply the default exclusion filter
+	 * @return a query limited to missing-vertical products
+	 */
+	private Query buildMissingVerticalSearchQuery(String sanitizedQuery, FilterRequestDto filters,
+			boolean applyDefaultExclusion) {
+		Long expiration = repository.expirationClause();
+		return Query.of(q -> q.bool(b -> {
+			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+			if (applyDefaultExclusion) {
+				b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+			}
+			b.mustNot(m -> m.exists(e -> e.field("vertical")));
+			if (StringUtils.hasText(sanitizedQuery)) {
+				b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(sanitizedQuery)));
+			}
+			if (filters != null) {
+				applyFilterRequest(filters, b);
+			}
+			return b;
+		}));
+	}
+
 	private String normalizeVerticalId(String verticalId) {
 		if (!StringUtils.hasText(verticalId)) {
 			return null;
@@ -313,7 +341,8 @@ public class SearchService {
 	}
 
 	/**
-	 * Execute a semantic-only global search strategy.
+	 * Execute a semantic-first global search strategy with a lexical fallback for
+	 * missing-vertical results.
 	 *
 	 * @param query          raw user query
 	 * @param domainLanguage localisation hint (currently unused but kept for future
@@ -334,8 +363,13 @@ public class SearchService {
 		CategorySuggestion verticalCta = findExactVerticalMatch(sanitizedQuery, domainLanguage);
 		SemanticGlobalSearchResult semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage,
 				normalizedFilters, sort);
+		List<GlobalSearchHit> missingVerticalResults = semanticResult.missingVerticalResults();
+		if (missingVerticalResults.isEmpty()) {
+			missingVerticalResults = executeMissingVerticalLexicalSearch(sanitizedQuery, domainLanguage,
+					normalizedFilters, sort);
+		}
 		return new GlobalSearchResult(semanticResult.verticalGroups(),
-				semanticResult.missingVerticalResults(),
+				missingVerticalResults,
 				verticalCta,
 				semanticResult.diagnostics());
 	}
@@ -1025,6 +1059,40 @@ public class SearchService {
 				buildSemanticDiagnostics(grouped, missingVerticalResults));
 	}
 
+	/**
+	 * Executes a lexical fallback search scoped to products without a vertical
+	 * assignment.
+	 *
+	 * @param sanitizedQuery sanitized query string
+	 * @param domainLanguage localisation hint for result mapping
+	 * @param filters        optional filters to apply
+	 * @param sort           optional sort definition
+	 * @return list of mapped hits without a vertical assignment
+	 */
+	private List<GlobalSearchHit> executeMissingVerticalLexicalSearch(String sanitizedQuery,
+			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort) {
+		if (!StringUtils.hasText(sanitizedQuery)) {
+			return List.of();
+		}
+
+		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
+		Query query = buildMissingVerticalSearchQuery(sanitizedQuery, filters, true);
+		NativeQueryBuilder builder = new NativeQueryBuilder()
+				.withQuery(query)
+				.withPageable(pageable)
+				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+
+		SearchHits<Product> hits;
+		try {
+			hits = repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+		} catch (Exception e) {
+			elasticLog(e);
+			throw e;
+		}
+
+		return mapHits(hits, domainLanguage, false, sort);
+	}
+
 
 
 	/**
@@ -1448,6 +1516,23 @@ public class SearchService {
 			MissingAggregate missing = missingAgg.aggregation().getAggregate().missing();
 			if (missing.docCount() > 0) {
 				buckets.add(new AggregationBucketDto(MISSING_BUCKET, null, missing.docCount(), true));
+			}
+		}
+
+		if (min == null && descriptor.request.min() != null) {
+			min = descriptor.request.min();
+		}
+		if (max == null && descriptor.request.max() != null) {
+			max = descriptor.request.max();
+		}
+		if ((min == null || max == null) && !buckets.isEmpty()) {
+			AggregationBucketDto firstBucket = buckets.get(0);
+			AggregationBucketDto lastBucket = buckets.get(buckets.size() - 1);
+			if (min == null && firstBucket.key() != null) {
+				min = Double.parseDouble(firstBucket.key());
+			}
+			if (max == null && lastBucket.to() != null) {
+				max = lastBucket.to();
 			}
 		}
 
