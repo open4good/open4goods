@@ -2696,6 +2696,9 @@
       }
     },
     "hero": {
+      "aiReview": {
+        "label": "AI Summary"
+      },
       "aiSummary": {
         "community": "Experts say",
         "ecological": "Environmentally",
@@ -2835,6 +2838,15 @@
           },
           "statisticalMethod": {
             "title": "Statistical method",
+            "titles": {
+              "sigma": "Statistical method: Normal Distribution (Sigma)",
+              "percentile": "Statistical method: Percentile",
+              "minmax_fixed": "Statistical method: Fixed Bounds",
+              "minmax_quantile": "Statistical method: Quantile Bounds",
+              "fixed_mapping": "Statistical method: Fixed Mapping",
+              "binary": "Statistical method: Binary",
+              "constant": "Statistical method: Constant"
+            },
             "sigma": {
               "bounds": "Normalization spans [{sigmaLower}{unit} ; {sigmaUpper}{unit}] based on {sigmaK}σ around the mean.",
               "scoring": "The score is computed by comparing the value with the ±{sigmaK}σ bounds around the mean.",
@@ -2945,6 +2957,7 @@
       "overview": "Overview",
       "alternatives": "Alternatives",
       "price": "Pricing",
+      "timeline": "Key Moments",
       "submenus": {
         "price": {
           "bestOffers": "Best offers",
@@ -2963,12 +2976,23 @@
     },
     "price": {
       "condition": {
+        "NEW": "New",
         "new": "New",
+        "OCCASION": "Second-hand",
         "occasion": "Second-hand",
         "refurbished": "Refurbished",
         "unknown": "Unknown",
         "used": "Second-hand"
       },
+      "table": {
+        "merchant": "Merchant",
+        "price": "Price",
+        "condition": "Condition"
+      },
+      "newOffersOnly": "Show new offers only",
+      "bestOffers": "Best offers",
+      "viewDeal": "View deal",
+      "history": "Price history",
       "noOffersBanner": "No offers available right now!",
       "headers": {
         "condition": "Condition",

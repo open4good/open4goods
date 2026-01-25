@@ -2013,7 +2013,7 @@
     "hero": {
       "eyebrow": "Explorer le catalogue",
       "title": "Les produits disponibles",
-      "subtitle": "Rechercher dans nos produits évalués . Et dans les autres ..."
+      "subtitle": "Rechercher dans nos produits évalués . Et dans les autres !"
     },
     "form": {
       "label": "Rechercher dans le catalogue",
@@ -2675,6 +2675,7 @@
       "overview": "Aperçu",
       "alternatives": "Alternatives",
       "price": "Prix",
+      "timeline": "Moments clés",
       "submenus": {
         "price": {
           "bestOffers": "Meilleurs prix",
@@ -2695,6 +2696,7 @@
       "condition": {
         "NEW": "Neuf",
         "new": "Neuf",
+        "OCCASION": "Occasion",
         "occasion": "Occasion",
         "refurbished": "Reconditionné",
         "unknown": "Inconnu",
@@ -2723,8 +2725,8 @@
       "metrics": {
         "average": "Prix moyen",
         "bestOffer": "Meilleure offre",
-        "highest": "Prix le plus haut",
-        "lowest": "Prix le plus bas",
+        "highest": "Le plus haut",
+        "lowest": "Le plus bas",
         "viewOffer": "Ouvrir l'offre chez {source}",
         "unknownSource": "Source inconnue"
       },

@@ -357,7 +357,7 @@ public class ProductController {
         Validation<Pageable> sortValidation = sanitizeSort(page, sortDto, allowedSortMappings);
         if (sortValidation.hasError()) {
             LOGGER.warn("Sort validation failed for request: {}", sortDto);
-            return sortValidation.error();
+            return castError(sortValidation.error());
         }
         effectivePageable = sortValidation.value();
 
@@ -367,7 +367,7 @@ public class ProductController {
                     ProductDtoComponent.valueOf(component);
                 } catch (IllegalArgumentException ex) {
                     LOGGER.warn("Invalid include parameter encountered: {}", component, ex);
-                    return badRequest("Invalid include parameter", "Unknown component: " + component);
+                    return castError(badRequest("Invalid include parameter", "Unknown component: " + component));
                 }
             }
         }
@@ -377,7 +377,7 @@ public class ProductController {
                 capabilities.allowedAggregations());
         if (aggregationValidation.hasError()) {
             LOGGER.warn("Aggregation validation failed for request: {}", aggDto);
-            return aggregationValidation.error();
+            return castError(aggregationValidation.error());
         }
         aggDto = aggregationValidation.value();
 
@@ -385,7 +385,7 @@ public class ProductController {
         Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, capabilities.allowedFilters());
         if (filterValidation.hasError()) {
             LOGGER.warn("Filter validation failed for request: {}", filterDto);
-            return filterValidation.error();
+            return castError(filterValidation.error());
         }
         filterDto = filterValidation.value();
 
@@ -455,7 +455,7 @@ public class ProductController {
         Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, allowedFilterMappings);
         if (filterValidation.hasError()) {
             LOGGER.warn("Filter validation failed for global search request: {}", filterDto);
-            return filterValidation.error();
+            return castError(filterValidation.error());
         }
         filterDto = filterValidation.value();
 
@@ -464,7 +464,7 @@ public class ProductController {
         Validation<Pageable> sortValidation = sanitizeSort(globalPageable, sortDto, allowedSortMappings);
         if (sortValidation.hasError()) {
             LOGGER.warn("Sort validation failed for global search request: {}", sortDto);
-            return sortValidation.error();
+            return castError(sortValidation.error());
         }
 
         SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, filterDto,
@@ -550,14 +550,17 @@ public class ProductController {
                 suggestion.verticalHomeTitle(), suggestion.verticalHomeUrl());
     }
 
-    private ResponseEntity<ProductSearchResponseDto> badRequest(String title, String detail) {
+    private ResponseEntity<?> badRequest(String title, String detail) {
         LOGGER.warn("Returning bad request ProblemDetail with title='{}', detail='{}'", title, detail);
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle(title);
         pd.setDetail(detail);
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-        return response;
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> ResponseEntity<T> castError(ResponseEntity<?> error) {
+        return (ResponseEntity<T>) error;
     }
 
     /**
@@ -969,13 +972,13 @@ public class ProductController {
             Set<String> allowedAggregations) {
     }
 
-    private record Validation<T>(T value, ResponseEntity<ProductSearchResponseDto> error) {
+    private record Validation<T>(T value, ResponseEntity<?> error) {
 
         static <T> Validation<T> ok(T value) {
             return new Validation<>(value, null);
         }
 
-        static <T> Validation<T> error(ResponseEntity<ProductSearchResponseDto> error) {
+        static <T> Validation<T> error(ResponseEntity<?> error) {
             return new Validation<>(null, error);
         }
 

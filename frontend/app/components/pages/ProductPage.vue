@@ -134,6 +134,14 @@
         </section>
 
         <section
+          v-if="product.timeline"
+          :id="sectionIds.timeline"
+          class="product-page__section"
+        >
+          <ProductLifeTimeline :timeline="product.timeline" />
+        </section>
+
+        <section
           v-if="showAlternativesSection"
           :id="sectionIds.alternatives"
           class="product-page__section"
@@ -247,6 +255,9 @@ const ProductDocumentationSection = defineAsyncComponent(
 )
 const ProductAdminSection = defineAsyncComponent(
   () => import('~/components/product/ProductAdminSection.vue')
+)
+const ProductLifeTimeline = defineAsyncComponent(
+  () => import('~/components/product/ProductLifeTimeline.vue')
 )
 
 const route = useRoute()
@@ -1565,8 +1576,6 @@ const radarData = computed<RadarDataset>(() => {
     series.push({
       key: 'current',
       name: productSeriesLabel,
-      key: 'current',
-      name: productSeriesLabel,
       values: productPlottedValues,
       rawValues: productValues,
     })
@@ -1590,8 +1599,6 @@ const radarData = computed<RadarDataset>(() => {
     series.push({
       key: 'best',
       name: bestLabel,
-      key: 'best',
-      name: bestLabel,
       values: bestPlottedValues,
       rawValues: bestValues,
     })
@@ -1613,8 +1620,6 @@ const radarData = computed<RadarDataset>(() => {
     )
   ) {
     series.push({
-      key: 'worst',
-      name: worstLabel,
       key: 'worst',
       name: worstLabel,
       values: worstPlottedValues,
@@ -1710,6 +1715,7 @@ const sectionIds = {
   impact: 'impact',
   ai: 'synthese',
   price: 'prix',
+  timeline: 'cycle-de-vie',
   alternatives: 'alternatives',
   attributes: 'caracteristiques',
   docs: 'documentation',
@@ -1770,13 +1776,6 @@ const attributesSubsections = computed(() => {
       label: t('product.navigation.submenus.attributes.summary'),
     },
   ]
-
-  if (product.value?.timeline) {
-    entries.push({
-      id: subSectionIds.attributesTimeline,
-      label: t('product.navigation.submenus.attributes.dates'),
-    })
-  }
 
   entries.push({
     id: subSectionIds.attributesDetails,
@@ -1851,6 +1850,12 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
         label: t('product.navigation.submenus.price.history'),
       },
     ],
+  },
+  {
+    id: sectionIds.timeline,
+    label: t('product.navigation.timeline'),
+    icon: 'mdi-timeline-clock-outline',
+    condition: !!product.value?.timeline,
   },
   {
     id: sectionIds.alternatives,

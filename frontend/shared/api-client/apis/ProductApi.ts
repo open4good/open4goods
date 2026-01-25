@@ -270,7 +270,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Runs a semantic-only search strategy powered by embeddings.
+     * Runs an embeddings-only search strategy with optional filters and sorting.
      * Execute a global search
      */
     async globalSearchRaw(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GlobalSearchResponseDto>> {
@@ -321,7 +321,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Runs a semantic-only search strategy powered by embeddings.
+     * Runs an embeddings-only search strategy with optional filters and sorting.
      * Execute a global search
      */
     async globalSearch(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GlobalSearchResponseDto> {

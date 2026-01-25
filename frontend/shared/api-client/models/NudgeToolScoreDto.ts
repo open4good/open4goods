@@ -102,3 +102,4 @@ export function NudgeToolScoreDtoToJSONTyped(value?: NudgeToolScoreDto | null, i
         'description': value['description'],
     };
 }
+

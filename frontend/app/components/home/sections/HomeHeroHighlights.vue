@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useEventPackI18n } from '~/composables/useEventPackI18n'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 import {
@@ -462,7 +462,9 @@ const applyImpactScorePlaceholders = (items: HeroHighlightItem[]) => {
   })
 }
 
-const applyProductsWithoutVerticalPlaceholder = (items: HeroHighlightItem[]) => {
+const applyProductsWithoutVerticalPlaceholder = (
+  items: HeroHighlightItem[]
+) => {
   const productsLabel = formattedProductsWithoutVerticalCount.value
 
   if (!productsLabel) {
@@ -516,7 +518,9 @@ const resolveSegmentIcon = (icon?: string) => {
 }
 
 const aiSummaryTitle = computed(() => t('home.hero.aiSummary.title'))
-const aiSummaryDescription = computed(() => t('home.hero.aiSummary.description'))
+const aiSummaryDescription = computed(() =>
+  t('home.hero.aiSummary.description')
+)
 const aiSummaryCreditsLabel = computed(() => {
   const remaining = formattedAiSummaryRemainingCredits.value
   if (!remaining) {
@@ -525,6 +529,8 @@ const aiSummaryCreditsLabel = computed(() => {
 
   return t('home.hero.aiSummary.creditsLabel', { count: remaining })
 })
+
+const isCreditsDialogActive = ref(false)
 </script>
 
 <template>
@@ -568,8 +574,8 @@ const aiSummaryCreditsLabel = computed(() => {
                     <span
                       v-if="
                         segment.icon &&
-                          resolveSegmentIcon(segment.icon) &&
-                          segment.iconPosition !== 'after'
+                        resolveSegmentIcon(segment.icon) &&
+                        segment.iconPosition !== 'after'
                       "
                       class="home-hero-highlights__icon"
                     >
@@ -583,8 +589,8 @@ const aiSummaryCreditsLabel = computed(() => {
                     <span
                       v-if="
                         segment.icon &&
-                          resolveSegmentIcon(segment.icon) &&
-                          segment.iconPosition === 'after'
+                        resolveSegmentIcon(segment.icon) &&
+                        segment.iconPosition === 'after'
                       "
                       class="home-hero-highlights__icon"
                     >
@@ -599,8 +605,8 @@ const aiSummaryCreditsLabel = computed(() => {
                     <span
                       v-if="
                         segment.icon &&
-                          resolveSegmentIcon(segment.icon) &&
-                          segment.iconPosition !== 'after'
+                        resolveSegmentIcon(segment.icon) &&
+                        segment.iconPosition !== 'after'
                       "
                       class="home-hero-highlights__icon"
                     >
@@ -614,8 +620,8 @@ const aiSummaryCreditsLabel = computed(() => {
                     <span
                       v-if="
                         segment.icon &&
-                          resolveSegmentIcon(segment.icon) &&
-                          segment.iconPosition === 'after'
+                        resolveSegmentIcon(segment.icon) &&
+                        segment.iconPosition === 'after'
                       "
                       class="home-hero-highlights__icon"
                     >
@@ -642,18 +648,55 @@ const aiSummaryCreditsLabel = computed(() => {
         <div class="home-hero-highlights__ai-summary-content">
           <div class="home-hero-highlights__ai-summary-header">
             <span class="home-hero-highlights__ai-summary-title">
+              <v-icon color="secondary" class="mr-2"
+                >mdi-bullhorn-variant</v-icon
+              >
               {{ aiSummaryTitle }}
-            </span>
-            <span class="home-hero-highlights__ai-summary-credits">
-              {{ aiSummaryCreditsLabel }}
             </span>
           </div>
           <p class="home-hero-highlights__ai-summary-description">
             {{ aiSummaryDescription }}
           </p>
+          <div class="d-flex justify-center mt-4">
+            <v-btn
+              color="secondary"
+              variant="flat"
+              rounded="pill"
+              prepend-icon="mdi-bullhorn-variant"
+              @click="isCreditsDialogActive = true"
+            >
+              {{ aiSummaryCreditsLabel }}
+            </v-btn>
+          </div>
         </div>
       </v-sheet>
     </SectionReveal>
+
+    <v-dialog v-model="isCreditsDialogActive" max-width="600">
+      <v-card class="pa-4" rounded="xl">
+        <v-card-text class="text-center pa-6">
+          <div class="d-flex justify-center gap-6 mb-8">
+            <v-icon size="56" color="primary">mdi-robot</v-icon>
+            <v-icon size="56" color="secondary">mdi-creation</v-icon>
+            <v-icon size="56" color="accent">mdi-sparkles</v-icon>
+          </div>
+          <p class="text-h6 font-weight-medium mb-2">
+            Rendez vous sur les pages produits non encore synthétisées pour
+            activer vos générations !
+          </p>
+        </v-card-text>
+        <v-card-actions class="justify-center pt-0 pb-4">
+          <v-btn
+            color="primary"
+            variant="flat"
+            size="large"
+            @click="isCreditsDialogActive = false"
+          >
+            Compris !
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -752,9 +795,6 @@ const aiSummaryCreditsLabel = computed(() => {
 .home-hero-highlights__ai-summary-title
   font-size: 0.95rem
 
-.home-hero-highlights__ai-summary-credits
-  font-size: 0.85rem
-  color: rgb(var(--v-theme-text-neutral-soft))
 
 .home-hero-highlights__ai-summary-description
   margin: 0

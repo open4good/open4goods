@@ -49,6 +49,7 @@ export const ScoreNormalizationConfigDtoMethodEnum = {
     Sigma: 'SIGMA',
     Percentile: 'PERCENTILE',
     MinmaxFixed: 'MINMAX_FIXED',
+    MinmaxObserved: 'MINMAX_OBSERVED',
     MinmaxQuantile: 'MINMAX_QUANTILE',
     FixedMapping: 'FIXED_MAPPING',
     Binary: 'BINARY',

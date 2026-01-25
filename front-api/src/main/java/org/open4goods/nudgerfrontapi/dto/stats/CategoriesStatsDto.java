@@ -30,5 +30,17 @@ public record CategoriesStatsDto(
         Map<String, Long> productsCountByCategory,
 
         @Schema(description = "Sum of product counts across enabled categories.", example = "20500")
-        long productsCountSum
+        long productsCountSum,
+
+        @Schema(description = "Total distinct products count (all verticals, including excluded).", example = "150000")
+        long totalProductsCount,
+
+        @Schema(description = "Total excluded products count.", example = "5000")
+        long excludedProductsCount,
+
+        @Schema(description = "Total products with AI reviews.", example = "10000")
+        long reviewedProductsCount,
+
+        @Schema(description = "Detailed statistics per vertical.", example = "{\"electronics\": {\"totalProducts\": 1000, ...}}")
+        Map<String, VerticalStatsDto> detailedStats
 ) { }

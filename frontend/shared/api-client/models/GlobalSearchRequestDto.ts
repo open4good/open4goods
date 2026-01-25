@@ -13,8 +13,21 @@
  */
 
 import { mapValues } from '../runtime';
-import type { FilterRequestDto } from './FilterRequestDto';
 import type { SortRequestDto } from './SortRequestDto';
+import {
+    SortRequestDtoFromJSON,
+    SortRequestDtoFromJSONTyped,
+    SortRequestDtoToJSON,
+    SortRequestDtoToJSONTyped,
+} from './SortRequestDto';
+import type { FilterRequestDto } from './FilterRequestDto';
+import {
+    FilterRequestDtoFromJSON,
+    FilterRequestDtoFromJSONTyped,
+    FilterRequestDtoToJSON,
+    FilterRequestDtoToJSONTyped,
+} from './FilterRequestDto';
+
 /**
  * 
  * @export
@@ -59,8 +72,8 @@ export function GlobalSearchRequestDtoFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'query': json['query'] == null ? undefined : json['query'],
-        'filters': json['filters'] == null ? undefined : json['filters'],
-        'sort': json['sort'] == null ? undefined : json['sort'],
+        'filters': json['filters'] == null ? undefined : FilterRequestDtoFromJSON(json['filters']),
+        'sort': json['sort'] == null ? undefined : SortRequestDtoFromJSON(json['sort']),
     };
 }
 
@@ -76,7 +89,8 @@ export function GlobalSearchRequestDtoToJSONTyped(value?: GlobalSearchRequestDto
     return {
         
         'query': value['query'],
-        'filters': value['filters'],
-        'sort': value['sort'],
+        'filters': FilterRequestDtoToJSON(value['filters']),
+        'sort': SortRequestDtoToJSON(value['sort']),
     };
 }
+

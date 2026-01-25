@@ -474,10 +474,10 @@ const {
       return null
     }
 
-    return await $fetch<ProductSearchResponseDto>('/api/products', {
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
-      body: baselinePayload.value, // This payload matches ProductSearchRequestDto which /api/products expects
+      body: baselinePayload.value, // This payload matches ProductSearchRequestDto which /api/products/search can handle
     })
   },
   {
@@ -502,7 +502,7 @@ const {
 
     if (!isFiltered.value) return null
 
-    return await $fetch<ProductSearchResponseDto>('/api/products', {
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
       body: {

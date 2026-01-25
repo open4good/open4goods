@@ -118,3 +118,4 @@ export function CategoriesStatsDtoToJSONTyped(value?: CategoriesStatsDto | null,
         'productsCountSum': value['productsCountSum'],
     };
 }
+

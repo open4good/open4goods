@@ -958,6 +958,36 @@ public class ProductRepository {
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexExcluded() {
+            CriteriaQuery query = new CriteriaQuery(new Criteria("excluded").is(true));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexValidAndReviewed() {
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("aiDescriptions").exists()));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexTotal(String vertical) {
+            CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexExcluded(String vertical) {
+            CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical).and(new Criteria("excluded").is(true)));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexValidAndReviewed(String vertical) {
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("vertical").is(vertical)).and(new Criteria("aiDescriptions").exists()));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
         /**
          * Compute absolute cardinality statistics for a score within a vertical.
          *
