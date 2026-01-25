@@ -97,7 +97,12 @@ describe('ProductImpactEcoScoreCard', () => {
   it('renders a placeholder message when the score is missing', () => {
     const wrapper = mount(ProductImpactEcoScoreCard, {
       props: { score: null },
-      global: { plugins: [i18n] },
+      global: {
+        plugins: [i18n],
+        stubs: {
+          NuxtLink: true,
+        },
+      },
     })
 
     expect(wrapper.text()).toContain('No score')
