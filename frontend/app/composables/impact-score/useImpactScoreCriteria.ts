@@ -1,9 +1,9 @@
+import { useCategories } from '~/composables/categories/useCategories'
 import type {
   AttributeConfigDto,
   VerticalConfigDto,
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
-import { useCategories } from '~/composables/categories/useCategories'
 
 export type ImpactScoreCriterion = {
   key: string
@@ -43,7 +43,7 @@ export const buildCriteriaFromCategory = (
       key,
       name: fallbackName,
       utility: attribute?.scoreUtility ?? '',
-      icon: attribute?.icon ?? CRITERIA_ICON_OVERRIDES[key] ?? null,
+      icon: resolvedIcon ?? null,
     }
   })
 }
@@ -81,7 +81,10 @@ export const useImpactScoreCriteria = () => {
     () => ({})
   )
   const loading = useState('impact-score-criteria-loading', () => false)
-  const error = useState<string | null>('impact-score-criteria-error', () => null)
+  const error = useState<string | null>(
+    'impact-score-criteria-error',
+    () => null
+  )
 
   const verticalOptions = computed(() =>
     categories.value
