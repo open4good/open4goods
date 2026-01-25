@@ -2013,7 +2013,7 @@
     "hero": {
       "eyebrow": "Explorer le catalogue",
       "title": "Les produits disponibles",
-      "subtitle": "Rechercher dans nos produits évalués . Et dans les autres !"
+      "subtitle": "Rechercher dans {reviewed} produits évalués . Et dans {others} autres !"
     },
     "form": {
       "label": "Rechercher dans le catalogue",

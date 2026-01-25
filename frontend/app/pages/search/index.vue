@@ -3,7 +3,7 @@
     <PageHeader
       :eyebrow="t('search.hero.eyebrow')"
       :title="t('search.hero.title')"
-      :description-html="t('search.hero.subtitle')"
+      :description-html="heroSubtitle"
       layout="single-column"
       container="lg"
       background="image"
@@ -313,6 +313,7 @@ import type {
   FieldMetadataDto,
   AggregationResponseDto,
   SortDto,
+  CategoriesStatsDto,
 } from '~~/shared/api-client'
 import SearchSuggestField, {
   type CategorySuggestionItem,
@@ -335,16 +336,41 @@ const { t, locale, availableLocales } = useI18n()
 const { mdAndUp } = useDisplay()
 const { translatePlural } = usePluralizedTranslation()
 const { trackSearch } = useAnalytics()
-const route = useRoute()
 const router = useRouter()
+const route = useRoute()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
-const routeQuery = computed(() =>
-  typeof route.query.q === 'string' ? route.query.q : ''
+const queryParams = computed(() => route.query)
+const searchQuery = ref(queryParams.value.q ? String(queryParams.value.q) : '')
+const searchInput = ref(searchQuery.value)
+
+const { data: stats } = await useAsyncData<CategoriesStatsDto | null>(
+  'search-stats',
+  () => $fetch<CategoriesStatsDto>('/api/stats/categories').catch(() => null),
+  { server: true, lazy: true }
 )
-const searchInput = ref(routeQuery.value)
+
+const heroSubtitle = computed(() => {
+  const template = t('search.hero.subtitle')
+  if (!stats.value)
+    return template.replace('{reviewed}', '...').replace('{others}', '...')
+
+  const formatCount = (val: number) =>
+    new Intl.NumberFormat(locale.value).format(val)
+
+  const reviewed = stats.value.reviewedProductsCount ?? 0
+  const validTotal =
+    (stats.value.productsCountSum ?? 0) +
+    (stats.value.productsWithoutVerticalCount ?? 0)
+  const others = Math.max(0, validTotal - reviewed)
+
+  return t('search.hero.subtitle', {
+    reviewed: formatCount(reviewed),
+    others: formatCount(others),
+  })
+})
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
 const openPanels = ref<number[]>([0])

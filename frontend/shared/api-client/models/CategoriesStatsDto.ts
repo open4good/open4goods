@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { VerticalStatsDto } from './VerticalStatsDto';
+import {
+    VerticalStatsDtoFromJSON,
+    VerticalStatsDtoFromJSONTyped,
+    VerticalStatsDtoToJSON,
+    VerticalStatsDtoToJSONTyped,
+} from './VerticalStatsDto';
+
 /**
  * 
  * @export
@@ -67,6 +75,30 @@ export interface CategoriesStatsDto {
      * @memberof CategoriesStatsDto
      */
     productsCountSum?: number;
+    /**
+     * Total distinct products count (all verticals, including excluded).
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    totalProductsCount?: number;
+    /**
+     * Total excluded products count.
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    excludedProductsCount?: number;
+    /**
+     * Total products with AI reviews.
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    reviewedProductsCount?: number;
+    /**
+     * Detailed statistics per vertical.
+     * @type {{ [key: string]: VerticalStatsDto; }}
+     * @memberof CategoriesStatsDto
+     */
+    detailedStats?: { [key: string]: VerticalStatsDto; };
 }
 
 /**
@@ -94,6 +126,10 @@ export function CategoriesStatsDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'productsWithoutVerticalCount': json['productsWithoutVerticalCount'] == null ? undefined : json['productsWithoutVerticalCount'],
         'productsCountByCategory': json['productsCountByCategory'] == null ? undefined : json['productsCountByCategory'],
         'productsCountSum': json['productsCountSum'] == null ? undefined : json['productsCountSum'],
+        'totalProductsCount': json['totalProductsCount'] == null ? undefined : json['totalProductsCount'],
+        'excludedProductsCount': json['excludedProductsCount'] == null ? undefined : json['excludedProductsCount'],
+        'reviewedProductsCount': json['reviewedProductsCount'] == null ? undefined : json['reviewedProductsCount'],
+        'detailedStats': json['detailedStats'] == null ? undefined : (mapValues(json['detailedStats'], VerticalStatsDtoFromJSON)),
     };
 }
 
@@ -116,6 +152,10 @@ export function CategoriesStatsDtoToJSONTyped(value?: CategoriesStatsDto | null,
         'productsWithoutVerticalCount': value['productsWithoutVerticalCount'],
         'productsCountByCategory': value['productsCountByCategory'],
         'productsCountSum': value['productsCountSum'],
+        'totalProductsCount': value['totalProductsCount'],
+        'excludedProductsCount': value['excludedProductsCount'],
+        'reviewedProductsCount': value['reviewedProductsCount'],
+        'detailedStats': value['detailedStats'] == null ? undefined : (mapValues(value['detailedStats'], VerticalStatsDtoToJSON)),
     };
 }
 

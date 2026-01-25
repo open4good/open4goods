@@ -31,6 +31,7 @@ class StatsServiceTest {
         AffiliationPartnerService partnerService = mock(AffiliationPartnerService.class);
         OpenDataService openDataService = mock(OpenDataService.class);
         ProductRepository productRepository = mock(ProductRepository.class);
+        ProductMappingService productMappingService = mock(ProductMappingService.class);
 
         Resource defaultResource = resource("_default.yml", DEFAULT_YAML);
         Resource enabledResource = resource("enabled.yml", ENABLED_YAML);
@@ -46,7 +47,7 @@ class StatsServiceTest {
         given(productRepository.countMainIndexWithoutVertical()).willReturn(3_210L);
         given(partnerService.getPartners()).willReturn(List.of(mock(AffiliationPartner.class), mock(AffiliationPartner.class)));
 
-        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository);
+        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, productMappingService);
 
         CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
 

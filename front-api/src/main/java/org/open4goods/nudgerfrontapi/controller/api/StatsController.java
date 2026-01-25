@@ -1,11 +1,14 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
-import java.time.Duration;
+
+
+import java.util.List;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoreStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoresStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
@@ -127,6 +130,45 @@ public class StatsController {
         CategoriesScoreStatsDto body = statsService.categoryScore(domainLanguage, scoreName);
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
+                .body(body);
+    }
+
+    @GetMapping("/random")
+    @Operation(
+            summary = "Get random products",
+            description = "Return a list of random products.",
+            parameters = {
+                    @io.swagger.v3.oas.annotations.Parameter(name = "num", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = false,
+                            description = "Number of products to return (max 10).",
+                            schema = @Schema(type = "integer", defaultValue = "10", maximum = "10")),
+                    @io.swagger.v3.oas.annotations.Parameter(name = "minOffersCount", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = false,
+                            description = "Minimum number of offers required for a product to be included.",
+                            schema = @Schema(type = "integer", defaultValue = "3")),
+                    @io.swagger.v3.oas.annotations.Parameter(name = "domainLanguage", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Products returned",
+                            headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
+                                    description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr-FR")),
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ProductDto.class))), // Should be ArraySchema but for simplicity using implementation
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<List<ProductDto>> random(
+            @RequestParam(name = "num", defaultValue = "10") int num,
+            @RequestParam(name = "minOffersCount", defaultValue = "3") int minOffersCount,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        logger.info("Entering random(num={}, minOffersCount={}, domainLanguage={})", num, minOffersCount, domainLanguage);
+        if (num > 10) {
+            num = 10;
+        }
+        List<ProductDto> body = statsService.random(num, minOffersCount, domainLanguage);
+        return ResponseEntity.ok()
+                .cacheControl(org.springframework.http.CacheControl.noCache()) // Random content should not be cached typically, or very short duration
                 .body(body);
     }
 }

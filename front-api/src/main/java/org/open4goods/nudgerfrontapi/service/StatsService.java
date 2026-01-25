@@ -12,11 +12,13 @@ import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoreStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoresStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoryScoreCardinalitiesDto;
 import org.open4goods.nudgerfrontapi.dto.stats.ScoreCardinalityDto;
+import org.open4goods.nudgerfrontapi.dto.stats.VerticalStatsDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.model.stats.AffiliationPartnersStats;
 import org.open4goods.services.opendata.service.OpenDataService;
@@ -49,17 +51,20 @@ public class StatsService {
     private final AffiliationPartnerService affiliationPartnerService;
     private final OpenDataService openDataService;
     private final ProductRepository productRepository;
+    private final ProductMappingService productMappingService;
 
     public StatsService(SerialisationService serialisationService,
                         ResourcePatternResolver resourceResolver,
                         AffiliationPartnerService affiliationPartnerService,
                         OpenDataService openDataService,
-                        ProductRepository productRepository) {
+                        ProductRepository productRepository,
+                        ProductMappingService productMappingService) {
         this.serialisationService = serialisationService;
         this.resourceResolver = resourceResolver;
         this.affiliationPartnerService = affiliationPartnerService;
         this.openDataService = openDataService;
         this.productRepository = productRepository;
+        this.productMappingService = productMappingService;
     }
 
     /**
@@ -77,8 +82,12 @@ public class StatsService {
         long isbnItemsCount = openDataService.totalItemsISBN();
         long impactScoreProductsCount = safeCount(productRepository.countMainIndexHavingImpactScore());
         long productsWithoutVerticalCount = safeCount(productRepository.countMainIndexWithoutVertical());
+        long totalProductsCount = safeCount(productRepository.countMainIndex());
+        long excludedProductsCount = safeCount(productRepository.countMainIndexExcluded());
+        long reviewedProductsCount = safeCount(productRepository.countMainIndexValidAndReviewed());
 
         Map<String, Long> productsCountByCategory = new LinkedHashMap<>();
+        Map<String, VerticalStatsDto> detailedStats = new LinkedHashMap<>();
         long productsCountSum = 0L;
         for (VerticalConfig vertical : enabledVerticals) {
             String verticalId = vertical.getId();
@@ -89,6 +98,13 @@ public class StatsService {
             long safeCount = safeCount(productRepository.countMainIndexHavingVertical(verticalId));
             productsCountByCategory.put(verticalId, safeCount);
             productsCountSum += safeCount;
+
+            long vTotal = safeCount(productRepository.countMainIndexTotal(verticalId));
+            long vExcluded = safeCount(productRepository.countMainIndexExcluded(verticalId));
+            long vRated = safeCount(productRepository.countMainIndexValidAndRated(verticalId));
+            long vReviewed = safeCount(productRepository.countMainIndexValidAndReviewed(verticalId));
+
+            detailedStats.put(verticalId, new VerticalStatsDto(vTotal, vExcluded, safeCount, vRated, vReviewed));
         }
 
         return new CategoriesStatsDto(
@@ -99,7 +115,11 @@ public class StatsService {
                 impactScoreProductsCount,
                 productsWithoutVerticalCount,
                 productsCountByCategory,
-                productsCountSum
+                productsCountSum,
+                totalProductsCount,
+                excludedProductsCount,
+                reviewedProductsCount,
+                detailedStats
         );
     }
 
@@ -292,5 +312,19 @@ public class StatsService {
     private VerticalConfig cloneDefault(VerticalConfig defaultConfig) throws SerialisationException {
         String yaml = serialisationService.toYaml(defaultConfig);
         return serialisationService.fromYaml(yaml, VerticalConfig.class);
+    }
+
+    /**
+     * Get a list of random products.
+     *
+     * @param num            number of products to return
+     * @param minOffersCount minimum number of offers
+     * @param domainLanguage language for localization
+     * @return list of random products
+     */
+    public List<ProductDto> random(int num, int minOffersCount, DomainLanguage domainLanguage) {
+        return productRepository.getRandomProducts(num, minOffersCount).stream()
+                .map(product -> productMappingService.mapProduct(product, null, null, domainLanguage, false))
+                .toList();
     }
 }

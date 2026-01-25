@@ -638,6 +638,40 @@ public class ProductRepository {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get random products globally with minimum offers count
+     * @param limit max number of products
+     * @param minOffersCount minimum number of offers
+     * @return list of random products
+     */
+    public List<Product> getRandomProducts(int limit, int minOffersCount) {
+        Criteria c = new Criteria("offersCount").greaterThanEqual(minOffersCount)
+                .and(new Criteria("excluded").is(false))
+                .and(getRecentPriceQuery());
+
+        // Script sort for random
+        SortOptions sortOptions = new SortOptions.Builder()
+                .script(s -> s
+                        .script(sc -> sc
+                                .source("Math.random()")
+                        )
+                        .type(ScriptSortType.Number)
+                        .order(SortOrder.Asc)
+                )
+                .build();
+
+        NativeQuery query = new NativeQueryBuilder()
+                .withQuery(new CriteriaQuery(c))
+                .withSort(sortOptions)
+                .withMaxResults(limit)
+                .build();
+
+        return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX)
+                .stream()
+                .map(SearchHit::getContent)
+                .collect(Collectors.toList());
+    }
+
 
 
 
@@ -966,7 +1000,7 @@ public class ProductRepository {
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
         public Long countMainIndexValidAndReviewed() {
-            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("aiDescriptions").exists()));
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("excluded").is(false)).and(new Criteria("aiDescriptions").exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
@@ -984,7 +1018,13 @@ public class ProductRepository {
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
         public Long countMainIndexValidAndReviewed(String vertical) {
-            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("vertical").is(vertical)).and(new Criteria("aiDescriptions").exists()));
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("vertical").is(vertical)).and(new Criteria("excluded").is(false)).and(new Criteria("aiDescriptions").exists()));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexValidAndRated(String vertical) {
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("vertical").is(vertical)).and(new Criteria("excluded").is(false)).and(new Criteria("scores.IMPACTSCORE.value").exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 

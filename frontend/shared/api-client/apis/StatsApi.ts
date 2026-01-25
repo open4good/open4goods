@@ -18,6 +18,7 @@ import type {
   CategoriesScoreStatsDto,
   CategoriesScoresStatsDto,
   CategoriesStatsDto,
+  ProductDto,
 } from '../models/index';
 import {
     CategoriesScoreStatsDtoFromJSON,
@@ -26,6 +27,8 @@ import {
     CategoriesScoresStatsDtoToJSON,
     CategoriesStatsDtoFromJSON,
     CategoriesStatsDtoToJSON,
+    ProductDtoFromJSON,
+    ProductDtoToJSON,
 } from '../models/index';
 
 export interface CategoriesRequest {
@@ -39,6 +42,12 @@ export interface CategoriesScoreRequest {
 
 export interface CategoriesScoresRequest {
     domainLanguage: CategoriesScoresDomainLanguageEnum;
+}
+
+export interface RandomRequest {
+    domainLanguage: RandomDomainLanguageEnum;
+    num?: number;
+    minOffersCount?: number;
 }
 
 /**
@@ -204,6 +213,64 @@ export class StatsApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * Return a list of random products.
+     * Get random products
+     */
+    async randomRaw(requestParameters: RandomRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductDto>> {
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling random().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['num'] != null) {
+            queryParameters['num'] = requestParameters['num'];
+        }
+
+        if (requestParameters['minOffersCount'] != null) {
+            queryParameters['minOffersCount'] = requestParameters['minOffersCount'];
+        }
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stats/random`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ProductDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Return a list of random products.
+     * Get random products
+     */
+    async random(requestParameters: RandomRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductDto> {
+        const response = await this.randomRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
 }
 
 /**
@@ -230,3 +297,11 @@ export const CategoriesScoresDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type CategoriesScoresDomainLanguageEnum = typeof CategoriesScoresDomainLanguageEnum[keyof typeof CategoriesScoresDomainLanguageEnum];
+/**
+ * @export
+ */
+export const RandomDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type RandomDomainLanguageEnum = typeof RandomDomainLanguageEnum[keyof typeof RandomDomainLanguageEnum];
