@@ -142,6 +142,20 @@ const impactScoreProductsCount = computed(() => {
   return count
 })
 
+const impactScoreCategoriesCount = computed(() => {
+  const detailedStats = categoriesStats.value?.detailedStats
+
+  if (!detailedStats) {
+    return null
+  }
+
+  const count = Object.values(detailedStats).filter(
+    stats => (stats.ratedProducts ?? 0) > 0
+  ).length
+
+  return count > 0 ? count : null
+})
+
 const productsWithoutVerticalCount = computed(() => {
   const count = categoriesStats.value?.productsWithoutVerticalCount
 

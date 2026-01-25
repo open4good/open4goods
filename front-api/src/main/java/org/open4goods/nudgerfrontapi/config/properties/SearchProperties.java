@@ -32,6 +32,19 @@ public class SearchProperties {
     }
 
     /**
+     * Minimum score required to keep a semantic search result.
+     */
+    private float semanticMinScore = 0.7f;
+
+    public float getSemanticMinScore() {
+        return semanticMinScore;
+    }
+
+    public void setSemanticMinScore(float semanticMinScore) {
+        this.semanticMinScore = semanticMinScore;
+    }
+
+    /**
      * Suggest-specific configuration properties.
      */
     public static class Suggest {

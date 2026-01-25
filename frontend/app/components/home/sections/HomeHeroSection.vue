@@ -32,6 +32,7 @@ const props = defineProps<{
   productsCount?: number
   categoriesCount?: number
   impactScoreProductsCount?: number
+  impactScoreCategoriesCount?: number
   productsWithoutVerticalCount?: number
   aiSummaryRemainingCredits?: number
   heroBackgroundI18nKey?: string
@@ -324,7 +325,10 @@ useHead({
                     :products-count="productsCount"
                     :categories-count="categoriesCount"
                     :impact-score-products-count="impactScoreProductsCount"
-                    :products-without-vertical-count="productsWithoutVerticalCount"
+                    :impact-score-categories-count="impactScoreCategoriesCount"
+                    :products-without-vertical-count="
+                      productsWithoutVerticalCount
+                    "
                     :ai-summary-remaining-credits="aiSummaryRemainingCredits"
                   />
                 </div>

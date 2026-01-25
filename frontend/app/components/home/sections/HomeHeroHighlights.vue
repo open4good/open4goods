@@ -30,6 +30,7 @@ const props = defineProps<{
   impactScoreCategoriesCount?: number
   productsWithoutVerticalCount?: number
   aiSummaryRemainingCredits?: number
+  heroBackgroundI18nKey?: string
 }>()
 
 const { t, te, tm, locale } = useI18n()

@@ -93,7 +93,7 @@
               "text": "produits dans"
             },
             {
-              "text": "{impactScoreCategories}",
+              "text": "{impactScoreCategories} catégories",
               "to": "/categories"
             }
           ]
