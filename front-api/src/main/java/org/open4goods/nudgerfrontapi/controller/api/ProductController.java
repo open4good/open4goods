@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.open4goods.model.Localisable;
 import org.open4goods.model.RolesConstants;
@@ -399,7 +400,7 @@ public class ProductController {
     }
 
     /**
-     * Execute a semantic-only global search.
+     * Execute a semantic-only global search with optional filters and sort rules.
      *
      * <p>Error codes:</p>
      * <ul>
@@ -411,7 +412,7 @@ public class ProductController {
     @PostMapping("/search")
     @Operation(
             summary = "Execute a global search",
-            description = "Runs a semantic-only search strategy powered by embeddings.",
+            description = "Runs an embeddings-only search strategy with optional filters and sorting.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
@@ -432,6 +433,9 @@ public class ProductController {
                             },
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = GlobalSearchResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+                            content = @Content(mediaType = "application/problem+json",
+                                    schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -442,7 +446,29 @@ public class ProductController {
             @RequestBody GlobalSearchRequestDto request) {
         LOGGER.info("Entering globalSearch(domainLanguage={}, request={})", domainLanguage, request);
         String query = request != null ? request.query() : null;
-        SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage);
+        FilterRequestDto filterDto = request != null ? request.filters() : null;
+        SortRequestDto sortDto = request != null ? request.sort() : null;
+
+        Set<String> allowedFilterMappings = Arrays.stream(AllowedGlobalFilters.values())
+                .map(AllowedGlobalFilters::fieldPath)
+                .collect(Collectors.toSet());
+        Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, allowedFilterMappings);
+        if (filterValidation.hasError()) {
+            LOGGER.warn("Filter validation failed for global search request: {}", filterDto);
+            return filterValidation.error();
+        }
+        filterDto = filterValidation.value();
+
+        Set<String> allowedSortMappings = collectGlobalSortMappings();
+        Pageable globalPageable = PageRequest.of(0, 100);
+        Validation<Pageable> sortValidation = sanitizeSort(globalPageable, sortDto, allowedSortMappings);
+        if (sortValidation.hasError()) {
+            LOGGER.warn("Sort validation failed for global search request: {}", sortDto);
+            return sortValidation.error();
+        }
+
+        SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, filterDto,
+                sortValidation.value().getSort());
 
         List<GlobalSearchVerticalGroupDto> groups = result.verticalGroups().stream()
                 .map(group -> new GlobalSearchVerticalGroupDto(

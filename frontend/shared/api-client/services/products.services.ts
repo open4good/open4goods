@@ -3,6 +3,7 @@ import { ProductApi } from '..'
 import type {
   AggregationRequestDto,
   FilterRequestDto,
+  GlobalSearchRequestDto,
   GlobalSearchResponseDto,
   ProductDto,
   ProductFieldOptionsResponse,
@@ -154,9 +155,9 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
   }
 
   const searchGlobalProducts = async (
-    query: string
+    payload: GlobalSearchRequestDto
   ): Promise<GlobalSearchResponseDto> => {
-    const normalizedQuery = query?.trim()
+    const normalizedQuery = payload?.query?.trim()
 
     if (!normalizedQuery) {
       throw new TypeError('Query is required to execute a global search.')
@@ -177,6 +178,8 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
         },
         body: {
           query: normalizedQuery,
+          filters: payload.filters,
+          sort: payload.sort,
         },
       })
     } catch (error) {

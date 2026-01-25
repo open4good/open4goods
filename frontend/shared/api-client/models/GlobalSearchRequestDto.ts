@@ -13,6 +13,8 @@
  */
 
 import { mapValues } from '../runtime';
+import type { FilterRequestDto } from './FilterRequestDto';
+import type { SortRequestDto } from './SortRequestDto';
 /**
  * 
  * @export
@@ -25,6 +27,18 @@ export interface GlobalSearchRequestDto {
      * @memberof GlobalSearchRequestDto
      */
     query?: string;
+    /**
+     * Optional filters applied to global search results.
+     * @type {FilterRequestDto}
+     * @memberof GlobalSearchRequestDto
+     */
+    filters?: FilterRequestDto;
+    /**
+     * Optional sort definition applied to global search results.
+     * @type {SortRequestDto}
+     * @memberof GlobalSearchRequestDto
+     */
+    sort?: SortRequestDto;
 }
 
 /**
@@ -45,6 +59,8 @@ export function GlobalSearchRequestDtoFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'query': json['query'] == null ? undefined : json['query'],
+        'filters': json['filters'] == null ? undefined : json['filters'],
+        'sort': json['sort'] == null ? undefined : json['sort'],
     };
 }
 
@@ -60,6 +76,7 @@ export function GlobalSearchRequestDtoToJSONTyped(value?: GlobalSearchRequestDto
     return {
         
         'query': value['query'],
+        'filters': value['filters'],
+        'sort': value['sort'],
     };
 }
-
