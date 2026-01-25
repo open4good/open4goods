@@ -2366,6 +2366,9 @@
       }
     },
     "hero": {
+      "aiReview": {
+        "label": "Synthèse IA"
+      },
       "aiSummary": {
         "community": "Les experts",
         "ecological": "Écologiquement",
@@ -2645,12 +2648,21 @@
     },
     "price": {
       "condition": {
+        "NEW": "Neuf",
         "new": "Neuf",
         "occasion": "Occasion",
         "refurbished": "Reconditionné",
         "unknown": "Inconnu",
         "used": "Occasion"
       },
+      "table": {
+        "merchant": "Marchand",
+        "price": "Prix",
+        "condition": "État"
+      },
+      "newOffersOnly": "Afficher uniquement les offres neuves",
+      "viewDeal": "Voir l'offre",
+      "history": "Historique des prix",
       "noOffersBanner": "Pas d'offres actuellement !",
       "headers": {
         "condition": "État",
