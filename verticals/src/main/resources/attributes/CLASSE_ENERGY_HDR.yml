@@ -17,11 +17,17 @@ scoring:
     min: 0.0
     max: 5.0
   normalization:
-    method: "MINMAX_FIXED"
+    method: "FIXED_MAPPING"
     params:
-      fixedMin: 0.0
-      fixedMax: 18.0
-  missingValuePolicy: "WORST"
+      mapping:
+        "100": 5.0
+        "85": 4.25
+        "70": 3.5
+        "55": 2.75
+        "40": 2.0
+        "25": 1.25
+        "10": 0.5
+  missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
   fr: "Classe énergétique (HDR)"
@@ -50,23 +56,23 @@ parser:
     - "(ÉCHELLE A++ À E)"
     - "NOT AVAILABLE"
 numericMapping:
-  A+++: 18.0
-  A++: 18.0
-  A+: 17.0
-  A: 16.0
-  B++: 15.0
-  B+: 14.0
-  B: 13.0
-  C++: 12.0
-  C+: 11.0
-  C: 10.0
-  D++: 9.0
-  D+: 8.0
-  D: 7.0
-  E++: 6.0
-  E+: 5.0
-  E: 4.0
-  F++: 3.0
-  F+: 2.0
-  F: 1.0
-  G: 0.0
+  A+++: 100.0
+  A++: 100.0
+  A+: 100.0
+  A: 100.0
+  B++: 85.0
+  B+: 85.0
+  B: 85.0
+  C++: 70.0
+  C+: 70.0
+  C: 70.0
+  D++: 55.0
+  D+: 55.0
+  D: 55.0
+  E++: 40.0
+  E+: 40.0
+  E: 40.0
+  F++: 25.0
+  F+: 25.0
+  F: 25.0
+  G: 10.0

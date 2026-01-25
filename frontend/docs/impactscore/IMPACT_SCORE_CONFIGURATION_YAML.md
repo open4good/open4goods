@@ -83,7 +83,7 @@ scoring:
     method: SIGMA
     params:
       sigmaK: 2.0
-  missingValuePolicy: WORST
+  missingValuePolicy: NEUTRAL
 ```
 
 ### 4.2 Classe énergétique (bornes fixes via mapping numérique)
@@ -126,7 +126,7 @@ impactBetterIs: GREATER
 scoring:
   normalization:
     method: MINMAX_OBSERVED
-  missingValuePolicy: WORST
+  missingValuePolicy: NEUTRAL
 ```
 
 ## 5) Validation à implémenter

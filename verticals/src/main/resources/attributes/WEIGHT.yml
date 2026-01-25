@@ -18,10 +18,8 @@ scoring:
     min: 0.0
     max: 5.0
   normalization:
-    method: "SIGMA"
-    params:
-      sigmaK: 2.0
-  missingValuePolicy: "WORST"
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
   fr: "Poids de l'objet"

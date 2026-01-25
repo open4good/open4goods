@@ -94,6 +94,10 @@ La méthode est définie dans `scoring.normalization.method` :
 **À éviter quand**
 - Trop peu de valeurs ou distribution instable (risque d'effet “yoyo” dans le temps).
 - Présence d’outliers forts (préférer `MINMAX_QUANTILE`).
+ 
+**Paramétrage recommandé**
+- La méthode est définie par attribut : on ajuste par vertical si la distribution devient instable.
+- En cas de distribution dégénérée, activer un `degenerateDistributionPolicy` explicite pour basculer sur une méthode de secours.
 
 ---
 
@@ -166,53 +170,53 @@ Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiqua
 
 ### Durabilité / support / disponibilité
 
-- `MINAVAILABILITYSOFTWAREUPDATESYEARS` (SIGMA) : proposer `MINMAX_FIXED` avec bornes marché (ex: 0–10 ans) si ces bornes sont connues, ou `MINMAX_OBSERVED` si l’on veut un score relatif au marché actuel.
-- `MINAVAILABILITYSPAREPARTSYEARS` (SIGMA) : même recommandation.
-- `MINGUARANTEEDSUPPORTYEARS` (SIGMA) : même recommandation.
-- `WARRANTY` (SIGMA) : même recommandation.
+- `MINAVAILABILITYSOFTWAREUPDATESYEARS` : `MINMAX_OBSERVED`.
+- `MINAVAILABILITYSPAREPARTSYEARS` : `MINMAX_OBSERVED`.
+- `MINGUARANTEEDSUPPORTYEARS` : `MINMAX_OBSERVED`.
+- `WARRANTY` : `MINMAX_OBSERVED`.
 
-**Pourquoi** : les durées sont souvent discrètes et bornées. Une échelle fixe donne un score stable et lisible.
+**Pourquoi** : les durées sont discrètes et bornées ; on veut un score relatif au marché actuel.
 
 ### Consommations électriques (W)
 
-- `POWER_CONSUMPTION_TYPICAL` (SIGMA) : considérer `MINMAX_QUANTILE` (p5/p95) ou `MINMAX_FIXED` si bornes stables.
-- `POWER_CONSUMPTION_SDR` (SIGMA) : idem.
-- `POWER_CONSUMPTION_HDR` (SIGMA) : idem.
-- `POWER_CONSUMPTION_STANDBY` (SIGMA) : idem.
-- `POWER_CONSUMPTION_STANDBY_NETWORKD` (SIGMA) : idem.
-- `POWER_CONSUMPTION_OFF` (SIGMA) : idem.
+- `POWER_CONSUMPTION_TYPICAL` : `MINMAX_OBSERVED`.
+- `POWER_CONSUMPTION_SDR` : `MINMAX_OBSERVED`.
+- `POWER_CONSUMPTION_HDR` : `MINMAX_OBSERVED`.
+- `POWER_CONSUMPTION_STANDBY` : `MINMAX_OBSERVED`.
+- `POWER_CONSUMPTION_STANDBY_NETWORKD` : `MINMAX_OBSERVED`.
+- `POWER_CONSUMPTION_OFF` : `MINMAX_OBSERVED`.
 
-**Pourquoi** : distributions souvent très asymétriques / coverage faible → SIGMA peu robuste.
+**Pourquoi** : on cherche une sobriété relative à l’offre actuelle ; la méthode reste ajustable par attribut si la distribution devient instable.
 
 ### Classe énergétique (catégoriel)
 
-- `CLASSE_ENERGY` (MINMAX_FIXED + mapping numérique) : préférable en `FIXED_MAPPING` pour éviter une distance linéaire implicite entre classes.
-- `CLASSE_ENERGY_SDR` (MINMAX_FIXED + mapping numérique) : idem.
-- `CLASSE_ENERGY_HDR` (MINMAX_FIXED + mapping numérique) : idem.
+- `CLASSE_ENERGY` : `FIXED_MAPPING` avec barème A–G.
+- `CLASSE_ENERGY_SDR` : `FIXED_MAPPING` avec barème A–G.
+- `CLASSE_ENERGY_HDR` : `FIXED_MAPPING` avec barème A–G.
 
-**Pourquoi** : les classes énergétiques sont des paliers, pas une mesure continue.
+**Pourquoi** : les classes énergétiques sont des paliers réglementaires.
 
 ### Indice de réparabilité (0–10)
 
-- `REPAIRABILITY_INDEX` (MINMAX_FIXED 0–10) : méthode pertinente si la note officielle est 0–10. Alternative : `PERCENTILE` si on veut une relativisation purement marché.
+- `REPAIRABILITY_INDEX` : `MINMAX_OBSERVED` pour refléter le marché actuel.
 
 ### Taille / poids
 
-- `DIAGONALE_POUCES` (SIGMA) : alternative `MINMAX_QUANTILE` pour limiter l'effet des extrêmes.
-- `WEIGHT` (SIGMA) : alternative `MINMAX_QUANTILE` ou `MINMAX_FIXED` si bornes connues par segment.
+- `DIAGONALE_POUCES` : `MINMAX_OBSERVED`.
+- `WEIGHT` : `MINMAX_OBSERVED`.
 
 ### ESG / Sustainalytics
 
-- `ESG` (SIGMA) : recommandé `MINMAX_FIXED` avec `fixedMin: 0`, `fixedMax: 100`, et `impactBetterIs: LOWER`.
-- `BRAND_SUSTAINALYTICS_SCORING` (SIGMA) : recommandé `MINMAX_FIXED` avec `fixedMin: 0`, `fixedMax: 100`, et `impactBetterIs: LOWER`.
+- `ESG` : `MINMAX_OBSERVED` avec **plus haut = mieux**.
+- `BRAND_SUSTAINALYTICS_SCORING` : `MINMAX_OBSERVED` avec **plus haut = mieux**.
 
-**Pourquoi** : scores ESG et Sustainalytics sont sur 0–100 avec sens inversé (plus bas = meilleur). Un MINMAX_FIXED donne un score stable, tout en permettant l’inversion via `impactBetterIs`.
+**Pourquoi** : on conserve une lecture relative au marché actuel avec un sens « performance » (plus haut = mieux).
 
 ### Qualité de la donnée
 
-- `DATA_QUALITY` (SIGMA) : recommandé `MINMAX_FIXED` sur une borne marché (ex: 0–100), avec `impactBetterIs: GREATER` si plus de complétude = meilleur.
+- `DATA_QUALITY` : `MINMAX_OBSERVED`, et utilisé comme pénalisation globale quand les données sont incomplètes.
 
-**Pourquoi** : la qualité de donnée est souvent un taux ou une note bornée, donc une échelle fixe est plus claire.
+**Pourquoi** : on conserve une lecture relative, tout en faisant porter la pénalisation au niveau global.
 
 ## 5) Note sur la relativisation (Score.relativ)
 
