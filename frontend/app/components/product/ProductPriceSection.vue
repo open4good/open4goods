@@ -180,15 +180,15 @@
         </v-data-table>
 
         <v-card
-          v-if="allOffers.length === 1"
-          class="mt-6 border product-price__single-offer"
+          v-if="allOffers.length > 0"
+          class="mt-6 border product-price__competition-card"
           variant="tonal"
-          color="info"
+          :color="competitionLevel.color"
         >
           <div class="d-flex align-center pa-4">
-            <v-icon icon="mdi-text" size="28" class="mr-4" />
+            <v-icon :icon="competitionLevel.icon" size="28" class="mr-4" />
             <span class="text-h6 font-weight-medium">
-              Concurrence faible !
+              {{ $t(competitionLevel.labelKey) }}
             </span>
           </div>
         </v-card>
@@ -861,6 +861,33 @@ const allOffers = computed(() => {
 const showNoOffersBanner = computed(
   () => !allOffers.value.length && !bestNewOffer.value
 )
+
+const competitionLevel = computed(() => {
+  const count = allOffers.value.length
+
+  if (count < 2) {
+    return {
+      icon: 'mdi-account-alert-outline',
+      labelKey: 'product.price.competition.low',
+      color: 'warning',
+    }
+  }
+
+  if (count > 4) {
+    return {
+      icon: 'mdi-store-check-outline',
+      labelKey: 'product.price.competition.good',
+      color: 'success',
+    }
+  }
+
+  // 2-4 offers
+  return {
+    icon: 'mdi-store-outline',
+    labelKey: 'product.price.competition.correct',
+    color: 'info',
+  }
+})
 
 const offersTitle = computed(() => {
   if (!allOffers.value.length) {

@@ -86,6 +86,7 @@
             :subtitle-params="impactSubtitleParams"
             :expanded-score-id="expandedScoreId"
             :ai-impact-text="product.aiReview?.ecologicalOneline"
+            :on-market-end-date="product.eprel?.onMarketEndDate"
           />
         </section>
 
@@ -1849,14 +1850,17 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
         id: subSectionIds.priceHistory,
         label: t('product.navigation.submenus.price.history'),
       },
+      ...(product.value?.timeline
+        ? [
+            {
+              id: sectionIds.timeline,
+              label: t('product.navigation.timeline'),
+            },
+          ]
+        : []),
     ],
   },
-  {
-    id: sectionIds.timeline,
-    label: t('product.navigation.timeline'),
-    icon: 'mdi-timeline-clock-outline',
-    condition: !!product.value?.timeline,
-  },
+
   {
     id: sectionIds.alternatives,
     label: t('product.navigation.alternatives'),

@@ -14,7 +14,7 @@
           v-bind="menuProps"
           v-model="internalSearch"
           :label="label"
-          :placeholder="placeholder"
+          :placeholder="currentPlaceholder"
           :aria-label="ariaLabel"
           :loading="loading"
           :elevation="getFieldElevation(isHovering)"
@@ -290,7 +290,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: string
     label: string
-    placeholder: string
+    placeholder: string | string[]
     ariaLabel: string
     minChars?: number
     enableScan?: boolean
@@ -358,6 +358,40 @@ const highlightedIndex = ref(-1)
 const resolvedAnalyticsContext = computed(
   () => props.analyticsContext?.trim() || route.path || 'unknown'
 )
+
+const currentPlaceholderIndex = ref(0)
+const placeholderInterval = ref<ReturnType<typeof setInterval> | null>(null)
+
+const currentPlaceholder = computed(() => {
+  if (Array.isArray(props.placeholder)) {
+    if (props.placeholder.length === 0) return ''
+    return props.placeholder[currentPlaceholderIndex.value]
+  }
+  return props.placeholder
+})
+
+const startPlaceholderRotation = () => {
+  if (placeholderInterval.value) clearInterval(placeholderInterval.value)
+  if (Array.isArray(props.placeholder) && props.placeholder.length > 1) {
+    placeholderInterval.value = setInterval(() => {
+      currentPlaceholderIndex.value =
+        (currentPlaceholderIndex.value + 1) % props.placeholder.length
+    }, 3000)
+  }
+}
+
+watch(
+  () => props.placeholder,
+  () => {
+    currentPlaceholderIndex.value = 0
+    startPlaceholderRotation()
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  if (placeholderInterval.value) clearInterval(placeholderInterval.value)
+})
 
 onMounted(() => {
   isHydrated.value = true

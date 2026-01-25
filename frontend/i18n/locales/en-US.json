@@ -2766,6 +2766,7 @@
       "viewSingleOffer": "View the offer"
     },
     "impact": {
+      "endOfLife": "Product no longer officially marketed by {brand}! Legal support periods start from {onMarketEndDate}",
       "alternatives": {
         "title": "Greener alternatives",
         "subtitle": "Discover similar products with a better impact score or price.",
@@ -2985,6 +2986,7 @@
       "fabLabel": "Need tailored help?"
     },
     "price": {
+      "lowCompetition": "Low competition!",
       "condition": {
         "NEW": "New",
         "new": "New",

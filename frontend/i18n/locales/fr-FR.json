@@ -69,6 +69,15 @@
         }
       },
       "iconAlt": "Icône du lanceur de l'application Nudger",
+      "search": {
+        "placeholders": [
+          "Smartphone reconditionné",
+          "Lave-linge économique",
+          "Jean made in France",
+          "Vélo électrique",
+          "Téléviseur 4K"
+        ]
+      },
       "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
 
       "highlights": [
@@ -2483,6 +2492,7 @@
       "viewSingleOffer": "Voir l'offre"
     },
     "impact": {
+      "endOfLife": "Produit plus officiellement commercialisé par {brand} ! Les durées de supports légales démarrent à partir du {onMarketEndDate}",
       "alternatives": {
         "title": "Moins cher, et meilleur pour la planète ?",
         "subtitle": "Découvrez des produits similaires avec un meilleur score d'impact, un prix égal ou plus accessible et des caracteristiques techniques similaires.",
@@ -2703,6 +2713,11 @@
       "fabLabel": "Besoin d'aide personnalisée ?"
     },
     "price": {
+      "competition": {
+        "low": "Concurrence faible !",
+        "correct": "Concurrence correcte !",
+        "good": "Bonne Concurrence !"
+      },
       "condition": {
         "NEW": "Neuf",
         "new": "Neuf",

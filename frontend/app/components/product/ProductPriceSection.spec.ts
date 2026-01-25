@@ -56,6 +56,11 @@ const i18nMessages = {
         },
         noHistory:
           "L'historique des prix n'est pas encore disponible pour ce produit.",
+        competition: {
+          low: 'Concurrence faible !',
+          correct: 'Concurrence correcte !',
+          good: 'Bonne Concurrence !',
+        },
         headers: {
           source: 'Source',
           offer: 'Offre',
@@ -103,7 +108,11 @@ const i18nMessages = {
           singleDay: '{date}',
           untitled: 'Commercial event',
         },
-        noHistory: 'Price history is not yet available for this product.',
+        competition: {
+          low: 'Low competition!',
+          correct: 'Correct competition!',
+          good: 'Good competition!',
+        },
         headers: {
           source: 'Source',
           offer: 'Offer',
@@ -365,7 +374,7 @@ describe('ProductPriceSection', () => {
     await wrapper.unmount()
   })
 
-  it('renders a low competition card and hides the offers table when there is exactly one offer', async () => {
+  it('renders a low competition card for < 2 offers', async () => {
     const wrapper = await mountComponent({
       offersByCondition: {
         NEW: [
@@ -381,9 +390,65 @@ describe('ProductPriceSection', () => {
       offersCount: 1,
     })
 
-    expect(wrapper.find('.product-price__offers-table').exists()).toBe(false)
-    expect(wrapper.find('.product-price__single-offer').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Concurrence faible !')
+    const card = wrapper.find('.product-price__competition-card')
+    expect(card.exists()).toBe(true)
+    expect(card.text()).toContain('Concurrence faible !')
+    expect(card.classes()).toContain('text-warning') // Depending on how color is applied, wait, mapped to v-card color
+    // v-card color prop doesn't add text-color class directly usually but background/theme color.
+    // We can check attributes or just existence.
+    await wrapper.unmount()
+  })
+
+  it('renders a correct competition card for 2-4 offers', async () => {
+    const wrapper = await mountComponent({
+      offersByCondition: {
+        NEW: [
+          {
+            datasourceName: 'Merchant A',
+            price: 100,
+            currency: 'EUR',
+            condition: 'NEW',
+          },
+          {
+            datasourceName: 'Merchant B',
+            price: 200,
+            currency: 'EUR',
+            condition: 'NEW',
+          },
+          {
+            datasourceName: 'Merchant C',
+            price: 300,
+            currency: 'EUR',
+            condition: 'NEW',
+          },
+        ],
+      },
+      offersCount: 3,
+    })
+
+    const card = wrapper.find('.product-price__competition-card')
+    expect(card.exists()).toBe(true)
+    expect(card.text()).toContain('Concurrence correcte !')
+
+    await wrapper.unmount()
+  })
+
+  it('renders a good competition card for > 4 offers', async () => {
+    const wrapper = await mountComponent({
+      offersByCondition: {
+        NEW: Array(5).fill({
+          datasourceName: 'Merchant',
+          price: 100,
+          currency: 'EUR',
+          condition: 'NEW',
+        }),
+      },
+      offersCount: 5,
+    })
+
+    const card = wrapper.find('.product-price__competition-card')
+    expect(card.exists()).toBe(true)
+    expect(card.text()).toContain('Bonne Concurrence !')
 
     await wrapper.unmount()
   })

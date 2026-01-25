@@ -27,6 +27,16 @@
         :expanded-score-id="expandedScoreId"
       />
     </div>
+
+    <!-- End of Life Alert -->
+    <v-alert v-if="isEndOfLife" type="warning" variant="tonal" class="mt-6">
+      {{
+        $t('product.impact.endOfLife', {
+          brand: productBrand,
+          onMarketEndDate: formattedOnMarketEndDate,
+        })
+      }}
+    </v-alert>
   </section>
 </template>
 
@@ -34,6 +44,8 @@
 import { computed, toRef } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { format } from 'date-fns'
+import { fr, enUS } from 'date-fns/locale'
 import ProductImpactEcoScoreCard from './impact/ProductImpactEcoScoreCard.vue'
 import type { ScoreView } from './impact/impact-types'
 
@@ -115,6 +127,12 @@ const props = defineProps({
     type: String as PropType<string | null>,
     default: null,
   },
+  onMarketEndDate: {
+    type: [String, Number, Date] as PropType<
+      string | number | Date | null | undefined
+    >,
+    default: null,
+  },
 })
 
 const radarData = toRef(props, 'radarData')
@@ -126,7 +144,8 @@ const verticalHomeUrl = toRef(props, 'verticalHomeUrl')
 const verticalTitle = toRef(props, 'verticalTitle')
 const subtitleParams = toRef(props, 'subtitleParams')
 const expandedScoreId = toRef(props, 'expandedScoreId')
-const { t } = useI18n()
+const onMarketEndDate = toRef(props, 'onMarketEndDate')
+const { t, locale } = useI18n()
 
 const primaryScore = computed(
   () =>
@@ -211,6 +230,23 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
 const showRadar = computed(
   () => radarAxes.value.length >= 3 && chartSeries.value.length > 0
 )
+
+const isEndOfLife = computed(() => {
+  if (!onMarketEndDate.value) return false
+  const date = new Date(onMarketEndDate.value)
+  // Check if valid date
+  if (isNaN(date.getTime())) return false
+  return date < new Date()
+})
+
+const formattedOnMarketEndDate = computed(() => {
+  if (!onMarketEndDate.value) return ''
+  const date = new Date(onMarketEndDate.value)
+  if (isNaN(date.getTime())) return ''
+  return format(date, 'dd MMM yyyy', {
+    locale: locale.value.startsWith('fr') ? fr : enUS,
+  })
+})
 </script>
 
 <style scoped>

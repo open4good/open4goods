@@ -284,7 +284,9 @@ const formattedOpenDataMillions = computed(() =>
   formatCount(props.openDataMillions)
 )
 
-const formattedProductsCount = computed(() => formatCount(props.productsCount))
+const formattedProductsCount = computed(() =>
+  formatCompactCount(props.productsCount)
+)
 
 const formattedCategoriesCount = computed(() =>
   formatCount(props.categoriesCount)

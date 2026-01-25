@@ -277,9 +277,12 @@ useHead({
                         })
                       "
                       :placeholder="
-                        packI18n.resolveString('hero.search.placeholder', {
-                          fallbackKeys: ['home.hero.search.placeholder'],
-                        })
+                        packI18n.resolveList<string>(
+                          'hero.search.placeholders',
+                          {
+                            fallbackKeys: ['home.hero.search.placeholders'],
+                          }
+                        )
                       "
                       :aria-label="
                         packI18n.resolveString('hero.search.ariaLabel', {

@@ -341,7 +341,10 @@ import type {
   AggregationResponseDto,
   SortDto,
   CategoriesStatsDto,
+  FieldMetadataDto,
+  AggregationRequestDto,
 } from '~~/shared/api-client'
+import { AggTypeEnum } from '~~/shared/api-client'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
@@ -441,9 +444,40 @@ const showMinimumNotice = computed(
     searchInput.value.length > 0 && searchInput.value.length < MIN_QUERY_LENGTH
 )
 
-const filterFields = ref<string[]>([])
+const filterFields = computed<FieldMetadataDto[]>(() => [
+  {
+    mapping: 'price.minPrice.price',
+    title: 'Prix',
+    valueType: 'numeric',
+    aggregationConfiguration: {
+      buckets: 10,
+    },
+  },
+  {
+    mapping: 'price.conditions',
+    title: 'État',
+    valueType: 'string',
+  },
+])
 
-const aggregationDefinition = computed<AggregationRequestDto>(() => ({}))
+const aggregationDefinition = computed<AggregationRequestDto>(() => {
+  const aggs = filterFields.value
+    .filter(field => field.mapping)
+    .map(field => ({
+      name: field.mapping!,
+      field: field.mapping!,
+      type:
+        field.valueType === 'numeric' ? AggTypeEnum.Range : AggTypeEnum.Terms,
+      ...(field.aggregationConfiguration?.buckets != null && {
+        buckets: field.aggregationConfiguration.buckets,
+      }),
+      ...(field.aggregationConfiguration?.interval != null && {
+        step: field.aggregationConfiguration.interval,
+      }),
+    }))
+
+  return aggs.length > 0 ? { aggs } : {}
+})
 
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(

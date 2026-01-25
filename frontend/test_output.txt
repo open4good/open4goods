@@ -1,0 +1,1578 @@
+
+> test
+> vitest run app/components/product/ProductPriceSection.spec.ts
+
+[info] [@nuxtjs/sitemap] `zeroRuntime` enabled - sitemap routes will be prerendered.
+
+ RUN  v3.2.4 /home/goulven/git/open4goods/frontend
+
+[33m[1m  ➜  MCP:     [22m[39mServer is running at http://localhost:5173/__mcp/sse
+stderr | app/components/product/ProductPriceSection.spec.ts
+[Vue Router warn]: uncaught error during route navigation:
+{
+  id: [32m'/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeHeroSection.vue'[39m,
+  plugin: [32m'vite:vue'[39m,
+  message: [32m'Error parsing JavaScript expression: Unexpected token (2:22)'[39m,
+  name: [32m'SyntaxError'[39m,
+  stack: [32m'SyntaxError: Error parsing JavaScript expression: Unexpected token (2:22)\n'[39m +
+    [32m'    at createCompilerError (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)\n'[39m +
+    [32m'    at emitError (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3014:5)\n'[39m +
+    [32m'    at createExp (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3007:7)\n'[39m +
+    [32m'    at Object.onattribend (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2532:29)\n'[39m +
+    [32m'    at Tokenizer.handleInAttrValue (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:959:16)\n'[39m +
+    [32m'    at Tokenizer.stateInAttrValueDoubleQuotes (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:969:10)\n'[39m +
+    [32m'    at Tokenizer.parse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1113:16)\n'[39m +
+    [32m'    at Object.baseParse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3053:13)\n'[39m +
+    [32m'    at Object.parse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-dom@3.5.27/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:910:23)\n'[39m +
+    [32m'    at Object.parse$1 [as parse] (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-sfc@3.5.27/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1824:24)'[39m,
+  loc: {
+    file: [32m'/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeHeroSection.vue'[39m,
+    line: [33m279[39m,
+    column: [33m37[39m
+  },
+  pluginCode: [32m'<script setup lang="ts">\n'[39m +
+    [32m"import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue'\n"[39m +
+    [32m"import { useTheme } from 'vuetify'\n"[39m +
+    [32m"import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'\n"[39m +
+    [32m'import SearchSuggestField, {\n'[39m +
+    [32m'  type CategorySuggestionItem,\n'[39m +
+    [32m'  type ProductSuggestionItem,\n'[39m +
+    [32m"} from '~/components/search/SearchSuggestField.vue'\n"[39m +
+    [32m"import type { VerticalConfigDto } from '~~/shared/api-client'\n"[39m +
+    [32m"import HomeHeroHighlights from '~/components/home/sections/HomeHeroHighlights.vue'\n"[39m +
+    [32m'\n'[39m +
+    [32m'import {\n'[39m +
+    [32m'  resolveThemedAssetUrl,\n'[39m +
+    [32m'  useHeroBackgroundAsset,\n'[39m +
+    [32m"} from '~~/app/composables/useThemedAsset'\n"[39m +
+    [32m"import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'\n"[39m +
+    [32m"import { useEventPackI18n } from '~/composables/useEventPackI18n'\n"[39m +
+    [32m"import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'\n"[39m +
+    [32m"import { resolveThemeName } from '~~/shared/constants/theme'\n"[39m +
+    [32m'\n'[39m +
+    [32m'const isHeroImageLoaded = ref(false)\n'[39m +
+    [32m'const heroReadyFallbackDelayMs = 900\n'[39m +
+    [32m'\n'[39m +
+    [32m'const props = defineProps<{\n'[39m +
+    [32m'  searchQuery: string\n'[39m +
+    [32m'  minSuggestionQueryLength: number\n'[39m +
+    [32m'  verticals?: VerticalConfigDto[]\n'[39m +
+    [32m'  heroImageLight?: string\n'[39m +
+    [32m'  heroImageDark?: string\n'[39m +
+    [32m'  partnersCount?: number\n'[39m +
+    [32m'  openDataMillions?: number\n'[39m +
+    [32m'  productsCount?: number\n'[39m +
+    [32m'  categoriesCount?: number\n'[39m +
+    [32m'  impactScoreProductsCount?: number\n'[39m +
+    [32m'  impactScoreCategoriesCount?: number\n'[39m +
+    [32m'  productsWithoutVerticalCount?: number\n'[39m +
+    [32m'  reviewedProductsCount?: number\n'[39m +
+    [32m'  aiSummaryRemainingCredits?: number\n'[39m +
+    [32m'  heroBackgroundI18nKey?: string\n'[39m +
+    [32m'  shouldReduceMotion?: boolean\n'[39m +
+    [32m'}>()\n'[39m +
+    [32m'\n'[39m +
+    [32m'const emit = defineEmits<{\n'[39m +
+    [32m"  'update:searchQuery': [value: string]\n"[39m +
+    [32m'  submit: []\n'[39m +
+    [32m"  'select-category': [payload: CategorySuggestionItem]\n"[39m +
+    [32m"  'select-product': [payload: ProductSuggestionItem]\n"[39m +
+    [32m'}>()\n'[39m +
+    [32m'\n'[39m +
+    [32m'const theme = useTheme()\n'[39m +
+    [32m'const heroBackgroundAsset = useHeroBackgroundAsset()\n'[39m +
+    [32m'const activeEventPack = useSeasonalEventPack()\n'[39m +
+    [32m'const packI18n = useEventPackI18n(activeEventPack)\n'[39m +
+    [32m'const themeName = computed(() =>\n'[39m +
+    [32m'  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)\n'[39m +
+    [32m')\n'[39m +
+    [32m'\n'[39m +
+    [32m'const searchQueryValue = computed(() => props.searchQuery)\n'[39m +
+    [32m'\n'[39m +
+    [32m'const { minSuggestionQueryLength } = toRefs(props)\n'[39m +
+    [32m'const shouldReduceMotion = computed(() => Boolean(props.shouldReduceMotion))\n'[39m +
+    [32m'const wizardVerticals = computed(() => props.verticals ?? [])\n'[39m +
+    [32m'const heroRevealReady = ref(false)\n'[39m +
+    [32m'const heroRevealVisible = ref(false)\n'[39m +
+    [32m'const heroRevealClasses = computed(() => ({\n'[39m +
+    [32m"  'is-ready': heroRevealReady.value,\n"[39m +
+    [32m"  'is-visible': heroRevealVisible.value,\n"[39m +
+    [32m'}))\n'[39m +
+    [32m'\n'[39m +
+    [32m'const updateSearchQuery = (value: string) => {\n'[39m +
+    [32m"  emit('update:searchQuery', value)\n"[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'const heroTitleSubtitle = computed(\n'[39m +
+    [32m'  () =>\n'[39m +
+    [32m"    packI18n.resolveStringVariant('hero.titleSubtitle', {\n"[39m +
+    [32m"      fallbackKeys: ['home.hero.titleSubtitle'],\n"[39m +
+    [32m"      stateKey: 'home-hero-title-subtitle',\n"[39m +
+    [32m"    }) ?? ''\n"[39m +
+    [32m')\n'[39m +
+    [32m'\n'[39m +
+    [32m'const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)\n'[39m +
+    [32m'const heroBackgroundI18nKey = computed(\n'[39m +
+    [32m"  () => props.heroBackgroundI18nKey?.trim() || 'hero.background'\n"[39m +
+    [32m')\n'[39m +
+    [32m'const heroBackgroundI18nValue = computed(\n'[39m +
+    [32m'  () =>\n'[39m +
+    [32m'    packI18n.resolveString(heroBackgroundI18nKey.value, {\n'[39m +
+    [32m"      fallbackKeys: ['home.hero.background'],\n"[39m +
+    [32m"    }) ?? ''\n"[39m +
+    [32m')\n'[39m +
+    [32m'\n'[39m +
+    [32m'const resolveHeroBackgroundSource = (value?: string): string | undefined => {\n'[39m +
+    [32m'  if (!value) {\n'[39m +
+    [32m'    return undefined\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  const trimmed = value.trim()\n'[39m +
+    [32m'  if (!trimmed) {\n'[39m +
+    [32m'    return undefined\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m"  if (trimmed.startsWith('/') || trimmed.startsWith('http')) {\n"[39m +
+    [32m'    return trimmed\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  return resolveThemedAssetUrl(trimmed, themeName.value, activeEventPack.value)\n'[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'const heroBackgroundOverride = computed(() =>\n'[39m +
+    [32m'  resolveHeroBackgroundSource(heroBackgroundI18nValue.value)\n'[39m +
+    [32m')\n'[39m +
+    [32m'const heroBackgroundSrc = computed(() => {\n'[39m +
+    [32m'  const themedAsset = heroBackgroundOverride.value?.trim()\n'[39m +
+    [32m'\n'[39m +
+    [32m'  if (themedAsset) {\n'[39m +
+    [32m'    return themedAsset\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  const fallbackAsset = heroBackgroundAsset.value?.trim()\n'[39m +
+    [32m'  if (fallbackAsset) {\n'[39m +
+    [32m'    return fallbackAsset\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  /* Hydration mismatch fix: Ensure server and client initial render match. */\n'[39m +
+    [32m'  /* We assume light theme as default for SSR unless reliable cookie sync is present. */\n'[39m +
+    [32m"  // If we can't guarantee theme sync, we should force a default, then switch on mount.\n"[39m +
+    [32m'  // Ideally, use a client-side only guard for the dynamic theme part or strictly match server.\n'[39m +
+    [32m'\n'[39m +
+    [32m'  const isDarkMode = Boolean(theme.global.current.value.dark)\n'[39m +
+    [32m'  const lightImage = props.heroImageLight?.trim()\n'[39m +
+    [32m'  const darkImage = props.heroImageDark?.trim()\n'[39m +
+    [32m'\n'[39m +
+    [32m"  return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')\n"[39m +
+    [32m'})\n'[39m +
+    [32m'\n'[39m +
+    [32m'const heroTitle = computed(\n'[39m +
+    [32m'  () =>\n'[39m +
+    [32m"    packI18n.resolveString('hero.title', {\n"[39m +
+    [32m"      fallbackKeys: ['home.hero.title'],\n"[39m +
+    [32m"    }) ?? ''\n"[39m +
+    [32m')\n'[39m +
+    [32m'\n'[39m +
+    [32m'const handleHeroImageLoad = () => {\n'[39m +
+    [32m'  isHeroImageLoaded.value = true\n'[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'onMounted(async () => {\n'[39m +
+    [32m'  // Ensure the DOM is fully mounted and initial state (opacity: 0) is rendered\n'[39m +
+    [32m'  await nextTick()\n'[39m +
+    [32m'\n'[39m +
+    [32m'  window.setTimeout(() => {\n'[39m +
+    [32m'    if (!isHeroImageLoaded.value) {\n'[39m +
+    [32m'      isHeroImageLoaded.value = true\n'[39m +
+    [32m'    }\n'[39m +
+    [32m'  }, heroReadyFallbackDelayMs)\n'[39m +
+    [32m'\n'[39m +
+    [32m'  if (shouldReduceMotion.value) {\n'[39m +
+    [32m'    heroRevealReady.value = true\n'[39m +
+    [32m'    heroRevealVisible.value = true\n'[39m +
+    [32m'    return\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  // Set ready state (transition enabled, but still hidden)\n'[39m +
+    [32m'  heroRevealReady.value = true\n'[39m +
+    [32m'\n'[39m +
+    [32m"  // Wait for the next frame to ensure the browser registers the 'ready' state\n"[39m +
+    [32m'  window.requestAnimationFrame(() => {\n'[39m +
+    [32m'    // And another frame to trigger the transition\n'[39m +
+    [32m'    window.requestAnimationFrame(() => {\n'[39m +
+    [32m'      heroRevealVisible.value = true\n'[39m +
+    [32m'    })\n'[39m +
+    [32m'  })\n'[39m +
+    [32m'})\n'[39m +
+    [32m'\n'[39m +
+    [32m'watch(shouldReduceMotion, value => {\n'[39m +
+    [32m'  if (value) {\n'[39m +
+    [32m'    heroRevealReady.value = true\n'[39m +
+    [32m'    heroRevealVisible.value = true\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'})\n'[39m +
+    [32m'\n'[39m +
+    [32m'const handleSubmit = () => {\n'[39m +
+    [32m"  emit('submit')\n"[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'const handleCategorySelect = (payload: CategorySuggestionItem) => {\n'[39m +
+    [32m"  emit('select-category', payload)\n"[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'const handleProductSelect = (payload: ProductSuggestionItem) => {\n'[39m +
+    [32m"  emit('select-product', payload)\n"[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'useHead({\n'[39m +
+    [32m'  link: [\n'[39m +
+    [32m'    {\n'[39m +
+    [32m"      rel: 'preload',\n"[39m +
+    [32m"      as: 'image',\n"[39m +
+    [32m'      href: () => heroBackgroundSrc.value,\n'[39m +
+    [32m'    },\n'[39m +
+    [32m'  ],\n'[39m +
+    [32m'})\n'[39m +
+    [32m'</script>\n'[39m +
+    [32m'\n'[39m +
+    [32m'<template>\n'[39m +
+    [32m'  <HeroSurface\n'[39m +
+    [32m'    tag="section"\n'[39m +
+    [32m'    class="home-hero"\n'[39m +
+    [32m'    aria-labelledby="home-hero-title"\n'[39m +
+    [32m'    variant="none"\n'[39m +
+    [32m'    :bleed="true"\n'[39m +
+    [32m'  >\n'[39m +
+    [32m'    <div class="home-hero__background" aria-hidden="true">\n'[39m +
+    [32m'      <v-fade-transition>\n'[39m +
+    [32m'        <div v-if="showHeroSkeleton" class="home-hero__background-loader">\n'[39m +
+    [32m'          <v-skeleton-loader\n'[39m +
+    [32m'            type="image"\n'[39m +
+    [32m'            class="home-hero__background-skeleton"\n'[39m +
+    [32m'          />\n'[39m +
+    [32m'        </div>\n'[39m +
+    [32m'      </v-fade-transition>\n'[39m +
+    [32m'      <img\n'[39m +
+    [32m'        class="home-hero__background-media"\n'[39m +
+    [32m'        :src="heroBackgroundSrc"\n'[39m +
+    [32m'        alt=""\n'[39m +
+    [32m'        fetchpriority="high"\n'[39m +
+    [32m'        decoding="async"\n'[39m +
+    [32m'        @load="handleHeroImageLoad"\n'[39m +
+    [32m'      />\n'[39m +
+    [32m'      <div class="home-hero__background-overlay" />\n'[39m +
+    [32m'    </div>\n'[39m +
+    [32m'    <v-container fluid class="home-hero__container">\n'[39m +
+    [32m'      <div\n'[39m +
+    [32m'        class="home-hero__inner home-reveal-group"\n'[39m +
+    [32m'        :class="heroRevealClasses"\n'[39m +
+    [32m'      >\n'[39m +
+    [32m'        <v-row class="home-hero__layout" align="stretch" justify="center">\n'[39m +
+    [32m'          <v-col cols="12" class="home-hero__content">\n'[39m +
+    [32m'            <h1\n'[39m +
+    [32m'              id="home-hero-title"\n'[39m +
+    [32m'              class="mt-8 home-hero__title home-reveal-item"\n'[39m +
+    [32m`              :style="{ '--reveal-delay': '0ms' }"\n`[39m +
+    [32m'            >\n'[39m +
+    [32m'              {{ heroTitle }}\n'[39m +
+    [32m'            </h1>\n'[39m +
+    [32m'            <p\n'[39m +
+    [32m'              v-if="heroTitleSubtitle"\n'[39m +
+    [32m'              class="home-hero__title-subtitle home-reveal-item"\n'[39m +
+    [32m`              :style="{ '--reveal-delay': '90ms' }"\n`[39m +
+    [32m'            >\n'[39m +
+    [32m'              {{ heroTitleSubtitle }}\n'[39m +
+    [32m'            </p>\n'[39m +
+    [32m'          </v-col>\n'[39m +
+    [32m'        </v-row>\n'[39m +
+    [32m'        <v-row justify="center">\n'[39m +
+    [32m'          <v-col cols="12" lg="10" xl="8">\n'[39m +
+    [32m'            <v-sheet\n'[39m +
+    [32m'              class="home-hero__panel home-reveal-item home-reveal-item--scale"\n'[39m +
+    [32m'              color="transparent"\n'[39m +
+    [32m'              elevation="0"\n'[39m +
+    [32m`              :style="{ '--reveal-delay': '180ms' }"\n`[39m +
+    [32m'            >\n'[39m +
+    [32m'              <div class="home-hero__panel-grid">\n'[39m +
+    [32m'                <div class="home-hero__panel-block">\n'[39m +
+    [32m'                  <form\n'[39m +
+    [32m'                    class="home-hero__search"\n'[39m +
+    [32m'                    role="search"\n'[39m +
+    [32m'                    @submit.prevent="handleSubmit"\n'[39m +
+    [32m'                  >\n'[39m +
+    [32m'                    <SearchSuggestField\n'[39m +
+    [32m'                      :model-value="searchQueryValue"\n'[39m +
+    [32m'                      class="home-hero__search-input"\n'[39m +
+    [32m'                      :label="\n'[39m +
+    [32m"                        packI18n.resolveString('hero.search.label', {\n"[39m +
+    [32m"                          fallbackKeys: ['home.hero.search.label'],\n"[39m +
+    [32m'                        })\n'[39m +
+    [32m'                      "\n'[39m +
+    [32m'                      :placeholder="\n'[39m +
+    [32m'                      :placeholder="\n'[39m +
+    [32m"                        packI18n.resolveList<string>('hero.search.placeholders', {\n"[39m +
+    [32m"                          fallbackKeys: ['home.hero.search.placeholders'],\n"[39m +
+    [32m'                        })\n'[39m +
+    [32m'                      "\n'[39m +
+    [32m'                      "\n'[39m +
+    [32m'                      :aria-label="\n'[39m +
+    [32m"                        packI18n.resolveString('hero.search.ariaLabel', {\n"[39m +
+    [32m"                          fallbackKeys: ['home.hero.search.ariaLabel'],\n"[39m +
+    [32m'                        })\n'[39m +
+    [32m'                      "\n'[39m +
+    [32m'                      :min-chars="minSuggestionQueryLength"\n'[39m +
+    [32m'                      :enable-scan="true"\n'[39m +
+    [32m'                      :scan-mobile="true"\n'[39m +
+    [32m'                      :scan-desktop="false"\n'[39m +
+    [32m'                      :enable-voice="true"\n'[39m +
+    [32m'                      :voice-mobile="true"\n'[39m +
+    [32m'                      :voice-desktop="true"\n'[39m +
+    [32m'                      @update:model-value="updateSearchQuery"\n'[39m +
+    [32m'                      @submit="handleSubmit"\n'[39m +
+    [32m'                      @select-category="handleCategorySelect"\n'[39m +
+    [32m'                      @select-product="handleProductSelect"\n'[39m +
+    [32m'                    >\n'[39m +
+    [32m'                      <template #append-inner>\n'[39m +
+    [32m'                        <v-btn\n'[39m +
+    [32m'                          class="home-hero__search-submit"\n'[39m +
+    [32m'                          icon="mdi-arrow-right"\n'[39m +
+    [32m'                          variant="plain"\n'[39m +
+    [32m'                          rounded="0"\n'[39m +
+    [32m'                          size="small"\n'[39m +
+    [32m'                          type="submit"\n'[39m +
+    [32m'                          :aria-label="\n'[39m +
+    [32m"                            packI18n.resolveString('hero.search.cta', {\n"[39m +
+    [32m"                              fallbackKeys: ['home.hero.search.cta'],\n"[39m +
+    [32m'                            })\n'[39m +
+    [32m'                          "\n'[39m +
+    [32m'                   '[39m... 5490 more characters,
+  frame: [32m'278 |                        "\n'[39m +
+    [32m'279 |                        :placeholder="\n'[39m +
+    [32m'280 |                        :placeholder="\n'[39m +
+    [32m'    |  ^\n'[39m +
+    [32m"281 |                          packI18n.resolveList<string>('hero.search.placeholders', {\n"[39m +
+    [32m"282 |                            fallbackKeys: ['home.hero.search.placeholders'],"[39m
+}
+
+stderr | app/components/product/ProductPriceSection.spec.ts
+[nuxt] error caught during app initialization SyntaxError: Error parsing JavaScript expression: Unexpected token (2:22)
+    at createCompilerError [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:1378:17[90m)[39m
+    at emitError [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:3014:5[90m)[39m
+    at createExp [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:3007:7[90m)[39m
+    at Object.onattribend [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:2532:29[90m)[39m
+    at Tokenizer.handleInAttrValue [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:959:16[90m)[39m
+    at Tokenizer.stateInAttrValueDoubleQuotes [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:969:10[90m)[39m
+    at Tokenizer.parse [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:1113:16[90m)[39m
+    at Object.baseParse [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:3053:13[90m)[39m
+    at Object.parse [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-dom@3.5.27/node_modules/[4m@vue[24m/compiler-dom/dist/compiler-dom.cjs.js:910:23[90m)[39m
+    at Object.parse$1 [as parse] [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-sfc@3.5.27/node_modules/[4m@vue[24m/compiler-sfc/dist/compiler-sfc.cjs.js:1824:24[90m)[39m {
+  cause: {
+    id: [32m'/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeHeroSection.vue'[39m,
+    plugin: [32m'vite:vue'[39m,
+    message: [32m'Error parsing JavaScript expression: Unexpected token (2:22)'[39m,
+    name: [32m'SyntaxError'[39m,
+    stack: [32m'SyntaxError: Error parsing JavaScript expression: Unexpected token (2:22)\n'[39m +
+      [32m'    at createCompilerError (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)\n'[39m +
+      [32m'    at emitError (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3014:5)\n'[39m +
+      [32m'    at createExp (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3007:7)\n'[39m +
+      [32m'    at Object.onattribend (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2532:29)\n'[39m +
+      [32m'    at Tokenizer.handleInAttrValue (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:959:16)\n'[39m +
+      [32m'    at Tokenizer.stateInAttrValueDoubleQuotes (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:969:10)\n'[39m +
+      [32m'    at Tokenizer.parse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1113:16)\n'[39m +
+      [32m'    at Object.baseParse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3053:13)\n'[39m +
+      [32m'    at Object.parse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-dom@3.5.27/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:910:23)\n'[39m +
+      [32m'    at Object.parse$1 [as parse] (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-sfc@3.5.27/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1824:24)'[39m,
+    loc: {
+      file: [32m'/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeHeroSection.vue'[39m,
+      line: [33m279[39m,
+      column: [33m37[39m
+    },
+    pluginCode: [32m'<script setup lang="ts">\n'[39m +
+      [32m"import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue'\n"[39m +
+      [32m"import { useTheme } from 'vuetify'\n"[39m +
+      [32m"import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'\n"[39m +
+      [32m'import SearchSuggestField, {\n'[39m +
+      [32m'  type CategorySuggestionItem,\n'[39m +
+      [32m'  type ProductSuggestionItem,\n'[39m +
+      [32m"} from '~/components/search/SearchSuggestField.vue'\n"[39m +
+      [32m"import type { VerticalConfigDto } from '~~/shared/api-client'\n"[39m +
+      [32m"import HomeHeroHighlights from '~/components/home/sections/HomeHeroHighlights.vue'\n"[39m +
+      [32m'\n'[39m +
+      [32m'import {\n'[39m +
+      [32m'  resolveThemedAssetUrl,\n'[39m +
+      [32m'  useHeroBackgroundAsset,\n'[39m +
+      [32m"} from '~~/app/composables/useThemedAsset'\n"[39m +
+      [32m"import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'\n"[39m +
+      [32m"import { useEventPackI18n } from '~/composables/useEventPackI18n'\n"[39m +
+      [32m"import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'\n"[39m +
+      [32m"import { resolveThemeName } from '~~/shared/constants/theme'\n"[39m +
+      [32m'\n'[39m +
+      [32m'const isHeroImageLoaded = ref(false)\n'[39m +
+      [32m'const heroReadyFallbackDelayMs = 900\n'[39m +
+      [32m'\n'[39m +
+      [32m'const props = defineProps<{\n'[39m +
+      [32m'  searchQuery: string\n'[39m +
+      [32m'  minSuggestionQueryLength: number\n'[39m +
+      [32m'  verticals?: VerticalConfigDto[]\n'[39m +
+      [32m'  heroImageLight?: string\n'[39m +
+      [32m'  heroImageDark?: string\n'[39m +
+      [32m'  partnersCount?: number\n'[39m +
+      [32m'  openDataMillions?: number\n'[39m +
+      [32m'  productsCount?: number\n'[39m +
+      [32m'  categoriesCount?: number\n'[39m +
+      [32m'  impactScoreProductsCount?: number\n'[39m +
+      [32m'  impactScoreCategoriesCount?: number\n'[39m +
+      [32m'  productsWithoutVerticalCount?: number\n'[39m +
+      [32m'  reviewedProductsCount?: number\n'[39m +
+      [32m'  aiSummaryRemainingCredits?: number\n'[39m +
+      [32m'  heroBackgroundI18nKey?: string\n'[39m +
+      [32m'  shouldReduceMotion?: boolean\n'[39m +
+      [32m'}>()\n'[39m +
+      [32m'\n'[39m +
+      [32m'const emit = defineEmits<{\n'[39m +
+      [32m"  'update:searchQuery': [value: string]\n"[39m +
+      [32m'  submit: []\n'[39m +
+      [32m"  'select-category': [payload: CategorySuggestionItem]\n"[39m +
+      [32m"  'select-product': [payload: ProductSuggestionItem]\n"[39m +
+      [32m'}>()\n'[39m +
+      [32m'\n'[39m +
+      [32m'const theme = useTheme()\n'[39m +
+      [32m'const heroBackgroundAsset = useHeroBackgroundAsset()\n'[39m +
+      [32m'const activeEventPack = useSeasonalEventPack()\n'[39m +
+      [32m'const packI18n = useEventPackI18n(activeEventPack)\n'[39m +
+      [32m'const themeName = computed(() =>\n'[39m +
+      [32m'  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)\n'[39m +
+      [32m')\n'[39m +
+      [32m'\n'[39m +
+      [32m'const searchQueryValue = computed(() => props.searchQuery)\n'[39m +
+      [32m'\n'[39m +
+      [32m'const { minSuggestionQueryLength } = toRefs(props)\n'[39m +
+      [32m'const shouldReduceMotion = computed(() => Boolean(props.shouldReduceMotion))\n'[39m +
+      [32m'const wizardVerticals = computed(() => props.verticals ?? [])\n'[39m +
+      [32m'const heroRevealReady = ref(false)\n'[39m +
+      [32m'const heroRevealVisible = ref(false)\n'[39m +
+      [32m'const heroRevealClasses = computed(() => ({\n'[39m +
+      [32m"  'is-ready': heroRevealReady.value,\n"[39m +
+      [32m"  'is-visible': heroRevealVisible.value,\n"[39m +
+      [32m'}))\n'[39m +
+      [32m'\n'[39m +
+      [32m'const updateSearchQuery = (value: string) => {\n'[39m +
+      [32m"  emit('update:searchQuery', value)\n"[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'const heroTitleSubtitle = computed(\n'[39m +
+      [32m'  () =>\n'[39m +
+      [32m"    packI18n.resolveStringVariant('hero.titleSubtitle', {\n"[39m +
+      [32m"      fallbackKeys: ['home.hero.titleSubtitle'],\n"[39m +
+      [32m"      stateKey: 'home-hero-title-subtitle',\n"[39m +
+      [32m"    }) ?? ''\n"[39m +
+      [32m')\n'[39m +
+      [32m'\n'[39m +
+      [32m'const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)\n'[39m +
+      [32m'const heroBackgroundI18nKey = computed(\n'[39m +
+      [32m"  () => props.heroBackgroundI18nKey?.trim() || 'hero.background'\n"[39m +
+      [32m')\n'[39m +
+      [32m'const heroBackgroundI18nValue = computed(\n'[39m +
+      [32m'  () =>\n'[39m +
+      [32m'    packI18n.resolveString(heroBackgroundI18nKey.value, {\n'[39m +
+      [32m"      fallbackKeys: ['home.hero.background'],\n"[39m +
+      [32m"    }) ?? ''\n"[39m +
+      [32m')\n'[39m +
+      [32m'\n'[39m +
+      [32m'const resolveHeroBackgroundSource = (value?: string): string | undefined => {\n'[39m +
+      [32m'  if (!value) {\n'[39m +
+      [32m'    return undefined\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  const trimmed = value.trim()\n'[39m +
+      [32m'  if (!trimmed) {\n'[39m +
+      [32m'    return undefined\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m"  if (trimmed.startsWith('/') || trimmed.startsWith('http')) {\n"[39m +
+      [32m'    return trimmed\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  return resolveThemedAssetUrl(trimmed, themeName.value, activeEventPack.value)\n'[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'const heroBackgroundOverride = computed(() =>\n'[39m +
+      [32m'  resolveHeroBackgroundSource(heroBackgroundI18nValue.value)\n'[39m +
+      [32m')\n'[39m +
+      [32m'const heroBackgroundSrc = computed(() => {\n'[39m +
+      [32m'  const themedAsset = heroBackgroundOverride.value?.trim()\n'[39m +
+      [32m'\n'[39m +
+      [32m'  if (themedAsset) {\n'[39m +
+      [32m'    return themedAsset\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  const fallbackAsset = heroBackgroundAsset.value?.trim()\n'[39m +
+      [32m'  if (fallbackAsset) {\n'[39m +
+      [32m'    return fallbackAsset\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  /* Hydration mismatch fix: Ensure server and client initial render match. */\n'[39m +
+      [32m'  /* We assume light theme as default for SSR unless reliable cookie sync is present. */\n'[39m +
+      [32m"  // If we can't guarantee theme sync, we should force a default, then switch on mount.\n"[39m +
+      [32m'  // Ideally, use a client-side only guard for the dynamic theme part or strictly match server.\n'[39m +
+      [32m'\n'[39m +
+      [32m'  const isDarkMode = Boolean(theme.global.current.value.dark)\n'[39m +
+      [32m'  const lightImage = props.heroImageLight?.trim()\n'[39m +
+      [32m'  const darkImage = props.heroImageDark?.trim()\n'[39m +
+      [32m'\n'[39m +
+      [32m"  return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')\n"[39m +
+      [32m'})\n'[39m +
+      [32m'\n'[39m +
+      [32m'const heroTitle = computed(\n'[39m +
+      [32m'  () =>\n'[39m +
+      [32m"    packI18n.resolveString('hero.title', {\n"[39m +
+      [32m"      fallbackKeys: ['home.hero.title'],\n"[39m +
+      [32m"    }) ?? ''\n"[39m +
+      [32m')\n'[39m +
+      [32m'\n'[39m +
+      [32m'const handleHeroImageLoad = () => {\n'[39m +
+      [32m'  isHeroImageLoaded.value = true\n'[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'onMounted(async () => {\n'[39m +
+      [32m'  // Ensure the DOM is fully mounted and initial state (opacity: 0) is rendered\n'[39m +
+      [32m'  await nextTick()\n'[39m +
+      [32m'\n'[39m +
+      [32m'  window.setTimeout(() => {\n'[39m +
+      [32m'    if (!isHeroImageLoaded.value) {\n'[39m +
+      [32m'      isHeroImageLoaded.value = true\n'[39m +
+      [32m'    }\n'[39m +
+      [32m'  }, heroReadyFallbackDelayMs)\n'[39m +
+      [32m'\n'[39m +
+      [32m'  if (shouldReduceMotion.value) {\n'[39m +
+      [32m'    heroRevealReady.value = true\n'[39m +
+      [32m'    heroRevealVisible.value = true\n'[39m +
+      [32m'    return\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  // Set ready state (transition enabled, but still hidden)\n'[39m +
+      [32m'  heroRevealReady.value = true\n'[39m +
+      [32m'\n'[39m +
+      [32m"  // Wait for the next frame to ensure the browser registers the 'ready' state\n"[39m +
+      [32m'  window.requestAnimationFrame(() => {\n'[39m +
+      [32m'    // And another frame to trigger the transition\n'[39m +
+      [32m'    window.requestAnimationFrame(() => {\n'[39m +
+      [32m'      heroRevealVisible.value = true\n'[39m +
+      [32m'    })\n'[39m +
+      [32m'  })\n'[39m +
+      [32m'})\n'[39m +
+      [32m'\n'[39m +
+      [32m'watch(shouldReduceMotion, value => {\n'[39m +
+      [32m'  if (value) {\n'[39m +
+      [32m'    heroRevealReady.value = true\n'[39m +
+      [32m'    heroRevealVisible.value = true\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'})\n'[39m +
+      [32m'\n'[39m +
+      [32m'const handleSubmit = () => {\n'[39m +
+      [32m"  emit('submit')\n"[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'const handleCategorySelect = (payload: CategorySuggestionItem) => {\n'[39m +
+      [32m"  emit('select-category', payload)\n"[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'const handleProductSelect = (payload: ProductSuggestionItem) => {\n'[39m +
+      [32m"  emit('select-product', payload)\n"[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'useHead({\n'[39m +
+      [32m'  link: [\n'[39m +
+      [32m'    {\n'[39m +
+      [32m"      rel: 'preload',\n"[39m +
+      [32m"      as: 'image',\n"[39m +
+      [32m'      href: () => heroBackgroundSrc.value,\n'[39m +
+      [32m'    },\n'[39m +
+      [32m'  ],\n'[39m +
+      [32m'})\n'[39m +
+      [32m'</script>\n'[39m +
+      [32m'\n'[39m +
+      [32m'<template>\n'[39m +
+      [32m'  <HeroSurface\n'[39m +
+      [32m'    tag="section"\n'[39m +
+      [32m'    class="home-hero"\n'[39m +
+      [32m'    aria-labelledby="home-hero-title"\n'[39m +
+      [32m'    variant="none"\n'[39m +
+      [32m'    :bleed="true"\n'[39m +
+      [32m'  >\n'[39m +
+      [32m'    <div class="home-hero__background" aria-hidden="true">\n'[39m +
+      [32m'      <v-fade-transition>\n'[39m +
+      [32m'        <div v-if="showHeroSkeleton" class="home-hero__background-loader">\n'[39m +
+      [32m'          <v-skeleton-loader\n'[39m +
+      [32m'            type="image"\n'[39m +
+      [32m'            class="home-hero__background-skeleton"\n'[39m +
+      [32m'          />\n'[39m +
+      [32m'        </div>\n'[39m +
+      [32m'      </v-fade-transition>\n'[39m +
+      [32m'      <img\n'[39m +
+      [32m'        class="home-hero__background-media"\n'[39m +
+      [32m'        :src="heroBackgroundSrc"\n'[39m +
+      [32m'        alt=""\n'[39m +
+      [32m'        fetchpriority="high"\n'[39m +
+      [32m'        decoding="async"\n'[39m +
+      [32m'        @load="handleHeroImageLoad"\n'[39m +
+      [32m'      />\n'[39m +
+      [32m'      <div class="home-hero__background-overlay" />\n'[39m +
+      [32m'    </div>\n'[39m +
+      [32m'    <v-container fluid class="home-hero__container">\n'[39m +
+      [32m'      <div\n'[39m +
+      [32m'        class="home-hero__inner home-reveal-group"\n'[39m +
+      [32m'        :class="heroRevealClasses"\n'[39m +
+      [32m'      >\n'[39m +
+      [32m'        <v-row class="home-hero__layout" align="stretch" justify="center">\n'[39m +
+      [32m'          <v-col cols="12" class="home-hero__content">\n'[39m +
+      [32m'            <h1\n'[39m +
+      [32m'              id="home-hero-title"\n'[39m +
+      [32m'              class="mt-8 home-hero__title home-reveal-item"\n'[39m +
+      [32m`              :style="{ '--reveal-delay': '0ms' }"\n`[39m +
+      [32m'            >\n'[39m +
+      [32m'              {{ heroTitle }}\n'[39m +
+      [32m'            </h1>\n'[39m +
+      [32m'            <p\n'[39m +
+      [32m'              v-if="heroTitleSubtitle"\n'[39m +
+      [32m'              class="home-hero__title-subtitle home-reveal-item"\n'[39m +
+      [32m`              :style="{ '--reveal-delay': '90ms' }"\n`[39m +
+      [32m'            >\n'[39m +
+      [32m'              {{ heroTitleSubtitle }}\n'[39m +
+      [32m'            </p>\n'[39m +
+      [32m'          </v-col>\n'[39m +
+      [32m'        </v-row>\n'[39m +
+      [32m'        <v-row justify="center">\n'[39m +
+      [32m'          <v-col cols="12" lg="10" xl="8">\n'[39m +
+      [32m'            <v-sheet\n'[39m +
+      [32m'              class="home-hero__panel home-reveal-item home-reveal-item--scale"\n'[39m +
+      [32m'              color="transparent"\n'[39m +
+      [32m'              elevation="0"\n'[39m +
+      [32m`              :style="{ '--reveal-delay': '180ms' }"\n`[39m +
+      [32m'            >\n'[39m +
+      [32m'              <div class="home-hero__panel-grid">\n'[39m +
+      [32m'                <div class="home-hero__panel-block">\n'[39m +
+      [32m'                  <form\n'[39m +
+      [32m'                    class="home-hero__search"\n'[39m +
+      [32m'                    role="search"\n'[39m +
+      [32m'                    @submit.prevent="handleSubmit"\n'[39m +
+      [32m'                  >\n'[39m +
+      [32m'                    <SearchSuggestField\n'[39m +
+      [32m'                      :model-value="searchQueryValue"\n'[39m +
+      [32m'                      class="home-hero__search-input"\n'[39m +
+      [32m'                      :label="\n'[39m +
+      [32m"                        packI18n.resolveString('hero.search.label', {\n"[39m +
+      [32m"                          fallbackKeys: ['home.hero.search.label'],\n"[39m +
+      [32m'                        })\n'[39m +
+      [32m'                      "\n'[39m +
+      [32m'                      :placeholder="\n'[39m +
+      [32m'                      :placeholder="\n'[39m +
+      [32m"                        packI18n.resolveList<string>('hero.search.placeholders', {\n"[39m +
+      [32m"                          fallbackKeys: ['home.hero.search.placeholders'],\n"[39m +
+      [32m'                        })\n'[39m +
+      [32m'                      "\n'[39m +
+      [32m'                      "\n'[39m +
+      [32m'                      :aria-label="\n'[39m +
+      [32m"                        packI18n.resolveString('hero.search.ariaLabel', {\n"[39m +
+      [32m"                          fallbackKeys: ['home.hero.search.ariaLabel'],\n"[39m +
+      [32m'                        })\n'[39m +
+      [32m'                      "\n'[39m +
+      [32m'                      :min-chars="minSuggestionQueryLength"\n'[39m +
+      [32m'                      :enable-scan="true"\n'[39m +
+      [32m'                      :scan-mobile="true"\n'[39m +
+      [32m'                      :scan-desktop="false"\n'[39m +
+      [32m'                      :enable-voice="true"\n'[39m +
+      [32m'                      :voice-mobile="true"\n'[39m +
+      [32m'                      :voice-desktop="true"\n'[39m +
+      [32m'                      @update:model-value="updateSearchQuery"\n'[39m +
+      [32m'                      @submit="handleSubmit"\n'[39m +
+      [32m'                      @select-category="handleCategorySelect"\n'[39m +
+      [32m'                      @select-product="handleProductSelect"\n'[39m +
+      [32m'                    >\n'[39m +
+      [32m'                      <template #append-inner>\n'[39m +
+      [32m'                        <v-btn\n'[39m +
+      [32m'                          class="home-hero__search-submit"\n'[39m +
+      [32m'                          icon="mdi-arrow-right"\n'[39m +
+      [32m'                          variant="plain"\n'[39m +
+      [32m'                          rounded="0"\n'[39m +
+      [32m'                          size="small"\n'[39m +
+      [32m'                          type="submit"\n'[39m +
+      [32m'                          :aria-label="\n'[39m +
+      [32m"                            packI18n.resolveString('hero.search.cta', {\n"[39m +
+      [32m"                              fallbackKeys: ['home.hero.search.cta'],\n"[39m +
+      [32m'                            })\n'[39m +
+      [32m'                          "\n'[39m +
+      [32m'                   '[39m... 5490 more characters,
+    frame: [32m'278 |                        "\n'[39m +
+      [32m'279 |                        :placeholder="\n'[39m +
+      [32m'280 |                        :placeholder="\n'[39m +
+      [32m'    |  ^\n'[39m +
+      [32m"281 |                          packI18n.resolveList<string>('hero.search.placeholders', {\n"[39m +
+      [32m"282 |                            fallbackKeys: ['home.hero.search.placeholders'],"[39m
+  },
+  statusCode: [33m500[39m,
+  fatal: [33mfalse[39m,
+  unhandled: [33mfalse[39m,
+  statusMessage: [90mundefined[39m,
+  data: [90mundefined[39m
+}
+
+stderr | app/components/product/ProductPriceSection.spec.ts
+[Vue Router warn]: Unexpected error when starting the router: {
+  id: [32m'/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeHeroSection.vue'[39m,
+  plugin: [32m'vite:vue'[39m,
+  message: [32m'Error parsing JavaScript expression: Unexpected token (2:22)'[39m,
+  name: [32m'SyntaxError'[39m,
+  stack: [32m'SyntaxError: Error parsing JavaScript expression: Unexpected token (2:22)\n'[39m +
+    [32m'    at createCompilerError (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)\n'[39m +
+    [32m'    at emitError (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3014:5)\n'[39m +
+    [32m'    at createExp (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3007:7)\n'[39m +
+    [32m'    at Object.onattribend (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2532:29)\n'[39m +
+    [32m'    at Tokenizer.handleInAttrValue (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:959:16)\n'[39m +
+    [32m'    at Tokenizer.stateInAttrValueDoubleQuotes (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:969:10)\n'[39m +
+    [32m'    at Tokenizer.parse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1113:16)\n'[39m +
+    [32m'    at Object.baseParse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3053:13)\n'[39m +
+    [32m'    at Object.parse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-dom@3.5.27/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:910:23)\n'[39m +
+    [32m'    at Object.parse$1 [as parse] (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-sfc@3.5.27/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1824:24)'[39m,
+  loc: {
+    file: [32m'/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeHeroSection.vue'[39m,
+    line: [33m279[39m,
+    column: [33m37[39m
+  },
+  pluginCode: [32m'<script setup lang="ts">\n'[39m +
+    [32m"import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue'\n"[39m +
+    [32m"import { useTheme } from 'vuetify'\n"[39m +
+    [32m"import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'\n"[39m +
+    [32m'import SearchSuggestField, {\n'[39m +
+    [32m'  type CategorySuggestionItem,\n'[39m +
+    [32m'  type ProductSuggestionItem,\n'[39m +
+    [32m"} from '~/components/search/SearchSuggestField.vue'\n"[39m +
+    [32m"import type { VerticalConfigDto } from '~~/shared/api-client'\n"[39m +
+    [32m"import HomeHeroHighlights from '~/components/home/sections/HomeHeroHighlights.vue'\n"[39m +
+    [32m'\n'[39m +
+    [32m'import {\n'[39m +
+    [32m'  resolveThemedAssetUrl,\n'[39m +
+    [32m'  useHeroBackgroundAsset,\n'[39m +
+    [32m"} from '~~/app/composables/useThemedAsset'\n"[39m +
+    [32m"import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'\n"[39m +
+    [32m"import { useEventPackI18n } from '~/composables/useEventPackI18n'\n"[39m +
+    [32m"import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'\n"[39m +
+    [32m"import { resolveThemeName } from '~~/shared/constants/theme'\n"[39m +
+    [32m'\n'[39m +
+    [32m'const isHeroImageLoaded = ref(false)\n'[39m +
+    [32m'const heroReadyFallbackDelayMs = 900\n'[39m +
+    [32m'\n'[39m +
+    [32m'const props = defineProps<{\n'[39m +
+    [32m'  searchQuery: string\n'[39m +
+    [32m'  minSuggestionQueryLength: number\n'[39m +
+    [32m'  verticals?: VerticalConfigDto[]\n'[39m +
+    [32m'  heroImageLight?: string\n'[39m +
+    [32m'  heroImageDark?: string\n'[39m +
+    [32m'  partnersCount?: number\n'[39m +
+    [32m'  openDataMillions?: number\n'[39m +
+    [32m'  productsCount?: number\n'[39m +
+    [32m'  categoriesCount?: number\n'[39m +
+    [32m'  impactScoreProductsCount?: number\n'[39m +
+    [32m'  impactScoreCategoriesCount?: number\n'[39m +
+    [32m'  productsWithoutVerticalCount?: number\n'[39m +
+    [32m'  reviewedProductsCount?: number\n'[39m +
+    [32m'  aiSummaryRemainingCredits?: number\n'[39m +
+    [32m'  heroBackgroundI18nKey?: string\n'[39m +
+    [32m'  shouldReduceMotion?: boolean\n'[39m +
+    [32m'}>()\n'[39m +
+    [32m'\n'[39m +
+    [32m'const emit = defineEmits<{\n'[39m +
+    [32m"  'update:searchQuery': [value: string]\n"[39m +
+    [32m'  submit: []\n'[39m +
+    [32m"  'select-category': [payload: CategorySuggestionItem]\n"[39m +
+    [32m"  'select-product': [payload: ProductSuggestionItem]\n"[39m +
+    [32m'}>()\n'[39m +
+    [32m'\n'[39m +
+    [32m'const theme = useTheme()\n'[39m +
+    [32m'const heroBackgroundAsset = useHeroBackgroundAsset()\n'[39m +
+    [32m'const activeEventPack = useSeasonalEventPack()\n'[39m +
+    [32m'const packI18n = useEventPackI18n(activeEventPack)\n'[39m +
+    [32m'const themeName = computed(() =>\n'[39m +
+    [32m'  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)\n'[39m +
+    [32m')\n'[39m +
+    [32m'\n'[39m +
+    [32m'const searchQueryValue = computed(() => props.searchQuery)\n'[39m +
+    [32m'\n'[39m +
+    [32m'const { minSuggestionQueryLength } = toRefs(props)\n'[39m +
+    [32m'const shouldReduceMotion = computed(() => Boolean(props.shouldReduceMotion))\n'[39m +
+    [32m'const wizardVerticals = computed(() => props.verticals ?? [])\n'[39m +
+    [32m'const heroRevealReady = ref(false)\n'[39m +
+    [32m'const heroRevealVisible = ref(false)\n'[39m +
+    [32m'const heroRevealClasses = computed(() => ({\n'[39m +
+    [32m"  'is-ready': heroRevealReady.value,\n"[39m +
+    [32m"  'is-visible': heroRevealVisible.value,\n"[39m +
+    [32m'}))\n'[39m +
+    [32m'\n'[39m +
+    [32m'const updateSearchQuery = (value: string) => {\n'[39m +
+    [32m"  emit('update:searchQuery', value)\n"[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'const heroTitleSubtitle = computed(\n'[39m +
+    [32m'  () =>\n'[39m +
+    [32m"    packI18n.resolveStringVariant('hero.titleSubtitle', {\n"[39m +
+    [32m"      fallbackKeys: ['home.hero.titleSubtitle'],\n"[39m +
+    [32m"      stateKey: 'home-hero-title-subtitle',\n"[39m +
+    [32m"    }) ?? ''\n"[39m +
+    [32m')\n'[39m +
+    [32m'\n'[39m +
+    [32m'const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)\n'[39m +
+    [32m'const heroBackgroundI18nKey = computed(\n'[39m +
+    [32m"  () => props.heroBackgroundI18nKey?.trim() || 'hero.background'\n"[39m +
+    [32m')\n'[39m +
+    [32m'const heroBackgroundI18nValue = computed(\n'[39m +
+    [32m'  () =>\n'[39m +
+    [32m'    packI18n.resolveString(heroBackgroundI18nKey.value, {\n'[39m +
+    [32m"      fallbackKeys: ['home.hero.background'],\n"[39m +
+    [32m"    }) ?? ''\n"[39m +
+    [32m')\n'[39m +
+    [32m'\n'[39m +
+    [32m'const resolveHeroBackgroundSource = (value?: string): string | undefined => {\n'[39m +
+    [32m'  if (!value) {\n'[39m +
+    [32m'    return undefined\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  const trimmed = value.trim()\n'[39m +
+    [32m'  if (!trimmed) {\n'[39m +
+    [32m'    return undefined\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m"  if (trimmed.startsWith('/') || trimmed.startsWith('http')) {\n"[39m +
+    [32m'    return trimmed\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  return resolveThemedAssetUrl(trimmed, themeName.value, activeEventPack.value)\n'[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'const heroBackgroundOverride = computed(() =>\n'[39m +
+    [32m'  resolveHeroBackgroundSource(heroBackgroundI18nValue.value)\n'[39m +
+    [32m')\n'[39m +
+    [32m'const heroBackgroundSrc = computed(() => {\n'[39m +
+    [32m'  const themedAsset = heroBackgroundOverride.value?.trim()\n'[39m +
+    [32m'\n'[39m +
+    [32m'  if (themedAsset) {\n'[39m +
+    [32m'    return themedAsset\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  const fallbackAsset = heroBackgroundAsset.value?.trim()\n'[39m +
+    [32m'  if (fallbackAsset) {\n'[39m +
+    [32m'    return fallbackAsset\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  /* Hydration mismatch fix: Ensure server and client initial render match. */\n'[39m +
+    [32m'  /* We assume light theme as default for SSR unless reliable cookie sync is present. */\n'[39m +
+    [32m"  // If we can't guarantee theme sync, we should force a default, then switch on mount.\n"[39m +
+    [32m'  // Ideally, use a client-side only guard for the dynamic theme part or strictly match server.\n'[39m +
+    [32m'\n'[39m +
+    [32m'  const isDarkMode = Boolean(theme.global.current.value.dark)\n'[39m +
+    [32m'  const lightImage = props.heroImageLight?.trim()\n'[39m +
+    [32m'  const darkImage = props.heroImageDark?.trim()\n'[39m +
+    [32m'\n'[39m +
+    [32m"  return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')\n"[39m +
+    [32m'})\n'[39m +
+    [32m'\n'[39m +
+    [32m'const heroTitle = computed(\n'[39m +
+    [32m'  () =>\n'[39m +
+    [32m"    packI18n.resolveString('hero.title', {\n"[39m +
+    [32m"      fallbackKeys: ['home.hero.title'],\n"[39m +
+    [32m"    }) ?? ''\n"[39m +
+    [32m')\n'[39m +
+    [32m'\n'[39m +
+    [32m'const handleHeroImageLoad = () => {\n'[39m +
+    [32m'  isHeroImageLoaded.value = true\n'[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'onMounted(async () => {\n'[39m +
+    [32m'  // Ensure the DOM is fully mounted and initial state (opacity: 0) is rendered\n'[39m +
+    [32m'  await nextTick()\n'[39m +
+    [32m'\n'[39m +
+    [32m'  window.setTimeout(() => {\n'[39m +
+    [32m'    if (!isHeroImageLoaded.value) {\n'[39m +
+    [32m'      isHeroImageLoaded.value = true\n'[39m +
+    [32m'    }\n'[39m +
+    [32m'  }, heroReadyFallbackDelayMs)\n'[39m +
+    [32m'\n'[39m +
+    [32m'  if (shouldReduceMotion.value) {\n'[39m +
+    [32m'    heroRevealReady.value = true\n'[39m +
+    [32m'    heroRevealVisible.value = true\n'[39m +
+    [32m'    return\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'\n'[39m +
+    [32m'  // Set ready state (transition enabled, but still hidden)\n'[39m +
+    [32m'  heroRevealReady.value = true\n'[39m +
+    [32m'\n'[39m +
+    [32m"  // Wait for the next frame to ensure the browser registers the 'ready' state\n"[39m +
+    [32m'  window.requestAnimationFrame(() => {\n'[39m +
+    [32m'    // And another frame to trigger the transition\n'[39m +
+    [32m'    window.requestAnimationFrame(() => {\n'[39m +
+    [32m'      heroRevealVisible.value = true\n'[39m +
+    [32m'    })\n'[39m +
+    [32m'  })\n'[39m +
+    [32m'})\n'[39m +
+    [32m'\n'[39m +
+    [32m'watch(shouldReduceMotion, value => {\n'[39m +
+    [32m'  if (value) {\n'[39m +
+    [32m'    heroRevealReady.value = true\n'[39m +
+    [32m'    heroRevealVisible.value = true\n'[39m +
+    [32m'  }\n'[39m +
+    [32m'})\n'[39m +
+    [32m'\n'[39m +
+    [32m'const handleSubmit = () => {\n'[39m +
+    [32m"  emit('submit')\n"[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'const handleCategorySelect = (payload: CategorySuggestionItem) => {\n'[39m +
+    [32m"  emit('select-category', payload)\n"[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'const handleProductSelect = (payload: ProductSuggestionItem) => {\n'[39m +
+    [32m"  emit('select-product', payload)\n"[39m +
+    [32m'}\n'[39m +
+    [32m'\n'[39m +
+    [32m'useHead({\n'[39m +
+    [32m'  link: [\n'[39m +
+    [32m'    {\n'[39m +
+    [32m"      rel: 'preload',\n"[39m +
+    [32m"      as: 'image',\n"[39m +
+    [32m'      href: () => heroBackgroundSrc.value,\n'[39m +
+    [32m'    },\n'[39m +
+    [32m'  ],\n'[39m +
+    [32m'})\n'[39m +
+    [32m'</script>\n'[39m +
+    [32m'\n'[39m +
+    [32m'<template>\n'[39m +
+    [32m'  <HeroSurface\n'[39m +
+    [32m'    tag="section"\n'[39m +
+    [32m'    class="home-hero"\n'[39m +
+    [32m'    aria-labelledby="home-hero-title"\n'[39m +
+    [32m'    variant="none"\n'[39m +
+    [32m'    :bleed="true"\n'[39m +
+    [32m'  >\n'[39m +
+    [32m'    <div class="home-hero__background" aria-hidden="true">\n'[39m +
+    [32m'      <v-fade-transition>\n'[39m +
+    [32m'        <div v-if="showHeroSkeleton" class="home-hero__background-loader">\n'[39m +
+    [32m'          <v-skeleton-loader\n'[39m +
+    [32m'            type="image"\n'[39m +
+    [32m'            class="home-hero__background-skeleton"\n'[39m +
+    [32m'          />\n'[39m +
+    [32m'        </div>\n'[39m +
+    [32m'      </v-fade-transition>\n'[39m +
+    [32m'      <img\n'[39m +
+    [32m'        class="home-hero__background-media"\n'[39m +
+    [32m'        :src="heroBackgroundSrc"\n'[39m +
+    [32m'        alt=""\n'[39m +
+    [32m'        fetchpriority="high"\n'[39m +
+    [32m'        decoding="async"\n'[39m +
+    [32m'        @load="handleHeroImageLoad"\n'[39m +
+    [32m'      />\n'[39m +
+    [32m'      <div class="home-hero__background-overlay" />\n'[39m +
+    [32m'    </div>\n'[39m +
+    [32m'    <v-container fluid class="home-hero__container">\n'[39m +
+    [32m'      <div\n'[39m +
+    [32m'        class="home-hero__inner home-reveal-group"\n'[39m +
+    [32m'        :class="heroRevealClasses"\n'[39m +
+    [32m'      >\n'[39m +
+    [32m'        <v-row class="home-hero__layout" align="stretch" justify="center">\n'[39m +
+    [32m'          <v-col cols="12" class="home-hero__content">\n'[39m +
+    [32m'            <h1\n'[39m +
+    [32m'              id="home-hero-title"\n'[39m +
+    [32m'              class="mt-8 home-hero__title home-reveal-item"\n'[39m +
+    [32m`              :style="{ '--reveal-delay': '0ms' }"\n`[39m +
+    [32m'            >\n'[39m +
+    [32m'              {{ heroTitle }}\n'[39m +
+    [32m'            </h1>\n'[39m +
+    [32m'            <p\n'[39m +
+    [32m'              v-if="heroTitleSubtitle"\n'[39m +
+    [32m'              class="home-hero__title-subtitle home-reveal-item"\n'[39m +
+    [32m`              :style="{ '--reveal-delay': '90ms' }"\n`[39m +
+    [32m'            >\n'[39m +
+    [32m'              {{ heroTitleSubtitle }}\n'[39m +
+    [32m'            </p>\n'[39m +
+    [32m'          </v-col>\n'[39m +
+    [32m'        </v-row>\n'[39m +
+    [32m'        <v-row justify="center">\n'[39m +
+    [32m'          <v-col cols="12" lg="10" xl="8">\n'[39m +
+    [32m'            <v-sheet\n'[39m +
+    [32m'              class="home-hero__panel home-reveal-item home-reveal-item--scale"\n'[39m +
+    [32m'              color="transparent"\n'[39m +
+    [32m'              elevation="0"\n'[39m +
+    [32m`              :style="{ '--reveal-delay': '180ms' }"\n`[39m +
+    [32m'            >\n'[39m +
+    [32m'              <div class="home-hero__panel-grid">\n'[39m +
+    [32m'                <div class="home-hero__panel-block">\n'[39m +
+    [32m'                  <form\n'[39m +
+    [32m'                    class="home-hero__search"\n'[39m +
+    [32m'                    role="search"\n'[39m +
+    [32m'                    @submit.prevent="handleSubmit"\n'[39m +
+    [32m'                  >\n'[39m +
+    [32m'                    <SearchSuggestField\n'[39m +
+    [32m'                      :model-value="searchQueryValue"\n'[39m +
+    [32m'                      class="home-hero__search-input"\n'[39m +
+    [32m'                      :label="\n'[39m +
+    [32m"                        packI18n.resolveString('hero.search.label', {\n"[39m +
+    [32m"                          fallbackKeys: ['home.hero.search.label'],\n"[39m +
+    [32m'                        })\n'[39m +
+    [32m'                      "\n'[39m +
+    [32m'                      :placeholder="\n'[39m +
+    [32m'                      :placeholder="\n'[39m +
+    [32m"                        packI18n.resolveList<string>('hero.search.placeholders', {\n"[39m +
+    [32m"                          fallbackKeys: ['home.hero.search.placeholders'],\n"[39m +
+    [32m'                        })\n'[39m +
+    [32m'                      "\n'[39m +
+    [32m'                      "\n'[39m +
+    [32m'                      :aria-label="\n'[39m +
+    [32m"                        packI18n.resolveString('hero.search.ariaLabel', {\n"[39m +
+    [32m"                          fallbackKeys: ['home.hero.search.ariaLabel'],\n"[39m +
+    [32m'                        })\n'[39m +
+    [32m'                      "\n'[39m +
+    [32m'                      :min-chars="minSuggestionQueryLength"\n'[39m +
+    [32m'                      :enable-scan="true"\n'[39m +
+    [32m'                      :scan-mobile="true"\n'[39m +
+    [32m'                      :scan-desktop="false"\n'[39m +
+    [32m'                      :enable-voice="true"\n'[39m +
+    [32m'                      :voice-mobile="true"\n'[39m +
+    [32m'                      :voice-desktop="true"\n'[39m +
+    [32m'                      @update:model-value="updateSearchQuery"\n'[39m +
+    [32m'                      @submit="handleSubmit"\n'[39m +
+    [32m'                      @select-category="handleCategorySelect"\n'[39m +
+    [32m'                      @select-product="handleProductSelect"\n'[39m +
+    [32m'                    >\n'[39m +
+    [32m'                      <template #append-inner>\n'[39m +
+    [32m'                        <v-btn\n'[39m +
+    [32m'                          class="home-hero__search-submit"\n'[39m +
+    [32m'                          icon="mdi-arrow-right"\n'[39m +
+    [32m'                          variant="plain"\n'[39m +
+    [32m'                          rounded="0"\n'[39m +
+    [32m'                          size="small"\n'[39m +
+    [32m'                          type="submit"\n'[39m +
+    [32m'                          :aria-label="\n'[39m +
+    [32m"                            packI18n.resolveString('hero.search.cta', {\n"[39m +
+    [32m"                              fallbackKeys: ['home.hero.search.cta'],\n"[39m +
+    [32m'                            })\n'[39m +
+    [32m'                          "\n'[39m +
+    [32m'                   '[39m... 5490 more characters,
+  frame: [32m'278 |                        "\n'[39m +
+    [32m'279 |                        :placeholder="\n'[39m +
+    [32m'280 |                        :placeholder="\n'[39m +
+    [32m'    |  ^\n'[39m +
+    [32m"281 |                          packI18n.resolveList<string>('hero.search.placeholders', {\n"[39m +
+    [32m"282 |                            fallbackKeys: ['home.hero.search.placeholders'],"[39m
+}
+
+stderr | app/components/product/ProductPriceSection.spec.ts
+[nuxt] error caught during app initialization SyntaxError: Error parsing JavaScript expression: Unexpected token (2:22)
+    at createCompilerError [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:1378:17[90m)[39m
+    at emitError [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:3014:5[90m)[39m
+    at createExp [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:3007:7[90m)[39m
+    at Object.onattribend [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:2532:29[90m)[39m
+    at Tokenizer.handleInAttrValue [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:959:16[90m)[39m
+    at Tokenizer.stateInAttrValueDoubleQuotes [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:969:10[90m)[39m
+    at Tokenizer.parse [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:1113:16[90m)[39m
+    at Object.baseParse [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-core@3.5.27/node_modules/[4m@vue[24m/compiler-core/dist/compiler-core.cjs.js:3053:13[90m)[39m
+    at Object.parse [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-dom@3.5.27/node_modules/[4m@vue[24m/compiler-dom/dist/compiler-dom.cjs.js:910:23[90m)[39m
+    at Object.parse$1 [as parse] [90m(/home/goulven/git/open4goods/frontend/[39mnode_modules/[4m.pnpm[24m/@vue+compiler-sfc@3.5.27/node_modules/[4m@vue[24m/compiler-sfc/dist/compiler-sfc.cjs.js:1824:24[90m)[39m {
+  cause: {
+    id: [32m'/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeHeroSection.vue'[39m,
+    plugin: [32m'vite:vue'[39m,
+    message: [32m'Error parsing JavaScript expression: Unexpected token (2:22)'[39m,
+    name: [32m'SyntaxError'[39m,
+    stack: [32m'SyntaxError: Error parsing JavaScript expression: Unexpected token (2:22)\n'[39m +
+      [32m'    at createCompilerError (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)\n'[39m +
+      [32m'    at emitError (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3014:5)\n'[39m +
+      [32m'    at createExp (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3007:7)\n'[39m +
+      [32m'    at Object.onattribend (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2532:29)\n'[39m +
+      [32m'    at Tokenizer.handleInAttrValue (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:959:16)\n'[39m +
+      [32m'    at Tokenizer.stateInAttrValueDoubleQuotes (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:969:10)\n'[39m +
+      [32m'    at Tokenizer.parse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1113:16)\n'[39m +
+      [32m'    at Object.baseParse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-core@3.5.27/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3053:13)\n'[39m +
+      [32m'    at Object.parse (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-dom@3.5.27/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:910:23)\n'[39m +
+      [32m'    at Object.parse$1 [as parse] (/home/goulven/git/open4goods/frontend/node_modules/.pnpm/@vue+compiler-sfc@3.5.27/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1824:24)'[39m,
+    loc: {
+      file: [32m'/home/goulven/git/open4goods/frontend/app/components/home/sections/HomeHeroSection.vue'[39m,
+      line: [33m279[39m,
+      column: [33m37[39m
+    },
+    pluginCode: [32m'<script setup lang="ts">\n'[39m +
+      [32m"import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue'\n"[39m +
+      [32m"import { useTheme } from 'vuetify'\n"[39m +
+      [32m"import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'\n"[39m +
+      [32m'import SearchSuggestField, {\n'[39m +
+      [32m'  type CategorySuggestionItem,\n'[39m +
+      [32m'  type ProductSuggestionItem,\n'[39m +
+      [32m"} from '~/components/search/SearchSuggestField.vue'\n"[39m +
+      [32m"import type { VerticalConfigDto } from '~~/shared/api-client'\n"[39m +
+      [32m"import HomeHeroHighlights from '~/components/home/sections/HomeHeroHighlights.vue'\n"[39m +
+      [32m'\n'[39m +
+      [32m'import {\n'[39m +
+      [32m'  resolveThemedAssetUrl,\n'[39m +
+      [32m'  useHeroBackgroundAsset,\n'[39m +
+      [32m"} from '~~/app/composables/useThemedAsset'\n"[39m +
+      [32m"import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'\n"[39m +
+      [32m"import { useEventPackI18n } from '~/composables/useEventPackI18n'\n"[39m +
+      [32m"import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'\n"[39m +
+      [32m"import { resolveThemeName } from '~~/shared/constants/theme'\n"[39m +
+      [32m'\n'[39m +
+      [32m'const isHeroImageLoaded = ref(false)\n'[39m +
+      [32m'const heroReadyFallbackDelayMs = 900\n'[39m +
+      [32m'\n'[39m +
+      [32m'const props = defineProps<{\n'[39m +
+      [32m'  searchQuery: string\n'[39m +
+      [32m'  minSuggestionQueryLength: number\n'[39m +
+      [32m'  verticals?: VerticalConfigDto[]\n'[39m +
+      [32m'  heroImageLight?: string\n'[39m +
+      [32m'  heroImageDark?: string\n'[39m +
+      [32m'  partnersCount?: number\n'[39m +
+      [32m'  openDataMillions?: number\n'[39m +
+      [32m'  productsCount?: number\n'[39m +
+      [32m'  categoriesCount?: number\n'[39m +
+      [32m'  impactScoreProductsCount?: number\n'[39m +
+      [32m'  impactScoreCategoriesCount?: number\n'[39m +
+      [32m'  productsWithoutVerticalCount?: number\n'[39m +
+      [32m'  reviewedProductsCount?: number\n'[39m +
+      [32m'  aiSummaryRemainingCredits?: number\n'[39m +
+      [32m'  heroBackgroundI18nKey?: string\n'[39m +
+      [32m'  shouldReduceMotion?: boolean\n'[39m +
+      [32m'}>()\n'[39m +
+      [32m'\n'[39m +
+      [32m'const emit = defineEmits<{\n'[39m +
+      [32m"  'update:searchQuery': [value: string]\n"[39m +
+      [32m'  submit: []\n'[39m +
+      [32m"  'select-category': [payload: CategorySuggestionItem]\n"[39m +
+      [32m"  'select-product': [payload: ProductSuggestionItem]\n"[39m +
+      [32m'}>()\n'[39m +
+      [32m'\n'[39m +
+      [32m'const theme = useTheme()\n'[39m +
+      [32m'const heroBackgroundAsset = useHeroBackgroundAsset()\n'[39m +
+      [32m'const activeEventPack = useSeasonalEventPack()\n'[39m +
+      [32m'const packI18n = useEventPackI18n(activeEventPack)\n'[39m +
+      [32m'const themeName = computed(() =>\n'[39m +
+      [32m'  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)\n'[39m +
+      [32m')\n'[39m +
+      [32m'\n'[39m +
+      [32m'const searchQueryValue = computed(() => props.searchQuery)\n'[39m +
+      [32m'\n'[39m +
+      [32m'const { minSuggestionQueryLength } = toRefs(props)\n'[39m +
+      [32m'const shouldReduceMotion = computed(() => Boolean(props.shouldReduceMotion))\n'[39m +
+      [32m'const wizardVerticals = computed(() => props.verticals ?? [])\n'[39m +
+      [32m'const heroRevealReady = ref(false)\n'[39m +
+      [32m'const heroRevealVisible = ref(false)\n'[39m +
+      [32m'const heroRevealClasses = computed(() => ({\n'[39m +
+      [32m"  'is-ready': heroRevealReady.value,\n"[39m +
+      [32m"  'is-visible': heroRevealVisible.value,\n"[39m +
+      [32m'}))\n'[39m +
+      [32m'\n'[39m +
+      [32m'const updateSearchQuery = (value: string) => {\n'[39m +
+      [32m"  emit('update:searchQuery', value)\n"[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'const heroTitleSubtitle = computed(\n'[39m +
+      [32m'  () =>\n'[39m +
+      [32m"    packI18n.resolveStringVariant('hero.titleSubtitle', {\n"[39m +
+      [32m"      fallbackKeys: ['home.hero.titleSubtitle'],\n"[39m +
+      [32m"      stateKey: 'home-hero-title-subtitle',\n"[39m +
+      [32m"    }) ?? ''\n"[39m +
+      [32m')\n'[39m +
+      [32m'\n'[39m +
+      [32m'const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)\n'[39m +
+      [32m'const heroBackgroundI18nKey = computed(\n'[39m +
+      [32m"  () => props.heroBackgroundI18nKey?.trim() || 'hero.background'\n"[39m +
+      [32m')\n'[39m +
+      [32m'const heroBackgroundI18nValue = computed(\n'[39m +
+      [32m'  () =>\n'[39m +
+      [32m'    packI18n.resolveString(heroBackgroundI18nKey.value, {\n'[39m +
+      [32m"      fallbackKeys: ['home.hero.background'],\n"[39m +
+      [32m"    }) ?? ''\n"[39m +
+      [32m')\n'[39m +
+      [32m'\n'[39m +
+      [32m'const resolveHeroBackgroundSource = (value?: string): string | undefined => {\n'[39m +
+      [32m'  if (!value) {\n'[39m +
+      [32m'    return undefined\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  const trimmed = value.trim()\n'[39m +
+      [32m'  if (!trimmed) {\n'[39m +
+      [32m'    return undefined\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m"  if (trimmed.startsWith('/') || trimmed.startsWith('http')) {\n"[39m +
+      [32m'    return trimmed\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  return resolveThemedAssetUrl(trimmed, themeName.value, activeEventPack.value)\n'[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'const heroBackgroundOverride = computed(() =>\n'[39m +
+      [32m'  resolveHeroBackgroundSource(heroBackgroundI18nValue.value)\n'[39m +
+      [32m')\n'[39m +
+      [32m'const heroBackgroundSrc = computed(() => {\n'[39m +
+      [32m'  const themedAsset = heroBackgroundOverride.value?.trim()\n'[39m +
+      [32m'\n'[39m +
+      [32m'  if (themedAsset) {\n'[39m +
+      [32m'    return themedAsset\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  const fallbackAsset = heroBackgroundAsset.value?.trim()\n'[39m +
+      [32m'  if (fallbackAsset) {\n'[39m +
+      [32m'    return fallbackAsset\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  /* Hydration mismatch fix: Ensure server and client initial render match. */\n'[39m +
+      [32m'  /* We assume light theme as default for SSR unless reliable cookie sync is present. */\n'[39m +
+      [32m"  // If we can't guarantee theme sync, we should force a default, then switch on mount.\n"[39m +
+      [32m'  // Ideally, use a client-side only guard for the dynamic theme part or strictly match server.\n'[39m +
+      [32m'\n'[39m +
+      [32m'  const isDarkMode = Boolean(theme.global.current.value.dark)\n'[39m +
+      [32m'  const lightImage = props.heroImageLight?.trim()\n'[39m +
+      [32m'  const darkImage = props.heroImageDark?.trim()\n'[39m +
+      [32m'\n'[39m +
+      [32m"  return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')\n"[39m +
+      [32m'})\n'[39m +
+      [32m'\n'[39m +
+      [32m'const heroTitle = computed(\n'[39m +
+      [32m'  () =>\n'[39m +
+      [32m"    packI18n.resolveString('hero.title', {\n"[39m +
+      [32m"      fallbackKeys: ['home.hero.title'],\n"[39m +
+      [32m"    }) ?? ''\n"[39m +
+      [32m')\n'[39m +
+      [32m'\n'[39m +
+      [32m'const handleHeroImageLoad = () => {\n'[39m +
+      [32m'  isHeroImageLoaded.value = true\n'[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'onMounted(async () => {\n'[39m +
+      [32m'  // Ensure the DOM is fully mounted and initial state (opacity: 0) is rendered\n'[39m +
+      [32m'  await nextTick()\n'[39m +
+      [32m'\n'[39m +
+      [32m'  window.setTimeout(() => {\n'[39m +
+      [32m'    if (!isHeroImageLoaded.value) {\n'[39m +
+      [32m'      isHeroImageLoaded.value = true\n'[39m +
+      [32m'    }\n'[39m +
+      [32m'  }, heroReadyFallbackDelayMs)\n'[39m +
+      [32m'\n'[39m +
+      [32m'  if (shouldReduceMotion.value) {\n'[39m +
+      [32m'    heroRevealReady.value = true\n'[39m +
+      [32m'    heroRevealVisible.value = true\n'[39m +
+      [32m'    return\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'\n'[39m +
+      [32m'  // Set ready state (transition enabled, but still hidden)\n'[39m +
+      [32m'  heroRevealReady.value = true\n'[39m +
+      [32m'\n'[39m +
+      [32m"  // Wait for the next frame to ensure the browser registers the 'ready' state\n"[39m +
+      [32m'  window.requestAnimationFrame(() => {\n'[39m +
+      [32m'    // And another frame to trigger the transition\n'[39m +
+      [32m'    window.requestAnimationFrame(() => {\n'[39m +
+      [32m'      heroRevealVisible.value = true\n'[39m +
+      [32m'    })\n'[39m +
+      [32m'  })\n'[39m +
+      [32m'})\n'[39m +
+      [32m'\n'[39m +
+      [32m'watch(shouldReduceMotion, value => {\n'[39m +
+      [32m'  if (value) {\n'[39m +
+      [32m'    heroRevealReady.value = true\n'[39m +
+      [32m'    heroRevealVisible.value = true\n'[39m +
+      [32m'  }\n'[39m +
+      [32m'})\n'[39m +
+      [32m'\n'[39m +
+      [32m'const handleSubmit = () => {\n'[39m +
+      [32m"  emit('submit')\n"[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'const handleCategorySelect = (payload: CategorySuggestionItem) => {\n'[39m +
+      [32m"  emit('select-category', payload)\n"[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'const handleProductSelect = (payload: ProductSuggestionItem) => {\n'[39m +
+      [32m"  emit('select-product', payload)\n"[39m +
+      [32m'}\n'[39m +
+      [32m'\n'[39m +
+      [32m'useHead({\n'[39m +
+      [32m'  link: [\n'[39m +
+      [32m'    {\n'[39m +
+      [32m"      rel: 'preload',\n"[39m +
+      [32m"      as: 'image',\n"[39m +
+      [32m'      href: () => heroBackgroundSrc.value,\n'[39m +
+      [32m'    },\n'[39m +
+      [32m'  ],\n'[39m +
+      [32m'})\n'[39m +
+      [32m'</script>\n'[39m +
+      [32m'\n'[39m +
+      [32m'<template>\n'[39m +
+      [32m'  <HeroSurface\n'[39m +
+      [32m'    tag="section"\n'[39m +
+      [32m'    class="home-hero"\n'[39m +
+      [32m'    aria-labelledby="home-hero-title"\n'[39m +
+      [32m'    variant="none"\n'[39m +
+      [32m'    :bleed="true"\n'[39m +
+      [32m'  >\n'[39m +
+      [32m'    <div class="home-hero__background" aria-hidden="true">\n'[39m +
+      [32m'      <v-fade-transition>\n'[39m +
+      [32m'        <div v-if="showHeroSkeleton" class="home-hero__background-loader">\n'[39m +
+      [32m'          <v-skeleton-loader\n'[39m +
+      [32m'            type="image"\n'[39m +
+      [32m'            class="home-hero__background-skeleton"\n'[39m +
+      [32m'          />\n'[39m +
+      [32m'        </div>\n'[39m +
+      [32m'      </v-fade-transition>\n'[39m +
+      [32m'      <img\n'[39m +
+      [32m'        class="home-hero__background-media"\n'[39m +
+      [32m'        :src="heroBackgroundSrc"\n'[39m +
+      [32m'        alt=""\n'[39m +
+      [32m'        fetchpriority="high"\n'[39m +
+      [32m'        decoding="async"\n'[39m +
+      [32m'        @load="handleHeroImageLoad"\n'[39m +
+      [32m'      />\n'[39m +
+      [32m'      <div class="home-hero__background-overlay" />\n'[39m +
+      [32m'    </div>\n'[39m +
+      [32m'    <v-container fluid class="home-hero__container">\n'[39m +
+      [32m'      <div\n'[39m +
+      [32m'        class="home-hero__inner home-reveal-group"\n'[39m +
+      [32m'        :class="heroRevealClasses"\n'[39m +
+      [32m'      >\n'[39m +
+      [32m'        <v-row class="home-hero__layout" align="stretch" justify="center">\n'[39m +
+      [32m'          <v-col cols="12" class="home-hero__content">\n'[39m +
+      [32m'            <h1\n'[39m +
+      [32m'              id="home-hero-title"\n'[39m +
+      [32m'              class="mt-8 home-hero__title home-reveal-item"\n'[39m +
+      [32m`              :style="{ '--reveal-delay': '0ms' }"\n`[39m +
+      [32m'            >\n'[39m +
+      [32m'              {{ heroTitle }}\n'[39m +
+      [32m'            </h1>\n'[39m +
+      [32m'            <p\n'[39m +
+      [32m'              v-if="heroTitleSubtitle"\n'[39m +
+      [32m'              class="home-hero__title-subtitle home-reveal-item"\n'[39m +
+      [32m`              :style="{ '--reveal-delay': '90ms' }"\n`[39m +
+      [32m'            >\n'[39m +
+      [32m'              {{ heroTitleSubtitle }}\n'[39m +
+      [32m'            </p>\n'[39m +
+      [32m'          </v-col>\n'[39m +
+      [32m'        </v-row>\n'[39m +
+      [32m'        <v-row justify="center">\n'[39m +
+      [32m'          <v-col cols="12" lg="10" xl="8">\n'[39m +
+      [32m'            <v-sheet\n'[39m +
+      [32m'              class="home-hero__panel home-reveal-item home-reveal-item--scale"\n'[39m +
+      [32m'              color="transparent"\n'[39m +
+      [32m'              elevation="0"\n'[39m +
+      [32m`              :style="{ '--reveal-delay': '180ms' }"\n`[39m +
+      [32m'            >\n'[39m +
+      [32m'              <div class="home-hero__panel-grid">\n'[39m +
+      [32m'                <div class="home-hero__panel-block">\n'[39m +
+      [32m'                  <form\n'[39m +
+      [32m'                    class="home-hero__search"\n'[39m +
+      [32m'                    role="search"\n'[39m +
+      [32m'                    @submit.prevent="handleSubmit"\n'[39m +
+      [32m'                  >\n'[39m +
+      [32m'                    <SearchSuggestField\n'[39m +
+      [32m'                      :model-value="searchQueryValue"\n'[39m +
+      [32m'                      class="home-hero__search-input"\n'[39m +
+      [32m'                      :label="\n'[39m +
+      [32m"                        packI18n.resolveString('hero.search.label', {\n"[39m +
+      [32m"                          fallbackKeys: ['home.hero.search.label'],\n"[39m +
+      [32m'                        })\n'[39m +
+      [32m'                      "\n'[39m +
+      [32m'                      :placeholder="\n'[39m +
+      [32m'                      :placeholder="\n'[39m +
+      [32m"                        packI18n.resolveList<string>('hero.search.placeholders', {\n"[39m +
+      [32m"                          fallbackKeys: ['home.hero.search.placeholders'],\n"[39m +
+      [32m'                        })\n'[39m +
+      [32m'                      "\n'[39m +
+      [32m'                      "\n'[39m +
+      [32m'                      :aria-label="\n'[39m +
+      [32m"                        packI18n.resolveString('hero.search.ariaLabel', {\n"[39m +
+      [32m"                          fallbackKeys: ['home.hero.search.ariaLabel'],\n"[39m +
+      [32m'                        })\n'[39m +
+      [32m'                      "\n'[39m +
+      [32m'                      :min-chars="minSuggestionQueryLength"\n'[39m +
+      [32m'                      :enable-scan="true"\n'[39m +
+      [32m'                      :scan-mobile="true"\n'[39m +
+      [32m'                      :scan-desktop="false"\n'[39m +
+      [32m'                      :enable-voice="true"\n'[39m +
+      [32m'                      :voice-mobile="true"\n'[39m +
+      [32m'                      :voice-desktop="true"\n'[39m +
+      [32m'                      @update:model-value="updateSearchQuery"\n'[39m +
+      [32m'                      @submit="handleSubmit"\n'[39m +
+      [32m'                      @select-category="handleCategorySelect"\n'[39m +
+      [32m'                      @select-product="handleProductSelect"\n'[39m +
+      [32m'                    >\n'[39m +
+      [32m'                      <template #append-inner>\n'[39m +
+      [32m'                        <v-btn\n'[39m +
+      [32m'                          class="home-hero__search-submit"\n'[39m +
+      [32m'                          icon="mdi-arrow-right"\n'[39m +
+      [32m'                          variant="plain"\n'[39m +
+      [32m'                          rounded="0"\n'[39m +
+      [32m'                          size="small"\n'[39m +
+      [32m'                          type="submit"\n'[39m +
+      [32m'                          :aria-label="\n'[39m +
+      [32m"                            packI18n.resolveString('hero.search.cta', {\n"[39m +
+      [32m"                              fallbackKeys: ['home.hero.search.cta'],\n"[39m +
+      [32m'                            })\n'[39m +
+      [32m'                          "\n'[39m +
+      [32m'                   '[39m... 5490 more characters,
+    frame: [32m'278 |                        "\n'[39m +
+      [32m'279 |                        :placeholder="\n'[39m +
+      [32m'280 |                        :placeholder="\n'[39m +
+      [32m'    |  ^\n'[39m +
+      [32m"281 |                          packI18n.resolveList<string>('hero.search.placeholders', {\n"[39m +
+      [32m"282 |                            fallbackKeys: ['home.hero.search.placeholders'],"[39m
+  },
+  statusCode: [33m500[39m,
+  fatal: [33mfalse[39m,
+  unhandled: [33mfalse[39m,
+  statusMessage: [90mundefined[39m,
+  data: [90mundefined[39m
+}
+
+stdout | app/components/product/ProductPriceSection.spec.ts
+DEBUG: Validating themedAssetIndex keys...
+DEBUG: Total keys: [33m108[39m
+DEBUG: Sample keys: [
+  [32m'common/christmas/blog-background.svg'[39m,
+  [32m'common/christmas/categories-background.svg'[39m,
+  [32m'common/christmas/contact-background.svg'[39m,
+  [32m'common/christmas/hero-background.svg'[39m,
+  [32m'common/christmas/open-data-background.svg'[39m
+]
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders a trend label when prices decrease
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > annotates charts with commercial events
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders metrics beneath each chart
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > links to the affiliation redirect when best offers have a token
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > displays compact favicon sizes for best offer highlights
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > omits best offer highlight when no best new offer is available
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > hides charts when history has fewer than three points
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders a low competition card for < 2 offers
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders a correct competition card for 2-4 offers
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+stderr | app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders a good competition card for > 4 offers
+[Vue warn]: Component "i18n-t" has already been registered in target app.
+[Vue warn]: Component "I18nT" has already been registered in target app.
+[Vue warn]: Component "i18n-n" has already been registered in target app.
+[Vue warn]: Component "I18nN" has already been registered in target app.
+[Vue warn]: Component "i18n-d" has already been registered in target app.
+[Vue warn]: Component "I18nD" has already been registered in target app.
+[Vue warn]: Directive "t" has already been registered in target app.
+
+ ❯ app/components/product/ProductPriceSection.spec.ts (10 tests | 10 failed) 40ms
+   × ProductPriceSection > renders a trend label when prices decrease 15ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > annotates charts with commercial events 4ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > renders metrics beneath each chart 3ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > links to the affiliation redirect when best offers have a token 2ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > displays compact favicon sizes for best offer highlights 2ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > omits best offer highlight when no best new offer is available 2ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > hides charts when history has fewer than three points 2ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > renders a low competition card for < 2 offers 2ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > renders a correct competition card for 2-4 offers 3ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+   × ProductPriceSection > renders a good competition card for > 4 offers 2ms
+     → Error parsing JavaScript expression: Unexpected token (2:22)
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders a trend label when prices decrease
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > annotates charts with commercial events
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders metrics beneath each chart
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > links to the affiliation redirect when best offers have a token
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > displays compact favicon sizes for best offer highlights
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > omits best offer highlight when no best new offer is available
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > hides charts when history has fewer than three points
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders a low competition card for < 2 offers
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders a correct competition card for 2-4 offers
+ FAIL  app/components/product/ProductPriceSection.spec.ts > ProductPriceSection > renders a good competition card for > 4 offers
+SyntaxError: Error parsing JavaScript expression: Unexpected token (2:22)
+278 |                        "
+279 |                        :placeholder="
+280 |                        :placeholder="
+    |  ^
+281 |                          packI18n.resolveList<string>('hero.search.placeholders', {
+282 |                            fallbackKeys: ['home.hero.search.placeholders'],
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed (10)
+   Start at  09:35:59
+   Duration  8.11s (transform 4.59s, setup 3.18s, collect 4.22s, tests 40ms, environment 211ms, prepare 161ms)
+
