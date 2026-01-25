@@ -169,7 +169,7 @@ const productsWithoutVerticalCount = computed(() => {
 const reviewedProductsCount = computed(() => {
   const count = categoriesStats.value?.reviewedProductsCount
 
-  if (typeof count !== 'number' || !Number.isFinite(count) || count <= 0) {
+  if (typeof count !== 'number' || !Number.isFinite(count) || count < 0) {
     return null
   }
 

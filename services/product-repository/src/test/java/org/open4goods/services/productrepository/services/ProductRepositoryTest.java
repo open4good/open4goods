@@ -11,6 +11,7 @@ import co.elastic.clients.elasticsearch._types.KnnSearch;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -121,13 +122,13 @@ class ProductRepositoryTest
         verify(elasticsearchOperations).count(queryCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));
 
         CriteriaQuery submittedQuery = queryCaptor.getValue();
-        // Just verify that we are indeed checking for reviews existence
-        // In the legacy code it was "reviews" (which is the object). 
-        // We want to verify usage of "reviews" or something more specific if we change it.
-        // For reproduction, checking it contains "reviews" logic.
-        
-        // Note: The criteria chain is complex to inspect deeply with simple asserts on the object graph without helpers,
-        // but we can at least capture it to debug or assert basics.
         assertThat(submittedQuery).isNotNull();
+
+        boolean hasReviewCriteria = submittedQuery.getCriteria().getCriteriaChain().stream()
+                .map(Criteria::getField)
+                .filter(Objects::nonNull)
+                .anyMatch(field -> "reviews.fr.review".equals(field.getName()));
+
+        assertThat(hasReviewCriteria).isTrue();
     }
 }
