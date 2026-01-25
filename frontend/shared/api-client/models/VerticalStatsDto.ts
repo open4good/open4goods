@@ -38,13 +38,13 @@ export interface VerticalStatsDto {
      */
     validProducts?: number;
     /**
-     * Number of rated products (having an impact score) in this vertical.
+     * Number of rated products (having an ECOSCORE) in this vertical.
      * @type {number}
      * @memberof VerticalStatsDto
      */
     ratedProducts?: number;
     /**
-     * Number of reviewed products (having an AI description) in this vertical.
+     * Number of reviewed products (having AI reviews) in this vertical.
      * @type {number}
      * @memberof VerticalStatsDto
      */

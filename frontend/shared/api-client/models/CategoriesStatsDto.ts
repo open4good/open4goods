@@ -88,6 +88,12 @@ export interface CategoriesStatsDto {
      */
     excludedProductsCount?: number;
     /**
+     * Total products with a valid ECOSCORE and offers.
+     * @type {number}
+     * @memberof CategoriesStatsDto
+     */
+    ratedProductsCount?: number;
+    /**
      * Total products with AI reviews.
      * @type {number}
      * @memberof CategoriesStatsDto
@@ -128,6 +134,7 @@ export function CategoriesStatsDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'productsCountSum': json['productsCountSum'] == null ? undefined : json['productsCountSum'],
         'totalProductsCount': json['totalProductsCount'] == null ? undefined : json['totalProductsCount'],
         'excludedProductsCount': json['excludedProductsCount'] == null ? undefined : json['excludedProductsCount'],
+        'ratedProductsCount': json['ratedProductsCount'] == null ? undefined : json['ratedProductsCount'],
         'reviewedProductsCount': json['reviewedProductsCount'] == null ? undefined : json['reviewedProductsCount'],
         'detailedStats': json['detailedStats'] == null ? undefined : (mapValues(json['detailedStats'], VerticalStatsDtoFromJSON)),
     };
@@ -154,6 +161,7 @@ export function CategoriesStatsDtoToJSONTyped(value?: CategoriesStatsDto | null,
         'productsCountSum': value['productsCountSum'],
         'totalProductsCount': value['totalProductsCount'],
         'excludedProductsCount': value['excludedProductsCount'],
+        'ratedProductsCount': value['ratedProductsCount'],
         'reviewedProductsCount': value['reviewedProductsCount'],
         'detailedStats': value['detailedStats'] == null ? undefined : (mapValues(value['detailedStats'], VerticalStatsDtoToJSON)),
     };

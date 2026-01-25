@@ -52,6 +52,12 @@ export interface GlobalSearchRequestDto {
      * @memberof GlobalSearchRequestDto
      */
     sort?: SortRequestDto;
+    /**
+     * Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').
+     * @type {string}
+     * @memberof GlobalSearchRequestDto
+     */
+    searchType?: string;
 }
 
 /**
@@ -74,6 +80,7 @@ export function GlobalSearchRequestDtoFromJSONTyped(json: any, ignoreDiscriminat
         'query': json['query'] == null ? undefined : json['query'],
         'filters': json['filters'] == null ? undefined : FilterRequestDtoFromJSON(json['filters']),
         'sort': json['sort'] == null ? undefined : SortRequestDtoFromJSON(json['sort']),
+        'searchType': json['searchType'] == null ? undefined : json['searchType'],
     };
 }
 
@@ -91,6 +98,7 @@ export function GlobalSearchRequestDtoToJSONTyped(value?: GlobalSearchRequestDto
         'query': value['query'],
         'filters': FilterRequestDtoToJSON(value['filters']),
         'sort': SortRequestDtoToJSON(value['sort']),
+        'searchType': value['searchType'],
     };
 }
 
