@@ -392,9 +392,10 @@ public class ProductController {
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
         boolean semanticSearch = StringUtils.hasText(normalizedQuery);
         Set<String> requestedComponents = include == null ? Set.of() : include;
+        String searchType = searchPayload == null ? null : searchPayload.searchType();
 
         ProductSearchResponseDto body = service.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
-                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto, semanticSearch);
+                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto, semanticSearch, searchType);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
     }
@@ -448,6 +449,7 @@ public class ProductController {
         String query = request != null ? request.query() : null;
         FilterRequestDto filterDto = request != null ? request.filters() : null;
         SortRequestDto sortDto = request != null ? request.sort() : null;
+        String searchType = request != null ? request.searchType() : null;
 
         Set<String> allowedFilterMappings = Arrays.stream(AllowedGlobalFilters.values())
                 .map(AllowedGlobalFilters::fieldPath)
@@ -468,7 +470,7 @@ public class ProductController {
         }
 
         SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, filterDto,
-                sortValidation.value().getSort());
+                sortValidation.value().getSort(), searchType);
 
         List<GlobalSearchVerticalGroupDto> groups = result.verticalGroups().stream()
                 .map(group -> new GlobalSearchVerticalGroupDto(

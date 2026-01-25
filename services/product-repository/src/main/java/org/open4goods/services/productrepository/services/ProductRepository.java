@@ -639,15 +639,20 @@ public class ProductRepository {
     }
 
     /**
-     * Get random products globally with minimum offers count
+     * Get random products globally with minimum offers count and optional vertical filter
      * @param limit max number of products
      * @param minOffersCount minimum number of offers
+     * @param verticalId optional vertical filter
      * @return list of random products
      */
-    public List<Product> getRandomProducts(int limit, int minOffersCount) {
+    public List<Product> getRandomProducts(int limit, int minOffersCount, String verticalId) {
         Criteria c = new Criteria("offersCount").greaterThanEqual(minOffersCount)
                 .and(new Criteria("excluded").is(false))
                 .and(getRecentPriceQuery());
+
+        if (verticalId != null && !verticalId.isBlank()) {
+            c = c.and(new Criteria("vertical").is(verticalId));
+        }
 
         // Script sort for random
         SortOptions sortOptions = new SortOptions.Builder()
@@ -670,6 +675,16 @@ public class ProductRepository {
                 .stream()
                 .map(SearchHit::getContent)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Get random products globally with minimum offers count
+     * @param limit max number of products
+     * @param minOffersCount minimum number of offers
+     * @return list of random products
+     */
+    public List<Product> getRandomProducts(int limit, int minOffersCount) {
+        return getRandomProducts(limit, minOffersCount, null);
     }
 
 
@@ -956,7 +971,7 @@ public class ProductRepository {
         public Long countMainIndexHavingImpactScore() {
                 Criteria criteria = getRecentPriceQuery()
                         .and(new Criteria("excluded").is(false))
-                        .and(new Criteria("scores.IMPACTSCORE.value").exists());
+                        .and(new Criteria("scores.ECOSCORE.value").exists());
                 CriteriaQuery query = new CriteriaQuery(criteria);
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
         }

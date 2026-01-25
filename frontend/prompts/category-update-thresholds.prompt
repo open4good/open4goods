@@ -1,0 +1,130 @@
+MISSION (CATEGORY / vertical) : tv
+FICHIER A MODIFIER : /home/goulven/git/open4goods/verticals/src/main/resources/verticals/tv.yml
+------------------------------------------------------------
+
+On veut simplifier le grouping des produits en 3 tiers basés sur les scores :
+
+- mauvais
+- moyens
+- bons
+
+Les seuils doivent être déduits des cardinalités (min / max / etc.) renvoyées par l’API de scoring.
+
+------------------------------------------------------------
+SOURCE DE VERITE : API DE SCORING (local)
+
+Utilise cet appel (token partagé) :
+
+curl -vik -s -X GET \
+  'http://localhost:8086/stats/random?num=3&minOffersCount=3&verticalId={vertical}&domainLanguage=fr' \
+  -H 'accept: application/json' \
+  -H 'X-Shared-Token: CHANGE_ME_SHARED_TOKEN'
+
+
+Le payload est volumineux : on ne veut extraire que les stats de distribution (min/max/avg/stdDev/count…) et pas tout le produit.
+
+------------------------------------------------------------
+OU TROUVER LES CARDINALITES DANS LE JSON
+
+Dans la réponse (liste de produits), chaque produit contient :
+
+- scores.ecoscore.relativ.{min,max,avg,stdDev,count,…}
+  → stats du score global (ImpactScore / Ecoscore)
+
+- scores.<SCORE_NAME>.relativ.{min,max,avg,stdDev,count,…}
+  → stats par score (ENERGY_CONSUMPTION, DURABILITY, …)
+
+Ces stats sont globales à la verticale.
+On peut lire celles du premier item : .[0]
+
+Exemples de chemins :
+.[0].scores.ecoscore.relativ.min
+.[0].scores.scores.DURABILITY.relativ.max
+
+------------------------------------------------------------
+REGLE DE CONSTRUCTION DES 3 TIERS
+
+A partir des cardinalités :
+
+min = stats.min
+max = stats.max
+
+t1 = min + (max - min) / 3
+t2 = min + 2 * (max - min) / 3
+
+Définition des groupes :
+
+- mauvais : score < t1
+- moyens : score >= t1 et < t2
+- bons : score >= t2
+
+Arrondir t1 et t2 à 2 décimales.
+Si max == min, ne pas modifier les seuils et signaler le cas.
+
+
+------------------------------------------------------------
+MODIFICATIONS ATTENDUES
+
+1) Seuils de sélection du nudge (ne garder que les bons)
+
+Dans :
+
+nudgeToolConfig:
+  scores:
+    - scoreName: ENERGY_CONSUMPTION
+      scoreMinValue: ...
+    - scoreName: DURABILITY
+      scoreMinValue: ...
+    - scoreName: REPARABILITY
+      scoreMinValue: ...
+    - scoreName: ESG
+      scoreMinValue: ...
+
+Remplacer chaque scoreMinValue par t2 calculé depuis :
+
+.[0].scores.scores.<scoreName>.relativ.min / max
+
+Objectif : le nudge ne sélectionne que le top tier (bons).
+
+------------------------------------------------------------
+2) Subsets ImpactScore en 3 tiers
+
+Remplacer les seuils fixes existants par les seuils calculés depuis :
+
+.[0].scores.ecoscore.relativ.min / max
+
+Utiliser :
+
+impact_bad :
+  scores.ECOSCORE.value LOWER_THAN t1
+
+impact_medium :
+  scores.ECOSCORE.value GREATER_THAN t1
+  ET
+  scores.ECOSCORE.value LOWER_THAN t2
+
+impact_good :
+  scores.ECOSCORE.value GREATER_THAN t2
+
+Mettre à jour aussi :
+title, caption, description, url.fr/en
+pour refléter mauvais / moyen / bon.
+
+------------------------------------------------------------
+EXTRACTION RAPIDE AVEC jq
+
+Ecoscore global :
+
+curl -s ... | jq '.[0].scores.ecoscore.relativ | {min,max,avg,stdDev,count}'
+
+Exemple score DURABILITY :
+
+curl -s ... | jq '.[0].scores.scores.DURABILITY.relativ | {min,max,avg,stdDev,count}'
+
+------------------------------------------------------------
+CRITERES D’ACCEPTATION
+
+- Seuils calculés depuis les cardinalités API (min/max)
+- scoreMinValue = t2 pour chaque score du nudge
+- Subsets ImpactScore basés sur t1 / t2 (plus de seuils fixes)
+- YAML valide et cohérent FR / EN

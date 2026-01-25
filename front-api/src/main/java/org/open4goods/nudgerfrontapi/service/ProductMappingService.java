@@ -1010,10 +1010,10 @@ public class ProductMappingService {
      */
     public ProductSearchResponseDto searchProducts(Pageable pageable, Locale locale, Set<String> includes,
             AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query,
-            FilterRequestDto filters, boolean semanticSearch) {
+            FilterRequestDto filters, boolean semanticSearch, String searchType) {
 
         SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation, filters,
-                semanticSearch);
+                 semanticSearch, searchType);
         SearchHits<Product> hits = result.hits();
 
         List<ProductDto> items = hits.getSearchHits().stream()

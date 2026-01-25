@@ -74,12 +74,12 @@ class ProductControllerTest {
 
         Filter filter = new Filter("scores.ENERGY_CONSUMPTION.value", FilterOperator.range, null, 0.0, 100.0);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
-                new FilterRequestDto(List.of(filter), List.of()), null);
+                new FilterRequestDto(List.of(filter), List.of()), null, null);
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
-                anyBoolean()))
+                anyBoolean(), any()))
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
@@ -89,7 +89,7 @@ class ProductControllerTest {
 
         ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
         verify(productMappingService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                filterCaptor.capture(), anyBoolean());
+                filterCaptor.capture(), anyBoolean(), any());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("scores.ENERGY_CONSUMPTION.value");
@@ -109,12 +109,12 @@ class ProductControllerTest {
         Filter filter = new Filter("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value", FilterOperator.term,
                 List.of("AA"), null, null);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
-                new FilterRequestDto(List.of(filter), List.of()), null);
+                new FilterRequestDto(List.of(filter), List.of()), null, null);
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                any(), anyBoolean()))
+                any(), anyBoolean(), any()))
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
@@ -124,7 +124,7 @@ class ProductControllerTest {
 
         ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
         verify(productMappingService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                filterCaptor.capture(), anyBoolean());
+                filterCaptor.capture(), anyBoolean(), any());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value");
@@ -141,12 +141,12 @@ class ProductControllerTest {
 
         Filter filter = new Filter("scores.ECOSCORE.value", FilterOperator.range, null, 0.0, 100.0);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
-                new FilterRequestDto(List.of(filter), List.of()), null);
+                new FilterRequestDto(List.of(filter), List.of()), null, null);
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
-                anyBoolean()))
+                anyBoolean(), any()))
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),

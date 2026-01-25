@@ -16,5 +16,7 @@ public record GlobalSearchRequestDto(
         @Schema(description = "Optional filters applied to global search results.")
         FilterRequestDto filters,
         @Schema(description = "Optional sort definition applied to global search results.")
-        SortRequestDto sort) {
+        SortRequestDto sort,
+        @Schema(description = "Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').", example = "TEXT")
+        String searchType) {
 }

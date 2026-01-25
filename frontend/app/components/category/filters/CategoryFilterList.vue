@@ -1,5 +1,17 @@
 <template>
   <div :class="['category-filter-list', `category-filter-list--${mode}`]">
+    <div
+      class="category-filter-list__header d-flex align-center justify-end mb-2"
+    >
+      <v-switch
+        :model-value="searchType === 'TEXT'"
+        color="primary"
+        label="Recherche textuelle"
+        hide-details
+        density="compact"
+        @update:model-value="$emit('update:searchType', $event ? 'TEXT' : null)"
+      />
+    </div>
     <template v-if="mode === 'grid'">
       <component
         :is="resolveComponent(field)"
@@ -48,17 +60,20 @@ const props = withDefaults(
     aggregations: Record<string, AggregationResponseDto>
     baselineAggregations?: Record<string, AggregationResponseDto>
     activeFilters: Filter[]
+    searchType?: string | null
     mode?: 'grid' | 'row'
   }>(),
   {
     baselineAggregations: () => ({}) as Record<string, AggregationResponseDto>,
     mode: 'grid',
+    searchType: null,
   }
 )
 
 const emit = defineEmits<{
   'update-range': [field: string, payload: { min?: number; max?: number }]
   'update-terms': [field: string, terms: string[]]
+  'update:searchType': [value: string | null]
 }>()
 
 const resolveComponent = (field: FieldMetadataDto) => {

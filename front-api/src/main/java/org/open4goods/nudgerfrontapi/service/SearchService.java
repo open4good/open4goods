@@ -182,14 +182,15 @@ public class SearchService {
 	 */
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
 	public SearchResult search(Pageable pageable, String verticalId, String query,
-			AggregationRequestDto aggregationQuery, FilterRequestDto filters, boolean allowSemanticFallback) {
+			AggregationRequestDto aggregationQuery, FilterRequestDto filters, boolean allowSemanticFallback, String searchType) {
 		String sanitizedQuery = sanitize(query);
 		String normalizedVerticalId = normalizeVerticalId(verticalId);
 
 		FilterRequestDto normalizedFilters = normalizeFilters(filters);
 		boolean hasExcludedOverride = hasExcludedOverride(normalizedFilters);
 		boolean applyDefaultExclusion = !hasExcludedOverride;
-		boolean useSemanticSearch = allowSemanticFallback && StringUtils.hasText(sanitizedQuery);
+		boolean textOnly = "TEXT".equalsIgnoreCase(searchType);
+		boolean useSemanticSearch = !textOnly && allowSemanticFallback && StringUtils.hasText(sanitizedQuery);
 		float[] semanticEmbedding = null;
 		if (useSemanticSearch) {
 			semanticEmbedding = buildNormalizedEmbedding(sanitizedQuery);
@@ -351,7 +352,7 @@ public class SearchService {
 	 * @return grouped search results and unassigned hits when necessary
 	 */
 	public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage, FilterRequestDto filters,
-			Sort sort) {
+			Sort sort, String searchType) {
 
 		String sanitizedQuery = sanitize(query);
 		if (!StringUtils.hasText(sanitizedQuery)) {
@@ -360,8 +361,16 @@ public class SearchService {
 		FilterRequestDto normalizedFilters = normalizeFilters(filters);
 
 		CategorySuggestion verticalCta = findExactVerticalMatch(sanitizedQuery, domainLanguage);
-		SemanticGlobalSearchResult semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage,
-				normalizedFilters, sort);
+		
+		boolean textOnly = "TEXT".equalsIgnoreCase(searchType);
+		SemanticGlobalSearchResult semanticResult;
+		if (textOnly) {
+			semanticResult = new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
+		} else {
+			semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage,
+					normalizedFilters, sort);
+		}
+
 		List<GlobalSearchHit> missingVerticalResults = semanticResult.missingVerticalResults();
 		if (missingVerticalResults.isEmpty()) {
 			missingVerticalResults = executeMissingVerticalLexicalSearch(sanitizedQuery, domainLanguage,

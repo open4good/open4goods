@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Map;
@@ -72,5 +73,14 @@ class StatsServiceTest {
                 return filename;
             }
         };
+    }
+    @Test
+    void randomPassesVerticalId() {
+        ProductRepository productRepository = mock(ProductRepository.class);
+        StatsService service = new StatsService(mock(SerialisationService.class), mock(ResourcePatternResolver.class), mock(AffiliationPartnerService.class), mock(OpenDataService.class), productRepository, mock(ProductMappingService.class));
+        
+        service.random(5, 2, "my-vertical", DomainLanguage.fr);
+        
+        verify(productRepository).getRandomProducts(5, 2, "my-vertical");
     }
 }

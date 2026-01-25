@@ -83,9 +83,11 @@
         :aggregations="productAggregations"
         :baseline-aggregations="baselineAggregations"
         :active-filters="activeFilters"
+        :search-type="searchType"
         mode="row"
         @update-range="updateRangeFilter"
         @update-terms="updateTermsFilter"
+        @update:search-type="searchType = $event"
       />
     </v-container>
 
@@ -116,8 +118,10 @@
           :aggregations="productAggregations"
           :baseline-aggregations="baselineAggregations"
           :active-filters="activeFilters"
+          :search-type="searchType"
           @update-range="updateRangeFilter"
           @update-terms="updateTermsFilter"
+          @update:search-type="searchType = $event"
         />
       </div>
     </v-navigation-drawer>
@@ -391,106 +395,75 @@ const heroSubtitle = computed(() => {
 })
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
+const searchType = ref<string | null>(null)
 const openPanels = ref<number[]>([])
 
 watch(
   routeQuery,
   value => {
     searchInput.value = value
-    // Do NOT reset filters automatically to allow refining search with filters kept?
-    // User requirement: "taillés sur les resultats retournés". Usually implies new search -> new context.
-    // But if I type "iPhone" and filter price, then change to "Samsung", I might want to keep price filter.
-    // For now, let's keep filters.
+    // Reset search type on new query?
+    // User requirement: explicit toggle. If I type new query, toggle likely stays until user resets.
   },
   { immediate: true }
 )
 
 const normalizedQuery = computed(() => routeQuery.value.trim())
-const trimmedInput = computed(() => searchInput.value.trim())
 const hasMinimumLength = computed(
   () => normalizedQuery.value.length >= MIN_QUERY_LENGTH
 )
-const showLatestProducts = computed(() => normalizedQuery.value.length === 0)
+
+const activeFilters = computed(() => filterRequest.value.filters || [])
+
+const isFiltered = computed(() => activeFilters.value.length > 0)
+
+const showLatestProducts = computed(
+  () => !normalizedQuery.value.length && !isFiltered.value
+)
+
 const shouldShowResults = computed(
-  () => hasMinimumLength.value || showLatestProducts.value
+  () => hasMinimumLength.value || showLatestProducts.value || isFiltered.value
 )
+
 const showInitialState = computed(
-  () => !shouldShowResults.value && trimmedInput.value.length === 0
+  () => !shouldShowResults.value && !searchInput.value
 )
+
 const showMinimumNotice = computed(
   () =>
-    trimmedInput.value.length > 0 &&
-    trimmedInput.value.length < MIN_QUERY_LENGTH
+    searchInput.value.length > 0 && searchInput.value.length < MIN_QUERY_LENGTH
 )
 
-const activeFilters = computed(() => filterRequest.value.filters ?? [])
-const isFiltered = computed(() => activeFilters.value.length > 0)
-// Global Search Data
+const filterFields = ref<string[]>([])
+
+const aggregationDefinition = computed<AggregationRequestDto>(() => ({}))
+
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(
-    'global-search',
+    'search-global',
     async () => {
-      if (!hasMinimumLength.value) {
-        return null
-      }
-
+      if (!hasMinimumLength.value) return null
       return await $fetch<GlobalSearchResponseDto>('/api/products/search', {
         method: 'POST',
         headers: requestHeaders,
         body: {
           query: normalizedQuery.value,
-          ...(isFiltered.value ? { filters: filterRequest.value } : {}),
+          filters: filterRequest.value,
+          searchType: searchType.value ?? undefined,
         },
       })
     },
     {
       watch: [() => normalizedQuery.value],
-      immediate: hasMinimumLength.value,
+      immediate: true,
     }
   )
-
-const semanticDiagnostics = computed(() => data.value?.semanticDiagnostics)
-
-watch(
-  semanticDiagnostics,
-  diagnostics => {
-    if (!diagnostics) {
-      return
-    }
-    if (import.meta.client) {
-      console.info('[search] Semantic diagnostics', diagnostics)
-    }
-  },
-  { immediate: true }
-)
-
-// Filtered Product Search Data
-const manualFields: FieldMetadataDto[] = [
-  {
-    mapping: 'price.minPrice.price',
-    title: '',
-    valueType: 'numeric',
-  },
-  {
-    mapping: 'price.conditions', // backend mapping for condition
-    title: '',
-    valueType: 'keyword',
-  },
-]
-
-const filterFields = computed(() => manualFields)
-
-const aggregationDefinition = computed(() => ({
-  aggs: [
-    { name: 'price', field: 'price.minPrice.price', type: 'range' },
-    { name: 'condition', field: 'price.conditions', type: 'terms' },
-  ],
-}))
 
 const requestBody = computed<ProductSearchRequestDto>(() => ({
   filters: filterRequest.value,
   aggs: aggregationDefinition.value,
   semanticSearch: hasMinimumLength.value ? true : undefined,
+  searchType: searchType.value ?? undefined,
 }))
 
 const latestProductsSort = computed<SortDto[]>(() => [
@@ -504,6 +477,7 @@ const baselinePayload = computed(() => ({
     ? { sorts: latestProductsSort.value }
     : undefined,
   semanticSearch: hasMinimumLength.value ? true : undefined,
+  searchType: searchType.value ?? undefined,
 }))
 
 const {

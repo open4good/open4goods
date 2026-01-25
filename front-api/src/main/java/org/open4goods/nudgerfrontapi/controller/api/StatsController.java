@@ -144,6 +144,9 @@ public class StatsController {
                     @io.swagger.v3.oas.annotations.Parameter(name = "minOffersCount", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = false,
                             description = "Minimum number of offers required for a product to be included.",
                             schema = @Schema(type = "integer", defaultValue = "3")),
+                    @io.swagger.v3.oas.annotations.Parameter(name = "verticalId", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = false,
+                            description = "Optional vertical filter.",
+                            schema = @Schema(type = "string")),
                     @io.swagger.v3.oas.annotations.Parameter(name = "domainLanguage", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = true,
                             description = "Language driving localisation of textual fields.",
                             schema = @Schema(implementation = DomainLanguage.class))
@@ -161,12 +164,13 @@ public class StatsController {
     public ResponseEntity<List<ProductDto>> random(
             @RequestParam(name = "num", defaultValue = "10") int num,
             @RequestParam(name = "minOffersCount", defaultValue = "3") int minOffersCount,
+            @RequestParam(name = "verticalId", required = false) String verticalId,
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        logger.info("Entering random(num={}, minOffersCount={}, domainLanguage={})", num, minOffersCount, domainLanguage);
+        logger.info("Entering random(num={}, minOffersCount={}, verticalId={}, domainLanguage={})", num, minOffersCount, verticalId, domainLanguage);
         if (num > 10) {
             num = 10;
         }
-        List<ProductDto> body = statsService.random(num, minOffersCount, domainLanguage);
+        List<ProductDto> body = statsService.random(num, minOffersCount, verticalId, domainLanguage);
         return ResponseEntity.ok()
                 .cacheControl(org.springframework.http.CacheControl.noCache()) // Random content should not be cached typically, or very short duration
                 .body(body);

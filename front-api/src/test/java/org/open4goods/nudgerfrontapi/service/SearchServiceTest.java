@@ -86,7 +86,7 @@ class SearchServiceTest {
         when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f});
 
         GlobalSearchResult result = searchService.globalSearch("téléviseurs", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted());
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
         assertThat(result).isNotNull();
@@ -113,7 +113,7 @@ class SearchServiceTest {
         when(textEmbeddingService.embed(any())).thenReturn(new float[]{0.1f});
 
         GlobalSearchResult result = searchService.globalSearch("something else", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted());
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
         assertThat(result.verticalCta()).isNull();
@@ -136,7 +136,7 @@ class SearchServiceTest {
 
         // WHEN
         GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted());
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
         // We verify that semantic embeddings were requested once.
@@ -178,7 +178,7 @@ class SearchServiceTest {
                 .thenReturn(new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null));
 
         GlobalSearchResult result = searchService.globalSearch("bras articule", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted());
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         assertThat(result).isNotNull();
         assertThat(result.diagnostics()).isNotNull();

@@ -135,7 +135,7 @@ const openDataMillions = computed(() => {
 const impactScoreProductsCount = computed(() => {
   const count = categoriesStats.value?.impactScoreProductsCount
 
-  if (typeof count !== 'number' || !Number.isFinite(count) || count <= 0) {
+  if (typeof count !== 'number' || !Number.isFinite(count) || count < 0) {
     return null
   }
 
@@ -153,7 +153,7 @@ const impactScoreCategoriesCount = computed(() => {
     stats => (stats.ratedProducts ?? 0) > 0
   ).length
 
-  return count > 0 ? count : null
+  return count
 })
 
 const productsWithoutVerticalCount = computed(() => {
@@ -833,6 +833,7 @@ useHead(() => ({
         :products-count="productsCount"
         :categories-count="categoriesCount"
         :impact-score-products-count="impactScoreProductsCount"
+        :impact-score-categories-count="impactScoreCategoriesCount"
         :products-without-vertical-count="productsWithoutVerticalCount"
         :ai-summary-remaining-credits="aiSummaryRemainingCredits"
         :should-reduce-motion="shouldReduceMotion"

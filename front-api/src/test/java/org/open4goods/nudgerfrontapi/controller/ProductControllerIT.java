@@ -134,7 +134,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -159,7 +159,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         VerticalConfig config = new VerticalConfig();
@@ -176,7 +176,7 @@ class ProductControllerIT {
                 .andExpect(status().isOk());
 
         ArgumentCaptor<AggregationRequestDto> captor = ArgumentCaptor.forClass(AggregationRequestDto.class);
-        then(service).should().searchProducts(any(Pageable.class), any(Locale.class), anySet(), captor.capture(), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean());
+        then(service).should().searchProducts(any(Pageable.class), any(Locale.class), anySet(), captor.capture(), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class));
 
         AggregationRequestDto aggregationRequestDto = captor.getValue();
         assertThat(aggregationRequestDto.aggs()).hasSize(1);
@@ -213,7 +213,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -230,7 +230,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -260,7 +260,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -281,7 +281,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -301,7 +301,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -337,7 +337,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -373,7 +373,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -439,7 +439,7 @@ class ProductControllerIT {
         var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class), anyBoolean()))
+        given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
                 .willReturn(responseDto);
 
         mockMvc.perform(post("/products")
@@ -451,7 +451,7 @@ class ProductControllerIT {
                 .andExpect(status().isOk());
 
         ArgumentCaptor<FilterRequestDto> captor = ArgumentCaptor.forClass(FilterRequestDto.class);
-        then(service).should().searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), captor.capture(), anyBoolean());
+        then(service).should().searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), captor.capture(), anyBoolean(), nullable(String.class));
 
         FilterRequestDto filterRequestDto = captor.getValue();
         assertThat(filterRequestDto.filters()).hasSize(1);

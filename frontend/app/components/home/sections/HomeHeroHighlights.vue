@@ -246,7 +246,7 @@ const heroPartnersLinkText = computed(() => {
 })
 
 const formatCount = (value?: number) => {
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
     return null
   }
 
@@ -536,7 +536,7 @@ const isCreditsDialogActive = ref(false)
 
 <template>
   <div class="home-hero-highlights" role="list">
-    <v-row align="stretch">
+    <v-row align="stretch" justify="center">
       <v-col
         v-for="(item, index) in heroHighlightItems"
         :key="`hero-highlight-${index}`"

@@ -321,11 +321,12 @@ public class StatsService {
      *
      * @param num            number of products to return
      * @param minOffersCount minimum number of offers
+     * @param verticalId     optional vertical filter
      * @param domainLanguage language for localization
      * @return list of random products
      */
-    public List<ProductDto> random(int num, int minOffersCount, DomainLanguage domainLanguage) {
-        return productRepository.getRandomProducts(num, minOffersCount).stream()
+    public List<ProductDto> random(int num, int minOffersCount, String verticalId, DomainLanguage domainLanguage) {
+        return productRepository.getRandomProducts(num, minOffersCount, verticalId).stream()
                 .map(product -> productMappingService.mapProduct(product, null, null, domainLanguage, false))
                 .toList();
     }
