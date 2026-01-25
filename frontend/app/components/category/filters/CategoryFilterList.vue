@@ -15,46 +15,19 @@
     </template>
 
     <template v-else>
-      <v-menu
-        v-for="field in fields"
-        :key="field.mapping ?? field.title"
-        :close-on-content-click="false"
-        location="bottom start"
-        offset="8"
-      >
-        <template #activator="{ props: menuProps }">
-          <v-btn
-            v-bind="menuProps"
-            :color="isActive(field) ? 'primary' : undefined"
-            :variant="isActive(field) ? 'flat' : 'outlined'"
-            append-icon="mdi-chevron-down"
-            class="text-none"
-          >
-            {{ resolveTitle(field) }}
-
-            <v-avatar
-              v-if="getFilterCount(field) > 0"
-              color="white"
-              size="20"
-              class="ms-2 text-primary font-weight-bold"
-              style="font-size: 12px"
-            >
-              {{ getFilterCount(field) }}
-            </v-avatar>
-          </v-btn>
-        </template>
-
-        <v-sheet min-width="320" class="pa-4 rounded-lg elevation-4 border">
-          <component
-            :is="resolveComponent(field)"
-            :field="field"
-            :aggregation="aggregations[field.mapping ?? '']"
-            :baseline-aggregation="baselineAggregations[field.mapping ?? '']"
-            :model-value="findActiveFilter(field.mapping)"
-            @update:model-value="onFilterChange(field, $event)"
-          />
-        </v-sheet>
-      </v-menu>
+      <div class="category-filter-list__row">
+        <component
+          :is="resolveComponent(field)"
+          v-for="field in fields"
+          :key="field.mapping ?? field.title"
+          :field="field"
+          :aggregation="aggregations[field.mapping ?? '']"
+          :baseline-aggregation="baselineAggregations[field.mapping ?? '']"
+          :model-value="findActiveFilter(field.mapping)"
+          class="category-filter-list__row-item"
+          @update:model-value="onFilterChange(field, $event)"
+        />
+      </div>
     </template>
   </div>
 </template>
@@ -65,8 +38,6 @@ import type {
   FieldMetadataDto,
   Filter,
 } from '~~/shared/api-client'
-import { resolveFilterFieldTitle } from '~/utils/_field-localization'
-
 import CategoryFilterNumeric from './CategoryFilterNumeric.vue'
 import CategoryFilterCondition from './CategoryFilterCondition.vue'
 import CategoryFilterTerms from './CategoryFilterTerms.vue'
@@ -90,8 +61,6 @@ const emit = defineEmits<{
   'update-terms': [field: string, terms: string[]]
 }>()
 
-const { t } = useI18n()
-
 const resolveComponent = (field: FieldMetadataDto) => {
   if (field.mapping === 'price.conditions') {
     return CategoryFilterCondition
@@ -104,30 +73,6 @@ const resolveComponent = (field: FieldMetadataDto) => {
 
 const findActiveFilter = (field?: string | null) => {
   return props.activeFilters.find(filter => filter.field === field) ?? null
-}
-
-const isActive = (field: FieldMetadataDto) => {
-  return !!findActiveFilter(field.mapping)
-}
-
-const getFilterCount = (field: FieldMetadataDto) => {
-  const filter = findActiveFilter(field.mapping)
-  if (!filter) return 0
-
-  if (filter.operator === 'term') {
-    return filter.terms?.length ?? 0
-  }
-
-  if (filter.operator === 'range') {
-    // If range is active, count as 1
-    return filter.min !== undefined || filter.max !== undefined ? 1 : 0
-  }
-
-  return 0
-}
-
-const resolveTitle = (field: FieldMetadataDto) => {
-  return resolveFilterFieldTitle(field, t)
 }
 
 const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
@@ -165,14 +110,23 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     align-items: stretch
 
   &--row
-    display: flex
-    flex-direction: row
-    flex-wrap: wrap
-    gap: 0.75rem
-    align-items: center
+    display: block
 
   &__item
     display: flex
     flex-direction: column
     min-width: 0
+
+  &__row
+    display: flex
+    flex-direction: row
+    flex-wrap: wrap
+    gap: 1rem
+    align-items: stretch
+
+  &__row-item
+    display: flex
+    flex-direction: column
+    flex: 1 1 280px
+    min-width: min(280px, 100%)
 </style>

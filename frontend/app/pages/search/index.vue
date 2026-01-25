@@ -175,9 +175,17 @@
           <v-col cols="12" lg="5">
             <section class="search-page__column">
               <div class="search-page__column-header">
-                <h2 class="text-h5 font-weight-bold mb-0">
-                  {{ t('search.columns.verticals.title') }}
-                </h2>
+                <div class="search-page__column-heading">
+                  <v-icon
+                    icon="mdi-star-check-outline"
+                    size="22"
+                    class="search-page__column-heading-icon"
+                    aria-hidden="true"
+                  />
+                  <h2 class="text-h5 font-weight-bold mb-0">
+                    {{ t('search.columns.verticals.title') }}
+                  </h2>
+                </div>
               </div>
 
               <div
@@ -255,9 +263,17 @@
                 class="search-page__column-header search-page__column-header--with-actions"
               >
                 <div class="search-page__column-title">
-                  <h2 class="text-h5 font-weight-bold mb-0">
-                    {{ t('search.columns.products.title') }}
-                  </h2>
+                  <div class="search-page__column-heading">
+                    <v-icon
+                      icon="mdi-star-off-outline"
+                      size="22"
+                      class="search-page__column-heading-icon"
+                      aria-hidden="true"
+                    />
+                    <h2 class="text-h5 font-weight-bold mb-0">
+                      {{ t('search.columns.products.title') }}
+                    </h2>
+                  </div>
                   <p class="search-page__column-subtitle">
                     {{ t('search.columns.products.subtitle') }}
                   </p>
@@ -347,7 +363,7 @@ const routeQuery = computed(() =>
 const searchInput = ref(routeQuery.value)
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
-const openPanels = ref<number[]>([0])
+const openPanels = ref<number[]>([])
 
 watch(
   routeQuery,
@@ -702,8 +718,8 @@ const limitedGroups = computed(() => {
 
 watch(
   limitedGroups,
-  groups => {
-    openPanels.value = groups.length ? [0] : []
+  () => {
+    openPanels.value = []
   },
   { immediate: true }
 )
@@ -932,6 +948,17 @@ function formatFallbackVerticalTitle(verticalId: string): string {
     display: flex
     flex-direction: column
     gap: 0.35rem
+
+  &__column-heading
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: 0.5rem
+    text-align: center
+    width: 100%
+
+  &__column-heading-icon
+    color: rgba(var(--v-theme-primary), 0.85)
 
   &__column-subtitle
     margin: 0
