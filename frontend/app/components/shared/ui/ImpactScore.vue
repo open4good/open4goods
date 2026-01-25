@@ -31,6 +31,117 @@
         }}</span>
       </div>
 
+      <!-- SVG Mode -->
+      <div
+        v-else-if="mode === 'svg'"
+        class="impact-score-svg"
+        :class="`impact-score-svg--${svgSize}`"
+        v-bind="activatorProps"
+      >
+        <svg
+          class="scoreSvg"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 420 140"
+          role="img"
+          :width="svgDimensions.width"
+          :height="svgDimensions.height"
+          :aria-label="svgAriaLabel"
+        >
+          <defs>
+            <clipPath :id="svgClipId">
+              <path
+                d="
+                  M24,16
+                  a16,16 0 0 1 16,-16
+                  h296
+                  a16,16 0 0 1 16,16
+                  v18
+                  l-22,0
+                  a14,14 0 0 0 -14,14
+                  v52
+                  a16,16 0 0 1 -16,16
+                  h-276
+                  a16,16 0 0 1 -16,-16
+                  z"
+              />
+            </clipPath>
+          </defs>
+
+          <g :clip-path="`url(#${svgClipId})`">
+            <rect
+              x="8"
+              y="8"
+              width="404"
+              height="124"
+              rx="22"
+              fill="#FFFFFF"
+              opacity="0.92"
+            />
+
+            <rect
+              x="34"
+              y="96"
+              width="300"
+              height="14"
+              rx="7"
+              :fill="svgInactiveColor"
+            />
+            <rect
+              x="34"
+              y="96"
+              :width="svgBarWidth"
+              height="14"
+              rx="7"
+              :fill="svgActiveColor"
+            />
+
+            <rect
+              x="350"
+              y="86"
+              width="44"
+              height="44"
+              rx="14"
+              :fill="svgActiveColor"
+              opacity="0.18"
+            />
+            <path
+              d="M364 106h16"
+              :stroke="svgActiveColor"
+              stroke-width="6"
+              stroke-linecap="round"
+            />
+
+            <text
+              x="34"
+              y="64"
+              font-size="54"
+              font-weight="800"
+              :fill="svgActiveColor"
+            >
+              {{ svgDisplayValue }}
+              <tspan
+                font-size="26"
+                font-weight="700"
+                fill="rgba(0,0,0,0.55)"
+              >
+                /20
+              </tspan>
+            </text>
+
+            <text
+              v-if="showScale"
+              x="34"
+              y="86"
+              font-size="16"
+              font-weight="600"
+              fill="rgba(0,0,0,0.55)"
+            >
+              {{ svgScaleLabel }}
+            </text>
+          </g>
+        </svg>
+      </div>
+
       <!-- Combined Mode (default) -->
       <div
         v-else-if="mode === 'combined'"
@@ -107,14 +218,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { vuetifyPalettes } from '~~/config/theme/palettes'
 
 const props = defineProps({
   score: {
     type: Number,
     required: true,
+  },
+  min: {
+    type: Number,
+    default: 0,
   },
   max: {
     type: Number,
@@ -126,8 +242,12 @@ const props = defineProps({
     >,
     default: 'medium',
   },
+  svgSize: {
+    type: String as PropType<'sm' | 'md' | 'lg'>,
+    default: 'md',
+  },
   mode: {
-    type: String as PropType<'badge' | 'stars' | 'combined'>,
+    type: String as PropType<'badge' | 'stars' | 'combined' | 'svg'>,
     default: 'combined',
   },
   layout: {
@@ -151,6 +271,10 @@ const props = defineProps({
     default: true,
   },
   showStars: {
+    type: Boolean,
+    default: true,
+  },
+  showScale: {
     type: Boolean,
     default: true,
   },
@@ -204,6 +328,133 @@ const formattedBadgeValue = computed(() =>
 
 const outOf20Label = computed(() => t('components.impactScore.outOf20'))
 
+const svgClipId = useId()
+const svgInactiveColor = vuetifyPalettes.light['impact-score-inactive']
+const svgMaxColor = vuetifyPalettes.light.primary
+const svgMinColor = vuetifyPalettes.light.red
+const svgTrackWidth = 300
+
+const sanitizeNumber = (value: number, fallback: number) =>
+  Number.isFinite(value) ? value : fallback
+
+const svgRangeMin = computed(() => sanitizeNumber(props.min, 0))
+const svgRangeMax = computed(() => sanitizeNumber(props.max, 20))
+// Display the raw score value (unclamped) while clamping only for the fill.
+const svgDisplayScore = computed(() => sanitizeNumber(props.score, 0))
+
+const svgT = computed(() => {
+  const min = svgRangeMin.value
+  const max = svgRangeMax.value
+
+  if (max <= min) {
+    return 0
+  }
+
+  const clamped = Math.min(Math.max(svgDisplayScore.value, min), max)
+  return (clamped - min) / (max - min)
+})
+
+const svgBarWidth = computed(() => {
+  const width = Math.round(svgTrackWidth * svgT.value)
+  return Math.min(svgTrackWidth, Math.max(0, width))
+})
+
+const hexToRgb = (hex: string) => {
+  const normalized = hex.replace('#', '').trim()
+  const value = Number.parseInt(normalized, 16)
+  const r = (value >> 16) & 255
+  const g = (value >> 8) & 255
+  const b = value & 255
+
+  return { r, g, b }
+}
+
+const rgbToHsl = (r: number, g: number, b: number) => {
+  const rNorm = r / 255
+  const gNorm = g / 255
+  const bNorm = b / 255
+  const max = Math.max(rNorm, gNorm, bNorm)
+  const min = Math.min(rNorm, gNorm, bNorm)
+  const delta = max - min
+  const lightness = (max + min) / 2
+
+  if (delta === 0) {
+    return { h: 0, s: 0, l: lightness }
+  }
+
+  const saturation = delta / (1 - Math.abs(2 * lightness - 1))
+  let hue = 0
+
+  switch (max) {
+    case rNorm:
+      hue = ((gNorm - bNorm) / delta) % 6
+      break
+    case gNorm:
+      hue = (bNorm - rNorm) / delta + 2
+      break
+    default:
+      hue = (rNorm - gNorm) / delta + 4
+  }
+
+  hue *= 60
+  if (hue < 0) {
+    hue += 360
+  }
+
+  return { h: hue, s: saturation, l: lightness }
+}
+
+const interpolateHsl = (from: string, to: string, ratio: number) => {
+  const start = rgbToHsl(...Object.values(hexToRgb(from)))
+  const end = rgbToHsl(...Object.values(hexToRgb(to)))
+  let deltaHue = end.h - start.h
+
+  if (Math.abs(deltaHue) > 180) {
+    deltaHue -= Math.sign(deltaHue) * 360
+  }
+
+  const hue = (start.h + deltaHue * ratio + 360) % 360
+  const saturation = start.s + (end.s - start.s) * ratio
+  const lightness = start.l + (end.l - start.l) * ratio
+
+  return `hsl(${Math.round(hue)}, ${Math.round(
+    saturation * 100
+  )}%, ${Math.round(lightness * 100)}%)`
+}
+
+const svgActiveColor = computed(() =>
+  interpolateHsl(svgMinColor, svgMaxColor, svgT.value)
+)
+
+const svgDisplayValue = computed(() =>
+  n(svgDisplayScore.value, {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0,
+  })
+)
+
+const svgScaleLabel = computed(() =>
+  t('components.impactScore.scale', {
+    min: n(svgRangeMin.value, { maximumFractionDigits: 0 }),
+    max: n(svgRangeMax.value, { maximumFractionDigits: 0 }),
+  })
+)
+
+const svgAriaLabel = computed(() =>
+  t('components.impactScore.svgAriaLabel', { score: svgDisplayValue.value })
+)
+
+const svgDimensions = computed(() => {
+  switch (props.svgSize) {
+    case 'sm':
+      return { width: 280, height: 94 }
+    case 'lg':
+      return { width: 420, height: 140 }
+    default:
+      return { width: 340, height: 113 }
+  }
+})
+
 const ratingSize = computed(() => {
   switch (props.size) {
     case 'small':
@@ -240,6 +491,9 @@ const shouldDisplayStars = computed(() => {
 })
 
 const tooltipLabel = computed(() => {
+  if (props.mode === 'svg') {
+    return svgAriaLabel.value
+  }
   if (
     (props.mode === 'badge' || props.mode === 'combined') &&
     shouldDisplayScore.value
@@ -271,14 +525,32 @@ const tooltipLabel = computed(() => {
 
 const layout = computed(() => props.layout)
 const size = computed(() => props.size)
+const svgSize = computed(() => props.svgSize)
 const showValue = computed(() => props.showValue)
 const mode = computed(() => props.mode)
+const showScale = computed(() => props.showScale)
 const flat = computed(() => props.flat)
 const badgeLayout = computed(() => props.badgeLayout)
 const badgeVariant = computed(() => props.badgeVariant)
 </script>
 
 <style scoped>
+.impact-score-svg {
+  display: inline-flex;
+  align-items: center;
+}
+
+.impact-score-svg .scoreSvg {
+  max-width: 100%;
+  height: auto;
+  font-family:
+    'Hanken Grotesk',
+    'Inter',
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+}
+
 /* Stars Style */
 .impact-score {
   --impact-score-gap: 0.5rem;
