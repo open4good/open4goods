@@ -298,7 +298,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 2.03
+      scoreMinValue: 2.84
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -307,7 +307,7 @@ nudgeToolConfig:
         en: "Televisions with a low energy consumption"
         fr: "Téléviseurs avec une faible consommation énergétique"
     - scoreName: "DURABILITY"
-      scoreMinValue: 2.6
+      scoreMinValue: 2.84
       mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
@@ -317,7 +317,7 @@ nudgeToolConfig:
         fr: "Téléviseurs avec une bonne durabilité"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 4.12
+      scoreMinValue: 2.84
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -326,7 +326,7 @@ nudgeToolConfig:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
     - scoreName: "ESG"
-      scoreMinValue: 2.6
+      scoreMinValue: 2.84
       mdiIcon: "mdi-scale-balance"
       title:
         en: "ESG criterias"
@@ -374,14 +374,14 @@ nudgeToolConfig:
         en: "high-impact"
         fr: "mauvais-ecoscore"
       caption:
-        en: "< 10.60"
-        fr: "< 10.60"
+        en: "Bad (< 10.60)"
+        fr: "Mauvais (< 10.60)"
       title:
         en: "Bad Ecoscore"
         fr: "Mauvais Ecoscore"
       description:
-        en: "Products with a bad Ecoscore"
-        fr: "Produits avec un mauvais Ecoscore"
+        en: "Products with a bad Ecoscore (lower tier)"
+        fr: "Produits avec un mauvais Ecoscore (tier inférieur)"
 
     - id: "impact_medium"
       group: "impactscore"
@@ -397,14 +397,14 @@ nudgeToolConfig:
         en: "medium-impact"
         fr: "ecoscore-moyen"
       caption:
-        en: "10.60 - 12.02"
-        fr: "10.60 - 12.02"
+        en: "Medium (10.60 - 12.02)"
+        fr: "Moyen (10.60 - 12.02)"
       title:
         en: "Medium Ecoscore"
         fr: "Ecoscore Moyen"
       description:
-        en: "Products with a medium Ecoscore"
-        fr: "Produits avec un Ecoscore moyen"
+        en: "Products with a medium Ecoscore (middle tier)"
+        fr: "Produits avec un Ecoscore moyen (tier intermédiaire)"
 
     - id: "impact_good"
       group: "impactscore"
@@ -417,14 +417,14 @@ nudgeToolConfig:
         en: "low-impact"
         fr: "bon-ecoscore"
       caption:
-        en: "> 12.02"
-        fr: "> 12.02"
+        en: "Good (> 12.02)"
+        fr: "Bon (> 12.02)"
       title:
         en: "Good Ecoscore"
         fr: "Bon Ecoscore"
       description:
-        en: "Products with a good Ecoscore"
-        fr: "Produits avec un bon Ecoscore"
+        en: "Products with a good Ecoscore (top tier)"
+        fr: "Produits avec un bon Ecoscore (tier supérieur)"
 
     ################
     # Price

@@ -1,0 +1,25 @@
+key: "DURABILITY"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-archive-outline"
+name:
+  default: "Durability"
+  fr: "Durabilité"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  default: "Durability"
+  fr: "Durabilité"
+scoreDescription:
+  default: "Composite score evaluating product longevity through warranty, support duration, and spare parts availability."
+  fr: "Score composite évaluant la longévité du produit à travers la garantie, la durée de support et la disponibilité des pièces détachées."
+scoreUtility:
+  default: "Higher durability extends product lifespan, reducing the need for replacements and associated environmental impact."
+  fr: "Une durabilité élevée prolonge la durée de vie du produit, réduisant le besoin de remplacement et l'impact environnemental associé."

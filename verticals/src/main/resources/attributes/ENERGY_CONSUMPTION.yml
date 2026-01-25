@@ -1,0 +1,25 @@
+key: "ENERGY_CONSUMPTION"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
+faIcon: "mdi-lightning-bolt"
+name:
+  default: "Energy consumption"
+  fr: "Consommation énergétique"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  default: "Energy consumption"
+  fr: "Consommation énergétique"
+scoreDescription:
+  default: "Composite score evaluating energy efficiency across power consumption and energy class."
+  fr: "Score composite évaluant l'efficacité énergétique à travers la consommation électrique et la classe énergétique."
+scoreUtility:
+  default: "Lower energy consumption reduces electricity costs and environmental impact during the product's lifetime."
+  fr: "Une consommation énergétique plus faible réduit les coûts d'électricité et l'impact environnemental sur la durée de vie du produit."

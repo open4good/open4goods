@@ -4,7 +4,7 @@ import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import ProductImpactSubscoreExplanation from './ProductImpactSubscoreExplanation.vue'
 import type { ScoreView } from './impact-types'
-import enUS from '../../../../../i18n/locales/en-US.json'
+import enUS from '../../../../i18n/locales/en-US.json'
 
 describe('ProductImpactSubscoreExplanation', () => {
   const i18n = createI18n({

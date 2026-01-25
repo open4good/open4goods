@@ -34,16 +34,18 @@ describe('GET /api/team Nitro endpoint', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    fetchMock.mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          cores: [],
-          contributors: [],
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            cores: [],
+            contributors: [],
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
       )
     )
 

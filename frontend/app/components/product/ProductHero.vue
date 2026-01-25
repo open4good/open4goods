@@ -19,15 +19,6 @@
           title-class="product-hero__title text-center"
           description-class="product-hero__short-description text-center"
         />
-        <div v-if="impactScore != null" class="product-hero__impact-score">
-          <ImpactScore
-            mode="svg"
-            :score="impactScore"
-            :min="0"
-            :max="20"
-            svg-size="lg"
-          />
-        </div>
         <CategoryNavigationBreadcrumbs
           v-if="heroBreadcrumbs.length"
           v-bind="heroBreadcrumbProps"
@@ -44,6 +35,18 @@
         <div class="product-hero__panel product-hero__panel--main">
           <div class="product-hero__main-content">
             <div class="product-hero__gallery-section">
+              <div
+                v-if="impactScore != null"
+                class="product-hero__impact-score"
+              >
+                <ImpactScore
+                  mode="svg"
+                  :score="impactScore"
+                  :min="0"
+                  :max="20"
+                  svg-size="lg"
+                />
+              </div>
               <ProductHeroGallery
                 class="product-hero__gallery"
                 :product="product"

@@ -1,6 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
-import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
 import ProductImpactSection from './ProductImpactSection.vue'
 
@@ -30,7 +29,7 @@ const i18nMessages = {
 }
 
 describe('ProductImpactSection', () => {
-  const mountComponent = async (props: any = {}) => {
+  const mountComponent = async (props: Record<string, unknown> = {}) => {
     const i18n = createI18n({
       legacy: false,
       locale: 'fr-FR',
