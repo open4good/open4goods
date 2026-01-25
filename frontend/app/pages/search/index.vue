@@ -342,9 +342,11 @@ const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
-const queryParams = computed(() => route.query)
-const searchQuery = ref(queryParams.value.q ? String(queryParams.value.q) : '')
-const searchInput = ref(searchQuery.value)
+const routeQuery = computed(() => {
+  const q = route.query.q
+  return (Array.isArray(q) ? q[0] : q) ?? ''
+})
+const searchInput = ref(routeQuery.value)
 
 const { data: stats } = await useAsyncData<CategoriesStatsDto | null>(
   'search-stats',
