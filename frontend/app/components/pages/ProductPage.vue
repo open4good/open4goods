@@ -49,6 +49,8 @@
               :product="product"
               :breadcrumbs="productBreadcrumbs"
               :impact-score="impactScoreOutOf20"
+              :impact-score-min="impactScoreMin"
+              :impact-score-max="impactScoreMax"
               :popular-attributes="heroPopularAttributes"
             />
             <div class="product-page__hero-corner" role="presentation">
@@ -2142,6 +2144,16 @@ const impactScoreOutOf20 = computed(() => {
   }
 
   return Number((score * 4).toFixed(1))
+})
+
+const impactScoreMin = computed(() => {
+  const absolute = product.value?.scores?.scores?.ECOSCORE?.absolute
+  return typeof absolute?.min === 'number' ? absolute.min : 0
+})
+
+const impactScoreMax = computed(() => {
+  const absolute = product.value?.scores?.scores?.ECOSCORE?.absolute
+  return typeof absolute?.max === 'number' ? absolute.max : 20
 })
 
 const reviewStructuredData = computed(() => {
