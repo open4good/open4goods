@@ -2418,7 +2418,8 @@
         "bannerTitle": "AI summary",
         "callToAction": {
           "title": "No summary available",
-          "subtitle": "Ask our AI to generate a summary for this product."
+          "subtitle": "Ask our AI to generate a summary for this product.",
+          "subtitleVariant": "We provide a powerful tool to know everything about {bestName}"
         },
         "cancel": "Cancel",
         "close": "Close",

@@ -997,7 +997,13 @@ public class SearchService {
 		}
 
 		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
-		SearchHits<Product> hits = executeSemanticSearch(null, embedding, null, true, pageable, sanitizedQuery);
+		SearchHits<Product> hits;
+		try {
+			hits = executeSemanticSearch(null, embedding, null, true, pageable, sanitizedQuery);
+		} catch (Exception e) {
+			LOGGER.error("Semantic search failed for query '{}'", sanitizedQuery, e);
+			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
+		}
 		
 		List<GlobalSearchHit> allHits = mapHits(hits, domainLanguage, true);
 		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(allHits);
@@ -1735,6 +1741,8 @@ public class SearchService {
 			} else {
 				LOGGER.error("Error : ", e);
 			}
+		} else {
+			LOGGER.error("Error executing elasticsearch query", e);
 		}
 	}
 

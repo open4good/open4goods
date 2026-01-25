@@ -1968,7 +1968,7 @@
     "hero": {
       "eyebrow": "Explorer le catalogue",
       "title": "Les produits disponibles",
-      "subtitle": "Rechercher dans nos produits évalués ou dans les autres."
+      "subtitle": "Rechercher dans nos produits évalués . Et dans les autres ..."
     },
     "form": {
       "label": "Rechercher dans le catalogue",
@@ -2172,7 +2172,8 @@
         "bannerTitle": "Synthèse IA",
         "callToAction": {
           "title": "Aucune synthèse disponible",
-          "subtitle": "Demandez à notre IA de générer une synthèse pour ce produit."
+          "subtitle": "Demandez à notre IA de générer une synthèse pour ce produit.",
+          "subtitleVariant": "Nous mettons à votre disposition un outil puissant pour tout savoir du {bestName}"
         },
         "cancel": "Annuler",
         "close": "Fermer",

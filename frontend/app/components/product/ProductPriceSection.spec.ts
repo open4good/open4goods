@@ -364,4 +364,27 @@ describe('ProductPriceSection', () => {
 
     await wrapper.unmount()
   })
+
+  it('renders a low competition card and hides the offers table when there is exactly one offer', async () => {
+    const wrapper = await mountComponent({
+      offersByCondition: {
+        NEW: [
+          {
+            datasourceName: 'Merchant B',
+            price: 799,
+            currency: 'EUR',
+            condition: 'NEW',
+            url: 'https://merchant-b.example',
+          },
+        ],
+      },
+      offersCount: 1,
+    })
+
+    expect(wrapper.find('.product-price__offers-table').exists()).toBe(false)
+    expect(wrapper.find('.product-price__single-offer').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Concurrence faible !')
+
+    await wrapper.unmount()
+  })
 })

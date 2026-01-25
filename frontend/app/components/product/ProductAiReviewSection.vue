@@ -8,18 +8,6 @@
             {{ $t('product.aiReview.title', titleParams) }}
           </h2>
 
-          <div class="product-ai-review__badge mb-2">
-            <v-chip
-              color="primary"
-              variant="tonal"
-              size="small"
-              class="font-weight-bold"
-            >
-              <v-icon start icon="mdi-robot" size="16" />
-              Synthèse IA
-            </v-chip>
-          </div>
-
           <div v-if="createdDate" class="product-ai-review__metadata mb-4">
             <v-icon
               icon="mdi-calendar-clock"
@@ -458,7 +446,11 @@
                 {{ $t('product.aiReview.request.callToAction.title') }}
               </h3>
               <p class="text-body-2 text-medium-emphasis">
-                {{ $t('product.aiReview.request.callToAction.subtitle') }}
+                {{
+                  $t('product.aiReview.request.callToAction.subtitleVariant', {
+                    bestName: productLabel,
+                  })
+                }}
               </p>
             </div>
           </div>
