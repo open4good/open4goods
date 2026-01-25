@@ -15,7 +15,7 @@
 
     <div ref="scrollContainer" class="category-fast-filters__scroller">
       <article
-        v-for="group in groupedSubsets"
+        v-for="(group, index) in groupedSubsets"
         :key="group.key"
         class="category-fast-filters__group"
         :aria-label="group.label"
@@ -46,12 +46,19 @@
                 <v-chip
                   v-bind="tooltipProps"
                   :value="subset.id"
-                  :color="isSubsetActive(subset) ? 'primary' : undefined"
+                  :color="
+                    index === 0 || isSubsetActive(subset)
+                      ? 'primary'
+                      : undefined
+                  "
                   :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
                   rounded="lg"
                   class="category-fast-filters__chip"
                 >
                   <span class="category-fast-filters__chip-label">
+                    <span v-if="index === 0" class="mr-1 font-weight-bold"
+                      >Impact</span
+                    >
                     {{ resolveSubsetLabel(subset) }}
                   </span>
                 </v-chip>
@@ -61,12 +68,17 @@
             <v-chip
               v-else
               :value="subset.id"
-              :color="isSubsetActive(subset) ? 'primary' : undefined"
+              :color="
+                index === 0 || isSubsetActive(subset) ? 'primary' : undefined
+              "
               :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
               rounded="lg"
               class="category-fast-filters__chip"
             >
               <span class="category-fast-filters__chip-label">
+                <span v-if="index === 0" class="mr-1 font-weight-bold"
+                  >Impact</span
+                >
                 {{ resolveSubsetLabel(subset) }}
               </span>
             </v-chip>

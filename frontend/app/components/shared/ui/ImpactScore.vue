@@ -31,6 +31,108 @@
         }}</span>
       </div>
 
+      <!-- SVG Mode -->
+      <div
+        v-else-if="mode === 'svg'"
+        class="impact-score-svg"
+        :class="`impact-score-svg--${svgSize}`"
+        v-bind="activatorProps"
+      >
+        <svg
+          class="scoreSvg"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 420 140"
+          role="img"
+          :width="svgDimensions.width"
+          :height="svgDimensions.height"
+          :aria-label="svgAriaLabel"
+        >
+          <defs>
+            <linearGradient
+              :id="svgGradientId"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
+              <stop offset="0%" :stop-color="svgMinColor" />
+              <stop offset="100%" :stop-color="svgMaxColor" />
+            </linearGradient>
+          </defs>
+
+          <rect
+            x="0"
+            y="0"
+            width="420"
+            height="140"
+            rx="24"
+            :fill="`url(#${svgGradientId})`"
+          />
+
+          <!-- Internal container for alignment, adjusted for padding -->
+          <g transform="translate(24, 20)">
+            <text
+              x="0"
+              y="54"
+              font-size="64"
+              font-weight="800"
+              fill="#FFFFFF"
+              style="font-variant-numeric: tabular-nums"
+            >
+              {{ svgDisplayValue }}
+              <tspan
+                font-size="32"
+                font-weight="700"
+                fill="rgba(255,255,255,0.7)"
+              >
+                / 20
+              </tspan>
+            </text>
+
+            <text
+              v-if="showScale"
+              x="0"
+              y="88"
+              font-size="18"
+              font-weight="600"
+              fill="rgba(255,255,255,0.7)"
+            >
+              Min / Max : {{ n(svgRangeMin, { maximumFractionDigits: 1 }) }} -
+              {{ n(svgRangeMax, { maximumFractionDigits: 1 }) }}
+            </text>
+
+            <!-- Progress Bar Background -->
+            <rect
+              x="0"
+              y="98"
+              width="300"
+              height="14"
+              rx="7"
+              fill="rgba(255,255,255,0.3)"
+            />
+
+            <!-- Progress Bar active -->
+            <rect
+              x="0"
+              y="98"
+              :width="svgBarWidth"
+              height="14"
+              rx="7"
+              fill="#FFFFFF"
+            />
+
+            <!-- Icon/Visual element on the right (Optional - kept simplified or removed if not needed, 
+                 but matching the layout of previous logic broadly. 
+                 Previous code had a box at x=350. Let's keep a decorative element or remove. 
+                 The prompt asked for "classical rectangle", "rounded corners", "gradient". 
+                 The previous specific path is gone. 
+                 I will omit the extra decorative icons for a cleaner look unless strictly required, 
+                 but to preserve the "variant" feel, I'll add a simple indicator or just keep it clean.
+            -->
+          </g>
+        </svg>
+      </div>
+
       <!-- Combined Mode (default) -->
       <div
         v-else-if="mode === 'combined'"
@@ -90,14 +192,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { vuetifyPalettes } from '~~/config/theme/palettes'
 
 const props = defineProps({
   score: {
     type: Number,
     required: true,
+  },
+  min: {
+    type: Number,
+    default: 0,
   },
   max: {
     type: Number,
@@ -109,8 +216,12 @@ const props = defineProps({
     >,
     default: 'medium',
   },
+  svgSize: {
+    type: String as PropType<'sm' | 'md' | 'lg'>,
+    default: 'md',
+  },
   mode: {
-    type: String as PropType<'badge' | 'stars' | 'combined'>,
+    type: String as PropType<'badge' | 'stars' | 'combined' | 'svg'>,
     default: 'combined',
   },
   layout: {
@@ -134,6 +245,10 @@ const props = defineProps({
     default: true,
   },
   showStars: {
+    type: Boolean,
+    default: true,
+  },
+  showScale: {
     type: Boolean,
     default: true,
   },
@@ -187,6 +302,58 @@ const formattedBadgeValue = computed(() =>
 
 const outOf20Label = computed(() => t('components.impactScore.outOf20'))
 
+const svgGradientId = useId()
+const svgMaxColor = vuetifyPalettes.light.primary
+const svgMinColor = vuetifyPalettes.light.red
+const svgTrackWidth = 300
+
+const sanitizeNumber = (value: number, fallback: number) =>
+  Number.isFinite(value) ? value : fallback
+
+const svgRangeMin = computed(() => sanitizeNumber(props.min, 0))
+const svgRangeMax = computed(() => sanitizeNumber(props.max, 20))
+// Display the raw score value (unclamped) while clamping only for the fill.
+const svgDisplayScore = computed(() => sanitizeNumber(props.score, 0))
+
+const svgT = computed(() => {
+  const min = svgRangeMin.value
+  const max = svgRangeMax.value
+
+  if (max <= min) {
+    return 0
+  }
+
+  const clamped = Math.min(Math.max(svgDisplayScore.value, min), max)
+  return (clamped - min) / (max - min)
+})
+
+const svgBarWidth = computed(() => {
+  const width = Math.round(svgTrackWidth * svgT.value)
+  return Math.min(svgTrackWidth, Math.max(0, width))
+})
+
+const svgDisplayValue = computed(() =>
+  n(svgDisplayScore.value, {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0,
+  })
+)
+
+const svgAriaLabel = computed(() =>
+  t('components.impactScore.svgAriaLabel', { score: svgDisplayValue.value })
+)
+
+const svgDimensions = computed(() => {
+  switch (props.svgSize) {
+    case 'sm':
+      return { width: 280, height: 94 }
+    case 'lg':
+      return { width: 420, height: 140 }
+    default:
+      return { width: 340, height: 113 }
+  }
+})
+
 const ratingSize = computed(() => {
   switch (props.size) {
     case 'small':
@@ -223,6 +390,9 @@ const shouldDisplayStars = computed(() => {
 })
 
 const tooltipLabel = computed(() => {
+  if (props.mode === 'svg') {
+    return svgAriaLabel.value
+  }
   if (
     (props.mode === 'badge' || props.mode === 'combined') &&
     shouldDisplayScore.value
@@ -254,14 +424,27 @@ const tooltipLabel = computed(() => {
 
 const layout = computed(() => props.layout)
 const size = computed(() => props.size)
+const svgSize = computed(() => props.svgSize)
 const showValue = computed(() => props.showValue)
 const mode = computed(() => props.mode)
+const showScale = computed(() => props.showScale)
 const flat = computed(() => props.flat)
 const badgeLayout = computed(() => props.badgeLayout)
 const badgeVariant = computed(() => props.badgeVariant)
 </script>
 
 <style scoped>
+.impact-score-svg {
+  display: inline-flex;
+  align-items: center;
+}
+
+.impact-score-svg .scoreSvg {
+  max-width: 100%;
+  height: auto;
+  font-family: 'Hanken Grotesk', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
 /* Stars Style */
 .impact-score {
   --impact-score-gap: 0.5rem;

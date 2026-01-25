@@ -1,0 +1,25 @@
+key: "REPARABILITY"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-tools"
+name:
+  default: "Reparability"
+  fr: "Réparabilité"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  default: "Reparability"
+  fr: "Réparabilité"
+scoreDescription:
+  default: "Composite score evaluating ease of repair through repairability index and spare parts availability."
+  fr: "Score composite évaluant la facilité de réparation à travers l'indice de réparabilité et la disponibilité des pièces détachées."
+scoreUtility:
+  default: "Higher reparability enables repairs instead of replacements, extending product life and reducing waste."
+  fr: "Une bonne réparabilité permet de réparer plutôt que remplacer, prolongeant la durée de vie et réduisant les déchets."

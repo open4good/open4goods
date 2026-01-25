@@ -110,4 +110,32 @@ describe('NudgeToolStepScores', () => {
 
     expect(wrapper.emitted('update:modelValue')).toEqual([[[]]])
   })
+
+  it('blocks toggling disabled scores', async () => {
+    const wrapper = mount(NudgeToolStepScores, {
+      props: {
+        modelValue: [],
+        scores: [
+          {
+            scoreName: 'esg',
+            title: 'ESG',
+            disabled: true,
+          },
+        ],
+      },
+      global: {
+        stubs: {
+          VRow: VRowStub,
+          VCol: VColStub,
+          VCard: VCardStub,
+          VIcon: VIconStub,
+          VTooltip: VTooltipStub,
+        },
+      },
+    })
+
+    await wrapper.find('.nudge-toggle-card').trigger('click')
+
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
 })

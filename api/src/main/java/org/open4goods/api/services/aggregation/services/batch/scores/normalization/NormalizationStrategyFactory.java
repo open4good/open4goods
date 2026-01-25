@@ -18,6 +18,7 @@ public final class NormalizationStrategyFactory {
             case SIGMA -> new SigmaNormalizationStrategy();
             case PERCENTILE -> new PercentileNormalizationStrategy();
             case MINMAX_FIXED -> new MinMaxFixedNormalizationStrategy();
+            case MINMAX_OBSERVED -> new MinMaxObservedNormalizationStrategy();
             case MINMAX_QUANTILE -> new MinMaxQuantileNormalizationStrategy();
             case FIXED_MAPPING -> new FixedMappingNormalizationStrategy();
             case BINARY -> new BinaryNormalizationStrategy();

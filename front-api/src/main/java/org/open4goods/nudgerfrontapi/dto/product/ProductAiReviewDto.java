@@ -24,6 +24,9 @@ public record ProductAiReviewDto(
         Integer totalTokens,
 
         @Schema(description = "Creation timestamp in epoch milliseconds", example = "1690972800000")
-        Long createdMs
+        Long createdMs,
+
+        @Schema(description = "Reason why generation failed if enoughData is false or review is missing")
+        String failureReason
 ) {
 }

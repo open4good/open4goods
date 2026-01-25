@@ -116,6 +116,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+
 import type {
   ProductTimelineDto,
   ProductTimelineEventDto,
@@ -267,6 +268,10 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
           event.type ?? ''
         )
     )
+    .map(event => ({
+      ...event,
+      timestamp: normalizeTimestamp(event.timestamp) ?? 0,
+    }))
     .sort((a, b) => a.timestamp - b.timestamp)
     .forEach((event, index) => {
       const type = event.type

@@ -1,5 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h, nextTick } from 'vue'
 import ProductAiReviewSection from './ProductAiReviewSection.vue'
@@ -21,7 +21,12 @@ vi.mock('@hcaptcha/vue3-hcaptcha', () => ({
   default: defineComponent({
     name: 'VueHcaptchaStub',
     emits: ['verify', 'expired', 'error'],
-    setup(_, { attrs }) {
+    setup(_, { attrs, expose, emit }) {
+      // Mock execute to simulate successful verification for testing flow
+      const execute = () => {
+        emit('verify', 'mock-token')
+      }
+      expose({ execute })
       return () => h('div', { class: 'vue-hcaptcha-stub', ...attrs })
     },
   }),
@@ -41,6 +46,21 @@ const ClientOnlyStub = defineComponent({
     return () => slots.default?.() ?? null
   },
 })
+
+// Mock the store
+const mockStartGeneration = vi.fn()
+const mockGetByGtin = vi.fn()
+const mockAcknowledgeCompletion = vi.fn() // Add this
+
+const mockStore = {
+  startGeneration: mockStartGeneration,
+  getByGtin: mockGetByGtin,
+  acknowledgeCompletion: mockAcknowledgeCompletion,
+}
+
+vi.mock('~/stores/useAiReviewGenerationStore', () => ({
+  useAiReviewGenerationStore: () => mockStore,
+}))
 
 const VIconStub = defineComponent({
   name: 'VIconStub',
@@ -312,7 +332,7 @@ const i18nMessages = {
           title: 'Request an AI summary',
           callToAction: {
             title: 'Request an AI review',
-            subtitle: 'Start a summary for this product.',
+            subtitleVariant: 'Start a summary for this product.',
           },
         },
         empty: 'No AI review is available for this product yet.',
@@ -434,6 +454,11 @@ const mountComponent = (
   })
 
 describe('ProductAiReviewSection', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetByGtin.mockReturnValue(null) // Default: no active generation
+  })
+
   it('renders the structured review content with highlighted sections', async () => {
     const review: AiReviewDto = {
       mediumTitle: 'Samsung TQ65S90D 2024 overview',
@@ -556,5 +581,33 @@ describe('ProductAiReviewSection', () => {
     await nextTick()
 
     expect(wrapper.find('#review-ref-6').exists()).toBe(true)
+  })
+
+  it('automatically transforms [n] reference into a link', async () => {
+    const review: AiReviewDto = {
+      summary: 'Details in [1].',
+      sources: defaultSources,
+    }
+
+    const wrapper = await mountComponent({ initialReview: review })
+    const summary = wrapper.find('.product-ai-review__summary')
+
+    expect(summary.html()).toContain(
+      '<a href="#review-ref-1" class="review-ref" data-source-id="1">1</a>'
+    )
+  })
+
+  it('automatically transforms [n, m] references into links', async () => {
+    const review: AiReviewDto = {
+      summary: 'Details in [1, 2].',
+      sources: defaultSources,
+    }
+
+    const wrapper = await mountComponent({ initialReview: review })
+    const summary = wrapper.find('.product-ai-review__summary')
+
+    expect(summary.html()).toContain(
+      '[<a href="#review-ref-1" class="review-ref" data-source-id="1">1</a>, <a href="#review-ref-2" class="review-ref" data-source-id="2">2</a>]'
+    )
   })
 })

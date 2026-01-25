@@ -69,6 +69,15 @@
         }
       },
       "iconAlt": "Icône du lanceur de l'application Nudger",
+      "search": {
+        "placeholders": [
+          "Smartphone reconditionné",
+          "Lave-linge économique",
+          "Jean made in France",
+          "Vélo électrique",
+          "Téléviseur 4K"
+        ]
+      },
       "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
 
       "highlights": [
@@ -76,10 +85,24 @@
           "title": "🌿 ImpactScore : Guider vos achats",
           "segments": [
             {
-              "text": "On va vous faire acheter moins pire pour la planète, grâce à notre évaluation environnementale innovante pour {products} produits dans"
+              "text": "Acheter moins pire pour la planète, grâce à notre"
             },
             {
-              "text": "{categories} catégories",
+              "text": "évaluation environnementale",
+              "to": "/impact-score"
+            },
+            {
+              "text": "innovante pour"
+            },
+            {
+              "text": "{impactScoreProducts}",
+              "to": "/impact-score"
+            },
+            {
+              "text": "produits dans"
+            },
+            {
+              "text": "{impactScoreCategories} catégories",
               "to": "/categories"
             }
           ]
@@ -88,15 +111,33 @@
           "title": "🇫🇷 Ouvert & éthique",
           "segments": [
             {
-              "text": "100% indépendant. Fait en france, hébergé en europe. Plus de {millions}M de produits en"
+              "text": "100% indépendant. Fait en France",
+              "icon": "breton-flag",
+              "iconPosition": "after"
             },
             {
-              "text": "données ouvertes.Nudger est un ",
+              "text": ", hébergé en Europe. Plus de"
+            },
+            {
+              "text": "73M",
               "to": "/opendata"
             },
             {
-              "text": "Logiciel libre",
+              "text": "de produits en"
+            },
+            {
+              "text": "données ouvertes.",
+              "to": "/opendata"
+            },
+            {
+              "text": "Nudger est aussi"
+            },
+            {
+              "text": "open source",
               "to": "/opensource"
+            },
+            {
+              "text": "et ne collecte aucune donnée personnelle."
             }
           ]
         },
@@ -104,18 +145,41 @@
           "title": "🫰 Comparateur de prix",
           "segments": [
             {
-              "text": "Sans se faire avoir sur les prix avec"
+              "text": "Sans se faire avoir sur les prix, avec les meilleures offres auprès de"
             },
             {
-              "text": "{partnersLink}.",
+              "text": "{partnersLink}",
               "to": "/partenaires"
             },
             {
-              "text": "Les meilleurs prix, l'historique neuf et occasion pour {products} produits"
+              "text": "commerçants. Achetez au meilleur moment avec l'historique neuf et occasion pour"
+            },
+            {
+              "text": "{priceHistoryProducts}",
+              "to": "/categories"
+            },
+            {
+              "text": "produits. Un exemple ?"
+            },
+            {
+              "text": "{randomProduct}",
+              "to": "{randomProductLink}"
             }
           ]
         }
       ],
+      "aiSummary": {
+        "title": "Synthèse IA communautaire",
+        "creditsLabel": "Crédits restants : {count}",
+        "creditsFallback": "Crédits restants : indisponible",
+        "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit et qui le partage avec les autres utilisateurs. A utiliser à bon escient, ce n'est gratuit que pour vous. ",
+        "reviewedProductsSuffix": "{reviewedProductsCount} fiches produits générées jusqu'à présent."
+      },
+      "example": {
+        "title": "Exemple ?",
+        "description": "Découvrez un produit au hasard pour explorer notre catalogue.",
+        "cta": "Voir ce produit"
+      },
       "agent": {
         "title": "Une question ?",
         "subtitle": "Posez votre question à notre agent IA expert Nudger."
@@ -652,6 +716,10 @@
         "new": "Neuf",
         "used": "Occasion"
       },
+      "searchMode": {
+        "semantic": "Recherche sémantique",
+        "text": "Recherche textuelle"
+      },
       "showMoreImpact": "Plus de filtres",
       "showMoreTechnical": "Plus de filtres",
       "technicalTitle": "Filtres techniques",
@@ -796,7 +864,8 @@
   "common": {
     "actions": {
       "goHome": "Retour à l'accueil",
-      "retry": "Réessayer"
+      "retry": "Réessayer",
+      "close": "Fermer"
     },
     "boolean": {
       "false": "Non",
@@ -807,7 +876,9 @@
     "impactScore": {
       "tooltip": "Qualité de l'impact évalué à {value} sur {max}",
       "tooltipBadge": "Qualité de l'impact évalué à {value} sur 20",
-      "outOf20": "/20"
+      "outOf20": "/20",
+      "scale": "Échelle : {min}–{max}",
+      "svgAriaLabel": "Score {score} sur 20"
     },
     "pageLoadingOverlay": {
       "label": "Chargement du contenu"
@@ -1992,7 +2063,7 @@
     "hero": {
       "eyebrow": "Explorer le catalogue",
       "title": "Les produits disponibles",
-      "subtitle": "Trouvez des produits, des marques et des références sélectionnés par Nudger dans chaque verticale."
+      "subtitle": "Rechercher dans {reviewed} produits évalués . Et dans {others} autres !"
     },
     "form": {
       "label": "Rechercher dans le catalogue",
@@ -2015,13 +2086,13 @@
     },
     "columns": {
       "verticals": {
-        "title": "Produits évalués",
+        "title": "Produits évalués ({count})",
         "emptyTitle": "Aucun résultat pour « {query} »",
         "emptyDescription": "Essayez un autre mot-clé ou élargissez votre recherche.",
         "unknownTitle": "Autres catégories"
       },
       "products": {
-        "title": "Produits non évalués",
+        "title": "Produits non évalués ({count})",
         "subtitle": "Produits trouvés sans catégorie associée. ",
         "emptyTitle": "Aucun produit pour « {query} »",
         "emptyDescription": "Essayez un autre mot-clé ou ajustez vos filtres."
@@ -2194,6 +2265,11 @@
         "agreement": "Je mandate Nudger pour rechercher et synthétiser les informations du {productName}. Dans une logique de sobriété et de partage, j'accepte également que ces données soient partagées à tous les utilisateurs de Nudger.",
         "bannerDescription": "Démarrer une synthèse du {productName}.",
         "bannerTitle": "Synthèse IA",
+        "callToAction": {
+          "title": "Aucune synthèse disponible",
+          "subtitle": "Demandez à notre IA de générer une synthèse pour ce produit.",
+          "subtitleVariant": "Nous mettons à votre disposition un outil puissant pour tout savoir du {bestName}"
+        },
         "cancel": "Annuler",
         "close": "Fermer",
         "description": "Nous utilisons des outils puissants d'IA, d'analyse et d'aggrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est couteuse (financièrement et énergétiquement). N'utilisez que si vous portez un intéret réel à ce produit, et si vous voulez nous aider, faîtes vos achats en passant par Nudger 😊",
@@ -2232,6 +2308,24 @@
         "failed": "La génération a échoué",
         "running": "Génération en cours ({step})",
         "success": "Synthèse disponible"
+      },
+      "generationPanel": {
+        "title": "Générations IA",
+        "quotaTitle": "{count} → Quota restant",
+        "expandPanel": "Afficher",
+        "collapsePanel": "Réduire",
+        "status": {
+          "generating": "Génération en cours...",
+          "success": "Terminé",
+          "error": "Échec"
+        },
+        "alert": {
+          "successTitle": "Résumé prêt !",
+          "successMessage": "Le résumé pour {product} a été généré avec succès.",
+          "errorTitle": "Échec de génération",
+          "errorMessage": "Impossible de générer le résumé pour {product}.",
+          "viewResult": "Voir le résumé"
+        }
       },
       "subtitle": {
         "one": "Une synthèse rédigée par notre IA à partir de {count} source vérifiée.",
@@ -2385,6 +2479,9 @@
       }
     },
     "hero": {
+      "aiReview": {
+        "label": "Synthèse IA"
+      },
       "aiSummary": {
         "community": "Les experts",
         "ecological": "Écologiquement",
@@ -2444,6 +2541,7 @@
       "viewSingleOffer": "Voir l'offre"
     },
     "impact": {
+      "endOfLife": "Produit plus officiellement commercialisé par {brand} ! Les durées de supports légales démarrent à partir du {onMarketEndDate}",
       "alternatives": {
         "title": "Moins cher, et meilleur pour la planète ?",
         "subtitle": "Découvrez des produits similaires avec un meilleur score d'impact, un prix égal ou plus accessible et des caracteristiques techniques similaires.",
@@ -2453,8 +2551,11 @@
         "untitled": "Produit sans nom",
         "viewProduct": "Voir la fiche {name}",
         "filters": {
-          "price": "Prix ≤ au vôtre",
-          "ecoscore": "Éco-score ≥ au vôtre"
+          "price": "Prix inférieur ou égal au produit actuel",
+          "ecoscore": "Éco-score supérieur ou égal au produit actuel",
+          "attributeGreater": "{label} supérieur ou égal à ce produit",
+          "attributeLower": "{label} inférieur ou égal à ce produit",
+          "attributeEqual": "{label} identique à ce produit"
         },
         "tooltips": {
           "price": "Afficher les produits dont le prix est inférieur ou égal à {value}.",
@@ -2527,6 +2628,16 @@
           },
           "statisticalMethod": {
             "title": "Méthode statistique",
+            "titles": {
+              "sigma": "Méthode statistique : Distribution Normale (Sigma)",
+              "percentile": "Méthode statistique : Percentile",
+              "minmax_fixed": "Méthode statistique : Bornes Fixes",
+              "minmax_observed": "Méthode statistique : Bornes Observées",
+              "minmax_quantile": "Méthode statistique : Bornes Quantiles",
+              "fixed_mapping": "Méthode statistique : Barème Fixe",
+              "binary": "Méthode statistique : Binaire",
+              "constant": "Méthode statistique : Constante"
+            },
             "sigma": {
               "bounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
               "scoring": "La note est calculée en comparant la valeur aux bornes ±{sigmaK}σ autour de la moyenne.",
@@ -2538,6 +2649,9 @@
             },
             "minmax_fixed": {
               "scoring": "La note est ramenée à une échelle commune via les bornes fixes [{fixedMin}{unit} ; {fixedMax}{unit}]."
+            },
+            "minmax_observed": {
+              "scoring": "La note est calculée en projetant la valeur sur l’échelle des valeurs observées sur le marché [min: {worst}{unit} ; max: {best}{unit}]."
             },
             "minmax_quantile": {
               "scoring": "La note est calculée via des bornes par quantiles [{quantileLow}{unit} ; {quantileHigh}{unit}] pour limiter l'effet des valeurs extrêmes."
@@ -2555,13 +2669,14 @@
           },
           "statisticalMethodInfo": {
             "title": "Pourquoi cette méthode ?",
-            "sigma": "Cette méthode est définie dans la configuration de l'attribut pour comparer des valeurs continues. σ est l’écart-type et {sigmaK}σ décrit l’intervalle autour de la moyenne qui couvre la plupart des valeurs.",
-            "percentile": "Cette méthode est choisie quand les valeurs sont peu nombreuses ou très discrètes. La configuration privilégie alors un classement relatif dans la distribution.",
-            "minmax_fixed": "Cette méthode est appliquée quand l'attribut possède des bornes stables définies dans la configuration. Elle convient bien aux valeurs normées.",
-            "minmax_quantile": "Cette méthode est utilisée quand il faut limiter l'effet des valeurs extrêmes. La configuration s'appuie sur des quantiles pour conserver une comparaison relative.",
-            "fixed_mapping": "Cette méthode est choisie pour des valeurs catégorielles avec un barème fixe défini dans la configuration.",
-            "binary": "Cette méthode s'applique lorsque l'attribut est évalué par seuil. La configuration définit la valeur de passage.",
-            "constant": "Cette méthode est un fallback défini dans la configuration lorsque l'attribut doit rester stable."
+            "sigma": "Choisie pour les données continues qui suivent une courbe en cloche. Contrairement aux bornes fixes, elle s'adapte automatiquement à la distribution réelle des produits.",
+            "percentile": "Privilégiée quand les valeurs sont dispersées ou peu nombreuses. Elle classe les produits les uns par rapport aux autres plutôt que sur une échelle absolue.",
+            "minmax_fixed": "Utilisée quand les bornes (min/max) sont connues et stables (ex: normes officielles). Contrairement à l'approche Sigma, elle ne dépend pas de la distribution des autres produits.",
+            "minmax_observed": "Utilisée pour comparer le produit par rapport à l'offre réelle du marché. La note dépend directement des meilleures et pires performances actuellement disponibles.",
+            "minmax_quantile": "Alternative à l'approche Sigma pour réduire l'impact des valeurs extrêmes. Elle se concentre sur le cœur de la distribution pour une comparaison plus juste.",
+            "fixed_mapping": "Idéale pour les critères qualitatifs (ex: classe énergétique). Elle permet d'attribuer une note précise à chaque valeur possible, sans calcul statistique.",
+            "binary": "La méthode la plus simple : ça passe ou ça casse. Utilisée pour les critères binaires (présence/absence) où aucune nuance n'est nécessaire.",
+            "constant": "Méthode de repli utilisée rarement, pour attribuer une note fixe indépendamment des caractéristiques du produit."
           }
         },
         "repairability_index": {
@@ -2637,6 +2752,7 @@
       "overview": "Aperçu",
       "alternatives": "Alternatives",
       "price": "Prix",
+      "timeline": "Moments clés",
       "submenus": {
         "price": {
           "bestOffers": "Meilleurs prix",
@@ -2654,13 +2770,28 @@
       "fabLabel": "Besoin d'aide personnalisée ?"
     },
     "price": {
+      "competition": {
+        "low": "Concurrence faible !",
+        "correct": "Concurrence correcte !",
+        "good": "Bonne Concurrence !"
+      },
       "condition": {
+        "NEW": "Neuf",
         "new": "Neuf",
+        "OCCASION": "Occasion",
         "occasion": "Occasion",
         "refurbished": "Reconditionné",
         "unknown": "Inconnu",
         "used": "Occasion"
       },
+      "table": {
+        "merchant": "Marchand",
+        "price": "Prix",
+        "condition": "État"
+      },
+      "newOffersOnly": "Afficher uniquement les offres neuves",
+      "viewDeal": "Voir l'offre",
+      "history": "Historique des prix",
       "noOffersBanner": "Pas d'offres actuellement !",
       "headers": {
         "condition": "État",
@@ -2676,8 +2807,8 @@
       "metrics": {
         "average": "Prix moyen",
         "bestOffer": "Meilleure offre",
-        "highest": "Prix le plus haut",
-        "lowest": "Prix le plus bas",
+        "highest": "Le plus haut",
+        "lowest": "Le plus bas",
         "viewOffer": "Ouvrir l'offre chez {source}",
         "unknownSource": "Source inconnue"
       },

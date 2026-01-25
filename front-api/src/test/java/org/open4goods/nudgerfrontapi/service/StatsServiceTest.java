@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ class StatsServiceTest {
         AffiliationPartnerService partnerService = mock(AffiliationPartnerService.class);
         OpenDataService openDataService = mock(OpenDataService.class);
         ProductRepository productRepository = mock(ProductRepository.class);
+        ProductMappingService productMappingService = mock(ProductMappingService.class);
 
         Resource defaultResource = resource("_default.yml", DEFAULT_YAML);
         Resource enabledResource = resource("enabled.yml", ENABLED_YAML);
@@ -42,9 +44,13 @@ class StatsServiceTest {
         given(openDataService.totalItemsGTIN()).willReturn(1_234L);
         given(openDataService.totalItemsISBN()).willReturn(567L);
         given(productRepository.countMainIndexHavingVertical("enabled")).willReturn(42L);
+        given(productRepository.countMainIndexHavingImpactScore()).willReturn(5_925L);
+        given(productRepository.countMainIndexWithoutVertical()).willReturn(3_210L);
+        given(productRepository.countMainIndexValidAndRated()).willReturn(9_876L);
+        given(productRepository.countMainIndexValidAndReviewed("fr")).willReturn(4_321L);
         given(partnerService.getPartners()).willReturn(List.of(mock(AffiliationPartner.class), mock(AffiliationPartner.class)));
 
-        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository);
+        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, productMappingService);
 
         CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
 
@@ -52,8 +58,12 @@ class StatsServiceTest {
         assertThat(dto.affiliationPartnersCount()).isEqualTo(2);
         assertThat(dto.gtinOpenDataItemsCount()).isEqualTo(1_234L);
         assertThat(dto.isbnOpenDataItemsCount()).isEqualTo(567L);
+        assertThat(dto.impactScoreProductsCount()).isEqualTo(5_925L);
+        assertThat(dto.productsWithoutVerticalCount()).isEqualTo(3_210L);
         assertThat(dto.productsCountByCategory()).isEqualTo(Map.of("enabled", 42L));
         assertThat(dto.productsCountSum()).isEqualTo(42L);
+        assertThat(dto.ratedProductsCount()).isEqualTo(9_876L);
+        assertThat(dto.reviewedProductsCount()).isEqualTo(4_321L);
     }
 
     private Resource resource(String filename, String yaml) {
@@ -63,5 +73,14 @@ class StatsServiceTest {
                 return filename;
             }
         };
+    }
+    @Test
+    void randomPassesVerticalId() {
+        ProductRepository productRepository = mock(ProductRepository.class);
+        StatsService service = new StatsService(mock(SerialisationService.class), mock(ResourcePatternResolver.class), mock(AffiliationPartnerService.class), mock(OpenDataService.class), productRepository, mock(ProductMappingService.class));
+        
+        service.random(5, 2, "my-vertical", DomainLanguage.fr);
+        
+        verify(productRepository).getRandomProducts(5, 2, "my-vertical");
     }
 }

@@ -33,6 +33,12 @@ public class AiReviewHolder {
 	 */
     @io.swagger.v3.oas.annotations.media.Schema(description = "Creation timestamp in epoch milliseconds")
 	private Long createdMs;
+	
+	/**
+	 * Reason why generation failed (e.g., "INSUFFICIENT_SOURCES", "GENERATION_ERROR")
+	 */
+    @io.swagger.v3.oas.annotations.media.Schema(description = "Reason why generation failed if enoughData is false")
+	private String failureReason;
 
 	public AiReview getReview() {
 		return review;
@@ -73,7 +79,14 @@ public class AiReviewHolder {
 	public void setTotalTokens(Integer totalTokens) {
 		this.totalTokens = totalTokens;
 	}
-	
+
+	public String getFailureReason() {
+		return failureReason;
+	}
+
+	public void setFailureReason(String failureReason) {
+		this.failureReason = failureReason;
+	}
 	
 	
 

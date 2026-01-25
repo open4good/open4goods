@@ -65,6 +65,11 @@ public final class ParticipatingScoreHelper {
             }
         }
 
+        aggregates.entrySet().removeIf(entry -> {
+            double total = entry.getValue().values().stream().mapToDouble(Double::doubleValue).sum();
+            return Double.compare(total, 0d) == 0;
+        });
+
         aggregates.replaceAll((aggregate, weights) -> normalize(aggregate, weights));
         return aggregates;
     }
@@ -84,9 +89,6 @@ public final class ParticipatingScoreHelper {
 
     private static Map<String, Double> normalize(String aggregateName, Map<String, Double> weights) {
         double total = weights.values().stream().mapToDouble(Double::doubleValue).sum();
-        if (Double.compare(total, 0d) == 0) {
-            throw new IllegalStateException("Ponderation sum is zero for aggregate " + aggregateName);
-        }
         Map<String, Double> normalized = new HashMap<>();
         weights.forEach((score, ponderation) -> normalized.put(score, ponderation / total));
         return normalized;

@@ -38,6 +38,12 @@ export interface NudgeToolScoreDto {
      */
     mdiIcon?: string;
     /**
+     * Whether the score should be disabled in the UI.
+     * @type {boolean}
+     * @memberof NudgeToolScoreDto
+     */
+    disabled?: boolean;
+    /**
      * Localised title of the nudge.
      * @type {string}
      * @memberof NudgeToolScoreDto
@@ -71,6 +77,7 @@ export function NudgeToolScoreDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'scoreName': json['scoreName'] == null ? undefined : json['scoreName'],
         'scoreMinValue': json['scoreMinValue'] == null ? undefined : json['scoreMinValue'],
         'mdiIcon': json['mdiIcon'] == null ? undefined : json['mdiIcon'],
+        'disabled': json['disabled'] == null ? undefined : json['disabled'],
         'title': json['title'] == null ? undefined : json['title'],
         'description': json['description'] == null ? undefined : json['description'],
     };
@@ -90,6 +97,7 @@ export function NudgeToolScoreDtoToJSONTyped(value?: NudgeToolScoreDto | null, i
         'scoreName': value['scoreName'],
         'scoreMinValue': value['scoreMinValue'],
         'mdiIcon': value['mdiIcon'],
+        'disabled': value['disabled'],
         'title': value['title'],
         'description': value['description'],
     };

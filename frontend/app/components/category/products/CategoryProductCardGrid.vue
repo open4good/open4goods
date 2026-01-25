@@ -86,7 +86,7 @@
           <ProductDesignation
             :product="product"
             variant="card"
-            :title-tag="normalizedSize === 'big' ? 'h2' : 'h3'"
+            :title-tag="normalizedSize === 'big' ? 'h4' : 'h5'"
             title-class="category-product-card-grid__title"
           />
         </div>

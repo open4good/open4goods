@@ -97,7 +97,7 @@ public class Score  implements Validable {
 		}
 		
 		if (null != absolute) {
-			sb.append(relativ.getValue()).append("--> abs:(").append(absolute).append(")");
+			sb.append(absolute.getValue()).append("--> abs:(").append(absolute).append(")");
 		}
 		
 		

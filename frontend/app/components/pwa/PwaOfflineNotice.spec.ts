@@ -1,6 +1,14 @@
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, ref, nextTick } from 'vue'
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 
 const messages: Record<string, string> = {
   'pwa.offline.title': 'Connection lost',
@@ -121,6 +129,7 @@ const mountNotice = () =>
 
 describe('PwaOfflineNotice', () => {
   beforeEach(() => {
+    vi.useFakeTimers()
     resetState()
     displayMock.smAndDown.value = false
     navigatorOnlineSpy?.mockRestore()
@@ -129,6 +138,10 @@ describe('PwaOfflineNotice', () => {
       .spyOn(window.navigator, 'onLine', 'get')
       .mockReturnValue(false)
     reloadSpy = vi.spyOn(window.location, 'reload').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it('renders the desktop tooltip indicator when offline', async () => {

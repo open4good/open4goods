@@ -41,10 +41,10 @@ describe('nudge tool filters', () => {
   it('creates score filters using score min values', () => {
     const filters = buildScoreFilters(
       [
-        { scoreName: 'IMPACT_SCORE', scoreMinValue: 70 },
+        { scoreName: 'IMPACT_SCORE', scoreMinValue: 70, disabled: true },
         { scoreName: 'REPAIRABILITY', scoreMinValue: 6 },
       ],
-      ['REPAIRABILITY']
+      ['IMPACT_SCORE', 'REPAIRABILITY']
     )
 
     expect(filters).toEqual([

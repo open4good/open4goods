@@ -238,7 +238,7 @@ public class CategoriesController {
         Pageable pageable = PageRequest.of(0, TOP_PRODUCTS_LIMIT,
                 Sort.by(Sort.Order.desc(SORT_FIELD_IMPACT_SCORE)));
 
-        SearchService.SearchResult result = searchService.search(pageable, null, null, null, filters, false);
+        SearchService.SearchResult result = searchService.search(pageable, null, null, null, filters, false, null);
         Locale locale = resolveLocale(domainLanguage);
 
         Map<Long, ProductDto> uniqueProducts = new LinkedHashMap<>();

@@ -32,7 +32,7 @@ const props = withDefaults(
   }>(),
   {
     variant: 'card',
-    titleTag: 'h3',
+    titleTag: 'h5',
     titleClass: 'product-designation__title',
     descriptionClass: 'product-designation__description',
     showShortDescription: undefined,

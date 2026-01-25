@@ -4,7 +4,7 @@ import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import ProductImpactSubscoreExplanation from './ProductImpactSubscoreExplanation.vue'
 import type { ScoreView } from './impact-types'
-import enUS from '../../../../../i18n/locales/en-US.json'
+import enUS from '../../../../i18n/locales/en-US.json'
 
 describe('ProductImpactSubscoreExplanation', () => {
   const i18n = createI18n({
@@ -20,11 +20,20 @@ describe('ProductImpactSubscoreExplanation', () => {
     props: ['icon'],
     setup(props) {
       return () =>
-        h(
-          'span',
-          { class: 'v-icon-stub', 'data-icon': props.icon },
-          props.icon
-        )
+        h('span', { class: 'v-icon-stub', 'data-icon': props.icon }, props.icon)
+    },
+  })
+
+  const VChipStub = defineComponent({
+    name: 'VChipStub',
+    setup(_props, { slots }) {
+      return () => h('span', { class: 'v-chip-stub' }, slots.default?.())
+    },
+  })
+  const VCardStub = defineComponent({
+    name: 'VCardStub',
+    setup(_props, { slots }) {
+      return () => h('div', { class: 'v-card-stub' }, slots.default?.())
     },
   })
 
@@ -32,6 +41,8 @@ describe('ProductImpactSubscoreExplanation', () => {
     plugins: [i18n],
     stubs: {
       VIcon: VIconStub,
+      VChip: VChipStub,
+      VCard: VCardStub,
     },
   }
 

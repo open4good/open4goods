@@ -158,6 +158,7 @@ nudgeToolConfig:
     - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
       scoreMinValue: 3.0
       mdiIcon: "mdi-scale-balance"
+      disabled: true
       title:
         en: "ESG criteria"
         fr: "Critères ESG"
@@ -193,6 +194,72 @@ nudgeToolConfig:
         fr: "Voir les produits"
 
   subsets:
+    ################
+    # Impact Score
+    ################
+    - id: "impact_high" # Unique identifier for the subset
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "LOWER_THAN"
+          value: "2"
+      image: "example-image.png"
+      url:
+        en: "high-impact"
+        fr: "petit-impact"
+      caption:
+        en: "< 2"
+        fr: "< 2"
+      title:
+        en: "Terrible impact "
+        fr: "Mauvais"
+      description:
+        en: "Products with an ImpactScore lower than 2/5"
+        fr: "Produits avec un ImpactScore inférieur à 2/5"
+
+    - id: "impact_medium"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "GREATER_THAN"
+          value: "2"
+        - field: "scores.ECOSCORE.value"
+          operator: "LOWER_THAN"
+          value: "4"
+      image: "example-image.png"
+      url:
+        en: "medium-impact"
+        fr: "impact-moyen"
+      caption:
+        en: "> 2 < 4"
+        fr: "> 2 < 4"
+      title:
+        en: "Relativ impact"
+        fr: "Moyen"
+      description:
+        en: "Products with an ImpactScore between 2/5 and 4/5"
+        fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
+
+    - id: "impact_low"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "GREATER_THAN"
+          value: "4"
+      image: "example-image.png"
+      url:
+        en: "impact-moderate"
+        fr: "impact-modere"
+      caption:
+        en: "> 4"
+        fr: "> 4"
+      title:
+        en: "Moderated impact"
+        fr: "Bon"
+      description:
+        en: "Products with an ImpactScore greater than 4/5"
+        fr: "Produits avec un ImpactScore supérieur à 4/5"
+
     # Price Subsets
     - id: "price_lower_400"
       group: "price"

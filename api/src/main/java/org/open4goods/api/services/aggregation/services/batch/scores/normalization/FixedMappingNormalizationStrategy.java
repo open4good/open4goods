@@ -33,7 +33,7 @@ public class FixedMappingNormalizationStrategy implements NormalizationStrategy 
             mapped = mapping.get(value.toString());
         }
         if (mapped == null) {
-            throw new ValidationException("Missing mapping entry for value " + key);
+            throw new ValidationException("Missing mapping entry for value " + key + ", attribute : " + attributeConfig);
         }
 
         double scaled = Math.max(resolveScaleMin(attributeConfig), Math.min(resolveScaleMax(attributeConfig), mapped));

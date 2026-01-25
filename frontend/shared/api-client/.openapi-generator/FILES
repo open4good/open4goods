@@ -168,6 +168,7 @@ models/TeamProperties.ts
 models/UploadedLabel.ts
 models/VerticalConfigDto.ts
 models/VerticalConfigFullDto.ts
+models/VerticalStatsDto.ts
 models/VerticalSubsetDto.ts
 models/WikiPageConfig.ts
 models/XwikiContentBlocDto.ts

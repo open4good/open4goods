@@ -56,7 +56,6 @@ commonAttributes:
   - HDMI_PORTS_QUANTITY
   - NOMBRE DE PORT ETHERNET LAN (RJ-45)
   - TECHNOLOGIES HISENSE (AV/TV)
-  - URLIMAGEORIGINAL
   - COMPATIBLE AVEC AMAZON ALEXA
   - LARGEUR (SANS SUPPORT)
   - SYSTÈME D'EXPLOITATION INSTALLÉ
@@ -126,7 +125,6 @@ commonAttributes:
   - FORME D'ÉCRAN
   - WI-FI DIRECT
   - MODE JEU
-  - MODES SMART
   - DIAGONALE D'ÉCRAN (CM)
   - RECHERCHE AUTOMATIQUE DES CANAUX
   - SUPPORT DE DEX SANS FIL
@@ -300,7 +298,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 3.1
+      scoreMinValue: 2
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -309,7 +307,7 @@ nudgeToolConfig:
         en: "Televisions with a low energy consumption"
         fr: "Téléviseurs avec une faible consommation énergétique"
     - scoreName: "DURABILITY"
-      scoreMinValue: 2.6
+      scoreMinValue: 2
       mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
@@ -319,7 +317,7 @@ nudgeToolConfig:
         fr: "Téléviseurs avec une bonne durabilité"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 3.8
+      scoreMinValue: 2
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -328,7 +326,7 @@ nudgeToolConfig:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
     - scoreName: "ESG"
-      scoreMinValue: 2.6
+      scoreMinValue: 2
       mdiIcon: "mdi-scale-balance"
       title:
         en: "ESG criterias"
@@ -362,6 +360,72 @@ nudgeToolConfig:
         en: "Continue"
         fr: "Continuer"
   subsets:
+    ################
+    # Impact Score
+    ################
+    - id: "impact_bad" # Unique identifier for the subset
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "LOWER_THAN"
+          value: "1.5"
+      image: "example-image.png"
+      url:
+        en: "high-impact"
+        fr: "mauvais-ecoscore"
+      caption:
+        en: "Bad (< 1.5)"
+        fr: "Mauvais (< 1.5)"
+      title:
+        en: "Bad Ecoscore"
+        fr: "Mauvais Ecoscore"
+      description:
+        en: "Products with a bad Ecoscore (lower tier)"
+        fr: "Produits avec un mauvais Ecoscore (tier inférieur)"
+
+    - id: "impact_medium"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "GREATER_THAN"
+          value: "1.5"
+        - field: "scores.ECOSCORE.value"
+          operator: "LOWER_THAN"
+          value: "3"
+      image: "example-image.png"
+      url:
+        en: "medium-impact"
+        fr: "ecoscore-moyen"
+      caption:
+        en: "Medium (1.5 - 3)"
+        fr: "Moyen (1.5 - 3)"
+      title:
+        en: "Medium Ecoscore"
+        fr: "Ecoscore Moyen"
+      description:
+        en: "Products with a medium Ecoscore (middle tier)"
+        fr: "Produits avec un Ecoscore moyen (tier intermédiaire)"
+
+    - id: "impact_good"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "GREATER_THAN"
+          value: "3"
+      image: "example-image.png"
+      url:
+        en: "low-impact"
+        fr: "bon-ecoscore"
+      caption:
+        en: "Good (> 3)"
+        fr: "Bon (> 3)"
+      title:
+        en: "Good Ecoscore"
+        fr: "Bon Ecoscore"
+      description:
+        en: "Products with a good Ecoscore (top tier)"
+        fr: "Produits avec un bon Ecoscore (tier supérieur)"
+
     ################
     # Price
     ################

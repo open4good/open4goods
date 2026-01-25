@@ -12,6 +12,8 @@ const i18n = createI18n({
       'components.impactScore.tooltip': 'Score: {value} / {max}',
       'components.impactScore.tooltipBadge': 'Score: {value} / 20',
       'components.impactScore.outOf20': '/20',
+      'components.impactScore.scale': 'Scale: {min}-{max}',
+      'components.impactScore.svgAriaLabel': 'Score {score} out of 20',
     },
   },
 })
@@ -188,5 +190,72 @@ describe('ImpactScore', () => {
     expect(badge.classes()).toContain('impact-score-badge--corner')
     expect(wrapper.text()).toContain('16.0')
     expect(wrapper.text()).toContain('/20')
+  })
+
+  it('renders the svg variant with a scaled bar', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 13,
+        min: 0,
+        max: 20,
+        mode: 'svg',
+        svgSize: 'md',
+      },
+      global: globalOptions,
+    })
+
+    const svg = wrapper.find('svg.scoreSvg')
+    expect(svg.exists()).toBe(true)
+    expect(svg.attributes('aria-label')).toBe('Score 13 out of 20')
+
+    const progressRect = wrapper
+      .findAll('rect')
+      .find(
+        rect =>
+          rect.attributes('x') === '0' &&
+          rect.attributes('y') === '98' &&
+          rect.attributes('width') !== '300'
+      )
+
+    // Expected width based on calculation logic (same as before just verifying existence and rough size)
+    // 13/20 = 0.65 -> 0.65 * 300 = 195
+    expect(progressRect?.attributes('width')).toBe('195')
+  })
+
+  it('generates unique clipPath ids for multiple svg instances', () => {
+    const wrapper = mount(
+      defineComponent({
+        components: { ImpactScore },
+        template: `
+          <div>
+            <ImpactScore mode="svg" :score="10" :min="0" :max="20" />
+            <ImpactScore mode="svg" :score="15" :min="0" :max="20" />
+          </div>
+        `,
+      }),
+      {
+        global: globalOptions,
+      }
+    )
+
+    const gradientIds = wrapper
+      .findAll('linearGradient')
+      .map(node => node.attributes('id'))
+    expect(new Set(gradientIds).size).toBe(gradientIds.length)
+  })
+
+  it('hides the scale label when showScale is false', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 8,
+        min: 0,
+        max: 20,
+        mode: 'svg',
+        showScale: false,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).not.toContain('Scale:')
   })
 })

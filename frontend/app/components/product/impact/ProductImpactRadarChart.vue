@@ -166,7 +166,6 @@ const option = computed<EChartsOption | null>(() => {
     radar: {
       indicator,
       radius: '64%',
-      center: ['50%', '45%'],
       axisName: {
         fontSize: 13,
       },

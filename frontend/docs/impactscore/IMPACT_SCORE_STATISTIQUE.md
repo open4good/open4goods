@@ -79,7 +79,19 @@ s = clamp(n\times S_{max}, 0, S_{max})
 
 Usage : notes normatives (0–10), unités bornées “standard”.
 
-## 5) Min–max par quantiles (MINMAX_QUANTILE)
+## 5) Min–max observé (MINMAX_OBSERVED)
+
+Si l’attribut n’a pas de bornes stables mais qu’on veut rester relatif au marché, on utilise les bornes observées
+dans le batch courant \([x_{min}, x_{max}]\) :
+\[
+n = \frac{x-x_{min}}{x_{max}-x_{min}}
+\quad ;\quad
+s = clamp(n\times S_{max}, 0, S_{max})
+\]
+
+**Attention** : les scores évoluent avec le catalogue et peuvent être sensibles aux outliers.
+
+## 6) Min–max par quantiles (MINMAX_QUANTILE)
 
 Pour réduire l’influence des outliers tout en restant relatif :
 - remplacer \(a\) et \(b\) par des quantiles \(q_{low}\) et \(q_{high}\) (ex : p5/p95)
@@ -87,13 +99,13 @@ Pour réduire l’influence des outliers tout en restant relatif :
 
 Nécessite une estimation de quantiles (stockage valeurs ou estimateur streaming).
 
-## 6) Barème fixe (FIXED_MAPPING)
+## 7) Barème fixe (FIXED_MAPPING)
 
 Ex : classe énergétique {A,B,C,D,E,F,G}
 - mapping direct vers un score 0..5 selon table.
 - policy si valeur non mappée : ERROR ou NEUTRAL ou WORST.
 
-## 7) Inversion (impactBetterIs)
+## 8) Inversion (impactBetterIs)
 
 Après calcul du score \(s\) :
 - si `impactBetterIs = LOWER` :
@@ -102,7 +114,7 @@ s' = S_{max} + S_{min} - s
 \]
 - sinon : \(s'=s\)
 
-## 8) Échelle finale stable 0–20 (poids)
+## 9) Échelle finale stable 0–20 (poids)
 
 Si sous-scores sont sur 0..5 :
 - normaliser les poids pour \(\sum w_i = 4\).
@@ -112,7 +124,7 @@ IS = \sum_i (s_i \times w'_i)
 \]
 avec \(w'_i = w_i \times 4/\sum w\).
 
-## 9) Métadonnées UI recommandées
+## 10) Métadonnées UI recommandées
 
 Pour rendre l’explication et la dataviz correctes :
 - `normalizationMethod`

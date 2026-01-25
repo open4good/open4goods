@@ -114,6 +114,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	// New fields for batch tracking.
 	private final File trackingFolder;
 
+    private final List<ReviewGenerationHook> hooks;
+
 	private final ObjectMapper objectMapper;
 	private static final String AI_SOURCE_NAME = "AI";
 	private static final String CITATIONS_METADATA_KEY = "citations";
@@ -137,14 +139,15 @@ public class ReviewGenerationService implements HealthIndicator {
 	public ReviewGenerationService(ReviewGenerationConfig properties, GoogleSearchService googleSearchService,
 			UrlFetchingService urlFetchingService, PromptService genAiService, BatchPromptService batchAiService,
 			MeterRegistry meterRegistry, ProductRepository productRepository, ReviewGenerationPreprocessingService preprocessingService,
-            VerticalsConfigService verticalsConfigService) {
+            VerticalsConfigService verticalsConfigService, List<ReviewGenerationHook> hooks) {
 		this.properties = properties;
 		this.genAiService = genAiService;
 		this.batchAiService = batchAiService;
 		this.meterRegistry = meterRegistry;
 		this.productRepository = productRepository;
-		this.preprocessingService = preprocessingService;
+        this.preprocessingService = preprocessingService;
         this.verticalsConfigService = verticalsConfigService;
+        this.hooks = hooks;
 		this.executorService = new ThreadPoolExecutor(properties.getThreadPoolSize(), properties.getThreadPoolSize(),
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
 				new ThreadPoolExecutor.AbortPolicy());
@@ -355,16 +358,19 @@ public class ReviewGenerationService implements HealthIndicator {
 			} catch (NotEnoughDataException e) {
 				logger.warn("Not enought data for generating ai review for {}", product);
 				holder.setEnoughData(false);
+				holder.setFailureReason("INSUFFICIENT_SOURCES");
 				status.setResult(holder);
 				status.setStatus(ReviewGenerationStatus.Status.FAILED);
 				status.setErrorMessage("Not enough data to generate an AI review for this product.");
 				status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR, status.getErrorMessage(), null);
 				meterRegistry.counter("review.generation.failed").increment();
 				lastGenerationFailed = true;
-				lastGenerationFailed = true;
+
 			} catch (Throwable e) {
                 e.printStackTrace();
 				logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
+				holder.setEnoughData(false);
+				holder.setFailureReason("GENERATION_ERROR");
 				status.setStatus(ReviewGenerationStatus.Status.FAILED);
 				status.setErrorMessage(e.getMessage());
 				status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR, status.getErrorMessage(), null);
@@ -375,6 +381,18 @@ public class ReviewGenerationService implements HealthIndicator {
 				computeTimings(status);
 				totalProcessed.incrementAndGet();
 			}
+
+            
+            // Execute hooks (enrichment/standard aggregation)
+            if (status.getStatus() == ReviewGenerationStatus.Status.SUCCESS) {
+                try {
+                    hooks.forEach(hook -> hook.onReviewGenerated(product));
+                } catch (Exception e) {
+                    logger.error("Error executing review generation hooks for UPC {}: {}", upc, e.getMessage(), e);
+                    // We do not fail the overall process if hooks fail, but we log it.
+                }
+            }
+
 			product.getReviews().put("fr", holder);
 			productRepository.forceIndex(product);
 		});
@@ -612,6 +630,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				AiReviewHolder holder = new AiReviewHolder();
 				holder.setCreatedMs(Instant.now().toEpochMilli());
 				holder.setEnoughData(false);
+				holder.setFailureReason("INSUFFICIENT_SOURCES");
 				product.getReviews().put("fr", holder);
 				productRepository.index(product);
 			} catch (Exception e) {
@@ -660,7 +679,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	 */
 	@Scheduled(fixedDelayString = "${review.generation.batch-poll-interval:PT5M}")
 	public void checkBatchJobStatuses() {
-		// TODO : ADD LOG
+		logger.info("Executing scheduled batch job status check...");
 		File[] trackingFiles = trackingFolder
 				.listFiles((dir, name) -> name.startsWith("tracking_") && name.endsWith(".json"));
 		if (trackingFiles == null || trackingFiles.length == 0) {
@@ -759,6 +778,14 @@ public class ReviewGenerationService implements HealthIndicator {
 					holder.setReview(newReview);
 					holder.setEnoughData(true);
 					product.getReviews().put("fr", holder);
+                    
+                    // Execute hooks
+                    try {
+                        hooks.forEach(hook -> hook.onReviewGenerated(product));
+                    } catch (Exception e) {
+                        logger.error("Error executing batch review generation hooks for product {}: {}", productId, e.getMessage(), e);
+                    }
+
 					productRepository.forceIndex(product);
 					updateBatchStatus(product.getId(), ReviewGenerationStatus.Status.SUCCESS, null);
 					logger.info("Updated review for product with ID {}", productId);
@@ -1005,15 +1032,26 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (!properties.isResolveUrl() || review == null) {
 			return review;
 		}
-
 		List<AiReview.AiSource> updatedSources = review.getSources() == null ? List.of() : review.getSources().stream().map(source -> {
 			String originalUrl = source.getUrl();
 			String resolvedUrl = resolveUrl(originalUrl);
+
+			if (isExcludedDomain(resolvedUrl)) {
+				logger.info("URL {} removed because it matches an excluded domain.", resolvedUrl);
+				return null;
+			}
+			if (!isValidUrl(resolvedUrl)) {
+				logger.warn("URL {} removed because it is invalid or unreachable.", resolvedUrl);
+				return null;
+			}
+
 			if (originalUrl != null && !originalUrl.equals(resolvedUrl)) {
 				return new AiReview.AiSource(source.getNumber(), source.getName(), source.getDescription(), resolvedUrl);
 			}
 			return source;
-		}).toList();
+		})
+		.filter(Objects::nonNull)
+		.toList();
 
 		ReferenceNormalization normalization = new ReferenceNormalization(
 				review.getDescription(),
@@ -1319,16 +1357,16 @@ public class ReviewGenerationService implements HealthIndicator {
 		String technicalReviewNovice = normalizer.normalize(review.getTechnicalReviewNovice());
 		String technicalReviewIntermediate = normalizer.normalize(review.getTechnicalReviewIntermediate());
 		String technicalReviewAdvanced = normalizer.normalize(review.getTechnicalReviewAdvanced());
-		
+
 		String ecologicalReviewNovice = normalizer.normalize(review.getEcologicalReviewNovice());
 		String ecologicalReviewIntermediate = normalizer.normalize(review.getEcologicalReviewIntermediate());
 		String ecologicalReviewAdvanced = normalizer.normalize(review.getEcologicalReviewAdvanced());
-		
+
 		String communityReviewNovice = normalizer.normalize(review.getCommunityReviewNovice());
 		String communityReviewIntermediate = normalizer.normalize(review.getCommunityReviewIntermediate());
 
 		String communityReviewAdvanced = normalizer.normalize(review.getCommunityReviewAdvanced());
-		
+
 		String summary = normalizer.normalize(review.getSummary());
 		String technicalOneline = normalizer.normalize(review.getTechnicalOneline());
 		String technicalShortReview = normalizer.normalize(review.getTechnicalShortReview());
@@ -1347,7 +1385,7 @@ public class ReviewGenerationService implements HealthIndicator {
 			dataQuality = appendDataQuality(dataQuality,
 					"Certaines références ont été retirées car elles ne correspondaient à aucune source.");
 		}
-		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle, 
+		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle,
 				summary, pros, cons, attributes, dataQuality, technicalOneline, technicalShortReview,
 				ecologicalOneline, communityOneline, review.getPdfs(), review.getImages(), review.getVideos(),
 				review.getSocialLinks(),
@@ -1406,6 +1444,14 @@ public class ReviewGenerationService implements HealthIndicator {
 		private boolean hasRemovedReferences() {
 			return removedReferences;
 		}
+	}
+
+	private boolean isExcludedDomain(String url) {
+		if (url == null || properties.getExcludedDomains() == null) {
+			return false;
+		}
+		// Basic check: if the URL contains any of the excluded domain strings.
+		return properties.getExcludedDomains().stream().anyMatch(url::contains);
 	}
 
 }

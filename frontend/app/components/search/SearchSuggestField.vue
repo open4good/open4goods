@@ -14,7 +14,7 @@
           v-bind="menuProps"
           v-model="internalSearch"
           :label="label"
-          :placeholder="placeholder"
+          :placeholder="currentPlaceholder"
           :aria-label="ariaLabel"
           :loading="loading"
           :elevation="getFieldElevation(isHovering)"
@@ -290,7 +290,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: string
     label: string
-    placeholder: string
+    placeholder: string | string[]
     ariaLabel: string
     minChars?: number
     enableScan?: boolean
@@ -358,6 +358,40 @@ const highlightedIndex = ref(-1)
 const resolvedAnalyticsContext = computed(
   () => props.analyticsContext?.trim() || route.path || 'unknown'
 )
+
+const currentPlaceholderIndex = ref(0)
+const placeholderInterval = ref<ReturnType<typeof setInterval> | null>(null)
+
+const currentPlaceholder = computed(() => {
+  if (Array.isArray(props.placeholder)) {
+    if (props.placeholder.length === 0) return ''
+    return props.placeholder[currentPlaceholderIndex.value]
+  }
+  return props.placeholder
+})
+
+const startPlaceholderRotation = () => {
+  if (placeholderInterval.value) clearInterval(placeholderInterval.value)
+  if (Array.isArray(props.placeholder) && props.placeholder.length > 1) {
+    placeholderInterval.value = setInterval(() => {
+      currentPlaceholderIndex.value =
+        (currentPlaceholderIndex.value + 1) % props.placeholder.length
+    }, 3000)
+  }
+}
+
+watch(
+  () => props.placeholder,
+  () => {
+    currentPlaceholderIndex.value = 0
+    startPlaceholderRotation()
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  if (placeholderInterval.value) clearInterval(placeholderInterval.value)
+})
 
 onMounted(() => {
   isHydrated.value = true
@@ -638,7 +672,9 @@ const normalizeProduct = (
     gtin,
     verticalId: match.verticalId ?? null,
     ecoscoreValue: Number.isFinite(match.ecoscoreValue)
-      ? Number(match.ecoscoreValue)
+      ? Number(match.ecoscoreValue) > 5
+        ? Number(match.ecoscoreValue) / 4
+        : Number(match.ecoscoreValue)
       : null,
     bestPrice: Number.isFinite(match.bestPrice)
       ? Number(match.bestPrice)
@@ -1007,8 +1043,8 @@ const handleScannerDecode = (rawValue: string | null) => {
   &--active
     :deep(.v-field)
       background-color: rgb(var(--v-theme-surface))
-      transform: scale(1.02)
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)
+      // Removed transform scale to prevent layout shifting
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)
 
 .search-suggest-field__voice-button,
 .search-suggest-field__scanner-button

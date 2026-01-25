@@ -180,7 +180,7 @@
     },
     "reviews": {
       "type": "object",
-      "enabled": false
+      "dynamic": "true"
     },
 
     "googleTaxonomyId": {

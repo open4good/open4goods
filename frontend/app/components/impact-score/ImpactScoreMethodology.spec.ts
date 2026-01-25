@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { defineComponent } from 'vue'
@@ -7,6 +7,7 @@ import ImpactScoreMethodology from './ImpactScoreMethodology.vue'
 mockNuxtImport('useLocalePath', () => () => (input: string) => input)
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key }))
 mockNuxtImport('useRouter', () => () => ({ push: () => {} }))
+vi.stubGlobal('$fetch', () => Promise.resolve())
 
 const VChipStub = defineComponent({
   name: 'VChip',
@@ -93,11 +94,9 @@ describe('ImpactScoreMethodology', () => {
     expect(cards).toHaveLength(2)
     expect(cards[0].text()).toContain('Lave-linge')
     expect(cards[1].text()).toContain('Téléviseurs')
-    const cta = cards[0].find('.impact-score-methodology__card-cta')
-    expect(cta.exists()).toBe(true)
-    expect(cta.attributes('aria-label')).toBe(
-      'impactScorePage.sections.methodology.verticalCtaAria'
-    )
+    expect(
+      cards[0].find('.impact-score-methodology__card-cta').attributes('to')
+    ).toBe('/lave-linge/ecoscore')
   })
 
   it('shows an empty state when no verticals are available', () => {
@@ -108,6 +107,8 @@ describe('ImpactScoreMethodology', () => {
       global: globalConfig,
     })
 
-    expect(wrapper.text()).toContain('impactScorePage.sections.methodology.empty')
+    expect(wrapper.text()).toContain(
+      'impactScorePage.sections.methodology.empty'
+    )
   })
 })

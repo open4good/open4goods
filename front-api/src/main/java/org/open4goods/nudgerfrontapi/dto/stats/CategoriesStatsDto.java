@@ -20,9 +20,30 @@ public record CategoriesStatsDto(
         @Schema(description = "Total number of ISBN items available in the OpenData exports.", example = "870000")
         long isbnOpenDataItemsCount,
 
+        @Schema(description = "Count of recent products with offers, a valid ImpactScore, and not excluded.", example = "5925")
+        long impactScoreProductsCount,
+
+        @Schema(description = "Count of recent products with offers that are not mapped to any vertical.", example = "81234")
+        long productsWithoutVerticalCount,
+
         @Schema(description = "Per-category product counts for recent products with offers, keyed by vertical id.", example = "{\"electronics\": 12000, \"appliances\": 8500}")
         Map<String, Long> productsCountByCategory,
 
         @Schema(description = "Sum of product counts across enabled categories.", example = "20500")
-        long productsCountSum
+        long productsCountSum,
+
+        @Schema(description = "Total distinct products count (all verticals, including excluded).", example = "150000")
+        long totalProductsCount,
+
+        @Schema(description = "Total excluded products count.", example = "5000")
+        long excludedProductsCount,
+
+        @Schema(description = "Total products with a valid ECOSCORE and offers.", example = "25000")
+        long ratedProductsCount,
+
+        @Schema(description = "Total products with AI reviews.", example = "10000")
+        long reviewedProductsCount,
+
+        @Schema(description = "Detailed statistics per vertical.", example = "{\"electronics\": {\"totalProducts\": 1000, ...}}")
+        Map<String, VerticalStatsDto> detailedStats
 ) { }

@@ -28,6 +28,8 @@ interface ProductsSearchPayload {
 
 interface GlobalSearchPayload {
   query?: string
+  filters?: FilterRequestDto
+  sort?: SortRequestDto
 }
 
 const isGlobalSearchPayload = (
@@ -40,9 +42,7 @@ const isGlobalSearchPayload = (
     'verticalId' in payload ||
     'pageNumber' in payload ||
     'pageSize' in payload ||
-    'sort' in payload ||
     'aggs' in payload ||
-    'filters' in payload ||
     'semanticSearch' in payload ||
     'include' in payload
   )
@@ -68,7 +68,11 @@ export default defineEventHandler(
 
     if (isGlobalSearchPayload(payload)) {
       try {
-        return await productService.searchGlobalProducts(payload.query ?? '')
+        return await productService.searchGlobalProducts({
+          query: payload.query ?? '',
+          filters: payload.filters,
+          sort: payload.sort,
+        })
       } catch (error) {
         const backendError = await extractBackendErrorDetails(error)
         console.error(

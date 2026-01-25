@@ -99,24 +99,33 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 					try {
 						relativize(s, vConf);
 					} catch (ValidationException e) {
-						dedicatedLogger.warn("{} -> Relativization of {} failed", this.getClass().getSimpleName(),p.getScores().get(scoreName), e);
-					}									
+						String msg = String.format("%s -> Relativization of score %s failed for product %s. Abort.", this.getClass().getSimpleName(), scoreName, p.getId());
+						dedicatedLogger.error(msg, e);
+						throw new RuntimeException(msg, e);
+					}
 				}
-			}			
+			}
 		}
-		
 
-			
+
 		////////////////////////
 		// Setting the ranking and worse / best bags
 		////////////////////////
-		
+
 		for (String scoreName : batchDatas.keySet()) {
 			// Sort in the list
-			List<Product> sorted = datas.stream(). sorted((e1, e2) -> Double.compare(
-				    e1.getScores().get(scoreName).getRelativ().getValue(),
-				    e2.getScores().get(scoreName).getRelativ().getValue()
-				)).toList();
+			List<Product> sorted = datas.stream()
+				.sorted((e1, e2) -> {
+					Score s1 = e1.getScores().get(scoreName);
+					Score s2 = e2.getScores().get(scoreName);
+					if (s1 == null || s1.getRelativ() == null || s1.getRelativ().getValue() == null) {
+						throw new RuntimeException("Invalid score state for sorting: " + scoreName + " on product " + e1.getId());
+					}
+					if (s2 == null || s2.getRelativ() == null || s2.getRelativ().getValue() == null) {
+						throw new RuntimeException("Invalid score state for sorting: " + scoreName + " on product " + e2.getId());
+					}
+					return Double.compare(s1.getRelativ().getValue(), s2.getRelativ().getValue());
+				}).toList();
 			
 			Long worseGtin = sorted.getFirst().getId();
 			Long bestGtin = sorted.getLast().getId();

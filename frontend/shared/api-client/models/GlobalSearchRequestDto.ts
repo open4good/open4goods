@@ -13,6 +13,21 @@
  */
 
 import { mapValues } from '../runtime';
+import type { SortRequestDto } from './SortRequestDto';
+import {
+    SortRequestDtoFromJSON,
+    SortRequestDtoFromJSONTyped,
+    SortRequestDtoToJSON,
+    SortRequestDtoToJSONTyped,
+} from './SortRequestDto';
+import type { FilterRequestDto } from './FilterRequestDto';
+import {
+    FilterRequestDtoFromJSON,
+    FilterRequestDtoFromJSONTyped,
+    FilterRequestDtoToJSON,
+    FilterRequestDtoToJSONTyped,
+} from './FilterRequestDto';
+
 /**
  * 
  * @export
@@ -25,6 +40,24 @@ export interface GlobalSearchRequestDto {
      * @memberof GlobalSearchRequestDto
      */
     query?: string;
+    /**
+     * Optional filters applied to global search results.
+     * @type {FilterRequestDto}
+     * @memberof GlobalSearchRequestDto
+     */
+    filters?: FilterRequestDto;
+    /**
+     * Optional sort definition applied to global search results.
+     * @type {SortRequestDto}
+     * @memberof GlobalSearchRequestDto
+     */
+    sort?: SortRequestDto;
+    /**
+     * Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').
+     * @type {string}
+     * @memberof GlobalSearchRequestDto
+     */
+    searchType?: string;
 }
 
 /**
@@ -45,6 +78,9 @@ export function GlobalSearchRequestDtoFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'query': json['query'] == null ? undefined : json['query'],
+        'filters': json['filters'] == null ? undefined : FilterRequestDtoFromJSON(json['filters']),
+        'sort': json['sort'] == null ? undefined : SortRequestDtoFromJSON(json['sort']),
+        'searchType': json['searchType'] == null ? undefined : json['searchType'],
     };
 }
 
@@ -60,6 +96,9 @@ export function GlobalSearchRequestDtoToJSONTyped(value?: GlobalSearchRequestDto
     return {
         
         'query': value['query'],
+        'filters': FilterRequestDtoToJSON(value['filters']),
+        'sort': SortRequestDtoToJSON(value['sort']),
+        'searchType': value['searchType'],
     };
 }
 
