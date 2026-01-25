@@ -58,8 +58,19 @@ describe('release utilities', () => {
       'reports',
       'releases'
     )
-    appReleasesDirectory = path.join(tempRoot, 'app', 'public', 'reports', 'releases')
-    publicReleasesDirectory = path.join(tempRoot, 'public', 'reports', 'releases')
+    appReleasesDirectory = path.join(
+      tempRoot,
+      'app',
+      'public',
+      'reports',
+      'releases'
+    )
+    publicReleasesDirectory = path.join(
+      tempRoot,
+      'public',
+      'reports',
+      'releases'
+    )
     await Promise.all([
       fs.mkdir(outputReleasesDirectory, { recursive: true }),
       fs.mkdir(appReleasesDirectory, { recursive: true }),
@@ -94,7 +105,6 @@ describe('release utilities', () => {
   afterEach(async () => {
     cwdSpy?.mockRestore()
     await fs.rm(tempRoot, { recursive: true, force: true })
-    vi.restoreAllMocks()
   })
 
   it('returns release notes from the public reports directory in descending order', async () => {
@@ -112,7 +122,10 @@ describe('release utilities', () => {
   })
 
   it('falls back to app public releases when the build output is missing', async () => {
-    await fs.rm(path.join(tempRoot, '.output'), { recursive: true, force: true })
+    await fs.rm(path.join(tempRoot, '.output'), {
+      recursive: true,
+      force: true,
+    })
     gitDates.clear()
     await fs.rm(path.join(appReleasesDirectory, 'app.md'), { force: true })
 
@@ -141,7 +154,10 @@ describe('release utilities', () => {
   })
 
   it('falls back to public releases when app public is missing', async () => {
-    await fs.rm(path.join(tempRoot, '.output'), { recursive: true, force: true })
+    await fs.rm(path.join(tempRoot, '.output'), {
+      recursive: true,
+      force: true,
+    })
     await fs.rm(path.join(tempRoot, 'app'), { recursive: true, force: true })
     await fs.mkdir(publicReleasesDirectory, { recursive: true })
     gitDates.clear()
