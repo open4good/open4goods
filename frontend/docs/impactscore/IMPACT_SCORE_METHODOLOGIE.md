@@ -82,8 +82,9 @@ Une politique explicite doit exister :
 - **NEUTRAL** (ex : 2.5/5)
 - **WORST** (0/5)
 
-Recommandation fréquente :
-- Utiliser **WORST** pour éviter qu’une donnée manquante améliore artificiellement le score, et compenser via un critère `DATA_QUALITY`.
+Décision actuelle :
+- Utiliser **NEUTRAL** partout pour ne pas sur- ou sous-pondérer un produit sur une donnée absente.
+- Reporter la pénalisation globale via le critère `DATA_QUALITY`.
 
 ## 4. Points de cohérence à vérifier (backend)
 
