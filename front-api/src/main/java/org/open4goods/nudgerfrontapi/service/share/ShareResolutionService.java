@@ -34,6 +34,7 @@ import org.open4goods.nudgerfrontapi.service.exception.InvalidAffiliationTokenEx
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -218,7 +219,7 @@ public class ShareResolutionService {
      * @return ordered list of candidates
      */
     private List<ShareCandidateDto> searchByQuery(String query, DomainLanguage domainLanguage) {
-        GlobalSearchResult searchResult = searchService.globalSearch(query, domainLanguage);
+        GlobalSearchResult searchResult = searchService.globalSearch(query, domainLanguage, null, Sort.unsorted());
         List<ShareCandidateDto> mapped = new ArrayList<>();
 
         searchResult.verticalGroups().forEach(group -> group.results().stream()

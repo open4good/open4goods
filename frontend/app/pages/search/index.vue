@@ -395,6 +395,7 @@ const { data, pending, error, refresh } =
         headers: requestHeaders,
         body: {
           query: normalizedQuery.value,
+          ...(isFiltered.value ? { filters: filterRequest.value } : {}),
         },
       })
     },
