@@ -998,9 +998,29 @@ public class ProductRepository {
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
+        /**
+         * Count recent products with offers, AI reviews, and not excluded from the catalogue.
+         *
+         * @return count of recent products with AI reviews
+         */
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
         public Long countMainIndexValidAndReviewed() {
-            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("excluded").is(false)).and(new Criteria("aiDescriptions").exists()));
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
+                    .and(new Criteria("excluded").is(false))
+                    .and(new Criteria("reviews").exists()));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Count recent products with offers, a valid ECOSCORE, and not excluded from the catalogue.
+         *
+         * @return count of recent products with an ECOSCORE
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexValidAndRated() {
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
+                    .and(new Criteria("excluded").is(false))
+                    .and(new Criteria("scores.ECOSCORE.value").exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
@@ -1016,15 +1036,27 @@ public class ProductRepository {
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
+        /**
+         * Count recent products with offers, AI reviews, and not excluded for a specific vertical.
+         *
+         * @param vertical vertical identifier
+         * @return count of recent products with AI reviews for the vertical
+         */
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
         public Long countMainIndexValidAndReviewed(String vertical) {
-            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("vertical").is(vertical)).and(new Criteria("excluded").is(false)).and(new Criteria("aiDescriptions").exists()));
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
+                    .and(new Criteria("vertical").is(vertical))
+                    .and(new Criteria("excluded").is(false))
+                    .and(new Criteria("reviews").exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
         public Long countMainIndexValidAndRated(String vertical) {
-            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery().and(new Criteria("vertical").is(vertical)).and(new Criteria("excluded").is(false)).and(new Criteria("scores.IMPACTSCORE.value").exists()));
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
+                    .and(new Criteria("vertical").is(vertical))
+                    .and(new Criteria("excluded").is(false))
+                    .and(new Criteria("scores.ECOSCORE.value").exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 

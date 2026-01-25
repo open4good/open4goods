@@ -38,6 +38,9 @@ public record CategoriesStatsDto(
         @Schema(description = "Total excluded products count.", example = "5000")
         long excludedProductsCount,
 
+        @Schema(description = "Total products with a valid ECOSCORE and offers.", example = "25000")
+        long ratedProductsCount,
+
         @Schema(description = "Total products with AI reviews.", example = "10000")
         long reviewedProductsCount,
 
