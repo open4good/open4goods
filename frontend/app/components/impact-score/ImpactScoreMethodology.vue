@@ -72,14 +72,13 @@
               </h3>
               <NuxtLink
                 class="impact-score-methodology__card-cta"
-                :to="item.ecoscoreLink"
+                :to="item.categoryLink"
                 :aria-label="
                   t('impactScorePage.sections.methodology.verticalCtaAria', {
                     vertical: item.label,
                   })
                 "
-                @click.stop.prevent="navigateToEcoscore(item.ecoscoreLink)"
-                @keydown.enter.prevent="navigateToEcoscore(item.ecoscoreLink)"
+                @click.stop
               >
                 <span>{{
                   t('impactScorePage.sections.methodology.verticalCta')
