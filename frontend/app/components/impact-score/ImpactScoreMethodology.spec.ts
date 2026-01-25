@@ -31,6 +31,12 @@ const VIconStub = defineComponent({
   template: '<span />',
 })
 
+const VBtnStub = defineComponent({
+  name: 'VBtn',
+  inheritAttrs: false,
+  template: '<button v-bind="$attrs"><slot /></button>',
+})
+
 const ResponsiveCarouselStub = defineComponent({
   name: 'ResponsiveCarousel',
   props: {
@@ -53,6 +59,7 @@ const globalConfig = {
   stubs: {
     VChip: VChipStub,
     VCard: VCardStub,
+    VBtn: VBtnStub,
     VImg: VImgStub,
     VIcon: VIconStub,
     ResponsiveCarousel: ResponsiveCarouselStub,
@@ -86,11 +93,11 @@ describe('ImpactScoreMethodology', () => {
     expect(cards).toHaveLength(2)
     expect(cards[0].text()).toContain('Lave-linge')
     expect(cards[1].text()).toContain('Téléviseurs')
-    expect(
-      cards[0]
-        .find('.impact-score-methodology__card-cta')
-        .attributes('to')
-    ).toBe('/lave-linge/ecoscore')
+    const cta = cards[0].find('.impact-score-methodology__card-cta')
+    expect(cta.exists()).toBe(true)
+    expect(cta.attributes('aria-label')).toBe(
+      'impactScorePage.sections.methodology.verticalCtaAria'
+    )
   })
 
   it('shows an empty state when no verticals are available', () => {
