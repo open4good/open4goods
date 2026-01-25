@@ -1499,7 +1499,7 @@
     "examples": {
       "eyebrow": "Calculation examples",
       "title": "Real product snapshots",
-      "subtitle": "Impact Score examples taken from actual oven listings on the site.",
+      "subtitle": "Impact Score examples taken from real-world appliance and electronics listings.",
       "whirlpoolOven": {
         "eyebrow": "Example 1",
         "title": "Whirlpool OMSR58RU1SB built-in oven",
@@ -1521,32 +1521,30 @@
             "label": "Data sources",
             "value": "Cdiscount, Darty, Fnac, Rakuten"
           }
-        },
-        "conclusion": "Impact Score 2.2/5 based on energy data, capacity and the available product sources."
+        }
       },
-      "samsungOven": {
+      "samsungTv": {
         "eyebrow": "Example 2",
-        "title": "Samsung NV7B41307AK built-in oven",
-        "description": "A+ label, 76 L cavity, with energy usage sourced from EPREL.",
+        "title": "Samsung Crystal UHD 55\" TV",
+        "description": "Energy class G, 55\" screen size, with retailer data sources.",
         "breakdown": {
           "energy": {
             "label": "Energy class",
-            "value": "A+ (EPREL)"
+            "value": "G (EPREL)"
           },
-          "consumption": {
-            "label": "Energy per cycle",
-            "value": "1.05 kWh/cycle"
+          "size": {
+            "label": "Screen size",
+            "value": "55\""
           },
-          "capacity": {
-            "label": "Oven capacity",
-            "value": "76 L"
+          "resolution": {
+            "label": "Resolution",
+            "value": "4K UHD"
           },
           "sources": {
             "label": "Data sources",
-            "value": "EPREL, Darty, Cdiscount, Rakuten"
+            "value": "EPREL, Darty, Fnac, Cdiscount"
           }
-        },
-        "conclusion": "Impact Score 2.1/5, reflecting energy performance and the coverage of product information."
+        }
       }
     },
     "summary": {

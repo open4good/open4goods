@@ -1252,7 +1252,7 @@
     "examples": {
       "eyebrow": "Exemples de calcul",
       "title": "Exemples réels",
-      "subtitle": "Des extraits d’Impact Score issus de fiches produits d’appareils de cuisson.",
+      "subtitle": "Des extraits d’Impact Score issus de fiches produits d’électroménager et d’électronique du quotidien.",
       "whirlpoolOven": {
         "eyebrow": "Exemple 1",
         "title": "Four encastrable Whirlpool OMSR58RU1SB",
@@ -1274,32 +1274,30 @@
             "label": "Sources de données",
             "value": "Cdiscount, Darty, Fnac, Rakuten"
           }
-        },
-        "conclusion": "Impact Score 2,2/5, calculé à partir des données énergie, de la capacité et des sources disponibles."
+        }
       },
-      "samsungOven": {
+      "samsungTv": {
         "eyebrow": "Exemple 2",
-        "title": "Four encastrable Samsung NV7B41307AK",
-        "description": "Étiquette A+, cavité 76 L et relevés d’énergie issus d’EPREL.",
+        "title": "Téléviseur Samsung Crystal UHD 55\"",
+        "description": "Classe énergie G, diagonale 55\" et sources distributeurs.",
         "breakdown": {
           "energy": {
             "label": "Classe énergie",
-            "value": "A+ (EPREL)"
+            "value": "G (EPREL)"
           },
-          "consumption": {
-            "label": "Consommation par cycle",
-            "value": "1,05 kWh/cycle"
+          "size": {
+            "label": "Taille de l’écran",
+            "value": "55\""
           },
-          "capacity": {
-            "label": "Capacité du four",
-            "value": "76 L"
+          "resolution": {
+            "label": "Résolution",
+            "value": "4K UHD"
           },
           "sources": {
             "label": "Sources de données",
-            "value": "EPREL, Darty, Cdiscount, Rakuten"
+            "value": "EPREL, Darty, Fnac, Cdiscount"
           }
-        },
-        "conclusion": "Impact Score 2,1/5, reflet des performances énergétiques et de la couverture des données produit."
+        }
       }
     },
     "summary": {
