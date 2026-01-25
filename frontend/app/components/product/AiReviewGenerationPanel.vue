@@ -204,7 +204,7 @@ const resolveProductLink = (item: {
     // For simplicity, let's assume we can navigate to /product/gtin-slug
     // Or just use the raw slug if it looks like a path.
   }
-  return `/product/${item.gtin}`
+  return `/${item.gtin}`
 }
 </script>
 

@@ -1252,7 +1252,7 @@ public class ProductController {
     private String determineSortableValueType(ProductDtoSortableFields field) {
         LOGGER.info("Entering determineSortableValueType(field={})", field);
         return switch (field) {
-        case price, offersCount, ecoscore -> VALUE_TYPE_NUMERIC;
+        case price, offersCount, ecoscore, creationDate, lastChange -> VALUE_TYPE_NUMERIC;
 		case brand, model -> VALUE_TYPE_TEXT;
 		default -> throw new IllegalArgumentException("Unexpected value: " + field);
         };
@@ -1356,18 +1356,16 @@ public class ProductController {
         if (force && !authenticatedUser) {
             LOGGER.warn("Force review generation requested without authentication for product {}", gtin);
         }
-        boolean forceGeneration = authenticatedUser;
-
         LOGGER.info(
                 "Entering triggerReview(gtin={}, domainLanguage={}, hasHcaptchaResponse={}, force={}, authenticatedUser={}, remoteAddr={})",
                 gtin,
                 domainLanguage,
                 StringUtils.hasText(hcaptchaResponse),
-                forceGeneration,
+                force,
                 authenticatedUser,
                 request != null ? request.getRemoteAddr() : null);
         try {
-            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request, authenticatedUser, forceGeneration);
+            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request, authenticatedUser, force);
             return ResponseEntity.ok()
                     .cacheControl(CacheControl.noCache())
                     .header("X-Locale", domainLanguage.languageTag())

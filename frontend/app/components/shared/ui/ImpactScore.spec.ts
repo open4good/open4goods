@@ -212,11 +212,13 @@ describe('ImpactScore', () => {
       .findAll('rect')
       .find(
         rect =>
-          rect.attributes('x') === '34' &&
-          rect.attributes('y') === '96' &&
+          rect.attributes('x') === '0' &&
+          rect.attributes('y') === '98' &&
           rect.attributes('width') !== '300'
       )
 
+    // Expected width based on calculation logic (same as before just verifying existence and rough size)
+    // 13/20 = 0.65 -> 0.65 * 300 = 195
     expect(progressRect?.attributes('width')).toBe('195')
   })
 
@@ -236,10 +238,10 @@ describe('ImpactScore', () => {
       }
     )
 
-    const clipIds = wrapper
-      .findAll('clipPath')
+    const gradientIds = wrapper
+      .findAll('linearGradient')
       .map(node => node.attributes('id'))
-    expect(new Set(clipIds).size).toBe(clipIds.length)
+    expect(new Set(gradientIds).size).toBe(gradientIds.length)
   })
 
   it('hides the scale label when showScale is false', () => {

@@ -15,19 +15,24 @@
     </template>
 
     <template v-else>
-      <div class="category-filter-list__row">
-        <component
-          :is="resolveComponent(field)"
+      <v-row dense>
+        <v-col
           v-for="field in fields"
           :key="field.mapping ?? field.title"
-          :field="field"
-          :aggregation="aggregations[field.mapping ?? '']"
-          :baseline-aggregation="baselineAggregations[field.mapping ?? '']"
-          :model-value="findActiveFilter(field.mapping)"
-          class="category-filter-list__row-item"
-          @update:model-value="onFilterChange(field, $event)"
-        />
-      </div>
+          cols="12"
+          sm="6"
+          md="3"
+        >
+          <component
+            :is="resolveComponent(field)"
+            :field="field"
+            :aggregation="aggregations[field.mapping ?? '']"
+            :baseline-aggregation="baselineAggregations[field.mapping ?? '']"
+            :model-value="findActiveFilter(field.mapping)"
+            @update:model-value="onFilterChange(field, $event)"
+          />
+        </v-col>
+      </v-row>
     </template>
   </div>
 </template>
@@ -111,33 +116,14 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr))
     align-items: stretch
 
-  &--row
-    display: flex
-    align-items: center
-    gap: 1.5rem
-    flex-wrap: wrap
+
 
   &__item
     display: flex
     flex-direction: column
     min-width: 0
 
-  &__row
-    display: flex
-    flex-direction: row
-    flex-wrap: wrap
-    gap: 1rem
-    align-items: stretch
-    flex: 1 1 auto
 
-  &__row-item
-    display: flex
-    flex-direction: column
-    flex: 1 1 200px
-    min-width: min(200px, 100%)
-
-  &__header
-    justify-content: flex-start
 
   &__search-toggle
     align-items: center

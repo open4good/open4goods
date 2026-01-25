@@ -68,7 +68,8 @@ export const useAiReviewGenerationStore = defineStore(
         image?: string
         slug?: string
       },
-      captchaToken?: string
+      captchaToken?: string,
+      force: boolean = false
     ) => {
       const { gtin } = product
       const existing = getByGtin(gtin)
@@ -103,6 +104,9 @@ export const useAiReviewGenerationStore = defineStore(
           method: 'POST',
           body: {
             hcaptchaResponse: captchaToken,
+          },
+          query: {
+            force: String(force),
           },
         })
 

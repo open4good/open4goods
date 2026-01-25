@@ -358,16 +358,19 @@ public class ReviewGenerationService implements HealthIndicator {
 			} catch (NotEnoughDataException e) {
 				logger.warn("Not enought data for generating ai review for {}", product);
 				holder.setEnoughData(false);
+				holder.setFailureReason("INSUFFICIENT_SOURCES");
 				status.setResult(holder);
 				status.setStatus(ReviewGenerationStatus.Status.FAILED);
 				status.setErrorMessage("Not enough data to generate an AI review for this product.");
 				status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR, status.getErrorMessage(), null);
 				meterRegistry.counter("review.generation.failed").increment();
 				lastGenerationFailed = true;
-				lastGenerationFailed = true;
+
 			} catch (Throwable e) {
                 e.printStackTrace();
 				logger.error("Asynchronous review generation failed for UPC {}: {}", upc, e.getMessage(), e);
+				holder.setEnoughData(false);
+				holder.setFailureReason("GENERATION_ERROR");
 				status.setStatus(ReviewGenerationStatus.Status.FAILED);
 				status.setErrorMessage(e.getMessage());
 				status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR, status.getErrorMessage(), null);
@@ -627,6 +630,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				AiReviewHolder holder = new AiReviewHolder();
 				holder.setCreatedMs(Instant.now().toEpochMilli());
 				holder.setEnoughData(false);
+				holder.setFailureReason("INSUFFICIENT_SOURCES");
 				product.getReviews().put("fr", holder);
 				productRepository.index(product);
 			} catch (Exception e) {

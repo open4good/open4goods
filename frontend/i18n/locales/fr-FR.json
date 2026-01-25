@@ -864,7 +864,8 @@
   "common": {
     "actions": {
       "goHome": "Retour à l'accueil",
-      "retry": "Réessayer"
+      "retry": "Réessayer",
+      "close": "Fermer"
     },
     "boolean": {
       "false": "Non",
@@ -2284,6 +2285,24 @@
         "running": "Génération en cours ({step})",
         "success": "Synthèse disponible"
       },
+      "generationPanel": {
+        "title": "Générations IA",
+        "quotaTitle": "{count} → Quota restant",
+        "expandPanel": "Afficher",
+        "collapsePanel": "Réduire",
+        "status": {
+          "generating": "Génération en cours...",
+          "success": "Terminé",
+          "error": "Échec"
+        },
+        "alert": {
+          "successTitle": "Résumé prêt !",
+          "successMessage": "Le résumé pour {product} a été généré avec succès.",
+          "errorTitle": "Échec de génération",
+          "errorMessage": "Impossible de générer le résumé pour {product}.",
+          "viewResult": "Voir le résumé"
+        }
+      },
       "subtitle": {
         "one": "Une synthèse rédigée par notre IA à partir de {count} source vérifiée.",
         "other": "Une synthèse rédigée par notre IA à partir de {count} sources vérifiées."
@@ -2437,24 +2456,6 @@
     },
     "hero": {
       "aiReview": {
-        "generationPanel": {
-          "title": "Générations IA",
-          "quotaTitle": "{count} → Quota restant",
-          "expandPanel": "Afficher",
-          "collapsePanel": "Réduire",
-          "status": {
-            "generating": "Génération en cours...",
-            "success": "Terminé",
-            "error": "Échec"
-          },
-          "alert": {
-            "successTitle": "Résumé prêt !",
-            "errorTitle": "Échec de génération",
-            "successMessage": "Le résumé pour {product} a été généré avec succès.",
-            "errorMessage": "Impossible de générer le résumé pour {product}.",
-            "viewResult": "Voir le résumé"
-          }
-        },
         "label": "Synthèse IA"
       },
       "aiSummary": {

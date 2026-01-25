@@ -53,21 +53,6 @@
               :impact-score-max="impactScoreMax"
               :popular-attributes="heroPopularAttributes"
             />
-            <div class="product-page__hero-corner" role="presentation">
-              <ImpactScore
-                v-if="impactScoreValue != null"
-                :score="impactScoreValue"
-                :max="5"
-                size="xxlarge"
-                mode="badge"
-                badge-layout="stacked"
-                badge-variant="corner"
-                flat
-              />
-              <span v-else class="product-page__hero-corner-fallback">
-                {{ $t('category.products.notRated') }}
-              </span>
-            </div>
           </div>
         </section>
 
@@ -125,6 +110,8 @@
             :title-params="aiTitleParams"
             :product-name="productTitle"
             :product-image="resolvedProductImageSource"
+            :failure-reason="product.aiReview?.failureReason ?? null"
+            :enough-data="product.aiReview?.enoughData ?? true"
           />
         </section>
 
@@ -228,7 +215,6 @@ import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigat
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
-import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
@@ -2398,17 +2384,34 @@ useHead(() => {
   left: -1.75rem; /* Adjust based on panel padding */
   width: 100px;
   height: 100px;
-  display: inline-flex;
+}
+
+.product-page__hero-corner-content {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 0 0 54% 0;
-  background: rgba(var(--v-theme-surface-glass-strong), 0.92);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
+  height: 100%;
+  padding: 0.5rem 0.6rem;
+  text-align: center;
+  transform: rotate(-12deg);
+}
+
+.product-page__hero-corner-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 0.9;
   color: rgb(var(--v-theme-text-neutral-strong));
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
-  backdrop-filter: blur(6px);
-  z-index: 2;
-  pointer-events: none;
+}
+
+.product-page__hero-corner-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  opacity: 0.8;
+  margin-top: 0.1rem;
 }
 
 .product-page__hero-corner-fallback {
@@ -2419,7 +2422,6 @@ useHead(() => {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   text-align: center;
   line-height: 1.1;
-  transform: rotate(-12deg);
 }
 
 .product-page__fab {

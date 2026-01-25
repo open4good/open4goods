@@ -4,6 +4,7 @@ import org.open4goods.model.StandardiserService;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.scoring.ScoreDegeneratePolicy;
 import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 
 /**
@@ -35,10 +36,10 @@ public class MinMaxObservedNormalizationStrategy implements NormalizationStrateg
         Double observedMin = cardinality.getMin();
         Double observedMax = cardinality.getMax();
         if (observedMin == null || observedMax == null) {
-            throw new ValidationException("Missing observed bounds for min-max observed normalization");
+            throw new ValidationException("Missing observed bounds for min-max observed normalization" + attributeConfig);
         }
         if (observedMax <= observedMin) {
-            throw new ValidationException("Invalid observed bounds for min-max observed normalization");
+            return handleDegenerate(attributeConfig);
         }
 
         double normalized = (value - observedMin) / (observedMax - observedMin);
@@ -74,5 +75,24 @@ public class MinMaxObservedNormalizationStrategy implements NormalizationStrateg
             return StandardiserService.DEFAULT_MAX_RATING;
         }
         return scoring.getScale().getMax();
+    }
+
+    private NormalizationResult handleDegenerate(AttributeConfig attributeConfig) throws ValidationException {
+        ScoreDegeneratePolicy policy = attributeConfig == null || attributeConfig.getScoring() == null
+                ? ScoreDegeneratePolicy.NEUTRAL
+                : attributeConfig.getScoring().getDegenerateDistributionPolicy();
+        if (policy == null || ScoreDegeneratePolicy.NEUTRAL.equals(policy)) {
+            return new NormalizationResult(resolveNeutralValue(attributeConfig), false);
+        }
+        if (ScoreDegeneratePolicy.ERROR.equals(policy)) {
+            throw new ValidationException("Invalid observed bounds for min-max observed normalization : " + attributeConfig);
+        }
+        return new NormalizationResult(resolveNeutralValue(attributeConfig), true);
+    }
+
+    private double resolveNeutralValue(AttributeConfig attributeConfig) {
+        double min = resolveScaleMin(attributeConfig);
+        double max = resolveScaleMax(attributeConfig);
+        return (min + max) / 2.0;
     }
 }

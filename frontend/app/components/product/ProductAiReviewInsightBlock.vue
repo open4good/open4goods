@@ -60,6 +60,11 @@ const isRight = computed(() => props.imagePosition === 'right')
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
 }
 
+.product-ai-review__card-text {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
 .product-ai-review-insight__media :deep(img) {
   object-fit: contain;
 }

@@ -1,14 +1,27 @@
 <template>
   <section :id="sectionId" ref="rootRef" class="product-ai-review">
     <!-- Existing Content when review exists -->
-    <template v-if="reviewContent">
+    <template v-if="reviewContent && !isBroken">
       <header class="product-ai-review__header">
-        <!-- Header content same as before -->
         <v-row>
           <v-col cols="12">
-            <h2 class="product-ai-review__title">
-              {{ $t('product.aiReview.title', titleParams) }}
-            </h2>
+            <div class="d-flex justify-space-between align-start w-100 mb-2">
+              <h2 class="product-ai-review__title">
+                {{ $t('product.aiReview.title', titleParams) }}
+              </h2>
+              <v-btn
+                v-if="canForceRegenerate"
+                color="primary"
+                variant="text"
+                size="small"
+                prepend-icon="mdi-refresh"
+                :loading="isGenerating"
+                :disabled="isGenerating"
+                @click="startRequest(true)"
+              >
+                {{ $t('product.aiReview.forceRegeneration') }}
+              </v-btn>
+            </div>
 
             <div v-if="createdDate" class="product-ai-review__metadata mb-4">
               <v-icon
@@ -442,9 +455,10 @@
                     <p class="text-body-2 mb-4">
                       {{ $t('product.aiReview.dataQuality.description') }}
                     </p>
-                    <div class="product-ai-review__quality-value">
-                      {{ dataQualityValue }}
-                    </div>
+                    <div
+                      class="product-ai-review__quality-value"
+                      v-html="dataQualityValue"
+                    />
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -502,14 +516,26 @@
             </v-avatar>
             <div>
               <h3 class="text-h6 font-weight-bold mb-1">
-                {{ $t('product.aiReview.request.callToAction.title') }}
+                {{
+                  isBroken
+                    ? $t('product.aiReview.retry.title')
+                    : $t('product.aiReview.request.callToAction.title')
+                }}
               </h3>
               <p class="text-body-2 text-medium-emphasis">
                 {{
-                  $t('product.aiReview.request.callToAction.subtitleVariant', {
-                    bestName: productLabel,
-                  })
+                  $t(
+                    isBroken
+                      ? 'product.aiReview.retry.subtitle'
+                      : 'product.aiReview.request.callToAction.subtitleVariant',
+                    {
+                      bestName: productLabel,
+                    }
+                  )
                 }}
+              </p>
+              <p v-if="failureReason" class="text-caption text-error">
+                {{ failureReason }}
               </p>
             </div>
           </div>
@@ -519,7 +545,11 @@
             prepend-icon="mdi-sparkles"
             @click="isDialogOpen = true"
           >
-            {{ $t('product.aiReview.requestButton') }}
+            {{
+              isBroken
+                ? $t('product.aiReview.retryButton')
+                : $t('product.aiReview.requestButton')
+            }}
           </v-btn>
         </v-card-text>
       </v-card>
@@ -553,7 +583,7 @@
               :status-message="statusMessage"
               :is-generating="isGenerating"
               :status-percent="statusPercent"
-              @submit="startRequest"
+              @submit="startRequest(isBroken)"
               @captcha-verify="handleCaptchaVerify"
               @captcha-expired="handleCaptchaExpired"
               @captcha-error="handleCaptchaError"
@@ -645,6 +675,14 @@ const props = defineProps({
   productImage: {
     type: String,
     default: null,
+  },
+  failureReason: {
+    type: String,
+    default: null,
+  },
+  enoughData: {
+    type: Boolean,
+    default: true,
   },
 })
 
@@ -970,21 +1008,51 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     cons,
     sources,
     attributes,
-    dataQuality: reviewData.dataQuality ?? null,
+    dataQuality: sanitizeAndTransform(reviewData.dataQuality),
   }
 }
+
+const isBroken = computed(() => {
+  // Explicit failure reason
+  if (props.failureReason) return true
+  // Not enough data flag
+  if (props.enoughData === false) return true
+
+  // If we have content but it's effectively empty (no description/summary)
+  if (reviewContent.value) {
+    const hasText =
+      reviewContent.value.description || reviewContent.value.summary
+    const hasSections =
+      reviewContent.value.technicalReview ||
+      reviewContent.value.ecologicalReview ||
+      reviewContent.value.communityReviewNovice
+    return !hasText && !hasSections
+  }
+
+  return false
+})
+
+const canForceRegenerate = computed(() => {
+  const { isLoggedIn } = useAuth()
+  return isLoggedIn.value
+})
 
 const toggleSources = () => {
   showAllSources.value = !showAllSources.value
 }
 
-const startRequest = () => {
+const startRequest = (force: boolean = false) => {
   errorMessage.value = null
-  void triggerGeneration()
+  void triggerGeneration(force)
 }
 
-const triggerGeneration = async () => {
-  if (requiresCaptcha.value && !captchaToken.value) {
+const triggerGeneration = async (force: boolean = false) => {
+  if (
+    requiresCaptcha.value &&
+    !captchaToken.value &&
+    !force &&
+    !canForceRegenerate.value
+  ) {
     errorMessage.value = t('product.aiReview.errors.captcha')
     return
   }
@@ -1000,7 +1068,8 @@ const triggerGeneration = async () => {
         image: props.productImage || undefined,
         slug: undefined,
       },
-      captchaToken.value ?? undefined
+      captchaToken.value ?? undefined,
+      force
     )
 
     isDialogOpen.value = false

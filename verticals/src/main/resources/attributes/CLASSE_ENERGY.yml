@@ -12,16 +12,7 @@ scoring:
     min: 0.0
     max: 5.0
   normalization:
-    method: "FIXED_MAPPING"
-    params:
-      mapping:
-        "100": 5.0
-        "85": 4.25
-        "70": 3.5
-        "55": 2.75
-        "40": 2.0
-        "25": 1.25
-        "10": 0.5
+    method: "MINMAX_OBSERVED"
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:

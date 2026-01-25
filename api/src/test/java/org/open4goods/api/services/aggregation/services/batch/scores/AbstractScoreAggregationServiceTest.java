@@ -179,6 +179,8 @@ class AbstractScoreAggregationServiceTest {
         String scoreName = "MINPARTSAVAILLABILITY";
 
         VerticalConfig config = buildConfigWithMethod(scoreName, ScoreNormalizationMethod.MINMAX_OBSERVED);
+        config.getAttributesConfig().getAttributeConfigByKey(scoreName)
+                .getScoring().setDegenerateDistributionPolicy(org.open4goods.model.vertical.scoring.ScoreDegeneratePolicy.ERROR);
 
         service.registerValue(scoreName, 3d, config);
 

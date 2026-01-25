@@ -46,7 +46,7 @@
             <div class="product-hero__gallery-section">
               <div
                 v-if="impactScore != null"
-                class="product-hero__impact-score"
+                class="product-hero__impact-score mb-4"
               >
                 <ImpactScore
                   mode="svg"

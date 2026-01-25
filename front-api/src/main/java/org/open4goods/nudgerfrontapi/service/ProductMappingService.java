@@ -812,7 +812,8 @@ public class ProductMappingService {
                 sources,
                 holder.isEnoughData(),
                 holder.getTotalTokens(),
-                holder.getCreatedMs());
+                holder.getCreatedMs(),
+                holder.getFailureReason());
     }
 
     /**
@@ -1072,7 +1073,27 @@ public class ProductMappingService {
             logger.info("Force review generation requested by authenticated user for product {}", gtin);
         }
         Product product = repository.getById(gtin);
-        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId(), force);
+        
+        boolean shouldForce = force;
+        if (!authenticatedUser) {
+        	// For anonymous users, we only allow forcing if the current review is broken/insufficient
+        	shouldForce = false;
+        	if (force) {
+        		AiReviewHolder holder = product.getReviews() != null ? product.getReviews().i18n("fr") : null;
+        		if (holder != null) {
+        			boolean isBroken = !holder.isEnoughData() 
+        					|| (holder.getFailureReason() != null && !holder.getFailureReason().isEmpty())
+        					|| holder.getReview() == null;
+        			
+        			if (isBroken) {
+        				logger.info("Allowing forced regeneration for anonymous user on broken review for product {}", gtin);
+        				shouldForce = true;
+        			}
+        		}
+        	}
+        }
+        
+        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId(), shouldForce);
         if (!authenticatedUser) {
             ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
             int remaining = Math.max(0, quota.getMaxPerIp()
