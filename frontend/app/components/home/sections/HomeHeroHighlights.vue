@@ -136,11 +136,13 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
   const translatedItems = normalizeHighlightItems(itemsToNormalize)
 
   if (translatedItems.length > 0) {
-    return applyProductsWithoutVerticalPlaceholder(
-      applyImpactScorePlaceholders(
-        applyOpenDataMillionsPlaceholder(
-          applyProductsCategoriesPlaceholder(
-            applyPartnerLinkPlaceholder(translatedItems)
+    return applyRandomProductPlaceholder(
+      applyProductsWithoutVerticalPlaceholder(
+        applyImpactScorePlaceholders(
+          applyOpenDataMillionsPlaceholder(
+            applyProductsCategoriesPlaceholder(
+              applyPartnerLinkPlaceholder(translatedItems)
+            )
           )
         )
       )
@@ -151,11 +153,13 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
   if (Array.isArray(tmItems) && tmItems.length > 0) {
     const directTranslated = normalizeHighlightItems(tmItems)
     if (directTranslated.length > 0) {
-      return applyProductsWithoutVerticalPlaceholder(
-        applyImpactScorePlaceholders(
-          applyOpenDataMillionsPlaceholder(
-            applyProductsCategoriesPlaceholder(
-              applyPartnerLinkPlaceholder(directTranslated)
+      return applyRandomProductPlaceholder(
+        applyProductsWithoutVerticalPlaceholder(
+          applyImpactScorePlaceholders(
+            applyOpenDataMillionsPlaceholder(
+              applyProductsCategoriesPlaceholder(
+                applyPartnerLinkPlaceholder(directTranslated)
+              )
             )
           )
         )
@@ -501,6 +505,66 @@ const applyProductsWithoutVerticalPlaceholder = (
       ...item,
       segments:
         segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
+    }
+  })
+}
+
+// Fetch random product
+const { data: randomProduct } = await useFetch('/api/stats/random', {
+  query: { num: 1, minOffersCount: 1 },
+  lazy: true,
+})
+
+const randomProductLink = computed(() => {
+  if (
+    !randomProduct.value ||
+    !Array.isArray(randomProduct.value) ||
+    randomProduct.value.length === 0
+  ) {
+    return null
+  }
+  const product = randomProduct.value[0]
+  return product?.names?.slug ? `/p/${product.names.slug}` : null
+})
+
+const randomProductName = computed(() => {
+  if (
+    !randomProduct.value ||
+    !Array.isArray(randomProduct.value) ||
+    randomProduct.value.length === 0
+  ) {
+    return null
+  }
+  const product = randomProduct.value[0]
+  return product?.names?.label || product?.names?.title || null
+})
+
+const applyRandomProductPlaceholder = (items: HeroHighlightItem[]) => {
+  const productName = randomProductName.value
+  const productLink = randomProductLink.value
+
+  if (!productName || !productLink) {
+    // If no random product, just return items unchanged
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithProduct = item.segments.map(segment => {
+      const text = segment.text.includes('{randomProduct}')
+        ? segment.text.replaceAll('{randomProduct}', productName)
+        : segment.text
+
+      const to =
+        segment.to && segment.to.includes('{randomProductLink}')
+          ? productLink
+          : segment.to
+
+      return { ...segment, text, to }
+    })
+
+    return {
+      ...item,
+      segments: segmentsWithProduct,
     }
   })
 }

@@ -150,7 +150,11 @@
               "to": "/categories"
             },
             {
-              "text": "produits."
+              "text": "produits. Un exemple ?"
+            },
+            {
+              "text": "{randomProduct}",
+              "to": "{randomProductLink}"
             }
           ]
         }
@@ -160,6 +164,11 @@
         "creditsLabel": "Crédits restants : {count}",
         "creditsFallback": "Crédits restants : indisponible",
         "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit. Gratuit, communautaire."
+      },
+      "example": {
+        "title": "Exemple ?",
+        "description": "Découvrez un produit au hasard pour explorer notre catalogue.",
+        "cta": "Voir ce produit"
       },
       "agent": {
         "title": "Une question ?",
@@ -2036,13 +2045,13 @@
     },
     "columns": {
       "verticals": {
-        "title": "Produits évalués",
+        "title": "Produits évalués ({count})",
         "emptyTitle": "Aucun résultat pour « {query} »",
         "emptyDescription": "Essayez un autre mot-clé ou élargissez votre recherche.",
         "unknownTitle": "Autres catégories"
       },
       "products": {
-        "title": "Produits non évalués",
+        "title": "Produits non évalués ({count})",
         "subtitle": "Produits trouvés sans catégorie associée. ",
         "emptyTitle": "Aucun produit pour « {query} »",
         "emptyDescription": "Essayez un autre mot-clé ou ajustez vos filtres."

@@ -178,8 +178,8 @@
         <v-row class="search-page__layout" align="start" justify="center">
           <v-col cols="12" lg="5">
             <section class="search-page__column">
-              <div class="search-page__column-header">
-                <div class="search-page__column-heading">
+              <div class="search-page__column-header d-flex justify-center">
+                <div class="search-page__column-heading text-center">
                   <v-icon
                     icon="mdi-star-check-outline"
                     size="22"
@@ -187,7 +187,11 @@
                     aria-hidden="true"
                   />
                   <h2 class="text-h5 font-weight-bold mb-0">
-                    {{ t('search.columns.verticals.title') }}
+                    {{
+                      t('search.columns.verticals.title', {
+                        count: evaluatedProductsCount,
+                      })
+                    }}
                   </h2>
                 </div>
               </div>
@@ -264,9 +268,9 @@
           <v-col cols="12" lg="7">
             <section class="search-page__column">
               <div
-                class="search-page__column-header search-page__column-header--with-actions"
+                class="search-page__column-header search-page__column-header--with-actions d-flex justify-center"
               >
-                <div class="search-page__column-title">
+                <div class="search-page__column-title text-center">
                   <div class="search-page__column-heading">
                     <v-icon
                       icon="mdi-star-off-outline"
@@ -275,7 +279,11 @@
                       aria-hidden="true"
                     />
                     <h2 class="text-h5 font-weight-bold mb-0">
-                      {{ t('search.columns.products.title') }}
+                      {{
+                        t('search.columns.products.title', {
+                          count: nonEvaluatedProductsCount,
+                        })
+                      }}
                     </h2>
                   </div>
                   <p class="search-page__column-subtitle">
@@ -751,6 +759,18 @@ const rightColumnPending = computed(() => {
   }
 
   return pending.value
+})
+
+const evaluatedProductsCount = computed(() => {
+  const groups = data.value?.verticalGroups ?? []
+  return groups.reduce(
+    (sum: number, group) => sum + (group.results?.length ?? 0),
+    0
+  )
+})
+
+const nonEvaluatedProductsCount = computed(() => {
+  return data.value?.missingVerticalResults?.length ?? 0
 })
 
 const handleSearchSubmit = () => {

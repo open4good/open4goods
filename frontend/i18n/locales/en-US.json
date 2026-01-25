@@ -441,7 +441,11 @@
               "to": "/categories"
             },
             {
-              "text": "products."
+              "text": "products. An example?"
+            },
+            {
+              "text": "{randomProduct}",
+              "to": "{randomProductLink}"
             }
           ]
         }
@@ -451,6 +455,11 @@
         "creditsLabel": "Credits remaining: {count}",
         "creditsFallback": "Credits remaining: unavailable",
         "description": "A powerful tool with real AI inside, giving you a panoramic view of your product. Free and community-driven."
+      },
+      "example": {
+        "title": "Example?",
+        "description": "Discover a random product to explore our catalog.",
+        "cta": "View this product"
       },
       "agent": {
         "title": "Any questions?",
@@ -2322,13 +2331,13 @@
     },
     "columns": {
       "verticals": {
-        "title": "Semantic categories",
+        "title": "Semantic categories ({count})",
         "emptyTitle": "No category matches for “{query}”",
         "emptyDescription": "Try a different keyword or broaden your query.",
         "unknownTitle": "Other categories"
       },
       "products": {
-        "title": "Uncategorised products",
+        "title": "Uncategorised products ({count})",
         "subtitle": "Products matched semantically without an assigned category.",
         "emptyTitle": "No uncategorised products for “{query}”",
         "emptyDescription": "Try another keyword or adjust your filters."
