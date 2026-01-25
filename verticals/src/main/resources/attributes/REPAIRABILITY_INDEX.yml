@@ -12,11 +12,8 @@ scoring:
     min: 0.0
     max: 5.0
   normalization:
-    method: "MINMAX_FIXED"
-    params:
-      fixedMin: 0.0
-      fixedMax: 10.0
-  missingValuePolicy: "WORST"
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
   fr: "Indice de réparabilité"

@@ -3,7 +3,7 @@
 ##################################
 key: "DIAGONALE_POUCES"
 userBetterIs: "GREATER"
-impactBetterIs: "LOWER"
+impactBetterIs: "GREATER"
 icecatFeaturesIds:
   - 944
 eprelFeatureNames:
@@ -22,10 +22,8 @@ scoring:
     min: 0.0
     max: 5.0
   normalization:
-    method: "SIGMA"
-    params:
-      sigmaK: 2.0
-  missingValuePolicy: "WORST"
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreUtility:
   fr: "La diagonale influe sur matériaux et énergie : plus elle est grande, plus l’impact de fabrication, transport et usage augmente."
