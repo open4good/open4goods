@@ -48,6 +48,7 @@
             <ProductHero
               :product="product"
               :breadcrumbs="productBreadcrumbs"
+              :impact-score="impactScoreOutOf20"
               :popular-attributes="heroPopularAttributes"
             />
             <div class="product-page__hero-corner" role="presentation">
@@ -2131,6 +2132,16 @@ const impactScoreValue = computed(() => {
     return null
   }
   return resolvePrimaryImpactScore(product.value)
+})
+
+const impactScoreOutOf20 = computed(() => {
+  const score = impactScoreValue.value
+
+  if (typeof score !== 'number') {
+    return null
+  }
+
+  return Number((score * 4).toFixed(1))
 })
 
 const reviewStructuredData = computed(() => {
