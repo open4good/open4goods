@@ -159,7 +159,8 @@
         "title": "Synthèse IA communautaire",
         "creditsLabel": "Crédits restants : {count}",
         "creditsFallback": "Crédits restants : indisponible",
-        "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit. Gratuit, communautaire."
+        "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit. Gratuit, communautaire.",
+        "reviewedProductsSuffix": "{reviewedProductsCount} fiches produits générées jusqu'à présent."
       },
       "agent": {
         "title": "Une question ?",

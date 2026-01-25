@@ -29,6 +29,7 @@ const props = defineProps<{
   impactScoreProductsCount?: number
   impactScoreCategoriesCount?: number
   productsWithoutVerticalCount?: number
+  reviewedProductsCount?: number
   aiSummaryRemainingCredits?: number
   heroBackgroundI18nKey?: string
 }>()
@@ -257,6 +258,24 @@ const formatCount = (value?: number) => {
   }
 }
 
+const formatCompactCount = (value?: number) => {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return null
+  }
+
+  if (value >= 1_000_000) {
+    const thousands = Math.floor(value / 1_000_000)
+    return `${thousands}k`
+  }
+
+  if (value >= 1000) {
+    const thousands = Math.floor(value / 1000)
+    return `${thousands}k`
+  }
+
+  return formatCount(value)
+}
+
 const formattedOpenDataMillions = computed(() =>
   formatCount(props.openDataMillions)
 )
@@ -276,7 +295,11 @@ const formattedImpactScoreCategoriesCount = computed(() =>
 )
 
 const formattedProductsWithoutVerticalCount = computed(() =>
-  formatCount(props.productsWithoutVerticalCount)
+  formatCompactCount(props.productsWithoutVerticalCount)
+)
+
+const formattedReviewedProductsCount = computed(() =>
+  formatCount(props.reviewedProductsCount)
 )
 
 const formattedAiSummaryRemainingCredits = computed(() => {
@@ -519,9 +542,18 @@ const resolveSegmentIcon = (icon?: string) => {
 }
 
 const aiSummaryTitle = computed(() => t('home.hero.aiSummary.title'))
-const aiSummaryDescription = computed(() =>
-  t('home.hero.aiSummary.description')
-)
+const aiSummaryDescription = computed(() => {
+  const baseDescription = t('home.hero.aiSummary.description')
+  const reviewedProductsCount = formattedReviewedProductsCount.value
+
+  if (!reviewedProductsCount) {
+    return baseDescription
+  }
+
+  return `${baseDescription} ${t('home.hero.aiSummary.reviewedProductsSuffix', {
+    reviewedProductsCount,
+  })}`
+})
 const aiSummaryCreditsLabel = computed(() => {
   const remaining = formattedAiSummaryRemainingCredits.value
   if (!remaining) {
@@ -654,30 +686,35 @@ const isCreditsDialogActive = ref(false)
         rounded="lg"
         elevation="3"
       >
-        <div class="home-hero-highlights__ai-summary-content">
-          <div class="home-hero-highlights__ai-summary-header">
-            <span class="home-hero-highlights__ai-summary-title">
-              <v-icon color="secondary" class="mr-2"
-                >mdi-bullhorn-variant</v-icon
+        <v-row class="home-hero-highlights__ai-summary-content" align="center">
+          <v-col cols="12" md="2" class="home-hero-highlights__ai-summary-icon">
+            <v-icon size="56" color="secondary">mdi-robot</v-icon>
+          </v-col>
+          <v-col cols="12" md="10">
+            <div class="home-hero-highlights__ai-summary-header">
+              <span class="home-hero-highlights__ai-summary-title">
+                <v-icon color="secondary" class="mr-2"
+                  >mdi-bullhorn-variant</v-icon
+                >
+                {{ aiSummaryTitle }}
+              </span>
+            </div>
+            <p class="home-hero-highlights__ai-summary-description">
+              {{ aiSummaryDescription }}
+            </p>
+            <div class="d-flex justify-center mt-4">
+              <v-btn
+                color="secondary"
+                variant="flat"
+                rounded="pill"
+                prepend-icon="mdi-bullhorn-variant"
+                @click="isCreditsDialogActive = true"
               >
-              {{ aiSummaryTitle }}
-            </span>
-          </div>
-          <p class="home-hero-highlights__ai-summary-description">
-            {{ aiSummaryDescription }}
-          </p>
-          <div class="d-flex justify-center mt-4">
-            <v-btn
-              color="secondary"
-              variant="flat"
-              rounded="pill"
-              prepend-icon="mdi-bullhorn-variant"
-              @click="isCreditsDialogActive = true"
-            >
-              {{ aiSummaryCreditsLabel }}
-            </v-btn>
-          </div>
-        </div>
+                {{ aiSummaryCreditsLabel }}
+              </v-btn>
+            </div>
+          </v-col>
+        </v-row>
       </v-sheet>
     </SectionReveal>
 
@@ -789,9 +826,11 @@ const isCreditsDialogActive = ref(false)
 
 .home-hero-highlights__ai-summary-content
   padding: 0.9rem 1.1rem
+  row-gap: 0.35rem
+
+.home-hero-highlights__ai-summary-icon
   display: flex
-  flex-direction: column
-  gap: 0.35rem
+  justify-content: center
 
 .home-hero-highlights__ai-summary-header
   display: flex

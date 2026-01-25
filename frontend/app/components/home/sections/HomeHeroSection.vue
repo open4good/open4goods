@@ -34,6 +34,7 @@ const props = defineProps<{
   impactScoreProductsCount?: number
   impactScoreCategoriesCount?: number
   productsWithoutVerticalCount?: number
+  reviewedProductsCount?: number
   aiSummaryRemainingCredits?: number
   heroBackgroundI18nKey?: string
   shouldReduceMotion?: boolean
@@ -329,6 +330,7 @@ useHead({
                     :products-without-vertical-count="
                       productsWithoutVerticalCount
                     "
+                    :reviewed-products-count="reviewedProductsCount"
                     :ai-summary-remaining-credits="aiSummaryRemainingCredits"
                   />
                 </div>

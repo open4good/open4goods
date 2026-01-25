@@ -99,7 +99,7 @@ const handleIntersect = (
       :is="transitionComponent || 'div'"
       :disabled="shouldReduceMotion || !transitionComponent"
     >
-      <div v-show="isVisible">
+      <div v-show="isVisible" class="section-reveal__content text-center">
         <slot :reveal="isVisible" />
       </div>
     </component>

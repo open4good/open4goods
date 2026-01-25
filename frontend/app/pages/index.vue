@@ -166,6 +166,16 @@ const productsWithoutVerticalCount = computed(() => {
   return count
 })
 
+const reviewedProductsCount = computed(() => {
+  const count = categoriesStats.value?.reviewedProductsCount
+
+  if (typeof count !== 'number' || !Number.isFinite(count) || count <= 0) {
+    return null
+  }
+
+  return count
+})
+
 const productsCount = computed(() => {
   const count = categoriesStats.value?.productsCountSum
 
@@ -835,6 +845,7 @@ useHead(() => ({
         :impact-score-products-count="impactScoreProductsCount"
         :impact-score-categories-count="impactScoreCategoriesCount"
         :products-without-vertical-count="productsWithoutVerticalCount"
+        :reviewed-products-count="reviewedProductsCount"
         :ai-summary-remaining-credits="aiSummaryRemainingCredits"
         :should-reduce-motion="shouldReduceMotion"
         hero-background-i18n-key="hero.background"

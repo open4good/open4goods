@@ -450,7 +450,8 @@
         "title": "Community AI summary",
         "creditsLabel": "Credits remaining: {count}",
         "creditsFallback": "Credits remaining: unavailable",
-        "description": "A powerful tool with real AI inside, giving you a panoramic view of your product. Free and community-driven."
+        "description": "A powerful tool with real AI inside, giving you a panoramic view of your product. Free and community-driven.",
+        "reviewedProductsSuffix": "{reviewedProductsCount} product pages generated so far."
       },
       "agent": {
         "title": "Any questions?",
