@@ -612,7 +612,7 @@ const aiSummaryDescription = computed(() => {
   const baseDescription = t('home.hero.aiSummary.description')
   const reviewedProductsCount = formattedReviewedProductsCount.value
 
-  if (!reviewedProductsCount) {
+  if (reviewedProductsCount == null) {
     return baseDescription
   }
 
@@ -756,7 +756,7 @@ const isCreditsDialogActive = ref(false)
           <v-col cols="12" md="2" class="home-hero-highlights__ai-summary-icon">
             <v-icon size="56" color="secondary">mdi-robot</v-icon>
           </v-col>
-          <v-col cols="12" md="10">
+          <v-col cols="12" md="10" class="home-hero-highlights__ai-summary-text">
             <div class="home-hero-highlights__ai-summary-header">
               <span class="home-hero-highlights__ai-summary-title">
                 <v-icon color="secondary" class="mr-2"
@@ -851,6 +851,8 @@ const isCreditsDialogActive = ref(false)
   display: flex
   flex-direction: column
   gap: 0.6rem
+  align-items: center
+  text-align: center
 
 .home-hero-highlights__title
   margin: 0
@@ -901,7 +903,7 @@ const isCreditsDialogActive = ref(false)
 .home-hero-highlights__ai-summary-header
   display: flex
   flex-wrap: wrap
-  justify-content: space-between
+  justify-content: center
   gap: 0.5rem
   font-weight: 600
   color: rgb(var(--v-theme-text-neutral-strong))
@@ -909,6 +911,11 @@ const isCreditsDialogActive = ref(false)
 .home-hero-highlights__ai-summary-title
   font-size: 0.95rem
 
+.home-hero-highlights__ai-summary-text
+  text-align: center
+  display: flex
+  flex-direction: column
+  gap: 0.25rem
 
 .home-hero-highlights__ai-summary-description
   margin: 0
