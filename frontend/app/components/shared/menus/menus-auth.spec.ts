@@ -77,7 +77,7 @@ function getCookieMockRegistry() {
 const themeCookiePreference = ref<ThemeName | null>(null)
 const preferredDarkMock = ref(false)
 
-const fetchMock = vi.fn()
+const fetchMock = vi.fn().mockResolvedValue({})
 const fetchCategoriesMock = vi.fn().mockResolvedValue([])
 const categoriesLoadingMock = ref(false)
 const fetchNavigationMock = vi.fn().mockResolvedValue(null)

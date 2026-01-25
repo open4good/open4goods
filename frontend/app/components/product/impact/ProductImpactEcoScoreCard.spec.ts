@@ -6,7 +6,7 @@ import ProductImpactEcoScoreCard from './ProductImpactEcoScoreCard.vue'
 import type { ScoreView } from './impact-types'
 
 describe('ProductImpactEcoScoreCard', () => {
-  vi.stubGlobal('$fetch', vi.fn())
+  vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({}))
 
   const i18n = createI18n({
     legacy: false,

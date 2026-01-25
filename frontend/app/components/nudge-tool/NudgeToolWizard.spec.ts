@@ -33,24 +33,6 @@ vi.mock('~/components/nudge-tool/NudgeWizardHeader.vue', () => ({
   default: { template: '<div class="header-stub"></div>' },
 }))
 
-vi.mock('#components', () => ({
-  NudgeToolStepCategory: {
-    template: '<div data-step="category">Category</div>',
-  },
-  NudgeToolStepScores: { template: '<div data-step="scores">Scores</div>' },
-  NudgeToolStepCondition: {
-    template: '<div data-step="condition">Condition</div>',
-  },
-  NudgeToolStepSubsetGroup: {
-    template: '<div data-step="subset">SubsetGroup</div>',
-  },
-  NudgeToolStepRecommendations: {
-    template: '<div data-step="recommendations">Recommendations</div>',
-  },
-  RoundedCornerCard: { template: '<div><slot /><slot name="corner"/></div>' },
-  NudgeWizardHeader: { template: '<div class="header-stub"></div>' },
-}))
-
 // Mock other imports that might cause issues
 vi.mock('~/utils/_category-filter-state', () => ({
   buildCategoryHash: vi.fn(),
