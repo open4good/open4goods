@@ -115,7 +115,7 @@ class ProductRepositoryTest
     {
         when(elasticsearchOperations.count(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(10L);
 
-        repository.countMainIndexValidAndReviewed();
+        repository.countMainIndexValidAndReviewed("fr");
 
         ArgumentCaptor<CriteriaQuery> queryCaptor = ArgumentCaptor.forClass(CriteriaQuery.class);
         verify(elasticsearchOperations).count(queryCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));

@@ -47,7 +47,7 @@ class StatsServiceTest {
         given(productRepository.countMainIndexHavingImpactScore()).willReturn(5_925L);
         given(productRepository.countMainIndexWithoutVertical()).willReturn(3_210L);
         given(productRepository.countMainIndexValidAndRated()).willReturn(9_876L);
-        given(productRepository.countMainIndexValidAndReviewed()).willReturn(4_321L);
+        given(productRepository.countMainIndexValidAndReviewed("fr")).willReturn(4_321L);
         given(partnerService.getPartners()).willReturn(List.of(mock(AffiliationPartner.class), mock(AffiliationPartner.class)));
 
         StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, productMappingService);

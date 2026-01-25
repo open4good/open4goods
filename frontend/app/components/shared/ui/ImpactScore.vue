@@ -119,12 +119,8 @@
               :fill="svgActiveColor"
             >
               {{ svgDisplayValue }}
-              <tspan
-                font-size="26"
-                font-weight="700"
-                fill="rgba(0,0,0,0.55)"
-              >
-                /20
+              <tspan font-size="26" font-weight="700" fill="rgba(0,0,0,0.55)">
+                /{{ n(svgRangeMax, { maximumFractionDigits: 1 }) }}
               </tspan>
             </text>
 
@@ -435,8 +431,8 @@ const svgDisplayValue = computed(() =>
 
 const svgScaleLabel = computed(() =>
   t('components.impactScore.scale', {
-    min: n(svgRangeMin.value, { maximumFractionDigits: 0 }),
-    max: n(svgRangeMax.value, { maximumFractionDigits: 0 }),
+    min: n(svgRangeMin.value, { maximumFractionDigits: 1 }),
+    max: n(svgRangeMax.value, { maximumFractionDigits: 1 }),
   })
 )
 
@@ -543,12 +539,7 @@ const badgeVariant = computed(() => props.badgeVariant)
 .impact-score-svg .scoreSvg {
   max-width: 100%;
   height: auto;
-  font-family:
-    'Hanken Grotesk',
-    'Inter',
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
+  font-family: 'Hanken Grotesk', 'Inter', 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Stars Style */

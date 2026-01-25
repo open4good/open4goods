@@ -2589,6 +2589,7 @@
               "sigma": "Méthode statistique : Distribution Normale (Sigma)",
               "percentile": "Méthode statistique : Percentile",
               "minmax_fixed": "Méthode statistique : Bornes Fixes",
+              "minmax_observed": "Méthode statistique : Bornes Observées",
               "minmax_quantile": "Méthode statistique : Bornes Quantiles",
               "fixed_mapping": "Méthode statistique : Barème Fixe",
               "binary": "Méthode statistique : Binaire",
@@ -2605,6 +2606,9 @@
             },
             "minmax_fixed": {
               "scoring": "La note est ramenée à une échelle commune via les bornes fixes [{fixedMin}{unit} ; {fixedMax}{unit}]."
+            },
+            "minmax_observed": {
+              "scoring": "La note est calculée en projetant la valeur sur l’échelle des valeurs observées sur le marché [min: {worst}{unit} ; max: {best}{unit}]."
             },
             "minmax_quantile": {
               "scoring": "La note est calculée via des bornes par quantiles [{quantileLow}{unit} ; {quantileHigh}{unit}] pour limiter l'effet des valeurs extrêmes."
@@ -2625,6 +2629,7 @@
             "sigma": "Choisie pour les données continues qui suivent une courbe en cloche. Contrairement aux bornes fixes, elle s'adapte automatiquement à la distribution réelle des produits.",
             "percentile": "Privilégiée quand les valeurs sont dispersées ou peu nombreuses. Elle classe les produits les uns par rapport aux autres plutôt que sur une échelle absolue.",
             "minmax_fixed": "Utilisée quand les bornes (min/max) sont connues et stables (ex: normes officielles). Contrairement à l'approche Sigma, elle ne dépend pas de la distribution des autres produits.",
+            "minmax_observed": "Utilisée pour comparer le produit par rapport à l'offre réelle du marché. La note dépend directement des meilleures et pires performances actuellement disponibles.",
             "minmax_quantile": "Alternative à l'approche Sigma pour réduire l'impact des valeurs extrêmes. Elle se concentre sur le cœur de la distribution pour une comparaison plus juste.",
             "fixed_mapping": "Idéale pour les critères qualitatifs (ex: classe énergétique). Elle permet d'attribuer une note précise à chaque valeur possible, sans calcul statistique.",
             "binary": "La méthode la plus simple : ça passe ou ça casse. Utilisée pour les critères binaires (présence/absence) où aucune nuance n'est nécessaire.",

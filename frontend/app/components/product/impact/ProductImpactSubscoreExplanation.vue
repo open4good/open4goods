@@ -600,6 +600,12 @@ const statisticalMethodItems = computed(() => {
         resolveStatisticalMethodTranslation('percentile.value', params)
       )
     }
+  } else if (methodKey === 'MINMAX_OBSERVED') {
+    if (worstValue.value && bestValue.value) {
+      items.push(
+        resolveStatisticalMethodTranslation('minmax_observed.scoring', params)
+      )
+    }
   } else if (methodKey === 'MINMAX_FIXED') {
     if (fixedMinValue.value && fixedMaxValue.value) {
       items.push(

@@ -2862,6 +2862,7 @@
               "sigma": "Statistical method: Normal Distribution (Sigma)",
               "percentile": "Statistical method: Percentile",
               "minmax_fixed": "Statistical method: Fixed Bounds",
+              "minmax_observed": "Statistical method: Observed Bounds",
               "minmax_quantile": "Statistical method: Quantile Bounds",
               "fixed_mapping": "Statistical method: Fixed Mapping",
               "binary": "Statistical method: Binary",
@@ -2878,6 +2879,9 @@
             },
             "minmax_fixed": {
               "scoring": "The score is scaled between the fixed bounds [{fixedMin}{unit} ; {fixedMax}{unit}]."
+            },
+            "minmax_observed": {
+              "scoring": "The score is calculated by projecting the value onto the scale of observed market values [min: {worst}{unit} ; max: {best}{unit}]."
             },
             "minmax_quantile": {
               "scoring": "The score is scaled using quantile bounds [{quantileLow}{unit} ; {quantileHigh}{unit}] to limit outliers."
@@ -2898,6 +2902,7 @@
             "sigma": "This method is set in the attribute configuration for continuous values. σ is the standard deviation and {sigmaK}σ represents the interval around the mean that contains most values.",
             "percentile": "This method is used when values are sparse or highly discrete. The configuration favors a relative ranking within the distribution.",
             "minmax_fixed": "This method applies when the attribute has stable bounds defined in configuration. It fits well for standardized ranges.",
+            "minmax_observed": "Used to compare the product against the actual market offer. The score depends directly on the best and worst performances currently available.",
             "minmax_quantile": "This method is used to reduce the impact of extreme values. The configuration relies on quantiles to keep comparisons relative.",
             "fixed_mapping": "This method is selected for categorical values with a fixed mapping defined in configuration.",
             "binary": "This method applies when the attribute is evaluated against a threshold. The configuration defines the pass value.",

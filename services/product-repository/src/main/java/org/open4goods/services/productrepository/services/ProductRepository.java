@@ -1018,11 +1018,17 @@ public class ProductRepository {
          *
          * @return count of recent products with AI reviews
          */
+        /**
+         * Count recent products with offers, AI reviews in the given language, and not excluded from the catalogue.
+         *
+         * @param language the language to check for reviews (e.g. "fr")
+         * @return count of recent products with AI reviews
+         */
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-        public Long countMainIndexValidAndReviewed() {
+        public Long countMainIndexValidAndReviewed(String language) {
             CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
                     .and(new Criteria("excluded").is(false))
-                    .and(new Criteria("reviews").exists()));
+                    .and(new Criteria("reviews." + language + ".review").exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
@@ -1057,12 +1063,19 @@ public class ProductRepository {
          * @param vertical vertical identifier
          * @return count of recent products with AI reviews for the vertical
          */
+        /**
+         * Count recent products with offers, AI reviews in the given language, and not excluded for a specific vertical.
+         *
+         * @param vertical vertical identifier
+         * @param language the language to check for reviews (e.g. "fr")
+         * @return count of recent products with AI reviews for the vertical
+         */
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-        public Long countMainIndexValidAndReviewed(String vertical) {
+        public Long countMainIndexValidAndReviewed(String vertical, String language) {
             CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
                     .and(new Criteria("vertical").is(vertical))
                     .and(new Criteria("excluded").is(false))
-                    .and(new Criteria("reviews").exists()));
+                    .and(new Criteria("reviews." + language + ".review").exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 

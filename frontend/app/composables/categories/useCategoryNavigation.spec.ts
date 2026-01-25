@@ -66,6 +66,7 @@ describe('useCategoryNavigation composable', () => {
       return Promise.reject(new Error(`Unexpected fetch call: ${request}`))
     })
 
+    const navigationResponse = {
       category: { title: 'Cached root' },
       childCategories: [],
     }
