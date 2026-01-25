@@ -660,7 +660,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	 */
 	@Scheduled(fixedDelayString = "${review.generation.batch-poll-interval:PT5M}")
 	public void checkBatchJobStatuses() {
-		// TODO : ADD LOG
+		logger.info("Executing scheduled batch job status check...");
 		File[] trackingFiles = trackingFolder
 				.listFiles((dir, name) -> name.startsWith("tracking_") && name.endsWith(".json"));
 		if (trackingFiles == null || trackingFiles.length == 0) {
@@ -1005,15 +1005,26 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (!properties.isResolveUrl() || review == null) {
 			return review;
 		}
-
 		List<AiReview.AiSource> updatedSources = review.getSources() == null ? List.of() : review.getSources().stream().map(source -> {
 			String originalUrl = source.getUrl();
 			String resolvedUrl = resolveUrl(originalUrl);
+
+			if (isExcludedDomain(resolvedUrl)) {
+				logger.info("URL {} removed because it matches an excluded domain.", resolvedUrl);
+				return null;
+			}
+			if (!isValidUrl(resolvedUrl)) {
+				logger.warn("URL {} removed because it is invalid or unreachable.", resolvedUrl);
+				return null;
+			}
+
 			if (originalUrl != null && !originalUrl.equals(resolvedUrl)) {
 				return new AiReview.AiSource(source.getNumber(), source.getName(), source.getDescription(), resolvedUrl);
 			}
 			return source;
-		}).toList();
+		})
+		.filter(Objects::nonNull)
+		.toList();
 
 		ReferenceNormalization normalization = new ReferenceNormalization(
 				review.getDescription(),
@@ -1319,16 +1330,16 @@ public class ReviewGenerationService implements HealthIndicator {
 		String technicalReviewNovice = normalizer.normalize(review.getTechnicalReviewNovice());
 		String technicalReviewIntermediate = normalizer.normalize(review.getTechnicalReviewIntermediate());
 		String technicalReviewAdvanced = normalizer.normalize(review.getTechnicalReviewAdvanced());
-		
+
 		String ecologicalReviewNovice = normalizer.normalize(review.getEcologicalReviewNovice());
 		String ecologicalReviewIntermediate = normalizer.normalize(review.getEcologicalReviewIntermediate());
 		String ecologicalReviewAdvanced = normalizer.normalize(review.getEcologicalReviewAdvanced());
-		
+
 		String communityReviewNovice = normalizer.normalize(review.getCommunityReviewNovice());
 		String communityReviewIntermediate = normalizer.normalize(review.getCommunityReviewIntermediate());
 
 		String communityReviewAdvanced = normalizer.normalize(review.getCommunityReviewAdvanced());
-		
+
 		String summary = normalizer.normalize(review.getSummary());
 		String technicalOneline = normalizer.normalize(review.getTechnicalOneline());
 		String technicalShortReview = normalizer.normalize(review.getTechnicalShortReview());
@@ -1347,7 +1358,7 @@ public class ReviewGenerationService implements HealthIndicator {
 			dataQuality = appendDataQuality(dataQuality,
 					"Certaines références ont été retirées car elles ne correspondaient à aucune source.");
 		}
-		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle, 
+		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle,
 				summary, pros, cons, attributes, dataQuality, technicalOneline, technicalShortReview,
 				ecologicalOneline, communityOneline, review.getPdfs(), review.getImages(), review.getVideos(),
 				review.getSocialLinks(),
@@ -1406,6 +1417,14 @@ public class ReviewGenerationService implements HealthIndicator {
 		private boolean hasRemovedReferences() {
 			return removedReferences;
 		}
+	}
+
+	private boolean isExcludedDomain(String url) {
+		if (url == null || properties.getExcludedDomains() == null) {
+			return false;
+		}
+		// Basic check: if the URL contains any of the excluded domain strings.
+		return properties.getExcludedDomains().stream().anyMatch(url::contains);
 	}
 
 }

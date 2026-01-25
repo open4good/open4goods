@@ -317,7 +317,7 @@ const i18nMessages = {
           title: 'Request an AI summary',
           callToAction: {
             title: 'Request an AI review',
-            subtitle: 'Start a summary for this product.',
+            subtitleVariant: 'Start a summary for this product.',
           },
         },
         empty: 'No AI review is available for this product yet.',

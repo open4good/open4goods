@@ -14,8 +14,12 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "review.generation")
 public class ReviewGenerationConfig {
 
-	
-	
+
+    /**
+     * Flag to enable URL resolution in post-processing.
+     * If true, the service will attempt to follow redirects (30x status) to resolve the final URL.
+     */
+    private boolean resolveUrl = true;
 	private String batchFolder = "/opt/open4goods/batch-ids/";
     private int threadPoolSize = 10;
     private int maxQueueSize = 1000;  // Maximum size of the executor queue.
@@ -24,16 +28,18 @@ public class ReviewGenerationConfig {
     // Property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";
 
+    private List<String> excludedDomains = new ArrayList<>();
+
     // Limit the number of search queries.
     private int maxSearch = 5;
 
-    
+
     // Minimum global tokens and source count required for valid generation.
     private int minGlobalTokens = 7500;
     private int minUrlCount = 4;
 
-    
-    
+
+
     // Properties for token-based content aggregation.
     private int maxTotalTokens = 100000;
     private int sourceMinTokens = 150;
@@ -128,6 +134,14 @@ public class ReviewGenerationConfig {
         this.queryTemplate = queryTemplate;
     }
 
+    public List<String> getExcludedDomains() {
+        return excludedDomains;
+    }
+
+    public void setExcludedDomains(List<String> excludedDomains) {
+        this.excludedDomains = excludedDomains;
+    }
+
     public int getMaxSearch() {
         return maxSearch;
     }
@@ -169,15 +183,15 @@ public class ReviewGenerationConfig {
     public void setRefreshDelayMonths(int refreshDelayMonths) {
         this.refreshDelayMonths = refreshDelayMonths;
     }
-    
+
     public Long getEstimatedTime() {
         return estimatedTime;
     }
-    
+
     public void setEstimatedTime(Long estimatedTime) {
         this.estimatedTime = estimatedTime;
     }
-    
+
     public int getRegenerationDelayDays() {
         return regenerationDelayDays;
     }
@@ -238,11 +252,7 @@ public class ReviewGenerationConfig {
 	public void setMinUrlCount(int minUrlCount) {
 		this.minUrlCount = minUrlCount;
 	}
-    /**
-     * Flag to enable URL resolution in post-processing.
-     * If true, the service will attempt to follow redirects (30x status) to resolve the final URL.
-     */
-    private boolean resolveUrl = true;
+
 
 	public boolean isResolveUrl() {
 		return resolveUrl;
@@ -256,6 +266,6 @@ public class ReviewGenerationConfig {
 	public void setBatchFolder(String batchFolder) {
 		this.batchFolder = batchFolder;
 	}
-    
-    
+
+
 }
