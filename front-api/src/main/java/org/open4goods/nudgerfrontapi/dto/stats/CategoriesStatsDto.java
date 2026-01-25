@@ -20,6 +20,12 @@ public record CategoriesStatsDto(
         @Schema(description = "Total number of ISBN items available in the OpenData exports.", example = "870000")
         long isbnOpenDataItemsCount,
 
+        @Schema(description = "Count of recent products with offers, a valid ImpactScore, and not excluded.", example = "5925")
+        long impactScoreProductsCount,
+
+        @Schema(description = "Count of recent products with offers that are not mapped to any vertical.", example = "81234")
+        long productsWithoutVerticalCount,
+
         @Schema(description = "Per-category product counts for recent products with offers, keyed by vertical id.", example = "{\"electronics\": 12000, \"appliances\": 8500}")
         Map<String, Long> productsCountByCategory,
 

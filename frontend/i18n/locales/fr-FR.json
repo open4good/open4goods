@@ -76,10 +76,24 @@
           "title": "🌿 ImpactScore : Guider vos achats",
           "segments": [
             {
-              "text": "On va vous faire acheter moins pire pour la planète, grâce à notre évaluation environnementale innovante pour {products} produits dans"
+              "text": "Acheter moins pire pour la planète, grâce à notre"
             },
             {
-              "text": "{categories} catégories",
+              "text": "évaluation environnementale",
+              "to": "/impact-score"
+            },
+            {
+              "text": "innovante pour"
+            },
+            {
+              "text": "{impactScoreProducts}",
+              "to": "/impact-score"
+            },
+            {
+              "text": "produits dans"
+            },
+            {
+              "text": "{impactScoreCategories}",
               "to": "/categories"
             }
           ]
@@ -88,15 +102,33 @@
           "title": "🇫🇷 Ouvert & éthique",
           "segments": [
             {
-              "text": "100% indépendant. Fait en france, hébergé en europe. Plus de {millions}M de produits en"
+              "text": "100% indépendant. Fait en France,",
+              "icon": "breton-flag",
+              "iconPosition": "after"
             },
             {
-              "text": "données ouvertes.Nudger est un ",
+              "text": "hébergé en Europe. Plus de"
+            },
+            {
+              "text": "{millions}M",
               "to": "/opendata"
             },
             {
-              "text": "Logiciel libre",
+              "text": "de produits en"
+            },
+            {
+              "text": "données ouvertes.",
+              "to": "/opendata"
+            },
+            {
+              "text": "Nudger est aussi"
+            },
+            {
+              "text": "open source",
               "to": "/opensource"
+            },
+            {
+              "text": "et ne collecte aucune donnée personnelle."
             }
           ]
         },
@@ -104,18 +136,31 @@
           "title": "🫰 Comparateur de prix",
           "segments": [
             {
-              "text": "Sans se faire avoir sur les prix avec"
+              "text": "Sans se faire avoir sur les prix, avec les meilleures offres auprès de"
             },
             {
-              "text": "{partnersLink}.",
+              "text": "{partnersLink}",
               "to": "/partenaires"
             },
             {
-              "text": "Les meilleurs prix, l'historique neuf et occasion pour {products} produits"
+              "text": "commerçants. Achetez au meilleur moment avec l'historique neuf et occasion pour"
+            },
+            {
+              "text": "{priceHistoryProducts}",
+              "to": "/categories"
+            },
+            {
+              "text": "produits."
             }
           ]
         }
       ],
+      "aiSummary": {
+        "title": "Synthèse IA communautaire",
+        "creditsLabel": "Crédits restants : {count}",
+        "creditsFallback": "Crédits restants : indisponible",
+        "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit. Gratuit, communautaire."
+      },
       "agent": {
         "title": "Une question ?",
         "subtitle": "Posez votre question à notre agent IA expert Nudger."

@@ -42,6 +42,8 @@ class StatsServiceTest {
         given(openDataService.totalItemsGTIN()).willReturn(1_234L);
         given(openDataService.totalItemsISBN()).willReturn(567L);
         given(productRepository.countMainIndexHavingVertical("enabled")).willReturn(42L);
+        given(productRepository.countMainIndexHavingImpactScore()).willReturn(5_925L);
+        given(productRepository.countMainIndexWithoutVertical()).willReturn(3_210L);
         given(partnerService.getPartners()).willReturn(List.of(mock(AffiliationPartner.class), mock(AffiliationPartner.class)));
 
         StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository);
@@ -52,6 +54,8 @@ class StatsServiceTest {
         assertThat(dto.affiliationPartnersCount()).isEqualTo(2);
         assertThat(dto.gtinOpenDataItemsCount()).isEqualTo(1_234L);
         assertThat(dto.isbnOpenDataItemsCount()).isEqualTo(567L);
+        assertThat(dto.impactScoreProductsCount()).isEqualTo(5_925L);
+        assertThat(dto.productsWithoutVerticalCount()).isEqualTo(3_210L);
         assertThat(dto.productsCountByCategory()).isEqualTo(Map.of("enabled", 42L));
         assertThat(dto.productsCountSum()).isEqualTo(42L);
     }

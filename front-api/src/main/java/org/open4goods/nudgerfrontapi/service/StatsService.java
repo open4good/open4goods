@@ -67,7 +67,7 @@ public class StatsService {
      *
      * @param domainLanguage currently unused but retained for future localisation of statistics labels
      * @return DTO describing the category statistics used by the frontend including affiliation partners,
-     * OpenData counts, and per-category product counts for recent products with offers.
+     * OpenData counts, ImpactScore products count, and per-category product counts for recent products with offers.
      */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
@@ -75,6 +75,8 @@ public class StatsService {
         AffiliationPartnersStats partnersStats = computeAffiliationPartnersStats();
         long gtinItemsCount = openDataService.totalItemsGTIN();
         long isbnItemsCount = openDataService.totalItemsISBN();
+        long impactScoreProductsCount = safeCount(productRepository.countMainIndexHavingImpactScore());
+        long productsWithoutVerticalCount = safeCount(productRepository.countMainIndexWithoutVertical());
 
         Map<String, Long> productsCountByCategory = new LinkedHashMap<>();
         long productsCountSum = 0L;
@@ -84,8 +86,7 @@ public class StatsService {
                 continue;
             }
 
-            Long count = productRepository.countMainIndexHavingVertical(verticalId);
-            long safeCount = count == null ? 0L : count;
+            long safeCount = safeCount(productRepository.countMainIndexHavingVertical(verticalId));
             productsCountByCategory.put(verticalId, safeCount);
             productsCountSum += safeCount;
         }
@@ -95,6 +96,8 @@ public class StatsService {
                 partnersStats.count(),
                 gtinItemsCount,
                 isbnItemsCount,
+                impactScoreProductsCount,
+                productsWithoutVerticalCount,
                 productsCountByCategory,
                 productsCountSum
         );
@@ -267,6 +270,16 @@ public class StatsService {
                 cardinality.getSum(),
                 cardinality.getStdDev()
         );
+    }
+
+    /**
+     * Protect against null counts returned by the repository.
+     *
+     * @param count repository count result
+     * @return non-null count
+     */
+    private long safeCount(Long count) {
+        return count == null ? 0L : count;
     }
 
     /**
