@@ -127,7 +127,7 @@
     </v-navigation-drawer>
 
     <v-progress-linear
-      v-if="pending || productsPending || baselinePending"
+      v-if="pending || productsPending || baselinePending || aggsPending"
       class="search-page__loader"
       indeterminate
       color="primary"
@@ -141,7 +141,7 @@
       max-width="xl"
     >
       <v-alert
-        v-if="error || productsError || baselineError"
+        v-if="error || productsError || baselineError || aggsError"
         type="error"
         variant="tonal"
         border="start"
@@ -161,13 +161,7 @@
           <v-btn
             color="primary"
             variant="text"
-            @click="
-              showLatestProducts
-                ? refreshBaseline()
-                : isFiltered
-                  ? refreshProducts()
-                  : refresh()
-            "
+            @click="handleRetry"
           >
             {{ t('common.actions.retry') }}
           </v-btn>
@@ -405,7 +399,7 @@ const heroSubtitle = computed(() => {
 })
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
-const searchType = ref<string | null>(null)
+const searchType = ref<string | null>('SEMANTIC')
 const openPanels = ref<number[]>([])
 
 watch(
@@ -479,6 +473,13 @@ const aggregationDefinition = computed<AggregationRequestDto>(() => {
   return aggs.length > 0 ? { aggs } : {}
 })
 
+const resolvedSearchType = computed(() =>
+  hasMinimumLength.value ? searchType.value ?? 'SEMANTIC' : undefined
+)
+const semanticSearchEnabled = computed(() =>
+  resolvedSearchType.value === 'SEMANTIC' ? true : undefined
+)
+
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(
     'search-global',
@@ -490,7 +491,7 @@ const { data, pending, error, refresh } =
         body: {
           query: normalizedQuery.value,
           filters: filterRequest.value,
-          searchType: searchType.value ?? undefined,
+          searchType: resolvedSearchType.value,
         },
       })
     },
@@ -503,8 +504,8 @@ const { data, pending, error, refresh } =
 const requestBody = computed<ProductSearchRequestDto>(() => ({
   filters: filterRequest.value,
   aggs: aggregationDefinition.value,
-  semanticSearch: hasMinimumLength.value ? true : undefined,
-  searchType: searchType.value ?? undefined,
+  semanticSearch: semanticSearchEnabled.value,
+  searchType: resolvedSearchType.value,
 }))
 
 const latestProductsSort = computed<SortDto[]>(() => [
@@ -517,8 +518,8 @@ const baselinePayload = computed(() => ({
   sort: showLatestProducts.value
     ? { sorts: latestProductsSort.value }
     : undefined,
-  semanticSearch: hasMinimumLength.value ? true : undefined,
-  searchType: searchType.value ?? undefined,
+  semanticSearch: semanticSearchEnabled.value,
+  searchType: resolvedSearchType.value,
 }))
 
 const {
@@ -541,6 +542,39 @@ const {
   },
   {
     watch: [() => normalizedQuery.value, () => showLatestProducts.value],
+    immediate: true,
+  }
+)
+
+const {
+  data: baselineAggregationData,
+  pending: aggsPending,
+  error: aggsError,
+  refresh: refreshAggregations,
+} = await useAsyncData<ProductSearchResponseDto | null>(
+  'search-baseline-aggregations',
+  async () => {
+    if (!showLatestProducts.value) {
+      return null
+    }
+
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+      method: 'POST',
+      headers: requestHeaders,
+      body: {
+        query: hasMinimumLength.value ? normalizedQuery.value : undefined,
+        aggs: aggregationDefinition.value,
+        semanticSearch: semanticSearchEnabled.value,
+        searchType: resolvedSearchType.value,
+      },
+    })
+  },
+  {
+    watch: [
+      () => normalizedQuery.value,
+      () => showLatestProducts.value,
+      () => resolvedSearchType.value,
+    ],
     immediate: true,
   }
 )
@@ -584,7 +618,11 @@ const baselineResults = computed(
 )
 const baselineAggregations = computed<Record<string, AggregationResponseDto>>(
   () => {
-    const aggs = baselineSearchData.value?.aggregations ?? []
+    const aggregationSource =
+      showLatestProducts.value && baselineAggregationData.value
+        ? baselineAggregationData.value
+        : baselineSearchData.value
+    const aggs = aggregationSource?.aggregations ?? []
     return aggs.reduce(
       (acc, curr) => {
         if (curr.field) acc[curr.field] = curr
@@ -638,6 +676,21 @@ const updateTermsFilter = (field: string, terms: string[]) => {
     ...filterRequest.value,
     filters: [...current, { field, operator: 'term', terms }],
   }
+}
+
+const handleRetry = () => {
+  if (showLatestProducts.value) {
+    refreshBaseline()
+    refreshAggregations()
+    return
+  }
+
+  if (isFiltered.value) {
+    refreshProducts()
+    return
+  }
+
+  refresh()
 }
 
 const clearFilters = () => {

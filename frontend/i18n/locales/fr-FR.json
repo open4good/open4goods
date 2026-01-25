@@ -716,6 +716,10 @@
         "new": "Neuf",
         "used": "Occasion"
       },
+      "searchMode": {
+        "semantic": "Recherche sémantique",
+        "text": "Recherche textuelle"
+      },
       "showMoreImpact": "Plus de filtres",
       "showMoreTechnical": "Plus de filtres",
       "technicalTitle": "Filtres techniques",
