@@ -1014,15 +1014,16 @@ public class ProductRepository {
         }
 
         /**
-         * Count recent products with offers, AI reviews, and not excluded from the catalogue.
+         * Count recent products with offers, AI reviews for the requested locale, and not excluded from the catalogue.
          *
+         * @param locale locale to check (e.g. {@code fr}); defaults to {@code default} when blank
          * @return count of recent products with AI reviews
          */
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-        public Long countMainIndexValidAndReviewed() {
+        public Long countMainIndexValidAndReviewed(String locale) {
             CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
                     .and(new Criteria("excluded").is(false))
-                    .and(new Criteria("reviews").exists()));
+                    .and(new Criteria(resolveReviewField(locale)).exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
@@ -1052,18 +1053,27 @@ public class ProductRepository {
         }
 
         /**
-         * Count recent products with offers, AI reviews, and not excluded for a specific vertical.
+         * Count recent products with offers, AI reviews for the requested locale, and not excluded for a specific vertical.
          *
          * @param vertical vertical identifier
+         * @param locale locale to check (e.g. {@code fr}); defaults to {@code default} when blank
          * @return count of recent products with AI reviews for the vertical
          */
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-        public Long countMainIndexValidAndReviewed(String vertical) {
+        public Long countMainIndexValidAndReviewed(String vertical, String locale) {
             CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
                     .and(new Criteria("vertical").is(vertical))
                     .and(new Criteria("excluded").is(false))
-                    .and(new Criteria("reviews").exists()));
+                    .and(new Criteria(resolveReviewField(locale)).exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        private String resolveReviewField(String locale) {
+            String resolvedLocale = locale;
+            if (resolvedLocale == null || resolvedLocale.isBlank()) {
+                resolvedLocale = "default";
+            }
+            return "reviews." + resolvedLocale + ".review";
         }
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)

@@ -85,7 +85,8 @@ public class StatsService {
         long totalProductsCount = safeCount(productRepository.countMainIndex());
         long excludedProductsCount = safeCount(productRepository.countMainIndexExcluded());
         long ratedProductsCount = safeCount(productRepository.countMainIndexValidAndRated());
-        long reviewedProductsCount = safeCount(productRepository.countMainIndexValidAndReviewed());
+        String reviewLocale = domainLanguage != null ? domainLanguage.languageTag() : null;
+        long reviewedProductsCount = safeCount(productRepository.countMainIndexValidAndReviewed(reviewLocale));
 
         Map<String, Long> productsCountByCategory = new LinkedHashMap<>();
         Map<String, VerticalStatsDto> detailedStats = new LinkedHashMap<>();
@@ -103,7 +104,7 @@ public class StatsService {
             long vTotal = safeCount(productRepository.countMainIndexTotal(verticalId));
             long vExcluded = safeCount(productRepository.countMainIndexExcluded(verticalId));
             long vRated = safeCount(productRepository.countMainIndexValidAndRated(verticalId));
-            long vReviewed = safeCount(productRepository.countMainIndexValidAndReviewed(verticalId));
+            long vReviewed = safeCount(productRepository.countMainIndexValidAndReviewed(verticalId, reviewLocale));
 
             detailedStats.put(verticalId, new VerticalStatsDto(vTotal, vExcluded, safeCount, vRated, vReviewed));
         }
