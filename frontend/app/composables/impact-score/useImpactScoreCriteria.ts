@@ -43,7 +43,7 @@ export const buildCriteriaFromCategory = (
       key,
       name: fallbackName,
       utility: attribute?.scoreUtility ?? '',
-      icon: resolvedIcon ?? null,
+      icon: attribute?.icon ?? CRITERIA_ICON_OVERRIDES[key] ?? null,
     }
   })
 }

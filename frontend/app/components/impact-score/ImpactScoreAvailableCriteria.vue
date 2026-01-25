@@ -16,7 +16,7 @@
       </p>
     </header>
 
-    <ImpactScoreCriteriaPanel :columns="{ sm: 4, md: 4, lg: 4 }" />
+    <ImpactScoreCriteriaPanel :columns="{ sm: 4, md: 4 }" />
   </section>
 </template>
 

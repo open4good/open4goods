@@ -73,15 +73,13 @@
               </h3>
               <v-btn
                 class="impact-score-methodology__card-cta"
+                :to="item.categoryLink"
                 :aria-label="
                   t('impactScorePage.sections.methodology.verticalCtaAria', {
                     vertical: item.label,
                   })
                 "
-                variant="text"
-                color="primary"
-                type="button"
-                @click.stop.prevent="navigateToCategory(item.categoryLink)"
+                @click.stop
               >
                 <span>{{
                   t('impactScorePage.sections.methodology.verticalCta')
