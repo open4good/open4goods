@@ -102,15 +102,15 @@
           "title": "🇫🇷 Ouvert & éthique",
           "segments": [
             {
-              "text": "100% indépendant. Fait en France,",
+              "text": "100% indépendant. Fait en France",
               "icon": "breton-flag",
               "iconPosition": "after"
             },
             {
-              "text": "hébergé en Europe. Plus de"
+              "text": ", hébergé en Europe. Plus de"
             },
             {
-              "text": "{millions}M",
+              "text": "73M",
               "to": "/opendata"
             },
             {

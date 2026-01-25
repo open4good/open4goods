@@ -298,7 +298,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 2.6
+      scoreMinValue: 2.96
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -317,7 +317,7 @@ nudgeToolConfig:
         fr: "Téléviseurs avec une bonne durabilité"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 2.6
+      scoreMinValue: 3.65
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -363,68 +363,68 @@ nudgeToolConfig:
     ################
     # Impact Score
     ################
-    - id: "impact_high" # Unique identifier for the subset
+    - id: "impact_bad" # Unique identifier for the subset
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "LOWER_THAN"
-          value: "2"
+          value: "9.19"
       image: "example-image.png"
       url:
         en: "high-impact"
-        fr: "petit-impact"
+        fr: "mauvais-ecoscore"
       caption:
-        en: "< 2"
-        fr: "< 2"
+        en: "< 9.19"
+        fr: "< 9.19"
       title:
-        en: "Terrible impact "
-        fr: "Impact très mauvais"
+        en: "Bad Ecoscore"
+        fr: "Mauvais Ecoscore"
       description:
-        en: "Products with an ImpactScore lower than 2/5"
-        fr: "Produits avec un ImpactScore inférieur à 2/5"
+        en: "Products with a bad Ecoscore"
+        fr: "Produits avec un mauvais Ecoscore"
 
     - id: "impact_medium"
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "GREATER_THAN"
-          value: "2"
+          value: "9.19"
         - field: "scores.ECOSCORE.value"
           operator: "LOWER_THAN"
-          value: "4"
+          value: "12.01"
       image: "example-image.png"
       url:
         en: "medium-impact"
-        fr: "impact-moyen"
+        fr: "ecoscore-moyen"
       caption:
-        en: "> 2 < 4"
-        fr: "> 2 < 4"
+        en: "9.19 - 12.01"
+        fr: "9.19 - 12.01"
       title:
-        en: "Relativ impact"
-        fr: "Impact moyen"
+        en: "Medium Ecoscore"
+        fr: "Ecoscore Moyen"
       description:
-        en: "Products with an ImpactScore between 2/5 and 4/5"
-        fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
+        en: "Products with a medium Ecoscore"
+        fr: "Produits avec un Ecoscore moyen"
 
-    - id: "impact_low"
+    - id: "impact_good"
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "GREATER_THAN"
-          value: "4"
+          value: "12.01"
       image: "example-image.png"
       url:
-        en: "impact-moderate"
-        fr: "impact-modere"
+        en: "low-impact"
+        fr: "bon-ecoscore"
       caption:
-        en: "> 4"
-        fr: "> 4"
+        en: "> 12.01"
+        fr: "> 12.01"
       title:
-        en: "Moderated impact"
-        fr: "Impact modéré"
+        en: "Good Ecoscore"
+        fr: "Bon Ecoscore"
       description:
-        en: "Products with an ImpactScore greater than 4/5"
-        fr: "Produits avec un ImpactScore supérieur à 4/5"
+        en: "Products with a good Ecoscore"
+        fr: "Produits avec un bon Ecoscore"
 
     ################
     # Price

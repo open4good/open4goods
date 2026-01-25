@@ -154,4 +154,38 @@ class ProductControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
+
+    @Test
+    void globalSearchWithEmptyAggsShouldBeAllowed() {
+        ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
+                new FilterRequestDto(List.of(), List.of()), null, null);
+
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        
+        // Mock service call to succeed
+        when(productMappingService.searchProducts(
+                any(Pageable.class), 
+                any(Locale.class), 
+                anySet(), 
+                any(),    // aggs
+                any(),    // domainLanguage
+                any(),    // verticalId
+                any(),    // query
+                any(),    // filter
+                anyBoolean(), 
+                any()))
+                .thenReturn(responseDto);
+
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(
+                PageRequest.of(0, 20), 
+                Set.of(),
+                null, // verticalId = null for global
+                null, 
+                DomainLanguage.fr, 
+                Locale.FRANCE, 
+                searchRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 }

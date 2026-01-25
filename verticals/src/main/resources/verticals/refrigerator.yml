@@ -212,7 +212,7 @@ nudgeToolConfig:
         fr: "< 2"
       title:
         en: "Terrible impact "
-        fr: "Impact très mauvais"
+        fr: "Mauvais"
       description:
         en: "Products with an ImpactScore lower than 2/5"
         fr: "Produits avec un ImpactScore inférieur à 2/5"
@@ -235,7 +235,7 @@ nudgeToolConfig:
         fr: "> 2 < 4"
       title:
         en: "Relativ impact"
-        fr: "Impact moyen"
+        fr: "Moyen"
       description:
         en: "Products with an ImpactScore between 2/5 and 4/5"
         fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
@@ -255,7 +255,7 @@ nudgeToolConfig:
         fr: "> 4"
       title:
         en: "Moderated impact"
-        fr: "Impact modéré"
+        fr: "Bon"
       description:
         en: "Products with an ImpactScore greater than 4/5"
         fr: "Produits avec un ImpactScore supérieur à 4/5"

@@ -330,7 +330,6 @@ import type {
   ProductSearchResponseDto,
   ProductSearchRequestDto,
   FilterRequestDto,
-  FieldMetadataDto,
   AggregationResponseDto,
   SortDto,
   CategoriesStatsDto,

@@ -852,9 +852,9 @@ public class ProductController {
         List<Agg> aggregations = aggregationRequest.aggs();
         if (aggregations == null || aggregations.isEmpty()) {
             if (normalizedVerticalId == null) {
-                LOGGER.warn("Aggregation request requires a verticalId when aggregations are empty");
-                return Validation.error(badRequest("Invalid aggregation parameter",
-                        "Aggregations require a verticalId"));
+                // Allow empty aggregations for global search (verticalId is null)
+                // This enables the frontend to query /products without specific aggregations or vertical
+                return Validation.ok(new AggregationRequestDto(List.of()));
             }
             return Validation.ok(new AggregationRequestDto(List.of()));
         }

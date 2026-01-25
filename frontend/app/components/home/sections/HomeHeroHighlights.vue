@@ -586,7 +586,11 @@ const isCreditsDialogActive = ref(false)
                         aria-hidden="true"
                       />
                     </span>
-                    {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                    {{
+                      segmentIndex > 0 && !/^[.,;!?)]/.test(segment.text)
+                        ? ` ${segment.text}`
+                        : segment.text
+                    }}
                     <span
                       v-if="
                         segment.icon &&
@@ -617,7 +621,11 @@ const isCreditsDialogActive = ref(false)
                         aria-hidden="true"
                       />
                     </span>
-                    {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                    {{
+                      segmentIndex > 0 && !/^[.,;!?)]/.test(segment.text)
+                        ? ` ${segment.text}`
+                        : segment.text
+                    }}
                     <span
                       v-if="
                         segment.icon &&
