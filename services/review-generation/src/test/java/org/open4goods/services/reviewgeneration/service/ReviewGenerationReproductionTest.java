@@ -1,7 +1,6 @@
 package org.open4goods.services.reviewgeneration.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -79,7 +78,8 @@ class ReviewGenerationReproductionTest {
                 meterRegistry,
                 productRepository,
                 preprocessingService,
-                verticalsConfigService
+                verticalsConfigService,
+                java.util.Collections.emptyList()
         );
 
         // Setup template engine similar to production

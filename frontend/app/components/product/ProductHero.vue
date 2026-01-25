@@ -33,6 +33,13 @@
         </p>
       </header>
 
+      <CategoryNavigationBreadcrumbs
+        v-if="heroBreadcrumbs.length"
+        v-bind="heroBreadcrumbProps"
+        class="product-hero__breadcrumbs home-reveal-item"
+        :style="{ '--reveal-delay': '60ms' }"
+      />
+
       <div class="product-hero__grid">
         <div class="product-hero__panel product-hero__panel--main">
           <div class="product-hero__main-content">
@@ -66,12 +73,6 @@
                   {{ productModelName }}
                 </span>
               </div>
-              <CategoryNavigationBreadcrumbs
-                v-if="heroBreadcrumbs.length"
-                v-bind="heroBreadcrumbProps"
-                class="product-hero__breadcrumbs home-reveal-item"
-                :style="{ '--reveal-delay': '60ms' }"
-              />
 
               <ul
                 v-if="heroAttributes.length"

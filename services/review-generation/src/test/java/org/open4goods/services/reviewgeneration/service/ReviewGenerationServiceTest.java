@@ -70,7 +70,8 @@ class ReviewGenerationServiceTest {
                 meterRegistry,
                 productRepository,
                 preprocessingService,
-                verticalsConfigService
+                verticalsConfigService,
+                java.util.Collections.emptyList()
         );
     }
 

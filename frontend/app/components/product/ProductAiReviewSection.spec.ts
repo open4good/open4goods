@@ -1,5 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h, nextTick } from 'vue'
 import ProductAiReviewSection from './ProductAiReviewSection.vue'
@@ -46,6 +46,21 @@ const ClientOnlyStub = defineComponent({
     return () => slots.default?.() ?? null
   },
 })
+
+// Mock the store
+const mockStartGeneration = vi.fn()
+const mockGetByGtin = vi.fn()
+const mockAcknowledgeCompletion = vi.fn() // Add this
+
+const mockStore = {
+  startGeneration: mockStartGeneration,
+  getByGtin: mockGetByGtin,
+  acknowledgeCompletion: mockAcknowledgeCompletion,
+}
+
+vi.mock('~/stores/useAiReviewGenerationStore', () => ({
+  useAiReviewGenerationStore: () => mockStore,
+}))
 
 const VIconStub = defineComponent({
   name: 'VIconStub',
@@ -439,6 +454,11 @@ const mountComponent = (
   })
 
 describe('ProductAiReviewSection', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetByGtin.mockReturnValue(null) // Default: no active generation
+  })
+
   it('renders the structured review content with highlighted sections', async () => {
     const review: AiReviewDto = {
       mediumTitle: 'Samsung TQ65S90D 2024 overview',

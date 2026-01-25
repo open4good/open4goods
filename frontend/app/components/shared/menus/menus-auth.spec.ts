@@ -354,7 +354,7 @@ describe('Shared menu authentication controls', () => {
     preferredDarkMock.value = false
     useStorageMock.mockClear()
     useCookieMock.mockClear()
-    fetchMock.mockReset()
+    fetchMock.mockReset().mockResolvedValue({})
     fetchCategoriesMock.mockClear()
     fetchNavigationMock.mockClear()
     username.value = null

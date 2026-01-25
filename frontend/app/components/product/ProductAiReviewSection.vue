@@ -1,441 +1,500 @@
 <template>
   <section :id="sectionId" ref="rootRef" class="product-ai-review">
-    <header class="product-ai-review__header">
-      <v-row>
-        <!-- Right Column: Title, Metadata, Summary -->
-        <v-col cols="12">
-          <h2 class="product-ai-review__title">
-            {{ $t('product.aiReview.title', titleParams) }}
-          </h2>
+    <!-- Existing Content when review exists -->
+    <template v-if="reviewContent">
+      <header class="product-ai-review__header">
+        <!-- Header content same as before -->
+        <v-row>
+          <v-col cols="12">
+            <h2 class="product-ai-review__title">
+              {{ $t('product.aiReview.title', titleParams) }}
+            </h2>
 
-          <div v-if="createdDate" class="product-ai-review__metadata mb-4">
-            <v-icon
-              icon="mdi-calendar-clock"
-              size="16"
-              class="product-ai-review__metadata-icon mr-1"
-            />
-            <span class="text-caption text-medium-emphasis">{{
-              $t('product.aiReview.generatedAt', { date: createdDate })
-            }}</span>
-          </div>
+            <div v-if="createdDate" class="product-ai-review__metadata mb-4">
+              <v-icon
+                icon="mdi-calendar-clock"
+                size="16"
+                class="product-ai-review__metadata-icon mr-1"
+              />
+              <span class="text-caption text-medium-emphasis">{{
+                $t('product.aiReview.generatedAt', { date: createdDate })
+              }}</span>
+            </div>
 
-          <p class="product-ai-review__subtitle mb-4">
-            {{
-              $t(
-                sourcesCount === 1
-                  ? 'product.aiReview.subtitle.one'
-                  : 'product.aiReview.subtitle.other',
-                { count: sourcesCount }
-              )
-            }}
-          </p>
+            <p class="product-ai-review__subtitle mb-4">
+              {{
+                $t(
+                  sourcesCount === 1
+                    ? 'product.aiReview.subtitle.one'
+                    : 'product.aiReview.subtitle.other',
+                  { count: sourcesCount }
+                )
+              }}
+            </p>
 
-          <div v-if="reviewContent?.summary" class="product-ai-review__summary">
-            <!-- eslint-disable vue/no-v-html -->
-            <p class="text-body-1" v-html="reviewContent.summary" />
-            <!-- eslint-enable vue/no-v-html -->
-          </div>
-        </v-col>
-      </v-row>
-    </header>
-
-    <div
-      v-if="reviewContent"
-      class="product-ai-review__content"
-      itemscope
-      itemtype="https://schema.org/Review"
-    >
-      <div class="product-ai-review__grid">
-        <!-- Row 1: Pros & Cons -->
-        <v-row v-if="reviewContent.pros?.length || reviewContent.cons?.length">
-          <v-col cols="12" md="6">
-            <v-card
-              v-if="reviewContent.pros?.length"
-              class="product-ai-review__card h-100"
-              elevation="0"
+            <div
+              v-if="reviewContent?.summary"
+              class="product-ai-review__summary"
             >
-              <v-card-text>
-                <header
-                  class="product-ai-review__sub-header d-flex align-center mb-3"
-                >
-                  <v-icon
-                    icon="mdi-thumb-up-outline"
-                    color="success"
-                    class="mr-2"
-                  />
-                  <h4 class="text-subtitle-1 font-weight-bold">
-                    {{ $t('product.aiReview.sections.pros') }}
-                  </h4>
-                </header>
-                <ul class="product-ai-review__list">
-                  <li
-                    v-for="pro in reviewContent.pros"
-                    :key="pro"
-                    class="product-ai-review__list-item"
-                  >
-                    <v-icon
-                      icon="mdi-check-circle-outline"
-                      size="18"
-                      color="success"
-                      class="product-ai-review__list-icon mt-1"
-                    />
-                    <!-- eslint-disable vue/no-v-html -->
-                    <span v-html="pro" />
-                    <!-- eslint-enable vue/no-v-html -->
-                  </li>
-                </ul>
-              </v-card-text>
-            </v-card>
-          </v-col>
-
-          <v-col cols="12" md="6">
-            <v-card
-              v-if="reviewContent.cons?.length"
-              class="product-ai-review__card h-100"
-              elevation="0"
-            >
-              <v-card-text>
-                <header
-                  class="product-ai-review__sub-header d-flex align-center mb-3"
-                >
-                  <v-icon
-                    icon="mdi-alert-circle-outline"
-                    color="error"
-                    class="mr-2"
-                  />
-                  <h4 class="text-subtitle-1 font-weight-bold">
-                    {{ $t('product.aiReview.sections.cons') }}
-                  </h4>
-                </header>
-                <ul class="product-ai-review__list">
-                  <li
-                    v-for="con in reviewContent.cons"
-                    :key="con"
-                    class="product-ai-review__list-item"
-                  >
-                    <v-icon
-                      icon="mdi-close-circle-outline"
-                      size="18"
-                      color="error"
-                      class="product-ai-review__list-icon mt-1"
-                    />
-                    <!-- eslint-disable vue/no-v-html -->
-                    <span v-html="con" />
-                    <!-- eslint-enable vue/no-v-html -->
-                  </li>
-                </ul>
-              </v-card-text>
-            </v-card>
+              <p class="text-body-1" v-html="reviewContent.summary" />
+            </div>
           </v-col>
         </v-row>
-
-        <!-- Technical Analysis -->
-        <v-row v-if="technicalContent" id="ai-review-technical">
-          <v-col cols="12">
-            <v-card class="product-ai-review__card" elevation="0">
-              <v-card-text>
-                <header
-                  class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
-                >
-                  <div
-                    class="product-ai-review__card-header d-flex align-center"
-                  >
-                    <div class="product-ai-review__card-icon mr-3">
-                      <v-icon icon="mdi-cog-outline" size="24" />
-                    </div>
-                    <h3 class="product-ai-review__card-title text-h6">
-                      {{ $t('product.aiReview.sections.technical') }}
-                    </h3>
-                  </div>
-                  <div class="product-ai-review__level-toggle-wrap">
-                    <v-btn-toggle
-                      v-model="technicalLevel"
-                      mandatory
-                      density="comfortable"
-                      class="product-ai-review__level-toggle"
-                      :aria-label="$t('product.aiReview.levels.label')"
-                    >
-                      <v-btn
-                        v-for="option in levelOptions"
-                        :key="option.value"
-                        :value="option.value"
-                        size="default"
-                        :variant="
-                          technicalLevel === option.value ? 'tonal' : 'outlined'
-                        "
-                        :color="
-                          technicalLevel === option.value
-                            ? 'primary'
-                            : 'secondary'
-                        "
-                        :aria-label="option.label"
-                        class="px-4"
-                      >
-                        <v-icon :icon="option.icon" size="20" class="mr-2" />
-                        {{ option.label }}
-                      </v-btn>
-                    </v-btn-toggle>
-                  </div>
-                </header>
-                <ProductAiReviewInsightBlock
-                  :content-html="technicalContent ?? ''"
-                  image-src="/images/product/ai-review-technical.svg"
-                  :image-alt="$t('product.aiReview.illustrations.technicalAlt')"
-                />
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <!-- Ecological Analysis -->
-        <v-row v-if="ecologicalContent" id="ai-review-ecological">
-          <v-col cols="12">
-            <v-card class="product-ai-review__card" elevation="0">
-              <v-card-text>
-                <header
-                  class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
-                >
-                  <div
-                    class="product-ai-review__card-header d-flex align-center"
-                  >
-                    <div
-                      class="product-ai-review__card-icon product-ai-review__card-icon--eco mr-3"
-                    >
-                      <v-icon icon="mdi-leaf" size="24" />
-                    </div>
-                    <h3 class="product-ai-review__card-title text-h6">
-                      {{ $t('product.aiReview.sections.ecological') }}
-                    </h3>
-                  </div>
-                  <div class="product-ai-review__level-toggle-wrap">
-                    <v-btn-toggle
-                      v-model="ecologicalLevel"
-                      mandatory
-                      density="comfortable"
-                      class="product-ai-review__level-toggle"
-                      :aria-label="$t('product.aiReview.levels.label')"
-                    >
-                      <v-btn
-                        v-for="option in levelOptions"
-                        :key="option.value"
-                        :value="option.value"
-                        size="default"
-                        :variant="
-                          ecologicalLevel === option.value
-                            ? 'tonal'
-                            : 'outlined'
-                        "
-                        :color="
-                          ecologicalLevel === option.value
-                            ? 'primary'
-                            : 'secondary'
-                        "
-                        :aria-label="option.label"
-                        class="px-4"
-                      >
-                        <v-icon :icon="option.icon" size="20" class="mr-2" />
-                        {{ option.label }}
-                      </v-btn>
-                    </v-btn-toggle>
-                  </div>
-                </header>
-                <ProductAiReviewInsightBlock
-                  :content-html="ecologicalContent ?? ''"
-                  image-src="/images/product/ai-review-ecological.svg"
-                  :image-alt="
-                    $t('product.aiReview.illustrations.ecologicalAlt')
-                  "
-                  image-position="right"
-                />
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <!-- Community Analysis -->
-        <v-row v-if="communityContent" id="ai-review-community">
-          <v-col cols="12">
-            <v-card class="product-ai-review__card" elevation="0">
-              <v-card-text>
-                <header
-                  class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
-                >
-                  <div
-                    class="product-ai-review__card-header d-flex align-center"
-                  >
-                    <div
-                      class="product-ai-review__card-icon product-ai-review__card-icon--community mr-3"
-                    >
-                      <v-icon icon="mdi-account-group-outline" size="24" />
-                    </div>
-                    <h3 class="product-ai-review__card-title text-h6">
-                      {{ $t('product.aiReview.sections.community') }}
-                    </h3>
-                  </div>
-                  <div class="product-ai-review__level-toggle-wrap">
-                    <v-btn-toggle
-                      v-model="communityLevel"
-                      mandatory
-                      density="comfortable"
-                      class="product-ai-review__level-toggle"
-                      :aria-label="$t('product.aiReview.levels.label')"
-                    >
-                      <v-btn
-                        v-for="option in levelOptions"
-                        :key="option.value"
-                        :value="option.value"
-                        size="default"
-                        :variant="
-                          communityLevel === option.value ? 'tonal' : 'outlined'
-                        "
-                        :color="
-                          communityLevel === option.value
-                            ? 'primary'
-                            : 'secondary'
-                        "
-                        :aria-label="option.label"
-                        class="px-4"
-                      >
-                        <v-icon :icon="option.icon" size="20" class="mr-2" />
-                        {{ option.label }}
-                      </v-btn>
-                    </v-btn-toggle>
-                  </div>
-                </header>
-                <ProductAiReviewInsightBlock
-                  :content-html="communityContent ?? ''"
-                  image-src="/images/product/ai-review-community.svg"
-                  :image-alt="$t('product.aiReview.illustrations.communityAlt')"
-                />
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </div>
+      </header>
 
       <div
-        v-if="reviewContent.sources?.length"
-        class="product-ai-review__sources mt-4"
+        class="product-ai-review__content"
+        itemscope
+        itemtype="https://schema.org/Review"
       >
-        <v-row class="product-ai-review__sources-row">
-          <v-col cols="12" :md="dataQualityValue ? 8 : 12">
-            <header
-              id="ai-review-sources-header"
-              class="product-ai-review__section-header mb-2"
-            >
-              <div class="product-ai-review__section-icon">
-                <v-icon icon="mdi-book-open-variant" size="20" />
-              </div>
-              <h4>{{ sourcesTitle }}</h4>
-            </header>
-            <v-table
-              density="compact"
-              class="product-ai-review__table product-ai-review__table--compact"
-            >
-              <thead>
-                <tr>
-                  <th scope="col">
-                    {{ $t('product.aiReview.sources.index') }}
-                  </th>
-                  <th scope="col">
-                    {{ $t('product.aiReview.sources.source') }}
-                  </th>
-                  <th scope="col">
-                    {{ $t('product.aiReview.sources.description') }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="source in visibleSources"
-                  :id="`review-ref-${source.number}`"
-                  :key="source.number"
-                >
-                  <td>
-                    <a
-                      :href="source.url"
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                    >
-                      [{{ source.number }}]
-                    </a>
-                  </td>
-                  <td>
-                    <div class="product-ai-review__source-info">
-                      <img
-                        v-if="source.favicon"
-                        :src="source.favicon"
-                        :alt="source.name"
-                        class="product-ai-review__source-favicon"
-                        width="16"
-                        height="16"
-                      />
-                      <span>{{ source.name }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <a
-                      :href="source.url"
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                    >
-                      {{ source.description }}
-                    </a>
-                  </td>
-                </tr>
-                <tr
-                  v-if="hasMoreSources"
-                  class="product-ai-review__sources-toggle"
-                >
-                  <td :colspan="3">
-                    <button
-                      type="button"
-                      class="product-ai-review__sources-toggle-btn"
-                      @click="toggleSources"
+        <div class="product-ai-review__grid">
+          <!-- Pros/Cons, Technical, Eco, Community same as before. Using v-if="reviewContent" implicitly via template wrapper -->
+          <!-- ... (Truncated purely for edit conciseness, ideally we wrap the whole existing block) ... -->
+          <!-- To avoid massive replace, I will assume the structure flows. 
+                Wait, I cannot use v-if twice or split the tree easily without big replace.
+                The prompt asks to replace the "empty state" logic mainly.
+                Let's target the v-else block and the script.
+           -->
+          <!-- Re-rendering the content block just to be safe it matches context -->
+          <!-- Actually, the user wants me to UPDATE the real page, replacing CTA with slider when generating. -->
+
+          <!-- Pros/Cons -->
+          <v-row
+            v-if="reviewContent.pros?.length || reviewContent.cons?.length"
+          >
+            <v-col cols="12" md="6">
+              <v-card
+                v-if="reviewContent.pros?.length"
+                class="product-ai-review__card h-100"
+                elevation="0"
+              >
+                <v-card-text>
+                  <header
+                    class="product-ai-review__sub-header d-flex align-center mb-3"
+                  >
+                    <v-icon
+                      icon="mdi-thumb-up-outline"
+                      color="success"
+                      class="mr-2"
+                    />
+                    <h4 class="text-subtitle-1 font-weight-bold">
+                      {{ $t('product.aiReview.sections.pros') }}
+                    </h4>
+                  </header>
+                  <ul class="product-ai-review__list">
+                    <li
+                      v-for="pro in reviewContent.pros"
+                      :key="pro"
+                      class="product-ai-review__list-item"
                     >
                       <v-icon
-                        :icon="
-                          showAllSources ? 'mdi-chevron-up' : 'mdi-chevron-down'
-                        "
+                        icon="mdi-check-circle-outline"
                         size="18"
+                        color="success"
+                        class="product-ai-review__list-icon mt-1"
                       />
-                      <span>{{ sourcesToggleLabel }}</span>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </v-table>
-          </v-col>
-          <v-col v-if="dataQualityValue" cols="12" md="4">
-            <v-card class="product-ai-review__quality" elevation="0">
-              <v-card-text>
-                <header
-                  class="product-ai-review__quality-header d-flex align-center mb-3"
-                >
-                  <v-icon
-                    icon="mdi-shield-check-outline"
-                    size="22"
-                    class="mr-2"
+                      <span v-html="pro" />
+                    </li>
+                  </ul>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-card
+                v-if="reviewContent.cons?.length"
+                class="product-ai-review__card h-100"
+                elevation="0"
+              >
+                <v-card-text>
+                  <header
+                    class="product-ai-review__sub-header d-flex align-center mb-3"
+                  >
+                    <v-icon
+                      icon="mdi-alert-circle-outline"
+                      color="error"
+                      class="mr-2"
+                    />
+                    <h4 class="text-subtitle-1 font-weight-bold">
+                      {{ $t('product.aiReview.sections.cons') }}
+                    </h4>
+                  </header>
+                  <ul class="product-ai-review__list">
+                    <li
+                      v-for="con in reviewContent.cons"
+                      :key="con"
+                      class="product-ai-review__list-item"
+                    >
+                      <v-icon
+                        icon="mdi-close-circle-outline"
+                        size="18"
+                        color="error"
+                        class="product-ai-review__list-icon mt-1"
+                      />
+                      <span v-html="con" />
+                    </li>
+                  </ul>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <!-- Tech/Eco/Community sections (omitted for brevity, assume they exist in file logic if I don't touch them, but receive context is key) -->
+          <v-row v-if="technicalContent" id="ai-review-technical">
+            <v-col cols="12">
+              <v-card class="product-ai-review__card" elevation="0">
+                <v-card-text>
+                  <header
+                    class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
+                  >
+                    <div
+                      class="product-ai-review__card-header d-flex align-center"
+                    >
+                      <div class="product-ai-review__card-icon mr-3">
+                        <v-icon icon="mdi-cog-outline" size="24" />
+                      </div>
+                      <h3 class="product-ai-review__card-title text-h6">
+                        {{ $t('product.aiReview.sections.technical') }}
+                      </h3>
+                    </div>
+                    <div class="product-ai-review__level-toggle-wrap">
+                      <v-btn-toggle
+                        v-model="technicalLevel"
+                        mandatory
+                        density="comfortable"
+                        class="product-ai-review__level-toggle"
+                        :aria-label="$t('product.aiReview.levels.label')"
+                      >
+                        <v-btn
+                          v-for="option in levelOptions"
+                          :key="option.value"
+                          :value="option.value"
+                          size="default"
+                          :variant="
+                            technicalLevel === option.value
+                              ? 'tonal'
+                              : 'outlined'
+                          "
+                          :color="
+                            technicalLevel === option.value
+                              ? 'primary'
+                              : 'secondary'
+                          "
+                          :aria-label="option.label"
+                          class="px-4"
+                        >
+                          <v-icon :icon="option.icon" size="20" class="mr-2" />
+                          {{ option.label }}
+                        </v-btn>
+                      </v-btn-toggle>
+                    </div>
+                  </header>
+                  <ProductAiReviewInsightBlock
+                    :content-html="technicalContent ?? ''"
+                    image-src="/images/product/ai-review-technical.svg"
+                    :image-alt="
+                      $t('product.aiReview.illustrations.technicalAlt')
+                    "
                   />
-                  <h3 class="text-subtitle-1 font-weight-bold">
-                    {{ $t('product.aiReview.dataQuality.title') }}
-                  </h3>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <v-row v-if="ecologicalContent" id="ai-review-ecological">
+            <v-col cols="12">
+              <v-card class="product-ai-review__card" elevation="0">
+                <v-card-text>
+                  <header
+                    class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
+                  >
+                    <div
+                      class="product-ai-review__card-header d-flex align-center"
+                    >
+                      <div
+                        class="product-ai-review__card-icon product-ai-review__card-icon--eco mr-3"
+                      >
+                        <v-icon icon="mdi-leaf" size="24" />
+                      </div>
+                      <h3 class="product-ai-review__card-title text-h6">
+                        {{ $t('product.aiReview.sections.ecological') }}
+                      </h3>
+                    </div>
+                    <div class="product-ai-review__level-toggle-wrap">
+                      <v-btn-toggle
+                        v-model="ecologicalLevel"
+                        mandatory
+                        density="comfortable"
+                        class="product-ai-review__level-toggle"
+                        :aria-label="$t('product.aiReview.levels.label')"
+                      >
+                        <v-btn
+                          v-for="option in levelOptions"
+                          :key="option.value"
+                          :value="option.value"
+                          size="default"
+                          :variant="
+                            ecologicalLevel === option.value
+                              ? 'tonal'
+                              : 'outlined'
+                          "
+                          :color="
+                            ecologicalLevel === option.value
+                              ? 'primary'
+                              : 'secondary'
+                          "
+                          :aria-label="option.label"
+                          class="px-4"
+                        >
+                          <v-icon :icon="option.icon" size="20" class="mr-2" />
+                          {{ option.label }}
+                        </v-btn>
+                      </v-btn-toggle>
+                    </div>
+                  </header>
+                  <ProductAiReviewInsightBlock
+                    :content-html="ecologicalContent ?? ''"
+                    image-src="/images/product/ai-review-ecological.svg"
+                    :image-alt="
+                      $t('product.aiReview.illustrations.ecologicalAlt')
+                    "
+                    image-position="right"
+                  />
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <v-row v-if="communityContent" id="ai-review-community">
+            <v-col cols="12">
+              <v-card class="product-ai-review__card" elevation="0">
+                <v-card-text>
+                  <header
+                    class="product-ai-review__card-heading mb-4 d-flex align-center justify-space-between flex-wrap gap-4"
+                  >
+                    <div
+                      class="product-ai-review__card-header d-flex align-center"
+                    >
+                      <div
+                        class="product-ai-review__card-icon product-ai-review__card-icon--community mr-3"
+                      >
+                        <v-icon icon="mdi-account-group-outline" size="24" />
+                      </div>
+                      <h3 class="product-ai-review__card-title text-h6">
+                        {{ $t('product.aiReview.sections.community') }}
+                      </h3>
+                    </div>
+                    <div class="product-ai-review__level-toggle-wrap">
+                      <v-btn-toggle
+                        v-model="communityLevel"
+                        mandatory
+                        density="comfortable"
+                        class="product-ai-review__level-toggle"
+                        :aria-label="$t('product.aiReview.levels.label')"
+                      >
+                        <v-btn
+                          v-for="option in levelOptions"
+                          :key="option.value"
+                          :value="option.value"
+                          size="default"
+                          :variant="
+                            communityLevel === option.value
+                              ? 'tonal'
+                              : 'outlined'
+                          "
+                          :color="
+                            communityLevel === option.value
+                              ? 'primary'
+                              : 'secondary'
+                          "
+                          :aria-label="option.label"
+                          class="px-4"
+                        >
+                          <v-icon
+                            :icon="option.icon"
+                            size="20"
+                            class="mr-2"
+                          />{{ option.label }}
+                        </v-btn>
+                      </v-btn-toggle>
+                    </div>
+                  </header>
+                  <ProductAiReviewInsightBlock
+                    :content-html="communityContent ?? ''"
+                    image-src="/images/product/ai-review-community.svg"
+                    :image-alt="
+                      $t('product.aiReview.illustrations.communityAlt')
+                    "
+                  />
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <!-- Sources Table (unchanged) -->
+          <div
+            v-if="reviewContent.sources?.length"
+            class="product-ai-review__sources mt-4"
+          >
+            <v-row class="product-ai-review__sources-row">
+              <v-col cols="12" :md="dataQualityValue ? 8 : 12">
+                <header
+                  id="ai-review-sources-header"
+                  class="product-ai-review__section-header mb-2"
+                >
+                  <div class="product-ai-review__section-icon">
+                    <v-icon icon="mdi-book-open-variant" size="20" />
+                  </div>
+                  <h4>{{ sourcesTitle }}</h4>
                 </header>
-                <p class="text-body-2 mb-4">
-                  {{ $t('product.aiReview.dataQuality.description') }}
-                </p>
-                <div class="product-ai-review__quality-value">
-                  {{ dataQualityValue }}
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
+                <v-table
+                  density="compact"
+                  class="product-ai-review__table product-ai-review__table--compact"
+                >
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        {{ $t('product.aiReview.sources.index') }}
+                      </th>
+                      <th scope="col">
+                        {{ $t('product.aiReview.sources.source') }}
+                      </th>
+                      <th scope="col">
+                        {{ $t('product.aiReview.sources.description') }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="source in visibleSources"
+                      :id="`review-ref-${source.number}`"
+                      :key="source.number"
+                    >
+                      <td>
+                        <a
+                          :href="source.url"
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          >[{{ source.number }}]</a
+                        >
+                      </td>
+                      <td>
+                        <div class="product-ai-review__source-info">
+                          <img
+                            v-if="source.favicon"
+                            :src="source.favicon"
+                            :alt="source.name"
+                            class="product-ai-review__source-favicon"
+                            width="16"
+                            height="16"
+                          />
+                          <span>{{ source.name }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <a
+                          :href="source.url"
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          >{{ source.description }}</a
+                        >
+                      </td>
+                    </tr>
+                    <tr
+                      v-if="hasMoreSources"
+                      class="product-ai-review__sources-toggle"
+                    >
+                      <td :colspan="3">
+                        <button
+                          type="button"
+                          class="product-ai-review__sources-toggle-btn"
+                          @click="toggleSources"
+                        >
+                          <v-icon
+                            :icon="
+                              showAllSources
+                                ? 'mdi-chevron-up'
+                                : 'mdi-chevron-down'
+                            "
+                            size="18"
+                          />
+                          <span>{{ sourcesToggleLabel }}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </v-col>
+              <v-col v-if="dataQualityValue" cols="12" md="4">
+                <v-card class="product-ai-review__quality" elevation="0">
+                  <v-card-text>
+                    <header
+                      class="product-ai-review__quality-header d-flex align-center mb-3"
+                    >
+                      <v-icon
+                        icon="mdi-shield-check-outline"
+                        size="22"
+                        class="mr-2"
+                      />
+                      <h3 class="text-subtitle-1 font-weight-bold">
+                        {{ $t('product.aiReview.dataQuality.title') }}
+                      </h3>
+                    </header>
+                    <p class="text-body-2 mb-4">
+                      {{ $t('product.aiReview.dataQuality.description') }}
+                    </p>
+                    <div class="product-ai-review__quality-value">
+                      {{ dataQualityValue }}
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </div>
+        </div>
       </div>
-    </div>
+    </template>
 
     <div v-else class="product-ai-review__empty">
-      <v-card class="product-ai-review__cta-card" elevation="0" border>
+      <!-- Generating State -->
+      <v-card
+        v-if="isGenerating"
+        class="product-ai-review__generating-card"
+        elevation="0"
+        border
+      >
+        <v-card-text class="pa-6">
+          <div class="d-flex align-center gap-4 mb-4">
+            <v-avatar color="primary" variant="tonal" size="56" class="mr-4">
+              <v-icon
+                icon="mdi-sparkles"
+                size="32"
+                class="product-ai-review__sparkle-icon"
+              />
+            </v-avatar>
+            <div>
+              <h3 class="text-h6 font-weight-bold mb-1">
+                {{ $t('product.aiReview.generationPanel.status.generating') }}
+              </h3>
+              <p class="text-body-2 text-medium-emphasis">
+                {{
+                  statusMessage ||
+                  $t('product.aiReview.status.running', { step: '...' })
+                }}
+              </p>
+            </div>
+          </div>
+          <v-progress-linear
+            color="primary"
+            :model-value="statusPercent"
+            rounded
+            height="8"
+            striped
+          />
+        </v-card-text>
+      </v-card>
+
+      <!-- Request State -->
+      <v-card v-else class="product-ai-review__cta-card" elevation="0" border>
         <v-card-text class="d-flex align-center justify-space-between pa-6">
           <div class="d-flex align-center gap-4">
             <v-avatar color="primary" variant="tonal" size="56" class="mr-4">
@@ -488,7 +547,7 @@
               :site-key="siteKey"
               :captcha-theme="captchaTheme"
               :captcha-locale="captchaLocale"
-              :requesting="requesting"
+              :requesting="isDialogRequesting"
               :submit-disabled="submitDisabled"
               :error-message="errorMessage"
               :status-message="statusMessage"
@@ -526,6 +585,7 @@ import { useIpQuota } from '~/composables/useIpQuota'
 
 import ProductAiReviewInsightBlock from '~/components/product/ProductAiReviewInsightBlock.vue'
 import ProductAiReviewRequestPanel from '~/components/product/ProductAiReviewRequestPanel.vue'
+import { useAiReviewGenerationStore } from '~/stores/useAiReviewGenerationStore'
 
 interface ReviewContent {
   description?: string | null
@@ -597,8 +657,8 @@ const review = ref<ReviewContent | null>(normalizeReview(props.initialReview))
 const createdMs = ref<number | null>(props.reviewCreatedAt ?? null)
 const requesting = ref(false)
 const errorMessage = ref<string | null>(null)
-const status = ref<ReviewGenerationStatus | null>(null)
-const pollHandle = ref<number | null>(null)
+// const status = ref<ReviewGenerationStatus | null>(null) // Handled by store
+// const pollHandle = ref<number | null>(null) // Handled by store
 const captchaToken = ref<string | null>(null)
 const rootRef = ref<HTMLElement | null>(null)
 const isDialogOpen = ref(false)
@@ -701,13 +761,9 @@ const createdDate = computed(() => {
   })
 })
 
-const isGenerating = computed(
-  () =>
-    status.value?.status &&
-    status.value.status !== 'SUCCESS' &&
-    status.value.status !== 'FAILED'
-)
-const statusPercent = computed(() => Math.round(status.value?.percent ?? 0))
+// const isGenerating = computed(...) // Moved to store item computed
+// Status logic moved to store integration computed
+// const statusPercent = computed(() => Math.round(status.value?.percent ?? 0))
 const submitDisabled = computed(() => {
   if (!agreementAccepted.value || requesting.value) {
     return true
@@ -720,23 +776,7 @@ const submitDisabled = computed(() => {
   return false
 })
 
-const statusMessage = computed(() => {
-  if (!status.value) {
-    return null
-  }
-
-  if (status.value.status === 'FAILED') {
-    return t('product.aiReview.status.failed')
-  }
-
-  if (status.value.status === 'SUCCESS') {
-    return t('product.aiReview.status.success')
-  }
-
-  return t('product.aiReview.status.running', {
-    step: status.value.status?.toLowerCase() ?? 'pending',
-  })
-})
+// const statusMessage = computed(...) // Moved to store item computed
 
 const technicalContent = computed(() =>
   selectReviewContent(technicalLevel.value, {
@@ -943,6 +983,38 @@ const startRequest = () => {
   void triggerGeneration()
 }
 
+const triggerGeneration = async () => {
+  if (requiresCaptcha.value && !captchaToken.value) {
+    errorMessage.value = t('product.aiReview.errors.captcha')
+    return
+  }
+
+  requesting.value = true
+  errorMessage.value = null
+
+  try {
+    await store.startGeneration(
+      {
+        gtin: String(props.gtin),
+        name: productLabel.value,
+        image: props.productImage || undefined,
+        slug: undefined,
+      },
+      captchaToken.value ?? undefined
+    )
+
+    isDialogOpen.value = false
+    recordUsage(quotaCategory)
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : t('product.aiReview.errors.generic')
+  } finally {
+    requesting.value = false
+  }
+}
+
 const handleCaptchaVerify = async (token: string) => {
   captchaToken.value = token
 }
@@ -956,99 +1028,59 @@ const handleCaptchaError = () => {
   errorMessage.value = t('product.aiReview.errors.captcha')
 }
 
-const triggerGeneration = async () => {
-  if (requiresCaptcha.value && !captchaToken.value) {
-    errorMessage.value = t('product.aiReview.errors.captcha')
-    return
-  }
+const store = useAiReviewGenerationStore()
 
-  requesting.value = true
-  errorMessage.value = null
+watch(
+  () => store.getByGtin(String(props.gtin)),
+  item => {
+    if (item?.status === 'success' && !review.value) {
+      // Reload the page logic or just fetch the review?
+      // The store only tracks status, not content.
+      // We should fetch the review content if success.
+      void fetchCompletedReview()
+    }
+  },
+  { deep: true, immediate: true }
+)
 
-  try {
-    await $fetch(`/api/products/${props.gtin}/review`, {
-      method: 'POST',
-      body: {
-        hcaptchaResponse: captchaToken.value ?? undefined,
-      },
-    })
-
-    recordUsage(quotaCategory)
-    startPolling()
-  } catch (error) {
-    console.error('Failed to trigger AI review', error)
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t('product.aiReview.errors.generic')
-  } finally {
-    requesting.value = false
-  }
-}
-
-const pollStatus = async () => {
+const fetchCompletedReview = async () => {
   try {
     const response = await $fetch<ReviewGenerationStatus>(
       `/api/products/${props.gtin}/review`
     )
-    if (!response || !response.status) {
-      stopPolling()
-      errorMessage.value = t('product.aiReview.errors.generic')
-      return
-    }
-
-    status.value = response
-
-    if (response.status === 'FAILED') {
-      stopPolling()
-      errorMessage.value =
-        response.result?.enoughData === false
-          ? t('product.aiReview.errors.notEnoughData')
-          : (response.errorMessage ?? t('product.aiReview.errors.generic'))
-      return
-    }
-
-    if (response.status === 'SUCCESS') {
-      const hasReview = Boolean(response.result?.review)
-      stopPolling()
-
-      if (!hasReview) {
-        errorMessage.value =
-          response.result?.enoughData === false
-            ? t('product.aiReview.errors.notEnoughData')
-            : t('product.aiReview.errors.generic')
-        return
-      }
-
+    if (response && response.status === 'SUCCESS' && response.result?.review) {
       review.value = normalizeReview(response.result.review)
       createdMs.value = response.result.createdMs ?? Date.now()
+      // Mark as seen so global alert doesn't show?
+      // Actually if we are on the page, we should acknowledge it.
+      store.acknowledgeCompletion(String(props.gtin))
     }
-  } catch (error) {
-    console.error('Failed to fetch review status', error)
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : t('product.aiReview.errors.generic')
-    stopPolling()
+  } catch (e) {
+    console.error('Failed to fetch completed review', e)
   }
 }
 
-const startPolling = () => {
-  stopPolling()
-  pollStatus()
-  if (import.meta.client) {
-    pollHandle.value = window.setInterval(() => {
-      void pollStatus()
-    }, 4000)
-  }
-}
+const isGeneratingInStore = computed(() => {
+  const item = store.getByGtin(String(props.gtin))
+  return item && (item.status === 'pending' || item.status === 'generating')
+})
 
-const stopPolling = () => {
-  if (pollHandle.value) {
-    window.clearInterval(pollHandle.value)
-    pollHandle.value = null
-  }
-}
+const storeItem = computed(() => store.getByGtin(String(props.gtin)))
+
+// Override the local requesting/status logic with store
+const isGenerating = computed(() => isGeneratingInStore.value)
+// We only show the dialog loading state if we are initiating it
+const isDialogRequesting = computed(
+  () => requesting.value || isGenerating.value
+)
+
+const statusPercent = computed(() => storeItem.value?.percent ?? 0)
+const statusMessage = computed(() => storeItem.value?.statusMessage)
+
+/* 
+   Removed local polling logic (pollStatus, startPolling, stopPolling, pollHandle, status)
+   as it is now handled by the store.
+*/
 
 watch(
   rootRef,
@@ -1087,7 +1119,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  stopPolling()
+  // Store continues polling
   if (import.meta.client) {
     window.removeEventListener(
       'ai-review:scroll-to-source',

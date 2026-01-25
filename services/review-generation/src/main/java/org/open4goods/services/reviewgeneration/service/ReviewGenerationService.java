@@ -114,6 +114,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	// New fields for batch tracking.
 	private final File trackingFolder;
 
+    private final List<ReviewGenerationHook> hooks;
+
 	private final ObjectMapper objectMapper;
 	private static final String AI_SOURCE_NAME = "AI";
 	private static final String CITATIONS_METADATA_KEY = "citations";
@@ -137,14 +139,15 @@ public class ReviewGenerationService implements HealthIndicator {
 	public ReviewGenerationService(ReviewGenerationConfig properties, GoogleSearchService googleSearchService,
 			UrlFetchingService urlFetchingService, PromptService genAiService, BatchPromptService batchAiService,
 			MeterRegistry meterRegistry, ProductRepository productRepository, ReviewGenerationPreprocessingService preprocessingService,
-            VerticalsConfigService verticalsConfigService) {
+            VerticalsConfigService verticalsConfigService, List<ReviewGenerationHook> hooks) {
 		this.properties = properties;
 		this.genAiService = genAiService;
 		this.batchAiService = batchAiService;
 		this.meterRegistry = meterRegistry;
 		this.productRepository = productRepository;
-		this.preprocessingService = preprocessingService;
+        this.preprocessingService = preprocessingService;
         this.verticalsConfigService = verticalsConfigService;
+        this.hooks = hooks;
 		this.executorService = new ThreadPoolExecutor(properties.getThreadPoolSize(), properties.getThreadPoolSize(),
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize()),
 				new ThreadPoolExecutor.AbortPolicy());
@@ -375,6 +378,18 @@ public class ReviewGenerationService implements HealthIndicator {
 				computeTimings(status);
 				totalProcessed.incrementAndGet();
 			}
+
+            
+            // Execute hooks (enrichment/standard aggregation)
+            if (status.getStatus() == ReviewGenerationStatus.Status.SUCCESS) {
+                try {
+                    hooks.forEach(hook -> hook.onReviewGenerated(product));
+                } catch (Exception e) {
+                    logger.error("Error executing review generation hooks for UPC {}: {}", upc, e.getMessage(), e);
+                    // We do not fail the overall process if hooks fail, but we log it.
+                }
+            }
+
 			product.getReviews().put("fr", holder);
 			productRepository.forceIndex(product);
 		});
@@ -759,6 +774,14 @@ public class ReviewGenerationService implements HealthIndicator {
 					holder.setReview(newReview);
 					holder.setEnoughData(true);
 					product.getReviews().put("fr", holder);
+                    
+                    // Execute hooks
+                    try {
+                        hooks.forEach(hook -> hook.onReviewGenerated(product));
+                    } catch (Exception e) {
+                        logger.error("Error executing batch review generation hooks for product {}: {}", productId, e.getMessage(), e);
+                    }
+
 					productRepository.forceIndex(product);
 					updateBatchStatus(product.getId(), ReviewGenerationStatus.Status.SUCCESS, null);
 					logger.info("Updated review for product with ID {}", productId);

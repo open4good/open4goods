@@ -1,27 +1,5 @@
 <template>
   <div :class="['category-filter-list', `category-filter-list--${mode}`]">
-    <div class="category-filter-list__header d-flex align-center">
-      <v-btn-toggle
-        class="category-filter-list__search-toggle"
-        :model-value="resolvedSearchType"
-        mandatory
-        rounded="pill"
-        density="comfortable"
-        @update:model-value="emit('update:searchType', $event)"
-      >
-        <v-btn
-          size="large"
-          value="SEMANTIC"
-          color="primary"
-          variant="outlined"
-        >
-          {{ t('category.filters.searchMode.semantic') }}
-        </v-btn>
-        <v-btn size="large" value="TEXT" color="primary" variant="outlined">
-          {{ t('category.filters.searchMode.text') }}
-        </v-btn>
-      </v-btn-toggle>
-    </div>
     <template v-if="mode === 'grid'">
       <component
         :is="resolveComponent(field)"
@@ -64,8 +42,6 @@ import CategoryFilterNumeric from './CategoryFilterNumeric.vue'
 import CategoryFilterCondition from './CategoryFilterCondition.vue'
 import CategoryFilterTerms from './CategoryFilterTerms.vue'
 
-const { t } = useI18n()
-
 const props = withDefaults(
   defineProps<{
     fields: FieldMetadataDto[]
@@ -87,8 +63,6 @@ const emit = defineEmits<{
   'update-terms': [field: string, terms: string[]]
   'update:searchType': [value: string | null]
 }>()
-
-const resolvedSearchType = computed(() => props.searchType ?? 'SEMANTIC')
 
 const resolveComponent = (field: FieldMetadataDto) => {
   if (field.mapping === 'price.conditions') {
