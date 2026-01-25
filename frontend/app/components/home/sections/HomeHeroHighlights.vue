@@ -12,6 +12,8 @@ import SectionReveal from '~/components/shared/ui/SectionReveal.vue'
 type HeroHighlightSegment = {
   text: string
   to?: string
+  icon?: string
+  iconPosition?: 'before' | 'after'
 }
 
 type HeroHighlightItem = {
@@ -24,6 +26,10 @@ const props = defineProps<{
   openDataMillions?: number
   productsCount?: number
   categoriesCount?: number
+  impactScoreProductsCount?: number
+  impactScoreCategoriesCount?: number
+  productsWithoutVerticalCount?: number
+  aiSummaryRemainingCredits?: number
 }>()
 
 const { t, te, tm, locale } = useI18n()
@@ -34,6 +40,9 @@ const partnersLinkPlaceholder = '{partnersLink}'
 const openDataMillionsPlaceholder = '{millions}'
 const productsCountPlaceholder = '{products}'
 const categoriesCountPlaceholder = '{categories}'
+const impactScoreProductsPlaceholder = '{impactScoreProducts}'
+const impactScoreCategoriesPlaceholder = '{impactScoreCategories}'
+const productsWithoutVerticalPlaceholder = '{priceHistoryProducts}'
 
 const normalizeHighlightSegments = (
   segments: unknown
@@ -48,10 +57,23 @@ const normalizeHighlightSegments = (
         return null
       }
 
-      const { text, to } = segment as { text?: unknown; to?: unknown }
+      const { text, to, icon, iconPosition } = segment as {
+        text?: unknown
+        to?: unknown
+        icon?: unknown
+        iconPosition?: unknown
+      }
       const normalizedText = typeof text === 'string' ? text.trim() : ''
       const normalizedTo =
         typeof to === 'string' && to.trim().length > 0 ? to.trim() : undefined
+      const normalizedIcon =
+        typeof icon === 'string' && icon.trim().length > 0
+          ? icon.trim()
+          : undefined
+      const normalizedIconPosition =
+        iconPosition === 'after' || iconPosition === 'before'
+          ? iconPosition
+          : undefined
 
       if (!normalizedText) {
         return null
@@ -60,6 +82,8 @@ const normalizeHighlightSegments = (
       return {
         text: normalizedText,
         to: normalizedTo,
+        icon: normalizedIcon,
+        iconPosition: normalizedIconPosition,
       }
     })
     .filter((segment): segment is HeroHighlightSegment => segment != null)
@@ -111,9 +135,13 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
   const translatedItems = normalizeHighlightItems(itemsToNormalize)
 
   if (translatedItems.length > 0) {
-    return applyOpenDataMillionsPlaceholder(
-      applyProductsCategoriesPlaceholder(
-        applyPartnerLinkPlaceholder(translatedItems)
+    return applyProductsWithoutVerticalPlaceholder(
+      applyImpactScorePlaceholders(
+        applyOpenDataMillionsPlaceholder(
+          applyProductsCategoriesPlaceholder(
+            applyPartnerLinkPlaceholder(translatedItems)
+          )
+        )
       )
     )
   }
@@ -122,9 +150,13 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
   if (Array.isArray(tmItems) && tmItems.length > 0) {
     const directTranslated = normalizeHighlightItems(tmItems)
     if (directTranslated.length > 0) {
-      return applyOpenDataMillionsPlaceholder(
-        applyProductsCategoriesPlaceholder(
-          applyPartnerLinkPlaceholder(directTranslated)
+      return applyProductsWithoutVerticalPlaceholder(
+        applyImpactScorePlaceholders(
+          applyOpenDataMillionsPlaceholder(
+            applyProductsCategoriesPlaceholder(
+              applyPartnerLinkPlaceholder(directTranslated)
+            )
+          )
         )
       )
     }
@@ -212,9 +244,7 @@ const heroPartnersLinkText = computed(() => {
   return `${formattedCount} ${fallbackLabel}`
 })
 
-const formattedOpenDataMillions = computed(() => {
-  const value = props.openDataMillions
-
+const formatCount = (value?: number) => {
   if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
     return null
   }
@@ -224,26 +254,34 @@ const formattedOpenDataMillions = computed(() => {
   } catch {
     return String(value)
   }
-})
+}
 
-const formattedProductsCount = computed(() => {
-  const value = props.productsCount
+const formattedOpenDataMillions = computed(() =>
+  formatCount(props.openDataMillions)
+)
 
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
-    return null
-  }
+const formattedProductsCount = computed(() => formatCount(props.productsCount))
 
-  try {
-    return new Intl.NumberFormat(locale.value).format(value)
-  } catch {
-    return String(value)
-  }
-})
+const formattedCategoriesCount = computed(() =>
+  formatCount(props.categoriesCount)
+)
 
-const formattedCategoriesCount = computed(() => {
-  const value = props.categoriesCount
+const formattedImpactScoreProductsCount = computed(() =>
+  formatCount(props.impactScoreProductsCount)
+)
 
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+const formattedImpactScoreCategoriesCount = computed(() =>
+  formatCount(props.impactScoreCategoriesCount ?? props.categoriesCount)
+)
+
+const formattedProductsWithoutVerticalCount = computed(() =>
+  formatCount(props.productsWithoutVerticalCount)
+)
+
+const formattedAiSummaryRemainingCredits = computed(() => {
+  const value = props.aiSummaryRemainingCredits
+
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
     return null
   }
 
@@ -380,6 +418,113 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
     }
   })
 }
+
+const applyImpactScorePlaceholders = (items: HeroHighlightItem[]) => {
+  const productsLabel = formattedImpactScoreProductsCount.value
+  const categoriesLabel = formattedImpactScoreCategoriesCount.value
+
+  if (!productsLabel || !categoriesLabel) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithCounts = item.segments
+      .map(segment => {
+        if (
+          !segment.text.includes(impactScoreProductsPlaceholder) &&
+          !segment.text.includes(impactScoreCategoriesPlaceholder)
+        ) {
+          return segment
+        }
+
+        const replacedText = segment.text
+          .replaceAll(impactScoreProductsPlaceholder, productsLabel)
+          .replaceAll(impactScoreCategoriesPlaceholder, categoriesLabel)
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHighlightSegment => segment != null)
+
+    return {
+      ...item,
+      segments:
+        segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
+    }
+  })
+}
+
+const applyProductsWithoutVerticalPlaceholder = (items: HeroHighlightItem[]) => {
+  const productsLabel = formattedProductsWithoutVerticalCount.value
+
+  if (!productsLabel) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithCounts = item.segments
+      .map(segment => {
+        if (!segment.text.includes(productsWithoutVerticalPlaceholder)) {
+          return segment
+        }
+
+        const replacedText = segment.text.replaceAll(
+          productsWithoutVerticalPlaceholder,
+          productsLabel
+        )
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHighlightSegment => segment != null)
+
+    return {
+      ...item,
+      segments:
+        segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
+    }
+  })
+}
+
+const resolveSegmentIcon = (icon?: string) => {
+  if (!icon) {
+    return null
+  }
+
+  switch (icon) {
+    case 'breton-flag':
+      return '/images/icons/breton-flag.svg'
+    default:
+      return null
+  }
+}
+
+const aiSummaryTitle = computed(() => t('home.hero.aiSummary.title'))
+const aiSummaryDescription = computed(() => t('home.hero.aiSummary.description'))
+const aiSummaryCreditsLabel = computed(() => {
+  const remaining = formattedAiSummaryRemainingCredits.value
+  if (!remaining) {
+    return t('home.hero.aiSummary.creditsFallback')
+  }
+
+  return t('home.hero.aiSummary.creditsLabel', { count: remaining })
+})
 </script>
 
 <template>
@@ -420,10 +565,66 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
                     class="home-hero-highlights__link"
                     :to="segment.to"
                   >
+                    <span
+                      v-if="
+                        segment.icon &&
+                          resolveSegmentIcon(segment.icon) &&
+                          segment.iconPosition !== 'after'
+                      "
+                      class="home-hero-highlights__icon"
+                    >
+                      <img
+                        :src="resolveSegmentIcon(segment.icon) ?? ''"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </span>
                     {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                    <span
+                      v-if="
+                        segment.icon &&
+                          resolveSegmentIcon(segment.icon) &&
+                          segment.iconPosition === 'after'
+                      "
+                      class="home-hero-highlights__icon"
+                    >
+                      <img
+                        :src="resolveSegmentIcon(segment.icon) ?? ''"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </span>
                   </NuxtLink>
                   <span v-else>
+                    <span
+                      v-if="
+                        segment.icon &&
+                          resolveSegmentIcon(segment.icon) &&
+                          segment.iconPosition !== 'after'
+                      "
+                      class="home-hero-highlights__icon"
+                    >
+                      <img
+                        :src="resolveSegmentIcon(segment.icon) ?? ''"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </span>
                     {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                    <span
+                      v-if="
+                        segment.icon &&
+                          resolveSegmentIcon(segment.icon) &&
+                          segment.iconPosition === 'after'
+                      "
+                      class="home-hero-highlights__icon"
+                    >
+                      <img
+                        :src="resolveSegmentIcon(segment.icon) ?? ''"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </span>
                   </span>
                 </template>
               </p>
@@ -432,6 +633,27 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
         </SectionReveal>
       </v-col>
     </v-row>
+    <SectionReveal class="home-hero-highlights__ai-summary" transition="fade">
+      <v-sheet
+        class="home-hero-highlights__ai-summary-card"
+        rounded="lg"
+        elevation="3"
+      >
+        <div class="home-hero-highlights__ai-summary-content">
+          <div class="home-hero-highlights__ai-summary-header">
+            <span class="home-hero-highlights__ai-summary-title">
+              {{ aiSummaryTitle }}
+            </span>
+            <span class="home-hero-highlights__ai-summary-credits">
+              {{ aiSummaryCreditsLabel }}
+            </span>
+          </div>
+          <p class="home-hero-highlights__ai-summary-description">
+            {{ aiSummaryDescription }}
+          </p>
+        </div>
+      </v-sheet>
+    </SectionReveal>
   </div>
 </template>
 
@@ -492,4 +714,51 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
   text-decoration: underline
   text-decoration-thickness: 0.08em
   text-underline-offset: 0.1em
+
+.home-hero-highlights__icon
+  display: inline-flex
+  align-items: center
+  margin-inline: 0.15rem
+
+  img
+    width: 1rem
+    height: 1rem
+    display: inline-block
+    vertical-align: middle
+
+.home-hero-highlights__ai-summary
+  margin-top: 1.25rem
+
+.home-hero-highlights__ai-summary-card
+  width: 100%
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6)
+  background: rgba(var(--v-theme-surface-glass), 0.85)
+  backdrop-filter: blur(8px)
+
+.home-hero-highlights__ai-summary-content
+  padding: 0.9rem 1.1rem
+  display: flex
+  flex-direction: column
+  gap: 0.35rem
+
+.home-hero-highlights__ai-summary-header
+  display: flex
+  flex-wrap: wrap
+  justify-content: space-between
+  gap: 0.5rem
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.home-hero-highlights__ai-summary-title
+  font-size: 0.95rem
+
+.home-hero-highlights__ai-summary-credits
+  font-size: 0.85rem
+  color: rgb(var(--v-theme-text-neutral-soft))
+
+.home-hero-highlights__ai-summary-description
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: 0.85rem
+  line-height: 1.4
 </style>

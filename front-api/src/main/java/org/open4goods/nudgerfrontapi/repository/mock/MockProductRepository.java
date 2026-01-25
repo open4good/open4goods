@@ -53,6 +53,16 @@ public class MockProductRepository extends ProductRepository {
     }
 
     @Override
+    public Long countMainIndexHavingImpactScore() {
+        return 0L;
+    }
+
+    @Override
+    public Long countMainIndexWithoutVertical() {
+        return 0L;
+    }
+
+    @Override
     public Stream<Product> exportAll() {
         return Stream.empty();
     }

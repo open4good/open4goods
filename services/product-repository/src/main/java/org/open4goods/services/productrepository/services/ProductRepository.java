@@ -914,6 +914,33 @@ public class ProductRepository {
         }
 
         /**
+         * Count recent products with offers, a registered impact score, and not excluded from the catalogue.
+         *
+         * @return count of recent products with an ImpactScore
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingImpactScore() {
+                Criteria criteria = getRecentPriceQuery()
+                        .and(new Criteria("excluded").is(false))
+                        .and(new Criteria("scores.IMPACTSCORE.value").exists());
+                CriteriaQuery query = new CriteriaQuery(criteria);
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Count recent products with offers that are missing a vertical assignment.
+         *
+         * @return count of recent products without a vertical
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexWithoutVertical() {
+                Criteria criteria = getRecentPriceQuery()
+                        .and(new Criteria("vertical").exists().not());
+                CriteriaQuery query = new CriteriaQuery(criteria);
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
          * Count recent products for a specific vertical.
          *
          * @param vertical vertical identifier

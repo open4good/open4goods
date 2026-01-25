@@ -8,6 +8,7 @@ import type {
   AffiliationPartnerDto,
   BlogPostDto,
   CategoriesStatsDto,
+  IpQuotaStatusDto,
 } from '~~/shared/api-client'
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeProblemsSection from '~/components/home/sections/HomeProblemsSection.vue'
@@ -91,6 +92,18 @@ const { data: affiliationPartners } = await useAsyncData<
   }
 )
 
+const { data: reviewQuotaStatus } = await useAsyncData<IpQuotaStatusDto | null>(
+  'home-review-quota',
+  () =>
+    $fetch<IpQuotaStatusDto>('/api/quotas/REVIEW_GENERATION', {
+      headers: requestHeaders,
+    }).catch(() => null),
+  {
+    default: () => null,
+    server: true,
+  }
+)
+
 const heroPartnersCount = computed(() => {
   const statsCount = categoriesStats.value?.affiliationPartnersCount
 
@@ -119,6 +132,26 @@ const openDataMillions = computed(() => {
   return roundedMillions > 0 ? roundedMillions : null
 })
 
+const impactScoreProductsCount = computed(() => {
+  const count = categoriesStats.value?.impactScoreProductsCount
+
+  if (typeof count !== 'number' || !Number.isFinite(count) || count <= 0) {
+    return null
+  }
+
+  return count
+})
+
+const productsWithoutVerticalCount = computed(() => {
+  const count = categoriesStats.value?.productsWithoutVerticalCount
+
+  if (typeof count !== 'number' || !Number.isFinite(count) || count <= 0) {
+    return null
+  }
+
+  return count
+})
+
 const productsCount = computed(() => {
   const count = categoriesStats.value?.productsCountSum
 
@@ -139,6 +172,16 @@ const categoriesCount = computed(() => {
   const fallbackCount = categoriesStats.value?.enabledVerticalConfigs ?? 0
 
   return fallbackCount > 0 ? fallbackCount : null
+})
+
+const aiSummaryRemainingCredits = computed(() => {
+  const remaining = reviewQuotaStatus.value?.remaining
+
+  if (typeof remaining !== 'number' || !Number.isFinite(remaining)) {
+    return null
+  }
+
+  return remaining
 })
 
 const seasonalEventPack = useSeasonalEventPack()
@@ -775,6 +818,9 @@ useHead(() => ({
         :open-data-millions="openDataMillions"
         :products-count="productsCount"
         :categories-count="categoriesCount"
+        :impact-score-products-count="impactScoreProductsCount"
+        :products-without-vertical-count="productsWithoutVerticalCount"
+        :ai-summary-remaining-credits="aiSummaryRemainingCredits"
         :should-reduce-motion="shouldReduceMotion"
         hero-background-i18n-key="hero.background"
         @submit="handleSearchSubmit"
