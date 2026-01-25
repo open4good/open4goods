@@ -85,12 +85,8 @@ public class StatsService {
         long totalProductsCount = safeCount(productRepository.countMainIndex());
         long excludedProductsCount = safeCount(productRepository.countMainIndexExcluded());
         long ratedProductsCount = safeCount(productRepository.countMainIndexValidAndRated());
-<<<<<<< HEAD
         long reviewedProductsCount = safeCount(productRepository.countMainIndexValidAndReviewed(domainLanguage.languageTag()));
-=======
         String reviewLocale = domainLanguage != null ? domainLanguage.languageTag() : null;
-        long reviewedProductsCount = safeCount(productRepository.countMainIndexValidAndReviewed(reviewLocale));
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
         Map<String, Long> productsCountByCategory = new LinkedHashMap<>();
         Map<String, VerticalStatsDto> detailedStats = new LinkedHashMap<>();
@@ -108,11 +104,7 @@ public class StatsService {
             long vTotal = safeCount(productRepository.countMainIndexTotal(verticalId));
             long vExcluded = safeCount(productRepository.countMainIndexExcluded(verticalId));
             long vRated = safeCount(productRepository.countMainIndexValidAndRated(verticalId));
-<<<<<<< HEAD
             long vReviewed = safeCount(productRepository.countMainIndexValidAndReviewed(verticalId, domainLanguage.languageTag()));
-=======
-            long vReviewed = safeCount(productRepository.countMainIndexValidAndReviewed(verticalId, reviewLocale));
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
             detailedStats.put(verticalId, new VerticalStatsDto(vTotal, vExcluded, safeCount, vRated, vReviewed));
         }
