@@ -1,139 +1,122 @@
 <template>
   <div class="category-filters" data-testid="category-filters">
-    <v-expansion-panels multiple class="category-filters__panels">
-      <v-expansion-panel value="global" expand-icon="mdi-chevron-down">
-        <template #title>
-          <h2 class="category-filters__title">
-            <v-icon
-              icon="mdi-tune-variant"
-              size="20"
-              class="category-filters__title-icon"
-            />
-            <span>{{ t('category.filters.globalTitle') }}</span>
-          </h2>
-        </template>
-        <template #text>
-          <div class="category-filters__section">
-            <CategoryFilterList
-              :fields="filterOptions?.global ?? []"
-              :aggregations="aggregationMap"
-              :baseline-aggregations="baselineAggregationMap"
-              :active-filters="activeFilters"
-              @update-range="updateRangeFilter"
-              @update-terms="updateTermsFilter"
-            />
-          </div>
-        </template>
-      </v-expansion-panel>
+    <section class="category-filters__section">
+      <h2 class="category-filters__title">
+        <v-icon
+          icon="mdi-tune-variant"
+          size="20"
+          class="category-filters__title-icon"
+        />
+        <span>{{ t('category.filters.globalTitle') }}</span>
+      </h2>
+      <div class="category-filters__section-body">
+        <CategoryFilterList
+          :fields="filterOptions?.global ?? []"
+          :aggregations="aggregationMap"
+          :baseline-aggregations="baselineAggregationMap"
+          :active-filters="activeFilters"
+          @update-range="updateRangeFilter"
+          @update-terms="updateTermsFilter"
+        />
+      </div>
+    </section>
 
-      <v-expansion-panel value="impact" expand-icon="mdi-chevron-down">
-        <template #title>
-          <h2 class="category-filters__title">
-            <v-icon
-              icon="mdi-leaf"
-              size="20"
-              class="category-filters__title-icon"
-            />
-            <span>{{ t('category.filters.impactTitle') }}</span>
-          </h2>
-        </template>
-        <template #text>
-          <div class="category-filters__section">
-            <CategoryFilterList
-              :fields="impactPrimary"
-              :aggregations="aggregationMap"
-              :baseline-aggregations="baselineAggregationMap"
-              :active-filters="activeFilters"
-              @update-range="updateRangeFilter"
-              @update-terms="updateTermsFilter"
-            />
+    <section class="category-filters__section">
+      <h2 class="category-filters__title">
+        <v-icon
+          icon="mdi-leaf"
+          size="20"
+          class="category-filters__title-icon"
+        />
+        <span>{{ t('category.filters.impactTitle') }}</span>
+      </h2>
+      <div class="category-filters__section-body">
+        <CategoryFilterList
+          :fields="impactPrimary"
+          :aggregations="aggregationMap"
+          :baseline-aggregations="baselineAggregationMap"
+          :active-filters="activeFilters"
+          @update-range="updateRangeFilter"
+          @update-terms="updateTermsFilter"
+        />
 
-            <div
-              v-if="impactRemaining.length"
-              class="category-filters__see-more"
-            >
-              <v-btn
-                variant="text"
-                density="comfortable"
-                color="primary"
-                @click="toggleImpactExpansion"
-              >
-                {{
-                  impactExpanded
-                    ? t('category.filters.hideImpact')
-                    : t('category.filters.showMoreImpact')
-                }}
-              </v-btn>
+        <div v-if="impactRemaining.length" class="category-filters__see-more">
+          <v-btn
+            variant="text"
+            density="comfortable"
+            color="primary"
+            @click="toggleImpactExpansion"
+          >
+            {{
+              impactExpanded
+                ? t('category.filters.hideImpact')
+                : t('category.filters.showMoreImpact')
+            }}
+          </v-btn>
 
-              <CategoryFilterList
-                v-if="impactExpanded"
-                :fields="impactRemaining"
-                :aggregations="aggregationMap"
-                :baseline-aggregations="baselineAggregationMap"
-                :active-filters="activeFilters"
-                class="mt-3"
-                @update-range="updateRangeFilter"
-                @update-terms="updateTermsFilter"
-              />
-            </div>
-          </div>
-        </template>
-      </v-expansion-panel>
+          <CategoryFilterList
+            v-if="impactExpanded"
+            :fields="impactRemaining"
+            :aggregations="aggregationMap"
+            :baseline-aggregations="baselineAggregationMap"
+            :active-filters="activeFilters"
+            class="mt-3"
+            @update-range="updateRangeFilter"
+            @update-terms="updateTermsFilter"
+          />
+        </div>
+      </div>
+    </section>
 
-      <v-expansion-panel value="technical" expand-icon="mdi-chevron-down">
-        <template #title>
-          <h2 class="category-filters__title">
-            <v-icon
-              icon="mdi-cog"
-              size="20"
-              class="category-filters__title-icon"
-            />
-            <span>{{ t('category.filters.technicalTitle') }}</span>
-          </h2>
-        </template>
-        <template #text>
-          <div class="category-filters__section">
-            <CategoryFilterList
-              :fields="technicalPrimary"
-              :aggregations="aggregationMap"
-              :baseline-aggregations="baselineAggregationMap"
-              :active-filters="activeFilters"
-              @update-range="updateRangeFilter"
-              @update-terms="updateTermsFilter"
-            />
+    <section class="category-filters__section">
+      <h2 class="category-filters__title">
+        <v-icon
+          icon="mdi-cog"
+          size="20"
+          class="category-filters__title-icon"
+        />
+        <span>{{ t('category.filters.technicalTitle') }}</span>
+      </h2>
+      <div class="category-filters__section-body">
+        <CategoryFilterList
+          :fields="technicalPrimary"
+          :aggregations="aggregationMap"
+          :baseline-aggregations="baselineAggregationMap"
+          :active-filters="activeFilters"
+          @update-range="updateRangeFilter"
+          @update-terms="updateTermsFilter"
+        />
 
-            <div
-              v-if="technicalRemaining.length"
-              class="category-filters__see-more"
-            >
-              <v-btn
-                variant="text"
-                density="comfortable"
-                color="primary"
-                @click="toggleTechnicalExpansion"
-              >
-                {{
-                  technicalExpanded
-                    ? t('category.filters.hideTechnical')
-                    : t('category.filters.showMoreTechnical')
-                }}
-              </v-btn>
+        <div
+          v-if="technicalRemaining.length"
+          class="category-filters__see-more"
+        >
+          <v-btn
+            variant="text"
+            density="comfortable"
+            color="primary"
+            @click="toggleTechnicalExpansion"
+          >
+            {{
+              technicalExpanded
+                ? t('category.filters.hideTechnical')
+                : t('category.filters.showMoreTechnical')
+            }}
+          </v-btn>
 
-              <CategoryFilterList
-                v-if="technicalExpanded"
-                :fields="technicalRemaining"
-                :aggregations="aggregationMap"
-                :baseline-aggregations="baselineAggregationMap"
-                :active-filters="activeFilters"
-                class="mt-3"
-                @update-range="updateRangeFilter"
-                @update-terms="updateTermsFilter"
-              />
-            </div>
-          </div>
-        </template>
-      </v-expansion-panel>
-    </v-expansion-panels>
+          <CategoryFilterList
+            v-if="technicalExpanded"
+            :fields="technicalRemaining"
+            :aggregations="aggregationMap"
+            :baseline-aggregations="baselineAggregationMap"
+            :active-filters="activeFilters"
+            class="mt-3"
+            @update-range="updateRangeFilter"
+            @update-terms="updateTermsFilter"
+          />
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -283,15 +266,19 @@ const toggleTechnicalExpansion = () => {
   flex-direction: column
   gap: 1rem
 
-  &__panels
-    background: transparent
-    :deep(.v-expansion-panel)
-      background: rgb(var(--v-theme-surface-default))
-      border-radius: 0.75rem
-      margin-bottom: 0.75rem
-
   &__section
     padding: 1rem
+    border-radius: 0.75rem
+    background: rgb(var(--v-theme-surface-default))
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3)
+    display: flex
+    flex-direction: column
+    gap: 1rem
+
+  &__section-body
+    display: flex
+    flex-direction: column
+    gap: 1rem
 
   &__see-more
     margin-top: 1rem
