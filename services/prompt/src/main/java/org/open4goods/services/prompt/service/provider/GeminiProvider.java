@@ -101,18 +101,24 @@ public class GeminiProvider implements GenAiProvider {
 			builder.model(resolveModel(options));
 			if (options.getTemperature() != null) {
 				builder.temperature(options.getTemperature());
-			}
+			} else {
+                builder.temperature(0.2);
+            }
 			if (options.getTopP() != null) {
 				builder.topP(options.getTopP());
-			}
+			} else {
+                builder.topP(0.9);
+            }
 			if (options.getMaxTokens() != null) {
 				builder.maxOutputTokens(options.getMaxTokens());
 			}
 		} else {
-             builder.model("gemini-1.5-flash-001");
+             builder.model("gemini-2.5-pro");
+             builder.temperature(0.2);
+             builder.topP(0.9);
         }
 
-            // Enable Google Search grounding when requested for interactive prompts.
+        // Enable Google Search grounding when requested for interactive prompts.
 		if (retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch) {
             builder.googleSearchRetrieval(true);
 		}
@@ -123,7 +129,7 @@ public class GeminiProvider implements GenAiProvider {
 		if (options != null && StringUtils.hasText(options.getModel())) {
 			return options.getModel();
 		}
-		return "gemini-1.5-flash-001";
+		return "gemini-2.5-pro";
 	}
 
 	private Prompt buildPrompt(ProviderRequest request, VertexAiGeminiChatOptions options) {
@@ -143,6 +149,8 @@ public class GeminiProvider implements GenAiProvider {
         Map<String, Object> metadata = new LinkedHashMap<>();
         try {
              response.getResult().getMetadata().entrySet().forEach(e -> metadata.put(e.getKey(), e.getValue()));
+             // Explicitly check for grounding keys in the output metadata if they are nested or need lifting
+             // For Vertex AI, sometimes metadata is attached to the generation or usage, but Spring AI usually merges them.
         } catch (Exception e) {
         	logger.warn("Error extractGroundingMetadata  ",e);
         }

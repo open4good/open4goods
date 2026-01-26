@@ -4,7 +4,6 @@
       <aside
         v-if="hasItems"
         class="ai-review-panel"
-        :class="{ 'ai-review-panel--stacked': isStacked }"
         role="complementary"
         :aria-label="t('product.aiReview.generationPanel.title')"
       >
@@ -154,20 +153,19 @@ import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAiReviewGenerationStore } from '~/stores/useAiReviewGenerationStore'
-import { useProductCompareStore } from '~/stores/useProductCompareStore'
+// import { useProductCompareStore } from ... removed
 import { useIpQuota } from '~/composables/useIpQuota'
 import { IpQuotaCategory } from '~~/shared/api-client'
 
 const { t } = useI18n()
 const store = useAiReviewGenerationStore()
-const compareStore = useProductCompareStore()
+// const compareStore = ... removed
 const { getRemaining } = useIpQuota()
 
 const { items, isCollapsed } = storeToRefs(store)
-const { items: compareItems } = storeToRefs(compareStore)
 
 const hasItems = computed(() => items.value.length > 0)
-const isStacked = computed(() => compareItems.value.length > 0)
+// const isStacked = ... removed (handled by CSS flex)
 
 const quotaCategory = IpQuotaCategory.ReviewGeneration
 const remainingGenerations = computed(() => getRemaining(quotaCategory))
@@ -210,17 +208,8 @@ const resolveProductLink = (item: {
 
 <style scoped lang="sass">
 .ai-review-panel
-  position: fixed
-  inset-inline-end: 1.5rem
-  inset-block-end: 1.5rem
-  width: min(380px, calc(100% - 3rem))
-  z-index: 12
-  transition: inset-block-end 0.3s ease
-
-  &--stacked
-
-    // Rough estimate for collapsed compare panel height
-    inset-block-end: calc(1.5rem + 80px)
+  width: 100%
+  pointer-events: auto
 
   &__card
     background: rgb(var(--v-theme-surface))
@@ -318,10 +307,5 @@ const resolveProductLink = (item: {
 
 @media (max-width: 600px)
   .ai-review-panel
-    width: calc(100% - 2rem)
-    inset-inline: 1rem
-    inset-block-end: 1rem
-
-    &--stacked
-      inset-block-end: calc(1rem + 80px)
+    // Mobile styles can be simplified as width is handled by container
 </style>

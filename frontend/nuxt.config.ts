@@ -211,7 +211,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   srcDir: 'app',
   dir: {
-    public: 'app/public',
+    public: 'public',
   },
   app: {
     head: {
@@ -262,7 +262,7 @@ export default defineNuxtConfig({
   },
 
   experimental: {
-    payloadExtraction: true,
+    payloadExtraction: false,
   },
 
   typescript: {

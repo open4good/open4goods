@@ -90,6 +90,7 @@
     "@vitest/coverage-v8": "3.2.4",
     "@vue/compiler-dom": "3.5.27",
     "@vue/test-utils": "^2.4.6",
+    "@vuetify/mcp": "^0.4.6",
     "@vueuse/nuxt": "^14.0.0",
     "dayjs-nuxt": "^2.1.11",
     "eslint": "^9.35.0",

@@ -80,13 +80,11 @@
         <div class="category-product-list__score">
           <ImpactScore
             v-if="impactScoreValue(product) != null"
-            :score="impactScoreValue(product) ?? 0"
-            :max="5"
-            size="large"
-            mode="badge"
-            badge-variant="corner"
-            badge-layout="stacked"
-            flat
+            :score="(impactScoreValue(product) ?? 0) * 4"
+            :max="20"
+            size="sm"
+            :show-methodology="false"
+            :show-range="false"
           />
           <span v-else class="category-product-list__score-fallback">
             {{ $t('category.products.notRated') }}

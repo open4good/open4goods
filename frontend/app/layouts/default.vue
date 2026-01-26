@@ -31,10 +31,12 @@
       </template>
     </TheMainFooter>
 
-    <CategoryComparePanel v-if="showComparePanel" />
-    <AiReviewGenerationPanel />
+    <div class="panels-stack">
+      <CategoryComparePanel v-if="showComparePanel" />
+      <AiReviewGenerationPanel />
+    </div>
+
     <AiReviewCompletionDialog />
-    <PwaOfflineNotice />
     <PwaOfflineNotice />
     <PwaInstallPrompt />
   </v-app>
@@ -85,7 +87,22 @@ onMounted(() => {
 </script>
 
 <style scoped lang="sass">
+.panels-stack
+  position: fixed
+  inset-inline-end: 1.5rem
+  inset-block-end: 1.5rem
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  gap: 1rem
+  z-index: 900
+  pointer-events: none
+  width: min(400px, calc(100% - 3rem))
 
+  @media (max-width: 600px)
+    inset-inline: 1rem
+    inset-block-end: 1rem
+    width: calc(100% - 2rem)
 
 .app-main-adjust
   padding-top: 64px !important

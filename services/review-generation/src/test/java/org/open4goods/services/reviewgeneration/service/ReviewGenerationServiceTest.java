@@ -344,6 +344,8 @@ class ReviewGenerationServiceTest {
 
         AiReview.AiSource source1 = new AiReview.AiSource(1, "Source —", "Desc —", "http://example.com/1");
         review.setSources(List.of(source1));
+        review.setBaseLine("Base — [1]");
+        review.setObsolescenceWarning("Obs — [2]");
 
         AiReview processed = ReflectionTestUtils.invokeMethod(reviewGenerationService, "processAiReview", review, null);
 
@@ -357,6 +359,8 @@ class ReviewGenerationServiceTest {
         assertThat(processed.getSources().get(0).getDescription()).isEqualTo("Desc -");
         
         // Assert new fields
+        assertThat(processed.getBaseLine()).isEqualTo("Base - <a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
+        assertThat(processed.getObsolescenceWarning()).isEqualTo("Obs - <a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
         assertThat(processed.getTechnicalReviewNovice()).isEqualTo("Tech Novice - <a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
         assertThat(processed.getTechnicalReviewIntermediate()).isEqualTo("Tech Intermediate - <a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
         assertThat(processed.getTechnicalReviewAdvanced()).isEqualTo("Tech Advanced - <a class=\"review-ref\" href=\"#review-ref-3\">[3]</a>");
@@ -382,5 +386,47 @@ class ReviewGenerationServiceTest {
         AiReview processed = ReflectionTestUtils.invokeMethod(reviewGenerationService, "processAiReview", review, null);
 
         assertThat(processed.getSources()).isEmpty();
+    }
+
+    @Test
+    void processAiReview_ShouldMergeGroundingSources() {
+        // Setup
+        properties.setResolveUrl(false);
+        AiReview review = new AiReview();
+        review.setDescription("Based on search [1] and [2].");
+        
+        // AI generated source (Initially #1)
+        AiReview.AiSource aiSource = new AiReview.AiSource(1, "AI Source", "From AI", "http://ai-generated.com");
+        review.setSources(List.of(aiSource));
+
+        // Grounding Metadata
+        Map<String, Object> webMetadata = Map.of(
+            "uri", "http://grounding-source.com",
+            "title", "Grounding Title"
+        );
+        Map<String, Object> chunk = Map.of("web", webMetadata);
+        Map<String, Object> groundingMetadata = Map.of("groundingChunks", List.of(chunk));
+        Map<String, Object> metadata = Map.of("groundingMetadata", groundingMetadata);
+
+        // Execute
+        AiReview processed = ReflectionTestUtils.invokeMethod(reviewGenerationService, "processAiReview", review, metadata);
+
+        // Assert
+        assertThat(processed.getSources()).hasSize(2);
+        
+        // Grounding source should be first (index 1)
+        assertThat(processed.getSources().get(0).getUrl()).isEqualTo("http://grounding-source.com");
+        assertThat(processed.getSources().get(0).getName()).isEqualTo("Grounding Title");
+        assertThat(processed.getSources().get(0).getNumber()).isEqualTo(1);
+        
+        // AI source should be second (index 2)
+        assertThat(processed.getSources().get(1).getUrl()).isEqualTo("http://ai-generated.com");
+        assertThat(processed.getSources().get(1).getNumber()).isEqualTo(2);
+
+        // Text references should be normalized
+        // [1] becomes [1] (pointing to Grounding Source)
+        // [2] becomes [2] (pointing to AI Source)
+        assertThat(processed.getDescription()).contains("<a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
+        assertThat(processed.getDescription()).contains("<a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
     }
 }

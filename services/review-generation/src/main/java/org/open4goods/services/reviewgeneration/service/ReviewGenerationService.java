@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -382,7 +383,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				totalProcessed.incrementAndGet();
 			}
 
-            
+
             // Execute hooks (enrichment/standard aggregation)
             if (status.getStatus() == ReviewGenerationStatus.Status.SUCCESS) {
                 try {
@@ -778,7 +779,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					holder.setReview(newReview);
 					holder.setEnoughData(true);
 					product.getReviews().put("fr", holder);
-                    
+
                     // Execute hooks
                     try {
                         hooks.forEach(hook -> hook.onReviewGenerated(product));
@@ -915,7 +916,6 @@ public class ReviewGenerationService implements HealthIndicator {
 
 		// 4. Resolve URLs (redirects)
 		processed = postProcess30x(processed);
-
 		return processed;
 	}
 
@@ -923,15 +923,47 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (metadata == null || metadata.isEmpty()) {
 			return review;
 		}
+		// 1. Resolve sources from metadata (Grounding)
 		List<AiReview.AiSource> metadataSources = resolveSourcesFromMetadata(metadata);
-		if (metadataSources.isEmpty()) {
+		
+		// 2. Get AI-generated sources and filter out invalid/empty ones.
+		List<AiReview.AiSource> aiSources = review.getSources() != null 
+				? review.getSources() 
+				: List.of();
+
+		// 3. Merge: Grounding Sources (Priority) + AI Sources (Fallback/Supplementary)
+		// We use a Map to deduct duplicates by URL.
+		Map<String, AiReview.AiSource> mergedMap = new LinkedHashMap<>();
+		int index = 1;
+
+		// Add Metadata Sources first
+		for (AiReview.AiSource src : metadataSources) {
+			if (src.getUrl() != null && !mergedMap.containsKey(src.getUrl())) {
+				// Re-index
+				mergedMap.put(src.getUrl(), new AiReview.AiSource(index++, src.getName(), src.getDescription(), src.getUrl()));
+			}
+		}
+
+		// Add AI Sources if not present
+		for (AiReview.AiSource src : aiSources) {
+			if (src.getUrl() != null && !mergedMap.containsKey(src.getUrl())) {
+				mergedMap.put(src.getUrl(), new AiReview.AiSource(index++, src.getName(), src.getDescription(), src.getUrl()));
+			}
+		}
+
+		List<AiReview.AiSource> finalSources = new ArrayList<>(mergedMap.values());
+		
+		// If no sources found at all, return original review (or maybe empty list)
+		if (finalSources.isEmpty()) {
 			return review;
 		}
 
-		int maxSourceNumber = metadataSources.size();
-		ReferenceNormalization normalization = normalizeReferences(review, metadataSources, maxSourceNumber);
+		// 4. Normalize references in the text to match the new indices
+		// Note: This relies on the assumption that if text used [1], it meant the first source we now have.
+		// If we prepended grounding sources, [1] now points to grounding source #1.
+		ReferenceNormalization normalization = normalizeReferences(review, finalSources, finalSources.size());
 
-		return copyWithNewData(review, normalization, metadataSources);
+		return copyWithNewData(review, normalization, finalSources);
 	}
 
 	private AiReview copyWithNewData(AiReview original, ReferenceNormalization normalization, List<AiReview.AiSource> sources) {
@@ -944,7 +976,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				normalization.shortDescription(),
 				normalization.mediumTitle(),
 				normalization.shortTitle(),
-				original.getBaseLine(),
+				normalization.baseLine(),
 				original.getManufacturingCountry(),
 				normalization.technicalReviewNovice(),
 				normalization.technicalReviewIntermediate(),
@@ -955,6 +987,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				normalization.communityReviewNovice(),
 				normalization.communityReviewIntermediate(),
 				normalization.communityReviewAdvanced(),
+				normalization.obsolescenceWarning(),
 				normalization.summary(),
 				normalization.pros(),
 				normalization.cons(),
@@ -983,6 +1016,8 @@ public class ReviewGenerationService implements HealthIndicator {
 				normalizeText(review.getShortDescription()),
 				normalizeText(review.getMediumTitle()),
 				normalizeText(review.getShortTitle()),
+				normalizeText(review.getBaseLine()),
+				normalizeText(review.getObsolescenceWarning()),
 				normalizeText(review.getSummary()),
 				review.getPros() == null ? List.of() : review.getPros().stream().map(this::normalizeText).toList(),
 				review.getCons() == null ? List.of() : review.getCons().stream().map(this::normalizeText).toList(),
@@ -1058,6 +1093,8 @@ public class ReviewGenerationService implements HealthIndicator {
 				review.getShortDescription(),
 				review.getMediumTitle(),
 				review.getShortTitle(),
+				review.getBaseLine(),
+				review.getObsolescenceWarning(),
 				review.getSummary(),
 				review.getPros(),
 				review.getCons(),
@@ -1098,9 +1135,23 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param urlString the URL to resolve
 	 * @return the final URL after following redirects, or the original if no redirect or error
 	 */
+	private final Map<String, String> urlCache = new ConcurrentHashMap<>();
+
+	/**
+	 * Resolves a URL by following redirects (up to a limit).
+	 * Caches results to improve performance.
+	 *
+	 * @param urlString the URL to resolve
+	 * @return the final URL after following redirects, or the original if no redirect or error
+	 */
 	private String resolveUrl(String urlString) {
 		if (urlString == null || urlString.isBlank()) {
 			return urlString;
+		}
+
+		// Check cache first
+		if (urlCache.containsKey(urlString)) {
+			return urlCache.get(urlString);
 		}
 
 		String currentUrl = urlString;
@@ -1148,11 +1199,15 @@ public class ReviewGenerationService implements HealthIndicator {
 				logger.warn("Too many redirects for URL: {}", urlString);
 			}
 
+			// Cache the result (even if it's the same as original)
+			urlCache.put(urlString, currentUrl);
 			return currentUrl;
 
 		} catch (Exception e) {
 			logger.warn("Failed to resolve URL {}: {}", urlString, e.getMessage());
-			return urlString; // Return original if failure
+			// Cache the failure (as original URL) to avoid repeated failures?
+			// Maybe short term, but for now safe to just return original.
+			return urlString; 
 		}
 	}
 
@@ -1255,6 +1310,8 @@ public class ReviewGenerationService implements HealthIndicator {
 				replaceReferences(review.getShortDescription()),
 				replaceReferences(review.getMediumTitle()),
 				replaceReferences(review.getShortTitle()),
+				replaceReferences(review.getBaseLine()),
+				replaceReferences(review.getObsolescenceWarning()),
 				replaceReferences(review.getSummary()),
 				review.getPros() == null ? List.of() : review.getPros().stream().map(this::replaceReferences).toList(),
 				review.getCons() == null ? List.of() : review.getCons().stream().map(this::replaceReferences).toList(),
@@ -1322,27 +1379,62 @@ public class ReviewGenerationService implements HealthIndicator {
 		return processAiReview(review, metadata);
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<AiReview.AiSource> resolveSourcesFromMetadata(Map<String, Object> metadata) {
-		if (metadata == null || metadata.isEmpty()) {
-			return List.of();
-		}
-		Object citations = metadata.get(CITATIONS_METADATA_KEY);
-		if (!(citations instanceof List<?> citationList)) {
-			return List.of();
-		}
 		List<AiReview.AiSource> sources = new ArrayList<>();
-		int index = 1;
-		for (Object citation : citationList) {
-			if (!(citation instanceof Map<?, ?> citationMap)) {
-				continue;
+		if (metadata == null || metadata.isEmpty()) {
+			return sources;
+		}
+		
+		// 1. Try "groundingMetadata" (Gemini Native)
+		// Structure: { "groundingChunks": [ { "web": { "uri": "...", "title": "..." } } ] }
+		if (metadata.containsKey("groundingMetadata")) {
+			Object groundingMetaObj = metadata.get("groundingMetadata");
+			if (groundingMetaObj instanceof Map) {
+				Map<String, Object> groundingMeta = (Map<String, Object>) groundingMetaObj;
+				if (groundingMeta.get("groundingChunks") instanceof List<?> chunks) {
+					int index = 1;
+					for (Object chunkObj : chunks) {
+						if (chunkObj instanceof Map) {
+							Map<String, Object> chunk = (Map<String, Object>) chunkObj;
+							if (chunk.get("web") instanceof Map) {
+								Map<String, Object> web = (Map<String, Object>) chunk.get("web");
+								String uri = (String) web.get("uri");
+								String title = (String) web.get("title");
+								if (uri != null && !uri.isBlank()) {
+									// Title fallback
+									if (title == null) title = ""; // or uri
+									// For description, Gemini might not provide snippet in this structure easily.
+									sources.add(new AiReview.AiSource(index++, title, "", uri));
+								}
+							}
+						}
+					}
+				}
 			}
-			String url = citationMap.get("url") != null ? citationMap.get("url").toString() : null;
-			if (url == null || url.isBlank()) {
-				continue;
+		}
+
+		// If we found grounding sources, return them.
+		if (!sources.isEmpty()) {
+			return sources;
+		}
+
+		// 2. Fallback: "citations" (Legacy / Generic Spring AI)
+		Object citations = metadata.get(CITATIONS_METADATA_KEY);
+		if (citations instanceof List<?> citationList) {
+			int index = 1;
+			for (Object citation : citationList) {
+				if (!(citation instanceof Map<?, ?> citationMap)) {
+					continue;
+				}
+				String url = citationMap.get("url") != null ? citationMap.get("url").toString() : null;
+				if (url == null || url.isBlank()) {
+					continue;
+				}
+				String title = citationMap.get("title") != null ? citationMap.get("title").toString() : url;
+				String snippet = citationMap.get("snippet") != null ? citationMap.get("snippet").toString() : "";
+				sources.add(new AiReview.AiSource(index++, title, snippet, url));
 			}
-			String title = citationMap.get("title") != null ? citationMap.get("title").toString() : url;
-			String snippet = citationMap.get("snippet") != null ? citationMap.get("snippet").toString() : "";
-			sources.add(new AiReview.AiSource(index++, title, snippet, url));
 		}
 		return sources;
 	}
@@ -1354,6 +1446,8 @@ public class ReviewGenerationService implements HealthIndicator {
 		String shortDescription = normalizer.normalize(review.getShortDescription());
 		String mediumTitle = normalizer.normalize(review.getMediumTitle());
 		String shortTitle = normalizer.normalize(review.getShortTitle());
+		String baseLine = normalizer.normalize(review.getBaseLine());
+		String obsolescenceWarning = normalizer.normalize(review.getObsolescenceWarning());
 		String technicalReviewNovice = normalizer.normalize(review.getTechnicalReviewNovice());
 		String technicalReviewIntermediate = normalizer.normalize(review.getTechnicalReviewIntermediate());
 		String technicalReviewAdvanced = normalizer.normalize(review.getTechnicalReviewAdvanced());
@@ -1386,6 +1480,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					"Certaines références ont été retirées car elles ne correspondaient à aucune source.");
 		}
 		return new ReferenceNormalization(description, shortDescription, mediumTitle, shortTitle,
+				baseLine, obsolescenceWarning,
 				summary, pros, cons, attributes, dataQuality, technicalOneline, technicalShortReview,
 				ecologicalOneline, communityOneline, review.getPdfs(), review.getImages(), review.getVideos(),
 				review.getSocialLinks(),
@@ -1405,7 +1500,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	}
 
 	private record ReferenceNormalization(String description, String shortDescription, String mediumTitle,
-			String shortTitle, String summary, List<String> pros,
+			String shortTitle, String baseLine, String obsolescenceWarning, String summary, List<String> pros,
 			List<String> cons, List<AiReview.AiAttribute> attributes, String dataQuality,
 			String technicalOneline, String technicalShortReview, String ecologicalOneline, String communityOneline,
 			List<String> pdfs, List<String> images, List<String> videos, List<String> socialLinks,
