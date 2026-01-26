@@ -588,9 +588,12 @@
         },
         "criteria": {
           "empty": "Les critères seront publiés prochainement.",
-          "title": "Critères retenus et pondérations",
+          "title": "Critères disponibles pour {category}",
+          "subtitle": "Chaque critère est pondéré afin de mettre en avant les signaux les plus utiles pour comparer les {category}.",
           "coefficientPrefix": "Compte pour",
-          "coefficientSuffix": "dans la note globale"
+          "coefficientSuffix": "dans la note globale",
+          "utilityLabel": "Utilité",
+          "utilityAria": "Afficher l'utilité du critère"
         },
         "availableCriteria": {
           "title": "Critères disponibles pour {category}",

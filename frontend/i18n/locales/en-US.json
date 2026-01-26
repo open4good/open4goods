@@ -862,9 +862,12 @@
         },
         "criteria": {
           "empty": "Criteria will be published soon.",
-          "title": "Selected criteria and weights",
+          "title": "Available criteria for {category}",
+          "subtitle": "Each criterion is weighted to highlight the most useful signals for comparing {category}.",
           "coefficientPrefix": "Counts for",
-          "coefficientSuffix": "in the overall score"
+          "coefficientSuffix": "in the overall score",
+          "utilityLabel": "Utility",
+          "utilityAria": "Show criterion utility"
         },
         "availableCriteria": {
           "title": "Available criteria for {category}",
