@@ -114,7 +114,10 @@ const bestOffersByCondition = computed<
   return mapped
 })
 
-const conditionOrder: OfferCondition[] = ['new', 'occasion']
+const conditionOrder = computed<OfferCondition[]>(() => {
+  const hasOccasion = !!props.product.offers?.bestOccasionOffer
+  return hasOccasion ? ['occasion', 'new'] : ['new', 'occasion']
+})
 
 const defaultCurrencyCode = computed(
   () => aggregatedBestOffer.value?.currency ?? 'EUR'
@@ -533,7 +536,7 @@ const startPriceCountdown = (condition: OfferCondition) => {
 }
 
 onMounted(() => {
-  conditionOrder.forEach(condition => {
+  conditionOrder.value.forEach(condition => {
     startPriceCountdown(condition)
   })
 })
@@ -548,7 +551,7 @@ onBeforeUnmount(() => {
 
 const conditionPanels = computed(() => {
   const offers = props.product.offers
-  return conditionOrder.map(condition => {
+  return conditionOrder.value.map(condition => {
     const offer = bestOffersByCondition.value[condition]
     const currency = offer?.currency ?? defaultCurrencyCode.value
     const price =

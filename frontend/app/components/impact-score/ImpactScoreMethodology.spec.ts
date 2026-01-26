@@ -96,7 +96,7 @@ describe('ImpactScoreMethodology', () => {
     expect(cards[1].text()).toContain('Téléviseurs')
     expect(
       cards[0].find('.impact-score-methodology__card-cta').attributes('to')
-    ).toBe('/lave-linge/ecoscore')
+    ).toBe('/lave-linge')
   })
 
   it('shows an empty state when no verticals are available', () => {

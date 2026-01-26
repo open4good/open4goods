@@ -43,7 +43,11 @@
       </aside>
 
       <main class="product-page__content">
-        <section :id="sectionIds.hero" class="product-page__section">
+        <section
+          :id="sectionIds.hero"
+          ref="heroSectionRef"
+          class="product-page__section"
+        >
           <div class="product-page__hero">
             <ProductHero
               :product="product"
@@ -260,6 +264,9 @@ const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
 
+const heroSectionRef = ref<HTMLElement | null>(null)
+const { bottom: heroSectionBottom } = useElementBounding(heroSectionRef)
+
 const PRODUCT_COMPONENTS = [
   'base',
   'identity',
@@ -274,7 +281,7 @@ const PRODUCT_COMPONENTS = [
 ].join(',')
 
 const impactSectionRef = ref<HTMLElement | null>(null)
-const { top: impactSectionTop } = useElementBounding(impactSectionRef)
+const { top: _impactSectionTop } = useElementBounding(impactSectionRef)
 
 const bannerNewPriceLabel = computed(() => {
   const offer = product.value?.offers?.bestNewOffer
@@ -318,25 +325,18 @@ const bannerOffersCountLabel = computed(() => {
 })
 
 watch(
-  () => impactSectionTop.value,
-  top => {
-    // Show banner when Impact Section reaches the top (offset by header height ~64px)
-    // We add a small buffer (e.g. 80px) so it triggers just as it's passing under the header
-    // The user wants it "on top of it's screen".
-    // If top is <= 64 (header height), it is at or above the viewport 'start' (under header).
-    // We also check if it's not *too* far up (scrolled past), but typically sticky banners stay until another section?
-    // User request: "Should not appears directly, should appears only when scrolling down"
-    // "triggered when user has 'Impact Score' on top of it's screen"
-
-    if (!impactSectionRef.value) {
+  () => heroSectionBottom.value,
+  bottom => {
+    // Show banner when Hero Section bottom is scrolled past the header
+    // Header is approx 64px.
+    // If bottom <= 64, the hero is mostly gone / scrolled up.
+    // We assume sticky banner should appear when the main hero price CTA is likely out of view.
+    if (!heroSectionRef.value) {
       isStickyBannerOpen.value = false
       return
     }
 
-    // Header is 64px.
-    // If Impact Section Top is <= 64px, it means the top of the section has hit the bottom of the header.
-    // We want it to show *from that point onwards* as we scroll down.
-    isStickyBannerOpen.value = top <= 80
+    isStickyBannerOpen.value = bottom <= 80
   },
   { immediate: true }
 )

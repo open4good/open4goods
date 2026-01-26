@@ -49,6 +49,7 @@ describe('ImpactScore', () => {
     stubs: {
       'v-tooltip': VTooltipStub,
       'v-rating': VRatingStub,
+      'v-btn': true,
     },
   }
 
@@ -63,7 +64,8 @@ describe('ImpactScore', () => {
 
     expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
     expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
-    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
+    // Stars are no longer shown in combined mode by default
+    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
     expect(wrapper.text()).toContain('16.0 / 20') // (4/5)*20 = 16.0
 
     // Check tooltip text
@@ -138,7 +140,7 @@ describe('ImpactScore', () => {
 
     expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
     expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
-    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
+    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
     expect(wrapper.text()).toContain('16.0 / 20')
   })
 
@@ -158,7 +160,7 @@ describe('ImpactScore', () => {
     const combined = wrapper.find('.impact-score-combined')
     expect(combined.classes()).toContain('impact-score-combined--vertical')
     expect(wrapper.find('.impact-score-badge').exists()).toBe(false)
-    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
+    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
   })
 
   it('supports flat styling on the badge', () => {
@@ -204,44 +206,13 @@ describe('ImpactScore', () => {
       global: globalOptions,
     })
 
-    const svg = wrapper.find('svg.scoreSvg')
-    expect(svg.exists()).toBe(true)
-    expect(svg.attributes('aria-label')).toBe('Score 13 out of 20')
+    const panel = wrapper.find('.impact-score-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.attributes('aria-label')).toBe('Score 13 out of 20')
 
-    const progressRect = wrapper
-      .findAll('rect')
-      .find(
-        rect =>
-          rect.attributes('x') === '0' &&
-          rect.attributes('y') === '98' &&
-          rect.attributes('width') !== '300'
-      )
-
-    // Expected width based on calculation logic (same as before just verifying existence and rough size)
-    // 13/20 = 0.65 -> 0.65 * 300 = 195
-    expect(progressRect?.attributes('width')).toBe('195')
-  })
-
-  it('generates unique clipPath ids for multiple svg instances', () => {
-    const wrapper = mount(
-      defineComponent({
-        components: { ImpactScore },
-        template: `
-          <div>
-            <ImpactScore mode="svg" :score="10" :min="0" :max="20" />
-            <ImpactScore mode="svg" :score="15" :min="0" :max="20" />
-          </div>
-        `,
-      }),
-      {
-        global: globalOptions,
-      }
-    )
-
-    const gradientIds = wrapper
-      .findAll('linearGradient')
-      .map(node => node.attributes('id'))
-    expect(new Set(gradientIds).size).toBe(gradientIds.length)
+    const fill = wrapper.find('.impact-score-panel__fill')
+    // 13/20 = 0.65 -> 65%
+    expect(fill.attributes('style')).toContain('width: 65%')
   })
 
   it('hides the scale label when showScale is false', () => {

@@ -44,18 +44,6 @@
         <div class="product-hero__panel product-hero__panel--main">
           <div class="product-hero__main-content">
             <div class="product-hero__gallery-section">
-              <div
-                v-if="impactScore != null"
-                class="product-hero__impact-score mb-4"
-              >
-                <ImpactScore
-                  mode="svg"
-                  :score="impactScore"
-                  :min="impactScoreMin"
-                  :max="impactScoreMax"
-                  svg-size="lg"
-                />
-              </div>
               <ProductHeroGallery
                 class="product-hero__gallery"
                 :product="product"
@@ -72,6 +60,19 @@
                 <span v-if="productModelName" class="product-hero__subtitle">
                   {{ productModelName }}
                 </span>
+              </div>
+
+              <div
+                v-if="impactScore != null"
+                class="product-hero__impact-score mb-4"
+              >
+                <ImpactScore
+                  mode="svg"
+                  :score="impactScore"
+                  :min="impactScoreMin"
+                  :max="impactScoreMax"
+                  svg-size="lg"
+                />
               </div>
 
               <ul

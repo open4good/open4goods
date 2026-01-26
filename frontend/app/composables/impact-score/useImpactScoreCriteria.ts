@@ -37,7 +37,6 @@ export const buildCriteriaFromCategory = (
   return available.map(key => {
     const attribute = attributeMap.get(key)
     const fallbackName = attribute?.scoreTitle ?? attribute?.name ?? key
-    const resolvedIcon = attribute?.icon?.trim() || CRITERIA_ICON_OVERRIDES[key]
 
     return {
       key,
@@ -81,7 +80,10 @@ export const useImpactScoreCriteria = () => {
     () => ({})
   )
   const loading = useState('impact-score-criteria-loading', () => false)
-  const error = useState<string | null>('impact-score-criteria-error', () => null)
+  const error = useState<string | null>(
+    'impact-score-criteria-error',
+    () => null
+  )
 
   const verticalOptions = computed(() =>
     categories.value

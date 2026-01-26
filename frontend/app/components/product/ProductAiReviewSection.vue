@@ -49,7 +49,9 @@
               v-if="reviewContent?.summary"
               class="product-ai-review__summary"
             >
+              <!-- eslint-disable vue/no-v-html -->
               <p class="text-body-1" v-html="reviewContent.summary" />
+              <!-- eslint-enable vue/no-v-html -->
             </div>
           </v-col>
         </v-row>
@@ -106,7 +108,9 @@
                         color="success"
                         class="product-ai-review__list-icon mt-1"
                       />
+                      <!-- eslint-disable vue/no-v-html -->
                       <span v-html="pro" />
+                      <!-- eslint-enable vue/no-v-html -->
                     </li>
                   </ul>
                 </v-card-text>
@@ -143,7 +147,9 @@
                         color="error"
                         class="product-ai-review__list-icon mt-1"
                       />
+                      <!-- eslint-disable vue/no-v-html -->
                       <span v-html="con" />
+                      <!-- eslint-enable vue/no-v-html -->
                     </li>
                   </ul>
                 </v-card-text>
@@ -455,10 +461,12 @@
                     <p class="text-body-2 mb-4">
                       {{ $t('product.aiReview.dataQuality.description') }}
                     </p>
+                    <!-- eslint-disable vue/no-v-html -->
                     <div
                       class="product-ai-review__quality-value"
                       v-html="dataQualityValue"
                     />
+                    <!-- eslint-enable vue/no-v-html -->
                   </v-card-text>
                 </v-card>
               </v-col>

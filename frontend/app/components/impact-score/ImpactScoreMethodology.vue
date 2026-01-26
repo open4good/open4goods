@@ -16,14 +16,19 @@
       </p>
     </header>
 
-    <div v-if="verticalCapsules.length" class="impact-score-methodology__capsules">
+    <div
+      v-if="verticalCapsules.length"
+      class="impact-score-methodology__capsules"
+    >
       <span class="impact-score-methodology__label">
         {{ t('impactScorePage.sections.methodology.verticalLabel') }}
       </span>
       <ResponsiveCarousel
         class="impact-score-methodology__carousel"
         :items="verticalCapsules"
-        :aria-label="t('impactScorePage.sections.methodology.verticalCarouselAria')"
+        :aria-label="
+          t('impactScorePage.sections.methodology.verticalCarouselAria')
+        "
         :breakpoints="{ xs: 1, sm: 2, md: 3, lg: 3, xl: 3 }"
       >
         <template #item="{ item }">
@@ -132,7 +137,8 @@ const verticalCapsules = computed(() =>
   [...props.verticals]
     .filter(vertical => vertical.enabled !== false)
     .map(vertical => ({
-      key: vertical.id ?? vertical.verticalHomeUrl ?? vertical.verticalHomeTitle,
+      key:
+        vertical.id ?? vertical.verticalHomeUrl ?? vertical.verticalHomeTitle,
       label: vertical.verticalHomeTitle?.trim() ?? '',
       order: vertical.order ?? Number.MAX_SAFE_INTEGER,
       categoryLink: normalizeVerticalBase(vertical),
@@ -147,7 +153,9 @@ const verticalCapsules = computed(() =>
         null,
     }))
     .filter(
-      (vertical): vertical is {
+      (
+        vertical
+      ): vertical is {
         key: string
         label: string
         order: number
@@ -157,19 +165,15 @@ const verticalCapsules = computed(() =>
       } =>
         Boolean(
           vertical.key &&
-            vertical.label &&
-            vertical.categoryLink &&
-            vertical.ecoscoreLink
+          vertical.label &&
+          vertical.categoryLink &&
+          vertical.ecoscoreLink
         )
     )
     .sort((a, b) => a.order - b.order)
 )
 
 const navigateToEcoscore = (link: string) => {
-  router.push(link)
-}
-
-const navigateToCategory = (link: string) => {
   router.push(link)
 }
 </script>
@@ -222,7 +226,9 @@ const navigateToCategory = (link: string) => {
   height: 100%;
   background: rgba(var(--v-theme-surface-default), 0.98);
   border-color: rgba(var(--v-theme-border-primary-strong), 0.6);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
   cursor: pointer;
 }
 
