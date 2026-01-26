@@ -56,12 +56,17 @@ const messages: Record<string, string> = {
   'category.ecoscorePage.sections.purpose.dataFallback':
     'Detailed data for each criterion will be available soon.',
   'category.ecoscorePage.sections.criteria.title':
-    'Selected criteria and weights',
+    'Available criteria for {category}',
+  'category.ecoscorePage.sections.criteria.subtitle':
+    'Each criterion is weighted to highlight the most useful signals for {category}.',
   'category.ecoscorePage.sections.criteria.coefficientPrefix': 'Counts for',
   'category.ecoscorePage.sections.criteria.coefficientSuffix':
     'in the overall score',
   'category.ecoscorePage.sections.criteria.empty':
     'Criteria will be published soon.',
+  'category.ecoscorePage.sections.criteria.utilityLabel': 'Utility',
+  'category.ecoscorePage.sections.criteria.utilityAria':
+    'Display criterion utility',
   'category.ecoscorePage.sections.transparency.title':
     'Transparency and traceability',
   'category.ecoscorePage.sections.transparency.criticalReviewTitle':
@@ -229,32 +234,6 @@ vi.mock('~/components/shared/ui/StickySectionNavigation.vue', () => ({
   }),
 }))
 
-vi.mock('~/components/domains/content/TextContent.vue', () => ({
-  default: defineComponent({
-    name: 'TextContentStub',
-    props: {
-      blocId: { type: String, default: '' },
-    },
-    setup(props) {
-      return () =>
-        h('div', { class: 'text-content-stub' }, `content:${props.blocId}`)
-    },
-  }),
-}))
-
-vi.mock('~/components/shared/ui/ImpactScore.vue', () => ({
-  default: defineComponent({
-    name: 'ImpactScoreStub',
-    props: {
-      score: { type: Number, default: 0 },
-    },
-    setup(props) {
-      return () =>
-        h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
-    },
-  }),
-}))
-
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: () => ({ selectCategoryBySlug: selectCategoryBySlugMock }),
 }))
@@ -361,10 +340,8 @@ const vuetifyStubs = {
     },
   }),
   'v-divider': { template: '<hr class="v-divider-stub" />' },
+  'v-tooltip': { template: '<div class="v-tooltip-stub"><slot /></div>' },
   'v-skeleton-loader': { template: '<div class="v-skeleton-loader-stub" />' },
-  ImpactScoreCriteriaPanel: {
-    template: '<div class="impact-score-criteria-panel-stub" />',
-  },
 }
 
 const mountPage = async () => {
@@ -411,12 +388,9 @@ describe('Category ecosystem Impact Score page', () => {
     expect(breadcrumbText).toContain('impactscore')
 
     const navItems = wrapper.findAll('.sticky-nav-stub__item')
-    expect(navItems).toHaveLength(6)
+    expect(navItems).toHaveLength(3)
     expect(navItems.map(item => item.text())).toEqual([
       'Available criteria',
-      'Overview',
-      'Purpose & data',
-      'Criteria',
       'Transparency',
       'AI audit',
     ])
@@ -425,14 +399,6 @@ describe('Category ecosystem Impact Score page', () => {
     expect(criteriaCards).toHaveLength(2)
     expect(criteriaCards[0].text()).toContain('Energy efficiency')
     expect(criteriaCards[0].text()).toContain('30%')
-
-    const sampleScore = wrapper.get('.impact-score-stub').text()
-    expect(sampleScore).toContain('score:4.3')
-
-    const orbit = wrapper.get('[data-test="impact-score-orbit"]')
-    expect(orbit.text()).toContain('Impact Score Televisions')
-    expect(orbit.text()).toContain('Transportation')
-    expect(orbit.text()).toContain('End of life')
 
     const yamlBlock = wrapper.get('[data-test="ai-yaml"]').text()
     expect(yamlBlock).toContain('key: value')
