@@ -44,6 +44,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
         "communityReviewIntermediate",
         "communityReviewAdvanced",
 
+        "obsolescenceWarning",
+
         "summary",
         "pros",
         "cons",
@@ -82,6 +84,10 @@ public class AiReview {
             String communityReviewIntermediate,
             String communityReviewAdvanced,
 
+
+            String obsolescenceWarning,
+
+
             String summary,
             List<String> pros,
             List<String> cons,
@@ -117,6 +123,8 @@ public class AiReview {
         this.communityReviewNovice = communityReviewNovice;
         this.communityReviewIntermediate = communityReviewIntermediate;
         this.communityReviewAdvanced = communityReviewAdvanced;
+
+        this.obsolescenceWarning = obsolescenceWarning;
 
         this.summary = summary;
         this.pros = pros;
@@ -329,6 +337,27 @@ public class AiReview {
     @Schema(description = "Community review (advanced)")
     private String communityReviewAdvanced;
 
+
+
+
+    @JsonProperty(required = true, value = "obsolescenceWarning")
+    @AiGeneratedField(instruction =
+            "Write in FRENCH. Obsolescence warning, checking out possible short / medium term obscolescence issue against last known standards. Check for compatibility, standards support, .... "
+          + "You MUST return nothing (empty string), if no detected concern"
+          + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
+          + "Never mention prices, dates, or product condition (new/used). "
+          + "MAXIMUM SOURCING: cite [n] after each statement; omit any uncertain claim.")
+    @Schema(description = "Community review (advanced)")
+    private String obsolescenceWarning;
+
+
+
+
+
+
+
+
+
     /** A summary of the product review. */
     @JsonProperty(required = true, value = "summary")
     @AiGeneratedField(instruction =
@@ -479,6 +508,9 @@ public class AiReview {
 
     public String getCommunityReviewAdvanced() { return communityReviewAdvanced; }
     public void setCommunityReviewAdvanced(String communityReviewAdvanced) { this.communityReviewAdvanced = communityReviewAdvanced; }
+
+    public String getObsolescenceWarning() { return obsolescenceWarning; }
+    public void setObsolescenceWarning(String obsolescenceWarning) { this.obsolescenceWarning = obsolescenceWarning; }
 
     public String getSummary() { return summary; }
     public void setSummary(String summary) { this.summary = summary; }
