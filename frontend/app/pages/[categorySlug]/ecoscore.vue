@@ -19,6 +19,7 @@
             :aria-label="navAriaLabel"
           >
             <StickySectionNavigation
+              class="category-ecoscore__section-toggle"
               data-test="sticky-navigation"
               :sections="navigationSections"
               :active-section="activeSection"
@@ -1151,6 +1152,22 @@ useSeoMeta({
 
 .category-ecoscore__nav
   position: relative
+
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__link)
+  color: rgb(var(--v-theme-text-neutral-strong))
+  background: rgba(var(--v-theme-surface-primary-080), 0.35)
+
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__link:hover),
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__link:focus-visible)
+  background: rgba(var(--v-theme-surface-primary-080), 0.6)
+
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__link--active)
+  background: rgba(var(--v-theme-surface-primary-120), 0.9)
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.85)
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__icon)
+  color: currentColor
 
 .category-ecoscore__sections
   display: flex
