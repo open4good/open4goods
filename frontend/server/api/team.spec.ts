@@ -34,26 +34,28 @@ describe('GET /api/team Nitro endpoint', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    fetchMock.mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          cores: [],
-          contributors: [],
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            cores: [],
+            contributors: [],
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        )
       )
     )
 
     vi.stubGlobal('fetch', fetchMock)
     vi.stubGlobal('defineEventHandler', (fn: TeamRouteHandler) => fn)
 
-    runtimeConfig.apiUrl = 'https://backend.example.test'
+    runtimeConfig.apiUrl = 'https://backend.example.test/api'
     runtimeConfig.machineToken = 'test-token-123'
     setResponseHeaderMock.mockReset()
-    process.env.API_URL = 'https://backend.example.test'
+    process.env.API_URL = 'https://backend.example.test/api'
     process.env.MACHINE_TOKEN = 'test-token-123'
 
     handler = (await import('./team')).default
@@ -78,8 +80,12 @@ describe('GET /api/team Nitro endpoint', () => {
 
     await handler(event)
 
-    expect(fetchMock).toHaveBeenCalledOnce()
-    const [, init] = fetchMock.mock.calls[0]
+    expect(fetchMock).toHaveBeenCalled()
+    const teamCall = fetchMock.mock.calls.find(([url]) =>
+      String(url).includes('/api/team')
+    )
+    expect(teamCall).toBeDefined()
+    const [, init] = teamCall!
     const headers = (init?.headers ?? {}) as Record<string, string>
 
     expect(headers['X-Shared-Token']).toBe('test-token-123')

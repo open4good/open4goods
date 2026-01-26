@@ -165,10 +165,10 @@ describe('ProductHeroPricing', () => {
 
     const panels = wrapper.findAll('.product-hero__pricing-panel')
     expect(panels).toHaveLength(2)
-    expect(panels[0]?.text()).toContain('New')
-    expect(panels[0]?.text()).toContain('799')
-    expect(panels[1]?.text()).toContain('Second-hand')
-    expect(panels[1]?.text()).toContain('649')
+    expect(panels[0]?.text()).toContain('Second-hand')
+    expect(panels[0]?.text()).toContain('649')
+    expect(panels[1]?.text()).toContain('New')
+    expect(panels[1]?.text()).toContain('799')
 
     await wrapper.unmount()
   })
@@ -202,8 +202,8 @@ describe('ProductHeroPricing', () => {
 
     const panels = wrapper.findAll('.product-hero__pricing-panel')
     expect(panels).toHaveLength(2)
-    expect(panels[0]?.text()).toContain('No new offers yet!')
-    expect(panels[1]?.text()).toContain('649')
+    expect(panels[0]?.text()).toContain('649')
+    expect(panels[1]?.text()).toContain('No new offers yet!')
 
     await wrapper.unmount()
   })

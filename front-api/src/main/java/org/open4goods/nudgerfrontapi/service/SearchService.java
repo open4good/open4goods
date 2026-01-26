@@ -31,6 +31,7 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
@@ -55,6 +56,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -70,7 +72,6 @@ import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
 import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
-import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
@@ -129,24 +130,30 @@ public class SearchService {
 	private static final String EXCLUDED_FIELD = "excluded";
 	private static final String EXCLUDED_CAUSES_FIELD = FilterField.excludedCauses.fieldPath();
 	private static final Set<String> BOOLEAN_AGGREGATION_FIELDS = Set.of();
-	private static final float MIN_SEMANTIC_SCORE = 0.9f;
 	private static final double OFFERS_COUNT_SEMANTIC_BOOST = 0.05d;
+	private static final String SORT_FIELD_PRICE = "price.minPrice.price";
+	private static final String SORT_FIELD_BRAND = "attributes.referentielAttributes.BRAND";
+	private static final String SORT_FIELD_MODEL = "attributes.referentielAttributes.MODEL";
+	private static final String SORT_FIELD_ECOSCORE = "scores.ECOSCORE.value";
 
 	private final ProductRepository repository;
 	private final VerticalsConfigService verticalsConfigService;
 	private final ProductMappingService productMappingService;
 	private final ApiProperties apiProperties;
+	private final SearchProperties searchProperties;
 	private final DjlTextEmbeddingService textEmbeddingService;
 	private final DjlEmbeddingProperties embeddingProperties;
 	private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
 	public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
 			@Lazy ProductMappingService productMappingService, ApiProperties apiProperties,
-			DjlTextEmbeddingService textEmbeddingService, DjlEmbeddingProperties embeddingProperties) {
+			SearchProperties searchProperties, DjlTextEmbeddingService textEmbeddingService,
+			DjlEmbeddingProperties embeddingProperties) {
 		this.repository = repository;
 		this.verticalsConfigService = verticalsConfigService;
 		this.productMappingService = productMappingService;
 		this.apiProperties = apiProperties;
+		this.searchProperties = searchProperties;
 		this.textEmbeddingService = textEmbeddingService;
 		this.embeddingProperties = embeddingProperties;
 	}
@@ -175,14 +182,15 @@ public class SearchService {
 	 */
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
 	public SearchResult search(Pageable pageable, String verticalId, String query,
-			AggregationRequestDto aggregationQuery, FilterRequestDto filters, boolean allowSemanticFallback) {
+			AggregationRequestDto aggregationQuery, FilterRequestDto filters, boolean allowSemanticFallback, String searchType) {
 		String sanitizedQuery = sanitize(query);
 		String normalizedVerticalId = normalizeVerticalId(verticalId);
 
 		FilterRequestDto normalizedFilters = normalizeFilters(filters);
 		boolean hasExcludedOverride = hasExcludedOverride(normalizedFilters);
 		boolean applyDefaultExclusion = !hasExcludedOverride;
-		boolean useSemanticSearch = allowSemanticFallback && StringUtils.hasText(sanitizedQuery);
+		boolean textOnly = "TEXT".equalsIgnoreCase(searchType);
+		boolean useSemanticSearch = !textOnly && allowSemanticFallback && StringUtils.hasText(sanitizedQuery);
 		float[] semanticEmbedding = null;
 		if (useSemanticSearch) {
 			semanticEmbedding = buildNormalizedEmbedding(sanitizedQuery);
@@ -192,14 +200,15 @@ public class SearchService {
 		}
 
 		Query searchQuery = useSemanticSearch
-				? buildSemanticFilterQuery(normalizedVerticalId, normalizedFilters, applyDefaultExclusion, sanitizedQuery)
+				? buildSemanticFilterQuery(normalizedVerticalId, normalizedFilters, applyDefaultExclusion,
+						VerticalScope.ANY)
 				: buildProductSearchQuery(normalizedVerticalId, sanitizedQuery, normalizedFilters, applyDefaultExclusion);
 
 		List<Agg> excludedAggregations = extractExcludedAggregations(aggregationQuery);
 		boolean requiresAdminExcludedAggregation = applyDefaultExclusion && !excludedAggregations.isEmpty();
 		Query adminAggregationQuery = requiresAdminExcludedAggregation
 				? (useSemanticSearch
-						? buildSemanticFilterQuery(normalizedVerticalId, normalizedFilters, false, sanitizedQuery)
+						? buildSemanticFilterQuery(normalizedVerticalId, normalizedFilters, false, VerticalScope.ANY)
 						: buildProductSearchQuery(normalizedVerticalId, sanitizedQuery, normalizedFilters, false))
 				: null;
 
@@ -267,7 +276,7 @@ public class SearchService {
 						.numCandidates(Math.max(knnLimit * 2, 50))
 						.filter(filter == null ? List.of() : List.of(filter)));
 
-		builder.withKnnSearches(knnSearch).withPageable(PageRequest.of(0, knnLimit)).withMinScore(MIN_SEMANTIC_SCORE);
+		builder.withKnnSearches(knnSearch).withPageable(PageRequest.of(0, knnLimit)).withMinScore(searchProperties.getSemanticMinScore());
 	}
 
 	Query buildProductSearchQuery(String normalizedVerticalId, String sanitizedQuery, FilterRequestDto filters,
@@ -283,7 +292,35 @@ public class SearchService {
 				b.filter(f -> f.term(t -> t.field("vertical").value(normalizedVerticalId)));
 			}
 			if (StringUtils.hasText(sanitizedQuery)) {
-				b.must(m -> m.match(mq -> mq.field("offerNames").query(sanitizedQuery)));
+				b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(sanitizedQuery)));
+			}
+			if (filters != null) {
+				applyFilterRequest(filters, b);
+			}
+			return b;
+		}));
+	}
+
+	/**
+	 * Builds a lexical query targeting products without a vertical assignment.
+	 *
+	 * @param sanitizedQuery        sanitized query string
+	 * @param filters               optional filters to apply
+	 * @param applyDefaultExclusion whether to apply the default exclusion filter
+	 * @return a query limited to missing-vertical products
+	 */
+	private Query buildMissingVerticalSearchQuery(String sanitizedQuery, FilterRequestDto filters,
+			boolean applyDefaultExclusion) {
+		Long expiration = repository.expirationClause();
+		return Query.of(q -> q.bool(b -> {
+			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+			if (applyDefaultExclusion) {
+				b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+			}
+			b.mustNot(m -> m.exists(e -> e.field("vertical")));
+			if (StringUtils.hasText(sanitizedQuery)) {
+				b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(sanitizedQuery)));
 			}
 			if (filters != null) {
 				applyFilterRequest(filters, b);
@@ -304,28 +341,51 @@ public class SearchService {
 	}
 
 	/**
-	 * Execute a semantic-only global search strategy.
+	 * Execute a semantic-first global search strategy with a lexical fallback for
+	 * missing-vertical results.
 	 *
 	 * @param query          raw user query
 	 * @param domainLanguage localisation hint (currently unused but kept for future
 	 *                       enhancements)
+	 * @param filters        optional filter criteria scoped to the global search
+	 * @param sort           optional sort definition for global search results
 	 * @return grouped search results and unassigned hits when necessary
 	 */
-	public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage) {
+	public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage, FilterRequestDto filters,
+			Sort sort, String searchType) {
 
 		String sanitizedQuery = sanitize(query);
 		if (!StringUtils.hasText(sanitizedQuery)) {
 			return new GlobalSearchResult(List.of(), List.of(), null, null);
 		}
+		FilterRequestDto normalizedFilters = normalizeFilters(filters);
 
 		CategorySuggestion verticalCta = findExactVerticalMatch(sanitizedQuery, domainLanguage);
-		SemanticGlobalSearchResult semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage);
-		if (!semanticResult.hasResults()) {
-			return new GlobalSearchResult(List.of(), List.of(), verticalCta, semanticResult.diagnostics());
+		
+		boolean textOnly = "TEXT".equalsIgnoreCase(searchType);
+		SemanticGlobalSearchResult semanticResult;
+		if (textOnly) {
+			semanticResult = new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
+		} else {
+			semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage,
+					normalizedFilters, sort);
 		}
 
-		return new GlobalSearchResult(semanticResult.verticalGroups(),
-				semanticResult.missingVerticalResults(),
+		List<GlobalSearchHit> missingVerticalResults = semanticResult.missingVerticalResults();
+		if (missingVerticalResults.isEmpty()) {
+			missingVerticalResults = executeMissingVerticalLexicalSearch(sanitizedQuery, domainLanguage,
+					normalizedFilters, sort);
+		}
+		
+		List<GlobalSearchVerticalGroup> verticalGroups = semanticResult.verticalGroups();
+		if (verticalGroups.isEmpty() && StringUtils.hasText(sanitizedQuery)) {
+			// Fallback: if semantic search failed to find categorized products, try lexical search
+			List<GlobalSearchHit> lexicalVerticalHits = executeVerticalLexicalSearch(sanitizedQuery, domainLanguage, normalizedFilters, sort);
+			verticalGroups = groupHitsByVertical(lexicalVerticalHits, sort);
+		}
+		
+		return new GlobalSearchResult(verticalGroups,
+				missingVerticalResults,
 				verticalCta,
 				semanticResult.diagnostics());
 	}
@@ -367,7 +427,7 @@ public class SearchService {
 	 * @return {@code true} when semantic fallback is enabled
 	 */
 	private boolean isSemanticSuggestFallbackEnabled() {
-		return true;
+		return searchProperties.getSuggest().isSemanticFallbackEnabled();
 	}
 
 	private List<CategorySuggestion> findCategoryMatches(List<String> tokens, DomainLanguage domainLanguage) {
@@ -467,7 +527,7 @@ public class SearchService {
 		NativeQueryBuilder builder = new NativeQueryBuilder().withQuery(filterQuery).withKnnSearches(knnSearch)
 				.withPageable(PageRequest.of(0, knnLimit))
 				.withSourceFilter(new FetchSourceFilter(true, SUGGEST_SOURCE_INCLUDES, null))
-				.withMinScore(MIN_SEMANTIC_SCORE);
+				.withMinScore(searchProperties.getSemanticMinScore());
 
 		try {
 			return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
@@ -937,12 +997,13 @@ public class SearchService {
 	}
 
 	/**
-	 * Group mapped hits by vertical identifier and sort groups by best score.
+	 * Group mapped hits by vertical identifier.
 	 *
 	 * @param hits mapped global search hits
-	 * @return grouped vertical results sorted by relevance
+	 * @param sort optional sort definition for global search results
+	 * @return grouped vertical results preserving the requested ordering
 	 */
-	private List<GlobalSearchVerticalGroup> groupHitsByVertical(List<GlobalSearchHit> hits) {
+	private List<GlobalSearchVerticalGroup> groupHitsByVertical(List<GlobalSearchHit> hits, Sort sort) {
 		if (hits == null || hits.isEmpty()) {
 			return List.of();
 		}
@@ -955,15 +1016,21 @@ public class SearchService {
 			grouped.computeIfAbsent(hit.verticalId(), key -> new ArrayList<>()).add(hit);
 		}
 
-		return grouped.entrySet().stream()
-				.map(entry -> new GlobalSearchVerticalGroup(entry.getKey(),
-						entry.getValue().stream().sorted(Comparator.comparing(GlobalSearchHit::score).reversed())
-								.toList()))
-				.sorted(Comparator.comparing(
-						(GlobalSearchVerticalGroup group) -> group.results().isEmpty() ? Double.NEGATIVE_INFINITY
-								: group.results().get(0).score())
-						.reversed())
+		List<GlobalSearchVerticalGroup> groups = grouped.entrySet().stream()
+				.map(entry -> new GlobalSearchVerticalGroup(entry.getKey(), List.copyOf(entry.getValue())))
 				.toList();
+		if (sort == null || sort.isUnsorted()) {
+			return groups.stream()
+					.map(group -> new GlobalSearchVerticalGroup(group.verticalId(),
+							group.results().stream().sorted(Comparator.comparing(GlobalSearchHit::score).reversed())
+									.toList()))
+					.sorted(Comparator.comparing(
+							(GlobalSearchVerticalGroup group) -> group.results().isEmpty() ? Double.NEGATIVE_INFINITY
+									: group.results().get(0).score())
+							.reversed())
+					.toList();
+		}
+		return groups;
 	}
 
 
@@ -972,32 +1039,126 @@ public class SearchService {
 	 * plus missing-vertical results.
 	 *
 	 * <ol>
-	 * <li>Resolve candidate verticals based on the query text</li>
-	 * <li>Run vector search within each candidate vertical</li>
+	 * <li>Run vector search on products with a vertical assigned</li>
 	 * <li>Run a dedicated semantic search on products without a vertical</li>
 	 * </ol>
 	 *
 	 * @param sanitizedQuery sanitized query string
 	 * @param domainLanguage localisation hint
+	 * @param filters        optional filters scoped to the global search
+	 * @param sort           optional sort definition for global search results
 	 * @return grouped semantic hits and missing-vertical results
 	 */
-	private SemanticGlobalSearchResult executeSemanticGlobalSearch(String sanitizedQuery, DomainLanguage domainLanguage) {
+	private SemanticGlobalSearchResult executeSemanticGlobalSearch(String sanitizedQuery, DomainLanguage domainLanguage,
+			FilterRequestDto filters, Sort sort) {
 		float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
 		if (embedding == null) {
 			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
 		}
 
 		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
-		SearchHits<Product> hits = executeSemanticSearch(null, embedding, null, true, pageable, sanitizedQuery);
+		SearchHits<Product> hits = null;
+		SearchHits<Product> missingHits = null;
+		try {
+			hits = executeSemanticSearch(null, embedding, filters, true, pageable, VerticalScope.REQUIRED);
+			missingHits = executeSemanticSearch(null, embedding, filters, true, pageable, VerticalScope.MISSING);
+		} catch (Exception e) {
+			LOGGER.error("Semantic search failed for query '{}'", sanitizedQuery, e);
+			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
+		}
 		
-		List<GlobalSearchHit> allHits = mapHits(hits, domainLanguage, true);
-		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(allHits);
-		List<GlobalSearchHit> missingVerticalResults = allHits.stream()
-				.filter(hit -> !StringUtils.hasText(hit.verticalId()))
-				.toList();
+		List<GlobalSearchHit> verticalHits = mapHits(hits, domainLanguage, true, sort);
+		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(verticalHits, sort);
+		List<GlobalSearchHit> missingVerticalResults = mapHits(missingHits, domainLanguage, true, sort);
 
 		return new SemanticGlobalSearchResult(grouped, missingVerticalResults, true,
 				buildSemanticDiagnostics(grouped, missingVerticalResults));
+	}
+
+	/**
+	 * Executes a lexical fallback search scoped to products without a vertical
+	 * assignment.
+	 *
+	 * @param sanitizedQuery sanitized query string
+	 * @param domainLanguage localisation hint for result mapping
+	 * @param filters        optional filters to apply
+	 * @param sort           optional sort definition
+	 * @return list of mapped hits without a vertical assignment
+	 */
+	private List<GlobalSearchHit> executeMissingVerticalLexicalSearch(String sanitizedQuery,
+			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort) {
+		if (!StringUtils.hasText(sanitizedQuery)) {
+			return List.of();
+		}
+
+		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
+		Query query = buildMissingVerticalSearchQuery(sanitizedQuery, filters, true);
+		NativeQueryBuilder builder = new NativeQueryBuilder()
+				.withQuery(query)
+				.withPageable(pageable)
+				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+
+		SearchHits<Product> hits;
+		try {
+			hits = repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+		} catch (Exception e) {
+			elasticLog(e);
+			throw e;
+		}
+
+		return mapHits(hits, domainLanguage, false, sort);
+	}
+
+	/**
+	 * Executes a lexical fallback search scoped to products WITH a vertical assignment.
+	 *
+	 * @param sanitizedQuery sanitized query string
+	 * @param domainLanguage localisation hint for result mapping
+	 * @param filters        optional filters to apply
+	 * @param sort           optional sort definition
+	 * @return list of mapped hits with a vertical assignment
+	 */
+	private List<GlobalSearchHit> executeVerticalLexicalSearch(String sanitizedQuery,
+			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort) {
+		if (!StringUtils.hasText(sanitizedQuery)) {
+			return List.of();
+		}
+
+		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
+		
+		// Build a query similar to buildProductSearchQuery but ensuring vertical exists
+		Long expiration = repository.expirationClause();
+		Query query = Query.of(q -> q.bool(b -> {
+			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+			b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+			
+			// Crucial difference: MUST have a vertical
+			b.filter(f -> f.exists(e -> e.field("vertical")));
+			
+			if (StringUtils.hasText(sanitizedQuery)) {
+				b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(sanitizedQuery)));
+			}
+			if (filters != null) {
+				applyFilterRequest(filters, b);
+			}
+			return b;
+		}));
+
+		NativeQueryBuilder builder = new NativeQueryBuilder()
+				.withQuery(query)
+				.withPageable(pageable)
+				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+
+		SearchHits<Product> hits;
+		try {
+			hits = repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+		} catch (Exception e) {
+			elasticLog(e);
+			throw e;
+		}
+
+		return mapHits(hits, domainLanguage, false, sort);
 	}
 
 
@@ -1041,7 +1202,7 @@ public class SearchService {
 			queryVector.add(value);
 		}
 
-		Query filterQuery = buildSemanticFilterQuery(verticalId, null, true, sanitizedQuery);
+		Query filterQuery = buildSemanticFilterQuery(verticalId, null, true, VerticalScope.ANY);
 
 		co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch
 				.of(knn -> knn.field("embedding").queryVector(queryVector).k(knnLimit)
@@ -1061,24 +1222,23 @@ public class SearchService {
 			throw e;
 		}
 
-		List<SearchHit<Product>> sortedHits = hits.getSearchHits().stream()
-				.sorted(Comparator.comparingDouble(this::resolveSemanticBoostedScore).reversed())
-				.toList();
+		List<SearchHit<Product>> sortedHits = sortSemanticHits(hits.getSearchHits(), Sort.unsorted());
 		return sortedHits.stream().skip((long) pageNumber * pageSize).limit(pageSize)
 				.map(hit -> mapHit(hit, domainLanguage, resolveSemanticBoostedScore(hit))).filter(Objects::nonNull)
 				.toList();
 	}
 
 	private List<GlobalSearchHit> mapHits(SearchHits<Product> hits, DomainLanguage domainLanguage,
-			boolean applyOffersCountBoost) {
+			boolean applyOffersCountBoost, Sort sort) {
 		if (hits == null || hits.isEmpty()) {
 			return List.of();
 		}
-		return hits.getSearchHits().stream()
+		List<SearchHit<Product>> sortedHits = sortSemanticHits(hits.getSearchHits(), sort);
+		return sortedHits.stream()
 				.map(hit -> mapHit(hit, domainLanguage,
 						applyOffersCountBoost ? resolveSemanticBoostedScore(hit) : hit.getScore()))
 				.filter(Objects::nonNull)
-				.sorted(Comparator.comparing(GlobalSearchHit::score).reversed()).toList();
+				.toList();
 	}
 
 	private GlobalSearchHit mapHit(SearchHit<Product> hit, DomainLanguage domainLanguage) {
@@ -1107,13 +1267,13 @@ public class SearchService {
 	 * @param applyDefaultExclusion whether the default exclusion filter should be
 	 *                              applied
 	 * @param pageable              requested page information
-	 * @param sanitizedQuery        sanitized query string for lexical constraints
+	 * @param verticalScope         constraint on vertical availability
 	 * @return search hits from the semantic query
 	 */
 	private SearchHits<Product> executeSemanticSearch(String verticalId, float[] embedding, FilterRequestDto filters,
-			boolean applyDefaultExclusion, Pageable pageable, String sanitizedQuery) {
-		Query filterQuery = buildSemanticFilterQuery(verticalId, filters, applyDefaultExclusion, sanitizedQuery);
-		return executeSemanticSearchWithFilter(embedding, filterQuery, pageable, null);
+			boolean applyDefaultExclusion, Pageable pageable, VerticalScope verticalScope) {
+		Query filterQuery = buildSemanticFilterQuery(verticalId, filters, applyDefaultExclusion, verticalScope);
+		return executeSemanticSearchWithFilter(embedding, filterQuery, pageable);
 	}
 
 	/**
@@ -1122,19 +1282,12 @@ public class SearchService {
 	 * @param embedding   normalized embedding vector
 	 * @param filterQuery query used to scope semantic results
 	 * @param pageable    requested page
-	 * @param sanitizedQuery sanitized query string for lexical constraints
 	 * @return search hits from the semantic query
 	 */
 	private SearchHits<Product> executeSemanticSearchWithFilter(float[] embedding, Query filterQuery,
-			Pageable pageable, String sanitizedQuery) {
+			Pageable pageable) {
 		if (embedding == null || embedding.length == 0) {
 			return null;
-		}
-
-		Query scopedFilter = filterQuery;
-		if (StringUtils.hasText(sanitizedQuery)) {
-			Query lexicalFilter = buildSemanticLexicalConstraint(sanitizedQuery);
-			scopedFilter = lexicalFilter != null ? combineFilters(filterQuery, lexicalFilter) : filterQuery;
 		}
 
 		int knnLimit = Math.max(pageable.getPageSize() * (pageable.getPageNumber() + 1), pageable.getPageSize());
@@ -1143,16 +1296,15 @@ public class SearchService {
 			queryVector.add(value);
 		}
 
-		final Query finalScopedFilter = scopedFilter;
 		co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch
 				.of(knn -> knn.field("embedding").queryVector(queryVector).k(knnLimit)
 						.numCandidates(Math.max(knnLimit * 2, 50))
-						.filter(finalScopedFilter == null ? List.of() : List.of(finalScopedFilter)));
+						.filter(filterQuery == null ? List.of() : List.of(filterQuery)));
 
-		NativeQueryBuilder builder = new NativeQueryBuilder().withQuery(scopedFilter).withKnnSearches(knnSearch)
+		NativeQueryBuilder builder = new NativeQueryBuilder().withQuery(filterQuery).withKnnSearches(knnSearch)
 				.withPageable(PageRequest.of(0, knnLimit))
 				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }))
-				.withMinScore(MIN_SEMANTIC_SCORE);
+				.withMinScore(searchProperties.getSemanticMinScore());
 
 		try {
 			return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
@@ -1174,9 +1326,7 @@ public class SearchService {
 			return hits;
 		}
 
-		List<SearchHit<Product>> sortedHits = hits.getSearchHits().stream()
-				.sorted(Comparator.comparingDouble(this::resolveSemanticBoostedScore).reversed())
-				.toList();
+		List<SearchHit<Product>> sortedHits = sortSemanticHits(hits.getSearchHits(), pageable.getSort());
 
 		int start = Math.toIntExact(pageable.getOffset());
 		int end = Math.min(start + pageable.getPageSize(), sortedHits.size());
@@ -1188,6 +1338,92 @@ public class SearchService {
 		List<SearchHit<Product>> sliced = sortedHits.subList(start, end);
 		return new SearchHitsImpl<>(hits.getTotalHits(), hits.getTotalHitsRelation(), hits.getMaxScore(), Duration.ZERO,
 				null, null, sliced, hits.getAggregations(), hits.getSuggest(), null);
+	}
+
+	/**
+	 * Sort semantic search hits according to the provided sort definition.
+	 *
+	 * @param hits search hits to sort
+	 * @param sort optional sort definition
+	 * @return sorted hits list
+	 */
+	private List<SearchHit<Product>> sortSemanticHits(List<SearchHit<Product>> hits, Sort sort) {
+		if (hits == null || hits.isEmpty()) {
+			return List.of();
+		}
+		Comparator<SearchHit<Product>> comparator = buildSemanticSortComparator(sort);
+		return hits.stream().sorted(comparator).toList();
+	}
+
+	/**
+	 * Build a comparator for semantic search hits based on user-defined sort rules.
+	 *
+	 * @param sort optional sort definition
+	 * @return comparator used to order semantic hits
+	 */
+	private Comparator<SearchHit<Product>> buildSemanticSortComparator(Sort sort) {
+		if (sort == null || sort.isUnsorted()) {
+			return Comparator.comparingDouble(this::resolveSemanticBoostedScore).reversed();
+		}
+
+		Comparator<SearchHit<Product>> comparator = null;
+		for (Sort.Order order : sort) {
+			Comparator<Comparable<Object>> valueComparator = order.isDescending()
+					? Comparator.nullsLast(Comparator.reverseOrder())
+					: Comparator.nullsLast(Comparator.naturalOrder());
+			Comparator<SearchHit<Product>> fieldComparator = Comparator.comparing(
+					hit -> (Comparable<Object>) resolveSortValue(hit != null ? hit.getContent() : null,
+							order.getProperty()),
+					valueComparator);
+			comparator = comparator == null ? fieldComparator : comparator.thenComparing(fieldComparator);
+		}
+		return comparator == null
+				? Comparator.comparingDouble(this::resolveSemanticBoostedScore).reversed()
+				: comparator.thenComparing(Comparator.comparingDouble(this::resolveSemanticBoostedScore).reversed());
+	}
+
+	/**
+	 * Resolve the sort value for a given product and field mapping.
+	 *
+	 * @param product product used for sorting
+	 * @param field   elastic field mapping requested by the client
+	 * @return comparable sort value or {@code null} when unavailable
+	 */
+	private Comparable<?> resolveSortValue(Product product, String field) {
+		if (product == null || !StringUtils.hasText(field)) {
+			return null;
+		}
+		return switch (field) {
+		case SORT_FIELD_PRICE -> {
+			AggregatedPrice price = product.bestPrice();
+			yield price != null ? price.getPrice() : null;
+		}
+		case "offersCount" -> product.getOffersCount();
+		case SORT_FIELD_BRAND -> normalizeSortText(resolveReferentielValue(product, ReferentielKey.BRAND));
+		case SORT_FIELD_MODEL -> normalizeSortText(resolveReferentielValue(product, ReferentielKey.MODEL));
+		case SORT_FIELD_ECOSCORE -> {
+			Score score = product.ecoscore();
+			yield score != null ? score.getValue() : null;
+		}
+		case "creationDate" -> product.getCreationDate();
+		case "lastChange" -> product.getLastChange();
+		default -> null;
+		};
+	}
+
+	private String resolveReferentielValue(Product product, ReferentielKey key) {
+		if (product == null || product.getAttributes() == null
+				|| product.getAttributes().getReferentielAttributes() == null) {
+			return null;
+		}
+		return product.getAttributes().getReferentielAttributes().get(key);
+	}
+
+	private String normalizeSortText(String value) {
+		if (!StringUtils.hasText(value)) {
+			return null;
+		}
+		return value.trim().toLowerCase(Locale.ROOT);
 	}
 
 	/**
@@ -1351,6 +1587,23 @@ public class SearchService {
 			}
 		}
 
+		if (min == null && descriptor.request.min() != null) {
+			min = descriptor.request.min();
+		}
+		if (max == null && descriptor.request.max() != null) {
+			max = descriptor.request.max();
+		}
+		if ((min == null || max == null) && !buckets.isEmpty()) {
+			AggregationBucketDto firstBucket = buckets.get(0);
+			AggregationBucketDto lastBucket = buckets.get(buckets.size() - 1);
+			if (min == null && firstBucket.key() != null) {
+				min = Double.parseDouble(firstBucket.key());
+			}
+			if (max == null && lastBucket.to() != null) {
+				max = lastBucket.to();
+			}
+		}
+
 		return new AggregationResponseDto(descriptor.request.name(), descriptor.request.field(), descriptor.type,
 				buckets, min, max);
 	}
@@ -1437,69 +1690,42 @@ public class SearchService {
 	}
 
 	/**
-	 * Builds the scoped filter query used for semantic search, including optional
-	 * lexical constraints.
+	 * Builds the scoped filter query used for semantic search.
 	 *
 	 * @param normalizedVerticalId  normalized vertical identifier (or {@code null})
 	 * @param filters               normalized filters applied by the caller
 	 * @param applyDefaultExclusion whether to apply the default exclusion filter
-	 * @param sanitizedQuery        sanitized query string for lexical constraints
-	 * @return a query combining semantic filters and lexical constraints
+	 * @param verticalScope         constraint on vertical presence
+	 * @return a query combining semantic filters
 	 */
 	private Query buildSemanticFilterQuery(String normalizedVerticalId, FilterRequestDto filters,
-			boolean applyDefaultExclusion, String sanitizedQuery) {
-		Query baseFilter = buildProductSearchQuery(normalizedVerticalId, null, filters, applyDefaultExclusion);
-		Query lexicalConstraint = buildSemanticLexicalConstraint(sanitizedQuery);
-		if (lexicalConstraint == null) {
-			return baseFilter;
-		}
-		return combineFilters(baseFilter, lexicalConstraint);
-	}
-
-	/**
-	 * Builds a lexical constraint for semantic search to avoid unrelated results.
-	 *
-	 * @param sanitizedQuery sanitized query string
-	 * @return lexical constraint query or {@code null} when the query is empty
-	 */
-	private Query buildSemanticLexicalConstraint(String sanitizedQuery) {
-		if (!StringUtils.hasText(sanitizedQuery)) {
-			return null;
-		}
-		String trimmedQuery = sanitizedQuery.trim();
-		if (!StringUtils.hasText(trimmedQuery)) {
-			return null;
-		}
+			boolean applyDefaultExclusion, VerticalScope verticalScope) {
+		Long expiration = repository.expirationClause();
 		return Query.of(q -> q.bool(b -> {
-			b.should(s -> s.match(m -> m.field("offerNames").query(trimmedQuery).operator(Operator.And)));
-			b.should(s -> s.match(m -> m.field("attributes.referentielAttributes.MODEL").query(trimmedQuery)
-					.operator(Operator.And)));
-			b.should(s -> s.match(m -> m.field("attributes.referentielAttributes.BRAND").query(trimmedQuery)
-					.operator(Operator.And)));
-			b.minimumShouldMatch("1");
+			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+			if (applyDefaultExclusion) {
+				b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+			}
+			if (StringUtils.hasText(normalizedVerticalId)) {
+				b.filter(f -> f.term(t -> t.field("vertical").value(normalizedVerticalId)));
+			}
+			if (verticalScope == VerticalScope.REQUIRED) {
+				b.filter(f -> f.exists(e -> e.field("vertical")));
+			} else if (verticalScope == VerticalScope.MISSING) {
+				b.mustNot(m -> m.exists(e -> e.field("vertical")));
+			}
+			if (filters != null) {
+				applyFilterRequest(filters, b);
+			}
 			return b;
 		}));
 	}
 
-	/**
-	 * Combines two query filters into a single boolean filter.
-	 *
-	 * @param baseFilter base filter query
-	 * @param constraint lexical constraint to append
-	 * @return combined query containing both filters
-	 */
-	private Query combineFilters(Query baseFilter, Query constraint) {
-		if (baseFilter == null) {
-			return constraint;
-		}
-		if (constraint == null) {
-			return baseFilter;
-		}
-		return Query.of(q -> q.bool(b -> {
-			b.filter(baseFilter);
-			b.must(constraint);
-			return b;
-		}));
+	private enum VerticalScope {
+		ANY,
+		REQUIRED,
+		MISSING
 	}
 
 	/**
@@ -1706,6 +1932,8 @@ public class SearchService {
 			} else {
 				LOGGER.error("Error : ", e);
 			}
+		} else {
+			LOGGER.error("Error executing elasticsearch query", e);
 		}
 	}
 

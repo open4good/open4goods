@@ -75,8 +75,8 @@ subsets:
       en: "< 2"
       fr: "< 2"
     title:
-      en: "Terrible impact "
-      fr: "Impact très mauvais"
+      en: "High "
+      fr: "Elevé"
     description:
       en: "Products with an ImpactScore lower than 2/5"
       fr: "Produits avec un ImpactScore inférieur à 2/5"
@@ -98,8 +98,8 @@ subsets:
       en: "> 2 < 4"
       fr: "> 2 < 4"
     title:
-      en: "Relativ impact"
-      fr: "Impact moyen"
+      en: "Medium"
+      fr: "Moyen"
     description:
       en: "Products with an ImpactScore between 2/5 and 4/5"
       fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
@@ -118,8 +118,8 @@ subsets:
       en: "> 4"
       fr: "> 4"
     title:
-      en: "Moderated impact"
-      fr: "Impact modéré"
+      en: "Faible"
+      fr: "Faible"
     description:
       en: "Products with an ImpactScore greater than 4/5"
       fr: "Produits avec un ImpactScore supérieur à 4/5"
@@ -292,15 +292,15 @@ attributesConfig:
     #    - "DESCRIPTION"
     #    - "PRODUCT_SHORT_DESCRIPTION"
 
-    #    - "CUSTOM_1"
-    #    - "CUSTOM_2"
-    #    - "CUSTOM_3"
-    #    - "CUSTOM_4"
-    #    - "CUSTOM_5"
-    #    - "CUSTOM_6"
-    #    - "CUSTOM_7"
-    #    - "CUSTOM_8"
-    #    - "CUSTOM_9"
+    - "CUSTOM_1"
+    - "CUSTOM_2"
+    - "CUSTOM_3"
+    - "CUSTOM_4"
+    - "CUSTOM_5"
+    - "CUSTOM_6"
+    - "CUSTOM_7"
+    - "CUSTOM_8"
+    - "CUSTOM_9"
 
     # TODO Will one day be used to complete offers, better than deleting them
     - "DELIVERY_COST"

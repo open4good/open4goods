@@ -32,12 +32,17 @@
     </TheMainFooter>
 
     <CategoryComparePanel v-if="showComparePanel" />
+    <AiReviewGenerationPanel />
+    <AiReviewCompletionDialog />
+    <PwaOfflineNotice />
     <PwaOfflineNotice />
     <PwaInstallPrompt />
   </v-app>
 </template>
 
 <script setup lang="ts">
+import { useAiReviewGenerationStore } from '~/stores/useAiReviewGenerationStore'
+
 const drawer = useState('mobileDrawer', () => false)
 const route = useRoute()
 const device = useDevice()
@@ -71,6 +76,12 @@ watch(
   },
   { immediate: true }
 )
+
+const aiReviewStore = useAiReviewGenerationStore()
+
+onMounted(() => {
+  aiReviewStore.resumePending()
+})
 </script>
 
 <style scoped lang="sass">

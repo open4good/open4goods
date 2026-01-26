@@ -178,10 +178,6 @@ const verticalCapsules = computed(() =>
 const navigateToEcoscore = (link: string) => {
   router.push(link)
 }
-
-const navigateToCategory = (link: string) => {
-  router.push(link)
-}
 </script>
 
 <style scoped>

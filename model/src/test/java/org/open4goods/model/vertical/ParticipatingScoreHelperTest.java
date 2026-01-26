@@ -84,4 +84,26 @@ class ParticipatingScoreHelperTest {
 
         assertThat(aggregates).isEmpty();
     }
+    @Test
+    void shouldIgnoreAggregateWhenTotalPonderationIsZero() {
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey("ZERO_WEIGHT");
+        attributeConfig.setAsScore(true);
+        attributeConfig.setParticipateInScores(Set.of("AGG_ZERO"));
+
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(Map.of("ZERO_WEIGHT", 0.0));
+
+        AttributesConfig attributesConfig = new AttributesConfig(List.of(attributeConfig));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setImpactScoreConfig(impactScoreConfig);
+        verticalConfig.setAttributesConfig(attributesConfig);
+        verticalConfig.setAvailableImpactScoreCriterias(List.of("ZERO_WEIGHT"));
+
+        Map<String, Map<String, Double>> aggregates = ParticipatingScoreHelper
+                .buildNormalizedParticipatingScores(verticalConfig);
+
+        assertThat(aggregates).doesNotContainKey("AGG_ZERO");
+    }
 }

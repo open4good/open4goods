@@ -12,6 +12,8 @@ const i18n = createI18n({
       'components.impactScore.tooltip': 'Score: {value} / {max}',
       'components.impactScore.tooltipBadge': 'Score: {value} / 20',
       'components.impactScore.outOf20': '/20',
+      'components.impactScore.scale': 'Scale: {min}-{max}',
+      'components.impactScore.svgAriaLabel': 'Score {score} out of 20',
     },
   },
 })
@@ -47,6 +49,7 @@ describe('ImpactScore', () => {
     stubs: {
       'v-tooltip': VTooltipStub,
       'v-rating': VRatingStub,
+      'v-btn': true,
     },
   }
 
@@ -61,7 +64,8 @@ describe('ImpactScore', () => {
 
     expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
     expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
-    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
+    // Stars are no longer shown in combined mode by default
+    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
     expect(wrapper.text()).toContain('16.0 / 20') // (4/5)*20 = 16.0
 
     // Check tooltip text
@@ -136,7 +140,7 @@ describe('ImpactScore', () => {
 
     expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
     expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
-    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
+    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
     expect(wrapper.text()).toContain('16.0 / 20')
   })
 
@@ -156,7 +160,7 @@ describe('ImpactScore', () => {
     const combined = wrapper.find('.impact-score-combined')
     expect(combined.classes()).toContain('impact-score-combined--vertical')
     expect(wrapper.find('.impact-score-badge').exists()).toBe(false)
-    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
+    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
   })
 
   it('supports flat styling on the badge', () => {
@@ -188,5 +192,41 @@ describe('ImpactScore', () => {
     expect(badge.classes()).toContain('impact-score-badge--corner')
     expect(wrapper.text()).toContain('16.0')
     expect(wrapper.text()).toContain('/20')
+  })
+
+  it('renders the svg variant with a scaled bar', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 13,
+        min: 0,
+        max: 20,
+        mode: 'svg',
+        svgSize: 'md',
+      },
+      global: globalOptions,
+    })
+
+    const panel = wrapper.find('.impact-score-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.attributes('aria-label')).toBe('Score 13 out of 20')
+
+    const fill = wrapper.find('.impact-score-panel__fill')
+    // 13/20 = 0.65 -> 65%
+    expect(fill.attributes('style')).toContain('width: 65%')
+  })
+
+  it('hides the scale label when showScale is false', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 8,
+        min: 0,
+        max: 20,
+        mode: 'svg',
+        showScale: false,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).not.toContain('Scale:')
   })
 })

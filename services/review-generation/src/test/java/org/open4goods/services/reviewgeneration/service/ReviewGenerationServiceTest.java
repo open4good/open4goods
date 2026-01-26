@@ -70,7 +70,8 @@ class ReviewGenerationServiceTest {
                 meterRegistry,
                 productRepository,
                 preprocessingService,
-                verticalsConfigService
+                verticalsConfigService,
+                java.util.Collections.emptyList()
         );
     }
 
@@ -338,6 +339,9 @@ class ReviewGenerationServiceTest {
         review.setCommunityReviewIntermediate("Comm Intermediate — [2]");
         review.setCommunityReviewAdvanced("Comm Advanced — [3]");
         
+        // Disable URL resolution to prevent network calls and filtering during this test
+        properties.setResolveUrl(false);
+
         AiReview.AiSource source1 = new AiReview.AiSource(1, "Source —", "Desc —", "http://example.com/1");
         review.setSources(List.of(source1));
 
@@ -362,5 +366,21 @@ class ReviewGenerationServiceTest {
         assertThat(processed.getCommunityReviewNovice()).isEqualTo("Comm Novice - <a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
         assertThat(processed.getCommunityReviewIntermediate()).isEqualTo("Comm Intermediate - <a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
         assertThat(processed.getCommunityReviewAdvanced()).isEqualTo("Comm Advanced - <a class=\"review-ref\" href=\"#review-ref-3\">[3]</a>");
+    }
+    @Test
+    void shouldFilterExcludedDomains() {
+        // Enable URL resolution
+        properties.setResolveUrl(true);
+        properties.setExcludedDomains(List.of("excluded.com"));
+
+        AiReview review = new AiReview();
+        review.setDescription("Desc [1]");
+        // This URL should be filtered out
+        AiReview.AiSource source1 = new AiReview.AiSource(1, "Excluded Source", "Desc", "http://excluded.com/resource");
+        review.setSources(List.of(source1));
+
+        AiReview processed = ReflectionTestUtils.invokeMethod(reviewGenerationService, "processAiReview", review, null);
+
+        assertThat(processed.getSources()).isEmpty();
     }
 }

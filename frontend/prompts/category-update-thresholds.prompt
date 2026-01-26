@@ -1,0 +1,168 @@
+MISSION (CATEGORY / vertical) : tv
+FICHIER A MODIFIER : /home/goulven/git/open4goods/verticals/src/main/resources/verticals/tv.yml
+------------------------------------------------------------
+
+On veut simplifier le grouping des produits en 3 tiers basés sur les scores :
+
+- mauvais
+- moyens
+- bons
+
+Les seuils doivent être déduits des cardinalités (min / max / etc.) renvoyées par l’API de scoring.
+
+------------------------------------------------------------
+SOURCE DE VERITE : API DE SCORING (local)
+
+Utilise cet appel (token partagé) :
+
+curl -vik -s -X GET \
+  'http://localhost:8086/stats/random?num=3&minOffersCount=3&verticalId={vertical}&domainLanguage=fr' \
+  -H 'accept: application/json' \
+  -H 'X-Shared-Token: CHANGE_ME_SHARED_TOKEN'
+
+
+Le payload est volumineux : on ne veut extraire que les stats de distribution (min/max/avg/stdDev/count…) et pas tout le produit.
+
+------------------------------------------------------------
+OU TROUVER LES CARDINALITES DANS LE JSON
+
+Dans la réponse (liste de produits), chaque produit contient :
+
+- scores.ecoscore.relativ.{min,max,avg,stdDev,percentiles,count,…}
+  → stats du score global (ImpactScore / Ecoscore)
+  *Note: Chercher l'objet `percentiles` contenant p33, p66 etc.*
+
+- scores.<SCORE_NAME>.relativ.{min,max,avg,stdDev,percentiles,count,…}
+  → stats par score (ENERGY_CONSUMPTION, DURABILITY, …)
+
+Ces stats sont globales à la verticale.
+On peut lire celles du premier item : .[0]
+
+Exemples de chemins :
+.[0].scores.ecoscore.relativ.percentiles.p33
+.[0].scores.scores.DURABILITY.relativ.avg
+
+OU TROUVER LA CONFIGURATION DES ATTRIBUTS
+
+Le prompt vous demandera de vérifier la méthode de normalisation.
+Elle se trouve dans les fichiers YAML sous :
+`/home/goulven/git/open4goods/verticals/src/main/resources/attributes/`
+Exemple : clé `scoring.normalization.method` dans `ENERGY_CONSUMPTION.yml`.
+
+------------------------------------------------------------
+REGLE DE CONSTRUCTION DES 3 TIERS
+
+Pour chaque score, tu dois d'abord déterminer la méthode de normalisation utilisée par l'attribut correspondant.
+
+1.  Identifier l'attribut :
+    Pour un score donné (ex: `ENERGY_CONSUMPTION`), trouver le fichier de configuration de l'attribut associé dans :
+    `/home/goulven/git/open4goods/verticals/src/main/resources/attributes/<SCORE_NAME>.yml`
+    (Le nom du fichier est généralement le nom du score).
+
+2.  Lire la méthode de normalisation (`scoring.normalization.method`) :
+    - Si le fichier existe : Valeurs possibles `MINMAX_OBSERVED`, `FIXED_MAPPING`, `SIGMA`, etc.
+    - Si le fichier N'EXISTE PAS (Score composite) : Considérer comme `COMPOSITE`.
+
+3.  Calculer les seuils t1 (limite mauvais/moyen) et t2 (limite moyen/bon) :
+
+    CAS A : Si method = `MINMAX_OBSERVED`, `FIXED_MAPPING` ou `COMPOSITE`
+    ---------------------------------------------------------------------
+    On veut une répartition équilibrée (1/3 des produits dans chaque tiers).
+    Utiliser les PERCENTILES (p33 et p66) fournis par l'API stats.
+
+    t1 = stats.percentiles.p33
+    t2 = stats.percentiles.p66
+
+    *Note : Si les percentiles ne sont pas disponibles dans le JSON, utiliser le CAS B en fallback, mais préférer les percentiles pour ces méthodes.*
+
+    CAS B : Si method = `SIGMA` (ou autre / fallback)
+    -------------------------------------------------
+    On suppose une distribution normale. On utilise la moyenne et l'écart-type pour approximer les tiers.
+    (Les seuils théoriques pour 33% / 66% sur une loi normale sont à environ +/- 0.43 sigma de la moyenne).
+
+    t1 = stats.avg - (0.43 * stats.stdDev)
+    t2 = stats.avg + (0.43 * stats.stdDev)
+
+    *Vérification :* S'assurer que t1 et t2 restent dans l'intervalle [min, max].
+    Si t1 < min, t1 = min.
+    Si t2 > max, t2 = max.
+
+4.  Si max == min (distribution dégénérée) :
+    ne pas modifier les seuils et signaler le cas.
+
+Définition des groupes :
+
+- mauvais : score < t1
+- moyens : score >= t1 et < t2
+- bons : score >= t2
+
+Arrondir t1 et t2 à 2 décimales.
+
+
+------------------------------------------------------------
+MODIFICATIONS ATTENDUES
+
+1) Seuils de sélection du nudge (ne garder que les bons)
+
+Dans :
+
+nudgeToolConfig:
+  scores:
+    - scoreName: ENERGY_CONSUMPTION
+      scoreMinValue: ...
+    - scoreName: DURABILITY
+      scoreMinValue: ...
+    - scoreName: REPARABILITY
+      scoreMinValue: ...
+    - scoreName: ESG
+      scoreMinValue: ...
+
+Remplacer chaque scoreMinValue par t2 calculé depuis :
+
+.[0].scores.scores.<scoreName>.relativ.min / max
+
+Objectif : le nudge ne sélectionne que le top tier (bons).
+
+------------------------------------------------------------
+2) Subsets ImpactScore en 3 tiers
+
+Remplacer les seuils fixes existants par les seuils calculés depuis :
+
+.[0].scores.ecoscore.relativ.min / max
+
+Utiliser :
+
+impact_bad :
+  scores.ECOSCORE.value LOWER_THAN t1
+
+impact_medium :
+  scores.ECOSCORE.value GREATER_THAN t1
+  ET
+  scores.ECOSCORE.value LOWER_THAN t2
+
+impact_good :
+  scores.ECOSCORE.value GREATER_THAN t2
+
+Mettre à jour aussi :
+title, caption, description, url.fr/en
+pour refléter mauvais / moyen / bon.
+
+------------------------------------------------------------
+EXTRACTION RAPIDE AVEC jq
+
+Ecoscore global (avec percentiles si dispos) :
+
+curl -s ... | jq '.[0].scores.ecoscore.relativ | {min,max,avg,stdDev,percentiles,count}'
+
+Exemple score DURABILITY :
+
+curl -s ... | jq '.[0].scores.scores.DURABILITY.relativ | {min,max,avg,stdDev,percentiles,count}'
+
+------------------------------------------------------------
+CRITERES D’ACCEPTATION
+
+- Vérification du fichier d'attribut pour la méthode de normalisation
+- Seuils calculés depuis les percentiles (MinMax/Fixed) ou avg/sigma (Sigma)
+- scoreMinValue = t2 pour chaque score du nudge
+- Subsets ImpactScore basés sur t1 / t2 (plus de seuils fixes)
+- YAML valide et cohérent FR / EN

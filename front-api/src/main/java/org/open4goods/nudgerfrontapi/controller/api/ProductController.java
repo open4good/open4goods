@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.open4goods.model.Localisable;
 import org.open4goods.model.RolesConstants;
@@ -356,7 +357,7 @@ public class ProductController {
         Validation<Pageable> sortValidation = sanitizeSort(page, sortDto, allowedSortMappings);
         if (sortValidation.hasError()) {
             LOGGER.warn("Sort validation failed for request: {}", sortDto);
-            return sortValidation.error();
+            return castError(sortValidation.error());
         }
         effectivePageable = sortValidation.value();
 
@@ -366,7 +367,7 @@ public class ProductController {
                     ProductDtoComponent.valueOf(component);
                 } catch (IllegalArgumentException ex) {
                     LOGGER.warn("Invalid include parameter encountered: {}", component, ex);
-                    return badRequest("Invalid include parameter", "Unknown component: " + component);
+                    return castError(badRequest("Invalid include parameter", "Unknown component: " + component));
                 }
             }
         }
@@ -376,7 +377,7 @@ public class ProductController {
                 capabilities.allowedAggregations());
         if (aggregationValidation.hasError()) {
             LOGGER.warn("Aggregation validation failed for request: {}", aggDto);
-            return aggregationValidation.error();
+            return castError(aggregationValidation.error());
         }
         aggDto = aggregationValidation.value();
 
@@ -384,22 +385,23 @@ public class ProductController {
         Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, capabilities.allowedFilters());
         if (filterValidation.hasError()) {
             LOGGER.warn("Filter validation failed for request: {}", filterDto);
-            return filterValidation.error();
+            return castError(filterValidation.error());
         }
         filterDto = filterValidation.value();
 
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
         boolean semanticSearch = StringUtils.hasText(normalizedQuery);
         Set<String> requestedComponents = include == null ? Set.of() : include;
+        String searchType = searchPayload == null ? null : searchPayload.searchType();
 
         ProductSearchResponseDto body = service.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
-                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto, semanticSearch);
+                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto, semanticSearch, searchType);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
     }
 
     /**
-     * Execute a semantic-only global search.
+     * Execute a semantic-only global search with optional filters and sort rules.
      *
      * <p>Error codes:</p>
      * <ul>
@@ -411,7 +413,7 @@ public class ProductController {
     @PostMapping("/search")
     @Operation(
             summary = "Execute a global search",
-            description = "Runs a semantic-only search strategy powered by embeddings.",
+            description = "Runs an embeddings-only search strategy with optional filters and sorting.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
@@ -432,6 +434,9 @@ public class ProductController {
                             },
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = GlobalSearchResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+                            content = @Content(mediaType = "application/problem+json",
+                                    schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -442,7 +447,30 @@ public class ProductController {
             @RequestBody GlobalSearchRequestDto request) {
         LOGGER.info("Entering globalSearch(domainLanguage={}, request={})", domainLanguage, request);
         String query = request != null ? request.query() : null;
-        SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage);
+        FilterRequestDto filterDto = request != null ? request.filters() : null;
+        SortRequestDto sortDto = request != null ? request.sort() : null;
+        String searchType = request != null ? request.searchType() : null;
+
+        Set<String> allowedFilterMappings = Arrays.stream(AllowedGlobalFilters.values())
+                .map(AllowedGlobalFilters::fieldPath)
+                .collect(Collectors.toSet());
+        Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, allowedFilterMappings);
+        if (filterValidation.hasError()) {
+            LOGGER.warn("Filter validation failed for global search request: {}", filterDto);
+            return castError(filterValidation.error());
+        }
+        filterDto = filterValidation.value();
+
+        Set<String> allowedSortMappings = collectGlobalSortMappings();
+        Pageable globalPageable = PageRequest.of(0, 100);
+        Validation<Pageable> sortValidation = sanitizeSort(globalPageable, sortDto, allowedSortMappings);
+        if (sortValidation.hasError()) {
+            LOGGER.warn("Sort validation failed for global search request: {}", sortDto);
+            return castError(sortValidation.error());
+        }
+
+        SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, filterDto,
+                sortValidation.value().getSort(), searchType);
 
         List<GlobalSearchVerticalGroupDto> groups = result.verticalGroups().stream()
                 .map(group -> new GlobalSearchVerticalGroupDto(
@@ -524,14 +552,17 @@ public class ProductController {
                 suggestion.verticalHomeTitle(), suggestion.verticalHomeUrl());
     }
 
-    private ResponseEntity<ProductSearchResponseDto> badRequest(String title, String detail) {
+    private ResponseEntity<?> badRequest(String title, String detail) {
         LOGGER.warn("Returning bad request ProblemDetail with title='{}', detail='{}'", title, detail);
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle(title);
         pd.setDetail(detail);
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        ResponseEntity<ProductSearchResponseDto> response = (ResponseEntity) ResponseEntity.badRequest().body(pd);
-        return response;
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> ResponseEntity<T> castError(ResponseEntity<?> error) {
+        return (ResponseEntity<T>) error;
     }
 
     /**
@@ -821,9 +852,9 @@ public class ProductController {
         List<Agg> aggregations = aggregationRequest.aggs();
         if (aggregations == null || aggregations.isEmpty()) {
             if (normalizedVerticalId == null) {
-                LOGGER.warn("Aggregation request requires a verticalId when aggregations are empty");
-                return Validation.error(badRequest("Invalid aggregation parameter",
-                        "Aggregations require a verticalId"));
+                // Allow empty aggregations for global search (verticalId is null)
+                // This enables the frontend to query /products without specific aggregations or vertical
+                return Validation.ok(new AggregationRequestDto(List.of()));
             }
             return Validation.ok(new AggregationRequestDto(List.of()));
         }
@@ -943,13 +974,13 @@ public class ProductController {
             Set<String> allowedAggregations) {
     }
 
-    private record Validation<T>(T value, ResponseEntity<ProductSearchResponseDto> error) {
+    private record Validation<T>(T value, ResponseEntity<?> error) {
 
         static <T> Validation<T> ok(T value) {
             return new Validation<>(value, null);
         }
 
-        static <T> Validation<T> error(ResponseEntity<ProductSearchResponseDto> error) {
+        static <T> Validation<T> error(ResponseEntity<?> error) {
             return new Validation<>(null, error);
         }
 
@@ -1221,7 +1252,7 @@ public class ProductController {
     private String determineSortableValueType(ProductDtoSortableFields field) {
         LOGGER.info("Entering determineSortableValueType(field={})", field);
         return switch (field) {
-        case price, offersCount, ecoscore -> VALUE_TYPE_NUMERIC;
+        case price, offersCount, ecoscore, creationDate, lastChange -> VALUE_TYPE_NUMERIC;
 		case brand, model -> VALUE_TYPE_TEXT;
 		default -> throw new IllegalArgumentException("Unexpected value: " + field);
         };
@@ -1325,18 +1356,16 @@ public class ProductController {
         if (force && !authenticatedUser) {
             LOGGER.warn("Force review generation requested without authentication for product {}", gtin);
         }
-        boolean forceGeneration = authenticatedUser;
-
         LOGGER.info(
                 "Entering triggerReview(gtin={}, domainLanguage={}, hasHcaptchaResponse={}, force={}, authenticatedUser={}, remoteAddr={})",
                 gtin,
                 domainLanguage,
                 StringUtils.hasText(hcaptchaResponse),
-                forceGeneration,
+                force,
                 authenticatedUser,
                 request != null ? request.getRemoteAddr() : null);
         try {
-            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request, authenticatedUser, forceGeneration);
+            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request, authenticatedUser, force);
             return ResponseEntity.ok()
                     .cacheControl(CacheControl.noCache())
                     .header("X-Locale", domainLanguage.languageTag())

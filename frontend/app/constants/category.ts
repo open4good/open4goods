@@ -12,4 +12,4 @@ export const CATEGORY_PAGE_SIZES: Record<CategoryViewMode, number> = {
   table: 60,
 }
 
-export const CATEGORY_DEFAULT_VIEW_MODE: CategoryViewMode = 'cards'
+export const CATEGORY_DEFAULT_VIEW_MODE: CategoryViewMode = 'list'

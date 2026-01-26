@@ -38,7 +38,13 @@ public class LoggingInterceptor implements HandlerInterceptor {
         String ip = request.getRemoteAddr();
         String user = resolveUser();
         int status = response.getStatus();
-        LOG.info("Exiting endpoint={} status={} ip={} user={}", uri, status, ip, user);
+        if (status >= 500) {
+            LOG.error("Exiting endpoint={} status={} ip={} user={}", uri, status, ip, user);
+        } else if (status >= 400) {
+            LOG.warn("Exiting endpoint={} status={} ip={} user={}", uri, status, ip, user);
+        } else {
+            LOG.info("Exiting endpoint={} status={} ip={} user={}", uri, status, ip, user);
+        }
     }
 
     private String resolveUser() {

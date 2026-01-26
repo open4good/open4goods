@@ -17,11 +17,7 @@ const VIconStub = defineComponent({
   props: ['icon'],
   setup(props) {
     return () =>
-      h(
-        'span',
-        { class: 'v-icon-stub', 'data-icon': props.icon },
-        props.icon
-      )
+      h('span', { class: 'v-icon-stub', 'data-icon': props.icon }, props.icon)
   },
 })
 
@@ -43,6 +39,8 @@ describe('ProductImpactSubscoreGenericCard', () => {
             tableHeaders: {
               ranking: 'Rank',
             },
+            rankingBadge: 'Rank {ranking} / {count}',
+            rankingBadgeSingle: 'Rank {ranking}',
             lifecycle: {
               USE: 'Use',
               END_OF_LIFE: 'End of life',

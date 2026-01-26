@@ -685,7 +685,7 @@ const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
       posterUrl: item.posterUrl,
     }
 
-    return {
+    const baseItem: Record<string, unknown> = {
       src:
         item.type === 'video'
           ? (item.posterUrl ?? item.originalUrl)
@@ -698,6 +698,15 @@ const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
       type: item.type,
       open4goodsMeta: meta,
     }
+
+    if (item.type === 'video' && item.videoUrl) {
+      const posterAttribute = item.posterUrl
+        ? ` poster="${escapeAttribute(item.posterUrl)}"`
+        : ''
+      baseItem.html = `<div class="product-gallery__lightbox-video"><video controls playsinline${posterAttribute} src="${escapeAttribute(item.videoUrl)}"></video></div>`
+    }
+
+    return baseItem as PictureSwipeItem
   })
 )
 
@@ -766,22 +775,6 @@ const bindLightboxListeners = () => {
       activeVideo = null
     }
   }
-
-  instance.listen('gettingData', (_index: number, item: LightboxItem) => {
-    const meta = item.open4goodsMeta
-
-    if (meta?.type === 'video' && meta.videoUrl) {
-      const posterAttribute = meta.posterUrl
-        ? ` poster="${escapeAttribute(meta.posterUrl)}"`
-        : ''
-      item.html = `<div class="product-gallery__lightbox-video"><video controls playsinline${posterAttribute} src="${escapeAttribute(meta.videoUrl)}"></video></div>`
-      item.w = meta.width || item.w || DEFAULT_VIDEO_WIDTH
-      item.h = meta.height || item.h || DEFAULT_VIDEO_HEIGHT
-      return
-    }
-
-    item.html = undefined
-  })
 
   instance.listen('afterChange', () => {
     activeMediaIndex.value =

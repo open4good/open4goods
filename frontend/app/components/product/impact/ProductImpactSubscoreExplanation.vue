@@ -43,32 +43,12 @@
       >
         {{ paragraph }}
       </p>
-      <p
-        v-if="score.description"
-        class="impact-subscore-explanation__description"
-      >
-        {{ score.description }}
-      </p>
     </div>
 
     <div
       v-if="statisticalMethodItems.length"
       class="impact-subscore-explanation__section"
     >
-      <v-card
-        v-if="statisticalMethodInfo"
-        variant="tonal"
-        class="impact-subscore-explanation__info-card"
-      >
-        <div class="impact-subscore-explanation__info-card-content">
-          <p class="impact-subscore-explanation__info-title">
-            {{ statisticalMethodInfo.title }}
-          </p>
-          <p class="impact-subscore-explanation__info-body">
-            {{ statisticalMethodInfo.body }}
-          </p>
-        </div>
-      </v-card>
       <h5 class="impact-subscore-explanation__title">
         {{ statisticalMethodTitle }}
       </h5>
@@ -86,6 +66,20 @@
           <span>{{ item }}</span>
         </li>
       </ul>
+      <v-card
+        v-if="statisticalMethodInfo"
+        variant="tonal"
+        class="impact-subscore-explanation__info-card"
+      >
+        <div class="impact-subscore-explanation__info-card-content">
+          <p class="impact-subscore-explanation__info-title">
+            {{ statisticalMethodInfo.title }}
+          </p>
+          <p class="impact-subscore-explanation__info-body">
+            {{ statisticalMethodInfo.body }}
+          </p>
+        </div>
+      </v-card>
     </div>
 
     <dl v-if="infoItems.length" class="impact-subscore-explanation__list">
@@ -113,10 +107,7 @@
       </div>
     </dl>
 
-    <div
-      v-if="rankingBadgeText"
-      class="impact-subscore-explanation__ranking"
-    >
+    <div v-if="rankingBadgeText" class="impact-subscore-explanation__ranking">
       <v-chip size="x-small" color="primary" variant="tonal">
         {{ rankingBadgeText }}
       </v-chip>
@@ -319,10 +310,14 @@ const populationValue = computed(() => {
 })
 
 const worstRawValue = computed(() =>
-  impactBetterIsLower.value ? absoluteStats.value?.max : absoluteStats.value?.min
+  impactBetterIsLower.value
+    ? absoluteStats.value?.max
+    : absoluteStats.value?.min
 )
 const bestRawValue = computed(() =>
-  impactBetterIsLower.value ? absoluteStats.value?.min : absoluteStats.value?.max
+  impactBetterIsLower.value
+    ? absoluteStats.value?.min
+    : absoluteStats.value?.max
 )
 
 const worstValue = computed(() => formatNumber(worstRawValue.value))
@@ -520,6 +515,10 @@ const readIndicatorDetails = computed(() => {
   const paragraphs: string[] = []
   const params = readIndicatorParams.value
 
+  if (props.score.description) {
+    paragraphs.push(props.score.description)
+  }
+
   if (productAbsoluteValue.value && productOn20Value.value) {
     paragraphs.push(resolveReadIndicatorTranslation('product', params))
   }
@@ -539,9 +538,13 @@ const resolveStatisticalMethodTranslation = (
   return t(`${translationFallbackBase}.statisticalMethod.${suffix}`, params)
 }
 
-const statisticalMethodTitle = computed(() =>
-  resolveStatisticalMethodTranslation('title', readIndicatorParams.value)
-)
+const statisticalMethodTitle = computed(() => {
+  const methodKey = normalizationMethod.value?.toLowerCase() ?? 'sigma'
+  return resolveStatisticalMethodTranslation(
+    `titles.${methodKey}`,
+    readIndicatorParams.value
+  )
+})
 
 const resolveStatisticalMethodInfoTranslation = (
   suffix: string,
@@ -589,13 +592,25 @@ const statisticalMethodItems = computed(() => {
       )
     }
   } else if (methodKey === 'PERCENTILE') {
-    items.push(resolveStatisticalMethodTranslation('percentile.scoring', params))
+    items.push(
+      resolveStatisticalMethodTranslation('percentile.scoring', params)
+    )
     if (percentileValue.value) {
-      items.push(resolveStatisticalMethodTranslation('percentile.value', params))
+      items.push(
+        resolveStatisticalMethodTranslation('percentile.value', params)
+      )
+    }
+  } else if (methodKey === 'MINMAX_OBSERVED') {
+    if (worstValue.value && bestValue.value) {
+      items.push(
+        resolveStatisticalMethodTranslation('minmax_observed.scoring', params)
+      )
     }
   } else if (methodKey === 'MINMAX_FIXED') {
     if (fixedMinValue.value && fixedMaxValue.value) {
-      items.push(resolveStatisticalMethodTranslation('minmax_fixed.scoring', params))
+      items.push(
+        resolveStatisticalMethodTranslation('minmax_fixed.scoring', params)
+      )
     }
   } else if (methodKey === 'MINMAX_QUANTILE') {
     if (quantileLowValue.value && quantileHighValue.value) {
@@ -604,7 +619,9 @@ const statisticalMethodItems = computed(() => {
       )
     }
   } else if (methodKey === 'FIXED_MAPPING') {
-    items.push(resolveStatisticalMethodTranslation('fixed_mapping.scoring', params))
+    items.push(
+      resolveStatisticalMethodTranslation('fixed_mapping.scoring', params)
+    )
   } else if (methodKey === 'BINARY') {
     const binaryKey = binaryUsesGreater.value
       ? 'binary.scoring_greater'
@@ -612,7 +629,9 @@ const statisticalMethodItems = computed(() => {
     items.push(resolveStatisticalMethodTranslation(binaryKey, params))
   } else if (methodKey === 'CONSTANT') {
     if (constantValue.value) {
-      items.push(resolveStatisticalMethodTranslation('constant.scoring', params))
+      items.push(
+        resolveStatisticalMethodTranslation('constant.scoring', params)
+      )
     }
   }
 

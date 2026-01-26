@@ -77,10 +77,11 @@
           :accent-corner="isCategoryStep ? undefined : 'top-left'"
           :corner-size="resolvedCornerSize"
         >
-          <template #append-title>
+          <template #prepend-title>
             <NudgeToolAnimatedIcon
               v-if="isCategoryStep"
-              class="ms-2"
+              class="me-2"
+              variant="bounce"
               :frequency-range="[1000, 2500]"
               :max-scale="1.4"
             />

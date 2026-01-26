@@ -14,6 +14,10 @@ public class NudgeToolScore {
     private String mdiIcon;
     private Localisable<String, String> title = new Localisable<>();
     private Localisable<String, String> description = new Localisable<>();
+    /**
+     * Flag indicating the score should be disabled in the UI.
+     */
+    private Boolean disabled;
 
     public String getScoreName() {
         return scoreName;
@@ -55,6 +59,24 @@ public class NudgeToolScore {
         this.description = description;
     }
 
+    /**
+     * Returns whether this score is disabled in the UI.
+     *
+     * @return {@code true} when the score should be disabled, {@code false} otherwise.
+     */
+    public Boolean getDisabled() {
+        return disabled;
+    }
+
+    /**
+     * Defines whether this score is disabled in the UI.
+     *
+     * @param disabled the flag to apply
+     */
+    public void setDisabled(Boolean disabled) {
+        this.disabled = disabled;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -66,11 +88,11 @@ public class NudgeToolScore {
         NudgeToolScore that = (NudgeToolScore) o;
         return Objects.equals(scoreName, that.scoreName) && Objects.equals(scoreMinValue, that.scoreMinValue)
                 && Objects.equals(mdiIcon, that.mdiIcon) && Objects.equals(title, that.title)
-                && Objects.equals(description, that.description);
+                && Objects.equals(description, that.description) && Objects.equals(disabled, that.disabled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(scoreName, scoreMinValue, mdiIcon, title, description);
+        return Objects.hash(scoreName, scoreMinValue, mdiIcon, title, description, disabled);
     }
 }

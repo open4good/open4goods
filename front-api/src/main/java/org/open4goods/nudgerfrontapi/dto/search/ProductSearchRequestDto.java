@@ -15,5 +15,7 @@ public record ProductSearchRequestDto(
         @Schema(description = "Filter clauses restricting the result set.")
         FilterRequestDto filters,
         @Schema(description = "Enable semantic search for text queries.")
-        Boolean semanticSearch) {
+        Boolean semanticSearch,
+        @Schema(description = "Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').", example = "TEXT")
+        String searchType) {
 }

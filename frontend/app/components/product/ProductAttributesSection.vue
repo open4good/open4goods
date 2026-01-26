@@ -165,12 +165,6 @@
           </p>
         </v-card>
       </div>
-
-      <v-row v-if="timeline" class="product-attributes__timeline-row" dense>
-        <v-col cols="12">
-          <ProductLifeTimeline id="attributes-timeline" :timeline="timeline" />
-        </v-col>
-      </v-row>
     </div>
 
     <div
@@ -737,7 +731,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuth } from '~/composables/useAuth'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
-import ProductLifeTimeline from '~/components/product/ProductLifeTimeline.vue'
+
 import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 import type {
   AttributeConfigDto,
@@ -799,7 +793,6 @@ const resolvedAttributes = computed<ProductAttributesDto | null>(() => {
   return props.product?.attributes ?? null
 })
 
-const timeline = computed(() => props.product?.timeline ?? null)
 const identity = computed(() => props.product?.identity ?? null)
 const gtin = computed(
   () => props.product?.gtin ?? props.product?.base?.gtin ?? null

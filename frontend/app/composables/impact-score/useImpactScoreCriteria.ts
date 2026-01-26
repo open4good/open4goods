@@ -39,7 +39,6 @@ export const buildCriteriaFromCategory = (
   return available.map(key => {
     const attribute = attributeMap.get(key)
     const fallbackName = attribute?.scoreTitle ?? attribute?.name ?? key
-    const resolvedIcon = attribute?.icon?.trim() || CRITERIA_ICON_OVERRIDES[key]
 
     return {
       key,

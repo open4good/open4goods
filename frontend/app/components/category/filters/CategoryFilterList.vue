@@ -15,36 +15,14 @@
     </template>
 
     <template v-else>
-      <v-menu
-        v-for="field in fields"
-        :key="field.mapping ?? field.title"
-        :close-on-content-click="false"
-        location="bottom start"
-        offset="8"
-      >
-        <template #activator="{ props: menuProps }">
-          <v-btn
-            v-bind="menuProps"
-            :color="isActive(field) ? 'primary' : undefined"
-            :variant="isActive(field) ? 'flat' : 'outlined'"
-            append-icon="mdi-chevron-down"
-            class="text-none"
-          >
-            {{ resolveTitle(field) }}
-
-            <v-avatar
-              v-if="getFilterCount(field) > 0"
-              color="white"
-              size="20"
-              class="ms-2 text-primary font-weight-bold"
-              style="font-size: 12px"
-            >
-              {{ getFilterCount(field) }}
-            </v-avatar>
-          </v-btn>
-        </template>
-
-        <v-sheet min-width="320" class="pa-4 rounded-lg elevation-4 border">
+      <v-row dense>
+        <v-col
+          v-for="field in fields"
+          :key="field.mapping ?? field.title"
+          cols="12"
+          sm="6"
+          md="3"
+        >
           <component
             :is="resolveComponent(field)"
             :field="field"
@@ -53,8 +31,8 @@
             :model-value="findActiveFilter(field.mapping)"
             @update:model-value="onFilterChange(field, $event)"
           />
-        </v-sheet>
-      </v-menu>
+        </v-col>
+      </v-row>
     </template>
   </div>
 </template>
@@ -65,8 +43,6 @@ import type {
   FieldMetadataDto,
   Filter,
 } from '~~/shared/api-client'
-import { resolveFilterFieldTitle } from '~/utils/_field-localization'
-
 import CategoryFilterNumeric from './CategoryFilterNumeric.vue'
 import CategoryFilterCondition from './CategoryFilterCondition.vue'
 import CategoryFilterTerms from './CategoryFilterTerms.vue'
@@ -77,20 +53,21 @@ const props = withDefaults(
     aggregations: Record<string, AggregationResponseDto>
     baselineAggregations?: Record<string, AggregationResponseDto>
     activeFilters: Filter[]
+    searchType?: string | null
     mode?: 'grid' | 'row'
   }>(),
   {
     baselineAggregations: () => ({}) as Record<string, AggregationResponseDto>,
     mode: 'grid',
+    searchType: null,
   }
 )
 
 const emit = defineEmits<{
   'update-range': [field: string, payload: { min?: number; max?: number }]
   'update-terms': [field: string, terms: string[]]
+  'update:searchType': [value: string | null]
 }>()
-
-const { t } = useI18n()
 
 const resolveComponent = (field: FieldMetadataDto) => {
   if (field.mapping === 'price.conditions') {
@@ -104,30 +81,6 @@ const resolveComponent = (field: FieldMetadataDto) => {
 
 const findActiveFilter = (field?: string | null) => {
   return props.activeFilters.find(filter => filter.field === field) ?? null
-}
-
-const isActive = (field: FieldMetadataDto) => {
-  return !!findActiveFilter(field.mapping)
-}
-
-const getFilterCount = (field: FieldMetadataDto) => {
-  const filter = findActiveFilter(field.mapping)
-  if (!filter) return 0
-
-  if (filter.operator === 'term') {
-    return filter.terms?.length ?? 0
-  }
-
-  if (filter.operator === 'range') {
-    // If range is active, count as 1
-    return filter.min !== undefined || filter.max !== undefined ? 1 : 0
-  }
-
-  return 0
-}
-
-const resolveTitle = (field: FieldMetadataDto) => {
-  return resolveFilterFieldTitle(field, t)
 }
 
 const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
@@ -155,7 +108,6 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
 </script>
 
 <style scoped lang="sass">
-
 .category-filter-list
   display: grid
   gap: 1.5rem
@@ -164,15 +116,19 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr))
     align-items: stretch
 
-  &--row
-    display: flex
-    flex-direction: row
-    flex-wrap: wrap
-    gap: 0.75rem
-    align-items: center
+
 
   &__item
     display: flex
     flex-direction: column
     min-width: 0
+
+
+
+  &__search-toggle
+    align-items: center
+    :deep(.v-btn)
+      text-transform: none
+      font-weight: 600
+      padding-inline: 1.25rem
 </style>

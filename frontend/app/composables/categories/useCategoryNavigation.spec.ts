@@ -10,6 +10,7 @@ describe('useCategoryNavigation composable', () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.unstubAllGlobals()
   })
 
@@ -56,6 +57,14 @@ describe('useCategoryNavigation composable', () => {
   it('reuses the cached navigation payload when the server TTL has not expired', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2024-01-01T00:00:00Z'))
+
+    // Prevent manifest fetching background task from interfering
+    fetchMock.mockImplementation((request: string) => {
+      if (typeof request === 'string' && request.includes('/builds/meta/')) {
+        return Promise.resolve({})
+      }
+      return Promise.reject(new Error(`Unexpected fetch call: ${request}`))
+    })
 
     const navigationResponse = {
       category: { title: 'Cached root' },

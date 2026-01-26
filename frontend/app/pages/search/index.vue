@@ -3,7 +3,7 @@
     <PageHeader
       :eyebrow="t('search.hero.eyebrow')"
       :title="t('search.hero.title')"
-      :description-html="t('search.hero.subtitle')"
+      :description-html="heroSubtitle"
       layout="single-column"
       container="lg"
       background="image"
@@ -83,9 +83,11 @@
         :aggregations="productAggregations"
         :baseline-aggregations="baselineAggregations"
         :active-filters="activeFilters"
+        :search-type="searchType"
         mode="row"
         @update-range="updateRangeFilter"
         @update-terms="updateTermsFilter"
+        @update:search-type="searchType = $event"
       />
     </v-container>
 
@@ -116,14 +118,16 @@
           :aggregations="productAggregations"
           :baseline-aggregations="baselineAggregations"
           :active-filters="activeFilters"
+          :search-type="searchType"
           @update-range="updateRangeFilter"
           @update-terms="updateTermsFilter"
+          @update:search-type="searchType = $event"
         />
       </div>
     </v-navigation-drawer>
 
     <v-progress-linear
-      v-if="pending || productsPending || baselinePending"
+      v-if="pending || productsPending || baselinePending || aggsPending"
       class="search-page__loader"
       indeterminate
       color="primary"
@@ -137,7 +141,7 @@
       max-width="xl"
     >
       <v-alert
-        v-if="error || productsError || baselineError"
+        v-if="error || productsError || baselineError || aggsError"
         type="error"
         variant="tonal"
         border="start"
@@ -157,13 +161,7 @@
           <v-btn
             color="primary"
             variant="text"
-            @click="
-              showLatestProducts
-                ? refreshBaseline()
-                : isFiltered
-                  ? refreshProducts()
-                  : refresh()
-            "
+            @click="handleRetry"
           >
             {{ t('common.actions.retry') }}
           </v-btn>
@@ -174,10 +172,22 @@
         <v-row class="search-page__layout" align="start" justify="center">
           <v-col cols="12" lg="5">
             <section class="search-page__column">
-              <div class="search-page__column-header">
-                <h2 class="text-h5 font-weight-bold mb-0">
-                  {{ t('search.columns.verticals.title') }}
-                </h2>
+              <div class="search-page__column-header d-flex justify-center">
+                <div class="search-page__column-heading text-center">
+                  <v-icon
+                    icon="mdi-star-check-outline"
+                    size="22"
+                    class="search-page__column-heading-icon"
+                    aria-hidden="true"
+                  />
+                  <h2 class="text-h5 font-weight-bold mb-0">
+                    {{
+                      t('search.columns.verticals.title', {
+                        count: evaluatedProductsCount,
+                      })
+                    }}
+                  </h2>
+                </div>
               </div>
 
               <div
@@ -252,12 +262,24 @@
           <v-col cols="12" lg="7">
             <section class="search-page__column">
               <div
-                class="search-page__column-header search-page__column-header--with-actions"
+                class="search-page__column-header search-page__column-header--with-actions d-flex justify-center"
               >
-                <div class="search-page__column-title">
-                  <h2 class="text-h5 font-weight-bold mb-0">
-                    {{ t('search.columns.products.title') }}
-                  </h2>
+                <div class="search-page__column-title text-center">
+                  <div class="search-page__column-heading">
+                    <v-icon
+                      icon="mdi-star-off-outline"
+                      size="22"
+                      class="search-page__column-heading-icon"
+                      aria-hidden="true"
+                    />
+                    <h2 class="text-h5 font-weight-bold mb-0">
+                      {{
+                        t('search.columns.products.title', {
+                          count: nonEvaluatedProductsCount,
+                        })
+                      }}
+                    </h2>
+                  </div>
                   <p class="search-page__column-subtitle">
                     {{ t('search.columns.products.subtitle') }}
                   </p>
@@ -310,10 +332,13 @@ import type {
   ProductSearchResponseDto,
   ProductSearchRequestDto,
   FilterRequestDto,
-  FieldMetadataDto,
   AggregationResponseDto,
   SortDto,
+  CategoriesStatsDto,
+  FieldMetadataDto,
+  AggregationRequestDto,
 } from '~~/shared/api-client'
+import { AggTypeEnum } from '~~/shared/api-client'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
@@ -335,117 +360,152 @@ const { t, locale, availableLocales } = useI18n()
 const { mdAndUp } = useDisplay()
 const { translatePlural } = usePluralizedTranslation()
 const { trackSearch } = useAnalytics()
-const route = useRoute()
 const router = useRouter()
+const route = useRoute()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
-const routeQuery = computed(() =>
-  typeof route.query.q === 'string' ? route.query.q : ''
-)
+const routeQuery = computed(() => {
+  const q = route.query.q
+  return (Array.isArray(q) ? q[0] : q) ?? ''
+})
 const searchInput = ref(routeQuery.value)
+
+const { data: stats } = await useAsyncData<CategoriesStatsDto | null>(
+  'search-stats',
+  () => $fetch<CategoriesStatsDto>('/api/stats/categories').catch(() => null),
+  { server: true, lazy: true }
+)
+
+const heroSubtitle = computed(() => {
+  const template = t('search.hero.subtitle')
+  if (!stats.value)
+    return template.replace('{reviewed}', '...').replace('{others}', '...')
+
+  const formatCount = (val: number) =>
+    new Intl.NumberFormat(locale.value).format(val)
+
+  const reviewed = stats.value.reviewedProductsCount ?? 0
+  const validTotal =
+    (stats.value.productsCountSum ?? 0) +
+    (stats.value.productsWithoutVerticalCount ?? 0)
+  const others = Math.max(0, validTotal - reviewed)
+
+  return t('search.hero.subtitle', {
+    reviewed: formatCount(reviewed),
+    others: formatCount(others),
+  })
+})
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
-const openPanels = ref<number[]>([0])
+const searchType = ref<string | null>('SEMANTIC')
+const openPanels = ref<number[]>([])
 
 watch(
   routeQuery,
   value => {
     searchInput.value = value
-    // Do NOT reset filters automatically to allow refining search with filters kept?
-    // User requirement: "taillés sur les resultats retournés". Usually implies new search -> new context.
-    // But if I type "iPhone" and filter price, then change to "Samsung", I might want to keep price filter.
-    // For now, let's keep filters.
+    // Reset search type on new query?
+    // User requirement: explicit toggle. If I type new query, toggle likely stays until user resets.
   },
   { immediate: true }
 )
 
 const normalizedQuery = computed(() => routeQuery.value.trim())
-const trimmedInput = computed(() => searchInput.value.trim())
 const hasMinimumLength = computed(
   () => normalizedQuery.value.length >= MIN_QUERY_LENGTH
 )
-const showLatestProducts = computed(() => normalizedQuery.value.length === 0)
+
+const activeFilters = computed(() => filterRequest.value.filters || [])
+
+const isFiltered = computed(() => activeFilters.value.length > 0)
+
+const showLatestProducts = computed(
+  () => !normalizedQuery.value.length && !isFiltered.value
+)
+
 const shouldShowResults = computed(
-  () => hasMinimumLength.value || showLatestProducts.value
+  () => hasMinimumLength.value || showLatestProducts.value || isFiltered.value
 )
+
 const showInitialState = computed(
-  () => !shouldShowResults.value && trimmedInput.value.length === 0
+  () => !shouldShowResults.value && !searchInput.value
 )
+
 const showMinimumNotice = computed(
   () =>
-    trimmedInput.value.length > 0 &&
-    trimmedInput.value.length < MIN_QUERY_LENGTH
+    searchInput.value.length > 0 && searchInput.value.length < MIN_QUERY_LENGTH
 )
 
-const activeFilters = computed(() => filterRequest.value.filters ?? [])
-const isFiltered = computed(() => activeFilters.value.length > 0)
-// Global Search Data
+const filterFields = computed<FieldMetadataDto[]>(() => [
+  {
+    mapping: 'price.minPrice.price',
+    title: 'Prix',
+    valueType: 'numeric',
+    aggregationConfiguration: {
+      buckets: 10,
+    },
+  },
+  {
+    mapping: 'price.conditions',
+    title: 'État',
+    valueType: 'string',
+  },
+])
+
+const aggregationDefinition = computed<AggregationRequestDto>(() => {
+  const aggs = filterFields.value
+    .filter(field => field.mapping)
+    .map(field => ({
+      name: field.mapping!,
+      field: field.mapping!,
+      type:
+        field.valueType === 'numeric' ? AggTypeEnum.Range : AggTypeEnum.Terms,
+      ...(field.aggregationConfiguration?.buckets != null && {
+        buckets: field.aggregationConfiguration.buckets,
+      }),
+      ...(field.aggregationConfiguration?.interval != null && {
+        step: field.aggregationConfiguration.interval,
+      }),
+    }))
+
+  return aggs.length > 0 ? { aggs } : {}
+})
+
+const resolvedSearchType = computed(() =>
+  hasMinimumLength.value ? searchType.value ?? 'SEMANTIC' : undefined
+)
+const semanticSearchEnabled = computed(() =>
+  resolvedSearchType.value === 'SEMANTIC' ? true : undefined
+)
+
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(
-    'global-search',
+    'search-global',
     async () => {
-      if (!hasMinimumLength.value) {
-        return null
-      }
-
+      if (!hasMinimumLength.value) return null
       return await $fetch<GlobalSearchResponseDto>('/api/products/search', {
         method: 'POST',
         headers: requestHeaders,
         body: {
           query: normalizedQuery.value,
+          filters: filterRequest.value,
+          searchType: resolvedSearchType.value,
         },
       })
     },
     {
       watch: [() => normalizedQuery.value],
-      immediate: hasMinimumLength.value,
+      immediate: true,
     }
   )
-
-const semanticDiagnostics = computed(() => data.value?.semanticDiagnostics)
-
-watch(
-  semanticDiagnostics,
-  diagnostics => {
-    if (!diagnostics) {
-      return
-    }
-    if (import.meta.client) {
-      console.info('[search] Semantic diagnostics', diagnostics)
-    }
-  },
-  { immediate: true }
-)
-
-// Filtered Product Search Data
-const manualFields: FieldMetadataDto[] = [
-  {
-    mapping: 'price.minPrice.price',
-    title: '',
-    valueType: 'numeric',
-  },
-  {
-    mapping: 'price.conditions', // backend mapping for condition
-    title: '',
-    valueType: 'keyword',
-  },
-]
-
-const filterFields = computed(() => manualFields)
-
-const aggregationDefinition = computed(() => ({
-  aggs: [
-    { name: 'price', field: 'price.minPrice.price', type: 'range' },
-    { name: 'condition', field: 'price.conditions', type: 'terms' },
-  ],
-}))
 
 const requestBody = computed<ProductSearchRequestDto>(() => ({
   filters: filterRequest.value,
   aggs: aggregationDefinition.value,
-  semanticSearch: hasMinimumLength.value ? true : undefined,
+  semanticSearch: semanticSearchEnabled.value,
+  searchType: resolvedSearchType.value,
 }))
 
 const latestProductsSort = computed<SortDto[]>(() => [
@@ -458,7 +518,8 @@ const baselinePayload = computed(() => ({
   sort: showLatestProducts.value
     ? { sorts: latestProductsSort.value }
     : undefined,
-  semanticSearch: hasMinimumLength.value ? true : undefined,
+  semanticSearch: semanticSearchEnabled.value,
+  searchType: resolvedSearchType.value,
 }))
 
 const {
@@ -476,11 +537,44 @@ const {
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
-      body: baselinePayload.value,
+      body: baselinePayload.value, // This payload matches ProductSearchRequestDto which /api/products/search can handle
     })
   },
   {
     watch: [() => normalizedQuery.value, () => showLatestProducts.value],
+    immediate: true,
+  }
+)
+
+const {
+  data: baselineAggregationData,
+  pending: aggsPending,
+  error: aggsError,
+  refresh: refreshAggregations,
+} = await useAsyncData<ProductSearchResponseDto | null>(
+  'search-baseline-aggregations',
+  async () => {
+    if (!showLatestProducts.value) {
+      return null
+    }
+
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+      method: 'POST',
+      headers: requestHeaders,
+      body: {
+        query: hasMinimumLength.value ? normalizedQuery.value : undefined,
+        aggs: aggregationDefinition.value,
+        semanticSearch: semanticSearchEnabled.value,
+        searchType: resolvedSearchType.value,
+      },
+    })
+  },
+  {
+    watch: [
+      () => normalizedQuery.value,
+      () => showLatestProducts.value,
+      () => resolvedSearchType.value,
+    ],
     immediate: true,
   }
 )
@@ -524,7 +618,11 @@ const baselineResults = computed(
 )
 const baselineAggregations = computed<Record<string, AggregationResponseDto>>(
   () => {
-    const aggs = baselineSearchData.value?.aggregations ?? []
+    const aggregationSource =
+      showLatestProducts.value && baselineAggregationData.value
+        ? baselineAggregationData.value
+        : baselineSearchData.value
+    const aggs = aggregationSource?.aggregations ?? []
     return aggs.reduce(
       (acc, curr) => {
         if (curr.field) acc[curr.field] = curr
@@ -578,6 +676,21 @@ const updateTermsFilter = (field: string, terms: string[]) => {
     ...filterRequest.value,
     filters: [...current, { field, operator: 'term', terms }],
   }
+}
+
+const handleRetry = () => {
+  if (showLatestProducts.value) {
+    refreshBaseline()
+    refreshAggregations()
+    return
+  }
+
+  if (isFiltered.value) {
+    refreshProducts()
+    return
+  }
+
+  refresh()
 }
 
 const clearFilters = () => {
@@ -701,8 +814,8 @@ const limitedGroups = computed(() => {
 
 watch(
   limitedGroups,
-  groups => {
-    openPanels.value = groups.length ? [0] : []
+  () => {
+    openPanels.value = []
   },
   { immediate: true }
 )
@@ -733,6 +846,18 @@ const rightColumnPending = computed(() => {
   }
 
   return pending.value
+})
+
+const evaluatedProductsCount = computed(() => {
+  const groups = data.value?.verticalGroups ?? []
+  return groups.reduce(
+    (sum: number, group) => sum + (group.results?.length ?? 0),
+    0
+  )
+})
+
+const nonEvaluatedProductsCount = computed(() => {
+  return data.value?.missingVerticalResults?.length ?? 0
 })
 
 const handleSearchSubmit = () => {
@@ -931,6 +1056,17 @@ function formatFallbackVerticalTitle(verticalId: string): string {
     display: flex
     flex-direction: column
     gap: 0.35rem
+
+  &__column-heading
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: 0.5rem
+    text-align: center
+    width: 100%
+
+  &__column-heading-icon
+    color: rgba(var(--v-theme-primary), 0.85)
 
   &__column-subtitle
     margin: 0

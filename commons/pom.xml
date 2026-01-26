@@ -42,7 +42,7 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>2.2.22</version> <!-- Using a recent version compatible with typical Spring Boot 3 / OpenAPI 3 setups -->
+            <version>2.2.42</version> <!-- Using a recent version compatible with typical Spring Boot 3 / OpenAPI 3 setups -->
         </dependency>
 
       <dependency>

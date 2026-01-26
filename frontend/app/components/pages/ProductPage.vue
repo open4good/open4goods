@@ -43,28 +43,20 @@
       </aside>
 
       <main class="product-page__content">
-        <section :id="sectionIds.hero" class="product-page__section">
+        <section
+          :id="sectionIds.hero"
+          ref="heroSectionRef"
+          class="product-page__section"
+        >
           <div class="product-page__hero">
             <ProductHero
               :product="product"
               :breadcrumbs="productBreadcrumbs"
+              :impact-score="impactScoreOutOf20"
+              :impact-score-min="impactScoreMin"
+              :impact-score-max="impactScoreMax"
               :popular-attributes="heroPopularAttributes"
             />
-            <div class="product-page__hero-corner" role="presentation">
-              <ImpactScore
-                v-if="impactScoreValue != null"
-                :score="impactScoreValue"
-                :max="5"
-                size="xxlarge"
-                mode="badge"
-                badge-layout="stacked"
-                badge-variant="corner"
-                flat
-              />
-              <span v-else class="product-page__hero-corner-fallback">
-                {{ $t('category.products.notRated') }}
-              </span>
-            </div>
           </div>
         </section>
 
@@ -86,6 +78,7 @@
             :subtitle-params="impactSubtitleParams"
             :expanded-score-id="expandedScoreId"
             :ai-impact-text="product.aiReview?.ecologicalOneline"
+            :on-market-end-date="product.eprel?.onMarketEndDate"
           />
         </section>
 
@@ -113,43 +106,17 @@
           :id="sectionIds.ai"
           class="product-page__section"
         >
-          <v-row class="product-page__ai-review-row">
-            <v-col cols="12" :md="aiReviewDataQuality ? 8 : 12">
-              <ProductAiReviewSection
-                :gtin="product.gtin ?? gtin"
-                :initial-review="product.aiReview?.review ?? null"
-                :review-created-at="product.aiReview?.createdMs ?? undefined"
-                :site-key="hcaptchaSiteKey"
-                :title-params="aiTitleParams"
-                :product-name="productTitle"
-                :product-image="resolvedProductImageSource"
-              />
-            </v-col>
-            <v-col v-if="aiReviewDataQuality" cols="12" md="4">
-              <v-card class="product-page__ai-review-quality" elevation="0">
-                <v-card-text>
-                  <header
-                    class="product-page__ai-review-quality-header d-flex align-center mb-3"
-                  >
-                    <v-icon
-                      icon="mdi-shield-check-outline"
-                      size="22"
-                      class="mr-2"
-                    />
-                    <h3 class="text-subtitle-1 font-weight-bold">
-                      {{ $t('product.aiReview.dataQuality.title') }}
-                    </h3>
-                  </header>
-                  <p class="text-body-2 mb-4">
-                    {{ $t('product.aiReview.dataQuality.description') }}
-                  </p>
-                  <div class="product-page__ai-review-quality-value">
-                    {{ aiReviewDataQuality }}
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
+          <ProductAiReviewSection
+            :gtin="product.gtin ?? gtin"
+            :initial-review="product.aiReview?.review ?? null"
+            :review-created-at="product.aiReview?.createdMs ?? undefined"
+            :site-key="hcaptchaSiteKey"
+            :title-params="aiTitleParams"
+            :product-name="productTitle"
+            :product-image="resolvedProductImageSource"
+            :failure-reason="product.aiReview?.failureReason ?? null"
+            :enough-data="product.aiReview?.enoughData ?? true"
+          />
         </section>
 
         <section :id="sectionIds.price" class="product-page__section">
@@ -159,6 +126,14 @@
             :commercial-events="commercialEvents"
             :title-params="priceTitleParams"
           />
+        </section>
+
+        <section
+          v-if="product.timeline"
+          :id="sectionIds.timeline"
+          class="product-page__section"
+        >
+          <ProductLifeTimeline :timeline="product.timeline" />
         </section>
 
         <section
@@ -244,7 +219,6 @@ import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigat
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
-import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
@@ -276,6 +250,9 @@ const ProductDocumentationSection = defineAsyncComponent(
 const ProductAdminSection = defineAsyncComponent(
   () => import('~/components/product/ProductAdminSection.vue')
 )
+const ProductLifeTimeline = defineAsyncComponent(
+  () => import('~/components/product/ProductLifeTimeline.vue')
+)
 
 const route = useRoute()
 const requestURL = useRequestURL()
@@ -286,6 +263,9 @@ const { isLoggedIn } = useAuth()
 const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
+
+const heroSectionRef = ref<HTMLElement | null>(null)
+const { bottom: heroSectionBottom } = useElementBounding(heroSectionRef)
 
 const PRODUCT_COMPONENTS = [
   'base',
@@ -301,7 +281,7 @@ const PRODUCT_COMPONENTS = [
 ].join(',')
 
 const impactSectionRef = ref<HTMLElement | null>(null)
-const { top: impactSectionTop } = useElementBounding(impactSectionRef)
+const { top: _impactSectionTop } = useElementBounding(impactSectionRef)
 
 const bannerNewPriceLabel = computed(() => {
   const offer = product.value?.offers?.bestNewOffer
@@ -345,25 +325,18 @@ const bannerOffersCountLabel = computed(() => {
 })
 
 watch(
-  () => impactSectionTop.value,
-  top => {
-    // Show banner when Impact Section reaches the top (offset by header height ~64px)
-    // We add a small buffer (e.g. 80px) so it triggers just as it's passing under the header
-    // The user wants it "on top of it's screen".
-    // If top is <= 64 (header height), it is at or above the viewport 'start' (under header).
-    // We also check if it's not *too* far up (scrolled past), but typically sticky banners stay until another section?
-    // User request: "Should not appears directly, should appears only when scrolling down"
-    // "triggered when user has 'Impact Score' on top of it's screen"
-
-    if (!impactSectionRef.value) {
+  () => heroSectionBottom.value,
+  bottom => {
+    // Show banner when Hero Section bottom is scrolled past the header
+    // Header is approx 64px.
+    // If bottom <= 64, the hero is mostly gone / scrolled up.
+    // We assume sticky banner should appear when the main hero price CTA is likely out of view.
+    if (!heroSectionRef.value) {
       isStickyBannerOpen.value = false
       return
     }
 
-    // Header is 64px.
-    // If Impact Section Top is <= 64px, it means the top of the section has hit the bottom of the header.
-    // We want it to show *from that point onwards* as we scroll down.
-    isStickyBannerOpen.value = top <= 80
+    isStickyBannerOpen.value = bottom <= 80
   },
   { immediate: true }
 )
@@ -1593,8 +1566,6 @@ const radarData = computed<RadarDataset>(() => {
     series.push({
       key: 'current',
       name: productSeriesLabel,
-      key: 'current',
-      name: productSeriesLabel,
       values: productPlottedValues,
       rawValues: productValues,
     })
@@ -1618,8 +1589,6 @@ const radarData = computed<RadarDataset>(() => {
     series.push({
       key: 'best',
       name: bestLabel,
-      key: 'best',
-      name: bestLabel,
       values: bestPlottedValues,
       rawValues: bestValues,
     })
@@ -1641,8 +1610,6 @@ const radarData = computed<RadarDataset>(() => {
     )
   ) {
     series.push({
-      key: 'worst',
-      name: worstLabel,
       key: 'worst',
       name: worstLabel,
       values: worstPlottedValues,
@@ -1732,16 +1699,13 @@ const showAlternativesSection = computed(() =>
 const alternativesHydrated = ref(false)
 const hasAlternatives = ref(true)
 const showAiReviewSection = computed(() => Boolean(categoryDetail.value))
-const aiReviewDataQuality = computed(() => {
-  const value = product.value?.aiReview?.review?.dataQuality
-  return typeof value === 'string' ? value.trim() : ''
-})
 
 const sectionIds = {
   hero: 'hero',
   impact: 'impact',
   ai: 'synthese',
   price: 'prix',
+  timeline: 'cycle-de-vie',
   alternatives: 'alternatives',
   attributes: 'caracteristiques',
   docs: 'documentation',
@@ -1802,13 +1766,6 @@ const attributesSubsections = computed(() => {
       label: t('product.navigation.submenus.attributes.summary'),
     },
   ]
-
-  if (product.value?.timeline) {
-    entries.push({
-      id: subSectionIds.attributesTimeline,
-      label: t('product.navigation.submenus.attributes.dates'),
-    })
-  }
 
   entries.push({
     id: subSectionIds.attributesDetails,
@@ -1882,8 +1839,17 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
         id: subSectionIds.priceHistory,
         label: t('product.navigation.submenus.price.history'),
       },
+      ...(product.value?.timeline
+        ? [
+            {
+              id: sectionIds.timeline,
+              label: t('product.navigation.timeline'),
+            },
+          ]
+        : []),
     ],
   },
+
   {
     id: sectionIds.alternatives,
     label: t('product.navigation.alternatives'),
@@ -2156,6 +2122,26 @@ const impactScoreValue = computed(() => {
   return resolvePrimaryImpactScore(product.value)
 })
 
+const impactScoreOutOf20 = computed(() => {
+  const score = impactScoreValue.value
+
+  if (typeof score !== 'number') {
+    return null
+  }
+
+  return Number((score * 4).toFixed(1))
+})
+
+const impactScoreMin = computed(() => {
+  const absolute = product.value?.scores?.scores?.ECOSCORE?.absolute
+  return typeof absolute?.min === 'number' ? absolute.min : 0
+})
+
+const impactScoreMax = computed(() => {
+  const absolute = product.value?.scores?.scores?.ECOSCORE?.absolute
+  return typeof absolute?.max === 'number' ? absolute.max : 20
+})
+
 const reviewStructuredData = computed(() => {
   const review = product.value?.aiReview?.review
   const score = impactScoreValue.value
@@ -2388,7 +2374,6 @@ useHead(() => {
   scroll-margin-top: 108px; /* Match sticky nav + banner */
 }
 
-
 .product-page__hero {
   position: relative;
 }
@@ -2399,17 +2384,34 @@ useHead(() => {
   left: -1.75rem; /* Adjust based on panel padding */
   width: 100px;
   height: 100px;
-  display: inline-flex;
+}
+
+.product-page__hero-corner-content {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 0 0 54% 0;
-  background: rgba(var(--v-theme-surface-glass-strong), 0.92);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45);
+  height: 100%;
+  padding: 0.5rem 0.6rem;
+  text-align: center;
+  transform: rotate(-12deg);
+}
+
+.product-page__hero-corner-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 0.9;
   color: rgb(var(--v-theme-text-neutral-strong));
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
-  backdrop-filter: blur(6px);
-  z-index: 2;
-  pointer-events: none;
+}
+
+.product-page__hero-corner-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  opacity: 0.8;
+  margin-top: 0.1rem;
 }
 
 .product-page__hero-corner-fallback {
@@ -2420,7 +2422,6 @@ useHead(() => {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   text-align: center;
   line-height: 1.1;
-  transform: rotate(-12deg);
 }
 
 .product-page__fab {
@@ -2451,7 +2452,6 @@ useHead(() => {
   .product-page__section {
     scroll-margin-top: 140px;
   }
-
 }
 
 @media (max-width: 960px) {

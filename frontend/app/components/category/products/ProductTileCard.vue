@@ -49,7 +49,7 @@
               <ProductDesignation
                 :product="product"
                 variant="card"
-                title-tag="h3"
+                title-tag="h5"
                 title-class="product-tile-card__title text-truncate"
               />
             </div>
@@ -144,7 +144,7 @@
               <ProductDesignation
                 :product="product"
                 variant="card"
-                title-tag="h3"
+                title-tag="h5"
                 title-class="product-tile-card__title text-truncate"
               />
             </div>
@@ -432,7 +432,7 @@ const displayTitle = computed(() =>
 
   &__title {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 0.9rem;
     line-height: 1.35;
     color: rgb(var(--v-theme-text-neutral-strong));
     font-weight: 700;

@@ -17,17 +17,17 @@
               border="thin"
               :class="{
                 'nudge-toggle-card--selected': isSelected(score.scoreName),
-                'nudge-toggle-card--disabled': isDisabled(score.scoreName),
+                'nudge-toggle-card--disabled': isDisabled(score),
               }"
               rounded="lg"
               role="button"
               :aria-pressed="isSelected(score.scoreName).toString()"
-              :aria-disabled="isDisabled(score.scoreName).toString()"
+              :aria-disabled="isDisabled(score).toString()"
               :aria-label="score.title"
-              :tabindex="isDisabled(score.scoreName) ? -1 : 0"
-              @click="toggle(score.scoreName ?? '')"
-              @keydown.enter.prevent="toggle(score.scoreName ?? '')"
-              @keydown.space.prevent="toggle(score.scoreName ?? '')"
+              :tabindex="isDisabled(score) ? -1 : 0"
+              @click="toggle(score)"
+              @keydown.enter.prevent="toggle(score)"
+              @keydown.space.prevent="toggle(score)"
             >
               <div class="nudge-toggle-card__body">
                 <div class="nudge-toggle-card__icon-rail">
@@ -72,14 +72,19 @@ const getScoreIcon = (score: NudgeToolScoreDto) => score.mdiIcon ?? 'mdi-leaf'
 const isSelected = (scoreName?: string | null) =>
   scoreName ? selectedNames.value.includes(scoreName) : false
 
-const isDisabled = (scoreName?: string | null) =>
-  Boolean(props.isZeroResults) && !isSelected(scoreName)
+const isDisabled = (score: NudgeToolScoreDto) =>
+  Boolean(score.disabled) ||
+  (Boolean(props.isZeroResults) && !isSelected(score.scoreName))
 
-const toggle = (scoreName: string) => {
-  if (isDisabled(scoreName)) {
+const toggle = (score: NudgeToolScoreDto) => {
+  if (isDisabled(score)) {
     return
   }
 
+  const scoreName = score.scoreName ?? ''
+  if (!scoreName) {
+    return
+  }
   const next = new Set(selectedNames.value)
 
   if (next.has(scoreName)) {

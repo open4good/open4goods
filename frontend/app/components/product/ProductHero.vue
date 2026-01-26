@@ -11,28 +11,34 @@
       <div class="product-hero__background-overlay" />
     </div>
     <div class="product-hero__content">
-      <header v-if="heroTitle" class="product-hero__heading">
+      <header
+        class="product-hero__heading home-reveal-group"
+        :class="heroRevealClasses"
+      >
         <ProductDesignation
           :product="product"
           variant="page"
           title-tag="h1"
           title-class="product-hero__title text-center"
           description-class="product-hero__short-description text-center"
+          class="home-reveal-item"
+          :style="{ '--reveal-delay': '0ms' }"
         />
-        <CategoryNavigationBreadcrumbs
-          v-if="heroBreadcrumbs.length"
-          v-bind="heroBreadcrumbProps"
-          class="product-hero__breadcrumbs text-center"
-        />
-        <v-fade-transition>
-          <p
-            v-if="aiBaseline"
-            class="product-hero__baseline text-center"
-          >
-            {{ aiBaseline }}
-          </p>
-        </v-fade-transition>
+        <p
+          v-if="aiBaseline"
+          class="product-hero__baseline text-center home-reveal-item"
+          :style="{ '--reveal-delay': '120ms' }"
+        >
+          {{ aiBaseline }}
+        </p>
       </header>
+
+      <CategoryNavigationBreadcrumbs
+        v-if="heroBreadcrumbs.length"
+        v-bind="heroBreadcrumbProps"
+        class="product-hero__breadcrumbs home-reveal-item"
+        :style="{ '--reveal-delay': '60ms' }"
+      />
 
       <div class="product-hero__grid">
         <div class="product-hero__panel product-hero__panel--main">
@@ -54,6 +60,19 @@
                 <span v-if="productModelName" class="product-hero__subtitle">
                   {{ productModelName }}
                 </span>
+              </div>
+
+              <div
+                v-if="impactScore != null"
+                class="product-hero__impact-score mb-4"
+              >
+                <ImpactScore
+                  mode="svg"
+                  :score="impactScore"
+                  :min="impactScoreMin"
+                  :max="impactScoreMax"
+                  svg-size="lg"
+                />
               </div>
 
               <ul
@@ -245,12 +264,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, type PropType } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+  type PropType,
+} from 'vue'
 import DOMPurify from 'isomorphic-dompurify'
 import { useI18n } from 'vue-i18n'
+import { usePreferredReducedMotion } from '@vueuse/core'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
+import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -295,10 +325,63 @@ const props = defineProps({
     type: Array as PropType<AttributeConfigDto[]>,
     default: () => [],
   },
+  impactScore: {
+    type: Number,
+    default: null,
+  },
+  impactScoreMin: {
+    type: Number,
+    default: 0,
+  },
+  impactScoreMax: {
+    type: Number,
+    default: 20,
+  },
   image: {
     type: String,
     default: null,
   },
+})
+
+const prefersReducedMotion = usePreferredReducedMotion()
+const accessibilityStore = useAccessibilityStore()
+const shouldReduceMotion = computed(
+  () =>
+    accessibilityStore.prefersReducedMotionOverride ||
+    prefersReducedMotion.value === 'reduce'
+)
+
+const heroRevealReady = ref(false)
+const heroRevealVisible = ref(false)
+const heroRevealClasses = computed(() => ({
+  'is-ready': heroRevealReady.value,
+  'is-visible': heroRevealVisible.value,
+}))
+
+onMounted(async () => {
+  await nextTick()
+
+  if (shouldReduceMotion.value) {
+    heroRevealReady.value = true
+    heroRevealVisible.value = true
+    return
+  }
+
+  heroRevealReady.value = true
+  // Wait for the next frame to ensure the browser registers the 'ready' state
+  window.requestAnimationFrame(() => {
+    // And another frame to trigger the transition
+    window.requestAnimationFrame(() => {
+      heroRevealVisible.value = true
+    })
+  })
+})
+
+watch(shouldReduceMotion, value => {
+  if (value) {
+    heroRevealReady.value = true
+    heroRevealVisible.value = true
+  }
 })
 
 const { t, te, n, locale } = useI18n()
@@ -442,7 +525,7 @@ const popularAttributes = computed<HeroAttribute[]>(() =>
 )
 
 const heroAttributes = computed<HeroAttribute[]>(() => {
-  const baseAttributes: HeroAttribute[] = [...popularAttributes.value]
+  const baseAttributes: HeroAttribute[] = []
 
   if (hasAiReview.value && aiReview.value) {
     baseAttributes.push({
@@ -452,6 +535,8 @@ const heroAttributes = computed<HeroAttribute[]>(() => {
       showLabel: false,
       enableTooltip: false,
     })
+  } else {
+    baseAttributes.push(...popularAttributes.value)
   }
 
   if (gtinCountry.value) {
@@ -731,7 +816,7 @@ const gtinCountry = computed(() => {
 }
 
 .product-hero__title {
-  font-size: clamp(2.1rem, 3vw, 3.25rem);
+  font-size: clamp(1.5rem, 2vw, 2.2rem);
   font-weight: 800;
   line-height: 1.05;
   margin: 0;
@@ -745,6 +830,12 @@ const gtinCountry = computed(() => {
   font-size: 1.05rem;
   color: rgb(var(--v-theme-text-neutral-secondary));
   text-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.product-hero__impact-score {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
 }
 
 .product-hero__breadcrumbs {
@@ -771,18 +862,6 @@ const gtinCountry = computed(() => {
   font-size: 1rem;
   font-weight: 500;
   color: rgba(var(--v-theme-text-neutral-strong), 0.9);
-  animation: baselineFadeIn 0.6s ease 0.2s both;
-}
-
-@keyframes baselineFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .product-hero__grid {
@@ -903,7 +982,7 @@ const gtinCountry = computed(() => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1rem;
 }
 
 .product-hero__ai-summary-item {

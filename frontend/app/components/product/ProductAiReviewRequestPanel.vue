@@ -4,9 +4,6 @@
       <header class="product-ai-review-request-panel__header">
         <div class="product-ai-review-request-panel__product-info">
           <div>
-            <p class="product-ai-review-request-panel__eyebrow">
-              {{ t('product.aiReview.request.eyebrow') }}
-            </p>
             <h3 class="product-ai-review-request-panel__headline">
               {{ productLabel }}
             </h3>
@@ -20,6 +17,7 @@
 
       <div class="product-ai-review-request-panel__controls">
         <div class="product-ai-review-request-panel__quota">
+          <v-icon icon="mdi-sparkles" size="22" />
           <div>
             <p class="product-ai-review-request-panel__quota-label">
               {{ t('siteIdentity.menu.account.privacy.quotas.aiRemaining') }}
@@ -28,7 +26,6 @@
               {{ remainingGenerationsLabel }}
             </p>
           </div>
-          <v-icon icon="mdi-sparkles" size="22" />
         </div>
 
         <ClientOnly>
@@ -36,11 +33,13 @@
             v-if="showCaptcha"
             class="product-ai-review-request-panel__captcha"
           >
+            <!-- Invisible Captcha -->
             <VueHcaptcha
               ref="captchaRef"
               :sitekey="siteKey"
               :theme="captchaTheme"
               :language="captchaLocale"
+              size="invisible"
               @verify="handleCaptchaVerify"
               @expired="emit('captcha-expired')"
               @error="emit('captcha-error')"
@@ -93,7 +92,7 @@
         variant="flat"
         :loading="requesting"
         :disabled="submitDisabled"
-        @click="emit('submit')"
+        @click="handleSubmit"
       >
         {{ t('product.aiReview.request.submit') }}
       </v-btn>
@@ -190,36 +189,27 @@ const submitDisabled = computed(() => {
   if (!agreementModel.value || props.requesting) {
     return true
   }
-
-  if (props.requiresCaptcha) {
-    // If captcha is required, valid captcha token is needed
-    // The parent controls 'submitDisabled' based on token presence too,
-    // but here we double check or rely on parent.
-    // Actually prop `submitDisabled` should supervise everything.
-    return props.submitDisabled
-  }
-
-  return false
+  // We rely on parent's disabled prop, which should now allow submit even if no token
+  return props.submitDisabled
 })
 
 const showSubmitButton = computed(() => {
-  // Always show submit button, it will be disabled if captcha not verified
-  return true
+  return !props.isGenerating
 })
+
+const handleSubmit = () => {
+  if (props.requiresCaptcha && hasSiteKey.value && captchaRef.value) {
+    // Invisble captcha: execute to get token
+    // If successful, handleCaptchaVerify will be called
+    captchaRef.value.execute()
+  } else {
+    // No captcha required or missing key configuration
+    emit('submit')
+  }
+}
 
 const handleCaptchaVerify = (token: string) => {
   emit('captcha-verify', token)
-  // Auto submit can happen here if desired, or user clicks button.
-  // emit('submit') // Let's wait for user click or make it consistent with previous UX?
-  // Previous Code: emit('submit') immediately.
-  // Refactor request: "User requested: Removing Validate button" logic was confusing in previous file.
-  // Let's keep manual submit for better UX in a panel, or auto if preferred.
-  // If hCaptcha is the only barrier, auto-submit is nice.
-  // But let's stick to manual submit for stability unless requested.
-  // Wait, the previous code had:
-  // "User requested Removing Validate button... I will hide the button if captcha is required."
-  // effectively auto-submitting.
-  // Let's reproduce that behavior:
   emit('submit')
 }
 </script>
@@ -238,7 +228,7 @@ const handleCaptchaVerify = (token: string) => {
 .product-ai-review-request-panel__header {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1rem;
 }
 
@@ -316,5 +306,21 @@ const handleCaptchaVerify = (token: string) => {
 .product-ai-review-request-panel__actions {
   display: flex;
   justify-content: flex-end;
+}
+</style>
+
+<style>
+/* 
+  Global fix for hCaptcha challenge visibility when body is scroll-locked by Vuetify (v-dialog).
+  The challenge container is appended to body, which may be shifted off-screen.
+  Force it to be fixed to the viewport.
+*/
+body > div:has(iframe[src*='hcaptcha'][src*='frame=challenge']) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999 !important; /* Ensure it's on top of everything including modal */
 }
 </style>

@@ -638,6 +638,55 @@ public class ProductRepository {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get random products globally with minimum offers count and optional vertical filter
+     * @param limit max number of products
+     * @param minOffersCount minimum number of offers
+     * @param verticalId optional vertical filter
+     * @return list of random products
+     */
+    public List<Product> getRandomProducts(int limit, int minOffersCount, String verticalId) {
+        Criteria c = new Criteria("offersCount").greaterThanEqual(minOffersCount)
+                .and(new Criteria("excluded").is(false))
+                .and(getRecentPriceQuery());
+
+        if (verticalId != null && !verticalId.isBlank()) {
+            c = c.and(new Criteria("vertical").is(verticalId));
+        }
+
+        // Script sort for random
+        SortOptions sortOptions = new SortOptions.Builder()
+                .script(s -> s
+                        .script(sc -> sc
+                                .source("Math.random()")
+                        )
+                        .type(ScriptSortType.Number)
+                        .order(SortOrder.Asc)
+                )
+                .build();
+
+        NativeQuery query = new NativeQueryBuilder()
+                .withQuery(new CriteriaQuery(c))
+                .withSort(sortOptions)
+                .withMaxResults(limit)
+                .build();
+
+        return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX)
+                .stream()
+                .map(SearchHit::getContent)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get random products globally with minimum offers count
+     * @param limit max number of products
+     * @param minOffersCount minimum number of offers
+     * @return list of random products
+     */
+    public List<Product> getRandomProducts(int limit, int minOffersCount) {
+        return getRandomProducts(limit, minOffersCount, null);
+    }
+
 
 
 
@@ -914,6 +963,33 @@ public class ProductRepository {
         }
 
         /**
+         * Count recent products with offers, a registered impact score, and not excluded from the catalogue.
+         *
+         * @return count of recent products with an ImpactScore
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingImpactScore() {
+                Criteria criteria = getRecentPriceQuery()
+                        .and(new Criteria("excluded").is(false))
+                        .and(new Criteria("scores.ECOSCORE.value").exists());
+                CriteriaQuery query = new CriteriaQuery(criteria);
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Count recent products with offers that are missing a vertical assignment.
+         *
+         * @return count of recent products without a vertical
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexWithoutVertical() {
+                Criteria criteria = getRecentPriceQuery()
+                        .and(new Criteria("vertical").exists().not());
+                CriteriaQuery query = new CriteriaQuery(criteria);
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
          * Count recent products for a specific vertical.
          *
          * @param vertical vertical identifier
@@ -929,6 +1005,84 @@ public class ProductRepository {
         public Long countMainIndexHavingScore(String scoreName, String vertical) {
                 CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexExcluded() {
+            CriteriaQuery query = new CriteriaQuery(new Criteria("excluded").is(true));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Count recent products with offers, AI reviews for the requested locale, and not excluded from the catalogue.
+         *
+         * @param locale locale to check (e.g. {@code fr}); defaults to {@code default} when blank
+         * @return count of recent products with AI reviews
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexValidAndReviewed(String locale) {
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
+                    .and(new Criteria("excluded").is(false))
+                    .and(new Criteria(resolveReviewField(locale)).exists()));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Count recent products with offers, a valid ECOSCORE, and not excluded from the catalogue.
+         *
+         * @return count of recent products with an ECOSCORE
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexValidAndRated() {
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
+                    .and(new Criteria("excluded").is(false))
+                    .and(new Criteria("scores.ECOSCORE.value").exists()));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexTotal(String vertical) {
+            CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexExcluded(String vertical) {
+            CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical).and(new Criteria("excluded").is(true)));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Count recent products with offers, AI reviews for the requested locale, and not excluded for a specific vertical.
+         *
+         * @param vertical vertical identifier
+         * @param locale locale to check (e.g. {@code fr}); defaults to {@code default} when blank
+         * @return count of recent products with AI reviews for the vertical
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexValidAndReviewed(String vertical, String locale) {
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
+                    .and(new Criteria("vertical").is(vertical))
+                    .and(new Criteria("excluded").is(false))
+                    .and(new Criteria(resolveReviewField(locale)).exists()));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        private String resolveReviewField(String locale) {
+            String resolvedLocale = locale;
+            if (resolvedLocale == null || resolvedLocale.isBlank()) {
+                resolvedLocale = "default";
+            }
+            return "reviews." + resolvedLocale + ".review";
+        }
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexValidAndRated(String vertical) {
+            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
+                    .and(new Criteria("vertical").is(vertical))
+                    .and(new Criteria("excluded").is(false))
+                    .and(new Criteria("scores.ECOSCORE.value").exists()));
+            return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
 
         /**

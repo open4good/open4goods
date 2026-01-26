@@ -94,6 +94,18 @@
         </div>
 
         <div class="category-product-list__actions">
+          <v-btn
+            v-if="externalOfferUrl(product)"
+            :href="externalOfferUrl(product)"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="primary"
+            variant="text"
+            class="mr-2"
+            append-icon="mdi-open-in-new"
+          >
+            {{ $t('product.offers.bestPrice') }}
+          </v-btn>
           <CategoryProductCompareToggle :product="product" />
         </div>
       </div>
@@ -141,6 +153,9 @@ const productLink = (product: ProductDto) =>
 
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)
+
+const externalOfferUrl = (product: ProductDto) =>
+  product.offers?.bestPrice?.url ?? undefined
 
 const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
 

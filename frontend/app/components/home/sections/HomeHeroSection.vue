@@ -31,6 +31,11 @@ const props = defineProps<{
   openDataMillions?: number
   productsCount?: number
   categoriesCount?: number
+  impactScoreProductsCount?: number
+  impactScoreCategoriesCount?: number
+  productsWithoutVerticalCount?: number
+  reviewedProductsCount?: number
+  aiSummaryRemainingCredits?: number
   heroBackgroundI18nKey?: string
   shouldReduceMotion?: boolean
 }>()
@@ -272,9 +277,12 @@ useHead({
                         })
                       "
                       :placeholder="
-                        packI18n.resolveString('hero.search.placeholder', {
-                          fallbackKeys: ['home.hero.search.placeholder'],
-                        })
+                        packI18n.resolveList<string>(
+                          'hero.search.placeholders',
+                          {
+                            fallbackKeys: ['home.hero.search.placeholders'],
+                          }
+                        )
                       "
                       :aria-label="
                         packI18n.resolveString('hero.search.ariaLabel', {
@@ -284,7 +292,7 @@ useHead({
                       :min-chars="minSuggestionQueryLength"
                       :enable-scan="true"
                       :scan-mobile="true"
-                      :scan-desktop="false"
+                      :scan-desktop="true"
                       :enable-voice="true"
                       :voice-mobile="true"
                       :voice-desktop="true"
@@ -320,6 +328,13 @@ useHead({
                     :open-data-millions="openDataMillions"
                     :products-count="productsCount"
                     :categories-count="categoriesCount"
+                    :impact-score-products-count="impactScoreProductsCount"
+                    :impact-score-categories-count="impactScoreCategoriesCount"
+                    :products-without-vertical-count="
+                      productsWithoutVerticalCount
+                    "
+                    :reviewed-products-count="reviewedProductsCount"
+                    :ai-summary-remaining-credits="aiSummaryRemainingCredits"
                   />
                 </div>
               </div>

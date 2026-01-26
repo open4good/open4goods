@@ -182,6 +182,7 @@ nudgeToolConfig:
     - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
       scoreMinValue: 4
       mdiIcon: "mdi-scale-balance"
+      disabled: true
       title:
         en: "ESG criterias"
         fr: "Critères ESG"
@@ -217,6 +218,72 @@ nudgeToolConfig:
         fr: "Continuer"
 
   subsets:
+    ################
+    # Impact Score
+    ################
+    - id: "impact_high" # Unique identifier for the subset
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "LOWER_THAN"
+          value: "2"
+      image: "example-image.png"
+      url:
+        en: "high-impact"
+        fr: "petit-impact"
+      caption:
+        en: "< 2"
+        fr: "< 2"
+      title:
+        en: "Terrible impact "
+        fr: "Mauvais"
+      description:
+        en: "Products with an ImpactScore lower than 2/5"
+        fr: "Produits avec un ImpactScore inférieur à 2/5"
+
+    - id: "impact_medium"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "GREATER_THAN"
+          value: "2"
+        - field: "scores.ECOSCORE.value"
+          operator: "LOWER_THAN"
+          value: "4"
+      image: "example-image.png"
+      url:
+        en: "medium-impact"
+        fr: "impact-moyen"
+      caption:
+        en: "> 2 < 4"
+        fr: "> 2 < 4"
+      title:
+        en: "Relativ impact"
+        fr: "Moyen"
+      description:
+        en: "Products with an ImpactScore between 2/5 and 4/5"
+        fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
+
+    - id: "impact_low"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "GREATER_THAN"
+          value: "4"
+      image: "example-image.png"
+      url:
+        en: "impact-moderate"
+        fr: "impact-modere"
+      caption:
+        en: "> 4"
+        fr: "> 4"
+      title:
+        en: "Moderated impact"
+        fr: "Bon"
+      description:
+        en: "Products with an ImpactScore greater than 4/5"
+        fr: "Produits avec un ImpactScore supérieur à 4/5"
+
     - id: "price_lower_450"
       group: "price"
       criterias:
@@ -2374,51 +2441,6 @@ attributesConfig:
 matchingCategories:
   Darty Pro - Cashback:
     - "GROS ELECTROMENAGER | LAVE-VAISSELLE"
-  rueducommerce.fr:
-    - "LAVE-VAISSELLE"
-    - "ELECTROMENAGER > LAVAGE & SECHAGE > LAVE-VAISSELLE"
-  darty.com:
-    - "GROS ELECTROMENAGER / LAVE-VAISSELLE / LAVE-VAISSELLE POSE LIBRE | GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE POSE LIBRE | LAVE-VAISSELLE | LAVE-VAISSELLE POSE LIBRE"
-    - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE POSE LIBRE | LAVE-VAISSELLE | GROS ELECTROMENAGER"
-    - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE ENCASTRABLE | LAVE-VAISSELLE | GROS ELECTROMENAGER"
-    - "GROS ELECTROMENAGER / LAVE-VAISSELLE / LAVE-VAISSELLE ENCASTRABLE | GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE ENCASTRABLE | LAVE-VAISSELLE | LAVE-VAISSELLE ENCASTRABLE"
-    - "GROS ELECTROMENAGER / LAVE-VAISSELLE / LAVE-VAISSELLE | GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE | LAVE-VAISSELLE | LAVE-VAISSELLE"
-    - "GROS ELECTROMENAGER / LAVE-VAISSELLE / COMBINE FOUR LAVE-VAISSELLE | GROS ELECTROMENAGER>LAVE-VAISSELLE>COMBINE FOUR LAVE-VAISSELLE | LAVE-VAISSELLE | COMBINE FOUR LAVE-VAISSELLE"
-    - "GROS ELECTROMENAGER / LAVE-VAISSELLE / MINI LAVE-VAISSELLE | GROS ELECTROMENAGER>LAVE-VAISSELLE>MINI LAVE-VAISSELLE | LAVE-VAISSELLE | MINI LAVE-VAISSELLE"
-  E.Leclerc FR:
-    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE POSE LIBRE | GROS ELECTROMENAGER | LAVE-VAISSELLE"
-    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE ENCASTRABLE | GROS ELECTROMENAGER | LAVE-VAISSELLE"
-    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-VAISSELLE | GROS ELECTROMENAGER | LAVE-VAISSELLE"
-    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE 60 CM | GROS ELECTROMENAGER | LAVE-VAISSELLE"
-  RueDuCommerce FR:
-    - "LAVE-VAISSELLE"
-    - "ELECTROMENAGER > LAVAGE & SECHAGE > LAVE-VAISSELLE"
-  Cdiscount FR:
-    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-VAISSELLE | LAVAGE-SECHAGE | LAVE-VAISSELLE"
-  ManoMano FR:
-    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-VAISSELLE | LAVE-VAISSELLE"
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-VAISSELLE | LAVE-VAISSELLE"
-    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > MATERIEL PROFESSIONNEL DE CUISINE > EQUIPEMENT DE LAVAGE > LAVE-VAISSELLE PROFESSIONNEL | LAVE-VAISSELLE PROFESSIONNEL"
-  cdiscount.com:
-    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-VAISSELLE | LAVAGE-SECHAGE | LAVE-VAISSELLE"
-  Joom FR:
-    - "HOME APPLIANCES > KITCHEN APPLIANCES > DISHWASHERS"
-  Référentiel produits Electro Depot:
-    - "ELECTRO DEPOT | LAVE-VAISSELLE | LAVE-VAISSELLE POSE LIBRE 60 CM"
-    - "ELECTRO DEPOT | LAVE-VAISSELLE | LAVE-VAISSELLE ENCASTRABLE"
-  UNDERDOG FR:
-    - "372 | DISHWASHERS | LAVE-VAISSELLE"
-  Castorama FR:
-    - "LAVE-VAISSELLE ENCASTRABLE | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > LAVE-VAISSELLE > LAVE-VAISSELLE ENCASTRABLE | CUISINE | GROS ELECTROMENAGER"
-    - "LAVE-VAISSELLE A POSER | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > LAVE-VAISSELLE > LAVE-VAISSELLE A POSER | CUISINE | GROS ELECTROMENAGER"
-  R&eacute;f&eacute;rentiel produits - Darty Pro:
-    - "GROS ELECTROMENAGER | LAVE-VAISSELLE"
-  alternate FR:
-    - "372 | DISHWASHERS | ELECTROMENAGER > LAVAGE, SECHAGE & RINCAGE > LAVE-VAISSELLE"
-  icecat.biz.yml:
-    - "LAVE-VAISSELLES"
-  e.leclerc:
-    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-VAISSELLE>LAVE-VAISSELLE POSE LIBRE | GROS ELECTROMENAGER | LAVE-VAISSELLE"
   rueducommerce.fr:
     - "LAVE-VAISSELLE"
     - "ELECTROMENAGER > LAVAGE & SECHAGE > LAVE-VAISSELLE"

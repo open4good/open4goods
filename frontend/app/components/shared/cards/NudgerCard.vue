@@ -65,20 +65,24 @@ const resolvedCorners = computed(() => {
   }
 
   // Apply accent corners
-  props.accentCorners.forEach((corner) => {
+  props.accentCorners.forEach(corner => {
     corners[corner] = props.accentRadius
   })
 
   // Apply flat corners
-  props.flatCorners.forEach((corner) => {
+  props.flatCorners.forEach(corner => {
     corners[corner] = '0'
   })
 
   // Individual overrides take highest priority
-  if (props.topLeftRadius !== undefined) corners['top-left'] = props.topLeftRadius
-  if (props.topRightRadius !== undefined) corners['top-right'] = props.topRightRadius
-  if (props.bottomRightRadius !== undefined) corners['bottom-right'] = props.bottomRightRadius
-  if (props.bottomLeftRadius !== undefined) corners['bottom-left'] = props.bottomLeftRadius
+  if (props.topLeftRadius !== undefined)
+    corners['top-left'] = props.topLeftRadius
+  if (props.topRightRadius !== undefined)
+    corners['top-right'] = props.topRightRadius
+  if (props.bottomRightRadius !== undefined)
+    corners['bottom-right'] = props.bottomRightRadius
+  if (props.bottomLeftRadius !== undefined)
+    corners['bottom-left'] = props.bottomLeftRadius
 
   return corners
 })
@@ -114,17 +118,19 @@ const styleVars = computed(() => ({
   padding: var(--nudger-card-padding)
   background: var(--nudger-card-background)
   border-radius: var(--nudger-card-top-left) var(--nudger-card-top-right) var(--nudger-card-bottom-right) var(--nudger-card-bottom-left)
-  box-sizing: border-box
-  color: rgb(var(--v-theme-text-neutral-strong))
-  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease
+  transition: all 0.2s ease-in-out
+  position: relative
+  overflow: hidden
 
-.nudger-card--border
-  border: 1px solid rgb(var(--v-theme-primary))
+  &--border
+    border: 1px solid rgb(var(--v-theme-primary))
 
-.nudger-card--shadow
-  box-shadow: 0 10px 26px rgba(var(--v-theme-primary), 0.06)
+  &--shadow
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08)
 
-.nudger-card--hoverable:hover
-  box-shadow: 0 18px 42px rgba(var(--v-theme-primary), 0.12)
-  transform: translateY(-1px)
+  &--hoverable
+    cursor: pointer
+    &:hover
+      transform: translateY(-4px)
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12)
 </style>

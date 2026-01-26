@@ -43,7 +43,7 @@ export const buildScoreFilters = (
       const matchedScore = scores.find(
         candidate => candidate.scoreName === name
       )
-      if (!matchedScore?.scoreMinValue) {
+      if (!matchedScore?.scoreMinValue || matchedScore.disabled) {
         return null
       }
 

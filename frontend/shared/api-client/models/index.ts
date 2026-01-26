@@ -150,6 +150,7 @@ export * from './TeamProperties';
 export * from './UploadedLabel';
 export * from './VerticalConfigDto';
 export * from './VerticalConfigFullDto';
+export * from './VerticalStatsDto';
 export * from './VerticalSubsetDto';
 export * from './WikiPageConfig';
 export * from './XwikiContentBlocDto';

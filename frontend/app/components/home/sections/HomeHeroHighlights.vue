@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useEventPackI18n } from '~/composables/useEventPackI18n'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 import {
@@ -12,6 +12,8 @@ import SectionReveal from '~/components/shared/ui/SectionReveal.vue'
 type HeroHighlightSegment = {
   text: string
   to?: string
+  icon?: string
+  iconPosition?: 'before' | 'after'
 }
 
 type HeroHighlightItem = {
@@ -24,6 +26,12 @@ const props = defineProps<{
   openDataMillions?: number
   productsCount?: number
   categoriesCount?: number
+  impactScoreProductsCount?: number
+  impactScoreCategoriesCount?: number
+  productsWithoutVerticalCount?: number
+  reviewedProductsCount?: number
+  aiSummaryRemainingCredits?: number
+  heroBackgroundI18nKey?: string
 }>()
 
 const { t, te, tm, locale } = useI18n()
@@ -34,6 +42,9 @@ const partnersLinkPlaceholder = '{partnersLink}'
 const openDataMillionsPlaceholder = '{millions}'
 const productsCountPlaceholder = '{products}'
 const categoriesCountPlaceholder = '{categories}'
+const impactScoreProductsPlaceholder = '{impactScoreProducts}'
+const impactScoreCategoriesPlaceholder = '{impactScoreCategories}'
+const productsWithoutVerticalPlaceholder = '{priceHistoryProducts}'
 
 const normalizeHighlightSegments = (
   segments: unknown
@@ -48,10 +59,23 @@ const normalizeHighlightSegments = (
         return null
       }
 
-      const { text, to } = segment as { text?: unknown; to?: unknown }
+      const { text, to, icon, iconPosition } = segment as {
+        text?: unknown
+        to?: unknown
+        icon?: unknown
+        iconPosition?: unknown
+      }
       const normalizedText = typeof text === 'string' ? text.trim() : ''
       const normalizedTo =
         typeof to === 'string' && to.trim().length > 0 ? to.trim() : undefined
+      const normalizedIcon =
+        typeof icon === 'string' && icon.trim().length > 0
+          ? icon.trim()
+          : undefined
+      const normalizedIconPosition =
+        iconPosition === 'after' || iconPosition === 'before'
+          ? iconPosition
+          : undefined
 
       if (!normalizedText) {
         return null
@@ -60,6 +84,8 @@ const normalizeHighlightSegments = (
       return {
         text: normalizedText,
         to: normalizedTo,
+        icon: normalizedIcon,
+        iconPosition: normalizedIconPosition,
       }
     })
     .filter((segment): segment is HeroHighlightSegment => segment != null)
@@ -111,9 +137,15 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
   const translatedItems = normalizeHighlightItems(itemsToNormalize)
 
   if (translatedItems.length > 0) {
-    return applyOpenDataMillionsPlaceholder(
-      applyProductsCategoriesPlaceholder(
-        applyPartnerLinkPlaceholder(translatedItems)
+    return applyRandomProductPlaceholder(
+      applyProductsWithoutVerticalPlaceholder(
+        applyImpactScorePlaceholders(
+          applyOpenDataMillionsPlaceholder(
+            applyProductsCategoriesPlaceholder(
+              applyPartnerLinkPlaceholder(translatedItems)
+            )
+          )
+        )
       )
     )
   }
@@ -122,9 +154,15 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
   if (Array.isArray(tmItems) && tmItems.length > 0) {
     const directTranslated = normalizeHighlightItems(tmItems)
     if (directTranslated.length > 0) {
-      return applyOpenDataMillionsPlaceholder(
-        applyProductsCategoriesPlaceholder(
-          applyPartnerLinkPlaceholder(directTranslated)
+      return applyRandomProductPlaceholder(
+        applyProductsWithoutVerticalPlaceholder(
+          applyImpactScorePlaceholders(
+            applyOpenDataMillionsPlaceholder(
+              applyProductsCategoriesPlaceholder(
+                applyPartnerLinkPlaceholder(directTranslated)
+              )
+            )
+          )
         )
       )
     }
@@ -212,10 +250,8 @@ const heroPartnersLinkText = computed(() => {
   return `${formattedCount} ${fallbackLabel}`
 })
 
-const formattedOpenDataMillions = computed(() => {
-  const value = props.openDataMillions
-
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+const formatCount = (value?: number) => {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
     return null
   }
 
@@ -224,26 +260,58 @@ const formattedOpenDataMillions = computed(() => {
   } catch {
     return String(value)
   }
-})
+}
 
-const formattedProductsCount = computed(() => {
-  const value = props.productsCount
-
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+const formatCompactCount = (value?: number) => {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
     return null
   }
 
-  try {
-    return new Intl.NumberFormat(locale.value).format(value)
-  } catch {
-    return String(value)
+  if (value >= 1_000_000) {
+    const thousands = Math.floor(value / 1_000_000)
+    return `${thousands}k`
   }
-})
 
-const formattedCategoriesCount = computed(() => {
-  const value = props.categoriesCount
+  if (value >= 1000) {
+    const thousands = Math.floor(value / 1000)
+    return `${thousands}k`
+  }
 
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+  return formatCount(value)
+}
+
+const formattedOpenDataMillions = computed(() =>
+  formatCount(props.openDataMillions)
+)
+
+const formattedProductsCount = computed(() =>
+  formatCompactCount(props.productsCount)
+)
+
+const formattedCategoriesCount = computed(() =>
+  formatCount(props.categoriesCount)
+)
+
+const formattedImpactScoreProductsCount = computed(() =>
+  formatCount(props.impactScoreProductsCount)
+)
+
+const formattedImpactScoreCategoriesCount = computed(() =>
+  formatCount(props.impactScoreCategoriesCount ?? props.categoriesCount)
+)
+
+const formattedProductsWithoutVerticalCount = computed(() =>
+  formatCompactCount(props.productsWithoutVerticalCount)
+)
+
+const formattedReviewedProductsCount = computed(() =>
+  formatCount(props.reviewedProductsCount)
+)
+
+const formattedAiSummaryRemainingCredits = computed(() => {
+  const value = props.aiSummaryRemainingCredits
+
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
     return null
   }
 
@@ -380,11 +448,196 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
     }
   })
 }
+
+const applyImpactScorePlaceholders = (items: HeroHighlightItem[]) => {
+  const productsLabel = formattedImpactScoreProductsCount.value
+  const categoriesLabel = formattedImpactScoreCategoriesCount.value
+
+  if (!productsLabel || !categoriesLabel) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithCounts = item.segments
+      .map(segment => {
+        if (
+          !segment.text.includes(impactScoreProductsPlaceholder) &&
+          !segment.text.includes(impactScoreCategoriesPlaceholder)
+        ) {
+          return segment
+        }
+
+        const replacedText = segment.text
+          .replaceAll(impactScoreProductsPlaceholder, productsLabel)
+          .replaceAll(impactScoreCategoriesPlaceholder, categoriesLabel)
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHighlightSegment => segment != null)
+
+    return {
+      ...item,
+      segments:
+        segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
+    }
+  })
+}
+
+const applyProductsWithoutVerticalPlaceholder = (
+  items: HeroHighlightItem[]
+) => {
+  const productsLabel = formattedProductsWithoutVerticalCount.value
+
+  if (!productsLabel) {
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithCounts = item.segments
+      .map(segment => {
+        if (!segment.text.includes(productsWithoutVerticalPlaceholder)) {
+          return segment
+        }
+
+        const replacedText = segment.text.replaceAll(
+          productsWithoutVerticalPlaceholder,
+          productsLabel
+        )
+
+        const normalizedText = replacedText.trim()
+
+        if (!normalizedText) {
+          return null
+        }
+
+        return {
+          ...segment,
+          text: normalizedText,
+        }
+      })
+      .filter((segment): segment is HeroHighlightSegment => segment != null)
+
+    return {
+      ...item,
+      segments:
+        segmentsWithCounts.length > 0 ? segmentsWithCounts : item.segments,
+    }
+  })
+}
+
+// Fetch random product
+const { data: randomProduct } = await useFetch('/api/stats/random', {
+  query: { num: 1, minOffersCount: 3 },
+  lazy: true,
+})
+
+const randomProductLink = computed(() => {
+  if (
+    !randomProduct.value ||
+    !Array.isArray(randomProduct.value) ||
+    randomProduct.value.length === 0
+  ) {
+    return null
+  }
+  const product = randomProduct.value[0]
+  return product?.names?.slug ? `/p/${product.names.slug}` : null
+})
+
+const randomProductName = computed(() => {
+  if (
+    !randomProduct.value ||
+    !Array.isArray(randomProduct.value) ||
+    randomProduct.value.length === 0
+  ) {
+    return null
+  }
+  const product = randomProduct.value[0]
+  return product?.names?.label || product?.names?.title || null
+})
+
+const applyRandomProductPlaceholder = (items: HeroHighlightItem[]) => {
+  const productName = randomProductName.value
+  const productLink = randomProductLink.value
+
+  if (!productName || !productLink) {
+    // If no random product, just return items unchanged
+    return items
+  }
+
+  return items.map(item => {
+    const segmentsWithProduct = item.segments.map(segment => {
+      const text = segment.text.includes('{randomProduct}')
+        ? segment.text.replaceAll('{randomProduct}', productName)
+        : segment.text
+
+      const to =
+        segment.to && segment.to.includes('{randomProductLink}')
+          ? productLink
+          : segment.to
+
+      return { ...segment, text, to }
+    })
+
+    return {
+      ...item,
+      segments: segmentsWithProduct,
+    }
+  })
+}
+
+const resolveSegmentIcon = (icon?: string) => {
+  if (!icon) {
+    return null
+  }
+
+  switch (icon) {
+    case 'breton-flag':
+      return '/images/icons/breton-flag.svg'
+    default:
+      return null
+  }
+}
+
+const aiSummaryTitle = computed(() => t('home.hero.aiSummary.title'))
+const aiSummaryDescription = computed(() => {
+  return t('home.hero.aiSummary.description')
+})
+
+const aiSummaryReviewedLabel = computed(() => {
+  const reviewedProductsCount = formattedReviewedProductsCount.value
+
+  if (reviewedProductsCount == null) {
+    return null
+  }
+
+  return t('home.hero.aiSummary.reviewedProductsSuffix', {
+    reviewedProductsCount,
+  })
+})
+const aiSummaryCreditsLabel = computed(() => {
+  const remaining = formattedAiSummaryRemainingCredits.value
+  if (!remaining) {
+    return t('home.hero.aiSummary.creditsFallback')
+  }
+
+  return t('home.hero.aiSummary.creditsLabel', { count: remaining })
+})
+
+const isCreditsDialogActive = ref(false)
 </script>
 
 <template>
   <div class="home-hero-highlights" role="list">
-    <v-row align="stretch">
+    <v-row align="stretch" justify="center">
       <v-col
         v-for="(item, index) in heroHighlightItems"
         :key="`hero-highlight-${index}`"
@@ -420,10 +673,74 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
                     class="home-hero-highlights__link"
                     :to="segment.to"
                   >
-                    {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                    <span
+                      v-if="
+                        segment.icon &&
+                        resolveSegmentIcon(segment.icon) &&
+                        segment.iconPosition !== 'after'
+                      "
+                      class="home-hero-highlights__icon"
+                    >
+                      <img
+                        :src="resolveSegmentIcon(segment.icon) ?? ''"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </span>
+                    {{
+                      segmentIndex > 0 && !/^[.,;!?)]/.test(segment.text)
+                        ? ` ${segment.text}`
+                        : segment.text
+                    }}
+                    <span
+                      v-if="
+                        segment.icon &&
+                        resolveSegmentIcon(segment.icon) &&
+                        segment.iconPosition === 'after'
+                      "
+                      class="home-hero-highlights__icon"
+                    >
+                      <img
+                        :src="resolveSegmentIcon(segment.icon) ?? ''"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </span>
                   </NuxtLink>
                   <span v-else>
-                    {{ segmentIndex > 0 ? ` ${segment.text}` : segment.text }}
+                    <span
+                      v-if="
+                        segment.icon &&
+                        resolveSegmentIcon(segment.icon) &&
+                        segment.iconPosition !== 'after'
+                      "
+                      class="home-hero-highlights__icon"
+                    >
+                      <img
+                        :src="resolveSegmentIcon(segment.icon) ?? ''"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </span>
+                    {{
+                      segmentIndex > 0 && !/^[.,;!?)]/.test(segment.text)
+                        ? ` ${segment.text}`
+                        : segment.text
+                    }}
+                    <span
+                      v-if="
+                        segment.icon &&
+                        resolveSegmentIcon(segment.icon) &&
+                        segment.iconPosition === 'after'
+                      "
+                      class="home-hero-highlights__icon"
+                    >
+                      <img
+                        :src="resolveSegmentIcon(segment.icon) ?? ''"
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    </span>
                   </span>
                 </template>
               </p>
@@ -432,6 +749,96 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
         </SectionReveal>
       </v-col>
     </v-row>
+    <SectionReveal class="home-hero-highlights__ai-summary" transition="fade">
+      <RoundedCornerCard
+        class="home-hero-highlights__ai-summary-card"
+        surface="strong"
+        accent-corner="bottom-right"
+        corner-variant="none"
+        corner-size="lg"
+        rounded="lg"
+        :selectable="false"
+        :elevation="10"
+        :hover-elevation="14"
+      >
+        <div class="home-hero-highlights__ai-summary-content">
+          <v-row align="center">
+            <v-col
+              cols="12"
+              md="2"
+              class="home-hero-highlights__ai-summary-icon"
+            >
+              <v-icon size="56" color="secondary">mdi-robot</v-icon>
+            </v-col>
+            <v-col
+              cols="12"
+              md="10"
+              class="home-hero-highlights__ai-summary-text"
+            >
+              <div class="home-hero-highlights__ai-summary-header">
+                <span class="home-hero-highlights__ai-summary-title">
+                  <v-icon color="secondary" class="mr-2"
+                    >mdi-bullhorn-variant</v-icon
+                  >
+                  {{ aiSummaryTitle }}
+                </span>
+              </div>
+              <p class="home-hero-highlights__ai-summary-description">
+                {{ aiSummaryDescription }}
+              </p>
+
+              <div class="home-hero-highlights__ai-summary-actions">
+                <div
+                  v-if="aiSummaryReviewedLabel"
+                  class="home-hero-highlights__ai-summary-secondary-info"
+                >
+                  <v-icon start size="small" color="secondary"
+                    >mdi-information-outline</v-icon
+                  >
+                  {{ aiSummaryReviewedLabel }}
+                </div>
+
+                <v-btn
+                  color="secondary"
+                  variant="flat"
+                  rounded="pill"
+                  prepend-icon="mdi-bullhorn-variant"
+                  @click="isCreditsDialogActive = true"
+                >
+                  {{ aiSummaryCreditsLabel }}
+                </v-btn>
+              </div>
+            </v-col>
+          </v-row>
+        </div>
+      </RoundedCornerCard>
+    </SectionReveal>
+
+    <v-dialog v-model="isCreditsDialogActive" max-width="600">
+      <v-card class="pa-4" rounded="xl">
+        <v-card-text class="text-center pa-6">
+          <div class="d-flex justify-center gap-6 mb-8">
+            <v-icon size="56" color="primary">mdi-robot</v-icon>
+            <v-icon size="56" color="secondary">mdi-creation</v-icon>
+            <v-icon size="56" color="accent">mdi-sparkles</v-icon>
+          </div>
+          <p class="text-h6 font-weight-medium mb-2">
+            Rendez vous sur les pages produits non encore synthétisées pour
+            activer vos générations !
+          </p>
+        </v-card-text>
+        <v-card-actions class="justify-center pt-0 pb-4">
+          <v-btn
+            color="primary"
+            variant="flat"
+            size="large"
+            @click="isCreditsDialogActive = false"
+          >
+            Compris !
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -474,6 +881,8 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
   display: flex
   flex-direction: column
   gap: 0.6rem
+  align-items: center
+  text-align: center
 
 .home-hero-highlights__title
   margin: 0
@@ -492,4 +901,76 @@ const applyProductsCategoriesPlaceholder = (items: HeroHighlightItem[]) => {
   text-decoration: underline
   text-decoration-thickness: 0.08em
   text-underline-offset: 0.1em
+
+.home-hero-highlights__icon
+  display: inline-flex
+  align-items: center
+  margin-inline: 0.15rem
+  vertical-align: text-bottom
+
+  img
+    width: 1rem
+    height: 1rem
+    display: inline-block
+    vertical-align: middle
+
+.home-hero-highlights__ai-summary
+  margin-top: 1.25rem
+
+.home-hero-highlights__ai-summary-cards-container
+  width: 100%
+
+.home-hero-highlights__ai-summary-card
+  width: 100%
+  /* Styles are now handled by RoundedCornerCard props */
+
+.home-hero-highlights__ai-summary-content
+  padding: 0.9rem 1.1rem
+  row-gap: 0.35rem
+
+.home-hero-highlights__ai-summary-icon
+  display: flex
+  justify-content: center
+
+.home-hero-highlights__ai-summary-header
+  display: flex
+  flex-wrap: wrap
+  justify-content: center
+  gap: 0.5rem
+  font-weight: 600
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.home-hero-highlights__ai-summary-title
+  font-size: 0.95rem
+
+.home-hero-highlights__ai-summary-text
+  text-align: center
+  display: flex
+  flex-direction: column
+  gap: 0.25rem
+
+.home-hero-highlights__ai-summary-description
+  margin: 0
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: 0.85rem
+  line-height: 1.4
+
+.home-hero-highlights__ai-summary-actions
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  justify-content: center
+  gap: 1rem
+  margin-top: 1rem
+
+.home-hero-highlights__ai-summary-secondary-info
+  display: inline-flex
+  align-items: center
+  padding: 0.35rem 0.85rem
+  background: rgba(var(--v-theme-surface-default), 0.6)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3)
+  border-radius: 999px
+  font-size: 0.8rem
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  backdrop-filter: blur(4px)
 </style>

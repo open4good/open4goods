@@ -111,10 +111,24 @@
               "title": "🌿 ImpactScore: guiding your purchases",
               "segments": [
                 {
-                  "text": "An innovative ecological and environmental assessment for {products} products across"
+                  "text": "Buy less harmful for the planet, thanks to our"
                 },
                 {
-                  "text": "{categories} categories",
+                  "text": "environmental assessment",
+                  "to": "/impact-score"
+                },
+                {
+                  "text": "covering"
+                },
+                {
+                  "text": "{impactScoreProducts}",
+                  "to": "/impact-score"
+                },
+                {
+                  "text": "products across"
+                },
+                {
+                  "text": "{impactScoreCategories} categories",
                   "to": "/categories"
                 }
               ]
@@ -123,15 +137,33 @@
               "title": "🇫🇷 Open & ethical",
               "segments": [
                 {
-                  "text": "100% independent. Over {millions}M products in"
+                  "text": "100% independent. Made in France,",
+                  "icon": "breton-flag",
+                  "iconPosition": "after"
+                },
+                {
+                  "text": "hosted in Europe. Over"
+                },
+                {
+                  "text": "{millions}M",
+                  "to": "/opendata"
+                },
+                {
+                  "text": "products in"
                 },
                 {
                   "text": "open data.",
                   "to": "/opendata"
                 },
                 {
-                  "text": "Open-source software",
+                  "text": "Nudger is also"
+                },
+                {
+                  "text": "open source",
                   "to": "/opensource"
+                },
+                {
+                  "text": "and collects no personal data."
                 }
               ]
             },
@@ -139,14 +171,21 @@
               "title": "Price comparison",
               "segments": [
                 {
-                  "text": "Avoid price traps with"
+                  "text": "Avoid price traps with the best offers from"
                 },
                 {
-                  "text": "{partnersLink}.",
+                  "text": "{partnersLink}",
                   "to": "/partners"
                 },
                 {
-                  "text": "Best prices, new and used price history for {products} products"
+                  "text": "merchants. Buy at the right time with new and used price history for"
+                },
+                {
+                  "text": "{priceHistoryProducts}",
+                  "to": "/categories"
+                },
+                {
+                  "text": "products."
                 }
               ]
             }
@@ -328,10 +367,24 @@
           "title": "🌿 ImpactScore: guiding your purchases",
           "segments": [
             {
-              "text": "An innovative ecological and environmental assessment for {products} products across"
+              "text": "Buy less harmful for the planet, thanks to our"
             },
             {
-              "text": "{categories} categories",
+              "text": "environmental assessment",
+              "to": "/impact-score"
+            },
+            {
+              "text": "covering"
+            },
+            {
+              "text": "{impactScoreProducts}",
+              "to": "/impact-score"
+            },
+            {
+              "text": "products across"
+            },
+            {
+              "text": "{impactScoreCategories} categories",
               "to": "/categories"
             }
           ]
@@ -340,15 +393,33 @@
           "title": "🇫🇷 Open & ethical",
           "segments": [
             {
-              "text": "100% independent. Over {millions}M products in"
+              "text": "100% independent. Made in France,",
+              "icon": "breton-flag",
+              "iconPosition": "after"
+            },
+            {
+              "text": "hosted in Europe. Over"
+            },
+            {
+              "text": "{millions}M",
+              "to": "/opendata"
+            },
+            {
+              "text": "products in"
             },
             {
               "text": "open data.",
               "to": "/opendata"
             },
             {
-              "text": "Open-source software",
+              "text": "Nudger is also"
+            },
+            {
+              "text": "open source",
               "to": "/opensource"
+            },
+            {
+              "text": "and collects no personal data."
             }
           ]
         },
@@ -356,18 +427,41 @@
           "title": "Price comparison",
           "segments": [
             {
-              "text": "Avoid price traps with"
+              "text": "Avoid price traps with the best offers from"
             },
             {
-              "text": "{partnersLink}.",
+              "text": "{partnersLink}",
               "to": "/partners"
             },
             {
-              "text": "Best prices, new and used price history for {products} products"
+              "text": "merchants. Buy at the right time with new and used price history for"
+            },
+            {
+              "text": "{priceHistoryProducts}",
+              "to": "/categories"
+            },
+            {
+              "text": "products. An example?"
+            },
+            {
+              "text": "{randomProduct}",
+              "to": "{randomProductLink}"
             }
           ]
         }
       ],
+      "aiSummary": {
+        "title": "Community AI summary",
+        "creditsLabel": "Credits remaining: {count}",
+        "creditsFallback": "Credits remaining: unavailable",
+        "description": "A powerful tool with real AI inside, giving you a panoramic view of your product. Free and community-driven.",
+        "reviewedProductsSuffix": "{reviewedProductsCount} product pages generated so far."
+      },
+      "example": {
+        "title": "Example?",
+        "description": "Discover a random product to explore our catalog.",
+        "cta": "View this product"
+      },
       "agent": {
         "title": "Any questions?",
         "subtitle": "Ask your question to our expert AI agent Nudger."
@@ -899,6 +993,10 @@
         "new": "New",
         "used": "Used"
       },
+      "searchMode": {
+        "semantic": "Semantic search",
+        "text": "Text search"
+      },
       "showMoreImpact": "Show more impact filters",
       "showMoreTechnical": "Show more technical filters",
       "technicalTitle": "Technical filters",
@@ -1041,10 +1139,16 @@
     }
   },
   "common": {
+    "count": {
+      "months": "{count} month | {count} months",
+      "years": "{count} year | {count} years"
+    },
     "actions": {
       "goHome": "Back to homepage",
-      "retry": "Retry"
+      "retry": "Retry",
+      "close": "Close"
     },
+    "years": "years",
     "boolean": {
       "false": "No",
       "true": "Yes"
@@ -1054,7 +1158,9 @@
     "impactScore": {
       "tooltip": "Impact quality rated at {value} out of {max}",
       "tooltipBadge": "Impact quality rated at {value} out of 20",
-      "outOf20": "/20"
+      "outOf20": "/20",
+      "scale": "Scale: {min}–{max}",
+      "svgAriaLabel": "Score {score} out of 20"
     },
     "pageLoadingOverlay": {
       "label": "Loading page content"
@@ -2260,13 +2366,13 @@
     },
     "columns": {
       "verticals": {
-        "title": "Semantic categories",
+        "title": "Semantic categories ({count})",
         "emptyTitle": "No category matches for “{query}”",
         "emptyDescription": "Try a different keyword or broaden your query.",
         "unknownTitle": "Other categories"
       },
       "products": {
-        "title": "Uncategorised products",
+        "title": "Uncategorised products ({count})",
         "subtitle": "Products matched semantically without an assigned category.",
         "emptyTitle": "No uncategorised products for “{query}”",
         "emptyDescription": "Try another keyword or adjust your filters."
@@ -2438,6 +2544,11 @@
         "agreement": "I authorize Nudger to research and summarize information about {productName}. In a spirit of sobriety and sharing, I also agree that this data can be shared with all Nudger users.",
         "bannerDescription": "Start a summary for {productName}.",
         "bannerTitle": "AI summary",
+        "callToAction": {
+          "title": "No summary available",
+          "subtitle": "Ask our AI to generate a summary for this product.",
+          "subtitleVariant": "We provide a powerful tool to know everything about {bestName}"
+        },
         "cancel": "Cancel",
         "close": "Close",
         "description": "blabla",
@@ -2476,6 +2587,24 @@
         "failed": "Generation failed",
         "running": "Generation in progress ({step})",
         "success": "Summary available"
+      },
+      "generationPanel": {
+        "title": "AI Generations",
+        "quotaTitle": "{count} → Remaining quota",
+        "expandPanel": "Expand",
+        "collapsePanel": "Collapse",
+        "status": {
+          "generating": "Generating...",
+          "success": "Completed",
+          "error": "Failed"
+        },
+        "alert": {
+          "successTitle": "Summary ready!",
+          "successMessage": "The summary for {product} has been generated successfully.",
+          "errorTitle": "Generation failed",
+          "errorMessage": "Unable to generate the summary for {product}.",
+          "viewResult": "View summary"
+        }
       },
       "subtitle": {
         "one": "An AI-written synthesis built from {count} verified source.",
@@ -2629,6 +2758,9 @@
       }
     },
     "hero": {
+      "aiReview": {
+        "label": "AI Summary"
+      },
       "aiSummary": {
         "community": "Experts say",
         "ecological": "Environmentally",
@@ -2685,7 +2817,16 @@
       "viewOffersCount": "View the {count} offers",
       "viewSingleOffer": "View the offer"
     },
+    "eprel": {
+      "detailsTitle": "European Registry for Energy Labelling",
+      "marketEndDate": "End of market date",
+      "minSoftwareUpdates": "Min. recurring software updates",
+      "minSpareParts": "Min. spare parts availability",
+      "outOfMarketDuration": "Out of market for",
+      "supportGuaranteedUntil": "Guaranteed support until"
+    },
     "impact": {
+      "endOfLife": "This product is no longer marketed by {brand}. Legal support durations started from {onMarketEndDate}.",
       "alternatives": {
         "title": "Greener alternatives",
         "subtitle": "Discover similar products with a better impact score or price.",
@@ -2695,8 +2836,11 @@
         "untitled": "Unnamed product",
         "viewProduct": "View product {name}",
         "filters": {
-          "price": "Price ≤ yours",
-          "ecoscore": "Eco-score ≥ yours"
+          "price": "Price lower or equal to current product",
+          "ecoscore": "Eco-score higher or equal to current product",
+          "attributeGreater": "{label} higher or equal to this product",
+          "attributeLower": "{label} lower or equal to this product",
+          "attributeEqual": "{label} same as this product"
         },
         "tooltips": {
           "price": "Show products priced at or below {value}.",
@@ -2768,6 +2912,16 @@
           },
           "statisticalMethod": {
             "title": "Statistical method",
+            "titles": {
+              "sigma": "Statistical method: Normal Distribution (Sigma)",
+              "percentile": "Statistical method: Percentile",
+              "minmax_fixed": "Statistical method: Fixed Bounds",
+              "minmax_observed": "Statistical method: Observed Bounds",
+              "minmax_quantile": "Statistical method: Quantile Bounds",
+              "fixed_mapping": "Statistical method: Fixed Mapping",
+              "binary": "Statistical method: Binary",
+              "constant": "Statistical method: Constant"
+            },
             "sigma": {
               "bounds": "Normalization spans [{sigmaLower}{unit} ; {sigmaUpper}{unit}] based on {sigmaK}σ around the mean.",
               "scoring": "The score is computed by comparing the value with the ±{sigmaK}σ bounds around the mean.",
@@ -2779,6 +2933,9 @@
             },
             "minmax_fixed": {
               "scoring": "The score is scaled between the fixed bounds [{fixedMin}{unit} ; {fixedMax}{unit}]."
+            },
+            "minmax_observed": {
+              "scoring": "The score is calculated by projecting the value onto the scale of observed market values [min: {worst}{unit} ; max: {best}{unit}]."
             },
             "minmax_quantile": {
               "scoring": "The score is scaled using quantile bounds [{quantileLow}{unit} ; {quantileHigh}{unit}] to limit outliers."
@@ -2799,6 +2956,7 @@
             "sigma": "This method is set in the attribute configuration for continuous values. σ is the standard deviation and {sigmaK}σ represents the interval around the mean that contains most values.",
             "percentile": "This method is used when values are sparse or highly discrete. The configuration favors a relative ranking within the distribution.",
             "minmax_fixed": "This method applies when the attribute has stable bounds defined in configuration. It fits well for standardized ranges.",
+            "minmax_observed": "Used to compare the product against the actual market offer. The score depends directly on the best and worst performances currently available.",
             "minmax_quantile": "This method is used to reduce the impact of extreme values. The configuration relies on quantiles to keep comparisons relative.",
             "fixed_mapping": "This method is selected for categorical values with a fixed mapping defined in configuration.",
             "binary": "This method applies when the attribute is evaluated against a threshold. The configuration defines the pass value.",
@@ -2878,6 +3036,7 @@
       "overview": "Overview",
       "alternatives": "Alternatives",
       "price": "Pricing",
+      "timeline": "Key Moments",
       "submenus": {
         "price": {
           "bestOffers": "Best offers",
@@ -2895,13 +3054,25 @@
       "fabLabel": "Need tailored help?"
     },
     "price": {
+      "lowCompetition": "Low competition!",
       "condition": {
+        "NEW": "New",
         "new": "New",
+        "OCCASION": "Second-hand",
         "occasion": "Second-hand",
         "refurbished": "Refurbished",
         "unknown": "Unknown",
         "used": "Second-hand"
       },
+      "table": {
+        "merchant": "Merchant",
+        "price": "Price",
+        "condition": "Condition"
+      },
+      "newOffersOnly": "Show new offers only",
+      "bestOffers": "Best offers",
+      "viewDeal": "View deal",
+      "history": "Price history",
       "noOffersBanner": "No offers available right now!",
       "headers": {
         "condition": "Condition",

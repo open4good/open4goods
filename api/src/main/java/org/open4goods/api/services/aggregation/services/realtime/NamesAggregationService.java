@@ -215,7 +215,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 					// SEO meta generation intentionally left commented-out (as in original),
 					// because of previous disk-space / stack-trace issues and template evaluation failures.
 					// Keeping behavior unchanged.
-					
+
 					// ---- Card Title ----
 					if (tConf.getCardTitle() != null) {
 						String computed = computeTemplate(data, tConf.getCardTitle());
@@ -522,6 +522,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 			chunks.addAll(offers);
 		}
 
+		// TODO : Should be all attributes
 		// Popular attribute name/value pairs (whitelisted per vertical)
 		List<String> popularAttributeKeys = vConf != null ? vConf.getPopularAttributes() : List.of();
 		if (!popularAttributeKeys.isEmpty() && data.getAttributes() != null) {
@@ -562,7 +563,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	 * Computes a text from a template string with placeholders like {BRAND}, {MODEL}, {ATTRIBUTE_KEY}.
 	 * Placeholders are replaced by product attribute values.
 	 * If a placeholder cannot be resolved, it is removed.
-	 * 
+	 *
 	 * @param data product data
 	 * @param template the template string
 	 * @return computed text
@@ -573,16 +574,16 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 
 
-		
+
 		// Simple regex to find {KEY} pattern
 		java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\{([A-Z0-9_]+)\\}");
 		java.util.regex.Matcher matcher = pattern.matcher(template);
-		
+
 		StringBuffer sb = new StringBuffer();
 		while (matcher.find()) {
 			String key = matcher.group(1);
 			String value = null;
-			
+
 			if ("BRAND".equals(key)) {
 				value = data.brand();
 			} else if ("MODEL".equals(key)) {
@@ -593,7 +594,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 					value = data.getAttributes().val(key);
 				}
 			}
-			
+
 			if (value != null) {
 				// Sanitize value
 				matcher.appendReplacement(sb, java.util.regex.Matcher.quoteReplacement(value.trim()));
@@ -603,7 +604,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 			}
 		}
 		matcher.appendTail(sb);
-		
+
 		return StringUtils.normalizeSpace(sb.toString());
 	}
 

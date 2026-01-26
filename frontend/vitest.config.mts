@@ -7,6 +7,7 @@ export default defineVitestConfig({
     testTimeout: 60000,
     hookTimeout: 60000,
     exclude: [...configDefaults.exclude, 'tests/visual/**'],
+    setupFiles: ['./vitest-setup.ts'],
   },
   server: {
     watch: {

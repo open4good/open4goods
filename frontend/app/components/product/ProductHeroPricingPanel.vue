@@ -447,9 +447,7 @@ const truncateString = (str: string, length: number) => {
   return str.slice(0, length) + '...'
 }
 
-const alternativeOffersToDisplay = computed(
-  () => props.alternativeOffers ?? []
-)
+const alternativeOffersToDisplay = computed(() => props.alternativeOffers ?? [])
 
 const conditionIcon = computed(() =>
   props.condition === 'new' ? 'mdi-tag-outline' : 'mdi-recycle-variant'
@@ -555,19 +553,20 @@ watch(
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  padding: 0.5rem 0.75rem;
-  border-radius: 16px;
-  width: 75%;
-  margin: 0 auto;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  padding: 0.5rem 0;
+  border-radius: 0;
+  width: 100%;
+  margin: 0;
+  box-shadow: none;
   text-decoration: none;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__pricing-panel-main--link:hover,
 .product-hero__pricing-panel-main--link:focus-visible {
-  box-shadow: 0 16px 32px rgba(var(--v-theme-shadow-primary-600), 0.18);
+  box-shadow: none;
   cursor: pointer;
+  background: rgba(var(--v-theme-surface-default), 0.5);
 }
 
 .product-hero__pricing-panel-merchant {
