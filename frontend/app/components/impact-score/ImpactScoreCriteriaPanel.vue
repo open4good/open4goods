@@ -1,9 +1,6 @@
 <template>
   <section class="impact-score-criteria-panel">
     <div v-if="showFilters" class="impact-score-criteria-panel__filters">
-      <span class="impact-score-criteria-panel__filters-label">
-        {{ t('impactScoreCriteriaPanel.filters.label') }}
-      </span>
       <v-chip-group
         v-model="selectedFilter"
         class="impact-score-criteria-panel__filters-group"
@@ -71,9 +68,11 @@
       <v-col
         v-for="criterion in displayedCriteria"
         :key="criterion.key"
-        cols="12"
-        sm="6"
-        md="4"
+        :cols="columnLayout.cols"
+        :sm="columnLayout.sm"
+        :md="columnLayout.md"
+        :lg="columnLayout.lg"
+        :xl="columnLayout.xl"
       >
         <v-card
           class="impact-score-criteria-panel__card"
@@ -125,16 +124,26 @@ import {
   type ImpactScoreCriterion,
 } from '~/composables/impact-score/useImpactScoreCriteria'
 
+type CriteriaColumns = {
+  cols?: number
+  sm?: number
+  md?: number
+  lg?: number
+  xl?: number
+}
+
 const props = withDefaults(
   defineProps<{
     variant?: 'cards' | 'table'
     verticalId?: string | null
     criteria?: ImpactScoreCriterion[]
+    columns?: CriteriaColumns
   }>(),
   {
     variant: 'cards',
     verticalId: null,
     criteria: undefined,
+    columns: () => ({}),
   }
 )
 
@@ -150,6 +159,12 @@ const {
 const selectedFilter = ref<string>('all')
 
 const showFilters = computed(() => !props.verticalId)
+const columnLayout = computed(() => ({
+  cols: 12,
+  sm: 6,
+  md: 4,
+  ...props.columns,
+}))
 
 const filters = computed(() => [
   { id: 'all', label: t('impactScoreCriteriaPanel.filters.all') },

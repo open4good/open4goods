@@ -21,6 +21,7 @@
         {{ t('impactScorePage.sections.methodology.verticalLabel') }}
       </span>
       <ResponsiveCarousel
+        class="impact-score-methodology__carousel"
         :items="verticalCapsules"
         :aria-label="t('impactScorePage.sections.methodology.verticalCarouselAria')"
         :breakpoints="{ xs: 1, sm: 2, md: 3, lg: 3, xl: 3 }"
@@ -70,22 +71,21 @@
               <h3 class="impact-score-methodology__card-title">
                 {{ item.label }}
               </h3>
-              <NuxtLink
+              <v-btn
                 class="impact-score-methodology__card-cta"
-                :to="item.ecoscoreLink"
+                :to="item.categoryLink"
                 :aria-label="
                   t('impactScorePage.sections.methodology.verticalCtaAria', {
                     vertical: item.label,
                   })
                 "
-                @click.stop.prevent="navigateToEcoscore(item.ecoscoreLink)"
-                @keydown.enter.prevent="navigateToEcoscore(item.ecoscoreLink)"
+                @click.stop
               >
                 <span>{{
                   t('impactScorePage.sections.methodology.verticalCta')
                 }}</span>
                 <v-icon icon="mdi-arrow-top-right" size="16" />
-              </NuxtLink>
+              </v-btn>
             </div>
           </v-card>
         </template>
@@ -168,6 +168,10 @@ const verticalCapsules = computed(() =>
 const navigateToEcoscore = (link: string) => {
   router.push(link)
 }
+
+const navigateToCategory = (link: string) => {
+  router.push(link)
+}
 </script>
 
 <style scoped>
@@ -233,11 +237,11 @@ const navigateToEcoscore = (link: string) => {
 }
 
 .impact-score-methodology__card-media {
-  padding: 1.25rem 1.25rem 0;
+  padding: 1.1rem 1.1rem 0;
 }
 
 .impact-score-methodology__card-image {
-  height: 180px;
+  height: 160px;
   border-radius: 18px;
   background: rgba(var(--v-theme-surface-primary-080), 0.7);
 }
@@ -252,7 +256,7 @@ const navigateToEcoscore = (link: string) => {
 .impact-score-methodology__card-body {
   display: grid;
   gap: 0.5rem;
-  padding: 1.25rem;
+  padding: 1.1rem;
 }
 
 .impact-score-methodology__card-label {
@@ -276,8 +280,8 @@ const navigateToEcoscore = (link: string) => {
   align-items: center;
   gap: 0.35rem;
   font-weight: 600;
-  color: rgb(var(--v-theme-primary));
-  text-decoration: none;
+  text-transform: none;
+  padding-inline: 0.25rem;
 }
 
 .impact-score-methodology__card-cta :deep(.v-icon) {
@@ -287,5 +291,9 @@ const navigateToEcoscore = (link: string) => {
 .impact-score-methodology__empty {
   margin: 0;
   color: rgb(var(--v-theme-text-neutral-secondary));
+}
+
+.impact-score-methodology__carousel :deep(.responsive-carousel__slide) {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 </style>
