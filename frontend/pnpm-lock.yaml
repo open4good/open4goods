@@ -9,7 +9,7 @@ overrides:
   tar: ^7.5.4
   lodash: ^4.17.23
   lodash-es: ^4.17.23
-  undici: ^6.23.0
+  undici: ^7.0.0
 
 importers:
 
@@ -8630,9 +8630,9 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
-  undici@6.23.0:
-    resolution: {integrity: sha512-VfQPToRA5FZs/qJxLIinmU59u0r7LXqoJkCzinq3ckNJp3vKEh7jTWN589YQ5+aoAC/TGRLyJLCPKcLQbM8r9g==}
-    engines: {node: '>=18.17'}
+  undici@7.19.1:
+    resolution: {integrity: sha512-Gpq0iNm5M6cQWlyHQv9MV+uOj1jWk7LpkoE5vSp/7zjb4zMdAcUD+VL5y0nH4p9EbUklq00eVIIX/XcDHzu5xg==}
+    engines: {node: '>=20.18.1'}
 
   unenv@2.0.0-rc.24:
     resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
@@ -9471,7 +9471,7 @@ snapshots:
   '@actions/http-client@3.0.1':
     dependencies:
       tunnel: 0.0.6
-      undici: 6.23.0
+      undici: 7.19.1
 
   '@actions/io@2.0.0': {}
 
@@ -12837,7 +12837,7 @@ snapshots:
       p-filter: 4.1.0
       semantic-release: 25.0.2(typescript@5.9.3)
       tinyglobby: 0.2.15
-      undici: 6.23.0
+      undici: 7.19.1
       url-join: 5.0.0
     transitivePeerDependencies:
       - supports-color
@@ -19398,7 +19398,7 @@ snapshots:
 
   undici-types@7.16.0: {}
 
-  undici@6.23.0: {}
+  undici@7.19.1: {}
 
   unenv@2.0.0-rc.24:
     dependencies:
