@@ -294,6 +294,7 @@ const navigateToCategory = (link: string) => {
   font-weight: 600;
   text-transform: none;
   padding-inline: 0.25rem;
+  align-self: flex-start;
 }
 
 .impact-score-methodology__card-cta :deep(.v-icon) {
