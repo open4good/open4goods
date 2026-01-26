@@ -131,6 +131,25 @@
                 </div>
               </div>
             </div>
+
+            <div v-if="gtinCountry" class="product-attributes__identity-row">
+              <span class="product-attributes__identity-label">
+                {{ $t('product.hero.gtinTooltip', "Pays d'origine") }}
+              </span>
+              <div
+                class="product-attributes__identity-value product-attributes__identity-value--country"
+              >
+                <img
+                  v-if="gtinCountry.flag"
+                  :src="gtinCountry.flag"
+                  :alt="gtinCountry.name"
+                  class="product-attributes__flag"
+                  width="24"
+                  height="18"
+                />
+                <span>{{ gtinCountry.name }}</span>
+              </div>
+            </div>
           </div>
 
           <p
@@ -798,6 +817,18 @@ const gtin = computed(
   () => props.product?.gtin ?? props.product?.base?.gtin ?? null
 )
 const gtinType = computed(() => props.product?.base?.gtinInfo?.upcType ?? null)
+
+const gtinCountry = computed(() => {
+  const info = props.product?.base?.gtinInfo
+  if (!info?.countryName) {
+    return null
+  }
+
+  return {
+    name: info.countryName,
+    flag: info.countryFlagUrl ?? null,
+  }
+})
 const technicalShortReview = computed(
   () => props.product?.aiReview?.review?.technicalShortReview?.trim() ?? ''
 )

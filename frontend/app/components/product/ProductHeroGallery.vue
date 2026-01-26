@@ -218,6 +218,7 @@ import {
 import { useI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
 import type { PictureSwipeItem, PictureSwipeOptions } from 'vue3-picture-swipe'
+import 'vue3-picture-swipe/dist/vue3-picture-swipe.css'
 
 defineOptions({ inheritAttrs: false })
 

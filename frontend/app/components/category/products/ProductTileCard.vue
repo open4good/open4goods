@@ -26,21 +26,7 @@
             </template>
           </v-img>
 
-          <div class="product-tile-card__corner" role="presentation">
-            <ImpactScore
-              v-if="impactScore != null"
-              :score="impactScore"
-              :max="scoreMax"
-              size="small"
-              mode="badge"
-              badge-layout="stacked"
-              badge-variant="corner"
-              flat
-            />
-            <span v-else class="product-tile-card__corner-fallback">
-              {{ notRatedLabel }}
-            </span>
-          </div>
+          <!-- Corner Score Removed -->
         </div>
 
         <div class="product-tile-card__content">

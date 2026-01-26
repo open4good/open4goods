@@ -1,28 +1,6 @@
 <template>
   <article v-if="score" class="impact-ecoscore">
-    <div class="d-flex justify-space-between align-center flex-wrap gap-4 mb-6">
-      <ImpactScore
-        :score="normalizedScore"
-        :max="5"
-        size="xxlarge"
-        mode="badge"
-        badge-layout="stacked"
-      />
-
-      <v-btn
-        :to="methodologyHref"
-        variant="flat"
-        class="text-none px-6 font-weight-bold"
-        color="primary"
-        rounded="pill"
-        :aria-label="$t('product.impact.methodologyLinkAria')"
-        append-icon="mdi-arrow-right"
-      >
-        {{ $t('product.impact.methodologyLink') }}
-      </v-btn>
-    </div>
-
-    <div v-if="aiImpactText" class="impact-ecoscore__ai-text">
+    <div v-if="aiImpactText" class="impact-ecoscore__ai-text mb-6">
       <v-icon icon="mdi-robot" size="small" class="mr-2 text-primary" />
       <span class="text-body-2">{{ aiImpactText }}</span>
     </div>
@@ -44,6 +22,12 @@
 
       <v-col v-if="shouldDisplayRadar" cols="4" class="pa-2">
         <div class="impact-ecoscore__analysis-radar">
+          <ImpactScore
+            :score="normalizedScore"
+            :max="20"
+            size="lg"
+            class="align-self-center w-100"
+          />
           <ProductImpactRadarChart
             class="impact-ecoscore__analysis-radar-chart"
             :axes="radarAxes"
@@ -144,12 +128,13 @@ const normalizedScore = computed(() => {
     return 0
   }
 
-  // If value > 5, it means it's on a scale of 20. Normalize to 5.
-  if (rawValue > 5) {
-    return Math.max(0, Math.min(rawValue / 4, 5))
+  // If value is small (<=5), scale it to 20.
+  // If it's already > 5, assume it's out of 20 (or 100, but we cap at 20).
+  if (rawValue <= 5) {
+    return rawValue * 4
   }
 
-  return Math.max(0, Math.min(rawValue, 5))
+  return Math.min(rawValue, 20)
 })
 
 const normalizedVerticalEcoscorePath = computed(() => {

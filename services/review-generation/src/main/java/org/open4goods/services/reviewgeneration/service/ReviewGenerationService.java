@@ -915,7 +915,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
 		// 4. Resolve URLs (redirects)
 		processed = postProcess30x(processed);
-
+System.out.println(processed.getSources());
 		return processed;
 	}
 

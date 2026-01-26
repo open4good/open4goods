@@ -196,11 +196,8 @@ const itemInitials = (name: string) => {
 
 <style scoped lang="sass">
 .category-compare-panel
-  position: fixed
-  inset-inline-end: 1.5rem
-  inset-block-end: 1.5rem
-  width: min(420px, calc(100% - 3rem))
-  z-index: 12
+  width: 100%
+  pointer-events: auto
 
   &__card
     background: rgb(var(--v-theme-surface-glass))
@@ -303,9 +300,7 @@ const itemInitials = (name: string) => {
 
 @media (max-width: 600px)
   .category-compare-panel
-    inset-inline: 0
-    inset-block-end: 0
-    width: 100%
+    // width handled by container
 
     &__card
       border-radius: 1.25rem 1.25rem 0 0

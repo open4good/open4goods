@@ -67,11 +67,10 @@
                 class="product-hero__impact-score mb-4"
               >
                 <ImpactScore
-                  mode="svg"
                   :score="impactScore"
                   :min="impactScoreMin"
                   :max="impactScoreMax"
-                  svg-size="lg"
+                  size="lg"
                 />
               </div>
 
@@ -539,23 +538,6 @@ const heroAttributes = computed<HeroAttribute[]>(() => {
     baseAttributes.push(...popularAttributes.value)
   }
 
-  if (gtinCountry.value) {
-    if (
-      !baseAttributes.some(
-        attribute => attribute.key === 'base.gtinInfo.countryName'
-      )
-    ) {
-      baseAttributes.push({
-        key: 'gtin-country',
-        label: '',
-        value: gtinCountry.value.name,
-        flag: gtinCountry.value.flag,
-        tooltip: t('product.hero.gtinTooltip'),
-        showLabel: false,
-      })
-    }
-  }
-
   return baseAttributes
 })
 
@@ -727,18 +709,6 @@ const heroBreadcrumbProps = computed(() => ({
   items: heroBreadcrumbs.value,
   ariaLabel: t('product.hero.breadcrumbAriaLabel'),
 }))
-
-const gtinCountry = computed(() => {
-  const info = props.product.base?.gtinInfo
-  if (!info?.countryName) {
-    return null
-  }
-
-  return {
-    name: info.countryName,
-    flag: info.countryFlagUrl ?? null,
-  }
-})
 </script>
 
 <style scoped>
@@ -939,6 +909,7 @@ const gtinCountry = computed(() => {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.35rem 0.6rem;
+  justify-content: center;
 }
 
 .product-hero__brand-name {
@@ -963,11 +934,6 @@ const gtinCountry = computed(() => {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.product-hero__attribute--country {
-  margin-top: 1rem;
-  padding-top: 0.5rem;
 }
 
 .product-hero__actions {
