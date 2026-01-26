@@ -1295,7 +1295,7 @@
     "availableCriteria": {
       "eyebrow": "Critères",
       "title": "Critères disponibles",
-      "subtitle": "Explorez les critères utilisés selon chaque verticale Impact Score."
+      "subtitle": "Explorez les critères utilisés selon chaque catégorie."
     },
     "principles": {
       "eyebrow": "Nos principes",
@@ -1322,31 +1322,55 @@
     },
     "examples": {
       "eyebrow": "Exemples de calcul",
-      "title": "Un \u00e9co-score lisible",
-      "subtitle": "Deux produits du quotidien pour illustrer l\u2019Impact Score.",
-      "television": {
+      "title": "Exemples réels",
+      "subtitle": "Des extraits d’Impact Score issus de fiches produits d’appareils de cuisson.",
+      "whirlpoolOven": {
         "eyebrow": "Exemple 1",
-        "title": "Téléviseur 55'' à dalle LED",
-        "description": "Étiquette énergie A, châssis en aluminium recyclé, pièces disponibles pendant 7 ans.",
+        "title": "Four encastrable Whirlpool OMSR58RU1SB",
+        "description": "Classe énergie A+, cavité 71 L et plusieurs sources marchands.",
         "breakdown": {
-          "energy": "Consommation optimisée (mode éco, capteur de luminosité)",
-          "materials": "60 % de métaux recyclés dans le châssis et le pied",
-          "repairability": "Indice de réparabilité élevé, tutoriels accessibles",
-          "transport": "Transport majoritairement maritime et mutualisé"
+          "energy": {
+            "label": "Classe énergie",
+            "value": "A+ (EPREL)"
+          },
+          "consumption": {
+            "label": "Consommation par cycle",
+            "value": "0,89 kWh/cycle"
+          },
+          "capacity": {
+            "label": "Capacité du four",
+            "value": "71 L"
+          },
+          "sources": {
+            "label": "Sources de données",
+            "value": "Cdiscount, Darty, Fnac, Rakuten"
+          }
         },
-        "conclusion": "Score élevé grâce à la sobriété énergétique et à la réparabilité, malgré un impact logistique présent."
+        "conclusion": "Impact Score 2,2/5, calculé à partir des données énergie, de la capacité et des sources disponibles."
       },
-      "washingMachine": {
+      "samsungOven": {
         "eyebrow": "Exemple 2",
-        "title": "Lave-linge 9 kg basse consommation",
-        "description": "Moteur à entraînement direct, pièces garanties 10 ans, programme éco par défaut.",
+        "title": "Four encastrable Samsung NV7B41307AK",
+        "description": "Étiquette A+, cavité 76 L et relevés d’énergie issus d’EPREL.",
         "breakdown": {
-          "energy": "Consommation annuelle réduite et étiquette A++",
-          "water": "Optimisation du volume d’eau par capteurs",
-          "durability": "Cuve renforcée et pièces disponibles sur la durée",
-          "logistics": "Packaging compact et livraison groupée"
+          "energy": {
+            "label": "Classe énergie",
+            "value": "A+ (EPREL)"
+          },
+          "consumption": {
+            "label": "Consommation par cycle",
+            "value": "1,05 kWh/cycle"
+          },
+          "capacity": {
+            "label": "Capacité du four",
+            "value": "76 L"
+          },
+          "sources": {
+            "label": "Sources de données",
+            "value": "EPREL, Darty, Cdiscount, Rakuten"
+          }
         },
-        "conclusion": "Un score solide grâce à l’efficacité à l’usage et à la durabilité des pièces, avec une logistique maîtrisée."
+        "conclusion": "Impact Score 2,1/5, reflet des performances énergétiques et de la couverture des données produit."
       }
     },
     "summary": {

@@ -32,6 +32,12 @@ const VIconStub = defineComponent({
   template: '<span />',
 })
 
+const VBtnStub = defineComponent({
+  name: 'VBtn',
+  inheritAttrs: false,
+  template: '<button v-bind="$attrs"><slot /></button>',
+})
+
 const ResponsiveCarouselStub = defineComponent({
   name: 'ResponsiveCarousel',
   props: {
@@ -54,6 +60,7 @@ const globalConfig = {
   stubs: {
     VChip: VChipStub,
     VCard: VCardStub,
+    VBtn: VBtnStub,
     VImg: VImgStub,
     VIcon: VIconStub,
     ResponsiveCarousel: ResponsiveCarouselStub,

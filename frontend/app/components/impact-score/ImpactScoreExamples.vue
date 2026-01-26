@@ -20,7 +20,7 @@
             <div>
               <p class="impact-score-examples__card-eyebrow">{{ example.eyebrow }}</p>
               <h3 class="impact-score-examples__card-title">{{ example.title }}</h3>
-              <p class="impact-score-examples__card-text">{{ example.description }}</p>
+              
             </div>
             <div class="impact-score-examples__score">
               <ImpactScore :score="example.score" :max="5" size="medium" />
@@ -55,64 +55,86 @@ const { t } = useI18n()
 
 const examples = computed(() => [
   {
-    key: 'television',
-    eyebrow: t('impactScorePage.examples.television.eyebrow'),
-    title: t('impactScorePage.examples.television.title'),
-    description: t('impactScorePage.examples.television.description'),
-    score: 4.2,
+    key: 'whirlpool-oven',
+    eyebrow: t('impactScorePage.examples.whirlpoolOven.eyebrow'),
+    title: t('impactScorePage.examples.whirlpoolOven.title'),
+    score: 2.2,
     breakdown: [
       {
-        label: t('impactScorePage.examples.television.breakdown.energy'),
-        value: '40%',
+        label: t('impactScorePage.examples.whirlpoolOven.breakdown.energy.label'),
+        value: t('impactScorePage.examples.whirlpoolOven.breakdown.energy.value'),
         icon: 'mdi-flash',
       },
       {
-        label: t('impactScorePage.examples.television.breakdown.materials'),
-        value: '25%',
-        icon: 'mdi-water-alert-outline',
+        label: t(
+          'impactScorePage.examples.whirlpoolOven.breakdown.consumption.label'
+        ),
+        value: t(
+          'impactScorePage.examples.whirlpoolOven.breakdown.consumption.value'
+        ),
+        icon: 'mdi-speedometer',
       },
       {
-        label: t('impactScorePage.examples.television.breakdown.repairability'),
-        value: '20%',
-        icon: 'mdi-tools',
+        label: t(
+          'impactScorePage.examples.whirlpoolOven.breakdown.capacity.label'
+        ),
+        value: t(
+          'impactScorePage.examples.whirlpoolOven.breakdown.capacity.value'
+        ),
+        icon: 'mdi-resize',
       },
       {
-        label: t('impactScorePage.examples.television.breakdown.transport'),
-        value: '15%',
-        icon: 'mdi-truck-fast-outline',
+        label: t(
+          'impactScorePage.examples.whirlpoolOven.breakdown.sources.label'
+        ),
+        value: t(
+          'impactScorePage.examples.whirlpoolOven.breakdown.sources.value'
+        ),
+        icon: 'mdi-database-outline',
       },
     ],
-    conclusion: t('impactScorePage.examples.television.conclusion'),
+    conclusion: t('impactScorePage.examples.whirlpoolOven.conclusion'),
   },
   {
-    key: 'washingMachine',
-    eyebrow: t('impactScorePage.examples.washingMachine.eyebrow'),
-    title: t('impactScorePage.examples.washingMachine.title'),
-    description: t('impactScorePage.examples.washingMachine.description'),
-    score: 3.6,
+    key: 'samsung-oven',
+    eyebrow: t('impactScorePage.examples.samsungOven.eyebrow'),
+    title: t('impactScorePage.examples.samsungOven.title'),
+    score: 2.1,
     breakdown: [
       {
-        label: t('impactScorePage.examples.washingMachine.breakdown.energy'),
-        value: '35%',
+        label: t('impactScorePage.examples.samsungOven.breakdown.energy.label'),
+        value: t('impactScorePage.examples.samsungOven.breakdown.energy.value'),
         icon: 'mdi-flash',
       },
       {
-        label: t('impactScorePage.examples.washingMachine.breakdown.water'),
-        value: '25%',
-        icon: 'mdi-water',
+        label: t(
+          'impactScorePage.examples.samsungOven.breakdown.consumption.label'
+        ),
+        value: t(
+          'impactScorePage.examples.samsungOven.breakdown.consumption.value'
+        ),
+        icon: 'mdi-speedometer',
       },
       {
-        label: t('impactScorePage.examples.washingMachine.breakdown.durability'),
-        value: '25%',
-        icon: 'mdi-shield-half-full',
+        label: t(
+          'impactScorePage.examples.samsungOven.breakdown.capacity.label'
+        ),
+        value: t(
+          'impactScorePage.examples.samsungOven.breakdown.capacity.value'
+        ),
+        icon: 'mdi-resize',
       },
       {
-        label: t('impactScorePage.examples.washingMachine.breakdown.logistics'),
-        value: '15%',
-        icon: 'mdi-ferry',
+        label: t(
+          'impactScorePage.examples.samsungOven.breakdown.sources.label'
+        ),
+        value: t(
+          'impactScorePage.examples.samsungOven.breakdown.sources.value'
+        ),
+        icon: 'mdi-database-outline',
       },
     ],
-    conclusion: t('impactScorePage.examples.washingMachine.conclusion'),
+    conclusion: t('impactScorePage.examples.samsungOven.conclusion'),
   },
 ])
 </script>

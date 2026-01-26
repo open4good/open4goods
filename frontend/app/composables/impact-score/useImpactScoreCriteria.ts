@@ -14,6 +14,10 @@ export type ImpactScoreCriterion = {
 
 type CriteriaByVerticalId = Record<string, ImpactScoreCriterion[]>
 
+const CRITERIA_ICON_OVERRIDES: Record<string, string> = {
+  'data-quality': 'mdi-database-check-outline',
+}
+
 const buildAttributeMap = (attributes: AttributeConfigDto[]) => {
   return attributes.reduce((map, attribute) => {
     if (attribute.key) {
@@ -33,12 +37,13 @@ export const buildCriteriaFromCategory = (
   return available.map(key => {
     const attribute = attributeMap.get(key)
     const fallbackName = attribute?.scoreTitle ?? attribute?.name ?? key
+    const resolvedIcon = attribute?.icon?.trim() || CRITERIA_ICON_OVERRIDES[key]
 
     return {
       key,
       name: fallbackName,
       utility: attribute?.scoreUtility ?? '',
-      icon: attribute?.icon ?? null,
+      icon: attribute?.icon ?? CRITERIA_ICON_OVERRIDES[key] ?? null,
     }
   })
 }
