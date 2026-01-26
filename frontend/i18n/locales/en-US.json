@@ -1500,49 +1500,49 @@
       "eyebrow": "Calculation examples",
       "title": "Real product snapshots",
       "subtitle": "Impact Score examples taken from real-world appliance and electronics listings.",
-      "whirlpoolOven": {
+      "samsungTv": {
         "eyebrow": "Example 1",
-        "title": "Whirlpool OMSR58RU1SB built-in oven",
-        "description": "A+ energy class, 71 L cavity and multiple retailer sources.",
+        "title": "Samsung Crystal UHD 55\" TV UE55CU7092",
+        "description": "Repairability, energy use, and software support from real product listings.",
         "breakdown": {
-          "energy": {
-            "label": "Energy class",
-            "value": "A+ (EPREL)"
+          "repairability": {
+            "label": "Repairability index",
+            "value": "7.3 / 10"
           },
           "consumption": {
-            "label": "Energy per cycle",
-            "value": "0.89 kWh/cycle"
+            "label": "Electricity consumption",
+            "value": "90 kWh/1000h"
           },
-          "capacity": {
-            "label": "Oven capacity",
-            "value": "71 L"
-          },
-          "sources": {
-            "label": "Data sources",
-            "value": "Cdiscount, Darty, Fnac, Rakuten"
-          }
-        }
-      },
-      "samsungTv": {
-        "eyebrow": "Example 2",
-        "title": "Samsung Crystal UHD 55\" TV",
-        "description": "Energy class G, 55\" screen size, with retailer data sources.",
-        "breakdown": {
-          "energy": {
+          "energyClass": {
             "label": "Energy class",
             "value": "G (EPREL)"
           },
-          "size": {
-            "label": "Screen size",
-            "value": "55\""
+          "softwareUpdates": {
+            "label": "Software updates",
+            "value": "7 years"
+          }
+        }
+      },
+      "fairphone": {
+        "eyebrow": "Example 2",
+        "title": "Fairphone 5 5G 256 GB smartphone",
+        "description": "A repair-friendly model with guaranteed long-term updates.",
+        "breakdown": {
+          "repairability": {
+            "label": "Repairability index",
+            "value": "9.3 / 10"
           },
-          "resolution": {
-            "label": "Resolution",
-            "value": "4K UHD"
+          "softwareUpdates": {
+            "label": "Software updates",
+            "value": "8 years"
           },
-          "sources": {
-            "label": "Data sources",
-            "value": "EPREL, Darty, Fnac, Cdiscount"
+          "warranty": {
+            "label": "Manufacturer warranty",
+            "value": "5 years"
+          },
+          "materials": {
+            "label": "Recycled materials",
+            "value": "70%"
           }
         }
       }

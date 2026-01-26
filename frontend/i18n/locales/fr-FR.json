@@ -1253,49 +1253,49 @@
       "eyebrow": "Exemples de calcul",
       "title": "Exemples réels",
       "subtitle": "Des extraits d’Impact Score issus de fiches produits d’électroménager et d’électronique du quotidien.",
-      "whirlpoolOven": {
+      "samsungTv": {
         "eyebrow": "Exemple 1",
-        "title": "Four encastrable Whirlpool OMSR58RU1SB",
-        "description": "Classe énergie A+, cavité 71 L et plusieurs sources marchands.",
+        "title": "Téléviseur Samsung Crystal UHD 55\" UE55CU7092",
+        "description": "Indice de réparabilité, énergie et suivi logiciel selon les sources produits.",
         "breakdown": {
-          "energy": {
-            "label": "Classe énergie",
-            "value": "A+ (EPREL)"
+          "repairability": {
+            "label": "Indice de réparabilité",
+            "value": "7,3 / 10"
           },
           "consumption": {
-            "label": "Consommation par cycle",
-            "value": "0,89 kWh/cycle"
+            "label": "Consommation électrique",
+            "value": "90 kWh/1000h"
           },
-          "capacity": {
-            "label": "Capacité du four",
-            "value": "71 L"
+          "energyClass": {
+            "label": "Classe énergétique",
+            "value": "G (EPREL)"
           },
-          "sources": {
-            "label": "Sources de données",
-            "value": "Cdiscount, Darty, Fnac, Rakuten"
+          "softwareUpdates": {
+            "label": "Mises à jour logicielles",
+            "value": "7 ans"
           }
         }
       },
-      "samsungTv": {
+      "fairphone": {
         "eyebrow": "Exemple 2",
-        "title": "Téléviseur Samsung Crystal UHD 55\"",
-        "description": "Classe énergie G, diagonale 55\" et sources distributeurs.",
+        "title": "Smartphone Fairphone 5 5G 256 Go",
+        "description": "Un modèle durable avec un indice de réparabilité élevé et des mises à jour garanties.",
         "breakdown": {
-          "energy": {
-            "label": "Classe énergie",
-            "value": "G (EPREL)"
+          "repairability": {
+            "label": "Indice de réparabilité",
+            "value": "9,3 / 10"
           },
-          "size": {
-            "label": "Taille de l’écran",
-            "value": "55\""
+          "softwareUpdates": {
+            "label": "Mises à jour logicielles",
+            "value": "8 ans"
           },
-          "resolution": {
-            "label": "Résolution",
-            "value": "4K UHD"
+          "warranty": {
+            "label": "Garantie constructeur",
+            "value": "5 ans"
           },
-          "sources": {
-            "label": "Sources de données",
-            "value": "EPREL, Darty, Fnac, Cdiscount"
+          "materials": {
+            "label": "Matériaux recyclés",
+            "value": "70 %"
           }
         }
       }
