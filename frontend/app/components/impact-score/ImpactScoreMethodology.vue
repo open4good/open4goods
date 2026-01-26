@@ -290,11 +290,13 @@ const navigateToCategory = (link: string) => {
 .impact-score-methodology__card-cta {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.35rem;
   font-weight: 600;
   text-transform: none;
   padding-inline: 0.25rem;
   align-self: flex-start;
+  text-align: left;
 }
 
 .impact-score-methodology__card-cta :deep(.v-icon) {
