@@ -536,7 +536,7 @@ const applyProductsWithoutVerticalPlaceholder = (
 
 // Fetch random product
 const { data: randomProduct } = await useFetch('/api/stats/random', {
-  query: { num: 1, minOffersCount: 1 },
+  query: { num: 1, minOffersCount: 3 },
   lazy: true,
 })
 
@@ -609,16 +609,19 @@ const resolveSegmentIcon = (icon?: string) => {
 
 const aiSummaryTitle = computed(() => t('home.hero.aiSummary.title'))
 const aiSummaryDescription = computed(() => {
-  const baseDescription = t('home.hero.aiSummary.description')
+  return t('home.hero.aiSummary.description')
+})
+
+const aiSummaryReviewedLabel = computed(() => {
   const reviewedProductsCount = formattedReviewedProductsCount.value
 
   if (reviewedProductsCount == null) {
-    return baseDescription
+    return null
   }
 
-  return `${baseDescription} ${t('home.hero.aiSummary.reviewedProductsSuffix', {
+  return t('home.hero.aiSummary.reviewedProductsSuffix', {
     reviewedProductsCount,
-  })}`
+  })
 })
 const aiSummaryCreditsLabel = computed(() => {
   const remaining = formattedAiSummaryRemainingCredits.value
@@ -747,41 +750,68 @@ const isCreditsDialogActive = ref(false)
       </v-col>
     </v-row>
     <SectionReveal class="home-hero-highlights__ai-summary" transition="fade">
-      <v-sheet
+      <RoundedCornerCard
         class="home-hero-highlights__ai-summary-card"
+        surface="strong"
+        accent-corner="bottom-right"
+        corner-variant="none"
+        corner-size="lg"
         rounded="lg"
-        elevation="3"
+        :selectable="false"
+        :elevation="10"
+        :hover-elevation="14"
       >
-        <v-row class="home-hero-highlights__ai-summary-content" align="center">
-          <v-col cols="12" md="2" class="home-hero-highlights__ai-summary-icon">
-            <v-icon size="56" color="secondary">mdi-robot</v-icon>
-          </v-col>
-          <v-col cols="12" md="10" class="home-hero-highlights__ai-summary-text">
-            <div class="home-hero-highlights__ai-summary-header">
-              <span class="home-hero-highlights__ai-summary-title">
-                <v-icon color="secondary" class="mr-2"
-                  >mdi-bullhorn-variant</v-icon
+        <div class="home-hero-highlights__ai-summary-content">
+          <v-row align="center">
+            <v-col
+              cols="12"
+              md="2"
+              class="home-hero-highlights__ai-summary-icon"
+            >
+              <v-icon size="56" color="secondary">mdi-robot</v-icon>
+            </v-col>
+            <v-col
+              cols="12"
+              md="10"
+              class="home-hero-highlights__ai-summary-text"
+            >
+              <div class="home-hero-highlights__ai-summary-header">
+                <span class="home-hero-highlights__ai-summary-title">
+                  <v-icon color="secondary" class="mr-2"
+                    >mdi-bullhorn-variant</v-icon
+                  >
+                  {{ aiSummaryTitle }}
+                </span>
+              </div>
+              <p class="home-hero-highlights__ai-summary-description">
+                {{ aiSummaryDescription }}
+              </p>
+
+              <div class="home-hero-highlights__ai-summary-actions">
+                <div
+                  v-if="aiSummaryReviewedLabel"
+                  class="home-hero-highlights__ai-summary-secondary-info"
                 >
-                {{ aiSummaryTitle }}
-              </span>
-            </div>
-            <p class="home-hero-highlights__ai-summary-description">
-              {{ aiSummaryDescription }}
-            </p>
-            <div class="d-flex justify-center mt-4">
-              <v-btn
-                color="secondary"
-                variant="flat"
-                rounded="pill"
-                prepend-icon="mdi-bullhorn-variant"
-                @click="isCreditsDialogActive = true"
-              >
-                {{ aiSummaryCreditsLabel }}
-              </v-btn>
-            </div>
-          </v-col>
-        </v-row>
-      </v-sheet>
+                  <v-icon start size="small" color="secondary"
+                    >mdi-information-outline</v-icon
+                  >
+                  {{ aiSummaryReviewedLabel }}
+                </div>
+
+                <v-btn
+                  color="secondary"
+                  variant="flat"
+                  rounded="pill"
+                  prepend-icon="mdi-bullhorn-variant"
+                  @click="isCreditsDialogActive = true"
+                >
+                  {{ aiSummaryCreditsLabel }}
+                </v-btn>
+              </div>
+            </v-col>
+          </v-row>
+        </div>
+      </RoundedCornerCard>
     </SectionReveal>
 
     <v-dialog v-model="isCreditsDialogActive" max-width="600">
@@ -876,6 +906,7 @@ const isCreditsDialogActive = ref(false)
   display: inline-flex
   align-items: center
   margin-inline: 0.15rem
+  vertical-align: text-bottom
 
   img
     width: 1rem
@@ -886,11 +917,12 @@ const isCreditsDialogActive = ref(false)
 .home-hero-highlights__ai-summary
   margin-top: 1.25rem
 
+.home-hero-highlights__ai-summary-cards-container
+  width: 100%
+
 .home-hero-highlights__ai-summary-card
   width: 100%
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.6)
-  background: rgba(var(--v-theme-surface-glass), 0.85)
-  backdrop-filter: blur(8px)
+  /* Styles are now handled by RoundedCornerCard props */
 
 .home-hero-highlights__ai-summary-content
   padding: 0.9rem 1.1rem
@@ -922,4 +954,23 @@ const isCreditsDialogActive = ref(false)
   color: rgb(var(--v-theme-text-neutral-secondary))
   font-size: 0.85rem
   line-height: 1.4
+
+.home-hero-highlights__ai-summary-actions
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  justify-content: center
+  gap: 1rem
+  margin-top: 1rem
+
+.home-hero-highlights__ai-summary-secondary-info
+  display: inline-flex
+  align-items: center
+  padding: 0.35rem 0.85rem
+  background: rgba(var(--v-theme-surface-default), 0.6)
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3)
+  border-radius: 999px
+  font-size: 0.8rem
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  backdrop-filter: blur(4px)
 </style>

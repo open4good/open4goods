@@ -19,7 +19,7 @@
           :loading="loading"
           :elevation="getFieldElevation(isHovering)"
           prepend-inner-icon="mdi-magnify"
-          variant="solo"
+          variant="solo-filled"
           density="comfortable"
           clearable
           hide-details
@@ -45,6 +45,7 @@
               density="comfortable"
               variant="plain"
               rounded="0"
+              icon
               :color="isVoiceListening ? 'primary' : undefined"
               :title="
                 voiceError ||
@@ -75,6 +76,7 @@
               density="comfortable"
               variant="plain"
               rounded="0"
+              icon
               :aria-label="t('search.suggestions.scanner.openLabel')"
               data-test="search-scanner-button"
               @click="openScannerDialog"
@@ -310,7 +312,7 @@ const props = withDefaults(
     enableSuggest: true,
     enableVoice: true,
     scanMobile: true,
-    scanDesktop: false,
+    scanDesktop: true,
     suggestMobile: true,
     suggestDesktop: true,
     voiceMobile: true,
@@ -1043,8 +1045,8 @@ const handleScannerDecode = (rawValue: string | null) => {
   &--active
     :deep(.v-field)
       background-color: rgb(var(--v-theme-surface))
-      // Removed transform scale to prevent layout shifting
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)
+      transform: scale(1.02)
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)
 
 .search-suggest-field__voice-button,
 .search-suggest-field__scanner-button

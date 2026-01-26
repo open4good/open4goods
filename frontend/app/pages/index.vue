@@ -13,9 +13,7 @@ import type {
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeProblemsSection from '~/components/home/sections/HomeProblemsSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
-import HomeFeaturesSection from '~/components/home/sections/HomeFeaturesSection.vue'
 import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
-import HomeObjectionsSection from '~/components/home/sections/HomeObjectionsSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
 import ParallaxWidget from '~/components/shared/ui/ParallaxWidget.vue'
@@ -267,7 +265,6 @@ const getRandomSuffix = () =>
 
 const essentialsAplatSuffix = useState('home-aplat-essentials', getRandomSuffix)
 const blogAplatSuffix = useState('home-aplat-blog', getRandomSuffix)
-const objectionsAplatSuffix = useState('home-aplat-objections', getRandomSuffix)
 
 const resolveAplatVariant = (suffix: string) => {
   const name = `parallax/parallax-aplats-${suffix}.svg`
@@ -282,9 +279,6 @@ const parallaxAplatEssentials = computed(() =>
 )
 const parallaxAplatBlog = computed(() =>
   resolveAplatVariant(blogAplatSuffix.value)
-)
-const parallaxAplatObjections = computed(() =>
-  resolveAplatVariant(objectionsAplatSuffix.value)
 )
 
 const prefersReducedMotion = usePreferredReducedMotion()
@@ -388,52 +382,6 @@ const solutionBenefits = computed(() => [
     emoji: '🛡️',
     label: String(t('home.solution.benefits.trust.title')),
     description: String(t('home.solution.benefits.trust.description')),
-  },
-])
-
-const featureCards = computed(() => [
-  {
-    icon: 'mdi-star',
-    title: String(t('home.features.cards.impactScore.title')),
-    description: String(t('home.features.cards.impactScore.description')),
-  },
-  {
-    icon: 'mdi-chart-line',
-    title: String(t('home.features.cards.priceComparison.title')),
-    description: String(t('home.features.cards.priceComparison.description')),
-  },
-  {
-    icon: 'mdi-source-branch',
-    title: String(t('home.features.cards.openIndependent.title')),
-    description: String(t('home.features.cards.openIndependent.description')),
-  },
-  {
-    icon: 'mdi-shield-off-outline',
-    title: String(t('home.features.cards.noTracking.title')),
-    description: String(t('home.features.cards.noTracking.description')),
-  },
-  {
-    icon: 'mdi-database',
-    title: String(t('home.features.cards.massiveBase.title')),
-    description: String(t('home.features.cards.massiveBase.description')),
-  },
-])
-
-const objectionItems = computed(() => [
-  {
-    icon: 'mdi-lightning-bolt',
-    question: String(t('home.objections.items.aiEnergy.question')),
-    answer: String(t('home.objections.items.aiEnergy.answer')),
-  },
-  {
-    icon: 'mdi-recycle',
-    question: String(t('home.objections.items.reuse.question')),
-    answer: String(t('home.objections.items.reuse.answer')),
-  },
-  {
-    icon: 'mdi-scale-balance',
-    question: String(t('home.objections.items.independence.question')),
-    answer: String(t('home.objections.items.independence.answer')),
   },
 ])
 
@@ -893,29 +841,6 @@ useHead(() => ({
         </ParallaxWidget>
 
         <ParallaxWidget
-          class="home-page__parallax home-page__parallax--centered"
-          reverse
-          :backgrounds="parallaxBackgrounds.features.backgrounds"
-          :overlay-opacity="parallaxBackgrounds.features.overlayOpacity"
-          :parallax-amount="parallaxBackgrounds.features.parallaxAmount"
-          :aria-label="t('home.parallax.features.ariaLabel')"
-          :max-offset-ratio="parallaxBackgrounds.features.maxOffsetRatio"
-          :data-i18n-pack-key="parallaxBackgroundKeys.features"
-          content-align="center"
-        >
-          <section id="home-features" class="home-page__section-wrapper">
-            <SectionReveal class="home-page__section" transition="scale">
-              <template #default="{ reveal }">
-                <HomeFeaturesSection
-                  :features="featureCards"
-                  :reveal="reveal"
-                />
-              </template>
-            </SectionReveal>
-          </section>
-        </ParallaxWidget>
-
-        <ParallaxWidget
           class="home-page__parallax"
           reverse
           :backgrounds="parallaxBackgrounds.blog.backgrounds"
@@ -937,37 +862,6 @@ useHead(() => ({
                 <HomeBlogSection
                   :loading="blogLoading"
                   :items="enrichedBlogItems"
-                  :reveal="reveal"
-                />
-              </template>
-            </SectionReveal>
-          </section>
-        </ParallaxWidget>
-
-        <ParallaxWidget
-          class="home-page__parallax"
-          reverse
-          :backgrounds="parallaxBackgrounds.objections.backgrounds"
-          :overlay-opacity="parallaxBackgrounds.objections.overlayOpacity"
-          :parallax-amount="parallaxBackgrounds.objections.parallaxAmount"
-          :aria-label="t('home.parallax.knowledge.ariaLabel')"
-          :max-offset-ratio="parallaxBackgrounds.objections.maxOffsetRatio"
-          :enable-aplats="true"
-          :aplat-svg="parallaxAplatObjections"
-          :data-i18n-pack-key="parallaxBackgroundKeys.objections"
-          :data-i18n-aplat-key="parallaxAplatKey"
-        >
-          <section
-            id="home-knowledge-objections"
-            class="home-page__section-wrapper home-page__stack"
-          >
-            <SectionReveal
-              class="home-page__section"
-              transition="slide-x-reverse"
-            >
-              <template #default="{ reveal }">
-                <HomeObjectionsSection
-                  :items="objectionItems"
                   :reveal="reveal"
                 />
               </template>

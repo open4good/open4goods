@@ -451,7 +451,7 @@ const hasHeader = computed(() =>
     flex-direction: column;
     gap: 0.75rem;
     flex: 1;
-    min-height: 300px;
+
     overflow-y: auto;
     /* Custom scrollbar to look nice inside the card */
     scrollbar-width: thin;

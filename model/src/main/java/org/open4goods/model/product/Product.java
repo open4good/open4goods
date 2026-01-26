@@ -341,22 +341,6 @@ public class Product implements Standardisable {
 		return offerNames.stream().min(Comparator.comparingInt(String::length)).orElse(null);
 	}
 
-	/**
-	 *
-	 * @return all names and descriptions, excluding the longest offer name
-	 */
-	public List<String> namesAndDescriptionsWithoutShortestName() {
-
-		Set<String> ret = new HashSet<>();
-		ret.addAll(getOfferNames());
-		ret.remove(shortestOfferName());
-
-		List<String> list = new ArrayList<>(ret);
-
-		list.sort(Comparator.naturalOrder());
-
-		return list;
-	}
 
 	public List<Score> virtualScores() {
 		List<Score> ret = scores.values().stream().filter(e -> e.getVirtual()).filter(e -> !e.getName().equals(ECOSCORE_NAME)).sorted((o1, o2) -> o2.getRelativ().getValue().compareTo(o1.getRelativ().getValue())).toList();

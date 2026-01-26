@@ -10,6 +10,7 @@ import { createBackendApiConfig } from '~~/shared/api-client/services/createBack
 type RandomStatsCacheContext = {
   domainLanguage: string
   num: number
+  minOffersCount: number
 }
 
 declare module 'h3' {
@@ -31,8 +32,16 @@ const resolveRandomStatsCacheContext = (
 
   const query = getQuery(event)
   const num = typeof query.num === 'string' ? parseInt(query.num, 10) : 1
+  const minOffersCount =
+    typeof query.minOffersCount === 'string'
+      ? parseInt(query.minOffersCount, 10)
+      : 1
 
-  const context: RandomStatsCacheContext = { domainLanguage, num }
+  const context: RandomStatsCacheContext = {
+    domainLanguage,
+    num,
+    minOffersCount,
+  }
 
   event.context.randomStatsCacheContext = context
 
@@ -42,14 +51,15 @@ const resolveRandomStatsCacheContext = (
 const handler = async (event: H3Event): Promise<ProductDto[]> => {
   setDomainLanguageCacheHeaders(event, 'public, max-age=60, s-maxage=60')
 
-  const { domainLanguage, num } = resolveRandomStatsCacheContext(event)
+  const { domainLanguage, num, minOffersCount } =
+    resolveRandomStatsCacheContext(event)
   const statsApi = new StatsApi(createBackendApiConfig())
 
   try {
     const result = await statsApi.random({
       domainLanguage: domainLanguage as 'fr' | 'en',
       num,
-      minOffersCount: 1,
+      minOffersCount,
     })
 
     // The API returns ProductDto but we expect an array
@@ -75,8 +85,9 @@ export default cachedEventHandler(handler, {
   name: 'random-products',
   maxAge: 60,
   getKey: event => {
-    const { domainLanguage, num } = resolveRandomStatsCacheContext(event)
+    const { domainLanguage, num, minOffersCount } =
+      resolveRandomStatsCacheContext(event)
 
-    return `${domainLanguage}-${num}`
+    return `${domainLanguage}-${num}-${minOffersCount}`
   },
 })

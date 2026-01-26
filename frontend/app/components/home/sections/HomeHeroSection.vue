@@ -292,7 +292,7 @@ useHead({
                       :min-chars="minSuggestionQueryLength"
                       :enable-scan="true"
                       :scan-mobile="true"
-                      :scan-desktop="false"
+                      :scan-desktop="true"
                       :enable-voice="true"
                       :voice-mobile="true"
                       :voice-desktop="true"

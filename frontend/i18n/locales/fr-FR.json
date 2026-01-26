@@ -70,6 +70,7 @@
       },
       "iconAlt": "Icône du lanceur de l'application Nudger",
       "search": {
+        "label": "Rechercher un produit",
         "placeholders": [
           "Smartphone reconditionné",
           "Lave-linge économique",
@@ -96,14 +97,43 @@
             },
             {
               "text": "{impactScoreProducts}",
-              "to": "/impact-score"
+              "to": "/search"
             },
             {
               "text": "produits dans"
             },
             {
-              "text": "{impactScoreCategories} catégories",
+              "text": "{impactScoreCategories}",
               "to": "/categories"
+            },
+            {
+              "text": " catégories"
+            }
+          ]
+        },
+        {
+          "title": "🫰 Comparateur de prix",
+          "segments": [
+            {
+              "text": "Sans se faire avoir sur les prix, avec les meilleures offres auprès de"
+            },
+            {
+              "text": "{partnersLink}",
+              "to": "/partenaires"
+            },
+            {
+              "text": "commerçants. Achetez au meilleur moment avec l'historique neuf et occasion pour"
+            },
+            {
+              "text": "{priceHistoryProducts}",
+              "to": "/categories"
+            },
+            {
+              "text": "produits. Un exemple ?"
+            },
+            {
+              "text": "{randomProduct}",
+              "to": "{randomProductLink}"
             }
           ]
         },
@@ -140,39 +170,13 @@
               "text": "et ne collecte aucune donnée personnelle."
             }
           ]
-        },
-        {
-          "title": "🫰 Comparateur de prix",
-          "segments": [
-            {
-              "text": "Sans se faire avoir sur les prix, avec les meilleures offres auprès de"
-            },
-            {
-              "text": "{partnersLink}",
-              "to": "/partenaires"
-            },
-            {
-              "text": "commerçants. Achetez au meilleur moment avec l'historique neuf et occasion pour"
-            },
-            {
-              "text": "{priceHistoryProducts}",
-              "to": "/categories"
-            },
-            {
-              "text": "produits. Un exemple ?"
-            },
-            {
-              "text": "{randomProduct}",
-              "to": "{randomProductLink}"
-            }
-          ]
         }
       ],
       "aiSummary": {
-        "title": "Synthèse IA communautaire",
-        "creditsLabel": "Crédits restants : {count}",
+        "title": "Fiches produits sur-puissantes 💪",
+        "creditsLabel": "synthèses restantes : {count}",
         "creditsFallback": "Crédits restants : indisponible",
-        "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit et qui le partage avec les autres utilisateurs. A utiliser à bon escient, ce n'est gratuit que pour vous. ",
+        "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit. Dans une optique de sobriété -et parceque le partage est dans notre ADN-, ces synthèses sont aussi mises à disposition des autres utilisateurs. Gratuit, sans inscription.",
         "reviewedProductsSuffix": "{reviewedProductsCount} fiches produits générées jusqu'à présent."
       },
       "example": {
@@ -1080,7 +1084,7 @@
       },
       "fields": {
         "author": {
-          "default": "Membre de la communauté Nudger",
+          "default": "Votre nom",
           "label": "Nom affiché",
           "placeholder": "Sous quel nom souhaites-tu apparaître ?"
         },
@@ -3255,7 +3259,7 @@
     },
     "steps": {
       "category": {
-        "title": "Impact Score : Etape par étape.",
+        "title": "Impact Score : étape par étape.",
         "subtitle": "Trouve le produit idéal qui correspond à ton budget et tes valeurs",
         "step": "Étape {step}"
       },

@@ -717,7 +717,9 @@ const remainingGenerationsLabel = computed(() => {
     return t('product.aiReview.request.remainingUnknown')
   }
 
-  return String(remainingGenerations.value)
+  const count = remainingGenerations.value
+  const status = count > 0 ? 'OK' : 'KO'
+  return `${status} (${count})`
 })
 
 const productLabel = computed(() =>

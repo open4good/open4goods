@@ -871,7 +871,7 @@ const filterOptions = computed(() => filterOptionsData.value ?? null)
 const sortOptions = computed(() => sortOptionsData.value ?? null)
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
-const DEFAULT_FILTERS_COLLAPSED_STATE = false
+const DEFAULT_FILTERS_COLLAPSED_STATE = true
 
 const filtersVisibilityCookie = useCookie<string | null>(
   FILTERS_VISIBILITY_STORAGE_KEY,

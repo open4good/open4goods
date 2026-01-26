@@ -75,8 +75,8 @@ subsets:
       en: "< 2"
       fr: "< 2"
     title:
-      en: "Bad "
-      fr: "Mauvais"
+      en: "High "
+      fr: "Elevé"
     description:
       en: "Products with an ImpactScore lower than 2/5"
       fr: "Produits avec un ImpactScore inférieur à 2/5"
@@ -98,7 +98,7 @@ subsets:
       en: "> 2 < 4"
       fr: "> 2 < 4"
     title:
-      en: "Relativ impact"
+      en: "Medium"
       fr: "Moyen"
     description:
       en: "Products with an ImpactScore between 2/5 and 4/5"
@@ -118,8 +118,8 @@ subsets:
       en: "> 4"
       fr: "> 4"
     title:
-      en: "Moderated impact"
-      fr: "Bon"
+      en: "Faible"
+      fr: "Faible"
     description:
       en: "Products with an ImpactScore greater than 4/5"
       fr: "Produits avec un ImpactScore supérieur à 4/5"
