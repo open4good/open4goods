@@ -2,7 +2,8 @@
   <div
     class="impact-score-panel"
     :class="[
-      `impact-score-panel--${size}`,
+      `impact-score-panel--${normalizedSize}`,
+      `impact-score-panel--${normalizedVariant}`,
       `impact-score-panel--${accentStep}`,
     ]"
     role="img"
@@ -18,6 +19,7 @@
         </div>
       </div>
 
+<<<<<<< HEAD
       <div v-if="hasMeta" class="impact-score-panel__col-right">
         <div v-if="showRange" class="impact-score-panel__meta-grid">
           <span class="impact-score-panel__label">Min :</span>
@@ -47,6 +49,9 @@
           </span>
         </div>
 
+=======
+      <div v-if="shouldShowMeta" class="impact-score-panel__col-right">
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
         <v-btn
           v-if="showMethodology"
           class="impact-score-panel__cta"
@@ -60,11 +65,15 @@
       </div>
     </div>
 
+<<<<<<< HEAD
     <div
       v-if="showProgressBar"
       class="impact-score-panel__bar"
       aria-hidden="true"
     >
+=======
+    <div v-if="shouldShowBar" class="impact-score-panel__bar" aria-hidden="true">
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
       <div class="impact-score-panel__track">
         <div
           class="impact-score-panel__fill"
@@ -94,8 +103,14 @@ const props = defineProps({
     default: 20,
   },
   size: {
-    type: String as PropType<'xs' | 'sm' | 'md' | 'lg'>,
+    type: String as PropType<
+      'xs' | 'sm' | 'md' | 'lg' | 'small' | 'medium' | 'default'
+    >,
     default: 'md',
+  },
+  variant: {
+    type: String as PropType<'default' | 'corner'>,
+    default: 'default',
   },
   showMethodology: {
     type: Boolean,
@@ -139,6 +154,7 @@ const accentStep = computed(() => {
   return 'high'
 })
 
+<<<<<<< HEAD
 // Helper to determine step for raw values relative to global scale (0-20)
 // < 1/3 (6.66) -> low
 // < 2/3 (13.33) -> mid
@@ -149,6 +165,19 @@ const getScaleStep = (val: number) => {
   if (ratio < 2 / 3) return 'mid'
   return 'high'
 }
+=======
+const normalizedSize = computed(() => {
+  const size = props.size
+
+  if (size === 'small') return 'xs'
+  if (size === 'medium' || size === 'default') return 'md'
+  return size
+})
+
+const normalizedVariant = computed(() =>
+  props.variant === 'corner' ? 'corner' : 'default'
+)
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
 const formattedScoreValue = computed(() =>
   n(displayScore.value, {
@@ -162,6 +191,14 @@ const ariaLabel = computed(() =>
 )
 
 const hasMeta = computed(() => props.showMethodology || props.showRange)
+
+const shouldShowMeta = computed(
+  () => normalizedVariant.value === 'default' && hasMeta.value
+)
+
+const shouldShowBar = computed(
+  () => normalizedVariant.value === 'default'
+)
 </script>
 
 <style scoped>
@@ -235,6 +272,32 @@ const hasMeta = computed(() => props.showMethodology || props.showRange)
 
 .impact-score-panel--lg .impact-score-panel__score-value {
   font-size: 3.4rem;
+}
+
+/* Variant styles */
+.impact-score-panel--corner {
+  padding: 6px 8px;
+  border-radius: 12px;
+  gap: 6px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  background: rgba(var(--v-theme-surface), 0.7);
+}
+
+.impact-score-panel--corner::before {
+  opacity: 0.6;
+}
+
+.impact-score-panel--corner .impact-score-panel__score {
+  gap: 4px;
+}
+
+.impact-score-panel--corner .impact-score-panel__score-value {
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.impact-score-panel--corner .impact-score-panel__score-out {
+  font-size: 0.75rem;
 }
 
 /* Top layout */
