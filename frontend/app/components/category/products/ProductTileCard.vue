@@ -185,10 +185,7 @@
                 :score="impactScore"
                 :max="scoreMax"
                 size="small"
-                mode="badge"
-                badge-layout="stacked"
-                badge-variant="corner"
-                flat
+                variant="corner"
               />
 
               <span v-else class="product-tile-card__corner-fallback">
