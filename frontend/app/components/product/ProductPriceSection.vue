@@ -260,6 +260,19 @@
                   {{ newTrendLabel }}
                 </p>
               </div>
+              <div
+                v-if="hasCommercialEvents"
+                class="product-price__chart-actions"
+              >
+                <v-checkbox
+                  v-model="showCommercialEvents"
+                  density="compact"
+                  hide-details
+                  color="primary"
+                  class="product-price__events-toggle"
+                  :label="$t('product.price.events.toggleLabel')"
+                />
+              </div>
             </header>
             <v-row class="ma-0">
               <v-col cols="12" md="4">
@@ -356,7 +369,7 @@
                 </template>
                 <!-- Commercial Events Card Support -->
                 <v-card
-                  v-if="selectedCommercialEvent"
+                  v-if="displaySelectedCommercialEvent"
                   class="product-price__event-card"
                   variant="tonal"
                 >
@@ -366,7 +379,7 @@
                         {{ $t('product.price.events.detailsTitle') }}
                       </p>
                       <p class="product-price__event-card-label">
-                        {{ selectedCommercialEvent.label }}
+                        {{ displaySelectedCommercialEvent.label }}
                       </p>
                     </div>
                     <v-btn
@@ -382,7 +395,7 @@
                     <span class="product-price__event-card-dates-label">
                       {{ $t('product.price.events.dateLabel') }}
                     </span>
-                    {{ formatEventDateRange(selectedCommercialEvent) }}
+                    {{ formatEventDateRange(displaySelectedCommercialEvent) }}
                   </p>
                 </v-card>
               </v-col>
@@ -517,6 +530,7 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
+  watch,
 } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -648,7 +662,10 @@ type ResolvedCommercialEvent = {
 type PackedCommercialEvent = ResolvedCommercialEvent & { rowIndex: number }
 
 const EVENT_COLOR_PALETTE = ['#0ea5e9', '#14b8a6', '#f97316', '#a855f7']
-const EVENT_ROW_HEIGHT = 18
+const EVENT_LABEL_ROW_HEIGHT = 26
+const EVENT_RANGE_HEIGHT = 10
+const EVENT_LABEL_FONT_SIZE = 16
+const EVENT_LABEL_LINE_HEIGHT = 18
 const EVENT_BAND_PADDING = 6
 const EVENT_BAND_GAP = 10
 const EVENT_MIN_WIDTH = 2
@@ -700,12 +717,28 @@ const resolvedEvents = computed<ResolvedCommercialEvent[]>(() =>
     .filter((event): event is ResolvedCommercialEvent => event !== null)
 )
 
+const hasCommercialEvents = computed(() => resolvedEvents.value.length > 0)
+const showCommercialEvents = ref(true)
+const displayCommercialEvents = computed(
+  () => showCommercialEvents.value && hasCommercialEvents.value
+)
+
 const selectedCommercialEventId = ref<string | null>(null)
 const selectedCommercialEvent = computed(() =>
   resolvedEvents.value.find(
     event => event.id === selectedCommercialEventId.value
   )
 )
+
+const displaySelectedCommercialEvent = computed(() =>
+  displayCommercialEvents.value ? selectedCommercialEvent.value : null
+)
+
+watch(showCommercialEvents, isEnabled => {
+  if (!isEnabled) {
+    selectedCommercialEventId.value = null
+  }
+})
 
 const formatEventDate = (value: number) =>
   format(value, 'dd MMM', {
@@ -731,10 +764,14 @@ const clearSelectedCommercialEvent = () => {
 
 const newChartOption = computed(() =>
   hasNewHistory.value
-    ? buildChartOption(newHistory.value, resolvedEvents.value, {
-        enableEventBand: true,
-        selectedEventId: selectedCommercialEventId.value,
-      })
+    ? buildChartOption(
+        newHistory.value,
+        displayCommercialEvents.value ? resolvedEvents.value : [],
+        {
+          enableEventBand: displayCommercialEvents.value,
+          selectedEventId: selectedCommercialEventId.value,
+        }
+      )
     : null
 )
 const occasionChartOption = computed(() =>
@@ -1162,7 +1199,7 @@ const buildChartOption = (
 
   const { packed, rowCount } = packCommercialEvents(events)
   const eventBandHeight =
-    Math.max(rowCount, 1) * EVENT_ROW_HEIGHT + EVENT_BAND_PADDING * 2
+    Math.max(rowCount, 1) * EVENT_LABEL_ROW_HEIGHT + EVENT_BAND_PADDING * 2
   const eventBandTop = 18
   const mainChartTop = eventBandTop + eventBandHeight + EVENT_BAND_GAP
 
@@ -1261,7 +1298,7 @@ const buildChartOption = (
       },
       {
         type: 'custom',
-        name: 'commercial-events',
+        name: 'commercial-events-labels',
         renderItem: (params, api) => {
           const start = Number(api.value(0))
           const end = Number(api.value(1))
@@ -1274,7 +1311,7 @@ const buildChartOption = (
           const startCoord = api.coord([start, rowIndex + 0.5])
           const endCoord = api.coord([end, rowIndex + 0.5])
           const bandHeight = api.size([0, 1])[1]
-          const rowHeight = Math.max(12, bandHeight - 6)
+          const rowHeight = Math.max(EVENT_LABEL_ROW_HEIGHT - 6, bandHeight - 6)
           const rectWidth = Math.max(
             endCoord[0] - startCoord[0],
             EVENT_MIN_WIDTH
@@ -1301,7 +1338,7 @@ const buildChartOption = (
             r: 4,
           }
 
-          const fillOpacity = isSelected ? 0.25 : 0.15
+          const fillOpacity = isSelected ? 0.32 : 0.22
           const borderOpacity = isSelected ? 0.95 : 0.6
 
           return {
@@ -1321,17 +1358,76 @@ const buildChartOption = (
                 style: {
                   text: label,
                   fill: color,
-                  fontSize: 11,
+                  fontSize: EVENT_LABEL_FONT_SIZE,
                   fontWeight: 600,
-                  width: Math.max(0, rectShape.width - 8),
-                  overflow: 'truncate',
-                  ellipsis: '…',
+                  lineHeight: EVENT_LABEL_LINE_HEIGHT,
                 },
-                position: [rectShape.x + 4, rectShape.y + rectShape.height / 2],
+                position: [rectShape.x + 6, rectShape.y + rectShape.height / 2],
                 textAlign: 'left',
                 textVerticalAlign: 'middle',
               },
             ],
+          }
+        },
+        data: eventSeriesData,
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        clip: false,
+        tooltip: { show: false },
+      },
+      {
+        type: 'custom',
+        name: 'commercial-events-range',
+        renderItem: (params, api) => {
+          const start = Number(api.value(0))
+          const end = Number(api.value(1))
+          const rowIndex = Number(api.value(2))
+          const color = String(api.value(4))
+          const eventId = String(api.value(5))
+          const isSelected = eventId === config.selectedEventId
+
+          const startCoord = api.coord([start, rowIndex + 0.5])
+          const endCoord = api.coord([end, rowIndex + 0.5])
+          const bandHeight = api.size([0, 1])[1]
+          const rangeHeight = Math.max(
+            6,
+            Math.min(EVENT_RANGE_HEIGHT, bandHeight - 10)
+          )
+          const rectWidth = Math.max(
+            endCoord[0] - startCoord[0],
+            EVENT_MIN_WIDTH
+          )
+          const rectX = startCoord[0]
+          const rectY = startCoord[1] - rangeHeight / 2
+
+          const clipX = Math.max(rectX, params.coordSys.x)
+          const clipRight = Math.min(
+            rectX + rectWidth,
+            params.coordSys.x + params.coordSys.width
+          )
+          const clipWidth = clipRight - clipX
+
+          if (clipWidth <= 0) {
+            return null
+          }
+
+          const fillOpacity = isSelected ? 0.2 : 0.12
+          const borderOpacity = isSelected ? 0.6 : 0.35
+
+          return {
+            type: 'rect',
+            shape: {
+              x: clipX,
+              y: rectY,
+              width: clipWidth,
+              height: rangeHeight,
+              r: 3,
+            },
+            style: {
+              fill: `rgba(${hexToRgb(color)}, ${fillOpacity})`,
+              stroke: `rgba(${hexToRgb(color)}, ${borderOpacity})`,
+              lineWidth: 1,
+            },
           }
         },
         data: eventSeriesData,
@@ -1559,6 +1655,29 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.product-price__chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.product-price__chart-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.product-price__events-toggle {
+  margin: 0;
+}
+
+:deep(.product-price__events-toggle .v-label) {
+  font-size: 0.9rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
 }
 
 .product-price__chart-heading h4 {

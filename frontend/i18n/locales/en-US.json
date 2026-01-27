@@ -3126,6 +3126,7 @@
         "unknownSource": "Unknown source"
       },
       "events": {
+        "toggleLabel": "Show commercial offers",
         "detailsTitle": "Commercial event",
         "clearSelection": "Clear selection",
         "dateLabel": "Dates:",
