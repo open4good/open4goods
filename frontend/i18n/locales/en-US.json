@@ -2852,7 +2852,13 @@
       "supportGuaranteedUntil": "Guaranteed support until"
     },
     "impact": {
-      "endOfLife": "This product is no longer marketed by {brand}. Legal support durations started from {onMarketEndDate}.",
+      "endOfLifeTitle": "Product no longer marketed",
+      "endOfLifeDescription": "This product is no longer officially marketed by {brand}. Legal support started on {onMarketEndDate}.",
+      "endOfLifeDescriptionFallback": "This product is no longer officially marketed by {brand}.",
+      "endOfLifeSupportEnd": "Legal support ends",
+      "endOfLifeSupportDuration": "Legal support duration",
+      "endOfLifeSupportRemaining": "Legal support remaining",
+      "endOfLifeSupportExpired": "Legal support ended",
       "alternatives": {
         "title": "Greener alternatives",
         "subtitle": "Discover similar products with a better impact score or price.",

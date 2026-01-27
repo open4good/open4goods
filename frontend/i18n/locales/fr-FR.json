@@ -2569,7 +2569,13 @@
       "viewSingleOffer": "Voir l'offre"
     },
     "impact": {
-      "endOfLife": "Produit plus officiellement commercialisé par {brand} ! Les durées de supports légales démarrent à partir du {onMarketEndDate}",
+      "endOfLifeTitle": "Produit plus commercialisé",
+      "endOfLifeDescription": "Le produit n'est plus officiellement commercialisé par {brand}. La durée de support légal a démarré le {onMarketEndDate}.",
+      "endOfLifeDescriptionFallback": "Le produit n'est plus officiellement commercialisé par {brand}.",
+      "endOfLifeSupportEnd": "Fin du support légal",
+      "endOfLifeSupportDuration": "Durée de support légal",
+      "endOfLifeSupportRemaining": "Support légal restant",
+      "endOfLifeSupportExpired": "Support légal terminé",
       "alternatives": {
         "title": "Moins cher, et meilleur pour la planète ?",
         "subtitle": "Découvrez des produits similaires avec un meilleur score d'impact, un prix égal ou plus accessible et des caracteristiques techniques similaires.",

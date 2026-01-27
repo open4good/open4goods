@@ -28,15 +28,71 @@
       />
     </div>
 
-    <!-- End of Life Alert -->
-    <v-alert v-if="isEndOfLife" type="warning" variant="tonal" class="mt-6">
-      {{
-        $t('product.impact.endOfLife', {
-          brand: productBrand,
-          onMarketEndDate: formattedOnMarketEndDate,
-        })
-      }}
-    </v-alert>
+    <!-- End of Life Card -->
+    <v-card
+      v-if="isEndOfLife"
+      class="product-impact__end-of-life mt-6"
+      color="warning"
+      variant="tonal"
+      data-testid="end-of-life-card"
+    >
+      <v-card-text class="product-impact__end-of-life-body">
+        <div class="product-impact__end-of-life-layout">
+          <v-icon
+            class="product-impact__end-of-life-icon"
+            size="56"
+            icon="mdi-alert-decagram-outline"
+          />
+          <div class="product-impact__end-of-life-content">
+            <p class="product-impact__end-of-life-title">
+              {{ $t('product.impact.endOfLifeTitle') }}
+            </p>
+            <p class="product-impact__end-of-life-description">
+              {{ endOfLifeDescription }}
+            </p>
+            <div class="product-impact__end-of-life-details">
+              <div
+                v-if="formattedSupportEndDate"
+                class="product-impact__end-of-life-detail"
+              >
+                <span class="product-impact__end-of-life-label">
+                  {{ $t('product.impact.endOfLifeSupportEnd') }}
+                </span>
+                <v-chip size="small" color="warning" variant="tonal">
+                  {{ formattedSupportEndDate }}
+                </v-chip>
+              </div>
+              <div
+                v-if="supportDuration"
+                class="product-impact__end-of-life-detail"
+              >
+                <span class="product-impact__end-of-life-label">
+                  {{ $t('product.impact.endOfLifeSupportDuration') }}
+                </span>
+                <v-chip size="small" color="primary" variant="tonal">
+                  {{ supportDuration }}
+                </v-chip>
+              </div>
+              <div
+                v-if="supportRemaining"
+                class="product-impact__end-of-life-detail"
+              >
+                <span class="product-impact__end-of-life-label">
+                  {{ $t('product.impact.endOfLifeSupportRemaining') }}
+                </span>
+                <v-chip
+                  size="small"
+                  :color="supportRemainingChipColor"
+                  variant="tonal"
+                >
+                  {{ supportRemaining }}
+                </v-chip>
+              </div>
+            </div>
+          </div>
+        </div>
+      </v-card-text>
+    </v-card>
 
     <!-- EPREL Details Table -->
     <EprelDetailsTable
@@ -51,13 +107,14 @@
 import { computed, toRef } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { format } from 'date-fns'
+import { differenceInMonths, differenceInYears, format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 
 import ProductImpactEcoScoreCard from './impact/ProductImpactEcoScoreCard.vue'
 import EprelDetailsTable from './EprelDetailsTable.vue'
 import type { ScoreView } from './impact/impact-types'
 import type { ProductEprelDto } from '~~/shared/api-client'
+import { normalizeTimestamp } from '~/utils/date-parsing'
 
 interface EprelDataWrapper {
   eprelDatas?: ProductEprelDto
@@ -163,6 +220,7 @@ const verticalTitle = toRef(props, 'verticalTitle')
 const subtitleParams = toRef(props, 'subtitleParams')
 const expandedScoreId = toRef(props, 'expandedScoreId')
 const onMarketEndDate = toRef(props, 'onMarketEndDate')
+const productEprelData = toRef(props, 'eprelData')
 const { t, locale } = useI18n()
 
 const primaryScore = computed(
@@ -249,27 +307,98 @@ const showRadar = computed(
   () => radarAxes.value.length >= 3 && chartSeries.value.length > 0
 )
 
-const isEndOfLife = computed(() => {
+const supportStartDate = computed<Date | null>(() => {
   const normalized = normalizeTimestamp(onMarketEndDate.value)
-  if (!normalized) return false
+  if (!normalized) return null
   const date = new Date(normalized)
-  // Check if valid date
-  if (isNaN(date.getTime())) return false
-  return date < new Date()
+  if (isNaN(date.getTime())) return null
+  return date
 })
 
-const formattedOnMarketEndDate = computed(() => {
-  const normalized = normalizeTimestamp(onMarketEndDate.value)
-  if (!normalized) return ''
-  const date = new Date(normalized)
-  if (isNaN(date.getTime())) return ''
-  return format(date, 'dd MMM yyyy', {
+const isEndOfLife = computed(() => {
+  if (!supportStartDate.value) return false
+  return supportStartDate.value < new Date()
+})
+
+const formattedSupportStartDate = computed(() => {
+  if (!supportStartDate.value) return ''
+  return format(supportStartDate.value, 'dd MMM yyyy', {
     locale: locale.value.startsWith('fr') ? fr : enUS,
   })
 })
 
-const productEprelData = toRef(props, 'eprelData')
 const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
+
+const minGuaranteedSupportYears = computed(() => {
+  const raw =
+    productEprelData.value?.eprelDatas?.categorySpecificAttributes
+      ?.minGuaranteedSupportYears
+  return Number(raw) || 0
+})
+
+const supportEndDate = computed<Date | null>(() => {
+  if (!supportStartDate.value || !minGuaranteedSupportYears.value) return null
+  const supportEnd = new Date(supportStartDate.value)
+  supportEnd.setFullYear(
+    supportEnd.getFullYear() + minGuaranteedSupportYears.value
+  )
+  return supportEnd
+})
+
+const formattedSupportEndDate = computed(() => {
+  if (!supportEndDate.value) return ''
+  return format(supportEndDate.value, 'dd MMM yyyy', {
+    locale: locale.value.startsWith('fr') ? fr : enUS,
+  })
+})
+
+const formatDuration = (start: Date, end: Date) => {
+  if (end <= start) return null
+  const years = differenceInYears(end, start)
+  const months = differenceInMonths(end, start) % 12
+  const parts: string[] = []
+
+  if (years > 0) parts.push(t('common.count.years', { count: years }, years))
+  if (months > 0)
+    parts.push(t('common.count.months', { count: months }, months))
+
+  return parts.join(' ')
+}
+
+const supportDuration = computed(() => {
+  if (!supportStartDate.value || !supportEndDate.value) return null
+  return formatDuration(supportStartDate.value, supportEndDate.value)
+})
+
+const supportRemainingIsExpired = computed(() => {
+  if (!supportEndDate.value) return false
+  return supportEndDate.value <= new Date()
+})
+
+const supportRemaining = computed(() => {
+  if (!supportEndDate.value) return null
+  if (supportRemainingIsExpired.value) {
+    return t('product.impact.endOfLifeSupportExpired')
+  }
+  return formatDuration(new Date(), supportEndDate.value)
+})
+
+const supportRemainingChipColor = computed(() => {
+  if (supportRemainingIsExpired.value) return 'error'
+  return 'success'
+})
+
+const endOfLifeDescription = computed(() => {
+  if (!formattedSupportStartDate.value) {
+    return t('product.impact.endOfLifeDescriptionFallback', {
+      brand: productBrand.value,
+    })
+  }
+  return t('product.impact.endOfLifeDescription', {
+    brand: productBrand.value,
+    onMarketEndDate: formattedSupportStartDate.value,
+  })
+})
 </script>
 
 <style scoped>
@@ -315,6 +444,61 @@ const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
   flex-direction: column;
 }
 
+.product-impact__end-of-life {
+  border-radius: 16px;
+}
+
+.product-impact__end-of-life-body {
+  padding: 1.5rem;
+}
+
+.product-impact__end-of-life-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.product-impact__end-of-life-icon {
+  color: rgba(var(--v-theme-warning));
+}
+
+.product-impact__end-of-life-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-impact__end-of-life-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: rgba(var(--v-theme-text-neutral-strong), 0.95);
+}
+
+.product-impact__end-of-life-description {
+  margin: 0;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  line-height: 1.5;
+}
+
+.product-impact__end-of-life-details {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.product-impact__end-of-life-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.product-impact__end-of-life-label {
+  font-size: 0.95rem;
+  color: rgba(var(--v-theme-text-neutral-strong), 0.85);
+  min-width: 12rem;
+}
+
 @media (max-width: 600px) {
   .product-impact__header {
     flex-direction: column;
@@ -324,6 +508,15 @@ const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
 
   .product-impact__toggle {
     width: 100%;
+  }
+
+  .product-impact__end-of-life-layout {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-impact__end-of-life-label {
+    min-width: unset;
   }
 }
 </style>
