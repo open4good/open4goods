@@ -181,15 +181,55 @@
 
         <v-card
           v-if="allOffers.length > 0"
-          class="mt-6 border product-price__competition-card"
-          variant="tonal"
-          :color="competitionLevel.color"
+          class="mt-6 product-price__competition-card"
+          :class="`product-price__competition-card--${competitionLevel.tone}`"
+          variant="flat"
         >
-          <div class="d-flex align-center pa-4">
-            <v-icon :icon="competitionLevel.icon" size="28" class="mr-4" />
-            <span class="text-h6 font-weight-medium">
-              {{ $t(competitionLevel.labelKey) }}
-            </span>
+          <div class="product-price__competition-content">
+            <div
+              class="product-price__competition-icon"
+              :class="`product-price__competition-icon--${competitionLevel.tone}`"
+            >
+              <v-icon :icon="competitionLevel.icon" size="28" />
+            </div>
+            <div class="product-price__competition-text">
+              <p class="product-price__competition-eyebrow">
+                {{
+                  $t(
+                    'product.price.competition.title',
+                    'Niveau de concurrence'
+                  )
+                }}
+              </p>
+              <h4 class="product-price__competition-title">
+                {{
+                  $t(
+                    competitionLevel.labelKey,
+                    competitionLevel.labelFallback
+                  )
+                }}
+              </h4>
+              <p class="product-price__competition-subtitle">
+                {{
+                  $t(
+                    competitionLevel.descriptionKey,
+                    competitionLevel.descriptionFallback
+                  )
+                }}
+              </p>
+            </div>
+            <v-chip
+              class="product-price__competition-count"
+              variant="tonal"
+              :color="competitionLevel.color"
+              size="small"
+            >
+              {{
+                $t('product.price.competition.count', '{count} offres', {
+                  count: allOffers.length,
+                })
+              }}
+            </v-chip>
           </div>
         </v-card>
       </div>
@@ -867,24 +907,39 @@ const competitionLevel = computed(() => {
 
   if (count < 2) {
     return {
-      icon: 'mdi-account-alert-outline',
+      tone: 'low',
+      icon: 'mdi-alert-outline',
       labelKey: 'product.price.competition.low',
+      labelFallback: 'Concurrence faible !',
+      descriptionKey: 'product.price.competition.lowDescription',
+      descriptionFallback:
+        'Peu d’offres disponibles, la comparaison est limitée.',
       color: 'warning',
     }
   }
 
   if (count > 4) {
     return {
-      icon: 'mdi-store-check-outline',
-      labelKey: 'product.price.competition.good',
+      tone: 'super',
+      icon: 'mdi-trophy-outline',
+      labelKey: 'product.price.competition.super',
+      labelFallback: 'Super concurrence !',
+      descriptionKey: 'product.price.competition.superDescription',
+      descriptionFallback:
+        'Beaucoup d’offres pour décrocher le meilleur prix.',
       color: 'success',
     }
   }
 
   // 2-4 offers
   return {
-    icon: 'mdi-store-outline',
+    tone: 'correct',
+    icon: 'mdi-account-multiple-check-outline',
     labelKey: 'product.price.competition.correct',
+    labelFallback: 'Concurrence correcte !',
+    descriptionKey: 'product.price.competition.correctDescription',
+    descriptionFallback:
+      'Assez d’offres pour comparer en toute sérénité.',
     color: 'info',
   }
 })
@@ -1384,6 +1439,104 @@ onBeforeUnmount(() => {
   border-radius: 16px;
 }
 
+.product-price__competition-card {
+  border-radius: 24px;
+  padding: 1.5rem;
+  background: rgba(var(--v-theme-surface-glass), 0.96);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12);
+  box-shadow:
+    0 12px 28px rgba(var(--v-theme-shadow-primary-600), 0.08),
+    inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.04);
+}
+
+.product-price__competition-card--low {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-primary-050), 0.95),
+    rgba(var(--v-theme-surface-muted), 0.9)
+  );
+}
+
+.product-price__competition-card--correct {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-primary-080), 0.95),
+    rgba(var(--v-theme-surface-glass), 0.9)
+  );
+}
+
+.product-price__competition-card--super {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v-theme-surface-primary-100), 0.95),
+    rgba(var(--v-theme-surface-glass-strong), 0.92)
+  );
+}
+
+.product-price__competition-content {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.product-price__competition-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--v-theme-surface-primary-120), 0.85);
+  color: rgb(var(--v-theme-text-on-accent));
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.1);
+}
+
+.product-price__competition-icon--low {
+  background: rgba(var(--v-theme-surface-primary-080), 0.9);
+}
+
+.product-price__competition-icon--correct {
+  background: rgba(var(--v-theme-surface-primary-100), 0.9);
+}
+
+.product-price__competition-icon--super {
+  background: rgba(var(--v-theme-surface-primary-120), 0.95);
+}
+
+.product-price__competition-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-price__competition-eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+}
+
+.product-price__competition-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-price__competition-subtitle {
+  margin: 0;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  font-size: 0.95rem;
+}
+
+.product-price__competition-count {
+  font-weight: 600;
+  border-radius: 999px;
+}
+
 .product-price__single-offer {
   border-radius: 24px;
 }
@@ -1521,6 +1674,16 @@ onBeforeUnmount(() => {
 @media (max-width: 768px) {
   .product-price__chart-header {
     align-items: stretch;
+  }
+
+  .product-price__competition-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    text-align: left;
+  }
+
+  .product-price__competition-count {
+    justify-self: flex-start;
   }
 }
 </style>
