@@ -19,6 +19,34 @@
       </div>
 
       <div v-if="hasMeta" class="impact-score-panel__col-right">
+        <div v-if="showRange" class="impact-score-panel__meta-grid">
+          <span class="impact-score-panel__label">Min :</span>
+          <span
+            class="impact-score-panel__value"
+            :class="`impact-score-panel--${getScaleStep(rangeMin)}`"
+          >
+            {{
+              n(rangeMin, {
+                maximumFractionDigits: 1,
+                minimumFractionDigits: 0,
+              })
+            }}
+          </span>
+
+          <span class="impact-score-panel__label">Max :</span>
+          <span
+            class="impact-score-panel__value"
+            :class="`impact-score-panel--${getScaleStep(rangeMax)}`"
+          >
+            {{
+              n(rangeMax, {
+                maximumFractionDigits: 1,
+                minimumFractionDigits: 0,
+              })
+            }}
+          </span>
+        </div>
+
         <v-btn
           v-if="showMethodology"
           class="impact-score-panel__cta"
@@ -29,31 +57,14 @@
         >
           Méthodologie
         </v-btn>
-
-        <div v-if="showRange">
-          <div class="impact-score-panel__row">
-            <span class="impact-score-panel__label">Min</span>
-            <span class="impact-score-panel__value">{{
-              n(rangeMin, {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 0,
-              })
-            }}</span>
-          </div>
-          <div class="impact-score-panel__row">
-            <span class="impact-score-panel__label">Max</span>
-            <span class="impact-score-panel__value">{{
-              n(rangeMax, {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 0,
-              })
-            }}</span>
-          </div>
-        </div>
       </div>
     </div>
 
-    <div class="impact-score-panel__bar" aria-hidden="true">
+    <div
+      v-if="showProgressBar"
+      class="impact-score-panel__bar"
+      aria-hidden="true"
+    >
       <div class="impact-score-panel__track">
         <div
           class="impact-score-panel__fill"
@@ -94,6 +105,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  showProgressBar: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const { t, n } = useI18n()
@@ -123,6 +138,17 @@ const accentStep = computed(() => {
   if (progress.value < 2 / 3) return 'mid'
   return 'high'
 })
+
+// Helper to determine step for raw values relative to global scale (0-20)
+// < 1/3 (6.66) -> low
+// < 2/3 (13.33) -> mid
+// >= 13.33 -> high
+const getScaleStep = (val: number) => {
+  const ratio = val / 20
+  if (ratio < 1 / 3) return 'low'
+  if (ratio < 2 / 3) return 'mid'
+  return 'high'
+}
 
 const formattedScoreValue = computed(() =>
   n(displayScore.value, {
@@ -258,24 +284,39 @@ const hasMeta = computed(() => props.showMethodology || props.showRange)
   min-width: 0;
 }
 
-.impact-score-panel__row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px; /* Closer together as requested */
+.impact-score-panel__meta-grid {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: 8px;
+  row-gap: 0;
+  align-items: baseline;
+  text-align: right;
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .impact-score-panel__label {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.95);
   font-weight: 600;
+  text-align: right;
 }
 
 .impact-score-panel__value {
   color: rgba(var(--v-theme-text-neutral-strong), 0.92);
   font-weight: 700;
+  text-align: right; /* Values align right */
+}
+
+/* Colorize values inside meta grid */
+.impact-score-panel__value.impact-score-panel--low {
+  color: rgb(var(--v-theme-error));
+}
+.impact-score-panel__value.impact-score-panel--mid {
+  color: rgb(var(--v-theme-warning));
+}
+.impact-score-panel__value.impact-score-panel--high {
+  color: rgb(var(--v-theme-success));
 }
 
 /* CTA mini button */

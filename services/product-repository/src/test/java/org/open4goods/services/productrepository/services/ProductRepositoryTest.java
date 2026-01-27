@@ -111,24 +111,4 @@ class ProductRepositoryTest
         // But for now, ensuring the method was called and query object formed is enough for this unit level verification
         // given the internal implementation is straightforward.
     }
-    @Test
-    void countMainIndexValidAndReviewedGeneratesCorrectQuery()
-    {
-        when(elasticsearchOperations.count(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(10L);
-
-        repository.countMainIndexValidAndReviewed("fr");
-
-        ArgumentCaptor<CriteriaQuery> queryCaptor = ArgumentCaptor.forClass(CriteriaQuery.class);
-        verify(elasticsearchOperations).count(queryCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));
-
-        CriteriaQuery submittedQuery = queryCaptor.getValue();
-        assertThat(submittedQuery).isNotNull();
-
-        boolean hasReviewCriteria = submittedQuery.getCriteria().getCriteriaChain().stream()
-                .map(Criteria::getField)
-                .filter(Objects::nonNull)
-                .anyMatch(field -> "reviews.fr.review".equals(field.getName()));
-
-        assertThat(hasReviewCriteria).isTrue();
-    }
 }

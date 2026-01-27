@@ -200,7 +200,7 @@ public class SearchService {
 		}
 
 		Query searchQuery = useSemanticSearch
-				? buildSemanticFilterQuery(normalizedVerticalId, normalizedFilters, applyDefaultExclusion,
+				? buildSemanticFilterQuery(normalizedVerticalId, null, normalizedFilters, applyDefaultExclusion,
 						VerticalScope.ANY)
 				: buildProductSearchQuery(normalizedVerticalId, sanitizedQuery, normalizedFilters, applyDefaultExclusion);
 
@@ -208,7 +208,7 @@ public class SearchService {
 		boolean requiresAdminExcludedAggregation = applyDefaultExclusion && !excludedAggregations.isEmpty();
 		Query adminAggregationQuery = requiresAdminExcludedAggregation
 				? (useSemanticSearch
-						? buildSemanticFilterQuery(normalizedVerticalId, normalizedFilters, false, VerticalScope.ANY)
+						? buildSemanticFilterQuery(normalizedVerticalId, null, normalizedFilters, false, VerticalScope.ANY)
 						: buildProductSearchQuery(normalizedVerticalId, sanitizedQuery, normalizedFilters, false))
 				: null;
 
@@ -1060,8 +1060,8 @@ public class SearchService {
 		SearchHits<Product> hits = null;
 		SearchHits<Product> missingHits = null;
 		try {
-			hits = executeSemanticSearch(null, embedding, filters, true, pageable, VerticalScope.REQUIRED);
-			missingHits = executeSemanticSearch(null, embedding, filters, true, pageable, VerticalScope.MISSING);
+			hits = executeSemanticSearch(null, null, embedding, filters, true, pageable, VerticalScope.REQUIRED);
+			missingHits = executeSemanticSearch(null, sanitizedQuery, embedding, filters, true, pageable, VerticalScope.MISSING);
 		} catch (Exception e) {
 			LOGGER.error("Semantic search failed for query '{}'", sanitizedQuery, e);
 			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
@@ -1202,7 +1202,7 @@ public class SearchService {
 			queryVector.add(value);
 		}
 
-		Query filterQuery = buildSemanticFilterQuery(verticalId, null, true, VerticalScope.ANY);
+		Query filterQuery = buildSemanticFilterQuery(verticalId, null, null, true, VerticalScope.ANY);
 
 		co.elastic.clients.elasticsearch._types.KnnSearch knnSearch = co.elastic.clients.elasticsearch._types.KnnSearch
 				.of(knn -> knn.field("embedding").queryVector(queryVector).k(knnLimit)
@@ -1262,6 +1262,7 @@ public class SearchService {
 	 * Executes a semantic search using the provided embedding vector.
 	 *
 	 * @param verticalId            optional vertical scope
+	 * @param textQuery             optional text query for lexical matching (used for missing-vertical products)
 	 * @param embedding             normalized embedding vector
 	 * @param filters               filters to apply
 	 * @param applyDefaultExclusion whether the default exclusion filter should be
@@ -1270,9 +1271,9 @@ public class SearchService {
 	 * @param verticalScope         constraint on vertical availability
 	 * @return search hits from the semantic query
 	 */
-	private SearchHits<Product> executeSemanticSearch(String verticalId, float[] embedding, FilterRequestDto filters,
+	private SearchHits<Product> executeSemanticSearch(String verticalId, String textQuery, float[] embedding, FilterRequestDto filters,
 			boolean applyDefaultExclusion, Pageable pageable, VerticalScope verticalScope) {
-		Query filterQuery = buildSemanticFilterQuery(verticalId, filters, applyDefaultExclusion, verticalScope);
+		Query filterQuery = buildSemanticFilterQuery(verticalId, textQuery, filters, applyDefaultExclusion, verticalScope);
 		return executeSemanticSearchWithFilter(embedding, filterQuery, pageable);
 	}
 
@@ -1693,12 +1694,13 @@ public class SearchService {
 	 * Builds the scoped filter query used for semantic search.
 	 *
 	 * @param normalizedVerticalId  normalized vertical identifier (or {@code null})
+	 * @param textQuery             optional text query for lexical matching (used for missing-vertical products)
 	 * @param filters               normalized filters applied by the caller
 	 * @param applyDefaultExclusion whether to apply the default exclusion filter
 	 * @param verticalScope         constraint on vertical presence
 	 * @return a query combining semantic filters
 	 */
-	private Query buildSemanticFilterQuery(String normalizedVerticalId, FilterRequestDto filters,
+	private Query buildSemanticFilterQuery(String normalizedVerticalId, String textQuery, FilterRequestDto filters,
 			boolean applyDefaultExclusion, VerticalScope verticalScope) {
 		Long expiration = repository.expirationClause();
 		return Query.of(q -> q.bool(b -> {
@@ -1714,6 +1716,10 @@ public class SearchService {
 				b.filter(f -> f.exists(e -> e.field("vertical")));
 			} else if (verticalScope == VerticalScope.MISSING) {
 				b.mustNot(m -> m.exists(e -> e.field("vertical")));
+				// For missing-vertical products, require text match to ensure relevance
+				if (StringUtils.hasText(textQuery)) {
+					b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(textQuery)));
+				}
 			}
 			if (filters != null) {
 				applyFilterRequest(filters, b);

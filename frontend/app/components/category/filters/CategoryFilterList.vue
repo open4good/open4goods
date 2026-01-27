@@ -15,13 +15,15 @@
     </template>
 
     <template v-else>
-      <v-row dense>
+      <v-row dense class="category-filter-list__row">
         <v-col
           v-for="field in fields"
           :key="field.mapping ?? field.title"
           cols="12"
           sm="6"
-          md="3"
+          md="6"
+          lg="4"
+          class="category-filter-list__col"
         >
           <component
             :is="resolveComponent(field)"
@@ -116,14 +118,19 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr))
     align-items: stretch
 
+  &--row
+    display: block
 
+  &__row
+    align-items: stretch
+
+  &__col
+    min-width: 280px
 
   &__item
     display: flex
     flex-direction: column
     min-width: 0
-
-
 
   &__search-toggle
     align-items: center

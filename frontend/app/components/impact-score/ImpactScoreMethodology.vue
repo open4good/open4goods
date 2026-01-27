@@ -86,7 +86,8 @@
                 variant="text"
                 color="primary"
                 type="button"
-                @click.stop.prevent="navigateToCategory(item.categoryLink)"
+                :to="item.categoryLink"
+                @click.stop
               >
                 <span>{{
                   t('impactScorePage.sections.methodology.verticalCta')

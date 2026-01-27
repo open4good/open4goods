@@ -747,10 +747,4 @@ watch(
     justify-content: flex-start;
   }
 }
-
-@media (min-width: 960px) {
-  .product-hero__pricing-panel-merchant-name {
-    display: none;
-  }
-}
 </style>

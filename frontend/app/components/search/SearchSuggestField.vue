@@ -674,9 +674,7 @@ const normalizeProduct = (
     gtin,
     verticalId: match.verticalId ?? null,
     ecoscoreValue: Number.isFinite(match.ecoscoreValue)
-      ? Number(match.ecoscoreValue) > 5
-        ? Number(match.ecoscoreValue) / 4
-        : Number(match.ecoscoreValue)
+      ? Number(match.ecoscoreValue)
       : null,
     bestPrice: Number.isFinite(match.bestPrice)
       ? Number(match.bestPrice)
