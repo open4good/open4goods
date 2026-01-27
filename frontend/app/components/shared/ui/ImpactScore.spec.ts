@@ -69,6 +69,34 @@ describe('ImpactScore', () => {
     expect(wrapper.find('.impact-score-panel__bar').exists()).toBe(true)
   })
 
+  it('maps the small size alias to the compact xs layout', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 12,
+        size: 'small',
+      },
+      global: globalOptions,
+    })
+
+    const panel = wrapper.find('.impact-score-panel')
+    expect(panel.classes()).toContain('impact-score-panel--xs')
+  })
+
+  it('hides meta and progress bar in corner variant', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 10,
+        variant: 'corner',
+        showMethodology: true,
+        showRange: true,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.find('.impact-score-panel__col-right').exists()).toBe(false)
+    expect(wrapper.find('.impact-score-panel__bar').exists()).toBe(false)
+  })
+
   it('hides/shows meta information', () => {
     const wrapper = mount(ImpactScore, {
       props: {

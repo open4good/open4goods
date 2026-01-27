@@ -69,11 +69,8 @@
                 v-if="impactScoreValue(product) != null"
                 :score="impactScoreValue(product) ?? 0"
                 :max="5"
-                :size="normalizedSize === 'big' ? 'default' : 'small'"
-                mode="badge"
-                badge-layout="stacked"
-                badge-variant="corner"
-                flat
+                size="small"
+                variant="corner"
               />
               <span v-else class="category-product-card-grid__corner-fallback">
                 {{ $t('category.products.notRated') }}
