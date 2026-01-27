@@ -35,6 +35,19 @@ generationExcludedFromAttributesMatching:
   - SIZE_STOCK_STATUS
   - PRICE_NOREBATE
 
+# Attributes that should be treated as product descriptions
+descriptionAttributes:
+  - DESCRIPTION
+  - DESCRIPTIF
+  - PRODUCT_DESCRIPTION
+  - PRODUCT_LONG_DESCRIPTION
+  - PRODUCT_SHORT_DESCRIPTION
+  - SHORT_DESCRIPTION
+  - LONG_DESCRIPTION
+  - DESCRIPTION_LONGUE
+  - DESCRIPTION_COURTE
+  - DETAILS
+
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
   - ACCESSOIRE

@@ -178,6 +178,10 @@
       "type": "object",
       "enabled": false
     },
+    "descriptionsByDatasource": {
+      "type": "object",
+      "enabled": false
+    },
     "reviews": {
       "type": "object",
        "enabled": false

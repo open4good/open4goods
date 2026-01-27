@@ -161,6 +161,11 @@ public class DataFragment implements Standardisable, Validable {
 	 */
 	private Set<Resource> resources = new HashSet<>();
 
+	/**
+	 * Descriptions provided by datasources, keyed by datasource name.
+	 */
+	private Map<String, String> descriptionsByDatasource = new HashMap<>();
+
 	private Integer quantityInStock;
 
 	// warranty, in monthes
@@ -180,6 +185,27 @@ public class DataFragment implements Standardisable, Validable {
 	 * The price history
 	 */
 	private List<Price> priceHistory = new ArrayList<>();
+
+	/**
+	 * Adds or replaces a datasource description.
+	 *
+	 * @param datasourceName datasource name providing the description
+	 * @param description    description content
+	 */
+	public void addDescription(final String datasourceName, final String description) {
+		if (StringUtils.isEmpty(datasourceName) || StringUtils.isEmpty(description)) {
+			return;
+		}
+		descriptionsByDatasource.put(datasourceName, description);
+	}
+
+	public Map<String, String> getDescriptionsByDatasource() {
+		return descriptionsByDatasource;
+	}
+
+	public void setDescriptionsByDatasource(final Map<String, String> descriptionsByDatasource) {
+		this.descriptionsByDatasource = descriptionsByDatasource;
+	}
 
 	@Override
 	public boolean equals(final Object obj) {

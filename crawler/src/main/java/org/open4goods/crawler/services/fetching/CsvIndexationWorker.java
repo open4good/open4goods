@@ -596,7 +596,7 @@ public class CsvIndexationWorker implements Runnable {
 	                description = description.replace(token, "");
 	            }
 	        }
-	        
+	        dataFragment.addDescription(dataFragment.getDatasourceName(), description);
             // Delete from source
             removeFromSource(item, descColumn);
 	    }

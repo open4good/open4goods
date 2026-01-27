@@ -471,6 +471,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			VerticalConfig vConf) throws AggregationSkipException {
 
 		try {
+			registerFragmentDescriptions(dataFragment, product, vConf);
 
 //			AttributesConfig attributesConfig = vConf.getAttributesConfig();
 
@@ -483,6 +484,11 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			// Incrementing "all" attributes
 			/////////////////////////////////////////
 			for (Attribute attr : dataFragment.getAttributes()) {
+				if (isDescriptionAttribute(attr, vConf)) {
+					registerDescription(product, dataFragment.getDatasourceName(), attr.getRawValue(), vConf);
+					product.getAttributes().getAll().remove(attr.getName());
+					continue;
+				}
 
 				ProductAttribute agg = product.getAttributes().getAll().get(attr.getName());
 
@@ -514,6 +520,45 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		onProduct(product, vConf);
 		return null;
+	}
+
+	private void registerFragmentDescriptions(final DataFragment dataFragment, final Product product,
+			final VerticalConfig vConf) {
+		if (dataFragment.getDescriptionsByDatasource() == null
+				|| dataFragment.getDescriptionsByDatasource().isEmpty()) {
+			return;
+		}
+		for (Map.Entry<String, String> entry : dataFragment.getDescriptionsByDatasource().entrySet()) {
+			registerDescription(product, entry.getKey(), entry.getValue(), vConf);
+		}
+	}
+
+	private void registerDescription(final Product product, final String datasourceName, final String description,
+			final VerticalConfig vConf) {
+		if (StringUtils.isEmpty(datasourceName) || StringUtils.isEmpty(description)) {
+			return;
+		}
+		product.getDescriptionsByDatasource().put(datasourceName, truncateDescription(description, vConf));
+	}
+
+	private boolean isDescriptionAttribute(final Attribute attribute, final VerticalConfig vConf) {
+		return vConf.getDescriptionAttributes() != null
+				&& vConf.getDescriptionAttributes().contains(attribute.getName());
+	}
+
+	private String truncateDescription(final String description, final VerticalConfig vConf) {
+		if (StringUtils.isEmpty(description)) {
+			return description;
+		}
+		int limit = vConf.getDescriptionsAggregationConfig().getDescriptionsTruncationLength();
+		if (limit <= 0 || description.length() <= limit) {
+			return description;
+		}
+		String suffix = vConf.getDescriptionsAggregationConfig().getDescriptionsTruncationSuffix();
+		if (suffix == null) {
+			suffix = "";
+		}
+		return description.substring(0, limit) + suffix;
 	}
 
 //	/**
