@@ -57,6 +57,12 @@ export interface AiReviewHolder {
      * @memberof AiReviewHolder
      */
     createdMs?: number;
+    /**
+     * Reason why generation failed if enoughData is false
+     * @type {string}
+     * @memberof AiReviewHolder
+     */
+    failureReason?: string;
 }
 
 /**
@@ -81,6 +87,7 @@ export function AiReviewHolderFromJSONTyped(json: any, ignoreDiscriminator: bool
         'enoughData': json['enoughData'] == null ? undefined : json['enoughData'],
         'totalTokens': json['totalTokens'] == null ? undefined : json['totalTokens'],
         'createdMs': json['createdMs'] == null ? undefined : json['createdMs'],
+        'failureReason': json['failureReason'] == null ? undefined : json['failureReason'],
     };
 }
 
@@ -100,6 +107,7 @@ export function AiReviewHolderToJSONTyped(value?: AiReviewHolder | null, ignoreD
         'enoughData': value['enoughData'],
         'totalTokens': value['totalTokens'],
         'createdMs': value['createdMs'],
+        'failureReason': value['failureReason'],
     };
 }
 

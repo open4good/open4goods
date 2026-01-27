@@ -7,7 +7,7 @@
       <!-- eslint-disable vue/no-v-html -->
       <p
         v-if="technicalShortReviewHtml"
-        class="product-attributes__subtitle"
+        class="product-attributes__subtitle container-fluid"
         v-html="technicalShortReviewHtml"
       />
       <!-- eslint-enable vue/no-v-html -->
@@ -17,23 +17,31 @@
     </header>
 
     <div class="product-attributes__block">
-      <div class="product-attributes__block-header">
-        <h3 id="attributes-main" class="product-attributes__block-title">
-          {{ $t('product.attributes.main.title') }}
-        </h3>
+      <div class="product-attributes__column-headers">
+        <div class="product-attributes__column-header">
+          <div class="product-attributes__column-header-content">
+            <v-icon
+              icon="mdi-card-account-details-outline"
+              size="20"
+              class="product-attributes__column-header-icon"
+            />
+            <span>{{ $t('product.attributes.main.identity.title') }}</span>
+          </div>
+        </div>
+        <div class="product-attributes__column-header">
+          <div class="product-attributes__column-header-content">
+            <v-icon
+              icon="mdi-format-list-bulleted"
+              size="20"
+              class="product-attributes__column-header-icon"
+            />
+            <span>{{ $t('product.attributes.main.title') }}</span>
+          </div>
+        </div>
       </div>
 
       <div class="product-attributes__main-grid">
         <v-card class="product-attributes__identity-card" variant="flat">
-          <div class="product-attributes__identity-heading">
-            <v-icon
-              icon="mdi-card-account-details-outline"
-              size="20"
-              class="product-attributes__identity-icon"
-            />
-            <span>{{ $t('product.attributes.main.identity.title') }}</span>
-          </div>
-
           <div
             v-if="hasIdentityData"
             class="product-attributes__identity-table"
@@ -1564,7 +1572,7 @@ const toggleDetailGroup = (id: string) => {
 
 .product-attributes__subtitle {
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-  max-width: 60ch;
+  max-width: 140ch;
 }
 
 .product-attributes__block {
@@ -1597,15 +1605,27 @@ const toggleDetailGroup = (id: string) => {
   gap: 1.25rem;
 }
 
-.product-attributes__identity-heading {
-  display: flex;
+.product-attributes__column-headers {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+  margin-bottom: 0.5rem;
+}
+
+.product-attributes__column-header {
+  text-align: center;
+}
+
+.product-attributes__column-header-content {
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   font-weight: 600;
+  font-size: 1rem;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
-.product-attributes__identity-icon {
+.product-attributes__column-header-icon {
   color: rgb(var(--v-theme-primary));
 }
 
@@ -1925,6 +1945,10 @@ const toggleDetailGroup = (id: string) => {
 }
 
 @media (min-width: 960px) {
+  .product-attributes__column-headers {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
   .product-attributes__main-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }

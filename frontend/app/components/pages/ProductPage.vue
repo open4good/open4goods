@@ -79,6 +79,8 @@
             :expanded-score-id="expandedScoreId"
             :ai-impact-text="product.aiReview?.ecologicalOneline"
             :on-market-end-date="product.eprel?.onMarketEndDate"
+            :score-min="impactScoreMin"
+            :score-max="impactScoreMax"
           />
         </section>
 

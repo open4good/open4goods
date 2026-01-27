@@ -132,7 +132,7 @@
                   ? 'warning'
                   : 'success'
             "
-            variant="flat"
+            variant="text"
             size="small"
             class="font-weight-bold"
           >

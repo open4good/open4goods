@@ -63,6 +63,12 @@ export interface ProductAiReviewDto {
      * @memberof ProductAiReviewDto
      */
     createdMs?: number;
+    /**
+     * Reason why generation failed if enoughData is false or review is missing
+     * @type {string}
+     * @memberof ProductAiReviewDto
+     */
+    failureReason?: string;
 }
 
 /**
@@ -88,6 +94,7 @@ export function ProductAiReviewDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'enoughData': json['enoughData'] == null ? undefined : json['enoughData'],
         'totalTokens': json['totalTokens'] == null ? undefined : json['totalTokens'],
         'createdMs': json['createdMs'] == null ? undefined : json['createdMs'],
+        'failureReason': json['failureReason'] == null ? undefined : json['failureReason'],
     };
 }
 
@@ -108,6 +115,7 @@ export function ProductAiReviewDtoToJSONTyped(value?: ProductAiReviewDto | null,
         'enoughData': value['enoughData'],
         'totalTokens': value['totalTokens'],
         'createdMs': value['createdMs'],
+        'failureReason': value['failureReason'],
     };
 }
 

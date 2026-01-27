@@ -24,7 +24,8 @@
         <div class="impact-ecoscore__analysis-radar">
           <ImpactScore
             :score="normalizedScore"
-            :max="20"
+            :min="scoreMin"
+            :max="scoreMax"
             size="lg"
             class="align-self-center w-100"
           />
@@ -96,6 +97,8 @@ const props = defineProps<{
   verticalTitle?: string
   expandedScoreId?: string | null
   aiImpactText?: string | null
+  scoreMin?: number
+  scoreMax?: number
 }>()
 
 const { locale, t: $t } = useI18n()
@@ -118,6 +121,9 @@ const shouldDisplayRadar = computed(() =>
 const hasDetailContent = computed(
   () => shouldDisplayRadar.value || detailScores.value.length > 0
 )
+
+const scoreMin = computed(() => props.scoreMin ?? 0)
+const scoreMax = computed(() => props.scoreMax ?? 20)
 
 const normalizedScore = computed(() => {
   const rawValue = Number.isFinite(props.score?.value)

@@ -25,6 +25,8 @@
         :product-image="productImage"
         :vertical-title="verticalTitle"
         :expanded-score-id="expandedScoreId"
+        :score-min="scoreMin"
+        :score-max="scoreMax"
       />
     </div>
 
@@ -58,7 +60,12 @@
                 <span class="product-impact__end-of-life-label">
                   {{ $t('product.impact.endOfLifeSupportEnd') }}
                 </span>
-                <v-chip size="small" color="warning" variant="tonal">
+                <v-chip
+                  size="small"
+                  color="primary"
+                  variant="tonal"
+                  @click="scrollToTimeline"
+                >
                   {{ formattedSupportEndDate }}
                 </v-chip>
               </div>
@@ -207,6 +214,14 @@ const props = defineProps({
   eprelData: {
     type: Object as PropType<EprelDataWrapper>,
     default: null,
+  },
+  scoreMin: {
+    type: Number,
+    default: 0,
+  },
+  scoreMax: {
+    type: Number,
+    default: 20,
   },
 })
 
@@ -399,6 +414,13 @@ const endOfLifeDescription = computed(() => {
     onMarketEndDate: formattedSupportStartDate.value,
   })
 })
+
+const scrollToTimeline = () => {
+  const timelineSection = document.getElementById('cycle-de-vie')
+  if (timelineSection) {
+    timelineSection.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 </script>
 
 <style scoped>
@@ -518,5 +540,14 @@ const endOfLifeDescription = computed(() => {
   .product-impact__end-of-life-label {
     min-width: unset;
   }
+}
+
+.product-impact__end-of-life-clickable {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.product-impact__end-of-life-clickable:hover {
+  opacity: 0.8;
 }
 </style>

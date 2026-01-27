@@ -2496,8 +2496,8 @@
       "pageCount": "{count} page | {count} pages",
       "previewUnavailable": "Aucun aperçu n’est disponible pour ce document. Utilisez le lien de téléchargement.",
       "sidebarTitle": "Documents disponibles",
-      "subtitle": "Consultez et téléchargez les documents officiels.",
-      "title": "Documentation",
+      "subtitle": "Consultez et téléchargez les documents techniques. Mode d'emploi, manuel utilisateur et fiches d'installation sont généralement présentes.",
+      "title": "Manuels, fiches techniques et guides utilisateurs",
       "untitled": "Document sans titre",
       "controls": {
         "rotate": "Pivoter le document",

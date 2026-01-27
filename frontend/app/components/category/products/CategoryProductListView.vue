@@ -39,15 +39,34 @@
           </div>
 
           <div class="category-product-list__meta">
-            <ProductPriceDisplay
-              :product="product"
-              layout="table"
-              class="category-product-list__price"
-            />
-            <span class="category-product-list__offers">
-              <v-icon icon="mdi-store" size="18" class="me-1" />
-              {{ offersCountLabel(product) }}
-            </span>
+            <div class="category-product-list__prices">
+              <ProductMicroPrice
+                v-if="product.offers?.bestOccasionOffer"
+                :product="product"
+                condition="used"
+              />
+              <ProductMicroPrice
+                v-if="product.offers?.bestNewOffer"
+                :product="product"
+                condition="new"
+              />
+            </div>
+
+            <div class="category-product-list__status">
+              <template v-if="resolveBaseLine(product)">
+                <span class="category-product-list__status-text">
+                  {{ resolveBaseLine(product) }}
+                </span>
+                <AiReviewAvailabilityIcon
+                  :is-reviewed="isReviewed(product)"
+                  size="20"
+                />
+              </template>
+              <span v-else class="category-product-list__offers">
+                <v-icon icon="mdi-store" size="18" class="me-1" />
+                {{ offersCountLabel(product) }}
+              </span>
+            </div>
           </div>
 
           <ul
@@ -91,18 +110,7 @@
         </div>
 
         <div class="category-product-list__actions">
-          <v-btn
-            v-if="externalOfferUrl(product)"
-            :href="externalOfferUrl(product)"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="primary"
-            variant="text"
-            class="mr-2"
-            append-icon="mdi-open-in-new"
-          >
-            {{ $t('product.offers.bestPrice') }}
-          </v-btn>
+          <!-- Removed best price button as it is now in micro prices -->
           <CompareToggleButton :product="product" />
         </div>
       </div>
@@ -115,7 +123,8 @@ import { computed } from 'vue'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
-import ProductPriceDisplay from '~/components/shared/ui/ProductPriceDisplay.vue'
+import AiReviewAvailabilityIcon from '~/components/shared/ai/AiReviewAvailabilityIcon.vue'
+import ProductMicroPrice from '~/components/product/ProductMicroPrice.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
@@ -152,11 +161,13 @@ const productLink = (product: ProductDto) =>
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)
 
-const externalOfferUrl = (product: ProductDto) =>
-  product.offers?.bestPrice?.url ?? undefined
-
 const offersCountLabel = (product: ProductDto) =>
   formatOffersCount(product, translatePlural)
+
+const resolveBaseLine = (product: ProductDto) =>
+  product.aiReview?.baseLine ?? null
+
+const isReviewed = (product: ProductDto) => !!product.aiReview
 
 type DisplayedAttribute = {
   key: string
@@ -231,16 +242,22 @@ const popularAttributesByProduct = (
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 
-  &__price
+  &__prices
+    display: flex
+    align-items: center
+    gap: 0.5rem
+    flex-wrap: wrap
+
+  &__status
     display: inline-flex
     align-items: center
-    gap: 0.4rem
-    font-weight: 600
-    color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__price-icon
-    font-size: 1rem
+    gap: 0.5rem
+    font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__status-text
+    font-weight: 500
+    color: rgb(var(--v-theme-primary))
 
   &__offers
     display: inline-flex

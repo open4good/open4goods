@@ -156,6 +156,12 @@ export interface AiReview {
      */
     communityReviewAdvanced: string;
     /**
+     * Community review (advanced)
+     * @type {string}
+     * @memberof AiReview
+     */
+    obsolescenceWarning: string;
+    /**
      * Summary of the product review
      * @type {string}
      * @memberof AiReview
@@ -246,6 +252,7 @@ export function instanceOfAiReview(value: object): value is AiReview {
     if (!('communityReviewNovice' in value) || value['communityReviewNovice'] === undefined) return false;
     if (!('communityReviewIntermediate' in value) || value['communityReviewIntermediate'] === undefined) return false;
     if (!('communityReviewAdvanced' in value) || value['communityReviewAdvanced'] === undefined) return false;
+    if (!('obsolescenceWarning' in value) || value['obsolescenceWarning'] === undefined) return false;
     if (!('summary' in value) || value['summary'] === undefined) return false;
     if (!('pros' in value) || value['pros'] === undefined) return false;
     if (!('cons' in value) || value['cons'] === undefined) return false;
@@ -284,6 +291,7 @@ export function AiReviewFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'communityReviewNovice': json['communityReviewNovice'],
         'communityReviewIntermediate': json['communityReviewIntermediate'],
         'communityReviewAdvanced': json['communityReviewAdvanced'],
+        'obsolescenceWarning': json['obsolescenceWarning'],
         'summary': json['summary'],
         'pros': json['pros'],
         'cons': json['cons'],
@@ -328,6 +336,7 @@ export function AiReviewToJSONTyped(value?: AiReview | null, ignoreDiscriminator
         'communityReviewNovice': value['communityReviewNovice'],
         'communityReviewIntermediate': value['communityReviewIntermediate'],
         'communityReviewAdvanced': value['communityReviewAdvanced'],
+        'obsolescenceWarning': value['obsolescenceWarning'],
         'summary': value['summary'],
         'pros': value['pros'],
         'cons': value['cons'],
