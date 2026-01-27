@@ -47,6 +47,7 @@ const i18nMessages = {
           viewOffer: "Ouvrir l'offre chez {source}",
         },
         events: {
+          toggleLabel: 'Afficher les offres commerciales',
           detailsTitle: 'Événement commercial',
           clearSelection: 'Effacer la sélection',
           dateLabel: 'Dates :',
@@ -109,6 +110,7 @@ const i18nMessages = {
           viewOffer: 'Open offer from {source}',
         },
         events: {
+          toggleLabel: 'Show commercial offers',
           detailsTitle: 'Commercial event',
           clearSelection: 'Clear selection',
           dateLabel: 'Dates:',
