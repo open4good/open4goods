@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
@@ -269,6 +270,9 @@ public class BatchPromptService implements HealthIndicator {
         body.setMessages(messages);
 
         // Create the request entry.
+        // NOTE: OpenAI Batch API does NOT support web_search tool.
+        // Web search is only available via real-time Responses API (/v1/responses).
+        // For grounded batch queries, consider pre-fetching web results before submission.
         var entry = new org.open4goods.services.prompt.dto.openai.BatchRequestEntry();
         entry.setCustomId(customId);
         entry.setMethod("POST");
@@ -558,9 +562,11 @@ public class BatchPromptService implements HealthIndicator {
                         }
                     }
                     
+                    // Get response node for grounding metadata extraction (may be used for content fallback too)
+                    JsonNode responseNode = node.path("response");
+                    
                     if (content == null || content.isEmpty()) {
                         // try fallback to top-level response.candidates (seen in logs)
-                        JsonNode responseNode = node.path("response");
                         JsonNode candidates = responseNode.path("candidates");
                         if (candidates.isArray() && candidates.size() > 0) {
                              JsonNode firstCandidate = candidates.get(0);
@@ -573,7 +579,11 @@ public class BatchPromptService implements HealthIndicator {
                     } else {
                          logger.debug("Extracted content for customId {}: {}...", customId, StringUtils.truncate(content, 100));
                     }
-                    outputs.add(new BatchResultItem(customId, content, line, Map.of()));
+                    
+                    // Extract grounding metadata from Gemini batch response
+                    Map<String, Object> metadata = extractGeminiGroundingMetadata(node, responseNode);
+                    
+                    outputs.add(new BatchResultItem(customId, content, line, metadata));
                 }
             }
             Files.deleteIfExists(outputFile.toPath());
@@ -615,5 +625,80 @@ public class BatchPromptService implements HealthIndicator {
                 || !StringUtils.hasText(vertexBatchConfig.getCredentialsJson())) {
             throw new IllegalStateException("Vertex batch configuration is missing (vertex.batch.project-id, bucket, credentials-json).");
         }
+    }
+
+    /**
+     * Extracts grounding metadata from a Gemini batch response.
+     * <p>
+     * Looks for groundingMetadata in multiple possible locations within the response structure,
+     * including groundingChunks (sources) and webSearchQueries (search queries executed).
+     * </p>
+     *
+     * @param node         the root JSON node of the batch output line
+     * @param responseNode the response sub-node (may be null)
+     * @return a map containing grounding metadata if found, empty map otherwise
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> extractGeminiGroundingMetadata(JsonNode node, JsonNode responseNode) {
+        Map<String, Object> metadata = new LinkedHashMap<>();
+        
+        try {
+            // Try multiple locations for groundingMetadata
+            JsonNode groundingMetadata = null;
+            
+            // 1. Check in response node
+            if (responseNode != null && !responseNode.isMissingNode()) {
+                groundingMetadata = responseNode.path("groundingMetadata");
+                if (groundingMetadata.isMissingNode()) {
+                    groundingMetadata = responseNode.path("grounding_metadata");
+                }
+            }
+            
+            // 2. Check in predictions[0].groundingMetadata
+            if (groundingMetadata == null || groundingMetadata.isMissingNode()) {
+                JsonNode predictions = node.path("predictions");
+                if (predictions.isArray() && predictions.size() > 0) {
+                    groundingMetadata = predictions.get(0).path("groundingMetadata");
+                    if (groundingMetadata.isMissingNode()) {
+                        groundingMetadata = predictions.get(0).path("grounding_metadata");
+                    }
+                }
+            }
+            
+            // 3. Check in candidates[0].groundingMetadata  
+            if (groundingMetadata == null || groundingMetadata.isMissingNode()) {
+                JsonNode candidates = responseNode != null ? responseNode.path("candidates") : node.path("candidates");
+                if (candidates.isArray() && candidates.size() > 0) {
+                    groundingMetadata = candidates.get(0).path("groundingMetadata");
+                    if (groundingMetadata.isMissingNode()) {
+                        groundingMetadata = candidates.get(0).path("grounding_metadata");
+                    }
+                }
+            }
+            
+            if (groundingMetadata != null && !groundingMetadata.isMissingNode()) {
+                // Convert to Map and add to metadata
+                Map<String, Object> groundingMap = objectMapper.convertValue(groundingMetadata, Map.class);
+                metadata.put("groundingMetadata", groundingMap);
+                
+                // Log extracted grounding info for debugging
+                JsonNode chunks = groundingMetadata.path("groundingChunks");
+                if (chunks.isArray()) {
+                    logger.info("Extracted {} grounding chunks from Gemini batch response", chunks.size());
+                }
+                
+                JsonNode queries = groundingMetadata.path("webSearchQueries");
+                if (queries.isArray()) {
+                    logger.debug("Web search queries executed: {}", queries);
+                }
+            } else {
+                logger.debug("No groundingMetadata found in Gemini batch response");
+            }
+            
+        } catch (Exception e) {
+            logger.warn("Error extracting grounding metadata from Gemini batch response: {}", e.getMessage());
+        }
+        
+        return metadata;
     }
 }
