@@ -19,8 +19,7 @@
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div v-if="hasMeta" class="impact-score-panel__col-right">
+      <div v-if="shouldShowMeta" class="impact-score-panel__col-right">
         <div v-if="showRange" class="impact-score-panel__meta-grid">
           <span class="impact-score-panel__label">Min :</span>
           <span
@@ -48,10 +47,6 @@
             }}
           </span>
         </div>
-
-=======
-      <div v-if="shouldShowMeta" class="impact-score-panel__col-right">
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
         <v-btn
           v-if="showMethodology"
           class="impact-score-panel__cta"
@@ -65,15 +60,11 @@
       </div>
     </div>
 
-<<<<<<< HEAD
     <div
-      v-if="showProgressBar"
+      v-if="shouldShowBar && showProgressBar"
       class="impact-score-panel__bar"
       aria-hidden="true"
     >
-=======
-    <div v-if="shouldShowBar" class="impact-score-panel__bar" aria-hidden="true">
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
       <div class="impact-score-panel__track">
         <div
           class="impact-score-panel__fill"
@@ -154,7 +145,6 @@ const accentStep = computed(() => {
   return 'high'
 })
 
-<<<<<<< HEAD
 // Helper to determine step for raw values relative to global scale (0-20)
 // < 1/3 (6.66) -> low
 // < 2/3 (13.33) -> mid
@@ -165,7 +155,7 @@ const getScaleStep = (val: number) => {
   if (ratio < 2 / 3) return 'mid'
   return 'high'
 }
-=======
+
 const normalizedSize = computed(() => {
   const size = props.size
 
@@ -177,7 +167,6 @@ const normalizedSize = computed(() => {
 const normalizedVariant = computed(() =>
   props.variant === 'corner' ? 'corner' : 'default'
 )
->>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
 
 const formattedScoreValue = computed(() =>
   n(displayScore.value, {
@@ -196,9 +185,7 @@ const shouldShowMeta = computed(
   () => normalizedVariant.value === 'default' && hasMeta.value
 )
 
-const shouldShowBar = computed(
-  () => normalizedVariant.value === 'default'
-)
+const shouldShowBar = computed(() => normalizedVariant.value === 'default')
 </script>
 
 <style scoped>
