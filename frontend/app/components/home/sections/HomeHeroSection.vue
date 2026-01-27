@@ -236,7 +236,10 @@ useHead({
         :class="heroRevealClasses"
       >
         <v-row class="home-hero__layout" align="stretch" justify="center">
-          <v-col cols="12" class="home-hero__content">
+          <v-col
+            cols="12"
+            class="d-flex flex-column align-center text-center ga-4"
+          >
             <h1
               id="home-hero-title"
               class="mt-8 home-hero__title home-reveal-item"
@@ -261,8 +264,8 @@ useHead({
               elevation="0"
               :style="{ '--reveal-delay': '180ms' }"
             >
-              <div class="home-hero__panel-grid">
-                <div class="home-hero__panel-block">
+              <div class="d-flex flex-column ga-6">
+                <div class="d-flex flex-column ga-4">
                   <form
                     class="home-hero__search"
                     role="search"
@@ -319,7 +322,7 @@ useHead({
                     </SearchSuggestField>
                   </form>
 
-                  <div class="home-hero__panel-block">
+                  <div class="d-flex flex-column ga-4">
                     <NudgeToolWizard :verticals="wizardVerticals" />
                   </div>
 
@@ -424,12 +427,7 @@ useHead({
   --v-gutter-x: clamp(2rem, 5vw, 3.5rem)
   --v-gutter-y: clamp(2rem, 5vw, 3.5rem)
 
-.home-hero__content
-  display: flex
-  flex-direction: column
-  gap: 1.5rem
-  align-items: center
-  text-align: center
+// .home-hero__content styles now handled by utility classes: d-flex flex-column align-center text-center ga-4
 
 .home-hero__eyebrow
   font-weight: 600
@@ -458,10 +456,7 @@ useHead({
   font-size: clamp(1.2rem, 5vw, 1.8rem)
   text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px
 
-.home-hero__search
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
+// .home-hero__search styles now handled by utility classes
 
 .home-hero__search-input
   border-radius: clamp(1.5rem, 4vw, 2rem)
@@ -481,16 +476,7 @@ useHead({
   max-width: clamp(56rem, 82vw, 72rem)
   margin-inline: auto
 
-.home-hero__panel-grid
-  display: grid
-  gap: clamp(1.5rem, 4vw, 2.5rem)
-  grid-template-columns: 1fr
-
-.home-hero__panel-block
-  display: flex
-  flex-direction: column
-  gap: clamp(1.25rem, 2vw, 1.75rem)
-  min-width: 0
+// .home-hero__panel-grid and .home-hero__panel-block styles now handled by utility classes: d-flex flex-column ga-6, ga-4
 
 .home-hero__wizard
   width: 100%

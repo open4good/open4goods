@@ -75,28 +75,32 @@ const sectionClasses = computed(() => [
           align="center"
           justify="space-between"
         >
-          <v-col cols="12" md="6" class="home-split__col home-split__col--copy">
-            <header class="home-section__header">
+          <v-col cols="12" md="6" class="d-flex flex-column ga-3">
+            <header class="d-flex flex-column ga-2">
               <slot name="eyebrow" />
               <h2 :id="titleId">{{ props.title }}</h2>
               <!-- eslint-disable vue/no-v-html -->
               <p
                 v-if="props.description"
-                class="home-section__subtitle subtitle-text"
+                class="home-section__subtitle subtitle-text ma-0"
                 v-html="props.description"
               ></p>
               <!-- eslint-enable vue/no-v-html -->
             </header>
-            <div class="home-section__body">
+            <div class="d-flex flex-column ga-6">
               <slot />
             </div>
           </v-col>
           <v-col
             cols="12"
             md="6"
-            class="home-split__col home-split__col--visual"
+            class="home-split__col--visual d-flex justify-center"
           >
-            <div class="home-split__visual" role="presentation">
+            <div
+              class="home-split__visual d-flex justify-center align-center"
+              style="position: relative; width: min(100%, 460px)"
+              role="presentation"
+            >
               <NudgerCard
                 :flat-corners="[]"
                 :accent-corners="[]"
@@ -160,41 +164,26 @@ const sectionClasses = computed(() => [
   flex-direction: column
   gap: clamp(2rem, 5vw, 3.25rem)
 
-.home-section__header
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
+// .home-section__header styles now handled by utility classes: d-flex flex-column ga-2
 
 .home-section__subtitle
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
 
-.home-section__body
-  display: flex
-  flex-direction: column
-  gap: clamp(1.5rem, 4vw, 2.5rem)
+// .home-section__body styles now handled by utility classes: d-flex flex-column ga-6
 
 .home-split__content
   row-gap: clamp(2rem, 5vw, 3rem)
   //background: rgb(var(--v-theme-hero-overlay-strong))
 
-.home-split__col--copy
-  display: flex
-  flex-direction: column
-  gap: clamp(0.875rem, 2vw, 1.25rem)
+// .home-split__col--copy styles now handled by utility classes: d-flex flex-column ga-3
 
 .home-split__col--visual
-  display: flex
-  justify-content: center
-  position: sticky;
+  // d-flex justify-center now handled by utility classes
+  position: sticky
   top: 64px // hauteur header menu
 
-.home-split__visual
-  position: relative
-  width: min(100%, 460px)
-  display: flex
-  justify-content: center
-  align-items: center
+// .home-split__visual styles now handled inline and by utility classes: d-flex justify-center align-center
 
 .home-split__image
   position: relative

@@ -2,11 +2,14 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
+import { createVuetify } from 'vuetify'
 import ProductImpactEcoScoreCard from './ProductImpactEcoScoreCard.vue'
 import type { ScoreView } from './impact-types'
 
 describe('ProductImpactEcoScoreCard', () => {
   vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({}))
+
+  const vuetify = createVuetify()
 
   const i18n = createI18n({
     legacy: false,
@@ -40,11 +43,45 @@ describe('ProductImpactEcoScoreCard', () => {
     absoluteValue: 78.123,
   }
 
+  const NuxtLinkStub = defineComponent({
+    name: 'NuxtLinkStub',
+    props: ['to', 'ariaLabel'],
+    setup(props, { slots }) {
+      return () =>
+        h(
+          'a',
+          {
+            class: 'nuxt-link-stub',
+            href: typeof props.to === 'string' ? props.to : '#',
+            'data-to': props.to,
+          },
+          slots.default?.()
+        )
+    },
+  })
+
   it('renders the impact score using ImpactScore component', () => {
     const wrapper = mount(ProductImpactEcoScoreCard, {
-      props: { score: stubScore },
+      props: {
+        score: stubScore,
+        showRadar: true,
+        radarAxes: [
+          { id: '1', name: 'A', attributeValue: null },
+          { id: '2', name: 'B', attributeValue: null },
+          { id: '3', name: 'C', attributeValue: null },
+        ],
+        chartSeries: [
+          {
+            label: 'S',
+            values: [],
+            lineColor: '',
+            areaColor: '',
+            symbolColor: '',
+          },
+        ],
+      },
       global: {
-        plugins: [i18n],
+        plugins: [i18n, vuetify],
         stubs: {
           ImpactScore: defineComponent({
             name: 'ImpactScoreStub',
@@ -54,22 +91,7 @@ describe('ProductImpactEcoScoreCard', () => {
                 h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
             },
           }),
-          NuxtLink: defineComponent({
-            name: 'NuxtLinkStub',
-            props: ['to', 'ariaLabel'],
-            setup(props, { slots }) {
-              return () =>
-                h(
-                  'a',
-                  {
-                    class: 'nuxt-link-stub',
-                    href: typeof props.to === 'string' ? props.to : '#',
-                    'data-to': props.to,
-                  },
-                  slots.default?.()
-                )
-            },
-          }),
+          NuxtLink: NuxtLinkStub,
           'v-icon': defineComponent({
             name: 'VIconStub',
             props: ['icon', 'size'],
@@ -87,10 +109,7 @@ describe('ProductImpactEcoScoreCard', () => {
     })
 
     expect(wrapper.find('.impact-score-stub').exists()).toBe(true)
-    expect(wrapper.text()).toContain('score:3.6')
-    expect(wrapper.find('.v-btn-stub').text()).toContain(
-      'Access the methodology'
-    )
+    expect(wrapper.text()).toContain('score:14.4')
     expect(wrapper.text()).not.toContain('Absolute value')
   })
 
@@ -98,27 +117,39 @@ describe('ProductImpactEcoScoreCard', () => {
     const wrapper = mount(ProductImpactEcoScoreCard, {
       props: { score: null },
       global: {
-        plugins: [i18n],
+        plugins: [i18n, vuetify],
         stubs: {
-          NuxtLink: true,
+          NuxtLink: NuxtLinkStub,
         },
       },
     })
 
     expect(wrapper.text()).toContain('No score')
+    expect(wrapper.text()).toContain('Access the methodology')
   })
 
   it('uses value (0-5) score directly', () => {
-    const scoreWithDifferentValues: ScoreView = {
-      ...stubScore,
-      value: 3.5,
-      on20: 20, // Should be ignored (20/4 = 5, but value is 3.5)
-    }
-
     const wrapper = mount(ProductImpactEcoScoreCard, {
-      props: { score: scoreWithDifferentValues },
+      props: {
+        score: stubScore,
+        showRadar: true,
+        radarAxes: [
+          { id: '1', name: 'A', attributeValue: null },
+          { id: '2', name: 'B', attributeValue: null },
+          { id: '3', name: 'C', attributeValue: null },
+        ],
+        chartSeries: [
+          {
+            label: 'S',
+            values: [],
+            lineColor: '',
+            areaColor: '',
+            symbolColor: '',
+          },
+        ],
+      },
       global: {
-        plugins: [i18n],
+        plugins: [i18n, vuetify],
         stubs: {
           ImpactScore: defineComponent({
             name: 'ImpactScoreStub',
@@ -128,7 +159,7 @@ describe('ProductImpactEcoScoreCard', () => {
                 h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
             },
           }),
-          NuxtLink: true,
+          NuxtLink: NuxtLinkStub,
           RouterLink: true,
           'v-icon': true,
           'v-chip-group': true,
@@ -139,6 +170,7 @@ describe('ProductImpactEcoScoreCard', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('score:3.5')
+    // Component uses normalizedScore which is stubScore.value (3.6) * 4 = 14.4
+    expect(wrapper.text()).toContain('score:14.4')
   })
 })

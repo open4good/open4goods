@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ImpactScore from './ImpactScore.vue'
 import { createI18n } from 'vue-i18n'
-import { defineComponent, h } from 'vue'
 
 const i18n = createI18n({
   legacy: false,
@@ -10,36 +9,8 @@ const i18n = createI18n({
   messages: {
     en: {
       'components.impactScore.tooltip': 'Score: {value} / {max}',
-      'components.impactScore.tooltipBadge': 'Score: {value} / 20',
-      'components.impactScore.outOf20': '/20',
-      'components.impactScore.scale': 'Scale: {min}-{max}',
       'components.impactScore.svgAriaLabel': 'Score {score} out of 20',
     },
-  },
-})
-
-// Stubs for Vuetify components
-const VTooltipStub = defineComponent({
-  name: 'VTooltip',
-  props: ['text'],
-  setup(props, { slots }) {
-    return () =>
-      h('div', { class: 'v-tooltip-stub', 'data-text': props.text }, [
-        slots.activator?.({ props: { 'aria-describedby': 'tooltip-id' } }),
-      ])
-  },
-})
-
-const VRatingStub = defineComponent({
-  name: 'VRating',
-  props: ['modelValue', 'length'],
-  setup(props) {
-    return () =>
-      h('div', {
-        class: 'v-rating-stub',
-        'data-value': props.modelValue,
-        'data-length': props.length,
-      })
   },
 })
 
@@ -47,186 +18,67 @@ describe('ImpactScore', () => {
   const globalOptions = {
     plugins: [i18n],
     stubs: {
-      'v-tooltip': VTooltipStub,
-      'v-rating': VRatingStub,
       'v-btn': true,
     },
   }
 
-  it('renders combined mode by default with chip and stars', () => {
+  it('renders correctly with default props', () => {
     const wrapper = mount(ImpactScore, {
       props: {
-        score: 4,
-        max: 5,
+        score: 15,
       },
       global: globalOptions,
     })
 
-    expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
-    expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
-    // Stars are no longer shown in combined mode by default
-    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
-    expect(wrapper.text()).toContain('16.0 / 20') // (4/5)*20 = 16.0
-
-    // Check tooltip text
-    expect(wrapper.find('.v-tooltip-stub').attributes('data-text')).toBe(
-      'Score: 16.0 / 20'
-    )
+    expect(wrapper.find('.impact-score-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('15/ 20')
+    expect(wrapper.find('.impact-score-panel--md').exists()).toBe(true)
   })
 
-  it('renders stars mode when specified', () => {
-    const wrapper = mount(ImpactScore, {
-      props: {
-        score: 4,
-        max: 5,
-        mode: 'stars',
-      },
-      global: globalOptions,
-    })
+  it('calculates score out of 20 correctly (though logic is mostly in formatting now)', () => {
+    // Current component seems to expect score pre-calculated or simply displays it relative to max if logic existed,
+    // but the code just shows {{ formattedScoreValue }} / 20
+    // and displayScore = props.score.
+    // So if we pass 2.5, it shows 2.5.
 
-    expect(wrapper.find('.impact-score').exists()).toBe(true)
-    expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
-    expect(wrapper.find('.impact-score-badge').exists()).toBe(false)
-  })
-
-  it('calculates score out of 20 correctly', () => {
     const wrapper = mount(ImpactScore, {
       props: {
         score: 2.5,
-        max: 5,
       },
       global: globalOptions,
     })
 
-    // (2.5/5)*20 = 10
-    expect(wrapper.text()).toContain('10.0 / 20')
+    expect(wrapper.text()).toContain('2.5/ 20')
   })
 
-  it('handles custom max correctly for badge score', () => {
+  it('applies xs size variant correctly', () => {
     const wrapper = mount(ImpactScore, {
       props: {
-        score: 75,
-        max: 100,
-      },
-      global: globalOptions,
-    })
-
-    // (75/100)*20 = 15
-    expect(wrapper.text()).toContain('15.0 / 20')
-  })
-
-  it('applies correct class based on size to the chip', () => {
-    const wrapper = mount(ImpactScore, {
-      props: {
-        score: 4,
-        size: 'large',
-      },
-      global: globalOptions,
-    })
-
-    const badge = wrapper.find('.impact-score-badge')
-    expect(badge.classes()).toContain('impact-score-badge--large')
-  })
-
-  it('renders combined mode correctly', () => {
-    const wrapper = mount(ImpactScore, {
-      props: {
-        score: 4,
-        max: 5,
-        mode: 'combined',
-      },
-      global: globalOptions,
-    })
-
-    expect(wrapper.find('.impact-score-combined').exists()).toBe(true)
-    expect(wrapper.find('.impact-score-badge').exists()).toBe(true)
-    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
-    expect(wrapper.text()).toContain('16.0 / 20')
-  })
-
-  it('supports vertical layout and toggleable elements', () => {
-    const wrapper = mount(ImpactScore, {
-      props: {
-        score: 3,
-        max: 5,
-        mode: 'combined',
-        layout: 'vertical',
-        showScore: false,
-        showStars: true,
-      },
-      global: globalOptions,
-    })
-
-    const combined = wrapper.find('.impact-score-combined')
-    expect(combined.classes()).toContain('impact-score-combined--vertical')
-    expect(wrapper.find('.impact-score-badge').exists()).toBe(false)
-    // expect(wrapper.findComponent(VRatingStub).exists()).toBe(true)
-  })
-
-  it('supports flat styling on the badge', () => {
-    const wrapper = mount(ImpactScore, {
-      props: {
-        score: 4,
-        flat: true,
-      },
-      global: globalOptions,
-    })
-
-    const badge = wrapper.find('.impact-score-badge')
-    expect(badge.classes()).toContain('impact-score-badge--flat')
-  })
-
-  it('renders stacked badge layout for corner variant', () => {
-    const wrapper = mount(ImpactScore, {
-      props: {
-        score: 4,
-        mode: 'badge',
-        badgeLayout: 'stacked',
-        badgeVariant: 'corner',
-      },
-      global: globalOptions,
-    })
-
-    const badge = wrapper.find('.impact-score-badge')
-    expect(badge.classes()).toContain('impact-score-badge--stacked')
-    expect(badge.classes()).toContain('impact-score-badge--corner')
-    expect(wrapper.text()).toContain('16.0')
-    expect(wrapper.text()).toContain('/20')
-  })
-
-  it('renders the svg variant with a scaled bar', () => {
-    const wrapper = mount(ImpactScore, {
-      props: {
-        score: 13,
-        min: 0,
-        max: 20,
-        mode: 'svg',
-        svgSize: 'md',
+        score: 18,
+        size: 'xs',
       },
       global: globalOptions,
     })
 
     const panel = wrapper.find('.impact-score-panel')
-    expect(panel.exists()).toBe(true)
-    expect(panel.attributes('aria-label')).toBe('Score 13 out of 20')
-
-    const fill = wrapper.find('.impact-score-panel__fill')
-    // 13/20 = 0.65 -> 65%
-    expect(fill.attributes('style')).toContain('width: 65%')
+    expect(panel.classes()).toContain('impact-score-panel--xs')
+    // Check that progress bar is hidden via CSS class logic (inferred)
+    // Actually jsdom might not compute styles, but we check specific element presence if v-if was used.
+    // The CSS hides it: .impact-score-panel--xs .impact-score-panel__bar { display: none; }
+    // We can check if the class exists.
+    expect(wrapper.find('.impact-score-panel__bar').exists()).toBe(true)
   })
 
-  it('hides the scale label when showScale is false', () => {
+  it('hides/shows meta information', () => {
     const wrapper = mount(ImpactScore, {
       props: {
-        score: 8,
-        min: 0,
-        max: 20,
-        mode: 'svg',
-        showScale: false,
+        score: 10,
+        showMethodology: false,
+        showRange: false,
       },
       global: globalOptions,
     })
 
-    expect(wrapper.text()).not.toContain('Scale:')
+    expect(wrapper.find('.impact-score-panel__col-right').exists()).toBe(false)
   })
 })

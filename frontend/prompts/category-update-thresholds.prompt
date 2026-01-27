@@ -52,7 +52,23 @@ Exemple : clé `scoring.normalization.method` dans `ENERGY_CONSUMPTION.yml`.
 ------------------------------------------------------------
 REGLE DE CONSTRUCTION DES 3 TIERS
 
-Pour chaque score, tu dois d'abord déterminer la méthode de normalisation utilisée par l'attribut correspondant.
+
+Chaque score que tu devrais categoriser peut être constitué de 1 ou plusieurs criteres, définis par
+
+participateInScores:
+  - REPARABILITY
+
+
+dans les définitions d'attributs (/home/goulven/git/open4goods/verticals/src/main/resources/attributes/*)
+
+
+
+Il faut estimer la répartition des scores aggrégés (ex : REPARABILITY) à partir des scores qui le composent.
+
+
+
+
+Pour chaque critère, tu dois d'abord déterminer la méthode de normalisation utilisée par l'attribut correspondant.
 
 1.  Identifier l'attribut :
     Pour un score donné (ex: `ENERGY_CONSUMPTION`), trouver le fichier de configuration de l'attribut associé dans :

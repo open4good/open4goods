@@ -72,13 +72,13 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
     >
       <p
         id="home-cta-title"
-        class="home-hero__subtitle home-reveal-item"
+        class="home-hero__subtitle home-reveal-item ma-0"
         :style="{ '--reveal-delay': '0ms' }"
       >
         {{ t('home.cta.title') }}
       </p>
       <form
-        class="home-hero__search home-reveal-item"
+        class="home-hero__search home-reveal-item d-flex flex-column ga-2 w-100"
         :style="{ '--reveal-delay': '200ms' }"
         role="search"
         @submit.prevent="handleSubmit"
@@ -155,15 +155,15 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
   padding-inline: 0
 
 .home-cta__content
+  // d-flex flex-column ga-3 styles kept in SASS as base, supplemented by component
   display: flex
   flex-direction: column
-  gap: clamp(0.875rem, 2vw, 1.25rem);
+  gap: clamp(0.875rem, 2vw, 1.25rem)
   box-shadow: 0 24px 36px rgba(var(--v-theme-shadow-primary-600), 0.15)
 
 .home-hero__search
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
+  // d-flex flex-column ga-2 w-100 now handled by utility classes
+  // keeping width in sass
   width: 100%
 
 .home-hero__search-input

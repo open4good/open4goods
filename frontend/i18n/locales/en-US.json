@@ -1,4 +1,24 @@
 {
+  "aiAudit": {
+    "positioning": {
+      "title": "Positioning",
+      "notAbsoluteWarning": "Warning: this score is not an absolute footprint measure."
+    },
+    "gapAnalysis": {
+      "title": "Gap Analysis",
+      "missing": "What is missing",
+      "whyUseful": "Why it is useful"
+    },
+    "weights": {
+      "title": "Criteria Weights",
+      "criterion": "Criterion",
+      "weight": "Weight",
+      "rationale": "Rationale"
+    },
+    "sources": {
+      "title": "Sources"
+    }
+  },
   "blog": {
     "article": {
       "edit": "Edit this article",
@@ -2484,6 +2504,9 @@
     }
   },
   "product": {
+    "offers": {
+      "bestPrice": "Best price"
+    },
     "admin": {
       "subtitle": "Tools reserved for Nudger teammates. Visible only when signed in.",
       "title": "Admin tools",

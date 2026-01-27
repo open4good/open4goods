@@ -298,7 +298,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 2
+      scoreMinValue: 2.76
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -307,7 +307,7 @@ nudgeToolConfig:
         en: "Televisions with a low energy consumption"
         fr: "Téléviseurs avec une faible consommation énergétique"
     - scoreName: "DURABILITY"
-      scoreMinValue: 2
+      scoreMinValue: 2.61
       mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
@@ -317,7 +317,7 @@ nudgeToolConfig:
         fr: "Téléviseurs avec une bonne durabilité"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 2
+      scoreMinValue: 2.80
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -368,63 +368,63 @@ nudgeToolConfig:
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "LOWER_THAN"
-          value: "1.5"
+          value: "13.42"
       image: "example-image.png"
       url:
         en: "high-impact"
         fr: "mauvais-ecoscore"
       caption:
-        en: "Bad (< 1.5)"
-        fr: "Mauvais (< 1.5)"
+        en: "Bad (< 13.42)"
+        fr: "Mauvais (< 13.42)"
       title:
         en: "Bad Ecoscore"
         fr: "Mauvais Ecoscore"
       description:
-        en: "Products with a bad Ecoscore (lower tier)"
-        fr: "Produits avec un mauvais Ecoscore (tier inférieur)"
+        en: "Products with a bad Ecoscore"
+        fr: "Produits avec un mauvais Ecoscore"
 
     - id: "impact_medium"
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "GREATER_THAN"
-          value: "1.5"
+          value: "13.42"
         - field: "scores.ECOSCORE.value"
           operator: "LOWER_THAN"
-          value: "3"
+          value: "14.58"
       image: "example-image.png"
       url:
         en: "medium-impact"
         fr: "ecoscore-moyen"
       caption:
-        en: "Medium (1.5 - 3)"
-        fr: "Moyen (1.5 - 3)"
+        en: "Medium (13.42 - 14.58)"
+        fr: "Moyen (13.42 - 14.58)"
       title:
         en: "Medium Ecoscore"
         fr: "Ecoscore Moyen"
       description:
-        en: "Products with a medium Ecoscore (middle tier)"
-        fr: "Produits avec un Ecoscore moyen (tier intermédiaire)"
+        en: "Products with a medium Ecoscore"
+        fr: "Produits avec un Ecoscore moyen"
 
     - id: "impact_good"
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "GREATER_THAN"
-          value: "3"
+          value: "14.58"
       image: "example-image.png"
       url:
         en: "low-impact"
         fr: "bon-ecoscore"
       caption:
-        en: "Good (> 3)"
-        fr: "Bon (> 3)"
+        en: "Good (> 14.58)"
+        fr: "Bon (> 14.58)"
       title:
         en: "Good Ecoscore"
         fr: "Bon Ecoscore"
       description:
-        en: "Products with a good Ecoscore (top tier)"
-        fr: "Produits avec un bon Ecoscore (tier supérieur)"
+        en: "Products with a good Ecoscore"
+        fr: "Produits avec un bon Ecoscore"
 
     ################
     # Price

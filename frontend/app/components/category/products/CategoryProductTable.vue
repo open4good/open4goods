@@ -13,7 +13,7 @@
     @click:row="onRowClick"
   >
     <template #[`item.compare`]="{ item }">
-      <CategoryProductCompareToggle
+      <CompareToggleButton
         :product="item.product"
         size="compact"
         class="category-product-table__compare"
@@ -77,7 +77,7 @@ import type {
   ProductDto,
 } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
+import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import {
   formatAttributeValue,
   resolveAttributeRawValueByKey,

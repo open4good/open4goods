@@ -33,13 +33,9 @@ const isVisible = computed(() => Boolean(props.reveal))
       :class="{ 'is-ready': true, 'is-visible': isVisible }"
       dense
     >
-      <v-col
-        v-for="(item, index) in props.items"
-        :key="item.text"
-        cols="12"
-      >
+      <v-col v-for="(item, index) in props.items" :key="item.text" cols="12">
         <NudgerCard
-          class="home-problems__card home-hover-card home-reveal-item"
+          class="home-problems__card home-hover-card home-reveal-item d-flex align-center ga-4 w-100"
           border
           :flat-corners="['top-right']"
           :accent-corners="['bottom-right']"
@@ -48,7 +44,7 @@ const isVisible = computed(() => Boolean(props.reveal))
           <v-avatar class="home-problems__icon" color="surface" size="64">
             <v-icon :icon="item.icon" size="32" />
           </v-avatar>
-          <p class="home-problems__text">{{ item.text }}</p>
+          <p class="home-problems__text ma-0">{{ item.text }}</p>
         </NudgerCard>
       </v-col>
     </v-row>
@@ -70,17 +66,14 @@ const isVisible = computed(() => Boolean(props.reveal))
   --v-gutter-y: clamp(1rem, 3vw, 1.5rem)
 
 .home-problems__card
-  width: 100%
-  display: flex
-  gap: 1rem
-  align-items: center
+  // Layout now handled by utility classes: d-flex align-center ga-4 w-100
 
 .home-problems__icon
   border: 1px solid rgb(var(--v-theme-secondary))
   color: rgb(var(--v-theme-secondary))
 
 .home-problems__text
-  margin: 0
+  // margin now handled by utility class: ma-0
   font-size: 1.05rem
   line-height: 1.5
   color: rgb(var(--v-theme-text-neutral-strong))

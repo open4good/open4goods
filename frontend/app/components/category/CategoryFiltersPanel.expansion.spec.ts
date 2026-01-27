@@ -1,6 +1,9 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
+import { createVuetify } from 'vuetify'
 import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
+
+const vuetify = createVuetify()
 
 // Mock sub-components
 const CategoryFilterListStub = {
@@ -38,6 +41,7 @@ describe('CategoryFiltersPanel Expansion', () => {
         technicalExpanded: false,
       },
       global: {
+        plugins: [vuetify],
         stubs: {
           CategoryFilterList: CategoryFilterListStub,
           VIcon: true,
@@ -79,6 +83,7 @@ describe('CategoryFiltersPanel Expansion', () => {
         technicalExpanded: false,
       },
       global: {
+        plugins: [vuetify],
         stubs: {
           CategoryFilterList: CategoryFilterListStub,
           VIcon: true,
@@ -104,6 +109,7 @@ describe('CategoryFiltersPanel Expansion', () => {
         technicalExpanded: false,
       },
       global: {
+        plugins: [vuetify],
         stubs: {
           CategoryFilterList: CategoryFilterListStub,
           VIcon: true,
@@ -134,6 +140,7 @@ describe('CategoryFiltersPanel Expansion', () => {
         technicalExpanded: false,
       },
       global: {
+        plugins: [vuetify],
         stubs: {
           CategoryFilterList: CategoryFilterListStub,
           VIcon: true,

@@ -43,7 +43,7 @@ public class GeminiProvider implements GenAiProvider {
 	@Override
 	public ProviderResult generateText(ProviderRequest request) {
 		VertexAiGeminiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
-				request.isAllowWebSearch());
+				request.isAllowWebSearch(), request.getJsonSchema());
 
 		ChatResponse response = chatModel.call(buildPrompt(request, options));
 		String content = response.getResult().getOutput().getText();
@@ -54,7 +54,7 @@ public class GeminiProvider implements GenAiProvider {
 	@Override
 	public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
 		VertexAiGeminiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
-				request.isAllowWebSearch());
+				request.isAllowWebSearch(), request.getJsonSchema());
 
 		Prompt prompt = buildPrompt(request, options);
 		return Flux.defer(() -> {
@@ -94,7 +94,7 @@ public class GeminiProvider implements GenAiProvider {
 		}).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
 	}
 
-	private VertexAiGeminiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode, boolean allowWebSearch) {
+	private VertexAiGeminiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode, boolean allowWebSearch, String jsonSchema) {
 		VertexAiGeminiChatOptions.Builder builder = VertexAiGeminiChatOptions.builder();
 
 		if (options != null) {
@@ -118,9 +118,18 @@ public class GeminiProvider implements GenAiProvider {
              builder.topP(0.9);
         }
 
+		// Enable JSON structured output when schema provided
+		if (jsonSchema != null && !jsonSchema.isBlank()) {
+			logger.debug("Enabling JSON structured output with schema for Gemini");
+			builder.responseMimeType("application/json");
+			builder.responseSchema(jsonSchema);
+		}
+
         // Enable Google Search grounding when requested for interactive prompts.
 		if (retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch) {
             builder.googleSearchRetrieval(true);
+            builder.internalToolExecutionEnabled(true);
+			logger.info("Enabled Google Search grounding with internal tool execution");
 		}
 		return builder.build();
 	}
@@ -143,14 +152,31 @@ public class GeminiProvider implements GenAiProvider {
 
 	private Map<String, Object> extractGroundingMetadata(ChatResponse response) {
 		if (response == null || response.getResult() == null || response.getResult().getMetadata() == null) {
+			logger.debug("No metadata available in response");
 			return Map.of();
 		}
 		// ChatGenerationMetadata usually exposes a map-like view. We copy it to ensure mutability.
         Map<String, Object> metadata = new LinkedHashMap<>();
         try {
              response.getResult().getMetadata().entrySet().forEach(e -> metadata.put(e.getKey(), e.getValue()));
-             // Explicitly check for grounding keys in the output metadata if they are nested or need lifting
-             // For Vertex AI, sometimes metadata is attached to the generation or usage, but Spring AI usually merges them.
+
+             // DEBUG: Log available keys to help verify grounding integration
+             if (logger.isDebugEnabled()) {
+            	 logger.debug("Gemini Metadata Keys: {}", metadata.keySet());
+				 if (metadata.containsKey("groundingMetadata")) {
+					 logger.debug("Found groundingMetadata: {}", metadata.get("groundingMetadata"));
+				 } else if (metadata.containsKey("grounding_metadata")) {
+					 logger.debug("Found grounding_metadata: {}", metadata.get("grounding_metadata"));
+					 metadata.put("groundingMetadata", metadata.get("grounding_metadata"));
+				 } else {
+            		 logger.debug("No groundingMetadata found in response metadata.");
+            	 }
+
+				 // Check for search queries in metadata (indicates grounding was triggered)
+				 if (metadata.containsKey("webSearchQueries")) {
+					 logger.info("Web search queries executed: {}", metadata.get("webSearchQueries"));
+				 }
+             }
         } catch (Exception e) {
         	logger.warn("Error extractGroundingMetadata  ",e);
         }

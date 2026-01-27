@@ -103,19 +103,22 @@ const onKeydown = (event: KeyboardEvent) => {
   display: flex
   align-items: center
   gap: 1rem
-  padding: 0.75rem 1rem
+  padding: 1rem
   width: 100%
   min-height: auto
-  background-color: transparent
-  border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
-  transition: all 0.2s ease
+  background-color: rgb(var(--v-theme-surface))
+  border: 1px solid rgba(var(--v-theme-border-primary), 0.08)
+  border-radius: 16px
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05)
+  transition: all 0.3s cubic-bezier(0.3, 0, 0.2, 1)
   cursor: pointer
   color: rgb(var(--v-theme-text-neutral-strong))
 
   &:hover
-    background-color: rgba(var(--v-theme-surface-active), 0.4)
-    border-color: rgba(var(--v-theme-primary), 0.3)
-    transform: translateY(-1px)
+    background-color: rgb(var(--v-theme-surface))
+    border-color: rgba(var(--v-theme-primary), 0.2)
+    box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.12)
+    transform: translateY(-2px)
 
   &:focus-visible
     outline: 2px solid rgb(var(--v-theme-accent-primary-highlight))

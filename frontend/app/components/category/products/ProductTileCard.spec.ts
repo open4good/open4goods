@@ -13,16 +13,23 @@ const i18n = createI18n({
   locale: 'en',
   messages: {
     en: {
+      products: {
+        compare: {
+          addToList: 'Add to compare',
+          removeFromList: 'Remove from compare',
+          removeSingle: 'Remove {name}',
+          limitReached: 'Limit reached',
+          differentCategory: 'Different category',
+          missingIdentifier: 'Missing identifier',
+          addButtonShort: 'Compare',
+          addedButtonShort: 'Added',
+          addButtonFull: 'Add to compare',
+          removeButtonFull: 'Remove from compare',
+        },
+      },
       category: {
         products: {
-          compare: {
-            addToList: 'Add to compare',
-            removeFromList: 'Remove from compare',
-            removeSingle: 'Remove {name}',
-            limitReached: 'Limit reached',
-            differentCategory: 'Different category',
-            missingIdentifier: 'Missing identifier',
-          },
+          untitledProduct: 'Untitled Product',
         },
       },
     },
@@ -93,9 +100,7 @@ describe('ProductTileCard', () => {
   it('builds the header title from the best available name', () => {
     const wrapper = createWrapper({ names: { prettyName: 'Pretty Z' } })
 
-    expect(wrapper.find('.product-tile-card__title').text()).toBe(
-      'Pretty Z'
-    )
+    expect(wrapper.find('.product-tile-card__title').text()).toBe('Pretty Z')
     expect(wrapper.find('.product-tile-card__subtitle').text()).toBe('Model Z')
   })
 
@@ -112,7 +117,7 @@ describe('ProductTileCard', () => {
 
     expect(store.hasProduct(wrapper.props('product'))).toBe(false)
 
-    await wrapper.find('[data-test="category-product-compare"]').trigger('click')
+    await wrapper.find('[data-test="product-compare-toggle"]').trigger('click')
 
     expect(store.hasProduct(wrapper.props('product'))).toBe(true)
   })

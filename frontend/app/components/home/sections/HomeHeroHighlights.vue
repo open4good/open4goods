@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import type { ProductDto } from '~~/shared/api-client'
+import { useDailyRandomProducts } from '~/composables/useDailyRandomProducts'
 import { useEventPackI18n } from '~/composables/useEventPackI18n'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
 import {
@@ -535,32 +537,23 @@ const applyProductsWithoutVerticalPlaceholder = (
 }
 
 // Fetch random product
-const { data: randomProduct } = await useFetch('/api/stats/random', {
-  query: { num: 1, minOffersCount: 3 },
-  lazy: true,
+// Fetch random product
+const { initDailyProducts, getRandomProduct } = useDailyRandomProducts()
+const currentRandomProduct = ref<ProductDto | null>(null)
+
+// Initialize on mount
+onMounted(async () => {
+  await initDailyProducts()
+  currentRandomProduct.value = getRandomProduct()
 })
 
 const randomProductLink = computed(() => {
-  if (
-    !randomProduct.value ||
-    !Array.isArray(randomProduct.value) ||
-    randomProduct.value.length === 0
-  ) {
-    return null
-  }
-  const product = randomProduct.value[0]
+  const product = currentRandomProduct.value
   return product?.names?.slug ? `/p/${product.names.slug}` : null
 })
 
 const randomProductName = computed(() => {
-  if (
-    !randomProduct.value ||
-    !Array.isArray(randomProduct.value) ||
-    randomProduct.value.length === 0
-  ) {
-    return null
-  }
-  const product = randomProduct.value[0]
+  const product = currentRandomProduct.value
   return product?.names?.label || product?.names?.title || null
 })
 
@@ -661,9 +654,14 @@ const isCreditsDialogActive = ref(false)
             :elevation="10"
             :hover-elevation="14"
           >
-            <div class="home-hero-highlights__card-content" role="listitem">
-              <p class="home-hero-highlights__title">{{ item.title }}</p>
-              <p class="home-hero-highlights__description">
+            <div
+              class="home-hero-highlights__card-content d-flex flex-column align-center text-center ga-2"
+              role="listitem"
+            >
+              <p class="home-hero-highlights__title ma-0 font-weight-bold">
+                {{ item.title }}
+              </p>
+              <p class="home-hero-highlights__description ma-0">
                 <template
                   v-for="(segment, segmentIndex) in item.segments"
                   :key="`hero-highlight-${index}-segment-${segmentIndex}`"
@@ -761,21 +759,19 @@ const isCreditsDialogActive = ref(false)
         :elevation="10"
         :hover-elevation="14"
       >
-        <div class="home-hero-highlights__ai-summary-content">
+        <div class="home-hero-highlights__ai-summary-content pa-4">
           <v-row align="center">
-            <v-col
-              cols="12"
-              md="2"
-              class="home-hero-highlights__ai-summary-icon"
-            >
+            <v-col cols="12" md="2" class="d-flex justify-center">
               <v-icon size="56" color="secondary">mdi-robot</v-icon>
             </v-col>
             <v-col
               cols="12"
               md="10"
-              class="home-hero-highlights__ai-summary-text"
+              class="d-flex flex-column ga-1 text-center"
             >
-              <div class="home-hero-highlights__ai-summary-header">
+              <div
+                class="d-flex flex-wrap justify-center ga-2 font-weight-bold"
+              >
                 <span class="home-hero-highlights__ai-summary-title">
                   <v-icon color="secondary" class="mr-2"
                     >mdi-bullhorn-variant</v-icon
@@ -783,14 +779,16 @@ const isCreditsDialogActive = ref(false)
                   {{ aiSummaryTitle }}
                 </span>
               </div>
-              <p class="home-hero-highlights__ai-summary-description">
+              <p class="home-hero-highlights__ai-summary-description ma-0">
                 {{ aiSummaryDescription }}
               </p>
 
-              <div class="home-hero-highlights__ai-summary-actions">
+              <div
+                class="d-flex flex-wrap align-center justify-center ga-4 mt-4"
+              >
                 <div
                   v-if="aiSummaryReviewedLabel"
-                  class="home-hero-highlights__ai-summary-secondary-info"
+                  class="d-inline-flex align-center px-3 py-1 rounded-pill home-hero-highlights__ai-summary-secondary-info"
                 >
                   <v-icon start size="small" color="secondary"
                     >mdi-information-outline</v-icon
@@ -877,21 +875,15 @@ const isCreditsDialogActive = ref(false)
   :deep(.rounded-card__content)
     min-height: auto
 
-.home-hero-highlights__card-content
-  display: flex
-  flex-direction: column
-  gap: 0.6rem
-  align-items: center
-  text-align: center
+// .home-hero-highlights__card-content styles now handled by utility classes: d-flex flex-column align-center text-center ga-2
 
 .home-hero-highlights__title
-  margin: 0
-  font-weight: 600
+  // margin, font-weight now handled by utility classes: ma-0 font-weight-bold
   color: rgb(var(--v-theme-text-neutral-strong))
   font-size: 1rem
 
 .home-hero-highlights__description
-  margin: 0
+  // margin now handled by utility class: ma-0
   color: rgb(var(--v-theme-text-neutral-secondary))
   line-height: 1.35
 
@@ -928,48 +920,27 @@ const isCreditsDialogActive = ref(false)
   padding: 0.9rem 1.1rem
   row-gap: 0.35rem
 
-.home-hero-highlights__ai-summary-icon
-  display: flex
-  justify-content: center
+// .home-hero-highlights__ai-summary-icon styles now handled by utility classes: d-flex justify-center
 
-.home-hero-highlights__ai-summary-header
-  display: flex
-  flex-wrap: wrap
-  justify-content: center
-  gap: 0.5rem
-  font-weight: 600
-  color: rgb(var(--v-theme-text-neutral-strong))
+// .home-hero-highlights__ai-summary-header styles now handled by utility classes: d-flex flex-wrap justify-center ga-2 font-weight-bold
 
 .home-hero-highlights__ai-summary-title
   font-size: 0.95rem
 
-.home-hero-highlights__ai-summary-text
-  text-align: center
-  display: flex
-  flex-direction: column
-  gap: 0.25rem
+// .home-hero-highlights__ai-summary-text styles now handled by utility classes: d-flex flex-column ga-1 text-center
 
 .home-hero-highlights__ai-summary-description
-  margin: 0
+  // margin now handled by utility class: ma-0
   color: rgb(var(--v-theme-text-neutral-secondary))
   font-size: 0.85rem
   line-height: 1.4
 
-.home-hero-highlights__ai-summary-actions
-  display: flex
-  flex-wrap: wrap
-  align-items: center
-  justify-content: center
-  gap: 1rem
-  margin-top: 1rem
+// .home-hero-highlights__ai-summary-actions styles now handled by utility classes: d-flex flex-wrap align-center justify-center ga-4 mt-4
 
 .home-hero-highlights__ai-summary-secondary-info
-  display: inline-flex
-  align-items: center
-  padding: 0.35rem 0.85rem
+  // d-inline-flex align-center px-3 py-1 rounded-pill now handled by utility classes
   background: rgba(var(--v-theme-surface-default), 0.6)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3)
-  border-radius: 999px
   font-size: 0.8rem
   color: rgb(var(--v-theme-text-neutral-secondary))
   backdrop-filter: blur(4px)

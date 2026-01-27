@@ -1,126 +1,161 @@
 <template>
   <div class="category-filters" data-testid="category-filters">
     <section class="category-filters__section">
-      <h2 class="category-filters__title">
+      <h2
+        class="category-filters__title cursor-pointer"
+        @click="isGlobalOpen = !isGlobalOpen"
+      >
+        <div class="d-flex align-center flex-grow-1 gap-2">
+          <v-icon
+            icon="mdi-tune-variant"
+            size="20"
+            class="category-filters__title-icon"
+          />
+          <span>{{ t('category.filters.globalTitle') }}</span>
+        </div>
         <v-icon
-          icon="mdi-tune-variant"
-          size="20"
-          class="category-filters__title-icon"
+          :icon="isGlobalOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+          color="medium-emphasis"
         />
-        <span>{{ t('category.filters.globalTitle') }}</span>
       </h2>
-      <div class="category-filters__section-body">
-        <CategoryFilterList
-          :fields="filterOptions?.global ?? []"
-          :aggregations="aggregationMap"
-          :baseline-aggregations="baselineAggregationMap"
-          :active-filters="activeFilters"
-          @update-range="updateRangeFilter"
-          @update-terms="updateTermsFilter"
-        />
-      </div>
-    </section>
-
-    <section class="category-filters__section">
-      <h2 class="category-filters__title">
-        <v-icon
-          icon="mdi-leaf"
-          size="20"
-          class="category-filters__title-icon"
-        />
-        <span>{{ t('category.filters.impactTitle') }}</span>
-      </h2>
-      <div class="category-filters__section-body">
-        <CategoryFilterList
-          :fields="impactPrimary"
-          :aggregations="aggregationMap"
-          :baseline-aggregations="baselineAggregationMap"
-          :active-filters="activeFilters"
-          @update-range="updateRangeFilter"
-          @update-terms="updateTermsFilter"
-        />
-
-        <div v-if="impactRemaining.length" class="category-filters__see-more">
-          <v-btn
-            variant="text"
-            density="comfortable"
-            color="primary"
-            @click="toggleImpactExpansion"
-          >
-            {{
-              impactExpanded
-                ? t('category.filters.hideImpact')
-                : t('category.filters.showMoreImpact')
-            }}
-          </v-btn>
-
+      <v-expand-transition>
+        <div v-show="isGlobalOpen" class="category-filters__section-body">
           <CategoryFilterList
-            v-if="impactExpanded"
-            :fields="impactRemaining"
+            :fields="filterOptions?.global ?? []"
             :aggregations="aggregationMap"
             :baseline-aggregations="baselineAggregationMap"
             :active-filters="activeFilters"
-            class="mt-3"
             @update-range="updateRangeFilter"
             @update-terms="updateTermsFilter"
           />
         </div>
-      </div>
+      </v-expand-transition>
     </section>
 
     <section class="category-filters__section">
-      <h2 class="category-filters__title">
+      <h2
+        class="category-filters__title cursor-pointer"
+        @click="isImpactOpen = !isImpactOpen"
+      >
+        <div class="d-flex align-center flex-grow-1 gap-2">
+          <v-icon
+            icon="mdi-leaf"
+            size="20"
+            class="category-filters__title-icon"
+          />
+          <span>{{ t('category.filters.impactTitle') }}</span>
+        </div>
         <v-icon
-          icon="mdi-cog"
-          size="20"
-          class="category-filters__title-icon"
+          :icon="isImpactOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+          color="medium-emphasis"
         />
-        <span>{{ t('category.filters.technicalTitle') }}</span>
       </h2>
-      <div class="category-filters__section-body">
-        <CategoryFilterList
-          :fields="technicalPrimary"
-          :aggregations="aggregationMap"
-          :baseline-aggregations="baselineAggregationMap"
-          :active-filters="activeFilters"
-          @update-range="updateRangeFilter"
-          @update-terms="updateTermsFilter"
-        />
-
-        <div
-          v-if="technicalRemaining.length"
-          class="category-filters__see-more"
-        >
-          <v-btn
-            variant="text"
-            density="comfortable"
-            color="primary"
-            @click="toggleTechnicalExpansion"
-          >
-            {{
-              technicalExpanded
-                ? t('category.filters.hideTechnical')
-                : t('category.filters.showMoreTechnical')
-            }}
-          </v-btn>
-
+      <v-expand-transition>
+        <div v-show="isImpactOpen" class="category-filters__section-body">
           <CategoryFilterList
-            v-if="technicalExpanded"
-            :fields="technicalRemaining"
+            :fields="impactPrimary"
             :aggregations="aggregationMap"
             :baseline-aggregations="baselineAggregationMap"
             :active-filters="activeFilters"
-            class="mt-3"
             @update-range="updateRangeFilter"
             @update-terms="updateTermsFilter"
           />
+
+          <div v-if="impactRemaining.length" class="category-filters__see-more">
+            <v-btn
+              variant="text"
+              density="comfortable"
+              color="primary"
+              @click="toggleImpactExpansion"
+            >
+              {{
+                impactExpanded
+                  ? t('category.filters.hideImpact')
+                  : t('category.filters.showMoreImpact')
+              }}
+            </v-btn>
+
+            <CategoryFilterList
+              v-if="impactExpanded"
+              :fields="impactRemaining"
+              :aggregations="aggregationMap"
+              :baseline-aggregations="baselineAggregationMap"
+              :active-filters="activeFilters"
+              class="mt-3"
+              @update-range="updateRangeFilter"
+              @update-terms="updateTermsFilter"
+            />
+          </div>
         </div>
-      </div>
+      </v-expand-transition>
+    </section>
+
+    <section class="category-filters__section">
+      <h2
+        class="category-filters__title cursor-pointer"
+        @click="isTechnicalOpen = !isTechnicalOpen"
+      >
+        <div class="d-flex align-center flex-grow-1 gap-2">
+          <v-icon
+            icon="mdi-cog"
+            size="20"
+            class="category-filters__title-icon"
+          />
+          <span>{{ t('category.filters.technicalTitle') }}</span>
+        </div>
+        <v-icon
+          :icon="isTechnicalOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+          color="medium-emphasis"
+        />
+      </h2>
+      <v-expand-transition>
+        <div v-show="isTechnicalOpen" class="category-filters__section-body">
+          <CategoryFilterList
+            :fields="technicalPrimary"
+            :aggregations="aggregationMap"
+            :baseline-aggregations="baselineAggregationMap"
+            :active-filters="activeFilters"
+            @update-range="updateRangeFilter"
+            @update-terms="updateTermsFilter"
+          />
+
+          <div
+            v-if="technicalRemaining.length"
+            class="category-filters__see-more"
+          >
+            <v-btn
+              variant="text"
+              density="comfortable"
+              color="primary"
+              @click="toggleTechnicalExpansion"
+            >
+              {{
+                technicalExpanded
+                  ? t('category.filters.hideTechnical')
+                  : t('category.filters.showMoreTechnical')
+              }}
+            </v-btn>
+
+            <CategoryFilterList
+              v-if="technicalExpanded"
+              :fields="technicalRemaining"
+              :aggregations="aggregationMap"
+              :baseline-aggregations="baselineAggregationMap"
+              :active-filters="activeFilters"
+              class="mt-3"
+              @update-range="updateRangeFilter"
+              @update-terms="updateTermsFilter"
+            />
+          </div>
+        </div>
+      </v-expand-transition>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type {
   AggregationResponseDto,
   FieldMetadataDto,
@@ -128,7 +163,6 @@ import type {
   FilterRequestDto,
   ProductFieldOptionsResponse,
 } from '~~/shared/api-client'
-import { useI18n } from 'vue-i18n'
 
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
@@ -154,6 +188,9 @@ const emit = defineEmits<{
 }>()
 
 const activeFilters = computed(() => props.filters?.filters ?? [])
+const isGlobalOpen = ref(false)
+const isImpactOpen = ref(false)
+const isTechnicalOpen = ref(false)
 
 const { t } = useI18n()
 

@@ -34,14 +34,10 @@ const isVisible = computed(() => Boolean(props.reveal))
         align="center"
         justify="space-between"
       >
-        <v-col
-          cols="12"
-          md="6"
-          class="home-solution__col home-solution__col--copy"
-        >
-          <header class="home-section__header">
+        <v-col cols="12" md="6" class="d-flex flex-column ga-3">
+          <header class="d-flex flex-column ga-2">
             <h2 id="home-solution-title">{{ sectionTitle }}</h2>
-            <p class="home-section__subtitle subtitle-text">
+            <p class="home-section__subtitle subtitle-text ma-0">
               {{ sectionDescription }}
             </p>
           </header>
@@ -57,7 +53,7 @@ const isVisible = computed(() => Boolean(props.reveal))
               md="6"
             >
               <NudgerCard
-                class="home-solution__item home-hover-card home-reveal-item"
+                class="home-solution__item home-hover-card home-reveal-item d-flex align-center ga-4 w-100"
                 border
                 :flat-corners="['top-left']"
                 :accent-corners="['bottom-left']"
@@ -66,9 +62,11 @@ const isVisible = computed(() => Boolean(props.reveal))
                 <v-avatar class="home-solution__icon" size="60" color="surface">
                   <span aria-hidden="true">{{ item.emoji }}</span>
                 </v-avatar>
-                <div class="home-solution__texts">
-                  <p class="home-solution__label">{{ item.label }}</p>
-                  <p class="home-solution__description">
+                <div class="d-flex flex-column ga-1">
+                  <p class="home-solution__label ma-0 font-weight-bold">
+                    {{ item.label }}
+                  </p>
+                  <p class="home-solution__description ma-0">
                     {{ item.description }}
                   </p>
                 </div>
@@ -93,10 +91,7 @@ const isVisible = computed(() => Boolean(props.reveal))
 </template>
 
 <style scoped lang="sass">
-.home-solution__col
-  display: flex;
-  flex-direction: column;
-  gap: clamp(0.875rem, 2vw, 1.25rem);
+// .home-solution__col styles now handled by utility classes: d-flex flex-column ga-3
 
 .home-section
   padding-block: clamp(1.5rem, 3vw, 2.75rem)
@@ -110,10 +105,7 @@ const isVisible = computed(() => Boolean(props.reveal))
 
 
 .home-solution__item
-  width: 100%;
-  display: flex;
-  gap: 1rem;
-  align-items: center;
+  // d-flex align-center ga-4 w-100 now handled by utility classes
   background: transparent !important;
 
 .home-solution__item::after
@@ -130,25 +122,18 @@ const isVisible = computed(() => Boolean(props.reveal))
   flex-direction: column;
   gap: clamp(0.875rem, 2vw, 1.25rem);
 
-.home-section__header
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+// .home-section__header styles now handled by utility classes: d-flex flex-column ga-2
 
-.home-solution__texts
-  display: flex
-  flex-direction: column
-  gap: 0.35rem
+// .home-solution__texts styles now handled by utility classes: d-flex flex-column ga-1
 
 .home-solution__description
-  margin: 0
+  // margin now handled by utility class: ma-0
   color: rgb(var(--v-theme-text-neutral-secondary))
   font-size: 0.95rem
 
 .home-solution__label
-  margin: 0
+  // margin, font-weight now handled by utility classes: ma-0 font-weight-bold
   font-size: clamp(1.05rem, 2.4vw, 1.25rem)
-  font-weight: 600
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .home-solution__image

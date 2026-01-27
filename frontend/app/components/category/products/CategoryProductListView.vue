@@ -39,12 +39,11 @@
           </div>
 
           <div class="category-product-list__meta">
-            <span class="category-product-list__price">
-              <span aria-hidden="true" class="category-product-list__price-icon"
-                >€</span
-              >
-              {{ listPriceValue(product) }}
-            </span>
+            <ProductPriceDisplay
+              :product="product"
+              layout="table"
+              class="category-product-list__price"
+            />
             <span class="category-product-list__offers">
               <v-icon icon="mdi-store" size="18" class="me-1" />
               {{ offersCountLabel(product) }}
@@ -82,7 +81,7 @@
             v-if="impactScoreValue(product) != null"
             :score="(impactScoreValue(product) ?? 0) * 4"
             :max="20"
-            size="sm"
+            size="xs"
             :show-methodology="false"
             :show-range="false"
           />
@@ -104,7 +103,7 @@
           >
             {{ $t('product.offers.bestPrice') }}
           </v-btn>
-          <CategoryProductCompareToggle :product="product" />
+          <CompareToggleButton :product="product" />
         </div>
       </div>
     </v-list-item>
@@ -115,13 +114,14 @@
 import { computed } from 'vue'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
+import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
+import ProductPriceDisplay from '~/components/shared/ui/ProductPriceDisplay.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
+import { formatOffersCount } from '~/utils/_product-pricing'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 
 const props = defineProps<{
@@ -154,23 +154,6 @@ const impactScoreValue = (product: ProductDto) =>
 
 const externalOfferUrl = (product: ProductDto) =>
   product.offers?.bestPrice?.url ?? undefined
-
-const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
-
-const listPriceValue = (product: ProductDto) => {
-  const currency = product.offers?.bestPrice?.currency
-  const price = product.offers?.bestPrice?.price
-
-  if (currency && currency !== 'EUR') {
-    return bestPriceLabel(product)
-  }
-
-  if (price != null) {
-    return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  }
-
-  return bestPriceLabel(product)
-}
 
 const offersCountLabel = (product: ProductDto) =>
   formatOffersCount(product, translatePlural)

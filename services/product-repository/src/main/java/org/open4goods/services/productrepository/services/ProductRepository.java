@@ -1071,7 +1071,8 @@ public class ProductRepository {
         private String resolveReviewField(String locale) {
             String resolvedLocale = locale;
             if (resolvedLocale == null || resolvedLocale.isBlank()) {
-                resolvedLocale = "default";
+            	// TODO : Handle i18n
+                resolvedLocale = "fr";
             }
             return "reviews." + resolvedLocale + ".review";
         }

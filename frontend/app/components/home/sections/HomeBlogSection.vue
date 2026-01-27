@@ -29,13 +29,17 @@ const fallbackIconSize = 48
   <section class="home-section home-blog" aria-labelledby="home-blog-title">
     <v-container fluid class="home-section__container">
       <div
-        class="home-section__inner home-reveal-group"
+        class="home-section__inner home-reveal-group d-flex flex-column ga-3 mx-auto"
+        style="max-width: 1180px"
         :class="{ 'is-ready': true, 'is-visible': isVisible }"
       >
-        <p id="home-blog-title" class="home-hero__subtitle home-reveal-item">
+        <p
+          id="home-blog-title"
+          class="home-hero__subtitle home-reveal-item ma-0"
+        >
           {{ t('home.blog.title') }}
         </p>
-        <p class="home-section__subtitle text-center home-reveal-item">
+        <p class="home-section__subtitle text-center home-reveal-item ma-0">
           {{ t('home.blog.subtitle') }}
         </p>
         <v-btn
@@ -49,12 +53,16 @@ const fallbackIconSize = 48
           {{ t('home.blog.cta') }}
         </v-btn>
 
-        <div v-if="loading" class="home-blog__skeletons">
+        <div
+          v-if="loading"
+          class="home-blog__skeletons d-grid ga-6"
+          style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))"
+        >
           <v-skeleton-loader
             v-for="index in 3"
             :key="`blog-skeleton-${index}`"
             type="image, article"
-            class="home-blog__skeleton"
+            class="rounded-xl"
           />
         </div>
         <template v-else>
@@ -65,11 +73,16 @@ const fallbackIconSize = 48
               cols="12"
               sm="6"
               md="4"
-              class="home-blog__col home-reveal-item home-reveal-item--blur"
+              class="d-flex home-reveal-item home-reveal-item--blur"
               :style="{ '--reveal-delay': `${240 + index * 90}ms` }"
             >
-              <NuxtLink :to="article.link" class="home-blog__item">
-                <article class="home-blog__card">
+              <NuxtLink
+                :to="article.link"
+                class="home-blog__item text-decoration-none d-flex flex-grow-1"
+              >
+                <article
+                  class="home-blog__card d-flex flex-column flex-grow-1 rounded-xl overflow-hidden"
+                >
                   <div class="home-blog__media" aria-hidden="true">
                     <v-img
                       v-if="article.hasImage"
@@ -84,13 +97,16 @@ const fallbackIconSize = 48
                       />
                     </div>
                   </div>
-                  <div class="home-blog__content">
-                    <p class="home-blog__date">{{ article.formattedDate }}</p>
-                    <h3 class="home-blog__title">{{ article.title }}</h3>
-                    <p class="home-blog__summary">{{ article.summary }}</p>
-                    <span class="home-blog__link-label">{{
-                      t('home.blog.readMore')
-                    }}</span>
+                  <div class="d-flex flex-column ga-2 pa-6">
+                    <p class="home-blog__date ma-0">
+                      {{ article.formattedDate }}
+                    </p>
+                    <h3 class="home-blog__title ma-0">{{ article.title }}</h3>
+                    <p class="home-blog__summary ma-0">{{ article.summary }}</p>
+                    <span
+                      class="home-blog__link-label mt-auto font-weight-bold"
+                      >{{ t('home.blog.readMore') }}</span
+                    >
                   </div>
                 </article>
               </NuxtLink>
@@ -120,12 +136,7 @@ const fallbackIconSize = 48
 .home-section__container
   padding-inline: 0
 
-.home-section__inner
-  max-width: 1180px
-  margin: 0 auto
-  display: flex
-  flex-direction: column
-  gap: clamp(0.875rem, 2vw, 1.25rem);
+// .home-section__inner styles now handled by utility classes: d-flex flex-column ga-3 mx-auto + inline style
 
 .home-section__header
   max-width: 760px
@@ -143,13 +154,7 @@ const fallbackIconSize = 48
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
 
-.home-blog__skeletons
-  display: grid
-  gap: 1.5rem
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))
-
-.home-blog__skeleton
-  border-radius: clamp(1.25rem, 3vw, 1.75rem)
+// .home-blog__skeletons and .home-blog__skeleton styles now handled by utility classes: d-grid ga-6 rounded-xl + inline style
 
 
 
@@ -161,18 +166,12 @@ const fallbackIconSize = 48
   display: flex
 
 .home-blog__item
-  text-decoration: none
+  // text-decoration-none d-flex flex-grow-1 now handled by utility classes
   color: inherit
-  display: flex
-  flex: 1
 
 .home-blog__card
+  // d-flex flex-column flex-grow-1 rounded-xl overflow-hidden now handled by utility classes
   height: 100%
-  flex: 1
-  display: flex
-  flex-direction: column
-  border-radius: clamp(1.25rem, 3vw, 1.85rem)
-  overflow: hidden
   background: rgba(var(--v-theme-surface-default), 0.96)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.28)
   box-shadow: 0 18px 28px rgba(var(--v-theme-shadow-primary-600), 0.12)
@@ -200,30 +199,25 @@ const fallbackIconSize = 48
   justify-content: center
   color: rgba(var(--v-theme-hero-gradient-start), 0.7)
 
-.home-blog__content
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-  padding: clamp(1.5rem, 4vw, 2rem)
+// .home-blog__content styles now handled by utility classes: d-flex flex-column ga-2 pa-6
 
 .home-blog__date
-  margin: 0
+  // margin now handled by utility class: ma-0
   font-size: 0.95rem
   color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-blog__title
-  margin: 0
+  // margin now handled by utility class: ma-0
   font-size: 1.25rem
   font-weight: 600
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .home-blog__summary
-  margin: 0
+  // margin now handled by utility class: ma-0
   color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-blog__link-label
-  margin-top: auto
-  font-weight: 600
+  // mt-auto font-weight-bold now handled by utility classes
   color: rgba(var(--v-theme-hero-gradient-end), 0.95)
 
 .home-blog__empty

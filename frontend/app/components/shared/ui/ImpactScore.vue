@@ -83,7 +83,7 @@ const props = defineProps({
     default: 20,
   },
   size: {
-    type: String as PropType<'sm' | 'md' | 'lg'>,
+    type: String as PropType<'xs' | 'sm' | 'md' | 'lg'>,
     default: 'md',
   },
   showMethodology: {
@@ -181,6 +181,19 @@ const hasMeta = computed(() => props.showMethodology || props.showRange)
 }
 
 /* Size variants */
+.impact-score-panel--xs {
+  padding: 8px 10px 8px;
+  border-radius: 14px;
+}
+
+.impact-score-panel--xs .impact-score-panel__score-value {
+  font-size: 1.8rem;
+}
+
+.impact-score-panel--xs .impact-score-panel__bar {
+  display: none;
+}
+
 .impact-score-panel--sm {
   padding: 12px 14px 10px;
   border-radius: 18px;

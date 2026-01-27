@@ -1,4 +1,24 @@
 {
+  "aiAudit": {
+    "positioning": {
+      "title": "Positionnement",
+      "notAbsoluteWarning": "Attention : ce score n'est pas une mesure d'empreinte absolue."
+    },
+    "gapAnalysis": {
+      "title": "Analyse des écarts",
+      "missing": "Ce qui manque",
+      "whyUseful": "Pourquoi c'est utile"
+    },
+    "weights": {
+      "title": "Pondération des critères",
+      "criterion": "Critère",
+      "weight": "Poids",
+      "rationale": "Justification"
+    },
+    "sources": {
+      "title": "Sources utilisées"
+    }
+  },
   "blog": {
     "article": {
       "edit": "Modifier cet article",
@@ -80,7 +100,6 @@
         ]
       },
       "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
-
       "highlights": [
         {
           "title": "🌿 ImpactScore : Guider vos achats",
@@ -332,16 +351,16 @@
       }
     },
     "objections": {
-      "title": "Questions directes, réponses transparentes",
-      "subtitle": "Les sujets qui reviennent le plus souvent.",
+      "title": "On va nous dire...",
+      "subtitle": "Les questions légitimes.",
       "items": {
         "aiEnergy": {
-          "question": "L’IA consomme beaucoup d’énergie ?",
-          "answer": "IA frugale, calculs optimisés, valeur nette positive."
+          "question": "Un coup de pouce écologique à grand renfort d'IA ????",
+          "answer": "Ces outils changent la donne, et vont changer beaucoup de choses. Nous pensons démontrer ici un cas d'usage 'AI 4 good', ou ces outils peuvent être utilisés pour de la contribution et de l'impact sociétal. Pour autant, nous sommes dans une démarche sobre en limitant le nombre d'appels et la taille des modèles utilisés !"
         },
         "reuse": {
           "question": "La vraie frugalité c’est le réemploi ?",
-          "answer": "On encourage d’abord consommer moins, puis mieux ; durabilité et reconditionné quand disponibles."
+          "answer": "Tout à fait d'accord, mais Nudger laisse le choix. C'est pour ça que nous mettons toujours en avant les offres d'occasion quand il y'en a de disponibles."
         },
         "independence": {
           "question": "Êtes-vous indépendants ?",
@@ -354,31 +373,28 @@
       "subtitle": "Les réponses rapides aux questions fréquentes.",
       "items": {
         "free": {
-          "question": "Nudger est-il gratuit ?",
-          "answer": "Oui, la recherche est libre d’accès."
+          "question": "Un coup de pouce écologique à grand renfort d'IA ?",
+          "answer": "Ces outils changent la donne, et vont changer beaucoup de choses. Nous pensons démontrer ici un cas d'usage 'AI 4 good', ou ces outils peuvent être utilisés pour de la contribution et de l'impact sociétal. Pour autant, nous sommes dans une démarche sobre en limitant le nombre d'appels et la taille des modèles utilisés !"
         },
         "account": {
-          "question": "Besoin d’un compte ?",
-          "answer": "Non pour rechercher ; compte optionnel si tu souhaites listes ou alertes."
+          "question": "La vraie frugalité, c’est pas le réemploi ?",
+          "answer": "Tout à fait d'accord, mais Nudger laisse le choix. C'est pour ça que nous mettons toujours en avant les offres d'occasion quand il y'en a de disponibles."
         },
         "categories": {
-          "question": "Quelles catégories ?",
-          "answer": "Électronique & Électroménager aujourd’hui, extensions à venir."
+          "question": "Êtes-vous indépendants ?",
+          "answer": "Oui. Résultats neutres, code ouvert, financements sans influence sur le classement."
         },
         "impactScore": {
           "question": "Comment est calculé l’Impact Score ?",
-          "answer": "Une multitude de critères pondérés + IA sobre, méthode ouverte et auditée.",
+          "answer": "Une multitude de critères pondérés + IA sobre, méthode ouverte et auditable.",
           "cta": "En savoir plus",
           "ctaAria": "Ouvrir la page dédiée à l'Impact Score"
         },
         "dataFreshness": {
           "question": "Les données sont-elles à jour ?",
-          "answer": "Oui, mises à jour régulières avec contrôles qualité."
+          "answer": "Oui, mises à jour 2 fois par jour (données produits et ecoscore)"
         },
-        "suggestProduct": {
-          "question": "Comment suggérer un produit ?",
-          "answer": "Via notre formulaire de contact dédié."
-        },
+
         "contact": {
           "question": "J’ai une question !"
         }
@@ -777,6 +793,10 @@
       "compare": {
         "addMoreHint": "Sélectionne au moins deux produits pour lancer une comparaison.",
         "addToList": "Ajouter à la comparaison",
+        "addButtonShort": "Comparer",
+        "addedButtonShort": "Ajouté",
+        "addButtonFull": "Ajouter au comparateur",
+        "removeButtonFull": "Retirer du comparateur",
         "collapsePanel": "Masquer la liste",
         "differentCategory": "Compare uniquement des produits de la même catégorie.",
         "expandPanel": "Afficher la liste",
@@ -2206,6 +2226,9 @@
     }
   },
   "product": {
+    "offers": {
+      "bestPrice": "Meilleur prix"
+    },
     "admin": {
       "subtitle": "Outils réservés à l'équipe Nudger. Affichés uniquement après connexion.",
       "title": "Impact Score :",
@@ -3513,6 +3536,11 @@
         "title": "Navigateur de documentation",
         "description": "Explorez l'arborescence, recherchez des pages et lisez les contenus en inline."
       }
+    }
+  },
+  "products": {
+    "compare": {
+      "addToList": "Ajouter à la comparaison"
     }
   }
 }

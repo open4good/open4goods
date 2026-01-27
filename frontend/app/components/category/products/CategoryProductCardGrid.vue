@@ -45,7 +45,7 @@
         :rel="linkRel"
       >
         <div class="category-product-card-grid__compare">
-          <CategoryProductCompareToggle :product="product" size="compact" />
+          <CompareToggleButton :product="product" size="compact" />
         </div>
 
         <div class="category-product-card-grid__media-wrapper">
@@ -89,6 +89,13 @@
             :title-tag="normalizedSize === 'big' ? 'h4' : 'h5'"
             title-class="category-product-card-grid__title"
           />
+          <div
+            v-if="product.aiReview?.review?.baseLine"
+            class="category-product-card-grid__baseline text-truncate"
+            :title="product.aiReview.review.baseLine"
+          >
+            {{ product.aiReview.review.baseLine }}
+          </div>
         </div>
 
         <v-card-item class="category-product-card-grid__body">
@@ -179,7 +186,7 @@ import type {
 import { ProductPriceTrendDtoTrendEnum } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
-import CategoryProductCompareToggle from './CategoryProductCompareToggle.vue'
+import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import {
   formatAttributeValue,
@@ -640,6 +647,13 @@ const getConditionCountLabel = (
     white-space: nowrap
     overflow: hidden
     text-overflow: ellipsis
+
+  &__baseline
+    margin-top: 0.25rem
+    font-size: 0.85rem
+    line-height: 1.3
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    opacity: 0.9
 
   &__attributes
     display: flex

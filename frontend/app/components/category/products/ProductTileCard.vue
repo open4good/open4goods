@@ -112,7 +112,7 @@
               <v-icon icon="mdi-store" size="16" class="me-1" />
               <span>{{ offersCountLabel }}</span>
             </div>
-            <CategoryProductCompareToggle
+            <CompareToggleButton
               class="product-tile-card__compare"
               :product="product"
               size="compact"
@@ -229,7 +229,7 @@
               <v-icon icon="mdi-store" size="16" class="me-1" />
               <span>{{ offersCountLabel }}</span>
             </div>
-            <CategoryProductCompareToggle
+            <CompareToggleButton
               class="product-tile-card__compare"
               :product="product"
               size="compact"
@@ -245,7 +245,7 @@
 import { computed } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import CategoryProductCompareToggle from '~/components/category/products/CategoryProductCompareToggle.vue'
+import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 

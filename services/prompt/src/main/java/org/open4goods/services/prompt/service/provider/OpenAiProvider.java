@@ -90,6 +90,7 @@ public class OpenAiProvider implements GenAiProvider {
 
     private ProviderResult generateWithWebSearch(ProviderRequest request) {
         try {
+            logger.info("Initiating OpenAI web search for prompt: {}", request.getPromptKey());
             Map<String, Object> body = new LinkedHashMap<>();
             String model = resolveModel(request.getOptions());
             body.put("model", model);
@@ -118,8 +119,11 @@ public class OpenAiProvider implements GenAiProvider {
                 throw new IllegalStateException("OpenAI responses API failed with status " + response.statusCode());
             }
             String raw = response.body();
+            logger.debug("OpenAI Responses API raw output length: {} chars", raw != null ? raw.length() : 0);
             String content = extractContent(raw);
             Map<String, Object> metadata = extractAnnotationsFromRaw(raw);
+            int citationCount = metadata.containsKey("citations") ? ((List<?>) metadata.get("citations")).size() : 0;
+            logger.info("Extracted {} citations from OpenAI response", citationCount);
             return new ProviderResult(service(), model, raw, content, metadata);
         } catch (Exception e) {
             logger.error("OpenAI web search request failed: {}", e.getMessage(), e);
@@ -148,16 +152,24 @@ public class OpenAiProvider implements GenAiProvider {
             chatOptions.setModel(resolveModel(options));
             if (options.getTemperature() != null) {
                 chatOptions.setTemperature(options.getTemperature());
+            } else {
+                chatOptions.setTemperature(0.2);  // Default like Gemini
             }
             if (options.getMaxTokens() != null) {
                 chatOptions.setMaxTokens(options.getMaxTokens());
             }
             if (options.getTopP() != null) {
                 chatOptions.setTopP(options.getTopP());
+            } else {
+                chatOptions.setTopP(0.9);  // Default like Gemini
             }
             if (options.getSeed() != null) {
                 chatOptions.setSeed(options.getSeed());
             }
+        } else {
+            chatOptions.setModel(resolveModel(null));
+            chatOptions.setTemperature(0.2);
+            chatOptions.setTopP(0.9);
         }
         return chatOptions;
     }
@@ -220,6 +232,7 @@ public class OpenAiProvider implements GenAiProvider {
 
     private Flux<ProviderEvent> streamFromWebSearch(ProviderRequest request, String model) {
         return Flux.defer(() -> {
+            logger.info("Starting streaming web search for model: {}", model);
             ProviderEvent start = ProviderEvent.started(service(), model);
             ProviderEvent toolStart = ProviderEvent.toolStatus(service(), model, "web_search", "started", Map.of());
             ProviderResult result = generateWithWebSearch(request);

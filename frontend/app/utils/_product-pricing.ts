@@ -11,6 +11,25 @@ type PluralizeFn = (
   params?: Record<string, unknown>
 ) => string
 
+export const formatPrice = (
+  price: number,
+  n: NumberFormatFn,
+  currency?: string
+): string => {
+  if (currency) {
+    try {
+      return n(price, { style: 'currency', currency })
+    } catch {
+      return `${n(price, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} ${currency}`.trim()
+    }
+  }
+
+  return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
 export const formatBestPrice = (
   product: ProductDto,
   t: TranslateFn,
@@ -23,15 +42,7 @@ export const formatBestPrice = (
     return t('category.products.priceUnavailable')
   }
 
-  if (currency) {
-    try {
-      return n(price, { style: 'currency', currency })
-    } catch {
-      return `${n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim()
-    }
-  }
-
-  return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return formatPrice(price, n, currency)
 }
 
 export const formatOffersCount = (

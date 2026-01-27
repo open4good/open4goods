@@ -1,8 +1,11 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
+import { createVuetify } from 'vuetify'
 
 import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
+
+const vuetify = createVuetify()
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -113,6 +116,7 @@ describe('CategoryFiltersPanel', () => {
         technicalExpanded: false,
       },
       global: {
+        plugins: [vuetify],
         stubs: {
           VIcon: VIconStub,
           VExpansionPanels: VExpansionPanelsStub,

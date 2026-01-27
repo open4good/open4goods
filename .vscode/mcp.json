@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "nuxt": {
+      "type": "sse",
+      "url": "http://localhost:3000/__mcp/sse"
+    },
+    "vuetify": {
+      "command": "node",
+      "args": [
+        "/home/goulven/git/open4goods/frontend/node_modules/@vuetify/mcp/dist/index.js"
+      ],
+      "env": {},
+      "type": "stdio"
+    }
+  },
+  "inputs": []
+}

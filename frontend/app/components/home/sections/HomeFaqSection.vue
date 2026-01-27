@@ -35,13 +35,13 @@ const isVisible = computed(() => Boolean(props.reveal))
     >
       <h2
         id="home-faq-title"
-        class="home-hero__subtitle home-reveal-item"
+        class="home-hero__subtitle home-reveal-item ma-0"
         :style="{ '--reveal-delay': '0ms' }"
       >
         {{ $t('home.faq.title') }}
       </h2>
       <p
-        class="home-section__subtitle home-reveal-item"
+        class="home-section__subtitle home-reveal-item ma-0"
         :style="{ '--reveal-delay': '100ms' }"
       >
         {{ $t('home.faq.subtitle') }}
@@ -95,21 +95,12 @@ const isVisible = computed(() => Boolean(props.reveal))
 .home-section__container
   padding-inline: 0
 
-.home-section__inner
-  max-width: 1180px
-  margin: 0 auto
-  display: flex
-  flex-direction: column
-  gap: clamp(0.875rem, 2vw, 1.25rem);
+// .home-section__inner styles now handled by utility classes: d-flex flex-column ga-3 mx-auto + inline style
 
-.home-section__header
-  max-width: 760px
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
+// .home-section__header styles now handled by utility classes: d-flex flex-column ga-2
 
 .home-section__subtitle
-  margin: 0
+  // margin now handled by utility class: ma-0
   color: rgb(var(--v-theme-text-neutral-secondary))
 
 .home-faq__panels

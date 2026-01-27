@@ -131,7 +131,7 @@ const mountGrid = async (
         VIcon: createStub('i'),
         ImpactScore: createStub('div'),
         NuxtLink: createStub('a'),
-        CategoryProductCompareToggle: CompareToggleStub,
+        CompareToggleButton: CompareToggleStub,
       },
     },
   })
