@@ -41,7 +41,6 @@
             </div>
           </div>
 
-          <p class="impact-score-examples__footer">{{ example.conclusion }}</p>
         </v-card>
       </v-col>
     </v-row>
@@ -55,86 +54,84 @@ const { t } = useI18n()
 
 const examples = computed(() => [
   {
-    key: 'whirlpool-oven',
-    eyebrow: t('impactScorePage.examples.whirlpoolOven.eyebrow'),
-    title: t('impactScorePage.examples.whirlpoolOven.title'),
-    score: 2.2,
+    key: 'samsung-tv',
+    eyebrow: t('impactScorePage.examples.samsungTv.eyebrow'),
+    title: t('impactScorePage.examples.samsungTv.title'),
+    score: 3.2,
     breakdown: [
       {
-        label: t('impactScorePage.examples.whirlpoolOven.breakdown.energy.label'),
-        value: t('impactScorePage.examples.whirlpoolOven.breakdown.energy.value'),
+        label: t(
+          'impactScorePage.examples.samsungTv.breakdown.repairability.label'
+        ),
+        value: t(
+          'impactScorePage.examples.samsungTv.breakdown.repairability.value'
+        ),
+        icon: 'mdi-wrench-outline',
+      },
+      {
+        label: t(
+          'impactScorePage.examples.samsungTv.breakdown.consumption.label'
+        ),
+        value: t(
+          'impactScorePage.examples.samsungTv.breakdown.consumption.value'
+        ),
         icon: 'mdi-flash',
       },
       {
         label: t(
-          'impactScorePage.examples.whirlpoolOven.breakdown.consumption.label'
+          'impactScorePage.examples.samsungTv.breakdown.energyClass.label'
         ),
         value: t(
-          'impactScorePage.examples.whirlpoolOven.breakdown.consumption.value'
+          'impactScorePage.examples.samsungTv.breakdown.energyClass.value'
         ),
-        icon: 'mdi-speedometer',
+        icon: 'mdi-label-outline',
       },
       {
         label: t(
-          'impactScorePage.examples.whirlpoolOven.breakdown.capacity.label'
+          'impactScorePage.examples.samsungTv.breakdown.softwareUpdates.label'
         ),
         value: t(
-          'impactScorePage.examples.whirlpoolOven.breakdown.capacity.value'
+          'impactScorePage.examples.samsungTv.breakdown.softwareUpdates.value'
         ),
-        icon: 'mdi-resize',
-      },
-      {
-        label: t(
-          'impactScorePage.examples.whirlpoolOven.breakdown.sources.label'
-        ),
-        value: t(
-          'impactScorePage.examples.whirlpoolOven.breakdown.sources.value'
-        ),
-        icon: 'mdi-database-outline',
+        icon: 'mdi-update',
       },
     ],
-    conclusion: t('impactScorePage.examples.whirlpoolOven.conclusion'),
   },
   {
-    key: 'samsung-oven',
-    eyebrow: t('impactScorePage.examples.samsungOven.eyebrow'),
-    title: t('impactScorePage.examples.samsungOven.title'),
-    score: 2.1,
+    key: 'fairphone',
+    eyebrow: t('impactScorePage.examples.fairphone.eyebrow'),
+    title: t('impactScorePage.examples.fairphone.title'),
+    score: 4.1,
     breakdown: [
       {
-        label: t('impactScorePage.examples.samsungOven.breakdown.energy.label'),
-        value: t('impactScorePage.examples.samsungOven.breakdown.energy.value'),
-        icon: 'mdi-flash',
+        label: t(
+          'impactScorePage.examples.fairphone.breakdown.repairability.label'
+        ),
+        value: t(
+          'impactScorePage.examples.fairphone.breakdown.repairability.value'
+        ),
+        icon: 'mdi-wrench-outline',
       },
       {
         label: t(
-          'impactScorePage.examples.samsungOven.breakdown.consumption.label'
+          'impactScorePage.examples.fairphone.breakdown.softwareUpdates.label'
         ),
         value: t(
-          'impactScorePage.examples.samsungOven.breakdown.consumption.value'
+          'impactScorePage.examples.fairphone.breakdown.softwareUpdates.value'
         ),
-        icon: 'mdi-speedometer',
+        icon: 'mdi-update',
       },
       {
-        label: t(
-          'impactScorePage.examples.samsungOven.breakdown.capacity.label'
-        ),
-        value: t(
-          'impactScorePage.examples.samsungOven.breakdown.capacity.value'
-        ),
-        icon: 'mdi-resize',
+        label: t('impactScorePage.examples.fairphone.breakdown.warranty.label'),
+        value: t('impactScorePage.examples.fairphone.breakdown.warranty.value'),
+        icon: 'mdi-shield-check-outline',
       },
       {
-        label: t(
-          'impactScorePage.examples.samsungOven.breakdown.sources.label'
-        ),
-        value: t(
-          'impactScorePage.examples.samsungOven.breakdown.sources.value'
-        ),
-        icon: 'mdi-database-outline',
+        label: t('impactScorePage.examples.fairphone.breakdown.materials.label'),
+        value: t('impactScorePage.examples.fairphone.breakdown.materials.value'),
+        icon: 'mdi-leaf',
       },
     ],
-    conclusion: t('impactScorePage.examples.samsungOven.conclusion'),
   },
 ])
 </script>
@@ -241,12 +238,6 @@ const examples = computed(() => [
 .impact-score-examples__pill-value {
   font-weight: 600;
   color: rgb(var(--v-theme-accent-primary-highlight));
-}
-
-.impact-score-examples__footer {
-  margin: 0;
-  color: rgb(var(--v-theme-text-neutral-secondary));
-  line-height: 1.5;
 }
 
 @media (max-width: 960px) {
