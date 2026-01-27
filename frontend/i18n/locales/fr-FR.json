@@ -2847,6 +2847,7 @@
         "unknownSource": "Source inconnue"
       },
       "events": {
+        "toggleLabel": "Afficher les offres commerciales",
         "detailsTitle": "Événement commercial",
         "clearSelection": "Effacer la sélection",
         "dateLabel": "Dates :",
