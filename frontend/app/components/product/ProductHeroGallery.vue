@@ -1,6 +1,5 @@
 <template>
   <div class="product-gallery-wrapper" v-bind="$attrs">
-    <!-- ClientOnly removed from root -->
     <div v-if="galleryItems.length" class="product-gallery">
       <div
         v-if="heroMedia"
@@ -172,21 +171,6 @@
           <v-icon icon="mdi-chevron-right" size="22" />
         </button>
       </div>
-
-      <ClientOnly>
-        <div
-          v-if="pictureSwipeComponent"
-          ref="pictureSwipeContainer"
-          class="product-gallery__lightbox"
-        >
-          <component
-            :is="pictureSwipeComponent"
-            ref="pictureSwipeRef"
-            :items="pictureSwipeItems"
-            :options="pictureSwipeOptions"
-          />
-        </div>
-      </ClientOnly>
     </div>
     <div v-else-if="heroFallbackImage" class="product-gallery__fallback">
       <NuxtImg
@@ -199,7 +183,6 @@
         @error="handleImageError"
       />
     </div>
-    <!-- ClientOnly removed -->
   </div>
 </template>
 
@@ -210,15 +193,15 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
-  shallowRef,
   watch,
-  type ComponentPublicInstance,
   type PropType,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
-import type { PictureSwipeItem, PictureSwipeOptions } from 'vue3-picture-swipe'
-import 'vue3-picture-swipe/dist/vue3-picture-swipe.css'
+import {
+  useProductGallery,
+  type ProductGalleryItem,
+} from '~/composables/useProductGallery'
 
 defineOptions({ inheritAttrs: false })
 
@@ -233,29 +216,25 @@ const props = defineProps({
   },
 })
 
-type PictureSwipeComponent = (typeof import('vue3-picture-swipe'))['default']
+const emit = defineEmits<{
+  (e: 'open-inline-gallery', index: number): void
+}>()
 
-type PictureSwipeComponentInstance = ComponentPublicInstance<{
-  pswp?: LightboxInstance
-}> & {
-  open?: (index: number) => void
-  $el?: HTMLElement
-}
-
-const pictureSwipeComponent = shallowRef<PictureSwipeComponent | null>(null)
-const pictureSwipeRef = ref<PictureSwipeComponentInstance | null>(null)
-const pictureSwipeContainer = ref<HTMLElement | null>(null)
 const heroVideoElement = ref<HTMLVideoElement | null>(null)
-
 const thumbnailViewport = ref<HTMLDivElement | null>(null)
 const thumbnailList = ref<HTMLUListElement | null>(null)
+
 const showThumbnailNavigation = ref(false)
 const canScrollThumbnailsLeft = ref(false)
 const canScrollThumbnailsRight = ref(false)
 
 const { t, te } = useI18n()
-const nuxtImage = useImage()
 const FALLBACK_IMAGE_SRC = '/images/no-image.png'
+
+const { galleryItems, heroFallbackImage } = useProductGallery(
+  computed(() => props.product),
+  props.title
+)
 
 const thumbnailGroupLabel = computed(() =>
   te('product.hero.thumbnails.groupLabel')
@@ -275,6 +254,8 @@ const nextThumbnailsLabel = computed(() =>
     : 'Scroll thumbnails forward'
 )
 
+// Thumbnail helpers
+type ThumbnailScrollDirection = 'left' | 'right'
 let thumbnailResizeObserver: ResizeObserver | null = null
 
 const updateThumbnailOverflow = () => {
@@ -301,9 +282,7 @@ const handleThumbnailScroll = () => {
 
 const scrollThumbnails = (direction: ThumbnailScrollDirection) => {
   const viewport = thumbnailViewport.value
-  if (!viewport) {
-    return
-  }
+  if (!viewport) return
 
   const scrollAmount = Math.max(viewport.clientWidth * 0.8, 120)
   const delta = direction === 'left' ? -scrollAmount : scrollAmount
@@ -314,16 +293,12 @@ const scrollThumbnails = (direction: ThumbnailScrollDirection) => {
 const scrollActiveThumbnailIntoView = () => {
   const viewport = thumbnailViewport.value
   const list = thumbnailList.value
-  if (!viewport || !list) {
-    return
-  }
+  if (!viewport || !list) return
 
   const activeItem = list.children[activeMediaIndex.value] as
     | HTMLElement
     | undefined
-  if (!activeItem) {
-    return
-  }
+  if (!activeItem) return
 
   const itemStart = activeItem.offsetLeft
   const itemEnd = itemStart + activeItem.offsetWidth
@@ -344,9 +319,7 @@ const scrollActiveThumbnailIntoView = () => {
 }
 
 const observeThumbnailElements = () => {
-  if (!import.meta.client) {
-    return
-  }
+  if (!import.meta.client) return
 
   if (!thumbnailResizeObserver) {
     thumbnailResizeObserver = new ResizeObserver(() => {
@@ -356,251 +329,23 @@ const observeThumbnailElements = () => {
   }
 
   thumbnailResizeObserver.disconnect()
-
   const viewport = thumbnailViewport.value
   const list = thumbnailList.value
 
-  if (viewport) {
-    thumbnailResizeObserver.observe(viewport)
-  }
-
-  if (list) {
-    thumbnailResizeObserver.observe(list)
-  }
+  if (viewport) thumbnailResizeObserver.observe(viewport)
+  if (list) thumbnailResizeObserver.observe(list)
 
   updateThumbnailOverflow()
 }
 
-type ImageModifiers = Parameters<typeof nuxtImage>[1]
-
-const resolveImageUrl = (
-  src: string | null | undefined,
-  modifiers?: ImageModifiers
-) => {
-  if (!src) {
-    return ''
-  }
-
-  try {
-    return nuxtImage(src, modifiers)
-  } catch {
-    return src
-  }
-}
-
-const fallbackDimension = (
-  value: number | null | undefined,
-  fallback: number
-) => (typeof value === 'number' && value > 0 ? value : fallback)
-
 const handleImageError = (event: Event) => {
-  if (!import.meta.client) {
-    return
-  }
-
+  if (!import.meta.client) return
   const target = event.target as HTMLImageElement | null
-  if (!target || target.dataset.fallbackApplied === 'true') {
-    return
-  }
-
+  if (!target || target.dataset.fallbackApplied === 'true') return
   target.dataset.fallbackApplied = 'true'
   target.src = FALLBACK_IMAGE_SRC
   target.srcset = ''
 }
-
-const DEFAULT_IMAGE_WIDTH = 1600
-const DEFAULT_IMAGE_HEIGHT = 1200
-const DEFAULT_THUMBNAIL_SIZE = 200
-const DEFAULT_VIDEO_WIDTH = 1280
-const DEFAULT_VIDEO_HEIGHT = 720
-
-const coverImageRaw = computed(
-  () =>
-    props.product.resources?.coverImagePath ??
-    props.product.resources?.externalCover ??
-    props.product.base?.coverImagePath ??
-    null
-)
-
-interface ProductGalleryItem {
-  id: string
-  type: 'image' | 'video'
-  originalUrl: string
-  previewUrl: string
-  thumbnailUrl: string
-  thumbnailWidth: number
-  thumbnailHeight: number
-  width: number
-  height: number
-  alt: string
-  caption: string
-  group?: string | null
-  videoUrl?: string
-  posterUrl?: string
-}
-
-interface LightboxMediaMeta {
-  type: ProductGalleryItem['type']
-  width: number
-  height: number
-  videoUrl?: string
-  posterUrl?: string
-}
-
-type LightboxItem = {
-  el?: Element | null
-  html?: string
-  w?: number
-  h?: number
-  open4goodsMeta?: LightboxMediaMeta
-  [key: string]: unknown
-}
-
-interface LightboxInstance {
-  listen(
-    event: 'gettingData',
-    handler: (index: number, item: LightboxItem) => void
-  ): void
-  listen(event: string, handler: (...args: unknown[]) => void): void
-  getCurrentIndex?: () => number
-  container?: HTMLElement
-  init?: () => void
-}
-
-type ThumbnailScrollDirection = 'left' | 'right'
-
-const galleryItems = computed<ProductGalleryItem[]>(() => {
-  const images = props.product.resources?.images ?? []
-  const videos = props.product.resources?.videos ?? []
-
-  const fallbackPoster =
-    coverImageRaw.value ?? images[0]?.url ?? images[0]?.originalUrl ?? ''
-
-  const imageItems: ProductGalleryItem[] = []
-  const videoItems: ProductGalleryItem[] = []
-
-  images.forEach(image => {
-    const original = image.originalUrl ?? image.url ?? ''
-    if (!original) {
-      return
-    }
-
-    const source = image.url ?? original
-    const caption = image.datasourceName ?? props.title
-    const width = fallbackDimension(image.width, DEFAULT_IMAGE_WIDTH)
-    const height = fallbackDimension(image.height, DEFAULT_IMAGE_HEIGHT)
-    const preview =
-      resolveImageUrl(source, {
-        width: 1200,
-        height: 900,
-        fit: 'cover',
-        format: 'webp',
-      }) || source
-    const thumbnail =
-      resolveImageUrl(source, {
-        width: DEFAULT_THUMBNAIL_SIZE,
-        height: DEFAULT_THUMBNAIL_SIZE,
-        fit: 'cover',
-        format: 'webp',
-      }) || preview
-
-    imageItems.push({
-      id: `image-${image.cacheKey ?? original}`,
-      type: 'image',
-      originalUrl: original,
-      previewUrl: preview,
-      thumbnailUrl: thumbnail,
-      thumbnailWidth: DEFAULT_THUMBNAIL_SIZE,
-      thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
-      width,
-      height,
-      alt: image.fileName ?? caption,
-      caption,
-      group: image.group,
-      posterUrl: preview,
-    })
-  })
-
-  videos.forEach(video => {
-    const url = video.url ?? ''
-    if (!url) {
-      return
-    }
-
-    const caption = video.datasourceName ?? props.title
-    const posterSource = fallbackPoster || coverImageRaw.value || ''
-    const poster = posterSource
-      ? resolveImageUrl(posterSource, {
-          width: DEFAULT_VIDEO_WIDTH,
-          height: DEFAULT_VIDEO_HEIGHT,
-          fit: 'cover',
-          format: 'webp',
-        }) || posterSource
-      : ''
-    const thumbnail = posterSource
-      ? resolveImageUrl(posterSource, {
-          width: DEFAULT_THUMBNAIL_SIZE,
-          height: DEFAULT_THUMBNAIL_SIZE,
-          fit: 'cover',
-          format: 'webp',
-        }) || posterSource
-      : ''
-
-    videoItems.push({
-      id: `video-${video.cacheKey ?? url}`,
-      type: 'video',
-      originalUrl: poster || url,
-      previewUrl: poster || thumbnail || url,
-      thumbnailUrl: thumbnail || poster || url,
-      thumbnailWidth: DEFAULT_THUMBNAIL_SIZE,
-      thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
-      width: DEFAULT_VIDEO_WIDTH,
-      height: DEFAULT_VIDEO_HEIGHT,
-      alt: video.fileName ?? caption,
-      caption,
-      group: video.group,
-      videoUrl: url,
-      posterUrl: poster || thumbnail || url,
-    })
-  })
-
-  const orderedItems = [...videoItems, ...imageItems]
-    .map((item, index) => ({ item, index }))
-    .filter(({ item }) => Boolean(item.originalUrl))
-    .sort((a, b) => {
-      const normaliseGroup = (value: unknown) =>
-        value == null ? '' : String(value).toLowerCase()
-
-      const groupA = normaliseGroup(a.item.group)
-      const groupB = normaliseGroup(b.item.group)
-
-      if (groupA === groupB) {
-        return a.index - b.index
-      }
-
-      return groupA.localeCompare(groupB)
-    })
-    .map(({ item }) => item)
-
-  return orderedItems
-})
-
-const heroFallbackImage = computed(() => {
-  const fallback =
-    coverImageRaw.value ?? galleryItems.value[0]?.previewUrl ?? null
-  if (!fallback) {
-    return null
-  }
-
-  return (
-    resolveImageUrl(fallback, {
-      width: 960,
-      height: 720,
-      fit: 'cover',
-      format: 'webp',
-    }) || fallback
-  )
-})
 
 const activeMediaIndex = ref(0)
 
@@ -638,9 +383,7 @@ const heroMediaIsVideo = computed(
 
 const stageAriaLabel = computed(() => {
   const media = heroMedia.value
-  if (!media) {
-    return t('product.hero.openGalleryFallback')
-  }
+  if (!media) return t('product.hero.openGalleryFallback')
 
   const label = media.caption || media.alt || props.title
   return media.type === 'video'
@@ -660,149 +403,6 @@ const thumbnailAriaLabel = (item: ProductGalleryItem, index: number) => {
   })
 }
 
-const escapeMap: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-}
-
-const escapeHtml = (value: string) =>
-  value.replace(/[&<>"']/g, char => escapeMap[char] ?? char)
-const escapeAttribute = (value: string | null | undefined) =>
-  escapeHtml(String(value ?? ''))
-
-const pictureSwipeItems = computed<PictureSwipeItem[]>(() =>
-  galleryItems.value.map(item => {
-    const caption = item.caption || props.title
-    const sanitizedCaption = escapeHtml(caption)
-
-    const meta: LightboxMediaMeta = {
-      type: item.type,
-      width: item.width,
-      height: item.height,
-      videoUrl: item.videoUrl,
-      posterUrl: item.posterUrl,
-    }
-
-    const baseItem: Record<string, unknown> = {
-      src:
-        item.type === 'video'
-          ? (item.posterUrl ?? item.originalUrl)
-          : item.originalUrl,
-      thumbnail: item.thumbnailUrl,
-      w: item.width,
-      h: item.height,
-      title: sanitizedCaption,
-      alt: item.alt,
-      type: item.type,
-      open4goodsMeta: meta,
-    }
-
-    if (item.type === 'video' && item.videoUrl) {
-      const posterAttribute = item.posterUrl
-        ? ` poster="${escapeAttribute(item.posterUrl)}"`
-        : ''
-      baseItem.html = `<div class="product-gallery__lightbox-video"><video controls playsinline${posterAttribute} src="${escapeAttribute(item.videoUrl)}"></video></div>`
-    }
-
-    return baseItem as PictureSwipeItem
-  })
-)
-
-const pictureSwipeOptions = computed<PictureSwipeOptions>(() => {
-  const base: PictureSwipeOptions = {
-    shareEl: false,
-    fullscreenEl: true,
-    zoomEl: true,
-    counterEl: true,
-    history: false,
-    bgOpacity: 0.95,
-    closeOnScroll: false,
-  }
-
-  if (import.meta.client) {
-    base.getThumbBoundsFn = (index: number) => {
-      const thumbnails = document.querySelectorAll<HTMLElement>(
-        '.product-gallery__thumbnail-image'
-      )
-      const element = thumbnails[index]
-
-      if (!element) {
-        const scrollY = window.scrollY || document.documentElement.scrollTop
-        return {
-          x: window.innerWidth / 2,
-          y: scrollY + window.innerHeight / 2,
-          w: 0,
-        }
-      }
-
-      const rect = element.getBoundingClientRect()
-      const scrollY = window.scrollY || document.documentElement.scrollTop
-
-      return {
-        x: rect.left,
-        y: rect.top + scrollY,
-        w: rect.width,
-      }
-    }
-  }
-
-  return base
-})
-
-const lightboxBound = ref(false)
-
-const bindLightboxListeners = () => {
-  const instance = (
-    pictureSwipeRef.value as ComponentPublicInstance<{
-      pswp?: LightboxInstance
-    }> | null
-  )?.pswp
-
-  if (!instance || lightboxBound.value) {
-    return
-  }
-
-  lightboxBound.value = true
-  let activeVideo: HTMLVideoElement | null = null
-
-  const stopVideo = () => {
-    if (activeVideo) {
-      activeVideo.pause()
-      activeVideo.removeAttribute('src')
-      activeVideo.load()
-      activeVideo = null
-    }
-  }
-
-  instance.listen('afterChange', () => {
-    activeMediaIndex.value =
-      instance.getCurrentIndex?.() ?? activeMediaIndex.value
-    stopVideo()
-
-    nextTick(() => {
-      const video = instance.container?.querySelector?.(
-        '.product-gallery__lightbox-video video'
-      )
-      if (video instanceof HTMLVideoElement) {
-        activeVideo = video
-        video.play().catch(() => {})
-      }
-    })
-  })
-
-  const resetBinding = () => {
-    stopVideo()
-    lightboxBound.value = false
-  }
-
-  instance.listen('beforeChange', stopVideo)
-  instance.listen('close', resetBinding)
-  instance.listen('destroy', resetBinding)
-}
-
 const setActiveMedia = (index: number) => {
   if (index >= 0 && index < galleryItems.value.length) {
     activeMediaIndex.value = index
@@ -813,75 +413,10 @@ const setActiveMedia = (index: number) => {
   }
 }
 
-const ensureLightbox = async () => {
-  if (pictureSwipeComponent.value || !import.meta.client) {
-    return
-  }
-
-  try {
-    const [{ default: VuePictureSwipe }] = await Promise.all([
-      import('vue3-picture-swipe'),
-    ])
-    pictureSwipeComponent.value = VuePictureSwipe
-  } catch (error) {
-    console.error('Failed to load gallery', error)
-  }
-}
-
-const pendingOpenIndex = ref<number | null>(null)
-
-const openLightboxAt = (index: number) => {
-  const componentInstance = pictureSwipeRef.value
-
-  if (!componentInstance) {
-    pendingOpenIndex.value = index
-    return false
-  }
-
-  if (componentInstance.open) {
-    componentInstance.open(index)
-    window.setTimeout(bindLightboxListeners, 150)
-    return true
-  }
-
-  const rootElement = (componentInstance.$el ?? pictureSwipeContainer.value) as
-    | HTMLElement
-    | undefined
-  const anchors = rootElement?.querySelectorAll<HTMLAnchorElement>(
-    'figure.gallery-thumbnail a'
-  )
-  const target = anchors?.[index]
-
-  if (target) {
-    target.dispatchEvent(
-      new MouseEvent('click', { bubbles: true, cancelable: true })
-    )
-    window.setTimeout(bindLightboxListeners, 150)
-    return true
-  }
-
-  pendingOpenIndex.value = index
-  return false
-}
-
-const openGallery = async (index: number) => {
-  if (!galleryItems.value.length) {
-    return
-  }
-
-  await ensureLightbox()
-  await nextTick()
-
-  const safeIndex = Math.min(Math.max(index, 0), galleryItems.value.length - 1)
-  activeMediaIndex.value = safeIndex
-  let opened = openLightboxAt(safeIndex)
-
-  if (!opened) {
-    await nextTick()
-    opened = openLightboxAt(safeIndex)
-  }
-
-  pendingOpenIndex.value = opened ? null : safeIndex
+// Logic for opening gallery
+const openGallery = (index: number) => {
+  if (!galleryItems.value.length) return
+  emit('open-inline-gallery', index)
 }
 
 const pauseHeroVideo = () => {
@@ -900,31 +435,14 @@ const galleryButtonLabel = computed(() =>
 
 const openGalleryFromVideo = (index: number) => {
   pauseHeroVideo()
-  void openGallery(index)
+  openGallery(index)
 }
 
 onMounted(async () => {
-  await ensureLightbox()
   await nextTick()
   observeThumbnailElements()
   scrollActiveThumbnailIntoView()
 })
-
-watch(
-  pictureSwipeRef,
-  async instance => {
-    if (!instance || pendingOpenIndex.value === null) {
-      return
-    }
-
-    await nextTick()
-
-    const index = pendingOpenIndex.value
-    pendingOpenIndex.value = null
-    openLightboxAt(index)
-  },
-  { flush: 'post' }
-)
 
 watch([thumbnailViewport, thumbnailList], () => {
   observeThumbnailElements()
@@ -941,6 +459,11 @@ onBeforeUnmount(() => {
   thumbnailResizeObserver?.disconnect()
   thumbnailResizeObserver = null
   pauseHeroVideo()
+})
+
+// Expose active methods just in case parent needs them
+defineExpose({
+  setActiveMedia,
 })
 </script>
 
@@ -1208,26 +731,7 @@ onBeforeUnmount(() => {
   color: #fff;
 }
 
-.product-gallery__lightbox {
-  position: relative;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-}
-
-.product-gallery__lightbox :deep(.my-gallery) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  clip-path: inset(50%);
-  border: 0;
-  white-space: nowrap;
-}
-
+/* Lightbox styles are removed as it is now inline */
 .product-gallery__sr-only {
   position: absolute;
   width: 1px;
@@ -1237,22 +741,6 @@ onBeforeUnmount(() => {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
-}
-
-.product-gallery__lightbox-video {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000;
-}
-
-.product-gallery__lightbox-video video {
-  width: 100%;
-  height: 100%;
-  max-height: 100vh;
-  object-fit: contain;
 }
 
 .product-gallery__fallback {

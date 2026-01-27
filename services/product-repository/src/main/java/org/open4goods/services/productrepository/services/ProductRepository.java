@@ -1064,6 +1064,11 @@ public class ProductRepository {
             CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
                     .and(new Criteria("vertical").is(vertical))
                     .and(new Criteria("excluded").is(false))
+                    // TODO : Does not works because fiels is not indexed in product mapping (    "reviews": {
+//                    "type": "object",
+//                    "enabled": false
+//                 },
+                    // How to proceed ?
                     .and(new Criteria(resolveReviewField(locale)).exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
@@ -1074,7 +1079,8 @@ public class ProductRepository {
             	// TODO : Handle i18n
                 resolvedLocale = "fr";
             }
-            return "reviews." + resolvedLocale + ".review";
+            // TODO : Weak, relying on baseline...
+            return "reviews." + resolvedLocale + ".review.baseLine";
         }
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)

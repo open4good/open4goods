@@ -4,6 +4,7 @@ import type { ProductDto } from '~~/shared/api-client'
 import { useDailyRandomProducts } from '~/composables/useDailyRandomProducts'
 import { useEventPackI18n } from '~/composables/useEventPackI18n'
 import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
+import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import {
   DEFAULT_EVENT_PACK,
   EVENT_PACK_I18N_BASE_KEY,
@@ -554,7 +555,8 @@ const randomProductLink = computed(() => {
 
 const randomProductName = computed(() => {
   const product = currentRandomProduct.value
-  return product?.names?.label || product?.names?.title || null
+  if (!product) return null
+  return resolveProductShortName(product, locale.value)
 })
 
 const applyRandomProductPlaceholder = (items: HeroHighlightItem[]) => {

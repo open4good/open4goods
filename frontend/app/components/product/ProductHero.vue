@@ -42,12 +42,22 @@
 
       <div class="product-hero__grid">
         <div class="product-hero__panel product-hero__panel--main">
+          <Transition name="fade">
+            <ProductHeroInlineGallery
+              v-if="showInlineGallery"
+              v-model:index="activeInlineGalleryIndex"
+              :items="galleryItems"
+              :start-index="activeInlineGalleryIndex"
+              @close="handleCloseInlineGallery"
+            />
+          </Transition>
           <div class="product-hero__main-content">
             <div class="product-hero__gallery-section">
               <ProductHeroGallery
                 class="product-hero__gallery"
                 :product="product"
                 :title="heroTitle"
+                @open-inline-gallery="handleOpenInlineGallery"
               />
             </div>
 
@@ -295,6 +305,7 @@ import {
   resolveProductShortName,
 } from '~/utils/_product-title-resolver'
 import { useThemedAsset } from '~/composables/useThemedAsset'
+import { useProductGallery } from '~/composables/useProductGallery'
 
 import type {
   AttributeConfigDto,
@@ -309,6 +320,9 @@ export interface ProductHeroBreadcrumb {
 
 const ProductHeroGallery = defineAsyncComponent(
   () => import('~/components/product/ProductHeroGallery.vue')
+)
+const ProductHeroInlineGallery = defineAsyncComponent(
+  () => import('~/components/product/ProductHeroInlineGallery.vue')
 )
 
 const props = defineProps({
@@ -451,6 +465,23 @@ const normalizeString = (value: string | null | undefined) =>
 const heroTitle = computed(() => {
   return resolveProductLongName(props.product, locale.value)
 })
+
+// Product Gallery Logic
+const { galleryItems } = useProductGallery(
+  computed(() => props.product),
+  heroTitle.value
+)
+const showInlineGallery = ref(false)
+const activeInlineGalleryIndex = ref(0)
+
+const handleOpenInlineGallery = (index: number) => {
+  activeInlineGalleryIndex.value = index
+  showInlineGallery.value = true
+}
+
+const handleCloseInlineGallery = () => {
+  showInlineGallery.value = false
+}
 
 const productBrandName = computed(() =>
   normalizeString(props.product.identity?.brand)

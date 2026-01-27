@@ -2871,6 +2871,7 @@
     "title": "Nudger",
     "footer": {
       "accessibleTitle": "Informations du pied de page",
+      "recordingEnabled": "Enregistrement activé",
       "blogLink": "Notre blog",
       "community": {
         "links": {

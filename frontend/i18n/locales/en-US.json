@@ -3151,6 +3151,7 @@
     "title": "Nudger",
     "footer": {
       "accessibleTitle": "Footer information",
+      "recordingEnabled": "Recording enabled",
       "blogLink": "Our blog",
       "community": {
         "links": {

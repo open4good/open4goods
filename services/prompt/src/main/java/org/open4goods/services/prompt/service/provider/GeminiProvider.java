@@ -118,19 +118,23 @@ public class GeminiProvider implements GenAiProvider {
              builder.topP(0.9);
         }
 
-		// Enable JSON structured output when schema provided
-		if (jsonSchema != null && !jsonSchema.isBlank()) {
+		// IMPORTANT: Gemini API limitation - controlled generation (responseSchema) is NOT compatible
+		// with Google Search grounding. They are mutually exclusive.
+		// When grounding is enabled, we skip the JSON schema and rely on prompt instructions instead.
+		boolean useGrounding = retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch;
+		
+		if (useGrounding) {
+			// Enable Google Search grounding - cannot use responseSchema with this
+            builder.googleSearchRetrieval(true);
+            builder.internalToolExecutionEnabled(true);
+			logger.info("Enabled Google Search grounding (JSON schema disabled due to API limitation)");
+		} else if (jsonSchema != null && !jsonSchema.isBlank()) {
+			// Enable JSON structured output only when NOT using grounding
 			logger.debug("Enabling JSON structured output with schema for Gemini");
 			builder.responseMimeType("application/json");
 			builder.responseSchema(jsonSchema);
 		}
-
-        // Enable Google Search grounding when requested for interactive prompts.
-		if (retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch) {
-            builder.googleSearchRetrieval(true);
-            builder.internalToolExecutionEnabled(true);
-			logger.info("Enabled Google Search grounding with internal tool execution");
-		}
+		
 		return builder.build();
 	}
 

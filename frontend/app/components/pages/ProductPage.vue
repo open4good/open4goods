@@ -185,7 +185,7 @@
 </template>
 
 <script setup lang="ts">
-import { useElementBounding } from '@vueuse/core'
+import { useElementBounding, useWindowScroll } from '@vueuse/core'
 import {
   computed,
   defineAsyncComponent,
@@ -259,13 +259,13 @@ const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const { t, n, locale } = useI18n()
 const { isLoggedIn } = useAuth()
-// Variables removed: scrollY, viewportHeight
 const display = useDisplay()
+const { y: scrollY } = useWindowScroll()
 
 const isStickyBannerOpen = ref(false)
 
 const heroSectionRef = ref<HTMLElement | null>(null)
-const { bottom: heroSectionBottom } = useElementBounding(heroSectionRef)
+const { bottom: _heroSectionBottom } = useElementBounding(heroSectionRef)
 
 const PRODUCT_COMPONENTS = [
   'base',
@@ -326,8 +326,8 @@ const bannerOffersCountLabel = computed(() => {
 
 // Update sticky banner visibility based on scroll position relative to hero section
 watch(
-  heroSectionBottom,
-  bottom => {
+  scrollY,
+  () => {
     if (!heroSectionRef.value) {
       isStickyBannerOpen.value = false
       return
@@ -336,7 +336,8 @@ watch(
     // Show banner when we've scrolled past the hero section
     // The banner should appear when the bottom of the hero section is nearing the top of the viewport
     // Adjust the offset (80px) as needed for the header height
-    isStickyBannerOpen.value = bottom <= 80
+    const rect = heroSectionRef.value.getBoundingClientRect()
+    isStickyBannerOpen.value = rect.bottom <= 80
   },
   { immediate: true }
 )
@@ -2339,7 +2340,7 @@ useHead(() => {
     );
 }
 
-.product-page > * {
+.product-page > *:not(.product-sticky-banner) {
   position: relative;
   z-index: 1;
 }

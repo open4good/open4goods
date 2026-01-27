@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useCookie } from '#app'
 
 import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
 import LatestReleaseBadge from '~/components/domains/releases/LatestReleaseBadge.vue'
@@ -9,6 +10,10 @@ import {
   normalizeLocale,
   resolveLocalizedRoutePath,
 } from '~~/shared/utils/localized-routes'
+import {
+  HOTJAR_RECORDING_COOKIE_NAME,
+  isHotjarRecordingCookieEnabled,
+} from '~~/shared/utils/hotjar-recording'
 
 type FooterLink = {
   label: string
@@ -106,6 +111,11 @@ const feedbackLinks = computed<FooterLink[]>(() => [
 ])
 
 const footerLogo = useFooterLogoAsset()
+
+const hotjarCookie = useCookie(HOTJAR_RECORDING_COOKIE_NAME)
+const isRecording = computed(() =>
+  isHotjarRecordingCookieEnabled(hotjarCookie.value)
+)
 </script>
 
 <template>
@@ -298,6 +308,17 @@ const footerLogo = useFooterLogoAsset()
           dense
           :scroll-target="releasesPath"
         />
+
+        <v-chip
+          v-if="isRecording"
+          color="error"
+          variant="flat"
+          size="small"
+          class="font-weight-bold"
+        >
+          <v-icon start icon="mdi-record-circle-outline" class="mr-1" />
+          {{ t('siteIdentity.footer.recordingEnabled') }}
+        </v-chip>
       </v-col>
     </v-row>
   </v-container>
