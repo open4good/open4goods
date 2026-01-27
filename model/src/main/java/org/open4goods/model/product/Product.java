@@ -159,6 +159,11 @@ public class Product implements Standardisable {
 	 */
 	private Map<String, String> categoriesByDatasources = new HashMap<String, String>();
 
+	/**
+	 * The product descriptions by datasources.
+	 */
+	private Map<String, String> descriptionsByDatasource = new HashMap<String, String>();
+
 	private Map<String, Score> scores = new HashMap<>();
 
 
@@ -175,6 +180,14 @@ public class Product implements Standardisable {
 	 */
 	@Field(type = FieldType.Dense_Vector, dims = 512)
 	private float[] embedding;
+
+	public Map<String, String> getDescriptionsByDatasource() {
+		return descriptionsByDatasource;
+	}
+
+	public void setDescriptionsByDatasource(final Map<String, String> descriptionsByDatasource) {
+		this.descriptionsByDatasource = descriptionsByDatasource;
+	}
 
 	//////////////////// :
 	// Stored (and computed) to help elastic querying / sorting

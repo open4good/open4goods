@@ -200,6 +200,12 @@ public class VerticalConfig {
 	private AttributesConfig attributesConfig = new AttributesConfig();
 
 	/**
+	 * Attribute names that represent descriptions for products.
+	 */
+	@JsonMerge
+	private Set<String> descriptionAttributes = new HashSet<>();
+
+	/**
 	 * Preferred aggregation parameters for attributes and impact scores. The map is
 	 * indexed by the document mapping (e.g. {@code attributes.indexed.WEIGHT}) used
 	 * by Elasticsearch so the same configuration can be reused across attributes
@@ -666,6 +672,14 @@ public class VerticalConfig {
 
 	public void setAttributesConfig(AttributesConfig attributesConfig) {
 		this.attributesConfig = attributesConfig;
+	}
+
+	public Set<String> getDescriptionAttributes() {
+		return descriptionAttributes;
+	}
+
+	public void setDescriptionAttributes(final Set<String> descriptionAttributes) {
+		this.descriptionAttributes = descriptionAttributes;
 	}
 
 	public Map<String, AggregationConfiguration> getAggregationConfiguration() {
