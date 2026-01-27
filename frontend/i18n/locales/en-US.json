@@ -882,9 +882,12 @@
         },
         "criteria": {
           "empty": "Criteria will be published soon.",
-          "title": "Selected criteria and weights",
+          "title": "Available criteria for {category}",
+          "subtitle": "Each criterion is weighted to highlight the most useful signals for comparing {category}.",
           "coefficientPrefix": "Counts for",
-          "coefficientSuffix": "in the overall score"
+          "coefficientSuffix": "in the overall score",
+          "utilityLabel": "Utility",
+          "utilityAria": "Show criterion utility"
         },
         "availableCriteria": {
           "title": "Available criteria for {category}",
@@ -1625,54 +1628,52 @@
     "examples": {
       "eyebrow": "Calculation examples",
       "title": "Real product snapshots",
-      "subtitle": "Impact Score examples taken from actual oven listings on the site.",
-      "whirlpoolOven": {
+      "subtitle": "Impact Score examples taken from real-world appliance and electronics listings.",
+      "samsungTv": {
         "eyebrow": "Example 1",
-        "title": "Whirlpool OMSR58RU1SB built-in oven",
-        "description": "A+ energy class, 71 L cavity and multiple retailer sources.",
+        "title": "Samsung Crystal UHD 55\" TV UE55CU7092",
+        "description": "Repairability, energy use, and software support from real product listings.",
         "breakdown": {
-          "energy": {
-            "label": "Energy class",
-            "value": "A+ (EPREL)"
+          "repairability": {
+            "label": "Repairability index",
+            "value": "7.3 / 10"
           },
           "consumption": {
-            "label": "Energy per cycle",
-            "value": "0.89 kWh/cycle"
+            "label": "Electricity consumption",
+            "value": "90 kWh/1000h"
           },
-          "capacity": {
-            "label": "Oven capacity",
-            "value": "71 L"
+          "energyClass": {
+            "label": "Energy class",
+            "value": "G (EPREL)"
           },
-          "sources": {
-            "label": "Data sources",
-            "value": "Cdiscount, Darty, Fnac, Rakuten"
+          "softwareUpdates": {
+            "label": "Software updates",
+            "value": "7 years"
           }
-        },
-        "conclusion": "Impact Score 2.2/5 based on energy data, capacity and the available product sources."
+        }
       },
-      "samsungOven": {
+      "fairphone": {
         "eyebrow": "Example 2",
-        "title": "Samsung NV7B41307AK built-in oven",
-        "description": "A+ label, 76 L cavity, with energy usage sourced from EPREL.",
+        "title": "Fairphone 5 5G 256 GB smartphone",
+        "description": "A repair-friendly model with guaranteed long-term updates.",
         "breakdown": {
-          "energy": {
-            "label": "Energy class",
-            "value": "A+ (EPREL)"
+          "repairability": {
+            "label": "Repairability index",
+            "value": "9.3 / 10"
           },
-          "consumption": {
-            "label": "Energy per cycle",
-            "value": "1.05 kWh/cycle"
+          "softwareUpdates": {
+            "label": "Software updates",
+            "value": "8 years"
           },
-          "capacity": {
-            "label": "Oven capacity",
-            "value": "76 L"
+          "warranty": {
+            "label": "Manufacturer warranty",
+            "value": "5 years"
           },
-          "sources": {
-            "label": "Data sources",
-            "value": "EPREL, Darty, Cdiscount, Rakuten"
+          "materials": {
+            "label": "Recycled materials",
+            "value": "70%"
           }
-        },
-        "conclusion": "Impact Score 2.1/5, reflecting energy performance and the coverage of product information."
+        }
       }
     },
     "summary": {

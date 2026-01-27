@@ -78,13 +78,15 @@
               </h3>
               <v-btn
                 class="impact-score-methodology__card-cta"
-                :to="item.categoryLink"
                 :aria-label="
                   t('impactScorePage.sections.methodology.verticalCtaAria', {
                     vertical: item.label,
                   })
                 "
-                @click.stop
+                variant="text"
+                color="primary"
+                type="button"
+                @click.stop.prevent="navigateToCategory(item.categoryLink)"
               >
                 <span>{{
                   t('impactScorePage.sections.methodology.verticalCta')
@@ -103,8 +105,8 @@
 </template>
 
 <script setup lang="ts">
-import type { VerticalConfigDto } from '~~/shared/api-client'
 import ResponsiveCarousel from '~/components/shared/ui/ResponsiveCarousel.vue'
+import type { VerticalConfigDto } from '~~/shared/api-client'
 
 const props = defineProps<{
   verticals: VerticalConfigDto[]
@@ -284,10 +286,13 @@ const navigateToEcoscore = (link: string) => {
 .impact-score-methodology__card-cta {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.35rem;
   font-weight: 600;
   text-transform: none;
   padding-inline: 0.25rem;
+  align-self: flex-start;
+  text-align: left;
 }
 
 .impact-score-methodology__card-cta :deep(.v-icon) {

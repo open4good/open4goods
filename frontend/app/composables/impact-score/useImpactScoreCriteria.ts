@@ -1,9 +1,9 @@
+import { useCategories } from '~/composables/categories/useCategories'
 import type {
   AttributeConfigDto,
   VerticalConfigDto,
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
-import { useCategories } from '~/composables/categories/useCategories'
 
 export type ImpactScoreCriterion = {
   key: string
@@ -16,6 +16,8 @@ type CriteriaByVerticalId = Record<string, ImpactScoreCriterion[]>
 
 const CRITERIA_ICON_OVERRIDES: Record<string, string> = {
   'data-quality': 'mdi-database-check-outline',
+  dataQuality: 'mdi-database-check-outline',
+  data_quality: 'mdi-database-check-outline',
 }
 
 const buildAttributeMap = (attributes: AttributeConfigDto[]) => {
@@ -42,7 +44,7 @@ export const buildCriteriaFromCategory = (
       key,
       name: fallbackName,
       utility: attribute?.scoreUtility ?? '',
-      icon: attribute?.icon ?? CRITERIA_ICON_OVERRIDES[key] ?? null,
+      icon: resolvedIcon ?? null,
     }
   })
 }

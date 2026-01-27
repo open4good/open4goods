@@ -258,7 +258,7 @@ watch(
 }
 
 .impact-score-criteria-panel__grid {
-  gap: clamp(1rem, 2vw, 1.75rem);
+  row-gap: clamp(1rem, 2vw, 1.75rem);
 }
 
 .impact-score-criteria-panel__card {

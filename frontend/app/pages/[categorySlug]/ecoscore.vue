@@ -19,6 +19,7 @@
             :aria-label="navAriaLabel"
           >
             <StickySectionNavigation
+              class="category-ecoscore__section-toggle"
               data-test="sticky-navigation"
               :sections="navigationSections"
               :active-section="activeSection"
@@ -29,238 +30,6 @@
           </aside>
 
           <main class="category-ecoscore__sections" role="main">
-            <section
-              :id="sectionIds.availableCriteria"
-              class="category-ecoscore__section"
-              role="region"
-              :aria-labelledby="`${sectionIds.availableCriteria}-title`"
-            >
-              <v-sheet
-                class="category-ecoscore__surface"
-                elevation="0"
-                rounded="xl"
-              >
-                <header class="category-ecoscore__header">
-                  <h2
-                    :id="`${sectionIds.availableCriteria}-title`"
-                    class="category-ecoscore__title"
-                  >
-                    {{
-                      t(
-                        'category.ecoscorePage.sections.availableCriteria.title',
-                        { category: categoryLabel }
-                      )
-                    }}
-                  </h2>
-                  <p class="category-ecoscore__subtitle">
-                    {{
-                      t(
-                        'category.ecoscorePage.sections.availableCriteria.subtitle',
-                        { category: categoryLabel }
-                      )
-                    }}
-                  </p>
-                </header>
-
-                <ImpactScoreCriteriaPanel
-                  variant="table"
-                  :vertical-id="category?.id ?? null"
-                />
-              </v-sheet>
-            </section>
-
-            <section
-              :id="sectionIds.overview"
-              class="category-ecoscore__section"
-              role="region"
-              :aria-labelledby="`${sectionIds.overview}-title`"
-            >
-              <v-sheet
-                class="category-ecoscore__surface"
-                elevation="0"
-                rounded="xl"
-              >
-                <header class="category-ecoscore__header">
-                  <h2
-                    :id="`${sectionIds.overview}-title`"
-                    class="category-ecoscore__title"
-                  >
-                    {{
-                      t('category.ecoscorePage.sections.overview.title', {
-                        category: categoryLabel,
-                      })
-                    }}
-                  </h2>
-                </header>
-
-                <div class="category-ecoscore__text-block">
-                  <TextContent
-                    class="category-ecoscore__wiki"
-                    bloc-id="pages:impactscore-vertical-jumbotron"
-                    :ipsum-length="220"
-                  />
-                </div>
-
-                <v-card
-                  class="category-ecoscore__intro-card"
-                  elevation="1"
-                  rounded="xl"
-                  variant="elevated"
-                >
-                  <v-row align="stretch" class="ga-6" justify="space-between">
-                    <v-col cols="12" lg="7">
-                      <CategoryImpactScoreOrbit
-                        :score="impactScoreValue"
-                        :max="impactScoreMax"
-                        :category-name="categoryLabel"
-                        :category-icon="heroImage || undefined"
-                        :criteria="impactScoreOrbitCriteria"
-                      />
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      lg="5"
-                      class="d-flex flex-column justify-center"
-                    >
-                      <div class="category-ecoscore__intro-copy">
-                        <h3 class="category-ecoscore__intro-title">
-                          {{
-                            t(
-                              'category.ecoscorePage.sections.overview.card.title'
-                            )
-                          }}
-                        </h3>
-                        <p class="category-ecoscore__intro-description">
-                          {{
-                            t(
-                              'category.ecoscorePage.sections.overview.card.description',
-                              { category: categoryLabel }
-                            )
-                          }}
-                        </p>
-                        <v-btn
-                          class="category-ecoscore__intro-cta"
-                          color="primary"
-                          size="large"
-                          variant="flat"
-                          :to="{ path: '/impact-score' }"
-                          :aria-label="
-                            t(
-                              'category.ecoscorePage.sections.overview.card.aria'
-                            )
-                          "
-                        >
-                          <v-icon
-                            class="me-2"
-                            icon="mdi-compass-outline"
-                            size="20"
-                          />
-                          {{
-                            t(
-                              'category.ecoscorePage.sections.overview.card.cta'
-                            )
-                          }}
-                        </v-btn>
-                      </div>
-                    </v-col>
-                  </v-row>
-                </v-card>
-              </v-sheet>
-            </section>
-
-            <section
-              :id="sectionIds.purpose"
-              class="category-ecoscore__section"
-              role="region"
-              :aria-labelledby="`${sectionIds.purpose}-title`"
-            >
-              <v-sheet
-                class="category-ecoscore__surface"
-                elevation="0"
-                rounded="xl"
-              >
-                <header class="category-ecoscore__header">
-                  <h2
-                    :id="`${sectionIds.purpose}-title`"
-                    class="category-ecoscore__title"
-                  >
-                    {{
-                      t('category.ecoscorePage.sections.purpose.title', {
-                        category: categoryLabel,
-                      })
-                    }}
-                  </h2>
-                </header>
-
-                <v-row
-                  class="category-ecoscore__purpose-grid"
-                  align="stretch"
-                  justify="center"
-                >
-                  <v-col cols="12" md="10">
-                    <v-card
-                      class="category-ecoscore__info-card"
-                      elevation="0"
-                      rounded="xl"
-                    >
-                      <h3 class="category-ecoscore__info-title">
-                        {{
-                          t(
-                            'category.ecoscorePage.sections.purpose.objectiveTitle'
-                          )
-                        }}
-                      </h3>
-                      <p class="category-ecoscore__info-body">
-                        {{
-                          purposeText ??
-                          t(
-                            'category.ecoscorePage.sections.purpose.objectiveFallback'
-                          )
-                        }}
-                      </p>
-                    </v-card>
-                  </v-col>
-
-                  <v-col cols="12" md="10">
-                    <v-card
-                      class="category-ecoscore__info-card"
-                      elevation="0"
-                      rounded="xl"
-                    >
-                      <h3 class="category-ecoscore__info-title">
-                        {{
-                          t('category.ecoscorePage.sections.purpose.dataTitle')
-                        }}
-                      </h3>
-                      <p class="category-ecoscore__info-body">
-                        {{
-                          availableDataText ??
-                          t(
-                            'category.ecoscorePage.sections.purpose.dataFallback'
-                          )
-                        }}
-                      </p>
-
-                      <v-divider class="my-4" role="presentation" />
-
-                      <ul class="category-ecoscore__data-list">
-                        <li
-                          v-for="criterion in availableCriteria"
-                          :key="criterion.key"
-                          class="category-ecoscore__data-item"
-                        >
-                          <strong>{{ criterion.label }}</strong>
-                          <span class="category-ecoscore__data-description">{{
-                            criterion.description
-                          }}</span>
-                        </li>
-                      </ul>
-                    </v-card>
-                  </v-col>
-                </v-row>
-              </v-sheet>
-            </section>
-
             <section
               :id="sectionIds.criteria"
               class="category-ecoscore__section"
@@ -283,15 +52,14 @@
                       })
                     }}
                   </h2>
+                  <p class="category-ecoscore__subtitle">
+                    {{
+                      t('category.ecoscorePage.sections.criteria.subtitle', {
+                        category: categoryLabel,
+                      })
+                    }}
+                  </p>
                 </header>
-
-                <div class="category-ecoscore__text-block">
-                  <TextContent
-                    class="category-ecoscore__wiki"
-                    bloc-id="pages:impactscore-vertical-criterias"
-                    :ipsum-length="240"
-                  />
-                </div>
 
                 <v-row
                   v-if="criteriaCards.length"
@@ -322,9 +90,43 @@
                         <span v-else>{{ criterion.fallback }}</span>
                       </div>
                       <div class="category-ecoscore__criteria-content">
-                        <h3 class="category-ecoscore__criteria-title">
-                          {{ criterion.label }}
-                        </h3>
+                        <div class="category-ecoscore__criteria-title-row">
+                          <h3 class="category-ecoscore__criteria-title">
+                            {{ criterion.label }}
+                          </h3>
+                          <v-tooltip
+                            v-if="criterion.utility"
+                            location="top"
+                            max-width="260"
+                          >
+                            <template #activator="{ props }">
+                              <v-btn
+                                v-bind="props"
+                                class="category-ecoscore__criteria-utility-btn"
+                                icon="mdi-information-outline"
+                                size="small"
+                                variant="text"
+                                :aria-label="
+                                  t(
+                                    'category.ecoscorePage.sections.criteria.utilityAria'
+                                  )
+                                "
+                              />
+                            </template>
+                            <div
+                              class="category-ecoscore__criteria-utility-tooltip"
+                            >
+                              <strong>
+                                {{
+                                  t(
+                                    'category.ecoscorePage.sections.criteria.utilityLabel'
+                                  )
+                                }}
+                              </strong>
+                              <p>{{ criterion.utility }}</p>
+                            </div>
+                          </v-tooltip>
+                        </div>
                         <p
                           v-if="criterion.description"
                           class="category-ecoscore__criteria-description"
@@ -357,6 +159,33 @@
                 <p v-else class="category-ecoscore__empty">
                   {{ t('category.ecoscorePage.sections.criteria.empty') }}
                 </p>
+
+                <div class="category-ecoscore__impact-summary">
+                  <h3 class="category-ecoscore__impact-title">
+                    {{ t('category.ecoscorePage.sections.overview.card.title') }}
+                  </h3>
+                  <p class="category-ecoscore__impact-description">
+                    {{
+                      t('category.ecoscorePage.sections.overview.card.description', {
+                        category: categoryLabel,
+                      })
+                    }}
+                  </p>
+                  <v-btn
+                    class="category-ecoscore__intro-cta"
+                    color="primary"
+                    size="large"
+                    variant="flat"
+                    block
+                    :to="{ path: '/impact-score' }"
+                    :aria-label="
+                      t('category.ecoscorePage.sections.overview.card.aria')
+                    "
+                  >
+                    <v-icon class="me-2" icon="mdi-compass-outline" size="20" />
+                    {{ t('category.ecoscorePage.sections.overview.card.cta') }}
+                  </v-btn>
+                </div>
               </v-sheet>
             </section>
 
@@ -746,10 +575,7 @@ import type {
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
 import CategoryHero from '~/components/category/CategoryHero.vue'
-import CategoryImpactScoreOrbit from '~/components/category/CategoryImpactScoreOrbit.vue'
 import AiAuditDisplay from '~/components/category/AiAuditDisplay.vue'
-import TextContent from '~/components/domains/content/TextContent.vue'
-import ImpactScoreCriteriaPanel from '~/components/impact-score/ImpactScoreCriteriaPanel.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 import { loadHighlightJs } from '~/utils/highlight-loader'
 import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
@@ -890,42 +716,6 @@ const availableCriteriaMap = computed(() => {
     map.set(criterion.key, criterion)
     return map
   }, new Map<string, { key: string; label: string; description: string; utility: string | null }>())
-})
-
-const lifecycleLabels = computed<Record<string, string>>(() => ({
-  EXTRACTION: t('category.ecoscorePage.lifecycle.EXTRACTION'),
-  MANUFACTURING: t('category.ecoscorePage.lifecycle.MANUFACTURING'),
-  TRANSPORTATION: t('category.ecoscorePage.lifecycle.TRANSPORTATION'),
-  USE: t('category.ecoscorePage.lifecycle.USE'),
-  END_OF_LIFE: t('category.ecoscorePage.lifecycle.END_OF_LIFE'),
-}))
-
-const impactScoreValue = computed(() => 4.3)
-const impactScoreMax = 5
-
-const impactScoreOrbitCriteria = computed(() => {
-  const weights = impactScoreConfig.value?.criteriasPonderation ?? {}
-
-  return availableImpactScoreCriterias.value.map(key => {
-    const attribute = attributeMap.value.get(key)
-    const fallbackTitle = attribute?.scoreTitle ?? attribute?.name ?? key
-
-    return {
-      key,
-      label: fallbackTitle,
-      description:
-        attribute?.scoreDescription ??
-        availableCriteriaMap.value.get(key)?.description ??
-        '',
-      weight: typeof weights?.[key] === 'number' ? Number(weights[key]) : null,
-      icon: attribute?.icon ?? null,
-      fallback: fallbackTitle.charAt(0).toUpperCase(),
-      lifecycles: Array.from(attribute?.participateInACV ?? []).map(stage => ({
-        code: stage,
-        label: lifecycleLabels.value[stage] ?? stage,
-      })),
-    }
-  })
 })
 
 const criteriaCards = computed(() => {
@@ -1106,9 +896,6 @@ const navAriaLabel = computed(() =>
 )
 
 const sectionIds = {
-  availableCriteria: 'category-impact-available-criteria',
-  overview: 'category-impact-overview',
-  purpose: 'category-impact-purpose',
   criteria: 'category-impact-criteria',
   transparency: 'category-impact-transparency',
   aiAudit: 'category-impact-ai-audit',
@@ -1118,23 +905,8 @@ type SectionId = (typeof sectionIds)[keyof typeof sectionIds]
 
 const navigationSections = computed(() => [
   {
-    id: sectionIds.availableCriteria as SectionId,
-    label: t('category.ecoscorePage.navigation.availableCriteria'),
-    icon: 'mdi-format-list-checks',
-  },
-  {
-    id: sectionIds.overview as SectionId,
-    label: t('category.ecoscorePage.navigation.overview'),
-    icon: 'mdi-information-outline',
-  },
-  {
-    id: sectionIds.purpose as SectionId,
-    label: t('category.ecoscorePage.navigation.purpose'),
-    icon: 'mdi-bullseye-arrow',
-  },
-  {
     id: sectionIds.criteria as SectionId,
-    label: t('category.ecoscorePage.navigation.criteria'),
+    label: t('category.ecoscorePage.navigation.availableCriteria'),
     icon: 'mdi-format-list-bulleted',
   },
   {
@@ -1153,14 +925,14 @@ const orientation = computed<'vertical' | 'horizontal'>(() =>
   display.mdAndDown.value ? 'horizontal' : 'vertical'
 )
 
-const activeSection = ref<SectionId>(sectionIds.overview)
+const activeSection = ref<SectionId>(sectionIds.criteria)
 const observer = ref<IntersectionObserver | null>(null)
 const visibleSectionRatios = new Map<string, number>()
 const MIN_SECTION_RATIO = 0.35
 
 const refreshActiveSection = () => {
   if (!visibleSectionRatios.size) {
-    activeSection.value = navigationSections.value[0]?.id ?? sectionIds.overview
+    activeSection.value = navigationSections.value[0]?.id ?? sectionIds.criteria
     return
   }
 
@@ -1381,6 +1153,22 @@ useSeoMeta({
 .category-ecoscore__nav
   position: relative
 
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__link)
+  color: rgb(var(--v-theme-text-neutral-strong))
+  background: rgba(var(--v-theme-surface-primary-080), 0.35)
+
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__link:hover),
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__link:focus-visible)
+  background: rgba(var(--v-theme-surface-primary-080), 0.6)
+
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__link--active)
+  background: rgba(var(--v-theme-surface-primary-120), 0.9)
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.85)
+  color: rgb(var(--v-theme-text-neutral-strong))
+
+.category-ecoscore__section-toggle :deep(.sticky-section-navigation__icon)
+  color: currentColor
+
 .category-ecoscore__sections
   display: flex
   flex-direction: column
@@ -1412,81 +1200,25 @@ useSeoMeta({
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
   line-height: 1.6
 
-.category-ecoscore__text-block
-  margin-bottom: clamp(1.5rem, 3vw, 2.5rem)
-
-.category-ecoscore__wiki :deep(.xwiki-sandbox)
-  font-size: 1.02rem
-  line-height: 1.7
-  color: rgba(var(--v-theme-text-neutral-strong), 0.92)
-
-
-.category-ecoscore__intro-card
+.category-ecoscore__impact-summary
+  margin-top: clamp(1.75rem, 3vw, 2.5rem)
+  padding: clamp(1.5rem, 2vw, 2.25rem)
+  border-radius: 22px
   background: linear-gradient(135deg, rgba(var(--v-theme-surface-primary-050), 0.75), rgba(var(--v-theme-surface-glass), 0.95))
-  padding: clamp(1.5rem, 2vw, 2.5rem)
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18)
-
-.category-ecoscore__intro-score
   display: flex
   flex-direction: column
-  align-items: center
-  justify-content: center
-  gap: 0.75rem
-  background: rgba(var(--v-theme-surface-default), 0.85)
-  border-radius: 24px
-  padding: clamp(1.25rem, 2vw, 2rem)
-  box-shadow: 0 24px 45px rgba(var(--v-theme-shadow-primary-600), 0.15)
+  gap: 1rem
 
-.category-ecoscore__intro-score-label
+.category-ecoscore__impact-title
   margin: 0
-  text-align: center
-  font-size: 0.95rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-
-.category-ecoscore__intro-title
-  margin: 0.25rem 0
-  font-size: clamp(1.4rem, 1.2vw + 1rem, 1.85rem)
+  font-size: clamp(1.35rem, 1.2vw + 1rem, 1.8rem)
   font-weight: 700
 
-.category-ecoscore__intro-description
-  margin-bottom: 1.25rem
+.category-ecoscore__impact-description
+  margin: 0
   color: rgba(var(--v-theme-text-neutral-secondary), 0.96)
-
-
-.category-ecoscore__purpose-grid
-  gap: clamp(1.5rem, 3vw, 2rem)
-
-.category-ecoscore__info-card
-  background: rgba(var(--v-theme-surface-muted), 0.85)
-  padding: clamp(1.25rem, 2vw, 2rem)
-  height: 100%
-
-.category-ecoscore__info-title
-  margin: 0 0 0.75rem
-  font-size: 1.15rem
-  font-weight: 600
-
-.category-ecoscore__info-body
-  margin: 0
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
   line-height: 1.6
-
-.category-ecoscore__data-list
-  list-style: none
-  display: flex
-  flex-direction: column
-  gap: 0.85rem
-  padding: 0
-  margin: 0
-
-.category-ecoscore__data-item
-  display: flex
-  flex-direction: column
-  gap: 0.35rem
-
-.category-ecoscore__data-description
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
-  line-height: 1.5
 
 .category-ecoscore__criteria-grid
   gap: clamp(1.25rem, 2vw, 2rem)
@@ -1516,6 +1248,27 @@ useSeoMeta({
   font-size: 1.05rem
   font-weight: 600
 
+.category-ecoscore__criteria-title-row
+  display: flex
+  align-items: flex-start
+  justify-content: space-between
+  gap: 0.5rem
+
+.category-ecoscore__criteria-utility-btn
+  margin-top: -0.2rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+
+.category-ecoscore__criteria-utility-tooltip
+  display: flex
+  flex-direction: column
+  gap: 0.35rem
+  max-width: 240px
+
+.category-ecoscore__criteria-utility-tooltip p
+  margin: 0
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+  line-height: 1.4
+
 .category-ecoscore__criteria-description
   margin: 0 0 0.5rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
@@ -1533,6 +1286,14 @@ useSeoMeta({
   margin: 0
   font-weight: 700
   color: rgb(var(--v-theme-accent-supporting))
+
+.category-ecoscore__intro-cta
+  align-self: stretch
+
+.category-ecoscore__intro-cta :deep(.v-btn__content)
+  white-space: normal
+  line-height: 1.3
+  text-align: center
 
 .category-ecoscore__empty
   margin: 0
@@ -1744,9 +1505,6 @@ useSeoMeta({
 
   .category-ecoscore__critical-media
     width: 100%
-
-  .category-ecoscore__intro-card
-    padding: clamp(1rem, 4vw, 2rem)
 
   .category-ecoscore__code-block
     max-height: 320px

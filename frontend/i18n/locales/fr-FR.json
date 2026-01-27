@@ -604,9 +604,12 @@
         },
         "criteria": {
           "empty": "Les critères seront publiés prochainement.",
-          "title": "Critères retenus et pondérations",
+          "title": "Critères disponibles pour {category}",
+          "subtitle": "Chaque critère est pondéré afin de mettre en avant les signaux les plus utiles pour comparer les {category}.",
           "coefficientPrefix": "Compte pour",
-          "coefficientSuffix": "dans la note globale"
+          "coefficientSuffix": "dans la note globale",
+          "utilityLabel": "Utilité",
+          "utilityAria": "Afficher l'utilité du critère"
         },
         "availableCriteria": {
           "title": "Critères disponibles pour {category}",
@@ -1347,54 +1350,52 @@
     "examples": {
       "eyebrow": "Exemples de calcul",
       "title": "Exemples réels",
-      "subtitle": "Des extraits d’Impact Score issus de fiches produits d’appareils de cuisson.",
-      "whirlpoolOven": {
+      "subtitle": "Des extraits d’Impact Score issus de fiches produits d’électroménager et d’électronique du quotidien.",
+      "samsungTv": {
         "eyebrow": "Exemple 1",
-        "title": "Four encastrable Whirlpool OMSR58RU1SB",
-        "description": "Classe énergie A+, cavité 71 L et plusieurs sources marchands.",
+        "title": "Téléviseur Samsung Crystal UHD 55\" UE55CU7092",
+        "description": "Indice de réparabilité, énergie et suivi logiciel selon les sources produits.",
         "breakdown": {
-          "energy": {
-            "label": "Classe énergie",
-            "value": "A+ (EPREL)"
+          "repairability": {
+            "label": "Indice de réparabilité",
+            "value": "7,3 / 10"
           },
           "consumption": {
-            "label": "Consommation par cycle",
-            "value": "0,89 kWh/cycle"
+            "label": "Consommation électrique",
+            "value": "90 kWh/1000h"
           },
-          "capacity": {
-            "label": "Capacité du four",
-            "value": "71 L"
+          "energyClass": {
+            "label": "Classe énergétique",
+            "value": "G (EPREL)"
           },
-          "sources": {
-            "label": "Sources de données",
-            "value": "Cdiscount, Darty, Fnac, Rakuten"
+          "softwareUpdates": {
+            "label": "Mises à jour logicielles",
+            "value": "7 ans"
           }
-        },
-        "conclusion": "Impact Score 2,2/5, calculé à partir des données énergie, de la capacité et des sources disponibles."
+        }
       },
-      "samsungOven": {
+      "fairphone": {
         "eyebrow": "Exemple 2",
-        "title": "Four encastrable Samsung NV7B41307AK",
-        "description": "Étiquette A+, cavité 76 L et relevés d’énergie issus d’EPREL.",
+        "title": "Smartphone Fairphone 5 5G 256 Go",
+        "description": "Un modèle durable avec un indice de réparabilité élevé et des mises à jour garanties.",
         "breakdown": {
-          "energy": {
-            "label": "Classe énergie",
-            "value": "A+ (EPREL)"
+          "repairability": {
+            "label": "Indice de réparabilité",
+            "value": "9,3 / 10"
           },
-          "consumption": {
-            "label": "Consommation par cycle",
-            "value": "1,05 kWh/cycle"
+          "softwareUpdates": {
+            "label": "Mises à jour logicielles",
+            "value": "8 ans"
           },
-          "capacity": {
-            "label": "Capacité du four",
-            "value": "76 L"
+          "warranty": {
+            "label": "Garantie constructeur",
+            "value": "5 ans"
           },
-          "sources": {
-            "label": "Sources de données",
-            "value": "EPREL, Darty, Cdiscount, Rakuten"
+          "materials": {
+            "label": "Matériaux recyclés",
+            "value": "70 %"
           }
-        },
-        "conclusion": "Impact Score 2,1/5, reflet des performances énergétiques et de la couverture des données produit."
+        }
       }
     },
     "summary": {
