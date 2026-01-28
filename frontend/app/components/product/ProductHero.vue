@@ -464,11 +464,6 @@ const ecologicalOnelineHtml = computed(() =>
 const communityOnelineHtml = computed(() =>
   sanitizeAiReviewHtml(aiReview.value?.communityOneline ?? null)
 )
-const aiBaseline = computed(() => {
-  const baseline = (aiReview.value as { baseLine?: string | null } | null)
-    ?.baseLine
-  return typeof baseline === 'string' ? baseline.trim() : ''
-})
 
 const handleAiReviewClick = () => {
   const element =
