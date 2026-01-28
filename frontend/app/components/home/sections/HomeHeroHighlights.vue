@@ -24,18 +24,44 @@ type HeroHighlightItem = {
   segments: HeroHighlightSegment[]
 }
 
-const props = defineProps<{
-  partnersCount?: number
-  openDataMillions?: number
-  productsCount?: number
-  categoriesCount?: number
-  impactScoreProductsCount?: number
-  impactScoreCategoriesCount?: number
-  productsWithoutVerticalCount?: number
-  reviewedProductsCount?: number
-  aiSummaryRemainingCredits?: number
-  heroBackgroundI18nKey?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    partnersCount?: number
+    openDataMillions?: number
+    productsCount?: number
+    categoriesCount?: number
+    impactScoreProductsCount?: number
+    impactScoreCategoriesCount?: number
+    productsWithoutVerticalCount?: number
+    reviewedProductsCount?: number
+    aiSummaryRemainingCredits?: number
+    heroBackgroundI18nKey?: string
+    highlightsI18nKey?: string
+    highlightsFallbackKeys?: string[]
+    aiSummaryI18nKey?: string
+    enableLinks?: boolean
+    scrollTargetId?: string
+    variant?: 'hero' | 'section'
+  }>(),
+  {
+    partnersCount: undefined,
+    openDataMillions: undefined,
+    productsCount: undefined,
+    categoriesCount: undefined,
+    impactScoreProductsCount: undefined,
+    impactScoreCategoriesCount: undefined,
+    productsWithoutVerticalCount: undefined,
+    reviewedProductsCount: undefined,
+    aiSummaryRemainingCredits: undefined,
+    heroBackgroundI18nKey: undefined,
+    highlightsI18nKey: 'hero.highlights',
+    highlightsFallbackKeys: undefined,
+    aiSummaryI18nKey: 'home.hero.aiSummary',
+    enableLinks: true,
+    scrollTargetId: '',
+    variant: 'section',
+  }
+)
 
 const { t, te, tm, locale } = useI18n()
 const activeEventPack = useSeasonalEventPack()
@@ -128,9 +154,24 @@ const normalizeHighlightItems = (items: unknown): HeroHighlightItem[] => {
     .filter((item): item is HeroHighlightItem => item != null)
 }
 
+const resolvedHighlightsKey = computed(() =>
+  props.highlightsI18nKey?.trim() || 'hero.highlights'
+)
+const resolvedHighlightsFallbackKeys = computed(() => {
+  if (props.highlightsFallbackKeys?.length) {
+    return props.highlightsFallbackKeys
+  }
+
+  return [`home.${resolvedHighlightsKey.value}`]
+})
+const shouldRenderLinks = computed(() => props.enableLinks)
+const scrollTargetId = computed(() => props.scrollTargetId?.trim() ?? '')
+const isScrollEnabled = computed(() => Boolean(scrollTargetId.value))
+const isHeroVariant = computed(() => props.variant === 'hero')
+
 const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
-  const packItems = packI18n.resolveList('hero.highlights', {
-    fallbackKeys: ['home.hero.highlights'],
+  const packItems = packI18n.resolveList(resolvedHighlightsKey.value, {
+    fallbackKeys: resolvedHighlightsFallbackKeys.value,
   })
 
   const itemsToNormalize = Array.isArray(packItems)
@@ -653,11 +694,6 @@ const resolveSegmentIcon = (icon?: string) => {
   }
 }
 
-const aiSummaryTitle = computed(() => t('home.hero.aiSummary.title'))
-const aiSummaryDescription = computed(() => {
-  return t('home.hero.aiSummary.description')
-})
-
 const aiSummaryReviewedLabel = computed(() => {
   const reviewedProductsCount = formattedReviewedProductsCount.value
 
@@ -665,24 +701,60 @@ const aiSummaryReviewedLabel = computed(() => {
     return null
   }
 
-  return t('home.hero.aiSummary.reviewedProductsSuffix', {
+  return t(`${props.aiSummaryI18nKey}.reviewedProductsSuffix`, {
     reviewedProductsCount,
   })
 })
 const aiSummaryCreditsLabel = computed(() => {
   const remaining = formattedAiSummaryRemainingCredits.value
   if (!remaining) {
-    return t('home.hero.aiSummary.creditsFallback')
+    return t(`${props.aiSummaryI18nKey}.creditsFallback`)
   }
 
-  return t('home.hero.aiSummary.creditsLabel', { count: remaining })
+  return t(`${props.aiSummaryI18nKey}.creditsLabel`, { count: remaining })
 })
 
 const isCreditsDialogActive = ref(false)
+const aiSummaryTitle = computed(() => t(`${props.aiSummaryI18nKey}.title`))
+const aiSummaryDescription = computed(() =>
+  t(`${props.aiSummaryI18nKey}.description`)
+)
+const scrollCtaLabel = (title: string) =>
+  t('home.hero.highlightsScrollCta', { title })
+
+const handleHighlightClick = () => {
+  if (!isScrollEnabled.value || !import.meta.client) {
+    return
+  }
+
+  const target = document.getElementById(scrollTargetId.value)
+  target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+const resolveHighlightStyle = (index: number) => {
+  if (!isHeroVariant.value) {
+    return undefined
+  }
+
+  const tilt = index % 2 === 0 ? '-1.6deg' : '1.3deg'
+  const offset = index % 2 === 0 ? '-10px' : '10px'
+
+  return {
+    '--highlight-tilt': tilt,
+    '--highlight-offset': offset,
+  } as Record<string, string>
+}
 </script>
 
 <template>
-  <div class="home-hero-highlights" role="list">
+  <div
+    class="home-hero-highlights"
+    :class="{
+      'home-hero-highlights--hero': isHeroVariant,
+      'home-hero-highlights--section': !isHeroVariant,
+    }"
+    role="list"
+  >
     <v-row align="stretch" justify="center">
       <v-col
         v-for="(item, index) in heroHighlightItems"
@@ -703,9 +775,12 @@ const isCreditsDialogActive = ref(false)
             corner-variant="none"
             corner-size="lg"
             rounded="lg"
-            :selectable="false"
+            :selectable="isScrollEnabled"
             :elevation="10"
             :hover-elevation="14"
+            :aria-label="isScrollEnabled ? scrollCtaLabel(item.title) : undefined"
+            :style="resolveHighlightStyle(index)"
+            @click="handleHighlightClick"
           >
             <div
               class="home-hero-highlights__card-content d-flex flex-column align-center text-center ga-2"
@@ -714,13 +789,18 @@ const isCreditsDialogActive = ref(false)
               <p class="home-hero-highlights__title ma-0 font-weight-bold">
                 {{ item.title }}
               </p>
-              <p class="home-hero-highlights__description ma-0">
+              <p
+                class="home-hero-highlights__description ma-0"
+                :class="{
+                  'home-hero-highlights__description--compact': isHeroVariant,
+                }"
+              >
                 <template
                   v-for="(segment, segmentIndex) in item.segments"
                   :key="`hero-highlight-${index}-segment-${segmentIndex}`"
                 >
                   <NuxtLink
-                    v-if="segment.to"
+                    v-if="segment.to && shouldRenderLinks"
                     class="home-hero-highlights__link"
                     :to="segment.to"
                   >
@@ -761,6 +841,7 @@ const isCreditsDialogActive = ref(false)
                   <span v-else>
                     <span
                       v-if="
+                        shouldRenderLinks &&
                         segment.icon &&
                         resolveSegmentIcon(segment.icon) &&
                         segment.iconPosition !== 'after'
@@ -780,6 +861,7 @@ const isCreditsDialogActive = ref(false)
                     }}
                     <span
                       v-if="
+                        shouldRenderLinks &&
                         segment.icon &&
                         resolveSegmentIcon(segment.icon) &&
                         segment.iconPosition === 'after'
@@ -832,7 +914,13 @@ const isCreditsDialogActive = ref(false)
                   {{ aiSummaryTitle }}
                 </span>
               </div>
-              <p class="home-hero-highlights__ai-summary-description ma-0">
+              <p
+                class="home-hero-highlights__ai-summary-description ma-0"
+                :class="{
+                  'home-hero-highlights__ai-summary-description--compact':
+                    isHeroVariant,
+                }"
+              >
                 {{ aiSummaryDescription }}
               </p>
 
@@ -874,8 +962,7 @@ const isCreditsDialogActive = ref(false)
             <v-icon size="56" color="accent">mdi-sparkles</v-icon>
           </div>
           <p class="text-h6 font-weight-medium mb-2">
-            Rendez vous sur les pages produits non encore synthétisées pour
-            activer vos générations !
+            {{ t('home.hero.aiSummary.dialog.description') }}
           </p>
         </v-card-text>
         <v-card-actions class="justify-center pt-0 pb-4">
@@ -885,7 +972,7 @@ const isCreditsDialogActive = ref(false)
             size="large"
             @click="isCreditsDialogActive = false"
           >
-            Compris !
+            {{ t('home.hero.aiSummary.dialog.confirm') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -924,6 +1011,8 @@ const isCreditsDialogActive = ref(false)
 .home-hero-highlights__card
   height: 100%
   width: 100%
+  transform: translateY(var(--highlight-offset, 0)) rotate(var(--highlight-tilt, 0deg))
+  transition: transform 180ms ease, box-shadow 180ms ease
 
   :deep(.rounded-card__content)
     min-height: auto
@@ -939,6 +1028,12 @@ const isCreditsDialogActive = ref(false)
   // margin now handled by utility class: ma-0
   color: rgb(var(--v-theme-text-neutral-secondary))
   line-height: 1.35
+
+.home-hero-highlights__description--compact
+  display: -webkit-box
+  -webkit-line-clamp: 1
+  -webkit-box-orient: vertical
+  overflow: hidden
 
 .home-hero-highlights__link
   color: rgb(var(--v-theme-text-neutral-strong))
@@ -961,6 +1056,21 @@ const isCreditsDialogActive = ref(false)
 
 .home-hero-highlights__ai-summary
   margin-top: 1.25rem
+
+.home-hero-highlights--section
+  margin-top: clamp(1rem, 3vw, 1.5rem)
+
+.home-hero-highlights--hero
+  .home-hero-highlights__ai-summary
+    margin-top: clamp(1rem, 4vw, 1.5rem)
+
+@media (min-width: 960px)
+  .home-hero-highlights--hero
+    .home-hero-highlights__col:nth-child(odd) .home-hero-highlights__card
+      --highlight-offset: -12px
+
+    .home-hero-highlights__col:nth-child(even) .home-hero-highlights__card
+      --highlight-offset: 12px
 
 .home-hero-highlights__ai-summary-cards-container
   width: 100%
@@ -987,6 +1097,12 @@ const isCreditsDialogActive = ref(false)
   color: rgb(var(--v-theme-text-neutral-secondary))
   font-size: 0.85rem
   line-height: 1.4
+
+.home-hero-highlights__ai-summary-description--compact
+  display: -webkit-box
+  -webkit-line-clamp: 1
+  -webkit-box-orient: vertical
+  overflow: hidden
 
 // .home-hero-highlights__ai-summary-actions styles now handled by utility classes: d-flex flex-wrap align-center justify-center ga-4 mt-4
 

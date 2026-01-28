@@ -470,11 +470,48 @@
           ]
         }
       ],
+      "highlightsCompact": [
+        {
+          "title": "🌿 ImpactScore",
+          "segments": [
+            {
+              "text": "A clear score to buy more responsibly."
+            }
+          ]
+        },
+        {
+          "title": "🫰 Fair prices",
+          "segments": [
+            {
+              "text": "Best offers and price history at the right time."
+            }
+          ]
+        },
+        {
+          "title": "🇫🇷 Open & ethical",
+          "segments": [
+            {
+              "text": "Independent, open source, open data."
+            }
+          ]
+        }
+      ],
       "aiSummary": {
         "title": "Community AI summary",
         "creditsLabel": "Credits remaining: {count}",
         "creditsFallback": "Credits remaining: unavailable",
         "description": "A powerful tool with real AI inside, giving you a panoramic view of your product. Free and community-driven.",
+        "reviewedProductsSuffix": "{reviewedProductsCount} product pages generated so far.",
+        "dialog": {
+          "description": "Visit product pages that have not been summarised yet to use your generations!",
+          "confirm": "Got it!"
+        }
+      },
+      "aiSummaryCompact": {
+        "title": "Community AI summary",
+        "creditsLabel": "Credits remaining: {count}",
+        "creditsFallback": "Credits remaining: unavailable",
+        "description": "A one-glance AI summary, free and community-driven.",
         "reviewedProductsSuffix": "{reviewedProductsCount} product pages generated so far."
       },
       "example": {
@@ -491,7 +528,11 @@
         "cornerTooltip": "Key highlights from Nudger’s methodology",
         "ariaLabel": "Hero context card summarising Nudger’s promise"
       },
+      "highlightsScrollCta": "Scroll to the promises: {title}",
       "background": "hero-background.webp"
+    },
+    "promises": {
+      "ariaLabel": "Our promises and commitments to compare responsibly"
     },
     "parallax": {
       "essentials": {
