@@ -2681,21 +2681,35 @@
           "readIndicator": {
             "title": "Comment lire cet indicateur",
             "higher": {
-              "worst": "Le plus faible {scoreLabelLower} observé est de {worst}{unit}.",
-              "best": "Le meilleur {scoreLabelLower} constaté parmi les {count} {verticalTitle} atteint {best}{unit}.",
-              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}{unit}.",
+              "worst": "Le plus faible {scoreLabelLower} observé est de {worstValue}.",
+              "best": "Le meilleur {scoreLabelLower} constaté parmi les {count} {verticalTitle} atteint {bestValue}.",
+              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {averageValue}.",
               "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}{unit}, obtient la note de {productOn20}/20.",
               "sigmaBounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
               "percentile": "Ce produit se situe autour du {percentile}ᵉ percentile de la distribution.",
+              "minmax_observed": "Les valeurs observées vont de {worstValue} à {bestValue}.",
+              "minmax_fixed": "Les bornes fixes sont {fixedMinValue} et {fixedMaxValue}.",
+              "minmax_quantile": "Les bornes par quantiles sont {quantileLowValue} et {quantileHighValue}.",
+              "fixed_mapping": "La note suit un barème de {mappingCount} valeurs possibles.",
+              "binary_greater": "La note passe quand la valeur est ≥ {thresholdValue}.",
+              "binary_lower": "La note passe quand la valeur est ≤ {thresholdValue}.",
+              "constant": "La note est fixée à {constantValueLabel}.",
               "distribution": "La notation utilise l'écart-type ({sigma}{unit}) pour s'assurer que les valeurs extrêmes n'écrasent pas les différences entre produits courants."
             },
             "lower": {
-              "worst": "Le {scoreLabelLower} le plus élevé observé est de {worst}{unit}.",
-              "best": "Le {scoreLabelLower} le plus faible constaté parmi les {count} {verticalTitle} atteint {best}{unit}.",
-              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {average}{unit}.",
+              "worst": "Le {scoreLabelLower} le plus élevé observé est de {worstValue}.",
+              "best": "Le {scoreLabelLower} le plus faible constaté parmi les {count} {verticalTitle} atteint {bestValue}.",
+              "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {averageValue}.",
               "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}{unit}, obtient la note de {productOn20}/20.",
               "sigmaBounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
               "percentile": "Ce produit se situe autour du {percentile}ᵉ percentile de la distribution.",
+              "minmax_observed": "Les valeurs observées vont de {worstValue} à {bestValue}.",
+              "minmax_fixed": "Les bornes fixes sont {fixedMinValue} et {fixedMaxValue}.",
+              "minmax_quantile": "Les bornes par quantiles sont {quantileLowValue} et {quantileHighValue}.",
+              "fixed_mapping": "La note suit un barème de {mappingCount} valeurs possibles.",
+              "binary_greater": "La note passe quand la valeur est ≥ {thresholdValue}.",
+              "binary_lower": "La note passe quand la valeur est ≤ {thresholdValue}.",
+              "constant": "La note est fixée à {constantValueLabel}.",
               "distribution": "La notation utilise l'écart-type ({sigma}{unit}) pour s'assurer que les valeurs extrêmes n'écrasent pas les différences entre produits courants."
             },
             "method": {
@@ -2759,6 +2773,20 @@
             "fixed_mapping": "Idéale pour les critères qualitatifs (ex: classe énergétique). Elle permet d'attribuer une note précise à chaque valeur possible, sans calcul statistique.",
             "binary": "La méthode la plus simple : ça passe ou ça casse. Utilisée pour les critères binaires (présence/absence) où aucune nuance n'est nécessaire.",
             "constant": "Méthode de repli utilisée rarement, pour attribuer une note fixe indépendamment des caractéristiques du produit."
+          }
+        },
+        "warranty": {
+          "readIndicator": {
+            "higher": {
+              "worst": "garantie <b>minimum</b> observé est de <b>{worstValue}</b>.",
+              "best": "garantie <b>maximum</b> constaté atteint <b>{bestValue}</b>.",
+              "average": "La <b>moyenne</b> pour les {count} {verticalTitle} disposant de données est de <b>{averageValue}</b>."
+            },
+            "lower": {
+              "worst": "garantie <b>minimum</b> observé est de <b>{worstValue}</b>.",
+              "best": "garantie <b>maximum</b> constaté atteint <b>{bestValue}</b>.",
+              "average": "La <b>moyenne</b> pour les {count} {verticalTitle} disposant de données est de <b>{averageValue}</b>."
+            }
           }
         },
         "repairability_index": {
