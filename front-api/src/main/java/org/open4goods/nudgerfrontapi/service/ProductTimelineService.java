@@ -5,6 +5,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Map;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.price.AggregatedPrice;
@@ -29,6 +33,7 @@ public class ProductTimelineService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductTimelineService.class);
     private static final long EPOCH_SECOND_THRESHOLD = 10_000_000_000L;
+    private static final int FAR_FUTURE_YEARS = 10;
 
     /**
      * Map a domain product to its timeline representation.
@@ -154,6 +159,7 @@ public class ProductTimelineService {
             addEprelEvent(events, ProductTimelineEventType.EPREL_ORGANISATION_CLOSED,
                     eprel.getOrganisation().getCloseDate(), null);
         }
+        appendEprelSupportEvents(eprel, events);
     }
 
     private void addEprelEvent(List<ProductTimelineEventDto> events, ProductTimelineEventType type, Long preferred,
@@ -194,6 +200,83 @@ public class ProductTimelineService {
             return timestamp * 1000;
         }
         return timestamp;
+    }
+
+    /**
+     * Adds computed after-sales support events derived from EPREL duration attributes.
+     *
+     * @param eprel  EPREL payload to inspect
+     * @param events event collector to enrich
+     */
+    private void appendEprelSupportEvents(EprelProduct eprel, List<ProductTimelineEventDto> events) {
+        Long baseTimestamp = normaliseTimestamp(
+                eprel.getOnMarketEndDateTs() != null ? eprel.getOnMarketEndDateTs() : eprel.getOnMarketEndDate());
+        if (baseTimestamp == null) {
+            return;
+        }
+        LocalDate baseDate = Instant.ofEpochMilli(baseTimestamp).atZone(ZoneOffset.UTC).toLocalDate();
+        LocalDate farFutureLimit = LocalDate.now(ZoneOffset.UTC).plusYears(FAR_FUTURE_YEARS);
+        if (baseDate.isAfter(farFutureLimit)) {
+            return;
+        }
+        Map<String, Object> attributes = eprel.getCategorySpecificAttributes();
+        addEprelSupportEvent(attributes, "minAvailabilitySparePartsYears", baseDate,
+                ProductTimelineEventType.EPREL_SPARE_PARTS_END, events);
+        addEprelSupportEvent(attributes, "minAvailabilitySoftwareUpdatesYears", baseDate,
+                ProductTimelineEventType.EPREL_SOFTWARE_SUPPORT_END, events);
+        addEprelSupportEvent(attributes, "minGuaranteedSupportYears", baseDate,
+                ProductTimelineEventType.EPREL_SUPPORT_END, events);
+    }
+
+    /**
+     * Adds a single EPREL support event if the duration attribute is present.
+     *
+     * @param attributes   EPREL category-specific attributes
+     * @param attributeKey attribute to look up
+     * @param baseDate     on-market end date used as baseline
+     * @param type         timeline event type
+     * @param events       event collector to enrich
+     */
+    private void addEprelSupportEvent(Map<String, Object> attributes, String attributeKey, LocalDate baseDate,
+            ProductTimelineEventType type, List<ProductTimelineEventDto> events) {
+        Integer years = extractPositiveInt(attributes, attributeKey);
+        if (years == null) {
+            return;
+        }
+        LocalDate targetDate = baseDate.plusYears(years);
+        long timestamp = targetDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+        events.add(new ProductTimelineEventDto(timestamp, type, ProductTimelineEventSource.EPREL, null, null));
+    }
+
+    /**
+     * Extracts a positive integer from EPREL attributes.
+     *
+     * @param attributes   EPREL category-specific attributes
+     * @param attributeKey attribute to resolve
+     * @return integer value or {@code null} when missing/invalid
+     */
+    private Integer extractPositiveInt(Map<String, Object> attributes, String attributeKey) {
+        if (attributes == null || attributeKey == null) {
+            return null;
+        }
+        Object rawValue = attributes.get(attributeKey);
+        if (rawValue == null) {
+            return null;
+        }
+        if (rawValue instanceof Number number) {
+            int value = number.intValue();
+            return value > 0 ? value : null;
+        }
+        if (rawValue instanceof String text) {
+            try {
+                int value = Integer.parseInt(text.trim());
+                return value > 0 ? value : null;
+            } catch (NumberFormatException ex) {
+                LOGGER.debug("Unable to parse EPREL support years for {}: {}", attributeKey, text);
+                return null;
+            }
+        }
+        return null;
     }
 
     private record TimelinePriceCandidate(Long timestamp, Double price) {
