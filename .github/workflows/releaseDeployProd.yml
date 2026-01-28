@@ -166,9 +166,6 @@ jobs:
           cp RELEASE-NOTES.md "frontend/app/public/reports/releases/${SAFE_VERSION}.md"
           cp RELEASE-NOTES.md "frontend/app/public/reports/releases/latest.md"
 
-          
-          
-
       ############################################
       # Frontend (tests coverage -> copy -> build)
       ############################################
@@ -207,7 +204,7 @@ jobs:
           else
             echo "No frontend coverage directory found at ${SRC}; skipping."
           fi
-      
+
       ############################################
       # Java / Maven (build + site + jacoco aggregate)
       ############################################
@@ -417,7 +414,7 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
+          ARGS: "-rltgoDzvO"
           SOURCE: "deploy-jars/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}

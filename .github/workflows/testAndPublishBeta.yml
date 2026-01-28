@@ -90,7 +90,7 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
+          ARGS: "-rltgoDzvO"
           SOURCE: "deploy-jars/"
           REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
