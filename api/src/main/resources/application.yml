@@ -83,14 +83,3 @@ google-taxonomy:
   en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
 
 gen-ai-config:
-  replacements:
-    "—": "-"
-    "–": "-"
-    "« ": "\\\""
-    " »": "\\\""
-    "…": "..."
-    "’": "'"
-    "•": "-"
-    "●": "-"
-    "×": "x"
-    " ": " "

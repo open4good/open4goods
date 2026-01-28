@@ -222,7 +222,7 @@ public class AiReview {
             "Write in FRENCH. ONE ultra-synthetic sentence (max ~14 words) summarizing the most striking highlights and trade-offs across: "
           + "(1) technical performance, (2) environmental impact/repairability, (3) community/expert feedback. "
           + "Neutral tone, no marketing. No prices, no dates, no product condition (new/used). "
-          + "MAXIMUM SOURCING: add citations [n] immediately after the claim(s). If no source supports a point, omit it.")
+          + "NO SOURCING: no sourcing, no citations ")
     @Schema(description = "Ultra-synthetic baseline under the title")
     private String baseLine;
 

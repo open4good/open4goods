@@ -24,13 +24,6 @@
           class="home-reveal-item"
           :style="{ '--reveal-delay': '0ms' }"
         />
-        <p
-          v-if="aiBaseline"
-          class="product-hero__baseline text-center home-reveal-item"
-          :style="{ '--reveal-delay': '120ms' }"
-        >
-          {{ aiBaseline }}
-        </p>
       </header>
 
       <CategoryNavigationBreadcrumbs
@@ -169,6 +162,52 @@
                         </div>
                       </li>
                     </ul>
+                  </template>
+                  <template v-else-if="attribute.key === 'descriptions-panel'">
+                    <div class="product-hero__descriptions-panel">
+                      <v-tabs
+                        v-model="activeDescriptionTab"
+                        density="compact"
+                        color="primary"
+                        align-tabs="start"
+                        class="mb-4 product-hero__tabs"
+                      >
+                        <v-tab
+                          v-for="(desc, source) in productDescriptions"
+                          :key="source"
+                          :value="source"
+                          class="text-body-2 font-weight-bold"
+                        >
+                          <img
+                            v-if="productFavicons[source]"
+                            :src="productFavicons[source]"
+                            width="16"
+                            height="16"
+                            class="mr-2 rounded-circle"
+                            alt=""
+                          />
+                          {{ source }}
+                        </v-tab>
+                      </v-tabs>
+
+                      <v-window
+                        v-model="activeDescriptionTab"
+                        class="product-hero__tab-content"
+                      >
+                        <v-window-item
+                          v-for="(desc, source) in productDescriptions"
+                          :key="source"
+                          :value="source"
+                        >
+                          <!-- eslint-disable vue/no-v-html -->
+                          <div
+                            class="text-body-2 text-medium-emphasis product-hero__description-body"
+                            v-html="desc"
+                          />
+                          <!-- eslint-enable vue/no-v-html -->
+                        </v-window-item>
+                      </v-window>
+                    </div>
                   </template>
                   <template v-else-if="attribute.showLabel !== false">
                     <span class="product-hero__attribute-label">{{
@@ -494,6 +533,28 @@ const hasBrandOrModel = computed(
   () => productBrandName.value.length > 0 || productModelName.value.length > 0
 )
 
+const productDescriptions = computed(
+  () => props.product.datasources?.descriptions ?? {}
+)
+const productFavicons = computed(
+  () => props.product.datasources?.favicons ?? {}
+)
+const hasDescriptions = computed(
+  () => Object.keys(productDescriptions.value).length > 0
+)
+const activeDescriptionTab = ref<string | null>(null)
+
+// Select first tab by default
+watch(
+  hasDescriptions,
+  val => {
+    if (val && !activeDescriptionTab.value) {
+      activeDescriptionTab.value = Object.keys(productDescriptions.value)[0]
+    }
+  },
+  { immediate: true }
+)
+
 const brandModelLine = computed(() => {
   const parts = [productBrandName.value, productModelName.value].filter(
     value => value.length
@@ -563,6 +624,14 @@ const heroAttributes = computed<HeroAttribute[]>(() => {
       key: 'ai-summary',
       label: '', // Not used
       value: '', // Not used
+      showLabel: false,
+      enableTooltip: false,
+    })
+  } else if (hasDescriptions.value) {
+    baseAttributes.push({
+      key: 'descriptions-panel',
+      label: '',
+      value: '',
       showLabel: false,
       enableTooltip: false,
     })
@@ -1195,5 +1264,53 @@ const heroBreadcrumbProps = computed(() => ({
   .product-hero__panel--pricing {
     grid-column: auto;
   }
+}
+
+.product-hero__descriptions-panel {
+  width: 100%;
+}
+
+.product-hero__tabs :deep(.v-btn) {
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.product-hero__tab-content {
+  background: rgba(var(--v-theme-surface-default), 0.4);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid rgba(var(--v-theme-outline), 0.1);
+}
+
+.product-hero__description-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.product-hero__description-body :deep(h1),
+.product-hero__description-body :deep(h2),
+.product-hero__description-body :deep(h3) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.product-hero__description-body :deep(p) {
+  margin-bottom: 0.75rem;
+}
+
+.product-hero__description-body :deep(ul) {
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.product-hero__description-body :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0.5rem 0;
 }
 </style>

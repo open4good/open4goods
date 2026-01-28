@@ -9,7 +9,7 @@
       <component :is="titleTag" :class="titleClass">
         {{ displayTitle }}
       </component>
-      <div v-if="baseLine" class="product-designation__baseline">
+      <div v-if="baseLine" class="text-center product-designation__baseline">
         {{ baseLine }}
       </div>
     </slot>
