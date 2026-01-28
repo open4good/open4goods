@@ -1,4 +1,3 @@
-
 server:
   port: ${SERVER_PORT:8086}
   compression:
@@ -9,35 +8,32 @@ server:
     enabled: true
   forward-headers-strategy: NATIVE
 
-    
 ########################
 # Logging configuration
 ########################
-logging: 
-    level:
-      org.apache.fontbox.ttf.PostScriptTable: ERROR
-    file:   
-      max-history: 5      
-      max-size: 200MB      
-      
+logging:
+  level:
+    org.apache.fontbox.ttf.PostScriptTable: ERROR
+  file:
+    max-history: 5
+    max-size: 200MB
 
 aggregationLogLevel: warn
-
 
 management:
   health:
     diskspace:
-      threshold: 100GB  
+      threshold: 100GB
   endpoints:
     web:
       exposure:
         include:
-          - "*"          
+          - "*"
   endpoint:
-    health:      
+    health:
       enabled: true
       show-details: always
-   
+
 spring:
   profiles:
     default: local
@@ -63,8 +59,8 @@ spring:
         options:
           model: ${OPENAI_MODEL:gpt-4o-mini}
           temperature: 1.0
-#          response-format:
-#            type: JSON_OBJECT
+    #          response-format:
+    #            type: JSON_OBJECT
     vertex:
       ai:
         gemini:
@@ -86,4 +82,15 @@ google-taxonomy:
   fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
   en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
 
-
+gen-ai-config:
+  replacements:
+    "—": "-"
+    "–": "-"
+    "« ": "\\\""
+    " »": "\\\""
+    "…": "..."
+    "’": "'"
+    "•": "-"
+    "●": "-"
+    "×": "x"
+    " ": " "

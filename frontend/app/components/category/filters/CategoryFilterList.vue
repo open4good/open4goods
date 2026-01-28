@@ -125,7 +125,7 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     align-items: stretch
 
   &__col
-    min-width: 280px
+    min-width: 480px
 
   &__item
     display: flex

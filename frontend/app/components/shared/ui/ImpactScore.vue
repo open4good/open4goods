@@ -53,7 +53,7 @@
           variant="text"
           density="compact"
           size="small"
-          :to="'./impactscore'"
+          :to="'./ecoscore'"
         >
           Méthodologie
         </v-btn>

@@ -245,7 +245,14 @@ public class PromptService implements HealthIndicator {
                     pConf.getProviderOptions()
             );
             providerResult = provider.generateText(providerRequest);
-            responseContent = providerResult.getContent();
+            responseContent = postProcess(providerResult.getContent());
+            providerResult = new ProviderResult(
+                providerResult.getProvider(),
+                providerResult.getModel(),
+                providerResult.getRawResponse(),
+                responseContent,
+                providerResult.getMetadata()
+            );
             externalApiHealthy = true; // API call succeeded, mark healthy.
             // --- Recording Response AFTER API call ---
             if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
@@ -741,5 +748,22 @@ public class PromptService implements HealthIndicator {
         } catch (Exception e) {
             logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
         }
+    }
+    
+    /**
+     * Post-processes the generated content by applying configured replacements.
+     * 
+     * @param content The content to process.
+     * @return The processed content with replacements applied.
+     */
+    private String postProcess(String content) {
+        if (content == null || genAiConfig.getReplacements() == null) {
+            return content;
+        }
+        String processed = content;
+        for (Entry<String, String> entry : genAiConfig.getReplacements().entrySet()) {
+            processed = processed.replace(entry.getKey(), entry.getValue());
+        }
+        return processed;
     }
 }

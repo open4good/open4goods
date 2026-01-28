@@ -116,4 +116,18 @@ public class PromptServiceConfig {
     public void setGoogleApiJson(String googleApiJson) {
         this.googleApiJson = googleApiJson;
     }
+    
+    /**
+     * Map of string replacements to apply to generated text.
+     * Key: target string, Value: replacement string
+     */
+    private java.util.Map<String, String> replacements;
+
+    public java.util.Map<String, String> getReplacements() {
+        return replacements;
+    }
+
+    public void setReplacements(java.util.Map<String, String> replacements) {
+        this.replacements = replacements;
+    }
 }
