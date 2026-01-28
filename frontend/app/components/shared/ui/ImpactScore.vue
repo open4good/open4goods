@@ -11,7 +11,7 @@
   >
     <div class="impact-score-panel__top">
       <div class="impact-score-panel__col-left">
-        <div class="impact-score-panel__score">
+        <div class="impact-score-panel__score justify-center">
           <span class="impact-score-panel__score-value">{{
             formattedScoreValue
           }}</span>

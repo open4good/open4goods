@@ -2289,6 +2289,7 @@
         "description": "Évaluation de la fiabilité et de la complétude des sources utilisées pour cette synthèse IA."
       },
       "requestButton": "Demander la synthèse",
+      "retryButton": "Réessayer",
       "request": {
         "agreement": "Je mandate Nudger pour rechercher et synthétiser les informations du {productName}. Dans une logique de sobriété et de partage, j'accepte également que ces données soient partagées à tous les utilisateurs de Nudger.",
         "bannerDescription": "Démarrer une synthèse du {productName}.",
@@ -2306,6 +2307,10 @@
         "remainingUnknown": "Indisponible",
         "submit": "Valider",
         "title": "Demander une synthèse IA"
+      },
+      "retry": {
+        "title": "La génération a échoué",
+        "subtitle": "Une erreur est survenue lors de la création de la synthèse pour {bestName}. Vous pouvez tenter une nouvelle demande."
       },
       "sections": {
         "cons": "Points faibles",
@@ -2782,7 +2787,9 @@
       },
       "ai": "Synthèse IA",
       "attributes": "Caractéristiques",
+      "collapse": "Réduire la navigation",
       "docs": "Documentation",
+      "expand": "Développer la navigation",
       "impact": "Impact écologique",
       "label": "Navigation de la fiche produit",
       "overview": "Aperçu",

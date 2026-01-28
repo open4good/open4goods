@@ -77,6 +77,7 @@ interface RadarAxisEntry {
 
 interface RadarSeriesEntry {
   label: string
+  key?: string
   values: Array<number | null>
   lineColor: string
   areaColor: string

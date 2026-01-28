@@ -8,7 +8,6 @@
     :accent-corner="'top-left'"
     :corner-variant="isCategoryStep ? 'none' : 'custom'"
     :corner-size="resolvedCornerSize"
-    :style="wizardStyle"
     :class="[
       'nudge-wizard',
       {
@@ -18,6 +17,10 @@
         'nudge-wizard--reduced-motion': shouldReduceMotion,
       },
     ]"
+    :style="{
+      ...wizardStyle,
+      transition: 'height 0.3s ease-in-out, min-height 0.3s ease-in-out',
+    }"
     :selectable="false"
   >
     <template #corner>
@@ -91,6 +94,7 @@
     </template>
 
     <div
+      v-if="!isCategoryStep"
       ref="progressRef"
       class="nudge-wizard__progress mb-4"
       aria-hidden="true"

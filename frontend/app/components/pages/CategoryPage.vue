@@ -124,7 +124,7 @@
                       :vertical-home-url="category?.verticalHomeUrl"
                       :category-name="categoryDisplayName"
                     />
-                    <CategoryCtaCard
+                    <CtaCard
                       class="category-page__assistant-cta"
                       icon="mdi-robot-outline"
                       :title="$t('category.filters.assistant.title')"
@@ -180,7 +180,7 @@
                     :vertical-home-url="category?.verticalHomeUrl"
                     :category-name="categoryDisplayName"
                   />
-                  <CategoryCtaCard
+                  <CtaCard
                     class="category-page__assistant-cta"
                     icon="mdi-robot-outline"
                     :title="$t('category.filters.assistant.title')"
@@ -467,7 +467,7 @@ import CategoryProductCardGrid from '~/components/category/products/CategoryProd
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
-import CategoryCtaCard from '~/components/category/CategoryCtaCard.vue'
+import CtaCard from '~/components/shared/CtaCard.vue'
 import {
   CATEGORY_DEFAULT_VIEW_MODE,
   CATEGORY_PAGE_SIZES,

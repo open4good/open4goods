@@ -23,14 +23,7 @@
         @click.stop.prevent="toggle"
       >
         <template v-if="variant === 'icon-only'">
-          <template v-if="isSelected">
-            <span class="compare-toggle-button__minus" aria-hidden="true"
-              >&minus;</span
-            >
-          </template>
-          <template v-else>
-            <v-icon :icon="icon" :size="iconSize" />
-          </template>
+          <v-icon :icon="currentIcon" :size="iconSize" />
         </template>
 
         <template v-else>
@@ -68,7 +61,7 @@ const props = withDefaults(
   {
     variant: 'icon-only',
     size: 'comfortable',
-    icon: 'mdi-compare-horizontal',
+    icon: 'mdi-plus',
   }
 )
 
@@ -94,7 +87,7 @@ const iconSize = computed(() => {
 })
 
 const currentIcon = computed(() => {
-  if (isSelected.value) return 'mdi-check'
+  if (isSelected.value) return 'mdi-minus'
   return props.icon
 })
 
@@ -221,11 +214,7 @@ const toggle = async () => {
     width: 3.75rem
     height: 3.75rem
 
-  /* Check/Minus styles for icon-only */
-  &__minus
-    font-size: 1.5em
-    line-height: 1
-    font-weight: 300
+
 
   /* Button variants */
   &--variant-button-icon,

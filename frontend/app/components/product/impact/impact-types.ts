@@ -70,6 +70,7 @@ export type ScoreView = {
   scoring?: ScoreScoringConfig | null
   importanceDescription?: string | null
   virtual?: boolean
+  numericMapping?: Record<string, number> | null
 }
 
 export type RankingInfo = {

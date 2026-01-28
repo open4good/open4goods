@@ -56,6 +56,7 @@ const props = defineProps<{
   stdDev?: number | null
   productName?: string
   productImage?: string | null
+  numericMapping?: Record<string, number> | null
 }>()
 
 const { t } = useI18n()
@@ -320,7 +321,7 @@ const chartOption = computed<EChartsOption | null>(() => {
   const displayDistribution =
     viewMode.value === 'normalized' && hasNormalizedView.value
       ? buildNormalizedDistribution()
-      : filteredDistribution.value
+      : buildAbsoluteDistribution()
   const dataValues = displayDistribution.map(bucket => bucket.value)
   const maxValue = Math.max(0, ...dataValues)
   const yAxisMax = Math.max(1, Math.ceil(maxValue * 1.2))
@@ -658,6 +659,34 @@ const resolveNormalizedAverage = () => {
     return null
   }
   return normalizeValue(props.averageValue)
+}
+
+const buildAbsoluteDistribution = () => {
+  if (!props.numericMapping) {
+    return filteredDistribution.value
+  }
+
+  // Create reverse mapping (value -> label)
+  const reverseMapping = new Map<number, string>()
+  Object.entries(props.numericMapping).forEach(([label, value]) => {
+    reverseMapping.set(value, label)
+  })
+
+  return filteredDistribution.value.map(bucket => {
+    const range = parseBucketRange(bucket.label)
+    if (range && range.exact != null) {
+      // Check for exact match with tolerance for floating point
+      for (const [value, label] of reverseMapping.entries()) {
+        if (Math.abs(value - range.exact) < 0.001) {
+          return {
+            ...bucket,
+            label,
+          }
+        }
+      }
+    }
+    return bucket
+  })
 }
 </script>
 

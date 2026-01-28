@@ -882,7 +882,7 @@ useHead(() => ({
         >
           <v-container fluid class="max_large mx-auto px-4">
             <v-row>
-              <v-col cols="12" md="8">
+              <v-col cols="12" md="6">
                 <SectionReveal class="home-page__section" transition="fade">
                   <template #default="{ reveal }">
                     <HomeFaqSection :items="faqPanels" :reveal="reveal" />
@@ -890,7 +890,7 @@ useHead(() => ({
                 </SectionReveal>
               </v-col>
 
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="6">
                 <SectionReveal class="home-page__section" transition="slide-y">
                   <template #default="{ reveal }">
                     <HomeCtaSection

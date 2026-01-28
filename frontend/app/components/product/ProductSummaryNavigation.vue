@@ -1,157 +1,182 @@
 <template>
-  <nav
-    class="product-summary-navigation"
-    :class="`product-summary-navigation--${orientation}`"
-    :aria-label="ariaLabel"
-  >
-    <ul class="product-summary-navigation__list">
-      <li
-        v-for="section in sections"
-        :key="section.id"
-        class="product-summary-navigation__item"
-      >
-        <div class="product-summary-navigation__item-header">
-          <button
-            type="button"
-            class="product-summary-navigation__link"
-            :class="{
-              'product-summary-navigation__link--active':
-                isSectionActive(section),
-            }"
-            :aria-current="isSectionActive(section) ? 'true' : undefined"
-            :aria-controls="section.id"
-            @click="handleSectionClick(section)"
-          >
-            <v-icon
-              v-if="section.icon"
-              :icon="section.icon"
-              size="18"
-              class="product-summary-navigation__icon"
-            />
-            <span class="product-summary-navigation__label">{{
-              section.label
-            }}</span>
-          </button>
-          <button
-            v-if="hasSubsections(section)"
-            type="button"
-            class="product-summary-navigation__toggle"
-            :aria-expanded="isSubmenuOpen(section)"
-            :aria-controls="`submenu-${section.id}`"
-            @click="toggleSubmenu(section.id)"
-          >
-            <v-icon
-              :icon="
-                isSubmenuOpen(section) ? 'mdi-chevron-up' : 'mdi-chevron-down'
-              "
-              size="18"
-            />
-          </button>
-        </div>
-        <v-expand-transition>
-          <ul
-            v-if="hasSubsections(section)"
-            v-show="isSubmenuOpen(section)"
-            :id="`submenu-${section.id}`"
-            class="product-summary-navigation__submenu"
-          >
-            <li
-              v-for="subsection in section.subsections"
-              :key="subsection.id"
-              class="product-summary-navigation__submenu-item"
-            >
-              <button
-                type="button"
-                class="product-summary-navigation__submenu-link"
-                :class="{
-                  'product-summary-navigation__submenu-link--active':
-                    subsection.id === activeSection,
-                }"
-                :aria-current="
-                  subsection.id === activeSection ? 'true' : undefined
-                "
-                :aria-controls="subsection.id"
-                @click="onNavigate(subsection.id)"
-              >
-                <v-icon
-                  v-if="subsection.icon"
-                  :icon="subsection.icon"
-                  size="16"
-                  class="product-summary-navigation__submenu-icon"
-                />
-                <span class="product-summary-navigation__submenu-label">{{
-                  subsection.label
-                }}</span>
-              </button>
-            </li>
-          </ul>
-        </v-expand-transition>
-      </li>
-    </ul>
-
-    <section
-      v-if="adminSections.length"
-      class="product-summary-navigation__admin-panel"
-      :aria-label="adminTitle"
+  <div class="product-summary-navigation-wrapper">
+    <button
+      type="button"
+      class="product-summary-navigation__collapse-toggle"
+      :aria-expanded="!isCollapsed"
+      :aria-label="
+        isCollapsed
+          ? $t('product.navigation.expand')
+          : $t('product.navigation.collapse')
+      "
+      @click="toggleCollapse"
     >
-      <p class="product-summary-navigation__admin-eyebrow">{{ adminTitle }}</p>
-      <p v-if="adminHelper" class="product-summary-navigation__admin-helper">
-        {{ adminHelper }}
-      </p>
-      <ul class="product-summary-navigation__admin-list">
+      <v-icon
+        :icon="isCollapsed ? 'mdi-dock-right' : 'mdi-dock-left'"
+        size="20"
+      />
+    </button>
+    <nav
+      class="product-summary-navigation"
+      :class="{
+        'product-summary-navigation--collapsed': isCollapsed,
+        [`product-summary-navigation--${orientation}`]: true,
+      }"
+      :aria-label="ariaLabel"
+    >
+      <ul class="product-summary-navigation__list">
         <li
-          v-for="admin in adminSections"
-          :key="admin.id"
-          class="product-summary-navigation__admin-item"
+          v-for="section in sections"
+          :key="section.id"
+          class="product-summary-navigation__item"
         >
-          <a
-            v-if="admin.href"
-            class="product-summary-navigation__admin-link"
-            :href="admin.href"
-            :target="admin.target"
-            :rel="resolveExternalRel(admin)"
-          >
-            <v-icon
-              v-if="admin.icon"
-              :icon="admin.icon"
-              size="18"
-              class="product-summary-navigation__admin-icon"
-            />
-            <span class="product-summary-navigation__admin-label">{{
-              admin.label
-            }}</span>
-          </a>
-          <button
-            v-else
-            type="button"
-            class="product-summary-navigation__admin-link"
-            :class="{
-              'product-summary-navigation__admin-link--active':
-                admin.id === activeSection,
-            }"
-            :aria-current="admin.id === activeSection ? 'true' : undefined"
-            :aria-controls="admin.id"
-            @click="onNavigate(admin.id)"
-          >
-            <v-icon
-              v-if="admin.icon"
-              :icon="admin.icon"
-              size="18"
-              class="product-summary-navigation__admin-icon"
-            />
-            <span class="product-summary-navigation__admin-label">{{
-              admin.label
-            }}</span>
-          </button>
+          <div class="product-summary-navigation__item-header">
+            <button
+              type="button"
+              class="product-summary-navigation__link"
+              :class="{
+                'product-summary-navigation__link--active':
+                  isSectionActive(section),
+              }"
+              :aria-current="isSectionActive(section) ? 'true' : undefined"
+              :aria-controls="section.id"
+              @click="handleSectionClick(section)"
+            >
+              <v-icon
+                v-if="section.icon"
+                :icon="section.icon"
+                size="18"
+                class="product-summary-navigation__icon"
+              />
+              <span class="product-summary-navigation__label">{{
+                section.label
+              }}</span>
+            </button>
+            <button
+              v-if="hasSubsections(section)"
+              type="button"
+              class="product-summary-navigation__toggle"
+              :aria-expanded="isSubmenuOpen(section)"
+              :aria-controls="`submenu-${section.id}`"
+              @click="toggleSubmenu(section.id)"
+            >
+              <v-icon
+                :icon="
+                  isSubmenuOpen(section) ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                "
+                size="18"
+              />
+            </button>
+          </div>
+          <v-expand-transition>
+            <ul
+              v-if="hasSubsections(section)"
+              v-show="isSubmenuOpen(section)"
+              :id="`submenu-${section.id}`"
+              class="product-summary-navigation__submenu"
+            >
+              <li
+                v-for="subsection in section.subsections"
+                :key="subsection.id"
+                class="product-summary-navigation__submenu-item"
+              >
+                <button
+                  type="button"
+                  class="product-summary-navigation__submenu-link"
+                  :class="{
+                    'product-summary-navigation__submenu-link--active':
+                      subsection.id === activeSection,
+                  }"
+                  :aria-current="
+                    subsection.id === activeSection ? 'true' : undefined
+                  "
+                  :aria-controls="subsection.id"
+                  @click="onNavigate(subsection.id)"
+                >
+                  <v-icon
+                    v-if="subsection.icon"
+                    :icon="subsection.icon"
+                    size="16"
+                    class="product-summary-navigation__submenu-icon"
+                  />
+                  <span class="product-summary-navigation__submenu-label">{{
+                    subsection.label
+                  }}</span>
+                </button>
+              </li>
+            </ul>
+          </v-expand-transition>
         </li>
       </ul>
-    </section>
-  </nav>
+
+      <section
+        v-if="adminSections.length"
+        class="product-summary-navigation__admin-panel"
+        :aria-label="adminTitle"
+      >
+        <p class="product-summary-navigation__admin-eyebrow">
+          {{ adminTitle }}
+        </p>
+        <p v-if="adminHelper" class="product-summary-navigation__admin-helper">
+          {{ adminHelper }}
+        </p>
+        <ul class="product-summary-navigation__admin-list">
+          <li
+            v-for="admin in adminSections"
+            :key="admin.id"
+            class="product-summary-navigation__admin-item"
+          >
+            <a
+              v-if="admin.href"
+              class="product-summary-navigation__admin-link"
+              :href="admin.href"
+              :target="admin.target"
+              :rel="resolveExternalRel(admin)"
+            >
+              <v-icon
+                v-if="admin.icon"
+                :icon="admin.icon"
+                size="18"
+                class="product-summary-navigation__admin-icon"
+              />
+              <span class="product-summary-navigation__admin-label">{{
+                admin.label
+              }}</span>
+            </a>
+            <button
+              v-else
+              type="button"
+              class="product-summary-navigation__admin-link"
+              :class="{
+                'product-summary-navigation__admin-link--active':
+                  admin.id === activeSection,
+              }"
+              :aria-current="admin.id === activeSection ? 'true' : undefined"
+              :aria-controls="admin.id"
+              @click="onNavigate(admin.id)"
+            >
+              <v-icon
+                v-if="admin.icon"
+                :icon="admin.icon"
+                size="18"
+                class="product-summary-navigation__admin-icon"
+              />
+              <span class="product-summary-navigation__admin-label">{{
+                admin.label
+              }}</span>
+            </button>
+          </li>
+        </ul>
+      </section>
+    </nav>
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
 import { ref, watch } from 'vue'
+
+const { t: $t } = useI18n()
 
 const _props = defineProps({
   sections: {
@@ -200,6 +225,12 @@ const _props = defineProps({
 })
 
 const emit = defineEmits<{ navigate: [string] }>()
+
+const isCollapsed = ref(false)
+
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 
 const openSectionId = ref<string | null>(null)
 
@@ -265,6 +296,38 @@ watch(
 </script>
 
 <style scoped>
+.product-summary-navigation-wrapper {
+  position: relative;
+}
+
+.product-summary-navigation__collapse-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.95);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.product-summary-navigation__collapse-toggle:hover,
+.product-summary-navigation__collapse-toggle:focus-visible {
+  background: rgba(var(--v-theme-surface-primary-100), 0.9);
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.6);
+  color: rgb(var(--v-theme-accent-primary-highlight));
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  transform: scale(1.05);
+}
+
 .product-summary-navigation {
   position: sticky;
   top: var(--product-sticky-offset, 0px);
@@ -274,6 +337,15 @@ watch(
   background: rgba(var(--v-theme-surface-glass));
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
   backdrop-filter: blur(8px);
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.product-summary-navigation--collapsed {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .product-summary-navigation--horizontal {

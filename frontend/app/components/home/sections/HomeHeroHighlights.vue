@@ -562,13 +562,43 @@ const randomProductName = computed(() => {
 const applyRandomProductPlaceholder = (items: HeroHighlightItem[]) => {
   const productName = randomProductName.value
   const productLink = randomProductLink.value
+  const placeholder = '{randomProduct}'
 
   if (!productName || !productLink) {
-    // If no random product, just return items unchanged
-    return items
-  }
+    // If no random product, remove the placeholder and potential intro text
+    return items.map(item => {
+      const segmentsWithCleanup = item.segments
+        .map(segment => {
+          if (!segment.text.includes(placeholder)) {
+            return segment
+          }
 
-  const placeholder = '{randomProduct}'
+          // Try to remove "Un exemple ? {randomProduct}" or just "{randomProduct}"
+          // We use a regex to match the placeholder and optional preceding text "Un exemple ?"
+          // The regex handles potential spacing nuances.
+          const cleanedText = segment.text
+            .replace(/Un exemple\s*\?*\s*\{randomProduct\}/gi, '')
+            .replace(placeholder, '')
+            .trim()
+
+          if (!cleanedText) {
+            return null
+          }
+
+          return {
+            ...segment,
+            text: cleanedText,
+          }
+        })
+        .filter((segment): segment is HeroHighlightSegment => segment != null)
+
+      return {
+        ...item,
+        segments:
+          segmentsWithCleanup.length > 0 ? segmentsWithCleanup : item.segments,
+      }
+    })
+  }
 
   return items.map(item => {
     const segmentsWithProduct = item.segments.flatMap(

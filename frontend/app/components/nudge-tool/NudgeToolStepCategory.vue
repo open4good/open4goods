@@ -347,8 +347,8 @@ watch(
 .nudge-step-category {
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2.5vw, 1.75rem);
-  padding-bottom: 0.75rem;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  padding-bottom: 0px;
 
   &__header {
     display: flex;
@@ -431,11 +431,13 @@ watch(
     }
 
     &--prev {
-      margin-right: -16px;
+      left: 0;
+      margin-right: -20px;
     }
 
     &--next {
-      margin-left: -16px;
+      right: 0;
+      margin-left: -20px;
     }
   }
 
@@ -452,6 +454,9 @@ watch(
     box-shadow: none;
     background: transparent !important;
     border: none !important;
+
+    /* Fix centering of content */
+    margin: auto 0;
 
     @media (max-width: 960px) {
       width: 160px;

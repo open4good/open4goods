@@ -547,6 +547,11 @@ watch(
   gap: 0.75rem;
 }
 
+.product-hero__pricing-panel-main-wrapper {
+  width: 80%;
+  margin: 0 auto;
+}
+
 .product-hero__pricing-panel-main {
   display: flex;
   align-items: center;

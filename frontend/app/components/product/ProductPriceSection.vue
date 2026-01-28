@@ -271,6 +271,48 @@
             <v-row class="ma-0">
               <v-col cols="12" md="4">
                 <div v-if="newStats" class="product-price__metrics h-100 pa-4">
+                  <!-- Best Offer CTA -->
+                  <a
+                    v-if="bestNewOffer && bestNewOfferLink"
+                    :href="bestNewOfferLink"
+                    rel="nofollow"
+                    class="product-price__history-cta"
+                    @click="
+                      handleOfferRedirectClick(
+                        bestNewOffer,
+                        'price-history-cta',
+                        bestNewOfferLink
+                      )
+                    "
+                  >
+                    <img
+                      v-if="bestNewOffer.favicon"
+                      :src="bestNewOffer.favicon"
+                      :alt="bestNewOffer.datasourceName ?? ''"
+                      class="product-price__history-cta-icon"
+                    />
+                    <v-icon
+                      v-else
+                      icon="mdi-store"
+                      size="24"
+                      class="product-price__history-cta-icon"
+                    />
+                    <div class="product-price__history-cta-info">
+                      <span class="product-price__history-cta-price">
+                        {{
+                          formatCurrency(
+                            bestNewOffer.price,
+                            bestNewOffer.currency
+                          )
+                        }}
+                      </span>
+                      <span class="product-price__history-cta-merchant">
+                        {{ bestNewOffer.datasourceName }}
+                      </span>
+                    </div>
+                    <v-icon icon="mdi-open-in-new" size="18" />
+                  </a>
+
                   <div class="product-price__metrics-summary">
                     <dl>
                       <div class="product-price__metrics-row">
@@ -1796,5 +1838,58 @@ onBeforeUnmount(() => {
   .product-price__competition-count {
     justify-self: flex-start;
   }
+}
+
+/* Best Offer CTA in history section */
+.product-price__history-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(var(--v-theme-primary), 0.1);
+  border-radius: 16px;
+  border: 1px solid rgba(var(--v-theme-primary), 0.2);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  width: min(100%, 520px);
+}
+
+.product-price__history-cta:hover {
+  background: rgba(var(--v-theme-primary), 0.16);
+  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.18);
+  transform: translateY(-2px);
+}
+
+.product-price__history-cta-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.product-price__history-cta-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.product-price__history-cta-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-primary));
+}
+
+.product-price__history-cta-merchant {
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

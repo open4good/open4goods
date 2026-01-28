@@ -2566,6 +2566,7 @@
         "description": "Assessment of the reliability and completeness of the sources used for this AI summary."
       },
       "requestButton": "Request the summary",
+      "retryButton": "Retry",
       "request": {
         "agreement": "I authorize Nudger to research and summarize information about {productName}. In a spirit of sobriety and sharing, I also agree that this data can be shared with all Nudger users.",
         "bannerDescription": "Start a summary for {productName}.",
@@ -2583,6 +2584,10 @@
         "remainingUnknown": "Unavailable",
         "submit": "Confirm",
         "title": "Request an AI summary"
+      },
+      "retry": {
+        "title": "Generation failed",
+        "subtitle": "An error occurred while generating the summary for {bestName}. You can try again."
       },
       "sections": {
         "cons": "Cons",
@@ -3064,7 +3069,9 @@
       },
       "ai": "AI summary",
       "attributes": "Specifications",
+      "collapse": "Collapse navigation",
       "docs": "Documentation",
+      "expand": "Expand navigation",
       "impact": "Environmental impact",
       "label": "Product detail navigation",
       "overview": "Overview",

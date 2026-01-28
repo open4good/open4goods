@@ -55,6 +55,34 @@
             </div>
 
             <div class="product-hero__details-section">
+              <div
+                v-if="impactScore != null"
+                class="product-hero__impact-score mb-4 d-flex align-center"
+                style="gap: 12px; height: 104px"
+              >
+                <CtaCard
+                  :title="t('category.filters.ecoscore.title', 'Impact Score')"
+                  :subtitle="
+                    t('category.filters.ecoscore.cta', 'Voir l\'analyse', {
+                      category: '',
+                    })
+                  "
+                  icon="mdi-leaf"
+                  size="large"
+                  to="/impact-score"
+                  class="flex-grow-1 h-100"
+                  style="max-width: 300px"
+                />
+                <ImpactScore
+                  :score="impactScore"
+                  :min="impactScoreMin"
+                  :max="impactScoreMax"
+                  :show-methodology="false"
+                  size="lg"
+                  class="h-100"
+                />
+              </div>
+
               <div v-if="hasBrandOrModel" class="product-hero__heading-group">
                 <span v-if="productBrandName" class="product-hero__brand-name">
                   {{ productBrandName }}
@@ -63,19 +91,6 @@
                 <span v-if="productModelName" class="product-hero__subtitle">
                   {{ productModelName }}
                 </span>
-              </div>
-
-              <div
-                v-if="impactScore != null"
-                class="product-hero__impact-score mb-4"
-              >
-                <ImpactScore
-                  :score="impactScore"
-                  :min="impactScoreMin"
-                  :max="impactScoreMax"
-                  :show-methodology="false"
-                  size="lg"
-                />
               </div>
 
               <ul
@@ -268,10 +283,9 @@
 
               <div class="product-hero__actions">
                 <v-btn
+                  v-if="!hasAiReview"
                   class="product-hero__ai-button"
-                  :prepend-icon="
-                    hasAiReview ? 'mdi-check-circle-outline' : 'mdi-robot'
-                  "
+                  prepend-icon="mdi-robot"
                   variant="flat"
                   @click="handleAiReviewClick"
                 >
@@ -336,6 +350,7 @@ import {
   type CompareListBlockReason,
 } from '~/stores/useProductCompareStore'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
+import CtaCard from '~/components/shared/CtaCard.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
@@ -661,8 +676,8 @@ const isCompareSelected = computed(() => compareStore.hasProduct(props.product))
 
 const compareButtonText = computed(() =>
   isCompareSelected.value
-    ? t('product.hero.compare.selected')
-    : t('product.hero.compare.label')
+    ? t('product.hero.compare.remove')
+    : t('product.hero.compare.add')
 )
 
 const compareButtonTitle = computed(() => {
@@ -703,9 +718,7 @@ const compareButtonAriaLabel = computed(() => {
 })
 
 const compareButtonIcon = computed(() =>
-  isCompareSelected.value
-    ? 'mdi-check-circle-outline'
-    : 'mdi-compare-horizontal'
+  isCompareSelected.value ? 'mdi-minus' : 'mdi-plus'
 )
 
 const isCompareDisabled = computed(
@@ -995,8 +1008,6 @@ const heroBreadcrumbProps = computed(() => ({
 .product-hero__details-section {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 1rem 0;
   height: 100%;
 }
 

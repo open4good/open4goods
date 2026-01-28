@@ -89,6 +89,7 @@
       :std-dev="score.absolute?.stdDev ?? null"
       :product-name="productName"
       :product-image="productImage"
+      :numeric-mapping="score.numericMapping ?? null"
     />
 
     <div v-if="hasDetails" class="impact-subscore__details">

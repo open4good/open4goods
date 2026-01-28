@@ -44,12 +44,36 @@
         :to="productLink(product)"
         :rel="linkRel"
       >
-        <div class="category-product-card-grid__compare">
-          <CompareToggleButton :product="product" size="compact" />
-        </div>
-
         <div class="category-product-card-grid__media-wrapper">
           <div class="category-product-card-grid__media">
+            <!-- Header Overlay -->
+            <div class="category-product-card-grid__media-header">
+              <!-- Impact Score (Left) -->
+              <div
+                class="category-product-card-grid__corner"
+                role="presentation"
+              >
+                <ImpactScore
+                  v-if="impactScoreValue(product) != null"
+                  :score="impactScoreValue(product) ?? 0"
+                  :max="20"
+                  size="small"
+                  variant="corner"
+                />
+                <span
+                  v-else
+                  class="category-product-card-grid__corner-fallback"
+                >
+                  {{ $t('category.products.notRated') }}
+                </span>
+              </div>
+
+              <!-- Compare Button (Right) -->
+              <div class="category-product-card-grid__compare">
+                <CompareToggleButton :product="product" size="compact" />
+              </div>
+            </div>
+
             <v-img
               :src="resolveImage(product)"
               :alt="
@@ -63,19 +87,6 @@
                 <v-skeleton-loader type="image" class="h-100" />
               </template>
             </v-img>
-
-            <div class="category-product-card-grid__corner" role="presentation">
-              <ImpactScore
-                v-if="impactScoreValue(product) != null"
-                :score="impactScoreValue(product) ?? 0"
-                :max="5"
-                size="small"
-                variant="corner"
-              />
-              <span v-else class="category-product-card-grid__corner-fallback">
-                {{ $t('category.products.notRated') }}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -584,23 +595,21 @@ const getConditionCountLabel = (
   &__card:hover &__image
     transform: scale(1.05)
 
-  &__corner
+  &__media-header
     position: absolute
     top: 0
     left: 0
-    width: 56px
-    height: 56px
-    display: inline-flex
-    align-items: center
-    justify-content: center
-    border-radius: 0 0 54% 0
-    background: rgba(var(--v-theme-surface-glass-strong), 0.95)
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.45)
-    color: rgb(var(--v-theme-text-neutral-strong))
-    box-shadow: 0 4px 12px rgba(0,0,0, 0.08)
-    backdrop-filter: blur(8px)
-    z-index: 2
-    pointer-events: none
+    right: 0
+    z-index: 5
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    pointer-events: none /* let clicks pass through to image link */
+    padding: 0
+
+  &__score-container
+    margin: 0.5rem 0 0 0.5rem
+    pointer-events: auto
 
   &__corner-fallback
     font-size: 0.65rem
@@ -611,12 +620,12 @@ const getConditionCountLabel = (
     text-align: center
     line-height: 1.1
     transform: rotate(-12deg)
+    margin-top: -4px /* visual tweak */
+    margin-left: -4px
 
   &__compare
-    position: absolute
-    right: 0.75rem
-    bottom: 0.75rem /* Moved to bottom */
-    z-index: 5
+    pointer-events: auto
+    margin: 0.5rem 0.5rem 0 0 /* top right spacing */
 
   &__body
     display: flex
@@ -739,10 +748,6 @@ const getConditionCountLabel = (
     .category-product-card-grid__media-wrapper
         min-height: 120px
         max-height: 180px
-
-    .category-product-card-grid__corner
-        width: 48px
-        height: 48px
 
     .category-product-card-grid__body
         padding: 0.75rem

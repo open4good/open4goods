@@ -1,5 +1,5 @@
 <template>
-  <CategoryCtaCard
+  <CtaCard
     v-if="ecoscoreUrl"
     :to="ecoscoreUrl"
     icon="mdi-leaf"
@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import CategoryCtaCard from '~/components/category/CategoryCtaCard.vue'
+import CtaCard from '~/components/shared/CtaCard.vue'
 
 const props = defineProps<{
   verticalHomeUrl?: string | null

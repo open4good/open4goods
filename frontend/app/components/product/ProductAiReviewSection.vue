@@ -1153,8 +1153,17 @@ const isDialogRequesting = computed(
   () => requesting.value || isGenerating.value
 )
 
-const statusPercent = computed(() => storeItem.value?.percent ?? 0)
-const statusMessage = computed(() => storeItem.value?.statusMessage)
+const statusPercent = computed(() => {
+  const displayed = store.getDisplayedMessage(String(props.gtin))
+  // Use displayed queue message if available, otherwise fallback to store item
+  return displayed?.percent ?? storeItem.value?.percent ?? 0
+})
+
+const statusMessage = computed(() => {
+  const displayed = store.getDisplayedMessage(String(props.gtin))
+  // Use displayed queue message if available, otherwise fallback to store item
+  return displayed?.message ?? storeItem.value?.statusMessage
+})
 
 /* 
    Removed local polling logic (pollStatus, startPolling, stopPolling, pollHandle, status)

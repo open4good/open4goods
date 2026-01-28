@@ -1,7 +1,13 @@
 <template>
   <v-card
     v-bind="mergedProps"
-    :class="['category-cta-card', attrs.class]"
+    :class="[
+      'cta-card',
+      attrs.class,
+      {
+        'cta-card--large': size === 'large',
+      },
+    ]"
     variant="text"
     :ripple="false"
     rounded="lg"
@@ -11,15 +17,19 @@
     @click="onActivate"
     @keydown="onKeydown"
   >
-    <div v-if="icon" class="category-cta-card__icon-wrapper">
-      <v-icon :icon="icon" size="24" class="category-cta-card__icon" />
+    <div v-if="icon" class="cta-card__icon-wrapper">
+      <v-icon
+        :icon="icon"
+        :size="size === 'large' ? 32 : 24"
+        class="cta-card__icon"
+      />
     </div>
 
-    <div class="category-cta-card__content">
-      <p class="category-cta-card__title">
+    <div class="cta-card__content">
+      <p class="cta-card__title">
         {{ title }}
       </p>
-      <p v-if="subtitle" class="category-cta-card__subtitle">
+      <p v-if="subtitle" class="cta-card__subtitle">
         {{ subtitle }}
       </p>
     </div>
@@ -27,8 +37,8 @@
     <v-icon
       v-if="showArrow"
       icon="mdi-arrow-right"
-      class="category-cta-card__arrow"
-      size="20"
+      class="cta-card__arrow"
+      :size="size === 'large' ? 24 : 20"
     />
   </v-card>
 </template>
@@ -44,16 +54,19 @@ const props = withDefaults(
     subtitle?: string | null
     icon?: string | null
     to?: string | null
-    ariaLabel: string
+    ariaLabel?: string
     showArrow?: boolean
     clickable?: boolean
+    size?: 'default' | 'large'
   }>(),
   {
     subtitle: null,
     icon: null,
     to: null,
+    ariaLabel: undefined,
     showArrow: true,
     clickable: false,
+    size: 'default',
   }
 )
 
@@ -99,7 +112,7 @@ const onKeydown = (event: KeyboardEvent) => {
 </script>
 
 <style scoped lang="sass">
-.category-cta-card
+.cta-card
   display: flex
   align-items: center
   gap: 1rem
@@ -113,6 +126,10 @@ const onKeydown = (event: KeyboardEvent) => {
   transition: all 0.3s cubic-bezier(0.3, 0, 0.2, 1)
   cursor: pointer
   color: rgb(var(--v-theme-text-neutral-strong))
+
+  &--large
+    padding: 1.5rem
+    gap: 1.25rem
 
   &:hover
     background-color: rgb(var(--v-theme-surface))
@@ -135,6 +152,11 @@ const onKeydown = (event: KeyboardEvent) => {
     color: rgb(var(--v-theme-primary))
     flex-shrink: 0
 
+    .cta-card--large &
+      width: 56px
+      height: 56px
+      border-radius: 12px
+
   &__content
     display: flex
     flex-direction: column
@@ -142,12 +164,18 @@ const onKeydown = (event: KeyboardEvent) => {
     flex: 1
     min-width: 0
 
+    .cta-card--large &
+      gap: 0.25rem
+
   &__title
     font-size: 0.95rem
     font-weight: 600
     line-height: 1.2
     margin: 0
     color: rgb(var(--v-theme-text-neutral-strong))
+
+    .cta-card--large &
+      font-size: 1.125rem
 
   &__subtitle
     font-size: 0.8rem
@@ -157,6 +185,9 @@ const onKeydown = (event: KeyboardEvent) => {
     white-space: nowrap
     overflow: hidden
     text-overflow: ellipsis
+
+    .cta-card--large &
+      font-size: 0.9rem
 
   &__arrow
     color: rgba(var(--v-theme-text-neutral-disabled), 0.8)

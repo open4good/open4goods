@@ -107,6 +107,20 @@
       </div>
     </dl>
 
+    <dl
+      v-if="mappingItems.length"
+      class="impact-subscore-explanation__list impact-subscore-explanation__list--mapping"
+    >
+      <div
+        v-for="item in mappingItems"
+        :key="item.label"
+        class="impact-subscore-explanation__row"
+      >
+        <dt class="impact-subscore-explanation__term">{{ item.label }}</dt>
+        <dd class="impact-subscore-explanation__value">{{ item.value }}</dd>
+      </div>
+    </dl>
+
     <div v-if="rankingBadgeText" class="impact-subscore-explanation__ranking">
       <v-chip size="x-small" color="primary" variant="tonal">
         {{ rankingBadgeText }}
@@ -286,6 +300,20 @@ const metadataItems = computed(() => {
     label: formatMetadataLabel(key),
     value: String(value),
   }))
+})
+
+const mappingItems = computed(() => {
+  const mapping = props.score.numericMapping
+  if (!mapping) {
+    return []
+  }
+
+  return Object.entries(mapping)
+    .sort(([, a], [, b]) => b - a)
+    .map(([label, value]) => ({
+      label,
+      value: formatNumber(value) ?? '',
+    }))
 })
 
 const rankingValue = computed(() => {
@@ -603,7 +631,11 @@ const statisticalMethodItems = computed(() => {
       )
     }
   } else if (methodKey === 'MINMAX_FIXED') {
-    if (fixedMinValue.value && fixedMaxValue.value) {
+    if (props.score.numericMapping) {
+      items.push(
+        resolveStatisticalMethodTranslation('fixed_mapping.scoring', params)
+      )
+    } else if (fixedMinValue.value && fixedMaxValue.value) {
       items.push(
         resolveStatisticalMethodTranslation('minmax_fixed.scoring', params)
       )
@@ -647,6 +679,7 @@ const hasContent = computed(
     statisticalMethodItems.value.length > 0 ||
     infoItems.value.length > 0 ||
     metadataItems.value.length > 0 ||
+    mappingItems.value.length > 0 ||
     Boolean(rankingBadgeText.value) ||
     hasImportance.value
 )

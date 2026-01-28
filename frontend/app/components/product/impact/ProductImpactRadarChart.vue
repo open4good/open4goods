@@ -36,6 +36,7 @@ interface RadarAxisEntry {
 
 interface RadarSeriesEntry {
   label: string
+  key?: string
   values: Array<number | null>
   lineColor: string
   areaColor: string
@@ -162,6 +163,13 @@ const option = computed<EChartsOption | null>(() => {
       padding: [16, 24, 0, 24],
       itemGap: 12,
       icon: 'circle',
+      selected: props.series.reduce(
+        (acc, entry) => {
+          acc[entry.label] = entry.key !== 'worst'
+          return acc
+        },
+        {} as Record<string, boolean>
+      ),
     },
     radar: {
       indicator,

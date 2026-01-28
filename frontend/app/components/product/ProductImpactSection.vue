@@ -162,6 +162,7 @@ interface RadarDataset {
 
 interface ChartSeriesEntry {
   label: string
+  key?: string
   values: Array<number | null>
   rawValues?: Array<number | null>
   lineColor: string
@@ -319,6 +320,7 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
 
       return {
         label,
+        key: entry.key,
         values,
         rawValues,
         lineColor: style.line,
