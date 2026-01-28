@@ -749,7 +749,22 @@ public class ProductMappingService {
                 ? Collections.emptyMap()
                 : new LinkedHashMap<>(product.getDatasourceCodes());
 
-        return new ProductDatasourcesDto(datasourceCodes);
+        return new ProductDatasourcesDto(datasourceCodes, product.getDescriptionsByDatasource(), resolveFavicons(product));
+    }
+
+    private Map<String, String> resolveFavicons(Product product) {
+        if (product.getDescriptionsByDatasource() == null || product.getDescriptionsByDatasource().isEmpty()) {
+            return Collections.emptyMap();
+        }
+        
+        Map<String, String> favicons = new LinkedHashMap<>();
+        for (String datasource : product.getDescriptionsByDatasource().keySet()) {
+             String url = buildSourceFavicon(datasource);
+             if (StringUtils.hasText(url)) {
+                 favicons.put(datasource, url);
+             }
+        }
+        return favicons;
     }
 
     /**

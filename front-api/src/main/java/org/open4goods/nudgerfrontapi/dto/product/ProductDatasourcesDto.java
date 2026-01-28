@@ -9,6 +9,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 public record ProductDatasourcesDto(
         @Schema(description = "Codes assigned to the product by each datasource")
-        Map<String, Long> datasourceCodes
+        Map<String, Long> datasourceCodes,
+        @Schema(description = "Product descriptions by datasource")
+        Map<String, String> descriptions,
+        @Schema(description = "Datasource favicons")
+        Map<String, String> favicons
 ) {
 }
