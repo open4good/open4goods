@@ -6,6 +6,43 @@
       :lifecycle="score.participateInACV ?? []"
     />
 
+    <!-- Enhanced attribute display with icon, description, value and sourcing -->
+    <div class="impact-subscore__attribute-display">
+      <div class="impact-subscore__attribute-left">
+        <v-icon
+          v-if="scoreIcon"
+          :icon="scoreIcon"
+          class="impact-subscore__icon"
+          size="48"
+        />
+        <p v-if="score.description" class="impact-subscore__description">
+          {{ score.description }}
+        </p>
+      </div>
+
+      <div class="impact-subscore__attribute-right">
+        <div class="impact-subscore__attribute-value-row">
+          <span class="impact-subscore__attribute-value">
+            {{ absoluteValue ?? '—' }}
+          </span>
+          <span v-if="absoluteUnit" class="impact-subscore__attribute-unit">
+            {{ absoluteUnit }}
+          </span>
+          <ProductAttributeSourcingLabel
+            v-if="score.attributeSourcing"
+            :sourcing="score.attributeSourcing"
+            :value="absoluteValue ?? ''"
+          />
+        </div>
+        <ImpactCoefficientBadge
+          v-if="coefficientValue != null"
+          class="impact-subscore__coefficient"
+          :value="coefficientValue"
+          :tooltip-params="{ scoreName: score.label }"
+        />
+      </div>
+    </div>
+
     <div class="impact-subscore__value mt-8">
       <div class="impact-subscore__value-primary">
         <slot
@@ -26,13 +63,6 @@
           </div>
         </slot>
       </div>
-
-      <ImpactCoefficientBadge
-        v-if="coefficientValue != null"
-        class="impact-subscore__coefficient"
-        :value="coefficientValue"
-        :tooltip-params="{ scoreName: score.label }"
-      />
     </div>
 
     <div v-if="hasEnergyClass" class="impact-subscore__badge">
@@ -85,6 +115,7 @@ import { useI18n } from 'vue-i18n'
 import ProductImpactSubscoreHeader from './ProductImpactSubscoreHeader.vue'
 import ProductImpactSubscoreChart from './ProductImpactSubscoreChart.vue'
 import ProductImpactSubscoreExplanation from './ProductImpactSubscoreExplanation.vue'
+import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ImpactCoefficientBadge from '~/components/shared/ui/ImpactCoefficientBadge.vue'
 import type { ScoreView } from './impact-types'
 
@@ -115,6 +146,11 @@ const absoluteValue = computed(() => {
 })
 
 const absoluteUnit = computed(() => props.score.unit?.toString().trim() || null)
+
+const scoreIcon = computed(() => {
+  const icon = props.score.icon?.toString().trim() ?? ''
+  return icon.length ? icon : null
+})
 
 const energyClassLabel = computed(() => {
   const display = props.score.energyClassDisplay?.trim()
@@ -309,5 +345,73 @@ const coefficientValue = computed(() => {
   background: rgba(var(--v-theme-surface-glass), 0.9);
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.05);
   padding: 1rem;
+}
+
+/* Enhanced attribute display layout */
+.impact-subscore__attribute-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.08);
+}
+
+.impact-subscore__attribute-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.impact-subscore__icon {
+  color: rgb(var(--v-theme-primary));
+  opacity: 0.85;
+}
+
+.impact-subscore__description {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+}
+
+.impact-subscore__attribute-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.impact-subscore__attribute-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.impact-subscore__attribute-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.impact-subscore__attribute-unit {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
+}
+
+@media (max-width: 600px) {
+  .impact-subscore__attribute-display {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .impact-subscore__attribute-right {
+    align-items: flex-start;
+    width: 100%;
+  }
 }
 </style>

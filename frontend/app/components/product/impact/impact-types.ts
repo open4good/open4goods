@@ -43,6 +43,7 @@ export type ScoreView = {
   id: string
   label: string
   description?: string | null
+  icon?: string | null
   relativeValue: number | null
   value?: number | null
   participateInScores?: string[] | null

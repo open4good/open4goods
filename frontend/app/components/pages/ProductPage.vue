@@ -1225,6 +1225,7 @@ const impactScores = computed(() => {
       id: score.id,
       label: score.name,
       description: score.description ?? null,
+      icon: attributeConfig?.icon ?? null,
       // For subscores, relativeValue should contain relativ.value for radar/table display
       relativeValue: isEcoscore ? absoluteScoreValue : relativeScoreValue,
       // For ECOSCORE, value should be the absolute value; for subscores, use relative
