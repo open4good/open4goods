@@ -2922,21 +2922,35 @@
           "readIndicator": {
             "title": "How to read this indicator",
             "higher": {
-              "worst": "The lowest {scoreLabelLower} recorded is {worst}{unit}.",
-              "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}{unit}.",
-              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}{unit}.",
+              "worst": "The lowest {scoreLabelLower} recorded is {worstValue}.",
+              "best": "The highest {scoreLabelLower} observed among the {count} {verticalTitle} is {bestValue}.",
+              "average": "Across the {count} {verticalTitle} with available data, the average reaches {averageValue}.",
               "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}{unit}, which converts to {productOn20}/20.",
               "sigmaBounds": "Normalization spans [{sigmaLower}{unit} ; {sigmaUpper}{unit}] based on {sigmaK}σ around the mean.",
               "percentile": "This product sits around the {percentile}th percentile of the distribution.",
+              "minmax_observed": "Observed values range from {worstValue} to {bestValue}.",
+              "minmax_fixed": "Fixed bounds run from {fixedMinValue} to {fixedMaxValue}.",
+              "minmax_quantile": "Quantile bounds run from {quantileLowValue} to {quantileHighValue}.",
+              "fixed_mapping": "The score follows a fixed mapping with {mappingCount} possible values.",
+              "binary_greater": "The score passes when the value is ≥ {thresholdValue}.",
+              "binary_lower": "The score passes when the value is ≤ {thresholdValue}.",
+              "constant": "The score is fixed at {constantValueLabel}.",
               "distribution": "The scoring uses standard deviation ({sigma}{unit}) to ensure extreme values do not overshadow differences between common products."
             },
             "lower": {
-              "worst": "The highest {scoreLabelLower} recorded is {worst}{unit}.",
-              "best": "The lowest {scoreLabelLower} observed among the {count} {verticalTitle} is {best}{unit}.",
-              "average": "Across the {count} {verticalTitle} with available data, the average reaches {average}{unit}.",
+              "worst": "The highest {scoreLabelLower} recorded is {worstValue}.",
+              "best": "The lowest {scoreLabelLower} observed among the {count} {verticalTitle} is {bestValue}.",
+              "average": "Across the {count} {verticalTitle} with available data, the average reaches {averageValue}.",
               "product": "{productName} posts a {scoreLabelLower} of {productAbsolute}{unit}, which converts to {productOn20}/20.",
               "sigmaBounds": "Normalization spans [{sigmaLower}{unit} ; {sigmaUpper}{unit}] based on {sigmaK}σ around the mean.",
               "percentile": "This product sits around the {percentile}th percentile of the distribution.",
+              "minmax_observed": "Observed values range from {worstValue} to {bestValue}.",
+              "minmax_fixed": "Fixed bounds run from {fixedMinValue} to {fixedMaxValue}.",
+              "minmax_quantile": "Quantile bounds run from {quantileLowValue} to {quantileHighValue}.",
+              "fixed_mapping": "The score follows a fixed mapping with {mappingCount} possible values.",
+              "binary_greater": "The score passes when the value is ≥ {thresholdValue}.",
+              "binary_lower": "The score passes when the value is ≤ {thresholdValue}.",
+              "constant": "The score is fixed at {constantValueLabel}.",
               "distribution": "The scoring uses standard deviation ({sigma}{unit}) to ensure extreme values do not overshadow differences between common products."
             },
             "method": {
@@ -3000,6 +3014,20 @@
             "fixed_mapping": "This method is selected for categorical values with a fixed mapping defined in configuration.",
             "binary": "This method applies when the attribute is evaluated against a threshold. The configuration defines the pass value.",
             "constant": "This method is a configuration fallback when the attribute must remain stable."
+          }
+        },
+        "warranty": {
+          "readIndicator": {
+            "higher": {
+              "worst": "Warranty <b>minimum</b> observed is <b>{worstValue}</b>.",
+              "best": "Warranty <b>maximum</b> observed reaches <b>{bestValue}</b>.",
+              "average": "The <b>average</b> across the {count} {verticalTitle} with data is <b>{averageValue}</b>."
+            },
+            "lower": {
+              "worst": "Warranty <b>minimum</b> observed is <b>{worstValue}</b>.",
+              "best": "Warranty <b>maximum</b> observed reaches <b>{bestValue}</b>.",
+              "average": "The <b>average</b> across the {count} {verticalTitle} with data is <b>{averageValue}</b>."
+            }
           }
         },
         "repairability_index": {

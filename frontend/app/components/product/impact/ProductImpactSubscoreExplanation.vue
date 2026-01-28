@@ -33,7 +33,9 @@
             size="18"
             class="impact-subscore-explanation__bullet-icon"
           />
-          <span>{{ item.text }}</span>
+          <!-- eslint-disable vue/no-v-html -->
+          <span v-html="item.text" />
+          <!-- eslint-enable vue/no-v-html -->
         </li>
       </ul>
       <p
@@ -283,6 +285,56 @@ const formatNumber = (
   })
 }
 
+const unitBase = computed(() => props.score.unit?.toString().trim() ?? '')
+const unitPluralRules = computed(() => new Intl.PluralRules(locale.value))
+
+const resolveUnitLabel = (value: number | null | undefined): string => {
+  const unit = unitBase.value
+  if (!unit.length) {
+    return ''
+  }
+
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return unit
+  }
+
+  const unitLower = unit.toLocaleLowerCase(locale.value)
+  const pluralForm = unitPluralRules.value.select(Math.abs(value))
+
+  if (unitLower === 'an' || unitLower === 'ans' || unitLower === 'an(s)') {
+    return pluralForm === 'one' ? 'An' : 'Ans'
+  }
+
+  if (unitLower.includes('(s)')) {
+    const base = unit.replace(/\(s\)/gi, '').trim()
+    if (!base.length) {
+      return unit
+    }
+    const plural = base.endsWith('s') ? base : `${base}s`
+    return pluralForm === 'one' ? base : plural
+  }
+
+  return unit
+}
+
+const formatValueWithUnit = (
+  value: string | null,
+  rawValue: number | null | undefined
+) => {
+  if (!value) {
+    return null
+  }
+
+  const unitLabel = resolveUnitLabel(rawValue)
+  if (!unitLabel) {
+    return value
+  }
+
+  const unitLower = unitLabel.toLocaleLowerCase(locale.value)
+  const needsSpace = unitLower === 'an' || unitLower === 'ans'
+  return needsSpace ? `${value} ${unitLabel}` : `${value}${unitLabel}`
+}
+
 const infoItems = computed(() => {
   const items: Array<{ label: string; value: string }> = []
 
@@ -352,6 +404,15 @@ const worstValue = computed(() => formatNumber(worstRawValue.value))
 
 const bestValue = computed(() => formatNumber(bestRawValue.value))
 const averageValue = computed(() => formatNumber(absoluteStats.value?.avg))
+const worstValueWithUnit = computed(() =>
+  formatValueWithUnit(worstValue.value, worstRawValue.value)
+)
+const bestValueWithUnit = computed(() =>
+  formatValueWithUnit(bestValue.value, bestRawValue.value)
+)
+const averageValueWithUnit = computed(() =>
+  formatValueWithUnit(averageValue.value, absoluteStats.value?.avg ?? null)
+)
 
 const normalizationMethod = computed(
   () => props.score.scoring?.normalization?.method ?? 'SIGMA'
@@ -415,6 +476,36 @@ const thresholdValue = computed(() =>
 const constantValue = computed(() =>
   formatNumber(normalizationParams.value?.constantValue ?? null)
 )
+const fixedMinValueWithUnit = computed(() =>
+  formatValueWithUnit(fixedMinValue.value, normalizationParams.value?.fixedMin)
+)
+const fixedMaxValueWithUnit = computed(() =>
+  formatValueWithUnit(fixedMaxValue.value, normalizationParams.value?.fixedMax)
+)
+const quantileLowValueWithUnit = computed(() =>
+  formatValueWithUnit(
+    quantileLowValue.value,
+    normalizationParams.value?.quantileLow
+  )
+)
+const quantileHighValueWithUnit = computed(() =>
+  formatValueWithUnit(
+    quantileHighValue.value,
+    normalizationParams.value?.quantileHigh
+  )
+)
+const thresholdValueWithUnit = computed(() =>
+  formatValueWithUnit(
+    thresholdValue.value,
+    normalizationParams.value?.threshold
+  )
+)
+const constantValueWithUnit = computed(() =>
+  formatValueWithUnit(
+    constantValue.value,
+    normalizationParams.value?.constantValue
+  )
+)
 const mappingCount = computed(() => {
   const mapping = normalizationParams.value?.mapping
   if (!mapping) {
@@ -466,6 +557,9 @@ const readIndicatorParams = computed(() => ({
   worst: worstValue.value,
   best: bestValue.value,
   average: averageValue.value,
+  worstValue: worstValueWithUnit.value,
+  bestValue: bestValueWithUnit.value,
+  averageValue: averageValueWithUnit.value,
   averageOn20: averageOn20Value.value,
   productName: productDisplayName.value,
   productAbsolute: productAbsoluteValue.value,
@@ -482,10 +576,16 @@ const readIndicatorParams = computed(() => ({
   scaleMax: formatNumber(scaleMax.value),
   fixedMin: fixedMinValue.value,
   fixedMax: fixedMaxValue.value,
+  fixedMinValue: fixedMinValueWithUnit.value,
+  fixedMaxValue: fixedMaxValueWithUnit.value,
   quantileLow: quantileLowValue.value,
   quantileHigh: quantileHighValue.value,
+  quantileLowValue: quantileLowValueWithUnit.value,
+  quantileHighValue: quantileHighValueWithUnit.value,
   threshold: thresholdValue.value,
+  thresholdValue: thresholdValueWithUnit.value,
   constantValue: constantValue.value,
+  constantValueLabel: constantValueWithUnit.value,
   mappingCount: mappingCount.value,
   userBetterIs: userBetterIsLower.value ? 'lower' : 'higher',
 }))
@@ -514,6 +614,69 @@ const readIndicatorTitle = computed(() =>
 const readIndicatorHighlights = computed(() => {
   const items: Array<{ id: string; text: string }> = []
   const params = readIndicatorParams.value
+  const methodKey = normalizationMethod.value?.toUpperCase() ?? 'SIGMA'
+  const methodSpecificLine = (() => {
+    if (methodKey === 'SIGMA') {
+      if (averageValueWithUnit.value && populationValue.value) {
+        return resolveReadIndicatorTranslation('average', params)
+      }
+      return null
+    }
+
+    if (methodKey === 'PERCENTILE') {
+      if (percentileValue.value) {
+        return resolveReadIndicatorTranslation('percentile', params)
+      }
+      return null
+    }
+
+    if (methodKey === 'MINMAX_OBSERVED') {
+      if (worstValueWithUnit.value && bestValueWithUnit.value) {
+        return resolveReadIndicatorTranslation('minmax_observed', params)
+      }
+      return null
+    }
+
+    if (methodKey === 'MINMAX_FIXED') {
+      if (fixedMinValueWithUnit.value && fixedMaxValueWithUnit.value) {
+        return resolveReadIndicatorTranslation('minmax_fixed', params)
+      }
+      return null
+    }
+
+    if (methodKey === 'MINMAX_QUANTILE') {
+      if (quantileLowValueWithUnit.value && quantileHighValueWithUnit.value) {
+        return resolveReadIndicatorTranslation('minmax_quantile', params)
+      }
+      return null
+    }
+
+    if (methodKey === 'FIXED_MAPPING') {
+      if (mappingCount.value) {
+        return resolveReadIndicatorTranslation('fixed_mapping', params)
+      }
+      return null
+    }
+
+    if (methodKey === 'BINARY') {
+      if (thresholdValueWithUnit.value) {
+        const binaryKey = binaryUsesGreater.value
+          ? 'binary_greater'
+          : 'binary_lower'
+        return resolveReadIndicatorTranslation(binaryKey, params)
+      }
+      return null
+    }
+
+    if (methodKey === 'CONSTANT') {
+      if (constantValueWithUnit.value) {
+        return resolveReadIndicatorTranslation('constant', params)
+      }
+      return null
+    }
+
+    return null
+  })()
 
   if (worstValue.value) {
     items.push({
@@ -529,10 +692,10 @@ const readIndicatorHighlights = computed(() => {
     })
   }
 
-  if (averageValue.value && populationValue.value) {
+  if (methodSpecificLine) {
     items.push({
-      id: 'average',
-      text: resolveReadIndicatorTranslation('average', params),
+      id: `method-${methodKey.toLowerCase()}`,
+      text: methodSpecificLine,
     })
   }
 
