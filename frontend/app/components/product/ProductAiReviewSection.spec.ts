@@ -56,6 +56,7 @@ const mockStore = {
   startGeneration: mockStartGeneration,
   getByGtin: mockGetByGtin,
   acknowledgeCompletion: mockAcknowledgeCompletion,
+  getDisplayedMessage: vi.fn(),
 }
 
 vi.mock('~/stores/useAiReviewGenerationStore', () => ({

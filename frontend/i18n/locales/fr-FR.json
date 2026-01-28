@@ -250,7 +250,11 @@
         "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
       },
       "highlightsScrollCta": "Faire défiler vers les promesses : {title}",
-      "background": "hero-background.webp"
+      "background": "hero-background.webp",
+      "categoryBadges": {
+        "label": "Nudgez votre catégorie préférée :",
+        "viewAll": "Voir toutes les Catégories"
+      }
     },
     "promises": {
       "ariaLabel": "Nos promesses et engagements pour comparer responsablement"

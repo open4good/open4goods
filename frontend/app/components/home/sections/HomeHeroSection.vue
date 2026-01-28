@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, toRefs, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
+import CategoryBadgesRow from '~/components/shared/navigation/CategoryBadgesRow.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
@@ -321,6 +322,8 @@ useHead({
                       </template>
                     </SearchSuggestField>
                   </form>
+
+                  <CategoryBadgesRow :categories="wizardVerticals" />
 
                   <div class="d-flex flex-column ga-4">
                     <NudgeToolWizard :verticals="wizardVerticals" />

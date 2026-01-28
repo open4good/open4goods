@@ -55,7 +55,7 @@ const isVisible = computed(() => Boolean(props.reveal))
       >
         <v-expansion-panel v-for="panel in props.items" :key="panel.blocId">
           <v-expansion-panel-title>
-            <h3 class="home-faq__panel-title">{{ panel.question }}</h3>
+            <h3>{{ panel.question }}</h3>
           </v-expansion-panel-title>
           <v-expansion-panel-text class="home-faq__panel-text">
             <!-- eslint-disable vue/no-v-html -->
@@ -91,6 +91,7 @@ const isVisible = computed(() => Boolean(props.reveal))
 .home-section
   padding-block: 0
   background: transparent
+  text-align: left
 
 .home-section__container
   padding-inline: 0
@@ -108,9 +109,6 @@ const isVisible = computed(() => Boolean(props.reveal))
   overflow: hidden
   border: 1px solid rgb(var(--v-theme-primary))
 
-.home-faq__panel-title
-  font-weight: 600
-  font-size: 1.05rem
 
 .home-faq__panel-text
   //background: rgba(var(--v-theme-surface-primary-080), 0.4)

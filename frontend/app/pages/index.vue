@@ -858,7 +858,9 @@ useHead(() => ({
                   :categories-count="categoriesCount"
                   :impact-score-products-count="impactScoreProductsCount"
                   :impact-score-categories-count="impactScoreCategoriesCount"
-                  :products-without-vertical-count="productsWithoutVerticalCount"
+                  :products-without-vertical-count="
+                    productsWithoutVerticalCount
+                  "
                   :reviewed-products-count="reviewedProductsCount"
                   :ai-summary-remaining-credits="aiSummaryRemainingCredits"
                   variant="section"
@@ -963,7 +965,7 @@ useHead(() => ({
   box-shadow: none
   overflow: hidden
 
-.home-page__parallax--centered :deep(.home-section)
+.home-page__parallax--centered :deep(.home-section:not(.home-faq))
   text-align: center
 
 .home-page__stack

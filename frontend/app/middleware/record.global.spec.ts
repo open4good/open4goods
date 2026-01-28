@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  HOTJAR_RECORDING_COOKIE_MAX_AGE,
-  HOTJAR_RECORDING_COOKIE_NAME,
-  HOTJAR_RECORDING_COOKIE_VALUE,
-} from '../../shared/utils/hotjar-recording'
+// Removing unused constants to fix linting errors
+// import {
+//   HOTJAR_RECORDING_COOKIE_MAX_AGE,
+//   HOTJAR_RECORDING_COOKIE_NAME,
+//   HOTJAR_RECORDING_COOKIE_VALUE,
+// } from '../../shared/utils/hotjar-recording'
 
 // Mock Nuxt auto-imports
 const useCookieMock = vi.fn()
@@ -12,16 +13,16 @@ const defineNuxtRouteMiddlewareMock = vi.fn(handler => handler)
 
 // Mock modules where auto-imports might come from
 vi.mock('#app', () => ({
-  useCookie: (...args: any[]) => useCookieMock(...args),
-  navigateTo: (...args: any[]) => navigateToMock(...args),
-  defineNuxtRouteMiddleware: (handler: any) =>
+  useCookie: (...args: unknown[]) => useCookieMock(...args),
+  navigateTo: (...args: unknown[]) => navigateToMock(...args),
+  defineNuxtRouteMiddleware: (handler: unknown) =>
     defineNuxtRouteMiddlewareMock(handler),
 }))
 
 vi.mock('#imports', () => ({
-  useCookie: (...args: any[]) => useCookieMock(...args),
-  navigateTo: (...args: any[]) => navigateToMock(...args),
-  defineNuxtRouteMiddleware: (handler: any) =>
+  useCookie: (...args: unknown[]) => useCookieMock(...args),
+  navigateTo: (...args: unknown[]) => navigateToMock(...args),
+  defineNuxtRouteMiddleware: (handler: unknown) =>
     defineNuxtRouteMiddlewareMock(handler),
 }))
 
@@ -31,7 +32,10 @@ vi.stubGlobal('navigateTo', navigateToMock)
 vi.stubGlobal('defineNuxtRouteMiddleware', defineNuxtRouteMiddlewareMock)
 
 describe('record.global middleware', () => {
-  let middleware: any
+  let middleware: (to: {
+    path: string
+    query: Record<string, unknown>
+  }) => Promise<unknown> | undefined
   const originalEnv = process.env.NODE_ENV
 
   beforeEach(async () => {

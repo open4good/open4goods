@@ -91,7 +91,7 @@ describe('ProductSummaryNavigation', () => {
   it('applies horizontal orientation modifier', async () => {
     const wrapper = await mountComponent({ orientation: 'horizontal' })
 
-    expect(wrapper.classes()).toContain(
+    expect(wrapper.find('.product-summary-navigation').classes()).toContain(
       'product-summary-navigation--horizontal'
     )
 

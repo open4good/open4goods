@@ -50,9 +50,9 @@ defineProps<{
   background: rgba(var(--v-theme-surface-muted), 1)
 
 .opendata-faq__header
-  text-align: center
+  text-align: left
   max-width: 720px
-  margin: 0 auto clamp(2rem, 5vw, 3rem)
+  margin: 0 0 clamp(2rem, 5vw, 3rem)
 
 .opendata-faq__title
   margin: 0

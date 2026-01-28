@@ -8,6 +8,8 @@ vi.mock('@vueuse/core', () => ({
   useLocalStorage: (_key: string, initialValue: unknown) => ref(initialValue),
 }))
 
+vi.stubGlobal('$fetch', vi.fn())
+
 describe('useAiReviewGenerationStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -45,9 +47,10 @@ describe('useAiReviewGenerationStore', () => {
     expect(store.items[0].seen).toBe(false)
   })
 
-  it('updates generation status', () => {
+  it('updates generation status', async () => {
+    vi.useFakeTimers()
     const store = useAiReviewGenerationStore()
-    store.startGeneration({ gtin: '123', name: 'Test' })
+    await store.startGeneration({ gtin: '123', name: 'Test' })
 
     store.updateStatus('123', {
       status: 'generating',
@@ -55,10 +58,16 @@ describe('useAiReviewGenerationStore', () => {
       message: 'Processing...',
     })
 
+    // Advance timers twice to trigger BOTH the initial "Démarrage..." message
+    // and the "Processing..." message. Each has a ~3-5s delay.
+    await vi.advanceTimersByTimeAsync(10000)
+
     const item = store.getByGtin('123')
     expect(item?.status).toBe('generating')
     expect(item?.percent).toBe(50)
     expect(item?.statusMessage).toBe('Processing...')
+
+    vi.useRealTimers()
   })
 
   it('completes generation successfully', () => {
