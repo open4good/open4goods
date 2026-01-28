@@ -2617,6 +2617,8 @@
       "subscoreDetailsToggle": "Voir les détails de l'indicateur",
       "subscoreEyebrow": "Indicateur d'impact",
       "subscoreChart": {
+        "averageLabel": "La moyenne",
+        "productLabel": "Ce produit",
         "markerAverage": "La moyenne de {scoreLabel} se positionne ici.",
         "markerProduct": "{productName} se positionne ici.",
         "title": "Répartition des critères",

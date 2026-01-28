@@ -185,9 +185,7 @@ const allDocs = computed(() => docsList.value ?? [])
 
 const tagOptions = computed(() => {
   const tags = new Set<string>()
-  allDocs.value.forEach(doc =>
-    (doc.tags ?? []).forEach(tag => tags.add(tag))
-  )
+  allDocs.value.forEach(doc => (doc.tags ?? []).forEach(tag => tags.add(tag)))
   return Array.from(tags).sort((a, b) => a.localeCompare(b))
 })
 

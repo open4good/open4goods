@@ -43,7 +43,11 @@ export interface ProductDisplayNameOptions {
  */
 export const resolveProductDisplayName = (
   product: {
-    identity?: { bestName?: string | null; brand?: string | null; model?: string | null } | null
+    identity?: {
+      bestName?: string | null
+      brand?: string | null
+      model?: string | null
+    } | null
     base?: { bestName?: string | null } | null
     names?: { prettyName?: string | null; h1Title?: string | null } | null
   },

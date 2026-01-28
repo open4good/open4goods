@@ -1,11 +1,19 @@
 <template>
   <section class="impact-score-criteria">
     <header class="impact-score-criteria__header">
-      <v-chip class="impact-score-criteria__eyebrow" variant="tonal" color="accent-primary-highlight">
+      <v-chip
+        class="impact-score-criteria__eyebrow"
+        variant="tonal"
+        color="accent-primary-highlight"
+      >
         {{ t('impactScorePage.criteria.eyebrow') }}
       </v-chip>
-      <h2 class="impact-score-criteria__title">{{ t('impactScorePage.criteria.title') }}</h2>
-      <p class="impact-score-criteria__subtitle">{{ t('impactScorePage.criteria.subtitle') }}</p>
+      <h2 class="impact-score-criteria__title">
+        {{ t('impactScorePage.criteria.title') }}
+      </h2>
+      <p class="impact-score-criteria__subtitle">
+        {{ t('impactScorePage.criteria.subtitle') }}
+      </p>
     </header>
 
     <v-row class="impact-score-criteria__grid" :gutter="16">
@@ -16,14 +24,25 @@
         sm="6"
         lg="4"
       >
-        <v-card class="impact-score-criteria__card" elevation="0" rounded="xl" border>
+        <v-card
+          class="impact-score-criteria__card"
+          elevation="0"
+          rounded="xl"
+          border
+        >
           <div class="impact-score-criteria__card-top">
-            <v-icon :icon="criterion.icon" size="28" color="accent-supporting" />
+            <v-icon
+              :icon="criterion.icon"
+              size="28"
+              color="accent-supporting"
+            />
             <v-chip size="small" variant="flat" color="surface-primary-120">
               {{ criterion.weight }}
             </v-chip>
           </div>
-          <h3 class="impact-score-criteria__card-title">{{ criterion.title }}</h3>
+          <h3 class="impact-score-criteria__card-title">
+            {{ criterion.title }}
+          </h3>
           <p class="impact-score-criteria__card-description">
             {{ criterion.description }}
           </p>

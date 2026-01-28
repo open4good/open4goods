@@ -8,20 +8,22 @@
       >
         {{ t('impactScorePage.details.eyebrow') }}
       </v-chip>
-      <h2 class="impact-score-details__title">{{ t('impactScorePage.details.title') }}</h2>
+      <h2 class="impact-score-details__title">
+        {{ t('impactScorePage.details.title') }}
+      </h2>
       <p class="impact-score-details__subtitle">
         {{ t('impactScorePage.details.subtitle') }}
       </p>
     </header>
 
     <v-row class="impact-score-details__grid" :gutter="16">
-      <v-col
-        v-for="card in detailCards"
-        :key="card.key"
-        cols="12"
-        md="6"
-      >
-        <v-card class="impact-score-details__card" elevation="0" rounded="xl" border>
+      <v-col v-for="card in detailCards" :key="card.key" cols="12" md="6">
+        <v-card
+          class="impact-score-details__card"
+          elevation="0"
+          rounded="xl"
+          border
+        >
           <div class="impact-score-details__card-header">
             <v-icon :icon="card.icon" size="28" color="accent-supporting" />
             <h3 class="impact-score-details__card-title">{{ card.title }}</h3>
@@ -29,13 +31,20 @@
           <p class="impact-score-details__card-description">
             {{ card.description }}
           </p>
-          <ul v-if="card.bullets.length" class="impact-score-details__card-list">
+          <ul
+            v-if="card.bullets.length"
+            class="impact-score-details__card-list"
+          >
             <li
               v-for="item in card.bullets"
               :key="item"
               class="impact-score-details__card-list-item"
             >
-              <v-icon icon="mdi-check-circle" size="20" color="accent-supporting" />
+              <v-icon
+                icon="mdi-check-circle"
+                size="20"
+                color="accent-supporting"
+              />
               <span>{{ item }}</span>
             </li>
           </ul>
@@ -76,7 +85,9 @@ const detailCards = computed(() => [
     icon: 'mdi-chart-bell-curve',
     title: t('impactScorePage.details.cards.relativisation.title'),
     description: t('impactScorePage.details.cards.relativisation.description'),
-    bullets: [t('impactScorePage.details.cards.relativisation.bullets.ranking')],
+    bullets: [
+      t('impactScorePage.details.cards.relativisation.bullets.ranking'),
+    ],
   },
   {
     key: 'data-quality',

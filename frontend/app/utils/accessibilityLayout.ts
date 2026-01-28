@@ -1,7 +1,6 @@
 export const ACCESSIBILITY_LAYOUT_CLASS = 'accessibility-layout'
 export const ACCESSIBILITY_LAYOUT_WIDE_CLASS = 'accessibility-layout--wide'
-export const ACCESSIBILITY_REDUCED_MOTION_CLASS =
-  'accessibility-reduced-motion'
+export const ACCESSIBILITY_REDUCED_MOTION_CLASS = 'accessibility-reduced-motion'
 
 export const applyAccessibilityLayout = (isZoomed: boolean) => {
   if (typeof document === 'undefined') {

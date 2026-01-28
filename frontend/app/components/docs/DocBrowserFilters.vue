@@ -14,11 +14,7 @@
       />
     </div>
 
-    <div
-      class="doc-browser-filters__results"
-      aria-live="polite"
-      role="status"
-    >
+    <div class="doc-browser-filters__results" aria-live="polite" role="status">
       {{ t('docs.search.results', { count: resultCount }) }}
     </div>
 

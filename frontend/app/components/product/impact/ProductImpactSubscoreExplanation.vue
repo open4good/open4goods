@@ -515,7 +515,6 @@ const readIndicatorDetails = computed(() => {
   const paragraphs: string[] = []
   const params = readIndicatorParams.value
 
-
   if (productAbsoluteValue.value && productOn20Value.value) {
     paragraphs.push(resolveReadIndicatorTranslation('product', params))
   }

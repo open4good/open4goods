@@ -64,8 +64,7 @@ const i18nMessages = {
           lowDescription:
             'Peu d’offres disponibles, la comparaison est limitée.',
           correct: 'Concurrence correcte !',
-          correctDescription:
-            'Assez d’offres pour comparer en toute sérénité.',
+          correctDescription: 'Assez d’offres pour comparer en toute sérénité.',
           super: 'Super concurrence !',
           superDescription:
             'Beaucoup d’offres pour décrocher le meilleur prix.',

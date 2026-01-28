@@ -22,6 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
+import org.open4goods.model.ai.AiReview;
+import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
@@ -570,5 +572,29 @@ class ProductMappingServiceTest {
         assertThat(dto.attributes().indexedAttributes()).containsKey("BRAND");
         assertThat(dto.attributes().indexedAttributes().get("BRAND").name())
                 .isEqualTo("BRAND"); // Fallback to attribute key itself
+    }
+    @Test
+    void mapAiReviewMapsBaseLine() throws Exception {
+        long gtin = 42L;
+        Product product = new Product(gtin);
+        Localisable<String, AiReviewHolder> reviews = new Localisable<>();
+        AiReview review = new AiReview();
+        review.setBaseLine("The baseline text");
+        AiReviewHolder holder = new AiReviewHolder();
+        holder.setReview(review);
+        holder.setSources(Map.of());
+        holder.setEnoughData(true);
+        holder.setTotalTokens(100);
+        holder.setCreatedMs(1L);
+        reviews.put("en", holder);
+        product.setReviews(reviews);
+        
+        when(repository.getById(gtin)).thenReturn(product);
+        
+        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"), DomainLanguage.en);
+        
+        assertThat(dto.aiReview()).isNotNull();
+        assertThat(dto.aiReview().review()).isNotNull();
+        assertThat(dto.aiReview().review().baseLine()).isEqualTo("The baseline text");
     }
 }

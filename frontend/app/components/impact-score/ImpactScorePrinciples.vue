@@ -1,11 +1,19 @@
 <template>
   <section class="impact-score-principles">
     <header class="impact-score-principles__header">
-      <v-chip class="impact-score-principles__eyebrow" color="accent-primary-highlight" variant="tonal">
+      <v-chip
+        class="impact-score-principles__eyebrow"
+        color="accent-primary-highlight"
+        variant="tonal"
+      >
         {{ t('impactScorePage.principles.eyebrow') }}
       </v-chip>
-      <h2 class="impact-score-principles__title">{{ t('impactScorePage.principles.title') }}</h2>
-      <p class="impact-score-principles__subtitle">{{ t('impactScorePage.principles.subtitle') }}</p>
+      <h2 class="impact-score-principles__title">
+        {{ t('impactScorePage.principles.title') }}
+      </h2>
+      <p class="impact-score-principles__subtitle">
+        {{ t('impactScorePage.principles.subtitle') }}
+      </p>
     </header>
 
     <v-row :gutter="16">
@@ -16,10 +24,23 @@
         sm="6"
         lg="3"
       >
-        <v-sheet class="impact-score-principles__card" rounded="xl" border elevation="0">
-          <v-icon :icon="principle.icon" size="30" color="accent-primary-highlight" />
-          <h3 class="impact-score-principles__card-title">{{ principle.title }}</h3>
-          <p class="impact-score-principles__card-text">{{ principle.description }}</p>
+        <v-sheet
+          class="impact-score-principles__card"
+          rounded="xl"
+          border
+          elevation="0"
+        >
+          <v-icon
+            :icon="principle.icon"
+            size="30"
+            color="accent-primary-highlight"
+          />
+          <h3 class="impact-score-principles__card-title">
+            {{ principle.title }}
+          </h3>
+          <p class="impact-score-principles__card-text">
+            {{ principle.description }}
+          </p>
         </v-sheet>
       </v-col>
     </v-row>

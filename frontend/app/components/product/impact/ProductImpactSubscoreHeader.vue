@@ -1,23 +1,33 @@
 <template>
   <header class="impact-subscore-header">
-    <div class="impact-subscore-header__info">
-      <h4 class="impact-subscore-header__title">
-        {{ title }}
-      </h4>
-      <div v-if="lifecycle?.length" class="impact-subscore-header__chips">
-        <v-chip
-          v-for="stage in lifecycle"
-          :key="stage"
-          :color="lifecycleColors[stage] ?? 'surface-ice-100'"
-          size="x-small"
-          variant="tonal"
-        >
-          {{ lifecycleLabels[stage] ?? stage }}
-        </v-chip>
+    <div class="impact-subscore-header__main">
+      <v-icon
+        v-if="icon"
+        :icon="icon"
+        color="primary"
+        class="impact-subscore-header__icon"
+        size="32"
+      />
+
+      <div class="impact-subscore-header__info">
+        <h4 class="impact-subscore-header__title">
+          {{ title }}
+        </h4>
+        <div v-if="lifecycle?.length" class="impact-subscore-header__chips">
+          <v-chip
+            v-for="stage in lifecycle"
+            :key="stage"
+            :color="lifecycleColors[stage] ?? 'surface-ice-100'"
+            size="x-small"
+            variant="tonal"
+          >
+            {{ lifecycleLabels[stage] ?? stage }}
+          </v-chip>
+        </div>
+        <p v-if="subtitle" class="impact-subscore-header__subtitle">
+          {{ subtitle }}
+        </p>
       </div>
-      <p v-if="subtitle" class="impact-subscore-header__subtitle">
-        {{ subtitle }}
-      </p>
     </div>
 
     <div
@@ -37,6 +47,7 @@ import { useI18n } from 'vue-i18n'
 const props = defineProps<{
   title: string
   subtitle?: string
+  icon?: string | null
   on20?: number | null
   percent?: number | null
   lifecycle?: string[]
@@ -74,6 +85,18 @@ const lifecycleColors: Record<string, string> = {
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
+}
+
+.impact-subscore-header__main {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.impact-subscore-header__icon {
+  margin-top: 2px; /* Slight alignment adjustment with title */
+  opacity: 0.9;
 }
 
 .impact-subscore-header__info {

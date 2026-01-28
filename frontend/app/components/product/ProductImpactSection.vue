@@ -9,6 +9,18 @@
           {{ $t('product.impact.subtitle', subtitleParams) }}
         </p>
       </div>
+
+      <div class="product-impact__header-actions">
+        <v-btn
+          class="product-impact__cta"
+          variant="flat"
+          rounded="pill"
+          size="small"
+          :to="methodologyHref"
+        >
+          {{ $t('product.impact.methodologyLink') }}
+        </v-btn>
+      </div>
     </header>
 
     <div class="product-impact__primary">
@@ -122,6 +134,7 @@ import EprelDetailsTable from './EprelDetailsTable.vue'
 import type { ScoreView } from './impact/impact-types'
 import type { ProductEprelDto } from '~~/shared/api-client'
 import { normalizeTimestamp } from '~/utils/date-parsing'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 interface EprelDataWrapper {
   eprelDatas?: ProductEprelDto
@@ -413,6 +426,28 @@ const endOfLifeDescription = computed(() => {
     brand: productBrand.value,
     onMarketEndDate: formattedSupportStartDate.value,
   })
+})
+
+const normalizedVerticalEcoscorePath = computed(() => {
+  const raw = props.verticalHomeUrl?.trim()
+  if (!raw) {
+    return null
+  }
+
+  const sanitized = raw.replace(/^\/+/, '').replace(/\/+$/, '')
+  if (!sanitized.length) {
+    return null
+  }
+
+  return `/${sanitized}/ecoscore`
+})
+
+const methodologyHref = computed(() => {
+  if (normalizedVerticalEcoscorePath.value) {
+    return normalizedVerticalEcoscorePath.value
+  }
+
+  return resolveLocalizedRoutePath('impact-score', locale.value)
 })
 
 const scrollToTimeline = () => {

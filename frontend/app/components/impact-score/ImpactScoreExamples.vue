@@ -1,26 +1,37 @@
 <template>
   <section class="impact-score-examples">
     <header class="impact-score-examples__header">
-      <v-chip class="impact-score-examples__eyebrow" color="accent-primary-highlight" variant="tonal">
+      <v-chip
+        class="impact-score-examples__eyebrow"
+        color="accent-primary-highlight"
+        variant="tonal"
+      >
         {{ t('impactScorePage.examples.eyebrow') }}
       </v-chip>
-      <h2 class="impact-score-examples__title">{{ t('impactScorePage.examples.title') }}</h2>
-      <p class="impact-score-examples__subtitle">{{ t('impactScorePage.examples.subtitle') }}</p>
+      <h2 class="impact-score-examples__title">
+        {{ t('impactScorePage.examples.title') }}
+      </h2>
+      <p class="impact-score-examples__subtitle">
+        {{ t('impactScorePage.examples.subtitle') }}
+      </p>
     </header>
 
     <v-row :gutter="16">
-      <v-col
-        v-for="example in examples"
-        :key="example.key"
-        cols="12"
-        md="6"
-      >
-        <v-card class="impact-score-examples__card" elevation="0" rounded="xl" border>
+      <v-col v-for="example in examples" :key="example.key" cols="12" md="6">
+        <v-card
+          class="impact-score-examples__card"
+          elevation="0"
+          rounded="xl"
+          border
+        >
           <div class="impact-score-examples__card-header">
             <div>
-              <p class="impact-score-examples__card-eyebrow">{{ example.eyebrow }}</p>
-              <h3 class="impact-score-examples__card-title">{{ example.title }}</h3>
-              
+              <p class="impact-score-examples__card-eyebrow">
+                {{ example.eyebrow }}
+              </p>
+              <h3 class="impact-score-examples__card-title">
+                {{ example.title }}
+              </h3>
             </div>
             <div class="impact-score-examples__score">
               <ImpactScore :score="example.score" :max="5" size="medium" />
@@ -33,14 +44,21 @@
               :key="item.label"
               class="impact-score-examples__pill"
             >
-              <v-icon :icon="item.icon" size="20" color="accent-primary-highlight" />
+              <v-icon
+                :icon="item.icon"
+                size="20"
+                color="accent-primary-highlight"
+              />
               <div class="impact-score-examples__pill-content">
-                <span class="impact-score-examples__pill-label">{{ item.label }}</span>
-                <span class="impact-score-examples__pill-value">{{ item.value }}</span>
+                <span class="impact-score-examples__pill-label">{{
+                  item.label
+                }}</span>
+                <span class="impact-score-examples__pill-value">{{
+                  item.value
+                }}</span>
               </div>
             </div>
           </div>
-
         </v-card>
       </v-col>
     </v-row>
@@ -127,8 +145,12 @@ const examples = computed(() => [
         icon: 'mdi-shield-check-outline',
       },
       {
-        label: t('impactScorePage.examples.fairphone.breakdown.materials.label'),
-        value: t('impactScorePage.examples.fairphone.breakdown.materials.value'),
+        label: t(
+          'impactScorePage.examples.fairphone.breakdown.materials.label'
+        ),
+        value: t(
+          'impactScorePage.examples.fairphone.breakdown.materials.value'
+        ),
         icon: 'mdi-leaf',
       },
     ],

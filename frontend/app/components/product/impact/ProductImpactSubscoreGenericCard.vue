@@ -4,17 +4,12 @@
       :title="score.label"
       :on20="score.on20"
       :lifecycle="score.participateInACV ?? []"
+      :icon="scoreIcon"
     />
 
     <!-- Enhanced attribute display with icon, description, value and sourcing -->
     <div class="impact-subscore__attribute-display">
       <div class="impact-subscore__attribute-left">
-        <v-icon
-          v-if="scoreIcon"
-          :icon="scoreIcon"
-          class="impact-subscore__icon"
-          size="48"
-        />
         <p v-if="score.description" class="impact-subscore__description">
           {{ score.description }}
         </p>
@@ -93,6 +88,7 @@
       :impact-better-is="score.impactBetterIs ?? null"
       :std-dev="score.absolute?.stdDev ?? null"
       :product-name="productName"
+      :product-image="productImage"
     />
 
     <div v-if="hasDetails" class="impact-subscore__details">

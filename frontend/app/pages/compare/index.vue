@@ -1564,10 +1564,7 @@ const resolveAttributeRow = (
   label?: string
 ): AttributeRow => {
   const icon = config?.icon ?? 'mdi-tune'
-  const betterIs =
-    config?.userBetterIs === 'LOWER'
-      ? 'lower'
-      : 'higher'
+  const betterIs = config?.userBetterIs === 'LOWER' ? 'lower' : 'higher'
 
   const rawValues = productEntries.value.map(entry =>
     resolveAttributeRawValueByKey(entry.product, key)

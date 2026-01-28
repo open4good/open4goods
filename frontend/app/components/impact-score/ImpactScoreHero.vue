@@ -5,7 +5,11 @@
       class="impact-score-hero__background"
       aria-hidden="true"
     >
-      <img :src="backgroundAsset" alt="" class="impact-score-hero__background-image" />
+      <img
+        :src="backgroundAsset"
+        alt=""
+        class="impact-score-hero__background-image"
+      />
       <div class="impact-score-hero__background-overlay" />
     </div>
     <v-container class="impact-score-hero__content py-10 py-md-14">
@@ -55,7 +59,11 @@
                 :key="item"
                 class="impact-score-hero__definition-item"
               >
-                <v-icon icon="mdi-check-circle" size="22" color="accent-supporting" />
+                <v-icon
+                  icon="mdi-check-circle"
+                  size="22"
+                  color="accent-supporting"
+                />
                 <span>{{ item }}</span>
               </li>
             </ul>
@@ -84,7 +92,8 @@ const definitionItems = computed(() => [
 .impact-score-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(
+  background:
+    linear-gradient(
       120deg,
       rgba(var(--v-theme-hero-gradient-start), 0.18),
       rgba(var(--v-theme-hero-gradient-mid), 0.08)

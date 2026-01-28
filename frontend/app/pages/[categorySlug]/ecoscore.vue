@@ -162,13 +162,18 @@
 
                 <div class="category-ecoscore__impact-summary">
                   <h3 class="category-ecoscore__impact-title">
-                    {{ t('category.ecoscorePage.sections.overview.card.title') }}
+                    {{
+                      t('category.ecoscorePage.sections.overview.card.title')
+                    }}
                   </h3>
                   <p class="category-ecoscore__impact-description">
                     {{
-                      t('category.ecoscorePage.sections.overview.card.description', {
-                        category: categoryLabel,
-                      })
+                      t(
+                        'category.ecoscorePage.sections.overview.card.description',
+                        {
+                          category: categoryLabel,
+                        }
+                      )
                     }}
                   </p>
                   <v-btn

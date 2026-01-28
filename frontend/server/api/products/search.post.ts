@@ -48,7 +48,9 @@ const isGlobalSearchPayload = (
   )
 
 export default defineEventHandler(
-  async (event): Promise<ProductSearchResponseDto | GlobalSearchResponseDto> => {
+  async (
+    event
+  ): Promise<ProductSearchResponseDto | GlobalSearchResponseDto> => {
     setDomainLanguageCacheHeaders(event, 'private, no-store')
 
     const payload = await readBody<ProductsSearchPayload | null>(event)

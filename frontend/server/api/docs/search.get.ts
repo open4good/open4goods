@@ -24,11 +24,7 @@ type SearchIndexCache = {
 const searchIndexes = new Map<string, SearchIndexCache>()
 const MAX_RESULTS = 20
 
-const buildCacheKey = (
-  event: H3Event,
-  locale: string,
-  basePath: string
-) => {
+const buildCacheKey = (event: H3Event, locale: string, basePath: string) => {
   const host =
     getRequestHeader(event, 'x-forwarded-host') ??
     getRequestHeader(event, 'host') ??

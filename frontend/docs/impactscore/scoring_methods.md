@@ -27,17 +27,21 @@ La méthode est définie dans `scoring.normalization.method` :
 ### 2.1 SIGMA (écart-type)
 
 **Principe**
+
 - Normalisation linéaire dans l'intervalle `[μ − kσ, μ + kσ]`.
 - Les valeurs hors bornes sont clampées aux extrêmes de l'échelle.
 
 **Paramètres**
+
 - `sigmaK` (par défaut 2.0)
 
 **À utiliser quand**
+
 - La distribution est continue et suffisamment stable.
 - On veut comparer des produits sur une base relative, centrée sur la moyenne.
 
 **À éviter quand**
+
 - Très peu de valeurs distinctes.
 - Outliers forts qui écrasent la variance utile.
 
@@ -46,16 +50,20 @@ La méthode est définie dans `scoring.normalization.method` :
 ### 2.2 PERCENTILE (rang relatif)
 
 **Principe**
+
 - Score basé sur le rang (mid-rank) dans la distribution observée.
 
 **Paramètres**
+
 - Aucun paramètre obligatoire.
 
 **À utiliser quand**
+
 - Les valeurs sont discrètes ou très répétées.
 - On veut une comparaison purement ordinale.
 
 **À éviter quand**
+
 - Peu d'observations disponibles.
 
 ---
@@ -63,17 +71,21 @@ La méthode est définie dans `scoring.normalization.method` :
 ### 2.3 MINMAX_FIXED (bornes fixes)
 
 **Principe**
+
 - Projection linéaire entre deux bornes connues `[fixedMin, fixedMax]`.
 
 **Paramètres**
+
 - `fixedMin`
 - `fixedMax`
 
 **À utiliser quand**
+
 - L'attribut a une échelle normative stable (ex : note 0–10, valeur 0–100).
 - On veut un score absolu, stable dans le temps.
 
 **À éviter quand**
+
 - Les bornes ne sont pas connues ou trop variables.
 
 ---
@@ -81,21 +93,26 @@ La méthode est définie dans `scoring.normalization.method` :
 ### 2.4 MINMAX_OBSERVED (bornes observées)
 
 **Principe**
+
 - Projection linéaire entre les bornes observées dans le batch `[min, max]`.
 - Les valeurs hors bornes sont clampées aux extrêmes de l'échelle.
 
 **Paramètres**
+
 - Aucun paramètre obligatoire.
 
 **À utiliser quand**
+
 - On veut une relativisation « marché » stricte (meilleur produit = score max, pire = score min).
 - Les bornes fixes sont inconnues, mais la couverture est suffisante.
 
 **À éviter quand**
+
 - Trop peu de valeurs ou distribution instable (risque d'effet “yoyo” dans le temps).
 - Présence d’outliers forts (préférer `MINMAX_QUANTILE`).
- 
+
 **Paramétrage recommandé**
+
 - La méthode est définie par attribut : on ajuste par vertical si la distribution devient instable.
 - En cas de distribution dégénérée, activer un `degenerateDistributionPolicy` explicite pour basculer sur une méthode de secours.
 
@@ -104,13 +121,16 @@ La méthode est définie dans `scoring.normalization.method` :
 ### 2.5 MINMAX_QUANTILE (bornes par quantiles)
 
 **Principe**
+
 - Projection linéaire entre deux quantiles (ex : p5/p95) pour limiter l'effet des outliers.
 
 **Paramètres**
+
 - `quantileLow`
 - `quantileHigh`
 
 **À utiliser quand**
+
 - La distribution est étalée ou contient des outliers.
 - On veut stabiliser le scoring sans figer des bornes absolues.
 
@@ -119,12 +139,15 @@ La méthode est définie dans `scoring.normalization.method` :
 ### 2.6 FIXED_MAPPING (barème fixe)
 
 **Principe**
+
 - Mapping direct d'une valeur discrète vers un score.
 
 **Paramètres**
+
 - `mapping` (table valeur → score)
 
 **À utiliser quand**
+
 - L'attribut est catégoriel (ex : classes énergétiques, labels).
 
 ---
@@ -132,13 +155,16 @@ La méthode est définie dans `scoring.normalization.method` :
 ### 2.7 BINARY (seuil)
 
 **Principe**
+
 - Score min ou max selon un seuil.
 
 **Paramètres**
+
 - `threshold`
 - `greaterIsPass` (par défaut `false` si absent)
 
 **À utiliser quand**
+
 - L'attribut est une conformité oui/non.
 
 ---
@@ -146,12 +172,15 @@ La méthode est définie dans `scoring.normalization.method` :
 ### 2.8 CONSTANT (score constant)
 
 **Principe**
+
 - Score constant (ou neutre par défaut).
 
 **Paramètres**
+
 - `constantValue` (optionnel)
 
 **À utiliser quand**
+
 - On veut neutraliser un attribut ou figer temporairement un score.
 
 ## 3) Application du sens d'impact

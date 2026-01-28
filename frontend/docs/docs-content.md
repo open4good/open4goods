@@ -23,12 +23,12 @@ Each markdown file can define:
 
 ```yaml
 ---
-title: "Human title"
-description: "Short SEO summary"
-tags: ["tag1", "tag2"]
-icon: "mdi-book-open-page-variant"
+title: 'Human title'
+description: 'Short SEO summary'
+tags: ['tag1', 'tag2']
+icon: 'mdi-book-open-page-variant'
 weight: 10
-updatedAt: "2026-02-10"
+updatedAt: '2026-02-10'
 draft: false
 ---
 ```

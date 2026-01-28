@@ -26,7 +26,8 @@ const accessibilityStore = useAccessibilityStore()
 const { prefersReducedMotionOverride } = storeToRefs(accessibilityStore)
 const isReducedMotionPreferred = computed(
   () =>
-    prefersReducedMotionOverride.value || reducedMotionPreference.value === 'reduce'
+    prefersReducedMotionOverride.value ||
+    reducedMotionPreference.value === 'reduce'
 )
 const isMounted = ref(false)
 let animationFrameId: number | null = null

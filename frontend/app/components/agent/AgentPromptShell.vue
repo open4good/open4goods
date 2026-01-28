@@ -98,7 +98,11 @@
           variant="outlined"
           density="comfortable"
           class="mb-3"
-          :rules="variable.required ? [v => !!v || $t('agents.promptInput.required')] : []"
+          :rules="
+            variable.required
+              ? [v => !!v || $t('agents.promptInput.required')]
+              : []
+          "
           :disabled="!isAuthorized"
           :data-test="`agent-template-variable-${variable.id}`"
         />

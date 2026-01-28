@@ -87,8 +87,7 @@ const resolveReleasesDirectory = async (): Promise<string> => {
     }
   }
 
-  cachedReleasesDirectory =
-    RELEASES_DIRECTORY_CANDIDATES.at(-1) ?? PROJECT_ROOT
+  cachedReleasesDirectory = RELEASES_DIRECTORY_CANDIDATES.at(-1) ?? PROJECT_ROOT
   return cachedReleasesDirectory
 }
 

@@ -57,10 +57,7 @@
             role="article"
             :aria-label="t('docs.labels.article')"
           >
-            <ContentRenderer
-              :value="doc"
-              :components="resolvedComponents"
-            />
+            <ContentRenderer :value="doc" :components="resolvedComponents" />
           </article>
 
           <footer v-if="showMeta" class="docs-page__footer">
@@ -93,11 +90,7 @@
 
         <aside v-if="showToc && tocItems.length" class="docs-page__toc">
           <slot name="aside">
-            <v-card
-              variant="outlined"
-              class="docs-page__toc-card"
-              rounded="xl"
-            >
+            <v-card variant="outlined" class="docs-page__toc-card" rounded="xl">
               <v-card-title class="text-subtitle-1 font-weight-semibold">
                 {{ t('docs.labels.toc') }}
               </v-card-title>
@@ -174,12 +167,8 @@ try {
 } catch {
   requestURL = null
 }
-const {
-  buildCanonicalUrl,
-  buildHreflangLinks,
-  getDocByPath,
-  listDocs,
-} = useDocsContent()
+const { buildCanonicalUrl, buildHreflangLinks, getDocByPath, listDocs } =
+  useDocsContent()
 
 const resolvedLocale = computed(() =>
   normalizeDocsLocale(props.locale ?? resolveLocaleFromRequest())
@@ -193,7 +182,11 @@ const resolvedPath = computed(() =>
   })
 )
 
-const { data: doc, pending, error } = await useAsyncData(
+const {
+  data: doc,
+  pending,
+  error,
+} = await useAsyncData(
   () => `docs-page:${resolvedPath.value}`,
   () => getDocByPath({ path: resolvedPath.value }),
   { watch: [resolvedPath] }
@@ -298,7 +291,10 @@ const { data: translations } = await useAsyncData(
           basePath: resolvedBasePath.value,
         })
 
-        const exists = await getDocByPath({ path: localizedPath, fields: ['path'] })
+        const exists = await getDocByPath({
+          path: localizedPath,
+          fields: ['path'],
+        })
 
         return exists ? locale : null
       })

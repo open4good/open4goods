@@ -42,11 +42,7 @@
           <th scope="row">{{ criterion.name }}</th>
           <td>{{ criterion.utility || emptyFallback }}</td>
           <td>
-            <v-icon
-              v-if="criterion.icon"
-              :icon="criterion.icon"
-              size="20"
-            />
+            <v-icon v-if="criterion.icon" :icon="criterion.icon" size="20" />
             <span
               v-else
               class="impact-score-criteria-panel__icon-fallback"
@@ -92,10 +88,7 @@
                 size="22"
                 color="primary"
               />
-              <span
-                v-else
-                class="impact-score-criteria-panel__icon-fallback"
-              >
+              <span v-else class="impact-score-criteria-panel__icon-fallback">
                 {{ criterion.name.charAt(0).toUpperCase() }}
               </span>
             </v-avatar>

@@ -35,7 +35,10 @@
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { EChartsOption } from 'echarts'
-import type { DistributionBucket, ScoreNormalizationParams } from './impact-types'
+import type {
+  DistributionBucket,
+  ScoreNormalizationParams,
+} from './impact-types'
 import { ensureECharts } from '~/utils/echarts-loader'
 
 let echartsRegistered = false
@@ -52,6 +55,7 @@ const props = defineProps<{
   impactBetterIs?: 'GREATER' | 'LOWER' | null
   stdDev?: number | null
   productName?: string
+  productImage?: string | null
 }>()
 
 const { t } = useI18n()
@@ -87,9 +91,11 @@ const filteredDistribution = computed(() =>
 )
 
 const hasData = computed(() => filteredDistribution.value.length > 0)
-const hasNormalizedView = computed(() => resolveNormalizationAvailability().supported)
-const normalizationMethod = computed(
-  () => (props.normalizationMethod ?? 'SIGMA').toUpperCase()
+const hasNormalizedView = computed(
+  () => resolveNormalizationAvailability().supported
+)
+const normalizationMethod = computed(() =>
+  (props.normalizationMethod ?? 'SIGMA').toUpperCase()
 )
 
 type BucketRange = {
@@ -240,6 +246,72 @@ const resolveProductName = computed(() => {
     : t('product.impact.subscoreChart.unknownProduct')
 })
 
+const COLOR_BAD: [number, number, number] = [239, 68, 68]
+const COLOR_AVG: [number, number, number] = [33, 150, 243]
+const COLOR_GOOD: [number, number, number] = [34, 197, 94]
+
+const interpolateColor = (
+  color1: [number, number, number],
+  color2: [number, number, number],
+  factor: number
+): [number, number, number] => {
+  return [
+    Math.round(color1[0] + (color2[0] - color1[0]) * factor),
+    Math.round(color1[1] + (color2[1] - color1[1]) * factor),
+    Math.round(color1[2] + (color2[2] - color1[2]) * factor),
+  ]
+}
+
+const resolveProductColor = (
+  index: number,
+  averageIndex: number | null,
+  count: number,
+  betterIs: string | null | undefined
+): [number, number, number] => {
+  if (averageIndex == null) {
+    // Fallback: simple gradient Red -> Green
+    const isLowerBetter = betterIs === 'LOWER'
+    const bestIndex = isLowerBetter ? 0 : count - 1
+    const worstIndex = isLowerBetter ? count - 1 : 0
+    const total = Math.abs(bestIndex - worstIndex) || 1
+    const factor = Math.abs(index - worstIndex) / total
+    return interpolateColor(COLOR_BAD, COLOR_GOOD, factor)
+  }
+
+  const isLowerBetter = betterIs === 'LOWER'
+  const worstIndex = isLowerBetter ? count - 1 : 0
+  const bestIndex = isLowerBetter ? 0 : count - 1
+
+  // Gradient 1: Worst -> Average (Red -> Blue)
+  const distToWorst = Math.abs(index - worstIndex)
+  const spanToAvg = Math.abs(averageIndex - worstIndex)
+
+  // Check if we are in the "bad to average" segment
+  // Logic: Is index strictly "between" worstIndx and averageIndex ?
+  // Or rather: is it closer to worst than average to best?
+
+  // Robust check:
+  const min1 = Math.min(worstIndex, averageIndex)
+  const max1 = Math.max(worstIndex, averageIndex)
+  if (index >= min1 && index <= max1) {
+    if (spanToAvg === 0) return COLOR_AVG
+    return interpolateColor(COLOR_BAD, COLOR_AVG, distToWorst / spanToAvg)
+  }
+
+  // Gradient 2: Average -> Best (Blue -> Green)
+  const min2 = Math.min(averageIndex, bestIndex)
+  const max2 = Math.max(averageIndex, bestIndex)
+  if (index >= min2 && index <= max2) {
+    const spanToBest = Math.abs(bestIndex - averageIndex)
+    if (spanToBest === 0) return COLOR_AVG
+    const distFromAvg = Math.abs(index - averageIndex)
+    return interpolateColor(COLOR_AVG, COLOR_GOOD, distFromAvg / spanToBest)
+  }
+
+  // Fallback if somehow outside (should not happen with inclusive ranges covering 0 to count-1)
+  return COLOR_AVG
+}
+
 const chartOption = computed<EChartsOption | null>(() => {
   if (!hasData.value) {
     return null
@@ -254,7 +326,7 @@ const chartOption = computed<EChartsOption | null>(() => {
   const yAxisMax = Math.max(1, Math.ceil(maxValue * 1.2))
   const productValue =
     viewMode.value === 'normalized' && hasNormalizedView.value
-      ? props.normalizedCurrentValue ?? null
+      ? (props.normalizedCurrentValue ?? null)
       : props.currentValue
   const averageValue =
     viewMode.value === 'normalized' && hasNormalizedView.value
@@ -268,7 +340,9 @@ const chartOption = computed<EChartsOption | null>(() => {
     index: number | null,
     color: string,
     tooltipKey: string,
-    tooltipParams: Record<string, string>
+    tooltipParams: Record<string, string>,
+    labelText: string,
+    labelColor: string
   ) => {
     if (index == null) {
       return null
@@ -285,6 +359,15 @@ const chartOption = computed<EChartsOption | null>(() => {
       itemStyle: {
         color,
       },
+      label: {
+        show: true,
+        position: 'top',
+        formatter: (params: { dataIndex: number }) =>
+          params.dataIndex === index ? labelText : '',
+        fontSize: 11,
+        fontWeight: 600,
+        color: labelColor,
+      },
       emphasis: {
         itemStyle: {
           opacity: 0.35,
@@ -299,30 +382,42 @@ const chartOption = computed<EChartsOption | null>(() => {
     }
   }
 
+  const productBaseColor =
+    productIndex != null
+      ? resolveProductColor(
+          productIndex,
+          averageIndex,
+          displayDistribution.length,
+          props.impactBetterIs
+        )
+      : COLOR_BAD
+
   const markerSeries = [
     buildMarkerSeries(
       'average',
       averageIndex,
-      'rgba(148, 163, 184, 0.28)',
+      'rgba(148, 163, 184, 0.35)',
       'product.impact.subscoreChart.markerAverage',
-      { scoreLabel: props.label }
+      { scoreLabel: props.label },
+      t('product.impact.subscoreChart.averageLabel'),
+      '#64748b'
     ),
     buildMarkerSeries(
       'product',
       productIndex,
-      'rgba(33, 150, 243, 0.22)',
+      `rgba(${productBaseColor.join(', ')}, 0.35)`,
       'product.impact.subscoreChart.markerProduct',
-      { productName: resolveProductName.value }
+      { productName: resolveProductName.value },
+      t('product.impact.subscoreChart.productLabel'),
+      `rgb(${productBaseColor.join(', ')})`
     ),
   ].filter(
-    (
-      series
-    ): series is NonNullable<ReturnType<typeof buildMarkerSeries>> =>
+    (series): series is NonNullable<ReturnType<typeof buildMarkerSeries>> =>
       series != null
   )
 
   return {
-    grid: { top: 20, left: 40, right: 20, bottom: 40 },
+    grid: { top: 36, left: 40, right: 20, bottom: 40 },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: {
       type: 'category',
@@ -520,7 +615,8 @@ const buildNormalizedDistribution = () => {
       const normalized = normalizeValue(range.exact)
       return {
         ...bucket,
-        label: normalized != null ? formatBucketValue(normalized) : bucket.label,
+        label:
+          normalized != null ? formatBucketValue(normalized) : bucket.label,
       }
     }
 

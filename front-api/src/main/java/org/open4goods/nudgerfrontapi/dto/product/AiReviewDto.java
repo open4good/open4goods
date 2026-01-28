@@ -84,6 +84,9 @@ public record AiReviewDto(
         String ecologicalOneline,
 
         @Schema(description = "Short community summary of the product (max 20 words)")
-        String communityOneline
+        String communityOneline,
+
+        @Schema(description = "Ultra-synthetic baseline shown under the title")
+        String baseLine
 ) {
 }

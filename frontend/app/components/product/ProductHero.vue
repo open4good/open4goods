@@ -80,6 +80,7 @@
                   :score="impactScore"
                   :min="impactScoreMin"
                   :max="impactScoreMax"
+                  :show-methodology="false"
                   size="lg"
                 />
               </div>

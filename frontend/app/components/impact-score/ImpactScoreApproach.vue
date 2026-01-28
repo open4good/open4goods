@@ -1,11 +1,19 @@
 <template>
   <section class="impact-score-approach">
     <header class="impact-score-approach__header">
-      <v-chip class="impact-score-approach__eyebrow" color="accent-primary-highlight" variant="tonal">
+      <v-chip
+        class="impact-score-approach__eyebrow"
+        color="accent-primary-highlight"
+        variant="tonal"
+      >
         {{ t('impactScorePage.approach.eyebrow') }}
       </v-chip>
-      <h2 class="impact-score-approach__title">{{ t('impactScorePage.approach.title') }}</h2>
-      <p class="impact-score-approach__subtitle">{{ t('impactScorePage.approach.subtitle') }}</p>
+      <h2 class="impact-score-approach__title">
+        {{ t('impactScorePage.approach.title') }}
+      </h2>
+      <p class="impact-score-approach__subtitle">
+        {{ t('impactScorePage.approach.subtitle') }}
+      </p>
     </header>
 
     <v-row :gutter="16" align="stretch">
@@ -20,18 +28,37 @@
             border
           >
             <div class="impact-score-approach__pillar-header">
-              <v-icon :icon="pillar.icon" size="26" color="accent-primary-highlight" />
-              <h3 class="impact-score-approach__pillar-title">{{ pillar.title }}</h3>
+              <v-icon
+                :icon="pillar.icon"
+                size="26"
+                color="accent-primary-highlight"
+              />
+              <h3 class="impact-score-approach__pillar-title">
+                {{ pillar.title }}
+              </h3>
             </div>
-            <p class="impact-score-approach__pillar-text">{{ pillar.description }}</p>
+            <p class="impact-score-approach__pillar-text">
+              {{ pillar.description }}
+            </p>
           </v-sheet>
         </div>
       </v-col>
       <v-col cols="12" md="5">
-        <v-sheet class="impact-score-approach__data" rounded="xl" elevation="0" border>
+        <v-sheet
+          class="impact-score-approach__data"
+          rounded="xl"
+          elevation="0"
+          border
+        >
           <div class="impact-score-approach__data-header">
-            <v-icon icon="mdi-database-check" size="28" color="accent-supporting" />
-            <h3 class="impact-score-approach__data-title">{{ t('impactScorePage.approach.data.title') }}</h3>
+            <v-icon
+              icon="mdi-database-check"
+              size="28"
+              color="accent-supporting"
+            />
+            <h3 class="impact-score-approach__data-title">
+              {{ t('impactScorePage.approach.data.title') }}
+            </h3>
           </div>
           <ul class="impact-score-approach__data-list">
             <li
@@ -39,7 +66,11 @@
               :key="item"
               class="impact-score-approach__data-item"
             >
-              <v-icon icon="mdi-check-circle" size="20" color="accent-supporting" />
+              <v-icon
+                icon="mdi-check-circle"
+                size="20"
+                color="accent-supporting"
+              />
               <span>{{ item }}</span>
             </li>
           </ul>

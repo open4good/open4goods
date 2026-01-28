@@ -7,8 +7,7 @@ const messages: Record<string, string> = {
   'home.photoInvitation.title': "Et si c'était vous ?",
   'home.photoInvitation.ariaLabel': 'Proposer votre photo pour Nudger',
   'home.photoInvitation.contact.subject': 'Proposition de photo pour Nudger',
-  'home.photoInvitation.contact.message':
-    'Bonjour, je propose une photo.',
+  'home.photoInvitation.contact.message': 'Bonjour, je propose une photo.',
   'home.photoInvitation.imageAlt': 'Portrait souriant invitant à participer',
 }
 

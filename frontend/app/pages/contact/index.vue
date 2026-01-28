@@ -15,21 +15,21 @@
     >
       <template #description>
         <div v-if="!hasPrefill">
-        <p class="mb-6">{{ t('contact.hero.description') }}</p>
-        <ul class="contact-hero__highlights" role="list">
-          <li
-            v-for="item in heroHighlights"
-            :key="item.text"
-            class="contact-hero__highlight"
-          >
-            <v-icon
-              :icon="item.icon"
-              size="26"
-              class="contact-hero__highlight-icon"
-            />
-            <span class="contact-hero__highlight-text">{{ item.text }}</span>
-          </li>
-        </ul>
+          <p class="mb-6">{{ t('contact.hero.description') }}</p>
+          <ul class="contact-hero__highlights" role="list">
+            <li
+              v-for="item in heroHighlights"
+              :key="item.text"
+              class="contact-hero__highlight"
+            >
+              <v-icon
+                :icon="item.icon"
+                size="26"
+                class="contact-hero__highlight-icon"
+              />
+              <span class="contact-hero__highlight-text">{{ item.text }}</span>
+            </li>
+          </ul>
         </div>
       </template>
 
@@ -176,9 +176,7 @@ const pageTitle = computed(() =>
   titleOverride.value ? titleOverride.value : String(t('contact.hero.title'))
 )
 const hasPrefill = computed(() =>
-  Boolean(
-    initialSubject.value || initialMessage.value || prefillTitleKey.value
-  )
+  Boolean(initialSubject.value || initialMessage.value || prefillTitleKey.value)
 )
 
 const linkedinUrl = computed(() => String(t('siteIdentity.links.linkedin')))

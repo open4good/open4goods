@@ -8,8 +8,8 @@
 - \(\mu\) : moyenne des valeurs dans la population de référence
 - \(\sigma\) : écart-type
 - \(N\) : nombre d’observations
-- \(S_{min}\) : score minimum (par défaut 0)
-- \(S_{max}\) : score maximum (par défaut 5)
+- \(S\_{min}\) : score minimum (par défaut 0)
+- \(S\_{max}\) : score maximum (par défaut 5)
 - `impactBetterIs` : sens « meilleur » pour le score impact
 
 On suppose que la normalisation produit un score \(s\in[S_{min},S_{max}]\).
@@ -29,18 +29,18 @@ Projection linéaire et clamp :
 n = \frac{x - (\mu - k\sigma)}{(\mu + k\sigma) - (\mu - k\sigma)}
 \]
 \[
-s = clamp(n \times S_{max}, 0, S_{max})
+s = clamp(n \times S*{max}, 0, S*{max})
 \]
 
 ### 2.2 Propriétés
 
-- \(x=\mu\Rightarrow s=S_{max}/2\) (ex : 2.5/5)
-- valeurs extrêmes au-delà de \(\pm k\sigma\) saturent à 0 ou \(S_{max}\)
+- \(x=\mu\Rightarrow s=S\_{max}/2\) (ex : 2.5/5)
+- valeurs extrêmes au-delà de \(\pm k\sigma\) saturent à 0 ou \(S\_{max}\)
 
 ### 2.3 Cas dégénérés
 
 - Si \(\sigma = 0\) :
-  - stratégie recommandée : renvoyer \(S_{max}/2\) (neutre) OU appliquer une policy YAML (NEUTRAL/ERROR/FALLBACK).
+  - stratégie recommandée : renvoyer \(S\_{max}/2\) (neutre) OU appliquer une policy YAML (NEUTRAL/ERROR/FALLBACK).
 - Si bornes quasi égales (sécurité flottante) : renvoyer score neutre.
 
 ## 3) Percentile scoring (mid-rank)
@@ -48,14 +48,15 @@ s = clamp(n \times S_{max}, 0, S_{max})
 ### 3.1 Formule (mid-rank)
 
 Soit :
-- \(c_{<}(x)\) : nombre de valeurs strictement inférieures à \(x\)
-- \(c_{=}(x)\) : nombre de valeurs égales à \(x\)
+
+- \(c\_{<}(x)\) : nombre de valeurs strictement inférieures à \(x\)
+- \(c\_{=}(x)\) : nombre de valeurs égales à \(x\)
 
 \[
-p = \frac{c_{<}(x) + 0.5\,c_{=}(x)}{N}
+p = \frac{c*{<}(x) + 0.5\,c*{=}(x)}{N}
 \]
 \[
-s = clamp(p \times S_{max}, 0, S_{max})
+s = clamp(p \times S*{max}, 0, S*{max})
 \]
 
 ### 3.2 Usage
@@ -74,7 +75,7 @@ Si l’attribut a des bornes stables \([a,b]\) :
 \[
 n = \frac{x-a}{b-a}
 \quad ;\quad
-s = clamp(n\times S_{max}, 0, S_{max})
+s = clamp(n\times S*{max}, 0, S*{max})
 \]
 
 Usage : notes normatives (0–10), unités bornées “standard”.
@@ -84,9 +85,9 @@ Usage : notes normatives (0–10), unités bornées “standard”.
 Si l’attribut n’a pas de bornes stables mais qu’on veut rester relatif au marché, on utilise les bornes observées
 dans le batch courant \([x_{min}, x_{max}]\) :
 \[
-n = \frac{x-x_{min}}{x_{max}-x_{min}}
+n = \frac{x-x*{min}}{x*{max}-x*{min}}
 \quad ;\quad
-s = clamp(n\times S_{max}, 0, S_{max})
+s = clamp(n\times S*{max}, 0, S\_{max})
 \]
 
 **Attention** : les scores évoluent avec le catalogue et peuvent être sensibles aux outliers.
@@ -94,7 +95,8 @@ s = clamp(n\times S_{max}, 0, S_{max})
 ## 6) Min–max par quantiles (MINMAX_QUANTILE)
 
 Pour réduire l’influence des outliers tout en restant relatif :
-- remplacer \(a\) et \(b\) par des quantiles \(q_{low}\) et \(q_{high}\) (ex : p5/p95)
+
+- remplacer \(a\) et \(b\) par des quantiles \(q*{low}\) et \(q*{high}\) (ex : p5/p95)
 - même projection linéaire + clamp
 
 Nécessite une estimation de quantiles (stockage valeurs ou estimateur streaming).
@@ -102,31 +104,35 @@ Nécessite une estimation de quantiles (stockage valeurs ou estimateur streaming
 ## 7) Barème fixe (FIXED_MAPPING)
 
 Ex : classe énergétique {A,B,C,D,E,F,G}
+
 - mapping direct vers un score 0..5 selon table.
 - policy si valeur non mappée : ERROR ou NEUTRAL ou WORST.
 
 ## 8) Inversion (impactBetterIs)
 
 Après calcul du score \(s\) :
+
 - si `impactBetterIs = LOWER` :
-\[
-s' = S_{max} + S_{min} - s
-\]
+  \[
+  s' = S*{max} + S*{min} - s
+  \]
 - sinon : \(s'=s\)
 
 ## 9) Échelle finale stable 0–20 (poids)
 
 Si sous-scores sont sur 0..5 :
+
 - normaliser les poids pour \(\sum w_i = 4\).
 - Impact Score 0..20 :
-\[
-IS = \sum_i (s_i \times w'_i)
-\]
-avec \(w'_i = w_i \times 4/\sum w\).
+  \[
+  IS = \sum_i (s_i \times w'\_i)
+  \]
+  avec \(w'\_i = w_i \times 4/\sum w\).
 
 ## 10) Métadonnées UI recommandées
 
 Pour rendre l’explication et la dataviz correctes :
+
 - `normalizationMethod`
 - `normalizationParams` (k, quantiles, bornes, mapping)
 - `stats` (avg, stdDev, median, quantiles si dispo)

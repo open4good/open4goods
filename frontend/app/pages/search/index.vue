@@ -158,11 +158,7 @@
           </p>
         </div>
         <template #append>
-          <v-btn
-            color="primary"
-            variant="text"
-            @click="handleRetry"
-          >
+          <v-btn color="primary" variant="text" @click="handleRetry">
             {{ t('common.actions.retry') }}
           </v-btn>
         </template>
@@ -474,7 +470,7 @@ const aggregationDefinition = computed<AggregationRequestDto>(() => {
 })
 
 const resolvedSearchType = computed(() =>
-  hasMinimumLength.value ? searchType.value ?? 'SEMANTIC' : undefined
+  hasMinimumLength.value ? (searchType.value ?? 'SEMANTIC') : undefined
 )
 const semanticSearchEnabled = computed(() =>
   resolvedSearchType.value === 'SEMANTIC' ? true : undefined

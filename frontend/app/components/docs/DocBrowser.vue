@@ -92,12 +92,7 @@
           render-h1
         />
 
-        <v-alert
-          v-else
-          type="info"
-          variant="tonal"
-          class="docs-browser__empty"
-        >
+        <v-alert v-else type="info" variant="tonal" class="docs-browser__empty">
           {{ t('docs.search.empty') }}
         </v-alert>
       </div>
@@ -193,9 +188,7 @@ const allDocs = computed(() => docsList.value ?? [])
 
 const tagOptions = computed(() => {
   const tags = new Set<string>()
-  allDocs.value.forEach(doc =>
-    (doc.tags ?? []).forEach(tag => tags.add(tag))
-  )
+  allDocs.value.forEach(doc => (doc.tags ?? []).forEach(tag => tags.add(tag)))
   return Array.from(tags).sort((a, b) => a.localeCompare(b))
 })
 
@@ -250,7 +243,9 @@ const filteredDocs = computed<DocsDoc[]>(() => {
   )
 })
 
-const allowedPaths = computed(() => new Set(filteredDocs.value.map(doc => doc.path)))
+const allowedPaths = computed(
+  () => new Set(filteredDocs.value.map(doc => doc.path))
+)
 
 const filterTree = (node: DocsNavigationNode): DocsNavigationNode | null => {
   const filteredChildren = node.children

@@ -1,21 +1,29 @@
 <template>
   <section class="impact-score-summary">
     <header class="impact-score-summary__header">
-      <v-chip class="impact-score-summary__eyebrow" color="accent-primary-highlight" variant="tonal">
+      <v-chip
+        class="impact-score-summary__eyebrow"
+        color="accent-primary-highlight"
+        variant="tonal"
+      >
         {{ t('impactScorePage.summary.eyebrow') }}
       </v-chip>
-      <h2 class="impact-score-summary__title">{{ t('impactScorePage.summary.title') }}</h2>
-      <p class="impact-score-summary__subtitle">{{ t('impactScorePage.summary.subtitle') }}</p>
+      <h2 class="impact-score-summary__title">
+        {{ t('impactScorePage.summary.title') }}
+      </h2>
+      <p class="impact-score-summary__subtitle">
+        {{ t('impactScorePage.summary.subtitle') }}
+      </p>
     </header>
 
     <v-row :gutter="16">
-      <v-col
-        v-for="item in summaryItems"
-        :key="item"
-        cols="12"
-        md="6"
-      >
-        <v-sheet class="impact-score-summary__card" rounded="xl" elevation="0" border>
+      <v-col v-for="item in summaryItems" :key="item" cols="12" md="6">
+        <v-sheet
+          class="impact-score-summary__card"
+          rounded="xl"
+          elevation="0"
+          border
+        >
           <v-icon icon="mdi-check-circle" size="22" color="accent-supporting" />
           <p class="impact-score-summary__card-text">{{ item }}</p>
         </v-sheet>

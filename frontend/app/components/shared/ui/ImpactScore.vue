@@ -50,9 +50,10 @@
         <v-btn
           v-if="showMethodology"
           class="impact-score-panel__cta"
-          variant="text"
+          variant="flat"
           density="compact"
-          size="small"
+          size="x-small"
+          rounded="pill"
           :to="'./ecoscore'"
         >
           Méthodologie
@@ -355,7 +356,7 @@ const shouldShowBar = computed(() => normalizedVariant.value === 'default')
 .impact-score-panel__value {
   color: rgba(var(--v-theme-text-neutral-strong), 0.92);
   font-weight: 700;
-  text-align: right; /* Values align right */
+  text-align: left; /* Values align left */
 }
 
 /* Colorize values inside meta grid */

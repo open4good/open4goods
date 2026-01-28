@@ -868,7 +868,8 @@ public class ProductMappingService {
                 review.getDataQuality(),
                 review.getTechnicalOneline(),
                 review.getEcologicalOneline(),
-                review.getCommunityOneline());
+                review.getCommunityOneline(),
+                review.getBaseLine());
     }
 
     /**

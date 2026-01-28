@@ -5,9 +5,11 @@
 ## 1) Constat (code actuel)
 
 ### 1.1 ProductImpactSubscoreExplanation.vue
+
 Le composant suppose explicitement un scoring sigma : la moyenne est présentée comme un pivot fixe à 10/20.
 
 Extrait :
+
 ```ts
 const averageOn20Value = computed(() => {
   // Sigma scoring definition: Average is always the pivot at 10/20 (2.5/5)
@@ -16,6 +18,7 @@ const averageOn20Value = computed(() => {
 ```
 
 ### 1.2 ProductImpactSubscoreChart.vue
+
 La « moyenne » et la valeur du produit sont rendues comme des barres de surlignage dans le bucket.
 
 ## 2) Changements demandés
@@ -37,16 +40,19 @@ Objectif : varier les textes + les valeurs mises en avant.
 ### 2.2 Modifier la représentation de la “moyenne” dans le graphe
 
 Recommandation ECharts :
+
 - utiliser `markLine` pour afficher la moyenne (ligne verticale) plutôt qu’une barre pleine.
 - conserver un surlignage discret du bucket produit (ou passer en `scatter`).
 
 Optionnel (si métadonnées dispo) :
+
 - SIGMA : afficher bande ±kσ (markArea) ou deux lignes (µ−kσ, µ+kσ)
 - PERCENTILE : afficher médiane (p50) et quartiles (p25/p75)
 
 ### 2.3 Ajouter un toggle “valeurs absolues” / “scores normalisés”
 
 Objectif : permettre au même graphe d’explorer :
+
 - la distribution en **valeurs absolues** (unités, données brutes)
 - la distribution en **scores normalisés** (0..5) pour comparer les critères
 
@@ -55,6 +61,7 @@ Le toggle doit être visible dès que la normalisation est connue (méthode + st
 ## 3) Données nécessaires côté API
 
 Pour permettre ces variations, le backend doit exposer (par sous-score) :
+
 - normalizationMethod
 - params (k, mapping, bornes, quantiles)
 - stats : avg, stdDev, éventuellement median/quantiles

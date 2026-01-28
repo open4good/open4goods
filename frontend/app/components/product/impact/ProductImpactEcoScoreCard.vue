@@ -26,6 +26,7 @@
             :score="normalizedScore"
             :min="scoreMin"
             :max="scoreMax"
+            :show-methodology="false"
             size="lg"
             class="align-self-center w-100"
           />

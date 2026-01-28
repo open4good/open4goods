@@ -184,6 +184,12 @@ export interface AiReviewDto {
      * @memberof AiReviewDto
      */
     communityOneline?: string;
+    /**
+     * Ultra-synthetic baseline shown under the title
+     * @type {string}
+     * @memberof AiReviewDto
+     */
+    baseLine?: string;
 }
 
 /**
@@ -228,6 +234,7 @@ export function AiReviewDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'technicalOneline': json['technicalOneline'] == null ? undefined : json['technicalOneline'],
         'ecologicalOneline': json['ecologicalOneline'] == null ? undefined : json['ecologicalOneline'],
         'communityOneline': json['communityOneline'] == null ? undefined : json['communityOneline'],
+        'baseLine': json['baseLine'] == null ? undefined : json['baseLine'],
     };
 }
 
@@ -267,6 +274,7 @@ export function AiReviewDtoToJSONTyped(value?: AiReviewDto | null, ignoreDiscrim
         'technicalOneline': value['technicalOneline'],
         'ecologicalOneline': value['ecologicalOneline'],
         'communityOneline': value['communityOneline'],
+        'baseLine': value['baseLine'],
     };
 }
 

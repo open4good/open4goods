@@ -25,10 +25,7 @@ vi.stubGlobal('$fetch', fetchMock)
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string): string => key,
-    n: (
-      value: number,
-      options?: Intl.NumberFormatOptions
-    ): string => {
+    n: (value: number, options?: Intl.NumberFormatOptions): string => {
       if (options?.style === 'currency' && options.currency) {
         return `${value} ${options.currency}`
       }
@@ -184,9 +181,11 @@ describe('SearchSuggestField', () => {
     expect(vm.products[0]?.bestPrice).toBe(499.99)
     expect(vm.products[0]?.bestPriceCurrency).toBe('EUR')
 
-    const formatSuggestionPrice = (wrapper.vm as {
-      formatSuggestionPrice: (item: ProductSuggestionItem) => string | null
-    }).formatSuggestionPrice
+    const formatSuggestionPrice = (
+      wrapper.vm as {
+        formatSuggestionPrice: (item: ProductSuggestionItem) => string | null
+      }
+    ).formatSuggestionPrice
 
     expect(formatSuggestionPrice(vm.products[0])).toBe('499.99 EUR')
   })

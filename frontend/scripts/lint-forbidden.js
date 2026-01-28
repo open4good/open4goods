@@ -13,7 +13,8 @@ try {
   config = JSON.parse(raw)
 } catch (e) {
   console.warn(
-    `[lint-forbidden] Could not read config at ${CONFIG_PATH}. Using defaults.` + e
+    `[lint-forbidden] Could not read config at ${CONFIG_PATH}. Using defaults.` +
+      e
   )
 }
 

@@ -195,18 +195,12 @@
             <div class="product-price__competition-text">
               <p class="product-price__competition-eyebrow">
                 {{
-                  $t(
-                    'product.price.competition.title',
-                    'Niveau de concurrence'
-                  )
+                  $t('product.price.competition.title', 'Niveau de concurrence')
                 }}
               </p>
               <h4 class="product-price__competition-title">
                 {{
-                  $t(
-                    competitionLevel.labelKey,
-                    competitionLevel.labelFallback
-                  )
+                  $t(competitionLevel.labelKey, competitionLevel.labelFallback)
                 }}
               </h4>
               <p class="product-price__competition-subtitle">
@@ -962,8 +956,7 @@ const competitionLevel = computed(() => {
       labelKey: 'product.price.competition.super',
       labelFallback: 'Super concurrence !',
       descriptionKey: 'product.price.competition.superDescription',
-      descriptionFallback:
-        'Beaucoup d’offres pour décrocher le meilleur prix.',
+      descriptionFallback: 'Beaucoup d’offres pour décrocher le meilleur prix.',
       color: 'success',
     }
   }
@@ -975,8 +968,7 @@ const competitionLevel = computed(() => {
     labelKey: 'product.price.competition.correct',
     labelFallback: 'Concurrence correcte !',
     descriptionKey: 'product.price.competition.correctDescription',
-    descriptionFallback:
-      'Assez d’offres pour comparer en toute sérénité.',
+    descriptionFallback: 'Assez d’offres pour comparer en toute sérénité.',
     color: 'info',
   }
 })

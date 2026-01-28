@@ -568,19 +568,40 @@ const applyRandomProductPlaceholder = (items: HeroHighlightItem[]) => {
     return items
   }
 
+  const placeholder = '{randomProduct}'
+
   return items.map(item => {
-    const segmentsWithProduct = item.segments.map(segment => {
-      const text = segment.text.includes('{randomProduct}')
-        ? segment.text.replaceAll('{randomProduct}', productName)
-        : segment.text
+    const segmentsWithProduct = item.segments.flatMap(
+      (segment: HeroHighlightSegment): HeroHighlightSegment[] => {
+        // Handle {randomProductLink} in existing links
+        const to =
+          segment.to && segment.to.includes('{randomProductLink}')
+            ? productLink
+            : segment.to
 
-      const to =
-        segment.to && segment.to.includes('{randomProductLink}')
-          ? productLink
-          : segment.to
+        if (!segment.text.includes(placeholder)) {
+          return [{ ...segment, to }]
+        }
 
-      return { ...segment, text, to }
-    })
+        // Split segment text around the placeholder to create a proper link
+        const parts = segment.text.split(placeholder)
+        const result: HeroHighlightSegment[] = []
+
+        parts.forEach((part: string, index: number) => {
+          // Add text before placeholder (if any)
+          if (part) {
+            result.push({ text: part, to: segment.to ? to : undefined })
+          }
+
+          // Add the product link segment (except after the last part)
+          if (index < parts.length - 1) {
+            result.push({ text: productName, to: productLink })
+          }
+        })
+
+        return result
+      }
+    )
 
     return {
       ...item,

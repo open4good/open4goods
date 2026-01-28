@@ -27,10 +27,12 @@ Certains attributs sont « meilleurs » pour l’utilisateur dans un sens, mais 
   - ex : diagonale d’écran TV → **plus petit = mieux** pour l’impact (à hypothèse égale).
 
 Implication :
+
 - L’inversion qui sert à calculer les sous-scores « impact » doit dépendre de **impactBetterIs**.
 - L’UI (explication) peut s’appuyer sur **les deux** pour contextualiser (« confortable mais plus impactant »).
 
 Compatibilité :
+
 - les champs `userBetterIs` et `impactBetterIs` sont requis pour expliciter le sens des comparaisons.
 
 ## 3. Pipeline de calcul (batch)
@@ -47,6 +49,7 @@ Ces valeurs brutes sont stockées dans `product.scores[attributeKey].value`.
 ### 3.2 Accumulation statistique (distribution)
 
 Pendant le traitement batch, le système maintient pour chaque sous-score :
+
 - N (count), somme, min/max, moyenne (µ), écart-type (σ)
 - et éventuellement des fréquences (pour percentile) et/ou quantiles.
 
@@ -65,38 +68,40 @@ ImpactScore = \sum_i (SubScore_i \times Weight_i)
 **Échelle stable (cible 0–20)**  
 Comme `SubScore_i` est sur 0..5, pour garantir une échelle 0..20, on veut :
 \[
-\sum_i Weight_i = 4
+\sum*i Weight_i = 4
 \]
 On peut l’obtenir en normalisant automatiquement les poids :
 \[
-Weight'_i = Weight_i \times \frac{4}{\sum_j Weight_j}
+Weight'\_i = Weight_i \times \frac{4}{\sum_j Weight_j}
 \]
 Puis :
 \[
-ImpactScore_{0..20} = \sum_i (SubScore_i \times Weight'_i)
+ImpactScore*{0..20} = \sum_i (SubScore_i \times Weight'\_i)
 \]
 
 ### 3.5 Valeurs manquantes
 
 Une politique explicite doit exister :
+
 - **NEUTRAL** (ex : 2.5/5)
 - **WORST** (0/5)
 
 Décision actuelle :
+
 - Utiliser **NEUTRAL** partout pour ne pas sur- ou sous-pondérer un produit sur une donnée absente.
 - Reporter la pénalisation globale via le critère `DATA_QUALITY`.
 
 ## 4. Points de cohérence à vérifier (backend)
 
-1) Ordonnancement des services batch : l’EcoScore doit être calculé après disponibilité des sous-scores normalisés (ou disposer d’un fallback maîtrisé).
-2) Application du sens (inversion) : l’inversion doit être fondée sur `impactBetterIs` (pas `userBetterIs`).
-3) Échelle : l’Impact Score doit respecter la cible 0..20 pour toutes les verticales (poids normalisés).
-4) Politique de manquants : le comportement “score manquant => 0 contribution” doit être aligné sur la stratégie retenue.
-5) Métadonnées UI : l’UI ne doit plus supposer une méthode sigma universelle.
+1. Ordonnancement des services batch : l’EcoScore doit être calculé après disponibilité des sous-scores normalisés (ou disposer d’un fallback maîtrisé).
+2. Application du sens (inversion) : l’inversion doit être fondée sur `impactBetterIs` (pas `userBetterIs`).
+3. Échelle : l’Impact Score doit respecter la cible 0..20 pour toutes les verticales (poids normalisés).
+4. Politique de manquants : le comportement “score manquant => 0 contribution” doit être aligné sur la stratégie retenue.
+5. Métadonnées UI : l’UI ne doit plus supposer une méthode sigma universelle.
 
 ## 5. Questions ouvertes à verrouiller
 
-1) Sens produit : « plus haut = meilleur (moins d’impact) » ou « plus haut = plus d’impact » ?
-2) Population statistique : verticale, catégorie, autre ?
-3) Chart : distribution affichée en valeurs absolues (unités) ou valeurs normalisées ?
-4) Sustainalytics : quelle métrique exacte (Score vs Risk Rating) ?
+1. Sens produit : « plus haut = meilleur (moins d’impact) » ou « plus haut = plus d’impact » ?
+2. Population statistique : verticale, catégorie, autre ?
+3. Chart : distribution affichée en valeurs absolues (unités) ou valeurs normalisées ?
+4. Sustainalytics : quelle métrique exacte (Score vs Risk Rating) ?

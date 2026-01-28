@@ -2899,6 +2899,8 @@
       "subscoreDetailsToggle": "View indicator details",
       "subscoreEyebrow": "Impact indicator",
       "subscoreChart": {
+        "averageLabel": "Average",
+        "productLabel": "This product",
         "markerAverage": "Average for {scoreLabel} sits here.",
         "markerProduct": "{productName} sits here.",
         "title": "Criteria distribution",

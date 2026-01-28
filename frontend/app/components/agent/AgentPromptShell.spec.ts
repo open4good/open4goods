@@ -22,14 +22,14 @@ mockNuxtImport(
   () =>
     () =>
     (input: { name: string; query?: Record<string, string> } | string) => {
-  if (typeof input === 'string') {
-    return input
-  }
-  const query = input?.query
-    ? new URLSearchParams(input.query).toString()
-    : ''
-  return query ? `/${input.name}?${query}` : `/${input.name}`
-}
+      if (typeof input === 'string') {
+        return input
+      }
+      const query = input?.query
+        ? new URLSearchParams(input.query).toString()
+        : ''
+      return query ? `/${input.name}?${query}` : `/${input.name}`
+    }
 )
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key }))
 
@@ -110,9 +110,7 @@ describe('AgentPromptShell', () => {
     const wrapper = mount(AgentPromptShell, {
       props: {
         title: 'Test agent',
-        promptTemplates: [
-          { id: 'p1', title: 'Prompt', content: '{{prompt}}' },
-        ],
+        promptTemplates: [{ id: 'p1', title: 'Prompt', content: '{{prompt}}' }],
         allowTemplateEditing: true,
       },
       global: globalConfig,
@@ -171,8 +169,12 @@ describe('AgentPromptShell', () => {
     await wrapper.get('[data-test="agent-prompt"]').setValue('Need help')
 
     const link = wrapper.get('[data-test="agent-contact-link"]')
-    expect(link.attributes('to')).toContain('titleKey=contact.prefill.title.question')
-    expect(link.attributes('to')).toContain('subject=agents.promptInput.contactSubject')
+    expect(link.attributes('to')).toContain(
+      'titleKey=contact.prefill.title.question'
+    )
+    expect(link.attributes('to')).toContain(
+      'subject=agents.promptInput.contactSubject'
+    )
     expect(link.attributes('to')).toContain('message=Need+help')
   })
 })

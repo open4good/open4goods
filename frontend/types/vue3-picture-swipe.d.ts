@@ -1,1 +1,1 @@
-declare module 'vue3-picture-swipe';
+declare module 'vue3-picture-swipe'

@@ -38,9 +38,7 @@ const getProductIdentifier = (product: ProductDto): string | null => {
 
 const resolveProductName = (product: ProductDto): string => {
   return (
-    resolveProductShortName(product) ||
-    product.names?.longestOfferName ||
-    '#'
+    resolveProductShortName(product) || product.names?.longestOfferName || '#'
   )
 }
 

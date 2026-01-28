@@ -20,7 +20,9 @@ scoring:
     min: 0.0
     max: 5.0
   normalization:
-    method: "MINMAX_OBSERVED"
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:

@@ -76,7 +76,11 @@ const resolvedPath = computed(() =>
   })
 )
 
-const { data: doc, pending, error } = await useAsyncData(
+const {
+  data: doc,
+  pending,
+  error,
+} = await useAsyncData(
   () => `docs-inline:${resolvedPath.value}`,
   () => getDocByPath({ path: resolvedPath.value }),
   { watch: [resolvedPath] }

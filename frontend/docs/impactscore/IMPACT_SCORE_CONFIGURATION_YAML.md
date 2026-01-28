@@ -4,7 +4,8 @@
 
 ## 1) Objectif
 
-Déclarer *dans le YAML de chaque attribut scorable* :
+Déclarer _dans le YAML de chaque attribut scorable_ :
+
 - comment transformer une valeur brute en sous-score 0..5
 - comment gérer les cas manquants / dégénérés
 - le sens utilisateur vs sens impact
@@ -61,7 +62,6 @@ scoring:
   missingValuePolicy: NEUTRAL | WORST
 
   degenerateDistributionPolicy: NEUTRAL | ERROR | FALLBACK
-
 ```
 
 ## 3) Compatibilité

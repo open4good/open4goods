@@ -38,10 +38,8 @@ const resolvedProps = computed(() => {
   if (isExternal.value) {
     return {
       href,
-      target: props.safeLinks ? '_blank' : props.target ?? undefined,
-      rel: props.safeLinks
-        ? 'noopener noreferrer'
-        : props.rel ?? undefined,
+      target: props.safeLinks ? '_blank' : (props.target ?? undefined),
+      rel: props.safeLinks ? 'noopener noreferrer' : (props.rel ?? undefined),
     }
   }
 
