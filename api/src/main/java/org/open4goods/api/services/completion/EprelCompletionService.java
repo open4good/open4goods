@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.open4goods.api.config.yml.ApiProperties;
@@ -95,7 +97,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 		} else {
 			logger.info("Completing product {} with EPREL datas", data);
 
-			EprelProduct eprelData = results.get(0);
+			EprelProduct eprelData = resolveLatestVersion(results.get(0), vertical);
 
 			data.setEprelDatas(eprelData);
 			data.getExternalIds().setEprel(eprelData.getEprelRegistrationNumber());
@@ -121,6 +123,57 @@ public class EprelCompletionService extends AbstractCompletionService {
 
 		}
 	}
+
+    /**
+     * Resolves the most recent EPREL version when the current entry is not the latest.
+     *
+     * @param eprelData current EPREL payload
+     * @param vertical vertical configuration used to filter EPREL categories
+     * @return most recent EPREL payload when available
+     */
+    private EprelProduct resolveLatestVersion(EprelProduct eprelData, VerticalConfig vertical) {
+        if (eprelData == null || Boolean.TRUE.equals(eprelData.getLastVersion())) {
+            return eprelData;
+        }
+        Long modelCoreId = eprelData.getProductModelCoreId();
+        if (modelCoreId == null) {
+            logger.info("EPREL model {} flagged as non-latest without model core id", eprelData.getEprelRegistrationNumber());
+            return eprelData;
+        }
+        List<EprelProduct> versions = eprelSearchService.searchByProductModelCoreId(
+                modelCoreId, vertical.getEprelGroupNames());
+        Optional<EprelProduct> latest = versions.stream()
+                .filter(Objects::nonNull)
+                .max((left, right) -> compareVersionId(left, right));
+        if (latest.isPresent() && latest.get() != eprelData) {
+            logger.info("Using EPREL latest version {} instead of {}", latest.get().getEprelRegistrationNumber(),
+                    eprelData.getEprelRegistrationNumber());
+            return latest.get();
+        }
+        return eprelData;
+    }
+
+    /**
+     * Compares EPREL versions using version identifiers when available.
+     *
+     * @param left first EPREL product
+     * @param right second EPREL product
+     * @return comparison result
+     */
+    private int compareVersionId(EprelProduct left, EprelProduct right) {
+        Long leftVersion = left == null ? null : left.getVersionId();
+        Long rightVersion = right == null ? null : right.getVersionId();
+        if (leftVersion == null && rightVersion == null) {
+            return 0;
+        }
+        if (leftVersion == null) {
+            return -1;
+        }
+        if (rightVersion == null) {
+            return 1;
+        }
+        return leftVersion.compareTo(rightVersion);
+    }
 
 	private Set<DataFragment> getEprelAttributesFragments(Product data, VerticalConfig vertical) {
 		Set<DataFragment> fragment = new HashSet<>();

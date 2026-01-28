@@ -71,6 +71,23 @@ public class EprelSearchService
     }
 
     /**
+     * Finds all EPREL products for a shared model core identifier.
+     *
+     * @param modelCoreId model core identifier
+     * @param eprelCategories optional EPREL categories to restrict the search
+     * @return matching products
+     */
+    public List<EprelProduct> searchByProductModelCoreId(Long modelCoreId, Collection<String> eprelCategories)
+    {
+        if (modelCoreId == null)
+        {
+            return List.of();
+        }
+        Query query = Query.of(q -> q.term(t -> t.field("productModelCoreId").value(modelCoreId)));
+        return execute(query, eprelCategories);
+    }
+
+    /**
      * Finds products whose model identifier matches the provided value exactly (case insensitive).
      *
      * @param model model identifier to search for

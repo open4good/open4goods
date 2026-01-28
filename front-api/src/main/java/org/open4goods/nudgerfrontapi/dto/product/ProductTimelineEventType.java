@@ -37,6 +37,15 @@ public enum ProductTimelineEventType {
     /** EPREL export timestamp. */
     @Schema(description = "EPREL export timestamp")
     EPREL_EXPORT,
+    /** EPREL spare parts availability end. */
+    @Schema(description = "EPREL calculated end date for spare parts availability")
+    EPREL_SPARE_PARTS_END,
+    /** EPREL software updates support end. */
+    @Schema(description = "EPREL calculated end date for software updates availability")
+    EPREL_SOFTWARE_SUPPORT_END,
+    /** EPREL guaranteed support end. */
+    @Schema(description = "EPREL calculated end date for overall technical support")
+    EPREL_SUPPORT_END,
     /** Internal import timestamp. */
     @Schema(description = "Date when the EPREL entry was imported")
     EPREL_IMPORTED,

@@ -2,8 +2,11 @@ package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.eprel.EprelProduct;
@@ -107,5 +110,34 @@ class ProductTimelineServiceTest {
                     assertThat(event.type()).isEqualTo(ProductTimelineEventType.EPREL_ON_MARKET_START);
                     assertThat(event.timestamp()).isEqualTo(1_600_000_000_000L);
                 });
+    }
+
+    @Test
+    void mapTimelineAddsEprelSupportEventsBasedOnOnMarketEndDate() {
+        Product product = new Product(5L);
+        EprelProduct eprel = new EprelProduct();
+        LocalDate onMarketEnd = LocalDate.of(2020, 1, 1);
+        long baseTimestamp = onMarketEnd.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+        eprel.setOnMarketEndDateTs(baseTimestamp);
+        eprel.setCategorySpecificAttributes(Map.of(
+                "minAvailabilitySparePartsYears", 7,
+                "minAvailabilitySoftwareUpdatesYears", 8,
+                "minGuaranteedSupportYears", 10));
+        product.setEprelDatas(eprel);
+
+        ProductTimelineDto dto = service.mapTimeline(product);
+
+        assertThat(dto).isNotNull();
+        assertThat(dto.events())
+                .extracting(ProductTimelineEventDto::type)
+                .contains(
+                        ProductTimelineEventType.EPREL_SPARE_PARTS_END,
+                        ProductTimelineEventType.EPREL_SOFTWARE_SUPPORT_END,
+                        ProductTimelineEventType.EPREL_SUPPORT_END);
+        assertThat(dto.events())
+                .filteredOn(event -> event.type() == ProductTimelineEventType.EPREL_SPARE_PARTS_END)
+                .first()
+                .extracting(ProductTimelineEventDto::timestamp)
+                .isEqualTo(onMarketEnd.plusYears(7).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
     }
 }
