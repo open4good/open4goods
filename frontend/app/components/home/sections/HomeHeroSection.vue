@@ -256,16 +256,16 @@ useHead({
             </p>
           </v-col>
         </v-row>
-        <v-row justify="center">
-          <v-col cols="12" lg="10" xl="8">
+        <v-row justify="center" class="home-hero__panel-row">
+          <v-col cols="12" lg="10" xl="8" class="home-hero__panel-col">
             <v-sheet
               class="home-hero__panel home-reveal-item home-reveal-item--scale"
               color="transparent"
               elevation="0"
               :style="{ '--reveal-delay': '180ms' }"
             >
-              <div class="d-flex flex-column ga-6">
-                <div class="d-flex flex-column ga-4">
+              <div class="home-hero__panel-content">
+                <div class="home-hero__panel-top d-flex flex-column ga-4">
                   <form
                     class="home-hero__search"
                     role="search"
@@ -325,7 +325,9 @@ useHead({
                   <div class="d-flex flex-column ga-4">
                     <NudgeToolWizard :verticals="wizardVerticals" />
                   </div>
+                </div>
 
+                <div class="home-hero__panel-bottom">
                   <HomeHeroHighlights
                     :partners-count="partnersCount"
                     :open-data-millions="openDataMillions"
@@ -338,6 +340,12 @@ useHead({
                     "
                     :reviewed-products-count="reviewedProductsCount"
                     :ai-summary-remaining-credits="aiSummaryRemainingCredits"
+                    highlights-i18n-key="hero.highlightsCompact"
+                    :highlights-fallback-keys="['home.hero.highlightsCompact']"
+                    ai-summary-i18n-key="home.hero.aiSummaryCompact"
+                    :enable-links="false"
+                    scroll-target-id="home-promises"
+                    variant="hero"
                   />
                 </div>
               </div>
@@ -475,11 +483,34 @@ useHead({
   width: 100%
   max-width: clamp(56rem, 82vw, 72rem)
   margin-inline: auto
+  height: 100%
+  display: flex
+  flex-direction: column
 
 // .home-hero__panel-grid and .home-hero__panel-block styles now handled by utility classes: d-flex flex-column ga-6, ga-4
 
 .home-hero__wizard
   width: 100%
+
+.home-hero__panel-row
+  flex: 1
+  align-items: stretch
+
+.home-hero__panel-col
+  display: flex
+
+.home-hero__panel-content
+  display: flex
+  flex-direction: column
+  gap: clamp(1.5rem, 4vw, 2.5rem)
+  height: 100%
+  width: 100%
+
+.home-hero__panel-top
+  width: 100%
+
+.home-hero__panel-bottom
+  margin-top: auto
 
 @media (max-width: 959px)
   .home-hero
@@ -488,6 +519,7 @@ useHead({
 
   .home-hero__panel
     padding: clamp(1.25rem, 5vw, 2rem)
+    height: auto
 
   .home-hero__panel-grid
     gap: clamp(1rem, 3vw, 1.5rem)
@@ -507,6 +539,9 @@ useHead({
 
   .home-hero__helpers
     margin-inline-start: 1.5rem
+
+  .home-hero__inner
+    height: 100%
 
 @media (min-width: 1280px)
   .home-hero__panel-grid

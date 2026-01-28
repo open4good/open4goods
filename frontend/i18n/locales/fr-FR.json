@@ -191,11 +191,48 @@
           ]
         }
       ],
+      "highlightsCompact": [
+        {
+          "title": "🌿 ImpactScore",
+          "segments": [
+            {
+              "text": "Un score clair pour acheter plus responsable."
+            }
+          ]
+        },
+        {
+          "title": "🫰 Prix justes",
+          "segments": [
+            {
+              "text": "Les meilleures offres et l'historique au bon moment."
+            }
+          ]
+        },
+        {
+          "title": "🇫🇷 Ouvert & éthique",
+          "segments": [
+            {
+              "text": "Indépendant, open source et données ouvertes."
+            }
+          ]
+        }
+      ],
       "aiSummary": {
         "title": "Fiches produits sur-puissantes 💪",
         "creditsLabel": "synthèses restantes : {count}",
         "creditsFallback": "Crédits restants : indisponible",
         "description": "Un outil puissant avec de la vraie IA dedans, qui vous offre un panoramique de votre produit. Dans une optique de sobriété -et parceque le partage est dans notre ADN-, ces synthèses sont aussi mises à disposition des autres utilisateurs. Gratuit, sans inscription.",
+        "reviewedProductsSuffix": "{reviewedProductsCount} fiches produits générées jusqu'à présent.",
+        "dialog": {
+          "description": "Rendez vous sur les pages produits non encore synthétisées pour activer vos générations !",
+          "confirm": "Compris !"
+        }
+      },
+      "aiSummaryCompact": {
+        "title": "Fiches produits sur-puissantes 💪",
+        "creditsLabel": "synthèses restantes : {count}",
+        "creditsFallback": "Crédits restants : indisponible",
+        "description": "Une synthèse IA claire en un coup d'œil, gratuite et sans inscription.",
         "reviewedProductsSuffix": "{reviewedProductsCount} fiches produits générées jusqu'à présent."
       },
       "example": {
@@ -212,7 +249,11 @@
         "cornerTooltip": "Les points forts de la méthodologie Nudger",
         "ariaLabel": "Carte contexte du héros présentant la promesse Nudger"
       },
+      "highlightsScrollCta": "Faire défiler vers les promesses : {title}",
       "background": "hero-background.webp"
+    },
+    "promises": {
+      "ariaLabel": "Nos promesses et engagements pour comparer responsablement"
     },
     "parallax": {
       "essentials": {

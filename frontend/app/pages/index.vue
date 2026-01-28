@@ -840,6 +840,34 @@ useHead(() => ({
           </section>
         </ParallaxWidget>
 
+        <section
+          id="home-promises"
+          class="home-page__section-wrapper home-page__stack home-page__promises"
+          :aria-label="t('home.promises.ariaLabel')"
+        >
+          <SectionReveal class="home-page__section" transition="slide-y">
+            <template #default="{ reveal }">
+              <div
+                class="home-page__promises-content"
+                :class="{ 'home-page__promises-content--visible': reveal }"
+              >
+                <HomeHeroHighlights
+                  :partners-count="heroPartnersCount"
+                  :open-data-millions="openDataMillions"
+                  :products-count="productsCount"
+                  :categories-count="categoriesCount"
+                  :impact-score-products-count="impactScoreProductsCount"
+                  :impact-score-categories-count="impactScoreCategoriesCount"
+                  :products-without-vertical-count="productsWithoutVerticalCount"
+                  :reviewed-products-count="reviewedProductsCount"
+                  :ai-summary-remaining-credits="aiSummaryRemainingCredits"
+                  variant="section"
+                />
+              </div>
+            </template>
+          </SectionReveal>
+        </section>
+
         <ParallaxWidget
           class="home-page__parallax"
           reverse
@@ -952,6 +980,26 @@ useHead(() => ({
 
 .home-page__section
   width: 100%
+
+.home-page__promises
+  padding: clamp(2rem, 6vw, 4rem) clamp(1.5rem, 6vw, 4rem)
+  background: linear-gradient(
+    160deg,
+    rgba(var(--v-theme-surface-ice-050), 0.85) 0%,
+    rgba(var(--v-theme-surface-default), 0.95) 60%,
+    rgba(var(--v-theme-surface-ice-100), 0.95) 100%
+  )
+
+.home-page__promises-content
+  max-width: 1100px
+  margin: 0 auto
+  opacity: 0
+  transform: translateY(20px)
+  transition: opacity 300ms ease, transform 300ms ease
+
+.home-page__promises-content--visible
+  opacity: 1
+  transform: translateY(0)
 
 .home-contact-redirect__card
   border: 1px solid rgb(var(--v-theme-surface-primary-080))
