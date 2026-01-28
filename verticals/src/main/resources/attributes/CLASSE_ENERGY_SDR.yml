@@ -17,7 +17,10 @@ scoring:
     min: 0.0
     max: 5.0
   normalization:
-    method: "MINMAX_OBSERVED"
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 10.0
+      fixedMax: 100.0
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:

@@ -12,7 +12,10 @@ scoring:
     min: 0.0
     max: 5.0
   normalization:
-    method: "MINMAX_OBSERVED"
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 10.0
+      fixedMax: 100.0
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
@@ -30,16 +33,16 @@ participateInACV:
 attributeValuesOrdering: "MAPPED"
 synonyms:
   all:
-  - "CLASSE ÉNERGÉTIQUE"
-  - "CLASSE ECO"
-  - "CLASSE ENERGÉTIQUE"
-  - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE"
-  - "CLASSE D'EFFICACITE ENERGETIQUE"
-  - "ENERGYCLASS"
-  - "CAVITIES[0]-ENERGYCLASS"
-  - "ENERGY EFFICIENCY CLASS"
-  - "CLASSE_ENERGY"
-  
+    - "CLASSE ÉNERGÉTIQUE"
+    - "CLASSE ECO"
+    - "CLASSE ENERGÉTIQUE"
+    - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE"
+    - "CLASSE D'EFFICACITE ENERGETIQUE"
+    - "ENERGYCLASS"
+    - "CAVITIES[0]-ENERGYCLASS"
+    - "ENERGY EFFICIENCY CLASS"
+    - "CLASSE_ENERGY"
+
 parser:
   normalize: true
   trim: true
@@ -47,9 +50,9 @@ parser:
   upperCase: true
   removeParenthesis: false
   deleteTokens:
-  - "CLASSE"
-  - "(ÉCHELLE A++ À E)"
-  - "NOT AVAILABLE"
+    - "CLASSE"
+    - "(ÉCHELLE A++ À E)"
+    - "NOT AVAILABLE"
 numericMapping:
   A+++: 100.0
   A++: 100.0

@@ -3,7 +3,7 @@
 ##################################
 key: "DIAGONALE_POUCES"
 userBetterIs: "GREATER"
-impactBetterIs: "GREATER"
+impactBetterIs: "LOWER"
 icecatFeaturesIds:
   - 944
 eprelFeatureNames:
