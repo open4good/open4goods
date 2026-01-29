@@ -2,7 +2,7 @@ import {
   HOTJAR_RECORDING_COOKIE_MAX_AGE,
   HOTJAR_RECORDING_COOKIE_NAME,
   HOTJAR_RECORDING_COOKIE_VALUE,
-} from '../../shared/utils/hotjar-recording'
+} from '~~/shared/utils/hotjar-recording'
 
 export default defineNuxtRouteMiddleware(to => {
   if (to.query.record === undefined) {

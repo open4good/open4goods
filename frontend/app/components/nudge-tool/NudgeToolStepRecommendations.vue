@@ -7,12 +7,10 @@
       <v-skeleton-loader type="image, article" />
     </div>
     <div v-else>
-      <CategoryProductCardGrid
+      <CategoryProductListView
         v-if="hasProducts"
-        :products="products"
+        :products="products.slice(0, 10)"
         :popular-attributes="popularAttributes"
-        variant="classic"
-        size="big"
       />
       <p v-else class="nudge-step-recos__empty">
         {{ $t('nudge-tool.steps.recommendations.empty') }}
@@ -24,7 +22,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
-import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
+import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 
 const props = withDefaults(
   defineProps<{

@@ -129,9 +129,20 @@ const mountGrid = async (
         VTooltip: VTooltipStub,
         VBtn: VBtnStub,
         VIcon: createStub('i'),
-        ImpactScore: createStub('div'),
+        ImpactScore: {
+          name: 'ImpactScore',
+          props: ['score', 'max'],
+          template:
+            '<div class="impact-score-stub" :data-score="score" :data-max="max"></div>',
+        },
         NuxtLink: createStub('a'),
         CompareToggleButton: CompareToggleStub,
+        ProductPriceRows: {
+          name: 'ProductPriceRows',
+          template:
+            '<div class="product-price-rows-stub"><div v-if="product.offers?.bestNewOffer" class="product-price-rows__row product-price-rows__row--new"></div><div v-if="product.offers?.bestOccasionOffer" class="product-price-rows__row product-price-rows__row--occasion"></div></div>',
+          props: ['product'],
+        },
       },
     },
   })
@@ -277,22 +288,37 @@ describe('CategoryProductCardGrid', () => {
     const wrapper = await mountGrid([product])
 
     // Check implementation of microtable
-    const pricingTable = wrapper.get(
-      '.category-product-card-grid__pricing-table'
-    )
+    const pricingTable = wrapper.findComponent({ name: 'ProductPriceRows' })
     expect(pricingTable.exists()).toBe(true)
 
-    const cells = wrapper.findAll('.category-product-card-grid__pricing-cell')
+    const cells = wrapper.findAll('.product-price-rows__row')
     expect(cells).toHaveLength(2)
 
     // Check classes for specific offer types
-    expect(
-      wrapper.find('.category-product-card-grid__pricing-cell--new').exists()
-    ).toBe(true)
-    expect(
-      wrapper
-        .find('.category-product-card-grid__pricing-cell--occasion')
-        .exists()
-    ).toBe(true)
+    expect(wrapper.find('.product-price-rows__row--new').exists()).toBe(true)
+    expect(wrapper.find('.product-price-rows__row--occasion').exists()).toBe(
+      true
+    )
+  })
+
+  it('renders impact score scaled by 4 (e.g. 3/5 -> 12/20)', async () => {
+    const product = buildProduct({
+      scores: {
+        scores: {
+          ECOSCORE: {
+            value: 3,
+            label: 'C',
+            color: '#ffcc00',
+          },
+        },
+      },
+    })
+
+    const wrapper = await mountGrid([product], { variant: 'classic' })
+
+    const impactScore = wrapper.findComponent({ name: 'ImpactScore' })
+    expect(impactScore.exists()).toBe(true)
+    expect(impactScore.props('score')).toBe(12) // 3 * 4
+    expect(impactScore.props('max')).toBe(20)
   })
 })

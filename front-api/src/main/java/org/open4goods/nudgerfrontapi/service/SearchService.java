@@ -72,6 +72,7 @@ import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
 import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.FieldValueFactorModifier;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
@@ -281,23 +282,45 @@ public class SearchService {
 
 	Query buildProductSearchQuery(String normalizedVerticalId, String sanitizedQuery, FilterRequestDto filters,
 			boolean applyDefaultExclusion) {
+		return buildLexicalQuery(normalizedVerticalId, sanitizedQuery, filters, applyDefaultExclusion, false, false);
+	}
+
+	private Query buildLexicalQuery(String verticalId, String query, FilterRequestDto filters,
+			boolean applyDefaultExclusion, boolean mustHaveVertical, boolean mustNotHaveVertical) {
 		Long expiration = repository.expirationClause();
-		return Query.of(q -> q.bool(b -> {
-			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
-			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
-			if (applyDefaultExclusion) {
-				b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+		return Query.of(q -> q.functionScore(fs -> {
+			fs.query(inner -> inner.bool(b -> {
+				b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+				b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+				if (applyDefaultExclusion) {
+					b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+				}
+				if (StringUtils.hasText(verticalId)) {
+					b.filter(f -> f.term(t -> t.field("vertical").value(verticalId)));
+				} else if (mustHaveVertical) {
+					b.filter(f -> f.exists(e -> e.field("vertical")));
+				} else if (mustNotHaveVertical) {
+					b.mustNot(m -> m.exists(e -> e.field("vertical")));
+				}
+
+				if (StringUtils.hasText(query)) {
+					b.must(m -> m.match(mq -> mq.field("offerNames").query(query)));
+				}
+
+				if (filters != null) {
+					applyFilterRequest(filters, b);
+				}
+				return b;
+			}));
+
+			if (StringUtils.hasText(query)) {
+				fs.functions(func -> func.fieldValueFactor(fvf -> fvf.field("offersCount")
+						.modifier(FieldValueFactorModifier.Log1p).factor(0.1).missing(0.0)));
+				fs.boostMode(FunctionBoostMode.Sum);
+				fs.scoreMode(FunctionScoreMode.Sum);
 			}
-			if (StringUtils.hasText(normalizedVerticalId)) {
-				b.filter(f -> f.term(t -> t.field("vertical").value(normalizedVerticalId)));
-			}
-			if (StringUtils.hasText(sanitizedQuery)) {
-				b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(sanitizedQuery)));
-			}
-			if (filters != null) {
-				applyFilterRequest(filters, b);
-			}
-			return b;
+
+			return fs;
 		}));
 	}
 
@@ -311,22 +334,7 @@ public class SearchService {
 	 */
 	private Query buildMissingVerticalSearchQuery(String sanitizedQuery, FilterRequestDto filters,
 			boolean applyDefaultExclusion) {
-		Long expiration = repository.expirationClause();
-		return Query.of(q -> q.bool(b -> {
-			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
-			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
-			if (applyDefaultExclusion) {
-				b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
-			}
-			b.mustNot(m -> m.exists(e -> e.field("vertical")));
-			if (StringUtils.hasText(sanitizedQuery)) {
-				b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(sanitizedQuery)));
-			}
-			if (filters != null) {
-				applyFilterRequest(filters, b);
-			}
-			return b;
-		}));
+		return buildLexicalQuery(null, sanitizedQuery, filters, applyDefaultExclusion, false, true);
 	}
 
 	private String normalizeVerticalId(String verticalId) {
@@ -1127,23 +1135,7 @@ public class SearchService {
 		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
 		
 		// Build a query similar to buildProductSearchQuery but ensuring vertical exists
-		Long expiration = repository.expirationClause();
-		Query query = Query.of(q -> q.bool(b -> {
-			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
-			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
-			b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
-			
-			// Crucial difference: MUST have a vertical
-			b.filter(f -> f.exists(e -> e.field("vertical")));
-			
-			if (StringUtils.hasText(sanitizedQuery)) {
-				b.must(m -> m.matchPhrasePrefix(mq -> mq.field("offerNames").query(sanitizedQuery)));
-			}
-			if (filters != null) {
-				applyFilterRequest(filters, b);
-			}
-			return b;
-		}));
+		Query query = buildLexicalQuery(null, sanitizedQuery, filters, true, true, false);
 
 		NativeQueryBuilder builder = new NativeQueryBuilder()
 				.withQuery(query)

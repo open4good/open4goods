@@ -909,7 +909,7 @@ watch(
       clearResetTimeout()
       // Lock current height as base if moving from category to content
       if (previous === 'category') {
-        // Logic handled in height watcher
+        lockedContentHeight.value = categoryHeight.value
       }
     }
   },
@@ -1075,7 +1075,14 @@ watch(
 
     const viewportChanged = lastViewportHeight.value !== viewportHeight.value
 
-    if (lockedContentHeight.value === null || viewportChanged) {
+    // Always update if we're in content mode and height is unset or viewport changed
+    // OR if we seeded it (non-null) but need to transition to the actual content height
+    if (
+      lockedContentHeight.value === null ||
+      viewportChanged ||
+      (isContentMode.value &&
+        lockedContentHeight.value === categoryHeight.value)
+    ) {
       await nextTick()
       lockedContentHeight.value = clampHeight(baseTotalHeight.value)
       lastViewportHeight.value = viewportHeight.value
@@ -1370,6 +1377,7 @@ const cornerIconDimensions = computed(() => {
 .nudge-wizard--category {
   .nudge-wizard__window {
     justify-content: flex-start;
+    overflow-y: hidden;
 
     :deep(.v-window__container) {
       align-items: flex-start;

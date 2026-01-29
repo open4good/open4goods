@@ -21,104 +21,6 @@
           {{ $t('product.price.noOffersBanner') }}
         </v-alert>
 
-        <!-- Primary Best Offer Card -->
-        <v-card
-          v-if="bestNewOffer"
-          class="product-price__best-offer-card my-4"
-          color="primary"
-          variant="flat"
-        >
-          <div
-            class="d-flex align-center justify-space-between w-100 flex-wrap gap-4 px-2 py-1"
-          >
-            <NuxtLink
-              v-if="bestNewOfferLink"
-              :to="bestNewOfferLink"
-              class="d-flex align-center gap-4 text-decoration-none text-white flex-grow-1"
-              @click="
-                handleOfferRedirectClick(
-                  bestNewOffer,
-                  'best-new-offer',
-                  bestNewOfferLink
-                )
-              "
-            >
-              <v-avatar
-                size="64"
-                rounded="lg"
-                color="white"
-                class="p-4 pa-1 elevation-1"
-              >
-                <img
-                  v-if="bestNewOffer.favicon"
-                  :src="bestNewOffer.favicon"
-                  :alt="bestNewOffer.datasourceName ?? ''"
-                  style="object-fit: contain; width: 100%; height: 100%"
-                />
-                <v-icon v-else icon="mdi-store" color="grey" />
-              </v-avatar>
-              <div mm>
-                <div
-                  class="ml-6 text-h4 font-weight-bold product-price__best-price"
-                >
-                  {{
-                    formatCurrency(bestNewOffer.price, bestNewOffer.currency)
-                  }}
-                </div>
-                <div class="ml-8 text-subtitle-1 opacity-90">
-                  {{ bestNewOffer.datasourceName }}
-                </div>
-              </div>
-            </NuxtLink>
-            <div v-else class="d-flex align-center gap-4 flex-grow-1">
-              <v-avatar
-                size="64"
-                rounded="lg"
-                color="white"
-                class="pa-1 elevation-1"
-              >
-                <img
-                  v-if="bestNewOffer.favicon"
-                  :src="bestNewOffer.favicon"
-                  :alt="bestNewOffer.datasourceName ?? ''"
-                  style="object-fit: contain; width: 100%; height: 100%"
-                />
-                <v-icon v-else icon="mdi-store" color="grey" />
-              </v-avatar>
-              <div>
-                <div class="text-h4 font-weight-bold product-price__best-price">
-                  {{
-                    formatCurrency(bestNewOffer.price, bestNewOffer.currency)
-                  }}
-                </div>
-                <div class="text-subtitle-1 opacity-90">
-                  {{ bestNewOffer.datasourceName }}
-                </div>
-              </div>
-            </div>
-
-            <v-btn
-              v-if="bestNewOfferLink"
-              :href="bestNewOfferLink"
-              target="_blank"
-              variant="flat"
-              color="surface"
-              class="product-price__cta-btn text-primary font-weight-bold px-6"
-              height="48"
-              @click="
-                handleOfferRedirectClick(
-                  bestNewOffer,
-                  'best-new-offer',
-                  bestNewOfferLink
-                )
-              "
-            >
-              {{ $t('product.price.viewDeal', "Voir l'offre") }}
-              <v-icon end icon="mdi-open-in-new" />
-            </v-btn>
-          </div>
-        </v-card>
-
         <!-- Offers Table -->
         <v-data-table
           v-if="allOffers.length > 1"
@@ -180,7 +82,7 @@
         </v-data-table>
 
         <v-card
-          v-if="allOffers.length > 0"
+          v-if="allOffers.length > 2"
           class="mt-6 product-price__competition-card"
           :class="`product-price__competition-card--${competitionLevel.tone}`"
           variant="flat"
@@ -312,6 +214,22 @@
                     </div>
                     <v-icon icon="mdi-open-in-new" size="18" />
                   </a>
+                  <div
+                    v-else
+                    class="d-flex flex-column align-center justify-center text-center pa-6 bg-grey-lighten-5 rounded-lg mb-4"
+                    style="border: 1px dashed rgba(0, 0, 0, 0.08)"
+                  >
+                    <v-icon
+                      icon="mdi-tag-off-outline"
+                      color="grey-lighten-1"
+                      class="mb-2"
+                    />
+                    <span
+                      class="text-caption font-weight-bold text-uppercase text-grey ls-1"
+                    >
+                      Pas d'offre NEUF
+                    </span>
+                  </div>
 
                   <div class="product-price__metrics-summary">
                     <dl>
@@ -454,6 +372,22 @@
                   v-if="occasionStats"
                   class="product-price__metrics h-100 pa-4"
                 >
+                  <div
+                    v-if="!bestOccasionOffer"
+                    class="d-flex flex-column align-center justify-center text-center pa-6 bg-grey-lighten-5 rounded-lg mb-4"
+                    style="border: 1px dashed rgba(0, 0, 0, 0.08)"
+                  >
+                    <v-icon
+                      icon="mdi-tag-off-outline"
+                      color="grey-lighten-1"
+                      class="mb-2"
+                    />
+                    <span
+                      class="text-caption font-weight-bold text-uppercase text-grey ls-1"
+                    >
+                      Pas d'offre OCCASION
+                    </span>
+                  </div>
                   <div class="product-price__metrics-summary">
                     <dl>
                       <div class="product-price__metrics-row">

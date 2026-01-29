@@ -63,6 +63,7 @@
     "hero": {
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
+      "animatedSubtitle": "Le comparateur écologique",
       "titleSubtitle": {
         "default": ["Acheter mieux. Sans dépenser plus."],
         "events": {
@@ -105,7 +106,7 @@
           "title": "🌿 ImpactScore : Guider vos achats",
           "segments": [
             {
-              "text": "Acheter moins pire pour la planète, grâce à notre"
+              "text": "Acheter moins pire pour la planète."
             },
             {
               "text": "évaluation environnementale",
@@ -134,7 +135,7 @@
           "title": "🫰 Comparateur de prix",
           "segments": [
             {
-              "text": "Sans se faire avoir sur les prix, avec les meilleures offres auprès de"
+              "text": "Sans se faire avoir sur les prix !"
             },
             {
               "text": "{partnersLink}",
@@ -160,7 +161,7 @@
           "title": "🇫🇷 Ouvert & éthique",
           "segments": [
             {
-              "text": "100% indépendant. Fait en France",
+              "text": "Indépendant. Ouvert. Transparent",
               "icon": "breton-flag",
               "iconPosition": "after"
             },
@@ -252,8 +253,7 @@
       "highlightsScrollCta": "Faire défiler vers les promesses : {title}",
       "background": "hero-background.webp",
       "categoryBadges": {
-        "label": "Nudgez votre catégorie préférée :",
-        "viewAll": "Voir toutes les Catégories"
+        "viewAll": "Toutes les Catégories"
       }
     },
     "promises": {
@@ -2276,6 +2276,20 @@
       "bestPrice": "Meilleur prix"
     },
     "admin": {
+      "vigilance": {
+        "title": "Points de vigilance",
+        "subtitle": "Ces indicateurs nécessitent votre attention avant l'achat.",
+        "conflicts": {
+          "title": "Informations contradictoires",
+          "description": "Nous avons détecté des différences entre les sources de données pour certaines caractéristiques.",
+          "attribute": "Caractéristique",
+          "values": "Valeurs trouvées"
+        },
+        "quality": {
+          "title": "Qualité de la donnée faible",
+          "description": "Le score de qualité de données ({score}/100) est inférieur à la moyenne de la catégorie ({avg}/100). Les informations peuvent être incomplètes."
+        }
+      },
       "subtitle": "Outils réservés à l'équipe Nudger. Affichés uniquement après connexion.",
       "title": "Impact Score :",
       "welcome_text": "Etape par étape",

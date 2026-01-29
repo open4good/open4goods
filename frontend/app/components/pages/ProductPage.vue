@@ -153,6 +153,17 @@
         </section>
 
         <section
+          v-if="showVigilanceSection"
+          :id="sectionIds.vigilance"
+          class="product-page__section"
+        >
+          <ProductVigilanceSection
+            :product="product"
+            :on-market-end-date="product.eprel?.onMarketEndDate"
+          />
+        </section>
+
+        <section
           v-if="showAttributesSection"
           :id="sectionIds.attributes"
           class="product-page__section"
@@ -213,6 +224,7 @@ import {
   type ProductSearchResponseDto,
   type ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
+import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
@@ -255,6 +267,9 @@ const ProductAdminSection = defineAsyncComponent(
 )
 const ProductLifeTimeline = defineAsyncComponent(
   () => import('~/components/product/ProductLifeTimeline.vue')
+)
+const ProductVigilanceSection = defineAsyncComponent(
+  () => import('~/components/product/ProductVigilanceSection.vue')
 )
 
 const route = useRoute()
@@ -1690,6 +1705,39 @@ const alternativesHydrated = ref(false)
 const hasAlternatives = ref(true)
 const showAiReviewSection = computed(() => Boolean(categoryDetail.value))
 
+const showVigilanceSection = computed(() => {
+  if (!product.value) return false
+
+  // Check End of Life
+  const onMarketEndDate = product.value.eprel?.onMarketEndDate
+  if (onMarketEndDate) {
+    const normalized = normalizeTimestamp(onMarketEndDate)
+    if (normalized) {
+      const date = new Date(normalized)
+      if (!isNaN(date.getTime()) && date < new Date()) {
+        return true
+      }
+    }
+  }
+
+  // Check Conflicts
+  const allAttributes = product.value.attributes?.allAttributes ?? {}
+  const hasConflicts = Object.values(allAttributes).some(
+    attr => attr.sourcing?.conflicts === true
+  )
+  if (hasConflicts) return true
+
+  // Check Data Quality
+  const dqScore = product.value.scores?.scores?.['DATA_QUALITY']
+  if (dqScore) {
+    const val = dqScore.value ?? 0
+    const avg = dqScore.relativ?.avg ?? dqScore.absolute?.avg ?? 0
+    if (val < avg) return true
+  }
+
+  return false
+})
+
 const sectionIds = {
   hero: 'hero',
   impact: 'impact',
@@ -1698,6 +1746,7 @@ const sectionIds = {
   timeline: 'cycle-de-vie',
   alternatives: 'alternatives',
   attributes: 'caracteristiques',
+  vigilance: 'vigilance',
   docs: 'documentation',
   adminPanel: 'admin-panel',
   adminJson: 'admin-json',
@@ -1845,6 +1894,12 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
     label: t('product.navigation.alternatives'),
     icon: 'mdi-compare-horizontal',
     condition: shouldShowAlternativesNavigation.value,
+  },
+  {
+    id: sectionIds.vigilance,
+    label: t('product.vigilance.title'),
+    icon: 'mdi-alert-circle-outline',
+    condition: showVigilanceSection.value,
   },
   {
     id: sectionIds.attributes,

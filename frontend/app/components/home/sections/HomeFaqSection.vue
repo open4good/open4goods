@@ -40,12 +40,7 @@ const isVisible = computed(() => Boolean(props.reveal))
       >
         {{ $t('home.faq.title') }}
       </h2>
-      <p
-        class="home-section__subtitle home-reveal-item ma-0"
-        :style="{ '--reveal-delay': '100ms' }"
-      >
-        {{ $t('home.faq.subtitle') }}
-      </p>
+
       <v-expansion-panels
         v-if="hasPanels"
         class="home-faq__panels home-reveal-item"

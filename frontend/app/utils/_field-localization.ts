@@ -23,6 +23,12 @@ const SORT_FIELD_TRANSLATION_KEYS: Record<string, string> = {
   [ECOSCORE_RELATIVE_FIELD]: 'category.products.sort.fields.impactScore',
 }
 
+export const SORT_FIELD_PRIORITIES: Record<string, number> = {
+  [ECOSCORE_RELATIVE_FIELD]: 100,
+  'price.minPrice.price': 90,
+  offersCount: 80,
+}
+
 const resolveTranslation = (
   mapping: string,
   t: TranslateFn,

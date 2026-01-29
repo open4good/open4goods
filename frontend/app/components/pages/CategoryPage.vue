@@ -493,6 +493,7 @@ import type { CategorySubsetClause } from '~/types/category-subset'
 import {
   resolveFilterFieldTitle,
   resolveSortFieldTitle,
+  SORT_FIELD_PRIORITIES,
 } from '~/utils/_field-localization'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
@@ -1394,13 +1395,9 @@ const hasSortOptions = computed(() => {
 })
 
 const defaultSortField = computed<string | null>(() => {
-  const impactFields = sortOptions.value?.impact ?? []
-  const candidate = impactFields.find(
-    field => typeof field.mapping === 'string'
-  )
-
-  if (candidate?.mapping) {
-    return String(candidate.mapping)
+  const options = sortItems.value
+  if (options.length > 0) {
+    return options[0].value
   }
 
   return hasSortOptions.value ? null : ECOSCORE_RELATIVE_FIELD
@@ -1439,6 +1436,16 @@ const sortItems = computed(() => {
         value: mapping,
         title: resolveSortFieldTitle(field, t),
       }
+    })
+    .sort((a, b) => {
+      const priorityA = SORT_FIELD_PRIORITIES[a.value] ?? 0
+      const priorityB = SORT_FIELD_PRIORITIES[b.value] ?? 0
+
+      if (priorityA !== priorityB) {
+        return priorityB - priorityA
+      }
+
+      return a.title.localeCompare(b.title)
     })
 
   if (options.length) {

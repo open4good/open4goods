@@ -142,6 +142,13 @@ const heroTitle = computed(
     }) ?? ''
 )
 
+const animatedSubtitle = computed(
+  () =>
+    packI18n.resolveString('hero.animatedSubtitle', {
+      fallbackKeys: ['home.hero.animatedSubtitle'],
+    }) ?? ''
+)
+
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
 }
@@ -249,6 +256,13 @@ useHead({
               {{ heroTitle }}
             </h1>
             <p
+              v-if="animatedSubtitle"
+              class="home-hero__title-animated-subtitle home-reveal-item"
+              :style="{ '--reveal-delay': '1500ms' }"
+            >
+              {{ animatedSubtitle }}
+            </p>
+            <p
               v-if="heroTitleSubtitle"
               class="home-hero__title-subtitle home-reveal-item"
               :style="{ '--reveal-delay': '90ms' }"
@@ -267,63 +281,68 @@ useHead({
             >
               <div class="home-hero__panel-content">
                 <div class="home-hero__panel-top d-flex flex-column ga-4">
-                  <form
-                    class="home-hero__search"
-                    role="search"
-                    @submit.prevent="handleSubmit"
-                  >
-                    <SearchSuggestField
-                      :model-value="searchQueryValue"
-                      class="home-hero__search-input"
-                      :label="
-                        packI18n.resolveString('hero.search.label', {
-                          fallbackKeys: ['home.hero.search.label'],
-                        })
-                      "
-                      :placeholder="
-                        packI18n.resolveList<string>(
-                          'hero.search.placeholders',
-                          {
-                            fallbackKeys: ['home.hero.search.placeholders'],
-                          }
-                        )
-                      "
-                      :aria-label="
-                        packI18n.resolveString('hero.search.ariaLabel', {
-                          fallbackKeys: ['home.hero.search.ariaLabel'],
-                        })
-                      "
-                      :min-chars="minSuggestionQueryLength"
-                      :enable-scan="true"
-                      :scan-mobile="true"
-                      :scan-desktop="true"
-                      :enable-voice="true"
-                      :voice-mobile="true"
-                      :voice-desktop="true"
-                      @update:model-value="updateSearchQuery"
-                      @submit="handleSubmit"
-                      @select-category="handleCategorySelect"
-                      @select-product="handleProductSelect"
+                  <div class="home-hero__search-card">
+                    <form
+                      class="home-hero__search"
+                      role="search"
+                      @submit.prevent="handleSubmit"
                     >
-                      <template #append-inner>
-                        <v-btn
-                          class="home-hero__search-submit"
-                          icon="mdi-arrow-right"
-                          variant="plain"
-                          rounded="0"
-                          size="small"
-                          type="submit"
-                          :aria-label="
-                            packI18n.resolveString('hero.search.cta', {
-                              fallbackKeys: ['home.hero.search.cta'],
-                            })
-                          "
-                        />
-                      </template>
-                    </SearchSuggestField>
-                  </form>
+                      <SearchSuggestField
+                        :model-value="searchQueryValue"
+                        class="home-hero__search-input"
+                        :label="
+                          packI18n.resolveString('hero.search.label', {
+                            fallbackKeys: ['home.hero.search.label'],
+                          })
+                        "
+                        :placeholder="
+                          packI18n.resolveList<string>(
+                            'hero.search.placeholders',
+                            {
+                              fallbackKeys: ['home.hero.search.placeholders'],
+                            }
+                          )
+                        "
+                        :aria-label="
+                          packI18n.resolveString('hero.search.ariaLabel', {
+                            fallbackKeys: ['home.hero.search.ariaLabel'],
+                          })
+                        "
+                        :min-chars="minSuggestionQueryLength"
+                        :enable-scan="true"
+                        :scan-mobile="true"
+                        :scan-desktop="true"
+                        :enable-voice="true"
+                        :voice-mobile="true"
+                        :voice-desktop="true"
+                        @update:model-value="updateSearchQuery"
+                        @submit="handleSubmit"
+                        @select-category="handleCategorySelect"
+                        @select-product="handleProductSelect"
+                      >
+                        <template #append-inner>
+                          <v-btn
+                            class="home-hero__search-submit"
+                            icon="mdi-arrow-right"
+                            variant="plain"
+                            rounded="0"
+                            size="small"
+                            type="submit"
+                            :aria-label="
+                              packI18n.resolveString('hero.search.cta', {
+                                fallbackKeys: ['home.hero.search.cta'],
+                              })
+                            "
+                          />
+                        </template>
+                      </SearchSuggestField>
+                    </form>
 
-                  <CategoryBadgesRow :categories="wizardVerticals" />
+                    <CategoryBadgesRow
+                      :categories="wizardVerticals"
+                      class="home-hero__badges"
+                    />
+                  </div>
 
                   <div class="d-flex flex-column ga-4">
                     <NudgeToolWizard :verticals="wizardVerticals" />
@@ -469,10 +488,25 @@ useHead({
 
 // .home-hero__search styles now handled by utility classes
 
+.home-hero__search-card
+  display: flex
+  flex-direction: column
+  // Visuals removed to return to standalone search bar + badges below
+  // background: rgba(var(--v-theme-surface-default), 0.9)
+  // border-radius: clamp(1rem, 3vw, 1.5rem)
+  // box-shadow: 0 12px 30px rgba(var(--v-theme-shadow-primary-600), 0.1)
+  // padding: 0.75rem 0.5rem 0.25rem
+  // border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.15)
+  gap: 0.5rem
+
 .home-hero__search-input
   border-radius: clamp(1.5rem, 4vw, 2rem)
   background: rgba(var(--v-theme-surface-default), 0.85)
   box-shadow: 0 18px 30px rgba(var(--v-theme-shadow-primary-600), 0.1)
+
+.home-hero__badges
+  padding-inline: 1rem
+  // padding-bottom removed as card container is gone
 
 .home-hero__search-submit
   box-shadow: none

@@ -2550,6 +2550,20 @@
       "bestPrice": "Best price"
     },
     "admin": {
+      "vigilance": {
+        "title": "Vigilance Points",
+        "subtitle": "These indicators require your attention before purchase.",
+        "conflicts": {
+          "title": "Conflicting Information",
+          "description": "We detected differences between data sources for some attributes.",
+          "attribute": "Attribute",
+          "values": "Found Values"
+        },
+        "quality": {
+          "title": "Low Data Quality",
+          "description": "The data quality score ({score}/100) is lower than the category average ({avg}/100). Information might be incomplete."
+        }
+      },
       "subtitle": "Tools reserved for Nudger teammates. Visible only when signed in.",
       "title": "Admin tools",
       "sections": {

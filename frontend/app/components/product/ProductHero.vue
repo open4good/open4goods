@@ -68,10 +68,9 @@
                     })
                   "
                   icon="mdi-leaf"
-                  size="large"
+                  size="small"
                   to="/impact-score"
-                  class="flex-grow-1 h-100"
-                  style="max-width: 300px"
+                  style="max-width: 200px"
                 />
                 <ImpactScore
                   :score="impactScore"
@@ -83,7 +82,7 @@
                 />
               </div>
 
-              <div v-if="hasBrandOrModel" class="product-hero__heading-group">
+              <div v-if="hasBrandOrModel" class="mb-4 product-hero__heading-group">
                 <span v-if="productBrandName" class="product-hero__brand-name">
                   {{ productBrandName }}
                 </span>

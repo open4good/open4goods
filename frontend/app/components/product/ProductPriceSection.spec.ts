@@ -388,7 +388,7 @@ describe('ProductPriceSection', () => {
     await wrapper.unmount()
   })
 
-  it('renders a low competition card for < 2 offers', async () => {
+  it('does not render a low competition card for < 2 offers', async () => {
     const wrapper = await mountComponent({
       offersByCondition: {
         NEW: [
@@ -405,15 +405,37 @@ describe('ProductPriceSection', () => {
     })
 
     const card = wrapper.find('.product-price__competition-card')
-    expect(card.exists()).toBe(true)
-    expect(card.text()).toContain('Concurrence faible !')
-    expect(card.text()).toContain(
-      'Peu d’offres disponibles, la comparaison est limitée.'
-    )
+    expect(card.exists()).toBe(false)
     await wrapper.unmount()
   })
 
-  it('renders a correct competition card for 2-4 offers', async () => {
+  it('does not render a competition card for 2 offers', async () => {
+    const wrapper = await mountComponent({
+      offersByCondition: {
+        NEW: [
+          {
+            datasourceName: 'Merchant A',
+            price: 100,
+            currency: 'EUR',
+            condition: 'NEW',
+          },
+          {
+            datasourceName: 'Merchant B',
+            price: 200,
+            currency: 'EUR',
+            condition: 'NEW',
+          },
+        ],
+      },
+      offersCount: 2,
+    })
+
+    const card = wrapper.find('.product-price__competition-card')
+    expect(card.exists()).toBe(false)
+    await wrapper.unmount()
+  })
+
+  it('renders a correct competition card for 3-4 offers', async () => {
     const wrapper = await mountComponent({
       offersByCondition: {
         NEW: [

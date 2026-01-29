@@ -1,9 +1,5 @@
 <template>
   <div v-if="displayedCategories.length" class="category-badges-row">
-    <span class="category-badges-row__label">
-      {{ t('home.hero.categoryBadges.label') }}
-    </span>
-
     <v-btn
       v-if="canScrollPrev"
       icon
@@ -30,6 +26,18 @@
         <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
         {{ category.verticalHomeTitle ?? category.id }}
       </v-chip>
+
+      <v-chip
+        :to="categoriesUrl"
+        variant="flat"
+        color="surface"
+        size="small"
+        rounded="pill"
+        class="category-badges-row__chip text-neutral-secondary elevation-1"
+      >
+        <v-icon icon="mdi-view-grid-outline" start size="16" />
+        {{ t('home.hero.categoryBadges.viewAll') }}
+      </v-chip>
     </div>
 
     <v-btn
@@ -43,11 +51,6 @@
     >
       <v-icon icon="mdi-chevron-double-right" size="18" />
     </v-btn>
-
-    <NuxtLink :to="categoriesUrl" class="category-badges-row__view-all">
-      <v-icon icon="mdi-view-grid-outline" size="16" start />
-      {{ t('home.hero.categoryBadges.viewAll') }}
-    </NuxtLink>
   </div>
 </template>
 

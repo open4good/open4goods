@@ -154,8 +154,8 @@ const normalizeHighlightItems = (items: unknown): HeroHighlightItem[] => {
     .filter((item): item is HeroHighlightItem => item != null)
 }
 
-const resolvedHighlightsKey = computed(() =>
-  props.highlightsI18nKey?.trim() || 'hero.highlights'
+const resolvedHighlightsKey = computed(
+  () => props.highlightsI18nKey?.trim() || 'hero.highlights'
 )
 const resolvedHighlightsFallbackKeys = computed(() => {
   if (props.highlightsFallbackKeys?.length) {
@@ -695,6 +695,10 @@ const resolveSegmentIcon = (icon?: string) => {
 }
 
 const aiSummaryReviewedLabel = computed(() => {
+  if (!props.reviewedProductsCount) {
+    return null
+  }
+
   const reviewedProductsCount = formattedReviewedProductsCount.value
 
   if (reviewedProductsCount == null) {
@@ -755,7 +759,7 @@ const resolveHighlightStyle = (index: number) => {
     }"
     role="list"
   >
-    <v-row align="stretch" justify="center">
+    <v-row align="stretch" class="mb-10" justify="center">
       <v-col
         v-for="(item, index) in heroHighlightItems"
         :key="`hero-highlight-${index}`"
@@ -778,7 +782,9 @@ const resolveHighlightStyle = (index: number) => {
             :selectable="isScrollEnabled"
             :elevation="10"
             :hover-elevation="14"
-            :aria-label="isScrollEnabled ? scrollCtaLabel(item.title) : undefined"
+            :aria-label="
+              isScrollEnabled ? scrollCtaLabel(item.title) : undefined
+            "
             :style="resolveHighlightStyle(index)"
             @click="handleHighlightClick"
           >
@@ -884,7 +890,7 @@ const resolveHighlightStyle = (index: number) => {
     </v-row>
     <SectionReveal class="home-hero-highlights__ai-summary" transition="fade">
       <RoundedCornerCard
-        class="home-hero-highlights__ai-summary-card"
+        class="mt-8 home-hero-highlights__ai-summary-card"
         surface="strong"
         accent-corner="bottom-right"
         corner-variant="none"

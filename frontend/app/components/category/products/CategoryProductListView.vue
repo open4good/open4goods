@@ -39,19 +39,6 @@
           </div>
 
           <div class="category-product-list__meta">
-            <div class="category-product-list__prices">
-              <ProductMicroPrice
-                v-if="product.offers?.bestOccasionOffer"
-                :product="product"
-                condition="used"
-              />
-              <ProductMicroPrice
-                v-if="product.offers?.bestNewOffer"
-                :product="product"
-                condition="new"
-              />
-            </div>
-
             <div class="category-product-list__status">
               <template v-if="resolveBaseLine(product)">
                 <span class="category-product-list__status-text">
@@ -95,6 +82,10 @@
           </ul>
         </div>
 
+        <div class="category-product-list__prices-column">
+          <ProductPriceRows :product="product" />
+        </div>
+
         <div class="category-product-list__score">
           <ImpactScore
             v-if="impactScoreValue(product) != null"
@@ -124,7 +115,7 @@ import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import AiReviewAvailabilityIcon from '~/components/shared/ai/AiReviewAvailabilityIcon.vue'
-import ProductMicroPrice from '~/components/product/ProductMicroPrice.vue'
+import ProductPriceRows from '~/components/product/ProductPriceRows.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
@@ -242,11 +233,12 @@ const popularAttributesByProduct = (
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 
-  &__prices
+  &__prices-column
     display: flex
-    align-items: center
-    gap: 0.5rem
-    flex-wrap: wrap
+    flex-direction: column
+    justify-content: center
+    min-width: 200px
+    flex: 0 0 auto
 
   &__status
     display: inline-flex

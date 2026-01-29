@@ -55,7 +55,7 @@
               >
                 <ImpactScore
                   v-if="impactScoreValue(product) != null"
-                  :score="impactScoreValue(product) ?? 0"
+                  :score="(impactScoreValue(product) ?? 0) * 4"
                   :max="20"
                   size="small"
                   variant="corner"
@@ -135,46 +135,7 @@
 
           <!-- Microtable Pricing Layout -->
           <div class="category-product-card-grid__pricing-table">
-            <template v-for="badge in offerBadges(product)" :key="badge.key">
-              <v-tooltip location="bottom" open-delay="200">
-                <template #activator="{ props: tooltipProps }">
-                  <div
-                    class="category-product-card-grid__pricing-cell"
-                    :class="`category-product-card-grid__pricing-cell--${badge.appearance}`"
-                    v-bind="tooltipProps"
-                  >
-                    <!-- Row Layout: LABEL - PRICE - TREND -->
-                    <span class="category-product-card-grid__pricing-label">
-                      {{ badge.label }}
-                    </span>
-
-                    <span class="category-product-card-grid__pricing-amount">
-                      {{ badge.price }}
-                    </span>
-
-                    <v-icon
-                      v-if="badge.trendIcon"
-                      :icon="badge.trendIcon"
-                      :color="badge.trendColor"
-                      size="small"
-                      class="category-product-card-grid__pricing-trend"
-                    />
-                  </div>
-                </template>
-
-                <!-- Tooltip Content -->
-                <div class="text-center">
-                  <div v-if="badge.countLabel" class="font-weight-bold mb-1">
-                    {{ badge.countLabel }}
-                  </div>
-                  <div v-else class="font-weight-bold mb-1">1 offre</div>
-
-                  <div v-if="badge.trendDescription" class="text-caption">
-                    {{ badge.trendDescription }}
-                  </div>
-                </div>
-              </v-tooltip>
-            </template>
+            <ProductPriceRows :product="product" />
           </div>
 
           <!-- Global offers count removed (moved to cells) -->
@@ -186,22 +147,18 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type {
-  AttributeConfigDto,
-  ProductAggregatedPriceDto,
-  ProductDto,
-} from '~~/shared/api-client'
-import { ProductPriceTrendDtoTrendEnum } from '~~/shared/api-client'
+import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
+import ProductPriceRows from '~/components/product/ProductPriceRows.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { formatBestPrice, formatOffersCount } from '~/utils/_product-pricing'
+import { formatOffersCount } from '~/utils/_product-pricing'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 
 const props = defineProps<{
@@ -220,43 +177,6 @@ const { translatePlural } = usePluralizedTranslation()
 
 const resolveCardProductName = (product: ProductDto) =>
   resolveProductShortName(product, locale.value)
-
-const currencySymbolCache = new Map<string, string>()
-const NBSP = '\u00A0'
-
-const resolveCurrencySymbol = (currency?: string | null): string | null => {
-  if (!currency) {
-    return null
-  }
-
-  const upperCaseCurrency = currency.toUpperCase()
-
-  if (currencySymbolCache.has(upperCaseCurrency)) {
-    return currencySymbolCache.get(upperCaseCurrency) ?? null
-  }
-
-  try {
-    const formatter = new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: upperCaseCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-      currencyDisplay: 'symbol',
-    })
-
-    const symbol =
-      formatter.formatToParts(0).find(part => part.type === 'currency')
-        ?.value ?? upperCaseCurrency
-
-    currencySymbolCache.set(upperCaseCurrency, symbol)
-
-    return symbol
-  } catch {
-    currencySymbolCache.set(upperCaseCurrency, upperCaseCurrency)
-
-    return upperCaseCurrency
-  }
-}
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
@@ -289,10 +209,51 @@ const productLink = (product: ProductDto) => {
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)
 
-const bestPriceLabel = (product: ProductDto) => formatBestPrice(product, t, n)
-
 const offersCountLabel = (product: ProductDto) =>
   formatOffersCount(product, translatePlural)
+
+type OfferBadge = {
+  key: string
+  label: string
+  price: string
+  appearance: string
+}
+
+const offerBadges = (product: ProductDto) => {
+  const entries: OfferBadge[] = []
+  const newOffer = product.offers?.bestNewOffer
+  const occasionOffer = product.offers?.bestOccasionOffer
+
+  if (newOffer?.price != null) {
+    entries.push({
+      key: 'new',
+      label: t('category.products.pricing.newOfferLabel'),
+      price:
+        newOffer.shortPrice ||
+        n(newOffer.price, {
+          style: 'currency',
+          currency: newOffer.currency || 'EUR',
+        }),
+      appearance: 'new',
+    })
+  }
+
+  if (occasionOffer?.price != null) {
+    entries.push({
+      key: 'occasion',
+      label: t('category.products.pricing.occasionOfferLabel'),
+      price:
+        occasionOffer.shortPrice ||
+        n(occasionOffer.price, {
+          style: 'currency',
+          currency: occasionOffer.currency || 'EUR',
+        }),
+      appearance: 'occasion',
+    })
+  }
+
+  return entries
+}
 
 type DisplayedAttribute = {
   key: string
@@ -330,205 +291,6 @@ const popularAttributesByProduct = (
     maxAttributes.value ?? (normalizedSize.value === 'small' ? 2 : 3)
 
   return entries.slice(0, effectiveMax)
-}
-
-const formatOfferPrice = (
-  offer: ProductAggregatedPriceDto | undefined,
-  fallback: ProductDto
-): string | null => {
-  if (!offer) {
-    return null
-  }
-
-  const currency = offer.currency ?? fallback.offers?.bestPrice?.currency
-  const shortPrice = offer.shortPrice?.trim()
-
-  if (shortPrice) {
-    if (!currency) {
-      return shortPrice
-    }
-
-    const symbol = resolveCurrencySymbol(currency)
-
-    if (!symbol) {
-      return shortPrice
-    }
-
-    const normalisedShortPrice = shortPrice.replace(/\s+/g, ' ').trim()
-    const containsSymbol =
-      normalisedShortPrice.includes(symbol) ||
-      normalisedShortPrice.toUpperCase().includes(currency.toUpperCase())
-
-    return containsSymbol
-      ? normalisedShortPrice
-      : `${normalisedShortPrice}${NBSP}${symbol}`
-  }
-
-  const price = offer.price
-
-  if (price == null) {
-    return null
-  }
-
-  if (currency) {
-    try {
-      return n(price, { style: 'currency', currency })
-    } catch {
-      return `${n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim()
-    }
-  }
-
-  return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-type OfferBadge = {
-  key: string
-  label: string
-  price: string
-  appearance: 'new' | 'occasion' | 'default'
-  trendIcon?: string
-  trendColor?: string
-  trend?: ProductPriceTrendDtoTrendEnum
-  countLabel?: string
-  trendDescription?: string
-}
-
-const resolveTrendIcon = (
-  trend?: ProductPriceTrendDtoTrendEnum
-): string | undefined => {
-  switch (trend) {
-    case ProductPriceTrendDtoTrendEnum.PriceDecrease:
-      return 'mdi-trending-down'
-    case ProductPriceTrendDtoTrendEnum.PriceIncrease:
-      return 'mdi-trending-up'
-    case ProductPriceTrendDtoTrendEnum.PriceStable:
-      return 'mdi-trending-neutral'
-    default:
-      return undefined
-  }
-}
-
-const resolveTrendColor = (
-  trend?: ProductPriceTrendDtoTrendEnum
-): string | undefined => {
-  switch (trend) {
-    case ProductPriceTrendDtoTrendEnum.PriceDecrease:
-      return 'success'
-    case ProductPriceTrendDtoTrendEnum.PriceIncrease:
-      return 'error'
-    case ProductPriceTrendDtoTrendEnum.PriceStable:
-      return 'neutral'
-    default:
-      return undefined
-  }
-}
-
-const getTrendDescription = (
-  trend: ProductPriceTrendDtoTrendEnum | undefined,
-  label: string
-) => {
-  switch (trend) {
-    case ProductPriceTrendDtoTrendEnum.PriceDecrease:
-      return t('category.products.pricing.trends.decrease', { label })
-    case ProductPriceTrendDtoTrendEnum.PriceIncrease:
-      return t('category.products.pricing.trends.increase', { label })
-    case ProductPriceTrendDtoTrendEnum.PriceStable:
-      return t('category.products.pricing.trends.stable', { label })
-    default:
-      return ''
-  }
-}
-
-const offerBadges = (product: ProductDto): OfferBadge[] => {
-  const entries: OfferBadge[] = []
-  const newOffer = product.offers?.bestNewOffer
-  const occasionOffer = product.offers?.bestOccasionOffer
-  const newTrend = product.offers?.newTrend?.trend
-  const occasionTrend = product.offers?.occasionTrend?.trend
-
-  if (newOffer) {
-    const formatted = formatOfferPrice(newOffer, product)
-
-    if (formatted) {
-      entries.push({
-        key: 'new',
-        label: t('category.products.pricing.newOfferLabel'),
-        price: formatted,
-        appearance: 'new',
-        trendIcon: resolveTrendIcon(newTrend),
-        trendColor: resolveTrendColor(newTrend),
-        trend: newTrend,
-        countLabel: getConditionCountLabel(product, 'new'),
-        trendDescription: getTrendDescription(
-          newTrend,
-          t('category.products.pricing.newOfferLabel')
-        ),
-      })
-    }
-  }
-
-  if (occasionOffer) {
-    const formatted = formatOfferPrice(occasionOffer, product)
-
-    if (formatted) {
-      entries.push({
-        key: 'occasion',
-        label: t('category.products.pricing.occasionOfferLabel'),
-        price: formatted,
-        appearance: 'occasion',
-        trendIcon: resolveTrendIcon(occasionTrend),
-        trendColor: resolveTrendColor(occasionTrend),
-        trend: occasionTrend,
-        countLabel: getConditionCountLabel(product, 'occasion'),
-        trendDescription: getTrendDescription(
-          occasionTrend,
-          t('category.products.pricing.occasionOfferLabel')
-        ),
-      })
-    }
-  }
-
-  // If no specific offer types, show generic best
-  if (!entries.length) {
-    const fallbackOffer = product.offers?.bestPrice
-    const formatted =
-      formatOfferPrice(fallbackOffer, product) ?? bestPriceLabel(product)
-
-    entries.push({
-      key: 'best',
-      label: t('category.products.pricing.bestOfferLabel'),
-      price: formatted,
-      appearance: 'default',
-    })
-  }
-
-  return entries
-}
-
-const getConditionCountLabel = (
-  product: ProductDto,
-  type: 'new' | 'occasion'
-): string | undefined => {
-  const offersByCondition = product.offers?.offersByCondition
-  if (!offersByCondition) return undefined
-
-  let count = 0
-  if (type === 'new') {
-    // Sum up "new" like keys. Typically 'NEW'
-    count = offersByCondition['NEW']?.length ?? 0
-  } else {
-    // Sum up anything not NEW? or specific keys like 'USED', 'REFURBISHED'
-    // For simplicity, we assume we want to show count for the 'bestOccasion' context.
-    // We can iterate keys.
-    Object.keys(offersByCondition).forEach(key => {
-      if (key !== 'NEW') {
-        count += offersByCondition[key]?.length ?? 0
-      }
-    })
-  }
-
-  if (count <= 0) return undefined
-  return translatePlural('category.products.offerCount', count, { count })
 }
 </script>
 
