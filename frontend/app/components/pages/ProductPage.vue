@@ -1460,7 +1460,13 @@ interface RadarSeriesEntry {
 }
 
 interface RadarDataset {
-  axes: Array<{ id: string; name: string; attributeValue: string | null }>
+  axes: Array<{
+    id: string
+    name: string
+    attributeValue: string | null
+    min?: number
+    max?: number
+  }>
   series: RadarSeriesEntry[]
 }
 
@@ -1495,6 +1501,9 @@ const radarData = computed<RadarDataset>(() => {
       }
 
       const attributeValue = findIndexedAttributeValue(id)
+      const abs = score.absolute
+      const min = typeof abs?.min === 'number' ? abs.min : null
+      const max = typeof abs?.max === 'number' ? abs.max : null
 
       return {
         id,
@@ -1503,6 +1512,8 @@ const radarData = computed<RadarDataset>(() => {
         attributeValue,
         bestValue: extractReferenceScoreValue(bestReferenceProduct.value, id),
         worstValue: extractReferenceScoreValue(worstReferenceProduct.value, id),
+        min,
+        max,
       }
     })
     .filter(
@@ -1515,6 +1526,8 @@ const radarData = computed<RadarDataset>(() => {
         attributeValue: string | null
         bestValue: number | null
         worstValue: number | null
+        min: number | null
+        max: number | null
       } => Boolean(entry)
     )
 
@@ -1522,11 +1535,23 @@ const radarData = computed<RadarDataset>(() => {
     return { axes: [], series: [] }
   }
 
-  const axes = axesDetails.map(({ id, name, attributeValue }) => ({
-    id,
-    name,
-    attributeValue,
-  }))
+  const axes = axesDetails.map(({ id, name, attributeValue, min, max }) => {
+    const config = attributeConfigMap.value?.get(id)
+    // For LOWER is BETTER (e.g. Energy), the Axis Max (Outer Edge) should be the Best Value (Min).
+    // For HIGHER is BETTER (e.g. Durabilty), the Axis Max is the Max Value.
+    let axisMax = max
+    if (config?.impactBetterIs === 'LOWER') {
+      axisMax = min
+    }
+
+    return {
+      id,
+      name,
+      attributeValue,
+      min: min ?? undefined,
+      max: axisMax ?? undefined,
+    }
+  })
   const productValues = axesDetails.map(entry => entry.productValue)
   const bestValues = axesDetails.map(entry => entry.bestValue ?? null)
   const worstValues = axesDetails.map(entry => entry.worstValue ?? null)
@@ -1542,18 +1567,17 @@ const radarData = computed<RadarDataset>(() => {
           productValue: productValues[index],
           bestValue: bestValues[index],
           worstValue: worstValues[index],
+          scaleMin: axesDetails[index].min ?? undefined,
+          scaleMax: axesDetails[index].max ?? undefined,
         },
         attributeConfigMap.value
       )
     })
   }
 
-  const productPlottedValues = transformValuesIfNeeded(
-    productValues,
-    productValues
-  )
-  const bestPlottedValues = transformValuesIfNeeded(bestValues, bestValues)
-  const worstPlottedValues = transformValuesIfNeeded(worstValues, worstValues)
+  const productPlottedValues = transformValuesIfNeeded(productValues)
+  const bestPlottedValues = transformValuesIfNeeded(bestValues)
+  const worstPlottedValues = transformValuesIfNeeded(worstValues)
 
   const series: RadarSeriesEntry[] = []
 

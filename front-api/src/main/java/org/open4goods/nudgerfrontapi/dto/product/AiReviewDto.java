@@ -86,6 +86,9 @@ public record AiReviewDto(
         @Schema(description = "Short community summary of the product (max 20 words)")
         String communityOneline,
 
+        @Schema(description = "Warning about potential obsolescence issues")
+        String obsolescenceWarning,
+
         @Schema(description = "Ultra-synthetic baseline shown under the title")
         String baseLine
 ) {

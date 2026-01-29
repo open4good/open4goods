@@ -3,7 +3,7 @@ import type { AiReviewDto, AiReviewSourceDto } from '~~/shared/api-client'
 const referencePattern = /\[(\s*\d+(?:\s*,\s*\d+)*)\]/g
 
 const buildReferenceAnchor = (referenceNumber: number): string =>
-  `<a class="review-ref" href="#review-ref-${referenceNumber}">[${referenceNumber}]</a>`
+  `<sup class="citation"><a class="review-ref" href="#review-ref-${referenceNumber}">[${referenceNumber}]</a></sup>`
 
 const collectAvailableReferences = (
   sources?: AiReviewSourceDto[] | null

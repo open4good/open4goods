@@ -32,6 +32,7 @@ interface RadarAxisEntry {
   id: string
   name: string
   attributeValue: string | null
+  max?: number
 }
 
 interface RadarSeriesEntry {
@@ -90,16 +91,32 @@ const option = computed<EChartsOption | null>(() => {
   }
 
   const indicator = props.axes.map((entry, index) => {
-    const valuesForAxis = props.series
-      .map(s => s.values[index])
-      .filter((v): v is number => typeof v === 'number' && Number.isFinite(v))
+    let max = 5
+    let min = 0
 
-    const maxObserved = valuesForAxis.length ? Math.max(...valuesForAxis) : 5
-    const paddedMax = maxObserved > 0 ? maxObserved * 1.1 : 5
+    if (
+      typeof entry.max === 'number' &&
+      Number.isFinite(entry.max) &&
+      entry.max > 0
+    ) {
+      max = entry.max
+    } else {
+      const valuesForAxis = props.series
+        .map(s => s.values[index])
+        .filter((v): v is number => typeof v === 'number' && Number.isFinite(v))
+
+      const maxObserved = valuesForAxis.length ? Math.max(...valuesForAxis) : 5
+      max = maxObserved > 0 ? maxObserved * 1.1 : 5
+    }
+
+    if (typeof entry.min === 'number' && Number.isFinite(entry.min)) {
+      min = entry.min
+    }
 
     return {
       name: entry.name,
-      max: paddedMax,
+      max: max,
+      min: min,
     }
   })
   const seriesData = props.series.map(entry => ({

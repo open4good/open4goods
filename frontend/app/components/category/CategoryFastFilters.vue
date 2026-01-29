@@ -18,8 +18,17 @@
         v-for="(group, index) in groupedSubsets"
         :key="group.key"
         class="category-fast-filters__group"
+        :class="{
+          'category-fast-filters__group--column': group.key === 'impactscore',
+        }"
         :aria-label="group.label"
       >
+        <span
+          v-if="group.key === 'impactscore'"
+          class="text-caption font-weight-bold"
+        >
+          Impact environnemental :
+        </span>
         <v-chip-group
           class="category-fast-filters__chip-group"
           :model-value="getGroupSelection(group.key)"
@@ -46,20 +55,25 @@
                 <v-chip
                   v-bind="tooltipProps"
                   :value="subset.id"
-                  :color="
-                    index === 0 || isSubsetActive(subset)
-                      ? 'primary'
-                      : undefined
-                  "
-                  :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
+                  :color="getSubsetStyle(group.key, subset).color"
+                  :variant="getSubsetStyle(group.key, subset).variant"
                   rounded="lg"
                   class="category-fast-filters__chip"
+                  :class="{
+                    'category-fast-filters__chip--white-text': getSubsetStyle(
+                      group.key,
+                      subset
+                    ).isDark,
+                  }"
                 >
                   <span class="category-fast-filters__chip-label">
-                    <span v-if="index === 0" class="mr-1 font-weight-bold"
-                      >Impact</span
+                    <span
+                      v-if="index === 0 && group.key !== 'impactscore'"
+                      class="mr-1 font-weight-bold"
                     >
-                    {{ resolveSubsetLabel(subset) }}
+                      Impact
+                    </span>
+                    {{ resolveSubsetLabel(subset, group.key) }}
                   </span>
                 </v-chip>
               </template>
@@ -68,18 +82,25 @@
             <v-chip
               v-else
               :value="subset.id"
-              :color="
-                index === 0 || isSubsetActive(subset) ? 'primary' : undefined
-              "
-              :variant="isSubsetActive(subset) ? 'flat' : 'outlined'"
+              :color="getSubsetStyle(group.key, subset).color"
+              :variant="getSubsetStyle(group.key, subset).variant"
               rounded="lg"
               class="category-fast-filters__chip"
+              :class="{
+                'category-fast-filters__chip--white-text': getSubsetStyle(
+                  group.key,
+                  subset
+                ).isDark,
+              }"
             >
               <span class="category-fast-filters__chip-label">
-                <span v-if="index === 0" class="mr-1 font-weight-bold"
-                  >Impact</span
+                <span
+                  v-if="index === 0 && group.key !== 'impactscore'"
+                  class="mr-1 font-weight-bold"
                 >
-                {{ resolveSubsetLabel(subset) }}
+                  Impact
+                </span>
+                {{ resolveSubsetLabel(subset, group.key) }}
               </span>
             </v-chip>
           </template>
@@ -220,7 +241,10 @@ const normalizeSelectionValue = (value: unknown): string | null => {
   return String(value)
 }
 
-const resolveSubsetLabel = (subset: VerticalSubsetDto): string => {
+const resolveSubsetLabel = (
+  subset: VerticalSubsetDto,
+  groupKey?: string
+): string => {
   if (!subset.title && !subset.caption && import.meta.server) {
     const cacheKey = subset.id ?? subset.group ?? 'unknown'
     if (!loggedSubsets.has(cacheKey)) {
@@ -232,7 +256,71 @@ const resolveSubsetLabel = (subset: VerticalSubsetDto): string => {
     }
   }
 
-  return subset.title ?? subset.caption ?? subset.id ?? subset.group ?? 'subset'
+  let label =
+    subset.title ?? subset.caption ?? subset.id ?? subset.group ?? 'subset'
+
+  // Special handling for Impact score labels to strip the "Impact" prefix
+  if (groupKey === 'impactscore') {
+    label = label.replace(/^Impact\s+/i, '')
+  }
+
+  return label
+}
+
+const getSubsetStyle = (
+  groupKey: string,
+  subset: VerticalSubsetDto
+): {
+  color: string | undefined
+  variant: 'flat' | 'outlined' | 'tonal'
+  isDark?: boolean
+} => {
+  const isActive = isSubsetActive(subset)
+
+  if (groupKey === 'impactscore') {
+    const label = resolveSubsetLabel(subset, groupKey).toLowerCase()
+
+    // Map labels to colors: High (Red), Low (Green), Medium (Blue)
+    let color = undefined
+    if (label.includes('faible')) {
+      color = 'success' // Green
+    } else if (label.includes('élevé') || label.includes('eleve')) {
+      color = 'error' // Red
+    } else if (label.includes('moyen')) {
+      color = 'info' // Blue
+    }
+
+    if (isActive) {
+      return { color: color ?? 'primary', variant: 'flat', isDark: true }
+    } else if (color) {
+      // For inactive impact scores, show them with color but outlined or tonal?
+      // User said "solid design" potentially implies they want them always colored?
+      // "Use red / green / blue scale colors for respectiv badges."
+      // Typically filters are outlined when inactive.
+      // Let's use the color for the text/border (outlined) when inactive, and solid when active.
+      // ACTUALLY, "solid design" + "use red/green/blue" might mean they want them to look like badges even when not selected?
+      // Or maybe just when selected.
+      // Standard behavior: Outlined when inactive (grey or colored border), Flat when active.
+      // Let's stick to: Inactive = Outlined (default color or specific?), Active = Flat (Specific Color).
+      // WAIT, "Stylise, moderniz, solid design" -> Maybe they want them always solid?
+      // But standard chips usually toggle.
+      // If I make them always solid, how do I show selection?
+      // Maybe opacity or a checkmark?
+      // Let's try: Active = Solid Color. Inactive = Outlined with that color?
+      // Let's try to pass the specific color to the active state.
+      // If inactive, let's keep it neutral or maybe tonal.
+      // Let's assume standard behavior:
+      // Active: Flat Error/Success/Info
+      // Inactive: Outlined (Neutral) OR Outlined (Color).
+      // Let's go with Active = Colored Flat.
+      return { color: color, variant: 'outlined', isDark: false }
+    }
+  }
+
+  return {
+    color: isActive ? 'primary' : undefined,
+    variant: isActive ? 'flat' : 'outlined',
+  }
 }
 
 const emitToggle = (subset: VerticalSubsetDto, desired: boolean) => {
@@ -384,6 +472,11 @@ watch(groupedSubsets, () => {
     gap: 0.5rem
     min-width: 0
 
+    &--column
+      flex-direction: column
+      align-items: flex-start
+      gap: 0.25rem
+
   &__chip-group
     display: flex
     flex-wrap: nowrap
@@ -407,6 +500,11 @@ watch(groupedSubsets, () => {
   &__nav
     flex: 0 0 auto
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__chip--white-text
+    color: #ffffff !important
+    :deep(.v-chip__content)
+      color: #ffffff !important
 
 @media (max-width: 959px)
   .category-fast-filters

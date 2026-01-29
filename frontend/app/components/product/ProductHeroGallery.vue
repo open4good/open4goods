@@ -469,23 +469,24 @@ defineExpose({
 
 <style scoped>
 .product-gallery-wrapper {
-  border-radius: 24px;
   position: relative;
-  background: rgba(15, 23, 42, 0.02);
+  background: #ffffff;
   display: flex;
   width: 100%;
+  padding: 1rem;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+  border-radius: 24px;
+  flex-direction: column; /* Ensure vertical stacking if needed */
 }
 
 .product-gallery {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  position: relative;
+  width: 100%;
   height: 100%;
   flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
 }
 
 .product-gallery__stage {
@@ -498,7 +499,8 @@ defineExpose({
   flex: 1 1 auto;
   aspect-ratio: 4 / 3;
   min-height: 0;
-  max-height: min(50vh, 380px);
+  max-height: min(60vh, 500px);
+  margin-bottom: 2rem; /* Add spacing below image for thumbnails */
 }
 
 .product-gallery__stage-trigger {
@@ -547,7 +549,8 @@ defineExpose({
 .product-gallery__video-gallery-btn {
   position: absolute;
   right: 16px;
-  bottom: 16px;
+  bottom: 16px; /* Moved back to bottom right since thumbnails are no longer overlaying */
+  top: auto;
   border: none;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.85);
@@ -561,6 +564,7 @@ defineExpose({
   transition:
     background-color 0.2s ease,
     transform 0.2s ease;
+  z-index: 10;
 }
 
 .product-gallery__video-gallery-btn:hover,
@@ -579,8 +583,14 @@ defineExpose({
   width: 100%;
   max-width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: white;
   display: block;
+}
+
+.product-gallery__stage-media {
+  object-fit: contain;
+  padding: 2rem;
 }
 
 .product-gallery__stage-overlay {
@@ -589,11 +599,7 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    0deg,
-    rgba(15, 23, 42, 0.65),
-    rgba(15, 23, 42, 0.2)
-  );
+  background: transparent;
   pointer-events: none;
 }
 
@@ -606,46 +612,63 @@ defineExpose({
 }
 
 .product-gallery__stage-overlay--inline {
-  background: linear-gradient(
-    0deg,
-    rgba(15, 23, 42, 0.35),
-    rgba(15, 23, 42, 0.05)
-  );
+  background: transparent;
 }
 
 .product-gallery__stage-icon {
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.9);
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
 }
 
 .product-gallery__thumbnails {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 1rem; /* More space for footer style */
   width: 100%;
-  justify-content: center;
-  margin-top: auto;
+  justify-content: center; /* Center initially, or space-between if navigation needed */
+  margin-top: 0;
   min-width: 0;
+
+  /* Footer layout specific - reset position */
+  position: relative;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  z-index: auto;
+  background: transparent;
+  backdrop-filter: none;
+  padding: 4px 0; /* Minimal vertical padding */
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .product-gallery__thumbnails--nav {
-  padding-inline: 0.25rem;
+  padding-inline: 0; /* Align with edges */
   justify-content: space-between;
 }
 
 .product-gallery__thumbnails-viewport {
-  flex: 1 1 auto;
+  flex: 1 1 auto; /* Take available width */
   overflow: hidden;
   scroll-behavior: smooth;
   min-width: 0;
+  /* Hide scrollbar */
+  scrollbar-width: none;
+  margin: 0 0.5rem; /* Space from arrows */
+}
+.product-gallery__thumbnails-viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .product-gallery__thumbnails-list {
   list-style: none;
   display: flex;
-  gap: 0.6rem;
+  gap: 0.75rem; /* Standard gap */
   padding: 0;
   margin: 0;
+  justify-content: center; /* Center thumbnails if they fit */
 }
+/* If thumbnails overflow, justification handles itself via scroll, but flex alignment helps */
 
 .product-gallery__thumbnail {
   flex: 0 0 auto;
@@ -653,35 +676,33 @@ defineExpose({
 
 .product-gallery__thumbnails-arrow {
   border: none;
-  background: rgba(var(--v-theme-surface-default), 0.92);
+  background: rgba(var(--v-theme-surface-default), 1);
   color: rgb(var(--v-theme-text-neutral-strong));
-  width: 48px;
-  height: 48px;
-  border-radius: 999px;
+  width: 40px; /* Standard accessible size */
+  height: 40px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
   transition:
     background-color 0.2s ease,
     color 0.2s ease,
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Subtle float effect */
 }
 
 .product-gallery__thumbnails-arrow:hover:not(:disabled) {
   background: rgba(var(--v-theme-surface-default), 1);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
-}
-
-.product-gallery__thumbnails-arrow:focus-visible {
-  outline: 2px solid rgba(var(--v-theme-accent-primary-highlight), 0.6);
-  outline-offset: 3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
 }
 
 .product-gallery__thumbnails-arrow:disabled {
   opacity: 0.4;
-  box-shadow: none;
   cursor: default;
+  box-shadow: none;
+  transform: none;
 }
 
 .product-gallery__thumbnail-button {
@@ -689,17 +710,20 @@ defineExpose({
   display: inline-flex;
   border: none;
   padding: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   background: transparent;
   transition:
     box-shadow 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  opacity: 0.7;
 }
 
 .product-gallery__thumbnail-button:hover {
   transform: translateY(-2px);
+  opacity: 1;
 }
 
 .product-gallery__thumbnail-button:focus-visible {
@@ -708,27 +732,29 @@ defineExpose({
 }
 
 .product-gallery__thumbnail-button--active {
-  box-shadow: 0 0 0 2px rgba(var(--v-theme-accent-primary-highlight), 0.6);
+  box-shadow: 0 0 0 2px rgba(var(--v-theme-accent-primary-highlight), 1);
+  opacity: 1;
 }
 
 .product-gallery__thumbnail-image {
-  width: 86px;
-  height: 86px;
+  width: 64px; /* Larger footer thumbs */
+  height: 64px;
   object-fit: cover;
   display: block;
 }
 
 .product-gallery__thumbnail-badge {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 4px;
+  right: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  padding: 0.25rem;
+  padding: 0.15rem;
   background: rgba(15, 23, 42, 0.75);
   color: #fff;
+  transform: scale(0.9);
 }
 
 /* Lightbox styles are removed as it is now inline */
@@ -747,7 +773,8 @@ defineExpose({
   border-radius: 20px;
   overflow: hidden;
   aspect-ratio: 4 / 3;
-  background: rgba(15, 23, 42, 0.04);
+  background: #fff;
+  padding: 2rem;
 }
 
 @media (max-width: 768px) {
@@ -756,11 +783,29 @@ defineExpose({
     max-height: 65vh;
   }
 
+  .product-gallery-wrapper {
+    padding: 0.75rem;
+  }
+
+  .product-gallery__video-gallery-btn {
+    right: 16px;
+    bottom: 16px;
+  }
+
   .product-gallery__stage-media,
   .product-gallery__video,
   .product-hero__fallback {
-    object-fit: contain;
-    background: rgba(15, 23, 42, 0.02);
+    /* object-fit: contain; already set above */
+  }
+
+  .product-gallery__thumbnails {
+    padding: 0;
+    gap: 0.5rem;
+  }
+
+  .product-gallery__thumbnail-image {
+    width: 56px;
+    height: 56px;
   }
 }
 
@@ -789,14 +834,9 @@ defineExpose({
     gap: 0.5rem;
   }
 
-  .product-gallery__thumbnails-arrow {
-    width: 44px;
-    height: 44px;
-  }
-
   .product-gallery__thumbnail-image {
-    width: 64px;
-    height: 64px;
+    width: 48px;
+    height: 48px;
   }
 }
 </style>

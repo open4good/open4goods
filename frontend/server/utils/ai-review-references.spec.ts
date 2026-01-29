@@ -19,7 +19,7 @@ describe('applyAiReviewReferenceLinks', () => {
     applyAiReviewReferenceLinks(review)
 
     expect(review.summary).toBe(
-      'Highlights <a class="review-ref" href="#review-ref-1">[1]</a>, <a class="review-ref" href="#review-ref-3">[3]</a>.'
+      'Highlights <sup class="citation"><a class="review-ref" href="#review-ref-1">[1]</a></sup>, <sup class="citation"><a class="review-ref" href="#review-ref-3">[3]</a></sup>.'
     )
     expect(review.technicalOneline).toBe('Specs .')
   })

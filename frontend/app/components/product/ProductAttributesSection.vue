@@ -142,7 +142,12 @@
 
             <div v-if="gtinCountry" class="product-attributes__identity-row">
               <span class="product-attributes__identity-label">
-                {{ $t('product.hero.gtinTooltip', "Pays d'origine") }}
+                Pays d'origine
+                <v-tooltip
+                  activator="parent"
+                  location="bottom"
+                  text="Basé sur le code GTIN du produit, cela n'indique pas nécessairement le lieu de fabrication."
+                />
               </span>
               <div
                 class="product-attributes__identity-value product-attributes__identity-value--country"
@@ -152,8 +157,6 @@
                   :src="gtinCountry.flag"
                   :alt="gtinCountry.name"
                   class="product-attributes__flag"
-                  width="24"
-                  height="18"
                 />
                 <span>{{ gtinCountry.name }}</span>
               </div>
@@ -1942,6 +1945,14 @@ const toggleDetailGroup = (id: string) => {
 .product-attributes__header-section--right {
   justify-content: flex-end;
   width: auto;
+}
+
+.product-attributes__flag {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.1);
 }
 
 @media (min-width: 960px) {

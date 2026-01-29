@@ -73,6 +73,7 @@ interface RadarAxisEntry {
   id: string
   name: string
   attributeValue: string | null
+  max?: number
 }
 
 interface RadarSeriesEntry {
@@ -175,14 +176,6 @@ defineExpose({})
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 2rem;
-  border-radius: 26px;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v-theme-surface-primary-100), 0.95),
-    rgba(var(--v-theme-surface-glass-strong), 0.9)
-  );
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.12);
   min-height: 100%;
 }
 
