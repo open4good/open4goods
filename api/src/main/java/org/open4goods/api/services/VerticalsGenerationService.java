@@ -2,6 +2,8 @@ package org.open4goods.api.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -17,6 +19,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -31,6 +35,8 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.NudgeToolScore;
+import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -48,6 +54,14 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 public class VerticalsGenerationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalsGenerationService.class);
+	private static final double DEFAULT_SCORE_THRESHOLD = 2.5;
+	private static final double TARGET_THRESHOLD_RATIO = 1.0 / 3.0;
+	private static final double SCORE_THRESHOLD_STEP = 0.1;
+	private static final double SCORE_MIN_VALUE = 0.0;
+	private static final double SCORE_MAX_VALUE = 5.0;
+	private static final double ACCEPTABLE_RATIO_DELTA = 0.02;
+	private static final int MAX_THRESHOLD_ITERATIONS = 40;
+	private static final String IMPACT_SCORE_NAME = "ECOSCORE";
 	private VerticalsGenerationConfig config;
 	private VerticalsConfigService  verticalConfigservice;
 	private ProductRepository repository;
@@ -347,6 +361,245 @@ public class VerticalsGenerationService {
 			LOGGER.error("Error while updaing vertical file {}",file,e1);
 			return "Error: " + e1.getMessage();
 		}
+	}
+
+	/**
+	 * Update a vertical file with new nudge tool thresholds and impact score subsets.
+	 *
+	 * @param fileName the vertical configuration file path
+	 * @return the updated file content
+	 */
+	public String updateVerticalFileWithNudgeToolConfig(String fileName) {
+		File file = new File(fileName);
+		try {
+			String verticalId = file.getName().substring(0, file.getName().length() - 4);
+			VerticalConfig vc = verticalConfigservice.getConfigById(verticalId);
+			if (vc == null) {
+				return "Error: Vertical not found for id " + verticalId;
+			}
+
+			LOGGER.warn("Will update {} for nudge tool thresholds", file.getName());
+			String originalContent = FileUtils.readFileToString(file, Charset.defaultCharset());
+
+			String updatedContent = updateNudgeToolScoreThresholds(originalContent, vc);
+			updatedContent = updateImpactScoreSubsets(updatedContent, verticalId);
+
+			FileUtils.writeStringToFile(file, updatedContent, Charset.defaultCharset());
+			return updatedContent;
+		} catch (IOException e1) {
+			LOGGER.error("Error while updating vertical file {}", file, e1);
+			return "Error: " + e1.getMessage();
+		}
+	}
+
+	private String updateNudgeToolScoreThresholds(String content, VerticalConfig verticalConfig) {
+		if (!content.contains("nudgeToolConfig:")) {
+			LOGGER.info("No nudgeToolConfig section found for {}", verticalConfig.getId());
+			return content;
+		}
+
+		List<NudgeToolScore> scores = verticalConfig.getNudgeToolConfig().getScores();
+		if (scores == null || scores.isEmpty()) {
+			LOGGER.info("No nudge tool scores configured for {}", verticalConfig.getId());
+			return content;
+		}
+
+		String updated = content;
+		for (NudgeToolScore score : scores) {
+			if (StringUtils.isBlank(score.getScoreName())) {
+				continue;
+			}
+			double threshold = computeThresholdForScore(verticalConfig.getId(), score.getScoreName(), SubsetCriteriaOperator.GREATER_THAN);
+			updated = replaceScoreMinValue(updated, score.getScoreName(), threshold);
+		}
+
+		return updated;
+	}
+
+	private String updateImpactScoreSubsets(String content, String verticalId) {
+		ScoreThresholds thresholds = computeImpactScoreThresholds(verticalId);
+		String lowerThreshold = formatScoreValue(thresholds.lower());
+		String upperThreshold = formatScoreValue(thresholds.upper());
+		String rootImpactSubsets = buildImpactScoreSubsetsBlock("  ", lowerThreshold, upperThreshold);
+		String nudgeImpactSubsets = buildImpactScoreSubsetsBlock("    ", lowerThreshold, upperThreshold);
+
+		String updated = replaceImpactScoreSubsets(content, "  ", rootImpactSubsets);
+		updated = replaceImpactScoreSubsets(updated, "    ", nudgeImpactSubsets);
+		return updated;
+	}
+
+	private ScoreThresholds computeImpactScoreThresholds(String verticalId) {
+		long total = repository.countMainIndexHavingScoreWithFilters(IMPACT_SCORE_NAME, verticalId);
+		if (total <= 0) {
+			LOGGER.info("No products found for impact score thresholds in {}", verticalId);
+			return new ScoreThresholds(2.0, 4.0);
+		}
+
+		double lowerThreshold = computeThresholdForScore(verticalId, IMPACT_SCORE_NAME, SubsetCriteriaOperator.LOWER_THAN);
+		double upperThreshold = computeThresholdForScore(verticalId, IMPACT_SCORE_NAME, SubsetCriteriaOperator.GREATER_THAN);
+		if (lowerThreshold >= upperThreshold) {
+			LOGGER.warn("Invalid impact score thresholds for {}: {} >= {}", verticalId, lowerThreshold, upperThreshold);
+			return new ScoreThresholds(2.0, 4.0);
+		}
+		return new ScoreThresholds(lowerThreshold, upperThreshold);
+	}
+
+	private double computeThresholdForScore(String verticalId, String scoreName, SubsetCriteriaOperator operator) {
+		long total = repository.countMainIndexHavingScoreWithFilters(scoreName, verticalId);
+		if (total <= 0) {
+			LOGGER.info("No products for score {} in {}", scoreName, verticalId);
+			return DEFAULT_SCORE_THRESHOLD;
+		}
+
+		double threshold = DEFAULT_SCORE_THRESHOLD;
+		for (int i = 0; i < MAX_THRESHOLD_ITERATIONS; i++) {
+			long count = repository.countMainIndexHavingScoreThreshold(scoreName, verticalId, operator, threshold);
+			double ratio = count / (double) total;
+			if (Math.abs(ratio - TARGET_THRESHOLD_RATIO) <= ACCEPTABLE_RATIO_DELTA) {
+				break;
+			}
+
+			boolean tooMany = ratio > TARGET_THRESHOLD_RATIO;
+			threshold = adjustThreshold(threshold, operator, tooMany);
+			if (threshold <= SCORE_MIN_VALUE || threshold >= SCORE_MAX_VALUE) {
+				threshold = clampScore(threshold);
+				break;
+			}
+		}
+
+		return clampScore(threshold);
+	}
+
+	private double adjustThreshold(double current, SubsetCriteriaOperator operator, boolean tooMany) {
+		return switch (operator) {
+		case GREATER_THAN -> current + (tooMany ? SCORE_THRESHOLD_STEP : -SCORE_THRESHOLD_STEP);
+		case LOWER_THAN -> current + (tooMany ? -SCORE_THRESHOLD_STEP : SCORE_THRESHOLD_STEP);
+		case EQUALS -> current;
+		};
+	}
+
+	private double clampScore(double value) {
+		return Math.min(SCORE_MAX_VALUE, Math.max(SCORE_MIN_VALUE, value));
+	}
+
+	private String replaceScoreMinValue(String content, String scoreName, double threshold) {
+		String formatted = formatScoreValue(threshold);
+		Pattern pattern = Pattern.compile("(?s)(-\\s*scoreName:\\s*\"?" + Pattern.quote(scoreName) + "\"?\\s*\\n\\s*scoreMinValue:\\s*)([0-9.]+)");
+		Matcher matcher = pattern.matcher(content);
+		if (!matcher.find()) {
+			LOGGER.warn("scoreMinValue not found for score {}", scoreName);
+			return content;
+		}
+		return matcher.replaceAll("$1" + formatted);
+	}
+
+	private String formatScoreValue(double value) {
+		BigDecimal decimal = BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).stripTrailingZeros();
+		return decimal.toPlainString();
+	}
+
+	private String buildImpactScoreSubsetsBlock(String indent, String lowerThreshold, String upperThreshold) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(indent).append("- id: \"impact_high\"").append("\n");
+		builder.append(indent).append("  group: \"impactscore\"").append("\n");
+		builder.append(indent).append("  criterias:").append("\n");
+		builder.append(indent).append("    - field: \"scores.ECOSCORE.value\"").append("\n");
+		builder.append(indent).append("      operator: \"LOWER_THAN\"").append("\n");
+		builder.append(indent).append("      value: \"").append(lowerThreshold).append("\"").append("\n");
+		builder.append(indent).append("  image: \"example-image.png\"").append("\n");
+		builder.append(indent).append("  url:").append("\n");
+		builder.append(indent).append("    en: \"high-impact\"").append("\n");
+		builder.append(indent).append("    fr: \"petit-impact\"").append("\n");
+		builder.append(indent).append("  caption:").append("\n");
+		builder.append(indent).append("    en: \"< ").append(lowerThreshold).append("\"").append("\n");
+		builder.append(indent).append("    fr: \"< ").append(lowerThreshold).append("\"").append("\n");
+		builder.append(indent).append("  title:").append("\n");
+		builder.append(indent).append("    en: \"High \"").append("\n");
+		builder.append(indent).append("    fr: \"Elevé\"").append("\n");
+		builder.append(indent).append("  description:").append("\n");
+		builder.append(indent).append("    en: \"Products with an ImpactScore lower than ").append(lowerThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("    fr: \"Produits avec un ImpactScore inférieur à ").append(lowerThreshold).append("/5\"").append("\n");
+		builder.append("\n");
+		builder.append(indent).append("- id: \"impact_medium\"").append("\n");
+		builder.append(indent).append("  group: \"impactscore\"").append("\n");
+		builder.append(indent).append("  criterias:").append("\n");
+		builder.append(indent).append("    - field: \"scores.ECOSCORE.value\"").append("\n");
+		builder.append(indent).append("      operator: \"GREATER_THAN\"").append("\n");
+		builder.append(indent).append("      value: \"").append(lowerThreshold).append("\"").append("\n");
+		builder.append(indent).append("    - field: \"scores.ECOSCORE.value\"").append("\n");
+		builder.append(indent).append("      operator: \"LOWER_THAN\"").append("\n");
+		builder.append(indent).append("      value: \"").append(upperThreshold).append("\"").append("\n");
+		builder.append(indent).append("  image: \"example-image.png\"").append("\n");
+		builder.append(indent).append("  url:").append("\n");
+		builder.append(indent).append("    en: \"medium-impact\"").append("\n");
+		builder.append(indent).append("    fr: \"impact-moyen\"").append("\n");
+		builder.append(indent).append("  caption:").append("\n");
+		builder.append(indent).append("    en: \"> ").append(lowerThreshold).append(" < ").append(upperThreshold).append("\"").append("\n");
+		builder.append(indent).append("    fr: \"> ").append(lowerThreshold).append(" < ").append(upperThreshold).append("\"").append("\n");
+		builder.append(indent).append("  title:").append("\n");
+		builder.append(indent).append("    en: \"Medium\"").append("\n");
+		builder.append(indent).append("    fr: \"Moyen\"").append("\n");
+		builder.append(indent).append("  description:").append("\n");
+		builder.append(indent).append("    en: \"Products with an ImpactScore between ").append(lowerThreshold).append("/5 and ").append(upperThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("    fr: \"Produits avec un ImpactScore compris entre ").append(lowerThreshold).append("/5 et ").append(upperThreshold).append("/5\"").append("\n");
+		builder.append("\n");
+		builder.append(indent).append("- id: \"impact_low\"").append("\n");
+		builder.append(indent).append("  group: \"impactscore\"").append("\n");
+		builder.append(indent).append("  criterias:").append("\n");
+		builder.append(indent).append("    - field: \"scores.ECOSCORE.value\"").append("\n");
+		builder.append(indent).append("      operator: \"GREATER_THAN\"").append("\n");
+		builder.append(indent).append("      value: \"").append(upperThreshold).append("\"").append("\n");
+		builder.append(indent).append("  image: \"example-image.png\"").append("\n");
+		builder.append(indent).append("  url:").append("\n");
+		builder.append(indent).append("    en: \"impact-moderate\"").append("\n");
+		builder.append(indent).append("    fr: \"impact-modere\"").append("\n");
+		builder.append(indent).append("  caption:").append("\n");
+		builder.append(indent).append("    en: \"> ").append(upperThreshold).append("\"").append("\n");
+		builder.append(indent).append("    fr: \"> ").append(upperThreshold).append("\"").append("\n");
+		builder.append(indent).append("  title:").append("\n");
+		builder.append(indent).append("    en: \"Faible\"").append("\n");
+		builder.append(indent).append("    fr: \"Faible\"").append("\n");
+		builder.append(indent).append("  description:").append("\n");
+		builder.append(indent).append("    en: \"Products with an ImpactScore greater than ").append(upperThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("    fr: \"Produits avec un ImpactScore supérieur à ").append(upperThreshold).append("/5\"").append("\n");
+		return builder.toString();
+	}
+
+	private String replaceImpactScoreSubsets(String content, String indent, String replacement) {
+		String startMarker = indent + "- id: \"impact_high\"";
+		int startIndex = content.indexOf(startMarker);
+		if (startIndex == -1) {
+			startMarker = indent + "- id: impact_high";
+			startIndex = content.indexOf(startMarker);
+		}
+		if (startIndex == -1) {
+			return content;
+		}
+
+		String endMarker = indent + "- id: \"impact_low\"";
+		int impactLowIndex = content.indexOf(endMarker, startIndex);
+		if (impactLowIndex == -1) {
+			endMarker = indent + "- id: impact_low";
+			impactLowIndex = content.indexOf(endMarker, startIndex);
+		}
+		if (impactLowIndex == -1) {
+			return content;
+		}
+
+		int nextIndex = content.indexOf("\n" + indent + "- id:", impactLowIndex + 1);
+		int endIndex = nextIndex == -1 ? content.length() : nextIndex + 1;
+
+		StringBuilder updated = new StringBuilder();
+		updated.append(content, 0, startIndex);
+		if (!content.substring(0, startIndex).endsWith("\n")) {
+			updated.append("\n");
+		}
+		updated.append(replacement);
+		updated.append(content.substring(endIndex));
+		return updated.toString();
+	}
+
+	private record ScoreThresholds(double lower, double upper) {
 	}
 
 
