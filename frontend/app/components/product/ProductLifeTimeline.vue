@@ -179,6 +179,10 @@ const eventLabelKeys: Record<string, string> = {
   EPREL_LAST_PUBLICATION:
     'product.attributes.timeline.events.eprelLastPublication',
   EPREL_EXPORT: 'product.attributes.timeline.events.eprelExport',
+  EPREL_SPARE_PARTS_END: 'product.attributes.timeline.events.eprelSparePartsEnd',
+  EPREL_SOFTWARE_SUPPORT_END:
+    'product.attributes.timeline.events.eprelSoftwareSupportEnd',
+  EPREL_SUPPORT_END: 'product.attributes.timeline.events.eprelSupportEnd',
   EPREL_IMPORTED: 'product.attributes.timeline.events.eprelImported',
   EPREL_ORGANISATION_CLOSED:
     'product.attributes.timeline.events.eprelOrganisationClosed',
@@ -200,6 +204,9 @@ const eventIcons: Record<string, string> = {
   EPREL_FIRST_PUBLICATION: 'mdi-newspaper-variant-outline',
   EPREL_LAST_PUBLICATION: 'mdi-newspaper-check',
   EPREL_EXPORT: 'mdi-cloud-upload-outline',
+  EPREL_SPARE_PARTS_END: 'mdi-cog-off-outline',
+  EPREL_SOFTWARE_SUPPORT_END: 'mdi-update',
+  EPREL_SUPPORT_END: 'mdi-shield-off-outline',
   EPREL_IMPORTED: 'mdi-database-import-outline',
   EPREL_ORGANISATION_CLOSED: 'mdi-domain-off',
 }
@@ -244,6 +251,11 @@ const eventDescriptionKeys: Record<string, string> = {
   EPREL_LAST_PUBLICATION:
     'product.attributes.timeline.descriptions.eprelLastPublication',
   EPREL_EXPORT: 'product.attributes.timeline.descriptions.eprelExport',
+  EPREL_SPARE_PARTS_END:
+    'product.attributes.timeline.descriptions.eprelSparePartsEnd',
+  EPREL_SOFTWARE_SUPPORT_END:
+    'product.attributes.timeline.descriptions.eprelSoftwareSupportEnd',
+  EPREL_SUPPORT_END: 'product.attributes.timeline.descriptions.eprelSupportEnd',
   EPREL_IMPORTED: 'product.attributes.timeline.descriptions.eprelImported',
   EPREL_ORGANISATION_CLOSED:
     'product.attributes.timeline.descriptions.eprelOrganisationClosed',
