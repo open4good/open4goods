@@ -43,13 +43,27 @@
         </a>
 
         <!-- Trend -->
+        <v-tooltip
+          v-if="badge.trendIcon && badge.trendDescription"
+          location="bottom"
+          :text="badge.trendDescription"
+        >
+          <template #activator="{ props: tooltipProps }">
+            <v-icon
+              v-bind="tooltipProps"
+              :icon="badge.trendIcon"
+              :color="badge.trendColor"
+              size="small"
+              class="product-price-rows__trend"
+            />
+          </template>
+        </v-tooltip>
         <v-icon
-          v-if="badge.trendIcon"
+          v-else-if="badge.trendIcon"
           :icon="badge.trendIcon"
           :color="badge.trendColor"
           size="small"
           class="product-price-rows__trend"
-          :title="badge.trendDescription"
         />
 
         <!-- Alternatives Dropdown -->
@@ -113,11 +127,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
 import type {
   ProductDto,
   ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
-import { ProductPriceTrendDtoTrendEnum } from '~~/shared/api-client'
 import { formatBestPrice } from '~/utils/_product-pricing'
 
 const props = defineProps<{
@@ -206,49 +220,19 @@ const formatOfferPrice = (
   return n(price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-const resolveTrendIcon = (
-  trend?: ProductPriceTrendDtoTrendEnum
-): string | undefined => {
-  switch (trend) {
-    case ProductPriceTrendDtoTrendEnum.PriceDecrease:
-      return 'mdi-trending-down'
-    case ProductPriceTrendDtoTrendEnum.PriceIncrease:
-      return 'mdi-trending-up'
-    case ProductPriceTrendDtoTrendEnum.PriceStable:
-      return 'mdi-trending-neutral'
-    default:
-      return undefined
-  }
-}
+const { resolvePriceTrendTone, resolveTrendIcon, formatTrendTooltip } =
+  useProductPriceTrend()
 
-const resolveTrendColor = (
-  trend?: ProductPriceTrendDtoTrendEnum
-): string | undefined => {
-  switch (trend) {
-    case ProductPriceTrendDtoTrendEnum.PriceDecrease:
-      return 'success'
-    case ProductPriceTrendDtoTrendEnum.PriceIncrease:
-      return 'error'
-    case ProductPriceTrendDtoTrendEnum.PriceStable:
+const resolveTrendColor = (tone: string): string | undefined => {
+  switch (tone) {
+    case 'decrease':
+      return 'success' // Price down is good
+    case 'increase':
+      return 'error' // Price up is bad
+    case 'stable':
       return 'neutral'
     default:
       return undefined
-  }
-}
-
-const getTrendDescription = (
-  trend: ProductPriceTrendDtoTrendEnum | undefined,
-  label: string
-) => {
-  switch (trend) {
-    case ProductPriceTrendDtoTrendEnum.PriceDecrease:
-      return t('category.products.pricing.trends.decrease', { label })
-    case ProductPriceTrendDtoTrendEnum.PriceIncrease:
-      return t('category.products.pricing.trends.increase', { label })
-    case ProductPriceTrendDtoTrendEnum.PriceStable:
-      return t('category.products.pricing.trends.stable', { label })
-    default:
-      return ''
   }
 }
 
@@ -274,9 +258,9 @@ const getAlternatives = (
     .filter(o => o.url !== bestOfferUrl)
     .map(o => ({
       id: randomId(),
-      merchantName: o.merchantName || 'Unknown',
+      merchantName: o.datasourceName ?? o.merchantName ?? 'Unknown',
       priceLabel: o.priceLabel || 'N/A',
-      favicon: o.merchantFavicon,
+      favicon: o.favicon ?? o.merchantFavicon,
       url: resolveUrl(o), // Apply same URL resolution logic
     }))
 }
@@ -306,19 +290,20 @@ const offerBadges = computed<Badge[]>(() => {
   if (newOffer) {
     const formatted = formatOfferPrice(newOffer)
     const url = resolveUrl(newOffer)
+    const tone = resolvePriceTrendTone(newTrend)
     if (formatted) {
       entries.push({
         key: 'new',
         label: t('category.products.pricing.newOfferLabel'),
         price: formatted,
         appearance: 'new',
-        trendIcon: resolveTrendIcon(newTrend),
-        trendColor: resolveTrendColor(newTrend),
-        trendDescription: getTrendDescription(
+        trendIcon: resolveTrendIcon(tone),
+        trendColor: resolveTrendColor(tone),
+        trendDescription: formatTrendTooltip(
           newTrend,
-          t('category.products.pricing.newOfferLabel')
+          newOffer.currency ?? 'EUR'
         ),
-        favicon: newOffer.merchantFavicon,
+        favicon: newOffer.favicon ?? newOffer.merchantFavicon,
         merchantName: newOffer.merchantName,
         url,
         hasAlternatives:
@@ -331,19 +316,20 @@ const offerBadges = computed<Badge[]>(() => {
   if (occasionOffer) {
     const formatted = formatOfferPrice(occasionOffer)
     const url = resolveUrl(occasionOffer)
+    const tone = resolvePriceTrendTone(occasionTrend)
     if (formatted) {
       entries.push({
         key: 'occasion',
         label: t('category.products.pricing.occasionOfferLabel'),
         price: formatted,
         appearance: 'occasion',
-        trendIcon: resolveTrendIcon(occasionTrend),
-        trendColor: resolveTrendColor(occasionTrend),
-        trendDescription: getTrendDescription(
+        trendIcon: resolveTrendIcon(tone),
+        trendColor: resolveTrendColor(tone),
+        trendDescription: formatTrendTooltip(
           occasionTrend,
-          t('category.products.pricing.occasionOfferLabel')
+          occasionOffer.currency ?? 'EUR'
         ),
-        favicon: occasionOffer.merchantFavicon,
+        favicon: occasionOffer.favicon ?? occasionOffer.merchantFavicon,
         merchantName: occasionOffer.merchantName,
         url,
         hasAlternatives:
@@ -374,7 +360,7 @@ const offerBadges = computed<Badge[]>(() => {
         label: t('category.products.pricing.bestOfferLabel'),
         price: formatted,
         appearance: 'default',
-        favicon: fallbackOffer?.merchantFavicon,
+        favicon: fallbackOffer?.favicon ?? fallbackOffer?.merchantFavicon,
         merchantName: fallbackOffer?.merchantName,
         url,
         hasAlternatives: false,

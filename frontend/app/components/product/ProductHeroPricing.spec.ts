@@ -1,9 +1,36 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricing from './ProductHeroPricing.vue'
+
+vi.mock('~/composables/useProductPriceTrend', () => ({
+  useProductPriceTrend: () => ({
+    resolvePriceTrendLabel: (trend: any) =>
+      trend?.trend === 'PRICE_INCREASE'
+        ? `Price increase of ${trend.variation}`
+        : trend?.trend === 'PRICE_DECREASE'
+          ? `Price drop of ${Math.abs(trend.variation)}`
+          : 'Price unchanged',
+    resolvePriceTrendTone: (trend: any) =>
+      trend?.trend === 'PRICE_INCREASE'
+        ? 'increase'
+        : trend?.trend === 'PRICE_DECREASE'
+          ? 'decrease'
+          : 'stable',
+    resolveTrendIcon: (tone: string) =>
+      tone === 'increase'
+        ? 'mdi-trending-up'
+        : tone === 'decrease'
+          ? 'mdi-trending-down'
+          : 'mdi-trending-neutral',
+    formatTrendTooltip: (trend: any) =>
+      trend
+        ? `Deviation of ${Math.abs(trend.variation)} over ${trend.period}`
+        : null,
+  }),
+}))
 
 describe('ProductHeroPricing', () => {
   const i18n = createI18n({
