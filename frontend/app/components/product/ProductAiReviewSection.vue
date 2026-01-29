@@ -385,15 +385,15 @@
                   <tbody>
                     <tr
                       v-for="source in visibleSources"
-                      :id="`review-ref-${source.number}`"
-                      :key="source.number"
+                      :id="`review-ref-${source.referenceId}`"
+                      :key="source.referenceId"
                     >
                       <td>
                         <a
                           :href="source.url"
                           target="_blank"
                           rel="noopener noreferrer nofollow"
-                          >[{{ source.number }}]</a
+                          >[{{ source.referenceId }}]</a
                         >
                       </td>
                       <td>
@@ -625,6 +625,10 @@ import ProductAiReviewInsightBlock from '~/components/product/ProductAiReviewIns
 import ProductAiReviewRequestPanel from '~/components/product/ProductAiReviewRequestPanel.vue'
 import { useAiReviewGenerationStore } from '~/stores/useAiReviewGenerationStore'
 
+interface ReviewSource extends AiReviewSourceDto {
+  referenceId: number
+}
+
 interface ReviewContent {
   description?: string | null
   shortDescription?: string | null
@@ -644,7 +648,7 @@ interface ReviewContent {
   summary?: string | null
   pros?: string[]
   cons?: string[]
-  sources?: AiReviewSourceDto[]
+  sources?: ReviewSource[]
   attributes?: AiReviewAttributeDto[]
   dataQuality?: string | null
 }
@@ -903,25 +907,28 @@ function selectReviewContent(
   )
 }
 
-function transformReferences(content: string | null): string | null {
+function transformReferences(
+  content: string | null,
+  referenceMap?: Map<string, number>
+): string | null {
   if (!content) {
     return null
   }
 
-  // Regex to match [1] or [1, 2] or [1, 2, 3] etc.
-  // It captures the numbers part inside the brackets
-  return content.replace(/\[(\d+(?:,\s*\d+)*)\]/g, (_match, numbers) => {
-    // Split the numbers by comma
-    const refs = (numbers as string).split(',').map((n: string) => {
-      const num = n.trim()
-      // Create a link for each number
-      // We use data-source-id to help with event handling if needed,
-      // and href to allow standard navigation/hover behavior
-      return `<sup class="citation"><a href="#review-ref-${num}" class="review-ref" data-source-id="${num}">[${num}]</a></sup>`
+  // Match [1], [1, 2], [1,2, 3], [1 ; 2] etc.
+  return content.replace(/\[([\d\s,;]+)\]/g, (_match, numbers) => {
+    const matches = (numbers as string).match(/\d+/g) ?? []
+    if (!matches.length) {
+      return _match
+    }
+
+    const refs = matches.map((raw: string) => {
+      const mapped = referenceMap?.get(raw) ?? Number(raw)
+      const referenceId = Number.isFinite(mapped) ? mapped : Number(raw)
+      return `<sup class="citation"><a href="#review-ref-${referenceId}" class="review-ref" data-source-id="${referenceId}">[${raw}]</a></sup>`
     })
 
-    // Reconstruct the string with links inside brackets
-    return `${refs.join(', ')}`
+    return refs.join(', ')
   })
 }
 
@@ -930,8 +937,30 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
     return null
   }
 
+  const sources: ReviewSource[] = (reviewData.sources ?? [])
+    .map((source, index) => {
+      const referenceId = source.number ?? index + 1
+      return {
+        number: source.number ?? undefined,
+        name: source.name ?? undefined,
+        description: source.description ?? undefined,
+        url: source.url ?? undefined,
+        favicon: source.favicon ?? undefined,
+        referenceId,
+      }
+    })
+    .filter(source => Boolean(source.url))
+
+  const referenceMap = new Map<string, number>()
+  sources.forEach(source => {
+    referenceMap.set(String(source.referenceId), source.referenceId)
+    if (source.number !== undefined && source.number !== null) {
+      referenceMap.set(String(source.number), source.referenceId)
+    }
+  })
+
   const sanitizeAndTransform = (text: string | null | undefined) => {
-    return transformReferences(sanitizeHtml(text ?? null))
+    return transformReferences(sanitizeHtml(text ?? null), referenceMap)
   }
 
   const pros = Array.isArray(reviewData.pros)
@@ -950,16 +979,6 @@ function normalizeReview(reviewData: AiReviewDto | null): ReviewContent | null {
             typeof entry === 'string' && entry.length > 0
         )
     : []
-
-  const sources: AiReviewSourceDto[] = (reviewData.sources ?? [])
-    .map(source => ({
-      number: source.number ?? undefined,
-      name: source.name ?? undefined,
-      description: source.description ?? undefined,
-      url: source.url ?? undefined,
-      favicon: source.favicon ?? undefined,
-    }))
-    .filter(source => Boolean(source.url))
 
   const rawAttributes = reviewData.attributes
   const attributesList = Array.isArray(rawAttributes)
@@ -1433,7 +1452,7 @@ const handleGlobalScrollEvent = (event: Event) => {
   font-size: 0.75em;
   vertical-align: super;
   line-height: 0;
-  margin-left: 0.1rem;
+  margin-left: 0;
 }
 
 .product-ai-review__card-text :deep(.review-ref) {
