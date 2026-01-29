@@ -9,6 +9,7 @@ export default defineNuxtRouteMiddleware(to => {
     return
   }
 
+  const { record, ...restQuery } = to.query
   const cookie = useCookie(HOTJAR_RECORDING_COOKIE_NAME, {
     maxAge: HOTJAR_RECORDING_COOKIE_MAX_AGE,
     sameSite: 'lax',
@@ -22,8 +23,7 @@ export default defineNuxtRouteMiddleware(to => {
     {
       path: to.path,
       query: {
-        ...to.query,
-        record: undefined,
+        ...restQuery,
       },
     },
     { redirectCode: 302 }
