@@ -16,7 +16,7 @@
         :class="heroRevealClasses"
       >
         <CategoryNavigationBreadcrumbs
-          v-if="heroBreadcrumbs.length"
+          v-if="visibleBreadcrumbs.length"
           v-bind="heroBreadcrumbProps"
           class="product-hero__breadcrumbs home-reveal-item ma-0 mr-4"
           :style="{ '--reveal-delay': '60ms' }"
@@ -331,6 +331,7 @@ import {
   watch,
   type PropType,
 } from 'vue'
+import { useHead, useRequestURL } from '#imports'
 import DOMPurify from 'isomorphic-dompurify'
 import { useI18n } from 'vue-i18n'
 import { usePreferredReducedMotion } from '@vueuse/core'
@@ -737,7 +738,36 @@ const toggleCompare = () => {
   compareStore.toggleProduct(props.product)
 }
 
-const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
+const itemIsProduct = (
+  breadcrumb: ProductHeroBreadcrumb,
+  productTitle: string,
+  productSlug: string
+) => {
+  const rawTitle = breadcrumb?.title ?? breadcrumb?.link ?? ''
+  const trimmedTitle = rawTitle.toString().trim()
+  const titleValue = trimmedTitle.length
+    ? trimmedTitle
+    : t('product.hero.missingBreadcrumbTitle')
+
+  if (!titleValue.trim().length) {
+    return false
+  }
+
+  const normalizedTitle = titleValue.trim().toLowerCase()
+  const normalizedLinkValue =
+    breadcrumb?.link?.toString().trim().toLowerCase() ?? ''
+
+  const matchesProductTitle = productTitle.length
+    ? normalizedTitle === productTitle
+    : false
+  const matchesProductLink = productSlug.length
+    ? normalizedLinkValue.endsWith(productSlug)
+    : false
+
+  return matchesProductTitle || matchesProductLink
+}
+
+const fullBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   const normalizedProductTitle = heroTitle.value.trim().toLowerCase()
   const normalizedProductSlug = (
     props.product.fullSlug ??
@@ -763,14 +793,13 @@ const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
       const normalizedLinkValue =
         breadcrumb?.link?.toString().trim().toLowerCase() ?? ''
 
-      const matchesProductTitle = normalizedProductTitle.length
-        ? normalizedTitle === normalizedProductTitle
-        : false
-      const matchesProductLink = normalizedProductSlug.length
-        ? normalizedLinkValue.endsWith(normalizedProductSlug)
-        : false
+      const isProduct = itemIsProduct(
+        breadcrumb,
+        normalizedProductTitle,
+        normalizedProductSlug
+      )
 
-      if (matchesProductTitle || matchesProductLink) {
+      if (isProduct) {
         return acc
       }
 
@@ -818,10 +847,65 @@ const heroBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   return baseCrumbs
 })
 
+const visibleBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
+  const crumbs = [...fullBreadcrumbs.value]
+  // Remove the last item if it's the product (which fullBreadcrumbs ensures is at the end)
+  // We identify it by checking if it matches the generated finalTitle or simply by removing the last element
+  // since fullBreadcrumbs logic guarantees the product is appended if missing, or preserved if present.
+  // The user wants to remove the "terminal model name".
+
+  // If the list is empty or has only 1 item (the product itself), we might end up with empty list.
+  if (crumbs.length > 0) {
+    // Check if the last item is indeed the product.
+    // In fullBreadcrumbs we push the product if distinct.
+    // If props.breadcrumbs contained the product, it was excluded from loop but added back?
+    // Wait, the loop excludes it (L766-774).
+    // Then L811 adds it back.
+    // So yes, the last item is ALWAYS the product (unless props.breadcrumbs was empty AND product has no name? Unlikely).
+    crumbs.pop()
+  }
+
+  // Limit to maximum 3 elements (the 3 last ones)
+  return crumbs.slice(-3)
+})
+
 const heroBreadcrumbProps = computed(() => ({
-  items: heroBreadcrumbs.value,
+  items: visibleBreadcrumbs.value,
   ariaLabel: t('product.hero.breadcrumbAriaLabel'),
 }))
+
+const requestUrl = useRequestURL()
+const baseUrl = computed(() => requestUrl.origin)
+
+useHead(() => {
+  if (!fullBreadcrumbs.value.length) {
+    return {}
+  }
+
+  const itemListElement = fullBreadcrumbs.value.map((crumb, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: crumb.title,
+    item: crumb.link
+      ? crumb.link.startsWith('http')
+        ? crumb.link
+        : `${baseUrl.value}${crumb.link.startsWith('/') ? '' : '/'}${crumb.link}`
+      : undefined,
+  }))
+
+  return {
+    script: [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement,
+        }),
+      },
+    ],
+  }
+})
 </script>
 
 <style scoped>

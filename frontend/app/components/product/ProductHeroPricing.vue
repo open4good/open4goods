@@ -53,8 +53,6 @@ import ProductHeroPricingPanel from '~/components/product/ProductHeroPricingPane
 
 type OfferCondition = 'occasion' | 'new'
 
-type ProductTrend = NonNullable<ProductDto['offers']>['newTrend']
-
 defineOptions({ inheritAttrs: false })
 
 const props = defineProps({

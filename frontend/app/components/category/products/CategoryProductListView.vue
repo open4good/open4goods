@@ -87,7 +87,7 @@
             v-if="impactScoreValue(product) != null"
             :score="(impactScoreValue(product) ?? 0) * 4"
             :max="20"
-            size="xs"
+            size="xl"
             :show-methodology="false"
             :show-range="false"
           />

@@ -14,80 +14,82 @@
     </v-btn>
 
     <div ref="scrollContainer" class="category-fast-filters__scroller">
-      <article
-        v-for="group in groupedSubsets"
-        :key="group.key"
-        class="category-fast-filters__group category-fast-filters__group--column"
-        :aria-label="group.label"
-      >
-        <span class="text-caption font-weight-bold text-center w-100">
-          {{ group.label }} :
-        </span>
-        <v-chip-group
-          class="category-fast-filters__chip-group"
-          :model-value="getGroupSelection(group.key)"
-          @update:model-value="
-            value => onGroupSelectionChange(group.key, value)
-          "
+      <div class="category-fast-filters__inner">
+        <article
+          v-for="group in groupedSubsets"
+          :key="group.key"
+          class="category-fast-filters__group category-fast-filters__group--column"
+          :aria-label="group.label"
         >
-          <template
-            v-for="subset in group.subsets"
-            :key="
-              subset.id ??
-              subset.caption ??
-              subset.title ??
-              subset.group ??
-              'subset'
+          <span class="text-caption font-weight-bold text-center w-100">
+            {{ group.label }} :
+          </span>
+          <v-chip-group
+            class="category-fast-filters__chip-group"
+            :model-value="getGroupSelection(group.key)"
+            @update:model-value="
+              value => onGroupSelectionChange(group.key, value)
             "
           >
-            <v-tooltip
-              v-if="subset.description"
-              location="bottom"
-              :text="subset.description"
+            <template
+              v-for="subset in group.subsets"
+              :key="
+                subset.id ??
+                subset.caption ??
+                subset.title ??
+                subset.group ??
+                'subset'
+              "
             >
-              <template #activator="{ props: tooltipProps }">
-                <v-chip
-                  v-bind="tooltipProps"
-                  :value="subset.id"
-                  :color="getSubsetStyle(group.key, subset).color"
-                  :variant="getSubsetStyle(group.key, subset).variant"
-                  rounded="lg"
-                  class="category-fast-filters__chip"
-                  :class="{
-                    'category-fast-filters__chip--white-text': getSubsetStyle(
-                      group.key,
-                      subset
-                    ).isDark,
-                  }"
-                >
-                  <span class="category-fast-filters__chip-label">
-                    {{ resolveSubsetLabel(subset, group.key) }}
-                  </span>
-                </v-chip>
-              </template>
-            </v-tooltip>
+              <v-tooltip
+                v-if="subset.description"
+                location="bottom"
+                :text="subset.description"
+              >
+                <template #activator="{ props: tooltipProps }">
+                  <v-chip
+                    v-bind="tooltipProps"
+                    :value="subset.id"
+                    :color="getSubsetStyle(group.key, subset).color"
+                    :variant="getSubsetStyle(group.key, subset).variant"
+                    rounded="lg"
+                    class="category-fast-filters__chip"
+                    :class="{
+                      'category-fast-filters__chip--white-text': getSubsetStyle(
+                        group.key,
+                        subset
+                      ).isDark,
+                    }"
+                  >
+                    <span class="category-fast-filters__chip-label">
+                      {{ resolveSubsetLabel(subset, group.key) }}
+                    </span>
+                  </v-chip>
+                </template>
+              </v-tooltip>
 
-            <v-chip
-              v-else
-              :value="subset.id"
-              :color="getSubsetStyle(group.key, subset).color"
-              :variant="getSubsetStyle(group.key, subset).variant"
-              rounded="lg"
-              class="category-fast-filters__chip"
-              :class="{
-                'category-fast-filters__chip--white-text': getSubsetStyle(
-                  group.key,
-                  subset
-                ).isDark,
-              }"
-            >
-              <span class="category-fast-filters__chip-label">
-                {{ resolveSubsetLabel(subset, group.key) }}
-              </span>
-            </v-chip>
-          </template>
-        </v-chip-group>
-      </article>
+              <v-chip
+                v-else
+                :value="subset.id"
+                :color="getSubsetStyle(group.key, subset).color"
+                :variant="getSubsetStyle(group.key, subset).variant"
+                rounded="lg"
+                class="category-fast-filters__chip"
+                :class="{
+                  'category-fast-filters__chip--white-text': getSubsetStyle(
+                    group.key,
+                    subset
+                  ).isDark,
+                }"
+              >
+                <span class="category-fast-filters__chip-label">
+                  {{ resolveSubsetLabel(subset, group.key) }}
+                </span>
+              </v-chip>
+            </template>
+          </v-chip-group>
+        </article>
+      </div>
     </div>
 
     <v-btn
@@ -430,7 +432,6 @@ watch(groupedSubsets, () => {
     flex: 1 1 auto
     display: flex
     align-items: center
-    gap: 1.5rem
     overflow-x: auto
     scrollbar-width: thin
     scrollbar-color: rgba(var(--v-theme-border-primary-strong), 0.6) transparent
@@ -446,6 +447,12 @@ watch(groupedSubsets, () => {
     &::-webkit-scrollbar-thumb
       background-color: rgba(var(--v-theme-border-primary-strong), 0.6)
       border-radius: 999px
+
+  &__inner
+    display: flex
+    align-items: center
+    gap: 1.5rem
+    margin: auto
 
   &__group
     flex: 0 0 auto

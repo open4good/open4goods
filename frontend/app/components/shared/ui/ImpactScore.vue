@@ -13,85 +13,133 @@
     role="img"
     :aria-label="ariaLabel"
   >
-    <div class="impact-score-panel__top">
-      <div v-if="banner" class="impact-score-panel__col-cta">
-        <CtaCard
-          :title="t('category.filters.ecoscore.title', 'Impact Score')"
-          :subtitle="
-            t('category.filters.ecoscore.cta', 'Voir l\'analyse', {
-              category: '',
-            })
-          "
-          icon="mdi-leaf"
-          size="small"
-          :to="'/impact-score'"
-          flat
-          class="impact-score-panel__cta-card"
-        />
+    <!-- Banner Layout -->
+    <template v-if="banner">
+      <div class="impact-score-panel__top">
+        <!-- Left: Icon + Score + Category + Methodology -->
+        <div class="impact-score-panel__banner-left">
+          <v-icon
+            icon="mdi-leaf"
+            size="20"
+            class="impact-score-panel__banner-icon"
+          />
+          <span class="impact-score-panel__banner-score">
+            {{ formattedScoreValue }}
+          </span>
+          <span class="impact-score-panel__banner-text pl-1">
+            Impact Score
+          </span>
+          <span v-if="category" class="impact-score-panel__banner-category">
+            {{ category }}
+          </span>
+          <NuxtLink
+            to="/ecoscore"
+            class="impact-score-panel__banner-methodology ml-1"
+          >
+            Méthodologie
+          </NuxtLink>
+        </div>
+
+        <div class="impact-score-panel__separator" />
+
+        <!-- Center: Brand - Model -->
+        <div class="impact-score-panel__banner-center">
+          <span v-if="brand">{{ brand }}</span>
+          <span v-if="brand && model" class="mx-1">-</span>
+          <span v-if="model">{{ model }}</span>
+        </div>
+
+        <div class="impact-score-panel__separator" />
+
+        <!-- Right: Generation Date -->
+        <div class="impact-score-panel__banner-right">
+          <span v-if="formattedDate">{{ formattedDate }}</span>
+        </div>
       </div>
-      <div class="impact-score-panel__col-left">
-        <div class="impact-score-panel__score justify-center">
-          <span class="impact-score-panel__score-value">{{
-            formattedScoreValue
-          }}</span>
-          <span class="impact-score-panel__score-out">/ 20</span>
+    </template>
+
+    <!-- Default Layout -->
+    <template v-else>
+      <div class="impact-score-panel__top">
+        <div class="impact-score-panel__col-cta">
+          <CtaCard
+            :title="t('category.filters.ecoscore.title', 'Impact Score')"
+            :subtitle="
+              t('category.filters.ecoscore.cta', 'Voir l\'analyse', {
+                category: '',
+              })
+            "
+            icon="mdi-leaf"
+            size="small"
+            :to="'/impact-score'"
+            flat
+            class="impact-score-panel__cta-card"
+          />
+        </div>
+        <div class="impact-score-panel__col-left">
+          <div class="impact-score-panel__score justify-center">
+            <span class="impact-score-panel__score-value">{{
+              formattedScoreValue
+            }}</span>
+            <span class="impact-score-panel__score-out">/ 20</span>
+          </div>
+        </div>
+
+        <div v-if="shouldShowMeta" class="impact-score-panel__col-right">
+          <div v-if="showRange" class="impact-score-panel__meta-grid">
+            <span class="impact-score-panel__label">Min :</span>
+            <span
+              class="impact-score-panel__value"
+              :class="`impact-score-panel--${getScaleStep(rangeMin)}`"
+            >
+              {{
+                n(rangeMin, {
+                  maximumFractionDigits: 1,
+                  minimumFractionDigits: 0,
+                })
+              }}
+            </span>
+
+            <span class="impact-score-panel__label">Max :</span>
+            <span
+              class="impact-score-panel__value"
+              :class="`impact-score-panel--${getScaleStep(rangeMax)}`"
+            >
+              {{
+                n(rangeMax, {
+                  maximumFractionDigits: 1,
+                  minimumFractionDigits: 0,
+                })
+              }}
+            </span>
+          </div>
+          <v-btn
+            v-if="showMethodology"
+            class="impact-score-panel__cta"
+            variant="flat"
+            density="compact"
+            size="x-small"
+            rounded="pill"
+            :to="'./ecoscore'"
+          >
+            Méthodologie
+          </v-btn>
         </div>
       </div>
 
-      <div v-if="shouldShowMeta" class="impact-score-panel__col-right">
-        <div v-if="showRange" class="impact-score-panel__meta-grid">
-          <span class="impact-score-panel__label">Min :</span>
-          <span
-            class="impact-score-panel__value"
-            :class="`impact-score-panel--${getScaleStep(rangeMin)}`"
-          >
-            {{
-              n(rangeMin, {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 0,
-              })
-            }}
-          </span>
-
-          <span class="impact-score-panel__label">Max :</span>
-          <span
-            class="impact-score-panel__value"
-            :class="`impact-score-panel--${getScaleStep(rangeMax)}`"
-          >
-            {{
-              n(rangeMax, {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 0,
-              })
-            }}
-          </span>
+      <div
+        v-if="shouldShowBar && showProgressBar"
+        class="impact-score-panel__bar"
+        aria-hidden="true"
+      >
+        <div class="impact-score-panel__track">
+          <div
+            class="impact-score-panel__fill"
+            :style="{ width: `${Math.round(progress * 100)}%` }"
+          />
         </div>
-        <v-btn
-          v-if="showMethodology"
-          class="impact-score-panel__cta"
-          variant="flat"
-          density="compact"
-          size="x-small"
-          rounded="pill"
-          :to="'./ecoscore'"
-        >
-          Méthodologie
-        </v-btn>
       </div>
-    </div>
-
-    <div
-      v-if="shouldShowBar && showProgressBar"
-      class="impact-score-panel__bar"
-      aria-hidden="true"
-    >
-      <div class="impact-score-panel__track">
-        <div
-          class="impact-score-panel__fill"
-          :style="{ width: `${Math.round(progress * 100)}%` }"
-        />
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -116,7 +164,7 @@ const props = defineProps({
   },
   size: {
     type: String as PropType<
-      'xs' | 'sm' | 'md' | 'lg' | 'small' | 'medium' | 'default'
+      'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'small' | 'medium' | 'default'
     >,
     default: 'md',
   },
@@ -144,9 +192,25 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  brand: {
+    type: String,
+    default: '',
+  },
+  model: {
+    type: String,
+    default: '',
+  },
+  date: {
+    type: [String, Number, Date],
+    default: null,
+  },
+  category: {
+    type: String,
+    default: '',
+  },
 })
 
-const { t, n } = useI18n()
+const { t, n, d } = useI18n()
 
 const sanitizeNumber = (value: number, fallback: number) =>
   Number.isFinite(value) ? value : fallback
@@ -215,6 +279,12 @@ const shouldShowMeta = computed(
 )
 
 const shouldShowBar = computed(() => normalizedVariant.value === 'default')
+
+const formattedDate = computed(() => {
+  if (!props.date) return ''
+  const dateObj = props.date instanceof Date ? props.date : new Date(props.date)
+  return d(dateObj, 'short')
+})
 </script>
 
 <style scoped>
@@ -260,16 +330,22 @@ const shouldShowBar = computed(() => normalizedVariant.value === 'default')
 }
 
 .impact-score-panel--banner {
-  padding-left: 8px; /* Reduce padding to accommodate internal card */
+  padding: 0;
   display: flex;
-  flex-direction: row; /* Ensure horizontal layout */
-  align-items: center; /* Vertically center content */
+  flex-direction: row;
+  align-items: center;
+  border-radius: 999px; /* Pill shape for thin footer style */
+  height: 48px; /* Fixed thin height */
 }
 
-/* Ensure inner layout works with banner */
+/* Override padding/layout for banner mode parts */
 .impact-score-panel--banner .impact-score-panel__top {
   width: 100%;
-  align-items: center; /* Center items vertically in banner mode */
+  height: 100%;
+  padding: 0 16px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
 }
 
 .impact-score-panel--flat {
@@ -282,6 +358,7 @@ const shouldShowBar = computed(() => normalizedVariant.value === 'default')
 
 .impact-score-panel--flat::before {
   display: none;
+  background: none;
 }
 
 /* Size variants */
@@ -313,6 +390,19 @@ const shouldShowBar = computed(() => normalizedVariant.value === 'default')
 
 .impact-score-panel--lg .impact-score-panel__score-value {
   font-size: 3.4rem;
+}
+
+.impact-score-panel--xl {
+  padding: 20px 24px 18px;
+  border-radius: 26px;
+}
+
+.impact-score-panel--xl .impact-score-panel__score-value {
+  font-size: 5.4rem;
+}
+
+.impact-score-panel--xl .impact-score-panel__bar {
+  display: none;
 }
 
 /* Variant styles */
@@ -355,7 +445,7 @@ const shouldShowBar = computed(() => normalizedVariant.value === 'default')
 .impact-score-panel__col-cta {
   display: flex;
   align-items: center;
-  margin-right: auto; /* Push everything else to right */
+  margin-right: auto;
   padding-right: 16px;
   border-right: 1px solid rgba(var(--v-theme-border-primary-strong), 0.1);
 }
@@ -460,5 +550,84 @@ const shouldShowBar = computed(() => normalizedVariant.value === 'default')
   background: var(--impact-accent);
   width: 0%;
   transition: width 0.3s ease-out;
+}
+
+/* === Banner Mode Special Styles === */
+.impact-score-panel__banner-left,
+.impact-score-panel__banner-center,
+.impact-score-panel__banner-right {
+  display: flex;
+  align-items: center;
+}
+
+.impact-score-panel__banner-left {
+  gap: 8px;
+}
+
+.impact-score-panel__banner-icon {
+  color: var(--impact-accent);
+}
+
+.impact-score-panel__banner-score {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--impact-accent);
+  line-height: 1;
+}
+
+.impact-score-panel__banner-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(var(--v-theme-text-neutral-strong), 0.9);
+}
+
+.impact-score-panel__banner-category {
+  font-weight: 700;
+  color: rgba(var(--v-theme-text-neutral-strong), 1);
+}
+
+.impact-score-panel__banner-methodology {
+  font-size: 0.75rem;
+  text-decoration: underline;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  color: inherit;
+}
+
+.impact-score-panel__banner-methodology:hover {
+  opacity: 1;
+}
+
+.impact-score-panel__banner-center {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(var(--v-theme-text-neutral-strong), 0.95);
+  text-align: center;
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 16px;
+  position: relative;
+}
+
+/* Gradient Separators */
+.impact-score-panel__separator {
+  width: 1px;
+  height: 24px;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--v-theme-border-primary), 0),
+    rgba(var(--v-theme-border-primary), 0.5) 50%,
+    rgba(var(--v-theme-border-primary), 0)
+  );
+  margin: 0 4px;
+}
+
+.impact-score-panel__banner-right {
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+  white-space: nowrap;
 }
 </style>

@@ -257,14 +257,6 @@ const normalizedVerticalEcoscorePath = computed(() => {
 
   return `/${sanitized}/ecoscore`
 })
-
-const methodologyHref = computed(() => {
-  if (normalizedVerticalEcoscorePath.value) {
-    return normalizedVerticalEcoscorePath.value
-  }
-
-  return resolveLocalizedRoutePath('impact-score', locale.value)
-})
 </script>
 
 <style scoped>

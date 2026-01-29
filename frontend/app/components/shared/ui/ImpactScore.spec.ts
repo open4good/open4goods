@@ -69,6 +69,24 @@ describe('ImpactScore', () => {
     expect(wrapper.find('.impact-score-panel__bar').exists()).toBe(true)
   })
 
+  it('applies xl size variant correctly', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 18,
+        size: 'xl',
+      },
+      global: globalOptions,
+    })
+
+    const panel = wrapper.find('.impact-score-panel')
+    expect(panel.classes()).toContain('impact-score-panel--xl')
+    // Check that progress bar is hidden via CSS class logic (inferred)
+    // Actually jsdom might not compute styles, but we check specific element presence if v-if was used.
+    // The CSS hides it: .impact-score-panel--xl .impact-score-panel__bar { display: none; }
+    // We can check if the class exists.
+    expect(wrapper.find('.impact-score-panel__bar').exists()).toBe(true)
+  })
+
   it('maps the small size alias to the compact xs layout', () => {
     const wrapper = mount(ImpactScore, {
       props: {

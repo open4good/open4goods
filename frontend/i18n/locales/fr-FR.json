@@ -2781,7 +2781,7 @@
       "scoreRanking": "Classement du facteur",
       "scoreValue": "Score relatif",
       "valueOutOf": "{value} / {max}",
-      "subtitle": "Comparez les scores environnementaux et sociétaux de ce produit.",
+      "subtitle": "Comprendre le positionnement environnemental de ce produit",
       "tableHeaders": {
         "attributeValue": "Valeur",
         "lifecycle": "Cycle de vie",

@@ -5,15 +5,21 @@ import { defineComponent, h } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricing from './ProductHeroPricing.vue'
 
+interface MockPriceTrend {
+  trend: string
+  variation: number
+  period?: number
+}
+
 vi.mock('~/composables/useProductPriceTrend', () => ({
   useProductPriceTrend: () => ({
-    resolvePriceTrendLabel: (trend: any) =>
+    resolvePriceTrendLabel: (trend: MockPriceTrend | null) =>
       trend?.trend === 'PRICE_INCREASE'
         ? `Price increase of ${trend.variation}`
         : trend?.trend === 'PRICE_DECREASE'
           ? `Price drop of ${Math.abs(trend.variation)}`
           : 'Price unchanged',
-    resolvePriceTrendTone: (trend: any) =>
+    resolvePriceTrendTone: (trend: MockPriceTrend | null) =>
       trend?.trend === 'PRICE_INCREASE'
         ? 'increase'
         : trend?.trend === 'PRICE_DECREASE'
@@ -25,7 +31,7 @@ vi.mock('~/composables/useProductPriceTrend', () => ({
         : tone === 'decrease'
           ? 'mdi-trending-down'
           : 'mdi-trending-neutral',
-    formatTrendTooltip: (trend: any) =>
+    formatTrendTooltip: (trend: MockPriceTrend | null) =>
       trend
         ? `Deviation of ${Math.abs(trend.variation)} over ${trend.period}`
         : null,
