@@ -2419,6 +2419,9 @@
           "eprelFirstPublication": "Première publication EPREL",
           "eprelLastPublication": "Dernière publication EPREL",
           "eprelExport": "Export EPREL",
+          "eprelSparePartsEnd": "Fin disponibilité pièces détachées",
+          "eprelSoftwareSupportEnd": "Fin support logiciel",
+          "eprelSupportEnd": "Fin support garanti",
           "eprelImported": "Importé dans Nudger",
           "eprelOrganisationClosed": "Organisation fermée",
           "generic": "Événement du cycle de vie"
@@ -2434,6 +2437,9 @@
           "eprelFirstPublication": "Date de première publication EPREL.",
           "eprelLastPublication": "Date de dernière publication EPREL.",
           "eprelExport": "Horodatage d'export EPREL.",
+          "eprelSparePartsEnd": "Date de fin de disponibilité des pièces détachées calculée via EPREL.",
+          "eprelSoftwareSupportEnd": "Date de fin des mises à jour logicielles calculée via EPREL.",
+          "eprelSupportEnd": "Date de fin du support technique global calculée via EPREL.",
           "eprelImported": "Date d'import de l'entrée EPREL.",
           "eprelOrganisationClosed": "Date de fermeture de l'organisation EPREL.",
           "generic": "Événement du cycle de vie"
