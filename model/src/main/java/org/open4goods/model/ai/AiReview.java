@@ -617,7 +617,7 @@ public class AiReview {
             @AiGeneratedField(instruction = "Maximum possible score exactly as stated by the source (e.g., \"5\", \"10\", \"20\"). VALUE-ONLY FIELD: no citations.")
             @Schema(description = "The maximum possible score")
             String max,
-            @JsonProperty(required = true, value = "comment")
+            @JsonProperty(required = false, value = "comment")
             @AiGeneratedField(instruction = "Short associated comment if present in the source. Write in FRENCH if you translate; otherwise keep original wording. Plain text only. VALUE-ONLY FIELD: no citations.")
             @Schema(description = "Short comment associated with the rating")
             String comment,

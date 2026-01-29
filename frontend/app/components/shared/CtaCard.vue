@@ -6,6 +6,7 @@
       attrs.class,
       {
         'cta-card--large': size === 'large',
+        'cta-card--flat': flat,
       },
     ]"
     variant="text"
@@ -58,6 +59,7 @@ const props = withDefaults(
     showArrow?: boolean
     clickable?: boolean
     size?: 'default' | 'large'
+    flat?: boolean
   }>(),
   {
     subtitle: null,
@@ -67,6 +69,7 @@ const props = withDefaults(
     showArrow: true,
     clickable: false,
     size: 'default',
+    flat: false,
   }
 )
 
@@ -130,6 +133,18 @@ const onKeydown = (event: KeyboardEvent) => {
   &--large
     padding: 1.5rem
     gap: 1.25rem
+
+  &--flat
+    background-color: transparent
+    border-color: transparent
+    box-shadow: none
+    padding: 0
+
+    &:hover
+       background-color: transparent
+       border-color: transparent
+       box-shadow: none
+       transform: none
 
   &:hover
     background-color: rgb(var(--v-theme-surface))

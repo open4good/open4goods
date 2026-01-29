@@ -43,7 +43,7 @@
         v-if="value != null"
         :score="(value ?? 0) * 4"
         :max="20"
-        size="sm"
+        size="xs"
         :show-methodology="false"
         :show-range="false"
       />

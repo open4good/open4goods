@@ -9,18 +9,6 @@
           {{ $t('product.impact.subtitle', subtitleParams) }}
         </p>
       </div>
-
-      <div class="product-impact__header-actions">
-        <v-btn
-          class="product-impact__cta"
-          variant="flat"
-          rounded="pill"
-          size="small"
-          :to="methodologyHref"
-        >
-          {{ $t('product.impact.methodologyLink') }}
-        </v-btn>
-      </div>
     </header>
 
     <div class="product-impact__primary">
@@ -69,6 +57,7 @@ interface RadarAxisEntry {
   id: string
   name: string
   attributeValue: string | null
+  max?: number
 }
 
 interface RadarSeriesEntry {

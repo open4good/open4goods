@@ -5,11 +5,30 @@
       `impact-score-panel--${normalizedSize}`,
       `impact-score-panel--${normalizedVariant}`,
       `impact-score-panel--${accentStep}`,
+      {
+        'impact-score-panel--banner': banner,
+        'impact-score-panel--flat': flat,
+      },
     ]"
     role="img"
     :aria-label="ariaLabel"
   >
     <div class="impact-score-panel__top">
+      <div v-if="banner" class="impact-score-panel__col-cta">
+        <CtaCard
+          :title="t('category.filters.ecoscore.title', 'Impact Score')"
+          :subtitle="
+            t('category.filters.ecoscore.cta', 'Voir l\'analyse', {
+              category: '',
+            })
+          "
+          icon="mdi-leaf"
+          size="small"
+          :to="'/impact-score'"
+          flat
+          class="impact-score-panel__cta-card"
+        />
+      </div>
       <div class="impact-score-panel__col-left">
         <div class="impact-score-panel__score justify-center">
           <span class="impact-score-panel__score-value">{{
@@ -80,6 +99,7 @@
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import CtaCard from '~/components/shared/CtaCard.vue'
 
 const props = defineProps({
   score: {
@@ -115,6 +135,14 @@ const props = defineProps({
   showProgressBar: {
     type: Boolean,
     default: true,
+  },
+  banner: {
+    type: Boolean,
+    default: false,
+  },
+  flat: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -231,6 +259,31 @@ const shouldShowBar = computed(() => normalizedVariant.value === 'default')
   --impact-accent: rgb(var(--v-theme-success));
 }
 
+.impact-score-panel--banner {
+  padding-left: 8px; /* Reduce padding to accommodate internal card */
+  display: flex;
+  flex-direction: row; /* Ensure horizontal layout */
+  align-items: center; /* Vertically center content */
+}
+
+/* Ensure inner layout works with banner */
+.impact-score-panel--banner .impact-score-panel__top {
+  width: 100%;
+  align-items: center; /* Center items vertically in banner mode */
+}
+
+.impact-score-panel--flat {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.impact-score-panel--flat::before {
+  display: none;
+}
+
 /* Size variants */
 .impact-score-panel--xs {
   padding: 8px 10px 8px;
@@ -299,6 +352,14 @@ const shouldShowBar = computed(() => normalizedVariant.value === 'default')
 }
 
 /* Score (left column) */
+.impact-score-panel__col-cta {
+  display: flex;
+  align-items: center;
+  margin-right: auto; /* Push everything else to right */
+  padding-right: 16px;
+  border-right: 1px solid rgba(var(--v-theme-border-primary-strong), 0.1);
+}
+
 .impact-score-panel__col-left {
   display: flex;
   flex-direction: column;

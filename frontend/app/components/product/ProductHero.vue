@@ -56,29 +56,51 @@
             <div class="product-hero__details-section">
               <div
                 v-if="impactScore != null"
-                class="product-hero__impact-score mb-4 d-flex align-center"
-                style="gap: 12px; height: 104px"
+                class="product-hero__impact-score mb-4 cursor-pointer"
+                @click="handleImpactScoreClick"
               >
-                <CtaCard
-                  :title="t('category.filters.ecoscore.title', 'Impact Score')"
-                  :subtitle="
-                    t('category.filters.ecoscore.cta', 'Voir l\'analyse', {
-                      category: '',
-                    })
-                  "
-                  icon="mdi-leaf"
-                  size="small"
-                  to="/impact-score"
-                  style="max-width: 200px"
-                />
                 <ImpactScore
                   :score="impactScore"
                   :min="impactScoreMin"
                   :max="impactScoreMax"
                   :show-methodology="false"
                   size="lg"
-                  class="h-100"
+                  :banner="true"
                 />
+              </div>
+
+              <div class="product-hero__actions">
+                <v-btn
+                  v-if="!hasAiReview"
+                  class="product-hero__ai-button"
+                  prepend-icon="mdi-robot"
+                  variant="flat"
+                  @click="handleAiReviewClick"
+                >
+                  {{ t('product.hero.aiReview.label', 'Synthèse IA') }}
+                </v-btn>
+
+                <v-btn
+                  class="product-hero__compare-button"
+                  :class="{
+                    'product-hero__compare-button--active': isCompareSelected,
+                  }"
+                  variant="flat"
+                  :aria-pressed="isCompareSelected"
+                  :aria-label="compareButtonAriaLabel"
+                  :title="compareButtonTitle"
+                  :disabled="isCompareDisabled"
+                  @click="toggleCompare"
+                >
+                  <v-icon
+                    :icon="compareButtonIcon"
+                    size="20"
+                    class="product-hero__compare-icon"
+                  />
+                  <span class="product-hero__compare-label">{{
+                    compareButtonText
+                  }}</span>
+                </v-btn>
               </div>
 
               <div class="product-hero__centered-info">
@@ -288,40 +310,6 @@
                   </li>
                 </ul>
               </div>
-
-              <div class="product-hero__actions">
-                <v-btn
-                  v-if="!hasAiReview"
-                  class="product-hero__ai-button"
-                  prepend-icon="mdi-robot"
-                  variant="flat"
-                  @click="handleAiReviewClick"
-                >
-                  {{ t('product.hero.aiReview.label', 'Synthèse IA') }}
-                </v-btn>
-
-                <v-btn
-                  class="product-hero__compare-button"
-                  :class="{
-                    'product-hero__compare-button--active': isCompareSelected,
-                  }"
-                  variant="flat"
-                  :aria-pressed="isCompareSelected"
-                  :aria-label="compareButtonAriaLabel"
-                  :title="compareButtonTitle"
-                  :disabled="isCompareDisabled"
-                  @click="toggleCompare"
-                >
-                  <v-icon
-                    :icon="compareButtonIcon"
-                    size="20"
-                    class="product-hero__compare-icon"
-                  />
-                  <span class="product-hero__compare-label">{{
-                    compareButtonText
-                  }}</span>
-                </v-btn>
-              </div>
             </div>
           </div>
         </div>
@@ -358,7 +346,6 @@ import {
   type CompareListBlockReason,
 } from '~/stores/useProductCompareStore'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
-import CtaCard from '~/components/shared/CtaCard.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
@@ -492,6 +479,15 @@ const handleAiReviewClick = () => {
   const element =
     document.getElementById('synthese') ||
     document.querySelector('.product-ai-review')
+  if (element) {
+    const offset = 120 // Adjust based on header height
+    const top = element.getBoundingClientRect().top + window.scrollY - offset
+    window.scrollTo({ top, behavior: 'smooth' })
+  }
+}
+
+const handleImpactScoreClick = () => {
+  const element = document.getElementById('impact')
   if (element) {
     const offset = 120 // Adjust based on header height
     const top = element.getBoundingClientRect().top + window.scrollY - offset

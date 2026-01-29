@@ -884,6 +884,7 @@ public class ProductMappingService {
                 review.getTechnicalOneline(),
                 review.getEcologicalOneline(),
                 review.getCommunityOneline(),
+                review.getObsolescenceWarning(),
                 review.getBaseLine());
     }
 
@@ -979,9 +980,9 @@ public class ProductMappingService {
             newHistory = mapPriceHistory(aggregatedPrices.getNewPricehistory());
             occasionHistory = mapPriceHistory(aggregatedPrices.getOccasionPricehistory());
             newTrend = mapPriceTrend(computePriceTrend(aggregatedPrices.getNewPricehistory(),
-                    aggregatedPrices.bestNewOffer()));
+                    aggregatedPrices.bestNewOffer(), aggregatedPrices.getTrends(), ProductCondition.NEW));
             occasionTrend = mapPriceTrend(computePriceTrend(aggregatedPrices.getOccasionPricehistory(),
-                    aggregatedPrices.bestOccasionOffer()));
+                    aggregatedPrices.bestOccasionOffer(), aggregatedPrices.getTrends(), ProductCondition.OCCASION));
         }
 
         return new ProductOffersDto(
@@ -1633,11 +1634,44 @@ public class ProductMappingService {
      * @return computed {@link PriceTrend} or {@code null} when the history is
      *         missing
      */
-    private PriceTrend computePriceTrend(List<PriceHistory> history, AggregatedPrice actualPrice) {
-        if (history == null || history.isEmpty()) {
-            return null;
+    /**
+     * Compute the raw price trend using the supplied history and reference price.
+     * Fallback to stored trends if history is missing or insufficient.
+     *
+     * @param history     chronological price history entries
+     * @param actualPrice price used as the current reference for the trend
+     * @param trends      map of pre-computed trends
+     * @param condition   product condition to lookup in trends map
+     * @return computed {@link PriceTrend} or {@code null}
+     */
+    private PriceTrend computePriceTrend(List<PriceHistory> history, AggregatedPrice actualPrice, Map<ProductCondition, Integer> trends, ProductCondition condition) {
+        PriceTrend fromHistory = null;
+        if (history != null && !history.isEmpty()) {
+            fromHistory = PriceTrend.of(history, actualPrice);
         }
-        return PriceTrend.of(history, actualPrice);
+
+        // Return history-based trend if it indicates a change or if we have enough data to be sure it's stable
+        if (fromHistory != null && (fromHistory.trend() != 0 || history.size() >= 2)) {
+            return fromHistory;
+        }
+
+        // Fallback to stored trend
+        if (trends != null && trends.containsKey(condition)) {
+            Integer storedTrend = trends.get(condition);
+            if (storedTrend != null && storedTrend != 0) {
+                // Return synthetic trend based on stored value
+                return new PriceTrend(
+                        storedTrend,
+                        null,
+                        actualPrice != null ? actualPrice.getPrice() : null,
+                        null,
+                        null,
+                        null,
+                        null);
+            }
+        }
+
+        return fromHistory;
     }
 
     /**

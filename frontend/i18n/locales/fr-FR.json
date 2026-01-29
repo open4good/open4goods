@@ -2200,6 +2200,9 @@
     },
     "vigilance": {
       "title": "Points de vigilance",
+      "obsolescence": {
+        "title": "Obsolescence"
+      },
       "subtitle": "Ces indicateurs nécessitent votre attention avant l'achat.",
       "quality": {
         "title": "Qualité de la donnée faible",
@@ -2333,8 +2336,8 @@
         "success": "Synthèse disponible"
       },
       "generationPanel": {
-        "title": "Générations IA",
-        "quotaTitle": "{count} → Quota restant",
+        "title": "Synthèses IA",
+        "quotaTitle": "Vos générations restantes : {count}",
         "expandPanel": "Afficher",
         "collapsePanel": "Réduire",
         "status": {
@@ -2559,7 +2562,7 @@
       "thumbnailLabel": "Sélectionner {type} {index} sur {total} : {label}",
       "videoBadge": "Vidéo",
       "viewOffersCount": "Voir les {count} offres",
-      "viewOffersNew": "Voir l'offre neuve | Voir les {count} offres neuves",
+      "viewOffersNew": "Une offre neuve | {count} offres neuves",
       "viewOffersOccasion": "Voir l'offre d'occasion | Voir les {count} offres d'occasion",
       "viewSingleOffer": "Voir l'offre"
     },
@@ -2850,7 +2853,7 @@
         "price": "Prix",
         "condition": "État"
       },
-      "newOffersOnly": "Afficher uniquement les offres neuves",
+      "newOffersOnly": "Toutes les offres",
       "viewDeal": "Voir l'offre",
       "history": "Historique des prix",
       "noOffersBanner": "Pas d'offres actuellement !",

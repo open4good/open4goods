@@ -21,113 +21,130 @@
           {{ $t('product.price.noOffersBanner') }}
         </v-alert>
 
-        <!-- Offers Table -->
-        <v-data-table
-          v-if="allOffers.length > 1"
-          :headers="offersHeaders"
-          :items="allOffers"
-          class="mt-6 rounded-xl border product-price__offers-table"
-          density="comfortable"
-          :items-per-page="5"
-        >
-          <template #[`item.merchant`]="{ item }">
-            <div class="d-flex align-center gap-2">
-              <img
-                v-if="item.favicon"
-                :src="item.favicon"
-                width="24"
-                height="24"
-                class="rounded"
-                :alt="item.datasourceName"
-              />
-              <span class="font-weight-medium">{{ item.datasourceName }}</span>
-            </div>
-          </template>
-          <template #[`item.price`]="{ item }">
-            <span class="font-weight-bold text-body-1">{{
-              formatCurrency(item.price, item.currency)
-            }}</span>
-          </template>
-          <template #[`item.condition`]="{ item }">
-            <v-chip
-              size="small"
-              :color="item.condition === 'NEW' ? 'success' : 'warning'"
-              variant="tonal"
-              class="font-weight-medium"
+        <v-row>
+          <v-col cols="12" md="8">
+            <!-- Offers Table -->
+            <v-data-table
+              v-if="allOffers.length > 1"
+              :headers="offersHeaders"
+              :items="allOffers"
+              class="rounded-xl border product-price__offers-table"
+              density="comfortable"
+              :items-per-page="5"
             >
-              {{
-                $t(`product.price.condition.${item.condition}`, item.condition)
-              }}
-            </v-chip>
-          </template>
-          <template #[`item.actions`]="{ item }">
-            <v-btn
-              :href="resolveOfferLink(item)"
-              target="_blank"
-              icon
-              variant="text"
-              size="small"
-              color="primary"
-              @click="
-                handleOfferRedirectClick(
-                  item,
-                  'offers-table',
-                  resolveOfferLink(item)
-                )
-              "
-            >
-              <v-icon icon="mdi-open-in-new" />
-            </v-btn>
-          </template>
-        </v-data-table>
+              <template #[`item.merchant`]="{ item }">
+                <div class="d-flex align-center gap-2">
+                  <img
+                    v-if="item.favicon"
+                    :src="item.favicon"
+                    width="24"
+                    height="24"
+                    class="rounded"
+                    :alt="item.datasourceName"
+                  />
+                  <span class="font-weight-medium">{{
+                    item.datasourceName
+                  }}</span>
+                </div>
+              </template>
+              <template #[`item.price`]="{ item }">
+                <span class="font-weight-bold text-body-1">{{
+                  formatCurrency(item.price, item.currency)
+                }}</span>
+              </template>
+              <template #[`item.condition`]="{ item }">
+                <v-chip
+                  size="small"
+                  :color="item.condition === 'NEW' ? 'success' : 'warning'"
+                  variant="tonal"
+                  class="font-weight-medium"
+                >
+                  {{
+                    $t(
+                      `product.price.condition.${item.condition}`,
+                      item.condition
+                    )
+                  }}
+                </v-chip>
+              </template>
+              <template #[`item.actions`]="{ item }">
+                <v-btn
+                  :href="resolveOfferLink(item)"
+                  target="_blank"
+                  icon
+                  variant="text"
+                  size="small"
+                  color="primary"
+                  @click="
+                    handleOfferRedirectClick(
+                      item,
+                      'offers-table',
+                      resolveOfferLink(item)
+                    )
+                  "
+                >
+                  <v-icon icon="mdi-open-in-new" />
+                </v-btn>
+              </template>
+            </v-data-table>
+          </v-col>
 
-        <v-card
-          v-if="allOffers.length > 2"
-          class="mt-6 product-price__competition-card"
-          :class="`product-price__competition-card--${competitionLevel.tone}`"
-          variant="flat"
-        >
-          <div class="product-price__competition-content">
-            <div
-              class="product-price__competition-icon"
-              :class="`product-price__competition-icon--${competitionLevel.tone}`"
+          <v-col cols="12" md="4">
+            <v-card
+              v-if="allOffers.length > 2"
+              class="product-price__competition-card"
+              :class="`product-price__competition-card--${competitionLevel.tone}`"
+              variant="flat"
             >
-              <v-icon :icon="competitionLevel.icon" size="28" />
-            </div>
-            <div class="product-price__competition-text">
-              <p class="product-price__competition-eyebrow">
-                {{
-                  $t('product.price.competition.title', 'Niveau de concurrence')
-                }}
-              </p>
-              <h4 class="product-price__competition-title">
-                {{
-                  $t(competitionLevel.labelKey, competitionLevel.labelFallback)
-                }}
-              </h4>
-              <p class="product-price__competition-subtitle">
-                {{
-                  $t(
-                    competitionLevel.descriptionKey,
-                    competitionLevel.descriptionFallback
-                  )
-                }}
-              </p>
-            </div>
-            <v-chip
-              class="product-price__competition-count"
-              variant="tonal"
-              :color="competitionLevel.color"
-              size="small"
-            >
-              {{
-                $t('product.price.competition.count', '{count} offres', {
-                  count: allOffers.length,
-                })
-              }}
-            </v-chip>
-          </div>
-        </v-card>
+              <div class="product-price__competition-content">
+                <div
+                  class="product-price__competition-icon"
+                  :class="`product-price__competition-icon--${competitionLevel.tone}`"
+                >
+                  <v-icon :icon="competitionLevel.icon" size="28" />
+                </div>
+                <div class="product-price__competition-text">
+                  <p class="product-price__competition-eyebrow">
+                    {{
+                      $t(
+                        'product.price.competition.title',
+                        'Niveau de concurrence'
+                      )
+                    }}
+                  </p>
+                  <h4 class="product-price__competition-title">
+                    {{
+                      $t(
+                        competitionLevel.labelKey,
+                        competitionLevel.labelFallback
+                      )
+                    }}
+                  </h4>
+                  <p class="product-price__competition-subtitle">
+                    {{
+                      $t(
+                        competitionLevel.descriptionKey,
+                        competitionLevel.descriptionFallback
+                      )
+                    }}
+                  </p>
+                </div>
+                <v-chip
+                  class="product-price__competition-count"
+                  variant="tonal"
+                  :color="competitionLevel.color"
+                  size="small"
+                >
+                  {{
+                    $t('product.price.competition.count', '{count} offres', {
+                      count: allOffers.length,
+                    })
+                  }}
+                </v-chip>
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
       </div>
 
       <!-- History Section -->

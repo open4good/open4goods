@@ -298,7 +298,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 3.8
+      scoreMinValue: 3.5
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -307,7 +307,7 @@ nudgeToolConfig:
         en: "Televisions with a low energy consumption"
         fr: "Téléviseurs avec une faible consommation énergétique"
     - scoreName: "DURABILITY"
-      scoreMinValue: 3
+      scoreMinValue: 3.9
       mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
@@ -317,7 +317,7 @@ nudgeToolConfig:
         fr: "Téléviseurs avec une bonne durabilité"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 3.2
+      scoreMinValue: 3
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -326,7 +326,7 @@ nudgeToolConfig:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
     - scoreName: "ESG"
-      scoreMinValue: 3.5
+      scoreMinValue: 2.5
       mdiIcon: "mdi-scale-balance"
       title:
         en: "ESG criterias"
@@ -583,7 +583,7 @@ subsets:
       fr: "< 500 €"
     title:
       en: "Affordable TVs"
-      fr: "TV pas chères"
+      fr: "< 500 €"
     description:
       en: "TVs priced under €500."
       fr: "Les TV dont le prix est inférieur à 500€."
@@ -606,7 +606,7 @@ subsets:
       fr: "500 - 1000 €"
     title:
       en: "Mid-range TVs"
-      fr: "TV milieu de gamme"
+      fr: "500 - 1000 €"
     description:
       en: "TVs priced between €500 and €1000."
       fr: "Les TV dont le prix est compris entre 500€ et 1000€."
@@ -626,7 +626,7 @@ subsets:
       fr: "> 1000 €"
     title:
       en: "Premium TVs"
-      fr: "TV haut de gamme"
+      fr: "> 1000 €"
     description:
       en: "TVs priced over €1000."
       fr: "Les TV dont le prix est supérieur à 1000€."
