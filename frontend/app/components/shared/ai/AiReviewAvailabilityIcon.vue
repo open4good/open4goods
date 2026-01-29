@@ -46,12 +46,12 @@ const hasQuota = computed(() => remaining.value > 0)
 
 const tooltipText = computed(() => {
   if (props.isReviewed) {
-    return t('product.ai_review.available')
+    return t('product.aiReview.tooltip.available')
   }
   if (hasQuota.value) {
-    return t('product.ai_review.generate_available', { count: remaining.value })
+    return t('product.aiReview.tooltip.remaining', { count: remaining.value })
   }
-  return t('product.ai_review.quota_exceeded')
+  return t('product.aiReview.tooltip.quotaExceeded')
 })
 </script>
 

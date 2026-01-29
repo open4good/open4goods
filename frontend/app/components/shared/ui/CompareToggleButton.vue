@@ -7,12 +7,13 @@
         :class="[
           `compare-toggle-button--variant-${variant}`,
           `compare-toggle-button--size-${size}`,
+          `compare-toggle-button--appearance-${appearance}`,
           {
             'compare-toggle-button--active': isSelected,
             'compare-toggle-button--inactive': !isSelected,
           },
         ]"
-        :variant="variant === 'icon-only' ? 'flat' : 'elevated'"
+        :variant="buttonVariant"
         :color="buttonColor"
         :aria-pressed="isSelected"
         :aria-label="ariaLabel"
@@ -57,11 +58,13 @@ const props = withDefaults(
     variant?: 'icon-only' | 'button-icon' | 'button-text'
     size?: 'compact' | 'comfortable' | 'large'
     icon?: string
+    appearance?: 'default' | 'plain'
   }>(),
   {
     variant: 'icon-only',
     size: 'comfortable',
     icon: 'mdi-plus',
+    appearance: 'default',
   }
 )
 
@@ -89,6 +92,14 @@ const iconSize = computed(() => {
 const currentIcon = computed(() => {
   if (isSelected.value) return 'mdi-minus'
   return props.icon
+})
+
+const buttonVariant = computed(() => {
+  if (props.appearance === 'plain') {
+    return 'plain'
+  }
+
+  return props.variant === 'icon-only' ? 'flat' : 'elevated'
 })
 
 const buttonColor = computed(() => {
@@ -200,6 +211,13 @@ const toggle = async () => {
       background-color: rgba(var(--v-theme-primary), 0.16)
       color: rgb(var(--v-theme-primary))
       box-shadow: none
+
+  &--appearance-plain
+    box-shadow: none
+    background-color: transparent !important
+
+    &:hover
+      background-color: rgba(var(--v-theme-surface-default), 0.08)
 
   /* Size adjustments for Icon Only */
   &--variant-icon-only.compare-toggle-button--size-compact

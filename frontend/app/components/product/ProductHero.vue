@@ -283,15 +283,14 @@
               </ul>
 
               <div class="product-hero__actions">
-                <v-btn
+                <AiReviewActionButton
                   v-if="!hasAiReview"
-                  class="product-hero__ai-button"
-                  prepend-icon="mdi-robot"
-                  variant="flat"
+                  :is-reviewed="hasAiReview"
+                  variant="button"
+                  :label="t('product.hero.aiReview.label')"
+                  button-class="product-hero__ai-button"
                   @click="handleAiReviewClick"
-                >
-                  {{ t('product.hero.aiReview.label', 'Synthèse IA') }}
-                </v-btn>
+                />
 
                 <v-btn
                   class="product-hero__compare-button"
@@ -344,6 +343,7 @@ import CategoryNavigationBreadcrumbs from '~/components/category/navigation/Cate
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import AiReviewActionButton from '~/components/shared/ai/AiReviewActionButton.vue'
 import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 import {
   MAX_COMPARE_ITEMS,
