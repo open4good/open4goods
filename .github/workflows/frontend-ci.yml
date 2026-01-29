@@ -44,7 +44,7 @@ jobs:
 
       - name: Publish frontend
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
           username: ${{ secrets.REMOTE_BETA_USER }}

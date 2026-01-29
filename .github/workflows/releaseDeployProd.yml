@@ -425,7 +425,7 @@ jobs:
       ############################################
       - name: 🔁 Start Applications
         if: env.MODE != 'test'
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
@@ -458,7 +458,7 @@ jobs:
 
       - name: Publish frontend
         if: env.MODE != 'test'
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
