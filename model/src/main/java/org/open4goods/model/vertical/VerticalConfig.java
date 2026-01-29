@@ -1084,12 +1084,23 @@ public class VerticalConfig {
                 @JsonMerge
                 private WeightParserConfig weight = new WeightParserConfig();
 
+                @JsonMerge
+                private WarrantyParserConfig warranty = new WarrantyParserConfig();
+
                 public WeightParserConfig getWeight() {
                         return weight;
                 }
 
                 public void setWeight(WeightParserConfig weight) {
                         this.weight = weight;
+                }
+
+                public WarrantyParserConfig getWarranty() {
+                        return warranty;
+                }
+
+                public void setWarranty(WarrantyParserConfig warranty) {
+                        this.warranty = warranty;
                 }
         }
 
@@ -1120,6 +1131,27 @@ public class VerticalConfig {
 
                 public void setDefaultUnit(String defaultUnit) {
                         this.defaultUnit = defaultUnit;
+                }
+        }
+
+        public static class WarrantyParserConfig {
+                private Double minYears;
+                private Double maxYears;
+
+                public Double getMinYears() {
+                        return minYears;
+                }
+
+                public void setMinYears(Double minYears) {
+                        this.minYears = minYears;
+                }
+
+                public Double getMaxYears() {
+                        return maxYears;
+                }
+
+                public void setMaxYears(Double maxYears) {
+                        this.maxYears = maxYears;
                 }
         }
 }

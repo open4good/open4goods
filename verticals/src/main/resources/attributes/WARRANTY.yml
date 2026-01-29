@@ -44,8 +44,5 @@ synonyms:
     - "MINGUARANTEEDGUARANTEE"
     - "GUARANTEEDURATION"
 parser:
-  normalize: true
-  trim: false
-  lowerCase: false
-  upperCase: true
+  clazz: org.open4goods.api.services.aggregation.services.realtime.parser.WarrantyParser
   removeParenthesis: false
