@@ -12,6 +12,15 @@ const i18n = createI18n({
       'components.impactScore.svgAriaLabel': 'Score {score} out of 20',
     },
   },
+  datetimeFormats: {
+    en: {
+      short: {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      },
+    },
+  },
 })
 
 describe('ImpactScore', () => {

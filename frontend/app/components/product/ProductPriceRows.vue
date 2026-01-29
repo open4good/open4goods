@@ -439,7 +439,7 @@ const offerBadges = computed<Badge[]>(() => {
     opacity: 0.6
 
   &__amount
-    font-size: 0.95rem
+    font-size: 1.4rem
     font-weight: 700
     white-space: nowrap
 

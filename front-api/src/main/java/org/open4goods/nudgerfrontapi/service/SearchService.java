@@ -103,7 +103,7 @@ public class SearchService {
 	private static final String MISSING_BUCKET = "ES-UNKNOWN";
 	private static final int DEFAULT_BUCKET_COUNT = 10;
 	private static final int DEFAULT_TERMS_SIZE = 50;
-	private static final int GLOBAL_SEARCH_LIMIT = 100;
+	private static final int GLOBAL_SEARCH_LIMIT = 20;
 	private static final int SUGGEST_RESULT_LIMIT = 5;
 	private static final String[] SUGGEST_SOURCE_INCLUDES = { "attributes.referentielAttributes.MODEL",
 			"attributes.referentielAttributes.BRAND", "attributes.referentielAttributes.GTIN", "coverImagePath",
@@ -303,13 +303,14 @@ public class SearchService {
 			} else if (mustHaveVertical) {
 				b.filter(f -> f.exists(e -> e.field("vertical")));
 			} else if (mustNotHaveVertical) {
-				b.mustNot(m -> m.exists(e -> e.field("vertical")));
+				// TODO : Check
+				//b.mustNot(m -> m.exists(e -> e.field("vertical")));
 			}
 
 			if (StringUtils.hasText(query)) {
 				b.must(m -> m.multiMatch(mm -> mm
 						.query(query)
-						.fields("offerNames", "attributes.referentielAttributes.BRAND", "attributes.referentielAttributes.MODEL")
+						.fields("offerNames", "attributes.referentielAttributes.BRAND.keyword", "attributes.referentielAttributes.MODEL.keyword")
 						.operator(co.elastic.clients.elasticsearch._types.query_dsl.Operator.And)
 						.type(co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType.BestFields)));
 			}
@@ -1090,7 +1091,7 @@ public class SearchService {
 
 
 		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
-		Query query = buildMissingVerticalSearchQuery(sanitizedQuery, filters, true);
+		Query query = buildMissingVerticalSearchQuery(sanitizedQuery, filters, false);
 		NativeQueryBuilder builder = new NativeQueryBuilder()
 				.withQuery(query)
 				.withPageable(pageable)

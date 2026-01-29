@@ -101,14 +101,9 @@
           <AiReviewActionButton
             :is-reviewed="isReviewed(product)"
             :review-created-at="reviewCreatedAt(product)"
-            size="compact"
-            appearance="plain"
+            size="large"
           />
-          <CompareToggleButton
-            :product="product"
-            size="compact"
-            appearance="plain"
-          />
+          <CompareToggleButton :product="product" size="comfortable" />
         </div>
       </div>
     </v-list-item>

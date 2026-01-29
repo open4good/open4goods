@@ -66,6 +66,10 @@
                   :show-methodology="false"
                   size="lg"
                   :banner="true"
+                  :brand="productBrandName"
+                  :model="productModelName"
+                  :date="aiGenerationDate"
+                  :category="categoryName"
                 />
               </div>
 
@@ -486,6 +490,18 @@ const handleAiReviewClick = () => {
     window.scrollTo({ top, behavior: 'smooth' })
   }
 }
+
+const aiGenerationDate = computed(() => {
+  return props.product.aiReview?.createdMs ?? null
+})
+
+const categoryName = computed(() => {
+  const crumbs = visibleBreadcrumbs.value
+  if (crumbs.length > 0) {
+    return crumbs[crumbs.length - 1].title
+  }
+  return ''
+})
 
 const handleImpactScoreClick = () => {
   const element = document.getElementById('impact')
