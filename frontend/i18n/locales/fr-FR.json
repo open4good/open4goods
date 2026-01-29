@@ -2261,6 +2261,11 @@
       "ariaLabel": "Bannière fixe pour promouvoir un achat responsable",
       "offersCount": "{count} offre | {count} offres"
     },
+    "hero": {
+      "aiReview": {
+        "label": "Synthèse IA"
+      }
+    },
     "start_impact_text": "Vous aimez ?",
     "start_impact_subtext": "Soutenez un projet à impact, ouvert et éthique en faisant vos achats par Nudger ! Ca marche aussi en passant directement via nos ",
     "partners_link": "nos partenaires",
@@ -2277,6 +2282,12 @@
         "notEnoughData": "Pas assez de données fiables pour générer une synthèse."
       },
       "generatedAt": "Synthèse générée le {date}",
+      "tooltip": {
+        "generatedAt": "Génération le {date}",
+        "available": "Synthèse IA disponible",
+        "remaining": "{count} génération restante | {count} générations restantes",
+        "quotaExceeded": "Quota épuisé"
+      },
       "dataQuality": {
         "title": "Qualité des données",
         "description": "Évaluation de la fiabilité et de la complétude des sources utilisées pour cette synthèse IA."

@@ -68,8 +68,13 @@
                 </span>
               </div>
 
-              <!-- Compare Button (Right) -->
-              <div class="category-product-card-grid__compare">
+              <!-- Actions (Right) -->
+              <div class="category-product-card-grid__actions">
+                <AiReviewActionButton
+                  :is-reviewed="isReviewed(product)"
+                  :review-created-at="reviewCreatedAt(product)"
+                  size="compact"
+                />
                 <CompareToggleButton :product="product" size="compact" />
               </div>
             </div>
@@ -151,6 +156,7 @@ import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
+import AiReviewActionButton from '~/components/shared/ai/AiReviewActionButton.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import ProductPriceRows from '~/components/product/ProductPriceRows.vue'
 import {
@@ -211,6 +217,11 @@ const impactScoreValue = (product: ProductDto) =>
 
 const offersCountLabel = (product: ProductDto) =>
   formatOffersCount(product, translatePlural)
+
+const isReviewed = (product: ProductDto) => !!product.aiReview
+
+const reviewCreatedAt = (product: ProductDto) =>
+  product.aiReview?.createdMs ?? undefined
 
 type OfferBadge = {
   key: string
@@ -385,9 +396,12 @@ const popularAttributesByProduct = (
     margin-top: -4px /* visual tweak */
     margin-left: -4px
 
-  &__compare
+  &__actions
     pointer-events: auto
     margin: 0.5rem 0.5rem 0 0 /* top right spacing */
+    display: inline-flex
+    align-items: center
+    gap: 0.4rem
 
   &__body
     display: flex

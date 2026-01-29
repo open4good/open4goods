@@ -44,10 +44,6 @@
                 <span class="category-product-list__status-text">
                   {{ resolveBaseLine(product) }}
                 </span>
-                <AiReviewAvailabilityIcon
-                  :is-reviewed="isReviewed(product)"
-                  size="20"
-                />
               </template>
               <span v-else class="category-product-list__offers">
                 <v-icon icon="mdi-store" size="18" class="me-1" />
@@ -102,7 +98,17 @@
 
         <div class="category-product-list__actions">
           <!-- Removed best price button as it is now in micro prices -->
-          <CompareToggleButton :product="product" />
+          <AiReviewActionButton
+            :is-reviewed="isReviewed(product)"
+            :review-created-at="reviewCreatedAt(product)"
+            size="compact"
+            appearance="plain"
+          />
+          <CompareToggleButton
+            :product="product"
+            size="compact"
+            appearance="plain"
+          />
         </div>
       </div>
     </v-list-item>
@@ -114,7 +120,7 @@ import { computed } from 'vue'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
-import AiReviewAvailabilityIcon from '~/components/shared/ai/AiReviewAvailabilityIcon.vue'
+import AiReviewActionButton from '~/components/shared/ai/AiReviewActionButton.vue'
 import ProductPriceRows from '~/components/product/ProductPriceRows.vue'
 import {
   formatAttributeValue,
@@ -159,6 +165,9 @@ const resolveBaseLine = (product: ProductDto) =>
   product.aiReview?.baseLine ?? null
 
 const isReviewed = (product: ProductDto) => !!product.aiReview
+
+const reviewCreatedAt = (product: ProductDto) =>
+  product.aiReview?.createdMs ?? undefined
 
 type DisplayedAttribute = {
   key: string
@@ -267,6 +276,7 @@ const popularAttributesByProduct = (
     display: flex
     align-items: center
     justify-content: flex-end
+    gap: 0.5rem
     flex: 0 0 auto
 
   &__score-fallback
