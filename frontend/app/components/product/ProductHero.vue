@@ -82,7 +82,10 @@
                 />
               </div>
 
-              <div v-if="hasBrandOrModel" class="mb-4 product-hero__heading-group">
+              <div
+                v-if="hasBrandOrModel"
+                class="mb-4 product-hero__heading-group"
+              >
                 <span v-if="productBrandName" class="product-hero__brand-name">
                   {{ productBrandName }}
                 </span>
@@ -845,6 +848,12 @@ const heroBreadcrumbProps = computed(() => ({
   position: absolute;
   inset: 0;
   background:
+    linear-gradient(
+      90deg,
+      rgb(var(--v-theme-surface-default)) 0%,
+      rgb(var(--v-theme-surface-default)) 45%,
+      rgba(var(--v-theme-surface-default), 0) 65%
+    ),
     radial-gradient(
       circle at 18% 22%,
       rgba(var(--v-theme-hero-gradient-start), 0.18),

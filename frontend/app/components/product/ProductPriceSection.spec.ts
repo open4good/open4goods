@@ -341,7 +341,7 @@ describe('ProductPriceSection', () => {
   it('links to the affiliation redirect when best offers have a token', async () => {
     const wrapper = await mountComponent()
 
-    const links = wrapper.findAll('.product-price__best-offer-card [href]')
+    const links = wrapper.findAll('.product-price__history-cta[href]')
     expect(links.length).toBeGreaterThanOrEqual(1)
     const hrefs = links.map(link => link.attributes('href'))
     expect(hrefs).toContain('/contrib/abc123')
@@ -352,7 +352,7 @@ describe('ProductPriceSection', () => {
   it('displays compact favicon sizes for best offer highlights', async () => {
     const wrapper = await mountComponent()
 
-    const icons = wrapper.findAll('.product-price__best-offer-card img')
+    const icons = wrapper.findAll('.product-price__history-cta img')
     expect(icons.length).toBeGreaterThanOrEqual(1)
     expect(icons[0]?.attributes('src')).toContain('merchant-b.example/icon.png')
 
@@ -362,7 +362,7 @@ describe('ProductPriceSection', () => {
   it('omits best offer highlight when no best new offer is available', async () => {
     const wrapper = await mountComponent({ bestNewOffer: undefined })
 
-    expect(wrapper.find('.product-price__best-offer-card').exists()).toBe(false)
+    expect(wrapper.find('.product-price__history-cta').exists()).toBe(false)
 
     await wrapper.unmount()
   })

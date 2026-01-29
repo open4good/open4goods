@@ -1,21 +1,5 @@
 <template>
   <div class="product-summary-navigation-wrapper">
-    <button
-      type="button"
-      class="product-summary-navigation__collapse-toggle"
-      :aria-expanded="!isCollapsed"
-      :aria-label="
-        isCollapsed
-          ? $t('product.navigation.expand')
-          : $t('product.navigation.collapse')
-      "
-      @click="toggleCollapse"
-    >
-      <v-icon
-        :icon="isCollapsed ? 'mdi-dock-right' : 'mdi-dock-left'"
-        size="20"
-      />
-    </button>
     <nav
       class="product-summary-navigation"
       :class="{
@@ -24,6 +8,22 @@
       }"
       :aria-label="ariaLabel"
     >
+      <button
+        type="button"
+        class="product-summary-navigation__collapse-toggle"
+        :aria-expanded="!isCollapsed"
+        :aria-label="
+          isCollapsed
+            ? $t('product.navigation.expand')
+            : $t('product.navigation.collapse')
+        "
+        @click="toggleCollapse"
+      >
+        <v-icon
+          :icon="isCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left'"
+          size="20"
+        />
+      </button>
       <ul class="product-summary-navigation__list">
         <li
           v-for="section in sections"
@@ -263,7 +263,10 @@ const toggleSubmenu = (sectionId: string) => {
   openSectionId.value = openSectionId.value === sectionId ? null : sectionId
 }
 
-const handleSectionClick = (section: { id: string }) => {
+const handleSectionClick = (section: {
+  id: string
+  subsections?: Array<{ id: string; label: string; icon?: string }>
+}) => {
   if (hasSubsections(section)) {
     // If clicking the section header, ensure it opens
     openSectionId.value = section.id
@@ -302,20 +305,32 @@ watch(
 
 .product-summary-navigation__collapse-toggle {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 0;
+  right: 0;
   z-index: 20;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
-  background: rgba(var(--v-theme-surface-glass-strong), 0.95);
+  width: 32px;
+  height: 32px;
+  border-radius: 0 16px 0 16px;
+  border: none;
+  background: transparent;
   color: rgb(var(--v-theme-text-neutral-strong));
   transition: all 0.3s ease;
   cursor: pointer;
+}
+
+.product-summary-navigation--collapsed
+  .product-summary-navigation__collapse-toggle {
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.95);
+  border-radius: 50%;
+  margin: 2px; /* Add margin to not stick exactly to the edge if circled? Or keep 0? User said "sticked to left:0". If circled, maybe centered? */
+  width: 28px; /* Slightly smaller to fit in 32px nav? Nav is 32px wide. */
+  height: 28px;
+  top: 2px;
+  right: 2px;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
 
@@ -324,8 +339,7 @@ watch(
   background: rgba(var(--v-theme-surface-primary-100), 0.9);
   border-color: rgba(var(--v-theme-border-primary-strong), 0.6);
   color: rgb(var(--v-theme-accent-primary-highlight));
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
-  transform: scale(1.05);
+  box-shadow: -2px 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .product-summary-navigation {
@@ -338,14 +352,28 @@ watch(
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
   backdrop-filter: blur(8px);
   transition:
-    transform 0.3s ease,
+    width 0.3s ease,
+    max-width 0.3s ease,
+    padding 0.3s ease,
     opacity 0.3s ease;
+  overflow: hidden;
+  max-width: 320px; /* Adjust according to design */
+  width: 100%;
 }
 
 .product-summary-navigation--collapsed {
-  transform: translateX(-100%);
+  max-width: 32px;
+  padding: 0;
+  box-shadow: none; /* Optional: remove shadow when collapsed */
+  background: transparent;
+}
+
+.product-summary-navigation--collapsed .product-summary-navigation__list,
+.product-summary-navigation--collapsed
+  .product-summary-navigation__admin-panel {
   opacity: 0;
   pointer-events: none;
+  width: 300px; /* Prevent layout shift during transition? */
 }
 
 .product-summary-navigation--horizontal {

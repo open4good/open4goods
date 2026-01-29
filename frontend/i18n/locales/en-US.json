@@ -2549,6 +2549,14 @@
     "offers": {
       "bestPrice": "Best price"
     },
+    "vigilance": {
+      "title": "Vigilance Points",
+      "subtitle": "These indicators require your attention before purchase.",
+      "quality": {
+        "title": "Low Data Quality",
+        "description": "The data quality score ({score}/100) is lower than the category average ({avg}/100). Information might be incomplete."
+      }
+    },
     "admin": {
       "vigilance": {
         "title": "Vigilance Points",

@@ -11,165 +11,172 @@
       </div>
     </header>
 
-    <div class="product-vigilance__grid">
+    <v-row justify="center">
       <!-- End of Life Card -->
-      <v-card
-        v-if="isEndOfLife"
-        class="product-vigilance__card product-vigilance__card--eol"
-        color="warning"
-        variant="tonal"
-      >
-        <v-card-text class="product-vigilance__card-body">
-          <div class="product-vigilance__card-layout">
-            <v-icon
-              class="product-vigilance__card-icon"
-              size="40"
-              icon="mdi-alert-decagram-outline"
-            />
-            <div class="product-vigilance__card-content">
-              <p class="product-vigilance__card-title">
-                {{ $t('product.impact.endOfLifeTitle') }}
-              </p>
-              <p class="product-vigilance__card-description">
-                {{ endOfLifeDescription }}
-              </p>
+      <v-col v-if="isEndOfLife" cols="12" :md="cardColumnSize">
+        <v-card
+          class="product-vigilance__card product-vigilance__card--eol h-100"
+          color="warning"
+          variant="tonal"
+        >
+          <v-card-text class="product-vigilance__card-body">
+            <div class="product-vigilance__card-layout">
+              <v-icon
+                class="product-vigilance__card-icon"
+                size="40"
+                icon="mdi-alert-decagram-outline"
+              />
+              <div class="product-vigilance__card-content">
+                <p class="product-vigilance__card-title">
+                  {{ $t('product.impact.endOfLifeTitle') }}
+                </p>
+                <p class="product-vigilance__card-description">
+                  {{ endOfLifeDescription }}
+                </p>
+              </div>
             </div>
-          </div>
-        </v-card-text>
-      </v-card>
+          </v-card-text>
+        </v-card>
+      </v-col>
 
       <!-- Conflicting Attributes Card -->
-      <v-card
-        v-if="hasConflictingAttributes"
-        class="product-vigilance__card product-vigilance__card--conflicts"
-        color="error"
-        variant="tonal"
-      >
-        <v-card-text class="product-vigilance__card-body">
-          <div class="product-vigilance__card-layout">
-            <v-icon
-              class="product-vigilance__card-icon"
-              size="40"
-              icon="mdi-alert-circle-outline"
-            />
-            <div class="product-vigilance__card-content">
-              <p class="product-vigilance__card-title">
-                {{ $t('product.vigilance.conflicts.title') }}
-              </p>
-              <p class="product-vigilance__card-description">
-                {{ $t('product.vigilance.conflicts.description') }}
-              </p>
+      <v-col v-if="hasConflictingAttributes" cols="12" :md="cardColumnSize">
+        <v-card
+          class="product-vigilance__card product-vigilance__card--conflicts h-100"
+          color="error"
+          variant="tonal"
+        >
+          <v-card-text class="product-vigilance__card-body">
+            <div class="product-vigilance__card-layout">
+              <v-icon
+                class="product-vigilance__card-icon"
+                size="40"
+                icon="mdi-alert-circle-outline"
+              />
+              <div class="product-vigilance__card-content">
+                <p class="product-vigilance__card-title">
+                  {{ $t('product.vigilance.conflicts.title') }}
+                </p>
+                <p class="product-vigilance__card-description">
+                  {{ $t('product.vigilance.conflicts.description') }}
+                </p>
 
-              <v-table density="compact" class="mt-4 bg-transparent">
-                <thead>
-                  <tr>
-                    <th>{{ $t('product.vigilance.conflicts.attribute') }}</th>
-                    <th>{{ $t('product.vigilance.conflicts.values') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="attr in conflictingAttributes" :key="attr.name">
-                    <td>{{ attr.name }}</td>
-                    <td>
-                      <div class="d-flex flex-wrap gap-2">
-                        <!-- Simplified view of conflicting values -->
-                        <v-chip
-                          v-for="(source, idx) in getUniqueValues(attr)"
-                          :key="idx"
-                          size="x-small"
-                          color="error"
-                          variant="outlined"
-                        >
-                          {{ source }}
-                        </v-chip>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
+                <v-table density="compact" class="mt-4 bg-transparent">
+                  <thead>
+                    <tr>
+                      <th>{{ $t('product.vigilance.conflicts.attribute') }}</th>
+                      <th>{{ $t('product.vigilance.conflicts.values') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="attr in conflictingAttributes" :key="attr.name">
+                      <td>{{ attr.name }}</td>
+                      <td>
+                        <div class="d-flex flex-wrap gap-2">
+                          <!-- Simplified view of conflicting values -->
+                          <v-chip
+                            v-for="(source, idx) in getUniqueValues(attr)"
+                            :key="idx"
+                            size="x-small"
+                            color="error"
+                            variant="outlined"
+                          >
+                            {{ source }}
+                          </v-chip>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </div>
             </div>
-          </div>
-        </v-card-text>
-      </v-card>
+          </v-card-text>
+        </v-card>
+      </v-col>
 
       <!-- Data Quality Card -->
-      <v-card
-        v-if="isLowDataQuality"
-        class="product-vigilance__card product-vigilance__card--quality"
-        color="warning"
-        variant="tonal"
-      >
-        <v-card-text class="product-vigilance__card-body">
-          <div class="product-vigilance__card-layout">
-            <v-icon
-              class="product-vigilance__card-icon"
-              size="40"
-              icon="mdi-database-alert-outline"
-            />
-            <div class="product-vigilance__card-content">
-              <p class="product-vigilance__card-title">
-                {{ $t('product.vigilance.quality.title') }}
-              </p>
-              <p class="product-vigilance__card-description">
-                {{
-                  $t('product.vigilance.quality.description', {
-                    score: dataQualityScoreValue,
-                    avg: dataQualityAvg,
-                  })
-                }}
-              </p>
+      <v-col v-if="isLowDataQuality" cols="12" :md="cardColumnSize">
+        <v-card
+          class="product-vigilance__card product-vigilance__card--quality h-100"
+          color="warning"
+          variant="tonal"
+        >
+          <v-card-text class="product-vigilance__card-body">
+            <div class="product-vigilance__card-layout">
+              <v-icon
+                class="product-vigilance__card-icon"
+                size="40"
+                icon="mdi-database-alert-outline"
+              />
+              <div class="product-vigilance__card-content">
+                <p class="product-vigilance__card-title">
+                  {{ $t('product.vigilance.quality.title') }}
+                </p>
+                <p class="product-vigilance__card-description">
+                  {{
+                    $t('product.vigilance.quality.description', {
+                      score: dataQualityScoreValue,
+                      avg: dataQualityAvg,
+                    })
+                  }}
+                </p>
+              </div>
             </div>
-          </div>
-        </v-card-text>
-      </v-card>
+          </v-card-text>
+        </v-card>
+      </v-col>
       <!-- Competition Vigilance Card -->
-      <v-card
-        v-if="isLowCompetition"
-        class="product-vigilance__card product-vigilance__card--competition"
-        color="warning"
-        variant="tonal"
-      >
-        <v-card-text class="product-vigilance__card-body">
-          <div class="product-vigilance__card-layout">
-            <v-icon
-              class="product-vigilance__card-icon"
-              size="40"
-              icon="mdi-alert-outline"
-            />
-            <div class="product-vigilance__card-content">
-              <p class="product-vigilance__card-title">
-                {{
-                  $t('product.price.competition.title', 'Niveau de concurrence')
-                }}
-              </p>
-              <p class="product-vigilance__card-description">
-                {{
-                  $t(
-                    'product.price.competition.lowDescription',
-                    'Peu d’offres disponibles, la comparaison est limitée.'
-                  )
-                }}
-              </p>
-              <v-chip
-                class="mt-2 align-self-start"
-                size="small"
-                color="warning"
-                variant="outlined"
-              >
-                {{
-                  $t('product.price.competition.count', '{count} offres', {
-                    count: competitionCount,
-                  })
-                }}
-                <span style="display: none" data-test-count>{{
-                  competitionCount
-                }}</span>
-              </v-chip>
+      <v-col v-if="isLowCompetition" cols="12" :md="cardColumnSize">
+        <v-card
+          class="product-vigilance__card product-vigilance__card--competition h-100"
+          color="warning"
+          variant="tonal"
+        >
+          <v-card-text class="product-vigilance__card-body">
+            <div class="product-vigilance__card-layout">
+              <v-icon
+                class="product-vigilance__card-icon"
+                size="40"
+                icon="mdi-alert-outline"
+              />
+              <div class="product-vigilance__card-content">
+                <p class="product-vigilance__card-title">
+                  {{
+                    $t(
+                      'product.price.competition.title',
+                      'Niveau de concurrence'
+                    )
+                  }}
+                </p>
+                <p class="product-vigilance__card-description">
+                  {{
+                    $t(
+                      'product.price.competition.lowDescription',
+                      'Peu d’offres disponibles, la comparaison est limitée.'
+                    )
+                  }}
+                </p>
+                <v-chip
+                  class="mt-2 align-self-start"
+                  size="small"
+                  color="warning"
+                  variant="outlined"
+                >
+                  {{
+                    $t('product.price.competition.count', '{count} offres', {
+                      count: competitionCount,
+                    })
+                  }}
+                  <span style="display: none" data-test-count>{{
+                    competitionCount
+                  }}</span>
+                </v-chip>
+              </div>
             </div>
-          </div>
-        </v-card-text>
-      </v-card>
-    </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
   </section>
 </template>
 
@@ -321,6 +328,23 @@ const isLowCompetition = computed(() => {
 })
 
 const competitionCount = computed(() => allOffers.value.length)
+
+// --- Active Cards & Layout Logic ---
+const activeCardCount = computed(() => {
+  let count = 0
+  if (isEndOfLife.value) count++
+  if (hasConflictingAttributes.value) count++
+  if (isLowDataQuality.value) count++
+  if (isLowCompetition.value) count++
+  return count
+})
+
+const cardColumnSize = computed(() => {
+  const count = activeCardCount.value
+  if (count <= 2) return 6
+  if (count === 3) return 4
+  return 3
+})
 </script>
 
 <style scoped>
@@ -347,12 +371,6 @@ const competitionCount = computed(() => allOffers.value.length)
   font-size: 1rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
   line-height: 1.5;
-}
-
-.product-vigilance__grid {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
 }
 
 .product-vigilance__card {

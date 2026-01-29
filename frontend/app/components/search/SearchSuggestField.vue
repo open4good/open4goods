@@ -81,7 +81,7 @@
               data-test="search-scanner-button"
               @click="openScannerDialog"
             >
-              <v-icon icon="mdi-barcode-scan" size="20" aria-hidden="true" />
+              <v-icon icon="mdi-barcode-scan" size="28" aria-hidden="true" />
             </v-btn>
             <slot v-if="$slots['append-inner']" name="append-inner" />
           </template>

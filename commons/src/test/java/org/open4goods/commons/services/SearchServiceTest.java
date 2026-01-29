@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verifyNoInteractions;
+
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.lenient;
+
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +25,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
+
 
 @ExtendWith(MockitoExtension.class)
 class SearchServiceTest
@@ -92,4 +95,5 @@ class SearchServiceTest
         assertThat(criteria.getCriteriaChain().stream().anyMatch(c -> "vertical".equals(c.getField().getName()))).isTrue();
         assertThat(criteria.getCriteriaChain().stream().anyMatch(c -> "offersCount".equals(c.getField().getName()))).isTrue();
     }
+
 }

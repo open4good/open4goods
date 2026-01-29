@@ -101,97 +101,20 @@
         ]
       },
       "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
-      "highlights": [
-        {
+      "highlights": {
+        "impact": {
           "title": "🌿 ImpactScore : Guider vos achats",
-          "segments": [
-            {
-              "text": "Acheter moins pire pour la planète."
-            },
-            {
-              "text": "évaluation environnementale",
-              "to": "/impact-score"
-            },
-            {
-              "text": "innovante pour"
-            },
-            {
-              "text": "{impactScoreProducts}",
-              "to": "/search"
-            },
-            {
-              "text": "produits dans"
-            },
-            {
-              "text": "{impactScoreCategories}",
-              "to": "/categories"
-            },
-            {
-              "text": " catégories"
-            }
-          ]
+          "subtitle": "Acheter moins pire pour la planète !"
         },
-        {
-          "title": "🫰 Comparateur de prix",
-          "segments": [
-            {
-              "text": "Sans se faire avoir sur les prix !"
-            },
-            {
-              "text": "{partnersLink}",
-              "to": "/partenaires"
-            },
-            {
-              "text": "commerçants. Achetez au meilleur moment avec l'historique neuf et occasion pour"
-            },
-            {
-              "text": "{priceHistoryProducts}",
-              "to": "/categories"
-            },
-            {
-              "text": "produits. Un exemple ?"
-            },
-            {
-              "text": "{randomProduct}",
-              "to": "{randomProductLink}"
-            }
-          ]
+        "price": {
+          "title": "💰 Comparateur de prix",
+          "subtitle": "Un des meilleurs comparateur du marché."
         },
-        {
+        "ethics": {
           "title": "🇫🇷 Ouvert & éthique",
-          "segments": [
-            {
-              "text": "Indépendant. Ouvert. Transparent",
-              "icon": "breton-flag",
-              "iconPosition": "after"
-            },
-            {
-              "text": ", hébergé en Europe. Plus de"
-            },
-            {
-              "text": "73M",
-              "to": "/opendata"
-            },
-            {
-              "text": "de produits en"
-            },
-            {
-              "text": "données ouvertes.",
-              "to": "/opendata"
-            },
-            {
-              "text": "Nudger est aussi"
-            },
-            {
-              "text": "open source",
-              "to": "/opensource"
-            },
-            {
-              "text": "et ne collecte aucune donnée personnelle."
-            }
-          ]
+          "subtitle": "Indépendant. Ouvert. Transparent."
         }
-      ],
+      },
       "highlightsCompact": [
         {
           "title": "🌿 ImpactScore",
@@ -2274,6 +2197,14 @@
   "product": {
     "offers": {
       "bestPrice": "Meilleur prix"
+    },
+    "vigilance": {
+      "title": "Points de vigilance",
+      "subtitle": "Ces indicateurs nécessitent votre attention avant l'achat.",
+      "quality": {
+        "title": "Qualité de la donnée faible",
+        "description": "Le score de qualité de données ({score}/100) est inférieur à la moyenne de la catégorie ({avg}/100). Les informations peuvent être incomplètes."
+      }
     },
     "admin": {
       "vigilance": {

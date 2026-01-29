@@ -282,46 +282,50 @@ public class SearchService {
 
 	Query buildProductSearchQuery(String normalizedVerticalId, String sanitizedQuery, FilterRequestDto filters,
 			boolean applyDefaultExclusion) {
+		if (!StringUtils.hasText(sanitizedQuery)) {
+			return buildBaseBoolQuery(normalizedVerticalId, sanitizedQuery, filters, applyDefaultExclusion, false, false);
+		}
 		return buildLexicalQuery(normalizedVerticalId, sanitizedQuery, filters, applyDefaultExclusion, false, false);
+	}
+
+	private Query buildBaseBoolQuery(String verticalId, String query, FilterRequestDto filters,
+			boolean applyDefaultExclusion, boolean mustHaveVertical, boolean mustNotHaveVertical) {
+		Long expiration = repository.expirationClause();
+
+		return Query.of(q -> q.bool(b -> {
+			b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
+			b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
+			if (applyDefaultExclusion) {
+				b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
+			}
+			if (StringUtils.hasText(verticalId)) {
+				b.filter(f -> f.term(t -> t.field("vertical").value(verticalId)));
+			} else if (mustHaveVertical) {
+				b.filter(f -> f.exists(e -> e.field("vertical")));
+			} else if (mustNotHaveVertical) {
+				b.mustNot(m -> m.exists(e -> e.field("vertical")));
+			}
+
+			if (StringUtils.hasText(query)) {
+				b.must(m -> m.multiMatch(mm -> mm
+						.query(query)
+						.fields("offerNames", "attributes.referentielAttributes.BRAND", "attributes.referentielAttributes.MODEL")
+						.operator(co.elastic.clients.elasticsearch._types.query_dsl.Operator.And)
+						.type(co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType.BestFields)));
+			}
+
+			if (filters != null) {
+				applyFilterRequest(filters, b);
+			}
+			return b;
+		}));
 	}
 
 	private Query buildLexicalQuery(String verticalId, String query, FilterRequestDto filters,
 			boolean applyDefaultExclusion, boolean mustHaveVertical, boolean mustNotHaveVertical) {
-		Long expiration = repository.expirationClause();
-		return Query.of(q -> q.functionScore(fs -> {
-			fs.query(inner -> inner.bool(b -> {
-				b.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(expiration.toString()))));
-				b.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0.0))));
-				if (applyDefaultExclusion) {
-					b.filter(f -> f.term(t -> t.field(EXCLUDED_FIELD).value(false)));
-				}
-				if (StringUtils.hasText(verticalId)) {
-					b.filter(f -> f.term(t -> t.field("vertical").value(verticalId)));
-				} else if (mustHaveVertical) {
-					b.filter(f -> f.exists(e -> e.field("vertical")));
-				} else if (mustNotHaveVertical) {
-					b.mustNot(m -> m.exists(e -> e.field("vertical")));
-				}
 
-				if (StringUtils.hasText(query)) {
-					b.must(m -> m.match(mq -> mq.field("offerNames").query(query)));
-				}
-
-				if (filters != null) {
-					applyFilterRequest(filters, b);
-				}
-				return b;
-			}));
-
-			if (StringUtils.hasText(query)) {
-				fs.functions(func -> func.fieldValueFactor(fvf -> fvf.field("offersCount")
-						.modifier(FieldValueFactorModifier.Log1p).factor(0.1).missing(0.0)));
-				fs.boostMode(FunctionBoostMode.Sum);
-				fs.scoreMode(FunctionScoreMode.Sum);
-			}
-
-			return fs;
-		}));
+		return buildBaseBoolQuery(verticalId, query, filters, applyDefaultExclusion, mustHaveVertical,
+				mustNotHaveVertical);
 	}
 
 	/**
@@ -334,6 +338,9 @@ public class SearchService {
 	 */
 	private Query buildMissingVerticalSearchQuery(String sanitizedQuery, FilterRequestDto filters,
 			boolean applyDefaultExclusion) {
+		if (!StringUtils.hasText(sanitizedQuery)) {
+			return buildBaseBoolQuery(null, sanitizedQuery, filters, applyDefaultExclusion, false, true);
+		}
 		return buildLexicalQuery(null, sanitizedQuery, filters, applyDefaultExclusion, false, true);
 	}
 
@@ -363,39 +370,24 @@ public class SearchService {
 			Sort sort, String searchType) {
 
 		String sanitizedQuery = sanitize(query);
-		if (!StringUtils.hasText(sanitizedQuery)) {
-			return new GlobalSearchResult(List.of(), List.of(), null, null);
-		}
+
 		FilterRequestDto normalizedFilters = normalizeFilters(filters);
 
 		CategorySuggestion verticalCta = findExactVerticalMatch(sanitizedQuery, domainLanguage);
-		
-		boolean textOnly = "TEXT".equalsIgnoreCase(searchType);
-		SemanticGlobalSearchResult semanticResult;
-		if (textOnly) {
-			semanticResult = new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
-		} else {
-			semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage,
-					normalizedFilters, sort);
-		}
 
-		List<GlobalSearchHit> missingVerticalResults = semanticResult.missingVerticalResults();
-		if (missingVerticalResults.isEmpty()) {
-			missingVerticalResults = executeMissingVerticalLexicalSearch(sanitizedQuery, domainLanguage,
-					normalizedFilters, sort);
-		}
-		
-		List<GlobalSearchVerticalGroup> verticalGroups = semanticResult.verticalGroups();
-		if (verticalGroups.isEmpty() && StringUtils.hasText(sanitizedQuery)) {
-			// Fallback: if semantic search failed to find categorized products, try lexical search
-			List<GlobalSearchHit> lexicalVerticalHits = executeVerticalLexicalSearch(sanitizedQuery, domainLanguage, normalizedFilters, sort);
-			verticalGroups = groupHitsByVertical(lexicalVerticalHits, sort);
-		}
-		
+		// TODO : I have no result here !
+		List<GlobalSearchHit> missingVerticalResults = executeMissingVerticalLexicalSearch(sanitizedQuery, domainLanguage,
+				normalizedFilters, sort);
+
+
+		List<GlobalSearchHit> lexicalVerticalHits = executeVerticalLexicalSearch(sanitizedQuery, domainLanguage, normalizedFilters, sort);
+		List<GlobalSearchVerticalGroup> verticalGroups = groupHitsByVertical(lexicalVerticalHits, sort);
+
+
 		return new GlobalSearchResult(verticalGroups,
 				missingVerticalResults,
 				verticalCta,
-				semanticResult.diagnostics());
+				null);
 	}
 
 	/**
@@ -1074,7 +1066,7 @@ public class SearchService {
 			LOGGER.error("Semantic search failed for query '{}'", sanitizedQuery, e);
 			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
 		}
-		
+
 		List<GlobalSearchHit> verticalHits = mapHits(hits, domainLanguage, true, sort);
 		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(verticalHits, sort);
 		List<GlobalSearchHit> missingVerticalResults = mapHits(missingHits, domainLanguage, true, sort);
@@ -1095,9 +1087,7 @@ public class SearchService {
 	 */
 	private List<GlobalSearchHit> executeMissingVerticalLexicalSearch(String sanitizedQuery,
 			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort) {
-		if (!StringUtils.hasText(sanitizedQuery)) {
-			return List.of();
-		}
+
 
 		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
 		Query query = buildMissingVerticalSearchQuery(sanitizedQuery, filters, true);
@@ -1105,6 +1095,7 @@ public class SearchService {
 				.withQuery(query)
 				.withPageable(pageable)
 				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+
 
 		SearchHits<Product> hits;
 		try {
@@ -1128,12 +1119,10 @@ public class SearchService {
 	 */
 	private List<GlobalSearchHit> executeVerticalLexicalSearch(String sanitizedQuery,
 			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort) {
-		if (!StringUtils.hasText(sanitizedQuery)) {
-			return List.of();
-		}
+
 
 		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
-		
+
 		// Build a query similar to buildProductSearchQuery but ensuring vertical exists
 		Query query = buildLexicalQuery(null, sanitizedQuery, filters, true, true, false);
 

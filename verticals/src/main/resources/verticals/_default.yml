@@ -379,6 +379,7 @@ attributesConfig:
     - "ADVERT_RAKUPON_END"
     - "BRAND_ID"
     - "LANGUAGE"
+    - "STOCK"
 
   # Attributes having the following value will be classified as product features
   featuredValues:

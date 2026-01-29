@@ -10,60 +10,6 @@
         <div class="flex-grow-1" />
 
         <div class="d-flex align-center ga-4">
-          <div
-            v-if="showMenuSearch"
-            ref="menuSearchRef"
-            class="main-menu-search"
-            :class="{ 'main-menu-search--open': isSearchOpen }"
-          >
-            <v-btn
-              v-if="!isSearchOpen"
-              class="main-menu-search__activator"
-              icon="mdi-magnify"
-              variant="text"
-              :aria-label="t('siteIdentity.menu.search.openLabel')"
-              @click="openSearch"
-            />
-
-            <v-expand-x-transition>
-              <div v-if="isSearchOpen" class="main-menu-search__field-wrapper">
-                <SearchSuggestField
-                  v-model="searchQuery"
-                  class="main-menu-search__field"
-                  :label="t('siteIdentity.menu.search.label')"
-                  :placeholder="t('siteIdentity.menu.search.placeholder')"
-                  :aria-label="t('siteIdentity.menu.search.ariaLabel')"
-                  :min-chars="MIN_SEARCH_QUERY_LENGTH"
-                  @submit="handleSearchSubmit"
-                  @select-category="handleCategorySuggestion"
-                  @select-product="handleProductSuggestion"
-                  @update:model-value="updateSearchQuery"
-                  @clear="handleSearchClear"
-                >
-                  <template #append-inner>
-                    <div class="main-menu-search__actions">
-                      <v-btn
-                        icon="mdi-arrow-right"
-                        variant="plain"
-                        rounded="0"
-                        size="small"
-                        :aria-label="t('siteIdentity.menu.search.submitLabel')"
-                        @click.prevent="handleSearchSubmit"
-                      />
-                      <v-btn
-                        icon="mdi-close"
-                        variant="text"
-                        color="text-neutral-secondary"
-                        size="small"
-                        :aria-label="t('siteIdentity.menu.search.closeLabel')"
-                        @click.prevent="closeSearch"
-                      />
-                    </div>
-                  </template>
-                </SearchSuggestField>
-              </div>
-            </v-expand-x-transition>
-          </div>
           <v-list class="d-flex justify-end font-weight-bold" role="menubar">
             <template v-for="item in menuItems" :key="item.id">
               <v-list-item
@@ -422,6 +368,67 @@
               </div>
             </template>
           </v-list>
+          <div
+            v-if="showMenuSearch"
+            ref="menuSearchRef"
+            class="main-menu-search"
+            :class="{ 'main-menu-search--open': isSearchOpen }"
+          >
+            <!-- Search Activator -->
+            <v-fade-transition leave-absolute>
+              <v-btn
+                v-if="!isSearchOpen"
+                class="main-menu-search__activator"
+                icon="mdi-magnify"
+                variant="text"
+                :aria-label="t('siteIdentity.menu.search.openLabel')"
+                @click="openSearch"
+              />
+            </v-fade-transition>
+
+            <!-- Search Field -->
+            <v-expand-x-transition>
+              <div
+                v-show="isSearchOpen"
+                class="main-menu-search__field-wrapper"
+              >
+                <SearchSuggestField
+                  v-model="searchQuery"
+                  class="main-menu-search__field"
+                  :label="t('siteIdentity.menu.search.label')"
+                  :placeholder="t('siteIdentity.menu.search.placeholder')"
+                  :aria-label="t('siteIdentity.menu.search.ariaLabel')"
+                  :min-chars="MIN_SEARCH_QUERY_LENGTH"
+                  @submit="handleSearchSubmit"
+                  @select-category="handleCategorySuggestion"
+                  @select-product="handleProductSuggestion"
+                  @update:model-value="updateSearchQuery"
+                  @clear="handleSearchClear"
+                >
+                  <template #append-inner>
+                    <div class="main-menu-search__actions">
+                      <v-btn
+                        icon="mdi-arrow-right"
+                        variant="plain"
+                        rounded="0"
+                        size="small"
+                        :aria-label="t('siteIdentity.menu.search.submitLabel')"
+                        @click.prevent="handleSearchSubmit"
+                      />
+                      <v-btn
+                        icon="mdi-close"
+                        variant="text"
+                        color="text-neutral-secondary"
+                        size="small"
+                        :aria-label="t('siteIdentity.menu.search.closeLabel')"
+                        @click.prevent="closeSearch"
+                      />
+                    </div>
+                  </template>
+                </SearchSuggestField>
+              </div>
+            </v-expand-x-transition>
+          </div>
           <div class="d-flex align-center ga-2">
             <v-menu
               location="bottom"
@@ -1304,8 +1311,10 @@ const isMenuItemActive = (item: MenuItem): boolean => {
       transform: scale(1.05)
 
   &__field-wrapper
-    width: 100%
-    max-width: 800px
+  &__field-wrapper
+    width: 600px
+    max-width: 50vw
+    min-width: 380px
 
   &__actions
     display: flex
