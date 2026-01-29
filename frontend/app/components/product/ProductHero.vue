@@ -12,26 +12,25 @@
     </div>
     <div class="product-hero__content">
       <header
-        class="product-hero__heading home-reveal-group"
+        class="product-hero__heading home-reveal-group d-flex flex-row align-center"
         :class="heroRevealClasses"
       >
+        <CategoryNavigationBreadcrumbs
+          v-if="heroBreadcrumbs.length"
+          v-bind="heroBreadcrumbProps"
+          class="product-hero__breadcrumbs home-reveal-item ma-0 mr-4"
+          :style="{ '--reveal-delay': '60ms' }"
+        />
         <ProductDesignation
           :product="product"
           variant="page"
           title-tag="h1"
-          title-class="product-hero__title text-center"
-          description-class="product-hero__short-description text-center"
+          title-class="product-hero__title text-left"
+          description-class="product-hero__short-description text-left"
           class="home-reveal-item"
           :style="{ '--reveal-delay': '0ms' }"
         />
       </header>
-
-      <CategoryNavigationBreadcrumbs
-        v-if="heroBreadcrumbs.length"
-        v-bind="heroBreadcrumbProps"
-        class="product-hero__breadcrumbs home-reveal-item"
-        :style="{ '--reveal-delay': '60ms' }"
-      />
 
       <div class="product-hero__grid">
         <div class="product-hero__panel product-hero__panel--main">
@@ -1022,7 +1021,7 @@ const heroBreadcrumbProps = computed(() => ({
 .product-hero__heading-group {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center; /* Changed from baseline */
   gap: 0.35rem 0.6rem;
   justify-content: center;
 }
@@ -1068,7 +1067,7 @@ const heroBreadcrumbProps = computed(() => ({
 
 .product-hero__ai-summary-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center; /* Changed from flex-start */
   gap: 0.5rem;
   font-size: 0.95rem;
   color: rgb(var(--v-theme-text-neutral-strong));
@@ -1171,7 +1170,7 @@ const heroBreadcrumbProps = computed(() => ({
 
 .product-hero__attribute {
   display: flex;
-  align-items: baseline;
+  align-items: center; /* Changed from baseline */
   gap: 0.4rem;
   font-size: 0.97rem;
   color: rgb(var(--v-theme-text-neutral-secondary));

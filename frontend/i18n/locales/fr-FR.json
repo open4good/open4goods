@@ -2539,7 +2539,7 @@
         "occasion": "Pas d'offres d'occasion pour l'instant !"
       },
       "alternativeOffers": {
-        "label": "Offres alternatives",
+        "label": "Toutes les offres",
         "placeholder": "Choisir une autre offre",
         "unknownMerchant": "Marchand inconnu"
       },
@@ -2935,7 +2935,7 @@
       },
       "highlightLinks": {
         "title": "Impact score",
-        "allProducts": "Tous nos produits",
+        "allProducts": "Tous nos produits évalués",
         "ecoscore": "Évaluation environnementale"
       },
       "timeSaver": {
