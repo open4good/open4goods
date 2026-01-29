@@ -1062,4 +1062,64 @@ public class VerticalConfig {
                 setEprelGroupNames(eprelGroupNames);
         }
 
+        ///////////////////////////////////////////////////////////////////////
+        // Parsers Configuration
+        ///////////////////////////////////////////////////////////////////////
+
+        /**
+         * Dedicated configuration section for specific parsers (weight, dimensions, etc.).
+         */
+        @JsonMerge
+        private ParsersConfig parsers = new ParsersConfig();
+
+        public ParsersConfig getParsers() {
+                return parsers;
+        }
+
+        public void setParsers(ParsersConfig parsers) {
+                this.parsers = parsers;
+        }
+
+        public static class ParsersConfig {
+                @JsonMerge
+                private WeightParserConfig weight = new WeightParserConfig();
+
+                public WeightParserConfig getWeight() {
+                        return weight;
+                }
+
+                public void setWeight(WeightParserConfig weight) {
+                        this.weight = weight;
+                }
+        }
+
+        public static class WeightParserConfig {
+                private Double minKg;
+                private Double maxKg;
+                private String defaultUnit;
+
+                public Double getMinKg() {
+                        return minKg;
+                }
+
+                public void setMinKg(Double minKg) {
+                        this.minKg = minKg;
+                }
+
+                public Double getMaxKg() {
+                        return maxKg;
+                }
+
+                public void setMaxKg(Double maxKg) {
+                        this.maxKg = maxKg;
+                }
+
+                public String getDefaultUnit() {
+                        return defaultUnit;
+                }
+
+                public void setDefaultUnit(String defaultUnit) {
+                        this.defaultUnit = defaultUnit;
+                }
+        }
 }

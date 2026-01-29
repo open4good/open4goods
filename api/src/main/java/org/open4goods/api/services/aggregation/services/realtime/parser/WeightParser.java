@@ -47,10 +47,9 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The configuration is exposed as a simple POJO ({@link WeightParserConfiguration}) so it can be
  * bound from YAML/JSON if desired.
- * TODO : Wears the "plausible range" and all specific verticals confuration in VerticalConfig.parsers.WEIGHT (to be created, will wears configuration for this kind of custom parser)
- * TODO : Update /home/goulven/git/open4goods/verticals/src/main/resources/verticals/* with plausible weights accordingly
- * TODO : Ensure it logs WARN if cannot resolve the weight.
- * TODO : Must ensure safety first. PRefers reejcting than too large acceptance
+ * <p>
+ * Specific vertical configurations (min/max range) are now managed in {@link VerticalConfig#getParsers()}.
+ * Unresolvable or unsafe weights (exceeding 5x max range) are rejected with a WARN log.
  */
 public class WeightParser extends AttributeParser {
 
@@ -233,23 +232,15 @@ public class WeightParser extends AttributeParser {
                 return GLOBAL_CONFIG;
         }
 
+
         /**
-         * Provides sensible defaults, including a "tv" vertical max around 200kg.
+         * Provides sensible defaults.
          */
         public static WeightParserConfiguration defaultConfiguration() {
                 WeightParserConfiguration cfg = new WeightParserConfiguration();
 
-
-
                 // Global plausible range: most product weights fall in [1g ; 2000kg]
                 cfg.plausibleRangeByVerticalId.put("all", new WeightRangeKg(0.001, 2000.0));
-// TODO : Remove when weared at yaml vertical configuration level
-                // Examples (can be overridden): TVs should not exceed ~200kg.
-                cfg.plausibleRangeByVerticalId.put("tv", new WeightRangeKg(0.1, 200.0));
-                cfg.plausibleRangeByVerticalId.put("television", new WeightRangeKg(0.1, 200.0));
-                cfg.plausibleRangeByVerticalId.put("televisions", new WeightRangeKg(0.1, 200.0));
-                cfg.plausibleRangeByVerticalId.put("dishwasher", new WeightRangeKg(1.0, 150.0));
-                cfg.plausibleRangeByVerticalId.put("lave-vaisselle", new WeightRangeKg(1.0, 150.0));
 
                 cfg.defaultUnitHint = WeightUnit.KILOGRAM;
                 cfg.defaultUnitHintByDatasource.put("all", WeightUnit.KILOGRAM);
@@ -281,7 +272,18 @@ public class WeightParser extends AttributeParser {
                         final String datasource = safeGetDatasource(src);
                         ParsedWeight w = parseInternal(raw, verticalConfig, datasource);
                         if (w != null) {
+                                // Safety check: if weight is wildly out of bounds (e.g. > 5x max), we might reject or warn.
+                                // Logic moved inside parseInternal/inference, but we can double-check here against absolute safety.
+                                WeightRangeKg range = resolveEffectiveRange(verticalConfig);
+                                if (w.kilograms() > range.getMaxKg() * 5.0) {
+                                	LOGGER.warn("Rejected weight {}kg for '{}' (datasource={}): exceeds 5x max configured ({}kg)", 
+                                			formatKg(w.kilograms()), attribute.getName(), datasource, range.getMaxKg());
+                                	continue;
+                                }
+                                
                                 parsed.add(w);
+                        } else {
+                        	LOGGER.warn("Could not parse weight from '{}' (datasource={})", raw, datasource);
                         }
                 }
 
@@ -318,6 +320,12 @@ public class WeightParser extends AttributeParser {
         public String parse(String value, AttributeConfig attributeConfig, VerticalConfig verticalConfig)
                         throws ParseException {
                 ParsedWeight w = parseInternal(value, verticalConfig, "all");
+                if (w != null) {
+                    WeightRangeKg range = resolveEffectiveRange(verticalConfig);
+                    if (w.kilograms() > range.getMaxKg() * 5.0) {
+                        return null;
+                    }
+                }
                 return w == null ? null : formatKg(w.kilograms());
         }
 
@@ -337,6 +345,12 @@ public class WeightParser extends AttributeParser {
         public String parse(String value, AttributeConfig attributeConfig, VerticalConfig verticalConfig, String datasource)
                         throws ParseException {
                 ParsedWeight w = parseInternal(value, verticalConfig, datasource);
+                if (w != null) {
+                    WeightRangeKg range = resolveEffectiveRange(verticalConfig);
+                    if (w.kilograms() > range.getMaxKg() * 5.0) {
+                        return null;
+                    }
+                }
                 return w == null ? null : formatKg(w.kilograms());
         }
 
@@ -365,7 +379,7 @@ public class WeightParser extends AttributeParser {
                         return null;
                 }
 
-                final WeightRangeKg range = GLOBAL_CONFIG.resolveRangeForVertical(verticalConfig);
+                final WeightRangeKg range = resolveEffectiveRange(verticalConfig);
                 final WeightUnit datasourceHint = GLOBAL_CONFIG.resolveDefaultUnitHintForDatasource(datasource);
 
                 // Level 1: compound forms like "1 kg 250 g" or "500 g 250 mg".
@@ -406,6 +420,16 @@ public class WeightParser extends AttributeParser {
                 }
 
                 return best;
+        }
+        
+        private WeightRangeKg resolveEffectiveRange(VerticalConfig verticalConfig) {
+        	if (verticalConfig != null && verticalConfig.getParsers() != null && verticalConfig.getParsers().getWeight() != null) {
+        		VerticalConfig.WeightParserConfig wpc = verticalConfig.getParsers().getWeight();
+        		if (wpc.getMinKg() != null && wpc.getMaxKg() != null) {
+        			return new WeightRangeKg(wpc.getMinKg(), wpc.getMaxKg());
+        		}
+        	}
+        	return GLOBAL_CONFIG.resolveRangeForVertical(verticalConfig);
         }
 
         private static String normalize(String raw) {

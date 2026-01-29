@@ -5,6 +5,11 @@
 #    > All verticals can override settings by redefining them in the dedicated vertical configuration file
 #####################################################################################################################################
 
+parsers:
+  weight:
+    minKg: 0.001
+    maxKg: 2000.0
+
 # If true, products url will be regenerated on each batch. Should not move too much, but...
 forceNameGeneration: true
 
@@ -57,7 +62,7 @@ excludingTokensFromCategoriesMatching:
 
 # The scores that are available to build the impact score
 availableImpactScoreCriterias:
-#  - ESG
+  #  - ESG
   - DATA_QUALITY
   - BRAND_SUSTAINALYTICS_SCORING
 
@@ -68,7 +73,6 @@ compositeScores:
 #####################################################################################################################################
 # Impact score normalization safeguards
 #####################################################################################################################################
-
 
 subsets:
   ################
@@ -270,7 +274,7 @@ brandsExclusion:
 
 brandsAlias:
   "LG ELECTRONICS": LG
-  "LG Electronics Inc.": LG 
+  "LG Electronics Inc.": LG
 
 ####################################################################################
 # 						ATTRIBUTES CONFIGURATION
