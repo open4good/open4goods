@@ -112,7 +112,9 @@ const feedbackLinks = computed<FooterLink[]>(() => [
 
 const footerLogo = useFooterLogoAsset()
 
-const hotjarCookie = useCookie(HOTJAR_RECORDING_COOKIE_NAME)
+const hotjarCookie = useCookie(HOTJAR_RECORDING_COOKIE_NAME, {
+  watch: true,
+})
 const isRecording = computed(() =>
   isHotjarRecordingCookieEnabled(hotjarCookie.value)
 )
