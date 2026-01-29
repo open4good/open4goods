@@ -20,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -110,5 +111,25 @@ class ProductRepositoryTest
         // If possible we could check if the verticalId is in the toString of the criteria if exposed
         // But for now, ensuring the method was called and query object formed is enough for this unit level verification
         // given the internal implementation is straightforward.
+    }
+
+    @Test
+    void countMainIndexHavingScoreWithFiltersReturnsCount()
+    {
+        when(elasticsearchOperations.count(any(CriteriaQuery.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(17L);
+
+        Long count = repository.countMainIndexHavingScoreWithFilters("ECOSCORE", "tv");
+
+        assertThat(count).isEqualTo(17L);
+    }
+
+    @Test
+    void countMainIndexHavingScoreThresholdReturnsCount()
+    {
+        when(elasticsearchOperations.count(any(CriteriaQuery.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(9L);
+
+        Long count = repository.countMainIndexHavingScoreThreshold("ECOSCORE", "tv", SubsetCriteriaOperator.GREATER_THAN, 2.5);
+
+        assertThat(count).isEqualTo(9L);
     }
 }

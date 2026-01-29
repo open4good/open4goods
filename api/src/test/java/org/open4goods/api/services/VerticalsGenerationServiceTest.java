@@ -19,6 +19,9 @@ import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.NudgeToolConfig;
+import org.open4goods.model.vertical.NudgeToolScore;
+import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -180,6 +183,107 @@ class VerticalsGenerationServiceTest {
         assertThat(result).isEqualTo("id: test-vertical\nmatchingCategories:\n  all: [\"NEW_CAT\"]\n");
         String fileContent = FileUtils.readFileToString(tempFile, Charset.defaultCharset());
         assertThat(fileContent).isEqualTo(result);
+    }
+
+    @Test
+    void updateVerticalFileWithNudgeToolConfigUpdatesThresholds(@TempDir java.nio.file.Path tempDir) throws Exception {
+        String verticalId = "tv";
+        File tempFile = tempDir.resolve(verticalId + ".yml").toFile();
+        String initialContent = ""
+                + "id: " + verticalId + "\n"
+                + "nudgeToolConfig:\n"
+                + "  scores:\n"
+                + "    - scoreName: \"ENERGY_CONSUMPTION\"\n"
+                + "      scoreMinValue: 2.5\n"
+                + "  subsets:\n"
+                + "    - id: \"impact_high\"\n"
+                + "      group: \"impactscore\"\n"
+                + "      criterias:\n"
+                + "        - field: \"scores.ECOSCORE.value\"\n"
+                + "          operator: \"LOWER_THAN\"\n"
+                + "          value: \"2\"\n"
+                + "    - id: \"impact_medium\"\n"
+                + "      group: \"impactscore\"\n"
+                + "      criterias:\n"
+                + "        - field: \"scores.ECOSCORE.value\"\n"
+                + "          operator: \"GREATER_THAN\"\n"
+                + "          value: \"2\"\n"
+                + "        - field: \"scores.ECOSCORE.value\"\n"
+                + "          operator: \"LOWER_THAN\"\n"
+                + "          value: \"4\"\n"
+                + "    - id: \"impact_low\"\n"
+                + "      group: \"impactscore\"\n"
+                + "      criterias:\n"
+                + "        - field: \"scores.ECOSCORE.value\"\n"
+                + "          operator: \"GREATER_THAN\"\n"
+                + "          value: \"4\"\n"
+                + "subsets:\n"
+                + "  - id: \"impact_high\"\n"
+                + "    group: \"impactscore\"\n"
+                + "    criterias:\n"
+                + "      - field: \"scores.ECOSCORE.value\"\n"
+                + "        operator: \"LOWER_THAN\"\n"
+                + "        value: \"2\"\n"
+                + "  - id: \"impact_medium\"\n"
+                + "    group: \"impactscore\"\n"
+                + "    criterias:\n"
+                + "      - field: \"scores.ECOSCORE.value\"\n"
+                + "        operator: \"GREATER_THAN\"\n"
+                + "        value: \"2\"\n"
+                + "      - field: \"scores.ECOSCORE.value\"\n"
+                + "        operator: \"LOWER_THAN\"\n"
+                + "        value: \"4\"\n"
+                + "  - id: \"impact_low\"\n"
+                + "    group: \"impactscore\"\n"
+                + "    criterias:\n"
+                + "      - field: \"scores.ECOSCORE.value\"\n"
+                + "        operator: \"GREATER_THAN\"\n"
+                + "        value: \"4\"\n";
+        FileUtils.writeStringToFile(tempFile, initialContent, Charset.defaultCharset());
+
+        VerticalConfig vConf = verticalConfig(verticalId);
+        NudgeToolScore score = new NudgeToolScore();
+        score.setScoreName("ENERGY_CONSUMPTION");
+        NudgeToolConfig nudgeToolConfig = new NudgeToolConfig();
+        nudgeToolConfig.setScores(List.of(score));
+        vConf.setNudgeToolConfig(nudgeToolConfig);
+
+        VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
+        when(verticalsConfigService.getConfigById(verticalId)).thenReturn(vConf);
+
+        ProductRepository repository = mock(ProductRepository.class);
+        when(repository.countMainIndexHavingScoreWithFilters(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(verticalId)))
+                .thenReturn(50L);
+        when(repository.countMainIndexHavingScoreThreshold(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(verticalId),
+                org.mockito.ArgumentMatchers.any(SubsetCriteriaOperator.class), org.mockito.ArgumentMatchers.anyDouble()))
+                .thenAnswer(invocation -> {
+                    SubsetCriteriaOperator operator = invocation.getArgument(2);
+                    double threshold = invocation.getArgument(3);
+                    if (operator == SubsetCriteriaOperator.GREATER_THAN) {
+                        return Math.round((5.0 - threshold) * 10);
+                    }
+                    if (operator == SubsetCriteriaOperator.LOWER_THAN) {
+                        return Math.round(threshold * 10);
+                    }
+                    return 0L;
+                });
+
+        VerticalsGenerationService service = new VerticalsGenerationService(
+                new VerticalsGenerationConfig(),
+                repository,
+                mock(SerialisationService.class),
+                mock(GoogleTaxonomyService.class),
+                verticalsConfigService,
+                mock(ResourcePatternResolver.class),
+                mock(EvaluationService.class),
+                mock(IcecatService.class),
+                mock(PromptService.class));
+
+        String result = service.updateVerticalFileWithNudgeToolConfig(tempFile.getAbsolutePath());
+
+        assertThat(result).contains("scoreMinValue: 3.3");
+        assertThat(result).contains("value: \"1.7\"");
+        assertThat(result).contains("value: \"3.3\"");
     }
 
     private VerticalConfig verticalConfig(String id) {

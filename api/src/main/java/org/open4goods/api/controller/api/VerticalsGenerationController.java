@@ -240,5 +240,14 @@ public class VerticalsGenerationController {
 
 	}
 
+	@GetMapping(path="/update/{vertical}/nudgetool/")
+	@Operation(summary="Update the nudge tool score thresholds and impact score subsets for a given vertical")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public String updateVerticalWithNudgeTool(
+			@PathVariable String vertical) throws ResourceNotFoundException, IOException {
+
+		return verticalsGenService.updateVerticalFileWithNudgeToolConfig("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml");
+	}
+
 
 }

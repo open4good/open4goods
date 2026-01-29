@@ -19,6 +19,7 @@ import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.productrepository.workers.FullProductIndexationWorker;
 import org.open4goods.services.productrepository.workers.PartialProductIndexationWorker;
@@ -1005,6 +1006,54 @@ public class ProductRepository {
         public Long countMainIndexHavingScore(String scoreName, String vertical) {
                 CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical) .and(new Criteria("scores." + scoreName + ".value").exists()));
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Count recent products with a score registered for a vertical.
+         *
+         * @param scoreName the score name under {@code scores.<name>.value}
+         * @param vertical the vertical identifier
+         * @return count of recent, non-excluded products having the score
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingScoreWithFilters(String scoreName, String vertical) {
+                String scoreField = "scores." + scoreName + ".value";
+                Criteria criteria = getRecentPriceQuery()
+                        .and(new Criteria("vertical").is(vertical))
+                        .and(new Criteria("excluded").is(false))
+                        .and(new Criteria(scoreField).exists());
+                CriteriaQuery query = new CriteriaQuery(criteria);
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        /**
+         * Count recent products with the given score field matching a threshold filter.
+         *
+         * @param scoreName the score name under {@code scores.<name>.value}
+         * @param vertical the vertical identifier
+         * @param operator the threshold operator to apply
+         * @param thresholdValue the numeric threshold to compare against
+         * @return the count of products matching the threshold
+         */
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public Long countMainIndexHavingScoreThreshold(String scoreName, String vertical, SubsetCriteriaOperator operator, double thresholdValue) {
+                String scoreField = "scores." + scoreName + ".value";
+                Criteria criteria = getRecentPriceQuery()
+                        .and(new Criteria("vertical").is(vertical))
+                        .and(new Criteria("excluded").is(false))
+                        .and(new Criteria(scoreField).exists());
+
+                Criteria thresholdCriteria = applyScoreThreshold(new Criteria(scoreField), operator, thresholdValue);
+                CriteriaQuery query = new CriteriaQuery(criteria.and(thresholdCriteria));
+                return elasticsearchOperations.count(query, CURRENT_INDEX);
+        }
+
+        private Criteria applyScoreThreshold(Criteria criteria, SubsetCriteriaOperator operator, double thresholdValue) {
+                return switch (operator) {
+                case LOWER_THAN -> criteria.lessThan(thresholdValue);
+                case GREATER_THAN -> criteria.greaterThan(thresholdValue);
+                case EQUALS -> criteria.is(thresholdValue);
+                };
         }
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
