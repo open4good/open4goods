@@ -64,7 +64,7 @@ const props = defineProps({
   },
 })
 
-const { n, t } = useI18n()
+const { n, t, locale } = useI18n()
 const {
   trackProductRedirect,
   trackAffiliateClick,
@@ -330,19 +330,15 @@ const formatPriceLabel = (price: number | null, currency: string) => {
     return '—'
   }
 
-  if (currency !== 'EUR') {
-    return n(price, {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: price >= 100 ? 0 : 2,
-    })
-  }
+  const loc = import.meta.client ? undefined : locale.value
+  const isEuro = currency === 'EUR'
 
-  return n(price, {
-    style: 'decimal',
-    minimumFractionDigits: price >= 100 ? 0 : 2,
-    maximumFractionDigits: price >= 100 ? 0 : 2,
-  })
+  return new Intl.NumberFormat(loc, {
+    style: isEuro ? 'decimal' : 'currency',
+    currency: isEuro ? undefined : currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  }).format(price)
 }
 
 const formatCurrencyDisplay = (priceLabel: string, currency: string) => {

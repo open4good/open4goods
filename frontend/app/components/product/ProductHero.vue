@@ -81,206 +81,213 @@
                 />
               </div>
 
-              <div
-                v-if="hasBrandOrModel"
-                class="mb-4 product-hero__heading-group"
-              >
-                <span v-if="productBrandName" class="product-hero__brand-name">
-                  {{ productBrandName }}
-                </span>
-                -
-                <span v-if="productModelName" class="product-hero__subtitle">
-                  {{ productModelName }}
-                </span>
-              </div>
-
-              <ul
-                v-if="heroAttributes.length"
-                class="product-hero__attributes"
-                role="list"
-              >
-                <li
-                  v-for="attribute in heroAttributes"
-                  :key="attribute.key"
-                  class="product-hero__attribute"
-                  :class="{
-                    'product-hero__attribute--country':
-                      attribute.key === 'gtin-country',
-                  }"
-                  role="listitem"
+              <div class="product-hero__centered-info">
+                <div
+                  v-if="hasBrandOrModel"
+                  class="mb-4 product-hero__heading-group"
                 >
-                  <template v-if="attribute.key === 'ai-summary'">
-                    <ul
-                      class="product-hero__ai-summary-list"
-                      @click="handleAiSummaryClick"
-                    >
-                      <li
-                        v-if="technicalOnelineHtml"
-                        class="product-hero__ai-summary-item"
-                      >
-                        <v-icon
-                          icon="mdi-cog-outline"
-                          size="small"
-                          class="product-hero__ai-summary-icon"
-                        />
-                        <div class="product-hero__ai-summary-content">
-                          <span class="product-hero__ai-summary-label">
-                            {{ t('product.hero.aiSummary.technical') }}
-                          </span>
-                          <!-- eslint-disable vue/no-v-html -->
-                          <span
-                            class="product-hero__ai-summary-text"
-                            v-html="technicalOnelineHtml"
-                          />
-                          <!-- eslint-enable vue/no-v-html -->
-                        </div>
-                      </li>
-                      <li
-                        v-if="ecologicalOnelineHtml"
-                        class="product-hero__ai-summary-item"
-                      >
-                        <v-icon
-                          icon="mdi-leaf"
-                          size="small"
-                          class="product-hero__ai-summary-icon"
-                        />
-                        <div class="product-hero__ai-summary-content">
-                          <span class="product-hero__ai-summary-label">
-                            {{ t('product.hero.aiSummary.ecological') }}
-                          </span>
-                          <!-- eslint-disable vue/no-v-html -->
-                          <span
-                            class="product-hero__ai-summary-text"
-                            v-html="ecologicalOnelineHtml"
-                          />
-                          <!-- eslint-enable vue/no-v-html -->
-                        </div>
-                      </li>
-                      <li
-                        v-if="communityOnelineHtml"
-                        class="product-hero__ai-summary-item"
-                      >
-                        <v-icon
-                          icon="mdi-account-group-outline"
-                          size="small"
-                          class="product-hero__ai-summary-icon"
-                        />
-                        <div class="product-hero__ai-summary-content">
-                          <span class="product-hero__ai-summary-label">
-                            {{ t('product.hero.aiSummary.community') }}
-                          </span>
-                          <!-- eslint-disable vue/no-v-html -->
-                          <span
-                            class="product-hero__ai-summary-text"
-                            v-html="communityOnelineHtml"
-                          />
-                          <!-- eslint-enable vue/no-v-html -->
-                        </div>
-                      </li>
-                    </ul>
-                  </template>
-                  <template v-else-if="attribute.key === 'descriptions-panel'">
-                    <div class="product-hero__descriptions-panel">
-                      <v-tabs
-                        v-model="activeDescriptionTab"
-                        density="compact"
-                        color="primary"
-                        align-tabs="start"
-                        class="mb-4 product-hero__tabs"
-                      >
-                        <v-tab
-                          v-for="(desc, source) in productDescriptions"
-                          :key="source"
-                          :value="source"
-                          class="text-body-2 font-weight-bold"
-                        >
-                          <img
-                            v-if="productFavicons[source]"
-                            :src="productFavicons[source]"
-                            width="16"
-                            height="16"
-                            class="mr-2 rounded-circle"
-                            alt=""
-                          />
-                          {{ source }}
-                        </v-tab>
-                      </v-tabs>
-
-                      <v-window
-                        v-model="activeDescriptionTab"
-                        class="product-hero__tab-content"
-                      >
-                        <v-window-item
-                          v-for="(desc, source) in productDescriptions"
-                          :key="source"
-                          :value="source"
-                        >
-                          <!-- eslint-disable vue/no-v-html -->
-                          <div
-                            class="text-body-2 text-medium-emphasis product-hero__description-body"
-                            v-html="desc"
-                          />
-                          <!-- eslint-enable vue/no-v-html -->
-                        </v-window-item>
-                      </v-window>
-                    </div>
-                  </template>
-                  <template v-else-if="attribute.showLabel !== false">
-                    <span class="product-hero__attribute-label">{{
-                      attribute.label
-                    }}</span>
-                    <span
-                      class="product-hero__attribute-separator"
-                      aria-hidden="true"
-                      >:</span
-                    >
-                  </template>
                   <span
-                    v-if="attribute.key !== 'ai-summary'"
-                    class="product-hero__attribute-value"
+                    v-if="productBrandName"
+                    class="product-hero__brand-name"
                   >
-                    <ProductAttributeSourcingLabel
-                      class="product-hero__attribute-value-label"
-                      :sourcing="attribute.sourcing"
-                      :value="attribute.value"
-                      :enable-tooltip="attribute.enableTooltip !== false"
-                    >
-                      <template #default="{ displayValue, displayHtml }">
-                        <v-tooltip
-                          location="bottom"
-                          :text="attribute.tooltip"
-                          :disabled="!attribute.tooltip"
-                        >
-                          <template #activator="{ props: tooltipProps }">
-                            <span
-                              class="product-hero__attribute-value-content"
-                              v-bind="tooltipProps"
-                            >
-                              <NuxtImg
-                                v-if="attribute.flag"
-                                :src="attribute.flag"
-                                :alt="displayValue"
-                                width="32"
-                                height="24"
-                                class="product-hero__flag"
-                              />
-                              <v-icon
-                                v-if="attribute.icon"
-                                :icon="attribute.icon"
-                                size="small"
-                                class="product-hero__icon mr-2"
-                              />
-                              <!-- eslint-disable-next-line vue/no-v-html -->
-                              <span v-if="displayHtml" v-html="displayHtml" />
-                              <span v-else>{{ displayValue }}</span>
-                            </span>
-                          </template>
-                        </v-tooltip>
-                      </template>
-                    </ProductAttributeSourcingLabel>
+                    {{ productBrandName }}
                   </span>
-                </li>
-              </ul>
+                  -
+                  <span v-if="productModelName" class="product-hero__subtitle">
+                    {{ productModelName }}
+                  </span>
+                </div>
+
+                <ul
+                  v-if="heroAttributes.length"
+                  class="product-hero__attributes"
+                  role="list"
+                >
+                  <li
+                    v-for="attribute in heroAttributes"
+                    :key="attribute.key"
+                    class="product-hero__attribute"
+                    :class="{
+                      'product-hero__attribute--country':
+                        attribute.key === 'gtin-country',
+                    }"
+                    role="listitem"
+                  >
+                    <template v-if="attribute.key === 'ai-summary'">
+                      <ul
+                        class="product-hero__ai-summary-list"
+                        @click="handleAiSummaryClick"
+                      >
+                        <li
+                          v-if="technicalOnelineHtml"
+                          class="product-hero__ai-summary-item"
+                        >
+                          <v-icon
+                            icon="mdi-cog-outline"
+                            size="small"
+                            class="product-hero__ai-summary-icon"
+                          />
+                          <div class="product-hero__ai-summary-content">
+                            <span class="product-hero__ai-summary-label">
+                              {{ t('product.hero.aiSummary.technical') }}
+                            </span>
+                            <!-- eslint-disable vue/no-v-html -->
+                            <span
+                              class="product-hero__ai-summary-text"
+                              v-html="technicalOnelineHtml"
+                            />
+                            <!-- eslint-enable vue/no-v-html -->
+                          </div>
+                        </li>
+                        <li
+                          v-if="ecologicalOnelineHtml"
+                          class="product-hero__ai-summary-item"
+                        >
+                          <v-icon
+                            icon="mdi-leaf"
+                            size="small"
+                            class="product-hero__ai-summary-icon"
+                          />
+                          <div class="product-hero__ai-summary-content">
+                            <span class="product-hero__ai-summary-label">
+                              {{ t('product.hero.aiSummary.ecological') }}
+                            </span>
+                            <!-- eslint-disable vue/no-v-html -->
+                            <span
+                              class="product-hero__ai-summary-text"
+                              v-html="ecologicalOnelineHtml"
+                            />
+                            <!-- eslint-enable vue/no-v-html -->
+                          </div>
+                        </li>
+                        <li
+                          v-if="communityOnelineHtml"
+                          class="product-hero__ai-summary-item"
+                        >
+                          <v-icon
+                            icon="mdi-account-group-outline"
+                            size="small"
+                            class="product-hero__ai-summary-icon"
+                          />
+                          <div class="product-hero__ai-summary-content">
+                            <span class="product-hero__ai-summary-label">
+                              {{ t('product.hero.aiSummary.community') }}
+                            </span>
+                            <!-- eslint-disable vue/no-v-html -->
+                            <span
+                              class="product-hero__ai-summary-text"
+                              v-html="communityOnelineHtml"
+                            />
+                            <!-- eslint-enable vue/no-v-html -->
+                          </div>
+                        </li>
+                      </ul>
+                    </template>
+                    <template
+                      v-else-if="attribute.key === 'descriptions-panel'"
+                    >
+                      <div class="product-hero__descriptions-panel">
+                        <v-tabs
+                          v-model="activeDescriptionTab"
+                          density="compact"
+                          color="primary"
+                          align-tabs="start"
+                          class="mb-4 product-hero__tabs"
+                        >
+                          <v-tab
+                            v-for="(desc, source) in productDescriptions"
+                            :key="source"
+                            :value="source"
+                            class="text-body-2 font-weight-bold"
+                          >
+                            <img
+                              v-if="productFavicons[source]"
+                              :src="productFavicons[source]"
+                              width="16"
+                              height="16"
+                              class="mr-2 rounded-circle"
+                              alt=""
+                            />
+                            {{ source }}
+                          </v-tab>
+                        </v-tabs>
+
+                        <v-window
+                          v-model="activeDescriptionTab"
+                          class="product-hero__tab-content"
+                        >
+                          <v-window-item
+                            v-for="(desc, source) in productDescriptions"
+                            :key="source"
+                            :value="source"
+                          >
+                            <!-- eslint-disable vue/no-v-html -->
+                            <div
+                              class="text-body-2 text-medium-emphasis product-hero__description-body"
+                              v-html="desc"
+                            />
+                            <!-- eslint-enable vue/no-v-html -->
+                          </v-window-item>
+                        </v-window>
+                      </div>
+                    </template>
+                    <template v-else-if="attribute.showLabel !== false">
+                      <span class="product-hero__attribute-label">{{
+                        attribute.label
+                      }}</span>
+                      <span
+                        class="product-hero__attribute-separator"
+                        aria-hidden="true"
+                        >:</span
+                      >
+                    </template>
+                    <span
+                      v-if="attribute.key !== 'ai-summary'"
+                      class="product-hero__attribute-value"
+                    >
+                      <ProductAttributeSourcingLabel
+                        class="product-hero__attribute-value-label"
+                        :sourcing="attribute.sourcing"
+                        :value="attribute.value"
+                        :enable-tooltip="attribute.enableTooltip !== false"
+                      >
+                        <template #default="{ displayValue, displayHtml }">
+                          <v-tooltip
+                            location="bottom"
+                            :text="attribute.tooltip"
+                            :disabled="!attribute.tooltip"
+                          >
+                            <template #activator="{ props: tooltipProps }">
+                              <span
+                                class="product-hero__attribute-value-content"
+                                v-bind="tooltipProps"
+                              >
+                                <NuxtImg
+                                  v-if="attribute.flag"
+                                  :src="attribute.flag"
+                                  :alt="displayValue"
+                                  width="32"
+                                  height="24"
+                                  class="product-hero__flag"
+                                />
+                                <v-icon
+                                  v-if="attribute.icon"
+                                  :icon="attribute.icon"
+                                  size="small"
+                                  class="product-hero__icon mr-2"
+                                />
+                                <!-- eslint-disable-next-line vue/no-v-html -->
+                                <span v-if="displayHtml" v-html="displayHtml" />
+                                <span v-else>{{ displayValue }}</span>
+                              </span>
+                            </template>
+                          </v-tooltip>
+                        </template>
+                      </ProductAttributeSourcingLabel>
+                    </span>
+                  </li>
+                </ul>
+              </div>
 
               <div class="product-hero__actions">
                 <v-btn
@@ -1016,6 +1023,14 @@ const heroBreadcrumbProps = computed(() => ({
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+.product-hero__centered-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
 }
 
 .product-hero__heading-group {
