@@ -6,6 +6,11 @@ resourcesConfig:
 # SHOULD be equal to the configuration file name, without the extension
 id: oven
 
+parsers:
+  warranty:
+    minYears: 0.0
+    maxYears: 10.0
+
 order: 2
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)

@@ -15,19 +15,13 @@
 
     <div ref="scrollContainer" class="category-fast-filters__scroller">
       <article
-        v-for="(group, index) in groupedSubsets"
+        v-for="group in groupedSubsets"
         :key="group.key"
-        class="category-fast-filters__group"
-        :class="{
-          'category-fast-filters__group--column': group.key === 'impactscore',
-        }"
+        class="category-fast-filters__group category-fast-filters__group--column"
         :aria-label="group.label"
       >
-        <span
-          v-if="group.key === 'impactscore'"
-          class="text-caption font-weight-bold"
-        >
-          Impact environnemental :
+        <span class="text-caption font-weight-bold text-center w-100">
+          {{ group.label }} :
         </span>
         <v-chip-group
           class="category-fast-filters__chip-group"
@@ -67,12 +61,6 @@
                   }"
                 >
                   <span class="category-fast-filters__chip-label">
-                    <span
-                      v-if="index === 0 && group.key !== 'impactscore'"
-                      class="mr-1 font-weight-bold"
-                    >
-                      Impact
-                    </span>
                     {{ resolveSubsetLabel(subset, group.key) }}
                   </span>
                 </v-chip>
@@ -94,12 +82,6 @@
               }"
             >
               <span class="category-fast-filters__chip-label">
-                <span
-                  v-if="index === 0 && group.key !== 'impactscore'"
-                  class="mr-1 font-weight-bold"
-                >
-                  Impact
-                </span>
                 {{ resolveSubsetLabel(subset, group.key) }}
               </span>
             </v-chip>

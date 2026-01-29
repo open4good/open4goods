@@ -9,6 +9,9 @@ parsers:
   weight:
     minKg: 0.001
     maxKg: 2000.0
+  warranty:
+    minYears: 0.0
+    maxYears: 20.0
 
 # If true, products url will be regenerated on each batch. Should not move too much, but...
 forceNameGeneration: true

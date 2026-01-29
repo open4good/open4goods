@@ -9,7 +9,7 @@
     <div class="product-price__content">
       <!-- Best Offers Section -->
       <div class="product-price__section">
-        <h3 class="product-price__subtitle-h3">
+        <h3 v-if="allOffers.length > 1" class="product-price__subtitle-h3">
           {{ offersTitle }}
         </h3>
         <v-alert

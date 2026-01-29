@@ -14,6 +14,14 @@ resourcesConfig:
 # SHOULD be equal to the configuration file name, without the extension
 id: tv
 
+parsers:
+  weight:
+    minKg: 0.1
+    maxKg: 200.0
+  warranty:
+    minYears: 0.0
+    maxYears: 10.0
+
 order: 1
 
 # The associated google taxonomyID. (Ex : FR - https://ww.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
@@ -363,7 +371,7 @@ nudgeToolConfig:
     ################
     # Impact Score
     ################
-    - id: "impact_bad" # Unique identifier for the subset
+    - id: "impact_high" # Unique identifier for the subset
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
@@ -372,16 +380,16 @@ nudgeToolConfig:
       image: "example-image.png"
       url:
         en: "high-impact"
-        fr: "mauvais-ecoscore"
+        fr: "fort-impact"
       caption:
-        en: "Bad (< 13.42)"
-        fr: "Mauvais (< 13.42)"
+        en: "High (< 13.42)"
+        fr: "Élevé (< 13.42)"
       title:
-        en: "Bad Ecoscore"
-        fr: "Mauvais Ecoscore"
+        en: "High Impact"
+        fr: "Impact Élevé"
       description:
-        en: "Products with a bad Ecoscore"
-        fr: "Produits avec un mauvais Ecoscore"
+        en: "Products with a high environmental impact"
+        fr: "Produits ayant un fort impact environnemental"
 
     - id: "impact_medium"
       group: "impactscore"
@@ -395,18 +403,18 @@ nudgeToolConfig:
       image: "example-image.png"
       url:
         en: "medium-impact"
-        fr: "ecoscore-moyen"
+        fr: "impact-moyen"
       caption:
         en: "Medium (13.42 - 14.58)"
         fr: "Moyen (13.42 - 14.58)"
       title:
-        en: "Medium Ecoscore"
-        fr: "Ecoscore Moyen"
+        en: "Medium Impact"
+        fr: "Impact Moyen"
       description:
-        en: "Products with a medium Ecoscore"
-        fr: "Produits avec un Ecoscore moyen"
+        en: "Products with a medium environmental impact"
+        fr: "Produits ayant un impact environnemental moyen"
 
-    - id: "impact_good"
+    - id: "impact_low"
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
@@ -415,16 +423,16 @@ nudgeToolConfig:
       image: "example-image.png"
       url:
         en: "low-impact"
-        fr: "bon-ecoscore"
+        fr: "faible-impact"
       caption:
-        en: "Good (> 14.58)"
-        fr: "Bon (> 14.58)"
+        en: "Low (> 14.58)"
+        fr: "Faible (> 14.58)"
       title:
-        en: "Good Ecoscore"
-        fr: "Bon Ecoscore"
+        en: "Low Impact"
+        fr: "Impact Faible"
       description:
-        en: "Products with a good Ecoscore"
-        fr: "Produits avec un bon Ecoscore"
+        en: "Products with a low environmental impact"
+        fr: "Produits ayant un faible impact environnemental"
 
     ################
     # Price

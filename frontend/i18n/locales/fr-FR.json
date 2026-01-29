@@ -661,7 +661,7 @@
         "default": "Autres filtres rapides",
         "price": "Prix",
         "screen_size": "Taille d'écran",
-        "impactscore": "Impact écologique"
+        "impactscore": "Impact environnemental"
       },
       "navigation": {
         "next": "Défiler vers les filtres rapides suivants",
@@ -2283,9 +2283,9 @@
       },
       "generatedAt": "Synthèse générée le {date}",
       "tooltip": {
-        "generatedAt": "Génération le {date}",
+        "generatedAt": "Synthèse avancée générée le {date}",
         "available": "Synthèse IA disponible",
-        "remaining": "{count} génération restante | {count} générations restantes",
+        "remaining": "Ce produit ne dispose pas encore de synthèse. Vous pouvez la demander et la partager à la communauré. Il vous reste {count} génération| {count} générations",
         "quotaExceeded": "Quota épuisé"
       },
       "dataQuality": {
