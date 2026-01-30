@@ -30,6 +30,19 @@ const VCheckboxStub = defineComponent({
   },
 })
 
+const VBadgeStub = defineComponent({
+  name: 'VBadgeStub',
+  props: {
+    content: {
+      type: [String, Number],
+      default: '',
+    },
+  },
+  setup(props) {
+    return () => h('span', { class: 'v-badge-stub' }, props.content)
+  },
+})
+
 const createI18nPlugin = () =>
   createI18n({
     legacy: false,
@@ -67,6 +80,7 @@ const mountComponent = (filter?: Filter | null) => {
       plugins: [createI18nPlugin()],
       stubs: {
         'v-checkbox': VCheckboxStub,
+        'v-badge': VBadgeStub,
       },
     },
   })

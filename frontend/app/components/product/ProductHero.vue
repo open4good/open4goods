@@ -107,7 +107,7 @@
               </div>
 
               <div class="mt-6 product-hero__centered-info">
-              
+
                 <ul
                   v-if="heroAttributes.length"
                   class="product-hero__attributes"
@@ -548,9 +548,6 @@ const productBrandName = computed(() =>
 )
 const productModelName = computed(() =>
   normalizeString(props.product.identity?.model)
-)
-const hasBrandOrModel = computed(
-  () => productBrandName.value.length > 0 || productModelName.value.length > 0
 )
 
 const productDescriptions = computed(
