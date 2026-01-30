@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -61,16 +63,11 @@ class ProductControllerTest {
 
     @Test
     void aggregatedScoreFiltersArePermitted() {
-        VerticalConfig config = new VerticalConfig();
-        config.setId("electronics");
-
-        AttributeConfig attributeConfig = new AttributeConfig();
-        attributeConfig.setKey("POWER_USAGE");
-        attributeConfig.setAsScore(true);
-        attributeConfig.setParticipateInScores(Set.of("ENERGY_CONSUMPTION"));
-        config.setAttributesConfig(new AttributesConfig(List.of(attributeConfig)));
-
-        when(verticalsConfigService.getConfigById("electronics")).thenReturn(config);
+        // Setup SearchCapabilities mock
+        Set<String> allowedFilters = new HashSet<>();
+        allowedFilters.add("scores.ENERGY_CONSUMPTION.value");
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(allowedFilters, Set.of(), Set.of());
+        when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
         Filter filter = new Filter("scores.ENERGY_CONSUMPTION.value", FilterOperator.range, null, 0.0, 100.0);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
@@ -78,7 +75,7 @@ class ProductControllerTest {
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
                 anyBoolean(), any()))
                 .thenReturn(responseDto);
 
@@ -88,7 +85,7 @@ class ProductControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
-        verify(productMappingService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
+        verify(searchService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
                 filterCaptor.capture(), anyBoolean(), any());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
@@ -97,14 +94,11 @@ class ProductControllerTest {
 
     @Test
     void attributeFiltersNotListedExplicitlyArePermitted() {
-        VerticalConfig config = new VerticalConfig();
-        config.setId("tv");
-
-        AttributeConfig attributeConfig = new AttributeConfig();
-        attributeConfig.setKey("BRAND_SUSTAINALYTICS_SCORING");
-        config.setAttributesConfig(new AttributesConfig(List.of(attributeConfig)));
-
-        when(verticalsConfigService.getConfigById("tv")).thenReturn(config);
+        // Setup SearchCapabilities mock
+        Set<String> allowedFilters = new HashSet<>();
+        allowedFilters.add("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value");
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(allowedFilters, Set.of(), Set.of());
+        when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
         Filter filter = new Filter("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value", FilterOperator.term,
                 List.of("AA"), null, null);
@@ -113,7 +107,7 @@ class ProductControllerTest {
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
                 any(), anyBoolean(), any()))
                 .thenReturn(responseDto);
 
@@ -123,7 +117,7 @@ class ProductControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
-        verify(productMappingService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
+        verify(searchService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
                 filterCaptor.capture(), anyBoolean(), any());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
@@ -133,11 +127,11 @@ class ProductControllerTest {
 
     @Test
     void compositeScoreFiltersArePermitted() {
-        VerticalConfig config = new VerticalConfig();
-        config.setId("tv");
-        config.setCompositeScores(List.of("ECOSCORE"));
-
-        when(verticalsConfigService.getConfigById("tv")).thenReturn(config);
+        // Setup SearchCapabilities mock
+        Set<String> allowedFilters = new HashSet<>();
+        allowedFilters.add("scores.ECOSCORE.value");
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(allowedFilters, Set.of(), Set.of());
+        when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
         Filter filter = new Filter("scores.ECOSCORE.value", FilterOperator.range, null, 0.0, 100.0);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
@@ -145,7 +139,7 @@ class ProductControllerTest {
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        when(productMappingService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
                 anyBoolean(), any()))
                 .thenReturn(responseDto);
 
@@ -157,6 +151,12 @@ class ProductControllerTest {
 
     @Test
     void globalSearchWithEmptyAggsShouldBeAllowed() {
+        // Setup SearchCapabilities mock for Global Search
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Collections.emptySet(), Set.of(), Set.of());
+        // For global search, buildSearchCapabilities might be called with verticalId=null.
+        // We can match any args.
+        when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
+
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
                 new FilterRequestDto(List.of(), List.of()), null, null);
 
@@ -164,7 +164,7 @@ class ProductControllerTest {
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         
         // Mock service call to succeed
-        when(productMappingService.searchProducts(
+        when(searchService.searchProducts(
                 any(Pageable.class), 
                 any(Locale.class), 
                 anySet(), 

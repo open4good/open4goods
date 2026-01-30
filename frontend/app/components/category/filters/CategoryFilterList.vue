@@ -1,5 +1,6 @@
 <template>
   <div :class="['category-filter-list', `category-filter-list--${mode}`]">
+    <!-- Grid Mode (Mobile Drawer) -->
     <template v-if="mode === 'grid'">
       <component
         :is="resolveComponent(field)"
@@ -14,6 +15,56 @@
       />
     </template>
 
+    <!-- Bar Mode (Desktop) -->
+    <template v-else-if="mode === 'bar'">
+      <div v-for="field in fields" :key="field.mapping ?? field.title">
+        <v-menu
+          :close-on-content-click="false"
+          location="bottom start"
+          offset="8"
+        >
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              variant="tonal"
+              :color="isFilterActive(field.mapping) ? 'primary' : undefined"
+              class="category-filter-list__bar-btn"
+              prepend-icon="mdi-filter-variant"
+              rounded="pill"
+            >
+              {{ field.title }}
+              <v-badge
+                v-if="isFilterActive(field.mapping)"
+                dot
+                color="primary"
+                inline
+                class="ms-2"
+              />
+              <v-icon icon="mdi-chevron-down" end size="small" />
+            </v-btn>
+          </template>
+
+          <v-card
+            min-width="300"
+            max-width="400"
+            class="pa-4"
+            rounded="xl"
+            elevation="3"
+          >
+            <component
+              :is="resolveComponent(field)"
+              :field="field"
+              :aggregation="aggregations[field.mapping ?? '']"
+              :baseline-aggregation="baselineAggregations[field.mapping ?? '']"
+              :model-value="findActiveFilter(field.mapping)"
+              @update:model-value="onFilterChange(field, $event)"
+            />
+          </v-card>
+        </v-menu>
+      </div>
+    </template>
+
+    <!-- Row Mode (Legacy/Fallback) -->
     <template v-else>
       <v-row dense class="category-filter-list__row">
         <v-col
@@ -21,8 +72,6 @@
           :key="field.mapping ?? field.title"
           cols="12"
           sm="6"
-          md="6"
-          lg="4"
           class="category-filter-list__col"
         >
           <component
@@ -56,7 +105,7 @@ const props = withDefaults(
     baselineAggregations?: Record<string, AggregationResponseDto>
     activeFilters: Filter[]
     searchType?: string | null
-    mode?: 'grid' | 'row'
+    mode?: 'grid' | 'row' | 'bar'
   }>(),
   {
     baselineAggregations: () => ({}) as Record<string, AggregationResponseDto>,
@@ -85,6 +134,10 @@ const findActiveFilter = (field?: string | null) => {
   return props.activeFilters.find(filter => filter.field === field) ?? null
 }
 
+const isFilterActive = (field?: string | null): boolean => {
+  return !!findActiveFilter(field)
+}
+
 const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
   const mapping = field.mapping
   if (!mapping) {
@@ -111,12 +164,20 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
 
 <style scoped lang="sass">
 .category-filter-list
-  display: grid
+  display: flex
+  flex-direction: column
   gap: 1.5rem
 
   &--grid
+    display: grid
     grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr))
     align-items: stretch
+
+  &--bar
+    flex-direction: row
+    flex-wrap: wrap
+    gap: 0.75rem
+    align-items: center
 
   &--row
     display: block
@@ -131,6 +192,11 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     display: flex
     flex-direction: column
     min-width: 0
+
+  &__bar-btn
+    text-transform: none
+    font-weight: 500
+    letter-spacing: 0
 
   &__search-toggle
     align-items: center

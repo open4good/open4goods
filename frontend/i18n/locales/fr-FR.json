@@ -95,7 +95,6 @@
         "placeholders": [
           "Smartphone reconditionné",
           "Lave-linge économique",
-          "Jean made in France",
           "Vélo électrique",
           "Téléviseur 4K"
         ]
@@ -104,11 +103,11 @@
       "highlights": {
         "impact": {
           "title": "🌿 ImpactScore : Guider vos achats",
-          "subtitle": "Acheter moins pire pour la planète !"
+          "subtitle": "Acheter moins pire pour la planète"
         },
         "price": {
           "title": "💰 Comparateur de prix",
-          "subtitle": "Un des meilleurs comparateur du marché."
+          "subtitle": "Un des meilleurs comparateur"
         },
         "ethics": {
           "title": "🇫🇷 Ouvert & éthique",
@@ -180,6 +179,7 @@
       }
     },
     "promises": {
+      "title": "Nos engagements",
       "ariaLabel": "Nos promesses et engagements pour comparer responsablement"
     },
     "parallax": {
@@ -2535,6 +2535,10 @@
         "label": "Comparer",
         "remove": "Retirer de la comparaison",
         "selected": "Comparé"
+      },
+      "description": {
+        "showMore": "Afficher plus",
+        "showLess": "Afficher moins"
       },
       "gtin": "Code GTIN",
       "gtinTooltip": "Basé sur le code GTIN du produit, cela n'indique pas nécessairement le lieu de fabrication.",

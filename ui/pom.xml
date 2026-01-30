@@ -14,11 +14,6 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>feedservice</artifactId>
-            <version>${global.version}</version>
-        </dependency>
 
         <!-- servlet container -->
         <dependency>
@@ -99,6 +94,12 @@
         <dependency>
             <groupId>org.open4goods</groupId>
             <artifactId>gtinservice</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>feedservice</artifactId>
             <version>${global.version}</version>
         </dependency>
 

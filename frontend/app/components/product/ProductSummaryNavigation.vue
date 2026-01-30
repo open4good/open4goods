@@ -622,6 +622,7 @@ watch(
 
 @media (max-width: 960px) {
   .product-summary-navigation {
+    position: static;
     border-radius: 0;
     box-shadow: none;
     padding: 0.75rem 0.5rem;

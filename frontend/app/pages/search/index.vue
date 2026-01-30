@@ -91,27 +91,19 @@
         />
       </v-btn>
 
-      <v-card
-        v-else
-        class="search-page__filters-card mx-auto"
-        rounded="xl"
-        elevation="1"
-        style="max-width: fit-content"
-      >
-        <div class="pa-4">
-          <CategoryFilterList
-            :fields="filterFields"
-            :aggregations="productAggregations"
-            :baseline-aggregations="baselineAggregations"
-            :active-filters="activeFilters"
-            :search-type="searchType"
-            mode="row"
-            @update-range="updateRangeFilter"
-            @update-terms="updateTermsFilter"
-            @update:search-type="searchType = $event"
-          />
-        </div>
-      </v-card>
+      <div v-else class="search-page__filters-bar mx-auto">
+        <CategoryFilterList
+          :fields="filterFields"
+          :aggregations="productAggregations"
+          :baseline-aggregations="baselineAggregations"
+          :active-filters="activeFilters"
+          :search-type="searchType"
+          mode="bar"
+          @update-range="updateRangeFilter"
+          @update-terms="updateTermsFilter"
+          @update:search-type="searchType = $event"
+        />
+      </div>
     </v-container>
 
     <v-navigation-drawer
@@ -450,13 +442,13 @@ const { data: stats } = await useAsyncData<CategoriesStatsDto | null>(
   { server: true, lazy: true }
 )
 
-const countEvaluated = computed(() => stats.value?.totalProductsCount ?? 0)
+const countEvaluated = computed(
+  () => stats.value?.impactScoreProductsCount ?? 0
+)
 
-const countOthers = computed(() => {
-  const gtin = stats.value?.gtinOpenDataItemsCount ?? 0
-  const isbn = stats.value?.isbnOpenDataItemsCount ?? 0
-  return gtin + isbn
-})
+const countOthers = computed(
+  () => stats.value?.productsWithoutVerticalCount ?? 0
+)
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
 const searchType = ref<string | null>('SEMANTIC')
@@ -486,7 +478,6 @@ const isFiltered = computed(() => activeFilters.value.length > 0)
  * Page number is zero-based internally but displayed as 1-based in UI.
  */
 const missingVerticalPageNumber = ref(0)
-const missingVerticalPageSize = ref(20)
 
 const showLatestProducts = computed(
   () => !normalizedQuery.value.length && !isFiltered.value
@@ -559,8 +550,6 @@ const { data, pending, error, refresh } =
           query: normalizedQuery.value,
           filters: filterRequest.value,
           searchType: resolvedSearchType.value,
-          pageNumber: missingVerticalPageNumber.value,
-          pageSize: missingVerticalPageSize.value,
         },
       })
     },
@@ -609,6 +598,10 @@ const {
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
+      query: {
+        query: hasMinimumLength.value ? normalizedQuery.value : undefined,
+        domainLanguage: 'fr-FR',
+      },
       body: baselinePayload.value, // This payload matches ProductSearchRequestDto which /api/products/search can handle
     })
   },
@@ -633,10 +626,12 @@ const {
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
-      body: {
+      query: {
         query: hasMinimumLength.value ? normalizedQuery.value : undefined,
+        domainLanguage: 'fr-FR',
+      },
+      body: {
         aggs: aggregationDefinition.value,
-        semanticSearch: semanticSearchEnabled.value,
         searchType: resolvedSearchType.value,
       },
     })
@@ -670,10 +665,12 @@ const {
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
-      body: {
+      query: {
         query: hasMinimumLength.value ? normalizedQuery.value : undefined,
-        ...requestBody.value,
+        domainLanguage: 'fr-FR',
       },
+      headers: requestHeaders,
+      body: requestBody.value,
     })
   },
   {

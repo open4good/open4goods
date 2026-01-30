@@ -350,9 +350,10 @@ public class ProductController {
                         .map(field -> new FieldMetadataDto(field.fieldPath(), null, null, determineGlobalFilterValueType(field), null))
                         .toList();
 
-        SearchCapabilities capabilities = buildSearchCapabilities(normalizedVerticalId, domainLanguage, filterableGlobal);
+        SearchService.SearchCapabilities capabilities = searchService.buildSearchCapabilities(normalizedVerticalId, domainLanguage, filterableGlobal);
         Set<String> allowedSortMappings = capabilities.allowedSorts();
 
+        // TODO : HEre we add a big micmac. We used the logic of duplicated search (verticals and global)
         Pageable effectivePageable = page;
         SortRequestDto sortDto = searchPayload == null ? null : searchPayload.sort();
         Validation<Pageable> sortValidation = sanitizeSort(page, sortDto, allowedSortMappings);
@@ -395,7 +396,7 @@ public class ProductController {
         Set<String> requestedComponents = include == null ? Set.of() : include;
         String searchType = searchPayload == null ? null : searchPayload.searchType();
 
-        ProductSearchResponseDto body = service.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
+        ProductSearchResponseDto body = searchService.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
                 domainLanguage, normalizedVerticalId, normalizedQuery, filterDto, semanticSearch, searchType);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
@@ -462,7 +463,9 @@ public class ProductController {
         }
         filterDto = filterValidation.value();
 
-        Set<String> allowedSortMappings = collectGlobalSortMappings();
+        Set<String> allowedSortMappings = Arrays.stream(ProductDtoSortableFields.values())
+                .map(ProductDtoSortableFields::getText)
+                .collect(Collectors.toSet());
         Pageable globalPageable = PageRequest.of(0, 100);
         Validation<Pageable> sortValidation = sanitizeSort(globalPageable, sortDto, allowedSortMappings);
         if (sortValidation.hasError()) {
@@ -591,7 +594,16 @@ public class ProductController {
         LOGGER.info(
                 "Entering buildVerticalFieldsResponse(verticalId={}, domainLanguage={}, globalFieldCount={})",
                 verticalId, domainLanguage, globalFields != null ? globalFields.size() : 0);
-        ProductFieldOptionsResponse body = resolveVerticalFields(verticalId, domainLanguage, globalFields);
+        // Logic moved to SearchService, but we need to resolve vertical config here if passing verticalId
+        if (!StringUtils.hasText(verticalId)) {
+             return ResponseEntity.ok(searchService.resolveVerticalFields(null, domainLanguage, globalFields));
+        }
+        VerticalConfig vConfig = verticalsConfigService.getConfigById(verticalId);
+        if (vConfig == null) {
+            LOGGER.warn("Vertical configuration not found for id='{}'", verticalId);
+            return ResponseEntity.notFound().build();
+        }
+        ProductFieldOptionsResponse body = searchService.resolveVerticalFields(vConfig, domainLanguage, globalFields);
         if (body == null) {
             LOGGER.warn("No vertical configuration found for id='{}'", verticalId);
             return ResponseEntity.notFound().build();
@@ -599,216 +611,7 @@ public class ProductController {
         return ResponseEntity.ok(body);
     }
 
-    private ProductFieldOptionsResponse resolveVerticalFields(String verticalId, DomainLanguage domainLanguage,
-            List<FieldMetadataDto> globalFields) {
-        LOGGER.info(
-                "Entering resolveVerticalFields(verticalId={}, domainLanguage={}, globalFieldCount={})",
-                verticalId, domainLanguage, globalFields != null ? globalFields.size() : 0);
-        if (!StringUtils.hasText(verticalId)) {
-            return resolveVerticalFields((VerticalConfig) null, domainLanguage, globalFields);
-        }
 
-        VerticalConfig vConfig = verticalsConfigService.getConfigById(verticalId);
-        if (vConfig == null) {
-            LOGGER.warn("Vertical configuration not found for id='{}'", verticalId);
-            return null;
-        }
-
-        return resolveVerticalFields(vConfig, domainLanguage, globalFields);
-    }
-
-    private ProductFieldOptionsResponse resolveVerticalFields(VerticalConfig config, DomainLanguage domainLanguage,
-            List<FieldMetadataDto> globalFields) {
-        LOGGER.info(
-                "Entering resolveVerticalFields(config={}, domainLanguage={}, globalFieldCount={})",
-                config, domainLanguage, globalFields != null ? globalFields.size() : 0);
-        List<FieldMetadataDto> immutableGlobal = List.copyOf(globalFields);
-        if (config == null) {
-            return new ProductFieldOptionsResponse(immutableGlobal, List.of(), List.of());
-        }
-
-        List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(immutableGlobal, config);
-        List<FieldMetadataDto> impactFields = new ArrayList<>();
-        mapImpactScores(config, domainLanguage).forEach(impactFields::add);
-
-        List<FieldMetadataDto> technicalFields = new ArrayList<>();
-        technicalFields.addAll(mapVerticalAttributeFilters(config.getEcoFilters(), config, domainLanguage));
-        technicalFields.addAll(mapVerticalAttributeFilters(config.getGlobalTechnicalFilters(), config, domainLanguage));
-        technicalFields.addAll(mapVerticalAttributeFilters(config.getTechnicalFilters(), config, domainLanguage));
-
-        return new ProductFieldOptionsResponse(globalWithAggregation, List.copyOf(impactFields), List.copyOf(technicalFields));
-    }
-
-    /**
-     * Resolve the search capabilities for the requested vertical.
-     *
-     * @param normalizedVerticalId optional vertical identifier supplied by the client
-     * @param domainLanguage       language used to localise filter metadata
-     * @param globalFields         list of fields available regardless of the vertical
-     * @return aggregation, sort and filter capabilities derived from the vertical configuration
-     */
-    private SearchCapabilities buildSearchCapabilities(String normalizedVerticalId, DomainLanguage domainLanguage,
-            List<FieldMetadataDto> globalFields) {
-        LOGGER.info(
-                "Entering buildSearchCapabilities(normalizedVerticalId={}, domainLanguage={}, globalFieldCount={})",
-                normalizedVerticalId, domainLanguage, globalFields != null ? globalFields.size() : 0);
-        boolean hasVertical = StringUtils.hasText(normalizedVerticalId);
-        VerticalConfig config = hasVertical ? verticalsConfigService.getConfigById(normalizedVerticalId) : null;
-        ProductFieldOptionsResponse fieldOptions = resolveVerticalFields(config, domainLanguage, globalFields);
-        Set<String> allowedFilters = collectAllowedFieldMappings(fieldOptions);
-        augmentWithAttributesConfig(allowedFilters, config);
-        augmentWithAggregatedScores(allowedFilters, config);
-        Set<String> allowedSorts = collectGlobalSortMappings();
-        if (hasVertical) {
-            allowedSorts.addAll(allowedFilters);
-        }
-        Set<String> allowedAggregations = collectAllowedAggregationMappings(allowedFilters, config);
-        return new SearchCapabilities(allowedFilters, allowedSorts, allowedAggregations);
-    }
-
-    private Set<String> collectAllowedFieldMappings(ProductFieldOptionsResponse fieldOptions) {
-        LOGGER.info("Entering collectAllowedFieldMappings(fieldOptions={})", fieldOptions);
-        Set<String> allowed = new HashSet<>();
-        if (fieldOptions == null) {
-            return allowed;
-        }
-        addFieldMappings(allowed, fieldOptions.global());
-        addFieldMappings(allowed, fieldOptions.impact());
-        addFieldMappings(allowed, fieldOptions.technical());
-        return allowed;
-    }
-
-    /**
-     * Add every attribute declared in the vertical configuration to the list of allowed
-     * filter mappings, even when the attribute is not explicitly listed as a filter. This
-     * keeps the validation layer aligned with the vertical definition so attributes such
-     * as {@code BRAND_SUSTAINALYTICS_SCORING} remain usable as filters.
-     *
-     * @param target collection of allowed filter mappings to update
-     * @param config vertical configuration providing attribute definitions
-     */
-    private void augmentWithAttributesConfig(Set<String> target, VerticalConfig config) {
-        LOGGER.info("Entering augmentWithAttributesConfig(targetSize={}, config={})",
-                target != null ? target.size() : 0, config);
-        if (target == null || config == null || config.getAttributesConfig() == null
-                || config.getAttributesConfig().getConfigs() == null) {
-            return;
-        }
-        for (AttributeConfig attribute : config.getAttributesConfig().getConfigs()) {
-            if (attribute == null || !StringUtils.hasText(attribute.getKey())) {
-                continue;
-            }
-            String mapping = toIndexedAttribute(attribute.getKey().trim(), config);
-            target.add(mapping);
-        }
-    }
-
-    /**
-     * Add aggregated score mappings derived from the vertical configuration.
-     *
-     * @param target collection of allowed filter mappings to update
-     * @param config vertical configuration supplying aggregated score identifiers
-     */
-    private void augmentWithAggregatedScores(Set<String> target, VerticalConfig config) {
-        LOGGER.info("Entering augmentWithAggregatedScores(targetSize={}, config={})",
-                target != null ? target.size() : 0, config);
-        if (target == null || config == null || config.getAggregatedScores() == null) {
-            return;
-        }
-        for (String score : config.getAggregatedScores()) {
-            if (!StringUtils.hasText(score)) {
-                continue;
-            }
-            String mapping = "scores." + score.trim()+".value";
-            target.add(mapping);
-        }
-
-        if (config.getCompositeScores() == null) {
-            return;
-        }
-        for (String score : config.getCompositeScores()) {
-            if (!StringUtils.hasText(score)) {
-                continue;
-            }
-            String mapping = "scores." + score.trim()+".value";
-            target.add(mapping);
-        }
-    }
-
-    /**
-     * Combine the explicit filter mappings with the aggregation hints defined in the vertical configuration.
-     *
-     * @param allowedFilterMappings mappings allowed for filtering
-     * @param config                vertical configuration possibly containing aggregation hints
-     * @return set of mappings that may be used to request aggregations
-     */
-    private Set<String> collectAllowedAggregationMappings(Set<String> allowedFilterMappings, VerticalConfig config) {
-        LOGGER.info("Entering collectAllowedAggregationMappings(allowedFilterMappingsSize={}, config={})",
-                allowedFilterMappings != null ? allowedFilterMappings.size() : 0, config);
-        Set<String> allowed = new HashSet<>(allowedFilterMappings);
-        if (config == null || config.getAggregationConfiguration() == null) {
-            if (config == null) {
-                Arrays.stream(AllowedGlobalAggregations.values())
-                        .map(AllowedGlobalAggregations::fieldPath)
-                        .forEach(allowed::add);
-            }
-            return allowed;
-        }
-        config.getAggregationConfiguration().keySet()
-                .forEach(candidate -> addAggregationKeyVariants(allowed, candidate, config));
-        return allowed;
-    }
-
-    /**
-     * Add acceptable aggregation key variants (with or without the {@code .numericValue} suffix).
-     *
-     * @param target    destination set to update
-     * @param candidate aggregation key declared in the configuration
-     * @param config    vertical configuration used to infer attribute metadata
-     */
-    private void addAggregationKeyVariants(Set<String> target, String candidate, VerticalConfig config) {
-        LOGGER.info("Entering addAggregationKeyVariants(candidate={}, config={})", candidate, config);
-        if (!StringUtils.hasText(candidate)) {
-            return;
-        }
-        String normalized = candidate.trim();
-        target.add(normalized);
-        if (normalized.endsWith(NUMERIC_VALUE_SUFFIX)) {
-            String base = normalized.substring(0, normalized.length() - NUMERIC_VALUE_SUFFIX.length());
-            if (!base.isEmpty()) {
-                target.add(base);
-            }
-            return;
-        }
-        if (normalized.endsWith(KEYWORD_VALUE_SUFFIX)) {
-            String base = normalized.substring(0, normalized.length() - KEYWORD_VALUE_SUFFIX.length());
-            if (!base.isEmpty()) {
-                target.add(base);
-            }
-            return;
-        }
-        if (normalized.startsWith(INDEXED_ATTRIBUTE_PREFIX)) {
-            String attributeKey = normalized.substring(INDEXED_ATTRIBUTE_PREFIX.length());
-            String valueType = resolveAttributeValueType(config, attributeKey);
-            if (VALUE_TYPE_NUMERIC.equals(valueType)) {
-                target.add(normalized + NUMERIC_VALUE_SUFFIX);
-            } else if (VALUE_TYPE_TEXT.equals(valueType)) {
-                target.add(normalized + KEYWORD_VALUE_SUFFIX);
-            }
-        }
-    }
-
-    /**
-     * @return default sort mappings accepted when no vertical override is provided.
-     */
-    private Set<String> collectGlobalSortMappings() {
-        LOGGER.info("Entering collectGlobalSortMappings()");
-        Set<String> fields = new HashSet<>();
-        for (ProductDtoSortableFields field : ProductDtoSortableFields.values()) {
-            fields.add(field.getText());
-        }
-        return fields;
-    }
 
     /**
      * Validate and normalise the requested sort specification.
@@ -984,9 +787,7 @@ public class ProductController {
         return Validation.ok(sanitized.isEmpty() ? List.of() : List.copyOf(sanitized));
     }
 
-    private record SearchCapabilities(Set<String> allowedFilters, Set<String> allowedSorts,
-            Set<String> allowedAggregations) {
-    }
+
 
     private record Validation<T>(T value, ResponseEntity<?> error) {
 
@@ -1003,260 +804,6 @@ public class ProductController {
         }
     }
 
-    private void addFieldMappings(Set<String> target, List<FieldMetadataDto> fields) {
-        LOGGER.info("Entering addFieldMappings(currentTargetSize={}, fieldsSize={})",
-                target != null ? target.size() : 0, fields != null ? fields.size() : null);
-        if (fields == null) {
-            return;
-        }
-        for (FieldMetadataDto field : fields) {
-            if (field == null) {
-                continue;
-            }
-            if (StringUtils.hasText(field.mapping())) {
-                target.add(field.mapping());
-            }
-        }
-    }
-
-    private List<FieldMetadataDto> augmentFieldsWithAggregationMetadata(List<FieldMetadataDto> fields, VerticalConfig config) {
-        LOGGER.info("Entering augmentFieldsWithAggregationMetadata(fieldsSize={}, config={})",
-                fields != null ? fields.size() : null, config);
-        if (fields == null || fields.isEmpty()) {
-            return List.of();
-        }
-        List<FieldMetadataDto> results = new ArrayList<>(fields.size());
-        for (FieldMetadataDto field : fields) {
-            if (field == null) {
-                continue;
-            }
-            if (!StringUtils.hasText(field.mapping())) {
-                results.add(field);
-                continue;
-            }
-            FieldMetadataDto.AggregationMetadata existing = field.aggregationConfiguration();
-            if (existing != null) {
-                results.add(field);
-                continue;
-            }
-            FieldMetadataDto.AggregationMetadata resolved = resolveAggregationMetadata(config, field.mapping());
-            if (resolved == null) {
-                results.add(field);
-            } else {
-                results.add(new FieldMetadataDto(field.mapping(), field.title(), field.description(), field.valueType(), resolved));
-            }
-        }
-        return List.copyOf(results);
-    }
-
-    /**
-     * Translate a vertical filter key to the indexed attribute path used by Elasticsearch.
-     *
-     * @param filterName filter identifier as defined in the vertical configuration
-     * @param config     vertical configuration used to resolve attribute metadata
-     * @return fully qualified field path pointing to the indexed attribute value. Numeric
-     *         attributes resolve to the <code>.numericValue</code> sub-field and textual ones to
-     *         the <code>.keyword</code> sub-field in order to target the appropriate Elasticsearch
-     *         data type.
-     */
-    private String toIndexedAttribute(String filterName, VerticalConfig config) {
-        LOGGER.info("Entering toIndexedAttribute(filterName={}, config={})", filterName, config);
-        String baseField = "attributes.indexed." + filterName;
-        AttributeConfig attributeConfig = null;
-        if (config.getAttributesConfig() != null) {
-            attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(filterName);
-        }
-        if (attributeConfig != null) {
-            if (attributeConfig.getFilteringType() == AttributeType.NUMERIC) {
-                return baseField + NUMERIC_VALUE_SUFFIX;
-            }
-            if (attributeConfig.getFilteringType() == AttributeType.TEXT) {
-                return baseField + KEYWORD_VALUE_SUFFIX;
-            }
-        }
-        return baseField;
-    }
-
-    /**
-     * Convert the configured attribute filters into field metadata enriched with localisation.
-     *
-     * @param filters        filter identifiers defined in the vertical configuration
-     * @param config         vertical configuration used to resolve attribute metadata
-     * @param domainLanguage requested domain language driving localisation
-     * @return immutable list of {@link FieldMetadataDto} describing the filters
-     */
-    private List<FieldMetadataDto> mapVerticalAttributeFilters(List<String> filters, VerticalConfig config,
-            DomainLanguage domainLanguage) {
-        LOGGER.info("Entering mapVerticalAttributeFilters(filtersSize={}, config={}, domainLanguage={})",
-                filters != null ? filters.size() : null, config, domainLanguage);
-        if (filters == null || filters.isEmpty()) {
-            return List.of();
-        }
-
-        List<FieldMetadataDto> results = new ArrayList<>();
-        for (String filterName : filters) {
-            if (!StringUtils.hasText(filterName)) {
-                continue;
-            }
-            String normalizedName = filterName.trim();
-            String mapping = toIndexedAttribute(normalizedName, config);
-            String title = resolveAttributeTitle(config, normalizedName, domainLanguage);
-            String valueType = resolveAttributeValueType(config, normalizedName);
-            FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, normalizedName);
-            FieldMetadataDto dto = new FieldMetadataDto(mapping, title, null, valueType, aggregation);
-            results.add(dto);
-        }
-        return List.copyOf(results);
-    }
-
-    private FieldMetadataDto.AggregationMetadata resolveAggregationMetadata(VerticalConfig config, String mapping,
-            String... fallbackKeys) {
-        LOGGER.info("Entering resolveAggregationMetadata(mapping={}, fallbackKeysCount={}, config={})", mapping,
-                fallbackKeys != null ? fallbackKeys.length : 0, config);
-        AggregationConfiguration aggregationConfig = findAggregationConfiguration(config, mapping, fallbackKeys);
-        if (aggregationConfig == null) {
-            return null;
-        }
-        Integer buckets = aggregationConfig.getBuckets();
-        Double interval = aggregationConfig.getInterval();
-        if (buckets == null && interval == null) {
-            return null;
-        }
-        return new FieldMetadataDto.AggregationMetadata(buckets, interval);
-    }
-
-    private AggregationConfiguration findAggregationConfiguration(VerticalConfig config, String mapping,
-            String... fallbackKeys) {
-        LOGGER.info("Entering findAggregationConfiguration(mapping={}, fallbackKeysCount={}, config={})", mapping,
-                fallbackKeys != null ? fallbackKeys.length : 0, config);
-        if (config == null) {
-            return null;
-        }
-        List<String> candidates = new ArrayList<>();
-        addAggregationCandidate(candidates, mapping);
-        if (fallbackKeys != null) {
-            for (String fallback : fallbackKeys) {
-                addAggregationCandidate(candidates, fallback);
-            }
-        }
-        for (String candidate : candidates) {
-            AggregationConfiguration resolved = config.getAggregationConfigurationFor(candidate);
-            if (resolved != null) {
-                return resolved;
-            }
-        }
-        return null;
-    }
-
-    private void addAggregationCandidate(List<String> target, String value) {
-        LOGGER.info("Entering addAggregationCandidate(value={})", value);
-        if (!StringUtils.hasText(value)) {
-            return;
-        }
-        String normalized = value.trim();
-        if (!target.contains(normalized)) {
-            target.add(normalized);
-        }
-        if (normalized.endsWith(NUMERIC_VALUE_SUFFIX)) {
-            String shortened = normalized.substring(0, normalized.length() - NUMERIC_VALUE_SUFFIX.length());
-            if (!shortened.isEmpty() && !target.contains(shortened)) {
-                target.add(shortened);
-            }
-        }
-        if (normalized.endsWith(KEYWORD_VALUE_SUFFIX)) {
-            String shortened = normalized.substring(0, normalized.length() - KEYWORD_VALUE_SUFFIX.length());
-            if (!shortened.isEmpty() && !target.contains(shortened)) {
-                target.add(shortened);
-            }
-        }
-    }
-
-    /**
-     * Resolve the localised attribute title for the provided key.
-     *
-     * @param config         vertical configuration supplying attribute metadata
-     * @param attributeKey   identifier of the attribute
-     * @param domainLanguage requested domain language driving localisation
-     * @return localised title or {@code null} when no localisation is available
-     */
-    private String resolveAttributeTitle(VerticalConfig config, String attributeKey, DomainLanguage domainLanguage) {
-        LOGGER.info("Entering resolveAttributeTitle(attributeKey={}, domainLanguage={}, config={})", attributeKey,
-                domainLanguage, config);
-        if (config.getAttributesConfig() == null) {
-            return null;
-        }
-        AttributeConfig attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(attributeKey);
-        if (attributeConfig == null || attributeConfig.getName() == null) {
-            return null;
-        }
-        return localise(attributeConfig.getName(), domainLanguage);
-    }
-
-    /**
-     * Build metadata entries for the impact scores configured on the vertical.
-     *
-     * @param config         vertical configuration supplying impact scores
-     * @param domainLanguage requested domain language driving localisation
-     * @return immutable list of {@link FieldMetadataDto} representing the scores
-     */
-    private List<FieldMetadataDto> mapImpactScores(VerticalConfig config, DomainLanguage domainLanguage) {
-        LOGGER.info("Entering mapImpactScores(config={}, domainLanguage={})", config, domainLanguage);
-        if (config.getAvailableImpactScoreCriterias() == null || config.getAvailableImpactScoreCriterias().isEmpty()) {
-            return List.of();
-        }
-
-        List<FieldMetadataDto> results = new ArrayList<>();
-        for (String key : config.getAvailableImpactScoreCriterias()) {
-            if (!StringUtils.hasText(key)) {
-                continue;
-            }
-
-            String normalizedKey = key.trim();
-            AttributeConfig attributeConfig = config.getAttributesConfig() == null
-                    ? null
-                    : config.getAttributesConfig().getAttributeConfigByKey(normalizedKey);
-
-            // Titles and descriptions now rely on attribute metadata when available.
-            String title = resolveImpactScoreTitle(attributeConfig, normalizedKey, domainLanguage);
-            String description = resolveImpactScoreDescription(attributeConfig, domainLanguage);
-
-            String mapping = "scores." + normalizedKey + ".value";
-            FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, normalizedKey);
-            results.add(new FieldMetadataDto(mapping, title, description, VALUE_TYPE_NUMERIC, aggregation));
-        }
-        return List.copyOf(results);
-    }
-
-    private String resolveImpactScoreTitle(AttributeConfig attributeConfig, String key, DomainLanguage domainLanguage) {
-        String localizedTitle = attributeConfig == null ? null : localise(attributeConfig.getScoreTitle(), domainLanguage);
-        if (!StringUtils.hasText(localizedTitle) && attributeConfig != null) {
-            localizedTitle = localise(attributeConfig.getName(), domainLanguage);
-        }
-        return StringUtils.hasText(localizedTitle) ? localizedTitle : key;
-    }
-
-    private String resolveImpactScoreDescription(AttributeConfig attributeConfig, DomainLanguage domainLanguage) {
-        if (attributeConfig == null) {
-            return null;
-        }
-        String localizedDescription = localise(attributeConfig.getScoreDescription(), domainLanguage);
-        return StringUtils.hasText(localizedDescription) ? localizedDescription : null;
-    }
-
-    private String resolveAttributeValueType(VerticalConfig config, String attributeKey) {
-        LOGGER.info("Entering resolveAttributeValueType(attributeKey={}, config={})", attributeKey, config);
-        if (config.getAttributesConfig() == null) {
-            return VALUE_TYPE_TEXT;
-        }
-        AttributeConfig attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(attributeKey);
-        if (attributeConfig == null || attributeConfig.getFilteringType() == null) {
-            return VALUE_TYPE_TEXT;
-        }
-        return switch (attributeConfig.getFilteringType()) {
-        case NUMERIC -> VALUE_TYPE_NUMERIC;
-        case BOOLEAN, TEXT -> VALUE_TYPE_TEXT;
-        };
-    }
 
     private String determineGlobalFilterValueType(AllowedGlobalFilters field) {
         LOGGER.info("Entering determineGlobalFilterValueType(field={})", field);

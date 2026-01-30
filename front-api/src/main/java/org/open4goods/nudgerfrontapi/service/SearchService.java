@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -18,42 +19,52 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.annotation.PostConstruct;
-
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.util.EmbeddingVectorUtils;
+import org.open4goods.model.Localisable;
+import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.helper.IdHelper;
-import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.vertical.AggregationConfiguration;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
+import org.open4goods.nudgerfrontapi.dto.PageDto;
+import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
+import org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
+import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationResponseDto;
+import org.open4goods.nudgerfrontapi.dto.search.AllowedGlobalAggregations;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterValueType;
-import org.open4goods.model.Localisable;
+import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SemanticScoreDiagnosticsDto;
+import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
-import org.open4goods.embedding.util.EmbeddingVectorUtils;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -70,10 +81,6 @@ import org.springframework.util.StringUtils;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.Script;
-import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
-import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
-import co.elastic.clients.elasticsearch._types.query_dsl.FieldValueFactorModifier;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.HistogramBucket;
@@ -83,7 +90,11 @@ import co.elastic.clients.elasticsearch._types.aggregations.MissingAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StatsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonData;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Dedicated search service tailored for the frontend API.
@@ -136,6 +147,11 @@ public class SearchService {
 	private static final String SORT_FIELD_BRAND = "attributes.referentielAttributes.BRAND";
 	private static final String SORT_FIELD_MODEL = "attributes.referentielAttributes.MODEL";
 	private static final String SORT_FIELD_ECOSCORE = "scores.ECOSCORE.value";
+    private static final String VALUE_TYPE_NUMERIC = "numeric";
+    private static final String VALUE_TYPE_TEXT = "text";
+    private static final String NUMERIC_VALUE_SUFFIX = ".numericValue";
+    private static final String KEYWORD_VALUE_SUFFIX = ".value";
+    private static final String INDEXED_ATTRIBUTE_PREFIX = "attributes.indexed.";
 
 	private final ProductRepository repository;
 	private final VerticalsConfigService verticalsConfigService;
@@ -163,6 +179,431 @@ public class SearchService {
 	void initializeSuggestIndex() {
 		rebuildVerticalSuggestions();
 	}
+
+
+    /**
+     * Resolve the search capabilities for the requested vertical.
+     *
+     * @param normalizedVerticalId optional vertical identifier supplied by the client
+     * @param domainLanguage       language used to localise filter metadata
+     * @param globalFields         list of fields available regardless of the vertical
+     * @return aggregation, sort and filter capabilities derived from the vertical configuration
+     */
+    public SearchCapabilities buildSearchCapabilities(String normalizedVerticalId, DomainLanguage domainLanguage,
+            List<FieldMetadataDto> globalFields) {
+        LOGGER.info(
+                "Entering buildSearchCapabilities(normalizedVerticalId={}, domainLanguage={}, globalFieldCount={})",
+                normalizedVerticalId, domainLanguage, globalFields != null ? globalFields.size() : 0);
+        boolean hasVertical = StringUtils.hasText(normalizedVerticalId);
+        VerticalConfig config = hasVertical ? verticalsConfigService.getConfigById(normalizedVerticalId) : null;
+        ProductFieldOptionsResponse fieldOptions = resolveVerticalFields(config, domainLanguage, globalFields);
+        Set<String> allowedFilters = collectAllowedFieldMappings(fieldOptions);
+        augmentWithAttributesConfig(allowedFilters, config);
+        augmentWithAggregatedScores(allowedFilters, config);
+        Set<String> allowedSorts = collectGlobalSortMappings();
+        if (hasVertical) {
+            allowedSorts.addAll(allowedFilters);
+        }
+        Set<String> allowedAggregations = collectAllowedAggregationMappings(allowedFilters, config);
+        return new SearchCapabilities(allowedFilters, allowedSorts, allowedAggregations);
+    }
+
+    public ProductFieldOptionsResponse resolveVerticalFields(VerticalConfig config, DomainLanguage domainLanguage,
+            List<FieldMetadataDto> globalFields) {
+        LOGGER.info(
+                "Entering resolveVerticalFields(config={}, domainLanguage={}, globalFieldCount={})",
+                config, domainLanguage, globalFields != null ? globalFields.size() : 0);
+        List<FieldMetadataDto> immutableGlobal = List.copyOf(globalFields);
+        if (config == null) {
+            return new ProductFieldOptionsResponse(immutableGlobal, List.of(), List.of());
+        }
+
+        List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(immutableGlobal, config);
+        List<FieldMetadataDto> impactFields = new ArrayList<>();
+        mapImpactScores(config, domainLanguage).forEach(impactFields::add);
+
+        List<FieldMetadataDto> technicalFields = new ArrayList<>();
+        technicalFields.addAll(mapVerticalAttributeFilters(config.getEcoFilters(), config, domainLanguage));
+        technicalFields.addAll(mapVerticalAttributeFilters(config.getGlobalTechnicalFilters(), config, domainLanguage));
+        technicalFields.addAll(mapVerticalAttributeFilters(config.getTechnicalFilters(), config, domainLanguage));
+
+        return new ProductFieldOptionsResponse(globalWithAggregation, List.copyOf(impactFields), List.copyOf(technicalFields));
+    }
+
+    private Set<String> collectAllowedFieldMappings(ProductFieldOptionsResponse fieldOptions) {
+        LOGGER.info("Entering collectAllowedFieldMappings(fieldOptions={})", fieldOptions);
+        Set<String> allowed = new HashSet<>();
+        if (fieldOptions == null) {
+            return allowed;
+        }
+        addFieldMappings(allowed, fieldOptions.global());
+        addFieldMappings(allowed, fieldOptions.impact());
+        addFieldMappings(allowed, fieldOptions.technical());
+        return allowed;
+    }
+
+    private void addFieldMappings(Set<String> target, List<FieldMetadataDto> fields) {
+        LOGGER.info("Entering addFieldMappings(currentTargetSize={}, fieldsSize={})",
+                target != null ? target.size() : 0, fields != null ? fields.size() : null);
+        if (fields == null) {
+            return;
+        }
+        for (FieldMetadataDto field : fields) {
+            if (field == null) {
+                continue;
+            }
+            if (StringUtils.hasText(field.mapping())) {
+                target.add(field.mapping());
+            }
+        }
+    }
+
+    private void augmentWithAttributesConfig(Set<String> target, VerticalConfig config) {
+        LOGGER.info("Entering augmentWithAttributesConfig(targetSize={}, config={})",
+                target != null ? target.size() : 0, config);
+        if (target == null || config == null || config.getAttributesConfig() == null
+                || config.getAttributesConfig().getConfigs() == null) {
+            return;
+        }
+        for (AttributeConfig attribute : config.getAttributesConfig().getConfigs()) {
+            if (attribute == null || !StringUtils.hasText(attribute.getKey())) {
+                continue;
+            }
+            String mapping = toIndexedAttribute(attribute.getKey().trim(), config);
+            target.add(mapping);
+        }
+    }
+
+    private void augmentWithAggregatedScores(Set<String> target, VerticalConfig config) {
+        LOGGER.info("Entering augmentWithAggregatedScores(targetSize={}, config={})",
+                target != null ? target.size() : 0, config);
+        if (target == null || config == null || config.getAggregatedScores() == null) {
+            return;
+        }
+        for (String score : config.getAggregatedScores()) {
+            if (!StringUtils.hasText(score)) {
+                continue;
+            }
+            String mapping = "scores." + score.trim()+".value";
+            target.add(mapping);
+        }
+
+        if (config.getCompositeScores() == null) {
+            return;
+        }
+        for (String score : config.getCompositeScores()) {
+            if (!StringUtils.hasText(score)) {
+                continue;
+            }
+            String mapping = "scores." + score.trim()+".value";
+            target.add(mapping);
+        }
+    }
+
+    private Set<String> collectAllowedAggregationMappings(Set<String> allowedFilterMappings, VerticalConfig config) {
+        LOGGER.info("Entering collectAllowedAggregationMappings(allowedFilterMappingsSize={}, config={})",
+                allowedFilterMappings != null ? allowedFilterMappings.size() : 0, config);
+        Set<String> allowed = new HashSet<>(allowedFilterMappings);
+        if (config == null || config.getAggregationConfiguration() == null) {
+            if (config == null) {
+                Arrays.stream(AllowedGlobalAggregations.values())
+                        .map(AllowedGlobalAggregations::fieldPath)
+                        .forEach(allowed::add);
+            }
+            return allowed;
+        }
+        config.getAggregationConfiguration().keySet()
+                .forEach(candidate -> addAggregationKeyVariants(allowed, candidate, config));
+        return allowed;
+    }
+
+    private void addAggregationKeyVariants(Set<String> target, String candidate, VerticalConfig config) {
+        LOGGER.info("Entering addAggregationKeyVariants(candidate={}, config={})", candidate, config);
+        if (!StringUtils.hasText(candidate)) {
+            return;
+        }
+        String normalized = candidate.trim();
+        target.add(normalized);
+        if (normalized.endsWith(NUMERIC_VALUE_SUFFIX)) {
+            String base = normalized.substring(0, normalized.length() - NUMERIC_VALUE_SUFFIX.length());
+            if (!base.isEmpty()) {
+                target.add(base);
+            }
+            return;
+        }
+        if (normalized.endsWith(KEYWORD_VALUE_SUFFIX)) {
+            String base = normalized.substring(0, normalized.length() - KEYWORD_VALUE_SUFFIX.length());
+            if (!base.isEmpty()) {
+                target.add(base);
+            }
+            return;
+        }
+        if (normalized.startsWith(INDEXED_ATTRIBUTE_PREFIX)) {
+            String attributeKey = normalized.substring(INDEXED_ATTRIBUTE_PREFIX.length());
+            String valueType = resolveAttributeValueType(config, attributeKey);
+            if (VALUE_TYPE_NUMERIC.equals(valueType)) {
+                target.add(normalized + NUMERIC_VALUE_SUFFIX);
+            } else if (VALUE_TYPE_TEXT.equals(valueType)) {
+                target.add(normalized + KEYWORD_VALUE_SUFFIX);
+            }
+        }
+    }
+
+    private Set<String> collectGlobalSortMappings() {
+        LOGGER.info("Entering collectGlobalSortMappings()");
+        Set<String> fields = new HashSet<>();
+        for (ProductDtoSortableFields field : ProductDtoSortableFields.values()) {
+            fields.add(field.getText());
+        }
+        return fields;
+    }
+
+    private List<FieldMetadataDto> augmentFieldsWithAggregationMetadata(List<FieldMetadataDto> fields, VerticalConfig config) {
+        LOGGER.info("Entering augmentFieldsWithAggregationMetadata(fieldsSize={}, config={})",
+                fields != null ? fields.size() : null, config);
+        if (fields == null || fields.isEmpty()) {
+            return List.of();
+        }
+        List<FieldMetadataDto> results = new ArrayList<>(fields.size());
+        for (FieldMetadataDto field : fields) {
+            if (field == null) {
+                continue;
+            }
+            if (!StringUtils.hasText(field.mapping())) {
+                results.add(field);
+                continue;
+            }
+            FieldMetadataDto.AggregationMetadata existing = field.aggregationConfiguration();
+            if (existing != null) {
+                results.add(field);
+                continue;
+            }
+            FieldMetadataDto.AggregationMetadata resolved = resolveAggregationMetadata(config, field.mapping());
+            if (resolved == null) {
+                results.add(field);
+            } else {
+                results.add(new FieldMetadataDto(field.mapping(), field.title(), field.description(), field.valueType(), resolved));
+            }
+        }
+        return List.copyOf(results);
+    }
+
+    private FieldMetadataDto.AggregationMetadata resolveAggregationMetadata(VerticalConfig config, String mapping,
+            String... fallbackKeys) {
+        LOGGER.info("Entering resolveAggregationMetadata(mapping={}, fallbackKeysCount={}, config={})", mapping,
+                fallbackKeys != null ? fallbackKeys.length : 0, config);
+        AggregationConfiguration aggregationConfig = findAggregationConfiguration(config, mapping, fallbackKeys);
+        if (aggregationConfig == null) {
+            return null;
+        }
+        Integer buckets = aggregationConfig.getBuckets();
+        Double interval = aggregationConfig.getInterval();
+        if (buckets == null && interval == null) {
+            return null;
+        }
+        return new FieldMetadataDto.AggregationMetadata(buckets, interval);
+    }
+
+    private AggregationConfiguration findAggregationConfiguration(VerticalConfig config, String mapping,
+            String... fallbackKeys) {
+        LOGGER.info("Entering findAggregationConfiguration(mapping={}, fallbackKeysCount={}, config={})", mapping,
+                fallbackKeys != null ? fallbackKeys.length : 0, config);
+        if (config == null) {
+            return null;
+        }
+        List<String> candidates = new ArrayList<>();
+        addAggregationCandidate(candidates, mapping);
+        if (fallbackKeys != null) {
+            for (String fallback : fallbackKeys) {
+                addAggregationCandidate(candidates, fallback);
+            }
+        }
+        for (String candidate : candidates) {
+            AggregationConfiguration resolved = config.getAggregationConfigurationFor(candidate);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
+        return null;
+    }
+
+    private void addAggregationCandidate(List<String> target, String value) {
+        LOGGER.info("Entering addAggregationCandidate(value={})", value);
+        if (!StringUtils.hasText(value)) {
+            return;
+        }
+        String normalized = value.trim();
+        if (!target.contains(normalized)) {
+            target.add(normalized);
+        }
+        if (normalized.endsWith(NUMERIC_VALUE_SUFFIX)) {
+            String shortened = normalized.substring(0, normalized.length() - NUMERIC_VALUE_SUFFIX.length());
+            if (!shortened.isEmpty() && !target.contains(shortened)) {
+                target.add(shortened);
+            }
+        }
+        if (normalized.endsWith(KEYWORD_VALUE_SUFFIX)) {
+            String shortened = normalized.substring(0, normalized.length() - KEYWORD_VALUE_SUFFIX.length());
+            if (!shortened.isEmpty() && !target.contains(shortened)) {
+                target.add(shortened);
+            }
+        }
+    }
+
+    private List<FieldMetadataDto> mapImpactScores(VerticalConfig config, DomainLanguage domainLanguage) {
+        LOGGER.info("Entering mapImpactScores(config={}, domainLanguage={})", config, domainLanguage);
+        if (config.getAvailableImpactScoreCriterias() == null || config.getAvailableImpactScoreCriterias().isEmpty()) {
+            return List.of();
+        }
+
+        List<FieldMetadataDto> results = new ArrayList<>();
+        for (String key : config.getAvailableImpactScoreCriterias()) {
+            if (!StringUtils.hasText(key)) {
+                continue;
+            }
+
+            String normalizedKey = key.trim();
+            AttributeConfig attributeConfig = config.getAttributesConfig() == null
+                    ? null
+                    : config.getAttributesConfig().getAttributeConfigByKey(normalizedKey);
+
+            // Titles and descriptions now rely on attribute metadata when available.
+            String title = resolveImpactScoreTitle(attributeConfig, normalizedKey, domainLanguage);
+            String description = resolveImpactScoreDescription(attributeConfig, domainLanguage);
+
+            String mapping = "scores." + normalizedKey + ".value";
+            FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, normalizedKey);
+            results.add(new FieldMetadataDto(mapping, title, description, VALUE_TYPE_NUMERIC, aggregation));
+        }
+        return List.copyOf(results);
+    }
+
+    private String resolveImpactScoreTitle(AttributeConfig attributeConfig, String key, DomainLanguage domainLanguage) {
+        String localizedTitle = attributeConfig == null ? null : localise(attributeConfig.getScoreTitle(), domainLanguage);
+        if (!StringUtils.hasText(localizedTitle) && attributeConfig != null) {
+            localizedTitle = localise(attributeConfig.getName(), domainLanguage);
+        }
+        return StringUtils.hasText(localizedTitle) ? localizedTitle : key;
+    }
+
+    private String resolveImpactScoreDescription(AttributeConfig attributeConfig, DomainLanguage domainLanguage) {
+        if (attributeConfig == null) {
+            return null;
+        }
+        String localizedDescription = localise(attributeConfig.getScoreDescription(), domainLanguage);
+        return StringUtils.hasText(localizedDescription) ? localizedDescription : null;
+    }
+
+    private List<FieldMetadataDto> mapVerticalAttributeFilters(List<String> filters, VerticalConfig config,
+            DomainLanguage domainLanguage) {
+        LOGGER.info("Entering mapVerticalAttributeFilters(filtersSize={}, config={}, domainLanguage={})",
+                filters != null ? filters.size() : null, config, domainLanguage);
+        if (filters == null || filters.isEmpty()) {
+            return List.of();
+        }
+
+        List<FieldMetadataDto> results = new ArrayList<>();
+        for (String filterName : filters) {
+            if (!StringUtils.hasText(filterName)) {
+                continue;
+            }
+            String normalizedName = filterName.trim();
+            String mapping = toIndexedAttribute(normalizedName, config);
+            String title = resolveAttributeTitle(config, normalizedName, domainLanguage);
+            String valueType = resolveAttributeValueType(config, normalizedName);
+            FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, normalizedName);
+            FieldMetadataDto dto = new FieldMetadataDto(mapping, title, null, valueType, aggregation);
+            results.add(dto);
+        }
+        return List.copyOf(results);
+    }
+
+    private String toIndexedAttribute(String filterName, VerticalConfig config) {
+        LOGGER.info("Entering toIndexedAttribute(filterName={}, config={})", filterName, config);
+        String baseField = "attributes.indexed." + filterName;
+        AttributeConfig attributeConfig = null;
+        if (config.getAttributesConfig() != null) {
+            attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(filterName);
+        }
+        if (attributeConfig != null) {
+            if (attributeConfig.getFilteringType() == AttributeType.NUMERIC) {
+                return baseField + NUMERIC_VALUE_SUFFIX;
+            }
+            if (attributeConfig.getFilteringType() == AttributeType.TEXT) {
+                return baseField + KEYWORD_VALUE_SUFFIX;
+            }
+        }
+        return baseField;
+    }
+
+    private String resolveAttributeTitle(VerticalConfig config, String attributeKey, DomainLanguage domainLanguage) {
+        LOGGER.info("Entering resolveAttributeTitle(attributeKey={}, domainLanguage={}, config={})", attributeKey,
+                domainLanguage, config);
+        if (config.getAttributesConfig() == null) {
+            return null;
+        }
+        AttributeConfig attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(attributeKey);
+        if (attributeConfig == null || attributeConfig.getName() == null) {
+            return null;
+        }
+        return localise(attributeConfig.getName(), domainLanguage);
+    }
+
+    private String resolveAttributeValueType(VerticalConfig config, String attributeKey) {
+        LOGGER.info("Entering resolveAttributeValueType(attributeKey={}, config={})", attributeKey, config);
+        if (config.getAttributesConfig() == null) {
+            return VALUE_TYPE_TEXT;
+        }
+        AttributeConfig attributeConfig = config.getAttributesConfig().getAttributeConfigByKey(attributeKey);
+        if (attributeConfig == null || attributeConfig.getFilteringType() == null) {
+            return VALUE_TYPE_TEXT;
+        }
+        return switch (attributeConfig.getFilteringType()) {
+        case NUMERIC -> VALUE_TYPE_NUMERIC;
+        case BOOLEAN, TEXT -> VALUE_TYPE_TEXT;
+        };
+    }
+
+
+
+	/**
+	 * Executes a product search and computes aggregation buckets tailored for the
+	 * frontend.
+	 *
+	 * @param pageable              pagination information requested by the caller
+	 * @param verticalId            optional vertical identifier used to scope the
+	 *                              search
+	 * @param query                 optional free text query applied on offer names
+	 * @param aggregationQuery      optional aggregation definition mirroring the
+	 *                              Nuxt contract
+	 * @param filters               optional structured filters applied on the
+	 *                              search query
+	 * @param allowSemanticFallback whether semantic search should be attempted
+	 *                              when a text query is provided
+	 * @return a {@link SearchResult} bundling {@link SearchHits} and aggregation
+	 *         metadata
+	 */
+	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
+    public ProductSearchResponseDto searchProducts(Pageable pageable, Locale locale, Set<String> includes,
+            AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query,
+            FilterRequestDto filters, boolean semanticSearch, String searchType) {
+
+        SearchResult result = search(pageable, verticalId, query, aggregation, filters,
+                 semanticSearch, searchType);
+        SearchHits<Product> hits = result.hits();
+
+        List<ProductDto> items = hits.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .map(product -> productMappingService.mapProduct(product, locale, includes, domainLanguage, false))
+                .toList();
+
+        Page<ProductDto> page = new PageImpl<>(items, pageable, hits.getTotalHits());
+        PageMetaDto meta = new PageMetaDto(page.getNumber(), page.getSize(), page.getTotalElements(),
+                page.getTotalPages());
+        PageDto<ProductDto> pageDto = new PageDto<>(meta, items);
+
+        return new ProductSearchResponseDto(pageDto, result.aggregations());
+    }
 
 	/**
 	 * Executes a product search and computes aggregation buckets tailored for the
@@ -303,8 +744,7 @@ public class SearchService {
 			} else if (mustHaveVertical) {
 				b.filter(f -> f.exists(e -> e.field("vertical")));
 			} else if (mustNotHaveVertical) {
-				// TODO : Check
-				//b.mustNot(m -> m.exists(e -> e.field("vertical")));
+				b.mustNot(m -> m.exists(e -> e.field("vertical")));
 			}
 
 			if (StringUtils.hasText(query)) {
@@ -1094,11 +1534,11 @@ public class SearchService {
 
 		// Vertical groups use a fixed limit (not paginated for now as per requirements)
 		Pageable verticalPageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
-		
+
 		SearchHits<Product> hits = null;
 		SearchHits<Product> missingHits = null;
 		try {
-			hits = executeSemanticSearch(null, null, embedding, filters, true, verticalPageable, VerticalScope.REQUIRED);
+			hits = executeSemanticSearch(null, sanitizedQuery, embedding, filters, true, verticalPageable, VerticalScope.REQUIRED);
 			missingHits = executeSemanticSearch(null, sanitizedQuery, embedding, filters, true, missingVerticalPageable, VerticalScope.MISSING);
 		} catch (Exception e) {
 			LOGGER.error("Semantic search failed for query '{}'", sanitizedQuery, e);
@@ -1108,7 +1548,7 @@ public class SearchService {
 		List<GlobalSearchHit> verticalHits = mapHits(hits, domainLanguage, true, sort);
 		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(verticalHits, sort);
 		List<GlobalSearchHit> missingVerticalResults = mapHits(missingHits, domainLanguage, true, sort);
-		
+
 		long totalElements = missingHits.getTotalHits();
 		int totalPages = missingVerticalPageable.getPageSize() > 0
 				? (int) Math.ceil((double) totalElements / missingVerticalPageable.getPageSize())
@@ -1755,6 +2195,15 @@ public class SearchService {
 			}
 			if (verticalScope == VerticalScope.REQUIRED) {
 				b.filter(f -> f.exists(e -> e.field("vertical")));
+				// For vertical products, we can also apply text matching to ensure relevance
+				// This helps when semantic search returns results that are vaguely related but don't contain the keywords
+				if (StringUtils.hasText(textQuery)) {
+					b.must(m -> m.multiMatch(mm -> mm
+							.query(textQuery)
+							.fields("offerNames", "attributes.referentielAttributes.BRAND.keyword", "attributes.referentielAttributes.MODEL.keyword")
+							.operator(co.elastic.clients.elasticsearch._types.query_dsl.Operator.And)
+							.type(co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType.BestFields)));
+				}
 			} else if (verticalScope == VerticalScope.MISSING) {
 				b.mustNot(m -> m.exists(e -> e.field("vertical")));
 				// For missing-vertical products, require text match to ensure relevance
@@ -1980,6 +2429,10 @@ public class SearchService {
 	 */
 	public record SearchResult(SearchHits<Product> hits, List<AggregationResponseDto> aggregations) {
 	}
+
+    public record SearchCapabilities(Set<String> allowedFilters, Set<String> allowedSorts,
+            Set<String> allowedAggregations) {
+    }
 
 	private record AggregationDescriptor(Agg request, AggType type, double interval, String histogramName,
 			String missingName, String statsName) {

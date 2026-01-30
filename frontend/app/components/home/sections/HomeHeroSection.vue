@@ -271,7 +271,7 @@ useHead({
             </p>
           </v-col>
         </v-row>
-        <v-row justify="center" class="home-hero__panel-row">
+        <v-row justify="center" class="mt-0 home-hero__panel-row">
           <v-col cols="12" lg="10" xl="8" class="home-hero__panel-col">
             <v-sheet
               class="home-hero__panel home-reveal-item home-reveal-item--scale"

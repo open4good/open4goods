@@ -272,6 +272,7 @@ brandsExclusion:
 brandsAlias:
   "LG ELECTRONICS": LG
   "LG Electronics Inc.": LG
+  "LG ELECTRONICS INC." : LG
 
 ####################################################################################
 # 						ATTRIBUTES CONFIGURATION

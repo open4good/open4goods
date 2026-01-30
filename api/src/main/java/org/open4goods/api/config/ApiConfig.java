@@ -14,9 +14,6 @@ import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.brand.service.BrandScoreService;
@@ -28,7 +25,6 @@ import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
-import org.open4goods.commons.services.SearchService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.crawler.repository.IndexationRepository;
@@ -38,6 +34,9 @@ import org.open4goods.crawler.services.FetchersService;
 import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
+import org.open4goods.embedding.config.DjlEmbeddingProperties;
+import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
@@ -75,10 +74,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -91,9 +87,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -249,11 +243,11 @@ public class ApiConfig {
 	}
 
 
-	@Bean
-    SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder,
-                    @Autowired DjlTextEmbeddingService textEmbeddingService) {
-            return new SearchService(aggregatedDataRepository, logsFolder, textEmbeddingService);
-    }
+//	@Bean
+//    SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder,
+//                    @Autowired DjlTextEmbeddingService textEmbeddingService) {
+//            return new SearchService(aggregatedDataRepository, logsFolder, textEmbeddingService);
+//    }
 
 	@Bean
         BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired SerialisationService serialisationService) throws Exception {

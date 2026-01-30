@@ -107,7 +107,6 @@
               </div>
 
               <div class="mt-6 product-hero__centered-info">
-
                 <ul
                   v-if="heroAttributes.length"
                   class="product-hero__attributes"
@@ -232,10 +231,26 @@
                             :value="source"
                           >
                             <!-- eslint-disable vue/no-v-html -->
-                            <div
-                              class="text-body-2 text-medium-emphasis product-hero__description-body"
-                              v-html="desc"
-                            />
+                            <div class="product-hero__description-wrapper">
+                              <div
+                                class="text-body-2 text-medium-emphasis product-hero__description-body"
+                                v-html="getDisplayDescription(source, desc)"
+                              />
+                              <v-btn
+                                v-if="shouldShowToggle(desc)"
+                                variant="text"
+                                size="small"
+                                color="primary"
+                                class="mt-2"
+                                @click="toggleDescription(source)"
+                              >
+                                {{
+                                  isDescriptionExpanded(source)
+                                    ? t('product.hero.description.showLess')
+                                    : t('product.hero.description.showMore')
+                                }}
+                              </v-btn>
+                            </div>
                             <!-- eslint-enable vue/no-v-html -->
                           </v-window-item>
                         </v-window>
@@ -571,6 +586,53 @@ watch(
   },
   { immediate: true }
 )
+
+const DESCRIPTION_MAX_CHARS = 175
+
+// Track expanded state for each description source
+const expandedDescriptions = ref<Record<string, boolean>>({})
+
+const stripHtmlTags = (html: string): string => {
+  const tempDiv = document.createElement('div')
+  tempDiv.innerHTML = html
+  return tempDiv.textContent || tempDiv.innerText || ''
+}
+
+const truncateDescription = (html: string, maxChars: number): string => {
+  const plainText = stripHtmlTags(html)
+  if (plainText.length <= maxChars) {
+    return html
+  }
+
+  // Truncate plain text and add ellipsis
+  const truncated = plainText.substring(0, maxChars).trim()
+  // Create a temporary div to get the HTML representation
+  const tempDiv = document.createElement('div')
+  tempDiv.innerHTML = html
+
+  // Simple approach: truncate and add ellipsis
+  return truncated + '...'
+}
+
+const shouldShowToggle = (description: string): boolean => {
+  const plainText = stripHtmlTags(description)
+  return plainText.length > DESCRIPTION_MAX_CHARS
+}
+
+const isDescriptionExpanded = (source: string): boolean => {
+  return expandedDescriptions.value[source] ?? false
+}
+
+const toggleDescription = (source: string) => {
+  expandedDescriptions.value[source] = !isDescriptionExpanded(source)
+}
+
+const getDisplayDescription = (source: string, description: string): string => {
+  if (isDescriptionExpanded(source) || !shouldShowToggle(description)) {
+    return description
+  }
+  return truncateDescription(description, DESCRIPTION_MAX_CHARS)
+}
 
 const brandModelLine = computed(() => {
   const parts = [productBrandName.value, productModelName.value].filter(
@@ -1005,8 +1067,9 @@ useHead(() => {
 
 .product-hero__impact-score {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   margin-top: 0.5rem;
+  width: 100%;
 }
 
 .product-hero__breadcrumbs {

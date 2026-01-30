@@ -21,7 +21,7 @@
         color="surface"
         size="small"
         rounded="pill"
-        class="category-badges-row__chip text-primary elevation-1"
+        class="category-badges-row__chip text-secondary elevation-1"
       >
         <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
         {{ category.verticalHomeTitle ?? category.id }}
@@ -192,7 +192,7 @@ watch(displayedCategories, () => {
 
   &__nav
     flex: 0 0 auto
-    color: rgb(var(--v-theme-primary))
+    color: rgb(var(--v-theme-secondary))
     min-width: 28px
     width: 28px
     height: 28px
@@ -204,7 +204,7 @@ watch(displayedCategories, () => {
     gap: 0.25rem
     font-size: 0.85rem
     font-weight: 500
-    color: rgb(var(--v-theme-primary))
+    color: rgb(var(--v-theme-secondary))
     text-decoration: none
     white-space: nowrap
     transition: opacity 0.2s ease

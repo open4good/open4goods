@@ -13,6 +13,7 @@ type HeroHighlightSegment = {
 
 type HeroHighlightItem = {
   title: string
+  icon?: string
   segments: HeroHighlightSegment[]
 }
 
@@ -62,26 +63,84 @@ const scrollTargetId = computed(() => props.scrollTargetId?.trim() ?? '')
 const isScrollEnabled = computed(() => Boolean(scrollTargetId.value))
 const isHeroVariant = computed(() => props.variant === 'hero')
 
-const heroHighlightItems = computed<HeroHighlightItem[]>(() => [
-  {
-    title: t('home.hero.highlights.impact.title'),
-    segments: [{ text: t('home.hero.highlights.impact.subtitle') }],
-  },
-  {
-    title: t('home.hero.highlights.price.title'),
-    segments: [{ text: t('home.hero.highlights.price.subtitle') }],
-  },
-  {
-    title: t('home.hero.highlights.ethics.title'),
-    segments: [
+const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
+  if (isHeroVariant.value) {
+    return [
       {
-        text: t('home.hero.highlights.ethics.subtitle'),
-        icon: 'breton-flag',
-        iconPosition: 'after',
+        title: t('home.hero.highlights.impact.title'),
+        segments: [{ text: t('home.hero.highlights.impact.subtitle') }],
       },
-    ],
-  },
-])
+      {
+        title: t('home.hero.highlights.price.title'),
+        segments: [{ text: t('home.hero.highlights.price.subtitle') }],
+      },
+      {
+        title: t('home.hero.highlights.ethics.title'),
+        segments: [
+          {
+            text: t('home.hero.highlights.ethics.subtitle'),
+            icon: 'breton-flag',
+            iconPosition: 'after',
+          },
+        ],
+      },
+    ]
+  }
+
+  const impactProducts = formatCount(props.impactScoreProductsCount ?? 0) ?? '0'
+  const impactCategories =
+    formatCount(props.impactScoreCategoriesCount ?? 0) ?? '0'
+  const partnersCount = formatCount(props.partnersCount ?? 0) ?? '0'
+  const productsCount = formatCount(props.productsCount ?? 0) ?? '0'
+  const openDataMillions = formatCount(props.openDataMillions ?? 0) ?? '73M'
+
+  return [
+    {
+      title: t('home.hero.highlights.impact.title'),
+      icon: 'mdi-leaf',
+      segments: [
+        { text: 'Acheter moins pire pour la planète. ' },
+        { text: 'évaluation environnementale', to: '/impact-score' },
+        { text: ' innovante pour ' },
+        { text: impactProducts, to: '/search' },
+        { text: ' produits dans ' },
+        { text: impactCategories, to: '/categories' },
+        { text: ' catégories' },
+      ],
+    },
+    {
+      title: t('home.hero.highlights.price.title'),
+      icon: 'mdi-currency-eur',
+      segments: [
+        { text: 'Sans se faire avoir sur les prix ! ' },
+        { text: partnersCount, to: '/partenaires' },
+        {
+          text: " commerçants. Achetez au meilleur moment avec l'historique neuf et occasion pour ",
+        },
+        { text: productsCount, to: '/categories' },
+        { text: ' produits.' },
+      ],
+    },
+    {
+      title: t('home.hero.highlights.ethics.title'),
+      icon: 'mdi-shield-check',
+      segments: [
+        {
+          text: 'Indépendant. Ouvert. Transparent',
+          icon: 'breton-flag',
+          iconPosition: 'after',
+        },
+        { text: ', hébergé en Europe. Plus de ' },
+        { text: openDataMillions, to: '/opendata' },
+        { text: ' de produits en ' },
+        { text: 'données ouvertes.', to: '/opendata' },
+        { text: ' Nudger est aussi ' },
+        { text: 'open source', to: '/opensource' },
+        { text: ' et ne collecte aucune donnée personnelle.' },
+      ],
+    },
+  ]
+})
 
 const formatCount = (value?: number) => {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
@@ -224,6 +283,9 @@ const resolveHighlightStyle = (index: number) => {
               class="home-hero-highlights__card-content d-flex flex-column align-center text-center ga-2"
               role="listitem"
             >
+              <v-icon v-if="item.icon" size="56" color="secondary" class="mb-4">
+                {{ item.icon }}
+              </v-icon>
               <p class="home-hero-highlights__title ma-0 font-weight-bold">
                 {{ item.title }}
               </p>
