@@ -151,7 +151,7 @@ const props = defineProps({
   },
   size: {
     type: String as PropType<
-      'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'small' | 'medium' | 'default'
+      'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'small' | 'medium' | 'default'
     >,
     default: 'md',
   },
@@ -336,6 +336,29 @@ const formattedDate = computed(() => {
 }
 
 /* Size variants */
+.impact-score-panel--xxs {
+  padding: 2px 6px 2px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+.impact-score-panel--xxs .impact-score-panel__score {
+  gap: 3px;
+}
+
+.impact-score-panel--xxs .impact-score-panel__score-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.impact-score-panel--xxs .impact-score-panel__score-out {
+  font-size: 0.7rem;
+}
+
+.impact-score-panel--xxs .impact-score-panel__bar {
+  display: none;
+}
+
 .impact-score-panel--xs {
   padding: 8px 10px 8px;
   border-radius: 14px;

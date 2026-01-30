@@ -2883,6 +2883,10 @@
         "remove": "Remove from compare",
         "selected": "In comparison"
       },
+      "description": {
+        "showMore": "Show more",
+        "showLess": "Show less"
+      },
       "gtin": "GTIN code",
       "gtinTooltip": "Based on the product GTIN code, this does not necessarily indicate the manufacturing location.",
       "mediaType": {
