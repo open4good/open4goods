@@ -28,6 +28,9 @@ describe('ImpactScore', () => {
     plugins: [i18n],
     stubs: {
       'v-btn': true,
+      'v-icon': true,
+      CtaCard: true,
+      NuxtLink: true,
     },
   }
 

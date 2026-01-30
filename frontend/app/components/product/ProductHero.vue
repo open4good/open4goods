@@ -805,10 +805,6 @@ const fullBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
         return acc
       }
 
-      const normalizedTitle = titleValue.trim().toLowerCase()
-      const normalizedLinkValue =
-        breadcrumb?.link?.toString().trim().toLowerCase() ?? ''
-
       const isProduct = itemIsProduct(
         breadcrumb,
         normalizedProductTitle,

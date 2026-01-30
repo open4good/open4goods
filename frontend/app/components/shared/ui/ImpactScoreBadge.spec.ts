@@ -1,4 +1,3 @@
-import { defineComponent } from 'vue'
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
@@ -14,18 +13,20 @@ const i18n = createI18n({
     },
   },
 })
-
-const VBtnStub = defineComponent({
-  name: 'VBtn',
-  props: ['variant', 'size', 'rounded', 'to'],
-  template: '<button class="v-btn" :class="[variant, size]"><slot /></button>',
-})
+const VBtnStub = {
+  name: 'v-btn',
+  template: '<button class="v-btn"><slot /></button>',
+  props: ['variant', 'size', 'rounded'],
+}
 
 describe('ImpactScore Badge', () => {
   const globalOptions = {
     plugins: [i18n],
     stubs: {
       'v-btn': VBtnStub,
+      'v-icon': true,
+      CtaCard: true,
+      NuxtLink: true,
     },
   }
 

@@ -45,7 +45,6 @@ import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ScoreView } from './impact/impact-types'
 import type { ProductEprelDto } from '~~/shared/api-client'
-import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 interface EprelDataWrapper {
   eprelDatas?: ProductEprelDto
@@ -155,7 +154,7 @@ const verticalTitle = toRef(props, 'verticalTitle')
 const subtitleParams = toRef(props, 'subtitleParams')
 const expandedScoreId = toRef(props, 'expandedScoreId')
 const productEprelData = toRef(props, 'eprelData')
-const { t, locale } = useI18n()
+const { t } = useI18n()
 
 const primaryScore = computed(
   () =>
@@ -243,20 +242,6 @@ const showRadar = computed(
 )
 
 const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
-
-const normalizedVerticalEcoscorePath = computed(() => {
-  const raw = props.verticalHomeUrl?.trim()
-  if (!raw) {
-    return null
-  }
-
-  const sanitized = raw.replace(/^\/+/, '').replace(/\/+$/, '')
-  if (!sanitized.length) {
-    return null
-  }
-
-  return `/${sanitized}/ecoscore`
-})
 </script>
 
 <style scoped>
