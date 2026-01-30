@@ -9,11 +9,11 @@
           <v-icon
             icon="mdi-tune-variant"
             size="20"
-            class="category-filters__title-icon"
+            class="me-4 category-filters__title-icon"
           />
           <span>{{ t('category.filters.globalTitle') }}</span>
         </div>
-        <v-icon
+        <v-icon 
           :icon="isGlobalOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
           color="medium-emphasis"
         />
@@ -41,7 +41,7 @@
           <v-icon
             icon="mdi-leaf"
             size="20"
-            class="category-filters__title-icon"
+            class="me-4 category-filters__title-icon"
           />
           <span>{{ t('category.filters.impactTitle') }}</span>
         </div>
@@ -99,7 +99,7 @@
           <v-icon
             icon="mdi-cog"
             size="20"
-            class="category-filters__title-icon"
+            class="me-4 category-filters__title-icon"
           />
           <span>{{ t('category.filters.technicalTitle') }}</span>
         </div>

@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -77,12 +79,14 @@ public class AwinFeedService extends AbstractFeedService {
     }
 
     /**
-     * Scheduled refresh of Awin datasource properties every day at a random time.
+     * Scheduled refresh of Awin datasource properties according to configuration.
      */
-    @Scheduled(cron = "0 "
-            + "#{T(java.util.concurrent.ThreadLocalRandom).current().nextInt(0,60)} "
-            + "#{T(java.util.concurrent.ThreadLocalRandom).current().nextInt(0,24)} * * ?")
+    @Scheduled(cron = "${feed.awin.cron}")
     public void scheduledLoad() {
+        if (!feedConfig.getAwin().isEnabled()) {
+            logger.info("Awin feed service is disabled. Skipping scheduled load.");
+            return;
+        }
         logger.info("Scheduled refresh of Awin datasources initiated.");
         load();
     }
@@ -108,16 +112,30 @@ public class AwinFeedService extends AbstractFeedService {
         // Retrieve additional metadata from the Awin API and update datasource properties.
         List<AwinMerchant> merchants = retrieveAwinMerchantMetadata(awinAccessToken, advertiserId);
 
+        // Optimization: Index merchants by ID and Name for O(1) lookup
+        Map<Integer, AwinMerchant> merchantsById = merchants.stream()
+                .collect(Collectors.toMap(AwinMerchant::getId, Function.identity(), (existing, replacement) -> existing));
+        Map<String, AwinMerchant> merchantsByName = merchants.stream()
+                .filter(m -> m.getName() != null)
+                .collect(Collectors.toMap(m -> m.getName().toLowerCase(), Function.identity(), (existing, replacement) -> existing));
+
+
         while (it.hasNext()) {
             Map<String, String> line = it.next();
 
             //TODO : from conf
-            if (!line.get("Membership Status").equalsIgnoreCase("Active")) {
+            if (line.containsKey("Membership Status") && !line.get("Membership Status").equalsIgnoreCase("Active")) {
             	continue;
             }
             // Retrieve the feed key using the attribute defined in the feed configuration.
             String feedKey = line.get(feedConfig.getDatasourceKeyAttribute());
-            Integer programId = Integer.valueOf(line.get("Advertiser ID"));
+            Integer programId = null;
+            try {
+                programId = Integer.valueOf(line.get("Advertiser ID"));
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+            
             if (feedKey == null || feedKey.trim().isEmpty()) {
                 logger.warn("Skipping CSV line due to missing feed key: {}", line);
                 continue;
@@ -136,18 +154,25 @@ public class AwinFeedService extends AbstractFeedService {
             }
 
             if (!merchants.isEmpty()) {
-            	//TODO(performance) : should use a map
-                AwinMerchant merchant = merchants.stream().filter(e-> (e.getId() == (programId)) || (e.getName().equalsIgnoreCase(feedKey)) ).findFirst().orElse(null);
+                AwinMerchant merchant = null;
+                if (programId != null) {
+                    merchant = merchantsById.get(programId);
+                }
+                if (merchant == null) {
+                    merchant = merchantsByName.get(feedKey.toLowerCase());
+                }
+
                 if (null != merchant ) {
-                ds.setDatasourceConfigName(merchant.getName());
+                    ds.setDatasourceConfigName(merchant.getName());
 
-                ds.setLogo(merchant.getLogoUrl());
-                ds.setPortalUrl(merchant.getDisplayUrl());
-                ds.setAffiliatedPortalUrl(merchant.getClickThroughUrl());
-                ds.setName(extractNameAndTld(ds.getPortalUrl()));
-                ds.setLanguage(merchant.getPrimaryRegion().getCountryCode().substring(0,2).toLowerCase());
-                ds.setDescription(merchant.getDescription());
-
+                    ds.setLogo(merchant.getLogoUrl());
+                    ds.setPortalUrl(merchant.getDisplayUrl());
+                    ds.setAffiliatedPortalUrl(merchant.getClickThroughUrl());
+                    ds.setName(extractNameAndTld(ds.getPortalUrl()));
+                    if (merchant.getPrimaryRegion() != null && merchant.getPrimaryRegion().getCountryCode() != null) {
+                       ds.setLanguage(merchant.getPrimaryRegion().getCountryCode().substring(0,2).toLowerCase());
+                    }
+                    ds.setDescription(merchant.getDescription());
                 }
             } else {
                 logger.warn("No Awin merchant metadata found for feed key '{}'.", feedKey);
@@ -175,8 +200,8 @@ public class AwinFeedService extends AbstractFeedService {
                 + "/programmes?relationship=joined&accessToken=" + accessToken;
         logger.info("Retrieving Awin merchant metadata from endpoint: {}", endpoint);
 
-        // TODO(p3,conf) : refresh in days from conf
-        File cachedResponse = remoteFileCachingService.getResource(endpoint,1);
+        int cacheTtl = feedConfig.getAwin().getCacheTtlDays();
+        File cachedResponse = remoteFileCachingService.getResource(endpoint, cacheTtl);
 
         if (cachedResponse == null || !cachedResponse.exists()) {
             throw new Exception("Cached response file not found for Awin merchant metadata");

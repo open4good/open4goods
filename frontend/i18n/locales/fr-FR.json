@@ -2545,7 +2545,7 @@
       "bestPriceTitle": "Meilleur prix",
       "breadcrumbAriaLabel": "Fil d'Ariane du produit",
       "compare": {
-        "add": "Ajouter à la comparaison",
+        "add": "Comparaison",
         "ariaAdd": "Ajouter {name} à la comparaison",
         "ariaSelected": "{name} est dans la comparaison",
         "label": "Comparer",
