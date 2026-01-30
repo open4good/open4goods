@@ -350,7 +350,7 @@ nudgeToolConfig:
         en: "Budget"
         fr: "Budget"
       description:
-        en: "Pick a price comfort zone."##
+        en: "Pick a price comfort zone."
         fr: "Votre budget"
       ctaLabel:
         en: "Continue"
