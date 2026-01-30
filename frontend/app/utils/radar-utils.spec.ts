@@ -33,8 +33,9 @@ describe('radar-utils', () => {
       worstValue: 5,
     }
     const map = createConfigMap({ TEST: 'GREATER' })
-    // No inversion, should remain 10
-    expect(transformRadarValue(10, context, map)).toBe(10)
+    // Formula: (Value - Min) / (Max - Min) * 100
+    // (10 - 5) / (20 - 5) = 5 / 15 = 1/3 ~ 33.33
+    expect(transformRadarValue(10, context, map)).toBeCloseTo(33.33)
   })
 
   it('preserves values when impactBetterIs is undefined (default)', () => {
@@ -45,8 +46,9 @@ describe('radar-utils', () => {
       worstValue: 5,
     }
     const map = createConfigMap({})
-    // No inversion, should remain 10
-    expect(transformRadarValue(10, context, map)).toBe(10)
+    // Formula: (Value - Min) / (Max - Min) * 100
+    // (10 - 5) / (20 - 5) = 5 / 15 = 1/3 ~ 33.33
+    expect(transformRadarValue(10, context, map)).toBeCloseTo(33.33)
   })
 
   it('inverts values correctly when impactBetterIs is LOWER', () => {
@@ -63,17 +65,17 @@ describe('radar-utils', () => {
     }
     const map = createConfigMap({ POWER: 'LOWER' })
 
-    // Validating max logic
-    // Max observed = 200
-    // Padded max = 200 * 1.1 = 220
+    // Formula: (Max - Value) / (Max - Min) * 100
+    // Min observed = 50, Max observed = 200
 
-    // Product: 220 - 100 = 120
-    // Best: 220 - 50 = 170 (Should be big, near edge)
-    // Worst: 220 - 200 = 20 (Should be small, near center)
+    // Product: 100 -> (200 - 100) / (200 - 50) = 100 / 150 = 2/3 ~ 66.67
+    expect(transformRadarValue(100, context, map)).toBeCloseTo(66.67)
 
-    expect(transformRadarValue(100, context, map)).toBeCloseTo(120)
-    expect(transformRadarValue(50, context, map)).toBeCloseTo(170)
-    expect(transformRadarValue(200, context, map)).toBeCloseTo(20)
+    // Best: 50 -> (200 - 50) / (200 - 50) = 150 / 150 = 1 = 100
+    expect(transformRadarValue(50, context, map)).toBeCloseTo(100)
+
+    // Worst: 200 -> (200 - 200) / (200 - 50) = 0
+    expect(transformRadarValue(200, context, map)).toBeCloseTo(0)
   })
 
   it('handles negative values with inversion', () => {
@@ -86,13 +88,10 @@ describe('radar-utils', () => {
     }
     const map = createConfigMap({ NEG: 'LOWER' })
 
-    // Max observed = -5
-    // Padded max = 5 (fallback since maxObserved <= 0? no)
-    // Code says: const paddedMax = maxObserved > 0 ? maxObserved * 1.1 : 5
-    // Since -5 is not > 0, paddedMax is 5.
-
-    // Product: 5 - (-10) = 15
-    expect(transformRadarValue(-10, context, map)).toBe(15)
+    // Min: -20, Max: -5
+    // Formula: (Max - Value) / (Max - Min) * 100
+    // (-5 - (-10)) / (-5 - (-20)) = 5 / 15 = 1/3 ~ 33.33
+    expect(transformRadarValue(-10, context, map)).toBeCloseTo(33.33)
   })
 
   it('handles case where map is undefined', () => {
@@ -102,6 +101,7 @@ describe('radar-utils', () => {
       bestValue: 5,
       worstValue: 20,
     }
-    expect(transformRadarValue(10, context, undefined)).toBe(10)
+    // (10 - 5) / (20 - 5) = 5 / 15 = 1/3 ~ 33.33
+    expect(transformRadarValue(10, context, undefined)).toBeCloseTo(33.33)
   })
 })
