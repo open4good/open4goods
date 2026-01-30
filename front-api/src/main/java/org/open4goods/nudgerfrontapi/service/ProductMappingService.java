@@ -47,7 +47,9 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.review.ReviewGenerationStatus;
+import org.open4goods.commons.services.textgen.BlaBlaSecGenerator;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
@@ -227,7 +229,7 @@ public class ProductMappingService {
                 ? mapIdentity(product, domainLanguage, locale)
                 : null;
         ProductNamesDto names = components.contains(ProductDtoComponent.names)
-                ? mapNames(product, domainLanguage, locale)
+                ? mapNames(product, domainLanguage, locale, vConfig)
                 : null;
         ProductAttributesDto attributes = components.contains(ProductDtoComponent.attributes)
                 ? mapAttributes(product, vConfig, domainLanguage)
@@ -548,15 +550,17 @@ public class ProductMappingService {
     /**
      * Map the localised names and SEO metadata associated with the product.
      */
-    private ProductNamesDto mapNames(Product product, DomainLanguage domainLanguage, Locale locale) {
+    private ProductNamesDto mapNames(Product product, DomainLanguage domainLanguage, Locale locale, VerticalConfig vConfig) {
         if (product.getNames() == null) {
             return null;
         }
+        List<String> designations = resolveDesignationVariants(product, vConfig, domainLanguage);
         return new ProductNamesDto(
                 resolveLocalisedString(product.getNames().getH1Title(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getPrettyName(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getSingular(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getSingularDesignation(), domainLanguage, locale),
+                designations,
                 resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale),
@@ -566,6 +570,45 @@ public class ProductMappingService {
                 product.getOfferNames() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getOfferNames()),
                 safeCall(product::longestOfferName),
                 safeCall(product::shortestOfferName));
+    }
+
+    /**
+     * Resolve designation variants for the product using the vertical configuration.
+     * The order is deterministically shuffled based on the product GTIN to ensure
+     * stable variants for the same product and different orderings across products.
+     *
+     * @param product product to resolve
+     * @param vConfig vertical configuration containing designation variants
+     * @param domainLanguage requested domain language
+     * @return ordered list of designation variants
+     */
+    private List<String> resolveDesignationVariants(Product product, VerticalConfig vConfig,
+            DomainLanguage domainLanguage) {
+        if (product == null || vConfig == null) {
+            return Collections.emptyList();
+        }
+        String lang = domainLanguage != null ? domainLanguage.languageTag() : "default";
+        ProductI18nElements i18n = vConfig.i18n(lang);
+        if (i18n == null || i18n.getDesignation() == null) {
+            return Collections.emptyList();
+        }
+        List<String> rawDesignations = i18n.getDesignation().stream()
+                .filter(StringUtils::hasText)
+                .map(StringUtils::trimWhitespace)
+                .collect(Collectors.toCollection(ArrayList::new));
+        if (rawDesignations.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String gtin = product.gtin();
+        if (!StringUtils.hasText(gtin)) {
+            gtin = String.valueOf(product.getId());
+        }
+        BlaBlaSecGenerator generator = new BlaBlaSecGenerator(gtin.hashCode());
+        for (int index = rawDesignations.size() - 1; index > 0; index--) {
+            int swapIndex = generator.getNextAlea(index + 1);
+            Collections.swap(rawDesignations, index, swapIndex);
+        }
+        return rawDesignations;
     }
 
     /**
