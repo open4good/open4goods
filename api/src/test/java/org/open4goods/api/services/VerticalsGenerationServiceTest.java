@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -262,10 +261,10 @@ class VerticalsGenerationServiceTest {
                 .thenAnswer(invocation -> {
                     SubsetCriteriaOperator operator = invocation.getArgument(2);
                     double threshold = invocation.getArgument(3);
-                    if (operator == SubsetCriteriaOperator.GREATER_THAN) {
+                    if (operator == SubsetCriteriaOperator.GREATER_THAN || operator == SubsetCriteriaOperator.GREATER_THAN_OR_EQUAL) {
                         return Math.round((5.0 - threshold) * 10);
                     }
-                    if (operator == SubsetCriteriaOperator.LOWER_THAN) {
+                    if (operator == SubsetCriteriaOperator.LOWER_THAN || operator == SubsetCriteriaOperator.LOWER_THAN_OR_EQUAL) {
                         return Math.round(threshold * 10);
                     }
                     return 0L;
@@ -284,9 +283,9 @@ class VerticalsGenerationServiceTest {
 
         String result = service.updateVerticalFileWithNudgeToolConfig(tempFile.getAbsolutePath());
 
-        assertThat(result).contains("scoreMinValue: 3.18");
-        assertThat(result).contains("value: \"1.82\"");
-        assertThat(result).contains("value: \"3.18\"");
+        assertThat(result).contains("scoreMinValue: 3.13");
+        assertThat(result).contains("value: \"1.88\"");
+        assertThat(result).contains("value: \"3.13\"");
     }
 
     @Test

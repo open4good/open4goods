@@ -1053,6 +1053,8 @@ public class ProductRepository {
                 return switch (operator) {
                 case LOWER_THAN -> criteria.lessThan(thresholdValue);
                 case GREATER_THAN -> criteria.greaterThan(thresholdValue);
+                case GREATER_THAN_OR_EQUAL -> criteria.greaterThanEqual(thresholdValue);
+                case LOWER_THAN_OR_EQUAL -> criteria.lessThanEqual(thresholdValue);
                 case EQUALS -> criteria.is(thresholdValue);
                 };
         }
@@ -1451,28 +1453,25 @@ public class ProductRepository {
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
         public ScoreRange getScoreRange(String scoreName, String verticalId, int sampleSize) {
-                List<Product> samples = getRandomProducts(sampleSize, 1, verticalId);
-                if (samples.isEmpty()) {
+                // Use aggregation for accurate min/max instead of random sampling
+                String fieldPath = "scores." + scoreName + ".value";
+                org.open4goods.model.rating.Cardinality cardinality = scoreCardinalityForField(scoreName, verticalId, fieldPath);
+                
+                if (cardinality == null) {
+                        logger.debug("No cardinality data for score {} in vertical {}, using default range", scoreName, verticalId);
                         return new ScoreRange(0.0, 5.0); // Default fallback
                 }
-
-                double min = Double.MAX_VALUE;
-                double max = -Double.MAX_VALUE;
-                boolean found = false;
-
-                for (Product p : samples) {
-                        if (p.getScores() != null && p.getScores().containsKey(scoreName)) {
-                                double val = p.getScores().get(scoreName).getValue();
-                                if (val < min) min = val;
-                                if (val > max) max = val;
-                                found = true;
-                        }
-                }
-
-                if (!found) {
+                
+                double min = cardinality.getMin();
+                double max = cardinality.getMax();
+                
+                // Validate the range
+                if (min >= max || Double.isNaN(min) || Double.isNaN(max) || Double.isInfinite(min) || Double.isInfinite(max)) {
+                        logger.warn("Invalid score range for {} in {}: min={}, max={}", scoreName, verticalId, min, max);
                         return new ScoreRange(0.0, 5.0);
                 }
-
+                
+                logger.debug("Score range for {} in {}: min={}, max={}", scoreName, verticalId, min, max);
                 return new ScoreRange(min, max);
         }
 

@@ -373,23 +373,38 @@ public class SearchService {
 			Sort sort, String searchType, Pageable missingVerticalPageable) {
 
 		String sanitizedQuery = sanitize(query);
-
 		FilterRequestDto normalizedFilters = normalizeFilters(filters);
-
 		CategorySuggestion verticalCta = findExactVerticalMatch(sanitizedQuery, domainLanguage);
 
-		// Use provided pageable or default to page 0 with GLOBAL_SEARCH_LIMIT
 		Pageable effectivePageable = missingVerticalPageable != null
 				? missingVerticalPageable
 				: PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
 
+		// 1. Try Semantic Search if requested
+		if ("SEMANTIC".equals(searchType)) {
+			SemanticGlobalSearchResult semanticResult = executeSemanticGlobalSearch(sanitizedQuery, domainLanguage,
+					normalizedFilters, sort, effectivePageable);
+
+			if (semanticResult.hasResults()) {
+				return new GlobalSearchResult(
+						semanticResult.verticalGroups(),
+						semanticResult.missingVerticalResults(),
+						semanticResult.missingVerticalTotalElements(),
+						semanticResult.missingVerticalTotalPages(),
+						effectivePageable.getPageNumber(),
+						effectivePageable.getPageSize(),
+						verticalCta,
+						semanticResult.diagnostics()
+				);
+			}
+		}
+
+		// 2. Lexical Fallback (or chosen strategy)
 		MissingVerticalPagedResult missingVerticalResult = executeMissingVerticalLexicalSearchPaged(sanitizedQuery, domainLanguage,
 				normalizedFilters, sort, effectivePageable);
 
-
 		List<GlobalSearchHit> lexicalVerticalHits = executeVerticalLexicalSearch(sanitizedQuery, domainLanguage, normalizedFilters, sort);
 		List<GlobalSearchVerticalGroup> verticalGroups = groupHitsByVertical(lexicalVerticalHits, sort);
-
 
 		return new GlobalSearchResult(verticalGroups,
 				missingVerticalResult.hits(),
@@ -1060,29 +1075,46 @@ public class SearchService {
 	 * @param sort           optional sort definition for global search results
 	 * @return grouped semantic hits and missing-vertical results
 	 */
+	/**
+	 * Executes a semantic-first strategy for global search.
+	 *
+	 * @param sanitizedQuery        sanitized user query
+	 * @param domainLanguage        localisation hint
+	 * @param filters               optional filters
+	 * @param sort                  optional sort
+	 * @param missingVerticalPageable pagination for non-vertical results
+	 * @return grouped semantic hits and missing-vertical results with pagination
+	 */
 	private SemanticGlobalSearchResult executeSemanticGlobalSearch(String sanitizedQuery, DomainLanguage domainLanguage,
-			FilterRequestDto filters, Sort sort) {
+			FilterRequestDto filters, Sort sort, Pageable missingVerticalPageable) {
 		float[] embedding = buildNormalizedEmbedding(sanitizedQuery);
 		if (embedding == null) {
-			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
+			return new SemanticGlobalSearchResult(List.of(), List.of(), 0, 0, false, null);
 		}
 
-		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
+		// Vertical groups use a fixed limit (not paginated for now as per requirements)
+		Pageable verticalPageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
+		
 		SearchHits<Product> hits = null;
 		SearchHits<Product> missingHits = null;
 		try {
-			hits = executeSemanticSearch(null, null, embedding, filters, true, pageable, VerticalScope.REQUIRED);
-			missingHits = executeSemanticSearch(null, sanitizedQuery, embedding, filters, true, pageable, VerticalScope.MISSING);
+			hits = executeSemanticSearch(null, null, embedding, filters, true, verticalPageable, VerticalScope.REQUIRED);
+			missingHits = executeSemanticSearch(null, sanitizedQuery, embedding, filters, true, missingVerticalPageable, VerticalScope.MISSING);
 		} catch (Exception e) {
 			LOGGER.error("Semantic search failed for query '{}'", sanitizedQuery, e);
-			return new SemanticGlobalSearchResult(List.of(), List.of(), false, null);
+			return new SemanticGlobalSearchResult(List.of(), List.of(), 0, 0, false, null);
 		}
 
 		List<GlobalSearchHit> verticalHits = mapHits(hits, domainLanguage, true, sort);
 		List<GlobalSearchVerticalGroup> grouped = groupHitsByVertical(verticalHits, sort);
 		List<GlobalSearchHit> missingVerticalResults = mapHits(missingHits, domainLanguage, true, sort);
+		
+		long totalElements = missingHits.getTotalHits();
+		int totalPages = missingVerticalPageable.getPageSize() > 0
+				? (int) Math.ceil((double) totalElements / missingVerticalPageable.getPageSize())
+				: 1;
 
-		return new SemanticGlobalSearchResult(grouped, missingVerticalResults, true,
+		return new SemanticGlobalSearchResult(grouped, missingVerticalResults, totalElements, totalPages, true,
 				buildSemanticDiagnostics(grouped, missingVerticalResults));
 	}
 
@@ -1853,9 +1885,19 @@ public class SearchService {
 	/**
 	 * Semantic search output used by global search to separate vertical and
 	 * missing-vertical hits.
+	 *
+	 * @param verticalGroups              vertical-grouped hits
+	 * @param missingVerticalResults      hits without a vertical
+	 * @param missingVerticalTotalElements total count of missing-vertical hits
+	 * @param missingVerticalTotalPages    total pages for missing-vertical results
+	 * @param executed                    whether semantic search was actually executed
+	 * @param diagnostics                 semantic score diagnostics
 	 */
 	private record SemanticGlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
-			List<GlobalSearchHit> missingVerticalResults, boolean executed,
+			List<GlobalSearchHit> missingVerticalResults,
+			long missingVerticalTotalElements,
+			int missingVerticalTotalPages,
+			boolean executed,
 			SemanticScoreDiagnosticsDto diagnostics) {
 
 		private SemanticGlobalSearchResult {

@@ -306,7 +306,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 3.5
+      scoreMinValue: 3.82
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -315,7 +315,7 @@ nudgeToolConfig:
         en: "Televisions with a low energy consumption"
         fr: "Téléviseurs avec une faible consommation énergétique"
     - scoreName: "DURABILITY"
-      scoreMinValue: 3.9
+      scoreMinValue: 3.41
       mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
@@ -325,7 +325,7 @@ nudgeToolConfig:
         fr: "Téléviseurs avec une bonne durabilité"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 3
+      scoreMinValue: 3.52
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -376,7 +376,7 @@ nudgeToolConfig:
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "LOWER_THAN"
-          value: "13.42"
+          value: "13.49"
       image: "example-image.png"
       url:
         en: "high-impact"
@@ -396,10 +396,10 @@ nudgeToolConfig:
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "GREATER_THAN"
-          value: "13.42"
+          value: "13.49"
         - field: "scores.ECOSCORE.value"
-          operator: "LOWER_THAN"
-          value: "14.58"
+          operator: "LOWER_THAN_OR_EQUAL"
+          value: "14.94"
       image: "example-image.png"
       url:
         en: "medium-impact"
@@ -419,7 +419,7 @@ nudgeToolConfig:
       criterias:
         - field: "scores.ECOSCORE.value"
           operator: "GREATER_THAN"
-          value: "14.58"
+          value: "14.94"
       image: "example-image.png"
       url:
         en: "low-impact"

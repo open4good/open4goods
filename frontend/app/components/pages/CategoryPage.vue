@@ -1782,11 +1782,17 @@ const viewComponentProps = computed(() => {
   }
 
   if (viewMode.value === 'list') {
-    return base
+    return {
+      ...base,
+      sortField: sortField.value,
+      fieldMetadata: filterFieldMap.value,
+    }
   }
 
   return {
     ...base,
+    sortField: sortField.value,
+    fieldMetadata: filterFieldMap.value,
     isCategoryDisabled: shouldRestrictCategoryProducts.value,
     nofollowLinks: shouldRestrictCategoryProducts.value,
   }

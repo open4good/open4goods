@@ -76,6 +76,19 @@
               }}</span>
             </li>
           </ul>
+
+          <!-- Sorted Attribute (when sorting by custom field) -->
+          <div
+            v-if="sortedAttributeByProduct(product)"
+            class="category-product-list__sorted-attribute"
+          >
+            <span class="category-product-list__sorted-attribute-label">
+              {{ sortedAttributeByProduct(product)!.label }}:
+            </span>
+            <span class="category-product-list__sorted-attribute-value">
+              {{ sortedAttributeByProduct(product)!.value }}
+            </span>
+          </div>
         </div>
 
         <div class="category-product-list__prices-column">
@@ -111,7 +124,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
+import type {
+  AttributeConfigDto,
+  FieldMetadataDto,
+  ProductDto,
+} from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import AiReviewActionButton from '~/components/shared/ai/AiReviewActionButton.vue'
@@ -123,10 +140,16 @@ import {
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatOffersCount } from '~/utils/_product-pricing'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
+import {
+  isCustomSortField,
+  resolveSortedAttributeValue,
+} from '~/utils/_sort-attribute-display'
 
 const props = defineProps<{
   products: ProductDto[]
   popularAttributes?: AttributeConfigDto[]
+  sortField?: string | null
+  fieldMetadata?: Record<string, FieldMetadataDto>
 }>()
 
 const { t, n, locale } = useI18n()
@@ -191,6 +214,37 @@ const popularAttributesByProduct = (
 
 const hasVertical = (product: ProductDto) => {
   return !!product.fullSlug?.trim()
+}
+
+const sortedAttributeByProduct = (
+  product: ProductDto
+): DisplayedAttribute | null => {
+  if (
+    !isCustomSortField(
+      props.sortField,
+      popularAttributeConfigs.value.map(c => c.key).filter(Boolean) as string[]
+    )
+  ) {
+    return null
+  }
+
+  const result = resolveSortedAttributeValue(
+    product,
+    props.sortField,
+    props.fieldMetadata,
+    t,
+    n
+  )
+
+  if (!result) {
+    return null
+  }
+
+  return {
+    key: result.key,
+    label: result.label,
+    value: result.value,
+  }
 }
 </script>
 
@@ -305,4 +359,19 @@ const hasVertical = (product: ProductDto) => {
 
   &__attribute-value
     color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__sorted-attribute
+    margin-top: 0.5rem
+    display: inline-flex
+    gap: 0.35rem
+    align-items: baseline
+    font-size: 1.1em
+
+  &__sorted-attribute-label
+    font-weight: 500
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__sorted-attribute-value
+    font-weight: 700
+    color: rgb(var(--v-theme-text-neutral-strong))
 </style>

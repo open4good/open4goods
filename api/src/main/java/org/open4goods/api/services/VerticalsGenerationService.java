@@ -143,10 +143,10 @@ public class VerticalsGenerationService {
 	private List<VerticalSubset> buildImpactScoreSubsetsList(String lowerThreshold, String upperThreshold) {
 		List<VerticalSubset> subsets = new ArrayList<>();
 
-		subsets.add(createImpactSubset("impact_high", "LOWER_THAN", lowerThreshold));
+		subsets.add(createImpactSubset("impact_high", "LOWER_THAN_OR_EQUAL", lowerThreshold));
 		subsets.add(createImpactSubset("impact_medium", List.of(
 				new SubsetCriteria(IMPACT_SCORE_FIELD, SubsetCriteriaOperator.GREATER_THAN, lowerThreshold),
-				new SubsetCriteria(IMPACT_SCORE_FIELD, SubsetCriteriaOperator.LOWER_THAN, upperThreshold)
+				new SubsetCriteria(IMPACT_SCORE_FIELD, SubsetCriteriaOperator.LOWER_THAN_OR_EQUAL, upperThreshold)
 		)));
 		subsets.add(createImpactSubset("impact_low", "GREATER_THAN", upperThreshold));
 
@@ -527,42 +527,44 @@ public class VerticalsGenerationService {
 			return (range.min() + range.max()) / 2.0;
 		}
 
-		double min = range.min();
-		double max = range.max();
-		double threshold = (min + max) / 2.0;
-		double step = (max - min) / 20.0;
+		double low = range.min();
+		double high = range.max();
+		double bestThreshold = (low + high) / 2.0;
+		double bestDelta = Double.MAX_VALUE;
 
 		for (int i = 0; i < MAX_THRESHOLD_ITERATIONS; i++) {
-			long count = repository.countMainIndexHavingScoreThreshold(scoreName, verticalId, operator, threshold);
+			double mid = (low + high) / 2.0;
+			long count = repository.countMainIndexHavingScoreThreshold(scoreName, verticalId, operator, mid);
 			double ratio = count / (double) total;
-			if (Math.abs(ratio - TARGET_THRESHOLD_RATIO) <= ACCEPTABLE_RATIO_DELTA) {
+			double delta = Math.abs(ratio - TARGET_THRESHOLD_RATIO);
+
+			if (delta < bestDelta) {
+				bestDelta = delta;
+				bestThreshold = mid;
+			}
+
+			if (delta <= ACCEPTABLE_RATIO_DELTA) {
 				break;
 			}
 
+			// Binary search logic depends on the operator
+			// For LOWER_THAN/LOWER_THAN_OR_EQUAL: increasing threshold increases count/ratio
+			// For GREATER_THAN/GREATER_THAN_OR_EQUAL: increasing threshold decreases count/ratio
+			boolean isDirect = (operator == SubsetCriteriaOperator.LOWER_THAN || operator == SubsetCriteriaOperator.LOWER_THAN_OR_EQUAL);
 			boolean tooMany = ratio > TARGET_THRESHOLD_RATIO;
-			threshold = adjustThreshold(threshold, operator, tooMany, step);
-			if (threshold <= min || threshold >= max) {
-				threshold = Math.clamp(threshold, min, max);
-				break;
+
+			if (isDirect) {
+				if (tooMany) high = mid;
+				else low = mid;
+			} else {
+				if (tooMany) low = mid;
+				else high = mid;
 			}
-			// Reduce step size to converge
-			step *= 0.9;
 		}
 
-		return BigDecimal.valueOf(threshold).setScale(2, RoundingMode.HALF_UP).doubleValue();
+		return BigDecimal.valueOf(bestThreshold).setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 
-	private double adjustThreshold(double current, SubsetCriteriaOperator operator, boolean tooMany, double step) {
-		return switch (operator) {
-		case GREATER_THAN -> current + (tooMany ? step : -step);
-		case LOWER_THAN -> current + (tooMany ? -step : step);
-		case EQUALS -> current;
-		};
-	}
-
-	private double clampScore(double value) {
-		return Math.min(SCORE_MAX_VALUE, Math.max(SCORE_MIN_VALUE, value));
-	}
 
 	private String replaceScoreMinValue(String content, String scoreName, double threshold) {
 		String formatted = formatScoreValue(threshold);
@@ -586,7 +588,7 @@ public class VerticalsGenerationService {
 		builder.append(indent).append("  group: \"impactscore\"").append("\n");
 		builder.append(indent).append("  criterias:").append("\n");
 		builder.append(indent).append("    - field: \"scores.ECOSCORE.value\"").append("\n");
-		builder.append(indent).append("      operator: \"LOWER_THAN\"").append("\n");
+		builder.append(indent).append("      operator: \"LOWER_THAN_OR_EQUAL\"").append("\n");
 		builder.append(indent).append("      value: \"").append(lowerThreshold).append("\"").append("\n");
 		builder.append(indent).append("  image: \"example-image.png\"").append("\n");
 		builder.append(indent).append("  url:").append("\n");
@@ -598,10 +600,10 @@ public class VerticalsGenerationService {
 		builder.append(indent).append("  title:").append("\n");
 		builder.append(indent).append("    en: \"High \"").append("\n");
 		builder.append(indent).append("    fr: \"Elevé\"").append("\n");
-		builder.append(indent).append("  description:").append("\n");
-		builder.append(indent).append("    en: \"Products with an ImpactScore lower than ").append(lowerThreshold).append("/5\"").append("\n");
-		builder.append(indent).append("    fr: \"Produits avec un ImpactScore inférieur à ").append(lowerThreshold).append("/5\"").append("\n");
-		builder.append("\n");
+		builder.append(indent).append("    description:").append("\n");
+		builder.append(indent).append("      en: \"Products with an ImpactScore lower than ").append(lowerThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("      fr: \"Produits avec un ImpactScore inférieur à ").append(lowerThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("\n");
 		builder.append(indent).append("- id: \"impact_medium\"").append("\n");
 		builder.append(indent).append("  group: \"impactscore\"").append("\n");
 		builder.append(indent).append("  criterias:").append("\n");
@@ -609,7 +611,7 @@ public class VerticalsGenerationService {
 		builder.append(indent).append("      operator: \"GREATER_THAN\"").append("\n");
 		builder.append(indent).append("      value: \"").append(lowerThreshold).append("\"").append("\n");
 		builder.append(indent).append("    - field: \"scores.ECOSCORE.value\"").append("\n");
-		builder.append(indent).append("      operator: \"LOWER_THAN\"").append("\n");
+		builder.append(indent).append("      operator: \"LOWER_THAN_OR_EQUAL\"").append("\n");
 		builder.append(indent).append("      value: \"").append(upperThreshold).append("\"").append("\n");
 		builder.append(indent).append("  image: \"example-image.png\"").append("\n");
 		builder.append(indent).append("  url:").append("\n");
@@ -621,10 +623,10 @@ public class VerticalsGenerationService {
 		builder.append(indent).append("  title:").append("\n");
 		builder.append(indent).append("    en: \"Medium\"").append("\n");
 		builder.append(indent).append("    fr: \"Moyen\"").append("\n");
-		builder.append(indent).append("  description:").append("\n");
-		builder.append(indent).append("    en: \"Products with an ImpactScore between ").append(lowerThreshold).append("/5 and ").append(upperThreshold).append("/5\"").append("\n");
-		builder.append(indent).append("    fr: \"Produits avec un ImpactScore compris entre ").append(lowerThreshold).append("/5 et ").append(upperThreshold).append("/5\"").append("\n");
-		builder.append("\n");
+		builder.append(indent).append("    description:").append("\n");
+		builder.append(indent).append("      en: \"Products with an ImpactScore between ").append(lowerThreshold).append("/5 and ").append(upperThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("      fr: \"Produits avec un ImpactScore compris entre ").append(lowerThreshold).append("/5 et ").append(upperThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("\n");
 		builder.append(indent).append("- id: \"impact_low\"").append("\n");
 		builder.append(indent).append("  group: \"impactscore\"").append("\n");
 		builder.append(indent).append("  criterias:").append("\n");
@@ -641,9 +643,9 @@ public class VerticalsGenerationService {
 		builder.append(indent).append("  title:").append("\n");
 		builder.append(indent).append("    en: \"Faible\"").append("\n");
 		builder.append(indent).append("    fr: \"Faible\"").append("\n");
-		builder.append(indent).append("  description:").append("\n");
-		builder.append(indent).append("    en: \"Products with an ImpactScore greater than ").append(upperThreshold).append("/5\"").append("\n");
-		builder.append(indent).append("    fr: \"Produits avec un ImpactScore supérieur à ").append(upperThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("    description:").append("\n");
+		builder.append(indent).append("      en: \"Products with an ImpactScore greater than ").append(upperThreshold).append("/5\"").append("\n");
+		builder.append(indent).append("      fr: \"Produits avec un ImpactScore supérieur à ").append(upperThreshold).append("/5\"").append("\n");
 		return builder.toString();
 	}
 

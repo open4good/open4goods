@@ -106,23 +106,8 @@
                 </v-btn>
               </div>
 
-              <div class="product-hero__centered-info">
-                <div
-                  v-if="hasBrandOrModel"
-                  class="mb-4 product-hero__heading-group"
-                >
-                  <span
-                    v-if="productBrandName"
-                    class="product-hero__brand-name"
-                  >
-                    {{ productBrandName }}
-                  </span>
-                  -
-                  <span v-if="productModelName" class="product-hero__subtitle">
-                    {{ productModelName }}
-                  </span>
-                </div>
-
+              <div class="mt-6 product-hero__centered-info">
+              
                 <ul
                   v-if="heroAttributes.length"
                   class="product-hero__attributes"
@@ -1122,7 +1107,6 @@ useHead(() => {
 }
 
 .product-hero__centered-info {
-  display: flex;
   flex-direction: column;
   justify-content: center;
   flex: 1;

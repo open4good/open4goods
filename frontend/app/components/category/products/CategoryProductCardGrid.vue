@@ -138,6 +138,19 @@
             </v-chip>
           </div>
 
+          <!-- Sorted Attribute (when sorting by custom field) -->
+          <div
+            v-if="sortedAttributeByProduct(product)"
+            class="category-product-card-grid__sorted-attribute"
+          >
+            <span class="category-product-card-grid__sorted-attribute-label">
+              {{ sortedAttributeByProduct(product)!.label }}:
+            </span>
+            <span class="category-product-card-grid__sorted-attribute-value">
+              {{ sortedAttributeByProduct(product)!.value }}
+            </span>
+          </div>
+
           <!-- Global offers count removed (moved to cells) -->
         </v-card-item>
 
@@ -152,7 +165,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
+import type {
+  AttributeConfigDto,
+  FieldMetadataDto,
+  ProductDto,
+} from '~~/shared/api-client'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductTileCard from '~/components/category/products/ProductTileCard.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
@@ -166,10 +183,16 @@ import {
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { formatOffersCount } from '~/utils/_product-pricing'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
+import {
+  isCustomSortField,
+  resolveSortedAttributeValue,
+} from '~/utils/_sort-attribute-display'
 
 const props = defineProps<{
   products: ProductDto[]
   popularAttributes?: AttributeConfigDto[]
+  sortField?: string | null
+  fieldMetadata?: Record<string, FieldMetadataDto>
   size?: 'compact' | 'comfortable' | 'small' | 'medium' | 'big'
   variant?: 'classic' | 'compact-tile'
   maxAttributes?: number
@@ -302,6 +325,37 @@ const popularAttributesByProduct = (
     maxAttributes.value ?? (normalizedSize.value === 'small' ? 2 : 3)
 
   return entries.slice(0, effectiveMax)
+}
+
+const sortedAttributeByProduct = (
+  product: ProductDto
+): DisplayedAttribute | null => {
+  if (
+    !isCustomSortField(
+      props.sortField,
+      popularAttributeConfigs.value.map(c => c.key).filter(Boolean) as string[]
+    )
+  ) {
+    return null
+  }
+
+  const result = resolveSortedAttributeValue(
+    product,
+    props.sortField,
+    props.fieldMetadata,
+    t,
+    n
+  )
+
+  if (!result) {
+    return null
+  }
+
+  return {
+    key: result.key,
+    label: result.label,
+    value: result.value,
+  }
 }
 </script>
 
@@ -444,6 +498,23 @@ const popularAttributesByProduct = (
     justify-content: center
     gap: 0.35rem
     margin: 0.25rem 0
+
+  &__sorted-attribute
+    display: flex
+    justify-content: center
+    align-items: center
+    gap: 0.25rem
+    margin-top: 0.5rem
+    font-size: 1.2em
+    line-height: 1.2
+
+  &__sorted-attribute-label
+    font-weight: 500
+    color: rgb(var(--v-theme-text-neutral-secondary))
+
+  &__sorted-attribute-value
+    font-weight: 700
+    color: rgb(var(--v-theme-text-neutral-strong))
 
   &__attribute
     background: rgba(var(--v-theme-surface-primary-080), 0.5) !important

@@ -205,35 +205,69 @@ const guessAttributeMapping = (
 const attributeColumns = computed<AttributeColumn[]>(() => {
   const seen = new Set<string>()
 
-  return attributeKeys.value.reduce<AttributeColumn[]>((accumulator, key) => {
-    const normalizedKey = String(key)
+  const columns = attributeKeys.value.reduce<AttributeColumn[]>(
+    (accumulator, key) => {
+      const normalizedKey = String(key)
 
-    if (!normalizedKey || seen.has(normalizedKey)) {
+      if (!normalizedKey || seen.has(normalizedKey)) {
+        return accumulator
+      }
+
+      seen.add(normalizedKey)
+
+      const config = attributeConfigMap.value?.[normalizedKey]
+      const mapping =
+        attributeFieldMappingByKey.value[normalizedKey] ??
+        guessAttributeMapping(normalizedKey, config)
+      const field = fieldMetadataMap.value?.[mapping]
+      const title =
+        config?.name ??
+        resolveFilterFieldTitle(field, t, mapping) ??
+        normalizedKey
+
+      accumulator.push({
+        key: normalizedKey,
+        headerKey: attributeHeaderKey(normalizedKey),
+        title,
+        mapping,
+        config,
+      })
+
       return accumulator
+    },
+    []
+  )
+
+  // Add sorted column if missing and not static
+  if (props.sortField) {
+    const isStatic = Object.values(staticSortHeaderToFieldMapping).includes(
+      props.sortField
+    )
+
+    if (!isStatic) {
+      const sortedKey = extractAttributeKeyFromMapping(props.sortField)
+
+      if (sortedKey && !seen.has(sortedKey)) {
+        const mapping = props.sortField
+        const config = attributeConfigMap.value?.[sortedKey]
+        const field = fieldMetadataMap.value?.[mapping]
+        const title =
+          config?.name ??
+          resolveFilterFieldTitle(field, t, mapping) ??
+          sortedKey
+
+        columns.unshift({
+          key: sortedKey,
+          headerKey: attributeHeaderKey(sortedKey),
+          title,
+          mapping,
+          config,
+        })
+      }
     }
+  }
 
-    seen.add(normalizedKey)
-
-    const config = attributeConfigMap.value?.[normalizedKey]
-    const mapping =
-      attributeFieldMappingByKey.value[normalizedKey] ??
-      guessAttributeMapping(normalizedKey, config)
-    const field = fieldMetadataMap.value?.[mapping]
-    const title =
-      config?.name ??
-      resolveFilterFieldTitle(field, t, mapping) ??
-      normalizedKey
-
-    accumulator.push({
-      key: normalizedKey,
-      headerKey: attributeHeaderKey(normalizedKey),
-      title,
-      mapping,
-      config,
-    })
-
-    return accumulator
-  }, [])
+  return columns
 })
 
 const headers = computed(() => [
