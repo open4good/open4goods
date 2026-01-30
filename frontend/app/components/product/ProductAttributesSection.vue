@@ -128,33 +128,14 @@
                   :alt="gtin"
                   class="product-attributes__gtin-image"
                 />
-                <div class="product-attributes__gtin-row">
-                  <span>{{ localizedGtinLabel }}</span>
+                <div>
+                  <span v-if="gtinType">{{ gtinType }}&nbsp;</span>
+                  <span>{{ gtin }}</span>
                   <v-tooltip
+                    activator="parent"
                     location="bottom"
-                    :text="
-                      copied
-                        ? $t('product.attributes.main.identity.copySuccess')
-                        : $t('product.attributes.main.identity.copy')
-                    "
-                  >
-                    <template #activator="{ props: activatorProps }">
-                      <v-btn
-                        icon
-                        variant="text"
-                        density="compact"
-                        size="small"
-                        class="product-attributes__copy-btn"
-                        v-bind="activatorProps"
-                        @click.stop="copyGtin"
-                      >
-                        <v-icon
-                          :icon="copied ? 'mdi-check' : 'mdi-content-copy'"
-                          size="16"
-                        />
-                      </v-btn>
-                    </template>
-                  </v-tooltip>
+                    :text="$t('product.attributes.main.identity.gtinLabel')"
+                  />
                 </div>
               </div>
             </div>
@@ -168,8 +149,6 @@
                   text="Basé sur le code GTIN du produit, cela n'indique pas nécessairement le lieu de fabrication."
                 />
               </span>
-              <br />
-              <span>{{ gtinCountry.name }}</span>
               <div
                 class="product-attributes__identity-value product-attributes__identity-value--country"
               >
@@ -179,6 +158,7 @@
                   :alt="gtinCountry.name"
                   class="product-attributes__flag"
                 />
+                <span>{{ gtinCountry.name }}</span>
               </div>
             </div>
           </div>
@@ -778,7 +758,6 @@
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useClipboard } from '@vueuse/core'
 import { useAuth } from '~/composables/useAuth'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
@@ -849,23 +828,6 @@ const gtin = computed(
   () => props.product?.gtin ?? props.product?.base?.gtin ?? null
 )
 const gtinType = computed(() => props.product?.base?.gtinInfo?.upcType ?? null)
-const gtinStrings = computed(
-  () => props.product?.base?.gtinInfo?.gtinStrings ?? []
-)
-
-const localizedGtinLabel = computed(() => {
-  if (gtinStrings.value.length === 1 && gtinType.value) {
-    return t(`product.attributes.main.identity.barcodeType.${gtinType.value}`)
-  }
-  return t('product.attributes.main.identity.gtin')
-})
-
-const { copy, copied } = useClipboard()
-const copyGtin = async () => {
-  if (gtin.value) {
-    await copy(gtin.value)
-  }
-}
 
 const gtinCountry = computed(() => {
   const info = props.product?.base?.gtinInfo
@@ -1748,16 +1710,6 @@ const toggleDetailGroup = (id: string) => {
 .product-attributes__gtin-caption {
   font-size: 0.85rem;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-}
-
-.product-attributes__gtin-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.product-attributes__copy-btn {
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.8);
 }
 
 .product-attributes__table {

@@ -83,3 +83,13 @@ google-taxonomy:
   en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
 
 gen-ai-config:
+
+feed:
+  awin:
+    cron: 0 43 1 * * ?
+    enabled: true
+    cache-ttl-days: 1
+  effiliation:
+    cron: 30 43 1 * * ?
+    enabled: true
+    cache-ttl-days: 1

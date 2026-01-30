@@ -74,14 +74,16 @@
               </div>
 
               <div v-if="hasCategory" class="product-hero__actions">
-                <AiReviewActionButton
-                  v-if="!hasAiReview"
-                  :is-reviewed="hasAiReview"
-                  variant="button"
-                  :label="t('product.hero.aiReview.label')"
-                  button-class="product-hero__ai-button"
-                  @click="handleAiReviewClick"
-                />
+                <div class="product-hero__ai-btn-wrapper">
+                  <AiReviewActionButton
+                    v-if="!hasAiReview"
+                    :is-reviewed="hasAiReview"
+                    variant="button"
+                    :label="t('product.hero.aiReview.label')"
+                    button-class="product-hero__ai-button"
+                    @click="handleAiReviewClick"
+                  />
+                </div>
 
                 <v-btn
                   class="product-hero__compare-button"
@@ -1204,6 +1206,7 @@ useHead(() => {
   margin-top: auto;
   display: flex;
   justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .product-hero__ai-summary-list {
@@ -1284,6 +1287,13 @@ useHead(() => {
   background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
 }
 
+.product-hero__ai-btn-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .product-hero__ai-button {
   background: rgba(var(--v-theme-surface-glass-strong), 0.5);
   backdrop-filter: blur(8px);
@@ -1296,8 +1306,9 @@ useHead(() => {
   letter-spacing: 0.01em;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
   transition: all 0.25s ease;
-  margin-right: 0.75rem;
+  /* margin-right: 0.75rem; Removed to use gap and flex centering */
 }
 
 .product-hero__ai-button:hover {
