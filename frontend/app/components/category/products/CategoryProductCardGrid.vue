@@ -58,7 +58,7 @@
                   :score="(impactScoreValue(product) ?? 0) * 4"
                   :max="20"
                   size="small"
-                  variant="corner"
+                  flat
                 />
                 <span
                   v-else
@@ -138,13 +138,13 @@
             </v-chip>
           </div>
 
-          <!-- Microtable Pricing Layout -->
-          <div class="category-product-card-grid__pricing-table">
-            <ProductPriceRows :product="product" />
-          </div>
-
           <!-- Global offers count removed (moved to cells) -->
         </v-card-item>
+
+        <!-- Microtable Pricing Layout -->
+        <div class="category-product-card-grid__pricing-table">
+          <ProductPriceRows :product="product" />
+        </div>
       </v-card>
     </v-col>
   </v-row>
@@ -379,6 +379,7 @@ const popularAttributesByProduct = (
     justify-content: space-between
     pointer-events: none /* let clicks pass through to image link */
     padding: 0
+    background: rgba(var(--v-theme-surface-default), 0.5)
 
   &__score-container
     margin: 0.5rem 0 0 0.5rem
@@ -454,12 +455,11 @@ const popularAttributesByProduct = (
     display: flex
     flex-direction: column
     gap: 0px
-    border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
-    border-radius: 8px
-    overflow: hidden
+    border-top: 1px solid rgba(var(--v-theme-border-primary), 0.15)
     margin-top: auto /* Push to bottom */
-    background: rgba(var(--v-theme-surface-default), 0.6) /* More transparent */
+    background: rgba(var(--v-theme-surface-default), 0.5)
     backdrop-filter: blur(4px)
+    width: 100%
 
   &__pricing-cell
     display: flex

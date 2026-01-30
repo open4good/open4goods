@@ -219,7 +219,7 @@ public class ShareResolutionService {
      * @return ordered list of candidates
      */
     private List<ShareCandidateDto> searchByQuery(String query, DomainLanguage domainLanguage) {
-        GlobalSearchResult searchResult = searchService.globalSearch(query, domainLanguage, null, Sort.unsorted(), null);
+        GlobalSearchResult searchResult = searchService.globalSearch(query, domainLanguage, null, Sort.unsorted(), null, null);
         List<ShareCandidateDto> mapped = new ArrayList<>();
 
         searchResult.verticalGroups().forEach(group -> group.results().stream()

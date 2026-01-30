@@ -21,8 +21,10 @@
           class="category-fast-filters__group category-fast-filters__group--column"
           :aria-label="group.label"
         >
-          <span class="text-caption font-weight-bold text-center w-100">
-            {{ group.label }} :
+          <span
+            class="text-caption font-weight-bold text-center w-100 text-uppercase"
+          >
+            {{ group.label }}
           </span>
           <v-chip-group
             class="category-fast-filters__chip-group"

@@ -3,13 +3,27 @@
     <PageHeader
       :eyebrow="t('search.hero.eyebrow')"
       :title="t('search.hero.title')"
-      :description-html="heroSubtitle"
       layout="single-column"
       container="lg"
       background="image"
       background-image-asset-key="searchBackground"
       class="mb-8"
     >
+      <template #description>
+        <div
+          class="text-body-1"
+          style="font-size: 1.05rem; line-height: 1.6; opacity: 0.9"
+        >
+          <i18n-t keypath="search.hero.subtitle" tag="span">
+            <template #reviewed>
+              <NumberCountUp :to="countEvaluated" />
+            </template>
+            <template #others>
+              <NumberCountUp :to="countOthers" :delay="1200" />
+            </template>
+          </i18n-t>
+        </div>
+      </template>
       <form class="search-hero__form mt-6" @submit.prevent="handleSearchSubmit">
         <SearchSuggestField
           v-model="searchInput"
@@ -31,8 +45,8 @@
             <v-btn
               class="search-hero__submit-icon"
               icon="mdi-arrow-right"
-              variant="flat"
-              color="primary"
+              variant="plain"
+              rounded="0"
               size="small"
               type="submit"
               :aria-label="t('search.form.submit')"
@@ -77,18 +91,26 @@
         />
       </v-btn>
 
-      <CategoryFilterList
+      <v-card
         v-else
-        :fields="filterFields"
-        :aggregations="productAggregations"
-        :baseline-aggregations="baselineAggregations"
-        :active-filters="activeFilters"
-        :search-type="searchType"
-        mode="row"
-        @update-range="updateRangeFilter"
-        @update-terms="updateTermsFilter"
-        @update:search-type="searchType = $event"
-      />
+        class="search-page__filters-card w-100"
+        rounded="xl"
+        elevation="1"
+      >
+        <div class="pa-4">
+          <CategoryFilterList
+            :fields="filterFields"
+            :aggregations="productAggregations"
+            :baseline-aggregations="baselineAggregations"
+            :active-filters="activeFilters"
+            :search-type="searchType"
+            mode="row"
+            @update-range="updateRangeFilter"
+            @update-terms="updateTermsFilter"
+            @update:search-type="searchType = $event"
+          />
+        </div>
+      </v-card>
     </v-container>
 
     <v-navigation-drawer
@@ -165,8 +187,41 @@
       </v-alert>
 
       <template v-else>
-        <v-row class="search-page__layout" align="start" justify="center">
-          <v-col cols="12" lg="5">
+        <div v-if="showNoResultsHero" class="search-page__no-results">
+          <v-icon
+            icon="mdi-magnify-close"
+            size="80"
+            class="search-page__no-results-icon mb-6"
+          />
+          <h2 class="text-h4 font-weight-bold mb-4">
+            {{ t('search.states.empty.title', { query: normalizedQuery }) }}
+          </h2>
+          <p class="text-body-1 mb-6">
+            {{ t('search.states.empty.description') }}
+          </p>
+          <v-btn
+            v-if="isFiltered"
+            variant="tonal"
+            color="primary"
+            size="large"
+            @click="clearFilters"
+          >
+            {{ t('category.filters.reset') }}
+          </v-btn>
+        </div>
+
+        <v-row
+          v-else
+          class="search-page__layout"
+          align="start"
+          justify="center"
+        >
+          <v-col
+            v-if="hasVerticalResults"
+            cols="12"
+            :lg="hasGlobalResults ? 5 : 10"
+            :offset-lg="hasGlobalResults ? 0 : 1"
+          >
             <section class="search-page__column">
               <div class="search-page__column-header d-flex justify-center">
                 <div class="search-page__column-heading text-center">
@@ -255,7 +310,12 @@
             </section>
           </v-col>
 
-          <v-col cols="12" lg="7">
+          <v-col
+            v-if="hasGlobalResults"
+            cols="12"
+            :lg="hasVerticalResults ? 7 : 6"
+            :offset-lg="hasVerticalResults ? 0 : 3"
+          >
             <section class="search-page__column">
               <div
                 class="search-page__column-header search-page__column-header--with-actions d-flex justify-center"
@@ -308,6 +368,21 @@
               </div>
 
               <CategoryProductListView v-else :products="rightColumnProducts" />
+
+              <v-pagination
+                v-if="
+                  !showLatestProducts &&
+                  !isFiltered &&
+                  missingVerticalPageCount > 1
+                "
+                :length="missingVerticalPageCount"
+                :model-value="missingVerticalPageNumber + 1"
+                class="mt-6"
+                density="comfortable"
+                rounded="lg"
+                :total-visible="5"
+                @update:model-value="onMissingVerticalPageChange"
+              />
             </section>
           </v-col>
         </v-row>
@@ -374,24 +449,12 @@ const { data: stats } = await useAsyncData<CategoriesStatsDto | null>(
   { server: true, lazy: true }
 )
 
-const heroSubtitle = computed(() => {
-  const template = t('search.hero.subtitle')
-  if (!stats.value)
-    return template.replace('{reviewed}', '...').replace('{others}', '...')
+const countEvaluated = computed(() => stats.value?.totalProductsCount ?? 0)
 
-  const formatCount = (val: number) =>
-    new Intl.NumberFormat(locale.value).format(val)
-
-  const reviewed = stats.value.reviewedProductsCount ?? 0
-  const validTotal =
-    (stats.value.productsCountSum ?? 0) +
-    (stats.value.productsWithoutVerticalCount ?? 0)
-  const others = Math.max(0, validTotal - reviewed)
-
-  return t('search.hero.subtitle', {
-    reviewed: formatCount(reviewed),
-    others: formatCount(others),
-  })
+const countOthers = computed(() => {
+  const gtin = stats.value?.gtinOpenDataItemsCount ?? 0
+  const isbn = stats.value?.isbnOpenDataItemsCount ?? 0
+  return gtin + isbn
 })
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
@@ -416,6 +479,13 @@ const hasMinimumLength = computed(
 const activeFilters = computed(() => filterRequest.value.filters || [])
 
 const isFiltered = computed(() => activeFilters.value.length > 0)
+
+/**
+ * Pagination state for missing-vertical (non-evaluated) products.
+ * Page number is zero-based internally but displayed as 1-based in UI.
+ */
+const missingVerticalPageNumber = ref(0)
+const missingVerticalPageSize = ref(20)
 
 const showLatestProducts = computed(
   () => !normalizedQuery.value.length && !isFiltered.value
@@ -488,11 +558,16 @@ const { data, pending, error, refresh } =
           query: normalizedQuery.value,
           filters: filterRequest.value,
           searchType: resolvedSearchType.value,
+          pageNumber: missingVerticalPageNumber.value,
+          pageSize: missingVerticalPageSize.value,
         },
       })
     },
     {
-      watch: [() => normalizedQuery.value],
+      watch: [
+        () => normalizedQuery.value,
+        () => missingVerticalPageNumber.value,
+      ],
       immediate: true,
     }
   )
@@ -853,8 +928,53 @@ const evaluatedProductsCount = computed(() => {
 })
 
 const nonEvaluatedProductsCount = computed(() => {
-  return data.value?.missingVerticalResults?.length ?? 0
+  // Use total from pagination metadata when available, fallback to array length
+  const pageData = (
+    data.value as { missingVerticalPage?: { totalElements?: number } } | null
+  )?.missingVerticalPage
+  return (
+    pageData?.totalElements ?? data.value?.missingVerticalResults?.length ?? 0
+  )
 })
+
+const missingVerticalPageCount = computed(() => {
+  const pageData = (
+    data.value as { missingVerticalPage?: { totalPages?: number } } | null
+  )?.missingVerticalPage
+  return pageData?.totalPages ?? 1
+})
+
+const hasVerticalResults = computed(() => limitedGroups.value.length > 0)
+const hasGlobalResults = computed(() => rightColumnProducts.value.length > 0)
+const showNoResultsHero = computed(
+  () =>
+    !hasVerticalResults.value &&
+    !hasGlobalResults.value &&
+    !pending.value &&
+    !rightColumnPending.value
+)
+
+/**
+ * Handle pagination change for missing-vertical (non-evaluated) products.
+ * UI uses 1-based page numbers, internal state uses 0-based.
+ */
+const onMissingVerticalPageChange = (newPage: number) => {
+  missingVerticalPageNumber.value = newPage - 1
+  // Scroll to top of results section
+  if (import.meta.client) {
+    window.scrollTo({ top: 200, behavior: 'smooth' })
+  }
+}
+
+/**
+ * Reset page number when query changes to start fresh.
+ */
+watch(
+  () => normalizedQuery.value,
+  () => {
+    missingVerticalPageNumber.value = 0
+  }
+)
 
 const handleSearchSubmit = () => {
   const value = searchInput.value.trim()
@@ -1009,6 +1129,19 @@ function formatFallbackVerticalTitle(verticalId: string): string {
 
   &__alert-description
     margin: 0
+
+  &__no-results
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    text-align: center
+    padding: 4rem 2rem
+    min-height: 400px
+
+  &__no-results-icon
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    opacity: 0.5
 
   &__empty
     text-align: center

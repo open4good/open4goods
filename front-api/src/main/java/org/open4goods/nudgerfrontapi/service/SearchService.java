@@ -360,15 +360,17 @@ public class SearchService {
 	 * Execute a semantic-first global search strategy with a lexical fallback for
 	 * missing-vertical results.
 	 *
-	 * @param query          raw user query
-	 * @param domainLanguage localisation hint (currently unused but kept for future
-	 *                       enhancements)
-	 * @param filters        optional filter criteria scoped to the global search
-	 * @param sort           optional sort definition for global search results
+	 * @param query                    raw user query
+	 * @param domainLanguage           localisation hint (currently unused but kept for future
+	 *                                 enhancements)
+	 * @param filters                  optional filter criteria scoped to the global search
+	 * @param sort                     optional sort definition for global search results
+	 * @param searchType               strategy to use for the search
+	 * @param missingVerticalPageable  pagination for missing-vertical results
 	 * @return grouped search results and unassigned hits when necessary
 	 */
 	public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage, FilterRequestDto filters,
-			Sort sort, String searchType) {
+			Sort sort, String searchType, Pageable missingVerticalPageable) {
 
 		String sanitizedQuery = sanitize(query);
 
@@ -376,9 +378,13 @@ public class SearchService {
 
 		CategorySuggestion verticalCta = findExactVerticalMatch(sanitizedQuery, domainLanguage);
 
-		// TODO : I have no result here !
-		List<GlobalSearchHit> missingVerticalResults = executeMissingVerticalLexicalSearch(sanitizedQuery, domainLanguage,
-				normalizedFilters, sort);
+		// Use provided pageable or default to page 0 with GLOBAL_SEARCH_LIMIT
+		Pageable effectivePageable = missingVerticalPageable != null
+				? missingVerticalPageable
+				: PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
+
+		MissingVerticalPagedResult missingVerticalResult = executeMissingVerticalLexicalSearchPaged(sanitizedQuery, domainLanguage,
+				normalizedFilters, sort, effectivePageable);
 
 
 		List<GlobalSearchHit> lexicalVerticalHits = executeVerticalLexicalSearch(sanitizedQuery, domainLanguage, normalizedFilters, sort);
@@ -386,7 +392,11 @@ public class SearchService {
 
 
 		return new GlobalSearchResult(verticalGroups,
-				missingVerticalResults,
+				missingVerticalResult.hits(),
+				missingVerticalResult.totalElements(),
+				missingVerticalResult.totalPages(),
+				effectivePageable.getPageNumber(),
+				effectivePageable.getPageSize(),
 				verticalCta,
 				null);
 	}
@@ -1077,26 +1087,37 @@ public class SearchService {
 	}
 
 	/**
-	 * Executes a lexical fallback search scoped to products without a vertical
+	 * Paginated result for missing-vertical search.
+	 *
+	 * @param hits          product hits for the current page
+	 * @param totalElements total number of matching elements
+	 * @param totalPages    total number of pages
+	 */
+	private record MissingVerticalPagedResult(List<GlobalSearchHit> hits, long totalElements, int totalPages) {
+		MissingVerticalPagedResult {
+			hits = List.copyOf(hits);
+		}
+	}
+
+	/**
+	 * Executes a paginated lexical search scoped to products without a vertical
 	 * assignment.
 	 *
 	 * @param sanitizedQuery sanitized query string
 	 * @param domainLanguage localisation hint for result mapping
 	 * @param filters        optional filters to apply
 	 * @param sort           optional sort definition
-	 * @return list of mapped hits without a vertical assignment
+	 * @param pageable       pagination parameters
+	 * @return paged result with hits and pagination metadata
 	 */
-	private List<GlobalSearchHit> executeMissingVerticalLexicalSearch(String sanitizedQuery,
-			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort) {
+	private MissingVerticalPagedResult executeMissingVerticalLexicalSearchPaged(String sanitizedQuery,
+			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort, Pageable pageable) {
 
-
-		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
 		Query query = buildMissingVerticalSearchQuery(sanitizedQuery, filters, false);
 		NativeQueryBuilder builder = new NativeQueryBuilder()
 				.withQuery(query)
 				.withPageable(pageable)
 				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
-
 
 		SearchHits<Product> hits;
 		try {
@@ -1106,7 +1127,13 @@ public class SearchService {
 			throw e;
 		}
 
-		return mapHits(hits, domainLanguage, false, sort);
+		List<GlobalSearchHit> mappedHits = mapHits(hits, domainLanguage, false, sort);
+		long totalElements = hits.getTotalHits();
+		int totalPages = pageable.getPageSize() > 0
+				? (int) Math.ceil((double) totalElements / pageable.getPageSize())
+				: 1;
+
+		return new MissingVerticalPagedResult(mappedHits, totalElements, totalPages);
 	}
 
 	/**
@@ -1798,9 +1825,22 @@ public class SearchService {
 
 	/**
 	 * Global search result including grouped hits and missing-vertical results.
+	 *
+	 * @param verticalGroups             vertical-grouped hits
+	 * @param missingVerticalResults     paginated hits without a vertical
+	 * @param missingVerticalTotalElements total count of missing-vertical hits
+	 * @param missingVerticalTotalPages    total pages for missing-vertical results
+	 * @param missingVerticalPageNumber    current page number (zero-based)
+	 * @param missingVerticalPageSize      page size used
+	 * @param verticalCta                category suggestion if found
+	 * @param diagnostics                semantic score diagnostics
 	 */
 	public record GlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
 			List<GlobalSearchHit> missingVerticalResults,
+			long missingVerticalTotalElements,
+			int missingVerticalTotalPages,
+			int missingVerticalPageNumber,
+			int missingVerticalPageSize,
 			CategorySuggestion verticalCta,
 			SemanticScoreDiagnosticsDto diagnostics) {
 

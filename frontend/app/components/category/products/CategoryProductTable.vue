@@ -44,8 +44,7 @@
         :score="(value ?? 0) * 4"
         :max="20"
         size="xs"
-        :show-methodology="false"
-        :show-range="false"
+        flat
       />
       <span v-else>{{ $t('category.products.notRated') }}</span>
     </template>

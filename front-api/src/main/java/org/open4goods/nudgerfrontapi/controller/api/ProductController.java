@@ -34,6 +34,7 @@ import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResultDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchVerticalGroupDto;
+import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchPageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestCategoryDto;
@@ -469,8 +470,14 @@ public class ProductController {
             return castError(sortValidation.error());
         }
 
+        // Build pageable for missing-vertical results with defaults
+        int pageNumber = request != null && request.pageNumber() != null ? request.pageNumber() : 0;
+        int pageSize = request != null && request.pageSize() != null ? request.pageSize() : 20;
+        pageSize = Math.max(1, Math.min(pageSize, 100)); // Clamp between 1 and 100
+        Pageable missingVerticalPageable = PageRequest.of(pageNumber, pageSize);
+
         SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, filterDto,
-                sortValidation.value().getSort(), searchType);
+                sortValidation.value().getSort(), searchType, missingVerticalPageable);
 
         List<GlobalSearchVerticalGroupDto> groups = result.verticalGroups().stream()
                 .map(group -> new GlobalSearchVerticalGroupDto(
@@ -485,8 +492,15 @@ public class ProductController {
             LOGGER.info("Vertical CTA found for query '{}': {}", query, result.verticalCta().verticalId());
         }
 
+        GlobalSearchPageMetaDto pageMetaDto = new GlobalSearchPageMetaDto(
+                result.missingVerticalPageNumber(),
+                result.missingVerticalPageSize(),
+                result.missingVerticalTotalElements(),
+                result.missingVerticalTotalPages());
+
         GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups,
                 missingVerticalResults,
+                pageMetaDto,
                 toCategoryDto(result.verticalCta()),
                 result.diagnostics());
         return ResponseEntity.ok()

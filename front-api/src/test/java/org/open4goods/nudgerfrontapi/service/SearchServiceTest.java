@@ -90,7 +90,7 @@ class SearchServiceTest {
 
 
         GlobalSearchResult result = searchService.globalSearch("téléviseurs", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null);
+                org.springframework.data.domain.Sort.unsorted(), null, null);
 
         // THEN
         assertThat(result).isNotNull();
@@ -117,7 +117,7 @@ class SearchServiceTest {
 
 
         GlobalSearchResult result = searchService.globalSearch("something else", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null);
+                org.springframework.data.domain.Sort.unsorted(), null, null);
 
         // THEN
         assertThat(result.verticalCta()).isNull();
@@ -136,7 +136,7 @@ class SearchServiceTest {
         
         // WHEN
         GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null);
+                org.springframework.data.domain.Sort.unsorted(), null, null);
 
         // THEN
         // We verify that semantic embeddings were NEVER requested

@@ -73,7 +73,7 @@
                 />
               </div>
 
-              <div class="product-hero__actions">
+              <div v-if="hasCategory" class="product-hero__actions">
                 <AiReviewActionButton
                   v-if="!hasAiReview"
                   :is-reviewed="hasAiReview"
@@ -408,6 +408,10 @@ const props = defineProps({
   image: {
     type: String,
     default: null,
+  },
+  hasCategory: {
+    type: Boolean,
+    default: false,
   },
 })
 

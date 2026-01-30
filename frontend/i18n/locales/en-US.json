@@ -2608,11 +2608,7 @@
       "ariaLabel": "Sticky banner promoting responsible shopping",
       "offersCount": "{count} offer | {count} offers"
     },
-    "hero": {
-      "aiReview": {
-        "label": "AI summary"
-      }
-    },
+
     "start_impact_text": "Enjoying this?",
     "start_impact_subtext": "Support an independent, open, and impactful web by shopping through Nudger! It also works via our partner merchants",
     "partners_link": "our partners",
@@ -2632,7 +2628,7 @@
       "tooltip": {
         "generatedAt": "Generated on {date}",
         "available": "AI summary available",
-        "remaining": "{count} generation remaining | {count} generations remaining",
+        "remaining": "This product does not have a summary yet. You can request it and share it with the community. You have {count} generation remaining | This product does not have a summary yet. You can request it and share it with the community. You have {count} generations remaining",
         "quotaExceeded": "Quota exceeded"
       },
       "dataQuality": {

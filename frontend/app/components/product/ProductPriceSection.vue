@@ -21,7 +21,7 @@
           {{ $t('product.price.noOffersBanner') }}
         </v-alert>
 
-        <v-row>
+        <v-row align="center" justify="center">
           <v-col cols="12" md="8">
             <!-- Offers Table -->
             <v-data-table
@@ -162,7 +162,7 @@
           }"
         >
           <article
-            v-if="hasNewHistory"
+            v-if="showNewSection"
             ref="newChartCardRef"
             class="product-price__chart-card"
           >
@@ -189,7 +189,7 @@
             </header>
             <v-row class="ma-0">
               <v-col cols="12" md="4">
-                <div v-if="newStats" class="product-price__metrics h-100 pa-4">
+                <div class="product-price__metrics h-100 pa-4">
                   <!-- Best Offer CTA -->
                   <a
                     v-if="bestNewOffer && bestNewOfferLink"
@@ -231,24 +231,13 @@
                     </div>
                     <v-icon icon="mdi-open-in-new" size="18" />
                   </a>
-                  <div
+                  <ProductPriceEmptyCard
                     v-else
-                    class="d-flex flex-column align-center justify-center text-center pa-6 bg-grey-lighten-5 rounded-lg mb-4"
-                    style="border: 1px dashed rgba(0, 0, 0, 0.08)"
-                  >
-                    <v-icon
-                      icon="mdi-tag-off-outline"
-                      color="grey-lighten-1"
-                      class="mb-2"
-                    />
-                    <span
-                      class="text-caption font-weight-bold text-uppercase text-grey ls-1"
-                    >
-                      Pas d'offre NEUF
-                    </span>
-                  </div>
+                    icon="mdi-tag-off-outline"
+                    :label="$t('product.price.noOffers.new')"
+                  />
 
-                  <div class="product-price__metrics-summary">
+                  <div v-if="newStats" class="product-price__metrics-summary">
                     <dl>
                       <div class="product-price__metrics-row">
                         <v-icon
@@ -315,7 +304,7 @@
                 </div>
               </v-col>
               <v-col cols="12" md="8">
-                <ClientOnly v-if="!isTestEnvironment">
+                <ClientOnly v-if="!isTestEnvironment && hasNewHistory">
                   <template #default>
                     <VueECharts
                       v-if="newChartOption && chartVisibility.new"
@@ -330,6 +319,19 @@
                     <div class="product-price__chart-placeholder" />
                   </template>
                 </ClientOnly>
+                <div
+                  v-else-if="!hasNewHistory"
+                  class="d-flex align-center justify-center text-center h-100 pa-6 text-grey-darken-1"
+                >
+                  <div>
+                    <v-icon
+                      icon="mdi-chart-timeline-variant"
+                      size="48"
+                      class="mb-2 opacity-50"
+                    />
+                    <p>{{ $t('product.price.noHistory') }}</p>
+                  </div>
+                </div>
                 <template v-else>
                   <div
                     v-if="newChartOption"
@@ -374,7 +376,7 @@
           </article>
 
           <article
-            v-if="hasOccasionHistory"
+            v-if="showOccasionSection"
             ref="occasionChartCardRef"
             class="product-price__chart-card"
           >
@@ -385,27 +387,56 @@
             </header>
             <v-row class="ma-0">
               <v-col cols="12" md="4">
-                <div
-                  v-if="occasionStats"
-                  class="product-price__metrics h-100 pa-4"
-                >
-                  <div
-                    v-if="!bestOccasionOffer"
-                    class="d-flex flex-column align-center justify-center text-center pa-6 bg-grey-lighten-5 rounded-lg mb-4"
-                    style="border: 1px dashed rgba(0, 0, 0, 0.08)"
+                <div class="product-price__metrics h-100 pa-4">
+                  <a
+                    v-if="bestOccasionOffer && bestOccasionOfferLink"
+                    :href="bestOccasionOfferLink"
+                    rel="nofollow"
+                    class="product-price__history-cta"
+                    @click="
+                      handleOfferRedirectClick(
+                        bestOccasionOffer,
+                        'price-history-cta',
+                        bestOccasionOfferLink
+                      )
+                    "
                   >
-                    <v-icon
-                      icon="mdi-tag-off-outline"
-                      color="grey-lighten-1"
-                      class="mb-2"
+                    <img
+                      v-if="bestOccasionOffer.favicon"
+                      :src="bestOccasionOffer.favicon"
+                      :alt="bestOccasionOffer.datasourceName ?? ''"
+                      class="product-price__history-cta-icon"
                     />
-                    <span
-                      class="text-caption font-weight-bold text-uppercase text-grey ls-1"
-                    >
-                      Pas d'offre OCCASION
-                    </span>
-                  </div>
-                  <div class="product-price__metrics-summary">
+                    <v-icon
+                      v-else
+                      icon="mdi-recycle"
+                      size="24"
+                      class="product-price__history-cta-icon"
+                    />
+                    <div class="product-price__history-cta-info">
+                      <span class="product-price__history-cta-price">
+                        {{
+                          formatCurrency(
+                            bestOccasionOffer.price,
+                            bestOccasionOffer.currency
+                          )
+                        }}
+                      </span>
+                      <span class="product-price__history-cta-merchant">
+                        {{ bestOccasionOffer.datasourceName }}
+                      </span>
+                    </div>
+                    <v-icon icon="mdi-open-in-new" size="18" />
+                  </a>
+                  <ProductPriceEmptyCard
+                    v-else
+                    icon="mdi-recycle"
+                    :label="$t('product.price.noOffers.occasion')"
+                  />
+                  <div
+                    v-if="occasionStats"
+                    class="product-price__metrics-summary"
+                  >
                     <dl>
                       <div class="product-price__metrics-row">
                         <v-icon
@@ -472,7 +503,7 @@
                 </div>
               </v-col>
               <v-col cols="12" md="8">
-                <ClientOnly v-if="!isTestEnvironment">
+                <ClientOnly v-if="!isTestEnvironment && hasOccasionHistory">
                   <template #default>
                     <VueECharts
                       v-if="occasionChartOption && chartVisibility.occasion"
@@ -486,6 +517,19 @@
                     <div class="product-price__chart-placeholder" />
                   </template>
                 </ClientOnly>
+                <div
+                  v-else-if="!hasOccasionHistory"
+                  class="d-flex align-center justify-center text-center h-100 pa-6 text-grey-darken-1"
+                >
+                  <div>
+                    <v-icon
+                      icon="mdi-chart-timeline-variant"
+                      size="48"
+                      class="mb-2 opacity-50"
+                    />
+                    <p>{{ $t('product.price.noHistory') }}</p>
+                  </div>
+                </div>
                 <template v-else>
                   <div
                     v-if="occasionChartOption"
@@ -530,6 +574,7 @@ import type {
   ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
 import { ensureECharts } from '~/utils/echarts-loader'
+import ProductPriceEmptyCard from '~/components/product/ProductPriceEmptyCard.vue'
 
 let echartsRegistered = false
 
@@ -636,6 +681,13 @@ const hasNewHistory = computed(
 )
 const hasOccasionHistory = computed(
   () => occasionHistory.value.length >= MIN_HISTORY_POINTS
+)
+
+const showNewSection = computed(
+  () => hasNewHistory.value || Boolean(bestNewOffer.value)
+)
+const showOccasionSection = computed(
+  () => hasOccasionHistory.value || Boolean(bestOccasionOffer.value)
 )
 
 type ResolvedCommercialEvent = {
@@ -768,7 +820,7 @@ const occasionChartOption = computed(() =>
 )
 
 const visibleChartsCount = computed(
-  () => [hasNewHistory.value, hasOccasionHistory.value].filter(Boolean).length
+  () => [showNewSection.value, showOccasionSection.value].filter(Boolean).length
 )
 
 const observeCharts = () => {
@@ -905,6 +957,9 @@ const resolveOfferLink = (
 }
 
 const bestNewOfferLink = computed(() => resolveOfferLink(bestNewOffer.value))
+const bestOccasionOfferLink = computed(() =>
+  resolveOfferLink(bestOccasionOffer.value)
+)
 
 const allOffers = computed(() => {
   const byCondition = props.offers?.offersByCondition ?? {}

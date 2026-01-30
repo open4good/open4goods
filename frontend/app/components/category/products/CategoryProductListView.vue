@@ -87,16 +87,15 @@
             v-if="impactScoreValue(product) != null"
             :score="(impactScoreValue(product) ?? 0) * 4"
             :max="20"
-            size="xl"
-            :show-methodology="false"
-            :show-range="false"
+            size="xs"
+            flat
           />
           <span v-else class="category-product-list__score-fallback">
             {{ $t('category.products.notRated') }}
           </span>
         </div>
 
-        <div class="category-product-list__actions">
+        <div v-if="hasVertical(product)" class="category-product-list__actions">
           <!-- Removed best price button as it is now in micro prices -->
           <AiReviewActionButton
             :is-reviewed="isReviewed(product)"
@@ -188,6 +187,10 @@ const popularAttributesByProduct = (
       }
     })
     .filter((attribute): attribute is DisplayedAttribute => attribute != null)
+}
+
+const hasVertical = (product: ProductDto) => {
+  return !!product.fullSlug?.trim()
 }
 </script>
 

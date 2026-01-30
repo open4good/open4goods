@@ -2261,11 +2261,7 @@
       "ariaLabel": "Bannière fixe pour promouvoir un achat responsable",
       "offersCount": "{count} offre | {count} offres"
     },
-    "hero": {
-      "aiReview": {
-        "label": "Synthèse IA"
-      }
-    },
+
     "start_impact_text": "Vous aimez ?",
     "start_impact_subtext": "Soutenez un projet à impact, ouvert et éthique en faisant vos achats par Nudger ! Ca marche aussi en passant directement via nos ",
     "partners_link": "nos partenaires",
@@ -2285,7 +2281,7 @@
       "tooltip": {
         "generatedAt": "Synthèse avancée générée le {date}",
         "available": "Synthèse IA disponible",
-        "remaining": "Ce produit ne dispose pas encore de synthèse. Vous pouvez la demander et la partager à la communauré. Il vous reste {count} génération| {count} générations",
+        "remaining": "Ce produit ne dispose pas encore de synthèse. Vous pouvez la demander et la partager à la communauté. Il vous reste {count} génération | Ce produit ne dispose pas encore de synthèse. Vous pouvez la demander et la partager à la communauté. Il vous reste {count} générations",
         "quotaExceeded": "Quota épuisé"
       },
       "dataQuality": {
@@ -2874,6 +2870,10 @@
       "viewDeal": "Voir l'offre",
       "history": "Historique des prix",
       "noOffersBanner": "Pas d'offres actuellement !",
+      "noOffers": {
+        "new": "Pas d'offres neuves actuellement",
+        "occasion": "Pas d'offres d'occasion actuellement"
+      },
       "headers": {
         "condition": "État",
         "offer": "Offre",

@@ -6,18 +6,26 @@
         v-for="option in conditionOptions"
         :key="option.key"
         :model-value="localTerms.includes(option.key)"
+        color="primary"
         density="comfortable"
         hide-details
-        color="primary"
         class="category-filter-condition__checkbox"
         @update:model-value="onCheckboxChange(option.key, $event)"
       >
         <template #label>
-          <div class="category-filter-condition__label">
-            <span>{{ option.label }}</span>
-            <span class="category-filter-condition__count">
-              {{ option.count }}
-            </span>
+          <div class="category-filter-condition__checkbox-content">
+            <div class="category-filter-condition__icon">
+              <NudgeConditionNewIcon v-if="option.key === 'NEW'" />
+              <NudgeConditionUsedIcon v-else-if="option.key === 'OCCASION'" />
+            </div>
+            <div class="category-filter-condition__label">
+              <span class="category-filter-condition__label-text">{{
+                option.label
+              }}</span>
+              <span class="category-filter-condition__count">
+                {{ option.count }}
+              </span>
+            </div>
           </div>
         </template>
       </v-checkbox>
@@ -32,6 +40,8 @@ import type {
   Filter,
 } from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
+import NudgeConditionNewIcon from '~/components/nudge-tool/NudgeConditionNewIcon.vue'
+import NudgeConditionUsedIcon from '~/components/nudge-tool/NudgeConditionUsedIcon.vue'
 
 const props = defineProps<{
   field: FieldMetadataDto
@@ -81,16 +91,12 @@ const conditionOptions = computed(() => [
   },
 ])
 
-const onCheckboxChange = (term: string, selected: boolean | null) => {
-  const next = new Set(localTerms.value)
-
-  if (!selected) {
-    next.delete(term)
+const onCheckboxChange = (key: string, checked: boolean) => {
+  if (checked) {
+    localTerms.value = [...localTerms.value, key]
   } else {
-    next.add(term)
+    localTerms.value = localTerms.value.filter(term => term !== key)
   }
-
-  localTerms.value = Array.from(next)
 
   emit(
     'update:modelValue',
@@ -117,26 +123,42 @@ const onCheckboxChange = (term: string, selected: boolean | null) => {
     font-weight: 600
 
   &__options
-    display: grid
+    display: flex
+    flex-direction: column
     gap: 0.5rem
 
   &__checkbox
-    padding: 0.5rem 0.75rem
-    border-radius: 0.75rem
-    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.5)
-    background: rgba(var(--v-theme-surface-primary-050), 0.6)
+    :deep(.v-label)
+      opacity: 1
+      width: 100%
 
-    :deep(.v-selection-control__wrapper)
-      margin-inline-end: 0.5rem
+  &__checkbox-content
+    display: flex
+    align-items: center
+    gap: 0.75rem
+    width: 100%
+
+  &__icon
+    width: 40px
+    height: 30px
+    display: flex
+    align-items: center
+    justify-content: center
+    flex-shrink: 0
 
   &__label
     display: flex
     align-items: center
-    justify-content: space-between
-    width: 100%
-    gap: 0.75rem
+    gap: 0.5rem
+    flex: 1
+
+  &__label-text
+    font-size: 0.95rem
+    font-weight: 500
+    color: rgb(var(--v-theme-text-neutral-strong))
 
   &__count
-    font-size: 0.85rem
+    font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
+    margin-left: auto
 </style>

@@ -15,7 +15,7 @@
   >
     <!-- Main Content -->
     <div class="impact-score-panel__top">
-      <div v-if="!banner" class="impact-score-panel__col-cta">
+      <div v-if="!banner && !flat" class="impact-score-panel__col-cta">
         <CtaCard
           :title="t('category.filters.ecoscore.title', 'Impact Score')"
           :subtitle="
@@ -262,7 +262,7 @@ const ariaLabel = computed(() =>
 const hasMeta = computed(() => props.showMethodology || props.showRange)
 
 const shouldShowMeta = computed(
-  () => normalizedVariant.value === 'default' && hasMeta.value
+  () => normalizedVariant.value === 'default' && hasMeta.value && !props.flat
 )
 
 const shouldShowBar = computed(() => normalizedVariant.value === 'default')

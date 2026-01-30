@@ -115,10 +115,10 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
         >
           <template #append-inner>
             <v-btn
-              class="home-hero__search-submit nudger_degrade-defaut"
+              class="home-hero__search-submit"
               icon="mdi-arrow-right"
-              variant="flat"
-              color="primary"
+              variant="plain"
+              rounded="0"
               size="small"
               type="submit"
               :aria-label="t('home.cta.searchSubmit')"

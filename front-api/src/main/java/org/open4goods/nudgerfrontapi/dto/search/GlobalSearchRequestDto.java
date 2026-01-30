@@ -18,5 +18,9 @@ public record GlobalSearchRequestDto(
         @Schema(description = "Optional sort definition applied to global search results.")
         SortRequestDto sort,
         @Schema(description = "Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').", example = "TEXT")
-        String searchType) {
+        String searchType,
+        @Schema(description = "Zero-based page index for missing-vertical results.", example = "0")
+        Integer pageNumber,
+        @Schema(description = "Page size for missing-vertical results.", example = "20", minimum = "1", maximum = "100")
+        Integer pageSize) {
 }

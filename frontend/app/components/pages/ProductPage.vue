@@ -56,6 +56,7 @@
               :impact-score-min="impactScoreMin"
               :impact-score-max="impactScoreMax"
               :popular-attributes="heroPopularAttributes"
+              :has-category="!!categoryDetail"
             />
           </div>
         </section>
@@ -83,25 +84,6 @@
             :score-max="impactScoreMax"
           />
         </section>
-
-        <div v-else-if="!categoryDetail" class="product-page__unrated">
-          <div class="product-page__unrated-content">
-            <h3 class="product-page__unrated-title">
-              {{ $t('product.impact.notRated.title') }}
-            </h3>
-            <p class="product-page__unrated-desc">
-              {{ $t('product.impact.notRated.description') }}
-            </p>
-            <NuxtLink
-              :to="methodologyHref"
-              class="product-page__unrated-cta"
-              :aria-label="$t('product.impact.methodologyLinkAria')"
-            >
-              <span>{{ $t('product.impact.methodologyLink') }}</span>
-              <v-icon icon="mdi-arrow-top-right" size="18" />
-            </NuxtLink>
-          </div>
-        </div>
 
         <section
           v-if="showAiReviewSection"
@@ -227,7 +209,7 @@ import {
 import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
-import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
+
 import ProductStickyPriceBanner from '~/components/product/ProductStickyPriceBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
@@ -643,18 +625,6 @@ const normalizedVerticalTitle = computed(() => {
 
     return title.toLowerCase()
   }
-})
-
-const methodologyHref = computed(() => {
-  const raw = verticalHomeUrl.value
-  if (raw) {
-    const sanitized = raw.replace(/^\/+/, '').replace(/\/+$/, '')
-    if (sanitized.length) {
-      return `/${sanitized}/ecoscore`
-    }
-  }
-
-  return resolveLocalizedRoutePath('impact-score', locale.value)
 })
 
 const BRAND_FILTER_FIELD = 'attributes.referentielAttributes.BRAND' as const

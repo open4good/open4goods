@@ -39,6 +39,7 @@
       class="category-filter-numeric__slider"
       thumb-label="always"
       color="primary"
+      hide-details="auto"
       @end="emitRange"
     >
       <template #thumb-label="{ modelValue: thumbValue }">
@@ -383,7 +384,7 @@ const gridLineColor = computed(() =>
   toColorWithAlpha(axisColorVar.value, '229, 231, 235')
 )
 const pointerShadowColor = computed(() =>
-  toColorWithAlpha(axisColorVar.value, '148, 163, 184', 0.18)
+  toColorWithAlpha(axisColorVar.value, '148, 163, 184', 0.06)
 )
 const CHART_HORIZONTAL_PADDING = 8
 
@@ -469,7 +470,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
     barWidth: 28,
     itemStyle: {
       color: chartBarColor.value,
-      borderRadius: [6, 6, 6, 6],
+      borderRadius: [2, 2, 0, 0],
     },
     label: {
       show: true,
@@ -504,7 +505,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
   const options = {
     grid: {
       top: 32,
-      bottom: 56,
+      bottom: 0,
       left: CHART_HORIZONTAL_PADDING,
       right: CHART_HORIZONTAL_PADDING,
       containLabel: true,
@@ -532,6 +533,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
       },
       axisTick: { show: false },
       axisLabel: {
+        show: false,
         color: axisColor.value,
         fontSize: 11,
         interval: 0,
@@ -655,13 +657,13 @@ const formatBucketLabel = (
 .category-filter-numeric
   display: flex
   flex-direction: column
-  gap: 0.75rem
   height: 100%
 
   &__header
     display: flex
     justify-content: space-between
     align-items: baseline
+    margin-bottom: 0.75rem
 
   &__title
     font-size: 1rem
@@ -674,7 +676,7 @@ const formatBucketLabel = (
     color: rgb(var(--v-theme-text-neutral-secondary))
 
   &__slider
-    margin-top: 0.25rem
+    margin-top: 0
     width: 100%
     min-width: 0
 
