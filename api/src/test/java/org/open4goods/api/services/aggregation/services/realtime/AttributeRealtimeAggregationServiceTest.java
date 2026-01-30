@@ -8,6 +8,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.open4goods.model.attribute.Attribute;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.attribute.ProductAttribute;
@@ -190,5 +191,25 @@ class AttributeRealtimeAggregationServiceTest {
 		String result = service.parseValue("0.5 W", attrConfig, verticalConfig);
 		// Assert
 		assertThat(result).isEqualTo("0.5");
+	}
+
+	@Test
+	void onDataFragmentMovesDescriptionAttributesToDatasourceDescriptions() throws Exception {
+		// Arrange
+		Product product = new Product(123L);
+		DataFragment fragment = new DataFragment();
+		fragment.setDatasourceName("source-a");
+		fragment.getAttributes().add(new Attribute("DESCRIPTION", "Long description"));
+		fragment.getAttributes().add(new Attribute("required_attr", "value"));
+		verticalConfig.setDescriptionAttributes(Set.of("DESCRIPTION"));
+
+		// Act
+		service.onDataFragment(fragment, product, verticalConfig);
+
+		// Assert
+		assertThat(product.getDescriptionsByDatasource())
+				.containsEntry("source-a", "Long description");
+		assertThat(product.getAttributes().getAll()).containsKey("required_attr");
+		assertThat(product.getAttributes().getAll()).doesNotContainKey("DESCRIPTION");
 	}
 }

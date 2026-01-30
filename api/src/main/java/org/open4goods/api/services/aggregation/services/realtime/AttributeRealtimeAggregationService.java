@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -471,6 +472,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			VerticalConfig vConf) throws AggregationSkipException {
 
 		try {
+			handleDescriptions(dataFragment, product, vConf);
 
 //			AttributesConfig attributesConfig = vConf.getAttributesConfig();
 
@@ -514,6 +516,54 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		onProduct(product, vConf);
 		return null;
+	}
+
+	private void handleDescriptions(final DataFragment dataFragment, final Product product, final VerticalConfig vConf) {
+		if (dataFragment == null || product == null || vConf == null) {
+			return;
+		}
+		Set<String> descriptionAttributes = vConf.getDescriptionAttributes();
+		Set<String> normalized = new HashSet<>();
+		if (descriptionAttributes != null) {
+			descriptionAttributes.stream()
+					.filter(StringUtils::isNotBlank)
+					.map(name -> name.trim().toUpperCase(Locale.ROOT))
+					.forEach(normalized::add);
+		}
+		if (!normalized.isEmpty() && dataFragment.getAttributes() != null) {
+			dataFragment.getAttributes().removeIf(attr -> {
+				String name = attr.getName();
+				if (StringUtils.isBlank(name)) {
+					return false;
+				}
+				String normalizedName = name.trim().toUpperCase(Locale.ROOT);
+				if (!normalized.contains(normalizedName)) {
+					return false;
+				}
+				mergeDescription(product, dataFragment.getDatasourceName(), attr.stringValue());
+				return true;
+			});
+		}
+		if (dataFragment.getDescriptionsByDatasource() != null
+					&& !dataFragment.getDescriptionsByDatasource().isEmpty()) {
+			dataFragment.getDescriptionsByDatasource().forEach((source, description) ->
+					mergeDescription(product, source, description));
+		}
+	}
+
+	private void mergeDescription(final Product product, final String datasourceName, final String description) {
+		if (product == null || StringUtils.isBlank(datasourceName) || StringUtils.isBlank(description)) {
+			return;
+		}
+		Map<String, String> descriptions = product.getDescriptionsByDatasource();
+		if (descriptions == null) {
+			descriptions = new HashMap<>();
+			product.setDescriptionsByDatasource(descriptions);
+		}
+		String existing = descriptions.get(datasourceName);
+		if (StringUtils.isBlank(existing) || description.length() > existing.length()) {
+			descriptions.put(datasourceName, description);
+		}
 	}
 
 //	/**
