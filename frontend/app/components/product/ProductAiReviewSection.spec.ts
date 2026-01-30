@@ -12,6 +12,7 @@ import type {
 vi.mock('vuetify', () => ({
   useTheme: () => ({
     global: {
+      name: { value: 'light' },
       current: { value: { dark: false } },
     },
   }),

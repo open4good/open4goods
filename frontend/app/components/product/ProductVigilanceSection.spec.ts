@@ -1,7 +1,16 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 import ProductVigilanceSection from './ProductVigilanceSection.vue'
+
+// Mock the child component to avoid import issues and simplify testing
+const ProductAttributeSourcingLabel = {
+  template: '<div><slot /></div>',
+  props: ['sourcing', 'enableTooltip'],
+}
 
 const i18nMessages = {
   'fr-FR': {
@@ -16,6 +25,19 @@ const i18nMessages = {
       vigilance: {
         title: 'Points de vigilance',
         subtitle: 'Informations importantes sur la durabilité et la qualité.',
+        conflicts: {
+          title: 'Conflits',
+          description: 'Description des conflits',
+          showMore: 'Voir plus',
+          showLess: 'Voir moins',
+        },
+        quality: {
+          title: 'Qualité des données',
+          description: 'Score: {score}, Moyenne: {avg}',
+        },
+        obsolescence: {
+          title: 'Obsolescence',
+        },
       },
       price: {
         competition: {
@@ -23,6 +45,7 @@ const i18nMessages = {
           lowDescription:
             'Peu d’offres disponibles, la comparaison est limitée.',
           count: '{count} offres',
+          cta: 'Voir les {count} offres',
         },
       },
     },
@@ -30,6 +53,14 @@ const i18nMessages = {
 }
 
 describe('ProductVigilanceSection', () => {
+  const vuetify = createVuetify({
+    components,
+    directives,
+  })
+
+  // Create a fresh i18n instance for each test to avoid pollution?
+  // Actually createI18n inside mountComponent is safer.
+
   const mountComponent = async (props: Record<string, unknown> = {}) => {
     const i18n = createI18n({
       legacy: false,
@@ -37,7 +68,7 @@ describe('ProductVigilanceSection', () => {
       messages: i18nMessages,
     })
 
-    return mountSuspended(ProductVigilanceSection, {
+    return mount(ProductVigilanceSection, {
       props: {
         product: {
           identity: { brand: 'Brand A' },
@@ -46,7 +77,10 @@ describe('ProductVigilanceSection', () => {
         ...props,
       },
       global: {
-        plugins: [[i18n]],
+        plugins: [vuetify, i18n],
+        stubs: {
+          ProductAttributeSourcingLabel,
+        },
       },
     })
   }
@@ -104,7 +138,6 @@ describe('ProductVigilanceSection', () => {
     expect(wrapper.find('.product-vigilance__card--competition').exists()).toBe(
       true
     )
-    console.log(wrapper.html())
     expect(wrapper.text()).toContain('1')
     expect(wrapper.text()).toContain('offres')
   })

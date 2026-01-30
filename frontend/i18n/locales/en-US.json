@@ -3203,6 +3203,12 @@
       "fabLabel": "Need tailored help?"
     },
     "price": {
+      "competition": {
+        "title": "Competition Level",
+        "lowDescription": "Few offers available, comparison is limited.",
+        "count": "{count} offers",
+        "cta": "See {count} offers"
+      },
       "lowCompetition": "Low competition!",
       "condition": {
         "NEW": "New",

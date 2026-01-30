@@ -56,7 +56,7 @@
             <div class="product-hero__details-section">
               <div
                 v-if="impactScore != null"
-                class="product-hero__impact-score mb-4 cursor-pointer"
+                class="mb-4 cursor-pointer"
                 @click="handleImpactScoreClick"
               >
                 <ImpactScore
@@ -69,7 +69,7 @@
                   :brand="productBrandName"
                   :model="productModelName"
                   :date="aiGenerationDate"
-                  :category="categoryName"
+                  :category="productVerticalName"
                 />
               </div>
 
@@ -499,14 +499,6 @@ const aiGenerationDate = computed(() => {
   return props.product.aiReview?.createdMs ?? null
 })
 
-const categoryName = computed(() => {
-  const crumbs = visibleBreadcrumbs.value
-  if (crumbs.length > 0) {
-    return crumbs[crumbs.length - 1].title
-  }
-  return ''
-})
-
 const handleImpactScoreClick = () => {
   const element = document.getElementById('impact')
   if (element) {
@@ -558,6 +550,9 @@ const handleCloseInlineGallery = () => {
   showInlineGallery.value = false
 }
 
+const productVerticalName = computed(() =>
+  normalizeString(props.product.names?.singular)
+)
 const productBrandName = computed(() =>
   normalizeString(props.product.identity?.brand)
 )

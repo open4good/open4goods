@@ -763,7 +763,7 @@
     "products": {
       "compare": {
         "addMoreHint": "Sélectionne au moins deux produits pour lancer une comparaison.",
-        "addToList": "Ajouter à la comparaison",
+        "addToList": "Ajouter au comparateur",
         "addButtonShort": "Comparer",
         "addedButtonShort": "Ajouté",
         "addButtonFull": "Ajouter au comparateur",
@@ -2198,6 +2198,7 @@
     "offers": {
       "bestPrice": "Meilleur prix"
     },
+
     "vigilance": {
       "title": "Points de vigilance",
       "obsolescence": {
@@ -2207,6 +2208,12 @@
       "quality": {
         "title": "Qualité de la donnée faible",
         "description": "Le score de qualité de données ({score}/100) est inférieur à la moyenne de la catégorie ({avg}/100). Les informations peuvent être incomplètes."
+      },
+      "conflicts": {
+        "title": "Informations contradictoires",
+        "description": "Des différences ont été détectées entre les sources de données.",
+        "showMore": "Voir toutes les différences",
+        "showLess": "Voir moins"
       }
     },
     "admin": {
@@ -2383,6 +2390,15 @@
           "gtin": "GTIN",
           "gtinLabel": "Référence code-barres GTIN",
           "gtinImageAlt": "Code-barres GTIN pour {gtin}",
+          "barcodeType": {
+            "ISBN_13": "ISBN",
+            "GTIN_13": "EAN-13",
+            "GTIN_8": "EAN-8",
+            "GTIN_12": "UPC-A",
+            "GTIN_14": "ITF-14",
+            "UNKNOWN": "Code barre"
+          },
+          "copy": "Copier",
           "empty": "Les informations d'identité ne sont pas encore disponibles pour ce produit."
         },
         "attributes": {
@@ -2584,8 +2600,8 @@
       "viewSingleOffer": "Voir l'offre"
     },
     "impact": {
-      "endOfLifeTitle": "Produit plus commercialisé",
-      "endOfLifeDescription": "Le produit n'est plus officiellement commercialisé par {brand}. La durée de support légal a démarré le {onMarketEndDate}.",
+      "endOfLifeTitle": "Ce produit n'est plus commercialisé",
+      "endOfLifeDescription": "Le produit n'est plus officiellement commercialisé par {brand} depuis le {onMarketEndDate}. La durée de support légal est de {legalSupportDuration} et a démarré le {onMarketEndDate}.",
       "endOfLifeDescriptionFallback": "Le produit n'est plus officiellement commercialisé par {brand}.",
       "endOfLifeSupportEnd": "Fin du support légal",
       "endOfLifeSupportDuration": "Durée de support légal",
@@ -2852,6 +2868,10 @@
     },
     "price": {
       "competition": {
+        "title": "Niveau de concurrence",
+        "lowDescription": "Peu d’offres disponibles, la comparaison est limitée.",
+        "count": "{count} offres",
+        "cta": "Voir les {count} offres",
         "low": "Concurrence faible !",
         "correct": "Concurrence correcte !",
         "good": "Bonne Concurrence !"

@@ -272,10 +272,8 @@
                   </header>
                   <ProductAiReviewInsightBlock
                     :content-html="ecologicalContent ?? ''"
-                    image-src="/images/product/ai-review-ecological.svg"
-                    :image-alt="
-                      $t('product.aiReview.illustrations.ecologicalAlt')
-                    "
+                    :image-src="logoSrc"
+                    :image-alt="$t('siteIdentity.title')"
                     image-position="right"
                   />
                 </v-card-text>
@@ -462,10 +460,7 @@
                       {{ $t('product.aiReview.dataQuality.description') }}
                     </p>
                     <!-- eslint-disable vue/no-v-html -->
-                    <div
-                      class="product-ai-review__quality-value"
-                      v-html="dataQualityValue"
-                    />
+                    <div class="product-ai--value" v-html="dataQualityValue" />
                     <!-- eslint-enable vue/no-v-html -->
                   </v-card-text>
                 </v-card>
@@ -624,6 +619,7 @@ import { useIpQuota } from '~/composables/useIpQuota'
 import ProductAiReviewInsightBlock from '~/components/product/ProductAiReviewInsightBlock.vue'
 import ProductAiReviewRequestPanel from '~/components/product/ProductAiReviewRequestPanel.vue'
 import { useAiReviewGenerationStore } from '~/stores/useAiReviewGenerationStore'
+import { useLogoAsset } from '~/composables/useThemedAsset'
 
 interface ReviewSource extends AiReviewSourceDto {
   referenceId: number
@@ -717,6 +713,8 @@ const showAllSources = ref(false)
 const technicalLevel = ref<ReviewLevel>('intermediate')
 const ecologicalLevel = ref<ReviewLevel>('intermediate')
 const communityLevel = ref<ReviewLevel>('intermediate')
+
+const logoSrc = useLogoAsset()
 
 const quotaCategory = IpQuotaCategory.ReviewGeneration
 

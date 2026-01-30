@@ -306,8 +306,8 @@
           <v-col
             v-if="hasGlobalResults"
             cols="12"
-            :lg="hasVerticalResults ? 7 : 6"
-            :offset-lg="hasVerticalResults ? 0 : 3"
+            :lg="hasVerticalResults ? 7 : 10"
+            :offset-lg="hasVerticalResults ? 0 : 1"
           >
             <section class="search-page__column">
               <div
@@ -415,6 +415,7 @@ import { useAnalytics } from '~/composables/useAnalytics'
 
 const MIN_QUERY_LENGTH = 3
 const VERTICAL_RESULTS_LIMIT = 4
+const GLOBAL_RESULTS_LIMIT = 10
 
 definePageMeta({
   ssr: true,
@@ -546,6 +547,10 @@ const { data, pending, error, refresh } =
       return await $fetch<GlobalSearchResponseDto>('/api/products/search', {
         method: 'POST',
         headers: requestHeaders,
+        query: {
+          page: missingVerticalPageNumber.value,
+          size: GLOBAL_RESULTS_LIMIT,
+        },
         body: {
           query: normalizedQuery.value,
           filters: filterRequest.value,
@@ -601,6 +606,7 @@ const {
       query: {
         query: hasMinimumLength.value ? normalizedQuery.value : undefined,
         domainLanguage: 'fr-FR',
+        size: GLOBAL_RESULTS_LIMIT,
       },
       body: baselinePayload.value, // This payload matches ProductSearchRequestDto which /api/products/search can handle
     })
@@ -668,6 +674,7 @@ const {
       query: {
         query: hasMinimumLength.value ? normalizedQuery.value : undefined,
         domainLanguage: 'fr-FR',
+        size: GLOBAL_RESULTS_LIMIT,
       },
       headers: requestHeaders,
       body: requestBody.value,
@@ -883,8 +890,12 @@ const limitedGroups = computed(() => {
 
 watch(
   limitedGroups,
-  () => {
-    openPanels.value = []
+  groups => {
+    if (groups.length === 1) {
+      openPanels.value = [0]
+    } else {
+      openPanels.value = []
+    }
   },
   { immediate: true }
 )

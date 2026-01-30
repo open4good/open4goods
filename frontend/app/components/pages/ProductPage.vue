@@ -142,6 +142,7 @@
           <ProductVigilanceSection
             :product="product"
             :on-market-end-date="product.eprel?.onMarketEndDate"
+            @click:offers="scrollToSection(subSectionIds.priceOffers)"
           />
         </section>
 
@@ -1505,21 +1506,13 @@ const radarData = computed<RadarDataset>(() => {
     return { axes: [], series: [] }
   }
 
-  const axes = axesDetails.map(({ id, name, attributeValue, min, max }) => {
-    const config = attributeConfigMap.value?.get(id)
-    // For LOWER is BETTER (e.g. Energy), the Axis Max (Outer Edge) should be the Best Value (Min).
-    // For HIGHER is BETTER (e.g. Durabilty), the Axis Max is the Max Value.
-    let axisMax = max
-    if (config?.impactBetterIs === 'LOWER') {
-      axisMax = min
-    }
-
+  const axes = axesDetails.map(({ id, name, attributeValue }) => {
     return {
       id,
       name,
       attributeValue,
-      min: min ?? undefined,
-      max: axisMax ?? undefined,
+      min: 0,
+      max: 100,
     }
   })
   const productValues = axesDetails.map(entry => entry.productValue)

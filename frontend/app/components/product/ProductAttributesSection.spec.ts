@@ -25,6 +25,15 @@ vi.mock('~/composables/useAuth', () => ({
   }),
 }))
 
+const copySpy = vi.fn()
+const copiedRef = ref(false)
+vi.mock('@vueuse/core', () => ({
+  useClipboard: () => ({
+    copy: copySpy,
+    copied: copiedRef,
+  }),
+}))
+
 const VCardStub = defineComponent({
   name: 'VCardStub',
   setup(_, { slots, attrs }) {
@@ -285,6 +294,10 @@ const buildProduct = (): ProductDto => ({
     gtin: 1234567890123,
     creationDate: Date.UTC(2023, 3, 12),
     lastChange: Date.UTC(2024, 4, 1),
+    gtinInfo: {
+      gtinStrings: ['1234567890123'],
+      upcType: 'GTIN_13',
+    },
   },
   identity: {
     brand: 'BrandX',
@@ -428,6 +441,11 @@ const i18n = createI18n({
               gtin: 'GTIN',
               gtinLabel: 'GTIN barcode reference',
               gtinImageAlt: 'GTIN barcode for {gtin}',
+              barcodeType: {
+                GTIN_13: 'EAN-13',
+              },
+              copy: 'Copy',
+              copySuccess: 'Copied!',
               empty:
                 'Identity information is not yet available for this product.',
             },
@@ -709,5 +727,25 @@ describe('ProductAttributesSection', () => {
     const auditText = auditRows.map(r => r.text()).join(' ')
 
     expect(auditText).toContain('OnlyInAll')
+  })
+
+  it('displays localized GTIN label and supports copy to clipboard', async () => {
+    const product = buildProduct()
+    const wrapper = await mountComponent(product)
+
+    // Check localized label (GTIN_13 -> EAN-13)
+    const gtinRow = wrapper.find('.product-attributes__gtin-row')
+    expect(gtinRow.exists()).toBe(true)
+    expect(gtinRow.text()).toContain('EAN-13')
+
+    // Find copy button
+    const copyBtn = wrapper.find('.product-attributes__copy-btn')
+    expect(copyBtn.exists()).toBe(true)
+
+    // Trigger click
+    await copyBtn.trigger('click')
+
+    // Expect copy to be called with the GTIN
+    expect(copySpy).toHaveBeenCalledWith(1234567890123)
   })
 })

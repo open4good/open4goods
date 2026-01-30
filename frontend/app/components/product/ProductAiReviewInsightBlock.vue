@@ -54,10 +54,9 @@ const isRight = computed(() => props.imagePosition === 'right')
 }
 
 .product-ai-review-insight__media-frame {
-  border-radius: 16px;
-  background: rgba(var(--v-theme-surface-primary-050), 0.8);
-  padding: 0.75rem;
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-ai-review__card-text {
