@@ -360,7 +360,10 @@ describe('ProductPriceSection', () => {
   })
 
   it('omits best offer highlight when no best new offer is available', async () => {
-    const wrapper = await mountComponent({ bestNewOffer: undefined })
+    const wrapper = await mountComponent({
+      bestNewOffer: undefined,
+      bestOccasionOffer: undefined,
+    })
 
     expect(wrapper.find('.product-price__history-cta').exists()).toBe(false)
 
@@ -378,6 +381,8 @@ describe('ProductPriceSection', () => {
           { timestamp: Date.UTC(2024, 4, 15), price: 699 },
         ],
       },
+      bestNewOffer: undefined,
+      bestOccasionOffer: undefined,
     })
 
     expect(wrapper.findAll('.echart-stub')).toHaveLength(0)

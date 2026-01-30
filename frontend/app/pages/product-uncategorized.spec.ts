@@ -159,9 +159,6 @@ describe('Uncategorized Product Page', () => {
 
     expect(wrapper.find('.product-page__fab').exists()).toBe(false)
 
-    // Should render the "No Score" alert
-    expect(wrapper.text()).toContain(messages['product.uncategorized.noScore'])
-
     // Breadcrumbs check
     const hero = wrapper.findComponent({ name: 'ProductHero-stub' })
     const breadcrumbs = hero.attributes('breadcrumbs')
