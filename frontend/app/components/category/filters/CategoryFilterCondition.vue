@@ -22,9 +22,14 @@
               <span class="category-filter-condition__label-text">{{
                 option.label
               }}</span>
-              <span class="category-filter-condition__count">
-                {{ option.count }}
-              </span>
+              <v-badge
+                v-if="option.count > 0"
+                :content="option.count"
+                color="primary"
+                variant="tonal"
+                inline
+                class="ms-2"
+              />
             </div>
           </div>
         </template>
@@ -149,16 +154,10 @@ const onCheckboxChange = (key: string, checked: boolean) => {
   &__label
     display: flex
     align-items: center
-    gap: 0.5rem
     flex: 1
 
   &__label-text
     font-size: 0.95rem
     font-weight: 500
     color: rgb(var(--v-theme-text-neutral-strong))
-
-  &__count
-    font-size: 0.875rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
-    margin-left: auto
 </style>

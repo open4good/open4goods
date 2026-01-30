@@ -93,9 +93,10 @@
 
       <v-card
         v-else
-        class="search-page__filters-card w-100"
+        class="search-page__filters-card mx-auto"
         rounded="xl"
         elevation="1"
+        style="max-width: fit-content"
       >
         <div class="pa-4">
           <CategoryFilterList

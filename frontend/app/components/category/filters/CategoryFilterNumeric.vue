@@ -108,7 +108,7 @@ type RangeBucketDatum = {
   missing?: boolean
 }
 
-const MAX_CHART_HEIGHT = 250
+const MAX_CHART_HEIGHT = 120
 const MAX_VISIBLE_LABELS = 6
 
 const props = defineProps<{
@@ -393,8 +393,8 @@ const chartHeight = computed(() => {
     return '0px'
   }
 
-  const baseHeight = 220
-  const extraHeight = Math.max(0, buckets.value.length - 6) * 16
+  const baseHeight = 100
+  const extraHeight = Math.max(0, buckets.value.length - 6) * 12
 
   return `${Math.min(MAX_CHART_HEIGHT, baseHeight + extraHeight)}px`
 })

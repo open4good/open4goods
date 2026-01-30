@@ -250,7 +250,7 @@ useHead({
           >
             <h1
               id="home-hero-title"
-              class="mt-8 home-hero__title home-reveal-item"
+              class=" home-hero__title home-reveal-item"
               :style="{ '--reveal-delay': '0ms' }"
             >
               {{ heroTitle }}
