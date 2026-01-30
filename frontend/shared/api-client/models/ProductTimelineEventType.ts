@@ -28,6 +28,9 @@ export const ProductTimelineEventType = {
     EprelFirstPublication: 'EPREL_FIRST_PUBLICATION',
     EprelLastPublication: 'EPREL_LAST_PUBLICATION',
     EprelExport: 'EPREL_EXPORT',
+    EprelSparePartsEnd: 'EPREL_SPARE_PARTS_END',
+    EprelSoftwareSupportEnd: 'EPREL_SOFTWARE_SUPPORT_END',
+    EprelSupportEnd: 'EPREL_SUPPORT_END',
     EprelImported: 'EPREL_IMPORTED',
     EprelOrganisationClosed: 'EPREL_ORGANISATION_CLOSED'
 } as const;

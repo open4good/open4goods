@@ -21,6 +21,7 @@ import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.NudgeToolConfig;
 import org.open4goods.model.vertical.NudgeToolScore;
+import org.open4goods.model.vertical.ScoreRange;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
@@ -254,6 +255,8 @@ class VerticalsGenerationServiceTest {
         ProductRepository repository = mock(ProductRepository.class);
         when(repository.countMainIndexHavingScoreWithFilters(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(verticalId)))
                 .thenReturn(50L);
+        when(repository.getScoreRange(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(verticalId), org.mockito.ArgumentMatchers.anyInt()))
+                .thenReturn(new ScoreRange(0.0, 5.0));
         when(repository.countMainIndexHavingScoreThreshold(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(verticalId),
                 org.mockito.ArgumentMatchers.any(SubsetCriteriaOperator.class), org.mockito.ArgumentMatchers.anyDouble()))
                 .thenAnswer(invocation -> {
@@ -281,9 +284,51 @@ class VerticalsGenerationServiceTest {
 
         String result = service.updateVerticalFileWithNudgeToolConfig(tempFile.getAbsolutePath());
 
-        assertThat(result).contains("scoreMinValue: 3.3");
-        assertThat(result).contains("value: \"1.7\"");
-        assertThat(result).contains("value: \"3.3\"");
+        assertThat(result).contains("scoreMinValue: 3.18");
+        assertThat(result).contains("value: \"1.82\"");
+        assertThat(result).contains("value: \"3.18\"");
+    }
+
+    @Test
+    void computeNudgeToolThresholdsReturnsMinimalConfig() {
+        String verticalId = "tv";
+        VerticalConfig vConf = verticalConfig(verticalId);
+        NudgeToolScore score = new NudgeToolScore();
+        score.setScoreName("ENERGY_CONSUMPTION");
+        NudgeToolConfig nudgeToolConfig = new NudgeToolConfig();
+        nudgeToolConfig.setScores(List.of(score));
+        vConf.setNudgeToolConfig(nudgeToolConfig);
+
+        VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
+        when(verticalsConfigService.getConfigById(verticalId)).thenReturn(vConf);
+
+        ProductRepository repository = mock(ProductRepository.class);
+        when(repository.getScoreRange(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(verticalId), org.mockito.ArgumentMatchers.anyInt()))
+                .thenReturn(new ScoreRange(0.0, 5.0));
+        when(repository.countMainIndexHavingScoreWithFilters(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(verticalId)))
+                .thenReturn(50L);
+        when(repository.countMainIndexHavingScoreThreshold(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(verticalId),
+                org.mockito.ArgumentMatchers.any(SubsetCriteriaOperator.class), org.mockito.ArgumentMatchers.anyDouble()))
+                .thenReturn(17L);
+
+        VerticalsGenerationService service = new VerticalsGenerationService(
+                new VerticalsGenerationConfig(),
+                repository,
+                mock(SerialisationService.class),
+                mock(GoogleTaxonomyService.class),
+                verticalsConfigService,
+                mock(ResourcePatternResolver.class),
+                mock(EvaluationService.class),
+                mock(IcecatService.class),
+                mock(PromptService.class));
+
+        VerticalConfig result = service.computeNudgeToolThresholds(verticalId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(verticalId);
+        assertThat(result.getNudgeToolConfig().getScores()).hasSize(1);
+        assertThat(result.getNudgeToolConfig().getScores().get(0).getScoreMinValue()).isNotNull();
+        assertThat(result.getNudgeToolConfig().getSubsets()).isNotEmpty();
     }
 
     private VerticalConfig verticalConfig(String id) {

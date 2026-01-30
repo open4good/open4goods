@@ -36,8 +36,11 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.NudgeToolScore;
+import org.open4goods.model.vertical.ScoreRange;
+import org.open4goods.model.vertical.SubsetCriteria;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.dto.PromptResponse;
@@ -54,12 +57,10 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 public class VerticalsGenerationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VerticalsGenerationService.class);
-	private static final double DEFAULT_SCORE_THRESHOLD = 2.5;
 	private static final double TARGET_THRESHOLD_RATIO = 1.0 / 3.0;
-	private static final double SCORE_THRESHOLD_STEP = 0.1;
 	private static final double SCORE_MIN_VALUE = 0.0;
 	private static final double SCORE_MAX_VALUE = 5.0;
-	private static final double ACCEPTABLE_RATIO_DELTA = 0.02;
+	private static final double ACCEPTABLE_RATIO_DELTA = 0.05;
 	private static final int MAX_THRESHOLD_ITERATIONS = 40;
 	private static final String IMPACT_SCORE_NAME = "ECOSCORE";
 	private VerticalsGenerationConfig config;
@@ -95,6 +96,75 @@ public class VerticalsGenerationService {
 	 */
 	public Map<String, VerticalCategoryMapping> getMappings() {
 		return sortedMappings;
+	}
+
+	public VerticalConfig computeNudgeToolThresholds(String verticalId) {
+		VerticalConfig verticalConfig = verticalConfigservice.getConfigById(verticalId);
+		if (verticalConfig == null) {
+			return null;
+		}
+
+		// Minimal config to return
+		VerticalConfig result = new VerticalConfig();
+		result.setId(verticalId);
+
+		// Compute nudge tool scores
+		if (verticalConfig.getNudgeToolConfig() != null) {
+			List<NudgeToolScore> scores = verticalConfig.getNudgeToolConfig().getScores();
+			if (scores != null && !scores.isEmpty()) {
+				for (NudgeToolScore score : scores) {
+					if (StringUtils.isNotBlank(score.getScoreName())) {
+						double threshold = computeThresholdForScore(verticalId, score.getScoreName(), SubsetCriteriaOperator.GREATER_THAN);
+						NudgeToolScore newScore = new NudgeToolScore();
+						newScore.setScoreName(score.getScoreName());
+						newScore.setScoreMinValue(threshold);
+						// Copy other useful metadata if needed, but let's keep it minimal
+						newScore.setTitle(score.getTitle());
+						newScore.setMdiIcon(score.getMdiIcon());
+						result.getNudgeToolConfig().getScores().add(newScore);
+					}
+				}
+			}
+		}
+
+		// Compute impact score subsets
+		ScoreThresholds thresholds = computeImpactScoreThresholds(verticalId);
+		String lowerThreshold = formatScoreValue(thresholds.lower());
+		String upperThreshold = formatScoreValue(thresholds.upper());
+
+		// Build subsets (impact score only for now as requested)
+		List<VerticalSubset> subsets = buildImpactScoreSubsetsList(lowerThreshold, upperThreshold);
+		result.getNudgeToolConfig().setSubsets(subsets);
+		result.setSubsets(subsets);
+
+		return result;
+	}
+
+	private List<VerticalSubset> buildImpactScoreSubsetsList(String lowerThreshold, String upperThreshold) {
+		List<VerticalSubset> subsets = new ArrayList<>();
+
+		subsets.add(createImpactSubset("impact_high", "LOWER_THAN", lowerThreshold));
+		subsets.add(createImpactSubset("impact_medium", List.of(
+				new SubsetCriteria(IMPACT_SCORE_FIELD, SubsetCriteriaOperator.GREATER_THAN, lowerThreshold),
+				new SubsetCriteria(IMPACT_SCORE_FIELD, SubsetCriteriaOperator.LOWER_THAN, upperThreshold)
+		)));
+		subsets.add(createImpactSubset("impact_low", "GREATER_THAN", upperThreshold));
+
+		return subsets;
+	}
+
+	private static final String IMPACT_SCORE_FIELD = "scores.ECOSCORE.value";
+
+	private VerticalSubset createImpactSubset(String id, String operator, String value) {
+		return createImpactSubset(id, List.of(new SubsetCriteria(IMPACT_SCORE_FIELD, SubsetCriteriaOperator.valueOf(operator), value)));
+	}
+
+	private VerticalSubset createImpactSubset(String id, List<SubsetCriteria> criterias) {
+		VerticalSubset subset = new VerticalSubset();
+		subset.setId(id);
+		subset.setGroup("impactscore");
+		subset.setCriterias(new ArrayList<>(criterias));
+		return subset;
 	}
 
 
@@ -435,23 +505,33 @@ public class VerticalsGenerationService {
 			return new ScoreThresholds(2.0, 4.0);
 		}
 
-		double lowerThreshold = computeThresholdForScore(verticalId, IMPACT_SCORE_NAME, SubsetCriteriaOperator.LOWER_THAN);
-		double upperThreshold = computeThresholdForScore(verticalId, IMPACT_SCORE_NAME, SubsetCriteriaOperator.GREATER_THAN);
+		ScoreRange range = repository.getScoreRange(IMPACT_SCORE_NAME, verticalId, 100);
+		double lowerThreshold = computeThresholdForScore(verticalId, IMPACT_SCORE_NAME, SubsetCriteriaOperator.LOWER_THAN, range);
+		double upperThreshold = computeThresholdForScore(verticalId, IMPACT_SCORE_NAME, SubsetCriteriaOperator.GREATER_THAN, range);
 		if (lowerThreshold >= upperThreshold) {
 			LOGGER.warn("Invalid impact score thresholds for {}: {} >= {}", verticalId, lowerThreshold, upperThreshold);
-			return new ScoreThresholds(2.0, 4.0);
+			return new ScoreThresholds(range.min() + (range.max() - range.min()) / 3.0, range.min() + 2 * (range.max() - range.min()) / 3.0);
 		}
 		return new ScoreThresholds(lowerThreshold, upperThreshold);
 	}
 
 	private double computeThresholdForScore(String verticalId, String scoreName, SubsetCriteriaOperator operator) {
+		ScoreRange range = repository.getScoreRange(scoreName, verticalId, 100);
+		return computeThresholdForScore(verticalId, scoreName, operator, range);
+	}
+
+	private double computeThresholdForScore(String verticalId, String scoreName, SubsetCriteriaOperator operator, ScoreRange range) {
 		long total = repository.countMainIndexHavingScoreWithFilters(scoreName, verticalId);
 		if (total <= 0) {
 			LOGGER.info("No products for score {} in {}", scoreName, verticalId);
-			return DEFAULT_SCORE_THRESHOLD;
+			return (range.min() + range.max()) / 2.0;
 		}
 
-		double threshold = DEFAULT_SCORE_THRESHOLD;
+		double min = range.min();
+		double max = range.max();
+		double threshold = (min + max) / 2.0;
+		double step = (max - min) / 20.0;
+
 		for (int i = 0; i < MAX_THRESHOLD_ITERATIONS; i++) {
 			long count = repository.countMainIndexHavingScoreThreshold(scoreName, verticalId, operator, threshold);
 			double ratio = count / (double) total;
@@ -460,20 +540,22 @@ public class VerticalsGenerationService {
 			}
 
 			boolean tooMany = ratio > TARGET_THRESHOLD_RATIO;
-			threshold = adjustThreshold(threshold, operator, tooMany);
-			if (threshold <= SCORE_MIN_VALUE || threshold >= SCORE_MAX_VALUE) {
-				threshold = clampScore(threshold);
+			threshold = adjustThreshold(threshold, operator, tooMany, step);
+			if (threshold <= min || threshold >= max) {
+				threshold = Math.clamp(threshold, min, max);
 				break;
 			}
+			// Reduce step size to converge
+			step *= 0.9;
 		}
 
-		return clampScore(threshold);
+		return BigDecimal.valueOf(threshold).setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 
-	private double adjustThreshold(double current, SubsetCriteriaOperator operator, boolean tooMany) {
+	private double adjustThreshold(double current, SubsetCriteriaOperator operator, boolean tooMany, double step) {
 		return switch (operator) {
-		case GREATER_THAN -> current + (tooMany ? SCORE_THRESHOLD_STEP : -SCORE_THRESHOLD_STEP);
-		case LOWER_THAN -> current + (tooMany ? -SCORE_THRESHOLD_STEP : SCORE_THRESHOLD_STEP);
+		case GREATER_THAN -> current + (tooMany ? step : -step);
+		case LOWER_THAN -> current + (tooMany ? -step : step);
 		case EQUALS -> current;
 		};
 	}

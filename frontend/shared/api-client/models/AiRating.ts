@@ -42,7 +42,7 @@ export interface AiRating {
      * @type {string}
      * @memberof AiRating
      */
-    comment: string;
+    comment?: string;
     /**
      * Reference source number
      * @type {number}
@@ -58,7 +58,6 @@ export function instanceOfAiRating(value: object): value is AiRating {
     if (!('source' in value) || value['source'] === undefined) return false;
     if (!('score' in value) || value['score'] === undefined) return false;
     if (!('max' in value) || value['max'] === undefined) return false;
-    if (!('comment' in value) || value['comment'] === undefined) return false;
     if (!('number' in value) || value['number'] === undefined) return false;
     return true;
 }
@@ -76,7 +75,7 @@ export function AiRatingFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'source': json['source'],
         'score': json['score'],
         'max': json['max'],
-        'comment': json['comment'],
+        'comment': json['comment'] == null ? undefined : json['comment'],
         'number': json['number'],
     };
 }

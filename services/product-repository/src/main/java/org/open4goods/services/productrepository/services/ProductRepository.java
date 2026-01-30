@@ -18,6 +18,7 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
+import org.open4goods.model.vertical.ScoreRange;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.services.productrepository.config.IndexationConfig;
@@ -1447,5 +1448,32 @@ public class ProductRepository {
 
 
 
+
+        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+        public ScoreRange getScoreRange(String scoreName, String verticalId, int sampleSize) {
+                List<Product> samples = getRandomProducts(sampleSize, 1, verticalId);
+                if (samples.isEmpty()) {
+                        return new ScoreRange(0.0, 5.0); // Default fallback
+                }
+
+                double min = Double.MAX_VALUE;
+                double max = -Double.MAX_VALUE;
+                boolean found = false;
+
+                for (Product p : samples) {
+                        if (p.getScores() != null && p.getScores().containsKey(scoreName)) {
+                                double val = p.getScores().get(scoreName).getValue();
+                                if (val < min) min = val;
+                                if (val > max) max = val;
+                                found = true;
+                        }
+                }
+
+                if (!found) {
+                        return new ScoreRange(0.0, 5.0);
+                }
+
+                return new ScoreRange(min, max);
+        }
 
 }
