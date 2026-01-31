@@ -115,7 +115,7 @@
 
     <v-container
       v-if="shouldShowResults"
-      class="search-page__results py-10 px-4 mx-auto"
+      class="search-page__results py-10 px-4 mx-auto w-100"
       fluid
     >
       <v-alert
@@ -176,7 +176,7 @@
             v-if="hasVerticalResults"
             cols="12"
             :lg="hasGlobalResults ? 5 : 10"
-            :offset-lg="hasGlobalResults ? 0 : 1"
+            :lg="hasGlobalResults ? 5 : 10"
           >
             <section class="search-page__column">
               <div class="search-page__column-header d-flex justify-center">
@@ -270,7 +270,7 @@
             v-if="hasGlobalResults"
             cols="12"
             :lg="hasVerticalResults ? 7 : 10"
-            :offset-lg="hasVerticalResults ? 0 : 1"
+            :lg="hasVerticalResults ? 7 : 10"
           >
             <section class="search-page__column">
               <div
@@ -707,7 +707,7 @@ const requestBody = computed<ProductSearchRequestDto>(() => ({
 }))
 
 const latestProductsSort = computed<SortRequestDto>(() => ({
-  sorts: [{ field: 'creationDate', order: 'desc' }],
+  sorts: [{ field: 'offersCount', order: 'desc' }],
 }))
 
 const effectiveSortRequest = computed<SortRequestDto | undefined>(() => {
