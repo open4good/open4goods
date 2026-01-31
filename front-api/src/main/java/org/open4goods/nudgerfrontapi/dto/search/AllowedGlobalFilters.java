@@ -17,6 +17,8 @@ public enum AllowedGlobalFilters {
     minPrice("price.minPrice.price", FilterRequestDto.FilterValueType.numeric),
     @Schema(description = "Filter on the product condition (NEW, USED)", example = "price.conditions")
     productCondition("price.conditions", FilterRequestDto.FilterValueType.keyword),
+    @Schema(description = "Filter on the manufacturing country", example = "gtinInfos.country")
+    country("gtinInfos.country", FilterRequestDto.FilterValueType.keyword),
     @Schema(description = "Filter on the product ecoscore", example = "scores.ECOSCORE.value")
     ecoscore("scores.ECOSCORE.value", FilterRequestDto.FilterValueType.numeric);
 

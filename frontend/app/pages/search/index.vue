@@ -116,7 +116,7 @@
     <v-container
       v-if="shouldShowResults"
       class="search-page__results py-10 px-4 mx-auto"
-      max-width="xl"
+      fluid
     >
       <v-alert
         v-if="error || productsError || baselineError || aggsError"
@@ -540,10 +540,7 @@ const sortItems = computed(() => {
       const field = filterFieldMap.value[mapping]
       return {
         value: mapping,
-        title: resolveSortFieldTitle(
-          field ?? { mapping, title: '' },
-          t
-        ),
+        title: resolveSortFieldTitle(field ?? { mapping, title: '' }, t),
       }
     })
     .sort((a, b) => {

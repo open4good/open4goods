@@ -205,4 +205,11 @@ class SearchServiceTest {
         boolean hasMultiMatch = esQuery.bool().must().stream().anyMatch(Query::isMultiMatch);
         assertThat(hasMultiMatch).isTrue();
     }
+
+    @Test
+    void buildSearchCapabilities_shouldIncludeAllowedGlobalAggregations_whenVerticalIsNull() {
+        SearchService.SearchCapabilities capabilities = searchService.buildSearchCapabilities(null, DomainLanguage.fr, Collections.emptyList());
+
+        assertThat(capabilities.allowedAggregations()).contains("gtinInfos.country");
+    }
 }

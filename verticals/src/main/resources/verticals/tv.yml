@@ -347,6 +347,7 @@ nudgeToolConfig:
         en: "Televisions with a good reparability"
         fr: "Téléviseurs avec une bonne réparabilité"
     - scoreName: "ESG"
+      disabled: true
       scoreMinValue: 2.5
       mdiIcon: "mdi-scale-balance"
       title:
@@ -387,16 +388,16 @@ nudgeToolConfig:
     - id: "impact_high" # Unique identifier for the subset
       group: "impactscore"
       criterias:
-        - field: "scores.ECOSCORE.value"
+        - field: "scores.ECOSCORE.relativ.value"
           operator: "LOWER_THAN"
-          value: "13.49"
+          value: "2"
       image: "example-image.png"
       url:
         en: "high-impact"
         fr: "fort-impact"
       caption:
-        en: "High (< 13.42)"
-        fr: "Élevé (< 13.42)"
+        en: "High "
+        fr: "Élevé "
       title:
         en: "High Impact"
         fr: "Impact Élevé"
@@ -407,19 +408,19 @@ nudgeToolConfig:
     - id: "impact_medium"
       group: "impactscore"
       criterias:
-        - field: "scores.ECOSCORE.value"
+        - field: "scores.ECOSCORE.relativ.value"
           operator: "GREATER_THAN"
-          value: "13.49"
-        - field: "scores.ECOSCORE.value"
+          value: "2"
+        - field: "scores.ECOSCORE.relativ.value"
           operator: "LOWER_THAN_OR_EQUAL"
-          value: "14.94"
+          value: "3.5"
       image: "example-image.png"
       url:
         en: "medium-impact"
         fr: "impact-moyen"
       caption:
-        en: "Medium (13.42 - 14.58)"
-        fr: "Moyen (13.42 - 14.58)"
+        en: "Medium"
+        fr: "Moyen "
       title:
         en: "Medium Impact"
         fr: "Impact Moyen"
@@ -430,16 +431,16 @@ nudgeToolConfig:
     - id: "impact_low"
       group: "impactscore"
       criterias:
-        - field: "scores.ECOSCORE.value"
+        - field: "scores.ECOSCORE.relativ.value"
           operator: "GREATER_THAN"
-          value: "14.94"
+          value: "3.5"
       image: "example-image.png"
       url:
         en: "low-impact"
         fr: "faible-impact"
       caption:
-        en: "Low (> 14.58)"
-        fr: "Faible (> 14.58)"
+        en: "Low "
+        fr: "Faible "
       title:
         en: "Low Impact"
         fr: "Impact Faible"
