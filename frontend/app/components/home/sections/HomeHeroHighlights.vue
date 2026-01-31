@@ -232,7 +232,7 @@ const resolveHighlightStyle = (index: number) => {
   }
 
   const tilt = index % 2 === 0 ? '-1.6deg' : '1.3deg'
-  const offset = index % 2 === 0 ? '-10px' : '10px'
+  const offset = '0px'
 
   return {
     '--tilt-default-angle': tilt,
@@ -291,8 +291,8 @@ const isHighlightUnlocked = (index: number) =>
             corner-size="lg"
             rounded="lg"
             :selectable="isScrollEnabled"
-            :elevation="10"
-            :hover-elevation="14"
+            :elevation="0"
+            :hover-elevation="0"
             :aria-label="
               isScrollEnabled ? scrollCtaLabel(item.title) : undefined
             "
@@ -582,10 +582,10 @@ const isHighlightUnlocked = (index: number) =>
 @media (min-width: 960px)
   .home-hero-highlights--hero
     .home-hero-highlights__col:nth-child(odd) .home-hero-highlights__card
-      --tilt-default-offset: -12px
+      /* --tilt-default-offset: -12px */
 
     .home-hero-highlights__col:nth-child(even) .home-hero-highlights__card
-      --tilt-default-offset: 12px
+      /* --tilt-default-offset: 12px */
 
 .home-hero-highlights__ai-summary-cards-container
   width: 100%

@@ -230,6 +230,14 @@ export default defineNuxtConfig({
           href: '/pwa-assets/icons/ios/180.png',
         },
         { rel: 'manifest', href: '/site.webmanifest' },
+        // Preload primary font for LCP optimization
+        {
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff2',
+          href: '/fonts/HankenGrotesk/HankenGrotesk-Regular.woff2',
+          crossorigin: 'anonymous',
+        },
       ],
       meta: [
         {
@@ -347,10 +355,18 @@ export default defineNuxtConfig({
 
   // Themes palettes are now defined in /frontend/config/theme/palettes.ts
   vuetify: {
+    moduleOptions: {
+      // Enable Vuetify CSS tree-shaking (only include CSS for used components)
+      styles: 'sass',
+    },
     icons: {
-      defaultSet: 'mdi',
-      sets: ['mdi'],
-      aliases: icons,
+      // Use SVG icons from @mdi/js instead of CDN font (eliminates render-blocking CSS)
+      defaultSet: 'mdi-svg',
+      svg: {
+        mdi: {
+          aliases: icons,
+        },
+      },
     },
     vuetifyOptions: {
       theme: {
@@ -390,7 +406,8 @@ export default defineNuxtConfig({
     pages: buildI18nPagesConfig(),
     vueI18n: './i18n.config.ts',
   },
-  css: ['vuetify/styles', '~/assets/sass/main.sass'],
+  // Note: Vuetify styles are now handled by moduleOptions.styles: 'sass' for tree-shaking
+  css: ['~/assets/sass/main.sass'],
 
   sitemap: {
     credits: false,

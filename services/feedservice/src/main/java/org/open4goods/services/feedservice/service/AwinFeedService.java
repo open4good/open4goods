@@ -120,6 +120,8 @@ public class AwinFeedService extends AbstractFeedService {
                 .collect(Collectors.toMap(m -> m.getName().toLowerCase(), Function.identity(), (existing, replacement) -> existing));
 
 
+        // TODO : Add a heavy error / healthchek if it.empty !
+
         while (it.hasNext()) {
             Map<String, String> line = it.next();
 
@@ -135,7 +137,7 @@ public class AwinFeedService extends AbstractFeedService {
             } catch (NumberFormatException e) {
                 // ignore
             }
-            
+
             if (feedKey == null || feedKey.trim().isEmpty()) {
                 logger.warn("Skipping CSV line due to missing feed key: {}", line);
                 continue;

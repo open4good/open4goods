@@ -115,7 +115,10 @@
               </span>
             </div>
 
-            <div v-if="gtin" class="product-attributes__identity-row">
+            <div
+              v-if="gtin"
+              class="product-attributes__identity-row product-attributes__gtin-row"
+            >
               <span class="product-attributes__identity-label">
                 {{ $t('product.attributes.main.identity.gtin') }}
               </span>
@@ -128,9 +131,36 @@
                   :alt="gtin"
                   class="product-attributes__gtin-image"
                 />
-                <div>
-                  <span v-if="gtinType">{{ gtinType }}&nbsp;</span>
-                  <span>{{ gtin }}</span>
+                <div class="product-attributes__gtin-content">
+                  <span v-if="gtinType">
+                    {{
+                      $t(
+                        `product.attributes.main.identity.barcodeType.${gtinType}`
+                      )
+                    }}&nbsp;
+                  </span>
+                  <span class="product-attributes__gtin-value">{{ gtin }}</span>
+                  <v-btn
+                    icon
+                    variant="text"
+                    density="comfortable"
+                    size="small"
+                    class="product-attributes__copy-btn ml-2"
+                    :color="copied ? 'success' : undefined"
+                    :aria-label="$t('product.attributes.main.identity.copy')"
+                    @click="copy(String(gtin))"
+                  >
+                    <v-icon :icon="copied ? 'mdi-check' : 'mdi-content-copy'" />
+                    <v-tooltip
+                      activator="parent"
+                      location="bottom"
+                      :text="
+                        copied
+                          ? $t('product.attributes.main.identity.copySuccess')
+                          : $t('product.attributes.main.identity.copy')
+                      "
+                    />
+                  </v-btn>
                   <v-tooltip
                     activator="parent"
                     location="bottom"
@@ -758,6 +788,7 @@
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useClipboard } from '@vueuse/core'
 import { useAuth } from '~/composables/useAuth'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
@@ -797,6 +828,8 @@ const props = defineProps({
 })
 
 const { t, n, locale } = useI18n()
+
+const { copy, copied } = useClipboard({ legacy: true })
 const { isLoggedIn } = useAuth()
 
 const searchTerm = ref('')
@@ -1509,7 +1542,8 @@ const detailTableHeaders = computed(() => [
   },
 ])
 
-const detailItemsPerPage = -1
+// Pagination enabled to reduce DOM size (Lighthouse performance fix)
+const detailItemsPerPage = 15
 
 const expandedDetailGroups = ref<string[]>([])
 

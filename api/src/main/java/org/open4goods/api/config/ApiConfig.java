@@ -96,8 +96,7 @@ import com.github.benmanes.caffeine.cache.Ticker;
 
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
-//import io.micrometer.core.aop.TimedAspect;
-//import io.micrometer.core.instrument.MeterRegistry;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -179,11 +178,7 @@ public class ApiConfig {
 
 
 
-//	@Bean
-//
-//	AmazonCompletionService amazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService, ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
-//		return new AmazonCompletionService(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
-//	}
+
 
 	@Bean
 	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService) {
@@ -243,11 +238,7 @@ public class ApiConfig {
 	}
 
 
-//	@Bean
-//    SearchService searchService(@Autowired ProductRepository aggregatedDataRepository, @Autowired String logsFolder,
-//                    @Autowired DjlTextEmbeddingService textEmbeddingService) {
-//            return new SearchService(aggregatedDataRepository, logsFolder, textEmbeddingService);
-//    }
+
 
 	@Bean
         BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired SerialisationService serialisationService) throws Exception {
@@ -327,11 +318,7 @@ public class ApiConfig {
 	// The scheduling thread pool executor
 	//////////////////////////////////////////////////////////
 
-//	@Bean
-//	public TaskScheduler heartBeatScheduler() {
-//	    return new ThreadPoolTaskScheduler();
-//	}
-//
+
 	@Bean
 	TaskScheduler threadPoolTaskScheduler() {
 		final ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
@@ -368,15 +355,7 @@ public class ApiConfig {
 	// Metrics
 	//////////////////////////
 
-//	/**
-//	 * To enable metrics on all methods / services
-//	 *
-//	 * @param registry
-//	 * @return
-//	 */
-//	@Bean TimedAspect timedAspect(final MeterRegistry registry) {
-//		return new TimedAspect(registry);
-//	}
+
 
 	//////////////////////////////////////////////////////////
 	// API services

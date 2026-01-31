@@ -211,11 +211,9 @@ import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 
-import ProductStickyPriceBanner from '~/components/product/ProductStickyPriceBanner.vue'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
-import ProductAttributesSection from '~/components/product/ProductAttributesSection.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
@@ -230,6 +228,12 @@ import {
 } from '~/components/product/impact/impact-score-groups'
 import { transformRadarValue } from '~/utils/radar-utils'
 
+const ProductStickyPriceBanner = defineAsyncComponent(
+  () => import('~/components/product/ProductStickyPriceBanner.vue')
+)
+const ProductAttributesSection = defineAsyncComponent(
+  () => import('~/components/product/ProductAttributesSection.vue')
+)
 const ProductImpactSection = defineAsyncComponent(
   () => import('~/components/product/ProductImpactSection.vue')
 )

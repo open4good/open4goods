@@ -58,6 +58,15 @@
               class="product-summary-navigation__toggle"
               :aria-expanded="isSubmenuOpen(section)"
               :aria-controls="`submenu-${section.id}`"
+              :aria-label="
+                isSubmenuOpen(section)
+                  ? $t('product.navigation.collapseSubmenu', {
+                      section: section.label,
+                    })
+                  : $t('product.navigation.expandSubmenu', {
+                      section: section.label,
+                    })
+              "
               @click="toggleSubmenu(section.id)"
             >
               <v-icon

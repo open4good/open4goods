@@ -17,6 +17,7 @@ public class AwinMerchant {
     private String status;
     private String primarySector;
     private List<ValidDomain> validDomains;
+    private String linkStatus;
 
     // Getters and setters
 
@@ -80,7 +81,15 @@ public class AwinMerchant {
         return primaryRegion;
     }
 
-    public void setPrimaryRegion(PrimaryRegion primaryRegion) {
+    public String getLinkStatus() {
+		return linkStatus;
+	}
+
+	public void setLinkStatus(String linkStatus) {
+		this.linkStatus = linkStatus;
+	}
+
+	public void setPrimaryRegion(PrimaryRegion primaryRegion) {
         this.primaryRegion = primaryRegion;
     }
 

@@ -746,6 +746,6 @@ describe('ProductAttributesSection', () => {
     await copyBtn.trigger('click')
 
     // Expect copy to be called with the GTIN
-    expect(copySpy).toHaveBeenCalledWith(1234567890123)
+    expect(copySpy).toHaveBeenCalledWith('1234567890123')
   })
 })

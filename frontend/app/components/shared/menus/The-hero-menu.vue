@@ -1311,7 +1311,6 @@ const isMenuItemActive = (item: MenuItem): boolean => {
       transform: scale(1.05)
 
   &__field-wrapper
-  &__field-wrapper
     width: 600px
     max-width: 50vw
     min-width: 380px
