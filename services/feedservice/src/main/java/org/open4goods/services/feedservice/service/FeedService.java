@@ -7,6 +7,7 @@ import java.util.Set;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.model.affiliation.AffiliationPartner;
+import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,8 @@ import org.slf4j.LoggerFactory;
  * This class maintains the original external contract:
  * - {@code fetchFeeds()} to load and fetch all feeds,
  * - {@code fetchFeedsByUrl(String)} to fetch feeds by URL,
- * - {@code fetchFeedsByKey(String)} to fetch feeds by key, and
+ * - {@code fetchFeedsByKey(String)} to fetch feeds by key,
+ * - {@code getFeedsByDatasourceName(String)} to fetch feeds by datasource name, and
  * - {@code getFeedsUrl()} to aggregate datasource properties.
  * </p>
  * <p>
@@ -98,6 +100,39 @@ public class FeedService {
         });
 
         return result;
+    }
+
+    /**
+     * Returns datasources matching the provided datasource or provider name.
+     *
+     * @param datasourceName datasource/provider name to match
+     * @return matching datasource properties
+     */
+    public Set<DataSourceProperties> getFeedsByDatasourceName(String datasourceName)
+    {
+        String cleanedName = normalizeDatasourceName(datasourceName);
+        Set<DataSourceProperties> result = new HashSet<>();
+        for (DataSourceProperties ds : getFeedsUrl()) {
+            try {
+                String configName = normalizeDatasourceName(ds.getDatasourceConfigName());
+                String dsName = normalizeDatasourceName(ds.getName());
+                if (cleanedName.equals(configName) || cleanedName.equals(dsName)) {
+                    result.add(ds);
+                    logger.info("Matched feed: {}", ds);
+                }
+            } catch (Exception e) {
+                logger.error("Error matching feed {}: ", ds, e);
+            }
+        }
+        return result;
+    }
+
+    private String normalizeDatasourceName(String datasourceName)
+    {
+        if (datasourceName == null) {
+            return "";
+        }
+        return IdHelper.azCharAndDigits(datasourceName).toLowerCase();
     }
 
 

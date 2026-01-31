@@ -72,6 +72,14 @@ public class FeedController {
 		batchService.fetchFeedsByKey(feedKey);
 	}
 
+    @PatchMapping(path = "/feedsByDatasourceName")
+    @Operation(summary="Manually run the indexation of feeds matching the datasource/provider name")
+    @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+    public void feedByDatasourceName(@RequestParam @NotBlank final String datasourceName)
+    {
+        batchService.fetchFeedsByDatasourceName(datasourceName);
+    }
+
 	@PatchMapping(path = "/feedsByUrl")
 	@Operation(summary="List all feeds from catalogs corresponding the given url")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")

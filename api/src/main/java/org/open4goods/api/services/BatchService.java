@@ -256,6 +256,26 @@ public class BatchService {
         }
     }
 
+    /**
+     * Fetches feeds that match the specified datasource/provider name.
+     *
+     * @param datasourceName the datasource/provider name to match
+     */
+    public void fetchFeedsByDatasourceName(String datasourceName)
+    {
+        logger.info("Fetching feeds with datasource name: {}", datasourceName);
+        Set<DataSourceProperties> datasources = feedService.getFeedsByDatasourceName(datasourceName);
+        logger.info("Found {} feeds for datasource name matching.", datasources.size());
+        for (DataSourceProperties ds : datasources) {
+            try {
+                logger.info("Fetching feed {}: {}", ds.getDatasourceConfigName(), ds);
+                csvDatasourceFetchingService.start(ds, ds.getDatasourceConfigName());
+            } catch (Exception e) {
+                logger.error("Error fetching feed {}: ", ds.getDatasourceConfigName(), e);
+            }
+        }
+    }
+
 
 
     /**
