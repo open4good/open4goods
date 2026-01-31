@@ -232,6 +232,10 @@ i18n:
     singularDesignation:
       prefix: "|| du téléviseur | de cette télévision | de la télévision ||"
       attrs: []
+    designation:
+      - "du téléviseur"
+      - "de cette télévision"
+      - "de la télévision"
     # TODO : Generate short title (for cards restitution, with popular attributes)
 
     ##################################
@@ -289,6 +293,9 @@ i18n:
     singularDesignation:
       prefix: "|| of the television | of this television ||"
       attrs: []
+    designation:
+      - "of the television"
+      - "of this television"
 
     ##################################
     # Vertical page elements
@@ -22491,4 +22498,3 @@ matchingCategories:
       - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV PANASONIC | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
       - "HIGH-TECH | HIGH-TECH>MARQUES HIGH-TECH>TCL>TV MINI LED TCL>TV MINI LED 4K TCL | MARQUES HIGH-TECH | TCL"
       - "HIGH TECH | HIGH-TECH > TV - CINEMA > TELEVISEURS - TELEVISIONS - TV > TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
-

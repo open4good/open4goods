@@ -1,5 +1,6 @@
 package org.open4goods.nudgerfrontapi.dto.product;
 
+import java.util.List;
 import java.util.Set;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,6 +17,8 @@ public record ProductNamesDto(
         String singular,
         @Schema(description = "Singular designation for the requested language", example = "du téléviseur")
         String singularDesignation,
+        @Schema(description = "Generated designation variants for the requested language", example = "[\"du téléviseur\", \"de cette télévision\"]")
+        List<String> designation,
         @Schema(description = "Meta description aligned with the requested language")
         String metaDescription,
         @Schema(description = "OpenGraph title for social sharing")

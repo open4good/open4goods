@@ -95,6 +95,9 @@ i18n:
     singularDesignation:
       prefix: "|| du lave-vaisselle | de ce lave-vaisselle | du lave-vaisselle ||"
       attrs: []
+    designation:
+      - "du lave-vaisselle"
+      - "de ce lave-vaisselle"
 
     # Product metas (generic templates reused)
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
@@ -140,6 +143,9 @@ i18n:
     singularDesignation:
       prefix: "|| of the dishwasher | of this dishwasher ||"
       attrs: []
+    designation:
+      - "of the dishwasher"
+      - "of this dishwasher"
 
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
     productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
