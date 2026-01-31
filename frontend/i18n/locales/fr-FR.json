@@ -2600,6 +2600,8 @@
       "viewSingleOffer": "Voir l'offre"
     },
     "impact": {
+      "title": "Impact environnemental",
+      "subtitle": "Comprendre l'impact {designation} pour mieux choisir.",
       "endOfLifeTitle": "Ce produit n'est plus commercialisé",
       "endOfLifeDescription": "Le produit n'est plus officiellement commercialisé par {brand} depuis le {onMarketEndDate}. La durée de support légal est de {legalSupportDuration} et a démarré le {onMarketEndDate}.",
       "endOfLifeDescriptionFallback": "Le produit n'est plus officiellement commercialisé par {brand}.",

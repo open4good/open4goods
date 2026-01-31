@@ -234,8 +234,11 @@ i18n:
       attrs: []
     designation:
       - "du téléviseur"
+      - "de ce téléviseur"
       - "de cette télévision"
       - "de la télévision"
+      - "de cet écran"
+      - "de ce TV"
     # TODO : Generate short title (for cards restitution, with popular attributes)
 
     ##################################
@@ -296,6 +299,9 @@ i18n:
     designation:
       - "of the television"
       - "of this television"
+      - "of the TV"
+      - "of this TV"
+      - "of the screen"
 
     ##################################
     # Vertical page elements

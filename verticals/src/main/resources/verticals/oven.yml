@@ -78,6 +78,18 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    singular:
+      prefix: "|| four | four encastrable | four électrique ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| du four | de ce four | de ce four encastrable | de ce four électrique | de cet appareil ||"
+      attrs: []
+    designation:
+      - "du four"
+      - "de ce four"
+      - "de ce four encastrable"
+      - "de ce four électrique"
+      - "de cet appareil"
 
     # Product metas (generic templates reused)
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
@@ -111,6 +123,18 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    singular:
+      prefix: "|| oven | built-in oven | electric oven ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| of the oven | of this oven | of the built-in oven | of this appliance | of the cooker ||"
+      attrs: []
+    designation:
+      - "of the oven"
+      - "of this oven"
+      - "of the built-in oven"
+      - "of this appliance"
+      - "of the cooker"
 
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
     productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."

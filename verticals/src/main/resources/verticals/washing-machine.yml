@@ -71,6 +71,18 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    singular:
+      prefix: "|| lave-linge | machine à laver ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| du lave-linge | de ce lave-linge | de la machine à laver | de cette machine | de cet appareil ||"
+      attrs: []
+    designation:
+      - "du lave-linge"
+      - "de ce lave-linge"
+      - "de la machine à laver"
+      - "de cette machine"
+      - "de cet appareil"
     cardTitle: "{BRAND} {MODEL}"
     shortName: "{BRAND} {MODEL}"
     longName: "{BRAND} {MODEL} - {WASHING_CAPACITY} {SPIN_SPEED}"
@@ -114,6 +126,18 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    singular:
+      prefix: "|| washing machine | washer ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| of the washing machine | of this washing machine | of the washer | of this washer | of the appliance ||"
+      attrs: []
+    designation:
+      - "of the washing machine"
+      - "of this washing machine"
+      - "of the washer"
+      - "of this washer"
+      - "of the appliance"
 
     # Product metas (generic templates reused)
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"

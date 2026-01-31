@@ -98,6 +98,9 @@ i18n:
     designation:
       - "du lave-vaisselle"
       - "de ce lave-vaisselle"
+      - "de cet appareil"
+      - "de cette machine"
+      - "du lave-vaisselle encastrable"
 
     # Product metas (generic templates reused)
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
@@ -146,6 +149,9 @@ i18n:
     designation:
       - "of the dishwasher"
       - "of this dishwasher"
+      - "of the appliance"
+      - "of this machine"
+      - "of the dish washer"
 
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
     productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
