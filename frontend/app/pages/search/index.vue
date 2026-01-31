@@ -69,43 +69,6 @@
       </p>
     </PageHeader>
 
-    <v-container
-      v-if="shouldShowResults"
-      class="search-page__actions py-2 px-4 mx-auto d-flex align-center justify-center"
-      max-width="xl"
-    >
-      <v-btn
-        v-if="!mdAndUp"
-        variant="tonal"
-        color="primary"
-        prepend-icon="mdi-filter-variant"
-        @click="filtersOpen = true"
-      >
-        {{ t('category.filters.title') }}
-        <v-badge
-          v-if="activeFilters.length"
-          :content="activeFilters.length"
-          color="primary"
-          inline
-          class="ms-2"
-        />
-      </v-btn>
-
-      <div v-else class="search-page__filters-bar mx-auto">
-        <CategoryFilterList
-          :fields="filterFields"
-          :aggregations="productAggregations"
-          :baseline-aggregations="baselineAggregations"
-          :active-filters="activeFilters"
-          :search-type="searchType"
-          mode="bar"
-          @update-range="updateRangeFilter"
-          @update-terms="updateTermsFilter"
-          @update:search-type="searchType = $event"
-        />
-      </div>
-    </v-container>
-
     <v-navigation-drawer
       v-model="filtersOpen"
       location="right"
@@ -324,7 +287,7 @@
                     <h2 class="text-h5 font-weight-bold mb-0">
                       {{
                         t('search.columns.products.title', {
-                          count: nonEvaluatedProductsCount,
+                          count: rightColumnResultsCount,
                         })
                       }}
                     </h2>
@@ -333,6 +296,37 @@
                     {{ t('search.columns.products.subtitle') }}
                   </p>
                 </div>
+              </div>
+
+              <CategoryResultsToolbar
+                :is-desktop="mdAndUp"
+                :results-count="rightColumnResultsCount"
+                :view-mode="viewMode"
+                :sort-items="sortItems"
+                :sort-field="sortField"
+                :sort-order="sortOrder"
+                :search-term="searchTerm"
+                :show-filters-button="true"
+                :filters-count="activeFilters.length"
+                @toggle-filters="filtersOpen = true"
+                @update:search-term="searchTerm = $event"
+                @update:sort-field="sortField = $event"
+                @update:sort-order="sortOrder = $event"
+                @update:view-mode="viewMode = $event"
+              />
+
+              <div v-if="mdAndUp" class="search-page__filters-bar">
+                <CategoryFilterList
+                  :fields="filterFields"
+                  :aggregations="productAggregations"
+                  :baseline-aggregations="baselineAggregations"
+                  :active-filters="activeFilters"
+                  :search-type="searchType"
+                  mode="bar"
+                  @update-range="updateRangeFilter"
+                  @update-terms="updateTermsFilter"
+                  @update:search-type="searchType = $event"
+                />
               </div>
 
               <div
@@ -360,21 +354,23 @@
                 </v-btn>
               </div>
 
-              <CategoryProductListView v-else :products="rightColumnProducts" />
+              <component
+                :is="viewComponent"
+                v-else
+                v-bind="viewComponentProps"
+                @update:sort-field="onTableSortFieldUpdate"
+                @update:sort-order="onTableSortOrderUpdate"
+              />
 
               <v-pagination
-                v-if="
-                  !showLatestProducts &&
-                  !isFiltered &&
-                  missingVerticalPageCount > 1
-                "
-                :length="missingVerticalPageCount"
-                :model-value="missingVerticalPageNumber + 1"
+                v-if="pageCount > 1"
+                :length="pageCount"
+                :model-value="pageNumber + 1"
                 class="mt-6"
                 density="comfortable"
                 rounded="lg"
                 :total-visible="5"
-                @update:model-value="onMissingVerticalPageChange"
+                @update:model-value="onPageChange"
               />
             </section>
           </v-col>
@@ -386,6 +382,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import type {
@@ -397,10 +394,10 @@ import type {
   ProductSearchRequestDto,
   FilterRequestDto,
   AggregationResponseDto,
-  SortDto,
   CategoriesStatsDto,
   FieldMetadataDto,
   AggregationRequestDto,
+  SortRequestDto,
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client'
 import SearchSuggestField, {
@@ -408,14 +405,26 @@ import SearchSuggestField, {
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import PageHeader from '~/components/shared/header/PageHeader.vue'
+import CategoryResultsToolbar from '~/components/category/CategoryResultsToolbar.vue'
+import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
+import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
 import CategoryFilterList from '~/components/category/filters/CategoryFilterList.vue'
+import {
+  CATEGORY_DEFAULT_VIEW_MODE,
+  CATEGORY_PAGE_SIZES,
+} from '~/constants/category'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import { useAnalytics } from '~/composables/useAnalytics'
+import type { CategoryViewMode } from '~/utils/_category-filter-state'
+import {
+  resolveFilterFieldTitle,
+  resolveSortFieldTitle,
+  SORT_FIELD_PRIORITIES,
+} from '~/utils/_field-localization'
 
 const MIN_QUERY_LENGTH = 3
 const VERTICAL_RESULTS_LIMIT = 4
-const GLOBAL_RESULTS_LIMIT = 10
 
 definePageMeta({
   ssr: true,
@@ -436,6 +445,11 @@ const routeQuery = computed(() => {
   return (Array.isArray(q) ? q[0] : q) ?? ''
 })
 const searchInput = ref(routeQuery.value)
+const searchTerm = ref(routeQuery.value)
+const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
+const pageNumber = ref(0)
+const sortField = ref<string | null>(null)
+const sortOrder = ref<'asc' | 'desc'>('desc')
 
 const { data: stats } = await useAsyncData<CategoriesStatsDto | null>(
   'search-stats',
@@ -459,6 +473,7 @@ watch(
   routeQuery,
   value => {
     searchInput.value = value
+    searchTerm.value = value
     // Reset search type on new query?
     // User requirement: explicit toggle. If I type new query, toggle likely stays until user resets.
   },
@@ -473,12 +488,100 @@ const hasMinimumLength = computed(
 const activeFilters = computed(() => filterRequest.value.filters || [])
 
 const isFiltered = computed(() => activeFilters.value.length > 0)
+const pageSize = computed(() => CATEGORY_PAGE_SIZES[viewMode.value])
 
-/**
- * Pagination state for missing-vertical (non-evaluated) products.
- * Page number is zero-based internally but displayed as 1-based in UI.
- */
-const missingVerticalPageNumber = ref(0)
+const filterFields = computed<FieldMetadataDto[]>(() => [
+  {
+    mapping: 'price.minPrice.price',
+    title: resolveFilterFieldTitle(undefined, t, 'price.minPrice.price'),
+    valueType: 'numeric',
+    aggregationConfiguration: {
+      buckets: 10,
+    },
+  },
+  {
+    mapping: 'offersCount',
+    title: resolveFilterFieldTitle(undefined, t, 'offersCount'),
+    valueType: 'numeric',
+    aggregationConfiguration: {
+      buckets: 10,
+    },
+  },
+  {
+    mapping: 'gtinInfos.country',
+    title: resolveFilterFieldTitle(undefined, t, 'gtinInfos.country'),
+    valueType: 'text',
+  },
+  {
+    mapping: 'price.conditions',
+    title: resolveFilterFieldTitle(undefined, t, 'price.conditions'),
+    valueType: 'text',
+  },
+])
+
+const filterFieldMap = computed<Record<string, FieldMetadataDto>>(() => {
+  return filterFields.value.reduce<Record<string, FieldMetadataDto>>(
+    (accumulator, field) => {
+      if (field.mapping) {
+        accumulator[field.mapping] = field
+      }
+
+      return accumulator
+    },
+    {}
+  )
+})
+
+const sortItems = computed(() => {
+  const sortFields = ['price.minPrice.price', 'offersCount']
+
+  const options = sortFields
+    .map(mapping => {
+      const field = filterFieldMap.value[mapping]
+      return {
+        value: mapping,
+        title: resolveSortFieldTitle(
+          field ?? { mapping, title: '' },
+          t
+        ),
+      }
+    })
+    .sort((a, b) => {
+      const priorityA = SORT_FIELD_PRIORITIES[a.value] ?? 0
+      const priorityB = SORT_FIELD_PRIORITIES[b.value] ?? 0
+
+      if (priorityA !== priorityB) {
+        return priorityB - priorityA
+      }
+
+      return a.title.localeCompare(b.title)
+    })
+
+  return options
+})
+
+const defaultSortField = computed(() => sortItems.value[0]?.value ?? null)
+
+watch(defaultSortField, value => {
+  if (!sortField.value && value) {
+    sortField.value = value
+  }
+})
+
+const sortRequest = computed<SortRequestDto | undefined>(() => {
+  if (!sortField.value) {
+    return undefined
+  }
+
+  return {
+    sorts: [
+      {
+        field: sortField.value,
+        order: sortOrder.value,
+      },
+    ],
+  }
+})
 
 const showLatestProducts = computed(
   () => !normalizedQuery.value.length && !isFiltered.value
@@ -497,21 +600,52 @@ const showMinimumNotice = computed(
     searchInput.value.length > 0 && searchInput.value.length < MIN_QUERY_LENGTH
 )
 
-const filterFields = computed<FieldMetadataDto[]>(() => [
-  {
-    mapping: 'price.minPrice.price',
-    title: 'Prix',
-    valueType: 'numeric',
-    aggregationConfiguration: {
-      buckets: 10,
-    },
+const updateSearchQuery = useDebounceFn((value: string) => {
+  const trimmed = value.trim()
+
+  if (trimmed.length > 0 && trimmed.length < MIN_QUERY_LENGTH) {
+    return
+  }
+
+  if (trimmed === routeQuery.value) {
+    return
+  }
+
+  router.replace({
+    path: route.path,
+    query: trimmed ? { q: trimmed } : {},
+  })
+}, 400)
+
+watch(searchTerm, value => {
+  if (searchInput.value !== value) {
+    searchInput.value = value
+  }
+
+  updateSearchQuery(value)
+})
+
+watch(searchInput, value => {
+  if (searchTerm.value !== value) {
+    searchTerm.value = value
+  }
+})
+
+watch(viewMode, () => {
+  pageNumber.value = 0
+})
+
+watch(
+  () => filterRequest.value,
+  () => {
+    pageNumber.value = 0
   },
-  {
-    mapping: 'price.conditions',
-    title: 'État',
-    valueType: 'string',
-  },
-])
+  { deep: true }
+)
+
+watch([sortField, sortOrder], () => {
+  pageNumber.value = 0
+})
 
 const aggregationDefinition = computed<AggregationRequestDto>(() => {
   const aggs = filterFields.value
@@ -547,13 +681,10 @@ const { data, pending, error, refresh } =
       return await $fetch<GlobalSearchResponseDto>('/api/products/search', {
         method: 'POST',
         headers: requestHeaders,
-        query: {
-          page: missingVerticalPageNumber.value,
-          size: GLOBAL_RESULTS_LIMIT,
-        },
         body: {
           query: normalizedQuery.value,
           filters: filterRequest.value,
+          sort: sortRequest.value,
           searchType: resolvedSearchType.value,
         },
       })
@@ -561,7 +692,10 @@ const { data, pending, error, refresh } =
     {
       watch: [
         () => normalizedQuery.value,
-        () => missingVerticalPageNumber.value,
+        () => pageNumber.value,
+        () => sortRequest.value,
+        () => filterRequest.value,
+        () => resolvedSearchType.value,
       ],
       immediate: true,
     }
@@ -570,22 +704,31 @@ const { data, pending, error, refresh } =
 const requestBody = computed<ProductSearchRequestDto>(() => ({
   filters: filterRequest.value,
   aggs: aggregationDefinition.value,
+  sort: sortRequest.value,
   semanticSearch: semanticSearchEnabled.value,
   searchType: resolvedSearchType.value,
 }))
 
-const latestProductsSort = computed<SortDto[]>(() => [
-  { field: 'creationDate', order: 'desc' },
-])
+const latestProductsSort = computed<SortRequestDto>(() => ({
+  sorts: [{ field: 'creationDate', order: 'desc' }],
+}))
+
+const effectiveSortRequest = computed<SortRequestDto | undefined>(() => {
+  if (showLatestProducts.value && !sortField.value) {
+    return latestProductsSort.value
+  }
+
+  return sortRequest.value
+})
 
 const baselinePayload = computed(() => ({
   query: hasMinimumLength.value ? normalizedQuery.value : undefined,
   aggs: aggregationDefinition.value,
-  sort: showLatestProducts.value
-    ? { sorts: latestProductsSort.value }
-    : undefined,
+  sort: effectiveSortRequest.value,
   semanticSearch: semanticSearchEnabled.value,
   searchType: resolvedSearchType.value,
+  pageNumber: pageNumber.value,
+  pageSize: pageSize.value,
 }))
 
 const {
@@ -603,16 +746,17 @@ const {
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
-      query: {
-        query: hasMinimumLength.value ? normalizedQuery.value : undefined,
-        domainLanguage: 'fr-FR',
-        size: GLOBAL_RESULTS_LIMIT,
-      },
-      body: baselinePayload.value, // This payload matches ProductSearchRequestDto which /api/products/search can handle
+      body: baselinePayload.value,
     })
   },
   {
-    watch: [() => normalizedQuery.value, () => showLatestProducts.value],
+    watch: [
+      () => normalizedQuery.value,
+      () => showLatestProducts.value,
+      () => pageNumber.value,
+      () => pageSize.value,
+      () => sortRequest.value,
+    ],
     immediate: true,
   }
 )
@@ -632,11 +776,8 @@ const {
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
-      query: {
-        query: hasMinimumLength.value ? normalizedQuery.value : undefined,
-        domainLanguage: 'fr-FR',
-      },
       body: {
+        query: hasMinimumLength.value ? normalizedQuery.value : undefined,
         aggs: aggregationDefinition.value,
         searchType: resolvedSearchType.value,
       },
@@ -671,17 +812,22 @@ const {
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
-      query: {
+      body: {
         query: hasMinimumLength.value ? normalizedQuery.value : undefined,
-        domainLanguage: 'fr-FR',
-        size: GLOBAL_RESULTS_LIMIT,
+        pageNumber: pageNumber.value,
+        pageSize: pageSize.value,
+        ...requestBody.value,
       },
-      headers: requestHeaders,
-      body: requestBody.value,
     })
   },
   {
-    watch: [() => normalizedQuery.value, () => filterRequest.value],
+    watch: [
+      () => normalizedQuery.value,
+      () => filterRequest.value,
+      () => pageNumber.value,
+      () => pageSize.value,
+      () => sortRequest.value,
+    ],
     immediate: false, // Wait for interaction
   }
 )
@@ -771,6 +917,7 @@ const handleRetry = () => {
 
 const clearFilters = () => {
   filterRequest.value = { filters: [], filterGroups: [] }
+  pageNumber.value = 0
   if (!mdAndUp.value) {
     filtersOpen.value = false
   }
@@ -904,6 +1051,11 @@ const missingVerticalProducts = computed(() =>
   extractProducts(data.value?.missingVerticalResults ?? [])
 )
 
+const pagedMissingVerticalProducts = computed(() => {
+  const start = pageNumber.value * pageSize.value
+  return missingVerticalProducts.value.slice(start, start + pageSize.value)
+})
+
 const rightColumnProducts = computed(() => {
   if (isFiltered.value) {
     return productResults.value
@@ -913,7 +1065,7 @@ const rightColumnProducts = computed(() => {
     return baselineResults.value
   }
 
-  return missingVerticalProducts.value
+  return pagedMissingVerticalProducts.value
 })
 
 const rightColumnPending = computed(() => {
@@ -928,6 +1080,55 @@ const rightColumnPending = computed(() => {
   return pending.value
 })
 
+const viewComponent = computed(() => {
+  if (viewMode.value === 'list') {
+    return CategoryProductListView
+  }
+
+  if (viewMode.value === 'table') {
+    return CategoryProductTable
+  }
+
+  return CategoryProductCardGrid
+})
+
+const viewComponentProps = computed(() => {
+  const base = {
+    products: rightColumnProducts.value,
+    popularAttributes: [] as AttributeConfigDto[],
+    sortField: sortField.value,
+    fieldMetadata: filterFieldMap.value,
+  }
+
+  if (viewMode.value === 'table') {
+    return {
+      ...base,
+      itemsPerPage: pageSize.value,
+      sortOrder: sortOrder.value,
+      attributeKeys: [],
+      attributeConfigs: {},
+    }
+  }
+
+  if (viewMode.value === 'list') {
+    return base
+  }
+
+  return base
+})
+
+const onTableSortFieldUpdate = (field: string | null) => {
+  if (sortField.value !== field) {
+    sortField.value = field
+  }
+}
+
+const onTableSortOrderUpdate = (order: 'asc' | 'desc') => {
+  if (sortOrder.value !== order) {
+    sortOrder.value = order
+  }
+}
+
 const evaluatedProductsCount = computed(() => {
   const groups = data.value?.verticalGroups ?? []
   return groups.reduce(
@@ -936,21 +1137,35 @@ const evaluatedProductsCount = computed(() => {
   )
 })
 
-const nonEvaluatedProductsCount = computed(() => {
-  // Use total from pagination metadata when available, fallback to array length
-  const pageData = (
-    data.value as { missingVerticalPage?: { totalElements?: number } } | null
-  )?.missingVerticalPage
-  return (
-    pageData?.totalElements ?? data.value?.missingVerticalResults?.length ?? 0
-  )
+const rightColumnResultsCount = computed(() => {
+  if (isFiltered.value) {
+    return (
+      productSearchData.value?.products?.page?.totalElements ??
+      productResults.value.length
+    )
+  }
+
+  if (showLatestProducts.value) {
+    return (
+      baselineSearchData.value?.products?.page?.totalElements ??
+      baselineResults.value.length
+    )
+  }
+
+  return missingVerticalProducts.value.length
 })
 
-const missingVerticalPageCount = computed(() => {
-  const pageData = (
-    data.value as { missingVerticalPage?: { totalPages?: number } } | null
-  )?.missingVerticalPage
-  return pageData?.totalPages ?? 1
+const pageCount = computed(() => {
+  if (isFiltered.value) {
+    return productSearchData.value?.products?.page?.totalPages ?? 1
+  }
+
+  if (showLatestProducts.value) {
+    return baselineSearchData.value?.products?.page?.totalPages ?? 1
+  }
+
+  const total = missingVerticalProducts.value.length
+  return Math.max(1, Math.ceil(total / pageSize.value))
 })
 
 const hasVerticalResults = computed(() => limitedGroups.value.length > 0)
@@ -964,11 +1179,11 @@ const showNoResultsHero = computed(
 )
 
 /**
- * Handle pagination change for missing-vertical (non-evaluated) products.
+ * Handle pagination change for right column results.
  * UI uses 1-based page numbers, internal state uses 0-based.
  */
-const onMissingVerticalPageChange = (newPage: number) => {
-  missingVerticalPageNumber.value = newPage - 1
+const onPageChange = (newPage: number) => {
+  pageNumber.value = newPage - 1
   // Scroll to top of results section
   if (import.meta.client) {
     window.scrollTo({ top: 200, behavior: 'smooth' })
@@ -981,7 +1196,7 @@ const onMissingVerticalPageChange = (newPage: number) => {
 watch(
   () => normalizedQuery.value,
   () => {
-    missingVerticalPageNumber.value = 0
+    pageNumber.value = 0
   }
 )
 
@@ -996,6 +1211,7 @@ const handleSearchSubmit = () => {
 
   // Clear filters on new search?
   clearFilters()
+  pageNumber.value = 0
 
   router.push({
     path: route.path,
@@ -1005,6 +1221,7 @@ const handleSearchSubmit = () => {
 
 const handleClear = () => {
   searchInput.value = ''
+  pageNumber.value = 0
   router.replace({
     path: route.path,
     query: {},
