@@ -165,6 +165,7 @@ i18n:
     singularDesignation:
       prefix: ""
       attrs: []
+    designation: []
 
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
     productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."

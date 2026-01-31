@@ -16,6 +16,8 @@ public class ProductI18nElements {
 	private PrefixedAttrText singular = new PrefixedAttrText();
 	@JsonMerge
 	private PrefixedAttrText singularDesignation = new PrefixedAttrText();
+	@JsonMerge
+	private List<String> designation = new ArrayList<>();
 	
 	@JsonMerge
 	private String cardTitle;
@@ -123,6 +125,17 @@ public class ProductI18nElements {
 
 	public void setSingularDesignation(PrefixedAttrText singularDesignation) {
 		this.singularDesignation = singularDesignation;
+	}
+
+	/**
+	 * Return the designation variants configured for product naming.
+	 */
+	public List<String> getDesignation() {
+		return designation;
+	}
+
+	public void setDesignation(List<String> designation) {
+		this.designation = designation;
 	}
 
 	public String getVerticalHomeUrl() {

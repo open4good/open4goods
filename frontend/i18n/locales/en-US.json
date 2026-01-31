@@ -2937,6 +2937,8 @@
       "supportGuaranteedUntil": "Guaranteed support until"
     },
     "impact": {
+      "title": "Environmental impact",
+      "subtitle": "Understand the impact {designation} to make a better choice.",
       "endOfLifeTitle": "Product no longer marketed",
       "endOfLifeDescription": "This product is no longer officially marketed by {brand}. Legal support started on {onMarketEndDate}.",
       "endOfLifeDescriptionFallback": "This product is no longer officially marketed by {brand}.",

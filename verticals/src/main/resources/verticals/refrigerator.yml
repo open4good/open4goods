@@ -81,6 +81,18 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    singular:
+      prefix: "|| réfrigérateur | frigo | frigidaire ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| du réfrigérateur | de ce réfrigérateur | du frigo | de ce frigo | de cet appareil ||"
+      attrs: []
+    designation:
+      - "du réfrigérateur"
+      - "de ce réfrigérateur"
+      - "du frigo"
+      - "de ce frigo"
+      - "de cet appareil"
 
     # Product metas (generic templates reused)
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
@@ -114,6 +126,18 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    singular:
+      prefix: "|| refrigerator | fridge | fridge-freezer ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| of the refrigerator | of this refrigerator | of the fridge | of this fridge | of the appliance ||"
+      attrs: []
+    designation:
+      - "of the refrigerator"
+      - "of this refrigerator"
+      - "of the fridge"
+      - "of this fridge"
+      - "of the appliance"
 
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
     productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
