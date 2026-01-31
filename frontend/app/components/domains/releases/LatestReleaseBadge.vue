@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 const props = withDefaults(
   defineProps<{ scrollTarget?: string; dense?: boolean }>(),
   {
@@ -64,6 +66,14 @@ const handleClick = (event: Event) => {
     border-color: rgba(var(--v-theme-primary), 0.4)
     box-shadow: 0 10px 26px rgba(var(--v-theme-shadow-primary-600), 0.18)
     transform: translateY(-1px)
+
+  &--unlocked
+    --tilt-angle: 0deg
+
+  &:hover
+    border-color: rgba(var(--v-theme-primary), 0.4)
+    box-shadow: 0 10px 26px rgba(var(--v-theme-shadow-primary-600), 0.18)
+    transform: translateY(-1px) rotate(var(--tilt-angle))
 
   &:active
     transform: translateY(0)

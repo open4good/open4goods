@@ -254,6 +254,22 @@ const unlockHighlight = (index: number) => {
 
 const isHighlightUnlocked = (index: number) =>
   unlockedHighlightIndexes.value.has(index)
+const isAiSummaryUnlocked = ref(false)
+
+const unlockAiSummary = () => {
+  isAiSummaryUnlocked.value = true
+}
+
+const resolveAiSummaryStyle = () => {
+  if (isHeroVariant.value) {
+    return undefined
+  }
+
+  return {
+    '--tilt-default-angle': '4deg', // Pronounced rotation (approx 2.5x base)
+    '--tilt-default-offset': '0px',
+  } as Record<string, string>
+}
 </script>
 
 <template>
@@ -402,6 +418,10 @@ const isHighlightUnlocked = (index: number) =>
     <SectionReveal class="home-hero-highlights__ai-summary" transition="fade">
       <RoundedCornerCard
         class="mt-8 home-hero-highlights__ai-summary-card"
+        :class="{
+          'home-tilt-lock': !isHeroVariant,
+          'home-tilt-lock--unlocked': !isHeroVariant && isAiSummaryUnlocked,
+        }"
         surface="strong"
         accent-corner="bottom-right"
         corner-variant="none"
@@ -410,6 +430,9 @@ const isHighlightUnlocked = (index: number) =>
         :selectable="false"
         :elevation="10"
         :hover-elevation="14"
+        :style="resolveAiSummaryStyle()"
+        @pointerenter="unlockAiSummary"
+        @focusin="unlockAiSummary"
       >
         <div class="home-hero-highlights__ai-summary-content pa-4">
           <v-row align="center">

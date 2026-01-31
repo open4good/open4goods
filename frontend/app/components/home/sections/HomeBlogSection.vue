@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, toRefs, ref } from 'vue'
 
 interface BlogItem {
   title?: string | null
@@ -23,6 +23,31 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 
 const fallbackIconSize = 48
+
+const unlockedCards = ref(new Set<number>())
+
+const unlockCard = (index: number) => {
+  if (unlockedCards.value.has(index)) {
+    return
+  }
+
+  const next = new Set(unlockedCards.value)
+  next.add(index)
+  unlockedCards.value = next
+}
+
+const isCardUnlocked = (index: number) => unlockedCards.value.has(index)
+
+const resolveCardStyle = (index: number) => {
+  if (index !== 2) {
+    return undefined
+  }
+
+  return {
+    '--tilt-default-angle': '2.6deg',
+    '--tilt-default-offset': '0px',
+  } as Record<string, string>
+}
 </script>
 
 <template>
@@ -82,6 +107,14 @@ const fallbackIconSize = 48
               >
                 <article
                   class="home-blog__card d-flex flex-column flex-grow-1 rounded-xl overflow-hidden"
+                  :class="{
+                    'home-tilt-lock': index === 2,
+                    'home-tilt-lock--unlocked':
+                      index === 2 && isCardUnlocked(index),
+                  }"
+                  :style="resolveCardStyle(index)"
+                  @pointerenter="unlockCard(index)"
+                  @focusin="unlockCard(index)"
                 >
                   <div class="home-blog__media" aria-hidden="true">
                     <v-img
