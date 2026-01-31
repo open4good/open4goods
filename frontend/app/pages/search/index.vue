@@ -175,8 +175,7 @@
           <v-col
             v-if="hasVerticalResults"
             cols="12"
-            :lg="hasGlobalResults ? 5 : 10"
-            :lg="hasGlobalResults ? 5 : 10"
+            :lg="hasGlobalResults ? 5 : 12"
           >
             <section class="search-page__column">
               <div class="search-page__column-header d-flex justify-center">
@@ -269,8 +268,7 @@
           <v-col
             v-if="hasGlobalResults"
             cols="12"
-            :lg="hasVerticalResults ? 7 : 10"
-            :lg="hasVerticalResults ? 7 : 10"
+            :lg="hasVerticalResults ? 7 : 12"
           >
             <section class="search-page__column">
               <div
