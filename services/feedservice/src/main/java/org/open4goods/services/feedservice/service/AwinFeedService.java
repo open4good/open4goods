@@ -81,7 +81,7 @@ public class AwinFeedService extends AbstractFeedService {
     /**
      * Scheduled refresh of Awin datasource properties according to configuration.
      */
-    @Scheduled(cron = "${feed.awin.cron}")
+    @Scheduled(cron = "${feed.awin.cron:-}")
     public void scheduledLoad() {
         if (!feedConfig.getAwin().isEnabled()) {
             logger.info("Awin feed service is disabled. Skipping scheduled load.");

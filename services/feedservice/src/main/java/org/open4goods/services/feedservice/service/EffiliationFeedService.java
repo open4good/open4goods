@@ -112,7 +112,7 @@ public class EffiliationFeedService extends AbstractFeedService {
     /**
      * Scheduled refresh of Effiliation datasource properties according to configuration.
      */
-    @Scheduled(cron = "${feed.effiliation.cron}")
+    @Scheduled(cron = "${feed.effiliation.cron:-}")
     public void scheduledLoad() {
         if (!feedConfig.getEffiliation().isEnabled()) {
             LOGGER.info("Effiliation feed service is disabled. Skipping scheduled load.");
