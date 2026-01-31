@@ -31,6 +31,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.service.GoogleIndexationDispatchService;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -54,11 +55,14 @@ class ProductControllerTest {
     @Mock
     private SearchService searchService;
 
+    @Mock
+    private GoogleIndexationDispatchService googleIndexationDispatchService;
+
     private ProductController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new ProductController(productMappingService, verticalsConfigService, searchService);
+        controller = new ProductController(productMappingService, verticalsConfigService, searchService, googleIndexationDispatchService);
     }
 
     @Test

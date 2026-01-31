@@ -185,6 +185,22 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ---
 
+### google-indexation
+
+**Purpose**: Publishes product URLs to the Google Indexing API after AI review generation.
+
+**Key Responsibilities**:
+- Authenticate with Google service accounts
+- Publish URL_UPDATED notifications
+- Expose actuator metrics and health checks
+- Support batch submissions and retries
+
+**Configuration**:
+- Requires Google Indexing API service account credentials
+- Configure API URL, batch sizes, and request timeouts
+
+---
+
 ### gtinservice
 
 **Purpose**: GTIN (Global Trade Item Number) validation and lookup.

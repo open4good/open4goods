@@ -43,6 +43,7 @@ import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
+import org.open4goods.nudgerfrontapi.service.GoogleIndexationDispatchService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
@@ -104,6 +105,7 @@ public class ProductController {
     private final ProductMappingService service;
     private final VerticalsConfigService verticalsConfigService;
     private final SearchService searchService;
+    private final GoogleIndexationDispatchService googleIndexationDispatchService;
 
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
@@ -114,12 +116,22 @@ public class ProductController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductController.class);
 
+    /**
+     * Create the product controller.
+     *
+     * @param service product mapping service
+     * @param verticalsConfigService vertical configuration service
+     * @param searchService search service
+     * @param googleIndexationDispatchService indexation dispatch service
+     */
     public ProductController(ProductMappingService service,
                              VerticalsConfigService verticalsConfigService,
-                             SearchService searchService) {
+                             SearchService searchService,
+                             GoogleIndexationDispatchService googleIndexationDispatchService) {
         this.service = service;
         this.verticalsConfigService = verticalsConfigService;
         this.searchService = searchService;
+        this.googleIndexationDispatchService = googleIndexationDispatchService;
     }
 
     /**
@@ -992,6 +1004,9 @@ public class ProductController {
         LOGGER.info("Entering reviewStatus(gtin={}, domainLanguage={})", gtin, domainLanguage);
         try {
             ReviewGenerationStatus status = service.getReviewStatus(gtin);
+            if (status != null && status.getStatus() == ReviewGenerationStatus.Status.SUCCESS) {
+                googleIndexationDispatchService.handleReviewSuccess(gtin, domainLanguage);
+            }
             return ResponseEntity.ok()
                     .cacheControl(CacheControl.noCache())
                     .header("X-Locale", domainLanguage.languageTag())

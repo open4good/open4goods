@@ -67,6 +67,14 @@ front:
     quota:
       max-per-ip: ${FRONT_REVIEW_GENERATION_MAX_PER_IP:3}
       window: ${FRONT_REVIEW_GENERATION_WINDOW:24h}
+  google-indexation:
+    enabled: ${FRONT_GOOGLE_INDEXATION_ENABLED:false}
+    realtime-enabled: ${FRONT_GOOGLE_INDEXATION_REALTIME_ENABLED:true}
+    batch-enabled: ${FRONT_GOOGLE_INDEXATION_BATCH_ENABLED:true}
+    batch-interval: ${FRONT_GOOGLE_INDEXATION_BATCH_INTERVAL:30m}
+    batch-size: ${FRONT_GOOGLE_INDEXATION_BATCH_SIZE:50}
+    max-attempts: ${FRONT_GOOGLE_INDEXATION_MAX_ATTEMPTS:5}
+    site-base-url: ${FRONT_GOOGLE_INDEXATION_SITE_BASE_URL:https://nudger.fr}
   search:
     suggest:
       semantic-fallback-enabled: true
@@ -145,6 +153,14 @@ management:
 
 open-data-config:
   generation-enabled: false
+
+google-indexation:
+  enabled: ${GOOGLE_INDEXATION_ENABLED:false}
+  service-account-json: ${GOOGLE_INDEXATION_SERVICE_ACCOUNT_JSON:}
+  service-account-path: ${GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH:}
+  api-url: ${GOOGLE_INDEXATION_API_URL:https://indexing.googleapis.com/v3/urlNotifications:publish}
+  request-timeout: ${GOOGLE_INDEXATION_REQUEST_TIMEOUT:10s}
+  batch-size: ${GOOGLE_INDEXATION_BATCH_SIZE:50}
 
 team-config:
   cores:
