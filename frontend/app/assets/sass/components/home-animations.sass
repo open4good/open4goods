@@ -26,6 +26,20 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease
   will-change: transform
 
+.home-tilt-lock
+  --tilt-angle: var(--tilt-default-angle, 0deg)
+  --tilt-translate-y: var(--tilt-default-offset, 0)
+  transform: translateY(var(--tilt-translate-y)) rotate(var(--tilt-angle))
+  transition: transform 0.18s ease
+  will-change: transform
+
+.home-tilt-lock--unlocked
+  --tilt-angle: 0deg
+
+@media (hover: none)
+  .home-tilt-lock
+    --tilt-angle: 0deg
+
 @media (hover: hover)
   .home-hover-card:hover
     transform: translateY(-6px) scale(1.01)
@@ -45,6 +59,10 @@
   .home-hover-card:hover
     transform: none !important
 
+  .home-tilt-lock
+    transition: none !important
+    transform: translateY(var(--tilt-translate-y)) rotate(0deg) !important
+
 :root.accessibility-reduced-motion
   .home-reveal-group
     .home-reveal-item
@@ -58,3 +76,7 @@
 
   .home-hover-card:hover
     transform: none !important
+
+  .home-tilt-lock
+    transition: none !important
+    transform: translateY(var(--tilt-translate-y)) rotate(0deg) !important
