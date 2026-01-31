@@ -235,10 +235,25 @@ const resolveHighlightStyle = (index: number) => {
   const offset = index % 2 === 0 ? '-10px' : '10px'
 
   return {
-    '--highlight-tilt': tilt,
-    '--highlight-offset': offset,
+    '--tilt-default-angle': tilt,
+    '--tilt-default-offset': offset,
   } as Record<string, string>
 }
+
+const unlockedHighlightIndexes = ref(new Set<number>())
+
+const unlockHighlight = (index: number) => {
+  if (unlockedHighlightIndexes.value.has(index)) {
+    return
+  }
+
+  const next = new Set(unlockedHighlightIndexes.value)
+  next.add(index)
+  unlockedHighlightIndexes.value = next
+}
+
+const isHighlightUnlocked = (index: number) =>
+  unlockedHighlightIndexes.value.has(index)
 </script>
 
 <template>
@@ -265,6 +280,11 @@ const resolveHighlightStyle = (index: number) => {
         >
           <RoundedCornerCard
             class="home-hero-highlights__card"
+            :class="{
+              'home-tilt-lock': isHeroVariant,
+              'home-tilt-lock--unlocked':
+                isHeroVariant && isHighlightUnlocked(index),
+            }"
             surface="strong"
             accent-corner="bottom-right"
             corner-variant="none"
@@ -278,6 +298,8 @@ const resolveHighlightStyle = (index: number) => {
             "
             :style="resolveHighlightStyle(index)"
             @click="handleHighlightClick"
+            @pointerenter="unlockHighlight(index)"
+            @focusin="unlockHighlight(index)"
           >
             <div
               class="home-hero-highlights__card-content d-flex flex-column align-center text-center ga-2"
@@ -506,8 +528,6 @@ const resolveHighlightStyle = (index: number) => {
 .home-hero-highlights__card
   height: 100%
   width: 100%
-  transform: translateY(var(--highlight-offset, 0)) rotate(var(--highlight-tilt, 0deg))
-  transition: transform 180ms ease, box-shadow 180ms ease
 
   :deep(.rounded-card__content)
     min-height: auto
@@ -562,10 +582,10 @@ const resolveHighlightStyle = (index: number) => {
 @media (min-width: 960px)
   .home-hero-highlights--hero
     .home-hero-highlights__col:nth-child(odd) .home-hero-highlights__card
-      --highlight-offset: -12px
+      --tilt-default-offset: -12px
 
     .home-hero-highlights__col:nth-child(even) .home-hero-highlights__card
-      --highlight-offset: 12px
+      --tilt-default-offset: 12px
 
 .home-hero-highlights__ai-summary-cards-container
   width: 100%

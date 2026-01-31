@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 
 const solutionImageSrc = '/homepage/gain/nudger-screaming.webp'
@@ -20,6 +20,15 @@ const { t } = useI18n()
 const sectionTitle = computed(() => t('home.solution.title'))
 const sectionDescription = computed(() => t('home.solution.description'))
 const isVisible = computed(() => Boolean(props.reveal))
+const isImageTiltUnlocked = ref(false)
+
+const unlockImageTilt = () => {
+  if (isImageTiltUnlocked.value) {
+    return
+  }
+
+  isImageTiltUnlocked.value = true
+}
 </script>
 
 <template>
@@ -75,11 +84,15 @@ const isVisible = computed(() => Boolean(props.reveal))
           </v-row>
         </v-col>
         <v-col cols="12" md="6" class="home-solution__visual">
-          <div class="home-solution__image-wrapper">
+          <div
+            class="home-solution__image-wrapper"
+            @pointerenter="unlockImageTilt"
+          >
             <img
               :src="solutionImageSrc"
               :alt="sectionTitle"
-              class="home-solution__image"
+              class="home-solution__image home-tilt-lock"
+              :class="{ 'home-tilt-lock--unlocked': isImageTiltUnlocked }"
               loading="lazy"
               decoding="async"
             />
@@ -143,7 +156,7 @@ const isVisible = computed(() => Boolean(props.reveal))
   height: auto
   display: block
   margin-inline: auto
-  transform: rotate(7deg)
+  --tilt-default-angle: 7deg
 
 @media (max-width: 599px)
   .home-solution__item

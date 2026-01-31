@@ -217,143 +217,21 @@
           <meta itemprop="name" :content="seoTitle" />
           <meta itemprop="numberOfItems" :content="String(resultsCount)" />
 
-          <div class="category-page__toolbar">
-            <div
-              class="category-page__toolbar-section category-page__toolbar-section--left"
-            >
-              <v-btn
-                v-if="!isDesktop"
-                color="primary"
-                variant="flat"
-                prepend-icon="mdi-filter-variant"
-                @click="filtersDrawer = true"
-              >
-                {{ $t('category.products.openFilters') }}
-              </v-btn>
-
-              <CategoryResultsCount :count="resultsCount" />
-
-              <div class="category-page__sort">
-                <div class="category-page__sort-select">
-                  <v-tooltip
-                    location="bottom"
-                    :text="$t('category.products.tooltips.sortField')"
-                  >
-                    <template #activator="{ props: sortSelectProps }">
-                      <v-select
-                        v-bind="sortSelectProps"
-                        v-model="sortField"
-                        :items="sortItems"
-                        :label="$t('category.products.sortLabel')"
-                        item-title="title"
-                        item-value="value"
-                        clearable
-                        :disabled="sortItems.length === 0"
-                        hide-details
-                        density="comfortable"
-                      />
-                    </template>
-                  </v-tooltip>
-                </div>
-                <v-btn-toggle
-                  v-model="sortOrder"
-                  class="category-page__sort-order"
-                  density="comfortable"
-                >
-                  <v-btn
-                    value="asc"
-                    :aria-label="$t('category.products.sortOrderAsc')"
-                  >
-                    <v-icon icon="mdi-sort-ascending" />
-                    <v-tooltip
-                      activator="parent"
-                      location="bottom"
-                      :text="$t('category.products.tooltips.sortAscending')"
-                    />
-                  </v-btn>
-                  <v-btn
-                    value="desc"
-                    :aria-label="$t('category.products.sortOrderDesc')"
-                  >
-                    <v-icon icon="mdi-sort-descending" />
-                    <v-tooltip
-                      activator="parent"
-                      location="bottom"
-                      :text="$t('category.products.tooltips.sortDescending')"
-                    />
-                  </v-btn>
-                </v-btn-toggle>
-              </div>
-            </div>
-
-            <div
-              class="category-page__toolbar-section category-page__toolbar-section--center"
-            >
-              <div class="category-page__search">
-                <v-tooltip
-                  location="bottom"
-                  :text="$t('category.products.tooltips.search')"
-                >
-                  <template #activator="{ props: searchProps }">
-                    <v-text-field
-                      v-bind="searchProps"
-                      v-model="searchTerm"
-                      :label="$t('category.products.searchPlaceholder')"
-                      prepend-inner-icon="mdi-magnify"
-                      clearable
-                      hide-details
-                      density="comfortable"
-                      class="category-page__search-input"
-                    />
-                  </template>
-                </v-tooltip>
-              </div>
-            </div>
-
-            <div
-              class="category-page__toolbar-section category-page__toolbar-section--right"
-            >
-              <v-btn-toggle
-                v-model="viewMode"
-                mandatory
-                class="category-page__view-toggle"
-              >
-                <v-btn
-                  value="cards"
-                  :aria-label="$t('category.products.viewCards')"
-                >
-                  <v-icon icon="mdi-view-grid" />
-                  <v-tooltip
-                    activator="parent"
-                    location="bottom"
-                    :text="$t('category.products.tooltips.viewCards')"
-                  />
-                </v-btn>
-                <v-btn
-                  value="list"
-                  :aria-label="$t('category.products.viewList')"
-                >
-                  <v-icon icon="mdi-view-list" />
-                  <v-tooltip
-                    activator="parent"
-                    location="bottom"
-                    :text="$t('category.products.tooltips.viewList')"
-                  />
-                </v-btn>
-                <v-btn
-                  value="table"
-                  :aria-label="$t('category.products.viewTable')"
-                >
-                  <v-icon icon="mdi-table" />
-                  <v-tooltip
-                    activator="parent"
-                    location="bottom"
-                    :text="$t('category.products.tooltips.viewTable')"
-                  />
-                </v-btn>
-              </v-btn-toggle>
-            </div>
-          </div>
+          <CategoryResultsToolbar
+            :is-desktop="isDesktop"
+            :results-count="resultsCount"
+            :view-mode="viewMode"
+            :sort-items="sortItems"
+            :sort-field="sortField"
+            :sort-order="sortOrder"
+            :search-term="searchTerm"
+            :show-filters-button="true"
+            @toggle-filters="filtersDrawer = true"
+            @update:search-term="searchTerm = $event"
+            @update:sort-field="sortField = $event"
+            @update:sort-order="sortOrder = $event"
+            @update:view-mode="viewMode = $event"
+          />
 
           <v-alert
             v-if="productError"
@@ -462,7 +340,7 @@ import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
-import CategoryResultsCount from '~/components/category/CategoryResultsCount.vue'
+import CategoryResultsToolbar from '~/components/category/CategoryResultsToolbar.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
@@ -2259,29 +2137,6 @@ const clearAllFilters = () => {
   &__container
     max-width: 1560px
 
-  &__toolbar
-    display: flex
-    flex-direction: column
-    gap: 1rem
-    margin-bottom: 1.5rem
-    width: 100%
-
-  &__toolbar-section
-    display: flex
-    align-items: center
-    gap: 1rem
-    width: 100%
-    flex-wrap: wrap
-
-  &__toolbar-section--left
-    justify-content: flex-start
-
-  &__toolbar-section--center
-    justify-content: center
-
-  &__toolbar-section--right
-    justify-content: flex-end
-
   &__fast-filters
     display: flex
     flex-direction: column
@@ -2500,28 +2355,6 @@ const clearAllFilters = () => {
     flex-direction: column
     gap: 1.5rem
 
-@media (min-width: 960px)
-  .category-page__toolbar
-    display: grid
-    grid-template-columns: auto minmax(260px, 1fr) auto
-    align-items: center
-    gap: 1.5rem
-
-  .category-page__toolbar-section
-    flex-wrap: nowrap
-
-  .category-page__toolbar-section--left
-    justify-content: flex-start
-
-  .category-page__toolbar-section--center
-    justify-content: center
-
-  .category-page__toolbar-section--right
-    justify-content: flex-end
-
-  .category-page__search
-    flex: 0 1 420px
-
 @media (min-width: 1280px)
   .category-page__layout
     grid-template-columns: minmax(260px, 300px) minmax(0, 1fr)
@@ -2534,29 +2367,9 @@ const clearAllFilters = () => {
     display: flex
 
 @media (max-width: 959px)
-  .category-page__toolbar
-    align-items: stretch
-
   .category-page__fast-filters
     flex-direction: column
     align-items: stretch
-
-  .category-page__search
-    flex: 1 1 100%
-    min-width: 0
-    max-width: 100%
-
-  .category-page__toolbar-section--center
-    justify-content: center
-
-  .category-page__toolbar-section--right
-    justify-content: flex-end
-
-  .category-page__sort
-    width: 100%
-
-  .category-page__sort-select
-    flex: 1 1 100%
 
   .category-page__layout
     grid-template-columns: minmax(0, 1fr)
