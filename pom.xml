@@ -86,6 +86,7 @@
         <module>front-api</module>
         <module>services/urlfetching</module>
         <module>services/googlesearch</module>
+        <module>services/google-indexation</module>
         <module>services/evaluation</module>
         <module>services/serialisation</module>
         <module>services/prompt</module>

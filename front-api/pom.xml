@@ -98,6 +98,11 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.open4goods</groupId>
+      <artifactId>google-indexation</artifactId>
+      <version>${global.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.ibm.icu</groupId>

@@ -42,6 +42,35 @@ Requests are limited using an in-memory token bucket. Defaults can be changed in
 
 When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
 
+## Google Indexation
+
+The front API can notify the Google Indexing API after AI review generation
+succeeds. The integration is disabled by default and must be enabled explicitly.
+
+Front API dispatch configuration:
+
+- `front.google-indexation.enabled` – master toggle (default `false`).
+- `front.google-indexation.realtime-enabled` – dispatch immediately on success.
+- `front.google-indexation.batch-enabled` – dispatch queued URLs on schedule.
+- `front.google-indexation.batch-interval` – schedule delay (default `30m`).
+- `front.google-indexation.batch-size` – maximum URLs per batch.
+- `front.google-indexation.max-attempts` – retry limit for failed URLs.
+- `front.google-indexation.site-base-url` – public base URL used to build product URLs.
+
+Google Indexing API credentials:
+
+- `google-indexation.service-account-json` – raw service account JSON.
+- `google-indexation.service-account-path` – file path to the service account JSON.
+
+Credentials are required when `front.google-indexation.enabled=true`. You can
+provide them via environment variables:
+
+```bash
+export FRONT_GOOGLE_INDEXATION_ENABLED=true
+export FRONT_GOOGLE_INDEXATION_SITE_BASE_URL=https://nudger.fr
+export GOOGLE_INDEXATION_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
+```
+
 ## API documentation
 
 Access to the Swagger UI (`/swagger-ui.html`) and the raw OpenAPI specification

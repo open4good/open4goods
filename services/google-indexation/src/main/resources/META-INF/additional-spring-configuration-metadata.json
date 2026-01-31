@@ -1,0 +1,38 @@
+{
+  "properties": [
+    {
+      "name": "google-indexation.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the Google Indexation client.",
+      "defaultValue": false
+    },
+    {
+      "name": "google-indexation.service-account-json",
+      "type": "java.lang.String",
+      "description": "Raw service account JSON used to authenticate with the Google Indexing API."
+    },
+    {
+      "name": "google-indexation.service-account-path",
+      "type": "java.lang.String",
+      "description": "Filesystem path to the service account JSON used to authenticate with the Google Indexing API."
+    },
+    {
+      "name": "google-indexation.api-url",
+      "type": "java.lang.String",
+      "description": "Google Indexing API endpoint.",
+      "defaultValue": "https://indexing.googleapis.com/v3/urlNotifications:publish"
+    },
+    {
+      "name": "google-indexation.request-timeout",
+      "type": "java.time.Duration",
+      "description": "Timeout applied to Indexing API requests.",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "google-indexation.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Default batch size used when publishing multiple URLs.",
+      "defaultValue": 50
+    }
+  ]
+}

@@ -48,6 +48,47 @@
       "defaultValue": true
     },
     {
+      "name": "front.google-indexation.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable Google Indexation dispatch in the front API.",
+      "defaultValue": false
+    },
+    {
+      "name": "front.google-indexation.realtime-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable real-time Indexing API dispatch when a review generation succeeds.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.google-indexation.batch-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable scheduled batch dispatch of queued URLs.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.google-indexation.batch-interval",
+      "type": "java.time.Duration",
+      "description": "Fixed delay between batch dispatches.",
+      "defaultValue": "30m"
+    },
+    {
+      "name": "front.google-indexation.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of URLs to send per batch.",
+      "defaultValue": 50
+    },
+    {
+      "name": "front.google-indexation.max-attempts",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of attempts before giving up on a URL.",
+      "defaultValue": 5
+    },
+    {
+      "name": "front.google-indexation.site-base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the public frontend used to build canonical product URLs."
+    },
+    {
       "name": "front.semantic-diagnostics-enabled",
       "type": "java.lang.Boolean",
       "description": "Enable semantic score diagnostics in global search responses.",
