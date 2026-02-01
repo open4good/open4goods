@@ -10,6 +10,7 @@ import { isDoNotTrackEnabled } from '~/utils/do-not-track'
 
 type HotjarPublicConfig = {
   enabled: boolean
+  mode?: 'always' | 'never' | 'query'
   siteId: number
   snippetVersion: number
 }
@@ -29,7 +30,11 @@ export default defineNuxtPlugin({
       | HotjarPublicConfig
       | undefined
 
-    if (!hotjarConfig?.enabled) {
+    if (!hotjarConfig) {
+      return
+    }
+
+    if (hotjarConfig.mode === 'never') {
       return
     }
 
@@ -37,15 +42,17 @@ export default defineNuxtPlugin({
       return
     }
 
-    const hotjarCookie = useCookie(HOTJAR_RECORDING_COOKIE_NAME)
+    if (hotjarConfig.mode !== 'always') {
+      const hotjarCookie = useCookie(HOTJAR_RECORDING_COOKIE_NAME)
 
-    if (!isHotjarRecordingCookieEnabled(hotjarCookie.value)) {
-      return
+      if (!isHotjarRecordingCookieEnabled(hotjarCookie.value)) {
+        return
+      }
     }
 
     nuxtApp.vueApp.use(Hotjar as Plugin, {
       id: hotjarConfig.siteId,
-      isProduction: hotjarConfig.enabled,
+      isProduction: hotjarConfig.mode !== 'never',
       snippetVersion: hotjarConfig.snippetVersion,
     })
   },
