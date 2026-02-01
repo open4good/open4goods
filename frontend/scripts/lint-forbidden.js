@@ -77,11 +77,16 @@ for (const filePath of allFiles) {
   const rule = config.rules.find(r => r.extensions.includes(ext))
   if (rule) {
     const content = fs.readFileSync(filePath, 'utf-8')
-    for (const char of rule.forbidden) {
+    for (const item of rule.forbidden) {
+      const char = typeof item === 'string' ? item : item.char
+      const replace = typeof item === 'string' ? null : item.replace
+
       if (content.includes(char)) {
-        console.error(
-          `ERROR: Found forbidden character "${char}" in ${path.relative(ROOT_DIR, filePath)}`
-        )
+        let msg = `ERROR: Found forbidden character "${char}"`
+        if (replace) msg += ` (use "${replace}" instead)`
+        msg += ` in ${path.relative(ROOT_DIR, filePath)}`
+
+        console.error(msg)
         hasError = true
       }
     }

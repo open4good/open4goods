@@ -14,7 +14,44 @@
   "rules": [
     {
       "extensions": [".md", ".yml", ".json"],
-      "forbidden": ["\u2014"]
+      "forbidden": [
+        {
+          "char": "\u2014",
+          "replace": "-"
+        },
+        {
+          "char": "\u2013",
+          "replace": "-"
+        },
+        {
+          "char": "\u00AB",
+          "replace": "\""
+        },
+        {
+          "char": "\u00BB",
+          "replace": "\""
+        },
+        {
+          "char": "\u2026",
+          "replace": "..."
+        },
+        {
+          "char": "\u2019",
+          "replace": "'"
+        },
+        {
+          "char": "\u2022",
+          "replace": "-"
+        },
+        {
+          "char": "\u25CF",
+          "replace": "-"
+        },
+        {
+          "char": "\u00D7",
+          "replace": "x"
+        }
+      ]
     }
   ]
 }

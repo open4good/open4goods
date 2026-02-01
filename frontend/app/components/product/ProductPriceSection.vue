@@ -31,6 +31,8 @@
               class="rounded-xl border product-price__offers-table"
               density="comfortable"
               :items-per-page="5"
+              hover
+              @click:row="onRowClick"
             >
               <template #[`item.merchant`]="{ item }">
                 <div class="d-flex align-center gap-2">
@@ -1057,6 +1059,22 @@ const offersHeaders = [
   { title: '', key: 'actions', sortable: false, align: 'end' },
 ]
 
+const onRowClick = (
+  event: PointerEvent,
+  { item }: { item: ProductAggregatedPriceDto }
+) => {
+  const target = event.target as HTMLElement
+  if (target.closest('.v-btn') || target.closest('a')) {
+    return
+  }
+
+  const link = resolveOfferLink(item)
+  if (link) {
+    handleOfferRedirectClick(item, 'offers-table', link)
+    window.open(link, '_blank')
+  }
+}
+
 const handleOfferRedirectClick = (
   offer: ProductAggregatedPriceDto | null,
   placement: string,
@@ -1484,6 +1502,10 @@ onBeforeUnmount(() => {
 
 .product-price__offers-table {
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12);
+}
+
+.product-price__offers-table :deep(tbody tr) {
+  cursor: pointer;
 }
 
 .product-price__no-offers {
