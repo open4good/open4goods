@@ -33,6 +33,7 @@
                     :placeholder="t('pwa.landing.search.placeholder')"
                     :aria-label="t('pwa.landing.search.ariaLabel')"
                     :min-chars="minSuggestionQueryLength"
+                    :scan-mobile="false"
                     density="comfortable"
                     variant="outlined"
                     color="primary"
@@ -45,7 +46,7 @@
                   />
                   <v-btn
                     block
-                    color="primary"
+                    color="secondary"
                     variant="flat"
                     size="large"
                     class="font-weight-bold"
@@ -166,13 +167,6 @@
       </v-dialog>
     </ClientOnly>
 
-    <PwaMobileActionBar
-      class="pwa-landing__action-bar"
-      @scan="isScannerOpen = true"
-      @wizard="isWizardOpen = true"
-      @search="$emit('submit')"
-    />
-
     <v-snackbar v-model="scannerError" color="error" timeout="3000">
       {{ scannerErrorMessage }}
     </v-snackbar>
@@ -187,7 +181,6 @@ import SearchSuggestField, {
 } from '~/components/search/SearchSuggestField.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import PwaBarcodeScanner from './PwaBarcodeScanner.vue'
-import PwaMobileActionBar from './PwaMobileActionBar.vue'
 import { useDisplay } from 'vuetify'
 import { computed, ref } from 'vue'
 

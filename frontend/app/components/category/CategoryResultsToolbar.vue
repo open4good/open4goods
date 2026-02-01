@@ -53,10 +53,7 @@
           density="comfortable"
           data-testid="results-toolbar-sort-order"
         >
-          <v-btn
-            value="asc"
-            :aria-label="t('category.products.sortOrderAsc')"
-          >
+          <v-btn value="asc" :aria-label="t('category.products.sortOrderAsc')">
             <v-icon icon="mdi-sort-ascending" />
             <v-tooltip
               activator="parent"
@@ -107,7 +104,7 @@
     </div>
 
     <div
-      v-if="showViewToggle"
+      v-if="showViewToggle && isDesktop"
       class="category-results-toolbar__section category-results-toolbar__section--right"
     >
       <v-btn-toggle
@@ -269,8 +266,9 @@ const internalSortOrder = computed({
     justify-content: flex-end
 
   .category-results-toolbar__sort
-    width: 100%
+    width: auto
 
   .category-results-toolbar__sort-select
-    flex: 1 1 100%
+    flex: 1 1 auto
+    min-width: 180px
 </style>

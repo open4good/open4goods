@@ -498,11 +498,11 @@ watch(groupedSubsets, () => {
       color: #ffffff !important
 
 @media (max-width: 959px)
+@media (max-width: 959px)
   .category-fast-filters
-    flex-direction: column
-    align-items: stretch
     gap: 0.75rem
-    border-radius: 1rem
+    border-radius: 999px
+
 
     &__scroller
       gap: 1rem

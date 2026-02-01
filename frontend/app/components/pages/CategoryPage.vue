@@ -1600,6 +1600,10 @@ const filterFieldMap = computed<Record<string, FieldMetadataDto>>(() => {
 })
 
 const viewComponent = computed(() => {
+  if (!isDesktop.value) {
+    return CategoryProductCardGrid
+  }
+
   if (viewMode.value === 'list') {
     return CategoryProductListView
   }
@@ -1647,23 +1651,25 @@ const viewComponentProps = computed(() => {
     popularAttributes: popularAttributes.value,
   }
 
-  if (viewMode.value === 'table') {
-    return {
-      ...base,
-      itemsPerPage: pageSize.value,
-      sortField: sortField.value,
-      sortOrder: sortOrder.value,
-      attributeKeys: attributeKeys.value,
-      attributeConfigs: attributeConfigMap.value,
-      fieldMetadata: filterFieldMap.value,
+  if (isDesktop.value) {
+    if (viewMode.value === 'table') {
+      return {
+        ...base,
+        itemsPerPage: pageSize.value,
+        sortField: sortField.value,
+        sortOrder: sortOrder.value,
+        attributeKeys: attributeKeys.value,
+        attributeConfigs: attributeConfigMap.value,
+        fieldMetadata: filterFieldMap.value,
+      }
     }
-  }
 
-  if (viewMode.value === 'list') {
-    return {
-      ...base,
-      sortField: sortField.value,
-      fieldMetadata: filterFieldMap.value,
+    if (viewMode.value === 'list') {
+      return {
+        ...base,
+        sortField: sortField.value,
+        fieldMetadata: filterFieldMap.value,
+      }
     }
   }
 

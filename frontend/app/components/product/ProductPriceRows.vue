@@ -259,7 +259,7 @@ const getAlternatives = (
     .map(o => ({
       id: randomId(),
       merchantName: o.datasourceName ?? o.merchantName ?? 'Unknown',
-      priceLabel: o.priceLabel || 'N/A',
+      priceLabel: formatOfferPrice(o) || 'N/A',
       favicon: o.favicon ?? o.merchantFavicon,
       url: resolveUrl(o), // Apply same URL resolution logic
     }))
