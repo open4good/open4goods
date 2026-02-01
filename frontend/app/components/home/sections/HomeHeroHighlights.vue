@@ -57,6 +57,7 @@ const props = withDefaults(
 )
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 
 const shouldRenderLinks = computed(() => props.enableLinks)
 const scrollTargetId = computed(() => props.scrollTargetId?.trim() ?? '')
@@ -102,7 +103,7 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
         { text: 'Acheter moins pire pour la planète. ' },
         { text: 'évaluation environnementale', to: '/impact-score' },
         { text: ' innovante pour ' },
-        { text: impactProducts, to: '/search' },
+        { text: impactProducts, to: localePath({ name: 'search' }) },
         { text: ' produits dans ' },
         { text: impactCategories, to: '/categories' },
         { text: ' catégories' },
@@ -324,9 +325,9 @@ const resolveAiSummaryStyle = () => {
               <v-icon v-if="item.icon" size="56" color="secondary" class="mb-4">
                 {{ item.icon }}
               </v-icon>
-              <p class="home-hero-highlights__title ma-0 font-weight-bold">
+              <h2 class="home-hero-highlights__title ma-0 font-weight-bold">
                 {{ item.title }}
-              </p>
+              </h2>
               <p class="home-hero-highlights__description ma-0">
                 <template
                   v-for="(segment, segmentIndex) in item.segments"

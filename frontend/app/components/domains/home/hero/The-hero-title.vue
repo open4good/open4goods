@@ -6,12 +6,12 @@ const { t } = useI18n()
 
 <template>
   <div class="hero-title-container">
+    <span class="hero-title-eyebrow">
+      {{ t('siteIdentity.hero.mainSubtitle') }}
+    </span>
     <h1 class="hero-title-text">
       {{ t('siteIdentity.hero.mainTitle') }}
     </h1>
-    <h2 class="hero-subtitle-text">
-      {{ t('siteIdentity.hero.mainSubtitle') }}
-    </h2>
     <div class="pt-2">
       <TheSearchBar />
     </div>
@@ -30,14 +30,18 @@ const { t } = useI18n()
   text-align: left
 
 
-.hero-title-text, .hero-subtitle-text
+.hero-title-text
     color: white
+
+.hero-title-eyebrow
+    display: block
+    font-size: 1.125rem
+    font-weight: 600
+    letter-spacing: 0.08em
+    text-transform: uppercase
+    color: rgba(255, 255, 255, 0.82)
 
 .hero-title-text
     font-size: clamp(1.5rem, 6vw, 4rem)
     font-weight: 700
-
-.hero-subtitle-text
-    font-size: 2rem
-    font-weight: 600
 </style>
