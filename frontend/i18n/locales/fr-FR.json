@@ -201,12 +201,11 @@
       "gainAlt": "Illustration d'un acheteur soulagé après un choix responsable."
     },
     "problems": {
-      "title": "Trop d'infos, mais pas celle qu'il faut ?",
-      "description": "Comparer impact, prix, fiabilité... Pas toujours facile !",
+      "title": "Consommer plus écolo. Pas simple !",
       "items": {
-        "labelsOverload": "Perdu dans la jungle des labels ? Difficile de comparer vraiment.",
+        "labelsOverload": "Trop d'infos, mais pas celle qu'il faut ? Comparer impact, prix, fiabilité... Pas toujours facile !",
         "budgetVsEcology": "Écologie vs pouvoir d'achat ? Marre de choisir entre les deux.",
-        "tooManyTabs": "8 sites ouverts ? Un seul endroit suffit."
+        "tooManyTabs": "8 sites ouverts ? Un seul endroit suffit. "
       }
     },
     "solution": {

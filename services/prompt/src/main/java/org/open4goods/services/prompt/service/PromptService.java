@@ -94,10 +94,11 @@ public class PromptService implements HealthIndicator {
         this.providerRegistry = providerRegistry;
 
         // Check if the service is enabled (if supported by configuration)
-        if (!genAiConfig.isEnabled()) {
-            logger.error("GenAiService is disabled via configuration.");
-            return;
-        }
+        // TODO : Better handle the enabled / disabled
+//        if (!genAiConfig.isEnabled()) {
+//            logger.error("GenAiService is disabled via configuration.");
+//            return;
+//        }
 
         // Load prompt templates and initialize chat models
         loadPrompts(genAiConfig.getPromptsTemplatesFolder());
@@ -339,6 +340,12 @@ public class PromptService implements HealthIndicator {
                             ? nativ.getPrompt().getAiService().name()
                             : "UNKNOWN",
                     "retrievalMode", nativ.getPrompt().getRetrievalMode().name()).increment();
+
+            if (!genAiConfig.isRepairEnabled()) {
+                logger.error("JSON parsing failed for prompt {} and repair is disabled.", promptKey, e);
+                throw new RuntimeException("JSON parsing failed for prompt " + promptKey + ": " + e.getMessage(), e);
+            }
+
             logger.warn("JSON parsing failed for prompt {}. Attempting repair.", promptKey, e);
             String repaired = repairJson(promptKey, raw, jsonSchema, nativ.getPrompt());
             ret.setBody(outputConverter.convert(repaired));
@@ -470,6 +477,12 @@ public class PromptService implements HealthIndicator {
                             ? pConf.getAiService().name()
                             : "UNKNOWN",
                     "retrievalMode", pConf.getRetrievalMode().name()).increment();
+
+            if (!genAiConfig.isRepairEnabled()) {
+                logger.error("JSON parsing failed for prompt {} and repair is disabled.", promptKey, e);
+                throw new RuntimeException("JSON parsing failed for prompt " + promptKey + ": " + e.getMessage(), e);
+            }
+
             logger.warn("JSON parsing failed for prompt {}. Attempting repair.", promptKey, e);
             String repaired = repairJson(promptKey, raw, jsonSchema, updatedConfig);
             ret.setBody(outputConverter.convert(repaired));
@@ -749,10 +762,10 @@ public class PromptService implements HealthIndicator {
             logger.error("Error recording prompt response for key {}: {}", promptKey, e.getMessage(), e);
         }
     }
-    
+
     /**
      * Post-processes the generated content by applying configured replacements.
-     * 
+     *
      * @param content The content to process.
      * @return The processed content with replacements applied.
      */

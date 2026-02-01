@@ -35,6 +35,25 @@ public class NudgeToolScore {
         this.scoreMinValue = scoreMinValue;
     }
 
+    private Integer fromPercent;
+    private Integer toPercent;
+
+    public Integer getFromPercent() {
+        return fromPercent;
+    }
+
+    public void setFromPercent(Integer fromPercent) {
+        this.fromPercent = fromPercent;
+    }
+
+    public Integer getToPercent() {
+        return toPercent;
+    }
+
+    public void setToPercent(Integer toPercent) {
+        this.toPercent = toPercent;
+    }
+
     public String getMdiIcon() {
         return mdiIcon;
     }

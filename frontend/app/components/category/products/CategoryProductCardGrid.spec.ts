@@ -121,6 +121,46 @@ const mountGrid = async (
       stubs: {
         VRow: createStub('div'),
         VCol: createStub('div'),
+        ProductCard: {
+          name: 'ProductCard',
+          props: {
+            product: { type: Object, required: true },
+            popularAttributes: Array,
+            sortField: String,
+            fieldMetadata: Object,
+            size: String,
+            maxAttributes: Number,
+            showAttributeIcons: Boolean,
+            disabled: Boolean,
+            nofollowLinks: Boolean,
+          },
+          components: {
+            ImpactScore: {
+              name: 'ImpactScore',
+              props: ['score', 'max'],
+              template:
+                '<div class="impact-score-stub" :data-score="score" :data-max="max"></div>',
+            },
+            ProductPriceRows: {
+              name: 'ProductPriceRows',
+              template:
+                '<div class="product-price-rows-stub"><div v-if="product.offers?.bestNewOffer" class="product-price-rows__row product-price-rows__row--new"></div><div v-if="product.offers?.bestOccasionOffer" class="product-price-rows__row product-price-rows__row--occasion"></div></div>',
+              props: ['product'],
+            },
+            CompareToggleButton: CompareToggleStub,
+          },
+          template: `
+            <div class="product-card" :class="{ 'product-card--disabled': disabled }" :rel="nofollowLinks ? 'nofollow' : undefined">
+              <div class="product-card__media">
+                <ImpactScore v-if="product.scores?.scores?.ECOSCORE" :score="(product.scores.scores.ECOSCORE.value || 0) * 4" :max="20" />
+              </div>
+              <div class="product-card__body">
+                <ProductPriceRows :product="product" />
+              </div>
+              <CompareToggleButton :product="product" size="compact" />
+            </div>
+          `,
+        },
         VCard: createStub('div'),
         VCardItem: createStub('div'),
         VImg: createStub('div'),
@@ -270,10 +310,8 @@ describe('CategoryProductCardGrid', () => {
       nofollowLinks: true,
     })
 
-    const card = wrapper.get('.category-product-card-grid__card')
-    expect(card.classes()).toContain(
-      'category-product-card-grid__card--disabled'
-    )
+    const card = wrapper.get('.product-card')
+    expect(card.classes()).toContain('product-card--disabled')
     expect(card.attributes('rel')).toBe('nofollow')
   })
 
@@ -314,7 +352,7 @@ describe('CategoryProductCardGrid', () => {
       },
     })
 
-    const wrapper = await mountGrid([product], { variant: 'classic' })
+    const wrapper = await mountGrid([product])
 
     const impactScore = wrapper.findComponent({ name: 'ImpactScore' })
     expect(impactScore.exists()).toBe(true)

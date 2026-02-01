@@ -110,11 +110,6 @@
 
         <div v-if="hasVertical(product)" class="category-product-list__actions">
           <!-- Removed best price button as it is now in micro prices -->
-          <AiReviewActionButton
-            :is-reviewed="isReviewed(product)"
-            :review-created-at="reviewCreatedAt(product)"
-            variant="button"
-          />
           <v-btn
             class="category-product-list__compare-button"
             :class="{
@@ -156,7 +151,6 @@ import {
   type CompareListBlockReason,
 } from '~/stores/useProductCompareStore'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import AiReviewActionButton from '~/components/shared/ai/AiReviewActionButton.vue'
 import ProductPriceRows from '~/components/product/ProductPriceRows.vue'
 import {
   formatAttributeValue,
@@ -205,11 +199,6 @@ const offersCountLabel = (product: ProductDto) =>
 
 const resolveBaseLine = (product: ProductDto) =>
   product.aiReview?.baseLine ?? null
-
-const isReviewed = (product: ProductDto) => !!product.aiReview
-
-const reviewCreatedAt = (product: ProductDto) =>
-  product.aiReview?.createdMs ?? undefined
 
 type DisplayedAttribute = {
   key: string

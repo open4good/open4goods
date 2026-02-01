@@ -62,11 +62,12 @@ const PLAUSIBLE_API_HOST =
 const PLAUSIBLE_ENABLED = process.env.NODE_ENV === 'production'
 const PLAUSIBLE_IGNORED_HOSTNAMES = ['localhost', '127.0.0.1']
 const HOTJAR_ENABLED = true
-const HOTJAR_MODE_ENV = process.env.HOTJAR_MODE ?? 'query'
+const HOTJAR_MODE_ENV = process.env.HOTJAR_MODE ?? 'always'
 const HOTJAR_MODE = ['always', 'never', 'query'].includes(HOTJAR_MODE_ENV)
   ? HOTJAR_MODE_ENV
   : 'always'
-const HOTJAR_SITE_ID = Number(process.env.HOTJAR_SITE_ID ?? 0)
+const HOTJAR_SITE_ID = Number(process.env.HOTJAR_SITE_ID ?? 1332067)
+
 const HOTJAR_SNIPPET_VERSION = Number(process.env.HOTJAR_SNIPPET_VERSION ?? 6)
 const navigationOfflineFallbackPlugin = {
   handlerDidError: async () => {

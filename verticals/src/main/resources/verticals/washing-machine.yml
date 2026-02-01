@@ -230,7 +230,7 @@ matchingCategories:
 nudgeToolConfig:
   scores:
     - scoreName: "CLASSE_ENERGY"
-      scoreMinValue: 16 # Class A
+      fromPercent: 67 # Class A
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy Class A"
@@ -239,7 +239,7 @@ nudgeToolConfig:
         en: "Top energy efficiency"
         fr: "Efficacité énergétique optimale"
     - scoreName: "REPAIRABILITY_INDEX"
-      scoreMinValue: 8.4
+      fromPercent: 67
       mdiIcon: "mdi-tools"
       title:
         en: "Repairability"
@@ -248,7 +248,7 @@ nudgeToolConfig:
         en: "Repairable washing machines"
         fr: "Lave-linges avec un bon indice de réparabilité"
     - scoreName: "ECOSCORE"
-      scoreMinValue: 3.2
+      fromPercent: 67
       mdiIcon: "mdi-leaf"
       title:
         en: "Eco Score"

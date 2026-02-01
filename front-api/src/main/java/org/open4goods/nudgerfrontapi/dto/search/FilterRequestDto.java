@@ -76,7 +76,9 @@ public record FilterRequestDto(
         @Schema(description = "Filter on the moderation causes applied to the product", example = "excludedCauses")
         excludedCauses("excludedCauses", FilterValueType.keyword),
         @Schema(description = "Filter on the product ecoscore", example = "ecoscore")
-        ecoscore("scores.ECOSCORE.value", FilterValueType.numeric);
+        ecoscore("scores.ECOSCORE.value", FilterValueType.numeric),
+        @Schema(description = "Filter on the product ecoscore relative value", example = "ecoscoreRelativ")
+        ecoscoreRelativ("scores.ECOSCORE.relativ.value", FilterValueType.numeric);
 
         private final String fieldPath;
         private final FilterValueType valueType;
@@ -124,7 +126,9 @@ public record FilterRequestDto(
         @Schema(description = "Matches documents where the field equals one of the provided terms.")
         term,
         @Schema(description = "Matches documents where the field is within the inclusive range defined by min and/or max.")
-        range
+        range,
+        @Schema(description = "Matches documents where the ranking field is within the percentile range. Uses min as fromPercent and max as toPercent.")
+        rankingPercentile
     }
 
     /**

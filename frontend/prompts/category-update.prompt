@@ -17,6 +17,7 @@ You have access to a local API (`localhost:8081`) to fetch live data.
 *   **Base URL**: `http://localhost:8081`
 *   **Auth Header**: `Authorization: open4goods`
 
+You can also use web tools (search) to get access to market informations on {TARGET_CATEGORY}`
 ---
 
 # Tasks
@@ -28,6 +29,23 @@ You have access to a local API (`localhost:8081`) to fetch live data.
 3.  Ensure text fields (titles, descriptions) are:
     *   Grammatically correct in **French** (fr) and English (en).
     *    consistent with the vertical's domain.
+
+4 - Setup custom properties for attributes parser. (parsers:) For example, based on the reference implementation, update
+
+parsers:
+  weight:
+    minKg:
+    maxKg:
+  warranty:
+    minYears:
+    maxYears:
+
+
+To match the {TARGET_CATEGORY} specificities
+
+5 - Update popularAttributes
+ Set popularAttributes with available attributes. popularAttributes  will be presented in product cards, or will be "top filters".
+
 
 ## Phase 2: Attribute Mapping
 **Goal**: Define which attributes are relevant for this category based on real data coverage.
@@ -42,56 +60,21 @@ You have access to a local API (`localhost:8081`) to fetch live data.
 2.  **Analyze the JSON Output**:
     *   Identify attributes with high coverage ("hits" count).
     *   Ignore technical attributes coming from `standard` datasources if they are meaningless to a consumer (e.g., internal IDs).
-    *   **DISMISS** custom attributes (starting with `CUSTOM_`) or "Themes".
+    *   *DISMISS** custom attributes (starting with `CUSTOM_`) or "Themes"), only retain the one that are product features
+    *   exclude already defined attributes from `/verticals/src/main/resources/attributes/` if they exist.
 3.  **Update Configuration**:
-    *   Update `attributesConfig.configs` in your `{TARGET_CATEGORY}.yml` with the relevant attributes found, using comments ( **DISMISS** custom attributes (starting with `CUSTOM_`) or "Themes")
-    *   Reuse defined attributes from `/verticals/src/main/resources/attributes/` if they exist.
-    *   If a highly relevant attribute is missing from the files, create a new definition in `/verticals/src/main/resources/attributes/`.
+    *   You will propose the maximum top 30 features, with a table report to the user (id, french_name, coverage). Can be none, if no new pertinent, with acceptable coverage feature appears.
+    *   You will then ask for the user to input the attributes (using id) he wants to be generated and interrupt
+    *   When the user sends you back attribute id , you will generate them in `/verticals/src/main/resources/attributes/`
+    *   If you create new attributes, create them in the
 
-## Phase 3: Category Mapping
-**Goal**: Map retailer categories to this vertical.
-
-1.  **Fetch Category Mappings**:
-    ```bash
-    curl -X 'GET' \
-      'http://localhost:8081/{TARGET_CATEGORY}/categories/?minOffersCount=2' \
-      -H 'accept: application/json' \
-      -H 'Authorization: open4goods'
-    ```
-2.  **Update `matchingCategories`**:
-    *   Update the `matchingCategories` section in `{TARGET_CATEGORY}.yml`.
-    *   Remove mappings that are obviously incorrect (false positives).
-    *   Merge with existing definitions.
-
-## Phase 4: Scoring & Nudge Configuration
+4 - Update
+## Phase 3: Specific filters configuration
 ** Warning : if major changed were operated previously, those statistics may not be up to date, as batch that computes scores may have not run with updated config.
 **Goal**: Configure "Nudge" scores (Environmental, Durability, etc.) by analyzing the statistical distribution of products.
 
-### 4.1 Define Impact Scores
-1.  Scan `/verticals/src/main/resources/attributes/` for attributes with `asScore: true`.
-2.  Select those relevant to `{TARGET_CATEGORY}` (e.g., energy consumption, repairability).
-3.  Update `availableImpactScoreCriterias` in your YAML file.
 
-### 4.2 Configure Nudge Thresholds (The "Best 33%")
-We use a "Sigma Scoring" system. You need to set `scoreMinValue` for each score so that it highlights roughly the top 33% of products.
-
-1.  **Fetch Random Product Data**:
-    Get a sample of products to analyze their scores.
-    ```bash
-    curl -X 'GET' \
-      'http://localhost:8081/product/random?number=50&vertical={TARGET_CATEGORY}' \
-      -H 'accept: application/json' \
-      -H 'Authorization: open4goods' > products_sample.json
-    ```
-2.  **Analyze Distribution**:
-    *   Extract the `scores` object from the JSON.
-    *   For each score (e.g., `ENERGY_CONSUMPTION`, `REPARABILITY`), calculate the distribution.
-    *   Determine the value X where ~33% of products have a score >= X.
-3.  **Update `nudgeToolConfig`**:
-    *   Update `scoreMinValue` with your calculated X.
-    *   Write descriptions (fr/en) explaining **why** these products are good (e.g., "Washing machines with low water consumption").
-
-### 4.3 Configure Filters (Subsets)
+### 3.1 Configure Filters (Subsets)
 1.  **Price Ranges**:
     *   Based on your knowledge of the market (or the product sample), define 3 price buckets: `Low`, `Medium`, `Premium`.
     *   Update `subsetGroups` (id: price) and `subsets` accordingly.

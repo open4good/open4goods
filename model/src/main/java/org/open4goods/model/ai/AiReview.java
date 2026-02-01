@@ -545,86 +545,142 @@ public class AiReview {
     public List<String> getSocialLinks() { return socialLinks; }
     public void setSocialLinks(List<String> socialLinks) { this.socialLinks = socialLinks; }
 
-    // --- Inner static classes converted from records ---
+    // --- Inner static POJO classes (converted from records for better JSON Schema generation) ---
 
     /**
      * Represents a source of information for an AI-generated review.
      */
-    @Schema(description = "Source information for the review")
-    public static record AiSource(
-            @JsonProperty(required = true, value = "number")
-            @AiGeneratedField(instruction = "Source number (must match provided sources). Plain text only. VALUE-ONLY FIELD: no citations.")
-            @Schema(description = "Source number")
-            Integer number,
-            @JsonProperty(required = true, value = "name")
-            @AiGeneratedField(instruction = "Human-readable source name/title. Plain text only. VALUE-ONLY FIELD: no citations.")
-            @Schema(description = "Source name")
-            String name,
-            @JsonProperty(required = true, value = "description")
-            @AiGeneratedField(instruction = "Very short description of what the source provides (e.g., official specs, review, user forum). Plain text only. VALUE-ONLY FIELD: no citations.")
-            @Schema(description = "Source description")
-            String description,
-            @JsonProperty(required = true, value = "url")
-            @AiGeneratedField(instruction = "Source URL exactly. VALUE-ONLY FIELD: no extra text, no citations.")
-            @Schema(description = "Source URL")
-            String url) {
+    @Schema(description = "Source information for the review", type = "object")
+    public static class AiSource {
+        
+        @JsonProperty(required = true, value = "number")
+        @AiGeneratedField(instruction = "Source number (must match provided sources). Plain text only. VALUE-ONLY FIELD: no citations.")
+        @Schema(description = "Source number", type = "integer")
+        private Integer number;
+        
+        @JsonProperty(required = true, value = "name")
+        @AiGeneratedField(instruction = "Human-readable source name/title. Plain text only. VALUE-ONLY FIELD: no citations.")
+        @Schema(description = "Source name", type = "string")
+        private String name;
+        
+        @JsonProperty(required = true, value = "description")
+        @AiGeneratedField(instruction = "Very short description of what the source provides (e.g., official specs, review, user forum). Plain text only. VALUE-ONLY FIELD: no citations.")
+        @Schema(description = "Source description", type = "string")
+        private String description;
+        
+        @JsonProperty(required = true, value = "url")
+        @AiGeneratedField(instruction = "Source URL exactly. VALUE-ONLY FIELD: no extra text, no citations.")
+        @Schema(description = "Source URL", type = "string")
+        private String url;
+
+        public AiSource() {}
+
+        public AiSource(Integer number, String name, String description, String url) {
+            this.number = number;
+            this.name = name;
+            this.description = description;
+            this.url = url;
+        }
 
         public Integer getNumber() { return number; }
+        public void setNumber(Integer number) { this.number = number; }
         public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
         public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
         public String getUrl() { return url; }
+        public void setUrl(String url) { this.url = url; }
     }
 
     /**
      * Represents an attribute of the product.
-     * NOTE: instructions for AiAttribute are intentionally left unchanged (per requirements).
      */
     @JsonDeserialize(using = AiAttributeDeserializer.class)
-    @Schema(description = "Product attribute derived from review")
-    public static record AiAttribute(
-            @JsonProperty(required = true, value = "name")
-            @AiGeneratedField(instruction = "Attribute name. Plain text only.")
-            @Schema(description = "Attribute name")
-            String name,
-            @JsonProperty(required = true, value = "value")
-            @AiGeneratedField(instruction = "Attribute value. Plain text only (no HTML).")
-            @Schema(description = "Attribute value")
-            String value,
-            @JsonProperty(required = true, value = "number")
-            @AiGeneratedField(instruction = "Source number that supports this attribute.")
-            @Schema(description = "Reference source number")
-            Integer number) {
+    @Schema(description = "Product attribute derived from review", type = "object")
+    public static class AiAttribute {
+        
+        @JsonProperty(required = true, value = "name")
+        @AiGeneratedField(instruction = "Attribute name. Plain text only.")
+        @Schema(description = "Attribute name", type = "string")
+        private String name;
+        
+        @JsonProperty(required = true, value = "value")
+        @AiGeneratedField(instruction = "Attribute value. Plain text only (no HTML).")
+        @Schema(description = "Attribute value", type = "string")
+        private String value;
+        
+        @JsonProperty(required = true, value = "number")
+        @AiGeneratedField(instruction = "Source number that supports this attribute.")
+        @Schema(description = "Reference source number", type = "integer")
+        private Integer number;
+
+        public AiAttribute() {}
+
+        public AiAttribute(String name, String value, Integer number) {
+            this.name = name;
+            this.value = value;
+            this.number = number;
+        }
 
         public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
         public String getValue() { return value; }
+        public void setValue(String value) { this.value = value; }
         public Integer getNumber() { return number; }
+        public void setNumber(Integer number) { this.number = number; }
     }
 
     /**
      * Represents a rating found in a source.
      */
-    @Schema(description = "Rating found in a source")
-    public static record AiRating(
-            @JsonProperty(required = true, value = "source")
-            @AiGeneratedField(instruction = "Name of the source that provides the rating. VALUE-ONLY FIELD: no citations.")
-            @Schema(description = "Source providing the rating")
-            String source,
-            @JsonProperty(required = true, value = "score")
-            @AiGeneratedField(instruction = "Score value exactly as stated by the source (e.g., \"4.5\"). VALUE-ONLY FIELD: no citations.")
-            @Schema(description = "The score value")
-            String score,
-            @JsonProperty(required = true, value = "max")
-            @AiGeneratedField(instruction = "Maximum possible score exactly as stated by the source (e.g., \"5\", \"10\", \"20\"). VALUE-ONLY FIELD: no citations.")
-            @Schema(description = "The maximum possible score")
-            String max,
-            @JsonProperty(required = false, value = "comment")
-            @AiGeneratedField(instruction = "Short associated comment if present in the source. Write in FRENCH if you translate; otherwise keep original wording. Plain text only. VALUE-ONLY FIELD: no citations.")
-            @Schema(description = "Short comment associated with the rating")
-            String comment,
-            @JsonProperty(required = true, value = "number")
-            @AiGeneratedField(instruction = "Source number that supports this rating. VALUE-ONLY FIELD.")
-            @Schema(description = "Reference source number")
-            Integer number) {
+    @Schema(description = "Rating found in a source", type = "object")
+    public static class AiRating {
+        
+        @JsonProperty(required = true, value = "source")
+        @AiGeneratedField(instruction = "Name of the source that provides the rating. VALUE-ONLY FIELD: no citations.")
+        @Schema(description = "Source providing the rating", type = "string")
+        private String source;
+        
+        @JsonProperty(required = true, value = "score")
+        @AiGeneratedField(instruction = "Score value exactly as stated by the source (e.g., \"4.5\"). VALUE-ONLY FIELD: no citations.")
+        @Schema(description = "The score value", type = "string")
+        private String score;
+        
+        @JsonProperty(required = true, value = "max")
+        @AiGeneratedField(instruction = "Maximum possible score exactly as stated by the source (e.g., \"5\", \"10\", \"20\"). VALUE-ONLY FIELD: no citations.")
+        @Schema(description = "The maximum possible score", type = "string")
+        private String max;
+        
+        @JsonProperty(required = false, value = "comment")
+        @AiGeneratedField(instruction = "Short associated comment if present in the source. Write in FRENCH if you translate; otherwise keep original wording. Plain text only. VALUE-ONLY FIELD: no citations.")
+        @Schema(description = "Short comment associated with the rating", type = "string")
+        private String comment;
+        
+        @JsonProperty(required = true, value = "number")
+        @AiGeneratedField(instruction = "Source number that supports this rating. VALUE-ONLY FIELD.")
+        @Schema(description = "Reference source number", type = "integer")
+        private Integer number;
+
+        public AiRating() {}
+
+        public AiRating(String source, String score, String max, String comment, Integer number) {
+            this.source = source;
+            this.score = score;
+            this.max = max;
+            this.comment = comment;
+            this.number = number;
+        }
+
+        public String getSource() { return source; }
+        public void setSource(String source) { this.source = source; }
+        public String getScore() { return score; }
+        public void setScore(String score) { this.score = score; }
+        public String getMax() { return max; }
+        public void setMax(String max) { this.max = max; }
+        public String getComment() { return comment; }
+        public void setComment(String comment) { this.comment = comment; }
+        public Integer getNumber() { return number; }
+        public void setNumber(Integer number) { this.number = number; }
     }
 
     public static class AiAttributeDeserializer extends JsonDeserializer<AiAttribute> {

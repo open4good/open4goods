@@ -1,7 +1,7 @@
 <template>
   <div v-if="displayedCategories.length" class="category-badges-row">
     <v-btn
-      v-if="canScrollPrev"
+      v-if="!mobile && canScrollPrev"
       icon
       variant="text"
       size="x-small"
@@ -41,7 +41,7 @@
     </div>
 
     <v-btn
-      v-if="canScrollNext"
+      v-if="!mobile && canScrollNext"
       icon
       variant="text"
       size="x-small"
@@ -63,6 +63,7 @@ import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 const props = defineProps<{
   categories: VerticalConfigDto[]
+  mobile?: boolean
 }>()
 
 const { t, locale } = useI18n()

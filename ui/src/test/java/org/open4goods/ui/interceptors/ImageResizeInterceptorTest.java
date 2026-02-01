@@ -3,6 +3,10 @@ package org.open4goods.ui.interceptors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -21,8 +25,11 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.commons.services.ResourceService;
+import org.open4goods.model.resource.Resource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 class ImageResizeInterceptorTest {
 
@@ -114,6 +121,37 @@ class ImageResizeInterceptorTest {
 
         assertThat(shouldContinue).isTrue();
         verifyNoInteractions(resourceService);
+    }
+
+    @Test
+    void preHandleReturns404WhenServeImageFails() throws Exception {
+         ResourceService resourceService = mock(ResourceService.class);
+         
+         ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com") {
+             @Override
+             Resource buildResource(String requestURI) {
+                 Resource resource = new Resource();
+                 resource.setFileName(requestURI);
+                 resource.setCacheKey("cached-file.webp");
+                 return resource;
+             }
+         };
+
+         MockHttpServletRequest request = new MockHttpServletRequest();
+         request.setRequestURI("/images/example.webp");
+         
+         MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+         when(response.getOutputStream()).thenThrow(new IOException("Disk error"));
+
+         java.io.File mockFile = mock(java.io.File.class);
+         when(resourceService.getCacheFile(any(Resource.class))).thenReturn(mockFile);
+         when(mockFile.exists()).thenReturn(true);
+         when(mockFile.getAbsolutePath()).thenReturn("/tmp/cached-file.webp");
+
+         boolean result = interceptor.preHandle(request, response, new Object());
+
+         assertThat(result).isFalse();
+         verify(response).sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
     }
 
     private byte[] createPngBytes() throws IOException {

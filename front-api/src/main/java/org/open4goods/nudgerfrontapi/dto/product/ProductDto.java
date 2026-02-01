@@ -107,7 +107,8 @@ public record ProductDto(
                 condition(FilterField.condition),
                 brand(FilterField.brand),
                 country(FilterField.country),
-                ecoscore(FilterField.ecoscore);
+                ecoscore(FilterField.ecoscore),
+                ecoscoreRelativ(FilterField.ecoscoreRelativ);
 
                 private final FilterField delegate;
 

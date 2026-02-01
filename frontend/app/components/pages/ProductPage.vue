@@ -2349,6 +2349,7 @@ useHead(() => {
 .product-page {
   position: relative;
   padding: 2rem 0;
+  overflow-x: hidden;
 }
 
 .product-page::before {
@@ -2404,6 +2405,8 @@ useHead(() => {
   display: flex;
   flex-direction: column;
   gap: 3rem;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .product-page__section {
@@ -2498,6 +2501,20 @@ useHead(() => {
   .product-page__fab {
     right: 1rem;
     bottom: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-page {
+    padding: 1rem 0;
+  }
+
+  .product-page__content {
+    gap: 2rem;
+  }
+
+  .product-page__section {
+    scroll-margin-top: 80px;
   }
 }
 

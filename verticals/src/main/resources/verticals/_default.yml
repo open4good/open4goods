@@ -57,7 +57,7 @@ excludingTokensFromCategoriesMatching:
   - CABLE
   - MEUBLE
 
-# The scores that are available to build the impact score
+# The global scores that are available to build the impact score
 availableImpactScoreCriterias:
   #  - ESG
   - DATA_QUALITY
@@ -66,6 +66,9 @@ availableImpactScoreCriterias:
 # Composite scores that are computed by the aggregation pipeline.
 compositeScores:
   - ECOSCORE
+  - DURABILITY
+  - REPARABILITY
+  - ESG
 
 #####################################################################################################################################
 # Impact score normalization safeguards
@@ -75,68 +78,65 @@ subsets:
   ################
   # Impact Score
   ################
-  - id: "impact_high" # Unique identifier for the subset
+  - id: "impact_high" # Unique identifier for the subset - Worst 33% (high environmental impact)
     group: "impactscore"
     criterias:
-      - field: "scores.ECOSCORE.value"
-        operator: "LOWER_THAN"
-        value: "2"
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 0
+        toPercent: 33
     image: "example-image.png"
     url:
       en: "high-impact"
-      fr: "petit-impact"
+      fr: "fort-impact"
     caption:
-      en: "< 2"
-      fr: "< 2"
-    title:
       en: "High "
-      fr: "Elevé"
+      fr: "Élevé "
+    title:
+      en: "High Impact"
+      fr: "Impact Élevé"
     description:
-      en: "Products with an ImpactScore lower than 2/5"
-      fr: "Produits avec un ImpactScore inférieur à 2/5"
+      en: "Products with a high environmental impact"
+      fr: "Produits ayant un fort impact environnemental"
 
-  - id: "impact_medium"
+  - id: "impact_medium" # Middle 34%
     group: "impactscore"
     criterias:
-      - field: "scores.ECOSCORE.value"
-        operator: "GREATER_THAN"
-        value: "2"
-      - field: "scores.ECOSCORE.value"
-        operator: "LOWER_THAN"
-        value: "4"
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 33
+        toPercent: 67
     image: "example-image.png"
     url:
       en: "medium-impact"
       fr: "impact-moyen"
     caption:
-      en: "> 2 < 4"
-      fr: "> 2 < 4"
-    title:
       en: "Medium"
-      fr: "Moyen"
+      fr: "Moyen "
+    title:
+      en: "Medium Impact"
+      fr: "Impact Moyen"
     description:
-      en: "Products with an ImpactScore between 2/5 and 4/5"
-      fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
+      en: "Products with a medium environmental impact"
+      fr: "Produits ayant un impact environnemental moyen"
 
-  - id: "impact_low"
+  - id: "impact_low" # Best 33% (low environmental impact)
     group: "impactscore"
     criterias:
-      - field: "scores.ECOSCORE.value"
-        operator: "GREATER_THAN"
-        value: "4"
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 67
+        toPercent: 100
     image: "example-image.png"
     url:
-      en: "impact-moderate"
-      fr: "impact-modere"
+      en: "low-impact"
+      fr: "faible-impact"
     caption:
-      en: "> 4"
-      fr: "> 4"
+      en: "Low "
+      fr: "Faible "
     title:
-      en: "Faible"
-      fr: "Faible"
+      en: "Low Impact"
+      fr: "Impact Faible"
     description:
-      en: "Products with an ImpactScore greater than 4/5"
-      fr: "Produits avec un ImpactScore supérieur à 4/5"
+      en: "Products with a low environmental impact"
+      fr: "Produits ayant un faible impact environnemental"
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -183,36 +183,6 @@ i18n:
     #        - key: "ecological-description"
     #          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
 
-    ####################################################################################
-    # AI TEXTS CONFIGS
-    ####################################################################################
-    aiConfigs:
-      override: false
-      pauseDurationMs: 1000
-      rootPrompt: |
-        Tu es un expert en [(${VERTICAL_TITLE})]. Fais une recherche d'information, une analyse technique, fonctionnelle et écologique pour le produit suivant : 
-         
-        Caractéristiques : 
-        [(${p.caracteristics()})]
-
-        Génère un fichier JSON clé-valeur, textes en français uniquement, pour l'objet concerné répondant uniquement et strictement aux prompts suivants :
-
-      prompts:
-        - key: "global-description"
-          prompt: |
-            : en tant qu'expert technique, rédige une description de l'objet en mettant en avant ses principales caractéristiques techniques. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
-
-        - key: "ecological-description"
-          prompt: |
-            : en tant qu'expert en impacts environnementaux, rédige une analyse de l'impact écologique de l'objet. Le texte doit comporter entre 180 et 200 mots et être composé de deux paragraphes distincts, séparés par un point-virgule. Veille à ce que chaque paragraphe soit équilibré en termes de longueur.
-
-        - key: "pros"
-          prompt: |
-            : en tant qu'expert technique, liste cinq avantages du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
-
-        - key: "cons"
-          prompt: |
-            : en tant qu'expert technique, liste cinq inconvénients techniques du produit dans une seule ligne, séparés par des points-virgules, dans un style formel.
 
 # GenAiConfig for this vertical
 genAiConfig:
@@ -273,7 +243,7 @@ brandsExclusion:
 brandsAlias:
   "LG ELECTRONICS": LG
   "LG Electronics Inc.": LG
-  "LG ELECTRONICS INC." : LG
+  "LG ELECTRONICS INC.": LG
 
 ####################################################################################
 # 						ATTRIBUTES CONFIGURATION

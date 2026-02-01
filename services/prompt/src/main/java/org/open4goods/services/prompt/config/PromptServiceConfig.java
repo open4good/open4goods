@@ -130,4 +130,18 @@ public class PromptServiceConfig {
     public void setReplacements(java.util.Map<String, String> replacements) {
         this.replacements = replacements;
     }
+
+    /**
+     * Flag to enable JSON repair attempts when initial parsing fails.
+     * When false, parsing failures will propagate as errors instead of attempting repair.
+     */
+    private boolean repairEnabled = true;
+
+    public boolean isRepairEnabled() {
+        return repairEnabled;
+    }
+
+    public void setRepairEnabled(boolean repairEnabled) {
+        this.repairEnabled = repairEnabled;
+    }
 }

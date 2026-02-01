@@ -155,7 +155,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 2.0
+      fromPercent: 67
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -165,7 +165,7 @@ nudgeToolConfig:
         fr: "Réfrigérateurs peu énergivores (Classe A à E)"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 3.0
+      fromPercent: 67
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -175,7 +175,7 @@ nudgeToolConfig:
         fr: "Frigos avec un bon indice de réparabilité"
 
     - scoreName: "DURABILITY"
-      scoreMinValue: 3.0
+      fromPercent: 67
       mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
@@ -185,7 +185,7 @@ nudgeToolConfig:
         fr: "Modèles durables (garantie, pièces détachées)"
 
     - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
-      scoreMinValue: 3.0
+      fromPercent: 67
       mdiIcon: "mdi-scale-balance"
       disabled: true
       title:

@@ -6,7 +6,7 @@
     </div>
 
     <v-row v-if="hasDetailContent" class="ma-n2">
-      <v-col :cols="shouldDisplayRadar ? 8 : 12" class="pa-2">
+      <v-col cols="12" :md="shouldDisplayRadar ? 8 : 12" class="pa-2">
         <ProductImpactDetailsTable
           v-if="detailScores.length"
           class="impact-ecoscore__analysis-details h-100"
@@ -20,7 +20,7 @@
         />
       </v-col>
 
-      <v-col v-if="shouldDisplayRadar" cols="4" class="pa-2">
+      <v-col v-if="shouldDisplayRadar" cols="12" md="4" class="pa-2">
         <div class="impact-ecoscore__analysis-radar">
           <ImpactScore
             :score="normalizedScore"
@@ -296,6 +296,11 @@ defineExpose({})
 }
 
 @media (max-width: 768px) {
+  .impact-ecoscore {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   .impact-ecoscore__header-main {
     max-width: 100%;
   }

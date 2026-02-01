@@ -335,12 +335,18 @@ watch(
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
   background: rgba(var(--v-theme-surface-glass-strong), 0.95);
   border-radius: 50%;
-  margin: 2px; /* Add margin to not stick exactly to the edge if circled? Or keep 0? User said "sticked to left:0". If circled, maybe centered? */
-  width: 28px; /* Slightly smaller to fit in 32px nav? Nav is 32px wide. */
+  margin: 2px;
+  width: 28px;
   height: 28px;
   top: 2px;
   right: 2px;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 600px) {
+  .product-summary-navigation {
+    display: none;
+  }
 }
 
 .product-summary-navigation__collapse-toggle:hover,

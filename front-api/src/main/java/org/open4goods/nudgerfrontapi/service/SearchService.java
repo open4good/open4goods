@@ -473,7 +473,9 @@ public class SearchService {
 
             String mapping = "scores." + normalizedKey + ".value";
             FieldMetadataDto.AggregationMetadata aggregation = resolveAggregationMetadata(config, mapping, normalizedKey);
+            // Allow both "score.value" (mapped to "value" in Cardinality) and "score.relativ.value"
             results.add(new FieldMetadataDto(mapping, title, description, VALUE_TYPE_NUMERIC, aggregation));
+            results.add(new FieldMetadataDto("scores." + normalizedKey + ".relativ.value", title, description, VALUE_TYPE_NUMERIC, aggregation));
         }
         return List.copyOf(results);
     }
@@ -1256,6 +1258,7 @@ public class SearchService {
 		return switch (operator) {
 		case term -> buildTermQuery(fieldPath, valueType, filter.terms());
 		case range -> buildRangeQuery(fieldPath, filter.min(), filter.max());
+		case rankingPercentile -> buildRankingPercentileQuery(fieldPath, filter.min(), filter.max());
 		};
 	}
 
@@ -1312,6 +1315,52 @@ public class SearchService {
 			}
 			return n;
 		})));
+	}
+
+	/**
+	 * Builds a script query for percentile-based ranking filters.
+	 * 
+	 * <p>The fieldPath should be a ranking field (e.g., "scores.ECOSCORE.ranking").
+	 * The min value represents fromPercent and max represents toPercent.
+	 * 
+	 * <p>Formula:
+	 * <ul>
+	 *   <li>MaxRank = count * (1 - fromPercent/100.0)</li>
+	 *   <li>MinRank = count * (1 - toPercent/100.0)</li>
+	 *   <li>Query: ranking > MinRank AND ranking <= MaxRank</li>
+	 * </ul>
+	 * 
+	 * @param fieldPath the ranking field path (e.g., "scores.ECOSCORE.ranking")
+	 * @param fromPercent the lower percentile bound (e.g., 70 for top 30%)
+	 * @param toPercent the upper percentile bound (e.g., 100 for best)
+	 * @return a script query, or null if parameters are invalid
+	 */
+	private Query buildRankingPercentileQuery(String fieldPath, Double fromPercent, Double toPercent) {
+		if (fromPercent == null && toPercent == null) {
+			return null;
+		}
+		if (fieldPath == null || !fieldPath.contains(".ranking")) {
+			LOGGER.warn("rankingPercentile filter requires a ranking field path, got: {}", fieldPath);
+			return null;
+		}
+		
+		// Derive count field from ranking field: scores.ECOSCORE.ranking -> scores.ECOSCORE.absolute.count
+		String countField = fieldPath.replace(".ranking", ".absolute.count");
+		
+		double from = fromPercent != null ? fromPercent : 0.0;
+		double to = toPercent != null ? toPercent : 100.0;
+		
+		// Build script: ranking > count * (1 - toPercent/100) AND ranking <= count * (1 - fromPercent/100)
+		String scriptSource = String.format(
+				"doc['%s'].size() > 0 && doc['%s'].size() > 0 && " +
+				"doc['%s'].value > doc['%s'].value * (1.0 - %f/100.0) && " +
+				"doc['%s'].value <= doc['%s'].value * (1.0 - %f/100.0)",
+				fieldPath, countField,
+				fieldPath, countField, to,
+				fieldPath, countField, from
+		);
+		
+		return Query.of(q -> q.script(s -> s.script(Script.of(sc -> sc.source(scriptSource)))));
 	}
 
 	private FilterValueType resolveValueType(String fieldPath, FilterOperator operator) {

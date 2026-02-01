@@ -58,6 +58,12 @@
                   </v-btn>
                 </v-card-text>
               </v-card>
+
+              <CategoryBadgesRow
+                :categories="verticals"
+                :mobile="true"
+                class="mt-4"
+              />
             </div>
           </v-sheet>
         </v-col>
@@ -180,6 +186,7 @@ import SearchSuggestField, {
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
+import CategoryBadgesRow from '~/components/shared/navigation/CategoryBadgesRow.vue'
 import PwaBarcodeScanner from './PwaBarcodeScanner.vue'
 import { useDisplay } from 'vuetify'
 import { computed, ref } from 'vue'

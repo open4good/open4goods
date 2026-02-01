@@ -345,8 +345,14 @@ const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
 @media (max-width: 600px) {
   .product-impact__header {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
+    text-align: center;
     gap: 1rem;
+  }
+
+  .product-impact__header-content {
+    align-items: center;
+    margin: 0 auto;
   }
 
   .product-impact__toggle {

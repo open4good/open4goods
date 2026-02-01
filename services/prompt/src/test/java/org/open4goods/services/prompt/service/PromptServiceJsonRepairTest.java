@@ -38,11 +38,12 @@ class PromptServiceJsonRepairTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        config = org.mockito.Mockito.mock(PromptServiceConfig.class);
+        config = new PromptServiceConfig();
         evaluationService = org.mockito.Mockito.mock(EvaluationService.class);
-        when(config.isEnabled()).thenReturn(true);
-        when(config.isCacheTemplates()).thenReturn(true);
-        when(config.getPromptsTemplatesFolder()).thenReturn(tempDir.toString());
+        config.setEnabled(true);
+        config.setCacheTemplates(true);
+        config.setPromptsTemplatesFolder(tempDir.toString());
+        config.setRepairEnabled(true);
 
         when(evaluationService.thymeleafEval(anyMap(), anyString()))
                 .thenAnswer(invocation -> invocation.getArgument(1, String.class));

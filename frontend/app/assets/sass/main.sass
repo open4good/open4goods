@@ -99,3 +99,12 @@ iframe[src*="hcaptcha.com"]
 div[style*="z-index: 2147483647"]
     z-index: 9999999!important
 
+// Mobile-specific: Center product page titles (H1, H2, H3)
+@media (max-width: 768px)
+    .product-page,
+    .product-price,
+    .product-ai-review,
+    .product-impact-section
+        h1, h2, h3
+            text-align: center
+

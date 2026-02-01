@@ -19,6 +19,18 @@ const parseNumericValue = (value: string | undefined): number | undefined => {
 const convertCriteria = (
   criteria: SubsetCriteria | undefined
 ): Filter | null => {
+  if (
+    criteria?.field &&
+    (criteria.fromPercent != null || criteria.toPercent != null)
+  ) {
+    return {
+      field: criteria.field,
+      operator: 'rankingPercentile',
+      min: criteria.fromPercent,
+      max: criteria.toPercent,
+    }
+  }
+
   if (!criteria?.field || !criteria.operator) {
     return null
   }

@@ -12,21 +12,21 @@
     </div>
     <div class="product-hero__content">
       <header
-        class="product-hero__heading home-reveal-group d-flex flex-row align-center"
+        class="product-hero__heading home-reveal-group d-flex flex-column align-center text-center"
         :class="heroRevealClasses"
       >
         <CategoryNavigationBreadcrumbs
           v-if="visibleBreadcrumbs.length"
           v-bind="heroBreadcrumbProps"
-          class="product-hero__breadcrumbs home-reveal-item ma-0 mr-4"
+          class="product-hero__breadcrumbs home-reveal-item ma-0 mb-2"
           :style="{ '--reveal-delay': '60ms' }"
         />
         <ProductDesignation
           :product="product"
           variant="page"
           title-tag="h1"
-          title-class="product-hero__title text-left"
-          description-class="product-hero__short-description text-left"
+          title-class="product-hero__title text-center"
+          description-class="product-hero__short-description text-center"
           class="home-reveal-item"
           :style="{ '--reveal-delay': '0ms' }"
         />
@@ -1016,6 +1016,8 @@ useHead(() => {
   flex-direction: column;
   gap: clamp(1.5rem, 3vw, 2.5rem);
   z-index: 1;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .product-hero__heading {
@@ -1132,6 +1134,14 @@ useHead(() => {
   .product-hero__main-content {
     grid-template-columns: 1fr;
   }
+
+  .product-hero__gallery-section {
+    order: 2;
+  }
+
+  .product-hero__details-section {
+    order: 1;
+  }
 }
 
 .product-hero__gallery-section {
@@ -1202,6 +1212,24 @@ useHead(() => {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .product-hero__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .product-hero__compare-button,
+  .product-hero__ai-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .product-hero__ai-btn-wrapper {
+    width: 100%;
+  }
 }
 
 .product-hero__ai-summary-list {

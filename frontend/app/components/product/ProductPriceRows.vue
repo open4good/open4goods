@@ -284,8 +284,8 @@ const offerBadges = computed<Badge[]>(() => {
   const entries: Badge[] = []
   const newOffer = props.product.offers?.bestNewOffer
   const occasionOffer = props.product.offers?.bestOccasionOffer
-  const newTrend = props.product.offers?.newTrend?.trend
-  const occasionTrend = props.product.offers?.occasionTrend?.trend
+  const newTrend = props.product.offers?.newTrend
+  const occasionTrend = props.product.offers?.occasionTrend
 
   if (newOffer) {
     const formatted = formatOfferPrice(newOffer)

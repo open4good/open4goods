@@ -779,8 +779,18 @@ defineExpose({
 
 @media (max-width: 768px) {
   .product-gallery__stage {
-    aspect-ratio: 1 / 1;
-    max-height: 65vh;
+    aspect-ratio: auto;
+    max-height: none;
+    min-height: auto;
+    height: auto;
+  }
+
+  .product-gallery__stage-media {
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
+    padding: 0.5rem;
   }
 
   .product-gallery-wrapper {
@@ -790,12 +800,6 @@ defineExpose({
   .product-gallery__video-gallery-btn {
     right: 16px;
     bottom: 16px;
-  }
-
-  .product-gallery__stage-media,
-  .product-gallery__video,
-  .product-hero__fallback {
-    /* object-fit: contain; already set above */
   }
 
   .product-gallery__thumbnails {

@@ -20,7 +20,9 @@ public enum AllowedGlobalFilters {
     @Schema(description = "Filter on the manufacturing country", example = "gtinInfos.country")
     country("gtinInfos.country", FilterRequestDto.FilterValueType.keyword),
     @Schema(description = "Filter on the product ecoscore", example = "scores.ECOSCORE.value")
-    ecoscore("scores.ECOSCORE.value", FilterRequestDto.FilterValueType.numeric);
+    ecoscore("scores.ECOSCORE.value", FilterRequestDto.FilterValueType.numeric),
+    @Schema(description = "Filter on the product ecoscore relative value", example = "scores.ECOSCORE.relativ.value")
+    ecoscoreRelativ("scores.ECOSCORE.relativ.value", FilterRequestDto.FilterValueType.numeric);
 
     private final String fieldPath;
     private final FilterRequestDto.FilterValueType valueType;

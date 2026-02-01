@@ -26,7 +26,7 @@ public class AiReviewDeserializationTest {
         AiReview.AiRating rating = mapper.readValue(json, AiReview.AiRating.class);
 
         assertThat(rating).isNotNull();
-        assertThat(rating.source()).isEqualTo("Test Source");
-        assertThat(rating.comment()).isNull();
+        assertThat(rating.getSource()).isEqualTo("Test Source");
+        assertThat(rating.getComment()).isNull();
     }
 }

@@ -150,7 +150,7 @@
       </div>
 
       <!-- History Section -->
-      <div class="product-price__section mt-10">
+      <div class="product-price__section product-price__history-section mt-10">
         <h3 class="product-price__subtitle-h3 mb-4">
           {{ $t('product.price.history', 'Historique') }}
         </h3>
@@ -1781,6 +1781,26 @@ onBeforeUnmount(() => {
 
   .product-price__competition-count {
     justify-self: flex-start;
+  }
+
+  .product-price__charts {
+    grid-template-columns: 1fr;
+  }
+
+  .product-price__chart-card {
+    max-width: 100%;
+  }
+
+  .product-price__offers-table {
+    overflow-x: auto;
+  }
+
+  .product-price__history-cta {
+    max-width: 100%;
+  }
+
+  .product-price__history-section {
+    display: none;
   }
 }
 

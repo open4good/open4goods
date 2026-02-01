@@ -212,4 +212,23 @@ class SearchServiceTest {
 
         assertThat(capabilities.allowedAggregations()).contains("gtinInfos.country");
     }
+
+    @Test
+    void resolveVerticalFields_shouldIncludeRelativValue_forImpactScores() {
+        // GIVEN
+        VerticalConfig config = new VerticalConfig();
+        config.setId("test-vertical");
+        config.setAvailableImpactScoreCriterias(List.of("ECOSCORE"));
+        // Ensure attributes config is not null to avoid potential NPEs, though logic handles nulls
+        config.setAttributesConfig(new org.open4goods.model.vertical.AttributesConfig()); 
+
+        // WHEN
+        org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse response = searchService.resolveVerticalFields(config, DomainLanguage.fr, Collections.emptyList());
+
+        // THEN
+        // Verify that the standard value mapping is present
+        assertThat(response.impact()).anyMatch(field -> field.mapping().equals("scores.ECOSCORE.value"));
+        // Verify that the relativ.value mapping is ALSO present
+        assertThat(response.impact()).anyMatch(field -> field.mapping().equals("scores.ECOSCORE.relativ.value"));
+    }
 }

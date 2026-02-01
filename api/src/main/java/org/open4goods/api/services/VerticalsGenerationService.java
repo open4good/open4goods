@@ -114,13 +114,23 @@ public class VerticalsGenerationService {
 			if (scores != null && !scores.isEmpty()) {
 				for (NudgeToolScore score : scores) {
 					if (StringUtils.isNotBlank(score.getScoreName())) {
-						double threshold = computeThresholdForScore(verticalId, score.getScoreName(), SubsetCriteriaOperator.GREATER_THAN);
 						NudgeToolScore newScore = new NudgeToolScore();
 						newScore.setScoreName(score.getScoreName());
-						newScore.setScoreMinValue(threshold);
-						// Copy other useful metadata if needed, but let's keep it minimal
+						// Copy other useful metadata
 						newScore.setTitle(score.getTitle());
 						newScore.setMdiIcon(score.getMdiIcon());
+						newScore.setDisabled(score.getDisabled());
+						newScore.setDescription(score.getDescription());
+						
+						// If fromPercent is set, use percentile-based config; otherwise calculate threshold
+						if (score.getFromPercent() != null) {
+							newScore.setFromPercent(score.getFromPercent());
+							newScore.setToPercent(score.getToPercent());
+							// scoreMinValue is not used when percentile-based filtering is active
+						} else {
+							double threshold = computeThresholdForScore(verticalId, score.getScoreName(), SubsetCriteriaOperator.GREATER_THAN);
+							newScore.setScoreMinValue(threshold);
+						}
 						result.getNudgeToolConfig().getScores().add(newScore);
 					}
 				}

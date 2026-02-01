@@ -62,7 +62,7 @@
         itemscope
         itemtype="https://schema.org/Review"
       >
-        <div class="product-ai-review__grid">
+        <div class="product-ai-review__grid mx-4 mx-md-0">
           <!-- Pros/Cons, Technical, Eco, Community same as before. Using v-if="reviewContent" implicitly via template wrapper -->
           <!-- ... (Truncated purely for edit conciseness, ideally we wrap the whole existing block) ... -->
           <!-- To avoid massive replace, I will assume the structure flows. 
@@ -512,7 +512,9 @@
 
       <!-- Request State -->
       <v-card v-else class="product-ai-review__cta-card" elevation="0" border>
-        <v-card-text class="d-flex align-center justify-space-between pa-6">
+        <v-card-text
+          class="product-ai-review__cta-content d-flex align-center justify-space-between pa-6"
+        >
           <div class="d-flex align-center gap-4">
             <v-avatar color="primary" variant="tonal" size="56" class="mr-4">
               <v-icon icon="mdi-robot-outline" size="32" />
@@ -1688,6 +1690,10 @@ const handleGlobalScrollEvent = (event: Event) => {
 }
 
 @media (max-width: 768px) {
+  .product-ai-review {
+    overflow-x: hidden;
+  }
+
   .product-ai-review__content,
   .product-ai-review__empty {
     padding: 1.35rem;
@@ -1701,6 +1707,34 @@ const handleGlobalScrollEvent = (event: Event) => {
   .product-ai-review__empty-cta {
     width: 100%;
     align-items: stretch;
+  }
+
+  .product-ai-review__card-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-ai-review__level-toggle-wrap {
+    width: 100%;
+  }
+
+  .product-ai-review__level-toggle {
+    width: 100%;
+  }
+
+  .product-ai-review__level-toggle .v-btn {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .product-ai-review__cta-content {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .product-ai-review__cta-content > .v-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

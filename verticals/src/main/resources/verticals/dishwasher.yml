@@ -169,7 +169,7 @@ i18n:
 nudgeToolConfig:
   scores:
     - scoreName: "ENERGY_CONSUMPTION"
-      scoreMinValue: 2.7
+      fromPercent: 67
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
@@ -179,7 +179,7 @@ nudgeToolConfig:
         fr: "Lave-vaisselles avec une faible consommation énergétique"
 
     - scoreName: "DURABILITY"
-      scoreMinValue: 2.7
+      fromPercent: 67
       mdiIcon: "mdi-archive-outline"
       title:
         en: "Durability"
@@ -189,7 +189,7 @@ nudgeToolConfig:
         fr: "Lave-vaisselles avec une bonne durabilité"
 
     - scoreName: "REPARABILITY"
-      scoreMinValue: 2.5
+      fromPercent: 67
       mdiIcon: "mdi-tools"
       title:
         en: "Reparability"
@@ -199,7 +199,7 @@ nudgeToolConfig:
         fr: "Lave-vaisselles avec une bonne réparabilité"
 
     - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
-      scoreMinValue: 4
+      fromPercent: 67
       mdiIcon: "mdi-scale-balance"
       disabled: true
       title:

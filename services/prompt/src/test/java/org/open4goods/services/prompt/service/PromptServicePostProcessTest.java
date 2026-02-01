@@ -49,7 +49,7 @@ class PromptServicePostProcessTest {
 
     @BeforeEach
     void setUp() {
-        when(genAiConfig.isEnabled()).thenReturn(true);
+
         when(meterRegistry.counter(any(String.class), any(String[].class))).thenReturn(mock(Counter.class));
         
         promptService = new PromptService(genAiConfig, serialisationService, evaluationService, meterRegistry, providerRegistry) {

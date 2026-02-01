@@ -146,7 +146,13 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 			}
 
 			// Serve the cached file
-			serveImage(response, cachedFile);
+			try {
+				serveImage(response, cachedFile);
+			} catch (IOException e) {
+				logger.error("Error serving cached image: {}", cachedFile.getAbsolutePath(), e);
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+				return false;
+			}
 			return false; // Prevent further request processing
 		}
 
