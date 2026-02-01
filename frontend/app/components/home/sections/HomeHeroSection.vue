@@ -250,7 +250,7 @@ useHead({
           >
             <h1
               id="home-hero-title"
-              class=" home-hero__title home-reveal-item"
+              class="home-hero__title home-reveal-item"
               :style="{ '--reveal-delay': '0ms' }"
             >
               {{ heroTitle }}
@@ -262,13 +262,13 @@ useHead({
             >
               {{ animatedSubtitle }}
             </p>
-            <p
+            <span
               v-if="heroTitleSubtitle"
               class="home-hero__title-subtitle home-reveal-item"
               :style="{ '--reveal-delay': '90ms' }"
             >
               {{ heroTitleSubtitle }}
-            </p>
+            </span>
           </v-col>
         </v-row>
         <v-row justify="center" class="mt-0 home-hero__panel-row">
@@ -479,6 +479,7 @@ useHead({
   color: rgba(var(--v-theme-surface-default), 0.94)
   font-size: clamp(1rem, 2.4vw, 1.4rem)
   line-height: 1.4
+  display: block
 
 .home-hero__title-animated-subtitle
   font-size: clamp(0.95rem, 2.2vw, 1.2rem)

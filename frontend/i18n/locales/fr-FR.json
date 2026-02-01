@@ -62,8 +62,8 @@
     },
     "hero": {
       "eyebrow": "Comparateur responsable",
-      "title": "Acheter mieux. Sans dépenser plus.",
-      "animatedSubtitle": "Le comparateur écologique",
+      "title": "Nudger : Le comparateur écologique",
+      "animatedSubtitle": "",
       "titleSubtitle": {
         "default": ["Acheter mieux. Sans dépenser plus."],
         "events": {

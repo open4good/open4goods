@@ -58,6 +58,7 @@ import type { CategoryNavigationDto } from '~~/shared/api-client'
 import CategoryNavigationGrid from '~/components/category/navigation/CategoryNavigationGrid.vue'
 import CategoryNavigationHero from '~/components/category/navigation/CategoryNavigationHero.vue'
 import CategoryNavigationVerticalHighlights from '~/components/category/navigation/CategoryNavigationVerticalHighlights.vue'
+import { normalizeCategoryPath } from '~/utils/normalizeCategoryPath'
 
 const { t } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
@@ -105,13 +106,17 @@ const heroDescription = computed(
 
 const breadcrumbs = computed(() => {
   const items = navigationData.value?.breadcrumbs ?? []
-  const normalized = items.map((breadcrumb, index) => ({
-    title: breadcrumb.title ?? '',
-    link:
-      index < items.length - 1 && breadcrumb.link
-        ? `/categories/${breadcrumb.link}`
-        : undefined,
-  }))
+  const normalized = items.map((breadcrumb, index) => {
+    const normalizedPath = normalizeCategoryPath(breadcrumb.link)
+
+    return {
+      title: breadcrumb.title ?? '',
+      link:
+        index < items.length - 1 && normalizedPath
+          ? `/categories/${normalizedPath}`
+          : undefined,
+    }
+  })
 
   const trail = [
     {
@@ -205,14 +210,18 @@ const breadcrumbJsonLd = computed(() => ({
 const itemListJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  itemListElement: filteredCategories.value.map((category, index) => ({
-    '@type': 'ListItem',
-    position: index + 1,
-    name: category.title ?? '',
-    url: buildAbsoluteUrl(
-      category.path ? `/categories/${category.path}` : undefined
-    ),
-  })),
+  itemListElement: filteredCategories.value.map((category, index) => {
+    const normalizedPath = normalizeCategoryPath(category.path)
+
+    return {
+      '@type': 'ListItem',
+      position: index + 1,
+      name: category.title ?? '',
+      url: buildAbsoluteUrl(
+        normalizedPath ? `/categories/${normalizedPath}` : undefined
+      ),
+    }
+  }),
 }))
 const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()

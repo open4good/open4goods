@@ -295,7 +295,8 @@
     },
     "hero": {
       "eyebrow": "Responsible shopping",
-      "title": "Responsible choices aren't a luxury",
+      "title": "Nudger: The eco-friendly comparator",
+      "animatedSubtitle": "",
       "titleSubtitle": {
         "default": ["Buy better. Spend smarter."],
         "events": {
