@@ -115,7 +115,28 @@
             :review-created-at="reviewCreatedAt(product)"
             variant="button"
           />
-          <CompareToggleButton :product="product" variant="button-text" />
+          <v-btn
+            class="category-product-list__compare-button"
+            :class="{
+              'category-product-list__compare-button--active':
+                isCompareSelected(product),
+            }"
+            variant="flat"
+            :aria-pressed="isCompareSelected(product)"
+            :aria-label="getCompareButtonAriaLabel(product)"
+            :title="getCompareButtonTitle(product)"
+            :disabled="isCompareDisabled(product)"
+            @click.stop.prevent="toggleCompare(product)"
+          >
+            <v-icon
+              :icon="getCompareButtonIcon(product)"
+              size="20"
+              class="category-product-list__compare-icon"
+            />
+            <span class="category-product-list__compare-label">{{
+              getCompareButtonText(product)
+            }}</span>
+          </v-btn>
         </div>
       </div>
     </v-list-item>
@@ -129,8 +150,12 @@ import type {
   FieldMetadataDto,
   ProductDto,
 } from '~~/shared/api-client'
+import {
+  MAX_COMPARE_ITEMS,
+  useProductCompareStore,
+  type CompareListBlockReason,
+} from '~/stores/useProductCompareStore'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import AiReviewActionButton from '~/components/shared/ai/AiReviewActionButton.vue'
 import ProductPriceRows from '~/components/product/ProductPriceRows.vue'
 import {
@@ -245,6 +270,82 @@ const sortedAttributeByProduct = (
     label: result.label,
     value: result.value,
   }
+}
+
+const compareStore = useProductCompareStore()
+
+const reasonMessage = (reason: CompareListBlockReason | undefined) => {
+  switch (reason) {
+    case 'limit-reached':
+      return t('category.products.compare.limitReached', {
+        count: MAX_COMPARE_ITEMS,
+      })
+    case 'vertical-mismatch':
+      return t('category.products.compare.differentCategory')
+    case 'missing-identifier':
+      return t('category.products.compare.missingIdentifier')
+    default:
+      return t('product.hero.compare.add')
+  }
+}
+
+const isCompareSelected = (product: ProductDto) =>
+  compareStore.hasProduct(product)
+
+const compareEligibility = (product: ProductDto) =>
+  compareStore.canAddProduct(product)
+
+const isCompareDisabled = (product: ProductDto) =>
+  !isCompareSelected(product) && !compareEligibility(product).success
+
+const toggleCompare = (product: ProductDto) => {
+  if (isCompareDisabled(product)) {
+    return
+  }
+  compareStore.toggleProduct(product)
+}
+
+const getCompareButtonText = (product: ProductDto) =>
+  isCompareSelected(product)
+    ? t('product.hero.compare.remove')
+    : t('product.hero.compare.add')
+
+const getCompareButtonIcon = (product: ProductDto) =>
+  isCompareSelected(product) ? 'mdi-minus' : 'mdi-plus'
+
+const getCompareButtonTitle = (product: ProductDto) => {
+  if (isCompareSelected(product)) {
+    return t('product.hero.compare.remove')
+  }
+
+  const eligibility = compareEligibility(product)
+  if (!eligibility.success) {
+    return reasonMessage(eligibility.reason)
+  }
+
+  return t('product.hero.compare.add')
+}
+
+const getCompareButtonAriaLabel = (product: ProductDto) => {
+  const productName = resolveListProductName(product) || ''
+
+  if (isCompareSelected(product)) {
+    if (t('product.hero.compare.ariaSelected')) {
+      return t('product.hero.compare.ariaSelected', { name: productName })
+    }
+    return t('product.hero.compare.remove')
+  }
+
+  const eligibility = compareEligibility(product)
+  if (!eligibility.success) {
+    return reasonMessage(eligibility.reason)
+  }
+
+  if (t('product.hero.compare.ariaAdd')) {
+    return t('product.hero.compare.ariaAdd', { name: productName })
+  }
+
+  return t('product.hero.compare.add')
 }
 </script>
 
@@ -374,4 +475,32 @@ const sortedAttributeByProduct = (
   &__sorted-attribute-value
     font-weight: 700
     color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__compare-button
+    background: rgba(var(--v-theme-surface-glass-strong), 0.5)
+    backdrop-filter: blur(8px)
+    border: 1px solid rgba(var(--v-theme-accent-primary-highlight), 0.2)
+    color: rgb(var(--v-theme-accent-primary-highlight))
+    padding: 0 1.25rem
+    height: 48px
+    border-radius: 14px
+    text-transform: none
+    letter-spacing: 0.01em
+    font-weight: 600
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06)
+    transition: all 0.25s ease
+
+    &:hover
+      background: rgba(var(--v-theme-accent-primary-highlight), 0.1)
+
+    &--active
+      background: linear-gradient(120deg, rgba(var(--v-theme-primary), 0.16), rgba(var(--v-theme-primary), 0.2))
+      color: rgb(var(--v-theme-primary))
+      box-shadow: 0 16px 32px rgba(var(--v-theme-primary), 0.2)
+
+  &__compare-icon
+    margin-inline-end: 0.25rem
+
+  &__compare-label
+    font-size: 0.98rem
 </style>

@@ -41,6 +41,13 @@ import {
     SemanticScoreDiagnosticsDtoToJSON,
     SemanticScoreDiagnosticsDtoToJSONTyped,
 } from './SemanticScoreDiagnosticsDto';
+import type { GlobalSearchPageMetaDto } from './GlobalSearchPageMetaDto';
+import {
+    GlobalSearchPageMetaDtoFromJSON,
+    GlobalSearchPageMetaDtoFromJSONTyped,
+    GlobalSearchPageMetaDtoToJSON,
+    GlobalSearchPageMetaDtoToJSONTyped,
+} from './GlobalSearchPageMetaDto';
 
 /**
  * 
@@ -60,6 +67,12 @@ export interface GlobalSearchResponseDto {
      * @memberof GlobalSearchResponseDto
      */
     missingVerticalResults?: Array<GlobalSearchResultDto>;
+    /**
+     * Pagination metadata for missing-vertical results
+     * @type {GlobalSearchPageMetaDto}
+     * @memberof GlobalSearchResponseDto
+     */
+    missingVerticalPage?: GlobalSearchPageMetaDto;
     /**
      * Category suggestion if a strict match is found
      * @type {SearchSuggestCategoryDto}
@@ -93,6 +106,7 @@ export function GlobalSearchResponseDtoFromJSONTyped(json: any, ignoreDiscrimina
         
         'verticalGroups': json['verticalGroups'] == null ? undefined : ((json['verticalGroups'] as Array<any>).map(GlobalSearchVerticalGroupDtoFromJSON)),
         'missingVerticalResults': json['missingVerticalResults'] == null ? undefined : ((json['missingVerticalResults'] as Array<any>).map(GlobalSearchResultDtoFromJSON)),
+        'missingVerticalPage': json['missingVerticalPage'] == null ? undefined : GlobalSearchPageMetaDtoFromJSON(json['missingVerticalPage']),
         'verticalCta': json['verticalCta'] == null ? undefined : SearchSuggestCategoryDtoFromJSON(json['verticalCta']),
         'semanticDiagnostics': json['semanticDiagnostics'] == null ? undefined : SemanticScoreDiagnosticsDtoFromJSON(json['semanticDiagnostics']),
     };
@@ -111,6 +125,7 @@ export function GlobalSearchResponseDtoToJSONTyped(value?: GlobalSearchResponseD
         
         'verticalGroups': value['verticalGroups'] == null ? undefined : ((value['verticalGroups'] as Array<any>).map(GlobalSearchVerticalGroupDtoToJSON)),
         'missingVerticalResults': value['missingVerticalResults'] == null ? undefined : ((value['missingVerticalResults'] as Array<any>).map(GlobalSearchResultDtoToJSON)),
+        'missingVerticalPage': GlobalSearchPageMetaDtoToJSON(value['missingVerticalPage']),
         'verticalCta': SearchSuggestCategoryDtoToJSON(value['verticalCta']),
         'semanticDiagnostics': SemanticScoreDiagnosticsDtoToJSON(value['semanticDiagnostics']),
     };

@@ -58,6 +58,18 @@ export interface GlobalSearchRequestDto {
      * @memberof GlobalSearchRequestDto
      */
     searchType?: string;
+    /**
+     * Zero-based page index for missing-vertical results.
+     * @type {number}
+     * @memberof GlobalSearchRequestDto
+     */
+    pageNumber?: number;
+    /**
+     * Page size for missing-vertical results.
+     * @type {number}
+     * @memberof GlobalSearchRequestDto
+     */
+    pageSize?: number;
 }
 
 /**
@@ -81,6 +93,8 @@ export function GlobalSearchRequestDtoFromJSONTyped(json: any, ignoreDiscriminat
         'filters': json['filters'] == null ? undefined : FilterRequestDtoFromJSON(json['filters']),
         'sort': json['sort'] == null ? undefined : SortRequestDtoFromJSON(json['sort']),
         'searchType': json['searchType'] == null ? undefined : json['searchType'],
+        'pageNumber': json['pageNumber'] == null ? undefined : json['pageNumber'],
+        'pageSize': json['pageSize'] == null ? undefined : json['pageSize'],
     };
 }
 
@@ -99,6 +113,8 @@ export function GlobalSearchRequestDtoToJSONTyped(value?: GlobalSearchRequestDto
         'filters': FilterRequestDtoToJSON(value['filters']),
         'sort': SortRequestDtoToJSON(value['sort']),
         'searchType': value['searchType'],
+        'pageNumber': value['pageNumber'],
+        'pageSize': value['pageSize'],
     };
 }
 

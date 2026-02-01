@@ -46,7 +46,9 @@ export interface SubsetCriteria {
 export const SubsetCriteriaOperatorEnum = {
     Equals: 'EQUALS',
     LowerThan: 'LOWER_THAN',
-    GreaterThan: 'GREATER_THAN'
+    GreaterThan: 'GREATER_THAN',
+    GreaterThanOrEqual: 'GREATER_THAN_OR_EQUAL',
+    LowerThanOrEqual: 'LOWER_THAN_OR_EQUAL'
 } as const;
 export type SubsetCriteriaOperatorEnum = typeof SubsetCriteriaOperatorEnum[keyof typeof SubsetCriteriaOperatorEnum];
 

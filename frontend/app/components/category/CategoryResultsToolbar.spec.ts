@@ -119,7 +119,8 @@ const VTextFieldStub = defineComponent({
 const VTooltipStub = defineComponent({
   name: 'VTooltip',
   setup(_, { slots }) {
-    return () => h('div', { class: 'v-tooltip-stub' }, slots.activator?.({ props: {} }))
+    return () =>
+      h('div', { class: 'v-tooltip-stub' }, slots.activator?.({ props: {} }))
   },
 })
 
@@ -144,7 +145,8 @@ const CategoryResultsCountStub = defineComponent({
     count: { type: Number, default: 0 },
   },
   setup(props) {
-    return () => h('span', { class: 'category-results-count-stub' }, `${props.count}`)
+    return () =>
+      h('span', { class: 'category-results-count-stub' }, `${props.count}`)
   },
 })
 
@@ -198,15 +200,18 @@ describe('CategoryResultsToolbar', () => {
     await wrapper.find('.v-select-stub').trigger('click')
     expect(wrapper.emitted('update:sortField')?.[0]).toEqual(['offersCount'])
 
+    await wrapper.setProps({ isDesktop: true })
     const toggleButtons = wrapper.findAllComponents(VBtnToggleStub)
     const viewToggle = toggleButtons.find(
-      toggle => toggle.attributes()['data-testid'] === 'results-toolbar-view-toggle'
+      toggle =>
+        toggle.attributes()['data-testid'] === 'results-toolbar-view-toggle'
     )
     viewToggle?.vm.$emit('update:modelValue', 'table')
     expect(wrapper.emitted('update:viewMode')?.[0]).toEqual(['table'])
 
     const sortToggle = toggleButtons.find(
-      toggle => toggle.attributes()['data-testid'] === 'results-toolbar-sort-order'
+      toggle =>
+        toggle.attributes()['data-testid'] === 'results-toolbar-sort-order'
     )
     sortToggle?.vm.$emit('update:modelValue', 'asc')
     expect(wrapper.emitted('update:sortOrder')?.[0]).toEqual(['asc'])
