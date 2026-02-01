@@ -590,9 +590,7 @@ const DESCRIPTION_MAX_CHARS = 175
 const expandedDescriptions = ref<Record<string, boolean>>({})
 
 const stripHtmlTags = (html: string): string => {
-  const tempDiv = document.createElement('div')
-  tempDiv.innerHTML = html
-  return tempDiv.textContent || tempDiv.innerText || ''
+  return html.replace(/<[^>]*>/g, '')
 }
 
 const truncateDescription = (html: string, maxChars: number): string => {
@@ -603,9 +601,6 @@ const truncateDescription = (html: string, maxChars: number): string => {
 
   // Truncate plain text and add ellipsis
   const truncated = plainText.substring(0, maxChars).trim()
-  // Create a temporary div to get the HTML representation
-  const tempDiv = document.createElement('div')
-  tempDiv.innerHTML = html
 
   // Simple approach: truncate and add ellipsis
   return truncated + '...'

@@ -75,9 +75,9 @@
       },
       "subtitles": {
         "default": [
-          "Gagne du temps. Choisis librement.",
-          "Consomme mieux sans payer plus. Nudger équilibre planète et budget.",
-          "Trouve rapidement des produits alignés avec tes valeurs, grâce à des données transparentes."
+          "Gagnez du temps. Choisissez librement.",
+          "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
+          "Trouvez rapidement des produits alignés avec vos valeurs, grâce à des données transparentes."
         ],
         "events": {
           "hold": [
@@ -234,7 +234,7 @@
     },
     "features": {
       "title": "Fonctionnalités clés",
-      "subtitle": "Découvre ce que Nudger met à ton service.",
+      "subtitle": "Découvrez ce que Nudger met à votre service.",
       "cards": {
         "impactScore": {
           "title": "Impact Score",
@@ -368,12 +368,12 @@
         }
       },
       "agent": {
-        "eyebrow": "Ton résultat IA ici 😉",
-        "title": "Pose ta question, on l’affiche dans la FAQ",
-        "subtitle": "Envoie ta demande, on répond avec une IA frugale et on affiche le résultat juste en dessous.",
-        "dynamicAnswerWithLink": "Découvre la réponse détaillée : {link}",
+        "eyebrow": "Votre résultat IA ici 😉",
+        "title": "Posez votre question, on l’affiche dans la FAQ",
+        "subtitle": "Envoyez votre demande, on répond avec une IA frugale et on affiche le résultat juste en dessous.",
+        "dynamicAnswerWithLink": "Découvrez la réponse détaillée : {link}",
         "dynamicAnswerWithState": "Réponse en cours ({state}).",
-        "dynamicAnswerPending": "Merci ! Ta question est dans la file.",
+        "dynamicAnswerPending": "Merci ! Votre question est dans la file.",
         "preview": {
           "eyebrow": "Flux IA en direct",
           "title": "Dernière réponse IA",
@@ -382,8 +382,8 @@
           "status": "Statut : {status}",
           "statusPending": "Statut en attente",
           "cta": "Ouvrir le résultat",
-          "helper": "Ouvre la dernière réponse publique dans un nouvel onglet",
-          "questionFallback": "Ta question IA s’affichera ici."
+          "helper": "Ouvrez la dernière réponse publique dans un nouvel onglet",
+          "questionFallback": "Votre question IA s’affichera ici."
         }
       }
     },
@@ -460,7 +460,7 @@
       "browseTaxonomy": "Explorer les catégories"
     },
     "photoInvitation": {
-      "title": "Toi aussi ?",
+      "title": "Vous aussi ?",
       "ariaLabel": "Proposer votre photo pour Nudger",
       "imageAlt": "Portrait souriant invitant à participer",
       "contact": {
@@ -470,8 +470,8 @@
     },
     "contactRedirect": {
       "eyebrow": "Besoin d’aide ?",
-      "title": "Tu ne trouves pas ta réponse ?",
-      "subtitle": "Saisis quelques mots et on te redirige vers le formulaire de contact.",
+      "title": "Vous ne trouvez pas votre réponse ?",
+      "subtitle": "Saisissez quelques mots et on vous redirige vers le formulaire de contact.",
       "inputLabel": "Votre demande en bref",
       "placeholder": "ex. Je cherche une facture ou une info produit",
       "cta": "Envoyer vers Contact",
@@ -501,7 +501,7 @@
         "leafLabel": "Feuille",
         "openSubcategory": "Ouvrir les sous-catégories de {category}",
         "openSubcategoryCta": "Voir les sous-catégories",
-        "subtitle": "Choisis une famille pour afficher ses sous-catégories ou découvrir nos guides.",
+        "subtitle": "Choisissez une famille pour afficher ses sous-catégories ou découvrir nos guides.",
         "title": "Parcourir les catégories",
         "verticalLabel": "Guide sélectionné",
         "viewVertical": "Ouvrir le guide {category}",
@@ -509,8 +509,8 @@
       },
       "hero": {
         "breadcrumbAriaLabel": "Fil d'Ariane de la navigation par catégories",
-        "childDescription": "Explore les sous-catégories et les sélections associées aux {category}.",
-        "description": "Découvre toutes les familles de produits analysées et accéde directement à la plus pertinente.",
+        "childDescription": "Explorez les sous-catégories et les sélections associées aux {category}.",
+        "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
         "resultsSummary": {
           "one": "{count} catégorie affichée",
           "other": "{count} catégories affichées"
@@ -518,7 +518,7 @@
         "rootBreadcrumb": "Toutes les catégories",
         "rootProductsTitle": "Les produits disponibles",
         "searchLabel": "Rechercher une catégorie",
-        "searchPlaceholder": "Tape le nom d'une catégorie",
+        "searchPlaceholder": "Tapez le nom d'une catégorie",
         "title": "Toutes les catégories de produits"
       },
       "loading": "Chargement de la navigation des catégories",
@@ -609,7 +609,7 @@
           "title": "Pourquoi et comment nous évaluons les {category}"
         },
         "transparency": {
-          "communityBody": "La définition de l'Impact Score {category} est disponible sur GitHub. Partage tes retours ou propose des ajustements.",
+          "communityBody": "La définition de l'Impact Score {category} est disponible sur GitHub. Partagez vos retours ou proposez des ajustements.",
           "communityCta": "Consulter la configuration",
           "communityIssues": "Ouvrir une discussion",
           "communityTitle": "En discuter",
@@ -634,7 +634,7 @@
             },
             "openData": {
               "title": "Données ouvertes",
-              "description": "Accéder aux jeux de données qui alimentent l'Impact Score des {category} et réutilise-les pour tes analyses.",
+              "description": "Accédez aux jeux de données qui alimentent l'Impact Score des {category} et réutilisez-les pour vos analyses.",
               "cta": "Explorer l'espace données",
               "aria": "Explorer les ressources open data pour l'Impact Score des {category}"
             }
@@ -762,21 +762,21 @@
     },
     "products": {
       "compare": {
-        "addMoreHint": "Sélectionne au moins deux produits pour lancer une comparaison.",
+        "addMoreHint": "Sélectionnez au moins deux produits pour lancer une comparaison.",
         "addToList": "Ajouter au comparateur",
         "addButtonShort": "Comparer",
         "addedButtonShort": "Ajouté",
         "addButtonFull": "Ajouter au comparateur",
         "removeButtonFull": "Retirer du comparateur",
         "collapsePanel": "Masquer la liste",
-        "differentCategory": "Compare uniquement des produits de la même catégorie.",
+        "differentCategory": "Comparez uniquement des produits de la même catégorie.",
         "expandPanel": "Afficher la liste",
         "itemsCount": {
           "one": "{count} produit sélectionné",
           "other": "{count} produits sélectionnés"
         },
         "launchComparison": "Comparer maintenant",
-        "limitReached": "Tu peux comparer jusqu'à {count} produits.",
+        "limitReached": "Vous pouvez comparer jusqu'à {count} produits.",
         "missingIdentifier": "Impossible de comparer ce produit.",
         "regionLabel": "Produits sélectionnés pour la comparaison",
         "removeFromList": "Retirer de la comparaison",
@@ -956,7 +956,7 @@
         }
       },
       "privacy": "Vos coordonnées ne sont utilisées que pour répondre à votre message et ne sont jamais partagées.",
-      "subtitle": "Remplis les informations ci-dessous, nous répondons rapidement.",
+      "subtitle": "Remplissez les informations ci-dessous, nous répondons rapidement.",
       "title": "Un message ?"
     },
     "hero": {
@@ -965,7 +965,7 @@
           "description": "Envie de collaborer, d'intégrer les données Nudger ou de co-construire un dispositif ? Parlons-en.",
           "label": "Partenariats & écosystème"
         },
-        "subtitle": "Choisis le sujet qui t'interesse : toutes les demande arrivent à la même équipe.",
+        "subtitle": "Choisissez le sujet qui vous intéresse : toutes les demandes arrivent à la même équipe.",
         "support": {
           "description": "Questions sur le comparateur, difficulté de connexion ? On vous accompagne pas à pas.",
           "label": "Support produit & utilisateurs"
@@ -976,7 +976,7 @@
           "label": "Presse & impact citoyen"
         }
       },
-      "description": "Parle-nous de ton projet, de ton organisation ou de ton usage de Nudger afin que nous d'orienter vers la bonne personne.",
+      "description": "Parlez-nous de votre projet, de votre organisation ou de votre usage de Nudger afin que nous puissions vous orienter vers la bonne personne.",
       "eyebrow": "Entrons en contact",
       "highlights": {
         "commitment": "Une réponse sous deux jours ouvrés pour la plupart des demandes.",
@@ -1077,7 +1077,7 @@
         "author": {
           "default": "Votre nom",
           "label": "Nom affiché",
-          "placeholder": "Sous quel nom souhaites-tu apparaître ?"
+          "placeholder": "Sous quel nom souhaitez-vous apparaître ?"
         },
         "message": {
           "label": "Message"
@@ -1090,18 +1090,18 @@
       "sections": {
         "bug": {
           "eyebrow": "Signaler un bug",
-          "intro": "Partager les étapes pour reproduire le bug, ce que tu attendais et ce qui s'est réellement produit afin que nous puissions enquêter rapidement.",
-          "messagePlaceholder": "Préciser les étapes, le comportement attendu et ce qui s'est produit.",
-          "subtitle": "Plus tu donnes de détails, plus nous pourrons corriger rapidement.",
-          "title": "Décris le problème rencontré",
+          "intro": "Partagez les étapes pour reproduire le bug, ce que vous attendiez et ce qui s'est réellement produit afin que nous puissions enquêter rapidement.",
+          "messagePlaceholder": "Précisez les étapes, le comportement attendu et ce qui s'est produit.",
+          "subtitle": "Plus vous donnez de détails, plus nous pourrons corriger rapidement.",
+          "title": "Décrivez le problème rencontré",
           "titlePlaceholder": "Ex. Erreur 500 sur la fiche produit"
         },
         "idea": {
           "eyebrow": "Proposer une idée",
-          "intro": "Présente le contexte de ton idée, son importance et la manière dont elle améliorerait Nudger pour toutes et tous.",
-          "messagePlaceholder": "Décris ton idée, le contexte et les bénéfices attendus.",
+          "intro": "Présentez le contexte de votre idée, son importance et la manière dont elle améliorerait Nudger pour toutes et tous.",
+          "messagePlaceholder": "Décrivez votre idée, le contexte et les bénéfices attendus.",
           "subtitle": "Explique comment Nudger pourrait mieux faire.",
-          "title": "Imagine la prochaine évolution",
+          "title": "Imaginez la prochaine évolution",
           "titlePlaceholder": "Ex. Comparer l'empreinte carbone des frigos"
         }
       }
@@ -1119,7 +1119,7 @@
         "label": "Ouvrir les issues GitHub"
       },
       "stats": {
-        "description": "Aide-nous à concentrer l'équipe sur les améliorations utiles.",
+        "description": "Aidez-nous à concentrer l'équipe sur les améliorations utiles.",
         "eyebrow": "En pratique",
         "items": {
           "iterations": "Itérations hebdomadaires sur les sujets les plus soutenus.",
@@ -1128,7 +1128,7 @@
         },
         "title": "Un backlog collaboratif"
       },
-      "subtitle": "Signaler les bugs, proposez des évolutions et votez pour les priorités qui comptent.",
+      "subtitle": "Signalez les bugs, proposez des évolutions et votez pour les priorités qui comptent.",
       "title": "Construisons Nudger avec vos idées"
     },
     "issues": {
@@ -1169,7 +1169,7 @@
         "issueTitle": "Bugs signalés",
         "label": "Bugs"
       },
-      "description": "Choisis une catégorie pour explorer les discussions en cours, vote pour les sujets qui te concerne ou en ouvrir une nouvelle.",
+      "description": "Choisissez une catégorie pour explorer les discussions en cours, votez pour les sujets qui vous concernent ou ouvrez-en une nouvelle.",
       "eyebrow": "Tableau communautaire",
       "idea": {
         "description": "Propose des améliorations qui rendraient Nudger plus utile. Nous passons chaque idée en revue !",
@@ -2986,7 +2986,7 @@
       },
       "timeSaver": {
         "badge": "Open source et sans pub",
-        "eyebrow": "Gagne du temps",
+        "eyebrow": "Gagnez du temps",
         "helpers": {
           "impact": "Score d'impact en un clin d'œil",
           "price": "Prix et historique inclus",
@@ -2995,9 +2995,9 @@
         "learnMoreCta": "Explorer les catégories",
         "primaryCta": "Lancer une recherche",
         "secondaryCta": "Parcourir responsable",
-        "subtitle": "Compare l'impact, le prix et les signaux de confiance en un seul endroit.",
-        "title": "Choisis librement.",
-        "titleFull": "Gagne du temps. Choisis librement.",
+        "subtitle": "Comparez l'impact, le prix et les signaux de confiance en un seul endroit.",
+        "title": "Choisissez librement.",
+        "titleFull": "Gagnez du temps. Choisissez librement.",
         "badgeAlt": "Comparateur indépendant"
       },
       "logoAlt": "Icône Nudger orange",
@@ -3008,7 +3008,7 @@
       "defaultCtaText": "Appel à l'action",
       "defaultSubtitle": "Démo vidéo hero pour montrer une intégration propre dans une application Vue 3.",
       "defaultTitle": "Titre par défaut",
-      "mainSubtitle": "Ton assistant achat, Libre et Indépendant",
+      "mainSubtitle": "Votre assistant achat, libre et indépendant",
       "mainTitle": "Le comparateur qui pense à demain"
     },
     "links": {
@@ -3308,7 +3308,7 @@
       "hero": {
         "eyebrow": "PWA",
         "title": "Votre compagnon éco sur mobile",
-        "subtitle": "Scanne, compare et trouve  les meilleurs produits en quelques gestes.",
+        "subtitle": "Scannez, comparez et trouvez les meilleurs produits en quelques gestes.",
         "meta": {
           "title": "Nudger - Compagnon mobile de l'impact",
           "description": "Découvrez Nudger en version mobile-first : scanner de codes-barres, assistant IA et partage d'éco-guides.",
@@ -3318,17 +3318,17 @@
       "search": {
         "title": "Recherche rapide",
         "label": "Rechercher un produit",
-        "placeholder": "Tape une marque ou un produit",
+        "placeholder": "Tapez une marque ou un produit",
         "cta": "Rechercher",
         "ariaLabel": "Rechercher un produit dans Nudger"
       },
       "actions": {
         "scan": {
           "title": "Scanner",
-          "description": "Utilise ta caméra pour obtenir instantanément impact et prix.",
-          "helper": "Aligne le code-barres dans le cadre pour un décodage immédiat.",
+          "description": "Utilisez votre caméra pour obtenir instantanément impact et prix.",
+          "helper": "Alignez le code-barres dans le cadre pour un décodage immédiat.",
           "loading": "Démarrage du scanner…",
-          "error": "Scanner indisponible. Réessaie ou lance une recherche.",
+          "error": "Scanner indisponible. Réessayez ou lancez une recherche.",
           "badge": "Live"
         },
         "wizard": {
@@ -3343,13 +3343,13 @@
         },
         "share": {
           "title": "Partager au manager",
-          "description": "Montre comment Nudger réagit instantanément sur les pages produits.",
+          "description": "Montrez comment Nudger réagit instantanément sur les pages produits.",
           "badge": "Démo"
         }
       },
       "share": {
         "title": "Partager Nudger comme astuce",
-        "description": "Envoie une capture ou un lien depuis ta page produit : le manager voit immédiatement le retour Nudger.",
+        "description": "Envoyez une capture ou un lien depuis votre page produit : le manager voit immédiatement le retour Nudger.",
         "cta": "Voir le rendu",
         "modalTitle": "Montrer l'éco-guide en action",
         "preview": {
@@ -3389,12 +3389,12 @@
     "steps": {
       "category": {
         "title": "Impact Score : étape par étape.",
-        "subtitle": "Trouve le produit idéal qui correspond à ton budget et tes valeurs",
+        "subtitle": "Trouvez le produit idéal qui correspond à votre budget et vos valeurs",
         "step": "Étape {step}"
       },
       "condition": {
         "title": "Neuf ou occasion ?",
-        "subtitle": "L'occasion est meilleur pour la planète. Et pour le porte-feuille !",
+        "subtitle": "L'occasion est meilleure pour la planète. Et pour votre portefeuille !",
         "options": {
           "new": "Neuf",
           "occasion": "Reconditionné",

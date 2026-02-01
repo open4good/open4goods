@@ -3141,7 +3141,6 @@
       "scoreRanking": "Factor ranking",
       "scoreValue": "Relative score",
       "valueOutOf": "{value} / {max}",
-      "subtitle": "Explore how this product scores across ecological and social criteria.",
       "tableHeaders": {
         "scoreName": "Indicator",
         "attributeValue": "Attribute value",
@@ -3163,8 +3162,7 @@
         "DURABILITY": "Durability",
         "ESG": "ESG performance"
       },
-      "hideDetails": "Hide detailed indicators",
-      "title": "Environmental impact"
+      "hideDetails": "Hide detailed indicators"
     },
     "navigation": {
       "admin": "Administration",

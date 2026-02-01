@@ -624,7 +624,7 @@ const steps = computed<WizardStep[]>(() => {
     icon: 'mdi-lightbulb-on',
     props: {
       products: recommendations.value,
-      popularAttributes: selectedCategory.value?.attributesConfig?.configs,
+      popularAttributes: selectedCategory.value?.popularAttributes,
       loading: loading.value,
     },
   })

@@ -54,6 +54,7 @@ const unlockImageTilt = () => {
             class="home-solution__list home-reveal-group"
             :class="{ 'is-ready': true, 'is-visible': isVisible }"
             dense
+            align="stretch"
           >
             <v-col
               v-for="(item, index) in props.benefits"
@@ -62,11 +63,14 @@ const unlockImageTilt = () => {
               md="6"
             >
               <NudgerCard
-                class="home-solution__item home-hover-card home-reveal-item d-flex align-center ga-4 w-100"
-                border
-                :flat-corners="['top-left']"
-                :accent-corners="['bottom-left']"
-                :style="{ '--reveal-delay': `${index * 90}ms` }"
+                class="home-solution__item home-hover-card home-reveal-item d-flex align-center ga-4 w-100 h-100"
+                base-radius="24px"
+                background="rgb(var(--v-theme-surface))"
+                :shadow="true"
+                :style="{
+                  '--reveal-delay': `${index * 90}ms`,
+                  border: '1px solid rgba(var(--v-theme-secondary), 0.2)',
+                }"
               >
                 <v-avatar class="home-solution__icon" size="60" color="surface">
                   <span aria-hidden="true">{{ item.emoji }}</span>
@@ -108,7 +112,7 @@ const unlockImageTilt = () => {
 
 .home-section
   padding-block: clamp(1.5rem, 3vw, 2.75rem)
-  background: rgb(var(--v-theme-surface-default))
+
 
 .home-solution__list
   margin: 0

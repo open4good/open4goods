@@ -36,10 +36,13 @@ const isVisible = computed(() => Boolean(props.reveal))
       <v-col v-for="(item, index) in props.items" :key="item.text" cols="12">
         <NudgerCard
           class="home-problems__card home-hover-card home-reveal-item d-flex align-center ga-4 w-100"
-          border
-          :flat-corners="['top-right']"
-          :accent-corners="['bottom-right']"
-          :style="{ '--reveal-delay': `${index * 90}ms` }"
+          base-radius="24px"
+          background="rgb(var(--v-theme-surface))"
+          :shadow="true"
+          :style="{
+            '--reveal-delay': `${index * 90}ms`,
+            border: '1px solid rgba(var(--v-theme-secondary), 0.2)',
+          }"
         >
           <v-avatar class="home-problems__icon" color="surface" size="64">
             <v-icon :icon="item.icon" size="32" />

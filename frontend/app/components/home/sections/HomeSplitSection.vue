@@ -149,7 +149,7 @@ const sectionClasses = computed(() => [
 <style scoped lang="sass">
 .home-section
   padding-block: clamp(1.5rem, 3vw, 2.75rem)
-  background: rgb(var(--v-theme-surface-default))
+
 
 .home-section__container
   padding-inline: clamp(1.5rem, 5vw, 4rem)
