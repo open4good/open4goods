@@ -93,7 +93,7 @@ jobs:
       - name: 📝 Build Release Notes (tag)
         id: build_changelog
         if: steps.meta.outputs.is_tag == 'true'
-        uses: mikepenz/release-changelog-builder-action@v6.0.1
+        uses: mikepenz/release-changelog-builder-action@v6.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
