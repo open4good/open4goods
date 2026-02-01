@@ -419,18 +419,22 @@ const faqPanels = computed(() =>
   }))
 )
 
-const faqJsonLd = computed(() => ({
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faqItems.value.map(item => ({
-    '@type': 'Question',
-    name: item.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: item.answer,
-    },
-  })),
-}))
+const faqJsonLd = computed(() => {
+  const validItems = faqItems.value.filter(item => item.answer?.trim())
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: validItems.map(item => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  }
+})
 
 const canonicalUrl = computed(() =>
   new URL(

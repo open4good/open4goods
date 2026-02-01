@@ -58,12 +58,12 @@ const resolveCardStyle = (index: number) => {
         style="max-width: 1180px"
         :class="{ 'is-ready': true, 'is-visible': isVisible }"
       >
-        <p
+        <h2
           id="home-blog-title"
           class="home-hero__subtitle home-reveal-item ma-0"
         >
           {{ t('home.blog.title') }}
-        </p>
+        </h2>
         <p class="home-section__subtitle text-center home-reveal-item ma-0">
           {{ t('home.blog.subtitle') }}
         </p>
