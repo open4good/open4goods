@@ -96,8 +96,8 @@
 
               <div class="category-navigation-grid__actions">
                 <NuxtLink
-                  v-if="category.path"
-                  :to="`/categories/${category.path}`"
+                  v-if="normalizedCategoryPath(category.path)"
+                  :to="`/categories/${normalizedCategoryPath(category.path)}`"
                   class="category-navigation-grid__link"
                   :aria-label="
                     t('categories.navigation.grid.openSubcategory', {
@@ -138,6 +138,7 @@
 <script setup lang="ts">
 import type { CategoryNavigationDtoChildCategoriesInner } from '~~/shared/api-client'
 import { useI18n } from 'vue-i18n'
+import { normalizeCategoryPath } from '~/utils/normalizeCategoryPath'
 
 const { categories } = defineProps<{
   categories: CategoryNavigationDtoChildCategoriesInner[]
@@ -149,6 +150,9 @@ const ariaLabel = (title?: string) =>
   t('categories.navigation.grid.cardAriaLabel', {
     category: title ?? '',
   })
+
+const normalizedCategoryPath = (path?: string | null) =>
+  normalizeCategoryPath(path)
 
 const childrenPreview = (category: CategoryNavigationDtoChildCategoriesInner) =>
   (

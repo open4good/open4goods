@@ -297,7 +297,6 @@ export default defineNuxtConfig({
     '/offline': { prerender: true },
     '/ecoscore': { redirect: { to: '/impact-score', statusCode: 301 } },
     '/eco-score': { redirect: { to: '/impact-score', statusCode: 301 } },
-    '/search': { redirect: { to: '/rechercher', statusCode: 301 } },
   },
   modules: [
     'vuetify-nuxt-module',

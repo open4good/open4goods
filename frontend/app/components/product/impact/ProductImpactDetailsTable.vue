@@ -1,9 +1,9 @@
 <template>
   <article class="impact-details">
     <header class="impact-details__header">
-      <h4 class="impact-details__title">
+      <h3 class="impact-details__title">
         {{ $t('product.impact.detailsTitle') }}
-      </h4>
+      </h3>
       <v-btn
         v-if="hasVirtualScores"
         variant="text"

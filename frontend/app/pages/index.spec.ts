@@ -130,7 +130,7 @@ const messages: Record<string, unknown> = {
     '{formattedCount} partner | {formattedCount} partners',
   'packs.default.hero.search.partnerLinkFallback': 'our partners',
   'packs.default.hero.eyebrow': 'Responsible shopping',
-  'packs.default.hero.title': 'Responsible choices are not a luxury',
+  'packs.default.hero.title': 'Nudger: The eco-friendly comparator',
   'packs.default.hero.subtitles': [
     'Save time, stay true to your values.',
     'Shop smarter without compromise.',
@@ -270,7 +270,7 @@ const messages: Record<string, unknown> = {
     '{formattedCount} partner | {formattedCount} partners',
   'home.hero.search.partnerLinkFallback': 'our partners',
   'home.hero.eyebrow': 'Responsible shopping',
-  'home.hero.title': 'Responsible choices are not a luxury',
+  'home.hero.title': 'Nudger: The eco-friendly comparator',
 
   'home.hero.imageAlt': 'Hero illustration',
   'home.problems.title': 'Too many labels, not enough clarity?',

@@ -6,7 +6,7 @@ import HomeHeroSection from './HomeHeroSection.vue'
 import type { EventPackName } from '~~/config/theme/event-packs'
 
 const messages: Record<string, unknown> = {
-  'packs.default.hero.title': "Réconcilier écologie et pouvoir d'achat",
+  'packs.default.hero.title': 'Nudger : Le comparateur écologique',
   'packs.default.hero.titleSubtitle': ['Acheter mieux. Sans dépenser plus.'],
   'packs.default.hero.background': 'hero-background.webp',
 }
