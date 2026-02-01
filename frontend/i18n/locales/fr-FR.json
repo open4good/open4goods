@@ -3008,8 +3008,13 @@
       "defaultCtaText": "Appel à l'action",
       "defaultSubtitle": "Démo vidéo hero pour montrer une intégration propre dans une application Vue 3.",
       "defaultTitle": "Titre par défaut",
+<<<<<<< HEAD
       "mainSubtitle": "Votre assistant achat, libre et indépendant",
       "mainTitle": "Le comparateur qui pense à demain"
+=======
+      "mainSubtitle": "Acheter Mieux sans dépenser plus",
+      "mainTitle": "Nudger : Le comparateur écologique"
+>>>>>>> branch 'main' of https://github.com/open4good/open4goods.git
     },
     "links": {
       "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"
