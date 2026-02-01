@@ -65,6 +65,10 @@ const HOTJAR_ENABLED =
   process.env.HOTJAR_ENABLED !== undefined
     ? process.env.HOTJAR_ENABLED === 'true'
     : process.env.NODE_ENV === 'production'
+const HOTJAR_MODE_ENV = process.env.HOTJAR_MODE ?? 'query'
+const HOTJAR_MODE = ['always', 'never', 'query'].includes(HOTJAR_MODE_ENV)
+  ? HOTJAR_MODE_ENV
+  : 'query'
 const HOTJAR_SITE_ID = Number(process.env.HOTJAR_SITE_ID ?? 0)
 const HOTJAR_SNIPPET_VERSION = Number(process.env.HOTJAR_SNIPPET_VERSION ?? 6)
 const navigationOfflineFallbackPlugin = {
@@ -527,6 +531,7 @@ export default defineNuxtConfig({
       },
       hotjar: {
         enabled: HOTJAR_ENABLED,
+        mode: HOTJAR_MODE,
         siteId: HOTJAR_SITE_ID,
         snippetVersion: HOTJAR_SNIPPET_VERSION,
       },

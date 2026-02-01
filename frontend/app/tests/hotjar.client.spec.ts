@@ -23,6 +23,7 @@ const runtimeConfigMock = vi.hoisted(() => ({
     public: {
       hotjar: {
         enabled: false,
+        mode: 'query',
         siteId: 0,
         snippetVersion: 6,
       },
@@ -63,6 +64,7 @@ describe('hotjar client plugin', () => {
       public: {
         hotjar: {
           enabled: false,
+          mode: 'query',
           siteId: 0,
           snippetVersion: 6,
         },
@@ -73,12 +75,13 @@ describe('hotjar client plugin', () => {
     isDoNotTrackEnabledMock.mockReturnValue(false)
   })
 
-  it('initializes Hotjar when cookie is present and enabled', async () => {
+  it('initializes Hotjar when mode is query and the cookie is present', async () => {
     const nuxtApp = createNuxtApp()
     setRuntimeConfig({
       public: {
         hotjar: {
           enabled: true,
+          mode: 'query',
           siteId: 123456,
           snippetVersion: 6,
         },
@@ -102,12 +105,38 @@ describe('hotjar client plugin', () => {
     })
   })
 
-  it('skips Hotjar when the cookie is missing', async () => {
+  it('initializes Hotjar when mode is always without a cookie', async () => {
     const nuxtApp = createNuxtApp()
     setRuntimeConfig({
       public: {
         hotjar: {
           enabled: true,
+          mode: 'always',
+          siteId: 123456,
+          snippetVersion: 6,
+        },
+      },
+    })
+    useCookieMock.mockReturnValue({ value: undefined })
+
+    const plugin = (await import('../plugins/hotjar.client')).default
+
+    plugin.setup?.(nuxtApp)
+
+    expect(nuxtApp.vueApp.use).toHaveBeenCalledWith(hotjarPlugin, {
+      id: 123456,
+      isProduction: true,
+      snippetVersion: 6,
+    })
+  })
+
+  it('skips Hotjar when mode is query and the cookie is missing', async () => {
+    const nuxtApp = createNuxtApp()
+    setRuntimeConfig({
+      public: {
+        hotjar: {
+          enabled: true,
+          mode: 'query',
           siteId: 123456,
           snippetVersion: 6,
         },
@@ -122,12 +151,34 @@ describe('hotjar client plugin', () => {
     expect(nuxtApp.vueApp.use).not.toHaveBeenCalled()
   })
 
+  it('skips Hotjar when mode is never', async () => {
+    const nuxtApp = createNuxtApp()
+    setRuntimeConfig({
+      public: {
+        hotjar: {
+          enabled: true,
+          mode: 'never',
+          siteId: 123456,
+          snippetVersion: 6,
+        },
+      },
+    })
+    useCookieMock.mockReturnValue({ value: HOTJAR_RECORDING_COOKIE_VALUE })
+
+    const plugin = (await import('../plugins/hotjar.client')).default
+
+    plugin.setup?.(nuxtApp)
+
+    expect(nuxtApp.vueApp.use).not.toHaveBeenCalled()
+  })
+
   it('skips Hotjar when Do Not Track is enabled', async () => {
     const nuxtApp = createNuxtApp()
     setRuntimeConfig({
       public: {
         hotjar: {
           enabled: true,
+          mode: 'always',
           siteId: 123456,
           snippetVersion: 6,
         },

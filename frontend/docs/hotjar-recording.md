@@ -10,9 +10,9 @@ users explicitly land on the homepage with `/?record`.
    - redirects the request to the canonical `/` URL to avoid indexing the query
      string.
 2. On the client, the Hotjar plugin runs only when:
-   - the `hotjar_record` cookie is present,
+   - the `hotjar_record` cookie is present (when mode is `query`),
    - Do Not Track is **not** enabled,
-   - `public.hotjar.enabled` is true and a valid `public.hotjar.siteId` is set.
+   - a valid `public.hotjar.siteId` is set.
 
 If the `record` parameter is absent, no cookie is set and Hotjar is not
 initialized.
@@ -22,6 +22,7 @@ initialized.
 Hotjar is configured via runtime config values exposed to the client:
 
 - `HOTJAR_ENABLED` (defaults to `true` in production, otherwise `false`)
+- `HOTJAR_MODE` (`query`, `always`, or `never`; defaults to `query`)
 - `HOTJAR_SITE_ID` (Hotjar site ID, required to enable recordings)
 - `HOTJAR_SNIPPET_VERSION` (defaults to `6`)
 
