@@ -7,10 +7,10 @@
 - \(x\) : valeur brute (mesure ou valeur mappée)
 - \(\mu\) : moyenne des valeurs dans la population de référence
 - \(\sigma\) : écart-type
-- \(N\) : nombre d’observations
+- \(N\) : nombre d'observations
 - \(S\_{min}\) : score minimum (par défaut 0)
 - \(S\_{max}\) : score maximum (par défaut 5)
-- `impactBetterIs` : sens « meilleur » pour le score impact
+- `impactBetterIs` : sens " meilleur " pour le score impact
 
 On suppose que la normalisation produit un score \(s\in[S_{min},S_{max}]\).
 
@@ -18,7 +18,7 @@ On suppose que la normalisation produit un score \(s\in[S_{min},S_{max}]\).
 
 ### 2.1 Formule
 
-On définit un intervalle « normal » :
+On définit un intervalle " normal " :
 \[
 [\mu - k\sigma, \mu + k\sigma]
 \]
@@ -61,28 +61,28 @@ s = clamp(p \times S*{max}, 0, S*{max})
 
 ### 3.2 Usage
 
-- recommandé si la distribution est très discrète (peu de valeurs distinctes) **ou** si l’on veut un score strictement ordinal.
-- attention : « moyenne » n’est pas un pivot fixe comme en sigma.
+- recommandé si la distribution est très discrète (peu de valeurs distinctes) **ou** si l'on veut un score strictement ordinal.
+- attention : " moyenne " n'est pas un pivot fixe comme en sigma.
 
 ### 3.3 Cas limites
 
 - N=0 : renvoyer neutre (policy)
 - fréquences absentes : renvoyer neutre (policy)
 
-## 4) Min–max borné (MINMAX_FIXED)
+## 4) Min-max borné (MINMAX_FIXED)
 
-Si l’attribut a des bornes stables \([a,b]\) :
+Si l'attribut a des bornes stables \([a,b]\) :
 \[
 n = \frac{x-a}{b-a}
 \quad ;\quad
 s = clamp(n\times S*{max}, 0, S*{max})
 \]
 
-Usage : notes normatives (0–10), unités bornées “standard”.
+Usage : notes normatives (0-10), unités bornées “standard”.
 
-## 5) Min–max observé (MINMAX_OBSERVED)
+## 5) Min-max observé (MINMAX_OBSERVED)
 
-Si l’attribut n’a pas de bornes stables mais qu’on veut rester relatif au marché, on utilise les bornes observées
+Si l'attribut n'a pas de bornes stables mais qu'on veut rester relatif au marché, on utilise les bornes observées
 dans le batch courant \([x_{min}, x_{max}]\) :
 \[
 n = \frac{x-x*{min}}{x*{max}-x*{min}}
@@ -92,9 +92,9 @@ s = clamp(n\times S*{max}, 0, S\_{max})
 
 **Attention** : les scores évoluent avec le catalogue et peuvent être sensibles aux outliers.
 
-## 6) Min–max par quantiles (MINMAX_QUANTILE)
+## 6) Min-max par quantiles (MINMAX_QUANTILE)
 
-Pour réduire l’influence des outliers tout en restant relatif :
+Pour réduire l'influence des outliers tout en restant relatif :
 
 - remplacer \(a\) et \(b\) par des quantiles \(q*{low}\) et \(q*{high}\) (ex : p5/p95)
 - même projection linéaire + clamp
@@ -118,7 +118,7 @@ Après calcul du score \(s\) :
   \]
 - sinon : \(s'=s\)
 
-## 9) Échelle finale stable 0–20 (poids)
+## 9) Échelle finale stable 0-20 (poids)
 
 Si sous-scores sont sur 0..5 :
 
@@ -131,7 +131,7 @@ Si sous-scores sont sur 0..5 :
 
 ## 10) Métadonnées UI recommandées
 
-Pour rendre l’explication et la dataviz correctes :
+Pour rendre l'explication et la dataviz correctes :
 
 - `normalizationMethod`
 - `normalizationParams` (k, quantiles, bornes, mapping)

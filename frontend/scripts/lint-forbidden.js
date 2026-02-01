@@ -66,6 +66,7 @@ function getFiles(dir) {
 
 // Validation logic
 let hasError = false
+const shouldFix = process.argv.includes('--fix')
 const allFiles = getFiles(ROOT_DIR)
 
 console.log(`[lint-forbidden] Scanning ${allFiles.length} files...`)
@@ -76,19 +77,37 @@ for (const filePath of allFiles) {
   // Find applicable rules
   const rule = config.rules.find(r => r.extensions.includes(ext))
   if (rule) {
-    const content = fs.readFileSync(filePath, 'utf-8')
+    let content = fs.readFileSync(filePath, 'utf-8')
+    let fileChanged = false
+
     for (const item of rule.forbidden) {
       const char = typeof item === 'string' ? item : item.char
       const replace = typeof item === 'string' ? null : item.replace
 
+      // Use split/join or replaceAll to replace all instances
       if (content.includes(char)) {
-        let msg = `ERROR: Found forbidden character "${char}"`
-        if (replace) msg += ` (use "${replace}" instead)`
-        msg += ` in ${path.relative(ROOT_DIR, filePath)}`
+        if (shouldFix && replace) {
+          content = content.replaceAll(char, replace)
+          fileChanged = true
+          console.log(
+            `[FIXED] Replaced "${char}" with "${replace}" in ${path.relative(
+              ROOT_DIR,
+              filePath
+            )}`
+          )
+        } else {
+          let msg = `ERROR: Found forbidden character "${char}"`
+          if (replace) msg += ` (use "${replace}" instead)`
+          msg += ` in ${path.relative(ROOT_DIR, filePath)}`
 
-        console.error(msg)
-        hasError = true
+          console.error(msg)
+          hasError = true
+        }
       }
+    }
+
+    if (fileChanged) {
+      fs.writeFileSync(filePath, content, 'utf-8')
     }
   }
 }

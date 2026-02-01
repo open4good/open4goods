@@ -4,14 +4,14 @@
 ## Nudger UI in action
 
 Experience Nudger frontend online:
-- [https://static.nudger.fr](https://static.nudger.fr) – statically generated version hosted on GitHub Pages.
-- [https://demo.nudger.fr](https://demo.nudger.fr) – server-rendered demo.
+- [https://static.nudger.fr](https://static.nudger.fr) - statically generated version hosted on GitHub Pages.
+- [https://demo.nudger.fr](https://demo.nudger.fr) - server-rendered demo.
 
 The default home page now features a Vuetify-based landing page.
 
 **Welcome** to the Nudger front-end project. This guide is a comprehensive overview of the Nudger UI application structure, coding conventions, and tooling.
 
-The Nudger front-end is a Nuxt 3 app (Vue 3) that interfaces with an OpenAPI-described backend for core application data. We employ modern frameworks and best practices – from  Pinia, to Vitest – to maintain a robust, scalable codebase.
+The Nudger front-end is a Nuxt 3 app (Vue 3) that interfaces with an OpenAPI-described backend for core application data. We employ modern frameworks and best practices - from  Pinia, to Vitest - to maintain a robust, scalable codebase.
 
 Use this document as the bible for:
 
@@ -81,28 +81,28 @@ To get the project up and running locally, follow these steps:
 
 
 8. **Other Useful Scripts**:
-   - `pnpm --offline lint` – run ESLint
-   - `pnpm --offline format` – check formatting
-   - `pnpm --offline test` – run tests with Vitest
-   - `pnpm test:visual` – run Playwright visual snapshots (requires dev server at `http://localhost:3000`; optional, not part of CI)
-   - `pnpm --offline generate:api` – regenerate the OpenAPI fetch client
-   - `pnpm --offline preprocess:css` – prefix Bootstrap and XWiki styles for `<TextContent>`
-   - `pnpm --offline preview` – serve the production build locally
-   - `pnpm --offline build:ssr` – build with increased memory
+   - `pnpm --offline lint` - run ESLint
+   - `pnpm --offline format` - check formatting
+   - `pnpm --offline test` - run tests with Vitest
+   - `pnpm test:visual` - run Playwright visual snapshots (requires dev server at `http://localhost:3000`; optional, not part of CI)
+   - `pnpm --offline generate:api` - regenerate the OpenAPI fetch client
+   - `pnpm --offline preprocess:css` - prefix Bootstrap and XWiki styles for `<TextContent>`
+   - `pnpm --offline preview` - serve the production build locally
+   - `pnpm --offline build:ssr` - build with increased memory
 
 ## API environment variables
 
 Runtime configuration uses the following variables defined in `nuxt.config.ts`:
 
-- **`API_URL`** – base URL of the backend API. Defaults to
+- **`API_URL`** - base URL of the backend API. Defaults to
   `http://localhost:8082` and is exposed as
   `config.apiUrl`.
-- **`TOKEN_COOKIE_NAME`** – cookie name for the JWT. Defaults to
+- **`TOKEN_COOKIE_NAME`** - cookie name for the JWT. Defaults to
   `access_token`.
-- **`REFRESH_COOKIE_NAME`** – cookie name for the refresh token. Defaults to
+- **`REFRESH_COOKIE_NAME`** - cookie name for the refresh token. Defaults to
   `refresh_token`.
-- **`MACHINE_TOKEN`** – shared token for server requests. Only available on the server through `config.machineToken` and injected as `X-Shared-Token` when calling `config.apiUrl`.
-- **`EDITOR_ROLES`** – comma-separated roles that enable edit links on content blocs. Defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP` (roles returned by the backend) and is exposed as `config.public.editRoles`.
+- **`MACHINE_TOKEN`** - shared token for server requests. Only available on the server through `config.machineToken` and injected as `X-Shared-Token` when calling `config.apiUrl`.
+- **`EDITOR_ROLES`** - comma-separated roles that enable edit links on content blocs. Defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP` (roles returned by the backend) and is exposed as `config.public.editRoles`.
 
 ## Authentication cookies
 
@@ -164,30 +164,30 @@ project/
 
 ### Key Config Files:
 
-- `nuxt.config.ts` – Nuxt modules and runtime configuration
-- `tsconfig.json` – TypeScript compiler options and path aliases
-- `eslint.config.mjs` and `.prettierrc` – linting and formatting rules
-- `vitest.config.ts` – test runner configuration
-- `tokens.config.json` – design tokens pulled from Figma
-- `.releaserc.json` – Semantic Release setup
-- `renovate.json` – Renovate bot configuration
-- `package.json` – scripts and dependencies
-- `api-specs/nudger-api.json` – OpenAPI specification used by `generate:api`
-- `api-specs/openapitools.json` – OpenAPI generator CLI configuration
-- `.husky/` – Git hooks executed on commit
+- `nuxt.config.ts` - Nuxt modules and runtime configuration
+- `tsconfig.json` - TypeScript compiler options and path aliases
+- `eslint.config.mjs` and `.prettierrc` - linting and formatting rules
+- `vitest.config.ts` - test runner configuration
+- `tokens.config.json` - design tokens pulled from Figma
+- `.releaserc.json` - Semantic Release setup
+- `renovate.json` - Renovate bot configuration
+- `package.json` - scripts and dependencies
+- `api-specs/nudger-api.json` - OpenAPI specification used by `generate:api`
+- `api-specs/openapitools.json` - OpenAPI generator CLI configuration
+- `.husky/` - Git hooks executed on commit
 
 ## Route internationalisation
 
 The application keeps translated slugs in a single place so every layer can share
 them consistently. `shared/utils/localized-routes.ts` exposes:
 
-- `LOCALIZED_ROUTE_PATHS` – a record that maps each named route to the slug that
+- `LOCALIZED_ROUTE_PATHS` - a record that maps each named route to the slug that
   should be served per Nuxt locale.
-- `resolveLocalizedRoutePath(routeName, locale, params?)` – returns the
+- `resolveLocalizedRoutePath(routeName, locale, params?)` - returns the
   translated path for navigation components and programmatic redirects. Provide
   any dynamic parameters (e.g. `{ slug: article.slug }`) and the helper injects
   them into the template.
-- `buildI18nPagesConfig()` – used by `nuxt.config.ts` to generate the
+- `buildI18nPagesConfig()` - used by `nuxt.config.ts` to generate the
   `@nuxtjs/i18n` `pages` configuration so visiting translated slugs never yields
   a 404.
 
@@ -232,7 +232,7 @@ through the `vueI18n` option so that server and client renderers stay aligned.
 - Use `<script setup lang="ts">` in all components
 - Write components in TypeScript
 - Use `useFetch`, `useAsyncData` for SSR-friendly data fetching
-- Avoid using `window`, `document`, etc. directly – guard with `if (process.client)`
+- Avoid using `window`, `document`, etc. directly - guard with `if (process.client)`
 - Use path aliases like `@/components/...`
 - Prefer small, focused components
 - Use `definePageMeta({ layout, middleware })` in pages

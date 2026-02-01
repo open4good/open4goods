@@ -1940,7 +1940,7 @@
             "entity": "JSDelivr CDN"
           },
           {
-            "url": "data:image/svg+xml,%3c?xml%20version=%271.0%27%20encoding=%27UTF-8%27?%3e%3csvg%20id=%27Calque_2%27…",
+            "url": "data:image/svg+xml,%3c?xml%20version=%271.0%27%20encoding=%27UTF-8%27?%3e%3csvg%20id=%27Calque_2%27...",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 821.8489999994636,
@@ -3742,7 +3742,7 @@
                     "height": 188
                   },
                   "snippet": "<p class=\"category-hero__description\" data-v-b9af4d61=\"\">",
-                  "nodeLabel": "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires…"
+                  "nodeLabel": "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires..."
                 }
               }
             ]
@@ -4442,12 +4442,12 @@
             "unusedBytes": 98,
             "children": [
               {
-                "name": "(inline) window.__NUXT__…",
+                "name": "(inline) window.__NUXT__...",
                 "resourceBytes": 1921,
                 "unusedBytes": 0
               },
               {
-                "name": "(inline) (function(){fun…",
+                "name": "(inline) (function(){fun...",
                 "resourceBytes": 902,
                 "unusedBytes": 98
               }
@@ -4939,8 +4939,8 @@
                 "width": 380,
                 "height": 5577
               },
-              "snippet": "<div data-v-e0464d77=\"\" data-v-4f083d71=\"\" class=\"v-list v-theme--light v-list--density-comfortable v-list--three-line categ…\" tabindex=\"0\" role=\"list\">",
-              "nodeLabel": "Philips 32PFS6939/12 Ambilight TV\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnolo…",
+              "snippet": "<div data-v-e0464d77=\"\" data-v-4f083d71=\"\" class=\"v-list v-theme--light v-list--density-comfortable v-list--three-line categ...\" tabindex=\"0\" role=\"list\">",
+              "nodeLabel": "Philips 32PFS6939/12 Ambilight TV\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnolo...",
               "explanation": "Fix any of the following:\n  Element has children which are not allowed: [role=link]"
             },
             "subItems": {
@@ -4960,8 +4960,8 @@
                       "width": 380,
                       "height": 378
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041017-televiseur-philips-32pfs693912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Philips 32PFS6939/12 Ambilight TV\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnolo…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041017-televiseur-philips-32pfs693912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Philips 32PFS6939/12 Ambilight TV\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnolo..."
                   }
                 },
                 {
@@ -4978,8 +4978,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094355536-tv-samsung-qe32ls03bbu-2022\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Télévision samsung 32 \" qled\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094355536-tv-samsung-qe32ls03bbu-2022\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Télévision samsung 32 \" qled\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d..."
                   }
                 },
                 {
@@ -4996,8 +4996,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041123-television-philips-43pus800912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur philips 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041123-television-philips-43pus800912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur philips 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'..."
                   }
                 }
               ]
@@ -6165,7 +6165,7 @@
                 "width": 20,
                 "height": 20
               },
-              "snippet": "<button data-v-c6be2ce6=\"\" type=\"button\" class=\"v-btn v-btn--icon v-theme--light v-btn--density-compact v-btn--variant-tex…\" aria-haspopup=\"menu\" aria-expanded=\"false\" aria-controls=\"v-menu-v-0-1-108\" aria-owns=\"v-menu-v-0-1-108\" style=\"width: 20px; height: 20px;\">",
+              "snippet": "<button data-v-c6be2ce6=\"\" type=\"button\" class=\"v-btn v-btn--icon v-theme--light v-btn--density-compact v-btn--variant-tex...\" aria-haspopup=\"menu\" aria-expanded=\"false\" aria-controls=\"v-menu-v-0-1-108\" aria-owns=\"v-menu-v-0-1-108\" style=\"width: 20px; height: 20px;\">",
               "nodeLabel": "div.category-product-list__prices-column > div.product-price-rows > div.product-price-rows__row > button.v-btn",
               "explanation": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
             }
@@ -6271,8 +6271,8 @@
                       "width": 412,
                       "height": 7844
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -6331,8 +6331,8 @@
                       "width": 380,
                       "height": 378
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041017-televiseur-philips-32pfs693912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Philips 32PFS6939/12 Ambilight TV\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnolo…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041017-televiseur-philips-32pfs693912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Philips 32PFS6939/12 Ambilight TV\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnolo..."
                   }
                 }
               ]
@@ -6373,8 +6373,8 @@
                       "width": 380,
                       "height": 378
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041017-televiseur-philips-32pfs693912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Philips 32PFS6939/12 Ambilight TV\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnolo…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041017-televiseur-philips-32pfs693912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Philips 32PFS6939/12 Ambilight TV\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnolo..."
                   }
                 }
               ]
@@ -6433,8 +6433,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094355536-tv-samsung-qe32ls03bbu-2022\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Télévision samsung 32 \" qled\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094355536-tv-samsung-qe32ls03bbu-2022\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Télévision samsung 32 \" qled\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d..."
                   }
                 }
               ]
@@ -6475,8 +6475,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094355536-tv-samsung-qe32ls03bbu-2022\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Télévision samsung 32 \" qled\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094355536-tv-samsung-qe32ls03bbu-2022\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Télévision samsung 32 \" qled\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d..."
                   }
                 }
               ]
@@ -6535,8 +6535,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041123-television-philips-43pus800912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur philips 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041123-television-philips-43pus800912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur philips 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'..."
                   }
                 }
               ]
@@ -6577,8 +6577,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041123-television-philips-43pus800912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur philips 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041123-television-philips-43pus800912-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur philips 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'..."
                   }
                 }
               ]
@@ -6637,8 +6637,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806095445397-televiseur-qled-samsung-tq43ls03dau-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur samsung 43 \" qled\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806095445397-televiseur-qled-samsung-tq43ls03dau-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur samsung 43 \" qled\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d..."
                   }
                 }
               ]
@@ -6679,8 +6679,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806095445397-televiseur-qled-samsung-tq43ls03dau-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur samsung 43 \" qled\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806095445397-televiseur-qled-samsung-tq43ls03dau-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur samsung 43 \" qled\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d..."
                   }
                 }
               ]
@@ -6739,8 +6739,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/6942351403199-televiseur-hisense-43a7nq-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV hisense 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'affichag…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/6942351403199-televiseur-hisense-43a7nq-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV hisense 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'affichag..."
                   }
                 }
               ]
@@ -6781,8 +6781,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/6942351403199-televiseur-hisense-43a7nq-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV hisense 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'affichag…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/6942351403199-televiseur-hisense-43a7nq-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV hisense 43 \" led\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'affichag..."
                   }
                 }
               ]
@@ -6841,8 +6841,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806084070685-tv-lgelectronics-oled42c35la-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV lgelectronics 42 \" oled\n1 offre\nDiagonale (en pouces)\n:\n42 \"\nTechnologie d'a…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806084070685-tv-lgelectronics-oled42c35la-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV lgelectronics 42 \" oled\n1 offre\nDiagonale (en pouces)\n:\n42 \"\nTechnologie d'a..."
                   }
                 }
               ]
@@ -6883,8 +6883,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806084070685-tv-lgelectronics-oled42c35la-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV lgelectronics 42 \" oled\n1 offre\nDiagonale (en pouces)\n:\n42 \"\nTechnologie d'a…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806084070685-tv-lgelectronics-oled42c35la-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV lgelectronics 42 \" oled\n1 offre\nDiagonale (en pouces)\n:\n42 \"\nTechnologie d'a..."
                   }
                 }
               ]
@@ -6943,8 +6943,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292520526-televiseur-tcl-32sf540x1-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TCL 32SF540X1\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\nLE…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292520526-televiseur-tcl-32sf540x1-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TCL 32SF540X1\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\nLE..."
                   }
                 }
               ]
@@ -6985,8 +6985,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292520526-televiseur-tcl-32sf540x1-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TCL 32SF540X1\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\nLE…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292520526-televiseur-tcl-32sf540x1-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TCL 32SF540X1\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\nLE..."
                   }
                 }
               ]
@@ -7045,8 +7045,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806091662446-television-lgelectronicsinc-32lq631c0za\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV LED LG 32LQ631C0ZA\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affich…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806091662446-television-lgelectronicsinc-32lq631c0za\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV LED LG 32LQ631C0ZA\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affich..."
                   }
                 }
               ]
@@ -7087,8 +7087,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806091662446-television-lgelectronicsinc-32lq631c0za\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV LED LG 32LQ631C0ZA\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affich…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806091662446-television-lgelectronicsinc-32lq631c0za\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV LED LG 32LQ631C0ZA\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affich..."
                   }
                 }
               ]
@@ -7147,8 +7147,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292512804-tv-led-tcl-32es561x1\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\n…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292512804-tv-led-tcl-32es561x1\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\n..."
                   }
                 }
               ]
@@ -7189,8 +7189,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292512804-tv-led-tcl-32es561x1\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\n…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292512804-tv-led-tcl-32es561x1\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\n..."
                   }
                 }
               ]
@@ -7249,8 +7249,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094916805-televiseur-samsung-tq43q65cau-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV samsung 43 \" qled\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'afficha…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094916805-televiseur-samsung-tq43q65cau-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV samsung 43 \" qled\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'afficha..."
                   }
                 }
               ]
@@ -7291,8 +7291,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094916805-televiseur-samsung-tq43q65cau-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV samsung 43 \" qled\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'afficha…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806094916805-televiseur-samsung-tq43q65cau-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV samsung 43 \" qled\n1 offre\nDiagonale (en pouces)\n:\n43 \"\nTechnologie d'afficha..."
                   }
                 }
               ]
@@ -7351,8 +7351,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806095569741-tv-samsung-tq43ls01dbu-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur samsung 43 \" qled\n2 offres\nDiagonale (en pouces)\n:\n43 \"\nTechnologie …"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806095569741-tv-samsung-tq43ls01dbu-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur samsung 43 \" qled\n2 offres\nDiagonale (en pouces)\n:\n43 \"\nTechnologie ..."
                   }
                 }
               ]
@@ -7393,8 +7393,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806095569741-tv-samsung-tq43ls01dbu-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur samsung 43 \" qled\n2 offres\nDiagonale (en pouces)\n:\n43 \"\nTechnologie …"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806095569741-tv-samsung-tq43ls01dbu-2024\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur samsung 43 \" qled\n2 offres\nDiagonale (en pouces)\n:\n43 \"\nTechnologie ..."
                   }
                 }
               ]
@@ -7453,8 +7453,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041048-television-led-philips-55pus700912\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur philips 55 \" led\n1 offre\nDiagonale (en pouces)\n:\n55 \"\nTechnologie d'…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041048-television-led-philips-55pus700912\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur philips 55 \" led\n1 offre\nDiagonale (en pouces)\n:\n55 \"\nTechnologie d'..."
                   }
                 }
               ]
@@ -7495,8 +7495,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041048-television-led-philips-55pus700912\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Téléviseur philips 55 \" led\n1 offre\nDiagonale (en pouces)\n:\n55 \"\nTechnologie d'…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8718863041048-television-led-philips-55pus700912\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Téléviseur philips 55 \" led\n1 offre\nDiagonale (en pouces)\n:\n55 \"\nTechnologie d'..."
                   }
                 }
               ]
@@ -7555,8 +7555,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292519780-television-tcl-32s5400ax1-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\n…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292519780-television-tcl-32s5400ax1-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\n..."
                   }
                 }
               ]
@@ -7597,8 +7597,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292519780-television-tcl-32s5400ax1-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\n…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292519780-television-tcl-32s5400ax1-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affichage\n:\n..."
                   }
                 }
               ]
@@ -7657,8 +7657,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292519933-tv-led-tcl-32s5409ax1\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Télévision tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affi…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292519933-tv-led-tcl-32s5409ax1\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Télévision tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affi..."
                   }
                 }
               ]
@@ -7699,8 +7699,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292519933-tv-led-tcl-32s5409ax1\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "Télévision tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affi…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/5901292519933-tv-led-tcl-32s5409ax1\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "Télévision tcl 32 \" led\n1 offre\nDiagonale (en pouces)\n:\n32 \"\nTechnologie d'affi..."
                   }
                 }
               ]
@@ -7759,8 +7759,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806087086157-tv-lgelectronics-50qned826re-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV lgelectronics 50 \" led\n1 offre\nDiagonale (en pouces)\n:\n50 \"\nTechnologie d'af…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806087086157-tv-lgelectronics-50qned826re-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV lgelectronics 50 \" led\n1 offre\nDiagonale (en pouces)\n:\n50 \"\nTechnologie d'af..."
                   }
                 }
               ]
@@ -7801,8 +7801,8 @@
                       "width": 380,
                       "height": 353
                     },
-                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806087086157-tv-lgelectronics-50qned826re-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta…\" role=\"link\">",
-                    "nodeLabel": "TV lgelectronics 50 \" led\n1 offre\nDiagonale (en pouces)\n:\n50 \"\nTechnologie d'af…"
+                    "snippet": "<a data-v-e0464d77=\"\" href=\"/televiseurs/8806087086157-tv-lgelectronics-50qned826re-2023\" tabindex=\"-2\" class=\"v-list-item v-list-item--link v-theme--light v-list-item--density-comforta...\" role=\"link\">",
+                    "nodeLabel": "TV lgelectronics 50 \" led\n1 offre\nDiagonale (en pouces)\n:\n50 \"\nTechnologie d'af..."
                   }
                 }
               ]
@@ -7862,7 +7862,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -7922,7 +7922,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -7982,7 +7982,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8042,7 +8042,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8102,7 +8102,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8144,7 +8144,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -8162,7 +8162,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8204,7 +8204,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -8222,7 +8222,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8264,7 +8264,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -8282,7 +8282,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8324,7 +8324,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -8342,7 +8342,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8384,7 +8384,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -8402,7 +8402,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8444,7 +8444,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -8462,7 +8462,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8504,7 +8504,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -8522,7 +8522,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8564,7 +8564,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -8582,7 +8582,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8603,7 +8603,7 @@
                 "height": 77
               },
               "snippet": "<p class=\"footer-mission text-body-1 mb-0\" data-v-1d7ad3e8=\"\">",
-              "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…",
+              "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d...",
               "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.68 (foreground color: #f6fafc, background color: #148dab, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
             },
             "subItems": {
@@ -8624,7 +8624,7 @@
                       "height": 311
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -8642,7 +8642,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8684,7 +8684,7 @@
                       "height": 311
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -8702,7 +8702,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8744,7 +8744,7 @@
                       "height": 311
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -8762,7 +8762,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8804,7 +8804,7 @@
                       "height": 311
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -8822,7 +8822,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8864,7 +8864,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -8906,7 +8906,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10984,7 +10984,7 @@
     },
     "is-crawlable": {
       "id": "is-crawlable",
-      "title": "Page isn’t blocked from indexing",
+      "title": "Page isn't blocked from indexing",
       "description": "Search engines are unable to include your pages in search results if they don't have permission to crawl them. [Learn more about crawler directives](https://developer.chrome.com/docs/lighthouse/seo/is-crawlable/).",
       "score": 1,
       "scoreDisplayMode": "binary",
@@ -11697,7 +11697,7 @@
               "height": 188
             },
             "snippet": "<p class=\"category-hero__description\" data-v-b9af4d61=\"\">",
-            "nodeLabel": "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires…"
+            "nodeLabel": "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires..."
           }
         ]
       },
@@ -13152,11 +13152,11 @@
     },
     "seo-mobile": {
       "title": "Mobile Friendly",
-      "description": "Make sure your pages are mobile friendly so users don’t have to pinch or zoom in order to read the content pages. [Learn how to make pages mobile-friendly](https://developers.google.com/search/mobile-sites/)."
+      "description": "Make sure your pages are mobile friendly so users don't have to pinch or zoom in order to read the content pages. [Learn how to make pages mobile-friendly](https://developers.google.com/search/mobile-sites/)."
     },
     "seo-content": {
       "title": "Content Best Practices",
-      "description": "Format your HTML in a way that enables crawlers to better understand your app’s content."
+      "description": "Format your HTML in a way that enables crawlers to better understand your app's content."
     },
     "seo-crawl": {
       "title": "Crawling and Indexing",

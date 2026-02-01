@@ -1057,8 +1057,8 @@ describe('PageHeader', () => {
 │                                                      │
 │           ┌─────────────────────┐                   │
 │           │  Context Card       │                   │
-│           │  • Helper 1         │                   │
-│           │  • Helper 2         │                   │
+│           │  - Helper 1         │                   │
+│           │  - Helper 2         │                   │
 │           └─────────────────────┘                   │
 │                                                      │
 │  min-height: 100dvh                                 │

@@ -10,7 +10,7 @@ This playbook describes how to implement and verify a themed event pack (texts +
 - [ ] Provide i18n strings under `home.events.<pack>` (eyebrow, title, subtitle lists, search helpers, alt texts).
 - [ ] Preview the pack with `?event=<pack>` to confirm overrides and fallbacks.
 
-## Texts (home hero) – override + fallback
+## Texts (home hero) - override + fallback
 
 - [ ] Add `home.events.<pack>.hero` keys in `i18n/locales/en-US.json` and `fr-FR.json`.
   - Minimum recommended fields: `eyebrow`, `title`, `titleSubtitle` (array), `subtitles` (array), `search.label`, `search.placeholder`, `search.helpersTitle`, and `search.helpers` (icon + segments).

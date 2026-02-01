@@ -61,9 +61,9 @@ When touching caching rules adjust the `runtimeCaching` array near the top of `n
 
 In addition to the default image/API caches, `nuxt.config.ts` now pre-defines the following Workbox strategies:
 
-1. `nudger-font-styles` – `StaleWhileRevalidate` for Google Fonts stylesheets.
-2. `nudger-font-files` – `CacheFirst` for Google Fonts binaries with a one-year TTL.
-3. `nudger-static-cdn` – `StaleWhileRevalidate` for JS/CSS fetched from `cdn.jsdelivr.net` or `unpkg.com`.
+1. `nudger-font-styles` - `StaleWhileRevalidate` for Google Fonts stylesheets.
+2. `nudger-font-files` - `CacheFirst` for Google Fonts binaries with a one-year TTL.
+3. `nudger-static-cdn` - `StaleWhileRevalidate` for JS/CSS fetched from `cdn.jsdelivr.net` or `unpkg.com`.
 
 These extra caches keep typography and remote UI widgets available offline and reduce layout shifts when the network is flaky.
 

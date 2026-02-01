@@ -43,11 +43,11 @@ _IPv6 loopback (`::1`) is intentionally ignored so that dual-stack machines fall
 
 ## How the helper works
 
-1. **Hostname normalisation** – `normalizeHost` extracts the first value from incoming headers (supporting comma-separated `x-forwarded-host` values), strips the port, and lowercases it so that `LOCALHOST:3000` resolves to `localhost`.
-2. **Domain language resolution** – the hostname is matched against `HOST_DOMAIN_LANGUAGE_MAP`. When no match is found the helper falls back to French (`domainLanguage: 'fr'`, `locale: 'fr-FR'`).
-3. **Locale derivation** – `DOMAIN_LANGUAGE_TO_LOCALE_MAP` provides the Nuxt locale string associated with each domain language.
-4. **Observability** – server callers can enable logging (default behaviour) to warn about unknown hostnames. Client-side consumers typically disable it to avoid console noise.
-5. **Application** – the i18n plugin uses `setLocale` only when the resolved locale differs from the current one. Server routes pass the `domainLanguage` to service factories so outbound API calls carry the correct locale context.
+1. **Hostname normalisation** - `normalizeHost` extracts the first value from incoming headers (supporting comma-separated `x-forwarded-host` values), strips the port, and lowercases it so that `LOCALHOST:3000` resolves to `localhost`.
+2. **Domain language resolution** - the hostname is matched against `HOST_DOMAIN_LANGUAGE_MAP`. When no match is found the helper falls back to French (`domainLanguage: 'fr'`, `locale: 'fr-FR'`).
+3. **Locale derivation** - `DOMAIN_LANGUAGE_TO_LOCALE_MAP` provides the Nuxt locale string associated with each domain language.
+4. **Observability** - server callers can enable logging (default behaviour) to warn about unknown hostnames. Client-side consumers typically disable it to avoid console noise.
+5. **Application** - the i18n plugin uses `setLocale` only when the resolved locale differs from the current one. Server routes pass the `domainLanguage` to service factories so outbound API calls carry the correct locale context.
 
 ## Updating or extending the mapping
 

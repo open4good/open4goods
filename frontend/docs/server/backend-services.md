@@ -78,12 +78,12 @@ export const useBlogService = (domainLanguage: DomainLanguage) => {
 
 Key points to preserve in every service wrapper:
 
-- **Configuration** – always use `createBackendApiConfig()` so authentication and
+- **Configuration** - always use `createBackendApiConfig()` so authentication and
   base URLs stay aligned with runtime configuration.
-- **Domain language** – accept the language from callers and pass it to every
+- **Domain language** - accept the language from callers and pass it to every
   OpenAPI call so backend responses match the current hostname.
-- **Lazy instantiation** – keep the generated client in a closure and reuse it.
-- **Server-only guards** – block browser execution paths; only SSR and Vitest
+- **Lazy instantiation** - keep the generated client in a closure and reuse it.
+- **Server-only guards** - block browser execution paths; only SSR and Vitest
   may talk to the backend directly.
 
 ## 2. Expose the service through a Nuxt server route

@@ -57,4 +57,4 @@ pnpm cap:sync
 - `pnpm lint`, `pnpm test`, `pnpm generate`
 - `pnpm cap:sync` on both platforms without errors
 - Install the PWA via Chrome/Edge/Safari and confirm the offline banner + install prompt behave as expected
-- Run Lighthouse’s PWA audit (> 90 score) and attach the report to the release ticket
+- Run Lighthouse's PWA audit (> 90 score) and attach the report to the release ticket

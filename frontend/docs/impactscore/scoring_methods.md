@@ -81,7 +81,7 @@ La méthode est définie dans `scoring.normalization.method` :
 
 **À utiliser quand**
 
-- L'attribut a une échelle normative stable (ex : note 0–10, valeur 0–100).
+- L'attribut a une échelle normative stable (ex : note 0-10, valeur 0-100).
 - On veut un score absolu, stable dans le temps.
 
 **À éviter quand**
@@ -103,13 +103,13 @@ La méthode est définie dans `scoring.normalization.method` :
 
 **À utiliser quand**
 
-- On veut une relativisation « marché » stricte (meilleur produit = score max, pire = score min).
+- On veut une relativisation " marché " stricte (meilleur produit = score max, pire = score min).
 - Les bornes fixes sont inconnues, mais la couverture est suffisante.
 
 **À éviter quand**
 
 - Trop peu de valeurs ou distribution instable (risque d'effet “yoyo” dans le temps).
-- Présence d’outliers forts (préférer `MINMAX_QUANTILE`).
+- Présence d'outliers forts (préférer `MINMAX_QUANTILE`).
 
 **Paramétrage recommandé**
 
@@ -191,7 +191,7 @@ Après normalisation, l'inversion est appliquée si `impactBetterIs: LOWER` :
 score_final = scale.max + scale.min - score_normalisé
 ```
 
-Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiquant que « plus bas = meilleur ».
+Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiquant que " plus bas = meilleur ".
 
 ## 4) Recommandations par attribut scorable (audit rapide)
 
@@ -215,17 +215,17 @@ Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiqua
 - `POWER_CONSUMPTION_STANDBY_NETWORKD` : `MINMAX_OBSERVED`.
 - `POWER_CONSUMPTION_OFF` : `MINMAX_OBSERVED`.
 
-**Pourquoi** : on cherche une sobriété relative à l’offre actuelle ; la méthode reste ajustable par attribut si la distribution devient instable.
+**Pourquoi** : on cherche une sobriété relative à l'offre actuelle ; la méthode reste ajustable par attribut si la distribution devient instable.
 
 ### Classe énergétique (catégoriel)
 
-- `CLASSE_ENERGY` : `FIXED_MAPPING` avec barème A–G.
-- `CLASSE_ENERGY_SDR` : `FIXED_MAPPING` avec barème A–G.
-- `CLASSE_ENERGY_HDR` : `FIXED_MAPPING` avec barème A–G.
+- `CLASSE_ENERGY` : `FIXED_MAPPING` avec barème A-G.
+- `CLASSE_ENERGY_SDR` : `FIXED_MAPPING` avec barème A-G.
+- `CLASSE_ENERGY_HDR` : `FIXED_MAPPING` avec barème A-G.
 
 **Pourquoi** : les classes énergétiques sont des paliers réglementaires.
 
-### Indice de réparabilité (0–10)
+### Indice de réparabilité (0-10)
 
 - `REPAIRABILITY_INDEX` : `MINMAX_OBSERVED` pour refléter le marché actuel.
 
@@ -239,7 +239,7 @@ Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiqua
 - `ESG` : `MINMAX_OBSERVED` avec **plus haut = mieux**.
 - `BRAND_SUSTAINALYTICS_SCORING` : `MINMAX_OBSERVED` avec **plus haut = mieux**.
 
-**Pourquoi** : on conserve une lecture relative au marché actuel avec un sens « performance » (plus haut = mieux).
+**Pourquoi** : on conserve une lecture relative au marché actuel avec un sens " performance " (plus haut = mieux).
 
 ### Qualité de la donnée
 
@@ -255,4 +255,4 @@ Le champ `Score.relativ` est calculé dans le batch à partir des méthodes ci-d
 - sinon un comportement legacy SIGMA (ou PERCENTILE si la distribution est trop discrète).
 
 Autrement dit : **la relativisation est déjà “calculée” via ces méthodes**.
-Pour obtenir un score « relatif au marché », privilégier `MINMAX_OBSERVED` (bornes observées) ou `MINMAX_QUANTILE` si la distribution contient des outliers.
+Pour obtenir un score " relatif au marché ", privilégier `MINMAX_OBSERVED` (bornes observées) ou `MINMAX_QUANTILE` si la distribution contient des outliers.

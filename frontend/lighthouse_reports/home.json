@@ -31596,7 +31596,7 @@
             "entity": "localhost"
           },
           {
-            "url": "data:image/svg+xml,%3c?xml%20version=%271.0%27%20encoding=%27UTF-8%27?%3e%3csvg%20id=%27Calque_2%27…",
+            "url": "data:image/svg+xml,%3c?xml%20version=%271.0%27%20encoding=%27UTF-8%27?%3e%3csvg%20id=%27Calque_2%27...",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 1603.0649999994785,
@@ -31612,7 +31612,7 @@
             "experimentalFromMainFrame": true
           },
           {
-            "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201200%20800'%20rol…",
+            "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201200%20800'%20rol...",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 1603.1189999990165,
@@ -35198,7 +35198,7 @@
             "entity": "localhost"
           },
           {
-            "url": "data:image/svg+xml;utf8,%3Csvg viewBox='0 0 256 256' width='1em' height='1em' xmlns='http://www.w3.…",
+            "url": "data:image/svg+xml;utf8,%3Csvg viewBox='0 0 256 256' width='1em' height='1em' xmlns='http://www.w3....",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 1950.536000000313,
@@ -35214,7 +35214,7 @@
             "experimentalFromMainFrame": true
           },
           {
-            "url": "data:image/svg+xml;utf8,%3Csvg viewBox='0 0 256 256' width='1em' height='1em' xmlns='http://www.w3.…",
+            "url": "data:image/svg+xml;utf8,%3Csvg viewBox='0 0 256 256' width='1em' height='1em' xmlns='http://www.w3....",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 1951.8109999988228,
@@ -35230,7 +35230,7 @@
             "experimentalFromMainFrame": true
           },
           {
-            "url": "data:image/svg+xml;utf8,%3Csvg viewBox='0 0 256 256' width='1em' height='1em' xmlns='http://www.w3.…",
+            "url": "data:image/svg+xml;utf8,%3Csvg viewBox='0 0 256 256' width='1em' height='1em' xmlns='http://www.w3....",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 1953.1569999996573,
@@ -35331,7 +35331,7 @@
             "entity": "localhost"
           },
           {
-            "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201200%20800'%20rol…",
+            "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201200%20800'%20rol...",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 2476.4089999981225,
@@ -35347,7 +35347,7 @@
             "experimentalFromMainFrame": true
           },
           {
-            "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201200%20800'%20rol…",
+            "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201200%20800'%20rol...",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 2477.319000000134,
@@ -47958,12 +47958,12 @@
             "encodedBytes": 1722,
             "children": [
               {
-                "name": "(inline) if (!window.__N…",
+                "name": "(inline) if (!window.__N...",
                 "resourceBytes": 240,
                 "unusedBytes": 0
               },
               {
-                "name": "(inline) window.__NUXT__…",
+                "name": "(inline) window.__NUXT__...",
                 "resourceBytes": 1483,
                 "unusedBytes": 0
               }
@@ -60856,7 +60856,7 @@
                 "height": 30
               },
               "snippet": "<p class=\"home-contact-redirect__eyebrow\" data-v-02281a80=\"\">",
-              "nodeLabel": "BESOIN D’AIDE ?",
+              "nodeLabel": "BESOIN D'AIDE ?",
               "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 1.59 (foreground color: #00de9f, background color: #f4f4f4, font size: 10.2pt (13.6px), font weight: bold). Expected contrast ratio of 4.5:1"
             }
           },
@@ -60895,7 +60895,7 @@
                       "width": 322,
                       "height": 48
                     },
-                    "snippet": "<div class=\"v-field v-field--appended v-field--center-affix v-field--prepended v-field…\" style=\"\" role=\"combobox\" aria-haspopup=\"menu\" aria-expanded=\"false\" aria-controls=\"menu-v-0-1-38\" aria-owns=\"menu-v-0-1-38\">",
+                    "snippet": "<div class=\"v-field v-field--appended v-field--center-affix v-field--prepended v-field...\" style=\"\" role=\"combobox\" aria-haspopup=\"menu\" aria-expanded=\"false\" aria-controls=\"menu-v-0-1-38\" aria-owns=\"menu-v-0-1-38\">",
                     "nodeLabel": "Une marque ou un modèle précis en tête ?"
                   }
                 },
@@ -60932,7 +60932,7 @@
                       "height": 294
                     },
                     "snippet": "<div class=\"home-cta__content card__nudger\" data-v-a8dd2fe5=\"\">",
-                    "nodeLabel": "PRÊT À ACHETER MIEUX SANS VOUS RUINER ?\n\nRelancez une recherche ou découvrez le…"
+                    "nodeLabel": "PRÊT À ACHETER MIEUX SANS VOUS RUINER ?\n\nRelancez une recherche ou découvrez le..."
                   }
                 }
               ]
@@ -60992,7 +60992,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61052,7 +61052,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61112,7 +61112,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61154,7 +61154,7 @@
                       "height": 338
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n…"
+                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n..."
                   }
                 },
                 {
@@ -61172,7 +61172,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61214,7 +61214,7 @@
                       "height": 338
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n…"
+                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n..."
                   }
                 },
                 {
@@ -61232,7 +61232,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61274,7 +61274,7 @@
                       "height": 338
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n…"
+                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n..."
                   }
                 },
                 {
@@ -61292,7 +61292,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61334,7 +61334,7 @@
                       "height": 338
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n…"
+                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n..."
                   }
                 },
                 {
@@ -61352,7 +61352,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61394,7 +61394,7 @@
                       "height": 338
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n…"
+                    "nodeLabel": "Évaluation environnementale\nTous nos produits\nRessources\nOpen data\nOpen Source\n..."
                   }
                 },
                 {
@@ -61412,7 +61412,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61433,7 +61433,7 @@
                 "height": 77
               },
               "snippet": "<p class=\"footer-mission text-body-1 mb-0\" data-v-dab14c11=\"\">",
-              "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…",
+              "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d...",
               "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.68 (foreground color: #f6fafc, background color: #148dab, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
             },
             "subItems": {
@@ -61454,7 +61454,7 @@
                       "height": 315
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -61472,7 +61472,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61514,7 +61514,7 @@
                       "height": 315
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -61532,7 +61532,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61574,7 +61574,7 @@
                       "height": 315
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -61592,7 +61592,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61634,7 +61634,7 @@
                       "height": 315
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-dab14c11=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -61652,7 +61652,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61694,7 +61694,7 @@
                       "height": 1201
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-inspector=\"app/components/shared/footers/TheMainFooter.vue:4:3\" data-v-433a9abd=\"\" data-v-018f328f=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nDonnez votre avis\nNous contacter\nNous s..."
                   }
                 }
               ]
@@ -61974,7 +61974,7 @@
                 "width": 360,
                 "height": 283
               },
-              "snippet": "<a href=\"/contact?subject=Proposition+de+photo+pour+Nudger&amp;message=Bonjour,%0A%0AJe…\" class=\"home-photo-invitation\" aria-label=\"Proposer votre photo pour Nudger\" data-v-inspector=\"app/components/home/sections/HomePhotoInvitation.vue:37:3\" data-v-1945f326=\"\" data-v-babcd839=\"\">",
+              "snippet": "<a href=\"/contact?subject=Proposition+de+photo+pour+Nudger&amp;message=Bonjour,%0A%0AJe...\" class=\"home-photo-invitation\" aria-label=\"Proposer votre photo pour Nudger\" data-v-inspector=\"app/components/home/sections/HomePhotoInvitation.vue:37:3\" data-v-1945f326=\"\" data-v-babcd839=\"\">",
               "nodeLabel": "Toi aussi ?",
               "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
             }
@@ -61993,7 +61993,7 @@
                 "width": 374,
                 "height": 302
               },
-              "snippet": "<a href=\"/contact?subject=Proposition+de+photo+pour+Nudger&amp;message=Bonjour,%0A%0AJe…\" class=\"home-photo-invitation home-solution__invitation\" aria-label=\"Proposer votre photo pour Nudger\" data-v-inspector=\"app/components/home/sections/HomePhotoInvitation.vue:37:3\" data-v-01b47da3=\"\" data-v-babcd839=\"\">",
+              "snippet": "<a href=\"/contact?subject=Proposition+de+photo+pour+Nudger&amp;message=Bonjour,%0A%0AJe...\" class=\"home-photo-invitation home-solution__invitation\" aria-label=\"Proposer votre photo pour Nudger\" data-v-inspector=\"app/components/home/sections/HomePhotoInvitation.vue:37:3\" data-v-01b47da3=\"\" data-v-babcd839=\"\">",
               "nodeLabel": "Toi aussi ?",
               "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
             }
@@ -63723,7 +63723,7 @@
         ],
         "items": [
           {
-            "url": "@keyframes v-shake {\n  59% {\n  margin-left: 0;\n} …",
+            "url": "@keyframes v-shake {\n  59% {\n  margin-left: 0;\n} ...",
             "totalBytes": 198789,
             "wastedBytes": 145912,
             "wastedPercent": 73.4006141191053
@@ -63891,7 +63891,7 @@
             "wastedPercent": 77.37370738706645
           },
           {
-            "url": ".main-menu-search[data-v-4446ad26] {\n  display: flex;\n  align-items: center;\n  gap: 0.5rem;\n} …",
+            "url": ".main-menu-search[data-v-4446ad26] {\n  display: flex;\n  align-items: center;\n  gap: 0.5rem;\n} ...",
             "totalBytes": 17220,
             "wastedBytes": 15165,
             "wastedPercent": 88.06401783951407
@@ -63981,7 +63981,7 @@
             "wastedPercent": 77.63110696606643
           },
           {
-            "url": ".home-page[data-v-02281a80] {\n  --cat-height: 150px;\n  --cat-in-hero: calc(var(--cat-height) / 2); … } …",
+            "url": ".home-page[data-v-02281a80] {\n  --cat-height: 150px;\n  --cat-in-hero: calc(var(--cat-height) / 2); ... } ...",
             "totalBytes": 11200,
             "wastedBytes": 10736,
             "wastedPercent": 95.85550516052999
@@ -64005,7 +64005,7 @@
             "wastedPercent": 69.32788992212897
           },
           {
-            "url": ".home-hero[data-v-f1ee0ebe] {\n  position: relative;\n  overflow: hidden;\n  min-height: 100dvh; … } …",
+            "url": ".home-hero[data-v-f1ee0ebe] {\n  position: relative;\n  overflow: hidden;\n  min-height: 100dvh; ... } ...",
             "totalBytes": 10555,
             "wastedBytes": 9162,
             "wastedPercent": 86.80385803346408
@@ -64023,7 +64023,7 @@
             "wastedPercent": 95.07072905331883
           },
           {
-            "url": ".nudge-wizard__stepper[data-v-cfe04d3b] .v-stepper-window {\n  display: none !important;\n} …",
+            "url": ".nudge-wizard__stepper[data-v-cfe04d3b] .v-stepper-window {\n  display: none !important;\n} ...",
             "totalBytes": 9388,
             "wastedBytes": 8710,
             "wastedPercent": 92.77359977843585
@@ -64035,7 +64035,7 @@
             "wastedPercent": 70.20686175580222
           },
           {
-            "url": ":root {\n  --v-theme-background: 255,255,255;\n  --v-theme-background-overlay-multiplier: 1;\n  --v-th…",
+            "url": ":root {\n  --v-theme-background: 255,255,255;\n  --v-theme-background-overlay-multiplier: 1;\n  --v-th...",
             "totalBytes": 48460,
             "wastedBytes": 8532,
             "wastedPercent": 17.60695767141116
@@ -64047,7 +64047,7 @@
             "wastedPercent": 87.51212153862731
           },
           {
-            "url": ".search-suggest-field__wrapper[data-v-8a6b3b7a] {\n  width: 100%;\n} …",
+            "url": ".search-suggest-field__wrapper[data-v-8a6b3b7a] {\n  width: 100%;\n} ...",
             "totalBytes": 9173,
             "wastedBytes": 8307,
             "wastedPercent": 90.55727554179566
@@ -64077,7 +64077,7 @@
             "wastedPercent": 98.58522649979594
           },
           {
-            "url": "/* region INPUT */\n.v-field {\n  display: grid;\n  grid-template-areas: \"prepend-inner field clear ap…",
+            "url": "/* region INPUT */\n.v-field {\n  display: grid;\n  grid-template-areas: \"prepend-inner field clear ap...",
             "totalBytes": 11080,
             "wastedBytes": 7459,
             "wastedPercent": 67.32247933287607
@@ -64107,7 +64107,7 @@
             "wastedPercent": 92.76960784313727
           },
           {
-            "url": ".mobile-menu[data-v-fb5e6a86] {\n  height: 100%;\n} …",
+            "url": ".mobile-menu[data-v-fb5e6a86] {\n  height: 100%;\n} ...",
             "totalBytes": 6857,
             "wastedBytes": 6254,
             "wastedPercent": 91.19971997783158
@@ -64125,13 +64125,13 @@
             "wastedPercent": 79.963209282581
           },
           {
-            "url": ".v-list-item {\n  align-items: center;\n  display: grid;\n  flex: none; … } …",
+            "url": ".v-list-item {\n  align-items: center;\n  display: grid;\n  flex: none; ... } ...",
             "totalBytes": 8455,
             "wastedBytes": 5747,
             "wastedPercent": 67.97161442933175
           },
           {
-            "url": ".v-container {\n  width: 100%;\n  padding: 16px;\n  margin-right: auto;\n  margin-left: auto;\n} …",
+            "url": ".v-container {\n  width: 100%;\n  padding: 16px;\n  margin-right: auto;\n  margin-left: auto;\n} ...",
             "totalBytes": 7502,
             "wastedBytes": 5594,
             "wastedPercent": 74.56746021167125
@@ -64155,7 +64155,7 @@
             "wastedPercent": 93.43699150244079
           },
           {
-            "url": ".category-product-card-grid[data-v-635a50e6] {\n  margin: 0;\n} …",
+            "url": ".category-product-card-grid[data-v-635a50e6] {\n  margin: 0;\n} ...",
             "totalBytes": 6173,
             "wastedBytes": 5238,
             "wastedPercent": 84.8561430793157
@@ -64173,7 +64173,7 @@
             "wastedPercent": 82.16777267313256
           },
           {
-            "url": ".v-btn {\n  align-items: center;\n  border-radius: 4px;\n  display: inline-grid;\n  grid-template-areas…",
+            "url": ".v-btn {\n  align-items: center;\n  border-radius: 4px;\n  display: inline-grid;\n  grid-template-areas...",
             "totalBytes": 6943,
             "wastedBytes": 4845,
             "wastedPercent": 69.77876361122314
@@ -64185,19 +64185,19 @@
             "wastedPercent": 94.6959609409676
           },
           {
-            "url": ".error-app[data-v-f249f6ff] {\n  background: rgb(var(--v-theme-surface-default));\n} …",
+            "url": ".error-app[data-v-f249f6ff] {\n  background: rgb(var(--v-theme-surface-default));\n} ...",
             "totalBytes": 5248,
             "wastedBytes": 4385,
             "wastedPercent": 83.5594512195122
           },
           {
-            "url": ".v-chip {\n  align-items: center;\n  display: inline-flex;\n  font-weight: 400;\n  max-width: 100%; … } …",
+            "url": ".v-chip {\n  align-items: center;\n  display: inline-flex;\n  font-weight: 400;\n  max-width: 100%; ... } ...",
             "totalBytes": 6345,
             "wastedBytes": 4347,
             "wastedPercent": 68.51595006934812
           },
           {
-            "url": ".rounded-card[data-v-a6fa7248] {\n  --rounded-card-border: rgba(var(--v-theme-border-primary-strong)…",
+            "url": ".rounded-card[data-v-a6fa7248] {\n  --rounded-card-border: rgba(var(--v-theme-border-primary-strong)...",
             "totalBytes": 5357,
             "wastedBytes": 4345,
             "wastedPercent": 81.10953483162847
@@ -64209,25 +64209,25 @@
             "wastedPercent": 94.10343160947318
           },
           {
-            "url": ".nudge-step-category[data-v-e8545996] {\n  display: flex;\n  flex-direction: column; … } …",
+            "url": ".nudge-step-category[data-v-e8545996] {\n  display: flex;\n  flex-direction: column; ... } ...",
             "totalBytes": 4515,
             "wastedBytes": 3867,
             "wastedPercent": 85.63834499867103
           },
           {
-            "url": ".footer-container[data-v-dab14c11] {\n  max-width: none;\n  width: 100%; … } …",
+            "url": ".footer-container[data-v-dab14c11] {\n  max-width: none;\n  width: 100%; ... } ...",
             "totalBytes": 4197,
             "wastedBytes": 3816,
             "wastedPercent": 90.92771715824082
           },
           {
-            "url": ".product-tile-card[data-v-8a161dba] {\n  height: 100%;\n  display: flex;\n  flex-direction: column; … } …",
+            "url": ".product-tile-card[data-v-8a161dba] {\n  height: 100%;\n  display: flex;\n  flex-direction: column; ... } ...",
             "totalBytes": 4613,
             "wastedBytes": 3810,
             "wastedPercent": 82.59776294112547
           },
           {
-            "url": ".parallax-widget[data-v-dc253e06] {\n  position: relative;\n  overflow: hidden; … } …",
+            "url": ".parallax-widget[data-v-dc253e06] {\n  position: relative;\n  overflow: hidden; ... } ...",
             "totalBytes": 4266,
             "wastedBytes": 3804,
             "wastedPercent": 89.16498663791083
@@ -64239,91 +64239,91 @@
             "wastedPercent": 68.7738731856379
           },
           {
-            "url": ".pwa-landing[data-v-b012368b] {\n  padding-bottom: calc(env(safe-area-inset-bottom) + 88px); … } …",
+            "url": ".pwa-landing[data-v-b012368b] {\n  padding-bottom: calc(env(safe-area-inset-bottom) + 88px); ... } ...",
             "totalBytes": 3994,
             "wastedBytes": 3668,
             "wastedPercent": 91.84777165748623
           },
           {
-            "url": "/* Stars Style */\n.impact-score[data-v-ff311e2a] {\n  --impact-score-gap: 0.5rem; … } …",
+            "url": "/* Stars Style */\n.impact-score[data-v-ff311e2a] {\n  --impact-score-gap: 0.5rem; ... } ...",
             "totalBytes": 4377,
             "wastedBytes": 3616,
             "wastedPercent": 82.60293378421606
           },
           {
-            "url": ".home-section[data-v-78d4910a] {\n  padding-block: clamp(1.5rem, 3vw, 2.75rem); … } …",
+            "url": ".home-section[data-v-78d4910a] {\n  padding-block: clamp(1.5rem, 3vw, 2.75rem); ... } ...",
             "totalBytes": 4019,
             "wastedBytes": 3322,
             "wastedPercent": 82.66407921580335
           },
           {
-            "url": "@font-face {\n  font-family: \"Hanken Grotesk\";\n  font-style: normal;\n  font-weight: 400; … } …",
+            "url": "@font-face {\n  font-family: \"Hanken Grotesk\";\n  font-style: normal;\n  font-weight: 400; ... } ...",
             "totalBytes": 5152,
             "wastedBytes": 3309,
             "wastedPercent": 64.224991265867
           },
           {
-            "url": ".v-card {\n  display: block;\n  overflow: hidden;\n  overflow-wrap: break-word;\n  position: relative; … } …",
+            "url": ".v-card {\n  display: block;\n  overflow: hidden;\n  overflow-wrap: break-word;\n  position: relative; ... } ...",
             "totalBytes": 4676,
             "wastedBytes": 3306,
             "wastedPercent": 70.69894772863377
           },
           {
-            "url": ".category-compare-panel[data-v-cadcfc20] {\n  position: fixed;\n  inset-inline-end: 1.5rem; … } …",
+            "url": ".category-compare-panel[data-v-cadcfc20] {\n  position: fixed;\n  inset-inline-end: 1.5rem; ... } ...",
             "totalBytes": 3775,
             "wastedBytes": 3191,
             "wastedPercent": 84.52368337395359
           },
           {
-            "url": ".nudge-tool-animated-icon[data-v-86e652a1] {\n  outline: none; … } …",
+            "url": ".nudge-tool-animated-icon[data-v-86e652a1] {\n  outline: none; ... } ...",
             "totalBytes": 3208,
             "wastedBytes": 2881,
             "wastedPercent": 89.81296758104737
           },
           {
-            "url": ".v-expansion-panel {\n  background-color: rgb(var(--v-theme-surface)); … } …",
+            "url": ".v-expansion-panel {\n  background-color: rgb(var(--v-theme-surface)); ... } ...",
             "totalBytes": 4088,
             "wastedBytes": 2788,
             "wastedPercent": 68.20138956845092
           },
           {
-            "url": ".v-skeleton-loader {\n  align-items: center;\n  background: rgb(var(--v-theme-surface)); … } …",
+            "url": ".v-skeleton-loader {\n  align-items: center;\n  background: rgb(var(--v-theme-surface)); ... } ...",
             "totalBytes": 3688,
             "wastedBytes": 2563,
             "wastedPercent": 69.49566160520607
           },
           {
-            "url": ".pwa-offline-indicator[data-v-0742244e] {\n  position: fixed; … } …",
+            "url": ".pwa-offline-indicator[data-v-0742244e] {\n  position: fixed; ... } ...",
             "totalBytes": 2793,
             "wastedBytes": 2415,
             "wastedPercent": 86.48242285386983
           },
           {
-            "url": ".v-alert {\n  display: grid;\n  flex: 1 1; … } …",
+            "url": ".v-alert {\n  display: grid;\n  flex: 1 1; ... } ...",
             "totalBytes": 3333,
             "wastedBytes": 2372,
             "wastedPercent": 71.15684627385095
           },
           {
-            "url": ".nudge-step-subset__header[data-v-411383f9] {\n  display: flex;\n  align-items: center; … } …",
+            "url": ".nudge-step-subset__header[data-v-411383f9] {\n  display: flex;\n  align-items: center; ... } ...",
             "totalBytes": 3057,
             "wastedBytes": 2320,
             "wastedPercent": 75.90448151782793
           },
           {
-            "url": ".v-progress-linear {\n  background: transparent;\n  overflow: hidden;\n  position: relative; … } …",
+            "url": ".v-progress-linear {\n  background: transparent;\n  overflow: hidden;\n  position: relative; ... } ...",
             "totalBytes": 3133,
             "wastedBytes": 2230,
             "wastedPercent": 71.1668581641772
           },
           {
-            "url": ".nudge-step-scores__header[data-v-e8736efc] {\n  display: flex;\n  justify-content: space-between; … } …",
+            "url": ".nudge-step-scores__header[data-v-e8736efc] {\n  display: flex;\n  justify-content: space-between; ... } ...",
             "totalBytes": 2843,
             "wastedBytes": 2193,
             "wastedPercent": 77.14064588756771
           },
           {
-            "url": ".home-solution__inner[data-v-01b47da3] {\n  max-width: 1180px;\n  margin: 0 auto;\n} …",
+            "url": ".home-solution__inner[data-v-01b47da3] {\n  max-width: 1180px;\n  margin: 0 auto;\n} ...",
             "totalBytes": 2526,
             "wastedBytes": 2083,
             "wastedPercent": 82.44794553083683
@@ -67676,7 +67676,7 @@
         ],
         "items": [
           {
-            "url": "@keyframes v-shake {\n  59% {\n  margin-left: 0;\n} …",
+            "url": "@keyframes v-shake {\n  59% {\n  margin-left: 0;\n} ...",
             "wastedBytes": 197508,
             "wastedPercent": 99.3553962798709,
             "totalBytes": 198789
@@ -67754,7 +67754,7 @@
             "totalBytes": 32198
           },
           {
-            "url": ":root {\n  --v-theme-background: 255,255,255;\n  --v-theme-background-overlay-multiplier: 1;\n  --v-th…",
+            "url": ":root {\n  --v-theme-background: 255,255,255;\n  --v-theme-background-overlay-multiplier: 1;\n  --v-th...",
             "wastedBytes": 31263,
             "wastedPercent": 64.5836345983019,
             "totalBytes": 48407
@@ -67862,7 +67862,7 @@
             "totalBytes": 17305
           },
           {
-            "url": ".main-menu-search[data-v-4446ad26] {\n  display: flex;\n  align-items: center;\n  gap: 0.5rem;\n} …",
+            "url": ".main-menu-search[data-v-4446ad26] {\n  display: flex;\n  align-items: center;\n  gap: 0.5rem;\n} ...",
             "wastedBytes": 17220,
             "wastedPercent": 100,
             "totalBytes": 17220
@@ -67970,13 +67970,13 @@
             "totalBytes": 11484
           },
           {
-            "url": ".home-page[data-v-02281a80] {\n  --cat-height: 150px;\n  --cat-in-hero: calc(var(--cat-height) / 2); … } …",
+            "url": ".home-page[data-v-02281a80] {\n  --cat-height: 150px;\n  --cat-in-hero: calc(var(--cat-height) / 2); ... } ...",
             "wastedBytes": 10722,
             "wastedPercent": 95.73229527516874,
             "totalBytes": 11200
           },
           {
-            "url": ".home-hero[data-v-f1ee0ebe] {\n  position: relative;\n  overflow: hidden;\n  min-height: 100dvh; … } …",
+            "url": ".home-hero[data-v-f1ee0ebe] {\n  position: relative;\n  overflow: hidden;\n  min-height: 100dvh; ... } ...",
             "wastedBytes": 10453,
             "wastedPercent": 99.03738654236068,
             "totalBytes": 10555
@@ -68047,7 +68047,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 270251,
                   "sourceWastedBytes": 212684
                 }
@@ -68063,7 +68063,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 259226,
                   "sourceWastedBytes": 146202
                 }
@@ -68079,7 +68079,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 216251,
                   "sourceWastedBytes": 144227
                 }
@@ -68095,7 +68095,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 173902,
                   "sourceWastedBytes": 100548
                 }
@@ -68111,7 +68111,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 71715,
                   "sourceWastedBytes": 66212
                 }
@@ -68127,7 +68127,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 68702,
                   "sourceWastedBytes": 44311
                 }
@@ -68143,7 +68143,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 258026,
                   "sourceWastedBytes": 55678
                 }
@@ -68159,7 +68159,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 51030,
                   "sourceWastedBytes": 42996
                 }
@@ -68175,7 +68175,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 64734,
                   "sourceWastedBytes": 38124
                 }
@@ -68191,7 +68191,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 59980,
                   "sourceWastedBytes": 35384
                 }
@@ -68207,7 +68207,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 45900,
                   "sourceWastedBytes": 31823
                 }
@@ -68223,7 +68223,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 27430,
                   "sourceWastedBytes": 23851
                 }
@@ -68239,7 +68239,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 44068,
                   "sourceWastedBytes": 22360
                 }
@@ -68255,7 +68255,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 18254,
                   "sourceWastedBytes": 15930
                 }
@@ -68271,7 +68271,7 @@
               "type": "subitems",
               "items": [
                 {
-                  "source": "…",
+                  "source": "...",
                   "sourceBytes": 58499,
                   "sourceWastedBytes": 21312
                 }
@@ -73325,7 +73325,7 @@
     },
     "is-crawlable": {
       "id": "is-crawlable",
-      "title": "Page isn’t blocked from indexing",
+      "title": "Page isn't blocked from indexing",
       "description": "Search engines are unable to include your pages in search results if they don't have permission to crawl them. [Learn more about crawler directives](https://developer.chrome.com/docs/lighthouse/seo/is-crawlable/).",
       "score": 1,
       "scoreDisplayMode": "binary",
@@ -77742,11 +77742,11 @@
     },
     "seo-mobile": {
       "title": "Mobile Friendly",
-      "description": "Make sure your pages are mobile friendly so users don’t have to pinch or zoom in order to read the content pages. [Learn how to make pages mobile-friendly](https://developers.google.com/search/mobile-sites/)."
+      "description": "Make sure your pages are mobile friendly so users don't have to pinch or zoom in order to read the content pages. [Learn how to make pages mobile-friendly](https://developers.google.com/search/mobile-sites/)."
     },
     "seo-content": {
       "title": "Content Best Practices",
-      "description": "Format your HTML in a way that enables crawlers to better understand your app’s content."
+      "description": "Format your HTML in a way that enables crawlers to better understand your app's content."
     },
     "seo-crawl": {
       "title": "Crawling and Indexing",

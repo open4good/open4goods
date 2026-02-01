@@ -4,7 +4,7 @@
 
 **Fresh Tech / Calm Energy**
 
-A modern, friendly, and trustworthy color system built around teal–green foundations, balanced with warm accents and clear functional contrasts. Designed for data-heavy, productivity, or wellbeing-oriented digital products.
+A modern, friendly, and trustworthy color system built around teal-green foundations, balanced with warm accents and clear functional contrasts. Designed for data-heavy, productivity, or wellbeing-oriented digital products.
 
 ---
 
@@ -81,9 +81,9 @@ A modern, friendly, and trustworthy color system built around teal–green found
 
 | State    | Color Rule                                     |
 | -------- | ---------------------------------------------- |
-| Hover    | Increase brightness or saturation by ~8–12%    |
+| Hover    | Increase brightness or saturation by ~8-12%    |
 | Active   | Shift toward darker variant                    |
-| Disabled | Reduce opacity to 40–50% and remove saturation |
+| Disabled | Reduce opacity to 40-50% and remove saturation |
 | Focus    | Use `#0088D6` outline or glow (2px min)        |
 
 ---
@@ -109,7 +109,7 @@ Recommended mapping:
 
 ---
 
-## Do / Don’t Summary
+## Do / Don't Summary
 
 **Do**
 
@@ -117,7 +117,7 @@ Recommended mapping:
 - Keep warm colors rare and meaningful.
 - Validate contrast in every new component.
 
-**Don’t**
+**Don't**
 
 - Use all colors in a single screen.
 - Use error color as decorative accent.
@@ -137,7 +137,7 @@ Recommended mapping:
 ## Agent / Machine Prompt (for UI Generation)
 
 > You are a UX/UI generation agent.  
-> Use a teal–green primary color system centered on #00DE9F and #00A1C2.  
+> Use a teal-green primary color system centered on #00DE9F and #00A1C2.  
 > Apply greens for success and growth, blues for actions, warm peach for warnings, and coral for errors.  
 > Maintain clear hierarchy, accessible contrast, and restrained use of warm colors.  
 > Prioritize clarity, calmness, and trust.  

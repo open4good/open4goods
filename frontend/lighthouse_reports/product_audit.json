@@ -3058,7 +3058,7 @@
             "entity": "nudger.fr"
           },
           {
-            "url": "data:image/svg+xml,%3csvg%20width='1440'%20height='800'%20viewBox='0%200%201440%20800'%20fill='none…",
+            "url": "data:image/svg+xml,%3csvg%20width='1440'%20height='800'%20viewBox='0%200%201440%20800'%20fill='none...",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 962.6639999970794,
@@ -3295,7 +3295,7 @@
             "entity": "JSDelivr CDN"
           },
           {
-            "url": "data:image/svg+xml,%3c?xml%20version=%271.0%27%20encoding=%27UTF-8%27?%3e%3csvg%20id=%27Calque_2%27…",
+            "url": "data:image/svg+xml,%3c?xml%20version=%271.0%27%20encoding=%27UTF-8%27?%3e%3csvg%20id=%27Calque_2%27...",
             "sessionTargetType": "page",
             "protocol": "data",
             "rendererStartTime": 1295.141999989748,
@@ -3985,7 +3985,7 @@
             "priority": "VeryLow"
           },
           {
-            "url": "data:text/javascript;base64,LyoqCiAqIEBsaWNzdGFydCBUaGUgZm9sbG93aW5nIGlzIHRoZSBlbnRpcmUgbGljZW5zZSB…",
+            "url": "data:text/javascript;base64,LyoqCiAqIEBsaWNzdGFydCBUaGUgZm9sbG93aW5nIGlzIHRoZSBlbnRpcmUgbGljZW5zZSB...",
             "sessionTargetType": "worker",
             "protocol": "data",
             "rendererStartTime": 2588.582999996841,
@@ -5677,7 +5677,7 @@
                 "width": 193,
                 "height": 59
               },
-              "snippet": "<img src=\"https://bwipjs-api.metafloor.com/?bcid=ean13&amp;text=8718863041017&amp;scale=3&amp;he…\" alt=\"8718863041017\" class=\"product-attributes__gtin-image\" data-v-0d1ca988=\"\">",
+              "snippet": "<img src=\"https://bwipjs-api.metafloor.com/?bcid=ean13&amp;text=8718863041017&amp;scale=3&amp;he...\" alt=\"8718863041017\" class=\"product-attributes__gtin-image\" data-v-0d1ca988=\"\">",
               "nodeLabel": "8718863041017"
             }
           }
@@ -5955,12 +5955,12 @@
             "unusedBytes": 98,
             "children": [
               {
-                "name": "(inline) window.__NUXT__…",
+                "name": "(inline) window.__NUXT__...",
                 "resourceBytes": 1921,
                 "unusedBytes": 0
               },
               {
-                "name": "(inline) (function(){fun…",
+                "name": "(inline) (function(){fun...",
                 "resourceBytes": 902,
                 "unusedBytes": 98
               }
@@ -6520,7 +6520,7 @@
                 "height": 375
               },
               "snippet": "<div class=\"product-life-timeline__rail\" role=\"list\" data-v-2bf8b820=\"\">",
-              "nodeLabel": "2024\nmars\nDébut commercialisation\nPremière mise sur le marché UE\naoût\nImporté d…",
+              "nodeLabel": "2024\nmars\nDébut commercialisation\nPremière mise sur le marché UE\naoût\nImporté d...",
               "explanation": "Fix any of the following:\n  Element has children which are not allowed: [role=group]"
             },
             "subItems": {
@@ -6541,7 +6541,7 @@
                       "height": 367
                     },
                     "snippet": "<div class=\"product-life-timeline__year-group\" role=\"group\" aria-label=\"Événements de l'année 2024\" data-v-2bf8b820=\"\">",
-                    "nodeLabel": "2024\nmars\nDébut commercialisation\nPremière mise sur le marché UE\naoût\nImporté d…"
+                    "nodeLabel": "2024\nmars\nDébut commercialisation\nPremière mise sur le marché UE\naoût\nImporté d..."
                   }
                 },
                 {
@@ -6598,7 +6598,7 @@
                 "height": 184
               },
               "snippet": "<nav class=\"product-docs__nav\" role=\"tablist\" aria-label=\"Liste des documents du produit\" aria-activedescendant=\"v-0-1-7-0-tab-0\" data-testid=\"product-docs-nav\" data-v-bdbe8606=\"\">",
-              "nodeLabel": "‹\n27\n1 page\n27 sept. 2024\nvietnamien · VI\n74,9 KB\nProduct Information Sheet\n2 p…",
+              "nodeLabel": "‹\n27\n1 page\n27 sept. 2024\nvietnamien · VI\n74,9 KB\nProduct Information Sheet\n2 p...",
               "explanation": "Fix any of the following:\n  Element has children which are not allowed: button[aria-label]"
             },
             "subItems": {
@@ -8104,7 +8104,7 @@
                 "width": 20,
                 "height": 20
               },
-              "snippet": "<button type=\"button\" class=\"v-btn v-btn--icon v-theme--light v-btn--density-compact v-btn--size-small …\" style=\"\" aria-describedby=\"v-tooltip-v-0-1-4\" data-v-0d1ca988=\"\">",
+              "snippet": "<button type=\"button\" class=\"v-btn v-btn--icon v-theme--light v-btn--density-compact v-btn--size-small ...\" style=\"\" aria-describedby=\"v-tooltip-v-0-1-4\" data-v-0d1ca988=\"\">",
               "nodeLabel": "div.product-attributes__identity-row > div.product-attributes__identity-value > div.product-attributes__gtin-row > button.v-btn",
               "explanation": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
             }
@@ -8210,8 +8210,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8270,8 +8270,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8348,8 +8348,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8408,8 +8408,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8451,7 +8451,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8468,8 +8468,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8511,7 +8511,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8528,8 +8528,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8571,7 +8571,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8588,8 +8588,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8631,7 +8631,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8648,8 +8648,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8691,7 +8691,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8708,8 +8708,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8751,7 +8751,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8768,8 +8768,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8811,7 +8811,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8828,8 +8828,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8871,7 +8871,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8888,8 +8888,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8931,7 +8931,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -8948,8 +8948,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -8991,7 +8991,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -9008,8 +9008,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9051,7 +9051,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -9068,8 +9068,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9111,7 +9111,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -9128,8 +9128,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9171,7 +9171,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -9188,8 +9188,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9231,7 +9231,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -9248,8 +9248,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9291,7 +9291,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -9308,8 +9308,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9351,7 +9351,7 @@
                       "height": 1034
                     },
                     "snippet": "<article class=\"impact-details impact-ecoscore__analysis-details h-100\" data-v-1403c99e=\"\" data-v-fe83fff2=\"\">",
-                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale…"
+                    "nodeLabel": "Détails de l'évaluation\nAfficher les scores virtuels\nNote / 20\n\t\nCritère\n\t\nVale..."
                   }
                 },
                 {
@@ -9368,8 +9368,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9411,7 +9411,7 @@
                       "height": 812
                     },
                     "snippet": "<article class=\"product-price__chart-card\" data-v-9d68d5ce=\"\">",
-                    "nodeLabel": "Offres neuves\n\nBaisse de 88,10 €\n\nAfficher les offres commerciales\n399,89 €\nrak…"
+                    "nodeLabel": "Offres neuves\n\nBaisse de 88,10 €\n\nAfficher les offres commerciales\n399,89 €\nrak..."
                   }
                 },
                 {
@@ -9428,8 +9428,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9470,7 +9470,7 @@
                       "width": 308,
                       "height": 68
                     },
-                    "snippet": "<a href=\"/contrib/eyJpZCI6IjAwY2RhOWY3LWNiMDYtNGZkZS1hNzFkLTMzYTE3ZTJkZjc4ZiIsInRzI…\" rel=\"nofollow\" class=\"product-price__history-cta\" data-v-9d68d5ce=\"\">",
+                    "snippet": "<a href=\"/contrib/eyJpZCI6IjAwY2RhOWY3LWNiMDYtNGZkZS1hNzFkLTMzYTE3ZTJkZjc4ZiIsInRzI...\" rel=\"nofollow\" class=\"product-price__history-cta\" data-v-9d68d5ce=\"\">",
                     "nodeLabel": "399,89 €\nrakuten.com"
                   }
                 },
@@ -9489,7 +9489,7 @@
                       "height": 812
                     },
                     "snippet": "<article class=\"product-price__chart-card\" data-v-9d68d5ce=\"\">",
-                    "nodeLabel": "Offres neuves\n\nBaisse de 88,10 €\n\nAfficher les offres commerciales\n399,89 €\nrak…"
+                    "nodeLabel": "Offres neuves\n\nBaisse de 88,10 €\n\nAfficher les offres commerciales\n399,89 €\nrak..."
                   }
                 },
                 {
@@ -9506,8 +9506,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9548,7 +9548,7 @@
                       "width": 308,
                       "height": 122
                     },
-                    "snippet": "<div class=\"d-flex flex-column align-center justify-center text-center pa-6 bg-grey-li…\" style=\"border:1px dashed rgba(0, 0, 0, 0.08);\" data-v-9d68d5ce=\"\">",
+                    "snippet": "<div class=\"d-flex flex-column align-center justify-center text-center pa-6 bg-grey-li...\" style=\"border:1px dashed rgba(0, 0, 0, 0.08);\" data-v-9d68d5ce=\"\">",
                     "nodeLabel": "PAS D'OFFRES D'OCCASION ACTUELLEMENT"
                   }
                 }
@@ -9608,8 +9608,8 @@
                       "width": 412,
                       "height": 17020
                     },
-                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l…\" style=\"\" data-v-5646a9f1=\"\">",
-                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l’app\nAjo…"
+                    "snippet": "<div class=\"v-application v-theme--light v-layout v-layout--full-height v-locale--is-l...\" style=\"\" data-v-5646a9f1=\"\">",
+                    "nodeLabel": "Nudger\nMenu\nRecherche rapide\nImpact Score\nLes produits\nBlog\nInstaller l'app\nAjo..."
                   }
                 }
               ]
@@ -9650,7 +9650,7 @@
                       "width": 201,
                       "height": 41
                     },
-                    "snippet": "<a href=\"https://static.nudger.fr/pdfs/philips-32pfs6939-12-tv-81-3-cm-32-full-hd-s…\" target=\"_blank\" rel=\"noopener\" class=\"product-docs__download\" data-v-bdbe8606=\"\">",
+                    "snippet": "<a href=\"https://static.nudger.fr/pdfs/philips-32pfs6939-12-tv-81-3-cm-32-full-hd-s...\" target=\"_blank\" rel=\"noopener\" class=\"product-docs__download\" data-v-bdbe8606=\"\">",
                     "nodeLabel": "Télécharger le PDF"
                   }
                 }
@@ -9711,7 +9711,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -9771,7 +9771,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -9831,7 +9831,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -9891,7 +9891,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -9951,7 +9951,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -9993,7 +9993,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -10011,7 +10011,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10053,7 +10053,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -10071,7 +10071,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10113,7 +10113,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -10131,7 +10131,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10173,7 +10173,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -10191,7 +10191,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10233,7 +10233,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -10251,7 +10251,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10293,7 +10293,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -10311,7 +10311,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10353,7 +10353,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -10371,7 +10371,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10413,7 +10413,7 @@
                       "height": 362
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO…"
+                    "nodeLabel": "Impact score\nÉvaluation environnementale\nTous nos produits évalués\nRessources\nO..."
                   }
                 },
                 {
@@ -10431,7 +10431,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10452,7 +10452,7 @@
                 "height": 77
               },
               "snippet": "<p class=\"footer-mission text-body-1 mb-0\" data-v-1d7ad3e8=\"\">",
-              "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…",
+              "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d...",
               "explanation": "Fix any of the following:\n  Element has insufficient color contrast of 3.68 (foreground color: #f6fafc, background color: #148dab, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
             },
             "subItems": {
@@ -10473,7 +10473,7 @@
                       "height": 311
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -10491,7 +10491,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10533,7 +10533,7 @@
                       "height": 311
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -10551,7 +10551,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10593,7 +10593,7 @@
                       "height": 311
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -10611,7 +10611,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10653,7 +10653,7 @@
                       "height": 311
                     },
                     "snippet": "<div class=\"footer-panel d-flex flex-column ga-4\" data-v-1d7ad3e8=\"\">",
-                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d…"
+                    "nodeLabel": "nudger.fr est une approche ouverte pour évaluer l'impact écologique et social d..."
                   }
                 },
                 {
@@ -10671,7 +10671,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10713,7 +10713,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -10755,7 +10755,7 @@
                       "height": 1232
                     },
                     "snippet": "<footer class=\"v-footer v-theme--light main-footer pa-0\" style=\"height:auto;\" data-v-5646a9f1=\"\" data-v-67fad3bf=\"\">",
-                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta…"
+                    "nodeLabel": "Informations du pied de page\nNous aider\nContribuer\nOutil de feedback\nNous conta..."
                   }
                 }
               ]
@@ -11293,7 +11293,7 @@
                 "height": 1154
               },
               "snippet": "<section id=\"impact\" class=\"product-page__section\" data-v-4bcc3cf2=\"\">",
-              "nodeLabel": "Impact Score\n\nComprendre le positionnement environnemental de ce produit\n\nDétai…",
+              "nodeLabel": "Impact Score\n\nComprendre le positionnement environnemental de ce produit\n\nDétai...",
               "explanation": "Fix any of the following:\n  Document has multiple elements referenced with ARIA with the same id attribute: impact"
             },
             "subItems": {
@@ -11314,7 +11314,7 @@
                       "height": 1154
                     },
                     "snippet": "<section id=\"impact\" class=\"product-impact\" data-v-4bcc3cf2=\"\" data-v-9b3467fb=\"\">",
-                    "nodeLabel": "Impact Score\n\nComprendre le positionnement environnemental de ce produit\n\nDétai…"
+                    "nodeLabel": "Impact Score\n\nComprendre le positionnement environnemental de ce produit\n\nDétai..."
                   }
                 }
               ]
@@ -11802,7 +11802,7 @@
                 "width": 246,
                 "height": 48
               },
-              "snippet": "<button type=\"button\" class=\"v-btn v-theme--light v-btn--density-default v-btn--size-default v-btn--var…\" style=\"\" aria-pressed=\"false\" aria-label=\"Ajouter PHILIPS 32PFS6939/12 TV LED Full HD Ambilight à la comparaison\" data-v-4ab2f8ea=\"\">",
+              "snippet": "<button type=\"button\" class=\"v-btn v-theme--light v-btn--density-default v-btn--size-default v-btn--var...\" style=\"\" aria-pressed=\"false\" aria-label=\"Ajouter PHILIPS 32PFS6939/12 TV LED Full HD Ambilight à la comparaison\" data-v-4ab2f8ea=\"\">",
               "nodeLabel": "Ajouter à la comparaison",
               "explanation": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
             }
@@ -13051,7 +13051,7 @@
                 "width": 193,
                 "height": 59
               },
-              "snippet": "<img src=\"https://bwipjs-api.metafloor.com/?bcid=ean13&amp;text=8718863041017&amp;scale=3&amp;he…\" alt=\"8718863041017\" class=\"product-attributes__gtin-image\" data-v-0d1ca988=\"\">",
+              "snippet": "<img src=\"https://bwipjs-api.metafloor.com/?bcid=ean13&amp;text=8718863041017&amp;scale=3&amp;he...\" alt=\"8718863041017\" class=\"product-attributes__gtin-image\" data-v-0d1ca988=\"\">",
               "nodeLabel": "8718863041017"
             },
             "url": "https://bwipjs-api.metafloor.com/?bcid=ean13&text=8718863041017&scale=3&height=10&includetext",
@@ -13625,7 +13625,7 @@
                 "width": 48,
                 "height": 48
               },
-              "snippet": "<img width=\"200\" height=\"200\" data-nuxt-img=\"\" srcset=\"https://static.nudger.fr/images/philips-32pfs6939-12-tv_463531774330675532…\" onerror=\"this.setAttribute('data-error', 1)\" alt=\"philips-32pfs6939-12-tv\" class=\"product-gallery__thumbnail-image\" src=\"https://static.nudger.fr/images/philips-32pfs6939-12-tv_463531774330675532…\" data-v-8ddea5c6=\"\">",
+              "snippet": "<img width=\"200\" height=\"200\" data-nuxt-img=\"\" srcset=\"https://static.nudger.fr/images/philips-32pfs6939-12-tv_463531774330675532...\" onerror=\"this.setAttribute('data-error', 1)\" alt=\"philips-32pfs6939-12-tv\" class=\"product-gallery__thumbnail-image\" src=\"https://static.nudger.fr/images/philips-32pfs6939-12-tv_463531774330675532...\" data-v-8ddea5c6=\"\">",
               "nodeLabel": "philips-32pfs6939-12-tv"
             },
             "url": "https://static.nudger.fr/images/philips-32pfs6939-12-tv_4635317743306755325.webp",
@@ -13647,7 +13647,7 @@
                 "width": 338,
                 "height": 180
               },
-              "snippet": "<img width=\"1000\" height=\"1000\" data-nuxt-img=\"\" srcset=\"https://static.nudger.fr/images/philips-32pfs6939-12-32-81-cm-led-tv-full-…\" onerror=\"this.setAttribute('data-error', 1)\" alt=\"philips-32pfs6939-12-32-81-cm-led-tv-full-hd\" class=\"product-gallery__stage-media\" loading=\"eager\" fetchpriority=\"high\" src=\"https://static.nudger.fr/images/philips-32pfs6939-12-32-81-cm-led-tv-full-…\" data-v-8ddea5c6=\"\">",
+              "snippet": "<img width=\"1000\" height=\"1000\" data-nuxt-img=\"\" srcset=\"https://static.nudger.fr/images/philips-32pfs6939-12-32-81-cm-led-tv-full-...\" onerror=\"this.setAttribute('data-error', 1)\" alt=\"philips-32pfs6939-12-32-81-cm-led-tv-full-hd\" class=\"product-gallery__stage-media\" loading=\"eager\" fetchpriority=\"high\" src=\"https://static.nudger.fr/images/philips-32pfs6939-12-32-81-cm-led-tv-full-...\" data-v-8ddea5c6=\"\">",
               "nodeLabel": "philips-32pfs6939-12-32-81-cm-led-tv-full-hd"
             },
             "url": "https://static.nudger.fr/images/philips-32pfs6939-12-32-81-cm-led-tv-full-hd_14031140075960030813.webp",
@@ -14281,7 +14281,7 @@
     },
     "is-crawlable": {
       "id": "is-crawlable",
-      "title": "Page isn’t blocked from indexing",
+      "title": "Page isn't blocked from indexing",
       "description": "Search engines are unable to include your pages in search results if they don't have permission to crawl them. [Learn more about crawler directives](https://developer.chrome.com/docs/lighthouse/seo/is-crawlable/).",
       "score": 1,
       "scoreDisplayMode": "binary",
@@ -17005,11 +17005,11 @@
     },
     "seo-mobile": {
       "title": "Mobile Friendly",
-      "description": "Make sure your pages are mobile friendly so users don’t have to pinch or zoom in order to read the content pages. [Learn how to make pages mobile-friendly](https://developers.google.com/search/mobile-sites/)."
+      "description": "Make sure your pages are mobile friendly so users don't have to pinch or zoom in order to read the content pages. [Learn how to make pages mobile-friendly](https://developers.google.com/search/mobile-sites/)."
     },
     "seo-content": {
       "title": "Content Best Practices",
-      "description": "Format your HTML in a way that enables crawlers to better understand your app’s content."
+      "description": "Format your HTML in a way that enables crawlers to better understand your app's content."
     },
     "seo-crawl": {
       "title": "Crawling and Indexing",

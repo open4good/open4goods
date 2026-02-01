@@ -33,12 +33,12 @@
       "title": "Fresh insights on responsible shopping"
     },
     "list": {
-      "loading": "Loading articles…",
+      "loading": "Loading articles...",
       "readMore": "Read more",
       "tagWithCount": "{tag} ({count})",
       "tagsAll": "All topics",
       "tagsAriaLabel": "Filter blog posts by tag",
-      "tagsLoading": "Loading tags…",
+      "tagsLoading": "Loading tags...",
       "tagsTitle": "Filter by tag"
     },
     "pagination": {
@@ -47,11 +47,11 @@
       "pageLink": "Blog page {page}"
     },
     "seo": {
-      "baseTitle": "Nudger Blog – Impact Score insights",
+      "baseTitle": "Nudger Blog - Impact Score insights",
       "description": "Explore the latest guides on sustainable appliances and energy-efficient choices from Nudger.",
-      "pageTitle": "{title} – Page {page}",
+      "pageTitle": "{title} - Page {page}",
       "tagDescription": "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice.",
-      "tagTitle": "{tag} articles – Nudger Blog"
+      "tagTitle": "{tag} articles - Nudger Blog"
     }
   },
   "home": {
@@ -59,7 +59,7 @@
       "default": {
         "hero": {
           "eyebrow": "Responsible shopping",
-          "title": "Responsible choices aren’t a luxury",
+          "title": "Responsible choices aren't a luxury",
           "titleSubtitle": ["Buy better. Spend smarter."],
           "subtitles": [
             "Save time, stay true to your values. Compare effortlessly, choose freely.",
@@ -70,7 +70,7 @@
           "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
           "search": {
             "label": "Search for a product",
-            "placeholder": "Search a product (e.g. television, smartphone…)",
+            "placeholder": "Search a product (e.g. television, smartphone...)",
             "ariaLabel": "Search for a responsible product",
             "cta": "NUDGER",
             "helper": "Independent comparator powered by open data.",
@@ -212,8 +212,8 @@
           ],
           "context": {
             "cornerLabel": "Impact digest",
-            "cornerTooltip": "Key highlights from Nudger’s methodology",
-            "ariaLabel": "Hero context card summarising Nudger’s promise"
+            "cornerTooltip": "Key highlights from Nudger's methodology",
+            "ariaLabel": "Hero context card summarising Nudger's promise"
           }
         }
       },
@@ -289,13 +289,13 @@
       }
     },
     "seo": {
-      "title": "Nudger – Responsible shopping made easy",
+      "title": "Nudger - Responsible shopping made easy",
       "description": "Compare the environmental impact and prices of over 50 million products with Nudger.",
       "imageAlt": "Illustration of the Nudger dashboard showing impact scores and price comparisons."
     },
     "hero": {
       "eyebrow": "Responsible shopping",
-      "title": "Responsible choices aren’t a luxury",
+      "title": "Responsible choices aren't a luxury",
       "titleSubtitle": {
         "default": ["Buy better. Spend smarter."],
         "events": {
@@ -326,7 +326,7 @@
       "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
       "search": {
         "label": "Search for a product",
-        "placeholder": "Search a product (e.g. television, smartphone…)",
+        "placeholder": "Search a product (e.g. television, smartphone...)",
         "ariaLabel": "Search for a responsible product",
         "cta": "NUDGER",
         "helper": "Independent comparator powered by open data.",
@@ -525,8 +525,8 @@
       },
       "context": {
         "cornerLabel": "Impact digest",
-        "cornerTooltip": "Key highlights from Nudger’s methodology",
-        "ariaLabel": "Hero context card summarising Nudger’s promise"
+        "cornerTooltip": "Key highlights from Nudger's methodology",
+        "ariaLabel": "Hero context card summarising Nudger's promise"
       },
       "highlightsScrollCta": "Scroll to the promises: {title}",
       "background": "hero-background.webp"
@@ -626,11 +626,11 @@
       "items": {
         "electronics": {
           "title": "Electronics",
-          "description": "Smartphones, TVs, audio… stay connected without compromising your values."
+          "description": "Smartphones, TVs, audio... stay connected without compromising your values."
         },
         "appliances": {
           "title": "Appliances",
-          "description": "Washing machines, dishwashers, fridges… optimise your energy use."
+          "description": "Washing machines, dishwashers, fridges... optimise your energy use."
         }
       }
     },
@@ -638,7 +638,7 @@
       "title": "Proof & trust",
       "subtitle": "Demanding partners and open data keep us accountable.",
       "logos": {
-        "ademe": "ADEME – French Agency for Ecological Transition"
+        "ademe": "ADEME - French Agency for Ecological Transition"
       },
       "stats": {
         "references": "50,000,000+ open-data references",
@@ -656,7 +656,7 @@
         "first": {
           "title": "How we keep our AI frugal",
           "date": "15 Jan 2025",
-          "excerpt": "The technical choices that keep Nudger’s computations low-carbon."
+          "excerpt": "The technical choices that keep Nudger's computations low-carbon."
         },
         "second": {
           "title": "Prioritising durability and repairability",
@@ -666,7 +666,7 @@
         "third": {
           "title": "Balancing price and impact, step by step",
           "date": "20 Dec 2024",
-          "excerpt": "Nudger’s method to align ecology and budget without compromise."
+          "excerpt": "Nudger's method to align ecology and budget without compromise."
         }
       }
     },
@@ -721,10 +721,10 @@
       },
       "agent": {
         "eyebrow": "Your AI result here 😉",
-        "title": "Ask your question, we’ll pin it to the FAQ",
-        "subtitle": "Share your request, we’ll answer with frugal AI and surface it below for everyone.",
+        "title": "Ask your question, we'll pin it to the FAQ",
+        "subtitle": "Share your request, we'll answer with frugal AI and surface it below for everyone.",
         "dynamicAnswerWithLink": "See the detailed AI answer: {link}",
-        "dynamicAnswerWithState": "We’re crafting the answer ({state}).",
+        "dynamicAnswerWithState": "We're crafting the answer ({state}).",
         "dynamicAnswerPending": "Thanks! Your question is in the queue.",
         "preview": {
           "eyebrow": "Live AI feed",
@@ -823,13 +823,13 @@
     },
     "contactRedirect": {
       "eyebrow": "Need help?",
-      "title": "Can’t find your answer?",
-      "subtitle": "Type a few words and we’ll take you straight to the contact form.",
+      "title": "Can't find your answer?",
+      "subtitle": "Type a few words and we'll take you straight to the contact form.",
       "inputLabel": "Your request in a few words",
       "placeholder": "e.g. I need an invoice or product info",
       "cta": "Go to Contact",
       "secondaryCta": "Open the Contact page",
-      "helper": "We’ll prefill the contact form to save you time.",
+      "helper": "We'll prefill the contact form to save you time.",
       "prefilledSubject": "Question from the FAQ"
     }
   },
@@ -844,7 +844,7 @@
   "categories": {
     "navigation": {
       "error": {
-        "loadFailed": "We couldn’t load the category navigation. Please try again."
+        "loadFailed": "We couldn't load the category navigation. Please try again."
       },
       "grid": {
         "cardAriaLabel": "Category card for {category}",
@@ -1004,9 +1004,9 @@
       },
       "seo": {
         "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit.",
-        "title": "{category} – Impact Score breakdown"
+        "title": "{category} - Impact Score breakdown"
       },
-      "title": "{category} – {label}"
+      "title": "{category} - {label}"
     },
     "fastFilters": {
       "activeClauses": "Applied subset filters",
@@ -1199,7 +1199,7 @@
     "page": {
       "edit": "Edit this page",
       "error": "We could not load this page. Please try again later.",
-      "loading": "Loading page…"
+      "loading": "Loading page..."
     }
   },
   "common": {
@@ -1223,7 +1223,7 @@
       "tooltip": "Impact quality rated at {value} out of {max}",
       "tooltipBadge": "Impact quality rated at {value} out of 20",
       "outOf20": "/20",
-      "scale": "Scale: {min}–{max}",
+      "scale": "Scale: {min}-{max}",
       "svgAriaLabel": "Score {score} out of 20"
     },
     "pageLoadingOverlay": {
@@ -1357,7 +1357,7 @@
     },
     "loading": {
       "message": "Please wait while we validate your contribution link.",
-      "title": "Preparing your redirect…"
+      "title": "Preparing your redirect..."
     },
     "seo": {
       "description": "We are validating your secure contribution link before redirecting you to Nudger's partner.",
@@ -1395,7 +1395,7 @@
         "description": "The link you followed may be broken or the page may have moved.",
         "helper": "Use the navigation links below or return to the homepage to continue exploring responsible shopping.",
         "statusMessage": "Error 404 - the requested resource could not be located.",
-        "title": "We can’t find this page"
+        "title": "We can't find this page"
       },
       "statusLabel": "Status code {code}"
     }
@@ -1511,7 +1511,7 @@
     "seo": {
       "description": "Share ideas, report bugs and vote on Nudger's public roadmap for responsible shopping.",
       "imageAlt": "Illustration of the Nudger community feedback board.",
-      "title": "Feedback & roadmap – Nudger community board"
+      "title": "Feedback & roadmap - Nudger community board"
     },
     "tabs": {
       "ariaLabel": "Feedback categories",
@@ -1542,7 +1542,7 @@
   "impactScorePage": {
     "seo": {
       "title": "Impact Score: a simple, transparent eco rating",
-      "description": "See how the Impact Score rates a product’s environmental footprint with 5 clear criteria and real-world examples."
+      "description": "See how the Impact Score rates a product's environmental footprint with 5 clear criteria and real-world examples."
     },
     "methodologyExplanation": {
       "title": "Sigma, percentile.... What???",
@@ -1749,7 +1749,7 @@
       "data": {
         "title": "Data we consider",
         "items": {
-          "regulatory": "Regulatory data: repairability index, energy label, warranty duration…",
+          "regulatory": "Regulatory data: repairability index, energy label, warranty duration...",
           "esg": "Extra-financial assessments of manufacturers (ESG/RSE).",
           "information": "Level of information available for the product: data quantity, quality, and openness.",
           "categorySpecific": "Category-specific data (e.g. noise level, water consumption, etc.)."
@@ -1993,7 +1993,7 @@
         },
         "seo": {
           "description": "Access Nudger's GTIN dataset with weekly updates, download options and schema details for your barcode data projects.",
-          "title": "GTIN open data – download the barcode catalogue"
+          "title": "GTIN open data - download the barcode catalogue"
         },
         "summary": {
           "title": "GTIN dataset overview"
@@ -2002,15 +2002,15 @@
       "isbn": {
         "columns": {
           "classification_decitre_1": {
-            "description": "Decitre classification – level 1.",
+            "description": "Decitre classification - level 1.",
             "label": "classification_decitre_1"
           },
           "classification_decitre_2": {
-            "description": "Decitre classification – level 2.",
+            "description": "Decitre classification - level 2.",
             "label": "classification_decitre_2"
           },
           "classification_decitre_3": {
-            "description": "Decitre classification – level 3.",
+            "description": "Decitre classification - level 3.",
             "label": "classification_decitre_3"
           },
           "currency": {
@@ -2125,7 +2125,7 @@
         },
         "seo": {
           "description": "Retrieve Nudger's ISBN dataset with weekly refreshes, download mirrors and schema information for publishing analytics.",
-          "title": "ISBN open data – download the book metadata export"
+          "title": "ISBN open data - download the book metadata export"
         },
         "summary": {
           "title": "ISBN dataset overview"
@@ -2182,7 +2182,7 @@
       "description": "You may use, share and adapt the data provided you credit Nudger and share any derivative databases under the same licence.",
       "title": "Open Database Licence (ODbL)"
     },
-    "loading": "Loading open data information…",
+    "loading": "Loading open data information...",
     "opensource": {
       "cta": {
         "ariaLabel": "Navigate to the open source page",
@@ -2389,7 +2389,7 @@
       "subtitle": "A trusted network of retailers, ecosystem builders and mentors committed to fairer shopping.",
       "title": "Partners who amplify Nudger"
     },
-    "loading": "Loading partners…",
+    "loading": "Loading partners...",
     "mentors": {
       "carouselAriaLabel": "Mentor carousel",
       "empty": "Mentor profiles will arrive shortly.",
@@ -2458,7 +2458,7 @@
         "openLabel": "Scan a barcode",
         "closeLabel": "Close the barcode scanner",
         "title": "Scan a barcode",
-        "loading": "Preparing the camera…",
+        "loading": "Preparing the camera...",
         "helper": "Align the barcode within the frame to search automatically.",
         "error": "We couldn't access your camera. Please enter the GTIN manually."
       },
@@ -2503,7 +2503,7 @@
       "verticalMismatch": "These products belong to different categories. Some metrics may not be comparable."
     },
     "states": {
-      "loading": "Loading product comparison…"
+      "loading": "Loading product comparison..."
     },
     "empty": {
       "title": "Add products to start comparing",
@@ -2849,7 +2849,7 @@
       "download": "Download PDF",
       "documentPdf": "Document PDF",
       "empty": "No documents are available for this product yet.",
-      "loading": "Loading document preview…",
+      "loading": "Loading document preview...",
       "navigationAria": "Product documentation list",
       "pageCount": "{count} page | {count} pages",
       "previewUnavailable": "Preview unavailable for this document. Use the download link instead.",
@@ -3362,7 +3362,7 @@
         "guestLabel": "Private session",
         "noRoles": "No assigned roles",
         "clearCache": "Clear cache",
-        "clearingCache": "Clearing cache…",
+        "clearingCache": "Clearing cache...",
         "logout": "Logout",
         "privacy": {
           "title": "Privacy-first session",
@@ -3555,7 +3555,7 @@
       "expand": "Show details for version {name}",
       "collapse": "Hide details for version {name}"
     },
-    "loading": "Loading release notes…",
+    "loading": "Loading release notes...",
     "empty": "Release notes will arrive soon.",
     "errors": {
       "loadFailed": "We could not load the release notes. Please try again."
@@ -3596,7 +3596,7 @@
       "subtitle": "A passionate crew blending tech, sustainability and social impact.",
       "title": "The people behind Nudger"
     },
-    "loading": "Loading team members…",
+    "loading": "Loading team members...",
     "sections": {
       "contributors": {
         "title": "Contributors"
@@ -3639,7 +3639,7 @@
         "title": "Your eco-companion, right on mobile",
         "subtitle": "Scan, compare, and nudge in a few taps. Designed for quick, on-the-go decisions.",
         "meta": {
-          "title": "Nudger – Mobile impact companion",
+          "title": "Nudger - Mobile impact companion",
           "description": "Experience Nudger as a mobile-first PWA: scan barcodes, launch the AI wizard, and share eco-guides instantly.",
           "imageAlt": "Mobile view of Nudger with quick actions and barcode scanner."
         }
@@ -3656,7 +3656,7 @@
           "title": "Scan barcode",
           "description": "Use your camera to get instant impact and price insights.",
           "helper": "Align the barcode inside the frame to decode instantly.",
-          "loading": "Starting scanner…",
+          "loading": "Starting scanner...",
           "error": "Scanner unavailable. Try again or search manually.",
           "badge": "Live"
         },
@@ -3760,7 +3760,7 @@
     "loader": {
       "eyebrow": "Share-to",
       "title": "Analyzing your link",
-      "pending": "Looking for the best match…",
+      "pending": "Looking for the best match...",
       "error": "We could not parse this link.",
       "timeout": "This is taking longer than expected.",
       "progressAria": "Share-to resolution progress",

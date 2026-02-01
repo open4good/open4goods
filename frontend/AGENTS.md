@@ -1,4 +1,4 @@
-# Nudger Frontend – Agent Guide (Nuxt 4 / Vue 3 / Vuetify)
+# Nudger Frontend - Agent Guide (Nuxt 4 / Vue 3 / Vuetify)
 
 > **Parent Guide**: [Root AGENTS.md](../AGENTS.md)  
 > This guide **extends** the root conventions with frontend-specific rules for Nuxt 4, Vue 3, and Vuetify.
@@ -20,7 +20,7 @@
 ## Everyday Commands (use `--offline` flag by default)
 
 - `pnpm install`
-- `pnpm dev` – Run the dev server (http://localhost:3000)
+- `pnpm dev` - Run the dev server (http://localhost:3000)
 - `pnpm build`
 - `pnpm generate`
 - `pnpm lint`, `pnpm lint:fix`
@@ -28,12 +28,12 @@
 
 ## Project Structure Highlights
 
-- `app/pages/` – File-based routing (kebab-case filenames). Pages may include lightweight structural wrappers (`<div>`, `<v-container>`, `<v-row>`, etc.) but complex UI should live in components under `app/components/`.
-- `app/components/` – Reusable UI building blocks. Prefer PascalCase filenames, but existing `The-hero-*` components remain until refactored; do not rename them casually.
-- `app/composables/` – Reusable logic (`useFoo`). Keep them SSR-safe and free of DOM-specific code.
-- `app/layouts/`, `app/stores/`, `app/plugins/`, `app/assets/`, `app/utils/` – Follow Nuxt conventions.
-- `server/` – Nuxt server routes and middleware that wrap OpenAPI clients.
-- `shared/` – Code shared between client and server (generated clients, utils, constants).
+- `app/pages/` - File-based routing (kebab-case filenames). Pages may include lightweight structural wrappers (`<div>`, `<v-container>`, `<v-row>`, etc.) but complex UI should live in components under `app/components/`.
+- `app/components/` - Reusable UI building blocks. Prefer PascalCase filenames, but existing `The-hero-*` components remain until refactored; do not rename them casually.
+- `app/composables/` - Reusable logic (`useFoo`). Keep them SSR-safe and free of DOM-specific code.
+- `app/layouts/`, `app/stores/`, `app/plugins/`, `app/assets/`, `app/utils/` - Follow Nuxt conventions.
+- `server/` - Nuxt server routes and middleware that wrap OpenAPI clients.
+- `shared/` - Code shared between client and server (generated clients, utils, constants).
 - Theme-scoped visuals (logos, hero/parallax backgrounds, textures) live under `app/assets/themes/<theme>/` with `common/` fallbacks-resolve them via `useThemedAsset`/`useThemeAsset` so light/dark switching stays consistent.
 
 ## Coding Conventions

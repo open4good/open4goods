@@ -33,12 +33,12 @@
       "title": "L'actualité"
     },
     "list": {
-      "loading": "Chargement des articles…",
+      "loading": "Chargement des articles...",
       "readMore": "Lire plus",
       "tagWithCount": "{tag} ({count})",
       "tagsAll": "Tous les thèmes",
       "tagsAriaLabel": "Filtrer les articles du blog par tag",
-      "tagsLoading": "Chargement des tags…",
+      "tagsLoading": "Chargement des tags...",
       "tagsTitle": "Filtrer par tag"
     },
     "pagination": {
@@ -56,9 +56,9 @@
   },
   "home": {
     "seo": {
-      "title": "Nudger - Consommer responsable n’est pas un luxe",
-      "description": "Comparez l’impact environnemental et les prix de plus de 50 millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
-      "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d’impact et des prix."
+      "title": "Nudger - Consommer responsable n'est pas un luxe",
+      "description": "Comparez l'impact environnemental et les prix de plus de 50 millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
+      "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d'impact et des prix."
     },
     "hero": {
       "eyebrow": "Comparateur responsable",
@@ -82,7 +82,7 @@
         "events": {
           "hold": [
             "Contenu temporaire (à remplacer).",
-            "Affichez le texte par défaut si aucune variante n’est définie."
+            "Affichez le texte par défaut si aucune variante n'est définie."
           ],
           "sdg": [
             "Des choix du quotidien alignés sur les Objectifs de développement durable."
@@ -99,7 +99,7 @@
           "Téléviseur 4K"
         ]
       },
-      "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d’impact.",
+      "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d'impact.",
       "highlights": {
         "impact": {
           "title": "🌿 ImpactScore : Guider vos achats",
@@ -193,19 +193,19 @@
         "ariaLabel": "Fond décoratif pour les articles et les objections"
       },
       "cta": {
-        "ariaLabel": "Fond décoratif pour la FAQ et l’appel à l’action"
+        "ariaLabel": "Fond décoratif pour la FAQ et l'appel à l'action"
       }
     },
     "split": {
-      "painAlt": "Illustration d’un acheteur submergé par les choix de produits.",
-      "gainAlt": "Illustration d’un acheteur soulagé après un choix responsable."
+      "painAlt": "Illustration d'un acheteur submergé par les choix de produits.",
+      "gainAlt": "Illustration d'un acheteur soulagé après un choix responsable."
     },
     "problems": {
       "title": "Trop d'infos, mais pas celle qu'il faut ?",
       "description": "Comparer impact, prix, fiabilité... Pas toujours facile !",
       "items": {
         "labelsOverload": "Perdu dans la jungle des labels ? Difficile de comparer vraiment.",
-        "budgetVsEcology": "Écologie vs pouvoir d’achat ? Marre de choisir entre les deux.",
+        "budgetVsEcology": "Écologie vs pouvoir d'achat ? Marre de choisir entre les deux.",
         "tooManyTabs": "8 sites ouverts ? Un seul endroit suffit."
       }
     },
@@ -269,16 +269,16 @@
       "bannerAriaLabel": "Navigation des catégories mises en avant",
       "scrollPrevious": "Faire défiler vers les catégories précédentes",
       "scrollNext": "Faire défiler vers les catégories suivantes",
-      "impactLinkAria": "Ouvrir l’Impact Score pour {category}",
-      "emptyState": "Les catégories apparaîtront ici dès qu’elles seront disponibles.",
+      "impactLinkAria": "Ouvrir l'Impact Score pour {category}",
+      "emptyState": "Les catégories apparaîtront ici dès qu'elles seront disponibles.",
       "items": {
         "electronics": {
           "title": "Électronique",
-          "description": "Smartphones, TV, audio… reste connecté sans renoncer à tes valeurs."
+          "description": "Smartphones, TV, audio... reste connecté sans renoncer à tes valeurs."
         },
         "appliances": {
           "title": "Électroménager",
-          "description": "Lave-linge, lave-vaisselle, frigos… "
+          "description": "Lave-linge, lave-vaisselle, frigos... "
         }
       }
     },
@@ -297,22 +297,22 @@
       "title": "En direct du blog",
       "subtitle": "Les derniers éclairages de notre rédaction.",
       "cta": "Voir tous les articles",
-      "readMore": "Lire l’article",
+      "readMore": "Lire l'article",
       "emptyState": "Les nouveaux articles seront affichés ici très bientôt.",
       "carouselAriaLabel": "Carrousel des articles du blog",
       "items": {
         "first": {
           "title": "Comment nous gardons une IA frugale",
           "date": "15 janv. 2025",
-          "excerpt": "Nos choix techniques pour limiter l’empreinte carbone des calculs Nudger."
+          "excerpt": "Nos choix techniques pour limiter l'empreinte carbone des calculs Nudger."
         },
         "second": {
           "title": "Prioriser durabilité et réparabilité",
           "date": "8 janv. 2025",
-          "excerpt": "Pourquoi les critères de réparabilité ont plus de poids dans l’Impact Score."
+          "excerpt": "Pourquoi les critères de réparabilité ont plus de poids dans l'Impact Score."
         },
         "third": {
-          "title": "Comparer prix et impact, mode d’emploi",
+          "title": "Comparer prix et impact, mode d'emploi",
           "date": "20 déc. 2024",
           "excerpt": "La méthode Nudger pour confronter écologie et budget sans compromis."
         }
@@ -324,11 +324,11 @@
       "items": {
         "aiEnergy": {
           "question": "Un coup de pouce écologique à grand renfort d'IA ????",
-          "answer": "Oui, et c’est une vraie question. L’IA peut consommer des ressources, donc on limite volontairement les appels et on utilise des modèles plus légers. L’objectif : en tirer le meilleur pour guider des choix plus responsables, sans surenchère."
+          "answer": "Oui, et c'est une vraie question. L'IA peut consommer des ressources, donc on limite volontairement les appels et on utilise des modèles plus légers. L'objectif : en tirer le meilleur pour guider des choix plus responsables, sans surenchère."
         },
         "reuse": {
-          "question": "La vraie frugalité c’est le réemploi ?",
-          "answer": "Oui - le réemploi reste souvent l’option la plus frugale. Nudger vous laisse choisir, et met en avant les offres d’occasion dès qu’il y en a."
+          "question": "La vraie frugalité c'est le réemploi ?",
+          "answer": "Oui - le réemploi reste souvent l'option la plus frugale. Nudger vous laisse choisir, et met en avant les offres d'occasion dès qu'il y en a."
         },
         "independence": {
           "question": "Êtes-vous indépendants ?",
@@ -342,18 +342,18 @@
       "items": {
         "free": {
           "question": "Un coup de pouce écologique à grand renfort d'IA ?",
-          "answer": "Oui, et c’est une vraie question. L’IA peut consommer des ressources, donc on limite volontairement les appels et on utilise des modèles plus légers. L’objectif : en tirer le meilleur pour guider des choix plus responsables, sans surenchère."
+          "answer": "Oui, et c'est une vraie question. L'IA peut consommer des ressources, donc on limite volontairement les appels et on utilise des modèles plus légers. L'objectif : en tirer le meilleur pour guider des choix plus responsables, sans surenchère."
         },
         "account": {
-          "question": "La vraie frugalité, c’est pas le réemploi ?",
-          "answer": "Oui - le réemploi reste souvent l’option la plus frugale. Nudger vous laisse choisir, et met en avant les offres d’occasion dès qu’il y en a."
+          "question": "La vraie frugalité, c'est pas le réemploi ?",
+          "answer": "Oui - le réemploi reste souvent l'option la plus frugale. Nudger vous laisse choisir, et met en avant les offres d'occasion dès qu'il y en a."
         },
         "categories": {
           "question": "Êtes-vous indépendants ?",
           "answer": "Oui. Classement neutre, code ouvert, financements sans influence sur les résultats."
         },
         "impactScore": {
-          "question": "Comment est calculé l’Impact Score ?",
+          "question": "Comment est calculé l'Impact Score ?",
           "answer": "Une multitude de critères pondérés + IA sobre, méthode ouverte et auditable.",
           "cta": "En savoir plus",
           "ctaAria": "Ouvrir la page dédiée à l'Impact Score"
@@ -364,12 +364,12 @@
         },
 
         "contact": {
-          "question": "J’ai une question !"
+          "question": "J'ai une question !"
         }
       },
       "agent": {
         "eyebrow": "Votre résultat IA ici 😉",
-        "title": "Posez votre question, on l’affiche dans la FAQ",
+        "title": "Posez votre question, on l'affiche dans la FAQ",
         "subtitle": "Envoyez votre demande, on répond avec une IA frugale et on affiche le résultat juste en dessous.",
         "dynamicAnswerWithLink": "Découvrez la réponse détaillée : {link}",
         "dynamicAnswerWithState": "Réponse en cours ({state}).",
@@ -383,7 +383,7 @@
           "statusPending": "Statut en attente",
           "cta": "Ouvrir le résultat",
           "helper": "Ouvrez la dernière réponse publique dans un nouvel onglet",
-          "questionFallback": "Votre question IA s’affichera ici."
+          "questionFallback": "Votre question IA s'affichera ici."
         }
       }
     },
@@ -412,7 +412,7 @@
           "cornerLabel": "Données fraîches",
           "bullets": [
             "Utiliser `cornerVariant=text` avec icône optionnelle",
-            "Parfait pour les badges « beta » ou « new »",
+            "Parfait pour les badges 'beta' ou 'new'",
             "Accent discret côté arrondi"
           ]
         },
@@ -469,7 +469,7 @@
       }
     },
     "contactRedirect": {
-      "eyebrow": "Besoin d’aide ?",
+      "eyebrow": "Besoin d'aide ?",
       "title": "Vous ne trouvez pas votre réponse ?",
       "subtitle": "Saisissez quelques mots et on vous redirige vers le formulaire de contact.",
       "inputLabel": "Votre demande en bref",
@@ -478,7 +478,7 @@
       "secondaryCta": "Aller à la page Contact",
       "helper": "Nous pré-remplissons le formulaire de contact pour vous faire gagner du temps.",
       "prefilledSubject": "Question depuis la FAQ",
-      "prefilledMessage": "Bonjour ! J’ai une question : "
+      "prefilledMessage": "Bonjour ! J'ai une question : "
     }
   },
   "shared": {
@@ -581,7 +581,7 @@
         },
         "availableCriteria": {
           "title": "Critères disponibles pour {category}",
-          "subtitle": "Chaque verticale Impact Score dispose d’une sélection de critères adaptés."
+          "subtitle": "Chaque verticale Impact Score dispose d'une sélection de critères adaptés."
         },
         "overview": {
           "card": {
@@ -853,7 +853,7 @@
     "page": {
       "edit": "Modifier cette page",
       "error": "Nous n'avons pas pu charger cette page. Merci de réessayer plus tard.",
-      "loading": "Chargement de la page…"
+      "loading": "Chargement de la page..."
     }
   },
   "common": {
@@ -872,7 +872,7 @@
       "tooltip": "Qualité de l'impact évalué à {value} sur {max}",
       "tooltipBadge": "Qualité de l'impact évalué à {value} sur 20",
       "outOf20": "/20",
-      "scale": "Échelle : {min}–{max}",
+      "scale": "Échelle : {min}-{max}",
       "svgAriaLabel": "Score {score} sur 20"
     },
     "pageLoadingOverlay": {
@@ -1006,7 +1006,7 @@
     },
     "loading": {
       "message": "Merci de patienter pendant la validation de votre lien de contribution.",
-      "title": "Préparation de la redirection…"
+      "title": "Préparation de la redirection..."
     },
     "seo": {
       "description": "Nous vérifions votre lien de contribution sécurisé avant de vous rediriger vers le partenaire de Nudger.",
@@ -1023,11 +1023,11 @@
       "actions": {
         "ariaLabel": "Actions rapides pour se remettre sur la bonne voie",
         "contactSupport": "Contacter le support",
-        "goHome": "Retour à l’accueil"
+        "goHome": "Retour à l'accueil"
       },
       "debug": {
-        "empty": "Aucune information de diagnostic supplémentaire n’est disponible.",
-        "messageLabel": "Message d’erreur",
+        "empty": "Aucune information de diagnostic supplémentaire n'est disponible.",
+        "messageLabel": "Message d'erreur",
         "stackLabel": "Trace de la pile",
         "title": "Détails techniques"
       },
@@ -1036,13 +1036,13 @@
         "badge": "Un contretemps est survenu",
         "description": "Une erreur inattendue nous a empêchés de charger cette page.",
         "helper": "Essayez une autre section de Nudger ou contactez-nous si le problème persiste.",
-        "statusMessage": "Erreur 500 - quelque chose s’est mal passé de notre côté.",
+        "statusMessage": "Erreur 500 - quelque chose s'est mal passé de notre côté.",
         "title": "Nous corrigeons le problème"
       },
       "notFound": {
         "badge": "Page introuvable",
         "description": "Le lien suivi est peut-être obsolète ou la page a été déplacée.",
-        "helper": "Utilisez les liens ci-dessous ou retournez à l’accueil pour poursuivre votre exploration.",
+        "helper": "Utilisez les liens ci-dessous ou retournez à l'accueil pour poursuivre votre exploration.",
         "statusMessage": "Erreur 404 - la ressource demandée est introuvable.",
         "title": "Nous ne trouvons pas cette page"
       },
@@ -1191,23 +1191,23 @@
   "impactScorePage": {
     "seo": {
       "title": "Impact Score : une lecture écologique et sociétale simple de chaque produit",
-      "description": "Découvrez comment l’Impact Score évalue l’impact environnemental d’un produit grâce à méthode transparente et ouverte."
+      "description": "Découvrez comment l'Impact Score évalue l'impact environnemental d'un produit grâce à méthode transparente et ouverte."
     },
     "methodologyExplanation": {
-      "title": "Sigma, percentile… c’est quoi ?",
+      "title": "Sigma, percentile... c'est quoi ?",
       "content": "Pour garantir un score équitable entre tous les produits, nous utilisons une approche statistique appelée **Sigma Scoring**.<br><br>Contrairement à une simple moyenne, cette méthode prend en compte la **dispersion** des données (écart-type).<br><ul><li><strong>Sigma Scoring :</strong> La plupart des produits se situent dans la moyenne. Les produits exceptionnels (en bien ou en mal) n'écrasent pas le score des autres.</li><li><strong>Percentile (Secours) :</strong> Si trop peu de valeurs différentes existent (ex: seulement 3 options de garantie possibles), le Sigma Scoring ne fonctionne plus bien. Nous passons alors en mode **Percentile** pour classer les produits du meilleur au moins bon, tout en gardant une note sur 5.</li></ul><br>C'est ce qui nous permet de vous donner une note vraiment utile, quelle que soit la catégorie de produit !"
     },
     "docs": {
       "title": "Documentation Impact Score",
-      "description": "Explorez les documents de référence, notes méthodologiques et sources de données de l’Impact Score."
+      "description": "Explorez les documents de référence, notes méthodologiques et sources de données de l'Impact Score."
     },
     "hero": {
       "eyebrow": "Impact Score",
       "title": "évaluation de l'impact environnemental de vos produits",
-      "subtitle": "La boussole éco-responsable inspirée de l’Écoscore",
+      "subtitle": "La boussole éco-responsable inspirée de l'Écoscore",
       "definition": {
         "title": "Une définition claire et accessible",
-        "description": "L’Impact Score traduit des données techniques en indicateurs compréhensibles et comparables, sans jargon.",
+        "description": "L'Impact Score traduit des données techniques en indicateurs compréhensibles et comparables, sans jargon.",
         "items": {
           "scale": "Note de 0 à 20 : 20 ne signifie pas une absence d'impact ou un produit bon pour la planète, mais que ce produit est le mieux classé par rapport à tous les autres",
           "data": "Appuyé sur des données vérifiées (fiches techniques, éco-organismes, référentiels publiques)",
@@ -1226,21 +1226,21 @@
           "bullets": {
             "scale": "0 = très mauvais, 20 = le moins pire",
             "sum": "La note globale additionne les scores de chaque critère",
-            "weights": "Les pondérations (0 à 1) sont définies par un système d’IA, dont les prompts et les réponses sont transparentes."
+            "weights": "Les pondérations (0 à 1) sont définies par un système d'IA, dont les prompts et les réponses sont transparentes."
           }
         },
         "ai": {
           "title": "Une démarche IA, ouverte au débat",
-          "description": "Nous sommes experts en données et en IA, pas en analyse du cycle de vie. Nous testons une approche alternative pour accélérer l’évaluation environnementale des produits électriques et électroniques.",
+          "description": "Nous sommes experts en données et en IA, pas en analyse du cycle de vie. Nous testons une approche alternative pour accélérer l'évaluation environnementale des produits électriques et électroniques.",
           "bullets": {
-            "verticals": "Chaque catégorie dispose d’une page dédiée pour comprendre son Impact Score",
+            "verticals": "Chaque catégorie dispose d'une page dédiée pour comprendre son Impact Score",
             "opensource": "Les configurations et coefficients sont disponibles en open-source",
             "discussion": "Proposez vos idées et ouvrez la discussion sur notre dépôt GitHub"
           }
         },
         "relativisation": {
           "title": "Principe de relativisation",
-          "description": "Un indice de réparabilité à 7,7 n’est lisible que quand on connait la meilleure et la pire note. Nous attribuons sur chaque critère 0 au produit le moins performant et 20 au meilleur pour faciliter la comparaison. Par choix, l’Impact Score final, lui, n’est pas relativisé : il est une somme de scores pondérés, ne laissant ainsi pas groupe avec des produits ayant 20/20 qu'ils sont sans impact sur la planète !",
+          "description": "Un indice de réparabilité à 7,7 n'est lisible que quand on connait la meilleure et la pire note. Nous attribuons sur chaque critère 0 au produit le moins performant et 20 au meilleur pour faciliter la comparaison. Par choix, l'Impact Score final, lui, n'est pas relativisé : il est une somme de scores pondérés, ne laissant ainsi pas groupe avec des produits ayant 20/20 qu'ils sont sans impact sur la planète !",
           "bullets": {
             "ranking": "Un classement clair pour situer chaque produit dans sa catégorie"
           }
@@ -1250,7 +1250,7 @@
           "description": "Quand une information manque, nous appliquons une valeur moyenne de la catégorie afin de ne ni pénaliser ni avantager un produit. Cette moindre disponibilité des données est pénalisée au travers de l'application d'un malus sur le score de qualité de la donnée.",
           "bullets": {
             "average": "Score virtuel basé sur la moyenne de la catégorie",
-            "malus": "Un malus reflète le manque d’information produit"
+            "malus": "Un malus reflète le manque d'information produit"
           }
         }
       }
@@ -1258,7 +1258,7 @@
     "criteria": {
       "eyebrow": "Exemple de critères",
       "title": "Notre Impact Score en bref",
-      "subtitle": "Chaque critère pèse dans la note finale et permet la comparaison entre produits d’une même catégorie. La liste précise des critères est disponible dans la page Impact Score de chaque catégorie. Par exemple : ",
+      "subtitle": "Chaque critère pèse dans la note finale et permet la comparaison entre produits d'une même catégorie. La liste précise des critères est disponible dans la page Impact Score de chaque catégorie. Par exemple : ",
       "items": {
         "circularity": {
           "title": "Réparabilité",
@@ -1267,7 +1267,7 @@
         },
         "energy": {
           "title": "Performance énergétique",
-          "description": "Consommation réelle, étiquette énergie et sobriété à l’usage.",
+          "description": "Consommation réelle, étiquette énergie et sobriété à l'usage.",
           "weight": "25 %"
         },
         "materials": {
@@ -1295,7 +1295,7 @@
     "principles": {
       "eyebrow": "Nos principes",
       "title": "Un impact mesuré sans compromis",
-      "subtitle": "La méthode reprend les fondamentaux de l’Écoscore : transparence, contextualisation et pédagogie.",
+      "subtitle": "La méthode reprend les fondamentaux de l'Écoscore : transparence, contextualisation et pédagogie.",
       "items": {
         "transparency": {
           "title": "Transparence totale",
@@ -1318,7 +1318,7 @@
     "examples": {
       "eyebrow": "Exemples de calcul",
       "title": "Exemples réels",
-      "subtitle": "Des extraits d’Impact Score issus de fiches produits d’électroménager et d’électronique du quotidien.",
+      "subtitle": "Des extraits d'Impact Score issus de fiches produits d'électroménager et d'électronique du quotidien.",
       "samsungTv": {
         "eyebrow": "Exemple 1",
         "title": "Téléviseur Samsung Crystal UHD 55\" UE55CU7092",
@@ -1368,13 +1368,13 @@
     },
     "summary": {
       "eyebrow": "À retenir",
-      "title": "Le condensé de l’Impact Score",
-      "subtitle": "Ce qu’il faut garder en tête pour comprendre la note.",
+      "title": "Le condensé de l'Impact Score",
+      "subtitle": "Ce qu'il faut garder en tête pour comprendre la note.",
       "items": {
-        "method": "Une méthode unique, inspirée de l’Écoscore et commune à toutes les catégories.",
+        "method": "Une méthode unique, inspirée de l'Écoscore et commune à toutes les catégories.",
         "criteria": "5 critères pondérés pour comparer rapidement des produits similaires.",
         "data": "Des données vérifiées, mises à jour et reliées à leurs sources.",
-        "usage": "Une note sur 20, lisible en un coup d’œil pour guider vos achats responsables."
+        "usage": "Une note sur 20, lisible en un coup d'œil pour guider vos achats responsables."
       }
     },
     "approach": {
@@ -1392,16 +1392,16 @@
         },
         "performant": {
           "title": "Performant",
-          "description": "Nos critères combinent des sources fiables et une pondération pertinente pour comparer les produits d’une même catégorie."
+          "description": "Nos critères combinent des sources fiables et une pondération pertinente pour comparer les produits d'une même catégorie."
         }
       },
       "data": {
         "title": "Données prises en compte",
         "items": {
-          "regulatory": "Données réglementaires : indice de réparabilité, fiche énergie, durée de garantie…",
+          "regulatory": "Données réglementaires : indice de réparabilité, fiche énergie, durée de garantie...",
           "esg": "Évaluations extra-financières des fabricants (ESG/RSE).",
-          "information": "Niveau d’information disponible sur le produit : quantité, qualité et ouverture des données.",
-          "categorySpecific": "Données spécifiques à chaque catégorie (ex. niveau sonore, consommation d’eau, etc.)."
+          "information": "Niveau d'information disponible sur le produit : quantité, qualité et ouverture des données.",
+          "categorySpecific": "Données spécifiques à chaque catégorie (ex. niveau sonore, consommation d'eau, etc.)."
         }
       }
     },
@@ -1436,7 +1436,7 @@
       "methodology": {
         "empty": "Les catégories seront bientôt disponibles.",
         "eyebrow": "Méthodologie",
-        "intro": "Les règles de calcul de l’ecoscore sont détaillées sur chaque produit (section « bilan écologique »). Chaque catégorie de produit possède ses propres critères et pondérations. Voici les catégories couvertes :",
+        "intro": "Les règles de calcul de l'ecoscore sont détaillées sur chaque produit (section 'bilan écologique'). Chaque catégorie de produit possède ses propres critères et pondérations. Voici les catégories couvertes :",
         "title": "Comment est calculé l'Impact Score ?",
         "verticalCarouselAria": "Parcourir le carrousel des catégories ecoscore",
         "verticalCardAria": "Accéder à la catégorie {vertical}",
@@ -1451,7 +1451,7 @@
           "caption": "Évaluation indicative basée sur notre méthodologie",
           "title": "Évaluation indicative"
         },
-        "title": "Qu’est-ce que l’Impact Score ?"
+        "title": "Qu'est-ce que l'Impact Score ?"
       }
     }
   },
@@ -1595,27 +1595,27 @@
         "faq": {
           "items": {
             "differenceEan": {
-              "answer": "<p><strong>L’EAN (European Article Number)</strong> était autrefois l'identifiant standard utilisé en Europe pour marquer les produits. Aujourd'hui, le terme GTIN a remplacé l’EAN afin de standardiser les codes de produit à l'échelle mondiale. L'EAN-13 est désormais un GTIN-13. <br/>En pratique, la transition de l'EAN au GTIN est surtout une question de nomenclature, et la structure du code reste la même. Le GTIN englobe également d'autres identifiants comme l'UPC (Universal Product Code) utilisé en Amérique du Nord.</p>",
+              "answer": "<p><strong>L'EAN (European Article Number)</strong> était autrefois l'identifiant standard utilisé en Europe pour marquer les produits. Aujourd'hui, le terme GTIN a remplacé l'EAN afin de standardiser les codes de produit à l'échelle mondiale. L'EAN-13 est désormais un GTIN-13. <br/>En pratique, la transition de l'EAN au GTIN est surtout une question de nomenclature, et la structure du code reste la même. Le GTIN englobe également d'autres identifiants comme l'UPC (Universal Product Code) utilisé en Amérique du Nord.</p>",
               "question": "Quelle est la différence entre GTIN et EAN ?"
             },
             "formats": {
-              "answer": "<p><strong>Les principaux formats de GTIN</strong> sont :<ul> <li> <strong>GTIN-12</strong> : couramment utilisé aux États-Unis et au Canada sous le nom de code UPC</li> <li><strong>GTIN-13</strong> : le plus courant en Europe</li><li><strong>GTIN-14</strong> : utilisé pour les unités logistiques , comme des cartons ou des palettes, plutôt que pour des articles à l’unité</li></ul> Ces différents formats permettent de répondre aux besoins spécifiques de chaque région et de chaque chaîne d'approvisionnement. <br/></p>",
+              "answer": "<p><strong>Les principaux formats de GTIN</strong> sont :<ul> <li> <strong>GTIN-12</strong> : couramment utilisé aux États-Unis et au Canada sous le nom de code UPC</li> <li><strong>GTIN-13</strong> : le plus courant en Europe</li><li><strong>GTIN-14</strong> : utilisé pour les unités logistiques , comme des cartons ou des palettes, plutôt que pour des articles à l'unité</li></ul> Ces différents formats permettent de répondre aux besoins spécifiques de chaque région et de chaque chaîne d'approvisionnement. <br/></p>",
               "question": "Quels sont les différents formats de GTIN ?"
             },
             "differenceUpc": {
-              "answer": "<p><strong>L'UPC (Universal Product Code)</strong> est une forme de GTIN-12, utilisé principalement en Amérique du Nord. La différence entre GTIN et UPC réside surtout dans leur utilisation régionale : le GTIN est un terme plus global, tandis que l’UPC se réfère à un code spécifique utilisé dans un contexte nord-américain. Toutefois, les deux systèmes sont compatibles et dans le cadre de la norme GTIN, l’UPC est reconnu comme une de ses sous-catégories.</p>",
+              "answer": "<p><strong>L'UPC (Universal Product Code)</strong> est une forme de GTIN-12, utilisé principalement en Amérique du Nord. La différence entre GTIN et UPC réside surtout dans leur utilisation régionale : le GTIN est un terme plus global, tandis que l'UPC se réfère à un code spécifique utilisé dans un contexte nord-américain. Toutefois, les deux systèmes sont compatibles et dans le cadre de la norme GTIN, l'UPC est reconnu comme une de ses sous-catégories.</p>",
               "question": "Quelle est la différence entre GTIN et UPC ?"
             },
             "ean13": {
-              "answer": "<p><strong>L’EAN-13</strong> est un code-barres constitué de 13 chiffres qui identifie les produits au niveau international, principalement en Europe.<br/> L'EAN-13 est aussi appelé GTIN-13 et est largement utilisé dans les points de vente pour scanner et suivre les articles. Il inclut un préfixe de pays, un code d’entreprise, un code produit et une clé de contrôle qui garantit l'exactitude du code.</p>",
+              "answer": "<p><strong>L'EAN-13</strong> est un code-barres constitué de 13 chiffres qui identifie les produits au niveau international, principalement en Europe.<br/> L'EAN-13 est aussi appelé GTIN-13 et est largement utilisé dans les points de vente pour scanner et suivre les articles. Il inclut un préfixe de pays, un code d'entreprise, un code produit et une clé de contrôle qui garantit l'exactitude du code.</p>",
               "question": "Qu'est-ce que le format EAN-13 ?"
             },
             "logistics": {
-              "answer": "<p><strong>Le GTIN dans la logistique</strong> joue un rôle essentiel pour identifier les produits à travers les chaînes d'approvisionnement. <br/>Par exemple, le format GTIN-14 permet d'identifier des unités d'expédition comme des cartons ou des palettes, et facilite ainsi la gestion des stocks et des expéditions. <br/>L’utilisation des codes-barres GTIN dans la logistique permet une traçabilité précise des produits tout au long de leur cycle de vie, du fabricant au distributeur.</p>",
+              "answer": "<p><strong>Le GTIN dans la logistique</strong> joue un rôle essentiel pour identifier les produits à travers les chaînes d'approvisionnement. <br/>Par exemple, le format GTIN-14 permet d'identifier des unités d'expédition comme des cartons ou des palettes, et facilite ainsi la gestion des stocks et des expéditions. <br/>L'utilisation des codes-barres GTIN dans la logistique permet une traçabilité précise des produits tout au long de leur cycle de vie, du fabricant au distributeur.</p>",
               "question": "Comment le GTIN est-il utilisé dans la logistique ?"
             },
             "whatIs": {
-              "answer": "<p><strong>Le GTIN (Global Trade Item Number)</strong> est un code numérique unique utilisé pour identifier des produits à l'échelle mondiale. Il se présente sous plusieurs formats (GTIN-12, GTIN-13, GTIN-14), chacun d'eux étant adapté à différents types de produits ou à des régions spécifiques. <br/>Par exemple, le GTIN-13 est couramment utilisé en Europe, tandis que le GTIN-12 est plus fréquent en Amérique du Nord. <br/>Chaque GTIN garantit qu’un produit peut être suivi, identifié et catalogué dans n'importe quelle partie du monde, assurant ainsi une gestion efficace des stocks et des ventes.</p>",
+              "answer": "<p><strong>Le GTIN (Global Trade Item Number)</strong> est un code numérique unique utilisé pour identifier des produits à l'échelle mondiale. Il se présente sous plusieurs formats (GTIN-12, GTIN-13, GTIN-14), chacun d'eux étant adapté à différents types de produits ou à des régions spécifiques. <br/>Par exemple, le GTIN-13 est couramment utilisé en Europe, tandis que le GTIN-12 est plus fréquent en Amérique du Nord. <br/>Chaque GTIN garantit qu'un produit peut être suivi, identifié et catalogué dans n'importe quelle partie du monde, assurant ainsi une gestion efficace des stocks et des ventes.</p>",
               "question": "Qu'est-ce qu'un GTIN ?"
             }
           },
@@ -1727,19 +1727,19 @@
         "faq": {
           "items": {
             "whatIs": {
-              "answer": "<p>Un ISBN (<strong>International Standard Book Number</strong>) est un numéro unique qui permet d'identifier un livre à l'échelle mondiale.<br/> C’est un identifiant essentiel pour les éditeurs, librairies, bibliothèques, et toutes les plateformes de vente de livres. L'ISBN facilite la gestion des stocks, la distribution, et la vente des livres.<br/> Chaque livre ou édition d'un même livre dispose de son propre ISBN, garantissant une identification unique dans les bases de données et les catalogues.<br/> Les ISBN sont utilisés aussi bien pour les livres imprimés que pour les livres numériques (e-books) et permettent aux lecteurs de retrouver facilement l’ouvrage qu’ils cherchent, notamment dans les systèmes de bibliothèques et sur les plateformes de vente en ligne.</p>",
+              "answer": "<p>Un ISBN (<strong>International Standard Book Number</strong>) est un numéro unique qui permet d'identifier un livre à l'échelle mondiale.<br/> C'est un identifiant essentiel pour les éditeurs, librairies, bibliothèques, et toutes les plateformes de vente de livres. L'ISBN facilite la gestion des stocks, la distribution, et la vente des livres.<br/> Chaque livre ou édition d'un même livre dispose de son propre ISBN, garantissant une identification unique dans les bases de données et les catalogues.<br/> Les ISBN sont utilisés aussi bien pour les livres imprimés que pour les livres numériques (e-books) et permettent aux lecteurs de retrouver facilement l'ouvrage qu'ils cherchent, notamment dans les systèmes de bibliothèques et sur les plateformes de vente en ligne.</p>",
               "question": "Qu'est-ce qu'un ISBN ?"
             },
             "structure": {
-              "answer": "<p>Un ISBN est composé de 13 chiffres (ou 10 dans l’ancien système), répartis en cinq segments. Ces segments incluent : <ul> <li> <strong> un préfixe </strong>: qui identifie le système de numérotation</li><li><strong>un groupe d’enregistrement</strong> : représente le pays ou la région linguistique</li><li> <strong>un numéro d'éditeur</strong></li><li> <strong>un numéro de titre</strong> :  identifie un ouvrage spécifique</li><li><strong>un chiffre de contrôle</strong> :  valide la structure de l’ISBN</li></ul> Cette structure permet une identification rapide et précise des livres, facilitant leur gestion à l’échelle mondiale. Le passage à l'ISBN-13 en 2007 s'est aligné sur les normes mondiales des codes-barres, rendant la distribution des livres encore plus efficace et standardisée.</p>",
+              "answer": "<p>Un ISBN est composé de 13 chiffres (ou 10 dans l'ancien système), répartis en cinq segments. Ces segments incluent : <ul> <li> <strong> un préfixe </strong>: qui identifie le système de numérotation</li><li><strong>un groupe d'enregistrement</strong> : représente le pays ou la région linguistique</li><li> <strong>un numéro d'éditeur</strong></li><li> <strong>un numéro de titre</strong> :  identifie un ouvrage spécifique</li><li><strong>un chiffre de contrôle</strong> :  valide la structure de l'ISBN</li></ul> Cette structure permet une identification rapide et précise des livres, facilitant leur gestion à l'échelle mondiale. Le passage à l'ISBN-13 en 2007 s'est aligné sur les normes mondiales des codes-barres, rendant la distribution des livres encore plus efficace et standardisée.</p>",
               "question": "Comment un ISBN est-il structuré ?"
             },
             "assignment": {
-              "answer": "<p>Un ISBN est attribué par une agence nationale ISBN dans chaque pays, qui gère la distribution et l'enregistrement des numéros ISBN. <br/>L'éditeur ou l'auteur doit contacter cette agence pour obtenir un ISBN pour son livre. <br/>Lors de la demande, des informations sur l'ouvrage sont fournies, telles que le titre, l’auteur, le format et l’édition. Une fois attribué, l'ISBN est unique pour cette édition et ne peut être réutilisé pour une autre, cela garantit une gestion efficace des livres dans les systèmes de bibliothèques, de vente, et de distribution.</p>",
+              "answer": "<p>Un ISBN est attribué par une agence nationale ISBN dans chaque pays, qui gère la distribution et l'enregistrement des numéros ISBN. <br/>L'éditeur ou l'auteur doit contacter cette agence pour obtenir un ISBN pour son livre. <br/>Lors de la demande, des informations sur l'ouvrage sont fournies, telles que le titre, l'auteur, le format et l'édition. Une fois attribué, l'ISBN est unique pour cette édition et ne peut être réutilisé pour une autre, cela garantit une gestion efficace des livres dans les systèmes de bibliothèques, de vente, et de distribution.</p>",
               "question": "Comment un ISBN est-il attribué à un livre ?"
             },
             "difference": {
-              "answer": "<p>L'<strong>ISBN-10</strong> était le format d'origine utilisé jusqu'en 2007. Il se composait de <strong>10 chiffres</strong>. Cependant, pour s'aligner avec les standards mondiaux des codes-barres EAN-13, le système est passé à l'<strong>ISBN-13</strong>, un format à <strong>13 chiffres</strong>. <br/>Ce changement a permis de standardiser les processus de vente et de distribution à l’échelle mondiale, car les ISBN-13 sont compatibles avec les systèmes de codes-barres commerciaux utilisés dans divers secteurs. <br/>Bien que les ISBN-10 existent encore pour les anciens ouvrages, les nouveaux livres publiés depuis 2007 utilisent exclusivement le format ISBN-13, qui offre une plus grande capacité pour les identifications futures.</p>",
+              "answer": "<p>L'<strong>ISBN-10</strong> était le format d'origine utilisé jusqu'en 2007. Il se composait de <strong>10 chiffres</strong>. Cependant, pour s'aligner avec les standards mondiaux des codes-barres EAN-13, le système est passé à l'<strong>ISBN-13</strong>, un format à <strong>13 chiffres</strong>. <br/>Ce changement a permis de standardiser les processus de vente et de distribution à l'échelle mondiale, car les ISBN-13 sont compatibles avec les systèmes de codes-barres commerciaux utilisés dans divers secteurs. <br/>Bien que les ISBN-10 existent encore pour les anciens ouvrages, les nouveaux livres publiés depuis 2007 utilisent exclusivement le format ISBN-13, qui offre une plus grande capacité pour les identifications futures.</p>",
               "question": "Quelle est la différence entre un ISBN-10 et un ISBN-13 ?"
             },
             "importance": {
@@ -1747,7 +1747,7 @@
               "question": "Pourquoi les ISBN sont-ils importants ?"
             },
             "nonBook": {
-              "answer": "<p>Il arrive qu'un ISBN soit utilisé pour identifier autre chose qu'un livre, cela peut se produire pour plusieurs raisons :</p><ul><li><strong>manque de compréhension des standards</strong> : certains vendeurs ou plateformes utilisent l'ISBN comme un identifiant générique, surtout si le produit est culturel ou lié aux loisirs créatifs.</li><li><strong>économies de coût</strong> : dans certains cas, il est plus économique pour un petit fabricant de réutiliser un code ISBN existant, bien que cela soit en dehors des normes.</li><li><strong>confusion de formats de codes</strong> : certaines plateformes de vente n’étant pas strictes sur la validation des codes standards, elles acceptent des ISBN pour des produits autres que des livres, ce qui crée des ambiguïtés.</li><li><strong>réaffectation ou erreur d'attribution</strong> : l'ISBN est parfois utilisé incorrectement pour des produits non éditoriaux, surtout si le fabricant ou le distributeur n’a pas de code-barres GTIN adapté.</li></ul>",
+              "answer": "<p>Il arrive qu'un ISBN soit utilisé pour identifier autre chose qu'un livre, cela peut se produire pour plusieurs raisons :</p><ul><li><strong>manque de compréhension des standards</strong> : certains vendeurs ou plateformes utilisent l'ISBN comme un identifiant générique, surtout si le produit est culturel ou lié aux loisirs créatifs.</li><li><strong>économies de coût</strong> : dans certains cas, il est plus économique pour un petit fabricant de réutiliser un code ISBN existant, bien que cela soit en dehors des normes.</li><li><strong>confusion de formats de codes</strong> : certaines plateformes de vente n'étant pas strictes sur la validation des codes standards, elles acceptent des ISBN pour des produits autres que des livres, ce qui crée des ambiguïtés.</li><li><strong>réaffectation ou erreur d'attribution</strong> : l'ISBN est parfois utilisé incorrectement pour des produits non éditoriaux, surtout si le fabricant ou le distributeur n'a pas de code-barres GTIN adapté.</li></ul>",
               "question": "Pourquoi est-ce que je retrouve des produits (autres que des livres) dans la base ?"
             }
           },
@@ -1790,15 +1790,15 @@
     "faq": {
       "items": {
         "contributors": {
-          "answer": "<p>Les principales sources de données ouvertes sont généralement les gouvernements, les institutions publiques, les ONG et parfois des entreprises privées. Les gouvernements, à tous les niveaux (national, régional, municipal), sont des acteurs majeurs dans la production de données ouvertes, en publiant des informations relatives à des secteurs tels que l’éducation, la santé, l'environnement, et les finances publiques. Les organisations internationales comme l'ONU ou l'OCDE, ainsi que certaines agences spécialisées, sont aussi d'importants contributeurs. De plus, des entreprises privées dans le domaine de la technologie ou de l'innovation, choisissent parfois de publier leurs données pour encourager la collaboration ou améliorer leur transparence. Enfin, des projets communautaires et collaboratifs permettent également de collecter et de publier des données ouvertes, souvent autour de thématiques spécifiques comme l'écologie ou le développement durable.</p>",
+          "answer": "<p>Les principales sources de données ouvertes sont généralement les gouvernements, les institutions publiques, les ONG et parfois des entreprises privées. Les gouvernements, à tous les niveaux (national, régional, municipal), sont des acteurs majeurs dans la production de données ouvertes, en publiant des informations relatives à des secteurs tels que l'éducation, la santé, l'environnement, et les finances publiques. Les organisations internationales comme l'ONU ou l'OCDE, ainsi que certaines agences spécialisées, sont aussi d'importants contributeurs. De plus, des entreprises privées dans le domaine de la technologie ou de l'innovation, choisissent parfois de publier leurs données pour encourager la collaboration ou améliorer leur transparence. Enfin, des projets communautaires et collaboratifs permettent également de collecter et de publier des données ouvertes, souvent autour de thématiques spécifiques comme l'écologie ou le développement durable.</p>",
           "question": "Qui produit et met à disposition les données ouvertes ?"
         },
         "definition": {
-          "answer": "<p>L'Open Data, ou données ouvertes, désigne des données rendues accessibles à tous, sans restriction d’accès, et sous un format librement exploitable.<br/> Elles peuvent être réutilisées, modifiées, redistribuées par n’importe qui, à des fins personnelles ou professionnelles.<br/> L'objectif est de maximiser l'accès à l'information pour encourager la transparence, l'innovation et l'efficacité dans différents secteurs. <br/><br/>L'Open Data est souvent fourni par des organismes publics, mais certaines entreprises privées commencent aussi à publier certaines de leurs données. Un aspect clé de l'Open Data est l'accessibilité technique : les données doivent être disponibles dans des formats standards et lisibles par des machines (comme les fichiers CSV, JSON ou XML) afin de permettre leur réutilisation sans obstacles techniques majeurs.<br/> En facilitant l'accès aux données, l'Open Data ouvre la voie à de nombreuses applications, comme la création d'applications mobiles, de visualisations ou d'analyses approfondies.</p>",
+          "answer": "<p>L'Open Data, ou données ouvertes, désigne des données rendues accessibles à tous, sans restriction d'accès, et sous un format librement exploitable.<br/> Elles peuvent être réutilisées, modifiées, redistribuées par n'importe qui, à des fins personnelles ou professionnelles.<br/> L'objectif est de maximiser l'accès à l'information pour encourager la transparence, l'innovation et l'efficacité dans différents secteurs. <br/><br/>L'Open Data est souvent fourni par des organismes publics, mais certaines entreprises privées commencent aussi à publier certaines de leurs données. Un aspect clé de l'Open Data est l'accessibilité technique : les données doivent être disponibles dans des formats standards et lisibles par des machines (comme les fichiers CSV, JSON ou XML) afin de permettre leur réutilisation sans obstacles techniques majeurs.<br/> En facilitant l'accès aux données, l'Open Data ouvre la voie à de nombreuses applications, comme la création d'applications mobiles, de visualisations ou d'analyses approfondies.</p>",
           "question": "Qu'est-ce que l'Open Data ?"
         },
         "importance": {
-          "answer": "<p>L'Open Data est crucial pour promouvoir la transparence et l’innovation. En rendant les données accessibles, il permet aux citoyens de mieux comprendre le monde qui les entoure et de participer aux discussions publiques de manière informée. <br/>Les entreprises peuvent utiliser ces données pour développer de nouveaux produits et services, ce qui stimule la croissance économique. <br/>De plus, l'Open Data permet une meilleure prise de décision, car les données publiques peuvent être analysées pour améliorer les politiques publiques, réduire les inefficacités, et rendre les gouvernements plus responsables de leurs actions.<br/> L'Open Data favorise aussi la collaboration entre différentes parties prenantes, notamment les chercheurs, les entrepreneurs, les développeurs et les collectivités locales, qui peuvent travailler ensemble pour résoudre des problèmes communs en utilisant les données de manière créative.</p>",
+          "answer": "<p>L'Open Data est crucial pour promouvoir la transparence et l'innovation. En rendant les données accessibles, il permet aux citoyens de mieux comprendre le monde qui les entoure et de participer aux discussions publiques de manière informée. <br/>Les entreprises peuvent utiliser ces données pour développer de nouveaux produits et services, ce qui stimule la croissance économique. <br/>De plus, l'Open Data permet une meilleure prise de décision, car les données publiques peuvent être analysées pour améliorer les politiques publiques, réduire les inefficacités, et rendre les gouvernements plus responsables de leurs actions.<br/> L'Open Data favorise aussi la collaboration entre différentes parties prenantes, notamment les chercheurs, les entrepreneurs, les développeurs et les collectivités locales, qui peuvent travailler ensemble pour résoudre des problèmes communs en utilisant les données de manière créative.</p>",
           "question": "Pourquoi l'Open Data est-il important ?"
         },
         "sources": {
@@ -1816,7 +1816,7 @@
         "label": "nos jeux de données"
       },
       "educationCard": {
-        "description": "L’open data, ou « données ouvertes », désigne des informations rendues disponibles librement par des organismes pour que chacun puisse les consulter, les utiliser et les réutiliser. L’objectif est de favoriser la transparence et la connaissance, de mieux comprendre le monde qui nous entoure et de permettre à des citoyens, associations ou entreprises de créer de nouvelles idées et services utiles.",
+        "description": "L'open data, - ou données ouvertes- , désigne des informations rendues disponibles librement par des organismes pour que chacun puisse les consulter, les utiliser et les réutiliser. L'objectif est de favoriser la transparence et la connaissance, de mieux comprendre le monde qui nous entoure et de permettre à des citoyens, associations ou entreprises de créer de nouvelles idées et services utiles.",
         "title": "Open Da... Quoi ?"
       },
       "subtitle": "Nous sommes des geeks généreux et partageurs. Pas de secrets chez nous.\n Nos données produits ? Open bar. Nos bases ? Téléchargeables.",
@@ -1828,10 +1828,10 @@
         "href": "https://spdx.org/licenses/ODbL-1.0.html#licenseText",
         "label": "Consulter la licence ODbL"
       },
-      "description": "La licence ODbL (Open Database License) permet à tout le monde d’utiliser librement une base de données : la consulter, la modifier et la redistribuer, même à des fins commerciales. \nSon but est clair : garantir que les données restent ouvertes et accessibles à tous, aujourd’hui comme demain.\n Vous pouvez donc utiliser, partager et adapter ces données en créditant Nudger et en diffusant toute base dérivée sous la même licence.",
+      "description": "La licence ODbL (Open Database License) permet à tout le monde d'utiliser librement une base de données : la consulter, la modifier et la redistribuer, même à des fins commerciales. \nSon but est clair : garantir que les données restent ouvertes et accessibles à tous, aujourd'hui comme demain.\n Vous pouvez donc utiliser, partager et adapter ces données en créditant Nudger et en diffusant toute base dérivée sous la même licence.",
       "title": "Open Database Licence (ODbL)"
     },
-    "loading": "Chargement des informations opendata…",
+    "loading": "Chargement des informations opendata...",
     "opensource": {
       "cta": {
         "ariaLabel": "Aller vers la page open-source",
@@ -1882,7 +1882,7 @@
       "ctaGroupLabel": "Appels à action principaux",
       "infoCard": {
         "title": "C'est quoi l'Open Source ?",
-        "description": "L’Open Source désigne des logiciels dont le fonctionnement est ouvert et accessible à tous. Chacun peut les utiliser librement, les modifier et les partager. L’idée centrale est le partage du savoir et la collaboration.",
+        "description": "L'Open Source désigne des logiciels dont le fonctionnement est ouvert et accessible à tous. Chacun peut les utiliser librement, les modifier et les partager. L'idée centrale est le partage du savoir et la collaboration.",
         "highlight": "",
         "items": {
           "collaborativeReviews": "Contributions",
@@ -2026,7 +2026,7 @@
       "empty": "Les partenaires de l'écosystème seront bientôt listés ici.",
       "fallbackDescription": "Le contenu de ce partenaire sera publié prochainement.",
       "linkLabel": "Découvrir l'initiative",
-      "subtitle": "Au travers d’échanges ou de partenariats directs, ils contribuent à la trajectoire de Nudger",
+      "subtitle": "Au travers d'échanges ou de partenariats directs, ils contribuent à la trajectoire de Nudger",
       "title": "Nudger s'inscrit dans un écosystème dynamique"
     },
     "errors": {
@@ -2038,7 +2038,7 @@
       "subtitle": "Un réseau de commerçants et un écosystème engagés pour des achats plus responsables.",
       "title": "Les partenaires de Nudger"
     },
-    "loading": "Chargement des partenaires…",
+    "loading": "Chargement des partenaires...",
     "mentors": {
       "carouselAriaLabel": "Carrousel des mentors",
       "empty": "Les profils mentors seront ajoutés prochainement.",
@@ -2056,7 +2056,7 @@
     "hero": {
       "eyebrow": "Explorer le catalogue",
       "title": "Les produits disponibles",
-      "subtitle": "Recherchez parmi {reviewed} produits évalués… et {others} autres !"
+      "subtitle": "Recherchez parmi {reviewed} produits évalués... et {others} autres !"
     },
     "form": {
       "label": "Rechercher dans le catalogue",
@@ -2073,21 +2073,21 @@
         "description": "Une erreur est survenue lors de l'interrogation du service de recherche. Veuillez réessayer."
       },
       "empty": {
-        "title": "Aucun résultat pour « {query} »",
+        "title": "Aucun résultat pour : {query}",
         "description": "Essayez un autre mot-clé ou explorez le catalogue depuis la page des catégories."
       }
     },
     "columns": {
       "verticals": {
         "title": "Produits évalués ({count})",
-        "emptyTitle": "Aucun résultat pour « {query} »",
+        "emptyTitle": "Aucun résultat pour : {query}",
         "emptyDescription": "Essayez un autre mot-clé ou élargissez votre recherche.",
         "unknownTitle": "Autres catégories"
       },
       "products": {
         "title": "Produits non évalués ({count})",
         "subtitle": "Produits trouvés sans catégorie associée.",
-        "emptyTitle": "Aucun produit pour « {query} »",
+        "emptyTitle": "Aucun produit pour : {query}",
         "emptyDescription": "Essayez un autre mot-clé ou ajustez vos filtres."
       }
     },
@@ -2107,7 +2107,7 @@
         "openLabel": "Scanner un code-barres",
         "closeLabel": "Fermer le scanner",
         "title": "Scanner un code-barres",
-        "loading": "Initialisation de la caméra…",
+        "loading": "Initialisation de la caméra...",
         "helper": "Alignez le code-barres dans le cadre pour lancer la recherche automatiquement.",
         "error": "Impossible d'accéder à votre caméra. Saisissez le GTIN manuellement."
       },
@@ -2152,14 +2152,14 @@
       "verticalMismatch": "Ces produits appartiennent à des catégories différentes. Certaines données ne sont pas comparables."
     },
     "states": {
-      "loading": "Chargement du comparateur…"
+      "loading": "Chargement du comparateur..."
     },
     "empty": {
       "title": "Ajoutez des produits pour commencer",
       "description": "Depuis les pages produits ou catégories, utilisez le bouton comparer pour bâtir votre tableau."
     },
     "sections": {
-      "overview": "Vue d’ensemble",
+      "overview": "Vue d'ensemble",
       "pricing": "Tarifs",
       "ecological": "Impact écologique",
       "technical": "Caractéristiques techniques",
@@ -2182,8 +2182,8 @@
     },
     "pricing": {
       "newPrice": "Meilleur prix neuf",
-      "occasionPrice": "Meilleur prix d’occasion",
-      "offersCount": "Nombre d’offres"
+      "occasionPrice": "Meilleur prix d'occasion",
+      "offersCount": "Nombre d'offres"
     },
     "ecological": {
       "ecoscore": "Ecoscore",
@@ -2308,7 +2308,7 @@
         },
         "cancel": "Annuler",
         "close": "Fermer",
-        "description": "Nous utilisons des outils puissants d’IA, d’analyse et d’agrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est coûteuse (financièrement et énergétiquement). À utiliser si vous avez un réel intérêt pour ce produit. Et si vous voulez nous aider : faites vos achats via Nudger 😊",
+        "description": "Nous utilisons des outils puissants d'IA, d'analyse et d'agrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est coûteuse (financièrement et énergétiquement). À utiliser si vous avez un réel intérêt pour ce produit. Et si vous voulez nous aider : faites vos achats via Nudger 😊",
         "eyebrow": "Synthèse IA",
         "productFallback": "ce produit",
         "remainingUnknown": "Indisponible",
@@ -2517,11 +2517,11 @@
     "docs": {
       "download": "Télécharger le PDF",
       "documentPdf": "Document PDF",
-      "empty": "Aucun document n’est encore disponible pour ce produit.",
-      "loading": "Chargement de l’aperçu du document…",
+      "empty": "Aucun document n'est encore disponible pour ce produit.",
+      "loading": "Chargement de l'aperçu du document...",
       "navigationAria": "Liste des documents du produit",
       "pageCount": "{count} page | {count} pages",
-      "previewUnavailable": "Aucun aperçu n’est disponible pour ce document. Utilisez le lien de téléchargement.",
+      "previewUnavailable": "Aucun aperçu n'est disponible pour ce document. Utilisez le lien de téléchargement.",
       "sidebarTitle": "Documents disponibles",
       "subtitle": "Consultez et téléchargez les documents techniques. Mode d'emploi, manuel utilisateur et fiches d'installation sont généralement présentes.",
       "title": "Manuels, fiches techniques et guides utilisateurs",
@@ -2559,7 +2559,7 @@
       "gtin": "Code GTIN",
       "gtinTooltip": "Basé sur le code GTIN du produit, cela n'indique pas nécessairement le lieu de fabrication.",
       "mediaType": {
-        "image": "l’image",
+        "image": "l'image",
         "video": "la vidéo"
       },
       "missingBreadcrumbTitle": "Catégorie",
@@ -2580,8 +2580,8 @@
         "unknownMerchant": "Marchand inconnu"
       },
       "openGalleryFallback": "Ouvrir la galerie média du produit",
-      "openGalleryImage": "Afficher l’image « {label} » en plein écran",
-      "openGalleryVideo": "Lire la vidéo « {label} »",
+      "openGalleryImage": "Afficher l'image '{label}' en plein écran",
+      "openGalleryVideo": "Lire la vidéo : {label}",
       "openGalleryCta": "Ouvrir la galerie",
       "impactBadge": {
         "title": "Score d'impact",
@@ -2610,7 +2610,7 @@
       "endOfLifeSupportExpired": "Support légal terminé",
       "alternatives": {
         "title": "😘 Moins cher, et meilleur pour la planète ?",
-        "subtitle": "Découvrez des produits similaires avec un meilleur score d’impact, un prix égal ou plus accessible et des caractéristiques techniques similaires.",
+        "subtitle": "Découvrez des produits similaires avec un meilleur score d'impact, un prix égal ou plus accessible et des caractéristiques techniques similaires.",
         "bestProduct": "Élu meilleur produit par rapport à vos critères !",
         "error": "Impossible de charger les alternatives pour le moment. Réessayez.",
         "retry": "Réessayer",
@@ -2671,7 +2671,7 @@
               "best": "Le meilleur {scoreLabelLower} constaté parmi les {count} {verticalTitle} atteint {bestValue}.",
               "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {averageValue}.",
               "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}{unit}, obtient la note de {productOn20}/20.",
-              "sigmaBounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
+              "sigmaBounds": "La normalisation couvre l'intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
               "percentile": "Ce produit se situe autour du {percentile}ᵉ percentile de la distribution.",
               "minmax_observed": "Les valeurs observées vont de {worstValue} à {bestValue}.",
               "minmax_fixed": "Les bornes fixes sont {fixedMinValue} et {fixedMaxValue}.",
@@ -2687,7 +2687,7 @@
               "best": "Le {scoreLabelLower} le plus faible constaté parmi les {count} {verticalTitle} atteint {bestValue}.",
               "average": "La moyenne pour les {count} {verticalTitle} disposant de données est de {averageValue}.",
               "product": "{productName}, avec un {scoreLabelLower} de {productAbsolute}{unit}, obtient la note de {productOn20}/20.",
-              "sigmaBounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
+              "sigmaBounds": "La normalisation couvre l'intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
               "percentile": "Ce produit se situe autour du {percentile}ᵉ percentile de la distribution.",
               "minmax_observed": "Les valeurs observées vont de {worstValue} à {bestValue}.",
               "minmax_fixed": "Les bornes fixes sont {fixedMinValue} et {fixedMaxValue}.",
@@ -2721,7 +2721,7 @@
               "constant": "Méthode statistique : Constante"
             },
             "sigma": {
-              "bounds": "La normalisation couvre l’intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
+              "bounds": "La normalisation couvre l'intervalle [{sigmaLower}{unit} ; {sigmaUpper}{unit}] basé sur {sigmaK}σ autour de la moyenne.",
               "scoring": "La note est calculée en comparant la valeur aux bornes ±{sigmaK}σ autour de la moyenne.",
               "distribution": "La notation utilise l'écart-type ({sigma}{unit}) pour s'assurer que les valeurs extrêmes n'écrasent pas les différences entre produits courants."
             },
@@ -2733,7 +2733,7 @@
               "scoring": "La note est ramenée à une échelle commune via les bornes fixes [{fixedMin}{unit} ; {fixedMax}{unit}]."
             },
             "minmax_observed": {
-              "scoring": "La note est calculée en projetant la valeur sur l’échelle des valeurs observées sur le marché [min: {worst}{unit} ; max: {best}{unit}]."
+              "scoring": "La note est calculée en projetant la valeur sur l'échelle des valeurs observées sur le marché [min: {worst}{unit} ; max: {best}{unit}]."
             },
             "minmax_quantile": {
               "scoring": "La note est calculée via des bornes par quantiles [{quantileLow}{unit} ; {quantileHigh}{unit}] pour limiter l'effet des valeurs extrêmes."
@@ -2871,7 +2871,7 @@
     "price": {
       "competition": {
         "title": "Niveau de concurrence",
-        "lowDescription": "Peu d’offres disponibles, la comparaison est limitée.",
+        "lowDescription": "Peu d'offres disponibles, la comparaison est limitée.",
         "count": "{count} offres",
         "cta": "Voir les {count} offres",
         "low": "Concurrence faible !",
@@ -2930,7 +2930,7 @@
       },
       "historyTitle": "Historique des prix",
       "noHistory": "Pas assez de données pour afficher l'historique des prix.",
-      "subtitle": "Suivez l’évolution des prix et comparez les offres.",
+      "subtitle": "Suivez l'évolution des prix et comparez les offres.",
       "title": "Prix et évolution",
       "trend": {
         "decrease": "Baisse de {amount}",
@@ -3001,12 +3001,12 @@
         "badgeAlt": "Comparateur indépendant"
       },
       "logoAlt": "Icône Nudger orange",
-      "mission": "Nudger.fr est une approche ouverte pour évaluer l’impact écologique et social des biens que nous achetons.",
+      "mission": "Nudger.fr est une approche ouverte pour évaluer l'impact écologique et social des biens que nous achetons.",
       "rightsReserved": "Tous droits réservés"
     },
     "hero": {
       "defaultCtaText": "Appel à l'action",
-      "defaultSubtitle": "(Pack dev/demo) Démo vidéo hero…",
+      "defaultSubtitle": "(Pack dev/demo) Démo vidéo hero...",
       "defaultTitle": "Titre par défaut",
       "mainSubtitle": "Acheter Mieux sans dépenser plus",
       "mainTitle": "Nudger : Le comparateur écologique"
@@ -3031,7 +3031,7 @@
         "guestLabel": "Session privée",
         "noRoles": "Aucun rôle attribué",
         "clearCache": "Vider le cache",
-        "clearingCache": "Nettoyage du cache…",
+        "clearingCache": "Nettoyage du cache...",
         "logout": "Se déconnecter",
         "privacy": {
           "title": "Session respectueuse de la vie privée",
@@ -3224,7 +3224,7 @@
       "expand": "Afficher les détails de la version {name}",
       "collapse": "Masquer les détails de la version {name}"
     },
-    "loading": "Chargement des notes de version…",
+    "loading": "Chargement des notes de version...",
     "empty": "Les notes de version seront publiées bientôt.",
     "errors": {
       "loadFailed": "Impossible de charger les notes de version. Merci de réessayer."
@@ -3265,7 +3265,7 @@
       "subtitle": "Une équipe engagée qui mêle tech, environnement et impact social.",
       "title": "Les femmes et les hommes derrière Nudger"
     },
-    "loading": "Chargement des membres…",
+    "loading": "Chargement des membres...",
     "sections": {
       "contributors": {
         "eyebrow": "Communauté",
@@ -3285,16 +3285,16 @@
   "pwa": {
     "install": {
       "title": "Installer Nudger",
-      "description": "Ajoutez Nudger à votre écran d’accueil pour garder éco-scores et alertes prix sous la main.",
-      "cta": "Installer l’app",
+      "description": "Ajoutez Nudger à votre écran d'accueil pour garder éco-scores et alertes prix sous la main.",
+      "cta": "Installer l'app",
       "dismiss": "Plus tard",
       "updateTitle": "Mise à jour disponible",
       "updateDescription": "Une nouvelle version de Nudger est prête. Rechargez pour récupérer les derniers indicateurs.",
       "updateCta": "Recharger",
       "offlineReady": "Mode hors ligne prêt",
       "offlineReadyDescription": "Les derniers contenus restent accessibles même sans connexion.",
-      "success": "Nudger est installé. Retrouvez-le sur votre écran d’accueil.",
-      "error": "L’installation a échoué. Merci de réessayer."
+      "success": "Nudger est installé. Retrouvez-le sur votre écran d'accueil.",
+      "error": "L'installation a échoué. Merci de réessayer."
     },
     "offline": {
       "title": "Vous êtes hors ligne",
@@ -3327,7 +3327,7 @@
           "title": "Scanner",
           "description": "Utilisez votre caméra pour obtenir instantanément impact et prix.",
           "helper": "Alignez le code-barres dans le cadre pour un décodage immédiat.",
-          "loading": "Démarrage du scanner…",
+          "loading": "Démarrage du scanner...",
           "error": "Scanner indisponible. Réessayez ou lancez une recherche.",
           "badge": "Live"
         },
@@ -3433,7 +3433,7 @@
     "loader": {
       "eyebrow": "Share-to",
       "title": "Analyse en cours",
-      "pending": "Nous cherchons la meilleure correspondance…",
+      "pending": "Nous cherchons la meilleure correspondance...",
       "error": "Impossible de lire ce lien.",
       "timeout": "C'est un peu plus long que prévu.",
       "progressAria": "Progression de l'analyse share-to",
