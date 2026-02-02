@@ -26,54 +26,18 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author gof
  *
  */
-public class AdminController {
+public class SitemapController {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SitemapController.class);
 
-	// The siteConfig
-	private final UiConfig config;
-
-
-	private final VerticalsConfigService verticalService;
 
 	private final SitemapGenerationService sitemapService;
 
-	private ProductRepository repository;
 
 
-	private VerticalsConfigService verticalsConfigService;
-
-
-	public AdminController(UiConfig config, VerticalsConfigService verticalsConfigService,
-			ProductRepository repository, SitemapGenerationService sitemapService) {
-		this.config = config;
-		this.verticalService = verticalsConfigService;
+	public SitemapController(
+			 SitemapGenerationService sitemapService) {
 		this.sitemapService = sitemapService;
-		this.repository = repository;
-		this.verticalsConfigService = verticalsConfigService;
-	}
-
-	//////////////////////////////////////////////////////////////
-	// Mappings
-	//////////////////////////////////////////////////////////////
-
-	/**
-	 * reload verticals config
-	 *
-	 * @param request
-	 * @return
-	 */
-	@GetMapping("/reloadConfigs")
-	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
-	public ModelAndView reloadConfigs(final HttpServletRequest request,
-			@RequestParam(name = "r", required = false) String redircectUrl) {
-		verticalService.loadConfigs();
-		ModelAndView mv = null;
-		if (null != redircectUrl) {
-			mv = new ModelAndView("redirect:" + redircectUrl);
-			mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
-		}
-		return mv;
 	}
 
 	/**
