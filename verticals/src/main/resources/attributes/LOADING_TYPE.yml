@@ -1,0 +1,17 @@
+key: "LOADING_TYPE"
+faIcon: "mdi-washing-machine"
+name:
+  default: "Loading type"
+  fr: "Type de chargement"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "CHARGEMENT"
+    - "TYPE DE CHARGEMENT"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

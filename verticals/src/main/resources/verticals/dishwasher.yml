@@ -8,6 +8,7 @@ id: dishwasher
 
 order: 4
 averageHoursPerDay: 1.0
+
 parsers:
   weight:
     minKg: 15.0
@@ -40,11 +41,11 @@ popular: true
 
 # The mainly presented attributes for this category
 popularAttributes:
-  - CLASSE_ENERGY
-  - ENERGY_CONSUMPTION_100_CYCLES
-  - WATER_CONSUMPTION
-  - NOISE_LEVEL
   - PLACE_SETTINGS
+  - NOISE_LEVEL
+  - WATER_CONSUMPTION
+  - CLASSE_ENERGY
+  - INSTALLATION_TYPE
 
 # GenAiConfig for this vertical
 genAiConfig:
@@ -403,7 +404,7 @@ nudgeToolConfig:
         en: "Dishwashers with less than 10 place settings."
         fr: "Lave-vaisselles de moins de 10 couverts."
 
-    - id: "capacity_medium"
+    - id: "capacity_standard"
       group: "capacity"
       criterias:
         - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
@@ -414,17 +415,17 @@ nudgeToolConfig:
           value: "14"
       image: "medium-capacity.png"
       url:
-        en: "medium-capacity"
-        fr: "capacite-moyenne"
+        en: "standard-capacity"
+        fr: "capacite-scandard"
       caption:
-        en: "10 - 13 settings"
-        fr: "10 - 13 couverts"
+        en: "10 - 14 settings"
+        fr: "10 - 14 couverts"
       title:
         en: "Standard Capacity"
         fr: "Capacité Standard"
       description:
-        en: "Dishwashers with 10 to 13 place settings."
-        fr: "Lave-vaisselles de 10 à 13 couverts."
+        en: "Dishwashers with 10 to 14 place settings."
+        fr: "Lave-vaisselles de 10 à 14 couverts."
 
     - id: "capacity_large"
       group: "capacity"
@@ -437,14 +438,14 @@ nudgeToolConfig:
         en: "large-capacity"
         fr: "grande-capacite"
       caption:
-        en: "> 13 settings"
-        fr: "> 13 couverts"
+        en: "> 14 settings"
+        fr: "> 14 couverts"
       title:
         en: "Large Capacity"
         fr: "Grande Capacité"
       description:
-        en: "Dishwashers with more than 13 place settings."
-        fr: "Lave-vaisselles de plus de 13 couverts."
+        en: "Dishwashers with more than 14 place settings."
+        fr: "Lave-vaisselles de plus de 14 couverts."
 
     - id: "installation_builtin"
       group: "installation"
@@ -566,6 +567,12 @@ attributesConfig:
     - key: "YEAR"
     - key: "COLOR"
     - key: "REPAIRABILITY_INDEX"
+    - key: "POWERDELAYSTART"
+    - key: "DRYINGPERFORMANCEINDEXV2"
+    - key: "CLEANINGPERFORMANCEINDEXV2"
+    - key: "POWERSTANDBYMODE"
+    - key: "POWEROFFMODE"
+    - key: "LOADING_TYPE"
 
 ####################################################################################
 # Product classification from categories (samples, will be overridden post-generation)

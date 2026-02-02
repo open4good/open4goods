@@ -1,0 +1,16 @@
+key: "LOW_NOISE"
+faIcon: "mdi-volume-off"
+name:
+  default: "Low noise"
+  fr: "Silencieux"
+filteringType: "BOOLEAN"
+asScore: false
+synonyms:
+  all:
+    - "LOWNOISEAPPLIANCE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

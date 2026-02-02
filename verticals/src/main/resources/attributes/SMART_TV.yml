@@ -1,0 +1,18 @@
+key: "SMART TV"
+filteringType: "TEXT"
+asScore: false
+faIcon: "mdi-television-box"
+name:
+  default: "Smart TV"
+  fr: "Smart TV"
+synonyms:
+  all:
+  icecat.biz:
+    - "SMART TV"
+  rakuten.com:
+    - "SMART TV"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true

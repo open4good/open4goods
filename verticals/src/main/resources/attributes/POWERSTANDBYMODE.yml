@@ -1,0 +1,15 @@
+key: "POWERSTANDBYMODE"
+faIcon: "mdi-power-sleep"
+name:
+  default: "Standby power consumption"
+  fr: "Consommation en veille"
+filteringType: "NUMERIC"
+unit: "W"
+asScore: false
+synonyms:
+  all:
+    - "POWERSTANDBYMODE"
+parser:
+  normalize: true
+  trim: true
+  removeParenthesis: false

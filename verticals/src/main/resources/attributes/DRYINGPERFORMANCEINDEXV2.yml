@@ -1,0 +1,14 @@
+key: "DRYINGPERFORMANCEINDEXV2"
+faIcon: "mdi-weather-windy"
+name:
+  default: "Drying performance index"
+  fr: "Indice de performance de séchage"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "DRYINGPERFORMANCEINDEXV2"
+parser:
+  normalize: true
+  trim: true
+  removeParenthesis: false

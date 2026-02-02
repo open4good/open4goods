@@ -1,0 +1,16 @@
+key: "RAPPORT D'IMAGE"
+filteringType: "TEXT"
+asScore: false
+faIcon: "mdi-aspect-ratio"
+name:
+  default: "Aspect Ratio"
+  fr: "Rapport d'image"
+synonyms:
+  all:
+  rakuten.com:
+    - "RAPPORT D'IMAGE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true

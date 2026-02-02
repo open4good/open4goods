@@ -1,0 +1,16 @@
+key: "FAST_FREEZE"
+faIcon: "mdi-snowflake"
+name:
+  default: "Fast freeze"
+  fr: "Congélation rapide"
+filteringType: "BOOLEAN"
+asScore: false
+synonyms:
+  all:
+    - "FASTFREEZE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

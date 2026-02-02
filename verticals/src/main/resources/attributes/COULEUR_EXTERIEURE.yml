@@ -1,0 +1,18 @@
+key: "COULEUR_EXTERIEURE"
+faIcon: "mdi-palette"
+name:
+  default: "Color"
+  fr: "Couleur"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "COULEUR EXTERIEURE"
+    - "COULEUR"
+    - "COLORIS"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

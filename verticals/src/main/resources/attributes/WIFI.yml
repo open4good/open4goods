@@ -1,0 +1,18 @@
+key: "WIFI"
+filteringType: "TEXT"
+asScore: false
+faIcon: "mdi-wifi"
+name:
+  default: "WiFi"
+  fr: "WiFi"
+synonyms:
+  all:
+  icecat.biz:
+    - "WIFI"
+  rakuten.com:
+    - "WIFI"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true

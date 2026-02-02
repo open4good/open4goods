@@ -1,0 +1,18 @@
+key: "DISPOSITIF_DE_SECURITE"
+faIcon: "mdi-lock-outline"
+name:
+  default: "Security features"
+  fr: "Sécurité"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "DISPOSITIF DE SECURITE"
+    - "SECURITE"
+    - "PORTE FROIDE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

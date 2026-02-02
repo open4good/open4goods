@@ -15,6 +15,7 @@ synonyms:
     - "SPINSPEEDHALF"
     - "SPINSPEEDQUARTER"
     - "VITESSE D'ESSORAGE"
+    - "VITESSE D'ESSORAGE MAXIMALE"
     - "ESSORAGE"
 parser:
   normalize: true

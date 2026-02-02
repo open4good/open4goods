@@ -17,6 +17,7 @@ synonyms:
     - "SPINCLASS"
     - "SPINDRYINGCLASS"
     - "CLASSE D'ESSORAGE"
+    - "CLASSE D'EFFICACITE D'ESSORAGE"
 parser:
   normalize: true
   trim: true

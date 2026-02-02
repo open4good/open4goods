@@ -16,6 +16,7 @@ synonyms:
     - "CAPACITÉ"
     - "CAPACITE DE LAVAGE"
     - "CAPACITÉ DE LAVAGE"
+    - "CAPACITE NOMINALE"
     - "CHARGE"
 parser:
   normalize: true

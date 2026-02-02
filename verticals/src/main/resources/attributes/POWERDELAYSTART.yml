@@ -1,0 +1,15 @@
+key: "POWERDELAYSTART"
+faIcon: "mdi-clock-start"
+name:
+  default: "Start delay"
+  fr: "Départ différé"
+filteringType: "NUMERIC"
+unit: "h"
+asScore: false
+synonyms:
+  all:
+    - "POWERDELAYSTART"
+parser:
+  normalize: true
+  trim: true
+  removeParenthesis: false

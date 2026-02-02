@@ -1,0 +1,18 @@
+key: "TYPE HD"
+filteringType: "TEXT"
+asScore: false
+faIcon: "mdi-video-outline"
+name:
+  default: "HD Type"
+  fr: "Type HD"
+synonyms:
+  all:
+  icecat.biz:
+    - "TYPE HD"
+  rakuten.com:
+    - "TYPE HD"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true

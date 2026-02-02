@@ -1,0 +1,16 @@
+key: "WINE_STORAGE"
+faIcon: "mdi-glass-wine"
+name:
+  default: "Wine storage"
+  fr: "Cave à vin"
+filteringType: "BOOLEAN"
+asScore: false
+synonyms:
+  all:
+    - "WINESTORAGEAPPLIANCE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

@@ -1,0 +1,14 @@
+key: "CLEANINGPERFORMANCEINDEXV2"
+faIcon: "mdi-sparkles"
+name:
+  default: "Cleaning performance index"
+  fr: "Indice de performance de lavage"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "CLEANINGPERFORMANCEINDEXV2"
+parser:
+  normalize: true
+  trim: true
+  removeParenthesis: false

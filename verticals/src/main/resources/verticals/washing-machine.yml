@@ -12,6 +12,9 @@ id: washing-machine
 averageHoursPerDay: 0.5
 
 parsers:
+  weight:
+    minKg: 30.0
+    maxKg: 150.0
   warranty:
     minYears: 0.0
     maxYears: 10.0
@@ -40,7 +43,14 @@ availableImpactScoreCriterias:
   - BRAND_SUSTAINALYTICS_SCORING
   - WATER_CONSUMPTION
   - ENERGY_CONSUMPTION_100_CYCLES
-  - NOISE_LEVEL
+  - NOISE_LEVEL_SPIN
+
+popularAttributes:
+  - WASHING_CAPACITY
+  - SPIN_SPEED
+  - SPIN_CLASS
+  - LOADING_TYPE
+  - CLASSE_ENERGY
 
 # GenAiConfig for this vertical
 genAiConfig:
@@ -493,311 +503,3504 @@ attributesConfig:
   # The line after configs: will be updated with the attribtes suggestion API, with commented attributes
   ##################################################################################################################
   configs:
-    ################################################################################
-    #                         CUSTOM_4
-    ################################################################################
-    # Generated on 24/01/2026 02:07, coverage was 75% (952/1253) .
-    # TOP attributes values are :
-    #     - ELECTROMENAGER (364 items)
-    #     - Darty Occasion (133 items)
-    #     - G (48 items)
-    #     - Doctor Brandt (43 items)
-    #     - Icoza (35 items)
-    #     - Super10Count (33 items)
-    #     - Darty (33 items)
-    #     - Underdog (23 items)
-    #     - 0.0 (21 items)
-    #     - $linkur (19 items)
-    #     + 24 more attributes...
-    #
-    ##################################
-    #   - key: "CUSTOM_4"
-    #     filteringType: "STRING"
-    #     asScore: false
-    #     faIcon: ""
-    #
-    #     icecatFeaturesIds:
-    #      - TODO
-    #
-    #     name:
-    #      default: "!!COMPLETE_HERE!!"
-    #      fr: "!!COMPLETE_HERE!!"
-    #
-    #     synonyms:
-    #      all:
-    #      pneus.fr:
-    #        - "CUSTOM_4"
-    #      joom.com:
-    #        - "CUSTOM_4"
-    #      123pneus.fr:
-    #        - "CUSTOM_4"
-    #      darty.com:
-    #        - "CUSTOM_4"
-    #      fnac.com:
-    #        - "CUSTOM_4"
-    #      JoomFR:
-    #        - "CUSTOM_4"
-    #      cdiscount.com:
-    #        - "CUSTOM_4"
-    #      manomano.fr:
-    #        - "CUSTOM_4"
-    #      PneusFR:
-    #        - "CUSTOM_4"
-    #
-    #    parser:
-    #      normalize: true
-    #      trim: false
-    #      lowerCase: false
-    #      upperCase: true
-    #      removeParenthesis: false
-    #      deleteTokens:
-    #        - "..."
-    ################################################################################
-    #                         TYPE DE PRODUIT
-    ################################################################################
-    # Generated on 24/01/2026 02:07, coverage was 75% (943/1253) .
-    # TOP attributes values are :
-    #     - Lave-linge (780 items)
-    #     - Lave-linge sechant (149 items)
-    #     - Mini lave-linge (5 items)
-    #     - Hotte (2 items)
-    #
-    ##################################
-    #   - key: "TYPE DE PRODUIT"
-    #     filteringType: "STRING"
-    #     asScore: false
-    #     faIcon: ""
-    #
-    #     icecatFeaturesIds:
-    #      - TODO
-    #
-    #     name:
-    #      default: "!!COMPLETE_HERE!!"
-    #      fr: "!!COMPLETE_HERE!!"
-    #
-    #     synonyms:
-    #      all:
-    #      rakuten.com:
-    #        - "TYPE DE PRODUIT"
-    #
-    #    parser:
-    #      normalize: true
-    #      trim: false
-    #      lowerCase: false
-    #      upperCase: true
-    #      removeParenthesis: false
-    #      deleteTokens:
-    #        - "..."
-    ################################################################################
-    #                         CUSTOM_3
-    ################################################################################
-    # Generated on 24/01/2026 02:07, coverage was 74% (938/1253) .
-    # TOP attributes values are :
-    #     - 0 (297 items)
-    #     - 0.00 (60 items)
-    #     - Falken (5 items)
-    #     - 26 (3 items)
-    #     - 237 (3 items)
-    #     - 41 (3 items)
-    #     - 8 (3 items)
-    #     - 13 (3 items)
-    #     - 46 (3 items)
-    #     - 5290 (3 items)
-    #     + 31 more attributes...
-    #
-    ##################################
-    #   - key: "CUSTOM_3"
-    #     filteringType: "STRING"
-    #     asScore: false
-    #     faIcon: ""
-    #
-    #     icecatFeaturesIds:
-    #      - TODO
-    #
-    #     name:
-    #      default: "!!COMPLETE_HERE!!"
-    #      fr: "!!COMPLETE_HERE!!"
-    #
-    #     synonyms:
-    #      all:
-    #      pneus.fr:
-    #        - "CUSTOM_3"
-    #      123pneus.fr:
-    #        - "CUSTOM_3"
-    #      fnac.com:
-    #        - "CUSTOM_3"
-    #      cdiscount.com:
-    #        - "CUSTOM_3"
-    #      manomano.fr:
-    #        - "CUSTOM_3"
-    #      PneusFR:
-    #        - "CUSTOM_3"
-    #
-    #    parser:
-    #      normalize: true
-    #      trim: false
-    #      lowerCase: false
-    #      upperCase: true
-    #      removeParenthesis: false
-    #      deleteTokens:
-    #        - "..."
-    ################################################################################
-    #                         CUSTOM_5
-    ################################################################################
-    # Generated on 24/01/2026 02:07, coverage was 66% (837/1253) .
-    # TOP attributes values are :
-    #     - 0 (481 items)
-    #     - 25 euros offerts des 249 euros d'achat jusqu'au 09/01/2026 (39 items)
-    #     - 10 euros offerts des 79 euros d'achat jusqu'au 01/12/2025 (11 items)
-    #     - 15 euros offerts des 129 euros d'achat jusqu'au 09/01/2026 (7 items)
-    #     - 0.00 (7 items)
-    #     - true (4 items)
-    #     - 25euros offerts des 249euros d'achat jusqu'au 20/08/2025 (3 items)
-    #     - 15euros offerts des 129euros d'achat jusqu'au 07/06/2025 (2 items)
-    #     - 15euros offerts des 129euros d'achat jusqu'au 23/07/2025 (2 items)
-    #     - 25 euros de remise des 299 euros d'achat (2 items)
-    #     + 6 more attributes...
-    #
-    ##################################
-    #   - key: "CUSTOM_5"
-    #     filteringType: "STRING"
-    #     asScore: false
-    #     faIcon: ""
-    #
-    #     icecatFeaturesIds:
-    #      - TODO
-    #
-    #     name:
-    #      default: "!!COMPLETE_HERE!!"
-    #      fr: "!!COMPLETE_HERE!!"
-    #
-    #     synonyms:
-    #      all:
-    #      pneus.fr:
-    #        - "CUSTOM_5"
-    #      joom.com:
-    #        - "CUSTOM_5"
-    #      123pneus.fr:
-    #        - "CUSTOM_5"
-    #      darty.com:
-    #        - "CUSTOM_5"
-    #      fnac.com:
-    #        - "CUSTOM_5"
-    #      JoomFR:
-    #        - "CUSTOM_5"
-    #      cdiscount.com:
-    #        - "CUSTOM_5"
-    #      manomano.fr:
-    #        - "CUSTOM_5"
-    #      PneusFR:
-    #        - "CUSTOM_5"
-    #
-    #    parser:
-    #      normalize: true
-    #      trim: false
-    #      lowerCase: false
-    #      upperCase: true
-    #      removeParenthesis: false
-    #      deleteTokens:
-    #        - "..."
-    ################################################################################
-    #                         CAPACITE NOMINALE
-    ################################################################################
-    # Generated on 24/01/2026 02:07, coverage was 66% (827/1253) .
-    # TOP attributes values are :
-    #     - 9 kg (177 items)
-    #     - 8 kg (157 items)
-    #     - 10 kg (104 items)
-    #     - 7 kg (78 items)
-    #     - 6 kg (58 items)
-    #     - 11 kg (34 items)
-    #     - 8 (29 items)
-    #     - 9 (29 items)
-    #     - 7 (25 items)
-    #     - 12 kg (22 items)
-    #     + 19 more attributes...
-    #
-    ##################################
-    #   - key: "CAPACITE NOMINALE"
-    #     filteringType: "STRING"
-    #     asScore: false
-    #     faIcon: ""
-    #
-    #     icecatFeaturesIds:
-    #      - TODO
-    #
-    #     name:
-    #      default: "!!COMPLETE_HERE!!"
-    #      fr: "!!COMPLETE_HERE!!"
-    #
-    #     synonyms:
-    #      all:
-    #      icecat.biz:
-    #        - "CAPACITE NOMINALE"
-    #      rakuten.com:
-    #        - "CAPACITE NOMINALE"
-    #      123comparer.fr:
-    #        - "CAPACITE NOMINALE"
-    #
-    #    parser:
-    #      normalize: true
-    #      trim: false
-    #      lowerCase: false
-    #      upperCase: true
-    #      removeParenthesis: false
-    #      deleteTokens:
-    #        - "..."
-    ################################################################################
-    #                         CUSTOM_1
-    ################################################################################
-    # Generated on 24/01/2026 02:07, coverage was 65% (826/1253) .
-    # TOP attributes values are :
-    #     - G (185 items)
-    #     - Produit MarketPlace (103 items)
-    #     - A (102 items)
-    #     - Etat correct (81 items)
-    #     - Bon état (32 items)
-    #     - bons plans (30 items)
-    #     - B (21 items)
-    #     - Trés bon état (16 items)
-    #     - 1106 (13 items)
-    #     - 1102 (13 items)
-    #     + 24 more attributes...
-    #
-    ##################################
-    #   - key: "CUSTOM_1"
-    #     filteringType: "STRING"
-    #     asScore: false
-    #     faIcon: ""
-    #
-    #     icecatFeaturesIds:
-    #      - TODO
-    #
-    #     name:
-    #      default: "!!COMPLETE_HERE!!"
-    #      fr: "!!COMPLETE_HERE!!"
-    #
-    #     synonyms:
-    #      all:
-    #      rueducommerce.fr:
-    #        - "CUSTOM_1"
-    #      pneus.fr:
-    #        - "CUSTOM_1"
-    #      joom.com:
-    #        - "CUSTOM_1"
-    #      123pneus.fr:
-    #        - "CUSTOM_1"
-    #      darty.com:
-    #        - "CUSTOM_1"
-    #      fnac.com:
-    #        - "CUSTOM_1"
-    #      UNDERDOGFR:
-    #        - "CUSTOM_1"
-    #      underdog.shop:
-    #        - "CUSTOM_1"
-    #      manomano.fr:
-    #        - "CUSTOM_1"
-    #      PneusFR:
+    - key: "PRODUCT_TYPE"
+    - key: "WASHING_CAPACITY"
+    - key: "SPIN_SPEED"
+    - key: "SPIN_CLASS"
+    - key: "LOADING_TYPE"
+    - key: "ENERGY_CONSUMPTION_100_CYCLES"
+    - key: "PROGRAM_DURATION_ECO"
+    - key: "NOISE_LEVEL_SPIN"
+    - key: "STYLE"
+    - key: "COLOR"
+
+  ################################################################################
+  #                         TYPE DE PRODUIT
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 43% (56/129) . 
+  # TOP attributes values are :
+#     - Lave-linge (49 items)
+#     - Lave-linge sechant (7 items)
+#   
+  ##################################
+#   - key: "TYPE DE PRODUIT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "TYPE DE PRODUIT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         VITESSE D'ESSORAGE MAXIMALE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 37% (48/129) . 
+  # TOP attributes values are :
+#     - 1400 tours/min (22 items)
+#     - 1400 (7 items)
+#     - 1200 tours/min (5 items)
+#     - 1200 (4 items)
+#     - 1351 tours/min (3 items)
+#     - 1000 tours/min (2 items)
+#     - 1500 tours/min (2 items)
+#   
+  ##################################
+#   - key: "VITESSE D'ESSORAGE MAXIMALE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "VITESSE D'ESSORAGE MAXIMALE"
+#      rakuten.com:
+#        - "VITESSE D'ESSORAGE MAXIMALE"
+#      123comparer.fr:
+#        - "VITESSE D'ESSORAGE MAXIMALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CAPACITE NOMINALE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 36% (47/129) . 
+  # TOP attributes values are :
+#     - 9 kg (8 items)
+#     - 10 kg (7 items)
+#     - 7 kg (6 items)
+#     - 8 kg (5 items)
+#     - 6 kg (4 items)
+#     - 9 (3 items)
+#     - 11 kg (2 items)
+#     - 11 (2 items)
+#     - 7 (2 items)
+#   
+  ##################################
+#   - key: "CAPACITE NOMINALE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "CAPACITE NOMINALE"
+#      rakuten.com:
+#        - "CAPACITE NOMINALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CHARGEMENT
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 32% (42/129) . 
+  # TOP attributes values are :
+#     - Frontal (37 items)
+#     - Top (5 items)
+#   
+  ##################################
+#   - key: "CHARGEMENT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "CHARGEMENT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSIMAGEWITHSCALE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 29% (38/129) . 
+  # TOP attributes values are :
+#     - A-Left-DarkGreen-WithAGScale.svg (21 items)
+#     - B-Left-MediumGreen-WithAGScale.svg (6 items)
+#     - APPP-Left-DarkGreen-WithAPPPDScale.svg (4 items)
+#     - D-Left-Yellow-WithAGScale.svg (3 items)
+#     - C-Left-LightGreen-WithAGScale.svg (3 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSIMAGEWITHSCALE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSIMAGEWITHSCALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MOISTURE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 29% (38/129) . 
+  # TOP attributes values are :
+#     - 53.9 (15 items)
+#     - 53 (6 items)
+#     - 53.4 (3 items)
+#     - 44 (2 items)
+#     - 52.9 (2 items)
+#     - 62.9 (2 items)
+#     - 53.5 (2 items)
+#   
+  ##################################
+#   - key: "MOISTURE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "MOISTURE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSIMAGE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 29% (38/129) . 
+  # TOP attributes values are :
+#     - A-Left-DarkGreen-WithAGScale.svg (21 items)
+#     - B-Left-MediumGreen-WithAGScale.svg (6 items)
+#     - APPP-Left-DarkGreen.png (4 items)
+#     - D-Left-Yellow-WithAGScale.svg (3 items)
+#     - C-Left-LightGreen-WithAGScale.svg (3 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSIMAGE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSIMAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CLASSE D'EFFICACITE D'ESSORAGE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 29% (38/129) . 
+  # TOP attributes values are :
+#     - Classe B (22 items)
+#     - B (12 items)
+#     - Classe A (2 items)
+#   
+  ##################################
+#   - key: "CLASSE D'EFFICACITE D'ESSORAGE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "CLASSE D'EFFICACITE D'ESSORAGE"
+#      rakuten.com:
+#        - "CLASSE D'EFFICACITE D'ESSORAGE"
+#      123comparer.fr:
+#        - "CLASSE D'EFFICACITE D'ESSORAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         WEBLINKSUPPLIER
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - https://corporate.haier-europe.com/en/ (5 items)
+#     - https://global.hisense.com/laundry (4 items)
+#     - https://www.samsung.com/support (3 items)
+#     - http://www.vedette.fr (3 items)
+#     - www.cecotec.es (2 items)
+#     - www.haier.com (2 items)
+#     - https://www.lg.com/global/ajax/common_manual (2 items)
+#   
+  ##################################
+#   - key: "WEBLINKSUPPLIER"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "WEBLINKSUPPLIER"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCONSPER100CYCLE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 51 (5 items)
+#     - 42 (3 items)
+#     - 45 (3 items)
+#     - 57 (3 items)
+#     - 49 (3 items)
+#     - 48 (2 items)
+#     - 60 (2 items)
+#     - 56 (2 items)
+#     - 44 (2 items)
+#     - 59 (2 items)
+#   
+  ##################################
+#   - key: "ENERGYCONSPER100CYCLE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCONSPER100CYCLE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         RELEASESSILVERIONS
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - false (34 items)
+#   
+  ##################################
+#   - key: "RELEASESSILVERIONS"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "RELEASESSILVERIONS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PROGRAMMEDURATIONRATED
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 228 (7 items)
+#     - 239 (5 items)
+#     - 208 (5 items)
+#     - 240 (3 items)
+#     - 188 (3 items)
+#     - 198 (2 items)
+#     - 195 (2 items)
+#   
+  ##################################
+#   - key: "PROGRAMMEDURATIONRATED"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "PROGRAMMEDURATIONRATED"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MAXTEMPERATUREHALF
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 27 (5 items)
+#     - 32 (5 items)
+#     - 29 (4 items)
+#     - 30 (3 items)
+#     - 28 (3 items)
+#     - 26 (3 items)
+#     - 25 (3 items)
+#     - 34 (2 items)
+#   
+  ##################################
+#   - key: "MAXTEMPERATUREHALF"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "MAXTEMPERATUREHALF"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PROGRAMMEDURATIONHALF
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 180 (6 items)
+#     - 174 (6 items)
+#     - 162 (4 items)
+#     - 150 (3 items)
+#     - 155 (3 items)
+#     - 156 (2 items)
+#     - 178 (2 items)
+#     - 160 (2 items)
+#   
+  ##################################
+#   - key: "PROGRAMMEDURATIONHALF"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "PROGRAMMEDURATIONHALF"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         RINSINGEFFECTIVENESS
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 5 (20 items)
+#     - 4.9 (11 items)
+#   
+  ##################################
+#   - key: "RINSINGEFFECTIVENESS"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "RINSINGEFFECTIVENESS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         WASHINGEFFICIENCYINDEXV2
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 1.031 (33 items)
+#   
+  ##################################
+#   - key: "WASHINGEFFICIENCYINDEXV2"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "WASHINGEFFICIENCYINDEXV2"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POWERDELAYSTART
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 4 (29 items)
+#     - 3.7 (3 items)
+#   
+  ##################################
+#   - key: "POWERDELAYSTART"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "POWERDELAYSTART"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PROGRAMMEDURATIONQUARTER
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 155 (5 items)
+#     - 180 (4 items)
+#     - 150 (4 items)
+#     - 160 (3 items)
+#     - 162 (3 items)
+#     - 174 (3 items)
+#     - 168 (2 items)
+#     - 154 (2 items)
+#   
+  ##################################
+#   - key: "PROGRAMMEDURATIONQUARTER"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "PROGRAMMEDURATIONQUARTER"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POWEROFFMODE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 0.5 (27 items)
+#     - 0.49 (5 items)
+#   
+  ##################################
+#   - key: "POWEROFFMODE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "POWEROFFMODE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSRANGE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - A_G (34 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSRANGE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSRANGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MAXTEMPERATUREQUARTER
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 23 (14 items)
+#     - 25 (5 items)
+#     - 26 (4 items)
+#     - 24 (3 items)
+#     - 22 (2 items)
+#     - 27 (2 items)
+#   
+  ##################################
+#   - key: "MAXTEMPERATUREQUARTER"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "MAXTEMPERATUREQUARTER"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         EPREL CATEGORY
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 24% (32/129) . 
+  # TOP attributes values are :
+#     - washingmachines2019 (26 items)
+#     - washerdriers2019 (4 items)
+#     - washingmachines (2 items)
+#   
+  ##################################
+#   - key: "EPREL CATEGORY"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "EPREL CATEGORY"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ECHELLE D'EFFICACITE ENERGETIQUE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 20% (26/129) . 
+  # TOP attributes values are :
+#     - A-G (24 items)
+#   
+  ##################################
+#   - key: "ECHELLE D'EFFICACITE ENERGETIQUE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "ECHELLE D'EFFICACITE ENERGETIQUE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         STYLE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 17% (23/129) . 
+  # TOP attributes values are :
+#     - null (23 items)
+#   
+  ##################################
+#   - key: "STYLE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      darty.com:
+#        - "STYLE"
+#      DartyProCashback:
+#        - "STYLE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         COULEUR GENERIQUE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 17% (22/129) . 
+  # TOP attributes values are :
+#     - Blanc (17 items)
+#     - Noir (3 items)
+#   
+  ##################################
+#   - key: "COULEUR GENERIQUE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "COULEUR GENERIQUE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POWERSTANDBYMODE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 16% (21/129) . 
+  # TOP attributes values are :
+#     - 0.5 (11 items)
+#     - 1 (8 items)
+#   
+  ##################################
+#   - key: "POWERSTANDBYMODE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "POWERSTANDBYMODE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TRANCHE DE POIDS
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 15% (20/129) . 
+  # TOP attributes values are :
+#     - 50 à 70 kg (7 items)
+#     - + de 100 kg (5 items)
+#     - 500 g à 3 kg (4 items)
+#     - 70 à 100 kg (2 items)
+#   
+  ##################################
+#   - key: "TRANCHE DE POIDS"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "TRANCHE DE POIDS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         HAUTEUR EMBALLEE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 12% (16/129) . 
+  # TOP attributes values are :
+#     - 89 (5 items)
+#     - 88.5 (2 items)
+#     - 890 (2 items)
+#   
+  ##################################
+#   - key: "HAUTEUR EMBALLEE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "HAUTEUR EMBALLEE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         INDICE D'EFFICACITE DE LAVAGE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 12% (16/129) . 
+  # TOP attributes values are :
+#     - 1.031 (15 items)
+#   
+  ##################################
+#   - key: "INDICE D'EFFICACITE DE LAVAGE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "INDICE D'EFFICACITE DE LAVAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         NIVEAU SONORE (ESSORAGE)
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 10% (14/129) . 
+  # TOP attributes values are :
+#     - 72 (5 items)
+#     - 79 (2 items)
+#     - 76 (2 items)
+#   
+  ##################################
+#   - key: "NIVEAU SONORE (ESSORAGE)"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "NIVEAU SONORE (ESSORAGE)"
+#      123comparer.fr:
+#        - "NIVEAU SONORE (ESSORAGE)"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TYPE DE CHARGEMENT
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 10% (14/129) . 
+  # TOP attributes values are :
+#     - Front-load (12 items)
+#   
+  ##################################
+#   - key: "TYPE DE CHARGEMENT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "TYPE DE CHARGEMENT"
+#      123comparer.fr:
+#        - "TYPE DE CHARGEMENT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PLACEMENT DE L'APPAREIL
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 10% (14/129) . 
+  # TOP attributes values are :
+#     - Freestanding (placement) (13 items)
+#   
+  ##################################
+#   - key: "PLACEMENT DE L'APPAREIL"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "PLACEMENT DE L'APPAREIL"
+#      123comparer.fr:
+#        - "PLACEMENT DE L'APPAREIL"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ECRAN INTEGRE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - Y (13 items)
+#   
+  ##################################
+#   - key: "ECRAN INTEGRE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "ECRAN INTEGRE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MINUTERIE, DEPART DIFFERE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - Y (11 items)
+#     - N (2 items)
+#   
+  ##################################
+#   - key: "MINUTERIE, DEPART DIFFERE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "MINUTERIE, DEPART DIFFERE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         HAUTEUR DU COLIS
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - 890 (8 items)
+#   
+  ##################################
+#   - key: "HAUTEUR DU COLIS"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "HAUTEUR DU COLIS"
+#      123comparer.fr:
+#        - "HAUTEUR DU COLIS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POWERNETWORKSTANDBY
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - 2 (8 items)
+#     - 0 (4 items)
+#   
+  ##################################
+#   - key: "POWERNETWORKSTANDBY"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "POWERNETWORKSTANDBY"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         COULEUR EXTERIEURE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - Blanc (8 items)
+#     - Noir (2 items)
+#   
+  ##################################
+#   - key: "COULEUR EXTERIEURE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "COULEUR EXTERIEURE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         EMPLACEMENT CHARNIERE DE PORTE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 9% (12/129) . 
+  # TOP attributes values are :
+#     - Left (10 items)
+#   
+  ##################################
+#   - key: "EMPLACEMENT CHARNIERE DE PORTE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "EMPLACEMENT CHARNIERE DE PORTE"
+#      123comparer.fr:
+#        - "EMPLACEMENT CHARNIERE DE PORTE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PLAGE D’EFFICACITE ENERGETIQUE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 9% (12/129) . 
+  # TOP attributes values are :
+#     - A to G (10 items)
+#   
+  ##################################
+#   - key: "PLAGE D’EFFICACITE ENERGETIQUE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "PLAGE D’EFFICACITE ENERGETIQUE"
+#      123comparer.fr:
+#        - "PLAGE D’EFFICACITE ENERGETIQUE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CLASSE D'EMISSION SONORE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 9% (12/129) . 
+  # TOP attributes values are :
+#     - A (6 items)
+#     - C (3 items)
+#     - B (3 items)
+#   
+  ##################################
+#   - key: "CLASSE D'EMISSION SONORE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "CLASSE D'EMISSION SONORE"
+#      123comparer.fr:
+#        - "CLASSE D'EMISSION SONORE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         COULEUR DE LA PORTE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 8% (11/129) . 
+  # TOP attributes values are :
+#     - Black (5 items)
+#     - White (3 items)
+#   
+  ##################################
+#   - key: "COULEUR DE LA PORTE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "COULEUR DE LA PORTE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         SECURITE ENFANT
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 6% (9/129) . 
+  # TOP attributes values are :
+#     - Y (9 items)
+#   
+  ##################################
+#   - key: "SECURITE ENFANT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "SECURITE ENFANT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TENSION D'ENTREE AC
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 6% (9/129) . 
+  # TOP attributes values are :
+#     - 220 - 240 (8 items)
+#   
+  ##################################
+#   - key: "TENSION D'ENTREE AC"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "TENSION D'ENTREE AC"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         INDICATION DU TEMPS RESTANT
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 6% (9/129) . 
+  # TOP attributes values are :
+#     - Y (9 items)
+#   
+  ##################################
+#   - key: "INDICATION DU TEMPS RESTANT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "INDICATION DU TEMPS RESTANT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TECHNOLOGIE DE CONVERTISSEUR
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - Y (8 items)
+#   
+  ##################################
+#   - key: "TECHNOLOGIE DE CONVERTISSEUR"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "TECHNOLOGIE DE CONVERTISSEUR"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         NOMBRE DE PROGRAMMES DE LAVAGE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - 16 (5 items)
+#   
+  ##################################
+#   - key: "NOMBRE DE PROGRAMMES DE LAVAGE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "NOMBRE DE PROGRAMMES DE LAVAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         DEPART DIFFERE
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - 24 (7 items)
+#   
+  ##################################
+#   - key: "DEPART DIFFERE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "DEPART DIFFERE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CONTROLE PAR WI-FI
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - Y (6 items)
+#     - N (2 items)
+#   
+  ##################################
+#   - key: "CONTROLE PAR WI-FI"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "CONTROLE PAR WI-FI"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MATERIAU DU TAMBOUR
+  ################################################################################
+  # Generated on 02/02/2026 09:39, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - Stainless steel (8 items)
+#   
+  ##################################
+#   - key: "MATERIAU DU TAMBOUR"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "MATERIAU DU TAMBOUR"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+
+  ################################################################################
+  #                         TYPE DE PRODUIT
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 43% (56/129) . 
+  # TOP attributes values are :
+#     - Lave-linge (49 items)
+#     - Lave-linge sechant (7 items)
+#   
+  ##################################
+#   - key: "TYPE DE PRODUIT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "TYPE DE PRODUIT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         VITESSE D'ESSORAGE MAXIMALE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 37% (48/129) . 
+  # TOP attributes values are :
+#     - 1400 tours/min (22 items)
+#     - 1400 (7 items)
+#     - 1200 tours/min (5 items)
+#     - 1200 (4 items)
+#     - 1351 tours/min (3 items)
+#     - 1000 tours/min (2 items)
+#     - 1500 tours/min (2 items)
+#   
+  ##################################
+#   - key: "VITESSE D'ESSORAGE MAXIMALE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "VITESSE D'ESSORAGE MAXIMALE"
+#      rakuten.com:
+#        - "VITESSE D'ESSORAGE MAXIMALE"
+#      123comparer.fr:
+#        - "VITESSE D'ESSORAGE MAXIMALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CAPACITE NOMINALE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 36% (47/129) . 
+  # TOP attributes values are :
+#     - 9 kg (8 items)
+#     - 10 kg (7 items)
+#     - 7 kg (6 items)
+#     - 8 kg (5 items)
+#     - 6 kg (4 items)
+#     - 9 (3 items)
+#     - 11 kg (2 items)
+#     - 11 (2 items)
+#     - 7 (2 items)
+#   
+  ##################################
+#   - key: "CAPACITE NOMINALE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "CAPACITE NOMINALE"
+#      rakuten.com:
+#        - "CAPACITE NOMINALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CHARGEMENT
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 32% (42/129) . 
+  # TOP attributes values are :
+#     - Frontal (37 items)
+#     - Top (5 items)
+#   
+  ##################################
+#   - key: "CHARGEMENT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "CHARGEMENT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSIMAGEWITHSCALE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 29% (38/129) . 
+  # TOP attributes values are :
+#     - A-Left-DarkGreen-WithAGScale.svg (21 items)
+#     - B-Left-MediumGreen-WithAGScale.svg (6 items)
+#     - APPP-Left-DarkGreen-WithAPPPDScale.svg (4 items)
+#     - D-Left-Yellow-WithAGScale.svg (3 items)
+#     - C-Left-LightGreen-WithAGScale.svg (3 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSIMAGEWITHSCALE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSIMAGEWITHSCALE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MOISTURE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 29% (38/129) . 
+  # TOP attributes values are :
+#     - 53.9 (15 items)
+#     - 53 (6 items)
+#     - 53.4 (3 items)
+#     - 44 (2 items)
+#     - 52.9 (2 items)
+#     - 62.9 (2 items)
+#     - 53.5 (2 items)
+#   
+  ##################################
+#   - key: "MOISTURE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "MOISTURE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSIMAGE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 29% (38/129) . 
+  # TOP attributes values are :
+#     - A-Left-DarkGreen-WithAGScale.svg (21 items)
+#     - B-Left-MediumGreen-WithAGScale.svg (6 items)
+#     - APPP-Left-DarkGreen.png (4 items)
+#     - D-Left-Yellow-WithAGScale.svg (3 items)
+#     - C-Left-LightGreen-WithAGScale.svg (3 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSIMAGE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSIMAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CLASSE D'EFFICACITE D'ESSORAGE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 29% (38/129) . 
+  # TOP attributes values are :
+#     - Classe B (22 items)
+#     - B (12 items)
+#     - Classe A (2 items)
+#   
+  ##################################
+#   - key: "CLASSE D'EFFICACITE D'ESSORAGE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "CLASSE D'EFFICACITE D'ESSORAGE"
+#      rakuten.com:
+#        - "CLASSE D'EFFICACITE D'ESSORAGE"
+#      123comparer.fr:
+#        - "CLASSE D'EFFICACITE D'ESSORAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         WEBLINKSUPPLIER
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - https://corporate.haier-europe.com/en/ (5 items)
+#     - https://global.hisense.com/laundry (4 items)
+#     - https://www.samsung.com/support (3 items)
+#     - http://www.vedette.fr (3 items)
+#     - www.cecotec.es (2 items)
+#     - www.haier.com (2 items)
+#     - https://www.lg.com/global/ajax/common_manual (2 items)
+#   
+  ##################################
+#   - key: "WEBLINKSUPPLIER"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "WEBLINKSUPPLIER"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCONSPER100CYCLE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 51 (5 items)
+#     - 42 (3 items)
+#     - 45 (3 items)
+#     - 57 (3 items)
+#     - 49 (3 items)
+#     - 48 (2 items)
+#     - 60 (2 items)
+#     - 56 (2 items)
+#     - 44 (2 items)
+#     - 59 (2 items)
+#   
+  ##################################
+#   - key: "ENERGYCONSPER100CYCLE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCONSPER100CYCLE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         RELEASESSILVERIONS
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - false (34 items)
+#   
+  ##################################
+#   - key: "RELEASESSILVERIONS"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "RELEASESSILVERIONS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PROGRAMMEDURATIONRATED
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 228 (7 items)
+#     - 239 (5 items)
+#     - 208 (5 items)
+#     - 240 (3 items)
+#     - 188 (3 items)
+#     - 198 (2 items)
+#     - 195 (2 items)
+#   
+  ##################################
+#   - key: "PROGRAMMEDURATIONRATED"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "PROGRAMMEDURATIONRATED"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MAXTEMPERATUREHALF
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 27 (5 items)
+#     - 32 (5 items)
+#     - 29 (4 items)
+#     - 30 (3 items)
+#     - 28 (3 items)
+#     - 26 (3 items)
+#     - 25 (3 items)
+#     - 34 (2 items)
+#   
+  ##################################
+#   - key: "MAXTEMPERATUREHALF"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "MAXTEMPERATUREHALF"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PROGRAMMEDURATIONHALF
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 180 (6 items)
+#     - 174 (6 items)
+#     - 162 (4 items)
+#     - 150 (3 items)
+#     - 155 (3 items)
+#     - 156 (2 items)
+#     - 178 (2 items)
+#     - 160 (2 items)
+#   
+  ##################################
+#   - key: "PROGRAMMEDURATIONHALF"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "PROGRAMMEDURATIONHALF"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         RINSINGEFFECTIVENESS
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 5 (20 items)
+#     - 4.9 (11 items)
+#   
+  ##################################
+#   - key: "RINSINGEFFECTIVENESS"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "RINSINGEFFECTIVENESS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         WASHINGEFFICIENCYINDEXV2
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 1.031 (33 items)
+#   
+  ##################################
+#   - key: "WASHINGEFFICIENCYINDEXV2"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "WASHINGEFFICIENCYINDEXV2"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POWERDELAYSTART
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 4 (29 items)
+#     - 3.7 (3 items)
+#   
+  ##################################
+#   - key: "POWERDELAYSTART"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "POWERDELAYSTART"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PROGRAMMEDURATIONQUARTER
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 155 (5 items)
+#     - 180 (4 items)
+#     - 150 (4 items)
+#     - 160 (3 items)
+#     - 162 (3 items)
+#     - 174 (3 items)
+#     - 168 (2 items)
+#     - 154 (2 items)
+#   
+  ##################################
+#   - key: "PROGRAMMEDURATIONQUARTER"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "PROGRAMMEDURATIONQUARTER"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POWEROFFMODE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 0.5 (27 items)
+#     - 0.49 (5 items)
+#   
+  ##################################
+#   - key: "POWEROFFMODE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "POWEROFFMODE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ENERGYCLASSRANGE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - A_G (34 items)
+#   
+  ##################################
+#   - key: "ENERGYCLASSRANGE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "ENERGYCLASSRANGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MAXTEMPERATUREQUARTER
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 26% (34/129) . 
+  # TOP attributes values are :
+#     - 23 (14 items)
+#     - 25 (5 items)
+#     - 26 (4 items)
+#     - 24 (3 items)
+#     - 22 (2 items)
+#     - 27 (2 items)
+#   
+  ##################################
+#   - key: "MAXTEMPERATUREQUARTER"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "MAXTEMPERATUREQUARTER"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         EPREL CATEGORY
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 24% (32/129) . 
+  # TOP attributes values are :
+#     - washingmachines2019 (26 items)
+#     - washerdriers2019 (4 items)
+#     - washingmachines (2 items)
+#   
+  ##################################
+#   - key: "EPREL CATEGORY"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "EPREL CATEGORY"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ECHELLE D'EFFICACITE ENERGETIQUE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 20% (26/129) . 
+  # TOP attributes values are :
+#     - A-G (24 items)
+#   
+  ##################################
+#   - key: "ECHELLE D'EFFICACITE ENERGETIQUE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "ECHELLE D'EFFICACITE ENERGETIQUE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         STYLE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 17% (23/129) . 
+  # TOP attributes values are :
+#     - null (23 items)
+#   
+  ##################################
+#   - key: "STYLE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      darty.com:
+#        - "STYLE"
+#      DartyProCashback:
+#        - "STYLE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         COULEUR GENERIQUE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 17% (22/129) . 
+  # TOP attributes values are :
+#     - Blanc (17 items)
+#     - Noir (3 items)
+#   
+  ##################################
+#   - key: "COULEUR GENERIQUE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "COULEUR GENERIQUE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POWERSTANDBYMODE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 16% (21/129) . 
+  # TOP attributes values are :
+#     - 0.5 (11 items)
+#     - 1 (8 items)
+#   
+  ##################################
+#   - key: "POWERSTANDBYMODE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "POWERSTANDBYMODE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TRANCHE DE POIDS
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 15% (20/129) . 
+  # TOP attributes values are :
+#     - 50 à 70 kg (7 items)
+#     - + de 100 kg (5 items)
+#     - 500 g à 3 kg (4 items)
+#     - 70 à 100 kg (2 items)
+#   
+  ##################################
+#   - key: "TRANCHE DE POIDS"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "TRANCHE DE POIDS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         HAUTEUR EMBALLEE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 12% (16/129) . 
+  # TOP attributes values are :
+#     - 89 (5 items)
+#     - 88.5 (2 items)
+#     - 890 (2 items)
+#   
+  ##################################
+#   - key: "HAUTEUR EMBALLEE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "HAUTEUR EMBALLEE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         INDICE D'EFFICACITE DE LAVAGE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 12% (16/129) . 
+  # TOP attributes values are :
+#     - 1.031 (15 items)
+#   
+  ##################################
+#   - key: "INDICE D'EFFICACITE DE LAVAGE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "INDICE D'EFFICACITE DE LAVAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         NIVEAU SONORE (ESSORAGE)
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 10% (14/129) . 
+  # TOP attributes values are :
+#     - 72 (5 items)
+#     - 79 (2 items)
+#     - 76 (2 items)
+#   
+  ##################################
+#   - key: "NIVEAU SONORE (ESSORAGE)"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "NIVEAU SONORE (ESSORAGE)"
+#      123comparer.fr:
+#        - "NIVEAU SONORE (ESSORAGE)"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TYPE DE CHARGEMENT
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 10% (14/129) . 
+  # TOP attributes values are :
+#     - Front-load (12 items)
+#   
+  ##################################
+#   - key: "TYPE DE CHARGEMENT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "TYPE DE CHARGEMENT"
+#      123comparer.fr:
+#        - "TYPE DE CHARGEMENT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PLACEMENT DE L'APPAREIL
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 10% (14/129) . 
+  # TOP attributes values are :
+#     - Freestanding (placement) (13 items)
+#   
+  ##################################
+#   - key: "PLACEMENT DE L'APPAREIL"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "PLACEMENT DE L'APPAREIL"
+#      123comparer.fr:
+#        - "PLACEMENT DE L'APPAREIL"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         ECRAN INTEGRE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - Y (13 items)
+#   
+  ##################################
+#   - key: "ECRAN INTEGRE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "ECRAN INTEGRE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MINUTERIE, DEPART DIFFERE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - Y (11 items)
+#     - N (2 items)
+#   
+  ##################################
+#   - key: "MINUTERIE, DEPART DIFFERE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "MINUTERIE, DEPART DIFFERE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         HAUTEUR DU COLIS
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - 890 (8 items)
+#   
+  ##################################
+#   - key: "HAUTEUR DU COLIS"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "HAUTEUR DU COLIS"
+#      123comparer.fr:
+#        - "HAUTEUR DU COLIS"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         POWERNETWORKSTANDBY
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - 2 (8 items)
+#     - 0 (4 items)
+#   
+  ##################################
+#   - key: "POWERNETWORKSTANDBY"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      eprel:
+#        - "POWERNETWORKSTANDBY"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         COULEUR EXTERIEURE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 10% (13/129) . 
+  # TOP attributes values are :
+#     - Blanc (8 items)
+#     - Noir (2 items)
+#   
+  ##################################
+#   - key: "COULEUR EXTERIEURE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      rakuten.com:
+#        - "COULEUR EXTERIEURE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         EMPLACEMENT CHARNIERE DE PORTE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 9% (12/129) . 
+  # TOP attributes values are :
+#     - Left (10 items)
+#   
+  ##################################
+#   - key: "EMPLACEMENT CHARNIERE DE PORTE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "EMPLACEMENT CHARNIERE DE PORTE"
+#      123comparer.fr:
+#        - "EMPLACEMENT CHARNIERE DE PORTE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         PLAGE D’EFFICACITE ENERGETIQUE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 9% (12/129) . 
+  # TOP attributes values are :
+#     - A to G (10 items)
+#   
+  ##################################
+#   - key: "PLAGE D’EFFICACITE ENERGETIQUE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "PLAGE D’EFFICACITE ENERGETIQUE"
+#      123comparer.fr:
+#        - "PLAGE D’EFFICACITE ENERGETIQUE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CLASSE D'EMISSION SONORE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 9% (12/129) . 
+  # TOP attributes values are :
+#     - A (6 items)
+#     - C (3 items)
+#     - B (3 items)
+#   
+  ##################################
+#   - key: "CLASSE D'EMISSION SONORE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "CLASSE D'EMISSION SONORE"
+#      123comparer.fr:
+#        - "CLASSE D'EMISSION SONORE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         COULEUR DE LA PORTE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 8% (11/129) . 
+  # TOP attributes values are :
+#     - Black (5 items)
+#     - White (3 items)
+#   
+  ##################################
+#   - key: "COULEUR DE LA PORTE"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "COULEUR DE LA PORTE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         SECURITE ENFANT
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 6% (9/129) . 
+  # TOP attributes values are :
+#     - Y (9 items)
+#   
+  ##################################
+#   - key: "SECURITE ENFANT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "SECURITE ENFANT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TENSION D'ENTREE AC
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 6% (9/129) . 
+  # TOP attributes values are :
+#     - 220 - 240 (8 items)
+#   
+  ##################################
+#   - key: "TENSION D'ENTREE AC"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "TENSION D'ENTREE AC"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         INDICATION DU TEMPS RESTANT
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 6% (9/129) . 
+  # TOP attributes values are :
+#     - Y (9 items)
+#   
+  ##################################
+#   - key: "INDICATION DU TEMPS RESTANT"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "INDICATION DU TEMPS RESTANT"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         TECHNOLOGIE DE CONVERTISSEUR
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - Y (8 items)
+#   
+  ##################################
+#   - key: "TECHNOLOGIE DE CONVERTISSEUR"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "TECHNOLOGIE DE CONVERTISSEUR"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         NOMBRE DE PROGRAMMES DE LAVAGE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - 16 (5 items)
+#   
+  ##################################
+#   - key: "NOMBRE DE PROGRAMMES DE LAVAGE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "NOMBRE DE PROGRAMMES DE LAVAGE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         DEPART DIFFERE
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - 24 (7 items)
+#   
+  ##################################
+#   - key: "DEPART DIFFERE"
+#     filteringType: "NUMERIC"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "DEPART DIFFERE"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         CONTROLE PAR WI-FI
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - Y (6 items)
+#     - N (2 items)
+#   
+  ##################################
+#   - key: "CONTROLE PAR WI-FI"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "CONTROLE PAR WI-FI"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..."
+  ################################################################################
+  #                         MATERIAU DU TAMBOUR
+  ################################################################################
+  # Generated on 02/02/2026 09:38, coverage was 6% (8/129) . 
+  # TOP attributes values are :
+#     - Stainless steel (8 items)
+#   
+  ##################################
+#   - key: "MATERIAU DU TAMBOUR"
+#     filteringType: "TEXT"
+#     asScore: false
+#     faIcon: ""
+#
+#     icecatFeaturesIds:      
+#      - TODO 
+#    
+#     name:
+#      default: "!!COMPLETE_HERE!!"
+#      fr: "!!COMPLETE_HERE!!"
+#    
+#     synonyms:
+#      all:
+#      icecat.biz:
+#        - "MATERIAU DU TAMBOUR"
+#           
+#    parser:
+#      normalize: true
+#      trim: false
+#      lowerCase: false
+#      upperCase: true
+#      removeParenthesis: false
+#      deleteTokens:   
+#        - "..." []
     #        - "CUSTOM_1"
     #      e.leclerc:
     #        - "CUSTOM_1"
@@ -829,7 +4032,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "VITESSE D'ESSORAGE MAXIMALE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -868,7 +4071,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CHARGEMENT"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -911,7 +4114,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "HAUTEUR"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1005,7 +4208,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "LARGEUR"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1052,7 +4255,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "DIMENSIONS"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1090,7 +4293,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CUSTOM_2"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1139,7 +4342,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CLASSE D'EFFICACITE D'ESSORAGE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1226,7 +4429,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "ENERGYCLASSIMAGEWITHSCALE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1264,7 +4467,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "ENERGYCLASSIMAGE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1343,7 +4546,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "EPREL CATEGORY"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1459,7 +4662,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "ENERGYCLASSRANGE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -1880,7 +5083,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "WEBLINKSUPPLIER"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2042,7 +5245,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "RELEASESSILVERIONS"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2199,7 +5402,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "ECHELLE D'EFFICACITE ENERGETIQUE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2242,7 +5445,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CUSTOM_8"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2380,7 +5583,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "TRANCHE DE POIDS"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2459,7 +5662,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "COULEUR GENERIQUE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2502,7 +5705,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CUSTOM_6"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2543,7 +5746,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "STYLE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2638,7 +5841,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "POIDS EMBALLE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2896,7 +6099,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "GAMME DE PRODUITS"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2939,7 +6142,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "OPTIONS ET PROGRAMMES SPECIAUX"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -2982,7 +6185,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "VOLUME DU TAMBOUR"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3058,7 +6261,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "TYPE DE CHARGEMENT"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3098,7 +6301,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "PLACEMENT DE L'APPAREIL"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3135,7 +6338,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "ECRAN INTEGRE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3180,7 +6383,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "NIVEAU SONORE (ESSORAGE)"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3218,7 +6421,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "EMPLACEMENT CHARNIERE DE PORTE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3261,7 +6464,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "TYPE DE COMMANDE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3302,7 +6505,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "PROGRAMMES DE LAVAGE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3339,7 +6542,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "MINUTERIE, DEPART DIFFERE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3377,7 +6580,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CLASSE D'EMISSION SONORE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3415,7 +6618,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "PLAGE D’EFFICACITE ENERGETIQUE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3455,7 +6658,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "COULEUR EXTERIEURE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3497,7 +6700,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "COULEUR DE LA PORTE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3534,7 +6737,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "SECURITE ENFANT"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3581,7 +6784,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "POIDS DU PAQUET"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3626,7 +6829,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "PROFONDEUR DU COLIS"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3666,7 +6869,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "HAUTEUR DU COLIS"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3711,7 +6914,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "LARGEUR DU COLIS"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3747,7 +6950,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "INDICATION DU TEMPS RESTANT"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3792,7 +6995,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "DUREE DU CYCLE (MAX)"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3833,7 +7036,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "TENSION D'ENTREE AC"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3871,7 +7074,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "TECHNOLOGIE DE CONVERTISSEUR"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3907,7 +7110,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "VITESSE D'ESSORAGE AJUSTABLE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3942,7 +7145,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "OBJET CONNECTE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -3977,7 +7180,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "SYSTEME D'EQUILIBRAGE DE CHARGE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4059,7 +7262,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "DEPART DIFFERE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4098,7 +7301,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "MATERIAU DU TAMBOUR"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4136,7 +7339,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CONTROLE PAR WI-FI"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4226,7 +7429,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CONSOMMATION D'EAU ANNUELLE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4273,7 +7476,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CONSOMMATION D'ENERGIE ANNUELLE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4313,7 +7516,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "FONCTION D'AJOUT DE VETEMENT (PAUSE)"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4350,7 +7553,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "TEMPERATURE REGLABLE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4390,7 +7593,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "CAPACITE MAXIMALE DE SECHAGE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4424,7 +7627,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "TYPE D'ECRAN"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4461,7 +7664,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "SYSTEME CONTROLE DE MOUSSE"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4497,7 +7700,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "EFFICACITE DE LA CONDENSATION"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #
@@ -4532,7 +7735,7 @@ attributesConfig:
     #
     ##################################
     #   - key: "FREQUENCE D'ENTREE AC"
-    #     filteringType: "STRING"
+    #     filteringType: "TEXT"
     #     asScore: false
     #     faIcon: ""
     #

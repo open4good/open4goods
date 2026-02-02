@@ -1,0 +1,16 @@
+key: "FREEZER_STARS"
+faIcon: "mdi-star"
+name:
+  default: "Freezer stars"
+  fr: "Etoiles congélateur"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "NOMBRE D'ETOILES DU COMPARTIMENT CONGELATION"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

@@ -1,0 +1,24 @@
+key: "NOISE_LEVEL_SPIN"
+faIcon: "mdi-volume-high"
+name:
+  default: "Noise level (spin)"
+  fr: "Niveau sonore (essorage)"
+suffix:
+  default: "dB"
+  fr: "dB"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "NIVEAU SONORE (ESSORAGE)"
+    - "NOISE_SPIN"
+    - "ACOUSTIC_NOISE_EMISSION_RATED"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "DB"
+    - "DB(A)"

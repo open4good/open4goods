@@ -1,0 +1,17 @@
+key: "PRODUCT_TYPE"
+faIcon: "mdi-tag-outline"
+name:
+  default: "Product type"
+  fr: "Type de produit"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "TYPE DE PRODUIT"
+    - "TYPE D'APPAREIL"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

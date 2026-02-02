@@ -1,0 +1,15 @@
+key: "POWEROFFMODE"
+faIcon: "mdi-power-off"
+name:
+  default: "Off mode power consumption"
+  fr: "Consommation éteint"
+filteringType: "NUMERIC"
+unit: "W"
+asScore: false
+synonyms:
+  all:
+    - "POWEROFFMODE"
+parser:
+  normalize: true
+  trim: true
+  removeParenthesis: false
