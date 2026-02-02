@@ -1,0 +1,1853 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xsi:schemaLocation="https://www.mojohaus.org/TAGLISTOUTPUT/1.0.0 https://www.mojohaus.org/taglist-maven-plugin/xsd/taglistOutput-1.0.0.xsd"
+    xmlns="https://www.mojohaus.org/TAGLISTOUTPUT/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tags>
+    <tag name="@todo" count="0" />
+    <tag name="TODO" count="334">
+      <files>
+        <file name="org.open4goods.xwiki.services.XwikiMappingService" count="3">
+          <comments>
+            <comment>
+              <lineNumber>126</lineNumber>
+              <comment>hard coding - objects.getObjectSummaries().get(0).getLinks() NOT GOOD , try to find the good summary !!</comment>
+            </comment>
+            <comment>
+              <lineNumber>272</lineNumber>
+              <comment>Should provide a streamed version. See IcecatFeatureService.downloadTo()</comment>
+            </comment>
+            <comment>
+              <lineNumber>404</lineNumber>
+              <comment>(p1,perf) : Do not re instanciate</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.attribute.Attribute" count="1">
+          <comments>
+            <comment>
+              <lineNumber>19</lineNumber>
+              <comment>performance, remove multivalued, specialization</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.prompt.service.PromptServiceJsonRepairTest" count="1">
+          <comments>
+            <comment>
+              <lineNumber>97</lineNumber>
+              <comment>Auto-generated method stub</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.brand.service.BrandService" count="4">
+          <comments>
+            <comment>
+              <lineNumber>35</lineNumber>
+              <comment>Profondly investigate. Refactor for simplification. Heavy documentation (javadoc clss / method level, inlide code comments)</comment>
+            </comment>
+            <comment>
+              <lineNumber>36</lineNumber>
+              <comment>performances : enhane</comment>
+            </comment>
+            <comment>
+              <lineNumber>37</lineNumber>
+              <comment>Document functional with technical links in /docs</comment>
+            </comment>
+            <comment>
+              <lineNumber>38</lineNumber>
+              <comment>New feature  : We will read /opt/open4goods/config/brands/manufacturing-places/* json to populate the according pojo</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.vertical.VerticalConfig" count="4">
+          <comments>
+            <comment>
+              <lineNumber>527</lineNumber>
+              <comment>(perf) : check effectiv caching</comment>
+            </comment>
+            <comment>
+              <lineNumber>551</lineNumber>
+              <comment>(perf) : caching on request.getservername</comment>
+            </comment>
+            <comment>
+              <lineNumber>569</lineNumber>
+              <comment>Local cache, better, store as attribute</comment>
+            </comment>
+            <comment>
+              <lineNumber>636</lineNumber>
+              <comment>Perf, could use a cached map</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.config.UrlManagementHelper" count="4">
+          <comments>
+            <comment>
+              <lineNumber>12</lineNumber>
+              <comment>Should be directly in properties class</comment>
+            </comment>
+            <comment>
+              <lineNumber>31</lineNumber>
+              <comment>Should be in conf, or should be goof opn the wiki side</comment>
+            </comment>
+            <comment>
+              <lineNumber>100</lineNumber>
+              <comment>Argh, a Xwiki bug here. Spaces prefix are missing for objects and attachments</comment>
+            </comment>
+            <comment>
+              <lineNumber>137</lineNumber>
+              <comment>Tweak : Should be properly fixed on the wiki side (???). Or from conf, a "forceScheme"</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.services.fetching.DataFragmentWebCrawler" count="4">
+          <comments>
+            <comment>
+              <lineNumber>337</lineNumber>
+              <comment></comment>
+            </comment>
+            <comment>
+              <lineNumber>440</lineNumber>
+              <comment>(gof) : should be made agnostic of dedicatedLogger and datasourceproperties Visit and parse an url immediatly with custom extrcators</comment>
+            </comment>
+            <comment>
+              <lineNumber>503</lineNumber>
+              <comment>Auto-generated catch block</comment>
+            </comment>
+            <comment>
+              <lineNumber>574</lineNumber>
+              <comment>Auto-generated method stub</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService" count="4">
+          <comments>
+            <comment>
+              <lineNumber>84</lineNumber>
+              <comment>(conf,p3) : wait (4000) from config</comment>
+            </comment>
+            <comment>
+              <lineNumber>125</lineNumber>
+              <comment>Get number of lines to read from config (limit 10000 in this case) NOTE : When having headers, this is enough !</comment>
+            </comment>
+            <comment>
+              <lineNumber>212</lineNumber>
+              <comment>(design,p2) : not handling escape chars dynamically : detected \ seems not to be really escapechars... if (escapeChar != null &amp;&amp; escapeCharsCandidates.get(escapeChar) > 0) { builder.setEscapeChar(escapeChar.charAt(0)); }</comment>
+            </comment>
+            <comment>
+              <lineNumber>264</lineNumber>
+              <comment>(P1, fiability) : put back when v1 stabilized</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.blog.service.BlogService" count="5">
+          <comments>
+            <comment>
+              <lineNumber>118</lineNumber>
+              <comment>(p3, conf): Schedule from configuration &lt;/p></comment>
+            </comment>
+            <comment>
+              <lineNumber>186</lineNumber>
+              <comment>Default internationalisation</comment>
+            </comment>
+            <comment>
+              <lineNumber>239</lineNumber>
+              <comment>Ugly fix to discard article tagged webhome. Should wear a list of exclusions patterns in configuration.</comment>
+            </comment>
+            <comment>
+              <lineNumber>299</lineNumber>
+              <comment>(p3,conf): Truncation length should be configurable</comment>
+            </comment>
+            <comment>
+              <lineNumber>343</lineNumber>
+              <comment>Handle healthchecks / metrics status</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.icecat.services.IcecatService" count="11">
+          <comments>
+            <comment>
+              <lineNumber>45</lineNumber>
+              <comment>all Long to Integer</comment>
+            </comment>
+            <comment>
+              <lineNumber>108</lineNumber>
+              <comment>Should be done in a separate thread</comment>
+            </comment>
+            <comment>
+              <lineNumber>116</lineNumber>
+              <comment>Should be done in a separate thread</comment>
+            </comment>
+            <comment>
+              <lineNumber>183</lineNumber>
+              <comment>(design,p3) : Should defer in the remotefilecachingservice</comment>
+            </comment>
+            <comment>
+              <lineNumber>196</lineNumber>
+              <comment>(p3, evolution): Have a refresh policy</comment>
+            </comment>
+            <comment>
+              <lineNumber>217</lineNumber>
+              <comment>Perf, caching</comment>
+            </comment>
+            <comment>
+              <lineNumber>236</lineNumber>
+              <comment>check default language is english</comment>
+            </comment>
+            <comment>
+              <lineNumber>252</lineNumber>
+              <comment>perf, quiet expensive with the "iteration" model. Must be fixed by proper injection of icecat stuff to open4goods attribute model</comment>
+            </comment>
+            <comment>
+              <lineNumber>271</lineNumber>
+              <comment>Perf</comment>
+            </comment>
+            <comment>
+              <lineNumber>329</lineNumber>
+              <comment>(P1, perf) : Caching of icecat stuff to open4goods attribute model</comment>
+            </comment>
+            <comment>
+              <lineNumber>342</lineNumber>
+              <comment>Perf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.ui.helper.UiHelper" count="3">
+          <comments>
+            <comment>
+              <lineNumber>13</lineNumber>
+              <comment>merge with uiservice</comment>
+            </comment>
+            <comment>
+              <lineNumber>43</lineNumber>
+              <comment>i18n Programmatic because much so easy</comment>
+            </comment>
+            <comment>
+              <lineNumber>93</lineNumber>
+              <comment>Should be site locale</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.services.XWikiAuthenticationService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>107</lineNumber>
+              <comment>how to manage this error: login succeedded but parsing error !!</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="edu.uci.ics.crawler4j.robotstxt.RobotstxtServer" count="1">
+          <comments>
+            <comment>
+              <lineNumber>150</lineNumber>
+              <comment>This one should be upgraded to remove all html tags</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.urlfetching.service.fetchers.ProxifiedHttpFetcher" count="1">
+          <comments>
+            <comment>
+              <lineNumber>101</lineNumber>
+              <comment>(p2, feature) : implement</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.nudgerfrontapi.config.LocalMockConfig" count="1">
+          <comments>
+            <comment>
+              <lineNumber>71</lineNumber>
+              <comment>Auto-generated method stub</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.attribute.ProductAttribute" count="2">
+          <comments>
+            <comment>
+              <lineNumber>23</lineNumber>
+              <comment>(p1, design) : remove after migration</comment>
+            </comment>
+            <comment>
+              <lineNumber>165</lineNumber>
+              <comment>i18n</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.extractors.custom.SustaynalyticsSeedExtractor" count="1">
+          <comments>
+            <comment>
+              <lineNumber>38</lineNumber>
+              <comment>Hard limit from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.verticals.GoogleTaxonomyService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>81</lineNumber>
+              <comment>(p3,conf) : Freshness from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>125</lineNumber>
+              <comment>logger.error System.err.println("Category exists : " + foundCategory);</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.extractors.ExpValuation" count="3">
+          <comments>
+            <comment>
+              <lineNumber>81</lineNumber>
+              <comment>(perf) :  caching</comment>
+            </comment>
+            <comment>
+              <lineNumber>82</lineNumber>
+              <comment>(design): externalize "provider specific code" in dedicated classes, remove the enum</comment>
+            </comment>
+            <comment>
+              <lineNumber>134</lineNumber>
+              <comment>Auto-generated catch block</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="null.FaviconServiceTest" count="2">
+          <comments>
+            <comment>
+              <lineNumber>1</lineNumber>
+              <comment>Not passing CI/CD package org.open4goods.services.favicon.service;</comment>
+            </comment>
+            <comment>
+              <lineNumber>28</lineNumber>
+              <comment>Could enhance the test : Setup a test web server, serve html and favicons from src/test/resources, check for expected behavior public class FaviconServiceTest {</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.extractors.Extractor" count="6">
+          <comments>
+            <comment>
+              <lineNumber>50</lineNumber>
+              <comment>(design) : ugly class, do multiple things (xpath / sanitisation, ...)</comment>
+            </comment>
+            <comment>
+              <lineNumber>75</lineNumber>
+              <comment>(design) : Refactor extractors and associated configs. Will also fix injection concerns</comment>
+            </comment>
+            <comment>
+              <lineNumber>207</lineNumber>
+              <comment>(perf) : could uidMap on expressions</comment>
+            </comment>
+            <comment>
+              <lineNumber>239</lineNumber>
+              <comment>(design) : sanitisation also for evalSimple</comment>
+            </comment>
+            <comment>
+              <lineNumber>254</lineNumber>
+              <comment>(gof) : could infer splittertags</comment>
+            </comment>
+            <comment>
+              <lineNumber>469</lineNumber>
+              <comment>(feature) : could infer splitter tag</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.CompletionFacadeService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>50</lineNumber>
+              <comment>(p2, perf) : should paralellize (on verticals, at upper level)</comment>
+            </comment>
+            <comment>
+              <lineNumber>60</lineNumber>
+              <comment>(P3,design) : Should be legacy, through a standard spring bean registration mechanism //////////////////////////////////////////////////////////////////////////////////////////////////////////</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="null.DatasourceRegressionTest" count="6">
+          <comments>
+            <comment>
+              <lineNumber>53</lineNumber>
+              <comment>(test) : Test regression on favico public class DatasourceRegressionTest {</comment>
+            </comment>
+            <comment>
+              <lineNumber>134</lineNumber>
+              <comment>(gof) : review standardisers</comment>
+            </comment>
+            <comment>
+              <lineNumber>149</lineNumber>
+              <comment>properly inject env return   new DataSourceConfigService(File.separator+"home"+File.separator+"Goulven.Furet"+File.separator+"git"+File.separator+"open4goods-config/datasources"); }</comment>
+            </comment>
+            <comment>
+              <lineNumber>198</lineNumber>
+              <comment>(gof) : so ugly ! final Map&lt;String, DataSourceProperties> dss2 = dss;</comment>
+            </comment>
+            <comment>
+              <lineNumber>222</lineNumber>
+              <comment>(test) : Test api regression here } else if (null!=dsProperties.getValue().getCsvDatasource() &amp;&amp; dsProperties.getValue().getCsvDatasource().getWebDatasource() != null) {</comment>
+            </comment>
+            <comment>
+              <lineNumber>387</lineNumber>
+              <comment>(bug) : handling special cases where running through authenticated proxy // on gitlab runner if (!StringUtils.isEmpty(wds.getCrawlConfig().getProxyHost())) { logger.warn( "No data for {} but a proxy is used. Skipping it on IC because of crawl4j authenticated proxy bug", tu.getUrl()); } else { final TestResultReport nodata = new TestResultReport(df, dsProperties.getName()); nodata.setUrl(tu.getUrl()); nodata.addMessage("no datafragment"); reports.add(nodata); }</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.config.yml.datasource.DataSourceProperties" count="1">
+          <comments>
+            <comment>
+              <lineNumber>36</lineNumber>
+              <comment>(gof) :; should be from a global conf The mapping of attributes that must be indexed as referentiel attributes</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.gtinservice.service.GtinService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>61</lineNumber>
+              <comment>(gof) : if exception render default error image</comment>
+            </comment>
+            <comment>
+              <lineNumber>79</lineNumber>
+              <comment>Size pageNumber conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.ui.controllers.ui.ResourceController" count="3">
+          <comments>
+            <comment>
+              <lineNumber>49</lineNumber>
+              <comment>"fast" Caching (eg : products are call 7/8 times per pages)</comment>
+            </comment>
+            <comment>
+              <lineNumber>194</lineNumber>
+              <comment>sec, IP Filter protection</comment>
+            </comment>
+            <comment>
+              <lineNumber>286</lineNumber>
+              <comment>Should probe the content type</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="null.GoogleTaxonomyServiceTest" count="1">
+          <comments>
+            <comment>
+              <lineNumber>15</lineNumber>
+              <comment>Proper inject brand service public class GoogleTaxonomyServiceTest {</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.AggregationFacadeService" count="6">
+          <comments>
+            <comment>
+              <lineNumber>53</lineNumber>
+              <comment>Maintain a state machine to disable multiple launching</comment>
+            </comment>
+            <comment>
+              <lineNumber>194</lineNumber>
+              <comment>Performance, could parallelize</comment>
+            </comment>
+            <comment>
+              <lineNumber>241</lineNumber>
+              <comment>Performance, could parallelize Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items</comment>
+            </comment>
+            <comment>
+              <lineNumber>265</lineNumber>
+              <comment>Performance, could parallelize Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items</comment>
+            </comment>
+            <comment>
+              <lineNumber>287</lineNumber>
+              <comment>Performance, could parallelize Note : a strong choice to rely on categories, to replay aggregation process from unmapped / unverticalized items</comment>
+            </comment>
+            <comment>
+              <lineNumber>306</lineNumber>
+              <comment>(p3,design) : not a good design</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.completion.IcecatCompletionService" count="18">
+          <comments>
+            <comment>
+              <lineNumber>43</lineNumber>
+              <comment>The duplicate GTIN</comment>
+            </comment>
+            <comment>
+              <lineNumber>44</lineNumber>
+              <comment>Add specific attributes : -"ReleaseDate": "31-05-2023", - "EndOfLifeDate": "31-12-2023",</comment>
+            </comment>
+            <comment>
+              <lineNumber>74</lineNumber>
+              <comment>Should set a specific log level here (not "agg(regation)" one)</comment>
+            </comment>
+            <comment>
+              <lineNumber>86</lineNumber>
+              <comment>(p2,perf) : should adda check on unprocessed resources</comment>
+            </comment>
+            <comment>
+              <lineNumber>116</lineNumber>
+              <comment>Refresh policy logger.info("Skipping, already fetched{}", data.gtin());</comment>
+            </comment>
+            <comment>
+              <lineNumber>149</lineNumber>
+              <comment>Should manage a thread pool if operating on all catalog</comment>
+            </comment>
+            <comment>
+              <lineNumber>167</lineNumber>
+              <comment>Not nice, use real httpclient</comment>
+            </comment>
+            <comment>
+              <lineNumber>200</lineNumber>
+              <comment>Handle taxonomy</comment>
+            </comment>
+            <comment>
+              <lineNumber>206</lineNumber>
+              <comment>HAndle related products System.out.println("RELATED : " + e.icecatID);</comment>
+            </comment>
+            <comment>
+              <lineNumber>209</lineNumber>
+              <comment></comment>
+            </comment>
+            <comment>
+              <lineNumber>221</lineNumber>
+              <comment>Could handle the FeaturesGroups (!!!!)</comment>
+            </comment>
+            <comment>
+              <lineNumber>223</lineNumber>
+              <comment>(i18n) --> Is Wrong</comment>
+            </comment>
+            <comment>
+              <lineNumber>262</lineNumber>
+              <comment>(P1,design) : Remove when tested</comment>
+            </comment>
+            <comment>
+              <lineNumber>286</lineNumber>
+              <comment>handle i18</comment>
+            </comment>
+            <comment>
+              <lineNumber>312</lineNumber>
+              <comment>(p3, feature) : HAndle end of year / end of year</comment>
+            </comment>
+            <comment>
+              <lineNumber>314</lineNumber>
+              <comment>i18n</comment>
+            </comment>
+            <comment>
+              <lineNumber>356</lineNumber>
+              <comment>Check ProductFamily</comment>
+            </comment>
+            <comment>
+              <lineNumber>370</lineNumber>
+              <comment>(p3,conf) : Constants</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.helper.WarrantyParser" count="1">
+          <comments>
+            <comment>
+              <lineNumber>50</lineNumber>
+              <comment>(feature, P1, 0.5) : Redesign through regexp</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.favicon.service.FaviconServiceImpl" count="3">
+          <comments>
+            <comment>
+              <lineNumber>253</lineNumber>
+              <comment>(p3,conf) : Freshness from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>292</lineNumber>
+              <comment>(p3,conf) : Freshness from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>400</lineNumber>
+              <comment>(p3,conf) : Freshness from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.store.DataFragmentStoreService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>81</lineNumber>
+              <comment>(p3,perf) : Virtual threads, but ko with visualVM profiling</comment>
+            </comment>
+            <comment>
+              <lineNumber>137</lineNumber>
+              <comment>come back on standard validation model</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.controller.api.IndexationController" count="1">
+          <comments>
+            <comment>
+              <lineNumber>38</lineNumber>
+              <comment>(perf,0.75, p2) : could optimize with "bulk" frow crawler</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.services.fetching.WebDatasourceFetchingService" count="5">
+          <comments>
+            <comment>
+              <lineNumber>139</lineNumber>
+              <comment>Auto-generated catch block</comment>
+            </comment>
+            <comment>
+              <lineNumber>148</lineNumber>
+              <comment>Auto-generated catch block</comment>
+            </comment>
+            <comment>
+              <lineNumber>165</lineNumber>
+              <comment>Auto-generated catch block</comment>
+            </comment>
+            <comment>
+              <lineNumber>173</lineNumber>
+              <comment>Auto-generated catch block</comment>
+            </comment>
+            <comment>
+              <lineNumber>277</lineNumber>
+              <comment>Auto-generated catch block</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.prompt.service.PromptService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>97</lineNumber>
+              <comment>Better handle the enabled / disabled if (!genAiConfig.isEnabled()) { logger.error("GenAiService is disabled via configuration."); return; }</comment>
+            </comment>
+            <comment>
+              <lineNumber>379</lineNumber>
+              <comment>(p2, perf) : should cache instructions scanner and bean output converter</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.helper.DocumentHelper" count="1">
+          <comments>
+            <comment>
+              <lineNumber>172</lineNumber>
+              <comment>(feature) : could infer splitter tag</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.model.VerticalAttributesStats" count="1">
+          <comments>
+            <comment>
+              <lineNumber>94</lineNumber>
+              <comment>(p3,conf) : From conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.services.XwikiFacadeService" count="5">
+          <comments>
+            <comment>
+              <lineNumber>51</lineNumber>
+              <comment>I18n</comment>
+            </comment>
+            <comment>
+              <lineNumber>58</lineNumber>
+              <comment>When xwiki jakarta compliant String htmlContent = xWikiHtmlService.renderXWiki20SyntaxAsXHTML(wikiPage.getContent());</comment>
+            </comment>
+            <comment>
+              <lineNumber>62</lineNumber>
+              <comment>Seems useless Objects objects = mappingService.getPageObjects(wikiPage);</comment>
+            </comment>
+            <comment>
+              <lineNumber>95</lineNumber>
+              <comment>ugly, should fetch the meta (mime type is availlable in xwiki service), but does not work for the blog image, special class and not appears in attachments list</comment>
+            </comment>
+            <comment>
+              <lineNumber>112</lineNumber>
+              <comment>Remove, or be more exaustiv</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.evaluation.StrictVariableExpressionEvaluator" count="1">
+          <comments>
+            <comment>
+              <lineNumber>28</lineNumber>
+              <comment>Auto-generated method stub</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="null.VerticalSearchResponse" count="5">
+          <comments>
+            <comment>
+              <lineNumber>56</lineNumber>
+              <comment>(design, p2)  : Bad design private Map&lt;String,NumericRangeFilter> numericFilters = new HashMap&lt;>(); /** The custom aggregations, pageNumber filters **/ private Map&lt;AttributeConfig, List&lt;VerticalFilterTerm>> customFilters = new HashMap&lt;>();</comment>
+            </comment>
+            <comment>
+              <lineNumber>116</lineNumber>
+              <comment>(P2, design) : So tweaky again. Design to be reviewed</comment>
+            </comment>
+            <comment>
+              <lineNumber>154</lineNumber>
+              <comment>(design,p2) : the contains is ugly. A miss design on numeric and terms filters in verticalsearchRequest and response, to be reviewed Double ret = numericFilters. entrySet().stream().filter(e-> e.getKey().contains(key)).findFirst().map(e->e.getValue().getMinValue()).orElse(0.0);; return ret; }</comment>
+            </comment>
+            <comment>
+              <lineNumber>160</lineNumber>
+              <comment>(design,p2) : the contains is ugly. A missdesign on numeric and terms filters in verticalsearchRequest and response, to be reviewed Double  ret = numericFilters.entrySet().stream().filter(e-> e.getKey().contains(key)).findFirst().map(e->e.getValue().getMaxValue()).orElse(10000000.0); return ret; }</comment>
+            </comment>
+            <comment>
+              <lineNumber>166</lineNumber>
+              <comment>(design,p2) : the contains is ugly. A missdesign on numeric and terms filters in verticalsearchRequest and response, to be reviewed Long  ret = numericFilters.entrySet().stream().filter(e-> e.getKey().contains(key)).findFirst().map(e->e.getValue().getUnknown()).orElse(null); return ret; }</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.config.yml.datasource.ApiDataSourceProperties" count="1">
+          <comments>
+            <comment>
+              <lineNumber>15</lineNumber>
+              <comment>(gof) : put in a separate HtmlDataSourceProperties</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="null.AmazonCompletionService" count="6">
+          <comments>
+            <comment>
+              <lineNumber>93</lineNumber>
+              <comment>Should set a specific log level here (not "agg(regation)" one) super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel()); this.amazonConfig = apiProperties.getAmazonConfig(); this.amazonDatasource = dataSourceConfigService.getDatasourceConfig(amazonConfig.getDatasourceName()); this.aggregator = aggregationFacadeService.getStandardAggregator("amazon");; this.aggregator.beforeStart();</comment>
+            </comment>
+            <comment>
+              <lineNumber>172</lineNumber>
+              <comment>Do not proceed, have a delay threshold fragments.addAll(completeGet(vertical, data)); } }</comment>
+            </comment>
+            <comment>
+              <lineNumber>335</lineNumber>
+              <comment>As constant if (o.getCondition().getValue().equals(AMAZON_PRODUCTSTATE_OCCASION)) { // Handling occasion product if (minOccasionPrice == null) { minOccasionPrice = o; } else { if (minOccasionPrice.getPrice().getAmount().doubleValue() > o.getPrice().getAmount() .doubleValue()) { minOccasionPrice = o; } } } else if (o.getCondition().getValue().equals(AMAZON_PRODUCTSTATE_NEW)) { // Handling new product if (minNewPrice == null) { minNewPrice = o; } else { if (minNewPrice.getPrice().getAmount().doubleValue() > o.getPrice().getAmount().doubleValue()) { minNewPrice = o; } } } else { logger.error("Unknown Amazon item condition : {}", o.getCondition().getValue()); }</comment>
+            </comment>
+            <comment>
+              <lineNumber>415</lineNumber>
+              <comment>From conf if (model.length() > 15) { model = IdHelper.extractBrandUids(model).stream().findFirst().orElse(null); logger.warn("Extracted model {} from amazon model : {}", model,manufactureInfo.getModel().getDisplayValue() );</comment>
+            </comment>
+            <comment>
+              <lineNumber>432</lineNumber>
+              <comment>Localisation if (null != productInfo.getColor()) current.addAttribute("COLOR",productInfo.getColor().getDisplayValue(), "fr",  null); if (null != productInfo.getIsAdultProduct())  current.addAttribute("ADULT",productInfo.getIsAdultProduct().getLabel(), "fr",  null); if (null != productInfo.getItemDimensions())  current.addAttribute("HEIGHT",getDisplayUnit(productInfo.getItemDimensions().getHeight()), "fr", null); if (null != productInfo.getItemDimensions()) current.addAttribute("WEIGHT",getDisplayUnit(productInfo.getItemDimensions().getWeight()), "fr",  null); if (null != productInfo.getItemDimensions()) current.addAttribute("WIDTH",getDisplayUnit(productInfo.getItemDimensions().getWidth()), "fr",  null); if (null != productInfo.getSize()) current.addAttribute("SIZE",productInfo.getSize().getDisplayValue() , "fr",  null);</comment>
+            </comment>
+            <comment>
+              <lineNumber>448</lineNumber>
+              <comment>Add here also TechnicalInfo technicalInfo = itemInfo.getTechnicalInfo();</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.services.CurrencyStandardiserService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>36</lineNumber>
+              <comment>(gof) : A specific currencyservice</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.config.yml.datasource.HtmlDataSourceProperties" count="1">
+          <comments>
+            <comment>
+              <lineNumber>96</lineNumber>
+              <comment>in conf in each datasource</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.resource.Resource" count="4">
+          <comments>
+            <comment>
+              <lineNumber>21</lineNumber>
+              <comment>Add systematic Source (datasourcename)</comment>
+            </comment>
+            <comment>
+              <lineNumber>62</lineNumber>
+              <comment>Move into imageinfo</comment>
+            </comment>
+            <comment>
+              <lineNumber>154</lineNumber>
+              <comment>share const with the resourcecontroller</comment>
+            </comment>
+            <comment>
+              <lineNumber>167</lineNumber>
+              <comment>better handling</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.extractors.TableAttributeExtractor" count="1">
+          <comments>
+            <comment>
+              <lineNumber>70</lineNumber>
+              <comment>(feature) : could infer splitter tags;</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.model.IcecatData" count="1">
+          <comments>
+            <comment>
+              <lineNumber>6</lineNumber>
+              <comment>Merge with xml model ?</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.reviewgeneration.service.ReviewGenerationPreprocessingService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>42</lineNumber>
+              <comment>Class level documentation / javadoc</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.extractors.ReviewXpathExtractor" count="1">
+          <comments>
+            <comment>
+              <lineNumber>25</lineNumber>
+              <comment>(design) : rename to ratingXpathExtractor ?</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.prompt.service.BatchPromptService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>235</lineNumber>
+              <comment>(p2, perf) : cache</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.AbstractCompletionService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>13</lineNumber>
+              <comment>Could be in separate(s) project, to help scaling thos post handlings</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.datafragment.DataFragment" count="10">
+          <comments>
+            <comment>
+              <lineNumber>73</lineNumber>
+              <comment>Should remove, creation is computed at Product level</comment>
+            </comment>
+            <comment>
+              <lineNumber>144</lineNumber>
+              <comment>(gof) : check if exists in es</comment>
+            </comment>
+            <comment>
+              <lineNumber>224</lineNumber>
+              <comment>(design,P3,0.25) : should be replaced by constructor</comment>
+            </comment>
+            <comment>
+              <lineNumber>514</lineNumber>
+              <comment>(conf, P3,0.25) : Number of spaces from configuration // If too many spaces, exit if (StringUtils.countMatches(val," ") > 2) { logger.warn("Cannot add referentiel attribute, having too many spaces for {}:{} at {}",key,val, this); return; }</comment>
+            </comment>
+            <comment>
+              <lineNumber>580</lineNumber>
+              <comment>(p3,conf) : From config</comment>
+            </comment>
+            <comment>
+              <lineNumber>590</lineNumber>
+              <comment>(p2,conf) : From conf, could have the =, ..</comment>
+            </comment>
+            <comment>
+              <lineNumber>761</lineNumber>
+              <comment>Involve on a map on the new model</comment>
+            </comment>
+            <comment>
+              <lineNumber>821</lineNumber>
+              <comment>(design,P3,0.25) : throw exception</comment>
+            </comment>
+            <comment>
+              <lineNumber>873</lineNumber>
+              <comment>(feature,P3,0.25) : Complete with other currencies</comment>
+            </comment>
+            <comment>
+              <lineNumber>896</lineNumber>
+              <comment>(perf,P3,0.25) Removing spaces chars</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.vertical.ImpactScoreConfig" count="1">
+          <comments>
+            <comment>
+              <lineNumber>35</lineNumber>
+              <comment>The validate method (check sums is 1)</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="null.GeolocService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>79</lineNumber>
+              <comment>(design) : raise an alert (could be enough for an email...) } }</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.ui.controllers.ui.UiService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>30</lineNumber>
+              <comment>(p2,design) : Merge with uihelper</comment>
+            </comment>
+            <comment>
+              <lineNumber>127</lineNumber>
+              <comment>(p3,conf) : role editor as const</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.XWikiServiceConfiguration" count="2">
+          <comments>
+            <comment>
+              <lineNumber>188</lineNumber>
+              <comment>check what is really needed !!</comment>
+            </comment>
+            <comment>
+              <lineNumber>276</lineNumber>
+              <comment>Test with RestClient or remove it RestClient restClient(RestClient.Builder builder) { String auth = xWikiProperties.getUsername() + ":" + xWikiProperties.getPassword();</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.extractors.DeepExtractor" count="2">
+          <comments>
+            <comment>
+              <lineNumber>53</lineNumber>
+              <comment>(gof) : should outside in another common classe. But could be more globally refactored into a non introspected manier. @see WebDatasourceFetchingService //////////////////////</comment>
+            </comment>
+            <comment>
+              <lineNumber>126</lineNumber>
+              <comment>(gof) : complete with other extractors</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.helper.ResourceHelper" count="2">
+          <comments>
+            <comment>
+              <lineNumber>10</lineNumber>
+              <comment>extensions from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>11</lineNumber>
+              <comment>move to service</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.eprelservice.service.EprelCatalogueService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>20</lineNumber>
+              <comment>HealthChecks, metrics</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.attribute.ProductAttributes" count="2">
+          <comments>
+            <comment>
+              <lineNumber>26</lineNumber>
+              <comment>(p3,i18n) : Internationalisation</comment>
+            </comment>
+            <comment>
+              <lineNumber>83</lineNumber>
+              <comment>(p3,perf) : performance</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.BatchService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>98</lineNumber>
+              <comment>(p3,conf) : schedule from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>306</lineNumber>
+              <comment>(p3,design) : remove</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.controller.api.ReviewGenerationController" count="1">
+          <comments>
+            <comment>
+              <lineNumber>76</lineNumber>
+              <comment>(P1, security)  : enforce this parameter, tight to an admin role</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.product.Score" count="1">
+          <comments>
+            <comment>
+              <lineNumber>25</lineNumber>
+              <comment>Remove field ?</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.services.DataSourceConfigService" count="6">
+          <comments>
+            <comment>
+              <lineNumber>32</lineNumber>
+              <comment>this class is a mess (caching datasource must be done at class init)</comment>
+            </comment>
+            <comment>
+              <lineNumber>39</lineNumber>
+              <comment>(gof) : inject in constructor</comment>
+            </comment>
+            <comment>
+              <lineNumber>88</lineNumber>
+              <comment>(p3, conf) : freshness from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>93</lineNumber>
+              <comment>Return empty image bytes</comment>
+            </comment>
+            <comment>
+              <lineNumber>94</lineNumber>
+              <comment>Log for action</comment>
+            </comment>
+            <comment>
+              <lineNumber>105</lineNumber>
+              <comment>(p3, conf) : freshness from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.feedservice.service.EffiliationFeedService" count="3">
+          <comments>
+            <comment>
+              <lineNumber>107</lineNumber>
+              <comment>should be configurable from yaml config, through feedConfig.schedule.classname</comment>
+            </comment>
+            <comment>
+              <lineNumber>108</lineNumber>
+              <comment>In config cron expression + doc</comment>
+            </comment>
+            <comment>
+              <lineNumber>109</lineNumber>
+              <comment>Add schedule at 1h43 AM every day in yaml config Should add the random seconds</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="null.CsvEnrichmentController" count="11">
+          <comments>
+            <comment>
+              <lineNumber>51</lineNumber>
+              <comment>Document list of available facets</comment>
+            </comment>
+            <comment>
+              <lineNumber>52</lineNumber>
+              <comment>Dedicated service</comment>
+            </comment>
+            <comment>
+              <lineNumber>53</lineNumber>
+              <comment>Could upgrade perf with micro batches (using multiGets on repos), and paralleilization</comment>
+            </comment>
+            <comment>
+              <lineNumber>54</lineNumber>
+              <comment>Specific role</comment>
+            </comment>
+            <comment>
+              <lineNumber>108</lineNumber>
+              <comment>Fork the stream to allow schema detection. //		CsvSchema inSchema  = csvService.detectSchema(destFile);</comment>
+            </comment>
+            <comment>
+              <lineNumber>270</lineNumber>
+              <comment>Externalize, mutualize with the unitary API endpiints</comment>
+            </comment>
+            <comment>
+              <lineNumber>271</lineNumber>
+              <comment>Implement the cost model</comment>
+            </comment>
+            <comment>
+              <lineNumber>289</lineNumber>
+              <comment>Add id's (alternate models, ...) case EnrichmentFacet.BRAND: enriched.put(key, p.brand()); break;</comment>
+            </comment>
+            <comment>
+              <lineNumber>299</lineNumber>
+              <comment>Review / customize the title strategy enriched.put(key, p.bestName()); break;</comment>
+            </comment>
+            <comment>
+              <lineNumber>304</lineNumber>
+              <comment>I18n Map&lt;String, String> raw = p.getAttributes().getAll().values().stream().collect(HashMap::new, (m, a) -> m.put(a.getName(), a.getValue()), HashMap::putAll); enriched.put(key, serialisationService.toJson(raw)); break;</comment>
+            </comment>
+            <comment>
+              <lineNumber>310</lineNumber>
+              <comment>I18n Map&lt;String, String> attrs = p.getAttributes().getIndexed().entrySet().stream() .collect(HashMap::new, (m, a) -> m.put(a.getKey(), a.getValue().getValue()), HashMap::putAll); enriched.put(key, serialisationService.toJson(attrs)); break;</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.contribution.service.ContributionService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>110</lineNumber>
+              <comment>(P2,perf) : async index</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.eprelservice.service.EprelSearchService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>27</lineNumber>
+              <comment>PErf : restict search on product defined vertical (against eprel associated categorie)if any</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.extractors.XpathExtractor" count="1">
+          <comments>
+            <comment>
+              <lineNumber>222</lineNumber>
+              <comment>(design) : space normalisation should apply on other "single line string" attributes</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.controller.api.CompletionController" count="2">
+          <comments>
+            <comment>
+              <lineNumber>101</lineNumber>
+              <comment>From conf amazonCompletionService.completeAll(false); }</comment>
+            </comment>
+            <comment>
+              <lineNumber>135</lineNumber>
+              <comment>From conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.test.ProductTestProvider" count="1">
+          <comments>
+            <comment>
+              <lineNumber>31</lineNumber>
+              <comment>(gof) : implement randomisation</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.productrepository.workers.FullProductIndexationWorker" count="1">
+          <comments>
+            <comment>
+              <lineNumber>49</lineNumber>
+              <comment>exit thread condition</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.helper.InStockParser" count="1">
+          <comments>
+            <comment>
+              <lineNumber>17</lineNumber>
+              <comment>Path from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.completion.EprelCompletionService" count="4">
+          <comments>
+            <comment>
+              <lineNumber>36</lineNumber>
+              <comment>From conf, not every one days.</comment>
+            </comment>
+            <comment>
+              <lineNumber>45</lineNumber>
+              <comment>(p3,conf) : Should set a specific log level here (not "agg(regation)" one)</comment>
+            </comment>
+            <comment>
+              <lineNumber>60</lineNumber>
+              <comment>do not process each time</comment>
+            </comment>
+            <comment>
+              <lineNumber>117</lineNumber>
+              <comment>Filter per vertical</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.remotefilecaching.service.RemoteFileCachingService" count="5">
+          <comments>
+            <comment>
+              <lineNumber>39</lineNumber>
+              <comment>(P3,test) : unit tests</comment>
+            </comment>
+            <comment>
+              <lineNumber>55</lineNumber>
+              <comment>(p3,design) : Inject</comment>
+            </comment>
+            <comment>
+              <lineNumber>243</lineNumber>
+              <comment>Should not expose the tmpFile</comment>
+            </comment>
+            <comment>
+              <lineNumber>284</lineNumber>
+              <comment>Should use a streamed, threaded pool caped version</comment>
+            </comment>
+            <comment>
+              <lineNumber>304</lineNumber>
+              <comment>Should mutualize</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.productrepository.services.ProductRepository" count="11">
+          <comments>
+            <comment>
+              <lineNumber>118</lineNumber>
+              <comment>(p1, conf) : Major constant, from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>139</lineNumber>
+              <comment>(p3,perf) : Virtual threads, but ko with visualVM profiling</comment>
+            </comment>
+            <comment>
+              <lineNumber>205</lineNumber>
+              <comment>Should throw</comment>
+            </comment>
+            <comment>
+              <lineNumber>288</lineNumber>
+              <comment>(P2,design) : in a stat service</comment>
+            </comment>
+            <comment>
+              <lineNumber>308</lineNumber>
+              <comment>(p2, conf) : threshold from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>952</lineNumber>
+              <comment>(P1,perf) : Heavy cache</comment>
+            </comment>
+            <comment>
+              <lineNumber>1181</lineNumber>
+              <comment>Does not works because fiels is not indexed in product mapping (    "reviews": { "type": "object", "enabled": false }, How to proceed ?</comment>
+            </comment>
+            <comment>
+              <lineNumber>1193</lineNumber>
+              <comment>Handle i18n</comment>
+            </comment>
+            <comment>
+              <lineNumber>1196</lineNumber>
+              <comment>Weak, relying on baseline...</comment>
+            </comment>
+            <comment>
+              <lineNumber>1307</lineNumber>
+              <comment>(p3,safety) : this cast should be avoided</comment>
+            </comment>
+            <comment>
+              <lineNumber>1333</lineNumber>
+              <comment>Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.model.dto.VerticalFilterTerm" count="1">
+          <comments>
+            <comment>
+              <lineNumber>40</lineNumber>
+              <comment>Auto-generated catch block</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.helper.ProductConditionParser" count="1">
+          <comments>
+            <comment>
+              <lineNumber>12</lineNumber>
+              <comment>Path from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.ui.Ui" count="1">
+          <comments>
+            <comment>
+              <lineNumber>47</lineNumber>
+              <comment>(p3,design,1) : remove all unirests call and dependencies, in flavor of spring "nativs" libraries</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.aggregation.services.realtime.IdentityAggregationService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>55</lineNumber>
+              <comment>(p2, features) : Should store the GTIN type when encountered in gtin infos, and then render with appropriate leading 0</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.urlfetching.service.fetchers.SeleniumHttpFetcher" count="1">
+          <comments>
+            <comment>
+              <lineNumber>82</lineNumber>
+              <comment>(p2, feature) : implement</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.price.Price" count="1">
+          <comments>
+            <comment>
+              <lineNumber>27</lineNumber>
+              <comment>(conf): from conf : price valid 3 monthes in microdata</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.attribute.IndexedAttribute" count="3">
+          <comments>
+            <comment>
+              <lineNumber>148</lineNumber>
+              <comment>Simple, but does not allow to handle conflicts, and so on</comment>
+            </comment>
+            <comment>
+              <lineNumber>173</lineNumber>
+              <comment></comment>
+            </comment>
+            <comment>
+              <lineNumber>190</lineNumber>
+              <comment></comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.helper.ShippingTimeParser" count="3">
+          <comments>
+            <comment>
+              <lineNumber>11</lineNumber>
+              <comment>(feature) : Shipping time could be greatly improved (jours ouvrés, inneficient parsing ..., log unresolved and so on for ShippingCostParser, ...)</comment>
+            </comment>
+            <comment>
+              <lineNumber>41</lineNumber>
+              <comment>(design) : a more general way to handle that</comment>
+            </comment>
+            <comment>
+              <lineNumber>54</lineNumber>
+              <comment>(gof) : test / detect if we have a ending year before appending it final LocalDate localDate = DateTimeFormat.forPattern( "EEEE dd MMM YYYY" ).withLocale( java.util.Locale.FRENCH ).parseLocalDate( tmp + " " + Year.now().getValue());</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.icecat.services.loader.FeatureLoader" count="1">
+          <comments>
+            <comment>
+              <lineNumber>114</lineNumber>
+              <comment>handle brand logos brandService.saveBrand(brand);</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.aggregation.services.batch.scores.SustainalyticsAggregationService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>19</lineNumber>
+              <comment>Needs evolution to handle multiple brand score providers. (have to go through an intermediate score)</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.config.yml.FetcherProperties" count="1">
+          <comments>
+            <comment>
+              <lineNumber>64</lineNumber>
+              <comment>gof(p2,0.5,portability) : the 3 bellow props, like api or ui,  should be dependant on root folder</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.feedservice.service.AbstractFeedService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>26</lineNumber>
+              <comment>(P2, design) : No scheduled reloading of feeds url</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.verticals.VerticalsConfigService" count="4">
+          <comments>
+            <comment>
+              <lineNumber>313</lineNumber>
+              <comment>(p3,perf) : chould be cached</comment>
+            </comment>
+            <comment>
+              <lineNumber>628</lineNumber>
+              <comment>(p1, perf) : cache</comment>
+            </comment>
+            <comment>
+              <lineNumber>666</lineNumber>
+              <comment>(p2,perf) : Maintain a map for key/val access</comment>
+            </comment>
+            <comment>
+              <lineNumber>731</lineNumber>
+              <comment>(p1, perf): cache</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.model.VerticalIndexField" count="1">
+          <comments>
+            <comment>
+              <lineNumber>8</lineNumber>
+              <comment>Auto-generated constructor stub</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.ui.config.SchedulingConfig" count="1">
+          <comments>
+            <comment>
+              <lineNumber>24</lineNumber>
+              <comment>Virtual threads not working return Executors.newScheduledThreadPool(5, Thread.ofVirtual().factory());</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.helper.IdHelper" count="3">
+          <comments>
+            <comment>
+              <lineNumber>97</lineNumber>
+              <comment>(conf,P2,0.25) : Use filter parameters from conf (see cm)</comment>
+            </comment>
+            <comment>
+              <lineNumber>114</lineNumber>
+              <comment>rename extract brand -> extractModel</comment>
+            </comment>
+            <comment>
+              <lineNumber>124</lineNumber>
+              <comment>(conf,0.25,P3) : branduid minimum length here) : from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.config.XWikiConstantsResourcesPath" count="1">
+          <comments>
+            <comment>
+              <lineNumber>9</lineNumber>
+              <comment>In properties class, or static (or both !)</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.aggregation.services.realtime.AttributeRealtimeAggregationService" count="3">
+          <comments>
+            <comment>
+              <lineNumber>58</lineNumber>
+              <comment>(p3,perf) / Usefull for batch mode, could remove once initial sanitization</comment>
+            </comment>
+            <comment>
+              <lineNumber>138</lineNumber>
+              <comment>(p3,design) : Means we have multiple attributes matching for indexed . Have a merge strategy</comment>
+            </comment>
+            <comment>
+              <lineNumber>511</lineNumber>
+              <comment>Add BRAND / MODEL from matches from attributes</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.config.ApiConfig" count="1">
+          <comments>
+            <comment>
+              <lineNumber>418</lineNumber>
+              <comment>(feature, 0.5, P3) : implements standardisation</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.helper.ShippingCostParser" count="1">
+          <comments>
+            <comment>
+              <lineNumber>12</lineNumber>
+              <comment>Path from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.completion.ResourceCompletionService" count="4">
+          <comments>
+            <comment>
+              <lineNumber>85</lineNumber>
+              <comment>(p3, conf): expose via YAML configuration</comment>
+            </comment>
+            <comment>
+              <lineNumber>381</lineNumber>
+              <comment>(p3, i18n): add resource language if needed</comment>
+            </comment>
+            <comment>
+              <lineNumber>453</lineNumber>
+              <comment>(p2, conf): user agent &amp; timeouts from configuration</comment>
+            </comment>
+            <comment>
+              <lineNumber>622</lineNumber>
+              <comment>From conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.ui.services.SitemapGenerationService" count="4">
+          <comments>
+            <comment>
+              <lineNumber>83</lineNumber>
+              <comment>(p3,conf) : Schedule from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>105</lineNumber>
+              <comment>I18n</comment>
+            </comment>
+            <comment>
+              <lineNumber>205</lineNumber>
+              <comment>Temp : default language for now</comment>
+            </comment>
+            <comment>
+              <lineNumber>279</lineNumber>
+              <comment>Temp : default language for now</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.productrepository.workers.PartialProductIndexationWorker" count="1">
+          <comments>
+            <comment>
+              <lineNumber>49</lineNumber>
+              <comment>exit thread condition</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.opendata.service.OpenDataService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>426</lineNumber>
+              <comment>Point to international website + internationalized URL</comment>
+            </comment>
+            <comment>
+              <lineNumber>460</lineNumber>
+              <comment>Point to international website + internationalized URL</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.services.fetching.CsvIndexationWorker" count="2">
+          <comments>
+            <comment>
+              <lineNumber>239</lineNumber>
+              <comment>(p3,conf) : from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>633</lineNumber>
+              <comment>(p2, feature) : handle COVERS</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>149</lineNumber>
+              <comment>Disabling google taxonomy for now</comment>
+            </comment>
+            <comment>
+              <lineNumber>193</lineNumber>
+              <comment>The language (should not be needed), will bug when other languages</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.backup.BackupService" count="5">
+          <comments>
+            <comment>
+              <lineNumber>100</lineNumber>
+              <comment>Schedule from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>145</lineNumber>
+              <comment>(p2,feature) : Export verticalis in separate files</comment>
+            </comment>
+            <comment>
+              <lineNumber>427</lineNumber>
+              <comment>(p3,conf) : Schedule from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>537</lineNumber>
+              <comment></comment>
+            </comment>
+            <comment>
+              <lineNumber>551</lineNumber>
+              <comment>Check count</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.controller.api.GenAiController" count="1">
+          <comments>
+            <comment>
+              <lineNumber>32</lineNumber>
+              <comment>Should split, into scoringController / resourceController, ....</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.services.XWikiHtmlService" count="11">
+          <comments>
+            <comment>
+              <lineNumber>63</lineNumber>
+              <comment>From const</comment>
+            </comment>
+            <comment>
+              <lineNumber>64</lineNumber>
+              <comment>Make it generic ? Provide the associated resource controller ?</comment>
+            </comment>
+            <comment>
+              <lineNumber>83</lineNumber>
+              <comment>Remove when rendering client side possible (waiting for jakarta migration)</comment>
+            </comment>
+            <comment>
+              <lineNumber>85</lineNumber>
+              <comment>manage response error / exceptions</comment>
+            </comment>
+            <comment>
+              <lineNumber>100</lineNumber>
+              <comment>Weak, should have a complete url parsing / formating</comment>
+            </comment>
+            <comment>
+              <lineNumber>107</lineNumber>
+              <comment></comment>
+            </comment>
+            <comment>
+              <lineNumber>156</lineNumber>
+              <comment></comment>
+            </comment>
+            <comment>
+              <lineNumber>170</lineNumber>
+              <comment>Markup should be mutualized with BlogController / downloadAttachment mapping</comment>
+            </comment>
+            <comment>
+              <lineNumber>200</lineNumber>
+              <comment>Below should be in XWikiConstantsResourcesPath ?</comment>
+            </comment>
+            <comment>
+              <lineNumber>222</lineNumber>
+              <comment>Weak</comment>
+            </comment>
+            <comment>
+              <lineNumber>229</lineNumber>
+              <comment>wrong place (see other, have to mutualize in the properties class, i guess) Get the URL of a Page attachment (image...) given its name and space</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.services.XWikiReadService" count="7">
+          <comments>
+            <comment>
+              <lineNumber>67</lineNumber>
+              <comment>check that wiki exists !!</comment>
+            </comment>
+            <comment>
+              <lineNumber>83</lineNumber>
+              <comment>have to harden, adopt a convention</comment>
+            </comment>
+            <comment>
+              <lineNumber>99</lineNumber>
+              <comment>Mutualize</comment>
+            </comment>
+            <comment>
+              <lineNumber>164</lineNumber>
+              <comment>add request param to url in order to get fields that are disabled by default</comment>
+            </comment>
+            <comment>
+              <lineNumber>211</lineNumber>
+              <comment>fetch classes ------------------------------------</comment>
+            </comment>
+            <comment>
+              <lineNumber>256</lineNumber>
+              <comment>XwikiAuthService</comment>
+            </comment>
+            <comment>
+              <lineNumber>278</lineNumber>
+              <comment>XwikiAuthenticationService</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.services.FetchersService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>25</lineNumber>
+              <comment>(design) : Should be a unique map of DatasourceFetchingService maintained here, and no multiple *FetchingService....</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.VerticalsGenerationService" count="4">
+          <comments>
+            <comment>
+              <lineNumber>329</lineNumber>
+              <comment>(p3, conf) : from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>768</lineNumber>
+              <comment>(conf,p2) : numberofsamples from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>885</lineNumber>
+              <comment>Enforce, log</comment>
+            </comment>
+            <comment>
+              <lineNumber>903</lineNumber>
+              <comment>Enforce, log</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.crawler.extractors.JsonExtractor" count="3">
+          <comments>
+            <comment>
+              <lineNumber>132</lineNumber>
+              <comment>(design) : No parsing infos</comment>
+            </comment>
+            <comment>
+              <lineNumber>169</lineNumber>
+              <comment>log if fail everywhere</comment>
+            </comment>
+            <comment>
+              <lineNumber>208</lineNumber>
+              <comment>(bug) : should set as referentiel from  all extractors, to avoid datafragmentcompletion to override "well set" referentiel attrs</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.controller.api.VerticalsGenerationController" count="5">
+          <comments>
+            <comment>
+              <lineNumber>186</lineNumber>
+              <comment>(p2,conf) : from conf verticalsGenService.updateAllVerticalFileWithCategories("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/",minOffers);</comment>
+            </comment>
+            <comment>
+              <lineNumber>197</lineNumber>
+              <comment>(p2,conf) : from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>211</lineNumber>
+              <comment>(p2,conf) : from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>238</lineNumber>
+              <comment>(p2,conf) : from conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>252</lineNumber>
+              <comment>(p2,conf) : from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.controller.api.BatchController" count="1">
+          <comments>
+            <comment>
+              <lineNumber>32</lineNumber>
+              <comment>Should split, into scoringController / resourceController, ....</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.product.EcoScoreRanking" count="2">
+          <comments>
+            <comment>
+              <lineNumber>2</lineNumber>
+              <comment>Some fields should be computed / rendered (eg. id's), not stored but so handy....</comment>
+            </comment>
+            <comment>
+              <lineNumber>3</lineNumber>
+              <comment>Add fields</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.feedservice.service.FeedService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>55</lineNumber>
+              <comment>Forcing load, in order feeds to be availlable to other service (datasourceconfig)</comment>
+            </comment>
+            <comment>
+              <lineNumber>56</lineNumber>
+              <comment>Not scheduled</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.config.XWikiServiceProperties" count="1">
+          <comments>
+            <comment>
+              <lineNumber>18</lineNumber>
+              <comment>Critical : Must be configurable in config</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.model.price.AggregatedPrices" count="1">
+          <comments>
+            <comment>
+              <lineNumber>33</lineNumber>
+              <comment>(perf, p2) : Remove, migration on trends private Integer trend= 0;</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>176</lineNumber>
+              <comment>(P1,perf): Remove when migration ok //////////////////</comment>
+            </comment>
+            <comment>
+              <lineNumber>233</lineNumber>
+              <comment>(p3,conf) : price history max size From conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="null.AwinCatalogServiceTest" count="1">
+          <comments>
+            <comment>
+              <lineNumber>19</lineNumber>
+              <comment>in hidden conf AwinCatalogService service = new AwinCatalogService("https://productdata.awin.com/datafeed/list/apikey/f3fe5d60a3668a0256f1dcdf9956ac03");</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.icecat.model.IcecatName" count="1">
+          <comments>
+            <comment>
+              <lineNumber>65</lineNumber>
+              <comment>Micmac, should merge with getValue (either icecat bug, either using same POJO for 2 xsd definitions</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.ui.config.AppConfig" count="3">
+          <comments>
+            <comment>
+              <lineNumber>56</lineNumber>
+              <comment>Cache period pageNumber conf</comment>
+            </comment>
+            <comment>
+              <lineNumber>220</lineNumber>
+              <comment>should not be required at ui side</comment>
+            </comment>
+            <comment>
+              <lineNumber>225</lineNumber>
+              <comment>should not be required at ui side</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>514</lineNumber>
+              <comment>Should be all attributes Popular attribute name/value pairs (whitelisted per vertical)</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.nudgerfrontapi.controller.api.ProductController" count="1">
+          <comments>
+            <comment>
+              <lineNumber>370</lineNumber>
+              <comment>HEre we add a big micmac. We used the logic of duplicated search (verticals and global)</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.ui.controllers.ui.pages.BlogController" count="5">
+          <comments>
+            <comment>
+              <lineNumber>55</lineNumber>
+              <comment>(p3,perf) : Caching</comment>
+            </comment>
+            <comment>
+              <lineNumber>59</lineNumber>
+              <comment>(p3,perf) : Have a streamed version</comment>
+            </comment>
+            <comment>
+              <lineNumber>65</lineNumber>
+              <comment>(p3,design) : classical xwiki download content is served here and it shouldn't, because of XwikiController not being @nnotated</comment>
+            </comment>
+            <comment>
+              <lineNumber>66</lineNumber>
+              <comment>(p3,perf) : Caching</comment>
+            </comment>
+            <comment>
+              <lineNumber>71</lineNumber>
+              <comment>(p3,perf) : Have a streamed version</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.feedservice.service.AwinFeedService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>123</lineNumber>
+              <comment>Add a heavy error / healthchek if it.empty !</comment>
+            </comment>
+            <comment>
+              <lineNumber>128</lineNumber>
+              <comment>from conf</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.xwiki.authentication.XwikiAuthenticationProvider" count="2">
+          <comments>
+            <comment>
+              <lineNumber>23</lineNumber>
+              <comment>gérer le profile par les props ??</comment>
+            </comment>
+            <comment>
+              <lineNumber>51</lineNumber>
+              <comment>Specific exception</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.commons.helper.DevModeService" count="1">
+          <comments>
+            <comment>
+              <lineNumber>65</lineNumber>
+              <comment>(p1, design) : fix (no index auto creation)</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.services.contribution.config.yml.ReversementConfig" count="1">
+          <comments>
+            <comment>
+              <lineNumber>22</lineNumber>
+              <comment>I18n</comment>
+            </comment>
+          </comments>
+        </file>
+      </files>
+    </tag>
+    <tag name="FIXME" count="0" />
+  </tags>
+</report>
