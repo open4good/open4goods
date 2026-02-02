@@ -57,10 +57,10 @@ public class VerticalConfig {
 	 */
 	private Integer icecatTaxonomyId;
 
-        /**
-         * The corresponding EPREL taxonomy IDs.
-         */
-        private List<String> eprelGroupNames = new ArrayList<>();
+	/**
+	 * The corresponding EPREL taxonomy IDs.
+	 */
+	private List<String> eprelGroupNames = new ArrayList<>();
 
 	/**
 	 * If true, then the vertical is handled through batch processing, but is not
@@ -71,25 +71,25 @@ public class VerticalConfig {
 	/** Flag indicating whether this category should be highlighted as popular. */
 	private boolean popular = false;
 
-        /**
-         * Absolute path to the vertical image (should be hosted on nudger to avoid
-         * recaching failures). Provide a large one, thumnails will be generated
-         * automaticaly. MUST be PNG or JPG
-         */
-        @JsonMerge
-        @NotBlank
-        private String verticalImage;
+	/**
+	 * Absolute path to the vertical image (should be hosted on nudger to avoid
+	 * recaching failures). Provide a large one, thumnails will be generated
+	 * automaticaly. MUST be PNG or JPG
+	 */
+	@JsonMerge
+	@NotBlank
+	private String verticalImage;
 
-        /**
-         * Name of the Material Design Icon representing the vertical.
-         */
-        private String mdiIcon;
+	/**
+	 * Name of the Material Design Icon representing the vertical.
+	 */
+	private String mdiIcon;
 
-        /**
-         * The product url, metas title, description, ....
-         */
-        @JsonMerge
-        private Map<String, ProductI18nElements> i18n = new HashMap<>();
+	/**
+	 * The product url, metas title, description, ....
+	 */
+	@JsonMerge
+	private Map<String, ProductI18nElements> i18n = new HashMap<>();
 
 //	@JsonMerge
 //	private GenAiConfig genAiConfig = new GenAiConfig();
@@ -115,7 +115,8 @@ public class VerticalConfig {
 	private List<String> globalTechnicalFilters = new ArrayList<>();
 
 	/**
-	 * The list of attributes considered common/standard for this vertical (to be extracted by AI).
+	 * The list of attributes considered common/standard for this vertical (to be
+	 * extracted by AI).
 	 */
 	private List<String> commonAttributes = new ArrayList<>();
 
@@ -214,20 +215,21 @@ public class VerticalConfig {
 	@JsonMerge
 	private Map<String, AggregationConfiguration> aggregationConfiguration = new HashMap<>();
 
-        /**
-         * Keys identifying the scores that are eligible to participate to the impact score construction.
-         * Titles and descriptions were previously embedded here but are now resolved elsewhere to keep the
-         * configuration lightweight and focused on selectable criteria identifiers.
-         */
+	/**
+	 * Keys identifying the scores that are eligible to participate to the impact
+	 * score construction. Titles and descriptions were previously embedded here but
+	 * are now resolved elsewhere to keep the configuration lightweight and focused
+	 * on selectable criteria identifiers.
+	 */
 	@JsonMerge
-    private List<String> availableImpactScoreCriterias = new ArrayList<>();
+	private List<String> availableImpactScoreCriterias = new ArrayList<>();
 
-        /**
-         * Keys identifying composite scores that are computed by the scoring pipeline
-         * and do not have a backing attribute definition.
-         */
-        @JsonMerge
-        private List<String> compositeScores = new ArrayList<>();
+	/**
+	 * Keys identifying composite scores that are computed by the scoring pipeline
+	 * and do not have a backing attribute definition.
+	 */
+	@JsonMerge
+	private List<String> compositeScores = new ArrayList<>();
 
 	/**
 	 * Configuration relativ to ecoscore computation. Key / values are : scoreName
@@ -236,21 +238,21 @@ public class VerticalConfig {
 	 */
 	private ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
 
-        ////////////////////
-        // The subsets for this vertical
-        ////////////////////
+	////////////////////
+	// The subsets for this vertical
+	////////////////////
 
 	/**
 	 * The vertical custom subsets
 	 */
-        @JsonMerge
-        private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
+	@JsonMerge
+	private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
 
-        /**
-         * The nudge tool configuration displayed to guide user selection.
-         */
-        @JsonMerge
-        private NudgeToolConfig nudgeToolConfig = new NudgeToolConfig();
+	/**
+	 * The nudge tool configuration displayed to guide user selection.
+	 */
+	@JsonMerge
+	private NudgeToolConfig nudgeToolConfig = new NudgeToolConfig();
 
 	/**
 	 * The subset dedicated to brands; Technical, no yaml def needed TODO(p2,
@@ -309,8 +311,6 @@ public class VerticalConfig {
 		this.injectSitesResults = injectSitesResults;
 	}
 
-
-
 	@Override
 	public String toString() {
 		return "config:" + id;
@@ -342,7 +342,12 @@ public class VerticalConfig {
 	 */
 	public LinkedHashMap<String, List<VerticalSubset>> getSubsetGroups() {
 		// Use LinkedHashMap to preserve the order of appearance of groups
-		return subsets.stream().collect(Collectors.groupingBy(VerticalSubset::getGroup, LinkedHashMap::new, // Ensures order of keys matches order of appearance
+		return subsets.stream().collect(Collectors.groupingBy(VerticalSubset::getGroup, LinkedHashMap::new, // Ensures
+																											// order of
+																											// keys
+																											// matches
+																											// order of
+																											// appearance
 				Collectors.toList()));
 	}
 
@@ -423,45 +428,41 @@ public class VerticalConfig {
 	 * @param scoreName
 	 * @return
 	 */
-        public Double ecoscoreParticipationMaxPointsOf20(String scoreName) {
-                return Double.valueOf(ecoscorePercentOf(scoreName)) / 5;
-        }
+	public Double ecoscoreParticipationMaxPointsOf20(String scoreName) {
+		return Double.valueOf(ecoscorePercentOf(scoreName)) / 5;
+	}
 
-        /**
-         * Collects the identifiers of composite scores that aggregate at least one
-         * attribute marked as a score. Aggregations are derived from
-         * {@link AttributeConfig#getParticipateInScores()} and returned as a distinct
-         * set to avoid duplicates when multiple attributes contribute to the same
-         * aggregate.
-         *
-         * @return distinct aggregate score identifiers, or an empty set when no
-         *         score attributes are configured
-         */
-        public Set<String> getAggregatedScores() {
-                if (attributesConfig == null || attributesConfig.getConfigs() == null) {
-                        return Set.of();
-                }
+	/**
+	 * Collects the identifiers of composite scores that aggregate at least one
+	 * attribute marked as a score. Aggregations are derived from
+	 * {@link AttributeConfig#getParticipateInScores()} and returned as a distinct
+	 * set to avoid duplicates when multiple attributes contribute to the same
+	 * aggregate.
+	 *
+	 * @return distinct aggregate score identifiers, or an empty set when no score
+	 *         attributes are configured
+	 */
+	public Set<String> getAggregatedScores() {
+		if (attributesConfig == null || attributesConfig.getConfigs() == null) {
+			return Set.of();
+		}
 
-                return attributesConfig.getConfigs().stream()
-                                .filter(AttributeConfig::isAsScore)
-                                .map(AttributeConfig::getParticipateInScores)
-                                .filter(Objects::nonNull)
-                                .flatMap(Collection::stream)
-                                .filter(Objects::nonNull)
-                                .filter(s -> !s.isBlank())
-                                .sorted()
-                                .collect(Collectors.toCollection(LinkedHashSet::new));
-        }
+		return attributesConfig.getConfigs().stream().filter(AttributeConfig::isAsScore)
+				.map(AttributeConfig::getParticipateInScores).filter(Objects::nonNull).flatMap(Collection::stream)
+				.filter(Objects::nonNull).filter(s -> !s.isBlank()).sorted()
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+	}
 
-        /**
-         *
-         * @return the specific attributes config for this vertical
-         */
-        public List<AttributeConfig> verticalFilters() {
+	/**
+	 *
+	 * @return the specific attributes config for this vertical
+	 */
+	public List<AttributeConfig> verticalFilters() {
 
 		return getVerticalFilters().stream()
 
-				.map(e -> getAttributesConfig().getAttributeConfigByKey(e)).filter(Objects::nonNull).collect(Collectors.toList());
+				.map(e -> getAttributesConfig().getAttributeConfigByKey(e)).filter(Objects::nonNull)
+				.collect(Collectors.toList());
 
 	}
 
@@ -625,7 +626,8 @@ public class VerticalConfig {
 	// TODO : Perf, could use a cached map
 	public FeatureGroup getOrCreateByIceCatCategoryFeatureGroup(int categoryFeatureGroupId) {
 
-		Optional<FeatureGroup> existing = featureGroups.stream().filter(e -> e.getIcecatCategoryFeatureGroupId() == categoryFeatureGroupId).findFirst();
+		Optional<FeatureGroup> existing = featureGroups.stream()
+				.filter(e -> e.getIcecatCategoryFeatureGroupId() == categoryFeatureGroupId).findFirst();
 		if (existing.isPresent()) {
 			return existing.get();
 		} else {
@@ -894,12 +896,8 @@ public class VerticalConfig {
 		if (brandsAlias == null) {
 			this.brandsAlias = new HashMap<>();
 		} else {
-			this.brandsAlias = brandsAlias.entrySet().stream()
-					.collect(Collectors.toMap(
-							e -> e.getKey().toUpperCase(),
-							Entry::getValue,
-							(v1, v2) -> v2,
-							HashMap::new));
+			this.brandsAlias = brandsAlias.entrySet().stream().collect(
+					Collectors.toMap(e -> e.getKey().toUpperCase(), Entry::getValue, (v1, v2) -> v2, HashMap::new));
 		}
 	}
 
@@ -943,42 +941,40 @@ public class VerticalConfig {
 		this.generationExcludedFromAttributesMatching = generationExcludedFromAttributesMatching;
 	}
 
-        public List<String> getAvailableImpactScoreCriterias() {
-                return availableImpactScoreCriterias;
-        }
+	public List<String> getAvailableImpactScoreCriterias() {
+		return availableImpactScoreCriterias;
+	}
 
-        public void setAvailableImpactScoreCriterias(List<String> availableImpactScoreCriterias) {
-                this.availableImpactScoreCriterias = availableImpactScoreCriterias;
-        }
+	public void setAvailableImpactScoreCriterias(List<String> availableImpactScoreCriterias) {
+		this.availableImpactScoreCriterias = availableImpactScoreCriterias;
+	}
 
-        public List<String> getCompositeScores() {
-                return compositeScores;
-        }
+	public List<String> getCompositeScores() {
+		return compositeScores;
+	}
 
-        public void setCompositeScores(List<String> compositeScores) {
-                this.compositeScores = compositeScores;
-        }
-
-
+	public void setCompositeScores(List<String> compositeScores) {
+		this.compositeScores = compositeScores;
+	}
 
 	public List<VerticalSubset> getSubsets() {
 		return subsets;
 	}
 
-        public void setSubsets(List<VerticalSubset> subsets) {
-                this.subsets = subsets;
-        }
+	public void setSubsets(List<VerticalSubset> subsets) {
+		this.subsets = subsets;
+	}
 
-        public NudgeToolConfig getNudgeToolConfig() {
-                return nudgeToolConfig;
-        }
+	public NudgeToolConfig getNudgeToolConfig() {
+		return nudgeToolConfig;
+	}
 
-        public void setNudgeToolConfig(NudgeToolConfig nudgeToolConfig) {
-                this.nudgeToolConfig = nudgeToolConfig;
-        }
+	public void setNudgeToolConfig(NudgeToolConfig nudgeToolConfig) {
+		this.nudgeToolConfig = nudgeToolConfig;
+	}
 
-        public VerticalSubset getBrandsSubset() {
-                return brandsSubset;
+	public VerticalSubset getBrandsSubset() {
+		return brandsSubset;
 	}
 
 	public void setBrandsSubset(VerticalSubset brandsSubset) {
@@ -997,161 +993,158 @@ public class VerticalConfig {
 		return verticalImage;
 	}
 
-        public void setVerticalImage(String verticalImage) {
-                this.verticalImage = verticalImage;
-        }
+	public void setVerticalImage(String verticalImage) {
+		this.verticalImage = verticalImage;
+	}
 
-        public String getMdiIcon() {
-                return mdiIcon;
-        }
+	public String getMdiIcon() {
+		return mdiIcon;
+	}
 
-        public void setMdiIcon(String mdiIcon) {
-                this.mdiIcon = mdiIcon;
-        }
+	public void setMdiIcon(String mdiIcon) {
+		this.mdiIcon = mdiIcon;
+	}
 
-        public Set<String> getCacheTokenNames() {
-                return cacheTokenNames;
-        }
+	public Set<String> getCacheTokenNames() {
+		return cacheTokenNames;
+	}
 
 	public void setCacheTokenNames(Set<String> cacheTokenNames) {
 		this.cacheTokenNames = cacheTokenNames;
 	}
 
-        public List<String> getEprelGroupNames() {
-                return eprelGroupNames;
-        }
+	public List<String> getEprelGroupNames() {
+		return eprelGroupNames;
+	}
 
-        public void setEprelGroupNames(List<String> eprelGroupNames) {
-                if (eprelGroupNames == null) {
-                        this.eprelGroupNames = new ArrayList<>();
-                        return;
-                }
+	public void setEprelGroupNames(List<String> eprelGroupNames) {
+		if (eprelGroupNames == null) {
+			this.eprelGroupNames = new ArrayList<>();
+			return;
+		}
 
-                List<String> sanitizedNames = eprelGroupNames.stream()
-                                .filter(Objects::nonNull)
-                                .map(String::trim)
-                                .filter(name -> !name.isEmpty())
-                                .distinct()
-                                .toList();
+		List<String> sanitizedNames = eprelGroupNames.stream().filter(Objects::nonNull).map(String::trim)
+				.filter(name -> !name.isEmpty()).distinct().toList();
 
-                this.eprelGroupNames = new ArrayList<>(sanitizedNames);
-        }
+		this.eprelGroupNames = new ArrayList<>(sanitizedNames);
+	}
 
-        /**
-         * @deprecated Use {@link #getEprelGroupNames()} instead.
-         */
-        @Deprecated
-        public String getEprelGroupName() {
-                return eprelGroupNames.isEmpty() ? null : eprelGroupNames.getFirst();
-        }
+	/**
+	 * @deprecated Use {@link #getEprelGroupNames()} instead.
+	 */
+	@Deprecated
+	public String getEprelGroupName() {
+		return eprelGroupNames.isEmpty() ? null : eprelGroupNames.getFirst();
+	}
 
-        /**
-         * Accepts both legacy scalar EPREL group names and the new list-based format.
-         *
-         * @param eprelGroupName single EPREL category name
-         * @deprecated use {@link #setEprelGroupNames(List)}
-         */
-        @Deprecated
-        @com.fasterxml.jackson.annotation.JsonSetter("eprelGroupName")
-        public void setEprelGroupName(String eprelGroupName) {
-                setEprelGroupNames(eprelGroupName == null ? null : List.of(eprelGroupName));
-        }
+	/**
+	 * Accepts both legacy scalar EPREL group names and the new list-based format.
+	 *
+	 * @param eprelGroupName single EPREL category name
+	 * @deprecated use {@link #setEprelGroupNames(List)}
+	 */
+	@Deprecated
+	@com.fasterxml.jackson.annotation.JsonSetter("eprelGroupName")
+	public void setEprelGroupName(String eprelGroupName) {
+		setEprelGroupNames(eprelGroupName == null ? null : List.of(eprelGroupName));
+	}
 
-        @com.fasterxml.jackson.annotation.JsonSetter("eprelGroupNames")
-        public void setEprelGroupNamesFromYaml(List<String> eprelGroupNames) {
-                setEprelGroupNames(eprelGroupNames);
-        }
+	@com.fasterxml.jackson.annotation.JsonSetter("eprelGroupNames")
+	public void setEprelGroupNamesFromYaml(List<String> eprelGroupNames) {
+		setEprelGroupNames(eprelGroupNames);
+	}
 
-        ///////////////////////////////////////////////////////////////////////
-        // Parsers Configuration
-        ///////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////
+	// Parsers Configuration
+	///////////////////////////////////////////////////////////////////////
 
-        /**
-         * Dedicated configuration section for specific parsers (weight, dimensions, etc.).
-         */
-        @JsonMerge
-        private ParsersConfig parsers = new ParsersConfig();
+	/**
+	 * Dedicated configuration section for specific parsers (weight, dimensions,
+	 * etc.).
+	 */
+	@JsonMerge
+	private ParsersConfig parsers = new ParsersConfig();
 
-        public ParsersConfig getParsers() {
-                return parsers;
-        }
+	public ParsersConfig getParsers() {
+		return parsers;
+	}
 
-        public void setParsers(ParsersConfig parsers) {
-                this.parsers = parsers;
-        }
+	public void setParsers(ParsersConfig parsers) {
+		this.parsers = parsers;
+	}
 
-        public static class ParsersConfig {
-                @JsonMerge
-                private WeightParserConfig weight = new WeightParserConfig();
+	public static class ParsersConfig {
+		@JsonMerge
+		private WeightParserConfig weight = new WeightParserConfig();
 
-                @JsonMerge
-                private WarrantyParserConfig warranty = new WarrantyParserConfig();
+		@JsonMerge
+		private WarrantyParserConfig warranty = new WarrantyParserConfig();
 
-                public WeightParserConfig getWeight() {
-                        return weight;
-                }
+		public WeightParserConfig getWeight() {
+			return weight;
+		}
 
-                public void setWeight(WeightParserConfig weight) {
-                        this.weight = weight;
-                }
+		public void setWeight(WeightParserConfig weight) {
+			this.weight = weight;
+		}
 
-                public WarrantyParserConfig getWarranty() {
-                        return warranty;
-                }
+		public WarrantyParserConfig getWarranty() {
+			return warranty;
+		}
 
-                public void setWarranty(WarrantyParserConfig warranty) {
-                        this.warranty = warranty;
-                }
-        }
+		public void setWarranty(WarrantyParserConfig warranty) {
+			this.warranty = warranty;
+		}
+	}
 
-        public static class WeightParserConfig {
-                private Double minKg;
-                private Double maxKg;
-                private String defaultUnit;
+	public static class WeightParserConfig {
+		private Double minKg;
+		private Double maxKg;
+		private String defaultUnit;
 
-                public Double getMinKg() {
-                        return minKg;
-                }
+		public Double getMinKg() {
+			return minKg;
+		}
 
-                public void setMinKg(Double minKg) {
-                        this.minKg = minKg;
-                }
+		public void setMinKg(Double minKg) {
+			this.minKg = minKg;
+		}
 
-                public Double getMaxKg() {
-                        return maxKg;
-                }
+		public Double getMaxKg() {
+			return maxKg;
+		}
 
-                public void setMaxKg(Double maxKg) {
-                        this.maxKg = maxKg;
-                }
+		public void setMaxKg(Double maxKg) {
+			this.maxKg = maxKg;
+		}
 
-                public String getDefaultUnit() {
-                        return defaultUnit;
-                }
+		public String getDefaultUnit() {
+			return defaultUnit;
+		}
 
-                public void setDefaultUnit(String defaultUnit) {
-                        this.defaultUnit = defaultUnit;
-                }
-        }
+		public void setDefaultUnit(String defaultUnit) {
+			this.defaultUnit = defaultUnit;
+		}
+	}
 
-        public static class WarrantyParserConfig {
-                private Double minYears;
-                private Double maxYears;
+	public static class WarrantyParserConfig {
+		private Double minYears;
+		private Double maxYears;
 
-                public Double getMinYears() {
-                        return minYears;
-                }
+		public Double getMinYears() {
+			return minYears;
+		}
 
-                public void setMinYears(Double minYears) {
-                        this.minYears = minYears;
-                }
+		public void setMinYears(Double minYears) {
+			this.minYears = minYears;
+		}
 
-                public Double getMaxYears() {
-                        return maxYears;
-                }
+		public Double getMaxYears() {
+			return maxYears;
+		}
 
-                public void setMaxYears(Double maxYears) {
-                        this.maxYears = maxYears;
-                }
-        }
+		public void setMaxYears(Double maxYears) {
+			this.maxYears = maxYears;
+		}
+	}
 }

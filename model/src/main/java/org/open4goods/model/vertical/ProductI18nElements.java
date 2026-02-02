@@ -15,10 +15,8 @@ public class ProductI18nElements {
 	@JsonMerge
 	private PrefixedAttrText singular = new PrefixedAttrText();
 	@JsonMerge
-	private PrefixedAttrText singularDesignation = new PrefixedAttrText();
-	@JsonMerge
 	private List<String> designation = new ArrayList<>();
-	
+
 	@JsonMerge
 	private String cardTitle;
 	@JsonMerge
@@ -116,16 +114,6 @@ public class ProductI18nElements {
 		this.singular = singular;
 	}
 
-	/**
-	 * Return the singular designation configured for product naming.
-	 */
-	public PrefixedAttrText getSingularDesignation() {
-		return singularDesignation;
-	}
-
-	public void setSingularDesignation(PrefixedAttrText singularDesignation) {
-		this.singularDesignation = singularDesignation;
-	}
 
 	/**
 	 * Return the designation variants configured for product naming.
