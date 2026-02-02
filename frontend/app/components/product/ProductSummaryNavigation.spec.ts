@@ -98,6 +98,23 @@ describe('ProductSummaryNavigation', () => {
     await wrapper.unmount()
   })
 
+  it('emits collapse-change when toggling collapse state', async () => {
+    const wrapper = await mountComponent()
+
+    const toggle = wrapper.find(
+      'button.product-summary-navigation__collapse-toggle'
+    )
+    await toggle.trigger('click')
+
+    expect(wrapper.emitted('collapse-change')).toBeTruthy()
+    expect(wrapper.emitted('collapse-change')?.[0]).toEqual([true])
+
+    await toggle.trigger('click')
+    expect(wrapper.emitted('collapse-change')?.[1]).toEqual([false])
+
+    await wrapper.unmount()
+  })
+
   it('renders admin panel and reacts to clicks', async () => {
     const adminSections = [
       { id: 'admin-json', label: 'Product JSON', icon: 'mdi-code-json' },

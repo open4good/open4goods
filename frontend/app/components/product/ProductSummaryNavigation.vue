@@ -233,12 +233,16 @@ const _props = defineProps({
   },
 })
 
-const emit = defineEmits<{ navigate: [string] }>()
+const emit = defineEmits<{
+  navigate: [string]
+  'collapse-change': [boolean]
+}>()
 
 const isCollapsed = ref(false)
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
+  emit('collapse-change', isCollapsed.value)
 }
 
 const openSectionId = ref<string | null>(null)
