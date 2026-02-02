@@ -419,6 +419,22 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ---
 
+### geocode
+
+**Purpose**: Offline city geocoding and distance lookup service backed by GeoNames cities5000.txt.
+
+**Key Responsibilities**:
+- Download and cache GeoNames cities5000.zip via `RemoteFileCachingService`
+- Parse and index cities into in-memory lookup maps for fast geocoding
+- Expose REST APIs to resolve city + country and compute distances
+- Provide health status based on successful dataset load
+
+**Configuration**:
+- Requires cache directory for `RemoteFileCachingService`
+- Uses GeoNames download URL `https://download.geonames.org/export/dump/cities5000.zip`
+
+---
+
 ## 6. Common Service Patterns
 
 ### 6.1 Configuration
