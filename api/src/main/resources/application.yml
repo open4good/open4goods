@@ -20,6 +20,16 @@ logging:
 
 aggregationLogLevel: warn
 
+api:
+  backup:
+    xwiki-backup-file: /opt/open4goods/backup/xwiki-backup.zip
+    data-backup-folder: /opt/open4goods/backup/products
+    import-product-path: /opt/open4goods/backup/import
+    copy-page-size: 5000
+    copy-bulk-size: 500
+    copy-threads: 4
+    copy-queue-size: 50
+
 management:
   health:
     diskspace:
