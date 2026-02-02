@@ -559,7 +559,7 @@ public class ProductMappingService {
                 resolveLocalisedString(product.getNames().getH1Title(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getPrettyName(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getSingular(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getSingularDesignation(), domainLanguage, locale),
+
                 designations,
                 resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),

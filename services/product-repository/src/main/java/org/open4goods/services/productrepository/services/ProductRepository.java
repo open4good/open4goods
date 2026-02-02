@@ -41,6 +41,7 @@ import org.springframework.data.elasticsearch.core.MultiGetItem;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.document.Document;
+import org.springframework.data.elasticsearch.core.index.Settings;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
@@ -842,7 +843,7 @@ public class ProductRepository {
 	    }
 
 	    IndexOperations productIndexOperations = elasticsearchOperations.indexOps(Product.class);
-	    Document settings = productIndexOperations.createSettings();
+	    Settings settings = productIndexOperations.createSettings();
 	    Document mapping = productIndexOperations.createMapping();
 
 	    boolean created = indexOperations.create(settings);
@@ -1517,21 +1518,21 @@ public class ProductRepository {
                 // Use aggregation for accurate min/max instead of random sampling
                 String fieldPath = "scores." + scoreName + ".value";
                 org.open4goods.model.rating.Cardinality cardinality = scoreCardinalityForField(scoreName, verticalId, fieldPath);
-                
+
                 if (cardinality == null) {
                         logger.debug("No cardinality data for score {} in vertical {}, using default range", scoreName, verticalId);
                         return new ScoreRange(0.0, 5.0); // Default fallback
                 }
-                
+
                 double min = cardinality.getMin();
                 double max = cardinality.getMax();
-                
+
                 // Validate the range
                 if (min >= max || Double.isNaN(min) || Double.isNaN(max) || Double.isInfinite(min) || Double.isInfinite(max)) {
                         logger.warn("Invalid score range for {} in {}: min={}, max={}", scoreName, verticalId, min, max);
                         return new ScoreRange(0.0, 5.0);
                 }
-                
+
                 logger.debug("Score range for {} in {}: min={}, max={}", scoreName, verticalId, min, max);
                 return new ScoreRange(min, max);
         }

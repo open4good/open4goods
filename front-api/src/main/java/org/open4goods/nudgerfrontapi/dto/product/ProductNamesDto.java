@@ -15,8 +15,7 @@ public record ProductNamesDto(
         String prettyName,
         @Schema(description = "Singular product name for the requested language", example = "Téléviseur")
         String singular,
-        @Schema(description = "Singular designation for the requested language", example = "du téléviseur")
-        String singularDesignation,
+
         @Schema(description = "Generated designation variants for the requested language", example = "[\"du téléviseur\", \"de cette télévision\"]")
         List<String> designation,
         @Schema(description = "Meta description aligned with the requested language")

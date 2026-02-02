@@ -153,7 +153,6 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { formatOffersCount } from '~/utils/_product-pricing'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import {
   isCustomSortField,
@@ -168,7 +167,6 @@ const props = defineProps<{
 }>()
 
 const { t, n, locale } = useI18n()
-const { translatePlural } = usePluralizedTranslation()
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
@@ -190,8 +188,6 @@ const productLink = (product: ProductDto) =>
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)
 
-const offersCountLabel = (product: ProductDto) =>
-  formatOffersCount(product, translatePlural)
 
 const resolveBaseLine = (product: ProductDto) =>
   product.aiReview?.baseLine ?? null

@@ -12,7 +12,7 @@ public class ProductTexts {
 
 	private Localisable<String,String> singular = new Localisable<>();
 
-	private Localisable<String,String> singularDesignation = new Localisable<>();
+
 
 	private Localisable<String,String> cardTitle = new Localisable<>();
 	private Localisable<String,String> shortName = new Localisable<>();
@@ -61,13 +61,7 @@ public class ProductTexts {
 		this.singular = singular;
 	}
 
-	public Localisable<String, String> getSingularDesignation() {
-		return singularDesignation;
-	}
 
-	public void setSingularDesignation(Localisable<String, String> singularDesignation) {
-		this.singularDesignation = singularDesignation;
-	}
 
 	public Localisable<String, String> getCardTitle() {
 		return cardTitle;

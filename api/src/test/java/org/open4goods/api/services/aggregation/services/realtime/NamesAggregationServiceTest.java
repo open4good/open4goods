@@ -117,21 +117,7 @@ class NamesAggregationServiceTest {
 				.isEqualTo("TV 55 \"");
 	}
 
-	@Test
-	void onProduct_shouldComputeSingularAndDesignation() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(blablaService.generateBlabla(anyString(), any()))
-				.thenAnswer(invocation -> invocation.getArgument(0, String.class));
 
-		Product product = new Product(11L);
-		product.setVertical("tv");
-
-		service.onProduct(product, config);
-
-		assertThat(product.getNames().getSingular().get("fr")).isEqualTo("Singular");
-		assertThat(product.getNames().getSingularDesignation().get("fr")).isEqualTo("Designation");
-	}
 
 	private VerticalConfig buildVerticalConfig() {
 		VerticalConfig config = new VerticalConfig();
@@ -146,9 +132,7 @@ class NamesAggregationServiceTest {
 		PrefixedAttrText singular = new PrefixedAttrText();
 		singular.setPrefix("Singular");
 		productI18nElements.setSingular(singular);
-		PrefixedAttrText singularDesignation = new PrefixedAttrText();
-		singularDesignation.setPrefix("Designation");
-		productI18nElements.setSingularDesignation(singularDesignation);
+
 
 		HashMap<String, ProductI18nElements> i18n = new HashMap<>();
 		i18n.put("fr", productI18nElements);
