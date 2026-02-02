@@ -2256,8 +2256,8 @@
       "ariaLabel": "Bannière fixe pour promouvoir un achat responsable",
       "offersCount": "{count} offre | {count} offres"
     },
-    "start_impact_text": "Vous aimez ?",
-    "start_impact_subtext": "Soutenez un projet à impact, ouvert et éthique en faisant vos achats via Nudger ! Ça marche aussi en passant directement par nos partenaires.",
+    "start_impact_text": "Envie de soutenir un projet à impact ?",
+    "start_impact_subtext": "Faites vos achats via Nudger ! Ça marche aussi en allant directement chez",
     "partners_link": "nos partenaires",
     "aiReview": {
       "empty": "Synthèse non encore demandée.",

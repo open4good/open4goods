@@ -739,9 +739,9 @@ const fetchRecommendations = async () => {
       query: {
         include:
           'base,identity,names,attributes,resources,scores,offers,vertical',
+        verticalId: selectedCategoryId.value,
       },
       body: {
-        verticalId: selectedCategoryId.value,
         pageNumber: 0,
         pageSize: 3,
         sort: {

@@ -1363,14 +1363,15 @@ public class SearchService {
 		double from = fromPercent != null ? fromPercent : 0.0;
 		double to = toPercent != null ? toPercent : 100.0;
 		
-		// Build script: ranking > count * (1 - toPercent/100) AND ranking <= count * (1 - fromPercent/100)
+		// Build script: ranking >= count * (fromPercent/100) AND ranking < count * (toPercent/100)
+		// Ranking is 0-indexed where 0=worst and count-1=best
 		String scriptSource = String.format(Locale.ROOT,
 				"doc['%s'].size() > 0 && doc['%s'].size() > 0 && " +
-				"doc['%s'].value > doc['%s'].value * (1.0 - %f/100.0) && " +
-				"doc['%s'].value <= doc['%s'].value * (1.0 - %f/100.0)",
+				"doc['%s'].value >= doc['%s'].value * (%f/100.0) && " +
+				"doc['%s'].value < doc['%s'].value * (%f/100.0)",
 				fieldPath, countField,
-				fieldPath, countField, to,
-				fieldPath, countField, from
+				fieldPath, countField, from,
+				fieldPath, countField, to
 		);
 		
 		return Query.of(q -> q.script(s -> s.script(Script.of(sc -> sc.source(scriptSource)))));

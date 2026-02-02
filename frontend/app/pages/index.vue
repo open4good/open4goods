@@ -29,14 +29,14 @@ import {
   resolveThemedAssetUrl,
   useThemeAsset,
 } from '~/composables/useThemedAsset'
-import { useThemedParallaxBackgrounds } from '~/composables/useThemedParallaxBackgrounds'
-import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 import {
   PARALLAX_SECTION_KEYS,
   THEME_ASSETS_FALLBACK,
   type ParallaxLayerConfig,
   type ParallaxSectionKey,
 } from '~~/config/theme/assets'
+import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
+
 import { resolveThemeName } from '~~/shared/constants/theme'
 import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
 
@@ -208,10 +208,23 @@ const theme = useTheme()
 const parallaxAplatFallback = useThemeAsset('parallaxAplat')
 
 const parallaxConfig = useParallaxConfig()
-const parallaxLayers = useThemedParallaxBackgrounds()
+const resolveParallaxAssets = () =>
+  PARALLAX_SECTION_KEYS.reduce<
+    Record<ParallaxSectionKey, ParallaxLayerConfig[]>
+  >(
+    (acc, section) => ({
+      ...acc,
+      [section]: [],
+    }),
+    {} as Record<ParallaxSectionKey, ParallaxLayerConfig[]>
+  )
+
+const parallaxLayersLight = resolveParallaxAssets()
+const parallaxLayersDark = resolveParallaxAssets()
 
 type ParallaxSectionRenderConfig = {
-  backgrounds: ParallaxLayerConfig[]
+  backgroundLight: ParallaxLayerConfig[]
+  backgroundDark: ParallaxLayerConfig[]
   overlayOpacity: number
   parallaxAmount: number
   maxOffsetRatio: number | null
@@ -226,7 +239,8 @@ const parallaxBackgrounds = computed<
     (acc, section) => ({
       ...acc,
       [section]: {
-        backgrounds: parallaxLayers.value[section] || [],
+        backgroundLight: parallaxLayersLight[section] || [],
+        backgroundDark: parallaxLayersDark[section] || [],
         overlayOpacity: parallaxConfig.value[section].overlay,
         parallaxAmount: parallaxConfig.value[section].parallaxAmount,
         maxOffsetRatio: parallaxConfig.value[section].maxOffsetRatio,
@@ -791,7 +805,8 @@ useHead(() => ({
           class="home-page__parallax"
           reverse
           :gapless="true"
-          :backgrounds="parallaxBackgrounds.essentials.backgrounds"
+          :background-light="parallaxBackgrounds.essentials.backgroundLight"
+          :background-dark="parallaxBackgrounds.essentials.backgroundDark"
           :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
           :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
           :aria-label="t('home.parallax.essentials.ariaLabel')"
@@ -856,7 +871,8 @@ useHead(() => ({
         <ParallaxWidget
           class="home-page__parallax"
           reverse
-          :backgrounds="parallaxBackgrounds.blog.backgrounds"
+          :background-light="parallaxBackgrounds.blog.backgroundLight"
+          :background-dark="parallaxBackgrounds.blog.backgroundDark"
           :overlay-opacity="parallaxBackgrounds.blog.overlayOpacity"
           :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
           :aria-label="t('home.parallax.knowledge.ariaLabel')"
@@ -883,7 +899,8 @@ useHead(() => ({
         <ParallaxWidget
           class="home-page__parallax home-page__parallax--centered"
           reverse
-          :backgrounds="parallaxBackgrounds.cta.backgrounds"
+          :background-light="parallaxBackgrounds.cta.backgroundLight"
+          :background-dark="parallaxBackgrounds.cta.backgroundDark"
           :overlay-opacity="parallaxBackgrounds.cta.overlayOpacity"
           :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
           :aria-label="t('home.parallax.cta.ariaLabel')"

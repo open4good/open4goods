@@ -575,7 +575,6 @@ const fetchAlternatives = async () => {
   }
 
   const body: Record<string, unknown> = {
-    verticalId: props.verticalId,
     pageSize: props.maxResults,
     pageNumber: 0,
     include: [
@@ -602,6 +601,9 @@ const fetchAlternatives = async () => {
   try {
     const response = await $fetch<ProductSearchResponseDto>('/api/products', {
       method: 'POST',
+      query: {
+        verticalId: props.verticalId,
+      },
       headers: {
         'X-XSRF-TOKEN': useCookie('XSRF-TOKEN').value || '',
       },
