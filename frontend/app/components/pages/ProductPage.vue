@@ -3,12 +3,8 @@
     <ClientOnly>
       <ProductStickyPriceBanner
         :open="isStickyBannerOpen"
-        :new-price-label="bannerNewPriceLabel"
-        :new-price-link="bannerNewPriceLink"
-        :used-price-label="bannerUsedPriceLabel"
-        :used-price-link="bannerUsedPriceLink"
+        :product="product ?? undefined"
         :offers-count-label="bannerOffersCountLabel"
-        @offers-click="scrollToSection(sectionIds.price)"
         @scroll-to-offers="scrollToSection(sectionIds.price)"
       />
     </ClientOnly>
@@ -204,7 +200,6 @@ import type {
   ProductReferenceDto,
   ProductScoreDto,
   ProductSearchResponseDto,
-  ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
@@ -262,7 +257,7 @@ const ProductVigilanceSection = defineAsyncComponent(
 const route = useRoute()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
-const { t, n, locale } = useI18n()
+const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const display = useDisplay()
 const { y: scrollY } = useWindowScroll()
@@ -287,41 +282,6 @@ const PRODUCT_COMPONENTS = [
 
 const impactSectionRef = ref<HTMLElement | null>(null)
 const { top: _impactSectionTop } = useElementBounding(impactSectionRef)
-
-const bannerNewPriceLabel = computed(() => {
-  const offer = product.value?.offers?.bestNewOffer
-  if (!offer?.price) return undefined
-  return n(offer.price, {
-    style: 'currency',
-    currency: offer.currency ?? 'EUR',
-    maximumFractionDigits: 2,
-  })
-})
-
-const bannerUsedPriceLabel = computed(() => {
-  const offer = product.value?.offers?.bestOccasionOffer
-  if (!offer?.price) return undefined
-  return n(offer.price, {
-    style: 'currency',
-    currency: offer.currency ?? 'EUR',
-    maximumFractionDigits: 2,
-  })
-})
-
-const resolveOfferLink = (
-  offer: ProductAggregatedPriceDto | null | undefined
-) => {
-  if (!offer) return undefined
-  if (offer.affiliationToken) return `/contrib/${offer.affiliationToken}`
-  return offer.url ?? undefined
-}
-
-const bannerNewPriceLink = computed(() =>
-  resolveOfferLink(product.value?.offers?.bestNewOffer)
-)
-const bannerUsedPriceLink = computed(() =>
-  resolveOfferLink(product.value?.offers?.bestOccasionOffer)
-)
 
 const bannerOffersCountLabel = computed(() => {
   const count = product.value?.offers?.offersCount ?? 0
