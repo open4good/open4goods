@@ -20,7 +20,7 @@ Multiple header implementations exist to suit different page designs. The Generi
 
 ## internal: PageHeader Component
 
-The `PageHeader` (`app/components/shared/header/PageHeader.vue`) is the unified component for standard pages. It supports Event Packs (via `useThemeAsset`) for dynamic backgrounds.
+The `PageHeader` (`app/components/shared/header/PageHeader.vue`) is the unified component for standard pages. It resolves theme assets via `useThemeAsset`.
 
 ### Usage Example
 
@@ -41,16 +41,14 @@ The `PageHeader` (`app/components/shared/header/PageHeader.vue`) is the unified 
 | `title`                   | `string`                                                   | -                   | Main heading (H1).                                |
 | `subtitle`                | `string`                                                   | -                   | Subheading text.                                  |
 | `background`              | `'surface-variant' \| 'image' \| 'gradient' \| 'parallax'` | `'surface-variant'` | Background style.                                 |
-| `backgroundImageAssetKey` | `ThemeAssetKey`                                            | -                   | Key to resolve background image from Event Packs. |
+| `backgroundImageAssetKey` | `ThemeAssetKey`                                            | -                   | Key to resolve background image from theme assets. |
 | `container`               | `'fluid' \| 'semi-fluid' \| 'lg' \| 'xl'`                  | `'lg'`              | Container width.                                  |
 | `eyebrow`                 | `string`                                                   | -                   | Small uppercase label above title.                |
 
-### Event Packs Integration
-
-The `PageHeader` can dynamically change its background based on the active "Event Pack" (e.g., Christmas, Bastille Day).
+### Theme Asset Integration
 
 1.  **Define Asset**: Ensure the asset key (e.g., `heroBackground`) is defined in `frontend/config/theme/assets.ts`.
-2.  **Configure Pack**: In `locales/fr-FR.json` (under `packs.<packName>.assets`), map the key to a path.
+2.  **Configure Theme Assets**: Map the key to a path in `frontend/config/theme/assets.ts`.
 3.  **Use Prop**: Pass `background-image-asset-key="heroBackground"` to `PageHeader`.
 
-**Note**: Specialized heroes (`ContactHero`, `OpendataHero`, etc.) do **not** currently support Event Pack background switching out-of-the-box, as they rely on `HeroSurface` or custom CSS.
+**Note**: Specialized heroes (`ContactHero`, `OpendataHero`, etc.) do **not** currently support `PageHeader` theme asset backgrounds, as they rely on `HeroSurface` or custom CSS.

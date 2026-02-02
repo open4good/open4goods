@@ -5,8 +5,6 @@ import SearchSuggestField, {
   type ProductSuggestionItem,
 } from '~/components/search/SearchSuggestField.vue'
 import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
-import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
-import { useEventPackI18n } from '~/composables/useEventPackI18n'
 
 type Emits = {
   'update:searchQuery': [value: string]
@@ -29,20 +27,27 @@ const props = withDefaults(
 
 const emit = defineEmits<Emits>()
 
-const { t, te } = useI18n()
+const { t, te, tm } = useI18n()
 
 const { categoriesLandingUrl, minSuggestionQueryLength } = toRefs(props)
 
 const searchQueryValue = computed(() => props.searchQuery)
 
-const activeEventPack = useSeasonalEventPack()
-const packI18n = useEventPackI18n(activeEventPack)
-
 const isVisible = computed(() => Boolean(props.reveal))
 
-const resolveSearchString = (path: string, fallbackKey: string) =>
-  packI18n.resolveString(path, { fallbackKeys: [fallbackKey] }) ??
-  (te(fallbackKey) ? String(t(fallbackKey)) : '')
+const resolveSearchString = (key: string) =>
+  te(key) ? String(t(key)) : ''
+
+const resolveSearchPlaceholder = () => {
+  if (te('home.hero.search.placeholders')) {
+    const value = tm('home.hero.search.placeholders')
+    if (Array.isArray(value)) {
+      return value.map(entry => String(entry))
+    }
+  }
+
+  return resolveSearchString('home.hero.search.placeholder')
+}
 
 const handleSubmit = () => {
   emit('submit')
@@ -86,21 +91,9 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
         <SearchSuggestField
           :model-value="searchQueryValue"
           class="home-hero__search-input"
-          :label="
-            resolveSearchString('hero.search.label', 'home.hero.search.label')
-          "
-          :placeholder="
-            resolveSearchString(
-              'hero.search.placeholder',
-              'home.hero.search.placeholder'
-            )
-          "
-          :aria-label="
-            resolveSearchString(
-              'hero.search.ariaLabel',
-              'home.hero.search.ariaLabel'
-            )
-          "
+          :label="resolveSearchString('home.hero.search.label')"
+          :placeholder="resolveSearchPlaceholder()"
+          :aria-label="resolveSearchString('home.hero.search.ariaLabel')"
           :min-chars="minSuggestionQueryLength"
           :enable-scan="true"
           :scan-mobile="true"

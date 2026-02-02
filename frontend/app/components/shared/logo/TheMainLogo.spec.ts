@@ -1,6 +1,6 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi, afterEach } from 'vitest'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import TheMainLogo from './The-main-logo.vue'
 
 // Mock dependencies
@@ -17,18 +17,6 @@ vi.mock('vuetify', () => ({
     global: {
       name: ref('light'),
     },
-  }),
-}))
-
-// We also need to mock useSeasonalEventPack since it's used by useThemedAsset
-vi.mock('~/composables/useSeasonalEventPack', () => ({
-  useSeasonalEventPack: () => computed(() => 'default'),
-}))
-
-// We need to mock useEventPackI18n
-vi.mock('~/composables/useEventPackI18n', () => ({
-  useEventPackI18n: () => ({
-    resolveString: () => null,
   }),
 }))
 
