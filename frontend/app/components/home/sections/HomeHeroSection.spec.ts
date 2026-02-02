@@ -1,25 +1,21 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi, afterEach } from 'vitest'
-import { computed, defineComponent, h, ref } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import { useNuxtApp, useState } from '#app'
 import HomeHeroSection from './HomeHeroSection.vue'
-import type { EventPackName } from '~~/config/theme/event-packs'
-
 const messages: Record<string, unknown> = {
-  'packs.default.hero.title': 'Nudger : Le comparateur écologique',
-  'packs.default.hero.titleSubtitle': ['Acheter mieux. Sans dépenser plus.'],
-  'packs.default.hero.background': 'hero-background.webp',
+  'home.hero.title': 'Nudger : Le comparateur écologique',
+  'home.hero.titleSubtitle': ['Acheter mieux. Sans dépenser plus.'],
+  'home.hero.background': 'hero-background.webp',
 }
 
 const subtitleCollections = {
-  default: messages['packs.default.hero.titleSubtitle'] as string[],
+  default: messages['home.hero.titleSubtitle'] as string[],
 }
-
-const activeEventPack = ref<EventPackName>('default')
 
 const resetHeroSubtitleState = () => {
   const seedState = useState<Record<string, number>>(
-    'event-pack-variant-seeds',
+    'home-hero-variant-seeds',
     () => ({})
   )
 
@@ -34,7 +30,7 @@ const resetHeroSubtitleState = () => {
 
   Reflect.deleteProperty(
     state as Record<string, unknown>,
-    'event-pack-variant-seeds'
+    'home-hero-variant-seeds'
   )
 }
 
@@ -50,7 +46,7 @@ vi.mock('vue-i18n', () => ({
         return messages[key]
       }
 
-      if (key === 'packs.default.hero.titleSubtitle') {
+      if (key === 'home.hero.titleSubtitle') {
         return subtitleCollections.default
       }
 
@@ -59,10 +55,6 @@ vi.mock('vue-i18n', () => ({
     te: (key: string) => Boolean(messages[key]),
     locale: ref('fr-FR'),
   }),
-}))
-
-vi.mock('~~/app/composables/useSeasonalEventPack', () => ({
-  useSeasonalEventPack: () => computed(() => activeEventPack.value),
 }))
 
 const createStub = (tag: string, className = '') =>
@@ -96,16 +88,15 @@ const mountComponent = async () => {
 }
 
 afterEach(() => {
-  activeEventPack.value = 'default'
   vi.restoreAllMocks()
 })
 
 describe('HomeHeroSection', () => {
-  it('renders the title and subtitle from the event pack', async () => {
+  it('renders the title and subtitle from the home hero copy', async () => {
     const wrapper = await mountComponent()
 
     expect(wrapper.find('.home-hero__title').text()).toBe(
-      messages['packs.default.hero.title']
+      messages['home.hero.title']
     )
     expect(wrapper.find('.home-hero__title-subtitle').text()).toBe(
       subtitleCollections.default[0]
@@ -114,12 +105,12 @@ describe('HomeHeroSection', () => {
     await wrapper.unmount()
   })
 
-  it('uses the background image from the pack override', async () => {
+  it('uses the background image from the home hero background', async () => {
     const wrapper = await mountComponent()
     const background = wrapper.find('.home-hero__background-media')
 
     expect(background.attributes('src')).toContain(
-      messages['packs.default.hero.background']
+      messages['home.hero.background']
     )
 
     await wrapper.unmount()

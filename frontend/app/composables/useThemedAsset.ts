@@ -6,10 +6,7 @@ import {
   themeAssets,
   type ThemeAssetKey,
 } from '~~/config/theme/assets'
-import type { EventPackName } from '~~/config/theme/event-packs'
-import { useSeasonalEventPack } from './useSeasonalEventPack'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
-import { useEventPackI18n } from './useEventPackI18n'
 
 export type ThemedAssetIndex = Record<string, string>
 
@@ -35,33 +32,17 @@ const themedAssetIndex: ThemedAssetIndex = Object.entries(rawAssetIndex).reduce(
   {}
 )
 
-console.log('DEBUG: Validating themedAssetIndex keys...')
-console.log('DEBUG: Total keys:', Object.keys(themedAssetIndex).length)
-console.log('DEBUG: Sample keys:', Object.keys(themedAssetIndex).slice(0, 5))
-if (Object.keys(themedAssetIndex).length === 0) {
-  console.log('DEBUG: NO KEYS FOUND! checking rawAssetIndex...')
-  console.log('DEBUG: Raw keys sample:', Object.keys(rawAssetIndex).slice(0, 5))
-}
-
 export const resolveThemedAssetUrlFromIndex = (
   relativePath: string | string[],
   themeName: ThemeName,
   index: ThemedAssetIndex,
-  fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK,
-  seasonalPack?: EventPackName
+  fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK
 ): string | undefined => {
   const sanitizedPaths = (
     Array.isArray(relativePath) ? relativePath : [relativePath]
   ).map(path => path.replace(/^\//, ''))
 
   const candidates = sanitizedPaths.flatMap(path => [
-    ...(seasonalPack
-      ? [
-          `${themeName}/${seasonalPack}/${path}`,
-          `common/${seasonalPack}/${path}`,
-          `${fallbackTheme}/${seasonalPack}/${path}`,
-        ]
-      : []),
     `${themeName}/${path}`,
     `common/${path}`,
     `${fallbackTheme}/${path}`,
@@ -71,13 +52,6 @@ export const resolveThemedAssetUrlFromIndex = (
     (resolved, candidate) => {
       if (resolved) {
         return resolved
-      }
-      // Log debugging info
-      console.log(
-        `[ThemeAsset] Checking candidate: ${candidate}, exists: ${!!index[candidate]}`
-      )
-      if (!index[candidate]) {
-        // console.log('Available keys sample:', Object.keys(index).slice(0, 5))
       }
       return index[candidate]
     },
@@ -97,50 +71,32 @@ const useCurrentThemeName = () => {
 
 export const resolveThemedAssetUrl = (
   relativePath: string | string[],
-  themeName: ThemeName,
-  seasonalPack?: EventPackName
+  themeName: ThemeName
 ): string | undefined =>
   resolveThemedAssetUrlFromIndex(
     relativePath,
     themeName,
     themedAssetIndex,
-    THEME_ASSETS_FALLBACK,
-    seasonalPack
+    THEME_ASSETS_FALLBACK
   )
 
 export const useThemedAsset = (relativePath: string) => {
   const themeName = useCurrentThemeName()
-  const seasonalPack = useSeasonalEventPack()
 
   return computed(
-    () =>
-      resolveThemedAssetUrl(
-        relativePath,
-        themeName.value,
-        seasonalPack.value
-      ) ?? ''
+    () => resolveThemedAssetUrl(relativePath, themeName.value) ?? ''
   )
 }
 
 export const useThemeAsset = (assetKey: MaybeRef<ThemeAssetKey>) => {
   const themeName = useCurrentThemeName()
-  const seasonalPack = useSeasonalEventPack()
-  const packI18n = useEventPackI18n(seasonalPack)
 
   return computed(() => {
     const key = toValue(assetKey)
     if (!key) return ''
 
-    const pack = toValue(seasonalPack)
-    const i18nAsset = packI18n.resolveString(`assets.${key}`)
-
-    // 1. Resolve candidates from i18n
     const candidates: string[] = []
-    if (i18nAsset) {
-      candidates.push(i18nAsset)
-    }
 
-    // 2. Add fallback candidates from static themeAssets config
     const fromTheme = themeAssets[themeName.value]?.[key]
     const fromCommon = themeAssets.common?.[key]
     const fallback = themeAssets[THEME_ASSETS_FALLBACK]?.[key]
@@ -155,7 +111,7 @@ export const useThemeAsset = (assetKey: MaybeRef<ThemeAssetKey>) => {
       return ''
     }
 
-    return resolveThemedAssetUrl(uniqueCandidates, themeName.value, pack) ?? ''
+    return resolveThemedAssetUrl(uniqueCandidates, themeName.value) ?? ''
   })
 }
 

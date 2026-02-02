@@ -4,8 +4,8 @@
  * Ce fichier définit :
  * - Les assets de base par thème (logo, favicon, etc.)
  *
- * Pour la configuration des packs événementiels (dates, etc.),
- * voir `event-packs.ts`
+ * Pour les variations saisonnières, utilisez des overrides de thèmes
+ * plutôt que des fichiers i18n.
  */
 
 import type { ThemeName } from '~~/shared/constants/theme'
@@ -28,7 +28,16 @@ export const THEME_ASSET_KEYS = [
   'contactBackground',
   'blogBackground',
   'categoriesBackground',
+  'openSourceBackground',
+  'openDataBackground',
+  'teamBackground',
+  'impactScoreBackground',
   'partnersBackground',
+  'compareBackground',
+  'searchBackground',
+  'feedbackBackground',
+  'promptBackground',
+  'releasesBackground',
   'parallaxAplat',
 ] as const
 
@@ -76,7 +85,16 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'contact-background.svg',
     blogBackground: 'blog-background.svg',
     categoriesBackground: 'categories-background.svg',
-    partnersBackground: 'placeholders/generated/partners.svg',
+    openSourceBackground: 'open-source-background.svg',
+    openDataBackground: 'open-data-background.svg',
+    teamBackground: 'backgrounds/team.svg',
+    impactScoreBackground: 'backgrounds/impact-score.svg',
+    partnersBackground: 'backgrounds/partners.svg',
+    compareBackground: 'backgrounds/compare.svg',
+    searchBackground: 'backgrounds/search.svg',
+    feedbackBackground: 'backgrounds/feedback.svg',
+    promptBackground: 'backgrounds/prompt.svg',
+    releasesBackground: 'backgrounds/releases.svg',
     parallaxAplat: 'parallax/parallax-aplats.svg',
   },
   dark: {
@@ -89,7 +107,16 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'contact-background.svg',
     blogBackground: 'blog-background.svg',
     categoriesBackground: 'categories-background.svg',
-    partnersBackground: 'placeholders/generated/partners.svg',
+    openSourceBackground: 'open-source-background.svg',
+    openDataBackground: 'open-data-background.svg',
+    teamBackground: 'backgrounds/team.svg',
+    impactScoreBackground: 'backgrounds/impact-score.svg',
+    partnersBackground: 'backgrounds/partners.svg',
+    compareBackground: 'backgrounds/compare.svg',
+    searchBackground: 'backgrounds/search.svg',
+    feedbackBackground: 'backgrounds/feedback.svg',
+    promptBackground: 'backgrounds/prompt.svg',
+    releasesBackground: 'backgrounds/releases.svg',
     parallaxAplat: 'parallax/parallax-aplats.svg',
   },
   common: {
@@ -102,7 +129,16 @@ export const themeAssets: Record<ThemeName | 'common', ThemeAssetConfig> = {
     contactBackground: 'placeholders/asset-missing.svg',
     blogBackground: 'placeholders/asset-missing.svg',
     categoriesBackground: 'placeholders/asset-missing.svg',
+    openSourceBackground: 'placeholders/asset-missing.svg',
+    openDataBackground: 'placeholders/asset-missing.svg',
+    teamBackground: 'placeholders/generated/team.svg',
+    impactScoreBackground: 'placeholders/generated/impact-score.svg',
     partnersBackground: 'placeholders/generated/partners.svg',
+    compareBackground: 'placeholders/generated/compare.svg',
+    searchBackground: 'placeholders/generated/search.svg',
+    feedbackBackground: 'placeholders/generated/feedback.svg',
+    promptBackground: 'placeholders/generated/prompt.svg',
+    releasesBackground: 'placeholders/generated/releases.svg',
     parallaxAplat: 'parallax/parallax-aplats.svg',
   },
 }

@@ -9,14 +9,13 @@ Theme-specific assets live under `app/assets/themes/<theme>/` with shared fallba
 - Prefer descriptive filenames by purpose rather than brand (e.g., `hero-background.svg`, `illustration-generic.svg`).
 
 ## Current folders
-- `light/`: placeholder defaults shown when no pack/theme override is provided.
-- `dark/`: placeholder defaults for dark mode (inherits from light/common otherwise).
+- `light/`: theme-specific defaults used in light mode.
+- `dark/`: theme-specific defaults for dark mode (inherits from light/common otherwise).
 - `common/`: neutral visuals usable across all themes (e.g., hero backgrounds, generic illustrations).
-- `common/hold/`: archived pre-placeholder assets kept for regression testing.
 
 Use the `useThemedAsset` composable to resolve the correct URL instead of importing assets directly.
 
-See [docs/theme-assets.md](../../docs/theme-assets.md) for end-to-end guidance on fallbacks, seasonal packs, and preview parameters.
+See [docs/theme-assets.md](../../docs/theme-assets.md) for end-to-end guidance on fallbacks and preview parameters.
 
 ## Recommended sizes & ratios
 - **Hero & parallax backgrounds**: keep a single large viewBox such as `1600x900` or `1920x1080` with `preserveAspectRatio="xMidYMid slice"` and generous bleed (10-15%) so the image covers wide and tall viewports without revealing empty bands.

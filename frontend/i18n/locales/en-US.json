@@ -55,239 +55,6 @@
     }
   },
   "home": {
-    "events": {
-      "default": {
-        "hero": {
-          "eyebrow": "Responsible shopping",
-          "title": "Responsible choices aren't a luxury",
-          "titleSubtitle": ["Buy better. Spend smarter."],
-          "subtitles": [
-            "Save time, stay true to your values. Compare effortlessly, choose freely.",
-            "Shop smarter without compromise. Nudger balances planet and price.",
-            "Find the responsible choice faster. Trusted data, transparent insights."
-          ],
-          "iconAlt": "Nudger PWA launcher icon",
-          "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
-          "search": {
-            "label": "Search for a product",
-            "placeholder": "Search a product (e.g. television, smartphone...)",
-            "ariaLabel": "Search for a responsible product",
-            "cta": "NUDGER",
-            "helper": "Independent comparator powered by open data.",
-            "helpersTitle": "Shop with intention. Compare for impact.",
-            "helpers": [
-              {
-                "icon": "🌿",
-                "label": "A unique ecological and environmental assessment for {products} across {categories} categories",
-                "segments": [
-                  {
-                    "text": "A unique ecological assessment",
-                    "to": "/impact-score"
-                  },
-                  {
-                    "text": " and environmental review for {products} across {categories} categories"
-                  }
-                ]
-              },
-              {
-                "icon": "🏷️",
-                "label": "The best prices on the market",
-                "segments": [
-                  {
-                    "text": "Stay smart on prices with"
-                  },
-                  {
-                    "text": "{partnersLink}",
-                    "to": "/partners"
-                  }
-                ]
-              },
-              {
-                "icon": "🛡️",
-                "label": "100% independent. Over {millions}M products in open data and free software",
-                "segments": [
-                  {
-                    "text": "100% independent. Over {millions}M products in "
-                  },
-                  {
-                    "text": "open data",
-                    "to": "/opendata"
-                  },
-                  {
-                    "text": " and "
-                  },
-                  {
-                    "text": "free software",
-                    "to": "/opensource"
-                  }
-                ]
-              }
-            ],
-            "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
-            "partnerLinkFallback": "our partners"
-          },
-          "highlights": [
-            {
-              "title": "🌿 ImpactScore: guiding your purchases",
-              "segments": [
-                {
-                  "text": "Buy less harmful for the planet, thanks to our"
-                },
-                {
-                  "text": "environmental assessment",
-                  "to": "/impact-score"
-                },
-                {
-                  "text": "covering"
-                },
-                {
-                  "text": "{impactScoreProducts}",
-                  "to": "/impact-score"
-                },
-                {
-                  "text": "products across"
-                },
-                {
-                  "text": "{impactScoreCategories} categories",
-                  "to": "/categories"
-                }
-              ]
-            },
-            {
-              "title": "🇫🇷 Open & ethical",
-              "segments": [
-                {
-                  "text": "100% independent. Made in France,",
-                  "icon": "breton-flag",
-                  "iconPosition": "after"
-                },
-                {
-                  "text": "hosted in Europe. Over"
-                },
-                {
-                  "text": "{millions}M",
-                  "to": "/opendata"
-                },
-                {
-                  "text": "products in"
-                },
-                {
-                  "text": "open data.",
-                  "to": "/opendata"
-                },
-                {
-                  "text": "Nudger is also"
-                },
-                {
-                  "text": "open source",
-                  "to": "/opensource"
-                },
-                {
-                  "text": "and collects no personal data."
-                }
-              ]
-            },
-            {
-              "title": "Price comparison",
-              "segments": [
-                {
-                  "text": "Avoid price traps with the best offers from"
-                },
-                {
-                  "text": "{partnersLink}",
-                  "to": "/partners"
-                },
-                {
-                  "text": "merchants. Buy at the right time with new and used price history for"
-                },
-                {
-                  "text": "{priceHistoryProducts}",
-                  "to": "/categories"
-                },
-                {
-                  "text": "products."
-                }
-              ]
-            }
-          ],
-          "context": {
-            "cornerLabel": "Impact digest",
-            "cornerTooltip": "Key highlights from Nudger's methodology",
-            "ariaLabel": "Hero context card summarising Nudger's promise"
-          }
-        }
-      },
-      "hold": {
-        "hero": {
-          "titleSubtitle": ["Legacy seasonal copy kept for testing."],
-          "subtitles": [
-            "Placeholder subtitles for the hold pack.",
-            "Define hero copy for the event pack or rely on default."
-          ]
-        }
-      },
-      "sdg": {
-        "hero": {
-          "titleSubtitle": [
-            "Everyday shopping aligned with the Sustainable Development Goals."
-          ],
-          "subtitles": [
-            "Small choices, global goals. Discover products aligned with the SDGs."
-          ]
-        }
-      },
-      "bastille-day": {
-        "hero": {
-          "eyebrow": "Bastille Day special",
-          "title": "Celebrate conscious choices on 14 July",
-          "titleSubtitle": ["Fireworks of fair prices and transparent impact."],
-          "subtitles": [
-            "Shop with liberté, égalité, durabilité in mind.",
-            "Switch to responsible picks while the skyline lights up."
-          ],
-          "iconAlt": "Fireworks celebrating responsible shopping",
-          "imageAlt": "Illustration of fireworks above city rooftops.",
-          "search": {
-            "label": "Search a Bastille Day-friendly product",
-            "placeholder": "Find a fan, fridge, or festive gift",
-            "helpersTitle": "Quick wins before the fireworks",
-            "helpers": [
-              {
-                "icon": "🎆",
-                "segments": [
-                  {
-                    "text": "Use the impact score to dodge wasteful picks."
-                  }
-                ]
-              },
-              {
-                "icon": "🥖",
-                "segments": [
-                  {
-                    "text": "Local and efficient? Filter by repairability first."
-                  }
-                ]
-              },
-              {
-                "icon": "🎇",
-                "segments": [
-                  {
-                    "text": "Balance celebrations and savings with transparent prices."
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        "parallax": {
-          "essentials": "parallax/parallax-background-bastille-essentials.svg",
-          "features": "parallax/parallax-background-bastille-features.svg",
-          "blog": "parallax/parallax-background-bastille-blog.svg",
-          "objections": "parallax/parallax-background-bastille-objections.svg",
-          "cta": "parallax/parallax-background-bastille-cta.svg"
-        }
-      }
-    },
     "seo": {
       "title": "Nudger - Responsible shopping made easy",
       "description": "Compare the environmental impact and prices of over 50 million products with Nudger.",
@@ -297,32 +64,14 @@
       "eyebrow": "Responsible shopping",
       "title": "Nudger: The eco-friendly comparator",
       "animatedSubtitle": "",
-      "titleSubtitle": {
-        "default": ["Buy better. Spend smarter."],
-        "events": {
-          "hold": ["Legacy seasonal copy kept for testing."],
-          "sdg": [
-            "Everyday shopping aligned with the Sustainable Development Goals."
-          ]
-        }
-      },
-      "subtitles": {
-        "default": [
-          "Save time, stay true to your values. Compare effortlessly, choose freely.",
-          "Shop smarter without compromise. Nudger balances planet and price.",
-          "Find the responsible choice faster. Trusted data, transparent insights."
-        ],
-        "events": {
-          "hold": [
-            "Placeholder subtitle for the hold pack.",
-            "Fallback to default if not redefined."
-          ],
-          "sdg": [
-            "Small choices, global goals. Discover products aligned with the SDGs."
-          ]
-        }
-      },
-
+      "titleSubtitle": [
+        "Buy better. Spend smarter."
+      ],
+      "subtitles": [
+        "Save time, stay true to your values. Compare effortlessly, choose freely.",
+        "Shop smarter without compromise. Nudger balances planet and price.",
+        "Find the responsible choice faster. Trusted data, transparent insights."
+      ],
       "iconAlt": "Nudger PWA launcher icon",
       "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
       "search": {
@@ -381,7 +130,10 @@
           }
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
-        "partnerLinkFallback": "our partners"
+        "partnerLinkFallback": "our partners",
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {
@@ -2609,7 +2361,6 @@
       "ariaLabel": "Sticky banner promoting responsible shopping",
       "offersCount": "{count} offer | {count} offers"
     },
-
     "start_impact_text": "Enjoying this?",
     "start_impact_subtext": "Support an independent, open, and impactful web by shopping through Nudger! It also works via our partner merchants",
     "partners_link": "our partners",
@@ -3863,165 +3614,6 @@
     "meta": {
       "title": "AI Agent Workspace - Nudger",
       "description": "Interact with Nudger AI agents to submit feedback and questions."
-    }
-  },
-  "packs": {
-    "default": {
-      "assets": {
-        "illustration": "placeholders/illustration.svg",
-        "logo": "placeholders/logo.svg",
-        "footerLogo": "placeholders/logo-footer.svg",
-        "favicon": "placeholders/favicon.svg"
-      },
-      "parallax": {
-        "essentials": "parallax-placeholder.svg",
-        "features": "parallax-placeholder.svg",
-        "blog": "parallax-placeholder.svg",
-        "objections": "parallax-placeholder.svg",
-        "cta": "parallax-placeholder.svg",
-        "aplat": "parallax-aplats.svg"
-      },
-      "hero": {
-        "eyebrow": "Responsible shopping",
-        "title": "Responsible choices aren't a luxury",
-        "titleSubtitle": ["Buy better. Spend smarter."],
-        "subtitles": [
-          "Save time, stay true to your values. Compare effortlessly, choose freely.",
-          "Shop smarter without compromise. Nudger balances planet and price.",
-          "Find the responsible choice faster. Trusted data, transparent insights."
-        ],
-        "iconAlt": "Nudger PWA launcher icon",
-        "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
-        "search": {
-          "label": "Search for a product",
-          "placeholder": "Search a product (e.g. television, smartphone...)",
-          "ariaLabel": "Search for a responsible product",
-          "cta": "NUDGER",
-          "helper": "Independent comparator powered by open data.",
-          "helpersTitle": "Shop with intention. Compare for impact.",
-          "helpers": [
-            {
-              "icon": "🌿",
-              "label": "A unique ecological and environmental assessment for {products} across {categories} categories",
-              "segments": [
-                {
-                  "text": "A unique ecological assessment",
-                  "to": "/impact-score"
-                },
-                {
-                  "text": " and environmental review for {products} across {categories} categories"
-                }
-              ]
-            },
-            {
-              "icon": "🏷️",
-              "label": "The best prices on the market",
-              "segments": [
-                {
-                  "text": "Stay smart on prices with"
-                },
-                {
-                  "text": "{partnersLink}",
-                  "to": "/partners"
-                }
-              ]
-            },
-            {
-              "icon": "🛡️",
-              "label": "100% independent. Over {millions}M products in open data and free software",
-              "segments": [
-                {
-                  "text": "100% independent. Over {millions}M products in "
-                },
-                {
-                  "text": "open data",
-                  "to": "/opendata"
-                },
-                {
-                  "text": " and "
-                },
-                {
-                  "text": "free software",
-                  "to": "/opensource"
-                }
-              ]
-            }
-          ],
-          "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
-          "partnerLinkFallback": "our partners"
-        },
-        "context": {
-          "cornerLabel": "Impact digest",
-          "cornerTooltip": "Key highlights from Nudger's methodology",
-          "ariaLabel": "Hero context card summarising Nudger's promise"
-        }
-      }
-    },
-    "sdg": {
-      "hero": {
-        "titleSubtitle": [
-          "Everyday shopping aligned with the Sustainable Development Goals."
-        ],
-        "subtitles": [
-          "Small choices, global goals. Discover products aligned with the SDGs."
-        ]
-      }
-    },
-    "bastille-day": {
-      "assets": {
-        "heroBackground": "bastille-day/hero-background.svg",
-        "illustration": "bastille-day/illustration-fireworks.svg"
-      },
-      "hero": {
-        "eyebrow": "Bastille Day special",
-        "title": "Celebrate conscious choices on 14 July",
-        "titleSubtitle": ["Fireworks of fair prices and transparent impact."],
-        "subtitles": [
-          "Shop with liberté, égalité, durabilité in mind.",
-          "Switch to responsible picks while the skyline lights up."
-        ],
-        "iconAlt": "Fireworks celebrating responsible shopping",
-        "imageAlt": "Illustration of fireworks above city rooftops.",
-        "search": {
-          "label": "Search a Bastille Day-friendly product",
-          "placeholder": "Find a fan, fridge, or festive gift",
-          "helpersTitle": "Quick wins before the fireworks",
-          "helpers": [
-            {
-              "icon": "🎆",
-              "segments": [
-                {
-                  "text": "Use the impact score to dodge wasteful picks."
-                }
-              ]
-            },
-            {
-              "icon": "🥖",
-              "segments": [
-                {
-                  "text": "Local and efficient? Filter by repairability first."
-                }
-              ]
-            },
-            {
-              "icon": "🎇",
-              "segments": [
-                {
-                  "text": "Balance celebrations and savings with transparent prices."
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "parallax": {
-        "essentials": "parallax-background-bastille-essentials.svg",
-        "features": "parallax-background-bastille-features.svg",
-        "blog": "parallax-background-bastille-blog.svg",
-        "objections": "parallax-background-bastille-objections.svg",
-        "cta": "parallax-background-bastille-cta.svg",
-        "aplat": "parallax-aplats.svg"
-      }
     }
   },
   "impactScoreCriteriaPanel": {

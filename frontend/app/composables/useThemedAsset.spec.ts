@@ -7,7 +7,6 @@ describe('useThemedAsset utilities', () => {
   const assetIndex = {
     'light/logo-new.png': '/_nuxt/light-logo-new.png',
     'common/hero-background.svg': '/_nuxt/common-hero.svg',
-    'light/hold/hero-background.svg': '/_nuxt/light-hold-hero.svg',
     'light/hero-background.svg': '/_nuxt/light-hero.svg',
   }
 
@@ -44,16 +43,4 @@ describe('useThemedAsset utilities', () => {
     expect(resolved).toBe('/_nuxt/light-logo-new.png')
   })
 
-  it('prioritises seasonal pack assets when pack is provided', () => {
-    // Should resolve to light/hold/hero-background.svg
-    const resolved = resolveThemedAssetUrlFromIndex(
-      'hero-background.svg',
-      'light',
-      assetIndex,
-      THEME_ASSETS_FALLBACK,
-      'hold'
-    )
-
-    expect(resolved).toBe('/_nuxt/light-hold-hero.svg')
-  })
 })

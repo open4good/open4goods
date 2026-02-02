@@ -9,10 +9,6 @@ import {
   type ParallaxSectionKey,
   type ParallaxPackConfig,
 } from '~~/config/theme/assets'
-import {
-  EVENT_PACK_I18N_BASE_KEY,
-  type EventPackName,
-} from '~~/config/theme/event-packs'
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 import { resolveThemedAssetUrl } from './useThemedAsset'
 
@@ -67,44 +63,33 @@ const resolveParallaxLayers = (
     .filter((resolved): resolved is ParallaxLayerConfig => Boolean(resolved))
 }
 
+const DEFAULT_PARALLAX_ASSETS: ParallaxPackConfig = {
+  essentials: ['parallax/parallax-placeholder.svg'],
+  features: ['parallax/parallax-placeholder.svg'],
+  blog: ['parallax/parallax-placeholder.svg'],
+  objections: ['parallax/parallax-placeholder.svg'],
+  cta: ['parallax/parallax-placeholder.svg'],
+}
+
 export const useThemedParallaxBackgrounds = (
-  packName: MaybeRef<EventPackName>,
   dynamicOverrides?: MaybeRef<
     Partial<Record<ParallaxSectionKey, ParallaxLayerSource[]>>
   >
 ) => {
   const theme = useTheme()
-  const { tm } = useI18n()
 
   const themeName = computed<ThemeName>(() =>
     resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
   )
 
-  const resolveI18nPack = (eventPack: EventPackName): ParallaxPackConfig => {
-    const i18nKey = `${EVENT_PACK_I18N_BASE_KEY}.${eventPack}.parallax`
-    const entries = tm(i18nKey) as Record<string, string> | undefined
-
-    if (!entries) {
-      return {}
-    }
-
-    return Object.fromEntries(
-      Object.entries(entries).map(([section, path]) => [section, [path]])
-    )
-  }
-
   return computed<Record<ParallaxSectionKey, ParallaxLayerConfig[]>>(() => {
-    const activePackName = unref(packName)
     const overrides = unref(dynamicOverrides)
-
-    // i18n resolution
-    const i18nPack = resolveI18nPack(activePackName)
 
     return PARALLAX_SECTION_KEYS.reduce<
       Record<ParallaxSectionKey, ParallaxLayerConfig[]>
     >(
       (acc, section) => {
-        const assets = overrides?.[section] ?? i18nPack[section] ?? []
+        const assets = overrides?.[section] ?? DEFAULT_PARALLAX_ASSETS[section]
 
         return {
           ...acc,

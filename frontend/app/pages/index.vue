@@ -25,7 +25,6 @@ import type {
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
 import { useParallaxConfig } from '~/composables/useParallaxConfig'
-import { useSeasonalEventPack } from '~/composables/useSeasonalEventPack'
 import {
   resolveThemedAssetUrl,
   useThemeAsset,
@@ -38,7 +37,6 @@ import {
   type ParallaxLayerConfig,
   type ParallaxSectionKey,
 } from '~~/config/theme/assets'
-import { EVENT_PACK_I18N_BASE_KEY } from '~~/config/theme/event-packs'
 import { resolveThemeName } from '~~/shared/constants/theme'
 import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
 
@@ -206,12 +204,11 @@ const aiSummaryRemainingCredits = computed(() => {
   return remaining
 })
 
-const seasonalEventPack = useSeasonalEventPack()
 const theme = useTheme()
 const parallaxAplatFallback = useThemeAsset('parallaxAplat')
 
 const parallaxConfig = useParallaxConfig()
-const parallaxLayers = useThemedParallaxBackgrounds(seasonalEventPack)
+const parallaxLayers = useThemedParallaxBackgrounds()
 
 type ParallaxSectionRenderConfig = {
   backgrounds: ParallaxLayerConfig[]
@@ -243,21 +240,6 @@ const themeName = computed(() =>
   resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
 )
 
-const parallaxBackgroundKeys = computed<Record<ParallaxSectionKey, string>>(
-  () =>
-    PARALLAX_SECTION_KEYS.reduce<Record<ParallaxSectionKey, string>>(
-      (acc, section) => ({
-        ...acc,
-        [section]: `${EVENT_PACK_I18N_BASE_KEY}.${seasonalEventPack.value}.parallax.${section}`,
-      }),
-      {} as Record<ParallaxSectionKey, string>
-    )
-)
-
-const parallaxAplatKey = computed(
-  () => `${EVENT_PACK_I18N_BASE_KEY}.${seasonalEventPack.value}.parallax.aplat`
-)
-
 const aplatSuffixes = ['left', 'center', 'right']
 
 const getRandomSuffix = () =>
@@ -269,8 +251,7 @@ const blogAplatSuffix = useState('home-aplat-blog', getRandomSuffix)
 const resolveAplatVariant = (suffix: string) => {
   const name = `parallax/parallax-aplats-${suffix}.svg`
   return (
-    resolveThemedAssetUrl(name, themeName.value, seasonalEventPack.value) ??
-    parallaxAplatFallback.value
+    resolveThemedAssetUrl(name, themeName.value) ?? parallaxAplatFallback.value
   )
 }
 
@@ -817,8 +798,6 @@ useHead(() => ({
           :max-offset-ratio="parallaxBackgrounds.essentials.maxOffsetRatio"
           :enable-aplats="true"
           :aplat-svg="parallaxAplatEssentials"
-          :data-i18n-pack-key="parallaxBackgroundKeys.essentials"
-          :data-i18n-aplat-key="parallaxAplatKey"
         >
           <section
             id="home-essentials"
@@ -884,8 +863,6 @@ useHead(() => ({
           :max-offset-ratio="parallaxBackgrounds.blog.maxOffsetRatio"
           :enable-aplats="true"
           :aplat-svg="parallaxAplatBlog"
-          :data-i18n-pack-key="parallaxBackgroundKeys.blog"
-          :data-i18n-aplat-key="parallaxAplatKey"
         >
           <section
             id="home-knowledge-blog"
@@ -911,7 +888,6 @@ useHead(() => ({
           :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
           :aria-label="t('home.parallax.cta.ariaLabel')"
           :max-offset-ratio="parallaxBackgrounds.cta.maxOffsetRatio"
-          :data-i18n-pack-key="parallaxBackgroundKeys.cta"
           content-align="center"
         >
           <v-container fluid class="max_large mx-auto px-4">

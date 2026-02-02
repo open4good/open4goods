@@ -5,16 +5,13 @@ Ce document recense l'état actuel des visuels de la page d'accueil et propose u
 ## Cartographie rapide
 
 - **Hero** : résolu via `useHeroBackgroundAsset` (`config/theme/assets.ts`), fichiers `app/assets/themes/light/hero-background.webp` (light) et fallback `app/assets/themes/common/hero-background.svg` pour le dark. Les références manuelles inexistantes ont été retirées de `app/pages/index.vue`.
-- **Parallax packs** : définis dans `config/theme/assets.ts` et résolus par `useThemedParallaxBackgrounds`.
-  - Light : `parallax/parallax-background-{1..3}.svg` (pack default). Variantes transparentes historiques déplacées dans le pack `hold`.
-  - Dark : uniquement `parallax-background-{1..3}.svg` et `parallax-background-bubbles-*.svg` (pas de versions " transparent ").
-  - Common : `hero-background.svg`, `illustration-generic.svg`, `backgrounds/texture-grid.svg`.
+- **Parallax** : configurations gérées par `useThemedParallaxBackgrounds` (placeholders par défaut dans `app/assets/themes/common/parallax/parallax-placeholder.svg`).
 - **Aplats** : `/app/public/images/home/parallax-aplats.svg` utilisé via `ParallaxSection` (`enableAplats`).
 - **Composants** : `HomeSolutionSection.vue` et `HomeFeaturesSection.vue` sont désormais agnostiques du background (parallax géré par `app/pages/index.vue`).
 
 ## Lacunes constatées
 
-1. Packs saisonniers incomplets : pack `sdg` vide, ancien pack de Noël archivé sous `hold`.
+1. Déclinaisons par thème manquantes : les sections parallax reposent encore sur un placeholder commun.
 2. Tailles hétérogènes : mélange de SVG 1440x800 et 1600x800 avec `height="800"` explicite, provoquant des bandes/blancs sur grands écrans malgré `preserveAspectRatio="xMidYMid slice"`.
 
 ## Recommandations de taille (SVG)
@@ -27,7 +24,7 @@ Ce document recense l'état actuel des visuels de la page d'accueil et propose u
 ## Plan d'action proposé
 
 1. **Aligner le hero** : rester sur `useHeroBackgroundAsset` + `config/theme/assets.ts`; ajouter une variante dark dédiée si besoin pour dépasser le fallback commun.
-2. **Compléter les packs** : remplir le pack `sdg` avec une déclinaison par section (light/dark) ; le pack `hold` sert uniquement de référence historique.
+2. **Compléter les déclinaisons parallax** : fournir une version par section (light/dark) pour `essentials`, `features`, `blog`, `objections`, `cta`.
 3. **Régénérer les SVG** : appliquer le gabarit 1600x900 (ou 1920x1080) à tous les fichiers `app/assets/themes/{light,dark}/parallax/*.svg`, en gardant la palette décrite dans les commentaires existants (tokens `hero-gradient-*`, `accent-primary-highlight`, `surface-*`).
 4. **Placeholders de validation** : produire 2-3 SVG exemples (light, dark, Noël) montrant l'effet parallaxe et la répartition des aplats, à stocker dans `app/assets/themes/common/` ou `light/` le temps de la régénération complète.
 5. **Tests visuels** : valider le rendu avec `ParallaxSection.vue` aux breakpoints mobiles/tablettes/desktop (largeur <960 px désactive le parallaxe) pour vérifier l'absence d'artefacts de bord.
@@ -36,4 +33,3 @@ Ce document recense l'état actuel des visuels de la page d'accueil et propose u
 
 - Les overlays (`overlayOpacity`) varient par section dans `app/pages/index.vue` ; conserver des couleurs de fond suffisamment contrastées pour éviter le " wash out " en light comme en dark.
 - Le fallback d'assets suit l'ordre `theme -> common -> THEME_ASSETS_FALLBACK` ; garder des noms symétriques entre thèmes pour faciliter la régénération automatisée.
-- Les packs saisonniers sont sélectionnés par `config/theme/seasons.ts` (fenêtres de dates UTC) - toute nouvelle variante doit y être référencée.

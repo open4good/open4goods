@@ -14,8 +14,6 @@ import {
   resolveThemedAssetUrl,
   useHeroBackgroundAsset,
 } from '~~/app/composables/useThemedAsset'
-import { useSeasonalEventPack } from '~~/app/composables/useSeasonalEventPack'
-import { useEventPackI18n } from '~/composables/useEventPackI18n'
 import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'
 import { resolveThemeName } from '~~/shared/constants/theme'
 
@@ -50,11 +48,10 @@ const emit = defineEmits<{
 
 const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
-const activeEventPack = useSeasonalEventPack()
-const packI18n = useEventPackI18n(activeEventPack)
 const themeName = computed(() =>
   resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
 )
+const { te, tm } = useI18n()
 
 const searchQueryValue = computed(() => props.searchQuery)
 
@@ -74,10 +71,7 @@ const updateSearchQuery = (value: string) => {
 
 const heroTitleSubtitle = computed(
   () =>
-    packI18n.resolveStringVariant('hero.titleSubtitle', {
-      fallbackKeys: ['home.hero.titleSubtitle'],
-      stateKey: 'home-hero-title-subtitle',
-    }) ?? ''
+    resolveStringVariant('home.hero.titleSubtitle', 'home-hero-title-subtitle')
 )
 
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
@@ -85,10 +79,7 @@ const heroBackgroundI18nKey = computed(
   () => props.heroBackgroundI18nKey?.trim() || 'hero.background'
 )
 const heroBackgroundI18nValue = computed(
-  () =>
-    packI18n.resolveString(heroBackgroundI18nKey.value, {
-      fallbackKeys: ['home.hero.background'],
-    }) ?? ''
+  () => resolveString(resolveHeroKey(heroBackgroundI18nKey.value))
 )
 
 const resolveHeroBackgroundSource = (value?: string): string | undefined => {
@@ -105,7 +96,7 @@ const resolveHeroBackgroundSource = (value?: string): string | undefined => {
     return trimmed
   }
 
-  return resolveThemedAssetUrl(trimmed, themeName.value, activeEventPack.value)
+  return resolveThemedAssetUrl(trimmed, themeName.value)
 }
 
 const heroBackgroundOverride = computed(() =>
@@ -136,18 +127,85 @@ const heroBackgroundSrc = computed(() => {
 })
 
 const heroTitle = computed(
-  () =>
-    packI18n.resolveString('hero.title', {
-      fallbackKeys: ['home.hero.title'],
-    }) ?? ''
+  () => resolveString('home.hero.title')
 )
 
 const animatedSubtitle = computed(
-  () =>
-    packI18n.resolveString('hero.animatedSubtitle', {
-      fallbackKeys: ['home.hero.animatedSubtitle'],
-    }) ?? ''
+  () => resolveString('home.hero.animatedSubtitle')
 )
+
+const variantSeeds = useState<Record<string, number>>(
+  'home-hero-variant-seeds',
+  () => ({})
+)
+
+const resolveString = (key: string): string => {
+  if (!key) {
+    return ''
+  }
+
+  if (!te(key)) {
+    return ''
+  }
+
+  const raw = tm(key)
+
+  if (typeof raw === 'string') {
+    return raw
+  }
+
+  if (typeof raw === 'number') {
+    return String(raw)
+  }
+
+  return ''
+}
+
+const resolveList = (key: string): string[] => {
+  if (!key) {
+    return []
+  }
+
+  const raw = tm(key)
+
+  if (Array.isArray(raw)) {
+    return raw.filter(item => typeof item === 'string') as string[]
+  }
+
+  return []
+}
+
+const resolveStringVariant = (key: string, stateKey: string): string => {
+  const direct = resolveString(key)
+  if (direct) {
+    return direct
+  }
+
+  const values = resolveList(key)
+  if (!values.length) {
+    return ''
+  }
+
+  if (!variantSeeds.value[stateKey]) {
+    variantSeeds.value[stateKey] = Math.random()
+  }
+
+  const index = Math.floor(variantSeeds.value[stateKey] * values.length)
+  return values[index] ?? ''
+}
+
+const resolveHeroKey = (path: string) =>
+  path.startsWith('home.') ? path : `home.${path}`
+
+const resolveSearchPlaceholder = () => {
+  const placeholders = resolveList('home.hero.search.placeholders')
+  if (placeholders.length) {
+    return placeholders
+  }
+
+  const placeholder = resolveString('home.hero.search.placeholder')
+  return placeholder ? [placeholder] : []
+}
 
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
@@ -290,24 +348,9 @@ useHead({
                       <SearchSuggestField
                         :model-value="searchQueryValue"
                         class="home-hero__search-input"
-                        :label="
-                          packI18n.resolveString('hero.search.label', {
-                            fallbackKeys: ['home.hero.search.label'],
-                          })
-                        "
-                        :placeholder="
-                          packI18n.resolveList<string>(
-                            'hero.search.placeholders',
-                            {
-                              fallbackKeys: ['home.hero.search.placeholders'],
-                            }
-                          )
-                        "
-                        :aria-label="
-                          packI18n.resolveString('hero.search.ariaLabel', {
-                            fallbackKeys: ['home.hero.search.ariaLabel'],
-                          })
-                        "
+                        :label="resolveString('home.hero.search.label')"
+                        :placeholder="resolveSearchPlaceholder()"
+                        :aria-label="resolveString('home.hero.search.ariaLabel')"
                         :min-chars="minSuggestionQueryLength"
                         :enable-scan="true"
                         :scan-mobile="true"
@@ -328,11 +371,7 @@ useHead({
                             rounded="0"
                             size="small"
                             type="submit"
-                            :aria-label="
-                              packI18n.resolveString('hero.search.cta', {
-                                fallbackKeys: ['home.hero.search.cta'],
-                              })
-                            "
+                            :aria-label="resolveString('home.hero.search.cta')"
                           />
                         </template>
                       </SearchSuggestField>

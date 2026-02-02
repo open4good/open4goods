@@ -3,143 +3,6 @@ import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
 import { defineComponent, h, ref, computed } from 'vue'
 
 const messages: Record<string, unknown> = {
-  'packs.default.hero.search.label': 'Search for a product',
-  'packs.default.hero.search.placeholder': 'Search a product',
-  'packs.default.hero.search.ariaLabel': 'Search input',
-  'packs.default.hero.search.cta': 'NUDGER',
-  'packs.default.hero.search.helper': '50M references',
-  'packs.default.hero.search.helpersTitle':
-    'Shop with intention. Compare for impact.',
-  'packs.default.hero.search.helpers': [
-    {
-      icon: '🌿',
-      label: 'Impact Score: a unique ecological and environmental assessment',
-      segments: [
-        { text: 'Impact Score: a' },
-        {
-          text: 'unique ecological and environmental assessment',
-          to: '/impact-score',
-        },
-      ],
-    },
-    {
-      icon: '🏷️',
-      label:
-        '100% independent, open-source, and {millions}+ open-data products',
-      segments: [
-        { text: '100% independent, open-source, and' },
-        { text: '{millions}+ open-data products' },
-      ],
-    },
-    {
-      icon: '🛡️',
-      label: 'Independent & open',
-      segments: [{ text: 'Independent & open' }],
-    },
-    {
-      icon: '⚡',
-      label: '50M references',
-      segments: [{ text: '50M references' }],
-    },
-  ],
-  'packs.default.hero.highlights': [
-    {
-      title: '🌿 ImpactScore: guiding your purchases',
-      segments: [
-        {
-          text: 'Buy less harmful for the planet, thanks to our',
-        },
-        {
-          text: 'environmental assessment',
-          to: '/impact-score',
-        },
-        {
-          text: 'covering',
-        },
-        {
-          text: '{impactScoreProducts}',
-          to: '/impact-score',
-        },
-        {
-          text: 'products across',
-        },
-        {
-          text: '{impactScoreCategories} categories',
-          to: '/categories',
-        },
-      ],
-    },
-    {
-      title: '🇫🇷 Open & ethical',
-      segments: [
-        {
-          text: '100% independent. Made in France,',
-          icon: 'breton-flag',
-          iconPosition: 'after',
-        },
-        {
-          text: 'hosted in Europe. Over',
-        },
-        {
-          text: '{millions}M',
-          to: '/opendata',
-        },
-        {
-          text: 'products in',
-        },
-        {
-          text: 'open data.',
-          to: '/opendata',
-        },
-        {
-          text: 'Nudger is also',
-        },
-        {
-          text: 'open source',
-          to: '/opensource',
-        },
-        {
-          text: 'and collects no personal data.',
-        },
-      ],
-    },
-    {
-      title: 'Price comparison',
-      segments: [
-        {
-          text: 'Avoid price traps with the best offers from',
-        },
-        {
-          text: '{partnersLink}',
-          to: '/partners',
-        },
-        {
-          text: 'merchants. Buy at the right time with new and used price history for',
-        },
-        {
-          text: '{priceHistoryProducts}',
-          to: '/categories',
-        },
-        {
-          text: 'products.',
-        },
-      ],
-    },
-  ],
-  'packs.default.hero.search.partnerLinkLabel':
-    '{formattedCount} partner | {formattedCount} partners',
-  'packs.default.hero.search.partnerLinkFallback': 'our partners',
-  'packs.default.hero.eyebrow': 'Responsible shopping',
-  'packs.default.hero.title': 'Nudger: The eco-friendly comparator',
-  'packs.default.hero.subtitles': [
-    'Save time, stay true to your values.',
-    'Shop smarter without compromise.',
-  ],
-  'packs.default.hero.titleSubtitle': ['Buy better. Spend smarter.'],
-  'packs.default.hero.imageAlt': 'Hero illustration',
-  'packs.default.hero.iconAlt': 'Hero icon',
-  'packs.default.hero.context.ariaLabel':
-    'Hero context card summarising Nudger’s promise',
   'home.hero.search.label': 'Search for a product',
   'home.hero.search.placeholder': 'Search a product',
   'home.hero.search.ariaLabel': 'Search input',
@@ -271,6 +134,7 @@ const messages: Record<string, unknown> = {
   'home.hero.search.partnerLinkFallback': 'our partners',
   'home.hero.eyebrow': 'Responsible shopping',
   'home.hero.title': 'Nudger: The eco-friendly comparator',
+  'home.hero.titleSubtitle': ['Buy better. Spend smarter.'],
 
   'home.hero.imageAlt': 'Hero illustration',
   'home.problems.title': 'Too many labels, not enough clarity?',
@@ -766,6 +630,20 @@ const HomeBlogCarouselStub = defineComponent({
   },
 })
 
+const HomeHeroSectionStub = defineComponent({
+  name: 'HomeHeroSectionStub',
+  setup() {
+    const subtitle =
+      (messages['home.hero.titleSubtitle'] as string[] | undefined)?.[0] ?? ''
+
+    return () =>
+      h('section', { class: 'home-hero' }, [
+        h('h1', { class: 'home-hero__title' }, messages['home.hero.title']),
+        h('span', { class: 'home-hero__title-subtitle' }, subtitle),
+      ])
+  },
+})
+
 const mountHomePage = async () => {
   const component = (await import('./index.vue')).default
   return mountSuspended(component, {
@@ -792,6 +670,7 @@ const mountHomePage = async () => {
         VExpansionPanelText: simpleStub('div'),
         NuxtLink: NuxtLinkStub,
         HomeBlogCarousel: HomeBlogCarouselStub,
+        HomeHeroSection: HomeHeroSectionStub,
       },
     },
   })
@@ -815,14 +694,13 @@ describe('Home page', () => {
   it('renders the hero title and subtitle', async () => {
     const wrapper = await mountHomePage()
 
-    const heroTitle = wrapper.find('section.home-hero .home-hero__title')
-    const heroSubtitle = wrapper.find(
-      'section.home-hero .home-hero__title-subtitle'
-    )
+    const heroTitle = wrapper.find('.home-hero__title')
+    const heroSubtitle = wrapper.find('.home-hero__title-subtitle')
 
-    expect(heroTitle.text()).toBe(messages['packs.default.hero.title'])
+    expect(heroTitle.exists()).toBe(true)
+    expect(heroTitle.text()).toBe(messages['home.hero.title'])
     expect(heroSubtitle.text()).toBe(
-      (messages['packs.default.hero.titleSubtitle'] as string[])[0]
+      (messages['home.hero.titleSubtitle'] as string[])[0]
     )
   })
 
