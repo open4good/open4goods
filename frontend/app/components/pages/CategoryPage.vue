@@ -691,11 +691,12 @@ const { data: initialProductsData } = await useAsyncData(
 
     return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
-      query: { include: LISTING_COMPONENTS },
-      body: {
+      query: {
+        include: LISTING_COMPONENTS,
         verticalId: verticalId.value,
         pageNumber: 0,
         pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
+        domainLanguage: locale.value,
       },
     })
   },
