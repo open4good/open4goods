@@ -1,0 +1,7 @@
+2988507	Paris	Paris	Paris,City of Paris	48.8566	2.3522	P	PPLC	FR		11	75			2148327	35	35	Europe/Paris	2023-01-01
+4717560	Paris	Paris	Paris,Texas	33.6609	-95.5555	P	PPL	US		TX				25000	0	0	America/Chicago	2023-01-01
+4409896	Springfield	Springfield	Springfield	37.2153	-93.2982	P	PPL	US		MO				167000	0	0	America/Chicago	2023-01-01
+4990729	Springfield	Springfield	Springfield	42.1015	-72.5898	P	PPL	US		MA				150000	0	0	America/New_York	2023-01-01
+2950159	Berlin	Berlin	Berlin,Berlyn	52.5244	13.4105	P	PPLC	DE		16	00			3644826	34	34	Europe/Berlin	2023-01-01
+5128581	New York City	New York City	New York,NYC	40.7143	-74.006	P	PPLC	US		NY				8175133	10	10	America/New_York	2023-01-01
+3448439	São Paulo	Sao Paulo	Sao Paulo,Sampa	-23.5475	-46.6361	P	PPLC	BR		27				10021295	0	0	America/Sao_Paulo	2023-01-01

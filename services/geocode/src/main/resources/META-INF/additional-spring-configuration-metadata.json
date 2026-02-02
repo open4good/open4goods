@@ -1,0 +1,28 @@
+{
+  "properties": [
+    {
+      "name": "geocode.cache.path",
+      "type": "java.lang.String",
+      "description": "Filesystem path used for cached GeoNames downloads.",
+      "defaultValue": "target/geocode-cache"
+    },
+    {
+      "name": "geocode.geonames.url",
+      "type": "java.lang.String",
+      "description": "GeoNames download URL for the cities5000 dataset.",
+      "defaultValue": "https://download.geonames.org/export/dump/cities5000.zip"
+    },
+    {
+      "name": "geocode.geonames.refresh-in-days",
+      "type": "java.lang.Integer",
+      "description": "Number of days before refreshing the cached GeoNames download.",
+      "defaultValue": 7
+    },
+    {
+      "name": "geocode.geonames.extracted-file-name",
+      "type": "java.lang.String",
+      "description": "Expected filename of the cities dataset inside the GeoNames zip archive.",
+      "defaultValue": "cities5000.txt"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+geocode:
+  cache:
+    path: ${GEOCODE_CACHE_PATH:target/geocode-cache}
+  geonames:
+    url: ${GEOCODE_GEONAMES_URL:https://download.geonames.org/export/dump/cities5000.zip}
+    refresh-in-days: ${GEOCODE_GEONAMES_REFRESH_DAYS:7}
+    extracted-file-name: cities5000.txt
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
