@@ -16,6 +16,9 @@ parsers:
 # If true, products url will be regenerated on each batch. Should not move too much, but...
 forceNameGeneration: true
 
+# Average electricity cost per kilowatt-hour (EUR).
+averageKwhCost: 0.1952
+
 # These datasources will be excluded from categories matching (for generation assistance)
 generationExcludedFromCategoriesMatching:
   - "fnac.com"
@@ -231,6 +234,7 @@ globalTechnicalFilters:
   - "YEAR"
   - "COLOR"
   - "WEIGHT"
+  - "usageCostYear"
 
 ####################################################################################
 # Brands configuration
@@ -372,6 +376,7 @@ attributesConfig:
     - key: "HDMI_PORTS_QUANTITY"
     - key: "COLOR"
     - key: "WEIGHT"
+    - key: "usageCostYear"
     - key: "POWER_CONSUMPTION_TYPICAL"
     - key: "POWER_CONSUMPTION_OFF"
     - key: "FEATURES"

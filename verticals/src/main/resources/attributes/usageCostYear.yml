@@ -1,0 +1,11 @@
+key: "usageCostYear"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
+faIcon: "mdi-currency-eur"
+name:
+  default: "Annual usage cost"
+  fr: "Coût d'usage annuel"
+suffix:
+  default: "€ / year"
+  fr: "€ / an"
+filteringType: "NUMERIC"

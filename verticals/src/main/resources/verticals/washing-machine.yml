@@ -9,6 +9,7 @@
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
 id: washing-machine
+averageHoursPerDay: 0.5
 
 parsers:
   warranty:

@@ -12,6 +12,7 @@ parsers:
     maxYears: 10.0
 
 order: 8
+averageHoursPerDay: 24.0
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
