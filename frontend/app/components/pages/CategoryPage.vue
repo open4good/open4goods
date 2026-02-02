@@ -688,14 +688,13 @@ const { data: initialProductsData } = await useAsyncData(
       return null
     }
 
-    return await $fetch<ProductSearchResponseDto>('/api/products', {
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
-      query: {
-        include: LISTING_COMPONENTS,
+      query: { include: LISTING_COMPONENTS },
+      body: {
         verticalId: verticalId.value,
         pageNumber: 0,
         pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
-        domainLanguage: locale.value,
       },
     })
   },
@@ -1343,17 +1342,16 @@ const sortFieldItems = computed<SortFieldItem[]>(() => {
   }
 
   const popularKeys = new Set(
-    popularAttributes.value.map(config => config.key).filter(Boolean) as string[]
+    popularAttributes.value
+      .map(config => config.key)
+      .filter(Boolean) as string[]
   )
 
   const buildItem = (mapping: string): SortFieldItem => {
     const field = fieldMap.get(mapping)
     return {
       value: mapping,
-      title: resolveSortFieldTitle(
-        field ?? { mapping, title: '' },
-        t
-      ),
+      title: resolveSortFieldTitle(field ?? { mapping, title: '' }, t),
     }
   }
 
@@ -1412,7 +1410,9 @@ const sortItems = computed<SortMenuItem[]>(() => {
     STANDARD_SORT_FIELDS.includes(item.value)
   )
   const popularKeys = new Set(
-    popularAttributes.value.map(config => config.key).filter(Boolean) as string[]
+    popularAttributes.value
+      .map(config => config.key)
+      .filter(Boolean) as string[]
   )
 
   const popularItems = sortFieldItems.value.filter(item => {
@@ -1918,25 +1918,28 @@ const fetchProducts = async () => {
   productError.value = null
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>('/api/products', {
-      method: 'POST',
-      query: { include: LISTING_COMPONENTS },
-      body: {
-        verticalId: verticalId.value,
-        pageNumber: pageNumber.value,
-        pageSize: pageSize.value,
-        query: hasMinimumSearchLength.value
-          ? normalizedSearchTerm.value
-          : undefined,
-        semanticSearch: shouldUseSemanticSearch.value ? true : undefined,
-        sort: sortRequest.value,
-        filters: combinedFilters.value,
-        aggs: buildAggregationRequest(
-          filterOptions.value,
-          adminFilterFields.value
-        ),
-      },
-    })
+    const response = await $fetch<ProductSearchResponseDto>(
+      '/api/products/search',
+      {
+        method: 'POST',
+        query: { include: LISTING_COMPONENTS },
+        body: {
+          verticalId: verticalId.value,
+          pageNumber: pageNumber.value,
+          pageSize: pageSize.value,
+          query: hasMinimumSearchLength.value
+            ? normalizedSearchTerm.value
+            : undefined,
+          semanticSearch: shouldUseSemanticSearch.value ? true : undefined,
+          sort: sortRequest.value,
+          filters: combinedFilters.value,
+          aggs: buildAggregationRequest(
+            filterOptions.value,
+            adminFilterFields.value
+          ),
+        },
+      }
+    )
 
     productsData.value = response
   } catch (error) {
