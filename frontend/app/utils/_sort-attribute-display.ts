@@ -5,12 +5,25 @@ import {
   formatAttributeValue,
   type ResolvedProductAttribute,
 } from '~/utils/_product-attributes'
-import { resolveFilterFieldTitle } from '~/utils/_field-localization'
+import {
+  formatBestPrice,
+  formatOffersCount,
+} from '~/utils/_product-pricing'
+import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import {
+  resolveFilterFieldTitle,
+  resolveSortFieldTitle,
+} from '~/utils/_field-localization'
 
 type TranslateFn = (key: string, params?: Record<string, unknown>) => string
 type NumberFormatFn = (
   value: number,
   options?: Intl.NumberFormatOptions
+) => string
+type PluralizeFn = (
+  key: string,
+  count: number,
+  params?: Record<string, unknown>
 ) => string
 
 const STATIC_SORT_FIELDS = new Set([
@@ -21,9 +34,11 @@ const STATIC_SORT_FIELDS = new Set([
   'offersCount',
 ])
 
-const extractAttributeKeyFromMapping = (mapping: string): string | null => {
+export const extractAttributeKeyFromMapping = (
+  mapping: string
+): string | null => {
   const patterns = [
-    /attributes\.(?:indexed(?:Attributes)?|referential(?:Attributes)?|indexedAttributes)\.([^.]+)/i,
+    /attributes\.(?:indexed(?:Attributes)?|referential(?:Attributes)?|referentielAttributes|indexedAttributes)\.([^.]+)/i,
     /attributes\.([^.]+)/i,
   ]
 
@@ -68,6 +83,114 @@ export interface SortedAttributeDisplay {
   key: string
   label: string
   value: string
+}
+
+export interface SortedFieldDisplay {
+  key: string
+  label: string
+  value: string
+  type: 'attribute' | 'static'
+  attributeKey?: string | null
+}
+
+const resolveSortFieldLabel = (
+  sortField: string,
+  fieldMetadata: Record<string, FieldMetadataDto> | null | undefined,
+  t: TranslateFn
+): string => {
+  const metadata = fieldMetadata?.[sortField]
+  return resolveSortFieldTitle(metadata ?? { mapping: sortField, title: '' }, t)
+}
+
+const resolveStaticSortDisplay = (
+  product: ProductDto,
+  sortField: string,
+  fieldMetadata: Record<string, FieldMetadataDto> | null | undefined,
+  t: TranslateFn,
+  n: NumberFormatFn,
+  translatePlural?: PluralizeFn
+): SortedFieldDisplay | null => {
+  const label = resolveSortFieldLabel(sortField, fieldMetadata, t)
+
+  if (sortField === ECOSCORE_RELATIVE_FIELD) {
+    const score = resolvePrimaryImpactScore(product)
+    if (score == null) {
+      return null
+    }
+
+    const formattedScore = n(score, {
+      maximumFractionDigits: 1,
+      minimumFractionDigits: 0,
+    })
+
+    return {
+      key: sortField,
+      label,
+      value: t('category.products.sort.values.impactScore', {
+        score: formattedScore,
+        max: 5,
+      }),
+      type: 'static',
+    }
+  }
+
+  if (sortField === 'price.minPrice.price') {
+    return {
+      key: sortField,
+      label,
+      value: formatBestPrice(product, t, n),
+      type: 'static',
+    }
+  }
+
+  if (sortField === 'offersCount') {
+    if (!translatePlural) {
+      return null
+    }
+
+    return {
+      key: sortField,
+      label,
+      value: formatOffersCount(product, translatePlural),
+      type: 'static',
+    }
+  }
+
+  if (sortField === 'attributes.referentielAttributes.BRAND') {
+    const brand =
+      product.identity?.brand ??
+      resolveAttributeRawValueByKey(product, 'BRAND')
+
+    if (!brand) {
+      return null
+    }
+
+    return {
+      key: sortField,
+      label,
+      value: String(brand),
+      type: 'static',
+    }
+  }
+
+  if (sortField === 'attributes.referentielAttributes.MODEL') {
+    const model =
+      product.identity?.model ??
+      resolveAttributeRawValueByKey(product, 'MODEL')
+
+    if (!model) {
+      return null
+    }
+
+    return {
+      key: sortField,
+      label,
+      value: String(model),
+      type: 'static',
+    }
+  }
+
+  return null
 }
 
 /**
@@ -122,5 +245,49 @@ export const resolveSortedAttributeValue = (
     key: attributeKey,
     label,
     value: formattedValue,
+  }
+}
+
+export const resolveSortedFieldDisplay = (
+  product: ProductDto,
+  sortField: string | null | undefined,
+  fieldMetadata: Record<string, FieldMetadataDto> | null | undefined,
+  t: TranslateFn,
+  n: NumberFormatFn,
+  translatePlural?: PluralizeFn
+): SortedFieldDisplay | null => {
+  if (!sortField) {
+    return null
+  }
+
+  if (STATIC_SORT_FIELDS.has(sortField)) {
+    return resolveStaticSortDisplay(
+      product,
+      sortField,
+      fieldMetadata,
+      t,
+      n,
+      translatePlural
+    )
+  }
+
+  const attributeDisplay = resolveSortedAttributeValue(
+    product,
+    sortField,
+    fieldMetadata,
+    t,
+    n
+  )
+
+  if (!attributeDisplay) {
+    return null
+  }
+
+  return {
+    key: sortField,
+    label: attributeDisplay.label,
+    value: attributeDisplay.value,
+    type: 'attribute',
+    attributeKey: attributeDisplay.key,
   }
 }

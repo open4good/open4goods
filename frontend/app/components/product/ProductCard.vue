@@ -78,6 +78,9 @@
           :key="attribute.key"
           size="x-small"
           class="product-card__attribute"
+          :class="{
+            'product-card__attribute--sorted': attribute.isSorted,
+          }"
           variant="flat"
           color="surface-primary-080"
           role="listitem"
@@ -94,16 +97,16 @@
         </v-chip>
       </div>
 
-      <!-- Sorted Attribute (when sorting by custom field) -->
+      <!-- Sorted field highlight -->
       <div
-        v-if="sortedAttributeByProduct"
+        v-if="shouldShowSortedField && sortedFieldDisplay"
         class="product-card__sorted-attribute"
       >
         <span class="product-card__sorted-attribute-label">
-          {{ sortedAttributeByProduct.label }}:
+          {{ sortedFieldDisplay.label }}:
         </span>
         <span class="product-card__sorted-attribute-value">
-          {{ sortedAttributeByProduct.value }}
+          {{ sortedFieldDisplay.value }}
         </span>
       </div>
     </v-card-item>
@@ -133,8 +136,7 @@ import {
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import {
-  isCustomSortField,
-  resolveSortedAttributeValue,
+  resolveSortedFieldDisplay,
 } from '~/utils/_sort-attribute-display'
 
 const props = withDefaults(
@@ -162,6 +164,7 @@ const props = withDefaults(
 )
 
 const { t, n, locale } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 
 const resolveCardProductName = (product: ProductDto) =>
   resolveProductShortName(product, locale.value)
@@ -196,7 +199,23 @@ type DisplayedAttribute = {
   label: string
   value: string
   icon?: string | null
+  isSorted?: boolean
 }
+
+const sortedFieldDisplay = computed(() =>
+  resolveSortedFieldDisplay(
+    props.product,
+    props.sortField,
+    props.fieldMetadata,
+    t,
+    n,
+    translatePlural
+  )
+)
+
+const sortedAttributeKey = computed(
+  () => sortedFieldDisplay.value?.attributeKey ?? null
+)
 
 const popularAttributesByProduct = computed<DisplayedAttribute[]>(() => {
   const attributes = resolvePopularAttributes(
@@ -217,6 +236,7 @@ const popularAttributesByProduct = computed<DisplayedAttribute[]>(() => {
       label: attribute.label,
       value,
       icon: props.showAttributeIcons ? (attribute.icon ?? null) : null,
+      isSorted: attribute.key === sortedAttributeKey.value,
     })
   })
 
@@ -226,35 +246,9 @@ const popularAttributesByProduct = computed<DisplayedAttribute[]>(() => {
   return entries.slice(0, effectiveMax)
 })
 
-const sortedAttributeByProduct = computed<DisplayedAttribute | null>(() => {
-  if (
-    !props.sortField ||
-    !isCustomSortField(
-      props.sortField,
-      popularAttributeConfigs.value.map(c => c.key).filter(Boolean) as string[]
-    )
-  ) {
-    return null
-  }
-
-  const result = resolveSortedAttributeValue(
-    props.product,
-    props.sortField,
-    props.fieldMetadata,
-    t,
-    n
-  )
-
-  if (!result) {
-    return null
-  }
-
-  return {
-    key: result.key,
-    label: result.label,
-    value: result.value,
-  }
-})
+const shouldShowSortedField = computed(() =>
+  Boolean(sortedFieldDisplay.value)
+)
 </script>
 
 <style scoped lang="sass">
@@ -391,7 +385,7 @@ const sortedAttributeByProduct = computed<DisplayedAttribute | null>(() => {
         line-height: 1.2
 
     &__sorted-attribute-label
-        font-weight: 500
+        font-weight: 600
         color: rgb(var(--v-theme-text-neutral-secondary))
 
     &__sorted-attribute-value
@@ -403,6 +397,11 @@ const sortedAttributeByProduct = computed<DisplayedAttribute | null>(() => {
         color: rgb(var(--v-theme-text-neutral-secondary)) !important
         font-weight: 500
         border: 1px solid rgba(var(--v-theme-border-primary), 0.1)
+
+    &__attribute--sorted
+        font-weight: 700
+        color: rgb(var(--v-theme-text-neutral-strong)) !important
+        border-color: rgba(var(--v-theme-border-primary-strong), 0.4)
 
     &__pricing-table
         display: flex

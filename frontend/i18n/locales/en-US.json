@@ -927,6 +927,14 @@
           "model": "Model",
           "offersCount": "Number of offers",
           "price": "Lowest price"
+        },
+        "groups": {
+          "standard": "Standard",
+          "popularAttributes": "Popular attributes",
+          "otherAttributes": "Other attributes"
+        },
+        "values": {
+          "impactScore": "{score} / {max}"
         }
       },
       "sortLabel": "Sort by",
