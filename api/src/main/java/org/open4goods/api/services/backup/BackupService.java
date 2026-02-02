@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
@@ -69,6 +70,7 @@ public class BackupService implements HealthIndicator {
 	// Used to trigger Health.down() if exception occurs
 	private String wikiException;
 	private String dataBackupException;
+	private String dataCopyException;
 
 	// Count of last exported items
 	private AtomicLong expordedProductsCounter = new AtomicLong(0L);
@@ -77,6 +79,7 @@ public class BackupService implements HealthIndicator {
 	// Flags to avoid conccurent export running
 	private AtomicBoolean wikiExportRunning = new AtomicBoolean(false);
 	private AtomicBoolean productExportRunning = new AtomicBoolean(false);
+	private AtomicBoolean productCopyRunning = new AtomicBoolean(false);
 
 	
 	
@@ -282,6 +285,102 @@ public class BackupService implements HealthIndicator {
 
 	    logger.info("Product import : finished");
 	}
+
+	/**
+	 * Copy the products index into a dedicated target index.
+	 *
+	 * @param suffix the suffix used to build the target index name
+	 */
+	public void copyTo(String suffix) {
+	    String targetIndexName = Product.DEFAULT_REPO + "-" + suffix;
+	    logger.info("Products copy to {} - start", targetIndexName);
+
+	    if (productCopyRunning.get()) {
+	        logger.warn("Product copy is already running. Skipped");
+	        return;
+	    }
+
+	    productCopyRunning.set(true);
+
+	    try {
+	        int copyThreads = Math.max(1, backupConfig.getCopyThreads());
+	        int copyBulkSize = Math.max(1, backupConfig.getCopyBulkSize());
+	        int copyPageSize = Math.max(1, backupConfig.getCopyPageSize());
+	        int copyQueueSize = Math.max(copyBulkSize, backupConfig.getCopyQueueSize());
+
+	        boolean created = productRepo.createIndex(targetIndexName);
+	        if (!created) {
+	            logger.warn("Target index {} already exists. Skipping copy.", targetIndexName);
+	            productCopyRunning.set(false);
+	            return;
+	        }
+
+	        LinkedBlockingQueue<List<Product>> blockingQueue = new LinkedBlockingQueue<>(copyQueueSize);
+	        ExecutorService executorService = Executors.newFixedThreadPool(copyThreads);
+	        AtomicBoolean producerDone = new AtomicBoolean(false);
+
+	        for (int i = 0; i < copyThreads; i++) {
+	            executorService.submit(() -> {
+	                try {
+	                    while (true) {
+	                        List<Product> batch = blockingQueue.poll(1, TimeUnit.SECONDS);
+	                        if (batch == null) {
+	                            if (producerDone.get()) {
+	                                return;
+	                            }
+	                            continue;
+	                        }
+	                        productRepo.store(batch, targetIndexName);
+	                    }
+	                } catch (InterruptedException e) {
+	                    Thread.currentThread().interrupt();
+	                    logger.error("Copy thread interrupted", e);
+	                    dataCopyException = e.getMessage();
+	                } catch (Exception e) {
+	                    logger.error("Error while indexing products to {}", targetIndexName, e);
+	                    dataCopyException = e.getMessage();
+	                }
+	            });
+	        }
+
+	        try (Stream<Product> stream = productRepo.exportAll(copyPageSize)) {
+	            List<Product> batch = new ArrayList<>(copyBulkSize);
+	            stream.forEach(product -> {
+	                batch.add(product);
+	                if (batch.size() >= copyBulkSize) {
+	                    try {
+	                        blockingQueue.put(new ArrayList<>(batch));
+	                        batch.clear();
+	                    } catch (InterruptedException e) {
+	                        Thread.currentThread().interrupt();
+	                        logger.error("Interruption while queueing copy batch", e);
+	                        dataCopyException = e.getMessage();
+	                    }
+	                }
+	            });
+
+	            if (!batch.isEmpty()) {
+	                blockingQueue.put(new ArrayList<>(batch));
+	                batch.clear();
+	            }
+	        }
+
+	        producerDone.set(true);
+	        executorService.shutdown();
+	        executorService.awaitTermination(1, TimeUnit.HOURS);
+	    } catch (InterruptedException e) {
+	        Thread.currentThread().interrupt();
+	        logger.error("Copy operation interrupted", e);
+	        dataCopyException = e.getMessage();
+	    } catch (Exception e) {
+	        logger.error("Error while copying products", e);
+	        dataCopyException = e.getMessage();
+	    } finally {
+	        productCopyRunning.set(false);
+	    }
+
+	    logger.info("Products copy to {} - complete", targetIndexName);
+	}
 	
 	/**
 	 * Used for translation on data import
@@ -429,6 +528,9 @@ public class BackupService implements HealthIndicator {
 		// Check exceptions during processing
 		if (null != dataBackupException) {
 			errorMessages.put("product_export_exception", dataBackupException);
+		}
+		if (null != dataCopyException) {
+			errorMessages.put("product_copy_exception", dataCopyException);
 		}
 
 		// Check exists

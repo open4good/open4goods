@@ -100,8 +100,8 @@ public class LocalDevConfig {
 	
 	@Bean
 	@Primary
-	BackupService backupService() {
-		return new BackupService(null, null, new BackupConfig(), null, null);
+	BackupService backupService(BackupConfig backupConfig) {
+		return new BackupService(null, null, backupConfig, null, null);
 	}
 	
 	@Bean

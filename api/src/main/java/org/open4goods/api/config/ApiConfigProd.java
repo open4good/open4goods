@@ -1,6 +1,6 @@
 package org.open4goods.api.config;
 
-import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.backup.BackupService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -14,15 +14,9 @@ import org.springframework.context.annotation.Profile;
 @Profile({"prod"})
 public class ApiConfigProd {
 
-	private final ApiProperties apiProperties;
-
-	public ApiConfigProd(ApiProperties apiProperties) {
-		this.apiProperties = apiProperties;
-	}
-	
     @Bean
-    BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
-    	return new BackupService(xwikiService, productRepository, apiProperties.getBackupConfig(), serialisationService, aggregationService);
+    BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, BackupConfig backupConfig, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
+    	return new BackupService(xwikiService, productRepository, backupConfig, serialisationService, aggregationService);
     }
 	
 
