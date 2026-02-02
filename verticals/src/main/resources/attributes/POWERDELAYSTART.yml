@@ -4,7 +4,8 @@ name:
   default: "Start delay"
   fr: "Départ différé"
 filteringType: "NUMERIC"
-unit: "h"
+unit:
+  default: "h"
 asScore: false
 synonyms:
   all:

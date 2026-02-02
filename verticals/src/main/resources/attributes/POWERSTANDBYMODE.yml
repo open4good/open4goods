@@ -4,7 +4,8 @@ name:
   default: "Standby power consumption"
   fr: "Consommation en veille"
 filteringType: "NUMERIC"
-unit: "W"
+unit:
+  default: "W"
 asScore: false
 synonyms:
   all:

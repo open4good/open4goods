@@ -4,7 +4,8 @@ name:
   default: "Off mode power consumption"
   fr: "Consommation éteint"
 filteringType: "NUMERIC"
-unit: "W"
+unit:
+  default: "W"
 asScore: false
 synonyms:
   all:
