@@ -689,7 +689,7 @@ const { data: initialProductsData } = await useAsyncData(
       return null
     }
 
-    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+    return await $fetch<ProductSearchResponseDto>('/api/products', {
       method: 'POST',
       query: {
         include: LISTING_COMPONENTS,

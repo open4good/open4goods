@@ -734,25 +734,22 @@ const fetchRecommendations = async () => {
       (filterRequest.value.filters?.length ?? 0) > 0 ||
       (filterRequest.value.filterGroups?.length ?? 0) > 0
 
-    const response = await $fetch<ProductSearchResponseDto>(
-      '/api/products/search',
-      {
-        method: 'POST',
-        query: {
-          include:
-            'base,identity,names,attributes,resources,scores,offers,vertical',
+    const response = await $fetch<ProductSearchResponseDto>('/api/products', {
+      method: 'POST',
+      query: {
+        include:
+          'base,identity,names,attributes,resources,scores,offers,vertical',
+      },
+      body: {
+        verticalId: selectedCategoryId.value,
+        pageNumber: 0,
+        pageSize: 3,
+        sort: {
+          sorts: [{ field: 'scores.ECOSCORE.value', order: 'desc' }],
         },
-        body: {
-          verticalId: selectedCategoryId.value,
-          pageNumber: 0,
-          pageSize: 3,
-          sort: {
-            sorts: [{ field: 'scores.ECOSCORE.value', order: 'desc' }],
-          },
-          filters: hasFilters ? filterRequest.value : undefined,
-        },
-      }
-    )
+        filters: hasFilters ? filterRequest.value : undefined,
+      },
+    })
 
     recommendations.value = response.products?.data ?? []
     totalMatches.value = response.products?.page?.totalElements ?? 0

@@ -600,16 +600,13 @@ const fetchAlternatives = async () => {
   errorMessage.value = null
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>(
-      '/api/products/search',
-      {
-        method: 'POST',
-        headers: {
-          'X-XSRF-TOKEN': useCookie('XSRF-TOKEN').value || '',
-        },
-        body,
-      }
-    )
+    const response = await $fetch<ProductSearchResponseDto>('/api/products', {
+      method: 'POST',
+      headers: {
+        'X-XSRF-TOKEN': useCookie('XSRF-TOKEN').value || '',
+      },
+      body,
+    })
 
     if (currentToken !== requestToken) {
       return
