@@ -64,10 +64,17 @@
           >
             <source :src="heroMedia.videoUrl" />
           </video>
-          <div class="product-gallery__video-badge">
+          <button
+            type="button"
+            class="product-gallery__video-badge"
+            :aria-label="$t('product.hero.videoBadge')"
+            @click="playHeroVideo"
+            @keydown.enter.prevent="playHeroVideo"
+            @keydown.space.prevent="playHeroVideo"
+          >
             <v-icon icon="mdi-play-circle-outline" size="24" />
             <span>{{ $t('product.hero.videoBadge') }}</span>
-          </div>
+          </button>
           <div
             class="product-gallery__stage-overlay product-gallery__stage-overlay--inline"
             aria-hidden="true"
@@ -427,6 +434,12 @@ const pauseHeroVideo = () => {
   }
 }
 
+const playHeroVideo = () => {
+  const element = heroVideoElement.value
+  if (!element) return
+  void element.play()
+}
+
 const galleryButtonLabel = computed(() =>
   te('product.hero.openGalleryCta')
     ? t('product.hero.openGalleryCta')
@@ -503,6 +516,10 @@ defineExpose({
   margin-bottom: 2rem; /* Add spacing below image for thumbnails */
 }
 
+.product-gallery__stage--video {
+  background: transparent;
+}
+
 .product-gallery__stage-trigger {
   border: none;
   background: transparent;
@@ -544,6 +561,13 @@ defineExpose({
   color: #fff;
   font-size: 0.9rem;
   font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.product-gallery__video-badge:focus-visible {
+  outline: 2px solid rgba(var(--v-theme-accent-primary-highlight), 0.6);
+  outline-offset: 3px;
 }
 
 .product-gallery__video-gallery-btn {
