@@ -21,6 +21,8 @@ public record VerticalConfigDto(
         Integer icecatTaxonomyId,
         @Schema(description = "Display order used to render the category list.", example = "1")
         Integer order,
+        @Schema(description = "Average daily usage used for cost estimation, in hours.", example = "4.0")
+        Double averageHoursPerDay,
         @Schema(description = "Material Design icon name representing the vertical.", example = "television")
         String mdiIcon,
         @Schema(description = "Thumbnail image representing the vertical.")

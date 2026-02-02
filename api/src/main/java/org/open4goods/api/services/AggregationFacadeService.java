@@ -23,6 +23,7 @@ import org.open4goods.api.services.aggregation.services.realtime.MediaAggregatio
 import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.UsageCostAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.brand.service.BrandScoreService;
@@ -357,6 +358,7 @@ public class AggregationFacadeService {
 		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
 		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger,icecatFeatureService));
+		services.add(new UsageCostAggregationService(logger));
 		services.add(new NamesAggregationService( logger, verticalConfigService, evaluationService, blablaService, embeddingService,
 				embeddingProperties));
 		//		services.add(new CategoryService( taxonomyService));

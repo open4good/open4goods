@@ -183,6 +183,16 @@ public class VerticalConfig {
 	private Integer order = Integer.MAX_VALUE;
 
 	/**
+	 * Average daily usage for the vertical, in hours, used for cost estimations.
+	 */
+	private Double averageHoursPerDay;
+
+	/**
+	 * Average electricity cost per kilowatt-hour, in euros, shared via the default configuration.
+	 */
+	private Double averageKwhCost;
+
+	/**
 	 * The I18n URL Mappings. Think SEO !
 	 */
 	@JsonMerge
@@ -987,6 +997,42 @@ public class VerticalConfig {
 
 	public void setOrder(Integer order) {
 		this.order = order;
+	}
+
+	/**
+	 * Returns the average number of hours per day that products in this vertical are used.
+	 *
+	 * @return average hours per day, or {@code null} when not configured
+	 */
+	public Double getAverageHoursPerDay() {
+		return averageHoursPerDay;
+	}
+
+	/**
+	 * Sets the average daily usage in hours for this vertical.
+	 *
+	 * @param averageHoursPerDay average hours per day
+	 */
+	public void setAverageHoursPerDay(Double averageHoursPerDay) {
+		this.averageHoursPerDay = averageHoursPerDay;
+	}
+
+	/**
+	 * Returns the average cost per kilowatt-hour used to compute usage costs.
+	 *
+	 * @return average kWh cost in euros, or {@code null} when not configured
+	 */
+	public Double getAverageKwhCost() {
+		return averageKwhCost;
+	}
+
+	/**
+	 * Sets the average cost per kilowatt-hour in euros.
+	 *
+	 * @param averageKwhCost average kWh cost in euros
+	 */
+	public void setAverageKwhCost(Double averageKwhCost) {
+		this.averageKwhCost = averageKwhCost;
 	}
 
 	public String getVerticalImage() {
