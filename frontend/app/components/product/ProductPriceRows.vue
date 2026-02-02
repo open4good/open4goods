@@ -1,5 +1,8 @@
 <template>
-  <div class="product-price-rows">
+  <div
+    class="product-price-rows"
+    :class="{ 'product-price-rows--compact': variant === 'compact' }"
+  >
     <template v-for="badge in offerBadges" :key="badge.key">
       <div
         class="product-price-rows__row"
@@ -136,6 +139,7 @@ import { formatBestPrice } from '~/utils/_product-pricing'
 
 const props = defineProps<{
   product: ProductDto
+  variant?: 'default' | 'compact'
 }>()
 
 const { t, n } = useI18n()
@@ -456,4 +460,23 @@ const offerBadges = computed<Badge[]>(() => {
 
   &__menu-list
      min-width: 200px
+
+.product-price-rows--compact
+  border-radius: 6px
+
+  .product-price-rows__row
+    min-height: 20px
+    padding: 0.1rem 0.35rem
+    gap: 0.3rem
+
+  .product-price-rows__label
+    font-size: 0.55rem
+    width: 3.25rem
+
+  .product-price-rows__amount
+    font-size: 0.9rem
+
+  .product-price-rows__favicon
+    width: 14px
+    height: 14px
 </style>
