@@ -23,7 +23,7 @@
                 <sleepycat-je.version>18.3.12</sleepycat-je.version>
                 <commons-io.version>2.21.0</commons-io.version>
                 <commons-text.version>1.15.0</commons-text.version>
-                <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+                <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
                 <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
                 <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
                 <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
