@@ -226,6 +226,50 @@ public class ReviewGenerationService implements HealthIndicator {
 
 
 
+    /**
+     * Generates the prompt configuration for review generation without executing the AI call.
+     * <p>
+     * This method performs the necessary preprocessing to build the prompt variables (fetching data,
+     * aggregating content) and then resolves the prompt configuration.
+     * </p>
+     *
+     * @param product        the product.
+     * @param verticalConfig the vertical configuration.
+     * @return the resolved {@link PromptConfig}.
+     * @throws ResourceNotFoundException if the prompt configuration or product data is missing.
+     */
+    public PromptConfig generateReviewDryRun(Product product, VerticalConfig verticalConfig) throws Exception {
+        // Use a dummy status as we are not tracking this process
+        ReviewGenerationStatus status = new ReviewGenerationStatus();
+        status.setUpc(product.getId());
+        status.setGtin(product.gtin());
+        status.setStatus(ReviewGenerationStatus.Status.PREPROCESSING);
+        status.setStartTime(Instant.now().toEpochMilli());
+
+        String promptKey = resolvePromptKey();
+        PromptConfig promptConfig = genAiService.getPromptConfig(promptKey);
+        if (promptConfig == null) {
+            throw new ResourceNotFoundException("Prompt not found: " + promptKey);
+        }
+
+        Map<String, Object> promptVariables;
+        if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
+            promptVariables = preprocessingService.buildBasePromptVariables(product, verticalConfig);
+        } else {
+            promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig, status);
+        }
+
+        // Add mock tokens if missing (mimic real execution)
+        if (!promptVariables.containsKey("SOURCE_TOKENS")) {
+             promptVariables.put("SOURCE_TOKENS", new HashMap<>());
+        }
+         if (!promptVariables.containsKey("TOTAL_TOKENS")) {
+             promptVariables.put("TOTAL_TOKENS", 0);
+        }
+
+        return genAiService.resolvePrompt(promptKey, promptVariables, AiReview.class);
+    }
+
 	/**
 	 * Asynchronous review generation using the realtime prompt service. (Uses a
 	 * ThreadPoolExecutor to run the process asynchronously.)

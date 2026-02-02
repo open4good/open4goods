@@ -397,7 +397,7 @@ import type {
   AggregationRequestDto,
   SortRequestDto,
 } from '~~/shared/api-client'
-import { AggTypeEnum } from '~~/shared/api-client'
+import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,

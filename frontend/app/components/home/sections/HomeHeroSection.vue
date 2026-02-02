@@ -69,17 +69,12 @@ const updateSearchQuery = (value: string) => {
   emit('update:searchQuery', value)
 }
 
-const heroTitleSubtitle = computed(
-  () =>
-    resolveStringVariant('home.hero.titleSubtitle', 'home-hero-title-subtitle')
-)
-
 const showHeroSkeleton = computed(() => !isHeroImageLoaded.value)
 const heroBackgroundI18nKey = computed(
   () => props.heroBackgroundI18nKey?.trim() || 'hero.background'
 )
-const heroBackgroundI18nValue = computed(
-  () => resolveString(resolveHeroKey(heroBackgroundI18nKey.value))
+const heroBackgroundI18nValue = computed(() =>
+  resolveString(resolveHeroKey(heroBackgroundI18nKey.value))
 )
 
 const resolveHeroBackgroundSource = (value?: string): string | undefined => {
@@ -126,17 +121,8 @@ const heroBackgroundSrc = computed(() => {
   return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')
 })
 
-const heroTitle = computed(
-  () => resolveString('home.hero.title')
-)
-
-const animatedSubtitle = computed(
-  () => resolveString('home.hero.animatedSubtitle')
-)
-
-const variantSeeds = useState<Record<string, number>>(
-  'home-hero-variant-seeds',
-  () => ({})
+const animatedSubtitle = computed(() =>
+  resolveString('home.hero.animatedSubtitle')
 )
 
 const resolveString = (key: string): string => {
@@ -173,25 +159,6 @@ const resolveList = (key: string): string[] => {
   }
 
   return []
-}
-
-const resolveStringVariant = (key: string, stateKey: string): string => {
-  const direct = resolveString(key)
-  if (direct) {
-    return direct
-  }
-
-  const values = resolveList(key)
-  if (!values.length) {
-    return ''
-  }
-
-  if (!variantSeeds.value[stateKey]) {
-    variantSeeds.value[stateKey] = Math.random()
-  }
-
-  const index = Math.floor(variantSeeds.value[stateKey] * values.length)
-  return values[index] ?? ''
 }
 
 const resolveHeroKey = (path: string) =>
@@ -306,13 +273,13 @@ useHead({
             cols="12"
             class="d-flex flex-column align-center text-center ga-4"
           >
-            <h1
+            <span
               id="home-hero-title"
               class="home-hero__title home-reveal-item"
               :style="{ '--reveal-delay': '0ms' }"
             >
-              {{ heroTitle }}
-            </h1>
+              Acheter mieux. Sans dépenser plus.
+            </span>
             <p
               v-if="animatedSubtitle"
               class="home-hero__title-animated-subtitle home-reveal-item"
@@ -320,13 +287,12 @@ useHead({
             >
               {{ animatedSubtitle }}
             </p>
-            <span
-              v-if="heroTitleSubtitle"
+            <h1
               class="home-hero__title-subtitle home-reveal-item"
-              :style="{ '--reveal-delay': '90ms' }"
+              :style="{ '--reveal-delay': '1000ms', fontSize: '1.82rem' }"
             >
-              {{ heroTitleSubtitle }}
-            </span>
+              Nudger : Le comparateur écologique
+            </h1>
           </v-col>
         </v-row>
         <v-row justify="center" class="mt-0 home-hero__panel-row">
@@ -350,7 +316,9 @@ useHead({
                         class="home-hero__search-input"
                         :label="resolveString('home.hero.search.label')"
                         :placeholder="resolveSearchPlaceholder()"
-                        :aria-label="resolveString('home.hero.search.ariaLabel')"
+                        :aria-label="
+                          resolveString('home.hero.search.ariaLabel')
+                        "
                         :min-chars="minSuggestionQueryLength"
                         :enable-scan="true"
                         :scan-mobile="true"
@@ -514,9 +482,8 @@ useHead({
 
 .home-hero__title-subtitle
   margin: clamp(0.65rem, 1.8vw, 1rem) auto 0
-  max-width: 28ch
   color: rgba(var(--v-theme-surface-default), 0.94)
-  font-size: clamp(1rem, 2.4vw, 1.4rem)
+  font-size: clamp(1.4rem, 2.8vw, 1.4rem)
   line-height: 1.4
   display: block
 

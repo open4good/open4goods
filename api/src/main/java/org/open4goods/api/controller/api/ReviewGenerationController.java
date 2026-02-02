@@ -133,6 +133,35 @@ public class ReviewGenerationController {
     }
 
     /**
+     * Retrieve the resolved prompt for review generation without executing the AI call.
+     *
+     * @param upc the product identifier
+     * @return the resolved prompt configuration
+     * @throws ResourceNotFoundException when the product does not exist
+     * @throws Exception when prompt generation fails
+     */
+    @GetMapping("/review/{id}/prompt")
+    @Operation(summary = "Get review generation prompt", description = "Return the fully resolved prompt configuration (dry run) for the requested UPC.",
+            parameters = {
+                    @Parameter(name = "id", in = ParameterIn.PATH, required = true,
+                            description = "Product UPC.",
+                            schema = @Schema(type = "integer", format = "int64", minimum = "0"))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Prompt returned",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = org.open4goods.services.prompt.config.PromptConfig.class))),
+                    @ApiResponse(responseCode = "404", description = "Product not found")
+            })
+    public ResponseEntity<org.open4goods.services.prompt.config.PromptConfig> getReviewPrompt(@PathVariable("id") long upc) throws Exception {
+        Product product = productRepository.getById(upc);
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
+        org.open4goods.services.prompt.config.PromptConfig promptConfig = reviewGenerationService.generateReviewDryRun(product, verticalConfig);
+        return ResponseEntity.ok(promptConfig);
+    }
+
+
+    /**
      * Trigger batch review generation for a vertical.
      *
      * @param verticalId the vertical identifier to batch

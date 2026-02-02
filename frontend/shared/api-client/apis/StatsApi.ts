@@ -15,11 +15,20 @@
 
 import * as runtime from '../runtime';
 import type {
+  CategoriesScoreStatsDto,
+  CategoriesScoresStatsDto,
   CategoriesStatsDto,
+  ProductDto,
 } from '../models/index';
 import {
+    CategoriesScoreStatsDtoFromJSON,
+    CategoriesScoreStatsDtoToJSON,
+    CategoriesScoresStatsDtoFromJSON,
+    CategoriesScoresStatsDtoToJSON,
     CategoriesStatsDtoFromJSON,
     CategoriesStatsDtoToJSON,
+    ProductDtoFromJSON,
+    ProductDtoToJSON,
 } from '../models/index';
 
 export interface CategoriesRequest {
@@ -104,7 +113,7 @@ export class StatsApi extends runtime.BaseAPI {
      * Return per-category score cardinalities for a single impact score criteria.
      * Get category score cardinalities for a score
      */
-    async categoriesScoreRaw(requestParameters: CategoriesScoreRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+    async categoriesScoreRaw(requestParameters: CategoriesScoreRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoriesScoreStatsDto>> {
         if (requestParameters['scoreName'] == null) {
             throw new runtime.RequiredError(
                 'scoreName',
@@ -149,18 +158,14 @@ export class StatsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<string>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
+        return new runtime.JSONApiResponse(response, (jsonValue) => CategoriesScoreStatsDtoFromJSON(jsonValue));
     }
 
     /**
      * Return per-category score cardinalities for a single impact score criteria.
      * Get category score cardinalities for a score
      */
-    async categoriesScore(requestParameters: CategoriesScoreRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+    async categoriesScore(requestParameters: CategoriesScoreRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoriesScoreStatsDto> {
         const response = await this.categoriesScoreRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -169,7 +174,7 @@ export class StatsApi extends runtime.BaseAPI {
      * Return per-category score cardinalities for each available impact score criteria.
      * Get categories score cardinalities
      */
-    async categoriesScoresRaw(requestParameters: CategoriesScoresRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+    async categoriesScoresRaw(requestParameters: CategoriesScoresRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoriesScoresStatsDto>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -206,18 +211,14 @@ export class StatsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<string>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
+        return new runtime.JSONApiResponse(response, (jsonValue) => CategoriesScoresStatsDtoFromJSON(jsonValue));
     }
 
     /**
      * Return per-category score cardinalities for each available impact score criteria.
      * Get categories score cardinalities
      */
-    async categoriesScores(requestParameters: CategoriesScoresRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+    async categoriesScores(requestParameters: CategoriesScoresRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoriesScoresStatsDto> {
         const response = await this.categoriesScoresRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -226,7 +227,7 @@ export class StatsApi extends runtime.BaseAPI {
      * Return a list of random products.
      * Get random products
      */
-    async randomRaw(requestParameters: RandomRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+    async randomRaw(requestParameters: RandomRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductDto>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -275,18 +276,14 @@ export class StatsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<string>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
+        return new runtime.JSONApiResponse(response, (jsonValue) => ProductDtoFromJSON(jsonValue));
     }
 
     /**
      * Return a list of random products.
      * Get random products
      */
-    async random(requestParameters: RandomRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+    async random(requestParameters: RandomRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductDto> {
         const response = await this.randomRaw(requestParameters, initOverrides);
         return await response.value();
     }

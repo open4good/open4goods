@@ -873,6 +873,22 @@ public class VerticalsGenerationService {
 	}
 
 
+    /**
+     * Generates the prompt configuration for ecoscore generation without executing the AI call.
+     *
+     * @param vConf the vertical configuration.
+     * @return the resolved {@link org.open4goods.services.prompt.config.PromptConfig}.
+     * @throws Exception if generation fails.
+     */
+    public org.open4goods.services.prompt.config.PromptConfig generateEcoscoreDryRun(VerticalConfig vConf) throws Exception {
+        Map<String, Object> context = new HashMap<String, Object>();
+        // TODO : Enforce, log
+        context.put("AVAILABLE_CRITERIAS", getCriterias(vConf));
+        context.put("VERTICAL_NAME", vConf.getI18n().get("fr").getVerticalHomeTitle());
+
+        return genAiService.resolvePrompt("impactscore-generation", context, org.open4goods.model.ai.ImpactScoreAiResult.class);
+    }
+
 	/**
 	 * Generates the AI yaml config defining an ecoscore for a given category
 	 * @param vConf

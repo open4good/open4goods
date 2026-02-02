@@ -16,10 +16,13 @@
 import * as runtime from '../runtime';
 import type {
   OpenDataDatasetDto,
+  OpenDataOverviewDto,
 } from '../models/index';
 import {
     OpenDataDatasetDtoFromJSON,
     OpenDataDatasetDtoToJSON,
+    OpenDataOverviewDtoFromJSON,
+    OpenDataOverviewDtoToJSON,
 } from '../models/index';
 
 export interface GtinRequest {
@@ -149,7 +152,7 @@ export class OpenDataApi extends runtime.BaseAPI {
      * Return aggregated metadata about the available GTIN and ISBN datasets.
      * Get OpenData overview
      */
-    async overviewRaw(requestParameters: OverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+    async overviewRaw(requestParameters: OverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<OpenDataOverviewDto>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -186,18 +189,14 @@ export class OpenDataApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<string>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
+        return new runtime.JSONApiResponse(response, (jsonValue) => OpenDataOverviewDtoFromJSON(jsonValue));
     }
 
     /**
      * Return aggregated metadata about the available GTIN and ISBN datasets.
      * Get OpenData overview
      */
-    async overview(requestParameters: OverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+    async overview(requestParameters: OverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<OpenDataOverviewDto> {
         const response = await this.overviewRaw(requestParameters, initOverrides);
         return await response.value();
     }

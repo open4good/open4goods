@@ -192,21 +192,21 @@ import {
   watch,
 } from 'vue'
 import { createError } from 'h3'
-import {
-  AggTypeEnum,
-  type Agg,
-  type AggregationBucketDto,
-  type AggregationResponseDto,
-  type AttributeConfigDto,
-  type CommercialEvent,
-  type FilterRequestDto,
-  type ProductIndexedAttributeDto,
-  type ProductDto,
-  type ProductReferenceDto,
-  type ProductScoreDto,
-  type ProductSearchResponseDto,
-  type ProductAggregatedPriceDto,
+import type {
+  Agg,
+  AggregationBucketDto,
+  AggregationResponseDto,
+  AttributeConfigDto,
+  CommercialEvent,
+  FilterRequestDto,
+  ProductIndexedAttributeDto,
+  ProductDto,
+  ProductReferenceDto,
+  ProductScoreDto,
+  ProductSearchResponseDto,
+  ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
+import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'

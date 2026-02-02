@@ -333,7 +333,7 @@ import type {
   VerticalConfigFullDto,
   VerticalSubsetDto,
 } from '~~/shared/api-client'
-import { AggTypeEnum } from '~~/shared/api-client'
+import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 
 import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.vue'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
@@ -1718,6 +1718,11 @@ const shouldFetchFreshProducts = computed(
   () => hasHydrated.value && !isUsingInitialProductsData.value
 )
 
+const NON_AGGREGATABLE_FIELDS = new Set([
+  'attributes.referentielAttributes.BRAND',
+  'attributes.referentielAttributes.MODEL',
+])
+
 const buildAggregationRequest = (
   options: ProductFieldOptionsResponse | null,
   extraFields: FieldMetadataDto[] = []
@@ -1733,7 +1738,11 @@ const buildAggregationRequest = (
   const aggs: Agg[] = []
 
   fields.forEach(field => {
-    if (!field.mapping || seen.has(field.mapping)) {
+    if (
+      !field.mapping ||
+      seen.has(field.mapping) ||
+      NON_AGGREGATABLE_FIELDS.has(field.mapping)
+    ) {
       return
     }
 

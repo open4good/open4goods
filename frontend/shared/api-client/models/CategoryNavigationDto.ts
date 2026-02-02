@@ -27,6 +27,13 @@ import {
     CategoryBreadcrumbItemDtoToJSON,
     CategoryBreadcrumbItemDtoToJSONTyped,
 } from './CategoryBreadcrumbItemDto';
+import type { ProductDto } from './ProductDto';
+import {
+    ProductDtoFromJSON,
+    ProductDtoFromJSONTyped,
+    ProductDtoToJSON,
+    ProductDtoToJSONTyped,
+} from './ProductDto';
 
 /**
  * 
@@ -66,16 +73,16 @@ export interface CategoryNavigationDto {
     popularCategories?: Array<GoogleCategoryDto>;
     /**
      * Top five new products for the category ordered by descending impact score. Only the base facet is populated.
-     * @type {Array<any>}
+     * @type {Array<ProductDto>}
      * @memberof CategoryNavigationDto
      */
-    topNewProducts?: Array<any>;
+    topNewProducts?: Array<ProductDto>;
     /**
      * Top five occasion products for the category ordered by descending impact score. Only the base facet is populated.
-     * @type {Array<any>}
+     * @type {Array<ProductDto>}
      * @memberof CategoryNavigationDto
      */
-    topOccasionProducts?: Array<any>;
+    topOccasionProducts?: Array<ProductDto>;
 }
 
 /**
@@ -100,8 +107,8 @@ export function CategoryNavigationDtoFromJSONTyped(json: any, ignoreDiscriminato
         'childCategories': json['childCategories'] == null ? undefined : ((json['childCategories'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
         'descendantVerticals': json['descendantVerticals'] == null ? undefined : ((json['descendantVerticals'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
         'popularCategories': json['popularCategories'] == null ? undefined : ((json['popularCategories'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
-        'topNewProducts': json['topNewProducts'] == null ? undefined : json['topNewProducts'],
-        'topOccasionProducts': json['topOccasionProducts'] == null ? undefined : json['topOccasionProducts'],
+        'topNewProducts': json['topNewProducts'] == null ? undefined : ((json['topNewProducts'] as Array<any>).map(ProductDtoFromJSON)),
+        'topOccasionProducts': json['topOccasionProducts'] == null ? undefined : ((json['topOccasionProducts'] as Array<any>).map(ProductDtoFromJSON)),
     };
 }
 
@@ -121,8 +128,8 @@ export function CategoryNavigationDtoToJSONTyped(value?: CategoryNavigationDto |
         'childCategories': value['childCategories'] == null ? undefined : ((value['childCategories'] as Array<any>).map(GoogleCategoryDtoToJSON)),
         'descendantVerticals': value['descendantVerticals'] == null ? undefined : ((value['descendantVerticals'] as Array<any>).map(GoogleCategoryDtoToJSON)),
         'popularCategories': value['popularCategories'] == null ? undefined : ((value['popularCategories'] as Array<any>).map(GoogleCategoryDtoToJSON)),
-        'topNewProducts': value['topNewProducts'],
-        'topOccasionProducts': value['topOccasionProducts'],
+        'topNewProducts': value['topNewProducts'] == null ? undefined : ((value['topNewProducts'] as Array<any>).map(ProductDtoToJSON)),
+        'topOccasionProducts': value['topOccasionProducts'] == null ? undefined : ((value['topOccasionProducts'] as Array<any>).map(ProductDtoToJSON)),
     };
 }
 

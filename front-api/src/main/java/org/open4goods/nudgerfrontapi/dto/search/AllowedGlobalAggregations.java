@@ -18,7 +18,11 @@ public enum AllowedGlobalAggregations {
     @Schema(description = "Aggregate the product condition (NEW, USED)", example = "price.conditions")
     productCondition("price.conditions", AggregationRequestDto.AggType.terms),
     @Schema(description = "Aggregate the manufacturing country", example = "gtinInfos.country")
-    country("gtinInfos.country", AggregationRequestDto.AggType.terms);
+    country("gtinInfos.country", AggregationRequestDto.AggType.terms),
+    @Schema(description = "Aggregate the relative ecoscore", example = "scores.ECOSCORE.relativ.value")
+    ecoscoreRelativ("scores.ECOSCORE.relativ.value", AggregationRequestDto.AggType.range),
+    @Schema(description = "Aggregate the ecoscore ranking", example = "scores.ECOSCORE.ranking")
+    ecoscoreRanking("scores.ECOSCORE.ranking", AggregationRequestDto.AggType.range);
 
     private final String fieldPath;
     private final AggregationRequestDto.AggType aggregationType;

@@ -213,6 +213,20 @@ public class VerticalsGenerationController {
 
 	}
 
+	@GetMapping(path="/update/{vertical}/impactscore/prompt")
+	@Operation(summary="Get impact score generation prompt", description="Return the fully resolved prompt configuration (dry run) for the requested vertical.")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public org.open4goods.services.prompt.config.PromptConfig getImpactScorePrompt(
+			@PathVariable String vertical) throws Exception {
+
+		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+		if (vc == null) {
+			throw new ResourceNotFoundException("Vertical not found: " + vertical);
+		}
+		return verticalsGenService.generateEcoscoreDryRun(vc);
+	}
+
+
 
 	@GetMapping(path="/update/{vertical}/categories/")
 	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")

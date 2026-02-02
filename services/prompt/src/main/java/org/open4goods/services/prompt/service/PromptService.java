@@ -294,6 +294,66 @@ public class PromptService implements HealthIndicator {
         return ret;
     }
 
+    /**
+     * Resolves the prompt configuration with the provided variables without executing the API call.
+     * <p>
+     * This method loads the prompt configuration, evaluates the system and user prompts using the provided variables,
+     * injects any necessary instructions (e.g., based on the return type), and returns the fully resolved configuration.
+     * </p>
+     *
+     * @param promptKey The key identifying the prompt configuration.
+     * @param variables The variables to resolve within the prompt templates.
+     * @param type      The expected return type (used to inject format instructions), or null if not applicable.
+     * @return The resolved {@link PromptConfig} containing the evaluated system and user prompts.
+     * @throws ResourceNotFoundException if the prompt configuration is not found.
+     */
+    public PromptConfig resolvePrompt(String promptKey, Map<String, Object> variables, Class<?> type)
+            throws ResourceNotFoundException, SerialisationException {
+        PromptConfig pConf = getPromptConfig(promptKey);
+        if (pConf == null) {
+            logger.error("PromptConfig {} does not exist", promptKey);
+            throw new ResourceNotFoundException("Prompt not found");
+        }
+
+        // Determine instructions if type is provided
+        Map<String, String> instructions = new HashMap<>();
+        if (type != null) {
+            instructions = AiFieldScanner.getGenAiInstruction(type);
+        }
+
+        String systemPromptEvaluated = "";
+        if (pConf.getSystemPrompt() != null) {
+            try {
+                systemPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
+            } catch (TemplateEvaluationException e) {
+                logger.error("Template evaluation error for system prompt in {}: {}", promptKey, e.getMessage());
+                throw e; // Or handle gracefully
+            }
+        }
+        String userPromptEvaluated;
+        try {
+            userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
+        } catch (TemplateEvaluationException e) {
+            logger.error("Template evaluation error for user prompt in {}: {}", promptKey, e.getMessage());
+            throw e;
+        }
+
+        if (null != instructions && !instructions.isEmpty()) {
+            systemPromptEvaluated += INSTRUCTION_HEADER_FR;
+            for (Entry<String, String> entry : instructions.entrySet()) {
+                systemPromptEvaluated += entry.getKey() + " : " + entry.getValue() + "\n";
+            }
+        }
+
+        // Clone/create a new config object with evaluated prompts
+        String yamlPromptConfig = serialisationService.toYamLiteral(pConf);
+        PromptConfig resolvedConfig = serialisationService.fromYaml(yamlPromptConfig, PromptConfig.class);
+        resolvedConfig.setSystemPrompt(systemPromptEvaluated);
+        resolvedConfig.setUserPrompt(userPromptEvaluated);
+
+        return resolvedConfig;
+    }
+
     public PromptResponse<String> prompt(String promptKey, Map<String, Object> variables)
             throws ResourceNotFoundException, SerialisationException {
 
