@@ -304,12 +304,13 @@ public class SearchService {
         LOGGER.info("Entering collectAllowedAggregationMappings(allowedFilterMappingsSize={}, config={})",
                 allowedFilterMappings != null ? allowedFilterMappings.size() : 0, config);
         Set<String> allowed = new HashSet<>(allowedFilterMappings);
+        
+        // Always allow global aggregations (like offersCount) regardless of vertical configuration
+        Arrays.stream(AllowedGlobalAggregations.values())
+                .map(AllowedGlobalAggregations::fieldPath)
+                .forEach(allowed::add);
+
         if (config == null || config.getAggregationConfiguration() == null) {
-            if (config == null) {
-                Arrays.stream(AllowedGlobalAggregations.values())
-                        .map(AllowedGlobalAggregations::fieldPath)
-                        .forEach(allowed::add);
-            }
             return allowed;
         }
         config.getAggregationConfiguration().keySet()

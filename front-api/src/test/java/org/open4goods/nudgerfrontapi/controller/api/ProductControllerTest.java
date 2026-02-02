@@ -63,14 +63,14 @@ class ProductControllerTest {
     @BeforeEach
     void setUp() {
         controller = new ProductController(productMappingService, verticalsConfigService, searchService, googleIndexationDispatchService);
+        // Default lenient mock for vertical existence check
+        org.mockito.Mockito.lenient().when(verticalsConfigService.getConfigById(any())).thenReturn(new VerticalConfig());
     }
 
     @Test
     void aggregatedScoreFiltersArePermitted() {
-        // Setup SearchCapabilities mock
-        Set<String> allowedFilters = new HashSet<>();
-        allowedFilters.add("scores.ENERGY_CONSUMPTION.value");
-        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(allowedFilters, Set.of(), Set.of());
+        // Capabilities not needed for this test anymore as validation is gone
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
         when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
         Filter filter = new Filter("scores.ENERGY_CONSUMPTION.value", FilterOperator.range, null, 0.0, 100.0);
@@ -98,10 +98,8 @@ class ProductControllerTest {
 
     @Test
     void attributeFiltersNotListedExplicitlyArePermitted() {
-        // Setup SearchCapabilities mock
-        Set<String> allowedFilters = new HashSet<>();
-        allowedFilters.add("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value");
-        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(allowedFilters, Set.of(), Set.of());
+        // Capabilities not needed for this test anymore as validation is gone
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
         when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
         Filter filter = new Filter("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value", FilterOperator.term,
@@ -131,10 +129,7 @@ class ProductControllerTest {
 
     @Test
     void compositeScoreFiltersArePermitted() {
-        // Setup SearchCapabilities mock
-        Set<String> allowedFilters = new HashSet<>();
-        allowedFilters.add("scores.ECOSCORE.value");
-        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(allowedFilters, Set.of(), Set.of());
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
         when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
         Filter filter = new Filter("scores.ECOSCORE.value", FilterOperator.range, null, 0.0, 100.0);
@@ -149,6 +144,43 @@ class ProductControllerTest {
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
                 "tv", null, DomainLanguage.fr, Locale.FRANCE, searchRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void unknownFilterShouldBeAccepted() {
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Collections.emptySet(), Set.of(), Set.of());
+        when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
+
+        Filter filter = new Filter("scores.UNKNOWN_FIELD.ranking", FilterOperator.rankingPercentile, null, 0.0, 100.0);
+        ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
+                new FilterRequestDto(List.of(filter), List.of()), null, null);
+
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
+        ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
+        
+        when(searchService.searchProducts(
+                any(Pageable.class), 
+                any(Locale.class), 
+                anySet(), 
+                any(),
+                any(),
+                any(),
+                any(),
+                any(), 
+                anyBoolean(), 
+                any()))
+                .thenReturn(responseDto);
+
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(
+                PageRequest.of(0, 20), 
+                Set.of(),
+                "tv", 
+                null, 
+                DomainLanguage.fr, 
+                Locale.FRANCE, 
+                searchRequest);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

@@ -35,6 +35,7 @@ public class AppConfig {
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
 
     @Bean
+    @org.springframework.context.annotation.Primary
     RemoteFileCachingService remoteFileCachingService(CacheProperties cacheProperties,
             RemoteFileCachingProperties props) {
         return new RemoteFileCachingService(cacheProperties.getPath(), props);

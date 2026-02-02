@@ -1844,7 +1844,7 @@ onBeforeUnmount(() => {
 }
 
 .product-price__history-cta-price {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: rgb(var(--v-theme-primary));
 }

@@ -20,7 +20,7 @@ public class GeocodeConfiguration
      * @return remote file caching service
      */
     @Bean
-    public RemoteFileCachingService remoteFileCachingService(GeocodeCacheProperties cacheProperties,
+    public RemoteFileCachingService geocodeRemoteFileCachingService(GeocodeCacheProperties cacheProperties,
             RemoteFileCachingProperties remoteFileCachingProperties)
     {
         return new RemoteFileCachingService(cacheProperties.getPath(), remoteFileCachingProperties);

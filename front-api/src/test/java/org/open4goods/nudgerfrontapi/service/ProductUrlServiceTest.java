@@ -40,7 +40,7 @@ class ProductUrlServiceTest {
         when(productRepository.getById(42L)).thenReturn(product);
         when(categoryMappingService.toVerticalConfigDto(Mockito.any(), Mockito.eq(DomainLanguage.fr)))
                 .thenReturn(new VerticalConfigDto("tv", true, true, null, null, 1, null, null, null, null,
-                        null, null, "televiseurs", null, null, null));
+                        null, null, null, "televiseurs", null, null, null));
 
         ProductUrlService service = new ProductUrlService(productRepository, verticalsConfigService, categoryMappingService, properties);
 

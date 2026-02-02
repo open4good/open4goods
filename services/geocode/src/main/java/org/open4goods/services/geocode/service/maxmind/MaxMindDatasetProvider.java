@@ -34,7 +34,7 @@ public class MaxMindDatasetProvider
      * @param remoteFileCachingService caching service
      * @param maxMindProperties MaxMind configuration
      */
-    public MaxMindDatasetProvider(RemoteFileCachingService remoteFileCachingService,
+    public MaxMindDatasetProvider(@org.springframework.beans.factory.annotation.Qualifier("geocodeRemoteFileCachingService") RemoteFileCachingService remoteFileCachingService,
             MaxMindProperties maxMindProperties)
     {
         this.remoteFileCachingService = remoteFileCachingService;

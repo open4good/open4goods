@@ -32,6 +32,9 @@ class GeocodeControllerIntegrationTest
     @Autowired
     private MockMvc mockMvc;
 
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private org.open4goods.services.geocode.service.MaxMindIpGeolocationService maxMindIpGeolocationService;
+
     @Test
     void geocodeReturnsAlternateMatch() throws Exception
     {

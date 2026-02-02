@@ -11,7 +11,7 @@
     },
     {
       "disable_score_absolute": {
-        "path_match": "scores.*.absolute",
+        "path_match": "scores.*.absolute.*",
         "mapping": {
           "enabled": false,
           "type": "object"
@@ -300,10 +300,7 @@
           "type": "object",
           "enabled": false
         },
-        "absolute": {
-          "type": "object",
-          "enabled": false
-        },
+
         "name": {
           "type": "keyword",
           "index": false

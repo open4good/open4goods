@@ -354,15 +354,17 @@ public class ProductController {
 
         String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
 
-        List<FieldMetadataDto> filterableGlobal = StringUtils.hasText(normalizedVerticalId)
-                ? Arrays.stream(ProductDtoFilterFields.values())
-                        .map(field -> new FieldMetadataDto(field.getText(), null, null, determineFilterValueType(field), null))
-                        .toList()
-                : Arrays.stream(AllowedGlobalFilters.values())
-                        .map(field -> new FieldMetadataDto(field.fieldPath(), null, null, determineGlobalFilterValueType(field), null))
-                        .toList();
-
-        SearchService.SearchCapabilities capabilities = searchService.buildSearchCapabilities(normalizedVerticalId, domainLanguage, filterableGlobal);
+        if (StringUtils.hasText(normalizedVerticalId)) {
+        	// We just check existence of vertical
+        	if(verticalsConfigService.getConfigById(normalizedVerticalId) == null) {
+        		LOGGER.warn("Vertical configuration not found for id='{}'", verticalId);
+                return ResponseEntity.notFound().build();
+        	}
+        }
+        
+        // Capabilities are used for Aggregation and Sort validation. 
+        // We pass empty global fields as we don't need to validate filter fields anymore.
+        SearchService.SearchCapabilities capabilities = searchService.buildSearchCapabilities(normalizedVerticalId, domainLanguage, List.of());
         Set<String> allowedSortMappings = capabilities.allowedSorts();
 
         // TODO : HEre we add a big micmac. We used the logic of duplicated search (verticals and global)
@@ -396,7 +398,7 @@ public class ProductController {
         aggDto = aggregationValidation.value();
 
         FilterRequestDto filterDto = searchPayload == null ? null : searchPayload.filters();
-        Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, capabilities.allowedFilters());
+        Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto);
         if (filterValidation.hasError()) {
             LOGGER.warn("Filter validation failed for request: {}", filterDto);
             return castError(filterValidation.error());
@@ -465,10 +467,7 @@ public class ProductController {
         SortRequestDto sortDto = request != null ? request.sort() : null;
         String searchType = request != null ? request.searchType() : null;
 
-        Set<String> allowedFilterMappings = Arrays.stream(AllowedGlobalFilters.values())
-                .map(AllowedGlobalFilters::fieldPath)
-                .collect(Collectors.toSet());
-        Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto, allowedFilterMappings);
+        Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto);
         if (filterValidation.hasError()) {
             LOGGER.warn("Filter validation failed for global search request: {}", filterDto);
             return castError(filterValidation.error());
@@ -713,24 +712,20 @@ public class ProductController {
     }
 
     /**
-     * Validate filter clauses and keep only authorised mappings.
+     * Validate filter clauses.
      */
-    private Validation<FilterRequestDto> sanitizeFilters(FilterRequestDto filterRequest,
-            Set<String> allowedFilterMappings) {
-        LOGGER.info("Entering sanitizeFilters(filterRequest={}, allowedFilterMappingsSize={})", filterRequest,
-                allowedFilterMappings != null ? allowedFilterMappings.size() : 0);
+    private Validation<FilterRequestDto> sanitizeFilters(FilterRequestDto filterRequest) {
+        LOGGER.info("Entering sanitizeFilters(filterRequest={})", filterRequest);
         if (filterRequest == null) {
             return Validation.ok(null);
         }
-        Validation<List<FilterRequestDto.Filter>> legacyValidation = sanitizeFilterList(filterRequest.filters(),
-                allowedFilterMappings);
+        Validation<List<FilterRequestDto.Filter>> legacyValidation = sanitizeFilterList(filterRequest.filters());
         if (legacyValidation.hasError()) {
             return Validation.error(legacyValidation.error());
         }
 
         Validation<List<FilterRequestDto.FilterGroup>> groupValidation = sanitizeFilterGroups(
-                filterRequest.filterGroups(),
-                allowedFilterMappings);
+                filterRequest.filterGroups());
         if (groupValidation.hasError()) {
             return Validation.error(groupValidation.error());
         }
@@ -739,8 +734,7 @@ public class ProductController {
     }
 
     private Validation<List<FilterRequestDto.FilterGroup>> sanitizeFilterGroups(
-            List<FilterRequestDto.FilterGroup> filterGroups,
-            Set<String> allowedFilterMappings) {
+            List<FilterRequestDto.FilterGroup> filterGroups) {
         if (filterGroups == null) {
             return Validation.ok(null);
         }
@@ -750,12 +744,11 @@ public class ProductController {
             if (group == null) {
                 continue;
             }
-            Validation<List<FilterRequestDto.Filter>> sanitizedMust = sanitizeFilterList(group.must(), allowedFilterMappings);
+            Validation<List<FilterRequestDto.Filter>> sanitizedMust = sanitizeFilterList(group.must());
             if (sanitizedMust.hasError()) {
                 return Validation.error(sanitizedMust.error());
             }
-            Validation<List<FilterRequestDto.Filter>> sanitizedShould = sanitizeFilterList(group.should(),
-                    allowedFilterMappings);
+            Validation<List<FilterRequestDto.Filter>> sanitizedShould = sanitizeFilterList(group.should());
             if (sanitizedShould.hasError()) {
                 return Validation.error(sanitizedShould.error());
             }
@@ -776,8 +769,7 @@ public class ProductController {
         return Validation.ok(sanitizedGroups.isEmpty() ? List.of() : List.copyOf(sanitizedGroups));
     }
 
-    private Validation<List<FilterRequestDto.Filter>> sanitizeFilterList(List<FilterRequestDto.Filter> filters,
-            Set<String> allowedFilterMappings) {
+    private Validation<List<FilterRequestDto.Filter>> sanitizeFilterList(List<FilterRequestDto.Filter> filters) {
         if (filters == null) {
             return Validation.ok(null);
         }
@@ -789,11 +781,7 @@ public class ProductController {
                 return Validation.error(badRequest("Invalid filters parameter", "Filter field is mandatory"));
             }
             String mapping = filter.field().trim();
-            if (!ADMIN_EXCLUDED_CAUSES_FIELD.equals(mapping) && !allowedFilterMappings.contains(mapping)) {
-                LOGGER.warn("Filter field '{}' is not permitted", mapping);
-                return Validation.error(badRequest("Invalid filters parameter",
-                        "Filter not permitted for field: " + mapping));
-            }
+            
             sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(), filter.max()));
         }
         return Validation.ok(sanitized.isEmpty() ? List.of() : List.copyOf(sanitized));

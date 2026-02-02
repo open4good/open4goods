@@ -58,7 +58,14 @@ public class MaxMindIpGeolocationService implements IpGeolocationService
     @PostConstruct
     public void initialize()
     {
-        loadDatabase();
+        try
+        {
+            loadDatabase();
+        }
+        catch (Exception ex)
+        {
+            LOGGER.warn("Failed to initialize MaxMind GeoIP database on startup. Geolocation will be unavailable.", ex);
+        }
     }
 
     /**

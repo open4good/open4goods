@@ -33,7 +33,7 @@ public class GeoNamesDatasetProvider
      * @param remoteFileCachingService caching service
      * @param geoNamesProperties GeoNames configuration
      */
-    public GeoNamesDatasetProvider(RemoteFileCachingService remoteFileCachingService,
+    public GeoNamesDatasetProvider(@org.springframework.beans.factory.annotation.Qualifier("geocodeRemoteFileCachingService") RemoteFileCachingService remoteFileCachingService,
             GeoNamesProperties geoNamesProperties)
     {
         this.remoteFileCachingService = remoteFileCachingService;
