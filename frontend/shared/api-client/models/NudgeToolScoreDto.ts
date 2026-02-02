@@ -32,6 +32,18 @@ export interface NudgeToolScoreDto {
      */
     scoreMinValue?: number;
     /**
+     * Minimum percentile ranking required (0-100).
+     * @type {number}
+     * @memberof NudgeToolScoreDto
+     */
+    fromPercent?: number;
+    /**
+     * Maximum percentile ranking required (0-100).
+     * @type {number}
+     * @memberof NudgeToolScoreDto
+     */
+    toPercent?: number;
+    /**
      * Material Design icon representing the score.
      * @type {string}
      * @memberof NudgeToolScoreDto
@@ -76,6 +88,8 @@ export function NudgeToolScoreDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         
         'scoreName': json['scoreName'] == null ? undefined : json['scoreName'],
         'scoreMinValue': json['scoreMinValue'] == null ? undefined : json['scoreMinValue'],
+        'fromPercent': json['fromPercent'] == null ? undefined : json['fromPercent'],
+        'toPercent': json['toPercent'] == null ? undefined : json['toPercent'],
         'mdiIcon': json['mdiIcon'] == null ? undefined : json['mdiIcon'],
         'disabled': json['disabled'] == null ? undefined : json['disabled'],
         'title': json['title'] == null ? undefined : json['title'],
@@ -96,6 +110,8 @@ export function NudgeToolScoreDtoToJSONTyped(value?: NudgeToolScoreDto | null, i
         
         'scoreName': value['scoreName'],
         'scoreMinValue': value['scoreMinValue'],
+        'fromPercent': value['fromPercent'],
+        'toPercent': value['toPercent'],
         'mdiIcon': value['mdiIcon'],
         'disabled': value['disabled'],
         'title': value['title'],

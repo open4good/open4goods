@@ -43,6 +43,18 @@ export const buildScoreFilters = (
       const matchedScore = scores.find(
         candidate => candidate.scoreName === name
       )
+      if (
+        matchedScore.fromPercent != undefined ||
+        matchedScore.toPercent != undefined
+      ) {
+        return {
+          field: `scores.${name}.ranking`,
+          operator: 'rankingPercentile',
+          min: matchedScore.fromPercent,
+          max: matchedScore.toPercent,
+        } satisfies Filter
+      }
+
       if (!matchedScore?.scoreMinValue || matchedScore.disabled) {
         return null
       }

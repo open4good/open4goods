@@ -18,6 +18,7 @@ import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.NudgeToolConfig;
+import org.open4goods.model.vertical.SubsetCriteria;
 import org.open4goods.model.vertical.NudgeToolScore;
 import org.open4goods.model.vertical.NudgeToolSubsetGroup;
 import org.open4goods.model.vertical.ProductI18nElements;
@@ -542,6 +543,8 @@ public class CategoryMappingService {
         return new NudgeToolScoreDto(
                 score.getScoreName(),
                 score.getScoreMinValue(),
+                score.getFromPercent(),
+                score.getToPercent(),
                 score.getMdiIcon(),
                 score.getDisabled(),
                 localise(score.getTitle(), domainLanguage),
@@ -587,10 +590,19 @@ public class CategoryMappingService {
         if (subset == null) {
             return null;
         }
+        // Ensure operator is set for percentile ranking
+        List<SubsetCriteria> criterias = defaultList(subset.getCriterias()).stream()
+            .peek(c -> {
+                if ((c.getFromPercent() != null || c.getToPercent() != null) && c.getOperator() == null) {
+                    c.setOperator(org.open4goods.model.vertical.SubsetCriteriaOperator.RANKING_PERCENTILE);
+                }
+            })
+            .collect(Collectors.toList());
+
         return new VerticalSubsetDto(
                 subset.getId(),
                 subset.getGroup(),
-                defaultList(subset.getCriterias()),
+                criterias,
                 subset.getImage(),
                 localise(subset.getUrl(), domainLanguage),
                 localise(subset.getCaption(), domainLanguage),

@@ -45,10 +45,10 @@ export interface AiRating {
     comment?: string;
     /**
      * Reference source number
-     * @type {number}
+     * @type {string}
      * @memberof AiRating
      */
-    number: number;
+    number: string;
 }
 
 /**

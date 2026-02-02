@@ -21,10 +21,10 @@ import { mapValues } from '../runtime';
 export interface AiSource {
     /**
      * Source number
-     * @type {number}
+     * @type {string}
      * @memberof AiSource
      */
-    number: number;
+    number: string;
     /**
      * Source name
      * @type {string}

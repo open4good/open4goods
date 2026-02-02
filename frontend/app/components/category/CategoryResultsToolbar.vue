@@ -225,12 +225,17 @@ const internalSortOrder = computed({
 
   &__sort
     display: flex
-    flex-wrap: wrap
+    flex-wrap: nowrap
     align-items: center
     gap: 0.75rem
 
   &__sort-select
     flex: 1 1 220px
+    min-width: 0
+
+  &__sort-order
+    flex-shrink: 0
+    overflow: visible
 
   &__search
     flex: 1 1 100%
@@ -270,5 +275,5 @@ const internalSortOrder = computed({
 
   .category-results-toolbar__sort-select
     flex: 1 1 auto
-    min-width: 180px
+    min-width: 130px
 </style>

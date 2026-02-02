@@ -43,10 +43,6 @@ parsers:
 
 To match the {TARGET_CATEGORY} specificities
 
-5 - Update popularAttributes
- Set popularAttributes with available attributes. popularAttributes  will be presented in product cards, or will be "top filters".
-
-
 ## Phase 2: Attribute Mapping
 **Goal**: Define which attributes are relevant for this category based on real data coverage.
 
@@ -70,8 +66,9 @@ To match the {TARGET_CATEGORY} specificities
 
 4 - Update
 ## Phase 3: Specific filters configuration
-** Warning : if major changed were operated previously, those statistics may not be up to date, as batch that computes scores may have not run with updated config.
-**Goal**: Configure "Nudge" scores (Environmental, Durability, etc.) by analyzing the statistical distribution of products.
+
+5 - Update popularAttributes
+ Set popularAttributes with available attributes. popularAttributes  will be presented in product cards, or will be "top filters".
 
 
 ### 3.1 Configure Filters (Subsets)
@@ -93,5 +90,5 @@ Before finishing, verify:
 - [ ] `nudgeToolConfig` has at least 3 scores defined.
 - [ ] `subsets` cover reasonable ranges for the current market.
 - [ ] All text is available in both `fr` and `en`.
+- [ ] Minimmum attributes and popular attributes are configured
 
-**Output**: Return the fully updated `{TARGET_CATEGORY}.yml` file.

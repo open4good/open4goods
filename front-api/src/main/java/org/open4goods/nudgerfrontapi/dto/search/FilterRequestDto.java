@@ -78,7 +78,9 @@ public record FilterRequestDto(
         @Schema(description = "Filter on the product ecoscore", example = "ecoscore")
         ecoscore("scores.ECOSCORE.value", FilterValueType.numeric),
         @Schema(description = "Filter on the product ecoscore relative value", example = "ecoscoreRelativ")
-        ecoscoreRelativ("scores.ECOSCORE.relativ.value", FilterValueType.numeric);
+        ecoscoreRelativ("scores.ECOSCORE.relativ.value", FilterValueType.numeric),
+        @Schema(description = "Filter on the product ecoscore ranking", example = "ecoscoreRanking")
+        ecoscoreRanking("scores.ECOSCORE.ranking", FilterValueType.numeric);
 
         private final String fieldPath;
         private final FilterValueType valueType;
@@ -108,7 +110,7 @@ public record FilterRequestDto(
         public boolean supports(FilterOperator operator) {
             return switch (valueType) {
             case keyword -> operator == FilterOperator.term;
-            case numeric -> operator == FilterOperator.range || operator == FilterOperator.term;
+            case numeric -> operator == FilterOperator.range || operator == FilterOperator.term || operator == FilterOperator.rankingPercentile;
             };
         }
         private static final Map<String, FilterField> LOOKUP = Arrays.stream(values())

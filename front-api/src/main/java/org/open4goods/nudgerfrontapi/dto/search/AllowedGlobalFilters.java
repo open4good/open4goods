@@ -22,7 +22,9 @@ public enum AllowedGlobalFilters {
     @Schema(description = "Filter on the product ecoscore", example = "scores.ECOSCORE.value")
     ecoscore("scores.ECOSCORE.value", FilterRequestDto.FilterValueType.numeric),
     @Schema(description = "Filter on the product ecoscore relative value", example = "scores.ECOSCORE.relativ.value")
-    ecoscoreRelativ("scores.ECOSCORE.relativ.value", FilterRequestDto.FilterValueType.numeric);
+    ecoscoreRelativ("scores.ECOSCORE.relativ.value", FilterRequestDto.FilterValueType.numeric),
+    @Schema(description = "Filter on the product ecoscore ranking", example = "scores.ECOSCORE.ranking")
+    ecoscoreRanking("scores.ECOSCORE.ranking", FilterRequestDto.FilterValueType.numeric);
 
     private final String fieldPath;
     private final FilterRequestDto.FilterValueType valueType;

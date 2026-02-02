@@ -1056,6 +1056,7 @@ public class ProductRepository {
                 case GREATER_THAN_OR_EQUAL -> criteria.greaterThanEqual(thresholdValue);
                 case LOWER_THAN_OR_EQUAL -> criteria.lessThanEqual(thresholdValue);
                 case EQUALS -> criteria.is(thresholdValue);
+                case RANKING_PERCENTILE -> throw new UnsupportedOperationException("Ranking percentile not supported in threshold calculation");
                 };
         }
 

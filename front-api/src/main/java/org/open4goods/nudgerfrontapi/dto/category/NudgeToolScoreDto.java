@@ -10,6 +10,10 @@ public record NudgeToolScoreDto(
         String scoreName,
         @Schema(description = "Minimum value required to feature the score.", example = "70")
         Double scoreMinValue,
+        @Schema(description = "Minimum percentile ranking required (0-100).", example = "50")
+        Integer fromPercent,
+        @Schema(description = "Maximum percentile ranking required (0-100).", example = "100")
+        Integer toPercent,
         @Schema(description = "Material Design icon representing the score.", example = "leaf")
         String mdiIcon,
         @Schema(description = "Whether the score should be disabled in the UI.", example = "true")

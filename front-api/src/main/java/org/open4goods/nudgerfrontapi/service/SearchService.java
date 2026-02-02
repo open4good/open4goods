@@ -1351,7 +1351,7 @@ public class SearchService {
 		double to = toPercent != null ? toPercent : 100.0;
 		
 		// Build script: ranking > count * (1 - toPercent/100) AND ranking <= count * (1 - fromPercent/100)
-		String scriptSource = String.format(
+		String scriptSource = String.format(Locale.ROOT,
 				"doc['%s'].size() > 0 && doc['%s'].size() > 0 && " +
 				"doc['%s'].value > doc['%s'].value * (1.0 - %f/100.0) && " +
 				"doc['%s'].value <= doc['%s'].value * (1.0 - %f/100.0)",
@@ -2497,7 +2497,8 @@ public class SearchService {
 	}
 
 	private void elasticLog(Exception e) {
-		if (e instanceof UncategorizedElasticsearchException) {
+		if (e instanceof UncategorizedElasticsearchException uee) {
+			LOGGER.error("Elasticsearch Uncategorized Error. Body: {}", uee.getResponseBody());
 			Throwable cause = e.getCause();
 			if (cause instanceof ElasticsearchException ee) {
 				LOGGER.error("Elasticsearch error: " + ee.response());

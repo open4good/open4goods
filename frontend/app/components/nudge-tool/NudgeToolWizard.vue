@@ -116,6 +116,7 @@
       <v-window
         v-model="activeStepKey"
         class="nudge-wizard__window"
+        :class="{ 'nudge-wizard__window--transitioning': isTransitioning }"
         :touch="false"
         :transition="windowTransition"
         :reverse-transition="windowReverseTransition"
@@ -984,10 +985,16 @@ const setStepRef = (
   }
 }
 
+const isTransitioning = ref(false)
+
 watch(
   activeStepKey,
   key => {
     activeStepRef.value = stepRefs.value[key] ?? null
+    isTransitioning.value = true
+    setTimeout(() => {
+      isTransitioning.value = false
+    }, 550)
   },
   { flush: 'post' }
 )
@@ -1265,14 +1272,19 @@ const cornerIconDimensions = computed(() => {
     height: 100%;
 
     :deep(.v-window__container) {
-      align-items: center;
+      align-items: stretch;
     }
 
     :deep(.v-window-item) {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
     }
+  }
+
+  &__step-content {
+    width: 100%;
+    margin: auto;
   }
 
   &__window-wrapper {
@@ -1413,6 +1425,10 @@ const cornerIconDimensions = computed(() => {
   .nudge-wizard__window :deep(.v-window__container) {
     align-items: stretch;
   }
+}
+
+.nudge-wizard__window--transitioning {
+  overflow-y: hidden !important;
 }
 
 .rapid-fade-enter-active,

@@ -2,6 +2,14 @@
   "dynamic": "strict",
   "dynamic_templates": [
     {
+      "score_absolute_count_as_integer": {
+        "path_match": "scores.*.absolute.count",
+        "mapping": {
+          "type": "integer"
+        }
+      }
+    },
+    {
       "disable_score_absolute": {
         "path_match": "scores.*.absolute",
         "mapping": {
@@ -184,7 +192,7 @@
     },
     "reviews": {
       "type": "object",
-       "enabled": false
+      "enabled": false
     },
 
     "googleTaxonomyId": {

@@ -137,15 +137,23 @@ public class VerticalsGenerationService {
 			}
 		}
 
-		// Compute impact score subsets
-		ScoreThresholds thresholds = computeImpactScoreThresholds(verticalId);
-		String lowerThreshold = formatScoreValue(thresholds.lower());
-		String upperThreshold = formatScoreValue(thresholds.upper());
 
-		// Build subsets (impact score only for now as requested)
-		List<VerticalSubset> subsets = buildImpactScoreSubsetsList(lowerThreshold, upperThreshold);
-		result.getNudgeToolConfig().setSubsets(subsets);
-		result.setSubsets(subsets);
+		// Check if subsets are already defined in the config (e.g. from tv.yml)
+		if (verticalConfig.getNudgeToolConfig() != null && verticalConfig.getNudgeToolConfig().getSubsets() != null && !verticalConfig.getNudgeToolConfig().getSubsets().isEmpty()) {
+			List<VerticalSubset> existingSubsets = verticalConfig.getNudgeToolConfig().getSubsets();
+			result.getNudgeToolConfig().setSubsets(existingSubsets);
+			result.setSubsets(existingSubsets);
+		} else {
+			// Compute impact score subsets
+			ScoreThresholds thresholds = computeImpactScoreThresholds(verticalId);
+			String lowerThreshold = formatScoreValue(thresholds.lower());
+			String upperThreshold = formatScoreValue(thresholds.upper());
+	
+			// Build subsets (impact score only for now as requested)
+			List<VerticalSubset> subsets = buildImpactScoreSubsetsList(lowerThreshold, upperThreshold);
+			result.getNudgeToolConfig().setSubsets(subsets);
+			result.setSubsets(subsets);
+		}
 
 		return result;
 	}

@@ -45,10 +45,6 @@
                   {{ resolveBaseLine(product) }}
                 </span>
               </template>
-              <span v-else class="category-product-list__offers">
-                <v-icon icon="mdi-store" size="18" class="me-1" />
-                {{ offersCountLabel(product) }}
-              </span>
             </div>
           </div>
 
@@ -359,6 +355,9 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
     gap: 1.5rem
     flex-wrap: wrap
 
+    @media (min-width: 992px)
+      flex-wrap: nowrap
+
   &__content
     display: flex
     flex-direction: column
@@ -388,7 +387,7 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
     display: flex
     flex-direction: column
     justify-content: center
-    min-width: 200px
+    width: 230px
     flex: 0 0 auto
 
   &__status
@@ -411,7 +410,7 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
     display: flex
     align-items: center
     justify-content: center
-    min-width: 180px
+    width: 180px
     flex: 0 0 auto
 
   &__actions

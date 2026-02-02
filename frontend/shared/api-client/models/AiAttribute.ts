@@ -33,10 +33,10 @@ export interface AiAttribute {
     value: string;
     /**
      * Reference source number
-     * @type {number}
+     * @type {string}
      * @memberof AiAttribute
      */
-    number: number;
+    number: string;
 }
 
 /**
