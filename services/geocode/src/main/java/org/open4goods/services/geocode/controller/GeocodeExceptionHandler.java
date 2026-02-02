@@ -42,7 +42,7 @@ public class GeocodeExceptionHandler
     {
         LOGGER.warn("Geocode result not found: {}", ex.getMessage());
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        pd.setTitle("City not found");
+        pd.setTitle("Geocode result not found");
         pd.setDetail(ex.getMessage());
         return pd;
     }
