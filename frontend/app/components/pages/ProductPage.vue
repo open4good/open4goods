@@ -25,7 +25,11 @@
 
     <v-skeleton-loader v-else-if="pending" type="article" class="mb-6" />
 
-    <div v-else-if="product" class="product-page__layout">
+    <div
+      v-else-if="product"
+      class="product-page__layout"
+      :class="{ 'product-page__layout--nav-collapsed': isNavCollapsed }"
+    >
       <aside
         class="product-page__nav"
         :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
@@ -39,6 +43,7 @@
           :orientation="orientation"
           :aria-label="$t('product.navigation.label')"
           @navigate="scrollToSection"
+          @collapse-change="handleNavCollapseChange"
         />
       </aside>
 
@@ -1964,6 +1969,15 @@ const orientation = computed<'vertical' | 'horizontal'>(() =>
   display.mdAndDown.value ? 'horizontal' : 'vertical'
 )
 
+const navCollapsed = ref(false)
+const isNavCollapsed = computed(
+  () => navCollapsed.value && orientation.value === 'vertical'
+)
+
+const handleNavCollapseChange = (collapsed: boolean) => {
+  navCollapsed.value = collapsed
+}
+
 const activeSection = ref<string>(sectionIds.hero)
 
 const observer = ref<IntersectionObserver | null>(null)
@@ -2384,11 +2398,20 @@ useHead(() => {
   gap: 2rem;
 }
 
+.product-page__layout--nav-collapsed {
+  grid-template-columns: minmax(40px, 40px) minmax(0, 1fr);
+  gap: 1rem;
+}
+
 .product-page__nav {
   position: sticky;
   top: 108px; /* 64px header + 44px banner */
   align-self: start;
   height: fit-content;
+}
+
+.product-page__layout--nav-collapsed .product-page__nav {
+  width: 40px;
 }
 
 .product-page__nav--mobile {
