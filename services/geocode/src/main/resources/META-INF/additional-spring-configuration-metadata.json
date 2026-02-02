@@ -23,6 +23,24 @@
       "type": "java.lang.String",
       "description": "Expected filename of the cities dataset inside the GeoNames zip archive.",
       "defaultValue": "cities5000.txt"
+    },
+    {
+      "name": "geocode.maxmind.url",
+      "type": "java.lang.String",
+      "description": "MaxMind GeoIP download URL.",
+      "defaultValue": "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=${MAXMIND_LICENSE_KEY}&suffix=tar.gz"
+    },
+    {
+      "name": "geocode.maxmind.refresh-in-days",
+      "type": "java.lang.Integer",
+      "description": "Number of days before refreshing the cached MaxMind download.",
+      "defaultValue": 7
+    },
+    {
+      "name": "geocode.maxmind.database-file-name",
+      "type": "java.lang.String",
+      "description": "Expected database filename inside the MaxMind archive.",
+      "defaultValue": "GeoLite2-City.mmdb"
     }
   ]
 }

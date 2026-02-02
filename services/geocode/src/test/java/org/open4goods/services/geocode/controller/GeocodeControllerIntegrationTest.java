@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.open4goods.services.geocode.config.yml.GeoNamesProperties;
+import org.open4goods.services.geocode.dto.IpGeolocationResponse;
+import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.services.geocode.service.geonames.GeoNamesDatasetProvider;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,16 @@ class GeocodeControllerIntegrationTest
                 .andExpect(jsonPath("$.distanceKm", Matchers.lessThan(900d)));
     }
 
+    @Test
+    void geolocReturnsMaxMindData() throws Exception
+    {
+        mockMvc.perform(get("/v1/geoloc")
+                .param("ip", "81.2.69.142"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.countryIsoCode").value("GB"))
+                .andExpect(jsonPath("$.cityName").value("London"));
+    }
+
     @TestConfiguration
     static class TestConfig
     {
@@ -81,6 +93,48 @@ class GeocodeControllerIntegrationTest
                 public Path getDatasetPath()
                 {
                     return fixturePath;
+                }
+            };
+        }
+
+        @Bean
+        @Primary
+        IpGeolocationService ipGeolocationService()
+        {
+            return new IpGeolocationService()
+            {
+                @Override
+                public IpGeolocationResponse resolve(String ip)
+                {
+                    if (!"81.2.69.142".equals(ip))
+                    {
+                        return null;
+                    }
+                    return new IpGeolocationResponse(
+                            ip,
+                            "Europe",
+                            "EU",
+                            "United Kingdom",
+                            "GB",
+                            "United Kingdom",
+                            "GB",
+                            "London",
+                            "England",
+                            "ENG",
+                            "EC1A",
+                            51.5142,
+                            -0.0931,
+                            5,
+                            "Europe/London",
+                            0,
+                            false,
+                            false);
+                }
+
+                @Override
+                public boolean isLoaded()
+                {
+                    return true;
                 }
             };
         }

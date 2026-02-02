@@ -2,8 +2,10 @@ package org.open4goods.services.geocode.controller;
 
 import org.open4goods.services.geocode.dto.DistanceResponse;
 import org.open4goods.services.geocode.dto.GeocodeResponse;
+import org.open4goods.services.geocode.dto.IpGeolocationResponse;
 import org.open4goods.services.geocode.model.CityMatch;
 import org.open4goods.services.geocode.service.GeocodeService;
+import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.services.geocode.util.HaversineUtil;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,15 +21,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class GeocodeController
 {
     private final GeocodeService geocodeService;
+    private final IpGeolocationService ipGeolocationService;
 
     /**
      * Creates a new geocode controller.
      *
      * @param geocodeService geocode service
      */
-    public GeocodeController(GeocodeService geocodeService)
+    public GeocodeController(GeocodeService geocodeService, IpGeolocationService ipGeolocationService)
     {
         this.geocodeService = geocodeService;
+        this.ipGeolocationService = ipGeolocationService;
     }
 
     /**
@@ -48,6 +52,24 @@ public class GeocodeController
             throw new GeocodeNotFoundException("City not found for " + city + ", " + country);
         }
         return toResponse(city, country, match);
+    }
+
+    /**
+     * Resolves IP geolocation data using the MaxMind database.
+     *
+     * @param ip IP address to resolve
+     * @return geolocation response
+     */
+    @GetMapping("/geoloc")
+    public IpGeolocationResponse geoloc(@RequestParam("ip") String ip)
+    {
+        validateRequired(ip, "ip");
+        IpGeolocationResponse response = ipGeolocationService.resolve(ip);
+        if (response == null)
+        {
+            throw new GeocodeNotFoundException("IP address not found for " + ip);
+        }
+        return response;
     }
 
     /**

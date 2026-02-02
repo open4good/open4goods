@@ -42,6 +42,12 @@
       "defaultValue": "24h"
     },
     {
+      "name": "front.geocode.base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the geocode microservice.",
+      "defaultValue": "http://localhost:8089"
+    },
+    {
       "name": "front.search.suggest.semantic-fallback-enabled",
       "type": "java.lang.Boolean",
       "description": "Enable semantic fallback for product suggestions when prefix search yields no results.",
