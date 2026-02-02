@@ -32,32 +32,11 @@
 
         <div class="product-sticky-banner__right">
           <div class="product-sticky-banner__prices">
-            <v-btn
-              v-if="newPriceLabel"
-              color="primary"
-              variant="elevated"
-              size="small"
-              class="product-sticky-banner__price-btn"
-              :href="newPriceLink"
-              target="_blank"
-              rel="noopener noreferrer"
-              @click="$emit('offer-click', 'new')"
-            >
-              {{ newPriceLabel }}
-            </v-btn>
-            <v-btn
-              v-if="usedPriceLabel"
-              color="secondary"
-              variant="elevated"
-              size="small"
-              class="product-sticky-banner__price-btn"
-              :href="usedPriceLink"
-              target="_blank"
-              rel="noopener noreferrer"
-              @click="$emit('offer-click', 'used')"
-            >
-              {{ usedPriceLabel }}
-            </v-btn>
+            <ProductPriceRows
+              v-if="product"
+              :product="product"
+              variant="compact"
+            />
           </div>
 
           <v-btn
@@ -77,6 +56,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import type { ProductDto } from '~~/shared/api-client'
 
 const { t } = useI18n()
 
@@ -86,29 +66,22 @@ withDefaults(
     color?: string
     elevation?: string | number
     ariaLabel?: string
-    newPriceLabel?: string
-    newPriceLink?: string
-    usedPriceLabel?: string
-    usedPriceLink?: string
     offersCountLabel?: string
     partnersLink?: string
+    product?: ProductDto
   }>(),
   {
     open: false,
     color: undefined,
     elevation: 8,
     ariaLabel: undefined,
-    newPriceLabel: undefined,
-    newPriceLink: undefined,
-    usedPriceLabel: undefined,
-    usedPriceLink: undefined,
     offersCountLabel: undefined,
     partnersLink: '/partners',
+    product: undefined,
   }
 )
 
 defineEmits<{
-  'offer-click': [type: 'new' | 'used']
   'scroll-to-offers': []
 }>()
 </script>
@@ -183,13 +156,6 @@ defineEmits<{
 .product-sticky-banner__prices {
   display: flex;
   gap: 0.5rem;
-}
-
-.product-sticky-banner__price-btn {
-  font-weight: 600;
-  text-transform: none;
-  min-width: 80px;
-  height: 28px !important;
 }
 
 .product-sticky-banner__count-btn {

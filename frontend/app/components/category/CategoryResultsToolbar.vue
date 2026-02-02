@@ -38,10 +38,13 @@
                 item-title="title"
                 item-value="value"
                 clearable
-                :disabled="sortItems.length === 0"
+                :disabled="!hasSortItems"
                 hide-details
                 density="comfortable"
                 data-testid="results-toolbar-sort-select"
+                :menu-props="{
+                  contentClass: 'category-results-toolbar__sort-menu',
+                }"
                 @update:model-value="emit('update:sortField', $event)"
               />
             </template>
@@ -153,12 +156,23 @@ type SortItem = {
   value: string
 }
 
+type SortGroupItem =
+  | {
+      type: 'subheader'
+      title: string
+    }
+  | {
+      type: 'divider'
+    }
+
+type SortOption = SortItem | SortGroupItem
+
 const props = withDefaults(
   defineProps<{
     isDesktop: boolean
     resultsCount: number
     viewMode: CategoryViewMode
-    sortItems: SortItem[]
+    sortItems: SortOption[]
     sortField: string | null
     sortOrder: 'asc' | 'desc'
     searchTerm: string
@@ -198,6 +212,14 @@ const internalSortOrder = computed({
   get: () => props.sortOrder,
   set: value => emit('update:sortOrder', value),
 })
+
+const availableSortItems = computed(() =>
+  props.sortItems.filter(
+    (item): item is SortItem => 'value' in item && Boolean(item.value)
+  )
+)
+
+const hasSortItems = computed(() => availableSortItems.value.length > 0)
 </script>
 
 <style scoped lang="sass">
@@ -276,4 +298,14 @@ const internalSortOrder = computed({
   .category-results-toolbar__sort-select
     flex: 1 1 auto
     min-width: 130px
+
+:deep(.category-results-toolbar__sort-menu .v-list-subheader)
+  font-size: 0.7rem
+  font-weight: 700
+  letter-spacing: 0.08em
+  text-transform: uppercase
+  color: rgb(var(--v-theme-text-neutral-soft))
+
+:deep(.category-results-toolbar__sort-menu .v-divider)
+  margin: 0.25rem 0
 </style>

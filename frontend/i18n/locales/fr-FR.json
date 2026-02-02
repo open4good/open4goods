@@ -809,6 +809,14 @@
           "model": "Modèle",
           "offersCount": "Nombre d'offres",
           "price": "Prix le plus bas"
+        },
+        "groups": {
+          "standard": "Tri standards",
+          "popularAttributes": "Attributs populaires",
+          "otherAttributes": "Autres attributs"
+        },
+        "values": {
+          "impactScore": "{score} / {max}"
         }
       },
       "sortLabel": "Trier par",
