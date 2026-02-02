@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.open4goods.model.exceptions.InvalidParameterException;
@@ -105,8 +105,8 @@ public class MaxMindDatasetProvider
                 GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(in);
                 TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn))
         {
-            TarArchiveEntry entry;
-            while ((entry = tarIn.getNextTarEntry()) != null)
+            ArchiveEntry entry;
+            while ((entry = tarIn.getNextEntry()) != null)
             {
                 if (entry.isDirectory())
                 {

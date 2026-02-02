@@ -190,29 +190,29 @@ public class MaxMindIpGeolocationService implements IpGeolocationService
      */
     private IpGeolocationResponse toResponse(String ip, CityResponse response)
     {
-        Location location = response.getLocation();
-        Subdivision subdivision = response.getSubdivisions().isEmpty()
+        Location location = response.location();
+        Subdivision subdivision = response.subdivisions().isEmpty()
                 ? null
-                : response.getSubdivisions().getFirst();
+                : response.subdivisions().getFirst();
         Integer accuracyRadius = location == null ? null : location.getAccuracyRadius();
         return new IpGeolocationResponse(
                 ip,
-                response.getContinent().getName(),
-                response.getContinent().getCode(),
-                response.getCountry().getName(),
-                response.getCountry().getIsoCode(),
-                response.getRegisteredCountry().getName(),
-                response.getRegisteredCountry().getIsoCode(),
-                response.getCity().getName(),
-                subdivision == null ? null : subdivision.getName(),
-                subdivision == null ? null : subdivision.getIsoCode(),
-                response.getPostal().getCode(),
-                location == null ? null : location.getLatitude(),
-                location == null ? null : location.getLongitude(),
+                response.continent().name(),
+                response.continent().code(),
+                response.country().name(),
+                response.country().isoCode(),
+                response.registeredCountry().name(),
+                response.registeredCountry().isoCode(),
+                response.city().name(),
+                subdivision == null ? null : subdivision.name(),
+                subdivision == null ? null : subdivision.isoCode(),
+                response.postal().code(),
+                location == null ? null : location.latitude(),
+                location == null ? null : location.longitude(),
                 accuracyRadius,
-                location == null ? null : location.getTimeZone(),
-                location == null ? null : location.getMetroCode(),
-                response.getTraits().isAnonymousProxy(),
-                response.getTraits().isAnycast());
+                location == null ? null : location.timeZone(),
+                null, // metroCode removed in MaxMind 5.0.0
+                false, // isAnonymousProxy removed in MaxMind 5.0.0
+                response.traits().isAnycast());
     }
 }
