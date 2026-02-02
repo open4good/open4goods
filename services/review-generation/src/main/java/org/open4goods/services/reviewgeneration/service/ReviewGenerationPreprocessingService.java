@@ -117,6 +117,32 @@ public class ReviewGenerationPreprocessingService {
 			}
 		}
 
+		// Add composite query for preferred domains and models
+		List<String> preferredDomains = properties.getPreferredDomains();
+		if (preferredDomains != null && !preferredDomains.isEmpty()) {
+			StringBuilder sitePart = new StringBuilder();
+			sitePart.append("(");
+			for (int i = 0; i < preferredDomains.size(); i++) {
+				sitePart.append("site:").append(preferredDomains.get(i));
+				if (i < preferredDomains.size() - 1) {
+					sitePart.append(" OR ");
+				}
+			}
+			sitePart.append(")");
+
+			StringBuilder modelPart = new StringBuilder();
+			modelPart.append("(");
+			modelPart.append("\"").append(brand).append(" ").append(primaryModel).append("\"");
+			if (alternateModels != null) {
+				for (String akaModel : alternateModels) {
+					modelPart.append(" OR \"").append(brand).append(" ").append(akaModel).append("\"");
+				}
+			}
+			modelPart.append(")");
+
+			queries.add(sitePart.toString() + " AND " + modelPart.toString());
+		}
+
 		status.addMessage("Searching the web...");
 		int searchesMade = 0;
 		List<GoogleSearchResult> allResults = new ArrayList<>();
@@ -125,6 +151,7 @@ public class ReviewGenerationPreprocessingService {
 			if (searchesMade >= maxSearch) {
 				break;
 			}
+
 			logger.debug("Executing search query: {}", query);
 			status.addMessage("Executing search query: " + query);
 			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, "lang_fr", "countryFR");
@@ -283,11 +310,11 @@ public class ReviewGenerationPreprocessingService {
 			offerNamesStr = String.join("\n", product.getOfferNames());
 		}
 		promptVariables.put("OFFER_NAMES", offerNamesStr);
-		
+
 		// Inject Ecoscore and Scores as JSON
 		try {
 			promptVariables.put("PRODUCT_ECOSCORE_JSON", serialisationService.toJson(product.ecoscore()));
-			
+
 			List<String> criteriaKeys = verticalConfig.getAvailableImpactScoreCriterias();
 			Map<String, org.open4goods.model.product.Score> filteredScores = product.getScores().entrySet().stream()
 					.filter(entry -> criteriaKeys.contains(entry.getKey()))

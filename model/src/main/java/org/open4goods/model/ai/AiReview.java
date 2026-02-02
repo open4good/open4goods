@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Represents an AI-generated review of a product, including descriptions, pros and cons,
  * data quality assessment, and sourced information.
  */
-@Schema(description = "Represents an AI-generated review of a product, including descriptions, pros and cons, data quality assessment, and sourced information.")
+@Schema(description = "Represents an AI-generated review of a product, including descriptions, pros and cons, data quality assessment, and sourced information.", type = "object")
 @JsonPropertyOrder({
         "description",
         "technicalOneline",
@@ -376,7 +376,7 @@ public class AiReview {
           + "Never mention prices, dates, or product condition (new/used). "
           + "SOURCING RULE: only add citations [n] when an entry contains a concrete claim (spec, measured result, explicit praise from a source). "
           + "If the pro is a generic phrasing without a concrete claim, omit citations.")
-    @Schema(description = "List of pros")
+    @Schema(description = "List of pros", type = "array")
     private List<String> pros = new ArrayList<>();
 
     /** The cons of the product. */
@@ -387,19 +387,19 @@ public class AiReview {
           + "Never mention prices, dates, or product condition (new/used). "
           + "SOURCING RULE: only add citations [n] when an entry contains a concrete claim (explicit criticism, limitation, defect, measurable downside). "
           + "If the con is generic without a concrete claim, omit citations.")
-    @Schema(description = "List of cons")
+    @Schema(description = "List of cons", type = "array")
     private List<String> cons = new ArrayList<>();
 
     /** The sources providing the information for this review. */
     @JsonProperty(required = true, value = "sources")
     @JsonDeserialize(using = AiSourcesDeserializer.class)
-    @Schema(description = "List of sources used for the review")
+    @Schema(description = "List of sources used for the review", type = "array")
     private List<AiSource> sources = new ArrayList<>();
 
     /** The attributes related to the product. */
     @JsonProperty(required = true, value = "attributes")
     @JsonDeserialize(using = AiAttributesDeserializer.class)
-    @Schema(description = "List of product attributes")
+    @Schema(description = "List of product attributes", type = "array")
     private List<AiAttribute> attributes = new ArrayList<>();
 
     /** The quality of data used for the review. */
@@ -414,35 +414,35 @@ public class AiReview {
 
     /** The ratings found in the sources. */
     @JsonProperty(required = false, value = "ratings")
-    @Schema(description = "List of ratings found in sources")
+    @Schema(description = "List of ratings found in sources", type = "array")
     private List<AiRating> ratings = new ArrayList<>();
 
     /** The pdfs found in the sources. */
     @JsonProperty(required = false, value = "pdfs")
     @AiGeneratedField(instruction =
             "List of PDF URLs only (manuals, datasheets, repairability docs). VALUE-ONLY FIELD: no extra text, no citations.")
-    @Schema(description = "List of PDF's url's for this product")
+    @Schema(description = "List of PDF's url's for this product", type = "array")
     private List<String> pdfs = new ArrayList<>();
 
     /** The images found in the sources. */
     @JsonProperty(required = false, value = "images")
     @AiGeneratedField(instruction =
             "List of product image URLs only (prefer high quality). VALUE-ONLY FIELD: no extra text, no citations.")
-    @Schema(description = "List of quality images url's for this product")
+    @Schema(description = "List of quality images url's for this product", type = "array")
     private List<String> images = new ArrayList<>();
 
     /** The videos found in the sources. */
     @JsonProperty(required = false, value = "videos")
     @AiGeneratedField(instruction =
             "List of video URLs only (YouTube, Vimeo, Dailymotion, direct files). VALUE-ONLY FIELD: no extra text, no citations.")
-    @Schema(description = "List of product related videos")
+    @Schema(description = "List of product related videos", type = "array")
     private List<String> videos = new ArrayList<>();
 
     /** The social network references */
     @JsonProperty(required = false, value = "social")
     @AiGeneratedField(instruction =
             "List of social post URLs only (Facebook, X/Twitter, Instagram, etc.). VALUE-ONLY FIELD: no extra text, no citations.")
-    @Schema(description = "List of social networks references")
+    @Schema(description = "List of social networks references", type = "array")
     private List<String> socialLinks = new ArrayList<>();
 
     /** No-args constructor (required for deserialization) */
