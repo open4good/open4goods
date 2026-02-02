@@ -57,6 +57,9 @@
               v-for="attribute in popularAttributesByProduct(product)"
               :key="attribute.key"
               class="category-product-list__attribute"
+              :class="{
+                'category-product-list__attribute--sorted': attribute.isSorted,
+              }"
               role="listitem"
             >
               <span class="category-product-list__attribute-label">{{
@@ -73,16 +76,16 @@
             </li>
           </ul>
 
-          <!-- Sorted Attribute (when sorting by custom field) -->
+          <!-- Sorted field highlight -->
           <div
-            v-if="sortedAttributeByProduct(product)"
+            v-if="sortedFieldDisplay(product)"
             class="category-product-list__sorted-attribute"
           >
             <span class="category-product-list__sorted-attribute-label">
-              {{ sortedAttributeByProduct(product)!.label }}:
+              {{ sortedFieldDisplay(product)!.label }}:
             </span>
             <span class="category-product-list__sorted-attribute-value">
-              {{ sortedAttributeByProduct(product)!.value }}
+              {{ sortedFieldDisplay(product)!.value }}
             </span>
           </div>
         </div>
@@ -155,8 +158,7 @@ import {
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import {
-  isCustomSortField,
-  resolveSortedAttributeValue,
+  resolveSortedFieldDisplay,
 } from '~/utils/_sort-attribute-display'
 
 const props = defineProps<{
@@ -167,6 +169,7 @@ const props = defineProps<{
 }>()
 
 const { t, n, locale } = useI18n()
+const { translatePlural } = usePluralizedTranslation()
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 
@@ -196,11 +199,22 @@ type DisplayedAttribute = {
   key: string
   label: string
   value: string
+  isSorted?: boolean
 }
 
 const popularAttributesByProduct = (
   product: ProductDto
 ): DisplayedAttribute[] => {
+  const sortedKey =
+    resolveSortedFieldDisplay(
+      product,
+      props.sortField,
+      props.fieldMetadata,
+      t,
+      n,
+      translatePlural
+    )?.attributeKey ?? null
+
   return resolvePopularAttributes(product, popularAttributeConfigs.value)
     .map(attribute => {
       const value = formatAttributeValue(attribute, t, n)
@@ -213,6 +227,7 @@ const popularAttributesByProduct = (
         key: attribute.key,
         label: attribute.label,
         value,
+        isSorted: attribute.key === sortedKey,
       }
     })
     .filter((attribute): attribute is DisplayedAttribute => attribute != null)
@@ -222,34 +237,35 @@ const hasVertical = (product: ProductDto) => {
   return !!product.fullSlug?.trim()
 }
 
-const sortedAttributeByProduct = (
+const sortedFieldDisplay = (
   product: ProductDto
-): DisplayedAttribute | null => {
-  if (
-    !isCustomSortField(
-      props.sortField,
-      popularAttributeConfigs.value.map(c => c.key).filter(Boolean) as string[]
-    )
-  ) {
-    return null
-  }
-
-  const result = resolveSortedAttributeValue(
+): { label: string; value: string } | null => {
+  const display = resolveSortedFieldDisplay(
     product,
     props.sortField,
     props.fieldMetadata,
     t,
-    n
+    n,
+    translatePlural
   )
 
-  if (!result) {
+  if (!display) {
     return null
   }
 
+  if (display.attributeKey) {
+    const isVisible = popularAttributesByProduct(product).some(
+      attribute => attribute.key === display.attributeKey
+    )
+
+    if (isVisible) {
+      return null
+    }
+  }
+
   return {
-    key: result.key,
-    label: result.label,
-    value: result.value,
+    label: display.label,
+    value: display.value,
   }
 }
 
@@ -445,6 +461,12 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
   &__attribute-value
     color: rgb(var(--v-theme-text-neutral-secondary))
 
+  &__attribute--sorted
+    .category-product-list__attribute-label,
+    .category-product-list__attribute-value
+      font-weight: 700
+      color: rgb(var(--v-theme-text-neutral-strong))
+
   &__sorted-attribute
     margin-top: 0.5rem
     display: inline-flex
@@ -453,7 +475,7 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
     font-size: 1.1em
 
   &__sorted-attribute-label
-    font-weight: 500
+    font-weight: 600
     color: rgb(var(--v-theme-text-neutral-secondary))
 
   &__sorted-attribute-value
