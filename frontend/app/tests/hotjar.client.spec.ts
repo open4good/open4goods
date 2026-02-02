@@ -99,7 +99,7 @@ describe('hotjar client plugin', () => {
     plugin.setup?.(nuxtApp)
 
     expect(nuxtApp.vueApp.use).toHaveBeenCalledWith(hotjarPlugin, {
-      id: 123456,
+      id: '123456',
       isProduction: true,
       snippetVersion: 6,
     })
@@ -124,7 +124,7 @@ describe('hotjar client plugin', () => {
     plugin.setup?.(nuxtApp)
 
     expect(nuxtApp.vueApp.use).toHaveBeenCalledWith(hotjarPlugin, {
-      id: 123456,
+      id: '123456',
       isProduction: true,
       snippetVersion: 6,
     })

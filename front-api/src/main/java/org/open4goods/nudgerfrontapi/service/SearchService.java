@@ -1260,7 +1260,19 @@ public class SearchService {
 		case term -> buildTermQuery(fieldPath, valueType, filter.terms());
 		case range -> buildRangeQuery(fieldPath, filter.min(), filter.max());
 		case rankingPercentile -> buildRankingPercentileQuery(fieldPath, filter.min(), filter.max());
+		case contains -> buildContainsQuery(fieldPath, filter.terms());
 		};
+	}
+
+	private Query buildContainsQuery(String fieldPath, List<String> terms) {
+		if (terms == null || terms.isEmpty()) {
+			return null;
+		}
+		String searchTerm = terms.get(0).trim();
+		if (!StringUtils.hasText(searchTerm)) {
+			return null;
+		}
+		return Query.of(q -> q.wildcard(w -> w.field(fieldPath).value("*" + searchTerm + "*").caseInsensitive(true)));
 	}
 
 	private Query buildTermQuery(String fieldPath, FilterValueType valueType, List<String> terms) {

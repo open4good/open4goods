@@ -130,7 +130,9 @@ public record FilterRequestDto(
         @Schema(description = "Matches documents where the field is within the inclusive range defined by min and/or max.")
         range,
         @Schema(description = "Matches documents where the ranking field is within the percentile range. Uses min as fromPercent and max as toPercent.")
-        rankingPercentile
+        rankingPercentile,
+        @Schema(description = "Matches documents where the field contains the provided text.")
+        contains
     }
 
     /**

@@ -51,7 +51,7 @@ export default defineNuxtPlugin({
     }
 
     nuxtApp.vueApp.use(Hotjar as Plugin, {
-      id: hotjarConfig.siteId,
+      id: String(hotjarConfig.siteId),
       isProduction: hotjarConfig.mode !== 'never',
       snippetVersion: hotjarConfig.snippetVersion,
     })
