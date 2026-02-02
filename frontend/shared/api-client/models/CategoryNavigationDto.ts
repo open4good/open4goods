@@ -27,13 +27,6 @@ import {
     CategoryBreadcrumbItemDtoToJSON,
     CategoryBreadcrumbItemDtoToJSONTyped,
 } from './CategoryBreadcrumbItemDto';
-import type { ProductDto } from './ProductDto';
-import {
-    ProductDtoFromJSON,
-    ProductDtoFromJSONTyped,
-    ProductDtoToJSON,
-    ProductDtoToJSONTyped,
-} from './ProductDto';
 
 /**
  * 
@@ -73,16 +66,16 @@ export interface CategoryNavigationDto {
     popularCategories?: Array<GoogleCategoryDto>;
     /**
      * Top five new products for the category ordered by descending impact score. Only the base facet is populated.
-     * @type {Array<ProductDto>}
+     * @type {Array<any>}
      * @memberof CategoryNavigationDto
      */
-    topNewProducts?: Array<ProductDto>;
+    topNewProducts?: Array<any>;
     /**
      * Top five occasion products for the category ordered by descending impact score. Only the base facet is populated.
-     * @type {Array<ProductDto>}
+     * @type {Array<any>}
      * @memberof CategoryNavigationDto
      */
-    topOccasionProducts?: Array<ProductDto>;
+    topOccasionProducts?: Array<any>;
 }
 
 /**
@@ -107,8 +100,8 @@ export function CategoryNavigationDtoFromJSONTyped(json: any, ignoreDiscriminato
         'childCategories': json['childCategories'] == null ? undefined : ((json['childCategories'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
         'descendantVerticals': json['descendantVerticals'] == null ? undefined : ((json['descendantVerticals'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
         'popularCategories': json['popularCategories'] == null ? undefined : ((json['popularCategories'] as Array<any>).map(GoogleCategoryDtoFromJSON)),
-        'topNewProducts': json['topNewProducts'] == null ? undefined : ((json['topNewProducts'] as Array<any>).map(ProductDtoFromJSON)),
-        'topOccasionProducts': json['topOccasionProducts'] == null ? undefined : ((json['topOccasionProducts'] as Array<any>).map(ProductDtoFromJSON)),
+        'topNewProducts': json['topNewProducts'] == null ? undefined : json['topNewProducts'],
+        'topOccasionProducts': json['topOccasionProducts'] == null ? undefined : json['topOccasionProducts'],
     };
 }
 
@@ -128,8 +121,8 @@ export function CategoryNavigationDtoToJSONTyped(value?: CategoryNavigationDto |
         'childCategories': value['childCategories'] == null ? undefined : ((value['childCategories'] as Array<any>).map(GoogleCategoryDtoToJSON)),
         'descendantVerticals': value['descendantVerticals'] == null ? undefined : ((value['descendantVerticals'] as Array<any>).map(GoogleCategoryDtoToJSON)),
         'popularCategories': value['popularCategories'] == null ? undefined : ((value['popularCategories'] as Array<any>).map(GoogleCategoryDtoToJSON)),
-        'topNewProducts': value['topNewProducts'] == null ? undefined : ((value['topNewProducts'] as Array<any>).map(ProductDtoToJSON)),
-        'topOccasionProducts': value['topOccasionProducts'] == null ? undefined : ((value['topOccasionProducts'] as Array<any>).map(ProductDtoToJSON)),
+        'topNewProducts': value['topNewProducts'],
+        'topOccasionProducts': value['topOccasionProducts'],
     };
 }
 

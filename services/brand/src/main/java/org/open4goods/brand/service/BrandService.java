@@ -32,6 +32,14 @@ public class BrandService {
     private Map<String, String> brandsAlias = new HashMap<>();
 
 
+    // TODO : Profondly investigate. Refactor for simplification. Heavy documentation (javadoc clss / method level, inlide code comments)
+    // TODO : performances : enhane
+    // TODO : Document functional with technical links in /docs
+    // TODO : New feature  :
+    // We will read /opt/open4goods/config/brands/manufacturing-places/* json to populate the according pojo
+
+
+
     public BrandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService)
             throws Exception {
         this.remoteFileCachingService = remoteFileCachingService;

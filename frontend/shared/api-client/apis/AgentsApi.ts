@@ -14,25 +14,6 @@
 
 
 import * as runtime from '../runtime';
-import type {
-  AgentActivityDto,
-  AgentIssueDto,
-  AgentRequestDto,
-  AgentRequestResponseDto,
-  AgentTemplateDto,
-} from '../models/index';
-import {
-    AgentActivityDtoFromJSON,
-    AgentActivityDtoToJSON,
-    AgentIssueDtoFromJSON,
-    AgentIssueDtoToJSON,
-    AgentRequestDtoFromJSON,
-    AgentRequestDtoToJSON,
-    AgentRequestResponseDtoFromJSON,
-    AgentRequestResponseDtoToJSON,
-    AgentTemplateDtoFromJSON,
-    AgentTemplateDtoToJSON,
-} from '../models/index';
 
 export interface GetIssueRequest {
     issueId: string;
@@ -54,7 +35,7 @@ export interface ListTemplatesRequest {
 
 export interface SubmitRequestRequest {
     domainLanguage: SubmitRequestDomainLanguageEnum;
-    agentRequestDto: AgentRequestDto;
+    body: string;
 }
 
 /**
@@ -65,7 +46,7 @@ export class AgentsApi extends runtime.BaseAPI {
     /**
      * Get details of an agent-created issue
      */
-    async getIssueRaw(requestParameters: GetIssueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AgentIssueDto>> {
+    async getIssueRaw(requestParameters: GetIssueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['issueId'] == null) {
             throw new runtime.RequiredError(
                 'issueId',
@@ -110,15 +91,14 @@ export class AgentsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AgentIssueDtoFromJSON(jsonValue));
+        return new runtime.VoidApiResponse(response);
     }
 
     /**
      * Get details of an agent-created issue
      */
-    async getIssue(requestParameters: GetIssueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AgentIssueDto> {
-        const response = await this.getIssueRaw(requestParameters, initOverrides);
-        return await response.value();
+    async getIssue(requestParameters: GetIssueRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.getIssueRaw(requestParameters, initOverrides);
     }
 
     /**
@@ -190,7 +170,7 @@ export class AgentsApi extends runtime.BaseAPI {
     /**
      * Get recent agent activity
      */
-    async listActivityRaw(requestParameters: ListActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<AgentActivityDto>>> {
+    async listActivityRaw(requestParameters: ListActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -227,21 +207,20 @@ export class AgentsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(AgentActivityDtoFromJSON));
+        return new runtime.VoidApiResponse(response);
     }
 
     /**
      * Get recent agent activity
      */
-    async listActivity(requestParameters: ListActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<AgentActivityDto>> {
-        const response = await this.listActivityRaw(requestParameters, initOverrides);
-        return await response.value();
+    async listActivity(requestParameters: ListActivityRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.listActivityRaw(requestParameters, initOverrides);
     }
 
     /**
      * Get available agent templates
      */
-    async listTemplatesRaw(requestParameters: ListTemplatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<AgentTemplateDto>>> {
+    async listTemplatesRaw(requestParameters: ListTemplatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -278,21 +257,20 @@ export class AgentsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(AgentTemplateDtoFromJSON));
+        return new runtime.VoidApiResponse(response);
     }
 
     /**
      * Get available agent templates
      */
-    async listTemplates(requestParameters: ListTemplatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<AgentTemplateDto>> {
-        const response = await this.listTemplatesRaw(requestParameters, initOverrides);
-        return await response.value();
+    async listTemplates(requestParameters: ListTemplatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.listTemplatesRaw(requestParameters, initOverrides);
     }
 
     /**
      * Submit a request to an agent
      */
-    async submitRequestRaw(requestParameters: SubmitRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AgentRequestResponseDto>> {
+    async submitRequestRaw(requestParameters: SubmitRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -300,10 +278,10 @@ export class AgentsApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['agentRequestDto'] == null) {
+        if (requestParameters['body'] == null) {
             throw new runtime.RequiredError(
-                'agentRequestDto',
-                'Required parameter "agentRequestDto" was null or undefined when calling submitRequest().'
+                'body',
+                'Required parameter "body" was null or undefined when calling submitRequest().'
             );
         }
 
@@ -336,16 +314,20 @@ export class AgentsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: AgentRequestDtoToJSON(requestParameters['agentRequestDto']),
+            body: requestParameters['body'] as any,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AgentRequestResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Submit a request to an agent
      */
-    async submitRequest(requestParameters: SubmitRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AgentRequestResponseDto> {
+    async submitRequest(requestParameters: SubmitRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.submitRequestRaw(requestParameters, initOverrides);
         return await response.value();
     }

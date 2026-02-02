@@ -16,15 +16,12 @@
 import * as runtime from '../runtime';
 import type {
   ExposedDocsContentDto,
-  ExposedDocsOverviewDto,
   ExposedDocsSearchResultDto,
   ExposedDocsTreeNodeDto,
 } from '../models/index';
 import {
     ExposedDocsContentDtoFromJSON,
     ExposedDocsContentDtoToJSON,
-    ExposedDocsOverviewDtoFromJSON,
-    ExposedDocsOverviewDtoToJSON,
     ExposedDocsSearchResultDtoFromJSON,
     ExposedDocsSearchResultDtoToJSON,
     ExposedDocsTreeNodeDtoFromJSON,
@@ -133,7 +130,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
      * Returns the categories of embedded resources exposed by the documentation service.
      * List exposed documentation categories
      */
-    async getOverviewRaw(requestParameters: GetOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExposedDocsOverviewDto>> {
+    async getOverviewRaw(requestParameters: GetOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -167,14 +164,18 @@ export class ExposedDocsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ExposedDocsOverviewDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Returns the categories of embedded resources exposed by the documentation service.
      * List exposed documentation categories
      */
-    async getOverview(requestParameters: GetOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExposedDocsOverviewDto> {
+    async getOverview(requestParameters: GetOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.getOverviewRaw(requestParameters, initOverrides);
         return await response.value();
     }

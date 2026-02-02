@@ -15,31 +15,16 @@
 
 import * as runtime from '../runtime';
 import type {
-  GlobalSearchRequestDto,
-  GlobalSearchResponseDto,
   ProblemDetail,
-  ProductDto,
   ProductFieldOptionsResponse,
-  ProductSearchRequestDto,
-  ProductSearchResponseDto,
   ReviewGenerationStatus,
   SearchSuggestResponseDto,
 } from '../models/index';
 import {
-    GlobalSearchRequestDtoFromJSON,
-    GlobalSearchRequestDtoToJSON,
-    GlobalSearchResponseDtoFromJSON,
-    GlobalSearchResponseDtoToJSON,
     ProblemDetailFromJSON,
     ProblemDetailToJSON,
-    ProductDtoFromJSON,
-    ProductDtoToJSON,
     ProductFieldOptionsResponseFromJSON,
     ProductFieldOptionsResponseToJSON,
-    ProductSearchRequestDtoFromJSON,
-    ProductSearchRequestDtoToJSON,
-    ProductSearchResponseDtoFromJSON,
-    ProductSearchResponseDtoToJSON,
     ReviewGenerationStatusFromJSON,
     ReviewGenerationStatusToJSON,
     SearchSuggestResponseDtoFromJSON,
@@ -61,7 +46,7 @@ export interface FilterableFieldsForVerticalRequest {
 
 export interface GlobalSearchRequest {
     domainLanguage: GlobalSearchDomainLanguageEnum;
-    globalSearchRequestDto: GlobalSearchRequestDto;
+    body: string;
 }
 
 export interface ProductRequest {
@@ -77,7 +62,7 @@ export interface ProductsRequest {
     pageSize?: number;
     verticalId?: string;
     query?: string;
-    productSearchRequestDto?: ProductSearchRequestDto;
+    body?: string;
 }
 
 export interface ReviewStatusRequest {
@@ -282,7 +267,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Runs an embeddings-only search strategy with optional filters and sorting.
      * Execute a global search
      */
-    async globalSearchRaw(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GlobalSearchResponseDto>> {
+    async globalSearchRaw(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -290,10 +275,10 @@ export class ProductApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['globalSearchRequestDto'] == null) {
+        if (requestParameters['body'] == null) {
             throw new runtime.RequiredError(
-                'globalSearchRequestDto',
-                'Required parameter "globalSearchRequestDto" was null or undefined when calling globalSearch().'
+                'body',
+                'Required parameter "body" was null or undefined when calling globalSearch().'
             );
         }
 
@@ -326,17 +311,21 @@ export class ProductApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: GlobalSearchRequestDtoToJSON(requestParameters['globalSearchRequestDto']),
+            body: requestParameters['body'] as any,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => GlobalSearchResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Runs an embeddings-only search strategy with optional filters and sorting.
      * Execute a global search
      */
-    async globalSearch(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GlobalSearchResponseDto> {
+    async globalSearch(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.globalSearchRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -345,7 +334,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return high‑level product information, aggregated scores and optional AI review content, including datasource favicons for offers and AI source references.
      * Get product view
      */
-    async productRaw(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductDto>> {
+    async productRaw(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
         if (requestParameters['gtin'] == null) {
             throw new runtime.RequiredError(
                 'gtin',
@@ -394,14 +383,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ProductDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return high‑level product information, aggregated scores and optional AI review content, including datasource favicons for offers and AI source references.
      * Get product view
      */
-    async product(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductDto> {
+    async product(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.productRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -410,7 +403,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return paginated products.
      * List products
      */
-    async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductSearchResponseDto>> {
+    async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -467,17 +460,21 @@ export class ProductApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: ProductSearchRequestDtoToJSON(requestParameters['productSearchRequestDto']),
+            body: requestParameters['body'] as any,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ProductSearchResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return paginated products.
      * List products
      */
-    async products(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductSearchResponseDto> {
+    async products(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.productsRaw(requestParameters, initOverrides);
         return await response.value();
     }

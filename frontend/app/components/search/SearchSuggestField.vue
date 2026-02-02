@@ -373,6 +373,11 @@ const currentPlaceholder = computed(() => {
 })
 
 const startPlaceholderRotation = () => {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  if (!(process as any).client) {
+    return
+  }
+
   if (placeholderInterval.value) clearInterval(placeholderInterval.value)
   if (Array.isArray(props.placeholder) && props.placeholder.length > 1) {
     placeholderInterval.value = setInterval(() => {

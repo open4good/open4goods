@@ -162,6 +162,12 @@ export interface VerticalConfigFullDto {
      */
     order?: number;
     /**
+     * Average daily usage used for cost estimation, in hours.
+     * @type {number}
+     * @memberof VerticalConfigFullDto
+     */
+    averageHoursPerDay?: number;
+    /**
      * Material Design icon name representing the vertical.
      * @type {string}
      * @memberof VerticalConfigFullDto
@@ -426,6 +432,7 @@ export function VerticalConfigFullDtoFromJSONTyped(json: any, ignoreDiscriminato
         'googleTaxonomyId': json['googleTaxonomyId'] == null ? undefined : json['googleTaxonomyId'],
         'icecatTaxonomyId': json['icecatTaxonomyId'] == null ? undefined : json['icecatTaxonomyId'],
         'order': json['order'] == null ? undefined : json['order'],
+        'averageHoursPerDay': json['averageHoursPerDay'] == null ? undefined : json['averageHoursPerDay'],
         'mdiIcon': json['mdiIcon'] == null ? undefined : json['mdiIcon'],
         'imageSmall': json['imageSmall'] == null ? undefined : json['imageSmall'],
         'imageMedium': json['imageMedium'] == null ? undefined : json['imageMedium'],
@@ -486,6 +493,7 @@ export function VerticalConfigFullDtoToJSONTyped(value?: VerticalConfigFullDto |
         'googleTaxonomyId': value['googleTaxonomyId'],
         'icecatTaxonomyId': value['icecatTaxonomyId'],
         'order': value['order'],
+        'averageHoursPerDay': value['averageHoursPerDay'],
         'mdiIcon': value['mdiIcon'],
         'imageSmall': value['imageSmall'],
         'imageMedium': value['imageMedium'],

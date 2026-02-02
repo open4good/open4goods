@@ -64,9 +64,7 @@
       "eyebrow": "Comparateur responsable",
       "title": "Nudger : Le comparateur écologique",
       "animatedSubtitle": "",
-      "titleSubtitle": [
-        "Acheter mieux. Sans dépenser plus."
-      ],
+      "titleSubtitle": ["Acheter mieux. Sans dépenser plus."],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -186,6 +184,7 @@
     },
     "problems": {
       "title": "Consommer plus écolo. Pas simple !",
+      "description": "Comparer l'impact, le prix et la fiabilité sur des douzaines d'onglets est épuisant. Nudger centralise tout cela.",
       "items": {
         "labelsOverload": "Trop d'infos, mais pas celle qu'il faut ? Comparer impact, prix, fiabilité... Pas toujours facile !",
         "budgetVsEcology": "Écologie vs pouvoir d'achat ? Marre de choisir entre les deux.",

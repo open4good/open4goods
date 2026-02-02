@@ -171,7 +171,7 @@ export class CategoriesApi extends runtime.BaseAPI {
      * Return the Google taxonomy navigation data required to display deep category navigation.
      * Get category navigation
      */
-    async navigationRaw(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoryNavigationDto>> {
+    async navigationRaw(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -216,14 +216,18 @@ export class CategoriesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => CategoryNavigationDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the Google taxonomy navigation data required to display deep category navigation.
      * Get category navigation
      */
-    async navigation(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoryNavigationDto> {
+    async navigation(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.navigationRaw(requestParameters, initOverrides);
         return await response.value();
     }
