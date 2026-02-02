@@ -57,6 +57,12 @@ public class BackupController {
 	public void productsImport() throws InvalidParameterException, IOException {
 		backupService.importProducts();
 	}
+
+	@PostMapping("/backup/products/copy-to")
+	@Operation(summary = "Copy products index to a new index suffix")
+	public void copyTo(@RequestParam String suffix) throws InvalidParameterException, IOException {
+		backupService.copyTo(suffix);
+	}
 	
 	
 }

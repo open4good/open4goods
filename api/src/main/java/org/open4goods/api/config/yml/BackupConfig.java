@@ -1,9 +1,13 @@
 package org.open4goods.api.config.yml;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.NotEmpty;
 
+@Configuration
+@ConfigurationProperties(prefix = "api.backup")
 @Validated
 public class BackupConfig {
 
@@ -40,6 +44,26 @@ public class BackupConfig {
 	 * Number of threads (and of files) to operate export with
 	 */
 	private int productsExportThreads = 4;
+
+	/**
+	 * Page size used while streaming products for copy operations.
+	 */
+	private int copyPageSize = 5000;
+
+	/**
+	 * Bulk size used while indexing products for copy operations.
+	 */
+	private int copyBulkSize = 500;
+
+	/**
+	 * Number of threads used for copy operations.
+	 */
+	private int copyThreads = 4;
+
+	/**
+	 * Queue size for copy operation batches.
+	 */
+	private int copyQueueSize = 50;
 
 
 	/**
@@ -146,6 +170,38 @@ public class BackupConfig {
 
 	public void setProductImportThreads(int productImportThreads) {
 		this.productImportThreads = productImportThreads;
+	}
+
+	public int getCopyPageSize() {
+		return copyPageSize;
+	}
+
+	public void setCopyPageSize(int copyPageSize) {
+		this.copyPageSize = copyPageSize;
+	}
+
+	public int getCopyBulkSize() {
+		return copyBulkSize;
+	}
+
+	public void setCopyBulkSize(int copyBulkSize) {
+		this.copyBulkSize = copyBulkSize;
+	}
+
+	public int getCopyThreads() {
+		return copyThreads;
+	}
+
+	public void setCopyThreads(int copyThreads) {
+		this.copyThreads = copyThreads;
+	}
+
+	public int getCopyQueueSize() {
+		return copyQueueSize;
+	}
+
+	public void setCopyQueueSize(int copyQueueSize) {
+		this.copyQueueSize = copyQueueSize;
 	}
 
 

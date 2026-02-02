@@ -193,11 +193,6 @@ public class ApiProperties {
 	private long genAiPauseDurationMs = 0L;
 
 	/**
-	 * Options for Wiki backup
-	 */
-	private BackupConfig backupConfig = new BackupConfig();
-
-	/**
 	 * Config for verticals generation service
 	 *
 	 * @return
@@ -483,14 +478,6 @@ public class ApiProperties {
 
 	public void setCorsAllowedHosts(List<String> corsAllowedHosts) {
 		this.corsAllowedHosts = corsAllowedHosts;
-	}
-
-	public BackupConfig getBackupConfig() {
-		return backupConfig;
-	}
-
-	public void setBackupConfig(BackupConfig backupConfig) {
-		this.backupConfig = backupConfig;
 	}
 
 	public long getGenAiPauseDurationMs() {

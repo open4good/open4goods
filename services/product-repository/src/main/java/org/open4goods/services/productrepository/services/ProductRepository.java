@@ -36,6 +36,7 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregatio
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.MultiGetItem;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -171,6 +172,21 @@ public class ProductRepository {
             Query query = Query.findAll();
             query.setPageable(EXPORT_STREAM_PAGE); // Fetch larger batches
             // Stream sequentially to avoid parallel overhead
+            return elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX)
+                    .stream()
+                    .map(SearchHit::getContent);
+        }
+
+        /**
+         * Export all aggregated data with a configurable page size.
+         *
+         * @param pageSize the page size to use when streaming products
+         * @return stream of products
+         */
+        public Stream<Product> exportAll(int pageSize) {
+            Query query = Query.findAll();
+            query.setPageable(PageRequest.of(0, pageSize));
             return elasticsearchOperations
                     .searchForStream(query, Product.class, CURRENT_INDEX)
                     .stream()
@@ -791,6 +807,50 @@ public class ProductRepository {
 	        .collect(Collectors.toList());
 
 	    elasticsearchOperations.bulkIndex(indexQueries, CURRENT_INDEX);
+	}
+
+	/**
+	 * Bulk index multiple products into a specific index.
+	 *
+	 * @param data the products to index
+	 * @param indexName the target index name
+	 */
+	public void store(Collection<Product> data, String indexName) {
+	    logger.info("Indexing {} products into {}", data.size(), indexName);
+
+	    List<IndexQuery> indexQueries = data.stream()
+	        .map(p -> new IndexQueryBuilder()
+	            .withId(String.valueOf(p.getId()))
+	            .withObject(p)
+	            .build())
+	        .collect(Collectors.toList());
+
+	    elasticsearchOperations.bulkIndex(indexQueries, IndexCoordinates.of(indexName));
+	}
+
+	/**
+	 * Create a new index using Product mapping and settings.
+	 *
+	 * @param indexName the target index name
+	 * @return true if the index was created, false if it already existed
+	 */
+	public boolean createIndex(String indexName) {
+	    IndexOperations indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of(indexName));
+	    if (indexOperations.exists()) {
+	        logger.warn("Index {} already exists", indexName);
+	        return false;
+	    }
+
+	    IndexOperations productIndexOperations = elasticsearchOperations.indexOps(Product.class);
+	    Document settings = productIndexOperations.createSettings();
+	    Document mapping = productIndexOperations.createMapping();
+
+	    boolean created = indexOperations.create(settings);
+	    if (created) {
+	        indexOperations.putMapping(mapping);
+	        indexOperations.refresh();
+	    }
+	    return created;
 	}
 
 

@@ -2,6 +2,16 @@
 rootFolder: ./
 datasourcesfolder: "./datasources/"
 
+api:
+  backup:
+    xwiki-backup-file: ./backup/xwiki-backup.zip
+    data-backup-folder: ./backup/products
+    import-product-path: ./backup/import
+    copy-page-size: 5000
+    copy-bulk-size: 500
+    copy-threads: 2
+    copy-queue-size: 25
+
 # Port the server will be running on
 server:
   port: 8081
