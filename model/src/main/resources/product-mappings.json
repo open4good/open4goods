@@ -12,6 +12,7 @@
     {
       "disable_score_absolute": {
         "path_match": "scores.*.absolute.*",
+        "path_unmatch": "scores.*.absolute.count",
         "mapping": {
           "enabled": false,
           "type": "object"

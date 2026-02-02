@@ -278,7 +278,7 @@ useHead({
               class="home-hero__title home-reveal-item"
               :style="{ '--reveal-delay': '0ms' }"
             >
-              Acheter mieux. Sans dépenser plus.
+              {{ resolveString('home.hero.title') }}
             </span>
             <p
               v-if="animatedSubtitle"
@@ -291,7 +291,7 @@ useHead({
               class="home-hero__title-subtitle home-reveal-item"
               :style="{ '--reveal-delay': '1000ms', fontSize: '1.82rem' }"
             >
-              Nudger : Le comparateur écologique
+              {{ resolveList('home.hero.titleSubtitle')[0] }}
             </h1>
           </v-col>
         </v-row>

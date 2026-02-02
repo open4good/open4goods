@@ -4,8 +4,8 @@ import { defineComponent, h, ref } from 'vue'
 import { useNuxtApp, useState } from '#app'
 import HomeHeroSection from './HomeHeroSection.vue'
 const messages: Record<string, unknown> = {
-  'home.hero.title': 'Nudger : Le comparateur écologique',
-  'home.hero.titleSubtitle': ['Acheter mieux. Sans dépenser plus.'],
+  'home.hero.title': 'Acheter mieux. Sans dépenser plus.',
+  'home.hero.titleSubtitle': ['Nudger : Le comparateur écologique'],
   'home.hero.background': 'hero-background.webp',
 }
 

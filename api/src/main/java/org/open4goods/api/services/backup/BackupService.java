@@ -46,7 +46,7 @@ import io.micrometer.core.annotation.Timed;
 
 /**
  * Service in charge of backuping open4gods data
- * 
+ *
  * @author Goulven.Furet
  *
  *
@@ -64,7 +64,7 @@ public class BackupService implements HealthIndicator {
 	private SerialisationService serialisationService;
 
 	private AggregationFacadeService aggregationService;
-	
+
 	private BackupConfig backupConfig;
 
 	// Used to trigger Health.down() if exception occurs
@@ -75,16 +75,16 @@ public class BackupService implements HealthIndicator {
 	// Count of last exported items
 	private AtomicLong expordedProductsCounter = new AtomicLong(0L);
 	private AtomicLong expectedBackupedProducts = new AtomicLong(0L);
-	
+
 	// Flags to avoid conccurent export running
 	private AtomicBoolean wikiExportRunning = new AtomicBoolean(false);
 	private AtomicBoolean productExportRunning = new AtomicBoolean(false);
 	private AtomicBoolean productCopyRunning = new AtomicBoolean(false);
 
-	
-	
-	
-	
+
+
+
+
 	public BackupService(XWikiReadService xwikiService, ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
 		super();
 		this.xwikiService = xwikiService;
@@ -115,13 +115,13 @@ public class BackupService implements HealthIndicator {
         LinkedBlockingQueue<Product> blockingQueue = new LinkedBlockingQueue<Product>(1000);
         // Reset the counter item flags
         expordedProductsCounter.set(0L);
-        
+
         try {
 	        ExecutorService executorService = Executors.newFixedThreadPool(backupConfig.getProductsExportThreads());
-	        
+
 	        // Starting files writing threads
 	        File backupFolder = new File(backupConfig.getDataBackupFolder());
-	        
+
 	        if (backupFolder != null && backupFolder.exists() && !backupFolder.isDirectory()) {
 	        	throw new Exception("is a file");
 	        } else  if (backupFolder != null && !backupFolder.exists()) {
@@ -129,37 +129,37 @@ public class BackupService implements HealthIndicator {
 	                throw new IOException("Failed to create parent directories: " + backupFolder.getAbsolutePath());
 	            }
 	        }
-	        
+
 	        // Creating the folders if needed
 	        backupFolder.mkdirs();
-	        
+
 	        // Starting the files writing threads
 	        for (int i = 0; i < backupConfig.getProductsExportThreads(); i++) {
 	        	executorService.submit(new ProductBackupThread(backupFolder, blockingQueue, serialisationService, i));
 	        }
-	        
-	        
+
+
 	        // Setting the expected number of items (min, new items can be indexed during backup)
 	        expectedBackupedProducts.set(productRepo.countMainIndex());
-	        
-	        // TODO(p2,feature) : Export verticalis in separate files 
-	        
+
+	        // TODO(p2,feature) : Export verticalis in separate files
+
 	        // Exporting all datas to the blocking queue
 	        productRepo.exportAll()
 	        .forEach(e -> {
 	        	try {
 	        		// Incrementing the counter
 	        		expordedProductsCounter.incrementAndGet();
-	        		
+
 					blockingQueue.put(e);
 				} catch (InterruptedException e1) {
 		            logger.error("Interruption error while backing up data", e1);
 		            this.dataBackupException = e1.getMessage();
 				}
 	        });
-	        
+
 	        executorService.shutdown();
-        	
+
         } catch (Exception e) {
             logger.error("Error while backing up data", e);
             this.dataBackupException = e.getMessage();
@@ -170,7 +170,7 @@ public class BackupService implements HealthIndicator {
         logger.info("Products data backup - complete");
     }
 
-	
+
 	public void exportVertical(String vertical) {
 	    logger.info("Exporting vertical {}", vertical);
 
@@ -219,12 +219,12 @@ public class BackupService implements HealthIndicator {
 	    logger.info("Vertical export complete : {}", vertical);
 	}
 
-	
-	
+
+
 	/**
 	 * Import product from the GZIP files
 	 * NOTE : Could increase perf by having one import thread per file
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void importProducts() {
 	    logger.info("Product import : started");
@@ -292,7 +292,7 @@ public class BackupService implements HealthIndicator {
 	 * @param suffix the suffix used to build the target index name
 	 */
 	public void copyTo(String suffix) {
-	    String targetIndexName = Product.DEFAULT_REPO + "-" + suffix;
+	    String targetIndexName =   "products-" + suffix;
 	    logger.info("Products copy to {} - start", targetIndexName);
 
 	    if (productCopyRunning.get()) {
@@ -309,11 +309,11 @@ public class BackupService implements HealthIndicator {
 	        int copyQueueSize = Math.max(copyBulkSize, backupConfig.getCopyQueueSize());
 
 	        boolean created = productRepo.createIndex(targetIndexName);
-	        if (!created) {
-	            logger.warn("Target index {} already exists. Skipping copy.", targetIndexName);
-	            productCopyRunning.set(false);
-	            return;
-	        }
+//	        if (!created) {
+//	            logger.warn("Target index {} already exists. Skipping copy.", targetIndexName);
+//	            productCopyRunning.set(false);
+//	            return;
+//	        }
 
 	        LinkedBlockingQueue<List<Product>> blockingQueue = new LinkedBlockingQueue<>(copyQueueSize);
 	        ExecutorService executorService = Executors.newFixedThreadPool(copyThreads);
@@ -381,7 +381,7 @@ public class BackupService implements HealthIndicator {
 
 	    logger.info("Products copy to {} - complete", targetIndexName);
 	}
-	
+
 	/**
 	 * Used for translation on data import
 	 * @param fromJson
@@ -389,25 +389,25 @@ public class BackupService implements HealthIndicator {
 	 */
 	private Product translate(Product p) {
 
-		
+
 		// Forcing fresh
 //		p.setLastChange(System.currentTimeMillis());
-				
+
 		// Attributes migration
 		// Purging aggregated
-//	
+//
 //		try {
 //			aggregationService.sanitize(p);
 //		} catch (AggregationSkipException e) {
 //			logger.error("Error in import, with product sanitisation",e);
 //		}
-		
-		
+
+
 		// Setting datasources to new Map format
 //		p.getMappedCategories().forEach(e -> {
 //			p.getCategoriesByDatasources().put(e.getKey(), e.getValue());
 //		});
-		
+
 		// Sanitize embeddings
 		if (p.getResources() != null) {
 			p.getResources().forEach(r -> {
@@ -481,12 +481,12 @@ public class BackupService implements HealthIndicator {
 		// Xwiki file check
 		/////////////////////////////
 
-		
+
 		File wikiFile = new File(backupConfig.getXwikiBackupFile());
 		long wikiLastModified = wikiFile.lastModified();
 		long wikiFileSize = wikiFile.length();
-		
-		
+
+
 		// Check exceptions during processing
 		if (null != wikiException) {
 			errorMessages.put("xwiki_export_exception", wikiException);
@@ -516,15 +516,15 @@ public class BackupService implements HealthIndicator {
 		File productFolder = new File(backupConfig.getDataBackupFolder());
 		long productLastModified = productFolder.lastModified();
 		long productFolderSize = FileUtils.sizeOfDirectoryAsBigInteger(productFolder).longValue();
-		
-		
+
+
 		// Check we have the expected number of items backuped (only if not running)
 		if (!productExportRunning.get()) {
 			if (expordedProductsCounter.longValue() < expectedBackupedProducts.longValue()) {
 				errorMessages.put("product_exported_items_too_low",  expordedProductsCounter.longValue() + " < " + expectedBackupedProducts.longValue());
 			}
 		}
-		
+
 		// Check exceptions during processing
 		if (null != dataBackupException) {
 			errorMessages.put("product_export_exception", dataBackupException);
@@ -550,20 +550,20 @@ public class BackupService implements HealthIndicator {
 		long oldestFileTs = Long.MAX_VALUE;
 		// TODO : Check count
 		File[] productBackupFiles = productFolder.listFiles();
-		
+
 		/*
 		 * Checking number of files is correct
 		 */
 		if (productBackupFiles.length != backupConfig.getProductsExportThreads()) {
 			errorMessages.put("product_backup_file_count", productBackupFiles.length + " <> " +  backupConfig.getProductsExportThreads());
 		}
-		
+
 		for (File f : productBackupFiles) {
 			if (f.lastModified() < oldestFileTs) {
 				oldestFileTs = f.lastModified();
 			}
 		}
-	
+
 		/**
 		 * Checking product backup oldness
 		 */
@@ -582,7 +582,7 @@ public class BackupService implements HealthIndicator {
 					.withDetail("product_backup_date", new Date (productLastModified).toString())
 					.withDetail("product_backup_size", FileUtils.byteCountToDisplaySize(productFolderSize))
 					.withDetail("last_product_export_items_count",  expordedProductsCounter.longValue())
-					
+
 					.withDetail("xwiki_export_running", wikiExportRunning.get())
 					.withDetail("xwiki_backup_date", new Date (wikiLastModified).toString())
 					.withDetail("xwiki_backup_size", FileUtils.byteCountToDisplaySize(wikiFileSize))
