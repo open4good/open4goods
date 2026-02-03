@@ -168,6 +168,8 @@ const toggleOption = (choice: ProductConditionChoice) => {
     &__illustration {
       max-width: 160px;
       max-height: 120px;
+      font-size: 72px;
+      line-height: 1;
       transition: transform 200ms ease;
     }
 
