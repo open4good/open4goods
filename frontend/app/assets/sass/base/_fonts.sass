@@ -13,7 +13,7 @@ $font-weights: (
     font-style: $style
     font-weight: $weight
     font-display: swap
-    src: url('/fonts/HankenGrotesk/#{$file-base}.woff2') format('woff2'), url('/fonts/HankenGrotesk/#{$file-base}.woff') format('woff'), url('/fonts/HankenGrotesk/#{$file-base}.ttf') format('truetype')
+    src: url('../../fonts/HankenGrotesk/#{$file-base}.woff2') format('woff2'), url('../../fonts/HankenGrotesk/#{$file-base}.woff') format('woff'), url('../../fonts/HankenGrotesk/#{$file-base}.ttf') format('truetype')
 
 @include font-face('Hanken Grotesk', map.get($font-weights, 'regular'), normal, 'HankenGrotesk-Regular')
 @include font-face('Hanken Grotesk', map.get($font-weights, 'regular'), italic, 'HankenGrotesk-Italic')

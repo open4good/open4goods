@@ -151,26 +151,31 @@ export const createCompareService = (options: CompareServiceOptions = {}) => {
 
     const products = await Promise.all(
       uniqueGtins.map(async gtin => {
-        const product = await fetchProduct(gtin)
-        const verticalId = product.base?.vertical ?? null
-        const review = normaliseReview(product.aiReview?.review)
+        try {
+          const product = await fetchProduct(gtin)
+          const verticalId = product.base?.vertical ?? null
+          const review = normaliseReview(product.aiReview?.review)
 
-        return {
-          gtin,
-          product,
-          verticalId,
-          title: resolveTitle(product),
-          brand: product.identity?.brand ?? null,
-          model: product.identity?.model ?? null,
-          coverImage: resolveCoverImage(product),
-          impactScore: resolvePrimaryImpactScore(product),
-          review,
-          country: resolveCountry(product),
+          return {
+            gtin,
+            product,
+            verticalId,
+            title: resolveTitle(product),
+            brand: product.identity?.brand ?? null,
+            model: product.identity?.model ?? null,
+            coverImage: resolveCoverImage(product),
+            impactScore: resolvePrimaryImpactScore(product),
+            review,
+            country: resolveCountry(product),
+          }
+        } catch (error) {
+          console.warn(`Failed to load product ${gtin} for comparison`, error)
+          return null
         }
       })
     )
 
-    return products
+    return products.filter((p): p is CompareProductEntry => p !== null)
   }
 
   const loadVertical = async (

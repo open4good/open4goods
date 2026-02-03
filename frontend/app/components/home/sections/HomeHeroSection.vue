@@ -18,6 +18,7 @@ import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'
 import { resolveThemeName } from '~~/shared/constants/theme'
 
 const isHeroImageLoaded = ref(false)
+const hasMounted = ref(false)
 const heroReadyFallbackDelayMs = 900
 
 const props = defineProps<{
@@ -109,15 +110,16 @@ const heroBackgroundSrc = computed(() => {
     return fallbackAsset
   }
 
-  /* Hydration mismatch fix: Ensure server and client initial render match. */
-  /* We assume light theme as default for SSR unless reliable cookie sync is present. */
-  // If we can't guarantee theme sync, we should force a default, then switch on mount.
-  // Ideally, use a client-side only guard for the dynamic theme part or strictly match server.
-
-  const isDarkMode = Boolean(theme.global.current.value.dark)
+  /* Hydration mismatch fix: Always use light theme default during SSR and initial render. */
+  /* Only switch to theme-aware value after hydration completes to avoid mismatch. */
   const lightImage = props.heroImageLight?.trim()
   const darkImage = props.heroImageDark?.trim()
 
+  if (!hasMounted.value) {
+    return lightImage ?? ''
+  }
+
+  const isDarkMode = Boolean(theme.global.current.value.dark)
   return isDarkMode ? (darkImage ?? '') : (lightImage ?? '')
 })
 
@@ -179,6 +181,9 @@ const handleHeroImageLoad = () => {
 }
 
 onMounted(async () => {
+  // Mark as mounted to enable theme-aware rendering without hydration mismatch
+  hasMounted.value = true
+
   // Ensure the DOM is fully mounted and initial state (opacity: 0) is rendered
   await nextTick()
 
@@ -225,15 +230,8 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   emit('select-product', payload)
 }
 
-useHead({
-  link: [
-    {
-      rel: 'preload',
-      as: 'image',
-      href: () => heroBackgroundSrc.value,
-    },
-  ],
-})
+/* Preload removed: The hero image is loaded eagerly with fetchpriority="high",
+   making the link preload redundant and causing browser warnings about unused preloads. */
 </script>
 
 <template>

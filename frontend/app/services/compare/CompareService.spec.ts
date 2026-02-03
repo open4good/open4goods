@@ -90,4 +90,19 @@ describe('CompareService', () => {
     await expect(service.loadVertical('VERTICAL')).resolves.toBe(vertical)
     expect(fetchVertical).toHaveBeenCalledWith('VERTICAL')
   })
+
+  it('handles partial failures during product load', async () => {
+    const fetchProduct = vi.fn().mockImplementation(async gtin => {
+      if (gtin === 'failed') {
+        throw new Error('Not found')
+      }
+      return buildProduct({ gtin: Number(gtin) })
+    })
+    const service = createCompareService({ fetchProduct })
+
+    const entries = await service.loadProducts(['123', 'failed', '456'])
+    expect(entries).toHaveLength(2)
+    expect(entries.map(e => e.gtin)).toEqual(['123', '456'])
+    expect(fetchProduct).toHaveBeenCalledTimes(3)
+  })
 })
