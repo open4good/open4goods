@@ -726,7 +726,9 @@ const handleProductSuggestion = (suggestion: ProductSuggestionItem) => {
 
 const seoTitle = computed(() => String(t('home.seo.title')))
 
-const seoDescription = computed(() => String(t('home.seo.description')))
+const seoDescription = computed(() =>
+  t('home.seo.description', { count: openDataMillions.value ?? 50 })
+)
 
 const seoImageAlt = computed(() => String(t('home.seo.imageAlt')))
 

@@ -312,7 +312,7 @@ public class PromptService implements HealthIndicator {
         PromptConfig pConf = getPromptConfig(promptKey);
         if (pConf == null) {
             logger.error("PromptConfig {} does not exist", promptKey);
-            throw new ResourceNotFoundException("Prompt not found");
+            throw new ResourceNotFoundException("Prompt not found : " + promptKey);
         }
 
         // Determine instructions if type is provided

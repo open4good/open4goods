@@ -1,5 +1,5 @@
 # Preprocessing
-> Replace `{TARGET_CATEGORY}` with : oven
+> Replace `{TARGET_CATEGORY}` with : washing-machine
 
 # Context
 You are a software developer responsible for creating high-quality, human-friendly configuration files for product categories in the Open4Goods project.
@@ -18,6 +18,7 @@ You have access to a local API (`localhost:8081`) to fetch live data.
 *   **Auth Header**: `Authorization: open4goods`
 
 You can also use web tools (search) to get access to market informations on {TARGET_CATEGORY}`
+If API Fails : Break and inform the user
 ---
 
 # Tasks
@@ -40,8 +41,12 @@ parsers:
     minYears:
     maxYears:
 
-
 To match the {TARGET_CATEGORY} specificities
+
+5 - Setup the average time in hours per day this product will be used.
+
+Set it in averageHoursPerDay. Try to add yaml comments to explain
+
 
 ## Phase 2: Attribute Mapping
 **Goal**: Define which attributes are relevant for this category based on real data coverage.
@@ -80,15 +85,30 @@ To match the {TARGET_CATEGORY} specificities
     *   Create a `subsetGroup` for them.
     *   Define `subsets` for ranges (e.g., "< 6kg", "6-9kg", "> 9kg").
 
----
+### 3.1 Configure FastFilters
+the subset:, root in the configuration file. ImpactScore filters is already defined for all in _default.yml
+Provides default filtering options for the category page, a standard user will be happy to have easily at disposition
 
-# Validation Checklist
-Before finishing, verify:
-- [ ] YAML syntax is valid.
-- [ ] `googleTaxonomyId` is set.
-- [ ] `eprelGroupNames` are correct.
-- [ ] `nudgeToolConfig` has at least 3 scores defined.
-- [ ] `subsets` cover reasonable ranges for the current market.
-- [ ] All text is available in both `fr` and `en`.
+
+## Phase 4 - Setting the availableImpact score criterias
+
+(availableImpactScoreCriterias:)
+
+from
+
+curl -X 'GET' \
+  'http://localhost:8081/{TARGET_CATEGORY}/impactscore-criterias/?minCoveragePercent=10' \
+  -H 'accept: */*' \
+  -H 'Authorization: open4goods'
+
+This will be the scores allowed to participate in Impact Score computation
+
+
+
+# Validate and reporting
+Validate by checking :
+- [ ] Vertical is validated with /verticals/src/test/java/org/open4goods/verticals/VerticalYamlValidationTest.java
 - [ ] Minimmum attributes and popular attributes are configured
-
+- [ ] `nudgeToolConfig` has at least 3 scores defined.
+- [ ] `subsets` (for fast filters, and for nudge tool wizard) covers reasonable ranges for the current market.
+- [ ] All text is available in both `fr` and `en`.

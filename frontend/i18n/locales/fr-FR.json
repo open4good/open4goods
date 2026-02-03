@@ -57,7 +57,7 @@
   "home": {
     "seo": {
       "title": "Nudger | Comparateur écologique",
-      "description": "Comparez l'impact environnemental et les prix de plus de 50 millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
+      "description": "Comparez l'impact environnemental et les prix de plus de {count} millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d'impact et des prix."
     },
     "hero": {

@@ -73,10 +73,7 @@ compositeScores:
   - REPARABILITY
   - ESG
 
-#####################################################################################################################################
-# Impact score normalization safeguards
-#####################################################################################################################################
-
+# Fast filters; with classical attributes range values for the product category page
 subsets:
   ################
   # Impact Score

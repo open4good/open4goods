@@ -578,6 +578,8 @@ nudgeToolConfig:
         en: "TVs with a screen size greater than 55 inches."
         fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
 
+        
+# Fast filters; with classical attributes range values for the product category page
 subsets:
   ################
   # Price

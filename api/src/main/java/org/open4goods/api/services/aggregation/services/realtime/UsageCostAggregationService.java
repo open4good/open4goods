@@ -84,9 +84,6 @@ public class UsageCostAggregationService extends AbstractAggregationService
                 .multiply(BigDecimal.valueOf(averageKwhCost))
                 .setScale(COST_SCALE, RoundingMode.HALF_UP);
 
-        if (data.getAttributes() != null && data.getAttributes().getIndexed() == null) {
-            data.getAttributes().setIndexed(new HashMap<>());
-        }
 
         if (data.getAttributes() != null) {
             data.getAttributes().getIndexed().put(ATTRIBUTE_KEY,

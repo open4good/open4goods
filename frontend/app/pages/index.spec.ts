@@ -261,7 +261,7 @@ const messages: Record<string, unknown> = {
   'home.cta.browseTaxonomy': 'Explore categories',
   'home.seo.title': 'Nudger – Responsible shopping made easy',
   'home.seo.description':
-    'Compare the environmental impact and prices of over 50 million products with Nudger.',
+    'Compare the environmental impact and prices of over {count} million products with Nudger.',
   'home.seo.imageAlt': 'Illustration of the Nudger dashboard',
   'siteIdentity.siteName': 'Nudger',
 }
