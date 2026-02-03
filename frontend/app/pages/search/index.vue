@@ -865,6 +865,15 @@ const productAggregations = computed<Record<string, AggregationResponseDto>>(
   }
 )
 
+// Log errors to console for debugging - ensures developers see API failures
+watch(
+  [error, productsError, baselineError, aggsError],
+  ([err, prodErr, baseErr, aggsErr]) => {
+    const errors = [err, prodErr, baseErr, aggsErr].filter(Boolean)
+    errors.forEach(e => console.error('[Search Page Error]', e))
+  }
+)
+
 const updateRangeFilter = (
   field: string,
   payload: { min?: number; max?: number }

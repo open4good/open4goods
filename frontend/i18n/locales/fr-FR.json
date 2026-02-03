@@ -664,10 +664,7 @@
         "ecoscore": "Impact Score",
         "googleTaxonomyId": "Catégorie produit Google",
         "lastChange": "Dernière mise à jour",
-        "offersCount": {
-          "one": "{count} offre",
-          "other": "{count} offres"
-        },
+        "offersCount": "Nombre d'offres",
         "price": "Fourchette de prix",
         "title": "Filtres"
       },
@@ -886,13 +883,10 @@
         "support": {
           "cta": "Nous écrire",
           "ctaAria": "Aller au formulaire de contact pour écrire à l'équipe Nudger",
-          "description": "Décris ta question dans le formulaire et donne un maximum de contexte pour que nous puissions répondre concrètement.",
+          "description": "Décrivez votre question dans le formulaire et donnez un maximum de contexte pour que nous puissions répondre concrètement.",
           "title": "Besoin d'un coup de pouce ?"
         }
-      },
-      "eyebrow": "Rester en lien",
-      "subtitle": "Le collectif rassemble citoyennes, entreprises et territoires autour de la consommation responsable.",
-      "title": "Des passerelles pour collaborer"
+      }
     },
     "form": {
       "actions": {

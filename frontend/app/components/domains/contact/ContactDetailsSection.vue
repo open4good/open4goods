@@ -1,71 +1,3 @@
-<template>
-  <section class="contact-details" aria-labelledby="contact-details-heading">
-    <v-container class="py-12">
-      <div class="contact-details__header">
-        <p v-if="eyebrow" class="contact-details__eyebrow">{{ eyebrow }}</p>
-        <h2 id="contact-details-heading" class="contact-details__title">
-          {{ title }}
-        </h2>
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <p class="contact-details__subtitle subtitle-text" v-html="subtitle" />
-      </div>
-
-      <v-row
-        class="contact-details__cards"
-        align="stretch"
-        justify="center"
-        role="list"
-      >
-        <v-col
-          v-for="item in items"
-          :key="item.title"
-          cols="12"
-          md="4"
-          class="d-flex"
-          role="listitem"
-        >
-          <v-card
-            elevation="4"
-            rounded="xl"
-            class="contact-details__card"
-            variant="outlined"
-          >
-            <div class="contact-details__icon-wrapper">
-              <v-avatar size="56" class="contact-details__icon">
-                <v-icon :icon="item.icon" size="30" color="primary" />
-              </v-avatar>
-            </div>
-            <div class="contact-details__content">
-              <h3 class="contact-details__card-title">
-                {{ item.title }}
-              </h3>
-              <p class="contact-details__card-description">
-                {{ item.description }}
-              </p>
-              <div v-if="item.links?.length" class="contact-details__links">
-                <v-btn
-                  v-for="link in item.links"
-                  :key="link.label"
-                  :href="link.href"
-                  :title="link.label"
-                  :aria-label="link.ariaLabel || link.label"
-                  variant="tonal"
-                  color="primary"
-                  prepend-icon="mdi-open-in-new"
-                  :target="isExternalLink(link.href) ? '_blank' : undefined"
-                  :rel="isExternalLink(link.href) ? 'noopener' : undefined"
-                  @click="handleLinkClick(link, $event)"
-                >
-                  {{ link.label }}
-                </v-btn>
-              </div>
-            </div>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </section>
-</template>
 
 <script setup lang="ts">
 export interface ContactDetailLink {
@@ -93,30 +25,7 @@ withDefaults(
   }
 )
 
-const isExternalLink = (href: string) =>
-  /^(?:https?:)?\/\//.test(href) ||
-  href.startsWith('mailto:') ||
-  href.startsWith('tel:')
 
-const handleLinkClick = (link: ContactDetailLink, event: MouseEvent) => {
-  if (!link.href) {
-    event.preventDefault()
-    return
-  }
-
-  if (link.href.startsWith('#')) {
-    event.preventDefault()
-
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    const targetId = link.href.slice(1)
-    const element = document.getElementById(targetId)
-
-    element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-}
 </script>
 
 <style scoped lang="sass">
