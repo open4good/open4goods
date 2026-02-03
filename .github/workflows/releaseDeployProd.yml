@@ -198,7 +198,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SRC="frontend/app/artifacts/coverage/lcov-report"
+          SRC="frontend/artifacts/coverage/lcov-report"
           if [[ -d "${SRC}" ]]; then
             rsync -a --delete "${SRC}/" "frontend/app/public/reports/test-coverage/frontend/"
           else
