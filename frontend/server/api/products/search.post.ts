@@ -24,16 +24,20 @@ interface ProductsSearchPayload {
   semanticSearch?: boolean
   query?: string
   include?: ProductsIncludeEnum[]
+  searchType?: string
 }
 
 interface GlobalSearchPayload {
   query?: string
   filters?: FilterRequestDto
   sort?: SortRequestDto
+  searchType?: string
 }
 
+type SearchPayload = ProductsSearchPayload | GlobalSearchPayload
+
 const isGlobalSearchPayload = (
-  payload: ProductsSearchPayload | GlobalSearchPayload
+  payload: SearchPayload
 ): payload is GlobalSearchPayload =>
   typeof payload === 'object' &&
   payload !== null &&
@@ -53,7 +57,7 @@ export default defineEventHandler(
   ): Promise<ProductSearchResponseDto | GlobalSearchResponseDto> => {
     setDomainLanguageCacheHeaders(event, 'private, no-store')
 
-    const payload = await readBody<ProductsSearchPayload | null>(event)
+    const payload = await readBody<SearchPayload | null>(event)
 
     if (!payload) {
       throw createError({
@@ -74,6 +78,7 @@ export default defineEventHandler(
           query: payload.query ?? '',
           filters: payload.filters,
           sort: payload.sort,
+          searchType: payload.searchType,
         })
       } catch (error) {
         const backendError = await extractBackendErrorDetails(error)
@@ -120,15 +125,18 @@ export default defineEventHandler(
       return hasContent ? body : undefined
     }
 
-    const searchBody = buildSearchBody(payload)
+    // After the type guard, we know this is a ProductsSearchPayload
+    const productsPayload = payload as ProductsSearchPayload
+
+    const searchBody = buildSearchBody(productsPayload)
 
     try {
       const response = await productService.searchProducts({
-        verticalId: payload.verticalId,
-        pageNumber: payload.pageNumber,
-        pageSize: payload.pageSize,
-        query: payload.query,
-        include: payload.include,
+        verticalId: productsPayload.verticalId,
+        pageNumber: productsPayload.pageNumber,
+        pageSize: productsPayload.pageSize,
+        query: productsPayload.query,
+        include: productsPayload.include,
         ...(searchBody ? { body: searchBody } : {}),
       })
       response.products?.data?.forEach(product => {
