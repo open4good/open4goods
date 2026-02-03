@@ -56,16 +56,19 @@ vi.mock('~/utils/_product-attributes', () => ({
   resolveAttributeRawValueByKey: () => null,
 }))
 
-vi.mock('~/components/shared/ui/ImpactScore.vue', () => ({
-  default: defineComponent({
-    name: 'ImpactScoreStub',
-    props: { score: { type: Number, default: 0 } },
-    setup(props) {
-      return () =>
-        h('div', { class: 'impact-score-stub' }, `score:${props.score}`)
-    },
-  }),
-}))
+vi.mock('~/components/shared/ui/ImpactScore.vue', async () => {
+  const { defineComponent: dc, h: hFn } = await import('vue')
+  return {
+    default: dc({
+      name: 'ImpactScoreStub',
+      props: { score: { type: Number, default: 0 } },
+      setup(props) {
+        return () =>
+          hFn('div', { class: 'impact-score-stub' }, `score:${props.score}`)
+      },
+    }),
+  }
+})
 
 const localeRef = ref('fr-FR')
 

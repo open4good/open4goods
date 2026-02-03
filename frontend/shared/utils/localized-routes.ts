@@ -48,6 +48,36 @@ export const LOCALIZED_WIKI_PATHS = {
       pageId: 'webpages:default:data-privacy:WebHome',
     },
   },
+  'impact-score-ia': {
+    'fr-FR': {
+      path: '/blog/impact-score-ia',
+      pageId: 'webpages:default:impact-score-ia:WebHome',
+    },
+    'en-US': {
+      path: '/blog/impact-score-ia',
+      pageId: 'webpages:default:impact-score-ia:WebHome',
+    },
+  },
+  'prioriser-durabilite': {
+    'fr-FR': {
+      path: '/blog/prioriser-durabilite',
+      pageId: 'webpages:default:prioriser-durabilite:WebHome',
+    },
+    'en-US': {
+      path: '/blog/prioriser-durabilite',
+      pageId: 'webpages:default:prioriser-durabilite:WebHome',
+    },
+  },
+  'equilibrer-prix-impact': {
+    'fr-FR': {
+      path: '/blog/equilibrer-prix-impact',
+      pageId: 'webpages:default:equilibrer-prix-impact:WebHome',
+    },
+    'en-US': {
+      path: '/blog/equilibrer-prix-impact',
+      pageId: 'webpages:default:equilibrer-prix-impact:WebHome',
+    },
+  },
 } satisfies LocalizedWikiPaths
 
 export type LocalizedWikiRouteName = keyof typeof LOCALIZED_WIKI_PATHS

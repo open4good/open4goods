@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="orbit-grad-contact-light" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" />
+      <stop offset="100%" stop-color="#F4F4F4" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#orbit-grad-contact-light)" />
+  
+  <circle cx="85%" cy="50%" r="80" fill="#00DE9F" fill-opacity="0.1" />
+  <circle cx="90%" cy="20%" r="40" fill="#00A1C2" fill-opacity="0.1" />
+  <line x1="85%" y1="50%" x2="90%" y2="20%" stroke="#0088D6" stroke-width="1" stroke-opacity="0.25" />
+</svg>

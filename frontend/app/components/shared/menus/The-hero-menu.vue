@@ -680,10 +680,7 @@ import {
   type ThemeName,
 } from '~~/shared/constants/theme'
 
-const SearchSuggestField = defineAsyncComponent({
-  loader: () => import('~/components/search/SearchSuggestField.vue'),
-  suspensible: false,
-})
+import SearchSuggestField from '~/components/search/SearchSuggestField.vue'
 
 const NudgeToolWizard = defineAsyncComponent({
   loader: () => import('~/components/nudge-tool/NudgeToolWizard.vue'),

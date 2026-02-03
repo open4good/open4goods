@@ -1604,8 +1604,8 @@ public class SearchService {
 			hits = executeSemanticSearch(null, sanitizedQuery, embedding, filters, true, verticalPageable, VerticalScope.REQUIRED);
 			missingHits = executeSemanticSearch(null, sanitizedQuery, embedding, filters, true, missingVerticalPageable, VerticalScope.MISSING);
 		} catch (Exception e) {
-			LOGGER.error("Semantic search failed for query '{}'", sanitizedQuery, e);
-			return new SemanticGlobalSearchResult(List.of(), List.of(), 0, 0, false, null);
+			elasticLog(e);
+			throw e;
 		}
 
 		List<GlobalSearchHit> verticalHits = mapHits(hits, domainLanguage, true, sort);

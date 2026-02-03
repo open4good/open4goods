@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import { useAsyncData } from '#imports'
 import { useBlog } from '~/composables/blog/useBlog'
 import type { BlogPostDto } from '~~/shared/api-client'
+import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
 
 interface BlogArticle extends BlogPostDto {
   content?: string
 }
+
+const XwikiFullPageRenderer = defineAsyncComponent(
+  () => import('~/components/cms/XwikiFullPageRenderer.vue')
+)
 
 const route = useRoute()
 const { currentArticle, loading, error, fetchArticle } = useBlog()
@@ -32,9 +37,15 @@ const slug = computed(() => {
   return trimmed.length > 0 ? trimmed : null
 })
 
+// Try to match wiki route
+const wikiRoute = computed(() => matchLocalizedWikiRouteByPath(route.path))
+
 await useAsyncData(
   () => (slug.value ? `blog-article-${slug.value}` : 'blog-article'),
-  () => (slug.value ? fetchArticle(slug.value) : Promise.resolve(null)),
+  () => {
+    if (wikiRoute.value) return Promise.resolve(null)
+    return slug.value ? fetchArticle(slug.value) : Promise.resolve(null)
+  },
   {
     server: true,
     immediate: true,
@@ -46,7 +57,8 @@ const article = computed(() => currentArticle.value as BlogArticle | null)
 </script>
 
 <template>
-  <v-container class="py-10 px-4 mx-auto" max-width="xl">
+  <XwikiFullPageRenderer v-if="wikiRoute" :page-id="wikiRoute.pageId" />
+  <v-container v-else class="py-10 px-4 mx-auto" max-width="xl">
     <v-row>
       <v-col cols="12">
         <v-btn variant="text" prepend-icon="mdi-arrow-left" to="/blog">
