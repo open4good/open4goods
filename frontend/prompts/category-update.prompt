@@ -112,3 +112,10 @@ Validate by checking :
 - [ ] `nudgeToolConfig` has at least 3 scores defined.
 - [ ] `subsets` (for fast filters, and for nudge tool wizard) covers reasonable ranges for the current market.
 - [ ] All text is available in both `fr` and `en`.
+
+
+Report cleanly to the user of the changes that has been effectivly made.
+
+- TLTR
+- Detailled updates
+
