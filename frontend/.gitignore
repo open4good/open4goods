@@ -46,3 +46,4 @@ node_modules/
 /lighthouse-report.json
 /output.html
 /test-results/
+/artifacts/
