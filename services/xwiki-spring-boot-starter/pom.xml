@@ -159,7 +159,7 @@
 		<dependency>
 			<groupId>org.xwiki.platform</groupId>
 			<artifactId>xwiki-platform-rest-model</artifactId>
-			<version>17.10.2</version>
+			<version>17.10.3</version>
 		</dependency>
 
 		<dependency>
