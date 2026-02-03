@@ -134,6 +134,13 @@
           <p class="search-page__alert-description">
             {{ t('search.states.error.description') }}
           </p>
+          <!-- Debug info in development -->
+          <div v-if="isDev" class="mt-4 text-caption" style="opacity: 0.7">
+            <p v-if="error">Global search error: {{ error }}</p>
+            <p v-if="productsError">Products error: {{ productsError }}</p>
+            <p v-if="baselineError">Baseline error: {{ baselineError }}</p>
+            <p v-if="aggsError">Aggregations error: {{ aggsError }}</p>
+          </div>
         </div>
         <template #append>
           <v-btn color="primary" variant="text" @click="handleRetry">
@@ -423,6 +430,7 @@ import {
 
 const MIN_QUERY_LENGTH = 3
 const VERTICAL_RESULTS_LIMIT = 4
+const isDev = process.env.NODE_ENV === 'development'
 
 definePageMeta({
   ssr: true,
@@ -738,7 +746,7 @@ const {
       return null
     }
 
-    return await $fetch<ProductSearchResponseDto>('/api/products', {
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
       body: baselinePayload.value,
@@ -768,7 +776,7 @@ const {
       return null
     }
 
-    return await $fetch<ProductSearchResponseDto>('/api/products', {
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
       body: {
@@ -804,7 +812,7 @@ const {
 
     if (!isFiltered.value) return null
 
-    return await $fetch<ProductSearchResponseDto>('/api/products', {
+    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
       body: {
@@ -869,9 +877,13 @@ const productAggregations = computed<Record<string, AggregationResponseDto>>(
 watch(
   [error, productsError, baselineError, aggsError],
   ([err, prodErr, baseErr, aggsErr]) => {
-    const errors = [err, prodErr, baseErr, aggsErr].filter(Boolean)
-    errors.forEach(e => console.error('[Search Page Error]', e))
-  }
+    const errorLabels = ['global', 'products', 'baseline', 'aggregations']
+    const allErrors = [err, prodErr, baseErr, aggsErr]
+    allErrors.forEach((e, i) => {
+      if (e) console.error(`[Search Page Error - ${errorLabels[i]}]`, e)
+    })
+  },
+  { immediate: true }
 )
 
 const updateRangeFilter = (
