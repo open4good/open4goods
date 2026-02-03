@@ -150,6 +150,8 @@ const onCheckboxChange = (key: string, checked: boolean) => {
     align-items: center
     justify-content: center
     flex-shrink: 0
+    font-size: 24px
+    line-height: 1
 
   &__label
     display: flex
