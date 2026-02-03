@@ -99,6 +99,7 @@
             :title-params="aiTitleParams"
             :product-name="productTitle"
             :product-image="resolvedProductImageSource"
+            :product-slug="product.fullSlug ?? product.slug ?? undefined"
             :failure-reason="product.aiReview?.failureReason ?? null"
             :enough-data="product.aiReview?.enoughData ?? true"
           />
@@ -2320,7 +2321,6 @@ useHead(() => {
 .product-page {
   position: relative;
   padding: 2rem 0;
-  overflow-x: hidden;
 }
 
 .product-page::before {

@@ -103,37 +103,12 @@ const close = () => {
 const viewReview = (item: GenerationQueueItem) => {
   close()
   if (item.productSlug) {
-    // Assuming slug is full path or we can construct it?
-    // Usually slug is just the slug part.
-    // Product links are often `/category/product-slug` or `/product/gtin-slug`
-    // If we only have slug, we might not have the category.
-    // Fallback to GTIN based route
-    // Wait, let's use router push logic
-    // For now, let's assume we can navigate to the stored slug if it's a path, or build one.
-    // If we only have partial info, fallback to reload or product ID?
-    // Let's rely on what we stored.
-
-    // Simplest: Go to product page by GTIN if we don't have full path
-    // Or if `productSlug` contains slash, use it.
-
-    // In store: productSlug: product.slug (often just the name-slug)
-    // We need category...
-    // Let's try navigating to using a finder helper or just `/product/<gtin>` if supported?
-    // Our app supports `/p/<gtin>` ? Or maybe just force a navigation that resolves?
-
-    // Inspecting store usage: we saved `product.slug`.
-
-    // Let's assume navigating to `/product/${item.gtin}` works as redirect
-    // OR just use item.productSlug if it looks full.
-
-    // Better: In `AiReviewGenerationStore`, we saved `productSlug`.
-    // In `ProductPage`, we see logic for `gtin`.
-
-    router.push({ path: `/product/${item.gtin}` }).catch(() => {
-      // fallback
+    router.push({ path: item.productSlug }).catch(() => {
+      // fallback if navigation fails
+      router.push({ path: `/${item.gtin}` })
     })
   } else {
-    router.push({ path: `/product/${item.gtin}` })
+    router.push({ path: `/${item.gtin}` })
   }
 }
 </script>

@@ -81,6 +81,24 @@ export const resolveProductTitle = (
     if (longName) return finalizeTitle(longName)
   }
 
+  // 2.5 Use longest offer name if no category associated
+  const isCategoryAssociated = Boolean(product.base?.vertical)
+  if (!isCategoryAssociated && (preferCardTitle || preferShortName)) {
+    const longestOfferName = normalizeString(product.names?.longestOfferName)
+    if (longestOfferName) return finalizeTitle(longestOfferName)
+
+    const offerNames = product.names?.offerNames
+    if (offerNames && offerNames.size > 0) {
+      let longest = ''
+      for (const name of offerNames) {
+        if (name.length > longest.length) {
+          longest = name
+        }
+      }
+      if (longest) return finalizeTitle(longest)
+    }
+  }
+
   // 2. H1 Title / Long Name equivalent
   if (preferH1Title) {
     // Prefer longName if available as it captures the "full" title intent

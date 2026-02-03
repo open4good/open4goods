@@ -686,6 +686,10 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  productSlug: {
+    type: String,
+    default: undefined,
+  },
   failureReason: {
     type: String,
     default: null,
@@ -1095,7 +1099,7 @@ const triggerGeneration = async (force: boolean = false) => {
         gtin: String(props.gtin),
         name: productLabel.value,
         image: props.productImage || undefined,
-        slug: undefined,
+        slug: props.productSlug,
       },
       captchaToken.value ?? undefined,
       force

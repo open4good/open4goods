@@ -178,6 +178,8 @@ const onFilterChange = (field: FieldMetadataDto, filter: Filter | null) => {
     flex-wrap: wrap
     gap: 0.75rem
     align-items: center
+    justify-content: center
+
 
   &--row
     display: block
