@@ -13,28 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { AiRating } from './AiRating';
-import {
-    AiRatingFromJSON,
-    AiRatingFromJSONTyped,
-    AiRatingToJSON,
-    AiRatingToJSONTyped,
-} from './AiRating';
-import type { AiSource } from './AiSource';
-import {
-    AiSourceFromJSON,
-    AiSourceFromJSONTyped,
-    AiSourceToJSON,
-    AiSourceToJSONTyped,
-} from './AiSource';
-import type { AiAttribute } from './AiAttribute';
-import {
-    AiAttributeFromJSON,
-    AiAttributeFromJSONTyped,
-    AiAttributeToJSON,
-    AiAttributeToJSONTyped,
-} from './AiAttribute';
-
 /**
  * Represents an AI-generated review of a product, including descriptions, pros and cons, data quality assessment, and sourced information.
  * @export
@@ -169,28 +147,28 @@ export interface AiReview {
     summary: string;
     /**
      * List of pros
-     * @type {Array<string>}
+     * @type {string}
      * @memberof AiReview
      */
-    pros: Array<string>;
+    pros: string;
     /**
      * List of cons
-     * @type {Array<string>}
+     * @type {string}
      * @memberof AiReview
      */
-    cons: Array<string>;
+    cons: string;
     /**
      * List of sources used for the review
-     * @type {Array<AiSource>}
+     * @type {string}
      * @memberof AiReview
      */
-    sources: Array<AiSource>;
+    sources: string;
     /**
      * List of product attributes
-     * @type {Array<AiAttribute>}
+     * @type {string}
      * @memberof AiReview
      */
-    attributes: Array<AiAttribute>;
+    attributes: string;
     /**
      * Quality of external data used for the review
      * @type {string}
@@ -199,34 +177,34 @@ export interface AiReview {
     dataQuality: string;
     /**
      * List of ratings found in sources
-     * @type {Array<AiRating>}
+     * @type {string}
      * @memberof AiReview
      */
-    ratings?: Array<AiRating>;
+    ratings?: string;
     /**
      * List of PDF's url's for this product
-     * @type {Array<string>}
+     * @type {string}
      * @memberof AiReview
      */
-    pdfs?: Array<string>;
+    pdfs?: string;
     /**
      * List of quality images url's for this product
-     * @type {Array<string>}
+     * @type {string}
      * @memberof AiReview
      */
-    images?: Array<string>;
+    images?: string;
     /**
      * List of product related videos
-     * @type {Array<string>}
+     * @type {string}
      * @memberof AiReview
      */
-    videos?: Array<string>;
+    videos?: string;
     /**
      * List of social networks references
-     * @type {Array<string>}
+     * @type {string}
      * @memberof AiReview
      */
-    social?: Array<string>;
+    social?: string;
 }
 
 /**
@@ -295,10 +273,10 @@ export function AiReviewFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'summary': json['summary'],
         'pros': json['pros'],
         'cons': json['cons'],
-        'sources': ((json['sources'] as Array<any>).map(AiSourceFromJSON)),
-        'attributes': ((json['attributes'] as Array<any>).map(AiAttributeFromJSON)),
+        'sources': json['sources'],
+        'attributes': json['attributes'],
         'dataQuality': json['dataQuality'],
-        'ratings': json['ratings'] == null ? undefined : ((json['ratings'] as Array<any>).map(AiRatingFromJSON)),
+        'ratings': json['ratings'] == null ? undefined : json['ratings'],
         'pdfs': json['pdfs'] == null ? undefined : json['pdfs'],
         'images': json['images'] == null ? undefined : json['images'],
         'videos': json['videos'] == null ? undefined : json['videos'],
@@ -340,10 +318,10 @@ export function AiReviewToJSONTyped(value?: AiReview | null, ignoreDiscriminator
         'summary': value['summary'],
         'pros': value['pros'],
         'cons': value['cons'],
-        'sources': ((value['sources'] as Array<any>).map(AiSourceToJSON)),
-        'attributes': ((value['attributes'] as Array<any>).map(AiAttributeToJSON)),
+        'sources': value['sources'],
+        'attributes': value['attributes'],
         'dataQuality': value['dataQuality'],
-        'ratings': value['ratings'] == null ? undefined : ((value['ratings'] as Array<any>).map(AiRatingToJSON)),
+        'ratings': value['ratings'],
         'pdfs': value['pdfs'],
         'images': value['images'],
         'videos': value['videos'],

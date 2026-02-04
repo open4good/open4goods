@@ -1,6 +1,7 @@
 apis/AdministrationApi.ts
 apis/AffiliationApi.ts
 apis/AgentsApi.ts
+apis/AssistantsApi.ts
 apis/AuthenticationApi.ts
 apis/BlogApi.ts
 apis/CategoriesApi.ts
@@ -34,15 +35,13 @@ models/AggregationBucketDto.ts
 models/AggregationMetadata.ts
 models/AggregationRequestDto.ts
 models/AggregationResponseDto.ts
-models/AiAttribute.ts
 models/AiPromptsConfig.ts
-models/AiRating.ts
 models/AiReview.ts
 models/AiReviewAttributeDto.ts
 models/AiReviewDto.ts
 models/AiReviewHolder.ts
 models/AiReviewSourceDto.ts
-models/AiSource.ts
+models/AssistantConfigDto.ts
 models/AttributeConfigDto.ts
 models/AttributeParserConfig.ts
 models/AttributesConfigDto.ts
