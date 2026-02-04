@@ -21,6 +21,7 @@
   },
   "blog": {
     "article": {
+      "back": "Retour",
       "edit": "Modifier cet article",
       "empty": "Le contenu de cet article sera disponible bientôt.",
       "featuredImageAlt": "Image mise en avant pour {title}",
