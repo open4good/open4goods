@@ -732,6 +732,37 @@ const seoDescription = computed(() =>
 
 const seoImageAlt = computed(() => String(t('home.seo.imageAlt')))
 
+const webPageJsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: seoTitle.value,
+  description: seoDescription.value,
+  url: canonicalUrl.value,
+  inLanguage: locale.value,
+  isPartOf: {
+    '@type': 'WebSite',
+    name: siteName.value,
+    url: canonicalUrl.value,
+  },
+  primaryImageOfPage: {
+    '@type': 'ImageObject',
+    url: ogImageUrl.value,
+  },
+}))
+
+const breadcrumbJsonLd = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: String(t('navigation.home')),
+      item: canonicalUrl.value,
+    },
+  ],
+}))
+
 useSeoMeta({
   title: () => seoTitle.value,
   description: () => seoDescription.value,
@@ -765,6 +796,16 @@ useHead(() => ({
       key: 'home-website-jsonld',
       type: 'application/ld+json',
       children: JSON.stringify(websiteJsonLd.value),
+    },
+    {
+      key: 'home-webpage-jsonld',
+      type: 'application/ld+json',
+      children: JSON.stringify(webPageJsonLd.value),
+    },
+    {
+      key: 'home-breadcrumb-jsonld',
+      type: 'application/ld+json',
+      children: JSON.stringify(breadcrumbJsonLd.value),
     },
   ],
 }))
