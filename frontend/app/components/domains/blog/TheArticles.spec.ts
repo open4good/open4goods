@@ -90,7 +90,7 @@ type TheArticlesPublicInstance = ComponentPublicInstance<
     seoDescription: string
     canonicalUrl: string
     primaryArticleImage: string | null | undefined
-    structuredData: Record<string, unknown>
+    structuredData: Record<string, unknown> | null
   }
 >
 
@@ -110,6 +110,11 @@ vi.mock('#imports', () => ({
   },
 }))
 
+vi.mock('#i18n', () => ({
+  useLocalePath: () => (input: unknown) =>
+    typeof input === 'string' ? input : '/',
+}))
+
 const translations: Record<
   string,
   string | ((params: Record<string, unknown>) => string)
@@ -124,6 +129,8 @@ const translations: Record<
   'blog.hero.eyebrow': 'Nudger blog',
   'blog.hero.title': 'Fresh insights on responsible shopping',
   'blog.hero.subtitle': 'Short reads on sustainable appliances and nudges.',
+  'blog.breadcrumbs.home': 'Home',
+  'blog.breadcrumbs.blog': 'Blog',
   'blog.pagination.info': ({ current, total, count }) =>
     `Page ${current} of ${total} (${count})`,
   'blog.pagination.pageLink': ({ page }) => `Go to page ${page}`,
@@ -133,6 +140,8 @@ const translations: Record<
   'blog.seo.description': 'Latest insights and company updates.',
   'blog.seo.tagDescription': ({ tag }) => `Articles about ${tag}.`,
   'common.actions.retry': 'Retry',
+  'siteIdentity.siteName': 'Nudger',
+  'siteIdentity.links.linkedin': 'https://www.linkedin.com/company/nudger/',
 }
 
 type TranslateParams = Record<string, unknown>
@@ -769,19 +778,28 @@ describe('TheArticles.vue', () => {
     const schema = vm.structuredData as Record<string, unknown>
     expect(schema).toMatchObject({
       '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
+    })
+
+    const graph = (schema['@graph'] ?? []) as Array<Record<string, unknown>>
+    const collectionPage = graph.find(
+      entry => entry['@type'] === 'CollectionPage'
+    )
+    const breadcrumbList = graph.find(
+      entry => entry['@type'] === 'BreadcrumbList'
+    )
+    const blogPosting = graph.find(
+      entry => entry['@type'] === 'BlogPosting'
+    )
+
+    expect(collectionPage).toMatchObject({
       name: 'Open4Goods blog – Nuxt – Page 2',
       description: 'Articles about Nuxt. A welcome post for the blog.',
       url: expect.stringContaining('/blog?page=2&tag=Nuxt'),
       inLanguage: 'en',
-      isPartOf: { '@type': 'Blog', name: 'Open4Goods blog' },
       about: 'Nuxt',
     })
-
-    const hasPart = (schema.hasPart ?? []) as Array<Record<string, unknown>>
-    expect(hasPart).toHaveLength(defaultArticles.length)
-    expect(hasPart[0]).toMatchObject({
-      '@type': 'BlogPosting',
+    expect(breadcrumbList).toBeTruthy()
+    expect(blogPosting).toMatchObject({
       headline: 'Hello Nuxt World',
       description: 'A welcome post for the blog.',
       url: expect.stringContaining('/blog/hello-world'),

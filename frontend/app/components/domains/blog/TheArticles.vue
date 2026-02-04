@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from '#app'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
+import { useLocalePath } from '#i18n'
 import { useI18n } from 'vue-i18n'
 import type { BlogTagDto } from '~~/shared/api-client'
 import PageHeader from '~/components/shared/header/PageHeader.vue'
+import { buildBlogCollectionJsonLd } from '~/utils/blog-jsonld'
 
 import { useBlog } from '~/composables/blog/useBlog'
 const {
@@ -26,6 +28,7 @@ const buildDateIsoString = (timestamp: number) => {
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const localePath = useLocalePath()
 const currentPage = computed(() => pagination.value.page || 1)
 const tagsLoading = ref(false)
 const articleListId = 'blog-articles-list'
@@ -365,65 +368,64 @@ const buildAbsoluteArticleLink = (slug: string | null | undefined) => {
   }
 }
 
+const toTrimmedString = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
+}
+
+const siteName = computed(() => String(t('siteIdentity.siteName')))
+const linkedinUrl = computed(() => toTrimmedString(t('siteIdentity.links.linkedin')))
+const logoUrl = computed(() => {
+  if (!requestUrl) {
+    return undefined
+  }
+
+  return new URL('/nudger-icon-512x512.png', requestUrl.origin).toString()
+})
+
+const homeLink = computed(() => localePath({ name: 'index' }) ?? '/')
+const blogLink = computed(() => localePath('/blog') ?? '/blog')
+
 const structuredData = computed(() => {
-  const articles = visibleArticles.value
-    .map(article => {
-      const entry: Record<string, unknown> = {
-        '@type': 'BlogPosting',
-      }
+  if (!canonicalUrl.value || !requestUrl) {
+    return null
+  }
 
-      const headline = article.title?.trim()
-      if (headline) {
-        entry.headline = headline
-      }
+  const posts = visibleArticles.value.map(article => ({
+    headline: article.title?.trim(),
+    description: article.summary?.trim(),
+    image: article.image ? [article.image] : undefined,
+    url: buildAbsoluteArticleLink(article.url),
+    datePublished: article.createdMs
+      ? buildDateIsoString(article.createdMs)
+      : undefined,
+    author: article.author?.trim(),
+  }))
 
-      const description = article.summary?.trim()
-      if (description) {
-        entry.description = description
-      }
-
-      if (article.image) {
-        entry.image = [article.image]
-      }
-
-      const url = buildAbsoluteArticleLink(article.url)
-      if (url) {
-        entry.url = url
-      }
-
-      if (article.createdMs) {
-        const published = buildDateIsoString(article.createdMs)
-        if (published) {
-          entry.datePublished = published
-        }
-      }
-
-      return entry
-    })
-    .filter(entry => Object.keys(entry).length > 1)
-
-  const schema: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: pageSeoTitle.value,
+  return buildBlogCollectionJsonLd({
+    canonicalUrl: canonicalUrl.value,
+    locale: locale.value,
+    pageTitle: pageSeoTitle.value,
     description: seoDescription.value || undefined,
-    url: canonicalUrl.value,
-    inLanguage: locale.value,
-    isPartOf: {
-      '@type': 'Blog',
-      name: baseSeoTitle.value,
+    about: sanitizedTag.value ?? undefined,
+    posts,
+    site: {
+      name: siteName.value,
+      origin: requestUrl.origin,
+      logoUrl: logoUrl.value,
+      sameAs: [linkedinUrl.value].filter(
+        (value): value is string => Boolean(value)
+      ),
     },
-  }
-
-  if (sanitizedTag.value) {
-    schema.about = sanitizedTag.value
-  }
-
-  if (articles.length > 0) {
-    schema.hasPart = articles
-  }
-
-  return schema
+    breadcrumbs: [
+      { name: t('blog.breadcrumbs.home'), link: homeLink.value },
+      { name: t('blog.breadcrumbs.blog'), link: blogLink.value },
+    ],
+  })
 })
 
 useSeoMeta({
@@ -445,12 +447,14 @@ useHead(() => ({
         },
       ]
     : [],
-  script: [
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify(structuredData.value),
-    },
-  ],
+  script: structuredData.value
+    ? [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(structuredData.value),
+        },
+      ]
+    : [],
 }))
 
 defineExpose({

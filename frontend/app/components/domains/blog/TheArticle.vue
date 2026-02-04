@@ -2,9 +2,11 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead, useRequestURL, useSeoMeta } from '#imports'
+import { useLocalePath } from '#i18n'
 import type { BlogPostDto } from '~~/shared/api-client'
 import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 import { useAuth } from '~/composables/useAuth'
+import { buildBlogArticleJsonLd } from '~/utils/blog-jsonld'
 
 interface BlogArticle extends BlogPostDto {
   /**
@@ -23,6 +25,7 @@ const articleTitle = computed(() => article.value.title?.trim() || 'Article')
 const articleSummary = computed(() => article.value.summary?.trim() ?? '')
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
+const localePath = useLocalePath()
 
 const buildDateInfo = (timestamp?: number) => {
   if (!timestamp) {
@@ -128,35 +131,51 @@ try {
 
 const canonicalUrl = computed(() => requestUrl?.href)
 
+const toTrimmedString = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
+}
+
 const structuredData = computed(() => {
-  const schema: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: articleTitle.value,
+  if (!canonicalUrl.value || !requestUrl) {
+    return null
+  }
+
+  const homeLink = localePath({ name: 'index' }) ?? '/'
+  const blogLink = localePath('/blog') ?? '/blog'
+
+  return buildBlogArticleJsonLd({
+    canonicalUrl: canonicalUrl.value,
+    locale: locale.value,
+    pageTitle: articleTitle.value,
     description: metaDescription.value || undefined,
-    mainEntityOfPage: canonicalUrl.value,
-  }
-
-  if (article.value.image) {
-    schema.image = [article.value.image]
-  }
-
-  if (article.value.author) {
-    schema.author = {
-      '@type': 'Person',
-      name: article.value.author,
-    }
-  }
-
-  if (publishedDate.value?.iso) {
-    schema.datePublished = publishedDate.value.iso
-  }
-
-  if (updatedDate.value?.iso) {
-    schema.dateModified = updatedDate.value.iso
-  }
-
-  return schema
+    site: {
+      name: String(t('siteIdentity.siteName')),
+      origin: requestUrl.origin,
+      logoUrl: new URL('/nudger-icon-512x512.png', requestUrl.origin).toString(),
+      sameAs: [toTrimmedString(t('siteIdentity.links.linkedin'))].filter(
+        (value): value is string => Boolean(value)
+      ),
+    },
+    breadcrumbs: [
+      { name: t('blog.breadcrumbs.home'), link: homeLink },
+      { name: t('blog.breadcrumbs.blog'), link: blogLink },
+      { name: articleTitle.value, link: canonicalUrl.value },
+    ],
+    article: {
+      headline: articleTitle.value,
+      description: metaDescription.value || undefined,
+      url: canonicalUrl.value,
+      image: article.value.image ? [article.value.image] : undefined,
+      author: article.value.author?.trim(),
+      datePublished: publishedDate.value?.iso,
+      dateModified: updatedDate.value?.iso ?? publishedDate.value?.iso,
+    },
+  })
 })
 
 useSeoMeta({
@@ -193,12 +212,14 @@ useHead(() => ({
         ]
       : []),
   ],
-  script: [
-    {
-      type: 'application/ld+json',
-      children: JSON.stringify(structuredData.value),
-    },
-  ],
+  script: structuredData.value
+    ? [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(structuredData.value),
+        },
+      ]
+    : [],
 }))
 </script>
 

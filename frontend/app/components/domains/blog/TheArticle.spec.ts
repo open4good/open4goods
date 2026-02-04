@@ -15,6 +15,11 @@ vi.mock('#imports', () => {
   }
 })
 
+vi.mock('#i18n', () => ({
+  useLocalePath: () => (input: unknown) =>
+    typeof input === 'string' ? input : '/',
+}))
+
 vi.mock('~/components/shared/images/RobustImage.vue', () => ({
   default: {
     name: 'RobustImageStub',
@@ -45,6 +50,14 @@ vi.mock('vue-i18n', () => ({
           return 'The content of this article will be available soon.'
         case 'blog.article.edit':
           return 'Edit this article'
+        case 'blog.breadcrumbs.home':
+          return 'Home'
+        case 'blog.breadcrumbs.blog':
+          return 'Blog'
+        case 'siteIdentity.siteName':
+          return 'Nudger'
+        case 'siteIdentity.links.linkedin':
+          return 'https://www.linkedin.com/company/nudger/'
         default:
           return key
       }
