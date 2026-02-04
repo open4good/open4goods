@@ -1,0 +1,340 @@
+scores:
+  - scoreName: "ENERGY_CONSUMPTION"
+    fromPercent: 50
+    mdiIcon: "mdi-lightning-bolt"
+    title:
+      en: "Energy consumption"
+      fr: "Consommation énergétique"
+    description:
+      en: "Televisions with low energy consumption"
+      fr: "Téléviseurs avec une faible consommation énergétique"
+  - scoreName: "DURABILITY"
+    fromPercent: 50
+    mdiIcon: "mdi-archive-outline"
+    title:
+      en: "Durability"
+      fr: "Durabilité"
+    description:
+      en: "Televisions with a good durability"
+      fr: "Téléviseurs avec une bonne durabilité"
+
+  - scoreName: "REPARABILITY"
+    fromPercent: 50
+    mdiIcon: "mdi-tools"
+    title:
+      en: "Reparability"
+      fr: "Réparabilité"
+    description:
+      en: "Televisions with a good reparability"
+      fr: "Téléviseurs avec une bonne réparabilité"
+  - scoreName: "ESG"
+    disabled: true
+    fromPercent: 50
+    mdiIcon: "mdi-scale-balance"
+    title:
+      en: "ESG criterias"
+      fr: "Critères ESG"
+    description:
+      en: "Models from brands with good ESG ratings"
+      fr: "Modèles dont la marque dispose d'un bon indice ESG"
+subsetGroups:
+  - id: "distance"
+    mdiIcon: "mdi-ruler"
+    layout: "grid"
+    title:
+      en: "How far is your head from the screen?"
+      fr: "À quelle distance est installée votre tête de l'écran ?"
+    description:
+      en: "Wellness score = 1 - |distance_cm - (diagonal_in × 2.54 × 2.5)| / (diagonal_in × 2.54 × 2.5)."
+      fr: "Indice bien-être = 1 - |distance_cm - (diagonale_pouces × 2.54 × 2.5)| / (diagonale_pouces × 2.54 × 2.5)."
+    ctaLabel:
+      en: "Continue"
+      fr: "Continuer"
+  - id: "price"
+    mdiIcon: "mdi-currency-eur"
+    layout: "grid"
+    title:
+      en: "Budget"
+      fr: "Budget"
+    description:
+      en: "Pick a price comfort zone."
+      fr: "Votre budget"
+    ctaLabel:
+      en: "Continue"
+      fr: "Continuer"
+  - id: "screen_size"
+    mdiIcon: "mdi-television-classic"
+    layout: "grid"
+    title:
+      en: "Screen size"
+      fr: "Taille d'écran"
+    description:
+      en: "Find the diagonal that fits your space."
+      fr: "Trouvez la diagonale adaptée à votre espace."
+    ctaLabel:
+      en: "Continue"
+      fr: "Continuer"
+subsets:
+  ################
+  # Distance
+  ################
+  - id: "distance_close"
+    group: "distance"
+    criterias:
+      - field: "assistant.viewingDistanceCm"
+        operator: "LOWER_THAN"
+        value: "150"
+    image: "distance-close.png"
+    url:
+      en: "distance-close"
+      fr: "distance-proche"
+    caption:
+      en: "< 1.5 m"
+      fr: "< 1,5 m"
+    title:
+      en: "Very close"
+      fr: "Très proche"
+    description:
+      en: "Viewing distance below 1.5 meters."
+      fr: "Distance de visionnage inférieure à 1,5 m."
+
+  - id: "distance_comfort"
+    group: "distance"
+    criterias:
+      - field: "assistant.viewingDistanceCm"
+        operator: "GREATER_THAN_OR_EQUAL"
+        value: "150"
+      - field: "assistant.viewingDistanceCm"
+        operator: "LOWER_THAN"
+        value: "300"
+    image: "distance-comfort.png"
+    url:
+      en: "distance-comfort"
+      fr: "distance-confort"
+    caption:
+      en: "1.5 m - 3 m"
+      fr: "1,5 m - 3 m"
+    title:
+      en: "Comfort distance"
+      fr: "Distance confort"
+    description:
+      en: "Typical comfort range for living rooms."
+      fr: "Distance de confort courante pour un salon."
+
+  - id: "distance_far"
+    group: "distance"
+    criterias:
+      - field: "assistant.viewingDistanceCm"
+        operator: "GREATER_THAN_OR_EQUAL"
+        value: "300"
+    image: "distance-far.png"
+    url:
+      en: "distance-far"
+      fr: "distance-loin"
+    caption:
+      en: "> 3 m"
+      fr: "> 3 m"
+    title:
+      en: "Far"
+      fr: "Loin"
+    description:
+      en: "Viewing distance above 3 meters."
+      fr: "Distance de visionnage supérieure à 3 m."
+
+  ################
+  # Impact Score
+  ################
+  - id: "impact_high" # Unique identifier for the subset - Worst 33% (high environmental impact)
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 0
+        toPercent: 33
+    image: "example-image.png"
+    url:
+      en: "high-impact"
+      fr: "fort-impact"
+    caption:
+      en: "High "
+      fr: "Élevé "
+    title:
+      en: "High Impact"
+      fr: "Impact Élevé"
+    description:
+      en: "Products with a high environmental impact"
+      fr: "Produits ayant un fort impact environnemental"
+
+  - id: "impact_medium" # Middle 34%
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 33
+        toPercent: 67
+    image: "example-image.png"
+    url:
+      en: "medium-impact"
+      fr: "impact-moyen"
+    caption:
+      en: "Medium"
+      fr: "Moyen "
+    title:
+      en: "Medium Impact"
+      fr: "Impact Moyen"
+    description:
+      en: "Products with a medium environmental impact"
+      fr: "Produits ayant un impact environnemental moyen"
+
+  - id: "impact_low" # Best 33% (low environmental impact)
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 67
+        toPercent: 100
+    image: "example-image.png"
+    url:
+      en: "low-impact"
+      fr: "faible-impact"
+    caption:
+      en: "Low "
+      fr: "Faible "
+    title:
+      en: "Low Impact"
+      fr: "Impact Faible"
+    description:
+      en: "Products with a low environmental impact"
+      fr: "Produits ayant un faible impact environnemental"
+
+  ################
+  # Price
+  ################
+  - id: "price_lower_500" # Unique identifier for the subset
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "LOWER_THAN"
+        value: "500"
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "0"
+    image: "example-image.png"
+    url:
+      en: "low-price"
+      fr: "petits-prix"
+    caption:
+      en: "TVs priced under €500."
+      fr: "Les TV dont le prix est inférieur à 500€."
+    title:
+      en: "< 500 €"
+      fr: "< 500 €"
+    description:
+      en: ""
+      fr: ""
+
+  - id: "price_500_1000"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "500"
+      - field: "price.minPrice.price"
+        operator: "LOWER_THAN"
+        value: "1000"
+    image: "example-image.png"
+    url:
+      en: "tv-500-1000-euros"
+      fr: "tv-500-1000-euros"
+    caption:
+      en: "TVs priced between €500 and €1000."
+      fr: "Les TV dont le prix est compris entre 500€ et 1000€."
+    title:
+      en: "500 - 1000 €"
+      fr: "500 - 1000 €"
+    description:
+      en: "500 - 1000 €"
+      fr: "500 - 1000 €"
+
+  - id: "price_greater_1000"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "1000"
+    image: "example-image.png"
+    url:
+      en: "premium-price"
+      fr: "haut-de-gamme"
+    caption:
+      en: "Premium TVs"
+      fr: "Les TV dont le prix est supérieur à 1000€."
+    title:
+      en: "> 1000 €"
+      fr: "> 1000 €"
+    description:
+      en: "TVs priced over €1000."
+      fr: "Les TV dont le prix est supérieur à 1000€."
+
+  ################
+  # Screen Size
+  ################
+  - id: "small_screens"
+    group: "screen_size"
+    criterias:
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "LOWER_THAN"
+        value: "32"
+    image: "small-screen.png"
+    url:
+      en: "small-screens"
+      fr: "petits-ecrans"
+    caption:
+      en: 'Small screens (< 32")'
+      fr: "Diagonale < 32 pouces"
+    title:
+      en: "Small Screen TVs"
+      fr: "Petits écrans"
+    description:
+      en: "TVs with a screen size smaller than 32 inches."
+      fr: "Les TV avec une taille d'écran inférieure à 32 pouces."
+
+  - id: "medium_screens"
+    group: "screen_size"
+    criterias:
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "GREATER_THAN"
+        value: "32"
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "LOWER_THAN"
+        value: "55"
+    image: "medium-screen.png"
+    url:
+      en: "medium-screens"
+      fr: "ecrans-moyens"
+    caption:
+      en: 'Medium screens (32" - 55")'
+      fr: "Diagonale entre 32 et 55 pouces"
+    title:
+      en: "Medium Screen TVs"
+      fr: "Écrans moyens"
+    description:
+      en: "TVs with a screen size between 32 and 55 inches."
+      fr: "Les TV avec une taille d'écran comprise entre 32 et 55 pouces."
+
+  - id: "large_screens"
+    group: "screen_size"
+    criterias:
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "GREATER_THAN"
+        value: "55"
+    image: "large-screen.png"
+    url:
+      en: "large-screens"
+      fr: "grands-ecrans"
+    caption:
+      en: 'Large screens (> 55")'
+      fr: "Diagonale > 55 pouces"
+    title:
+      en: "Large Screen TVs"
+      fr: "Grands écrans"
+    description:
+      en: "TVs with a screen size greater than 55 inches."
+      fr: "Les TV avec une taille d'écran supérieure à 55 pouces."

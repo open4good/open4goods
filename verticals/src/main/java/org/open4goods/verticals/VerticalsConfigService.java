@@ -60,14 +60,16 @@ public class VerticalsConfigService {
 	private final List<String> configPaths = new ArrayList<>();
 	private final List<String> impactScorePaths = new ArrayList<>();
 	private final List<String> impactScoreJsonPaths = new ArrayList<>();
-	
+
 	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:verticals/_default.yml";
 	private static final String CLASSPATH_ATTRIBUTES = "classpath*:attributes/*.yml";
-	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:verticals/impactscores/_default.yml";
+	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:/verticals/impactscores/_default.yml";
+	private static final String CLASSPATH_ASSISTANTS = "classpath:/assistant/*.yml";
 
 	private SerialisationService serialisationService;
 
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
+	private final Map<String, NudgeToolConfig> assistantConfigs = new ConcurrentHashMap<>(50);
 
 	// The cache of categories to verticalconfig association. datasource (or all) ->
 	// category -> VerticalConfig
@@ -85,7 +87,7 @@ public class VerticalsConfigService {
 
 	//
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1);
-	
+
 	private GoogleTaxonomyService googleTaxonomyService;
 
 	// The default config
@@ -97,12 +99,12 @@ public class VerticalsConfigService {
 		this.serialisationService = serialisationService;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.resourceResolver = resourceResolver;
-		
+
 		// Default paths
 		this.configPaths.add("classpath:/verticals/*.yml");
 		this.impactScorePaths.add("classpath:/verticals/impactscores/*.yml");
 		this.impactScoreJsonPaths.add("classpath:/verticals/impactscores/*.json");
-		
+
 		// initial configs loads
 		loadConfigs();
 
@@ -112,15 +114,15 @@ public class VerticalsConfigService {
 		});
 
 	}
-	
+
 	public void addConfigPath(String path) {
 		this.configPaths.add(path);
 	}
-	
+
 	public void addImpactScorePath(String path) {
 		this.impactScorePaths.add(path);
 	}
-	
+
 	public void addImpactScoreJsonPath(String path) {
 		this.impactScoreJsonPaths.add(path);
 	}
@@ -151,8 +153,9 @@ public class VerticalsConfigService {
 		/////////////////////////////////////////
 		// Load configurations from classpath
 		/////////////////////////////////////////
-		
+
 		Map<String, ImpactScoreConfig> impactScores = loadImpactScoreConfigs();
+		refreshAssistantConfigs();
 
 		for (VerticalConfig uc : loadFromClasspath(impactScores)) {
 			logger.info("Adding config {} from classpath", uc.getId());
@@ -200,12 +203,68 @@ public class VerticalsConfigService {
 	}
 
 	/**
+	 * Reloads assistant definitions from the classpath.
+	 */
+	private void refreshAssistantConfigs() {
+		Map<String, NudgeToolConfig> loadedConfigs = new ConcurrentHashMap<>(50);
+		Resource[] resources;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_ASSISTANTS);
+		} catch (IOException e) {
+			logger.error("Cannot load assistants from {} : {}", CLASSPATH_ASSISTANTS, e.getMessage());
+			return;
+		}
+
+		for (Resource resource : resources) {
+			String filename = resource.getFilename();
+			if (filename == null || !filename.endsWith(".yml")) {
+				logger.warn("Skipping assistant resource without filename: {}", resource);
+				continue;
+			}
+			String id = filename.substring(0, filename.length() - 4);
+			try (InputStream inputStream = resource.getInputStream()) {
+				NudgeToolConfig config = serialisationService.fromYaml(inputStream, NudgeToolConfig.class);
+				if (config != null) {
+					loadedConfigs.put(id, config);
+					logger.info("Loaded assistant config {}", id);
+				}
+			} catch (Exception e) {
+				logger.error("Cannot retrieve assistant config : {}", filename, e);
+			}
+		}
+
+		synchronized (assistantConfigs) {
+			assistantConfigs.clear();
+			assistantConfigs.putAll(loadedConfigs);
+		}
+	}
+
+	/**
+	 * Retrieve the assistant configuration by its identifier.
+	 *
+	 * @param assistantId the assistant identifier
+	 * @return the assistant configuration, or {@code null} when missing
+	 */
+	public NudgeToolConfig getAssistantConfigById(String assistantId) {
+		return assistantConfigs.get(assistantId);
+	}
+
+	/**
+	 * Returns all assistant configurations keyed by identifier.
+	 *
+	 * @return a snapshot of the assistant configurations map
+	 */
+	public Map<String, NudgeToolConfig> getAssistantConfigs() {
+		return Map.copyOf(assistantConfigs);
+	}
+
+	/**
 	 *
 	 * @return the available verticals configurations from classpath
 	 */
 	private List<VerticalConfig> loadFromClasspath(Map<String, ImpactScoreConfig> impactScores) {
 		List<VerticalConfig> ret = new ArrayList<>();
-		
+
 		for (String path : configPaths) {
 			try {
 				Resource[] resources = resourceResolver.getResources(path);
@@ -215,7 +274,7 @@ public class VerticalsConfigService {
 					}
 					try {
 						VerticalConfig config = getConfig(r.getInputStream(), getDefaultConfig());
-						
+
 						if (config.getId() == null) {
 							logger.error("Vertical config loaded from {} has no ID. Skipping.", r.getFilename());
 							continue;
@@ -227,18 +286,18 @@ public class VerticalsConfigService {
 							logger.warn("Duplicate Vertical ID found: {}. Skipping {}", config.getId(), r.getFilename());
 							continue;
 						}
-		
+
 						if (impactScores.containsKey(config.getId())) {
 							ImpactScoreConfig isConfig = impactScores.get(config.getId());
 							config.setImpactScoreConfig(isConfig);
-							
+
 							// If we have an AI result (likely from JSON), we sync available criteria to match the JSON definition
 							// This ensures that criteria defined in JSON take precedence over YAML/default
 							if (isConfig.getAiResult() != null && isConfig.getAiResult().getAvailableCriterias() != null) {
 								config.setAvailableImpactScoreCriterias(isConfig.getAiResult().getAvailableCriterias());
 							}
 						}
-		
+
 						ret.add(config);
 					} catch (Exception e) {
 						logger.error("Error loading vertical config from {}", r.getFilename(), e);
@@ -275,14 +334,14 @@ public class VerticalsConfigService {
 					}
 					try (InputStream inputStream = r.getInputStream()) {
 						ImpactScoreConfig config = serialisationService.fromYaml(inputStream, ImpactScoreConfig.class);
-						
+
 						// Merging with default
 						if (defaultImpactScoreConfig != null && config != null) {
 							if (config.getMinDistinctValuesForSigma() == null) {
 								config.setMinDistinctValuesForSigma(defaultImpactScoreConfig.getMinDistinctValuesForSigma());
 							}
 						}
-						
+
 						String key = r.getFilename().replace(".yml", "");
 						configs.put(key, config);
 					} catch (Exception e) {
@@ -330,7 +389,7 @@ public class VerticalsConfigService {
 						}
 
 						config.setAiResult(aiResult);
-						
+
 						// Map weights from AI result to config
 						if (aiResult.getCriteriaWeights() != null) {
 							Map<String, Double> weights = new HashMap<>();
@@ -340,7 +399,7 @@ public class VerticalsConfigService {
 							config.setCriteriasPonderation(weights);
 							logger.debug("Mapped {} weights from JSON for {}", weights.size(), yamlKey);
 						}
-						
+
 					} catch (Exception e) {
 						logger.error("Error loading impact score JSON {}", r.getFilename(), e);
 					}
