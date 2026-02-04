@@ -27,6 +27,10 @@
       "readingTime": "Approx. {minutes} min read",
       "updated": "Updated {date}"
     },
+    "breadcrumbs": {
+      "blog": "Blog",
+      "home": "Home"
+    },
     "hero": {
       "eyebrow": "Nudger blog",
       "subtitle": "Short reads on sustainable appliances, nudges and the lessons we learn while building Nudger.",

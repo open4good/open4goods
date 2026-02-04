@@ -27,6 +27,10 @@
       "readingTime": "Env. {minutes} min de lecture",
       "updated": "Mis à jour {date}"
     },
+    "breadcrumbs": {
+      "blog": "Blog",
+      "home": "Accueil"
+    },
     "hero": {
       "eyebrow": "Blog Nudger",
       "subtitle": "Des articles courts sur la consommation responsable et les coulisses de Nudger.",
