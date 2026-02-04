@@ -58,7 +58,8 @@ export interface Filter {
 export const FilterOperatorEnum = {
     Term: 'term',
     Range: 'range',
-    RankingPercentile: 'rankingPercentile'
+    RankingPercentile: 'rankingPercentile',
+    Contains: 'contains'
 } as const;
 export type FilterOperatorEnum = typeof FilterOperatorEnum[keyof typeof FilterOperatorEnum];
 
