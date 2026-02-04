@@ -221,4 +221,62 @@ describe('NudgeToolWizard', () => {
       'recommendations',
     ])
   })
+
+  it('omits category step when assistant config is provided', async () => {
+    const wrapper = await mountSuspended(NudgeToolWizard, {
+      global: {
+        mocks: {
+          $t: (t: string) => t,
+        },
+        stubs: {
+          RoundedCornerCard: {
+            template: '<div><slot /><slot name="corner" /></div>',
+          },
+          VBtn: true,
+          VAvatar: true,
+          VImg: true,
+          VIcon: true,
+          VProgressLinear: true,
+          VWindow: { template: '<div><slot /></div>' },
+          VWindowItem: { template: '<div><slot /></div>', props: ['value'] },
+          VTooltip: {
+            props: ['text', 'location'],
+            template:
+              '<div class="v-tooltip-stub"><slot name="activator" :props="{}" /><slot /></div>',
+          },
+          NudgeToolStepCategory: {
+            template: '<div data-step="category"></div>',
+          },
+          NudgeToolStepScores: { template: '<div data-step="scores"></div>' },
+          NudgeToolStepCondition: {
+            template: '<div data-step="condition"></div>',
+          },
+          NudgeToolStepSubsetGroup: {
+            template: '<div data-step="subset"></div>',
+          },
+          NudgeToolStepRecommendations: {
+            template: '<div data-step="recommendations"></div>',
+          },
+        },
+      },
+      props: {
+        assistantCategoryId: 'tv',
+        assistantConfig: {
+          scores: [],
+          subsets: [
+            {
+              id: 'distance',
+              group: 'distance',
+            },
+          ],
+        },
+      },
+    })
+
+    const stepKeys = wrapper
+      .findAll('[data-step]')
+      .map(node => node.attributes('data-step'))
+
+    expect(stepKeys).toEqual(['subset', 'condition', 'recommendations'])
+  })
 })

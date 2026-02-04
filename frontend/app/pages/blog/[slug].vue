@@ -15,7 +15,12 @@ const XwikiFullPageRenderer = defineAsyncComponent(
 )
 
 const route = useRoute()
+const { t } = useI18n()
 const { currentArticle, loading, error, fetchArticle } = useBlog()
+
+const assistantCategoryMappings: Record<string, string> = {
+  'quelle-taille-de-tv-choisir-pour-son-salon': 'tv',
+}
 
 const slug = computed(() => {
   const rawSlug = route.params.slug
@@ -54,6 +59,11 @@ await useAsyncData(
 )
 
 const article = computed(() => currentArticle.value as BlogArticle | null)
+
+const assistantConfigId = computed(() => slug.value)
+const assistantCategoryId = computed(
+  () => (slug.value ? assistantCategoryMappings[slug.value] ?? null : null)
+)
 </script>
 
 <template>
@@ -62,7 +72,7 @@ const article = computed(() => currentArticle.value as BlogArticle | null)
     <v-row>
       <v-col cols="12">
         <v-btn variant="text" prepend-icon="mdi-arrow-left" to="/blog">
-          Retour
+          {{ t('blog.article.back') }}
         </v-btn>
 
         <v-skeleton-loader
@@ -76,6 +86,12 @@ const article = computed(() => currentArticle.value as BlogArticle | null)
         </v-alert>
 
         <TheArticle v-else-if="article" :article="article" />
+
+        <NudgeToolAssistantWizard
+          v-if="article && assistantConfigId"
+          :assistant-id="assistantConfigId"
+          :assistant-category-id="assistantCategoryId"
+        />
       </v-col>
     </v-row>
   </v-container>

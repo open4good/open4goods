@@ -279,6 +279,7 @@ import {
 import type {
   Filter,
   FilterRequestDto,
+  NudgeToolConfigDto,
   NudgeToolSubsetGroupDto,
   ProductConditionSelection,
   ProductDto,
@@ -304,6 +305,8 @@ const props = defineProps<{
   initialFilters?: FilterRequestDto
   initialCategoryId?: string | null
   initialSubsets?: string[]
+  assistantConfig?: NudgeToolConfigDto
+  assistantCategoryId?: string | null
   compact?: boolean
 }>()
 
@@ -321,7 +324,9 @@ const { fetchCategories, selectCategoryBySlug, currentCategory } =
   useCategories()
 
 const categories = useState<VerticalCategoryDto[]>('nudge-categories', () => [])
-const selectedCategoryId = ref<string | null>(props.initialCategoryId ?? null)
+const selectedCategoryId = ref<string | null>(
+  props.assistantCategoryId ?? props.initialCategoryId ?? null
+)
 const condition = ref<ProductConditionSelection>([])
 const selectedScores = ref<string[]>([])
 const activeSubsetIds = ref<string[]>(props.initialSubsets ?? [])
@@ -338,7 +343,18 @@ const hasZeroMatches = computed(
 
 const activeStepKey = ref('category')
 const previousStepKey = ref<string | null>(null)
-const visitedStepKeys = ref<string[]>(['category'])
+const visitedStepKeys = ref<string[]>([])
+
+const isAssistantMode = computed(() => Boolean(props.assistantConfig))
+
+watch(
+  () => props.assistantCategoryId,
+  nextValue => {
+    if (nextValue !== undefined) {
+      selectedCategoryId.value = nextValue ?? null
+    }
+  }
+)
 
 const selectedCategory = computed(() => {
   // Prefer detailed category if loaded and matching
@@ -359,7 +375,9 @@ const categoryIcon = computed(
     'mdi-tag'
 )
 
-const nudgeConfig = computed(() => selectedCategory.value?.nudgeToolConfig)
+const nudgeConfig = computed(
+  () => props.assistantConfig ?? selectedCategory.value?.nudgeToolConfig
+)
 
 const unknownCategory = computed<NudgeToolCategory>(() => ({
   id: 'unknown-category',
@@ -540,18 +558,20 @@ type WizardStep = {
 const steps = computed<WizardStep[]>(() => {
   const sequence: WizardStep[] = []
 
-  sequence.push({
-    key: 'category',
-    component: NudgeToolStepCategory,
-    title: t('nudge-tool.steps.category.title'),
-    subtitle: t('nudge-tool.steps.category.subtitle'),
-    props: {
-      categories: displayCategories.value,
-      selectedCategoryId: selectedCategoryId.value,
-      isAuthenticated: isLoggedIn.value,
-      compact: props.compact ?? false,
-    },
-  })
+  if (!isAssistantMode.value) {
+    sequence.push({
+      key: 'category',
+      component: NudgeToolStepCategory,
+      title: t('nudge-tool.steps.category.title'),
+      subtitle: t('nudge-tool.steps.category.subtitle'),
+      props: {
+        categories: displayCategories.value,
+        selectedCategoryId: selectedCategoryId.value,
+        isAuthenticated: isLoggedIn.value,
+        compact: props.compact ?? false,
+      },
+    })
+  }
 
   if ((nudgeConfig.value?.scores?.length ?? 0) > 0) {
     sequence.push({
@@ -654,14 +674,18 @@ watch(
 watch(
   steps,
   allSteps => {
+    const firstStepKey = allSteps[0]?.key
     if (!allSteps.find(step => step.key === activeStepKey.value)) {
-      activeStepKey.value = allSteps[0]?.key ?? 'recommendations'
+      activeStepKey.value = firstStepKey ?? 'recommendations'
     }
 
     const validKeys = allSteps.map(step => step.key)
     visitedStepKeys.value = visitedStepKeys.value.filter(key =>
       validKeys.includes(key)
     )
+    if (!visitedStepKeys.value.length && firstStepKey) {
+      visitedStepKeys.value = [firstStepKey]
+    }
   },
   { immediate: true, deep: true }
 )
@@ -703,6 +727,10 @@ const getFirstContentStepKey = () =>
   steps.value.find(step => step.key !== 'category')?.key
 
 const onCategorySelect = async (categoryId: string) => {
+  if (isAssistantMode.value) {
+    return
+  }
+
   selectedCategoryId.value = categoryId
 
   // Optimistically fetch details to ensure attributes are available
@@ -863,6 +891,10 @@ const handleProgressClick = (stepKey: string) => {
 const windowTransitionDurationMs = 0
 
 const resetCategorySelectionState = () => {
+  if (isAssistantMode.value) {
+    return
+  }
+
   selectedCategoryId.value = null
   selectedScores.value = []
   activeSubsetIds.value = []
@@ -892,6 +924,10 @@ const scheduleCategoryReset = () => {
 }
 
 const resetForCategorySelection = () => {
+  if (isAssistantMode.value) {
+    return
+  }
+
   activeStepKey.value = 'category'
   scheduleCategoryReset()
 }
@@ -926,7 +962,7 @@ onMounted(async () => {
       null
   }
 
-  if (props.initialCategoryId) {
+  if (props.initialCategoryId && !isAssistantMode.value) {
     const nextStepKey = getFirstContentStepKey()
     if (nextStepKey) {
       activeStepKey.value = nextStepKey

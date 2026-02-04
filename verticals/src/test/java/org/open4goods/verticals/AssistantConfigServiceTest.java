@@ -36,7 +36,8 @@ class AssistantConfigServiceTest {
      */
     @Test
     void shouldLoadAssistantConfigWithDistanceGroup() {
-        NudgeToolConfig config = verticalsConfigService.getAssistantConfigById("tv");
+        NudgeToolConfig config = verticalsConfigService.getAssistantConfigById(
+                "quelle-taille-de-tv-choisir-pour-son-salon");
 
         assertThat(config).as("TV assistant config should be loaded").isNotNull();
         assertThat(config.getSubsetGroups())

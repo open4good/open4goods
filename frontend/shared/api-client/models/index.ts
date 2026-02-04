@@ -25,6 +25,7 @@ export * from './AiSource';
 export * from './AttributeConfigDto';
 export * from './AttributeParserConfig';
 export * from './AttributesConfigDto';
+export * from './AssistantConfigDto';
 export * from './AuthTokensDto';
 export * from './BarcodeAggregationProperties';
 export * from './BlogPostDto';

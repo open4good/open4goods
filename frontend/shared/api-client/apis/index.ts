@@ -3,6 +3,7 @@
 export * from './AdministrationApi';
 export * from './AffiliationApi';
 export * from './AgentsApi';
+export * from './AssistantConfigsApi';
 export * from './AuthenticationApi';
 export * from './BlogApi';
 export * from './CategoriesApi';
