@@ -703,7 +703,8 @@ const props = defineProps({
 const { locale, t, n } = useI18n()
 const theme = useTheme()
 const { isLoggedIn } = useAuth()
-const { getRemaining, refreshQuota, recordUsage } = useIpQuota()
+const { getRemaining, invalidateQuota, refreshQuota, recordUsage } =
+  useIpQuota()
 
 const review = ref<ReviewContent | null>(normalizeReview(props.initialReview))
 const createdMs = ref<number | null>(props.reviewCreatedAt ?? null)
@@ -1107,6 +1108,7 @@ const triggerGeneration = async (force: boolean = false) => {
 
     isDialogOpen.value = false
     recordUsage(quotaCategory)
+    await invalidateQuota(quotaCategory)
   } catch (error) {
     errorMessage.value =
       error instanceof Error

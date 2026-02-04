@@ -2,6 +2,7 @@ import { useStorage } from '@vueuse/core'
 import type { IpQuotaStatusDto, IpQuotaCategory } from '~~/shared/api-client'
 
 const STORAGE_KEY = 'nudger-ip-quota-v1'
+const DEFAULT_TTL_MS = 60 * 60 * 1000
 
 /**
  * Local storage payload tracking the latest IP quota status per category.
@@ -52,18 +53,31 @@ export const useIpQuota = () => {
     })
   }
 
-  const refreshQuota = async (category: IpQuotaCategory) => {
+  const refreshQuota = async (
+    category: IpQuotaCategory,
+    options: { force?: boolean } = {}
+  ) => {
     if (!import.meta.client) {
       return null
     }
 
+    const cached = getEntry(category)
+    if (
+      cached &&
+      !options.force &&
+      Date.now() - cached.lastSync < DEFAULT_TTL_MS
+    ) {
+      return {
+        category,
+        used: cached.used,
+        remaining: cached.remaining,
+        limit: cached.limit,
+        windowSeconds: cached.windowSeconds,
+      }
+    }
+
     const response = await $fetch<IpQuotaStatusDto>(`/api/quotas/${category}`, {
-      headers: {
-        'cache-control': 'no-cache',
-      },
-      query: {
-        cacheBuster: String(Date.now()),
-      },
+      headers: {},
     })
 
     applyQuotaStatus(category, response)
@@ -110,6 +124,8 @@ export const useIpQuota = () => {
   return {
     refreshQuota,
     recordUsage,
+    invalidateQuota: (category: IpQuotaCategory) =>
+      refreshQuota(category, { force: true }),
     getUsed,
     getRemaining,
     getLimit,
