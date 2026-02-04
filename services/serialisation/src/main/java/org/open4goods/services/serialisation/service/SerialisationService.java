@@ -178,6 +178,24 @@ public class SerialisationService {
     }
 
     /**
+     * Deserializes a JSON input stream into an object of the specified type.
+     *
+     * @param <T> the type of the object
+     * @param input the InputStream containing JSON data
+     * @param valueType the target class
+     * @return deserialized object
+     * @throws SerialisationException if deserialization fails
+     */
+    public <T> T fromJson(final InputStream input, final Class<T> valueType) throws SerialisationException {
+        try {
+            return jsonMapper.readValue(input, valueType);
+        } catch (final IOException e) {
+            logger.error("Error deserializing JSON InputStream to {}", valueType, e);
+            throw new SerialisationException("Error deserializing JSON InputStream", e);
+        }
+    }
+
+    /**
      * Deserializes a JSON string into a Map of String keys and values.
      *
      * @param value the JSON string

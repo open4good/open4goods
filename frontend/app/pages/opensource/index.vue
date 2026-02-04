@@ -388,7 +388,7 @@ const liveReportTabs = computed(() => [
     icon: 'mdi-cog-outline',
     label: String(t('opensource.live.tabs.maven.title')),
     description: String(t('opensource.live.tabs.maven.description')),
-    src: '/reports/maven-site/index.html',
+    src: '/reports/maven-site/project-info.html',
   },
 ])
 

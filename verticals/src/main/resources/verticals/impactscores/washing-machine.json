@@ -1,0 +1,750 @@
+{
+    "use_case": "consumer_comparison",
+    "geo_scope": "EU/France",
+    "vertical": "Machines à laver",
+    "available_criterias": [
+        "WARRANTY",
+        "POWER_CONSUMPTION_TYPICAL",
+        "DATA_QUALITY",
+        "POWER_CONSUMPTION_OFF",
+        "REPAIRABILITY_INDEX",
+        "WEIGHT",
+        "CLASSE_ENERGY"
+    ],
+    "positioning": {
+        "claim": "relative LCA-inspired score (ACV best-effort) for within-category comparison",
+        "not_an_absolute_footprint": true,
+        "what_it_means_for_users": "Ce score classe des lave-linge entre eux (marché UE/France) sur des proxies ACV clés (usage énergétique, durabilité/réparabilité, transparence des données). Il est pertinent pour choisir « le meilleur parmi des alternatives comparables », mais il ne remplace pas une ACV complète auditée (frontières, inventaires, scénarios, unité fonctionnelle détaillée). [S1][S2][S3] "
+    },
+    "reference_lifetime": {
+        "lifetime_years_reference": 12.0,
+        "lifetime_years_range": {
+            "min": 10.0,
+            "max": 15.0
+        },
+        "rationale": "Référence fixée à 12 ans, cohérente avec des estimations UE pour « gros électroménager » autour de 12,5 ans (2019→2023) [S14] et avec la littérature JRC liée à l’écolabel/éco-conception qui mobilise des hypothèses de durée de vie typique et des scénarios durabilité/réparabilité pour lave-linge [S6]. La plage 10–15 ans couvre la variabilité (intensité d’usage, pannes, maintenance, qualité, contexte) et évite de sur-optimiser le score relatif sur une valeur unique. [S6][S14] ",
+        "citations": [
+            "S6",
+            "S14"
+        ]
+    },
+    "gap_analysis_absolute_vs_relative": {
+        "what_is_missing_vs_full_lca": "Manquent typiquement : (1) inventaires complets (matières, composants, procédés, transport, maintenance, pièces) ; (2) frontières et allocation détaillées ; (3) unité fonctionnelle et profils d’usage (cycles, température, taux de remplissage) explicités ; (4) impacts multi-catégories complets (eau/détergents, toxicité, particules, etc.) ; (5) scénarios fin de vie et taux de collecte/recyclage ; (6) revue critique/assurance qualité au niveau ACV. Le score relatif repose sur quelques indicateurs disponibles, donc risque de « déplacement de charge » entre étapes/catégories. [S1][S2][S3][S25] ",
+        "why_relative_is_still_useful": "Pour le grand public, un score relatif est utile si (a) il est robuste (normalisation, outliers, données manquantes) et (b) il se cale sur la matérialité la plus déterminante. Il permet la comparabilité intra-catégorie et l’incitation à de meilleures performances et à plus de transparence, en cohérence avec la logique de comparabilité et de « benchmarking » promue par les cadres EF/PEF et par les dispositifs UE (étiquette énergie, exigences d’écoconception). [S3][S6][S7][S8] ",
+        "mitigations": [
+            "Ancrer les poids sur la matérialité typique « fabrication vs usage vs fin de vie » documentée par sources publiques (JRC/UE, ADEME) et cadres ACV (ISO/PEF) plutôt que sur des préférences arbitraires. [S1][S3][S6][S12] ",
+            "Limiter le double-comptage : regrouper mentalement les indicateurs corrélés (classe énergie, conso typique, conso veille/arrêt) en « bloc énergie » et répartir le poids à l’intérieur du bloc pour éviter de surpondérer la même information. [S7][S6] ",
+            "Prendre en compte que l’usage réel peut s’écarter des mesures standardisées (programme, température, charge, comportements) : la normalisation relative (ranking + sigma) réduit l’impact des extrêmes et des distributions atypiques ; et le poids énergie est majoritaire mais pas total, afin de ne pas rendre le score ultra-sensible à un seul paramètre. [S6][S28] ",
+            "Rehausser DATA_QUALITY car les critères manquants sont imputés à la moyenne : cela évite d’avantager les produits peu documentés (qui recevraient sinon mécaniquement des « scores moyens ») et aligne l’incitation sur les exigences EF/PEF de qualité/traçabilité des données. Garde-fou : DATA_QUALITY ne doit pas pouvoir compenser une très mauvaise performance énergétique. [S3][S4][S5] "
+        ]
+    },
+    "weighting_method": {
+        "approach": "evidence-weighted materiality + redundancy control + consumer comparability",
+        "key_principles": [
+            "literature-first weighting",
+            "lifecycle materiality for Machines à laver (usage énergétique + fabrication + durabilité)",
+            "anti double-counting (energy block split across correlated indicators)",
+            "robustness to outliers (sigma scoring caps) and discrete buckets (percentile fallback)",
+            "missing data virtualization (mean imputation) + DATA_QUALITY incentive",
+            "durability & repair proxies aligned with EU/FR policy direction (repair, spare parts, guarantees)"
+        ],
+        "assumptions": [
+            {
+                "assumption": "Le « bloc énergie » (classe énergie + consommation typique + veille/arrêt) est le déterminant le plus actionnable et souvent majeur des impacts climatiques/ressources sur la durée d’usage d’un lave-linge, même si la part exacte varie selon mix électrique, usage et modèle.",
+                "why_it_matters": "Justifie un poids majoritaire pour l’énergie (0,55) tout en conservant une part significative pour la fabrication/durabilité afin de rester robuste à la variabilité d’usage et aux arbitrages durée de vie vs efficacité. [S6][S12][S7] ",
+                "citations": [
+                    "S6",
+                    "S12",
+                    "S7"
+                ]
+            },
+            {
+                "assumption": "La durée de vie de référence est 12 ans (plage 10–15) pour comparer des produits sur un horizon réaliste UE/France.",
+                "why_it_matters": "La matérialité de la fabrication et l’intérêt de la réparabilité augmentent lorsque la durée d’usage est longue ; inversement, une durée trop courte surpondère l’efficacité énergétique à court terme. [S14][S6] ",
+                "citations": [
+                    "S14",
+                    "S6"
+                ]
+            },
+            {
+                "assumption": "WARRANTY et REPAIRABILITY_INDEX sont des proxys complémentaires (et partiellement corrélés) de durabilité : l’un reflète engagement/risque côté fabricant/vendeur, l’autre reflète la capacité effective à réparer (pièces, démontage, doc).",
+                "why_it_matters": "Justifie un « bloc durabilité » (0,22) scindé pour limiter le double-comptage tout en capturant l’effet ACV de l’allongement d’usage. [S13][S15][S16][S19][S21] ",
+                "citations": [
+                    "S13",
+                    "S15",
+                    "S16",
+                    "S19",
+                    "S21"
+                ]
+            },
+            {
+                "assumption": "DATA_QUALITY doit être plus élevé que dans une pondération ACV « classique » car l’imputation à la moyenne des critères manquants crée sinon un avantage structurel aux produits peu documentés.",
+                "why_it_matters": "Sans incitation explicite, les acteurs pourraient minimiser la divulgation de données (ou publier le strict minimum) tout en bénéficiant de scores « moyens » ; cela dégrade la comparabilité et la confiance. [S3][S4][S5] ",
+                "citations": [
+                    "S3",
+                    "S4",
+                    "S5"
+                ]
+            }
+        ]
+    },
+    "criteria_weights": [
+        {
+            "criterion": "WARRANTY",
+            "weight": 0.1,
+            "directionality": "higher_is_better",
+            "impact_dimensions": [
+                "circularity",
+                "resource_use",
+                "climate",
+                "social"
+            ],
+            "rationale": "La garantie (au-delà du minimum légal) est un proxy simple de durabilité/fiabilité et réduit le risque de remplacement prématuré, ce qui amortit les impacts de fabrication sur davantage d’années d’usage. Pertinent grand public et cohérent avec l’orientation UE vers la réparation et l’allongement d’usage. [S13][S19][S21][S22] ",
+            "overlap_notes": "Corrélé à REPAIRABILITY_INDEX (produits « durables » souvent mieux réparables) : on limite le double-comptage en partageant le « bloc durabilité » entre garantie (engagement/risque) et réparabilité (capacité technique/prix pièces). [S15][S16] ",
+            "guardrails": "La garantie ne doit pas compenser une très mauvaise performance énergétique : le bloc énergie reste majoritaire (0,55) et la contribution maximale de WARRANTY est plafonnée par son poids (0,10). Recommandation produit : imposer un plancher d’énergie (ex. percentile minimal) avant de laisser la durabilité améliorer fortement le score global. [S7][S8] ",
+            "evidence_strength": {
+                "level": "medium",
+                "why": "Lien durabilité→réduction d’impacts via allongement d’usage bien établi en ACV, mais WARRANTY reste un proxy (ne garantit pas à elle seule réparation effective ni durée d’usage réelle). Appui politique/public (UE/ADEME) robuste. [S13][S3] "
+            }
+        },
+        {
+            "criterion": "POWER_CONSUMPTION_TYPICAL",
+            "weight": 0.25,
+            "directionality": "lower_is_better",
+            "impact_dimensions": [
+                "climate",
+                "resource_use"
+            ],
+            "rationale": "La consommation en fonctionnement est le driver le plus direct des impacts d’usage (électricité) et un levier majeur d’amélioration (réglementation, étiquette énergie). Les méthodes UE (étiquette) s’appuient sur des mesures standardisées et un indicateur kWh/100 cycles ; le JRC documente l’importance de l’énergie et la variabilité liée aux comportements, ce qui justifie un poids élevé mais pas exclusif. [S7][S6][S10] ",
+            "overlap_notes": "Fort chevauchement avec CLASSE_ENERGY (classe dérivée d’un indicateur d’efficacité/consommation). Stratégie : répartir le poids énergie entre (i) consommation typique (valeur continue, sensible aux écarts) et (ii) classe (information discrète très lisible). [S7][S6] ",
+            "guardrails": "N/A (garde-fou global : la somme du bloc énergie est limitée à 0,55 pour éviter de « noyer » fabrication/durabilité ; et DATA_QUALITY ne peut pas compenser une mauvaise énergie). [S3][S12] ",
+            "evidence_strength": {
+                "level": "high",
+                "why": "Indicateur directement lié à l’usage énergétique, fortement encadré par l’UE (étiquette/éco-conception) et reconnu comme paramètre clé de performance environnementale en approche cycle de vie pour produits consommateurs d’énergie. [S7][S8][S3] "
+            }
+        },
+        {
+            "criterion": "DATA_QUALITY",
+            "weight": 0.15,
+            "directionality": "higher_is_better",
+            "impact_dimensions": [
+                "other",
+                "social"
+            ],
+            "rationale": "Comme les critères manquants sont imputés à la moyenne, un produit peu documenté recevrait sinon mécaniquement des scores « moyens » et pourrait être avantagé. Un poids de 0,15 incite à publier des données complètes/traçables, en cohérence avec les cadres EF/PEF (qualité, représentativité, revue). Il reste inférieur au bloc énergie pour ne pas écraser la matérialité environnementale. [S3][S4][S5] ",
+            "overlap_notes": "DATA_QUALITY est transversal et corrélé à tous les autres critères via l’imputation. Le poids est justifié non comme « impact environnemental direct », mais comme correction de biais méthodologique (anti-optimisation par non-divulgation) et amélioration de comparabilité. [S3][S4] ",
+            "guardrails": "Garde-fou anti-greenwashing : (1) plafonner l’amélioration possible via DATA_QUALITY à son poids (0,15) sans bonus non-linéaire ; (2) option recommandée : appliquer un « plancher énergie » (ex. score énergie minimal) pour éviter qu’un produit très énergivore soit « sauvé » par la transparence seule. [S7][S3] ",
+            "evidence_strength": {
+                "level": "medium",
+                "why": "Les cadres EF/PEF définissent des exigences et méthodes de qualité des données, mais la traduction en pondération de score est un choix de design. Le rationnel est fort compte tenu de l’imputation à la moyenne (biais structurel). [S3][S5] "
+            }
+        },
+        {
+            "criterion": "POWER_CONSUMPTION_OFF",
+            "weight": 0.05,
+            "directionality": "lower_is_better",
+            "impact_dimensions": [
+                "climate",
+                "resource_use"
+            ],
+            "rationale": "La consommation en mode arrêt/veille peut être faible mais non nulle à l’échelle annuelle et est explicitement ciblée par l’UE via des exigences d’écoconception dédiées. On lui attribue un poids modéré (0,05) : important pour éviter les « mauvais élèves » en veille, mais secondaire vs la consommation en cycle. [S9][S11] ",
+            "overlap_notes": "Corrélé au bloc énergie (même vecteur électricité). Stratégie : conserver un sous-poids dédié car les déterminants techniques (alimentation/électronique/connexion) diffèrent de la conso en cycle, et les règlements UE le traitent séparément. [S9] ",
+            "guardrails": "N/A (poids volontairement limité pour ne pas surpondérer un poste généralement plus faible ; l’essentiel du bloc énergie est porté par la conso typique et la classe). [S9] ",
+            "evidence_strength": {
+                "level": "high",
+                "why": "Encadrement réglementaire UE spécifique et mesurable. L’incertitude porte surtout sur l’importance relative par rapport à l’usage en cycle, d’où le poids modéré. [S9] "
+            }
+        },
+        {
+            "criterion": "REPAIRABILITY_INDEX",
+            "weight": 0.12,
+            "directionality": "higher_is_better",
+            "impact_dimensions": [
+                "circularity",
+                "resource_use",
+                "climate"
+            ],
+            "rationale": "La réparabilité augmente la probabilité de réparation plutôt que remplacement, ce qui réduit les impacts de fabrication amortis par année/cycle. En France, l’indice (puis l’indice de durabilité) structure l’information consommateur sur la documentation, la démontabilité, la disponibilité/prix des pièces, etc. Pertinent grand public et aligné avec la dynamique UE « right to repair ». [S15][S16][S17][S21][S22] ",
+            "overlap_notes": "Chevauchement partiel avec WARRANTY : la réparabilité décrit la capacité technique/économique de réparer, la garantie décrit l’engagement contractuel. Pour limiter le double-comptage, on répartit le bloc durabilité (0,22) entre les deux, et on conserve un bloc énergie majoritaire. [S15][S19] ",
+            "guardrails": "Même garde-fou que WARRANTY : ne pas compenser une très mauvaise efficacité énergétique. Recommandation : si REPAIRABILITY_INDEX provient d’un indice remplacé localement par l’indice de durabilité, garder une règle de correspondance transparente (et documenter la source) plutôt que d’inventer des valeurs. [S23][S24] ",
+            "evidence_strength": {
+                "level": "high",
+                "why": "Méthodes/paramètres définis par arrêtés et pages gouvernementales, donc mesurables et auditables en principe ; lien environnemental via allongement d’usage soutenu par sources publiques (ADEME/UE). [S13][S15][S21] "
+            }
+        },
+        {
+            "criterion": "WEIGHT",
+            "weight": 0.08,
+            "directionality": "lower_is_better",
+            "impact_dimensions": [
+                "resource_use",
+                "climate",
+                "other"
+            ],
+            "rationale": "Le poids est un proxy accessible de la quantité de matières (acier, plastiques, composants) et donc, à gros traits, des impacts de fabrication (extraction/production). Les données ADEME montrent un ordre de grandeur « fabrication » significatif dans l’empreinte totale d’un lave-linge, ce qui justifie un critère orienté fabrication, malgré son caractère imparfait. [S12][S1] ",
+            "overlap_notes": "Corrélé à la capacité/robustesse et indirectement à la conso (machines plus grandes). Pour limiter les biais, le poids est modéré (0,08) et ne doit pas pénaliser excessivement des machines plus lourdes si elles sont nettement meilleures en énergie/durabilité ; la normalisation sigma réduit aussi l’effet des extrêmes. [S6] ",
+            "guardrails": "Proxy uniquement : éviter d’en faire un critère dominant. Poids plafonné (0,08) et interprétation « à caractéristiques comparables » (capacité/usage). Recommandation : segmenter par capacité si possible en amont du scoring (même vertical), sinon la pondération reste prudente. [S6] ",
+            "evidence_strength": {
+                "level": "low",
+                "why": "WEIGHT n’est pas un indicateur ACV direct (composition, contenu recyclé, conception, électronique peuvent varier). Il sert de proxy grand public pour capter une partie de la matérialité fabrication mise en évidence par des bases/études, d’où un poids limité. [S12] "
+            }
+        },
+        {
+            "criterion": "CLASSE_ENERGY",
+            "weight": 0.25,
+            "directionality": "categorical",
+            "impact_dimensions": [
+                "climate",
+                "resource_use"
+            ],
+            "rationale": "La classe énergétique UE est un signal très lisible pour le consommateur, construit à partir d’un indicateur standardisé d’efficacité/consommation (kWh/100 cycles, etc.). Elle est centrale pour la comparaison grand public et alignée avec les objectifs UE de réduction des consommations d’énergie des produits. [S7][S10][S6] ",
+            "overlap_notes": "Redondant avec POWER_CONSUMPTION_TYPICAL : pour éviter le double-comptage, on partage le poids du bloc énergie entre une mesure continue (conso typique, 0,25) et un indicateur discret (classe, 0,25), et on garde un sous-critère veille/arrêt (0,05). [S7] ",
+            "guardrails": "Éviter de compter deux fois la même info : si la conso typique est directement dérivée de la même mesure que la classe, documenter la relation et conserver cette répartition (0,25/0,25) sans ajouter d’autres indicateurs énergétiques redondants. [S7][S6] ",
+            "evidence_strength": {
+                "level": "high",
+                "why": "Cadre réglementaire UE explicite, harmonisé et conçu pour la comparaison consommateurs ; indicateur robuste pour le classement relatif. Limite : dépendance aux conditions de test vs usage réel, d’où la complémentarité avec d’autres critères et la normalisation. [S7][S6] "
+            }
+        }
+    ],
+    "normalization_notes": {
+        "relative_ranking_0_100": "Chaque critère est converti en classement relatif intra-jeu de produits (meilleur=100, pire=0). Cela renforce la comparabilité « marché » mais signifie que le score dépend du panel (arrivée de nouveaux produits = déplacement des scores). Cohérent avec l’idée de benchmarking intra-catégorie. [S3] ",
+        "sigma_scoring_0_5": "La normalisation sigma (cap à ±2σ, μ→2,5/5) réduit l’influence d’outliers (ex. valeurs extrêmes de consommation ou poids) et stabilise les poids choisis : un critère fortement pondéré ne doit pas devenir instable à cause de quelques valeurs aberrantes. Cette logique est cohérente avec les pratiques d’analyses comparatives où la robustesse et la transparence des hypothèses sont essentielles. [S3][S25] ",
+        "percentile_fallback": "Fallback percentile (mid-rank) si distribution « low entropy » (beaucoup de valeurs identiques : classes énergie concentrées, garanties standardisées). Cela évite de sur-interpréter des micro-écarts ou des distributions en paliers. [S3] ",
+        "missing_value_virtualization": "Si un critère manque, imputation à la moyenne du panel : cela évite de pénaliser arbitrairement mais crée un risque d’avantage pour les produits sous-documentés. D’où un poids DATA_QUALITY (0,15) pour inciter la complétude et s’aligner sur les cadres EF/PEF (qualité/traçabilité des données). [S3][S5] "
+    },
+    "quality_checks": {
+        "criteria_weights_complete": true,
+        "weights_sum_to_1": true,
+        "sum_value": 1.0,
+        "unused_or_zero_weight_criterias": [
+        ],
+        "renormalization_rule_if_needed": "Si un critère devait être mis à 0 (cas exceptionnel), renormaliser proportionnellement les autres poids non nuls pour que la somme redevienne 1,0, en conservant la structure des blocs (énergie vs durabilité vs data quality vs fabrication)."
+    },
+    "materiality_summary": {
+        "dominant_lifecycle_stages_for_vertical": [
+            "manufacturing",
+            "use_phase",
+            "distribution",
+            "end_of_life"
+        ],
+        "short_summary": "Pour les lave-linge, la matérialité environnementale se répartit principalement entre (i) l’usage (électricité, et aussi eau/détergents non captés ici) et (ii) la fabrication (métaux/plastiques/électronique), avec une variabilité selon mix électrique et intensité d’usage. Des ordres de grandeur ADEME montrent une empreinte totale significative et une part fabrication non négligeable, tandis que les travaux JRC et la réglementation UE ciblent fortement l’efficacité en usage et la durabilité/réparabilité (pièces, info réparation). Cela justifie un bloc énergie majoritaire (0,55) + un bloc durabilité (0,22) + un proxy fabrication (poids, 0,08). [S12][S13][S6][S7][S8] "
+    },
+    "sources": [
+        {
+            "id": "S1",
+            "type": "standard",
+            "title": "ISO 14040:2006 — Environmental management — Life cycle assessment — Principles and framework",
+            "authors_or_org": "ISO",
+            "year": 2006,
+            "publisher": "International Organization for Standardization",
+            "url": "hxxps://www[dot]iso[dot]org/standard/37456[dot]html",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "positioning",
+                "gap analysis framing"
+            ],
+            "notes": "Cadre ACV (principes, objectif/périmètre, limites)."
+        },
+        {
+            "id": "S2",
+            "type": "standard",
+            "title": "ISO 14044:2006 — Environmental management — Life cycle assessment — Requirements and guidelines",
+            "authors_or_org": "ISO",
+            "year": 2006,
+            "publisher": "International Organization for Standardization",
+            "url": "hxxps://www[dot]iso[dot]org/standard/38498[dot]html",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "positioning",
+                "gap analysis framing"
+            ],
+            "notes": "Exigences et lignes directrices ACV (données, revue, reporting)."
+        },
+        {
+            "id": "S3",
+            "type": "public_agency",
+            "title": "Product Environmental Footprint (PEF) Guide — Consolidated version",
+            "authors_or_org": "European Commission (DG Environment)",
+            "year": 2013,
+            "publisher": "European Commission",
+            "url": "hxxps://www[dot]vliz[dot]be/imisdocs/publications/396125[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "positioning",
+                "gap analysis mitigations",
+                "normalization notes rationale"
+            ],
+            "notes": "Cadre EF/PEF (comparabilité, unité d’analyse, exigences de données)."
+        },
+        {
+            "id": "S4",
+            "type": "public_agency",
+            "title": "Product Environmental Footprint Category Rules Guidance (PEFCR Guidance) — version 6.3",
+            "authors_or_org": "European Commission (JRC)",
+            "year": 2017,
+            "publisher": "European Commission Joint Research Centre",
+            "url": "hxxps://eplca[dot]jrc[dot]ec[dot]europa[dot]eu/permalink/PEFCR_guidance_v6[dot]3-2[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "data quality rationale",
+                "comparability framing"
+            ],
+            "notes": "Guide PEFCR (focalisation sur paramètres matériels, exigences méthodo)."
+        },
+        {
+            "id": "S5",
+            "type": "public_agency",
+            "title": "Environmental Footprint (EF) Data Quality Rating Rules and Review Requirements",
+            "authors_or_org": "European Commission (JRC)",
+            "year": 2025,
+            "publisher": "European Commission Joint Research Centre",
+            "url": "hxxps://eplca[dot]jrc[dot]ec[dot]europa[dot]eu/permalink/EFDQR_rulebook[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "data quality rationale",
+                "missing data mitigation"
+            ],
+            "notes": "Règles DQR EF (qualité/representativité/traçabilité)."
+        },
+        {
+            "id": "S6",
+            "type": "public_agency",
+            "title": "Follow-up of the preparatory study for Ecodesign and Energy Label for household washing machines and household washer dryers — Explanatory notes (EUR 28807 EN, JRC108583)",
+            "authors_or_org": "Boyano A., Espinosa N., Villanueva A. (JRC-EC)",
+            "year": 2017,
+            "publisher": "Publications Office of the European Union",
+            "url": "hxxps://publications[dot]jrc[dot]ec[dot]europa[dot]eu/repository/bitstream/JRC108583/jrc108583_wash_explanatory-notes_20171206_final_clean[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "energy materiality context",
+                "lifetime reference rationale",
+                "overlap & behavior variability notes"
+            ],
+            "notes": "Base technique JRC pour révision étiquette énergie/écoconception (énergie, eau, comportement)."
+        },
+        {
+            "id": "S7",
+            "type": "regulation",
+            "title": "Commission Delegated Regulation (EU) 2019/2014 — Energy labelling of household washing machines and household washer-dryers",
+            "authors_or_org": "European Commission",
+            "year": 2019,
+            "publisher": "EUR-Lex",
+            "url": "hxxps://eur-lex[dot]europa[dot]eu/EN/legal-content/EN/TXT/?uri=CELEX:32019R2014",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "energy class rationale",
+                "typical consumption proxy justification"
+            ],
+            "notes": "Cadre réglementaire UE de la classe énergie et informations standardisées."
+        },
+        {
+            "id": "S8",
+            "type": "regulation",
+            "title": "Commission Regulation (EU) 2019/2023 — Ecodesign requirements for household washing machines and household washer-dryers",
+            "authors_or_org": "European Commission",
+            "year": 2019,
+            "publisher": "EUR-Lex",
+            "url": "hxxps://eur-lex[dot]europa[dot]eu/legal-content/EN/TXT/?uri=CELEX:32019R2023",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "durability/repair policy alignment",
+                "guardrails context"
+            ],
+            "notes": "Inclut exigences (dont aspects ressources/infos réparation selon versions/annexes)."
+        },
+        {
+            "id": "S9",
+            "type": "regulation",
+            "title": "Commission Regulation (EU) 2023/826 — Ecodesign requirements for off mode, standby mode, and networked standby energy consumption (repeals 1275/2008)",
+            "authors_or_org": "European Commission",
+            "year": 2023,
+            "publisher": "EUR-Lex",
+            "url": "hxxps://eur-lex[dot]europa[dot]eu/eli/reg/2023/826/oj/eng",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "off/standby rationale"
+            ],
+            "notes": "Cadre UE dédié veille/arrêt/réseau (pertinent POWER_CONSUMPTION_OFF)."
+        },
+        {
+            "id": "S10",
+            "type": "public_agency",
+            "title": "Washing machines (policy and product list) — Energy Efficient Products",
+            "authors_or_org": "European Commission",
+            "year": 2024,
+            "publisher": "European Commission",
+            "url": "hxxps://energy-efficient-products[dot]ec[dot]europa[dot]eu/product-list/washing-machines_en",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "energy block justification"
+            ],
+            "notes": "Page UE synthèse étiquette énergie/éco-conception lave-linge."
+        },
+        {
+            "id": "S11",
+            "type": "public_agency",
+            "title": "Standby, networked standby and Off mode (policy and scope) — Energy Efficient Products",
+            "authors_or_org": "European Commission",
+            "year": 2024,
+            "publisher": "European Commission",
+            "url": "hxxps://energy-efficient-products[dot]ec[dot]europa[dot]eu/product-list/standby-networked-standby-and-mode_en",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "off/standby rationale"
+            ],
+            "notes": "Page UE vulgarisation du règlement veille/arrêt."
+        },
+        {
+            "id": "S12",
+            "type": "public_agency",
+            "title": "Base Carbone ADEME — Électroménager (facteurs d’émission ACV, dont lave-linge 7 kg)",
+            "authors_or_org": "ADEME",
+            "year": 2024,
+            "publisher": "ADEME",
+            "url": "hxxps://prod-basecarbonesolo[dot]ademe-dri[dot]fr/documentation/UPLOAD_DOC_FR/electromenager_2[dot]htm",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "manufacturing vs total materiality",
+                "weight proxy justification"
+            ],
+            "notes": "Ordres de grandeur ACV (cradle-to-gate vs total) pour électroménager."
+        },
+        {
+            "id": "S13",
+            "type": "public_agency",
+            "title": "ADEME — Communiqué : Allonger la durée d’usage des objets : un gain pour la planète et pour le porte-monnaie",
+            "authors_or_org": "ADEME",
+            "year": 2024,
+            "publisher": "ADEME",
+            "url": "hxxps://www[dot]ademe[dot]fr/presse/communique-national/allonger-la-duree-dusage-des-objets-un-gain-pour-la-planete-et-pour-le-porte-monnaie/",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "durability benefit rationale",
+                "materiality summary"
+            ],
+            "notes": "Exemples chiffrés de gains environnementaux liés à l’allongement d’usage (incluant lave-linge)."
+        },
+        {
+            "id": "S14",
+            "type": "public_agency",
+            "title": "Product lifespans — monitoring trends in Europe (EEA Briefing, published 17 Dec 2024)",
+            "authors_or_org": "European Environment Agency (EEA)",
+            "year": 2024,
+            "publisher": "EEA",
+            "url": "hxxps://www[dot]eea[dot]europa[dot]eu/en/analysis/publications/product-lifespans-monitoring-trends",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "lifetime reference range"
+            ],
+            "notes": "Donne des tendances de durée de vie des appareils ménagers (grands appareils ~12,5 ans en 2023)."
+        },
+        {
+            "id": "S15",
+            "type": "regulation",
+            "title": "Arrêté du 29 décembre 2020 — Critères/sous-critères et système de notation de l’indice de réparabilité des lave-linges ménagers à chargement frontal",
+            "authors_or_org": "Gouvernement français",
+            "year": 2020,
+            "publisher": "Légifrance",
+            "url": "hxxps://www[dot]legifrance[dot]gouv[dot]fr/jorf/id/JORFTEXT000042838115",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "repairability index rationale",
+                "overlap notes warranty vs repairability"
+            ],
+            "notes": "Cadre officiel FR du calcul de l’indice de réparabilité (lave-linge hublot)."
+        },
+        {
+            "id": "S16",
+            "type": "regulation",
+            "title": "Arrêté du 22 avril 2022 — Critères/sous-critères et système de notation de l’indice de réparabilité des lave-linges ménagers à chargement par le dessus",
+            "authors_or_org": "Gouvernement français",
+            "year": 2022,
+            "publisher": "Légifrance",
+            "url": "hxxps://www[dot]legifrance[dot]gouv[dot]fr/jorf/id/JORFTEXT000045742683",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "repairability index rationale"
+            ],
+            "notes": "Cadre officiel FR du calcul de l’indice de réparabilité (lave-linge top)."
+        },
+        {
+            "id": "S17",
+            "type": "public_agency",
+            "title": "Indice de réparabilité — Ministère de la Transition écologique (France)",
+            "authors_or_org": "Ministère de la Transition écologique",
+            "year": 2024,
+            "publisher": "ecologie.gouv.fr",
+            "url": "hxxps://www[dot]ecologie[dot]gouv[dot]fr/politiques-publiques/indice-reparabilite",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "repairability index context (policy)"
+            ],
+            "notes": "Page FR officielle (objectif, périmètre, base légale)."
+        },
+        {
+            "id": "S18",
+            "type": "public_agency",
+            "title": "Indice de réparabilité — Notice d’information / mode de calcul (v3.0)",
+            "authors_or_org": "Ministère de la Transition écologique (France)",
+            "year": 2024,
+            "publisher": "ecologie.gouv.fr (PDF)",
+            "url": "hxxps://www[dot]ecologie[dot]gouv[dot]fr/sites/default/files/notice_information_mode_calcul_indice_reparabilite_v3[dot]0_0[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "repairability index rationale (what it measures)"
+            ],
+            "notes": "Notice officielle détaillant les composantes de l’indice."
+        },
+        {
+            "id": "S19",
+            "type": "regulation",
+            "title": "Directive (EU) 2019/771 — Contracts for the sale of goods",
+            "authors_or_org": "European Parliament and Council",
+            "year": 2019,
+            "publisher": "EUR-Lex",
+            "url": "hxxps://eur-lex[dot]europa[dot]eu/eli/dir/2019/771/oj/eng",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "warranty context"
+            ],
+            "notes": "Cadre UE sur conformité et responsabilité du vendeur (référence contexte garantie)."
+        },
+        {
+            "id": "S20",
+            "type": "public_agency",
+            "title": "Consumer sales and guarantees — European Commission (overview of Directive (EU) 2019/771)",
+            "authors_or_org": "European Commission",
+            "year": 2025,
+            "publisher": "European Commission",
+            "url": "hxxps://commission[dot]europa[dot]eu/law/law-topic/consumer-protection-law/consumer-contract-law/consumer-sales-and-guarantees_en",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "warranty context (2-year liability summary)"
+            ],
+            "notes": "Synthèse Commission (application, 2 ans, documents)."
+        },
+        {
+            "id": "S21",
+            "type": "regulation",
+            "title": "Directive (EU) 2024/1799 — Common rules promoting the repair of goods (summary)",
+            "authors_or_org": "European Union",
+            "year": 2024,
+            "publisher": "EUR-Lex (Summary of EU legislation)",
+            "url": "hxxps://eur-lex[dot]europa[dot]eu/EN/legal-content/summary/common-rules-promoting-the-repair-of-goods-and-amending-related-eu-legislation[dot]html",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "repair policy alignment",
+                "durability rationale"
+            ],
+            "notes": "Résumé Eur-Lex du « right to repair » (promotion réparation)."
+        },
+        {
+            "id": "S22",
+            "type": "public_agency",
+            "title": "Directive on repair of goods — European Commission (implementation timeline and scope)",
+            "authors_or_org": "European Commission",
+            "year": 2023,
+            "publisher": "European Commission",
+            "url": "hxxps://commission[dot]europa[dot]eu/law/law-topic/consumer-protection-law/directive-repair-goods_en",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "repair policy alignment",
+                "warranty/repair context"
+            ],
+            "notes": "Page Commission (adoption, entrée en vigueur, transposition)."
+        },
+        {
+            "id": "S23",
+            "type": "regulation",
+            "title": "Arrêté du 5 avril 2024 — Critères/sous-critères et système de notation pour l’indice de durabilité des lave-linge ménagers",
+            "authors_or_org": "Gouvernement français",
+            "year": 2024,
+            "publisher": "Légifrance",
+            "url": "hxxps://www[dot]legifrance[dot]gouv[dot]fr/jorf/id/JORFTEXT000049372742",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "guardrails mapping context (repairability to durability index evolution)"
+            ],
+            "notes": "Contexte d’évolution de l’affichage FR (réparabilité → durabilité) pour lave-linge."
+        },
+        {
+            "id": "S24",
+            "type": "public_agency",
+            "title": "Indice de durabilité — Ministère de la Transition écologique (France)",
+            "authors_or_org": "Ministère de la Transition écologique",
+            "year": 2024,
+            "publisher": "ecologie.gouv.fr",
+            "url": "hxxps://www[dot]ecologie[dot]gouv[dot]fr/politiques-publiques/indice-durabilite",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "guardrails mapping context"
+            ],
+            "notes": "Page FR officielle sur l’indice de durabilité (périmètre, objectif)."
+        },
+        {
+            "id": "S25",
+            "type": "public_agency",
+            "title": "ILCD Handbook — General guide for Life Cycle Assessment: Detailed guidance",
+            "authors_or_org": "European Commission (JRC/ILCD)",
+            "year": 2010,
+            "publisher": "European Commission Joint Research Centre",
+            "url": "hxxps://eplca[dot]jrc[dot]ec[dot]europa[dot]eu/uploads/ILCD-Handbook-General-guide-for-LCA-DETAILED-GUIDANCE-12March2010-ISBN-fin-v1[dot]0[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": true,
+            "used_for": [
+                "gap analysis framing",
+                "robustness/transparency rationale"
+            ],
+            "notes": "Référence méthodologique ACV (périmètre, données, interprétation)."
+        },
+        {
+            "id": "S26",
+            "type": "public_agency",
+            "title": "Guide for EF compliant data sets — version 1.0",
+            "authors_or_org": "Fazio S. et al. (JRC)",
+            "year": 2019,
+            "publisher": "European Commission Joint Research Centre",
+            "url": "hxxps://eplca[dot]jrc[dot]ec[dot]europa[dot]eu/permalink/Guide_EF_compliant_data_sets_v1[dot]0[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "high",
+            "used": false,
+            "used_for": [
+                "optional deepening on data quality"
+            ],
+            "notes": "Consulté en soutien, non cité comme pilier principal."
+        },
+        {
+            "id": "S28",
+            "type": "other",
+            "title": "BEUC & ANEC comments on draft energy label washing machines / washer-dryers (context on representativeness of tests)",
+            "authors_or_org": "BEUC (European Consumer Organisation) & ANEC",
+            "year": 2019,
+            "publisher": "BEUC/ANEC (PDF)",
+            "url": "hxxps://www[dot]beuc[dot]eu/sites/default/files/publications/beuc-x-2019-015_anec-beuc_comments_draft_energy_label_washing_machines[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "medium",
+            "used": true,
+            "used_for": [
+                "behavior / test representativeness caveat"
+            ],
+            "notes": "Source parties prenantes : utile pour nuance usage réel vs conditions de test."
+        },
+        {
+            "id": "S29",
+            "type": "industry_methodology",
+            "title": "Baromètre SAV — Gros électroménager (durée d’usage / réparabilité) [PDF]",
+            "authors_or_org": "GIFAM",
+            "year": 2022,
+            "publisher": "GIFAM",
+            "url": "hxxps://www[dot]gifam[dot]fr/wp-content/uploads/2022/11/Barometre_SAV_GIFAM_-_GROS_ELECTROMENAGER[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "medium",
+            "used": false,
+            "used_for": [
+                "triangulation lifetime/durability context"
+            ],
+            "notes": "Consulté en triangulation (industrie), non utilisé comme base principale."
+        },
+        {
+            "id": "S30",
+            "type": "other",
+            "title": "Environmental Life Cycle Assessment (LCA) study of replacement and refurbishment options for domestic washing machines (PDF) — tentative access",
+            "authors_or_org": "eco-conception.fr (site)",
+            "year": 2020,
+            "publisher": "eco-conception.fr",
+            "url": "hxxps://www[dot]eco-conception[dot]fr/data/sources/users/8/environmental-life-cycle-assessment-lca-study-of-replacement-and-refurbishment-options-for-domestic-washing-machines[dot]pdf",
+            "accessed_date": "2026-02-04",
+            "reliability": "low",
+            "used": false,
+            "used_for": [
+            ],
+            "notes": "Tentative d’accès via lien direct : erreur technique lors de l’ouverture, donc non exploité."
+        }
+    ],
+    "search_log": [
+        {
+            "query": "Règlement (UE) 2019/2014 étiquette énergie lave-linge exigences informations consommation kWh 100 cycles",
+            "date": "2026-02-04",
+            "notes": "Fonder le bloc énergie sur la réglementation UE harmonisée."
+        },
+        {
+            "query": "Commission Regulation (EU) 2019/2023 ecodesign requirements household washing machines spare parts availability repair information",
+            "date": "2026-02-04",
+            "notes": "Relier durabilité/réparabilité aux exigences d’écoconception UE."
+        },
+        {
+            "query": "Follow-up preparatory study Ecodesign Energy Label household washing machines JRC108583 lifetime years",
+            "date": "2026-02-04",
+            "notes": "Obtenir éléments techniques (usage, comportement, hypothèses durée de vie)."
+        },
+        {
+            "query": "Product lifespans monitoring trends Europe washing machines 12.5 years 2023 EEA",
+            "date": "2026-02-04",
+            "notes": "Référencer une durée de vie moyenne UE récente pour grands appareils."
+        },
+        {
+            "query": "Arrêté du 29 décembre 2020 indice de réparabilité lave-linge ménagers à chargement frontal",
+            "date": "2026-02-04",
+            "notes": "Sourcer le REPAIRABILITY_INDEX via textes officiels France."
+        },
+        {
+            "query": "Regulation (EU) 2023/826 off mode standby mode networked standby EUR-Lex",
+            "date": "2026-02-04",
+            "notes": "Sourcer POWER_CONSUMPTION_OFF via règlement UE dédié veille/arrêt."
+        },
+        {
+            "query": "ADEME Base Carbone electromenager lave-linge à chargement frontal capacité 7 kg 539 275",
+            "date": "2026-02-04",
+            "notes": "Obtenir ordres de grandeur ACV (total vs fabrication) pour matérialité."
+        }
+    ]
+}

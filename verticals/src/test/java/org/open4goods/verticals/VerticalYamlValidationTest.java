@@ -77,6 +77,7 @@ class VerticalYamlValidationTest {
                 VerticalConfig loadedConfig = verticalsConfigService.getConfigById(config.getId());
                 if (loadedConfig != null) {
                     config.setImpactScoreConfig(loadedConfig.getImpactScoreConfig());
+                    config.setAvailableImpactScoreCriterias(loadedConfig.getAvailableImpactScoreCriterias());
                 }
 
                 assertVerticalConfig(config, resource.getFilename());
@@ -113,8 +114,8 @@ class VerticalYamlValidationTest {
         assertThat(tvConfig).isNotNull();
 
         assertThat(tvConfig.getAvailableImpactScoreCriterias())
-            .as("Default impact score criteria should be merged into the TV config")
-            .contains("BRAND_SUSTAINALYTICS_SCORING", "DATA_QUALITY");
+            .as("Default impact score criteria should be merged into the TV config, unless overridden by JSON")
+            .contains("DATA_QUALITY");
 
         List<String> attributeKeys = tvConfig.getAttributesConfig().getConfigs().stream()
             .map(AttributeConfig::getKey)

@@ -1,0 +1,26 @@
+id: test_json_fallback
+googleTaxonomyId: 12345
+i18n:
+  fr:
+    verticalHomeUrl: "test-vertical-home"
+    h1Title:
+      prefix: "Test Vertical"
+      attrs: []
+    singular:
+      prefix: "Test"
+      attrs: []
+    singularDesignation:
+      prefix: "Test Designation"
+      attrs: []
+    designation: []
+    productMetaTitle: "Test Title"
+    productMetaDescription: "Test Description"
+    productMetaOpenGraphTitle: "Test OG Title"
+    productMetaOpenGraphDescription: "Test OG Description"
+    productMetaTwitterTitle: "Test Twitter Title"
+    productMetaTwitterDescription: "Test Twitter Description"
+genAiConfig:
+  enabled: false
+matchingCategories:
+  test_source:
+    - "Test Category"

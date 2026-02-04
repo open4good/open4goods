@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.vertical.AttributeComparisonRule;
+import org.open4goods.model.ai.ImpactScoreAiResult;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.AttributesConfig;
@@ -56,11 +57,13 @@ public class VerticalsConfigService {
 
 	private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
 
-	private static final String CLASSPATH_VERTICALS = "classpath:/verticals/*.yml";
-	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:/verticals/_default.yml";
-	private static final String CLASSPATH_ATTRIBUTES = "classpath:/attributes/*.yml";
-	private static final String CLASSPATH_IMPACT_SCORES = "classpath:/verticals/impactscores/*.yml";
-	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:/verticals/impactscores/_default.yml";
+	private final List<String> configPaths = new ArrayList<>();
+	private final List<String> impactScorePaths = new ArrayList<>();
+	private final List<String> impactScoreJsonPaths = new ArrayList<>();
+	
+	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:verticals/_default.yml";
+	private static final String CLASSPATH_ATTRIBUTES = "classpath*:attributes/*.yml";
+	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:verticals/impactscores/_default.yml";
 
 	private SerialisationService serialisationService;
 
@@ -82,6 +85,8 @@ public class VerticalsConfigService {
 
 	//
 	private final ExecutorService executorService = Executors.newFixedThreadPool(1);
+	
+	private GoogleTaxonomyService googleTaxonomyService;
 
 	// The default config
 	private VerticalConfig defaultConfig;
@@ -90,8 +95,14 @@ public class VerticalsConfigService {
 			GoogleTaxonomyService googleTaxonomyService, ResourcePatternResolver resourceResolver) {
 		super();
 		this.serialisationService = serialisationService;
+		this.googleTaxonomyService = googleTaxonomyService;
 		this.resourceResolver = resourceResolver;
-
+		
+		// Default paths
+		this.configPaths.add("classpath:/verticals/*.yml");
+		this.impactScorePaths.add("classpath:/verticals/impactscores/*.yml");
+		this.impactScoreJsonPaths.add("classpath:/verticals/impactscores/*.json");
+		
 		// initial configs loads
 		loadConfigs();
 
@@ -100,6 +111,18 @@ public class VerticalsConfigService {
 			googleTaxonomyService.updateCategoryWithVertical(v);
 		});
 
+	}
+	
+	public void addConfigPath(String path) {
+		this.configPaths.add(path);
+	}
+	
+	public void addImpactScorePath(String path) {
+		this.impactScorePaths.add(path);
+	}
+	
+	public void addImpactScoreJsonPath(String path) {
+		this.impactScoreJsonPaths.add(path);
 	}
 
 	/**
@@ -133,12 +156,15 @@ public class VerticalsConfigService {
 
 		for (VerticalConfig uc : loadFromClasspath(impactScores)) {
 			logger.info("Adding config {} from classpath", uc.getId());
+            System.out.println("DEBUG: Adding to vConfs: " + uc.getId());
 			vConfs.put(uc.getId(), uc);
 		}
 		// Switching confs
 		synchronized (configs) {
 			configs.clear();
 			configs.putAll(vConfs);
+            System.out.println("DEBUG: Configs map size: " + configs.size());
+            System.out.println("DEBUG: Configs keys: " + configs.keySet());
 		}
 
 		// Associating categoriesToVertical
@@ -179,93 +205,150 @@ public class VerticalsConfigService {
 	 */
 	private List<VerticalConfig> loadFromClasspath(Map<String, ImpactScoreConfig> impactScores) {
 		List<VerticalConfig> ret = new ArrayList<>();
-		Resource[] resources = null;
-		try {
-			resources = resourceResolver.getResources(CLASSPATH_VERTICALS);
-		} catch (IOException e) {
-			logger.error("Cannot load  verticals from {} : {}", CLASSPATH_VERTICALS, e.getMessage());
-			return ret;
-		}
-
-		for (Resource r : resources) {
-			if (r.getFilename().equals(DEFAULT_CONFIG_FILENAME)) {
-				continue;
-			}
+		
+		for (String path : configPaths) {
 			try {
-				VerticalConfig config = getConfig(r.getInputStream(), getDefaultConfig());
-				// Removed check for null impactScoreConfig here as it will be injected later
+				Resource[] resources = resourceResolver.getResources(path);
+				for (Resource r : resources) {
+					if (expectedDefaultConfig(r)) {
+						continue;
+					}
+					try {
+						VerticalConfig config = getConfig(r.getInputStream(), getDefaultConfig());
+						
+						if (config.getId() == null) {
+							logger.error("Vertical config loaded from {} has no ID. Skipping.", r.getFilename());
+							continue;
+						}
 
-				// Check if ID is unique in the current list
-				boolean exists = ret.stream().anyMatch(v -> v.getId().equals(config.getId()));
-				if (exists) {
-					logger.error("DUPLICATE VERTICAL ID DETECTED: '{}' is already defined in another file. Ignoring definition from '{}'.",
-							config.getId(), r.getFilename());
-					continue;
+						// Check if ID is unique in the current list
+						boolean exists = ret.stream().anyMatch(v -> v.getId().equals(config.getId()));
+						if(exists){
+							logger.warn("Duplicate Vertical ID found: {}. Skipping {}", config.getId(), r.getFilename());
+							continue;
+						}
+		
+						if (impactScores.containsKey(config.getId())) {
+							ImpactScoreConfig isConfig = impactScores.get(config.getId());
+							config.setImpactScoreConfig(isConfig);
+							
+							// If we have an AI result (likely from JSON), we sync available criteria to match the JSON definition
+							// This ensures that criteria defined in JSON take precedence over YAML/default
+							if (isConfig.getAiResult() != null && isConfig.getAiResult().getAvailableCriterias() != null) {
+								config.setAvailableImpactScoreCriterias(isConfig.getAiResult().getAvailableCriterias());
+							}
+						}
+		
+						ret.add(config);
+					} catch (Exception e) {
+						logger.error("Error loading vertical config from {}", r.getFilename(), e);
+					}
 				}
-
-				ret.add(config);
-			} catch (IllegalStateException e) {
-				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
-			} catch (Exception e) {
-				logger.error("Cannot retrieve vertical config : {}", r.getFilename(), e);
-			}
-			
-			// Inject impact score config
-			try {
-				if (null != impactScores.get(r.getFilename())) {
-					ret.get(ret.size() - 1).setImpactScoreConfig(impactScores.get(r.getFilename()));
-				}
-			} catch (Exception e) {
-				logger.error("Cannot inject impact score config : {}", r.getFilename(), e);
+			} catch (IOException e) {
+				logger.error("Cannot load verticals from {} : {}", path, e.getMessage());
 			}
 		}
-
 		return ret;
 	}
 
 	private Map<String, ImpactScoreConfig> loadImpactScoreConfigs() {
 		Map<String, ImpactScoreConfig> configs = new HashMap<>();
-		ImpactScoreConfig defaultConfig = null;
+		ImpactScoreConfig defaultImpactScoreConfig = null;
 
 		// Loading default
 		try {
 			Resource r = resourceResolver.getResource(CLASSPATH_IMPACT_SCORES_DEFAULT);
 			if (r.exists()) {
-				defaultConfig = serialisationService.fromYaml(r.getInputStream(), ImpactScoreConfig.class);
+				defaultImpactScoreConfig = serialisationService.fromYaml(r.getInputStream(), ImpactScoreConfig.class);
 			}
 		} catch (Exception e) {
 			logger.error("Cannot load default impact score config from {}", CLASSPATH_IMPACT_SCORES_DEFAULT, e);
 		}
 
-		Resource[] resources;
-		try {
-			resources = resourceResolver.getResources(CLASSPATH_IMPACT_SCORES);
-		} catch (IOException e) {
-			logger.error("Cannot load impact score configs from {}", CLASSPATH_IMPACT_SCORES, e);
-			return configs;
+		// 1. Load from YAML (Standard loading)
+		for (String path : impactScorePaths) {
+			try {
+				Resource[] resources = resourceResolver.getResources(path);
+				for (Resource r : resources) {
+					if (expectedDefaultConfig(r)) {
+						continue;
+					}
+					try (InputStream inputStream = r.getInputStream()) {
+						ImpactScoreConfig config = serialisationService.fromYaml(inputStream, ImpactScoreConfig.class);
+						
+						// Merging with default
+						if (defaultImpactScoreConfig != null && config != null) {
+							if (config.getMinDistinctValuesForSigma() == null) {
+								config.setMinDistinctValuesForSigma(defaultImpactScoreConfig.getMinDistinctValuesForSigma());
+							}
+						}
+						
+						String key = r.getFilename().replace(".yml", "");
+						configs.put(key, config);
+					} catch (Exception e) {
+						logger.error("Error loading impact score config from {}", r.getFilename(), e);
+					}
+				}
+			} catch (IOException e) {
+				logger.error("Cannot load impact scores from {}", path, e);
+			}
 		}
 
-		for (Resource r : resources) {
-			if (DEFAULT_CONFIG_FILENAME.equals(r.getFilename())) {
-				continue;
-			}
-			try (InputStream inputStream = r.getInputStream()) {
-				ImpactScoreConfig config = serialisationService.fromYaml(inputStream, ImpactScoreConfig.class);
-				
-				// Merging with default
-				if (defaultConfig != null && config != null) {
-					if (config.getMinDistinctValuesForSigma() == null) {
-						config.setMinDistinctValuesForSigma(defaultConfig.getMinDistinctValuesForSigma());
+		// 2. Inject AI Results from JSON
+		injectAiResultsFromJson(configs);
+
+		return configs;
+	}
+
+	private boolean expectedDefaultConfig(Resource r) {
+		return r.getFilename().equals(DEFAULT_CONFIG_FILENAME) || r.getFilename().equals("_default.yml");
+	}
+
+	private void injectAiResultsFromJson(Map<String, ImpactScoreConfig> configs) {
+		for (String path : impactScoreJsonPaths) {
+			try {
+				Resource[] resources = resourceResolver.getResources(path);
+				for (Resource r : resources) {
+					try (InputStream inputStream = r.getInputStream()) {
+						String filename = r.getFilename();
+						String jsonBasename = filename.substring(0, filename.lastIndexOf('.'));
+						String yamlKey = jsonBasename;
+
+						ImpactScoreAiResult aiResult = serialisationService.fromJson(inputStream, ImpactScoreAiResult.class);
+
+						ImpactScoreConfig config = configs.get(yamlKey);
+						if (config == null) {
+							config = new ImpactScoreConfig();
+							configs.put(yamlKey, config);
+							logger.info("Created new ImpactScoreConfig for '{}' from JSON '{}' (no YAML found).", yamlKey, filename);
+						} else {
+							logger.info("Updating existing ImpactScoreConfig for '{}' from JSON '{}'.", yamlKey, filename);
+						}
+
+						if (config.getAiResult() != null) {
+							logger.warn("ImpactScoreConfig for '{}' already has an aiResult loaded from YAML. It will be overwritten by the JSON file '{}'.", yamlKey, filename);
+						}
+
+						config.setAiResult(aiResult);
+						
+						// Map weights from AI result to config
+						if (aiResult.getCriteriaWeights() != null) {
+							Map<String, Double> weights = new HashMap<>();
+							for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : aiResult.getCriteriaWeights()) {
+								weights.put(cw.criterion, cw.weight);
+							}
+							config.setCriteriasPonderation(weights);
+							logger.debug("Mapped {} weights from JSON for {}", weights.size(), yamlKey);
+						}
+						
+					} catch (Exception e) {
+						logger.error("Error loading impact score JSON {}", r.getFilename(), e);
 					}
-					// Note: texts could also be merged if needed, similar to VerticalConfig mergeDefaults
 				}
-				
-				configs.put(r.getFilename(), config);
-			} catch (Exception e) {
-				logger.error("Cannot load impact score config from {}", r.getFilename(), e);
+			} catch (IOException e) {
+				logger.warn("Cannot load impact score JSONs from {}", path, e);
 			}
 		}
-		return configs;
 	}
 
 	private Map<String, AttributeConfig> loadAttributeCatalog() {

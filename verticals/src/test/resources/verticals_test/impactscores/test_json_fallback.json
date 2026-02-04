@@ -1,0 +1,58 @@
+{
+  "use_case": "consumer_comparison",
+  "geo_scope": "EU",
+  "vertical": "test_vertical",
+  "available_criterias": ["TEST_CRITERIA"],
+  "positioning": {
+    "claim": "Test Claim",
+    "not_an_absolute_footprint": true,
+    "what_it_means_for_users": "Test meaning"
+  },
+  "reference_lifetime": {
+    "lifetime_years_reference": 5.0,
+    "lifetime_years_range": { "min": 3.0, "max": 8.0 },
+    "rationale": "Test rationale",
+    "citations": []
+  },
+  "gap_analysis_absolute_vs_relative": {
+    "what_is_missing_vs_full_lca": "Test gap",
+    "why_relative_is_still_useful": "Test utility",
+    "mitigations": []
+  },
+  "weighting_method": {
+    "approach": "Test approach",
+    "key_principles": [],
+    "assumptions": []
+  },
+  "criteria_weights": [
+    {
+      "criterion": "TEST_CRITERIA",
+      "weight": 0.5,
+      "directionality": "lower_is_better",
+      "impact_dimensions": [],
+      "rationale": "Test rationale",
+      "overlap_notes": "None",
+      "guardrails": "None",
+      "evidence_strength": { "level": "high", "why": "Test evidence" }
+    }
+  ],
+  "normalization_notes": {
+    "relative_ranking_0_100": "Test normalization",
+    "sigma_scoring_0_5": "Test sigma",
+    "percentile_fallback": "Test percentile",
+    "missing_value_virtualization": "Test missing"
+  },
+  "quality_checks": {
+    "criteria_weights_complete": true,
+    "weights_sum_to_1": true,
+    "sum_value": 1.0,
+    "unused_or_zero_weight_criterias": [],
+    "renormalization_rule_if_needed": "None"
+  },
+  "materiality_summary": {
+    "dominant_lifecycle_stages_for_vertical": [],
+    "short_summary": "Test materiality"
+  },
+  "sources": [],
+  "search_log": []
+}

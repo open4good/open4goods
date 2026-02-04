@@ -1,0 +1,284 @@
+{
+  "use_case": "consumer_comparison",
+  "geo_scope": "EU/France",
+  "vertical": "Fours",
+  "available_criterias": ["WARRANTY", "DATA_QUALITY", "WEIGHT", "CLASSE_ENERGY"],
+  "positioning": {
+    "claim": "relative LCA-inspired score (ACV best-effort) for within-category comparison",
+    "not_an_absolute_footprint": true,
+    "what_it_means_for_users": "Ce score compare les fours entre eux sur la base de critères environnementaux clés (énergie, matériaux, durabilité), sans fournir d'empreinte carbone absolue. Il vise à guider les consommateurs vers les modèles les plus écologiques de la catégorie, tout en incitant les fabricants à améliorer leurs pratiques [S7]."
+  },
+  "reference_lifetime": {
+    "lifetime_years_reference": 13,
+    "lifetime_years_range": {"min": 10, "max": 15},
+    "rationale": "Les données disponibles indiquent une durée d’usage typique d’environ 13 ans pour un four en France (moyenne récente, contre 15 ans il y a une décennie) [S1]. Certaines ACV utilisent un scénario de 10 ans de durée de vie pour les fours:contentReference[oaicite:0]{index=0}, tandis que d’autres sources mentionnent qu’un four peut encore fonctionner au-delà de 13-15 ans. Nous retenons 13 ans comme valeur de référence représentative (UE/FR).",
+    "citations": ["S1", "S2"]
+  },
+  "gap_analysis_absolute_vs_relative": {
+    "what_is_missing_vs_full_lca": "Par rapport à une ACV complète (ISO 14040), ce score relatif ne dispose pas d’un inventaire exhaustif de tous les flux de matières/énergie du cycle de vie. De plus, toutes les catégories d’impacts ne sont pas évaluées (ex: toxicité, eau, épuisement ressources):contentReference[oaicite:1]{index=1}. Les frontières du système sont simplifiées: le score utilise quelques critères proxies au lieu de modéliser chaque étape et processus en détail (pas d’unité fonctionnelle fine par usage, pas de prise en compte précise de la fabrication de chaque composant, etc.).",
+    "why_relative_is_still_useful": "Un score relatif simplifié reste utile pour comparer rapidement l’empreinte environnementale de produits similaires sur le marché. Il permet de distinguer les fours plus vertueux de manière lisible pour le grand public, et de stimuler des choix de consommation responsables:contentReference[oaicite:2]{index=2}. Malgré l’absence de données ACV complètes, un indice synthétique offre une robustesse suffisante pour orienter les acheteurs vers des produits globalement moins impactants.",
+    "mitigations": [
+      "Ancrer les pondérations sur la littérature ACV relative aux contributions des phases de cycle de vie:contentReference[oaicite:3]{index=3}:contentReference[oaicite:4]{index=4}",
+      "Éviter les double-comptes en séparant les critères corrélés et en documentant les chevauchements potentiels (énergie vs matériaux vs durabilité)",
+      "Rehausser le poids de DATA_QUALITY, car les données manquantes sont imputées à la moyenne (incitation à la transparence du fabricant):contentReference[oaicite:5]{index=5}"
+    ]
+  },
+  "weighting_method": {
+    "approach": "evidence-weighted materiality + redundancy control + consumer comparability",
+    "key_principles": [
+      "literature-first weighting",
+      "lifecycle materiality for Fours",
+      "anti double-counting",
+      "robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)",
+      "missing data virtualization + DATA_QUALITY incentive",
+      "ESG/brand sustainability included with guardrails"
+    ],
+    "assumptions": [
+      {
+        "assumption": "Une garantie plus longue implique une durée de vie réelle plus longue du produit (fiabilité accrue).",
+        "why_it_matters": "Si un four est utilisé 15 ans au lieu de 8 ans, l’impact de sa fabrication est amorti sur une période plus longue, réduisant son impact annuel:contentReference[oaicite:6]{index=6}. Nous supposons donc qu’une garantie élevée reflète un produit plus durable, ce qui est bénéfique pour l’environnement.",
+        "citations": ["S6"]
+      }
+    ]
+  },
+  "criteria_weights": [
+    {
+      "criterion": "CLASSE_ENERGY",
+      "weight": 0.35,
+      "directionality": "categorical",
+      "impact_dimensions": ["climate", "resource_use"],
+      "rationale": "La classe énergétique mesure l’efficacité du four pendant son utilisation. Un modèle mieux classé (ex : A) consomme moins d’électricité pour un même usage, ce qui réduit les émissions de CO₂ et la consommation de ressources énergétiques sur son cycle de vie d’utilisation:contentReference[oaicite:7]{index=7}. Comme la phase d’usage contribue significativement à l’impact climat d’un four (surtout avec un mix électrique carboné):contentReference[oaicite:8]{index=8}:contentReference[oaicite:9]{index=9}, ce critère est déterminant pour comparer l’empreinte carbone en utilisation.",
+      "overlap_notes": "Ce critère couvre l’impact lié à l’énergie consommée en usage, sans double-comptage avec d’autres critères. Il peut y avoir corrélation indirecte avec la taille du four (un grand four consomme plus) mais l’étiquette énergie standardise la mesure, limitant les biais. Aucune autre mesure de consommation n’est utilisée dans le score, évitant tout recouvrement.",
+      "guardrails": "La notation étant basée sur une échelle normalisée (A→G), les écarts extrêmes sont plafonnés par la méthode de scoring (ex : cap à 0 et 100) pour qu’un très mauvais appareil n’écrase pas les autres critères. Par ailleurs, un four très inefficace ne pourra pas compenser uniquement avec une bonne durabilité ou transparence, car l’énergie pèse le plus lourd.",
+      "evidence_strength": {
+        "level": "high",
+        "why": "De nombreuses études ACV confirment que l’énergie consommée à l’usage est un facteur majeur d’impact pour les fours:contentReference[oaicite:10]{index=10}:contentReference[oaicite:11]{index=11}. Par exemple, en Italie l’essentiel de la charge environnementale d’un four électrique provient de l’électricité utilisée (mix fossile):contentReference[oaicite:12]{index=12}. La confiance dans ce critère est élevée du fait de la convergence des données."
+      }
+    },
+    {
+      "criterion": "WEIGHT",
+      "weight": 0.30,
+      "directionality": "lower_is_better",
+      "impact_dimensions": ["climate", "resource_use", "toxicity"],
+      "rationale": "Le poids d’un four reflète la quantité de matériaux mobilisés (acier, aluminium, verre, composants électroniques…). Un four plus lourd nécessite plus de ressources et d’énergie à fabriquer, ce qui accroît les émissions de GES et autres impacts liés à l’extraction et à la transformation des matières:contentReference[oaicite:13]{index=13}. En France, la fabrication représente ainsi ~80 % de l’empreinte carbone totale d’un four électrique standard (≈218 kg CO₂e sur 273 kg):contentReference[oaicite:14]{index=14}, illustrant l’importance de l’étape matériaux/production.",
+      "overlap_notes": "Le critère poids capture l’empreinte environnementale de la phase de fabrication, non prise en compte par la classe énergie. Il peut être corrélé à la robustesse ou à la taille du four (un modèle plus solide ou volumineux étant plus lourd), mais la durabilité est traitée à part via la garantie. Ainsi, on évite de pénaliser deux fois un design durable : le poids couvre l’impact de fabrication initial, tandis que la garantie valorise la longévité.",
+      "guardrails": "Pour ne pas pénaliser indûment les fours de grande capacité, les scores sont établis relativement entre produits de format comparable. Les valeurs extrêmes de poids sont lissées par la normalisation statistique (méthode sigma), évitant qu’un four exceptionnellement lourd ou léger ne domine outrageusement le score global.",
+      "evidence_strength": {
+        "level": "high",
+        "why": "Les données ACV montrent de façon cohérente que la phase de production (corrélée au poids et aux matériaux) pèse lourd dans le bilan environnemental:contentReference[oaicite:15]{index=15}:contentReference[oaicite:16]{index=16}. Des sources ADEME et études scientifiques soulignent l’impact majeur des matériaux (métaux, électronique) sur le changement climatique et d’autres catégories (épuisement des ressources, écotoxicité) lors de la fabrication d’un four."
+      }
+    },
+    {
+      "criterion": "WARRANTY",
+      "weight": 0.2,
+      "directionality": "higher_is_better",
+      "impact_dimensions": ["climate", "resource_use", "circularity"],
+      "rationale": "La durée de garantie est prise comme indicateur de la longévité potentielle du produit. Un four garanti plus longtemps a plus de chances d’être utilisé ou maintenu pendant une période étendue, ce qui répartit l’impact de sa fabrication sur un laps de temps plus long:contentReference[oaicite:17]{index=17}:contentReference[oaicite:18]{index=18}. En prolongeant la durée de vie d’un appareil, on réduit la fréquence de remplacement et donc l’épuisement de ressources et les déchets produits sur le long terme.",
+      "overlap_notes": "La garantie prolonge la perspective d’usage et agit en complément des autres critères. Elle n’est pas redondante avec la classe énergie (efficacité) ni avec le poids (fabrication initiale), mais vient moduler l’impact de la fabrication en cas de durée d’utilisation étendue. Un lien indirect existe avec le poids (un produit très robuste peut être plus lourd), mais en pondérant séparément la durabilité et la fabrication, on évite de double-compter et on permet aux produits lourds mais durables d’être en partie compensés par leur longue vie.",
+      "guardrails": "Nous avons limité le poids de la garantie à 20 % pour qu’un appareil très inefficace ne soit pas \"sauvé\" par une simple garantie longue. Les études montrent qu’un remplacement anticipé peut être écologiquement justifié si le nouvel appareil est beaucoup plus efficient (>20 % d’économie d’énergie):contentReference[oaicite:19]{index=19}. Ainsi, un four classé mauvais en énergie ne pourra pas compenser entièrement avec une garantie élevée, assurant que l’efficacité prime sur la seule promesse de durabilité.",
+      "evidence_strength": {
+        "level": "high",
+        "why": "L’importance de la durabilité est appuyée par des analyses institutionnelles (ADEME) et académiques. Elles montrent qu’allonger la durée d’usage d’un équipement réduit nettement ses impacts annuels, surtout pour les impacts dominés par la production:contentReference[oaicite:20]{index=20}. La corrélation entre fiabilité (garantie) et bénéfice environnemental est donc crédible, bien que dépendante des progrès d’efficacité du remplaçant éventuel."
+      }
+    },
+    {
+      "criterion": "DATA_QUALITY",
+      "weight": 0.15,
+      "directionality": "higher_is_better",
+      "impact_dimensions": ["social", "other"],
+      "rationale": "Ce critère valorise la transparence des informations environnementales du produit (données complètes, spécifiques, vérifiées). Un fabricant fournissant des données précises (ex : consommation réelle, composition) démontre un engagement et permet un calcul plus fiable du score. À l’inverse, l’absence de données implique d’utiliser des valeurs moyennes par défaut, ce qui risque de masquer des contre-performances:contentReference[oaicite:21]{index=21}. En attribuant un poids dédié à la qualité des données, on incite les marques à être transparentes (sinon leur produit n’obtient qu’un score moyen sur les critères manquants, plus une pénalité de transparence).",
+      "overlap_notes": "DATA_QUALITY n’a pas d’équivalent direct dans les impacts ACV et n’entre pas en collision avec les critères physiques. Cependant il interagit de manière transversale : en cas de donnée manquante sur un facteur (énergie, etc.), la moyenne est attribuée, et parallèlement le score de qualité de données du produit baisse. Ce mécanisme garantit qu’un produit ne tirera pas avantage d’une donnée cachée (score moyen seulement) et qu’il sera en outre pénalisé pour non-transparence, sans double-compter l’impact en lui-même.",
+      "guardrails": "Le poids de 15 % alloué à la transparence reste modéré pour éviter qu’un produit polluant ne compense ses impacts par la seule fourniture d’informations. Comme souligné par l’approche ESG, la transparence et la durabilité de la marque sont importantes:contentReference[oaicite:22]{index=22}, mais ici elles ne peuvent supplanter la performance énergie/matériaux. Ainsi, même un produit très bien documenté ne pourra dépasser un concurrent propre mais moins transparent. La pénalité par données manquantes (imputation moyenne + score DATA_QUALITY réduit) est calibrée pour être dissuasive sans dominer les autres critères.",
+      "evidence_strength": {
+        "level": "medium",
+        "why": "La prise en compte de la qualité des données repose sur une approche méthodologique plutôt que sur un impact direct. Elle est justifiée par le besoin de fiabilité et d’éthique dans l’évaluation environnementale. Les initiatives publiques d’affichage imposent d’ailleurs des pénalités par défaut en cas de données non fournies:contentReference[oaicite:23]{index=23}. L’intégration de DATA_QUALITY s’aligne sur ces pratiques, mais son lien indirect avec les impacts concrets justifie un niveau de preuve moyen."
+      }
+    }
+  ],
+  "normalization_notes": {
+    "relative_ranking_0_100": "Chaque critère est converti en score relatif de 0 à 100 en fonction du classement des produits sur ce critère (meilleur = 100, pire = 0). Cette échelle relative garantit qu’il y a toujours une différenciation maximale entre produits, même si les écarts absolus sont faibles. Pour l’utilisateur, cela signifie qu’un score élevé indique un produit en tête de sa catégorie sur l’aspect considéré, sans pour autant quantifier l’impact réel en valeur absolue.",
+    "sigma_scoring_0_5": "Les attributs bruts sont normalisés de 0 à 5 par une méthode statistique sigma. On fixe 2,5/5 au niveau de la moyenne des produits, et on attribue 0 et 5 respectivement aux performances situées à ~2 écarts-types en-dessous ou au-dessus de la moyenne (avec plafonnement). Ce procédé réduit l’influence des valeurs aberrantes (outliers) et évite qu’un critère à forte dispersion ne domine ou n’écrase le score global. Il assure également une certaine stabilité : la plupart des produits \"moyens\" obtiennent autour de 2,5/5, ce qui rend les différences vraiment marquantes seulement pour les produits nettement supérieurs ou inférieurs à la moyenne.",
+    "percentile_fallback": "Si la distribution d’un critère est trop resserrée ou peu entropique (par ex. si presque tous les produits ont des valeurs similaires), on utilise un classement par paliers percentiles. Concrètement, on peut assigner des scores par quartiles ou déciles afin de maintenir une différenciation. Ce fallback évite qu’un critère où tout le monde est semblable n’attribue qu’un score ~2,5/5 à tous les produits. À la place, même de faibles différences se traduisent par des écarts de score, ce qui reflète un avantage compétitif pour les meilleurs et une marge de progrès pour les moins bien placés, malgré une faible variance initiale.",
+    "missing_value_virtualization": "Lorsqu’une donnée produit est manquante, la valeur moyenne du marché est imputée pour ce critère. Ainsi, le produit n’est ni sur-avantagé ni sur-pénalisé initialement : il obtient un score moyen par défaut sur ce point. Cependant, combiné avec le critère DATA_QUALITY, cela crée un malus global : le produit ne dépassera pas la moyenne sur le critère en question et perd des points de transparence. Cette approche est cohérente avec les pratiques recommandées (ex. utilisation de valeurs par défaut pénalisantes en affichage environnemental):contentReference[oaicite:24]{index=24}. Elle vise à encourager les fabricants à fournir leurs données réelles, sous peine d’avoir un score médiocre dû à l’imputation et à la pénalité de qualité des données."
+  },
+  "quality_checks": {
+    "criteria_weights_complete": true,
+    "weights_sum_to_1": true,
+    "sum_value": 1.0,
+    "unused_or_zero_weight_criterias": [],
+    "renormalization_rule_if_needed": "Si un ou plusieurs critères étaient exclus (poids 0), les poids des critères restants seraient rééchelonnés proportionnellement de sorte à conserver une somme de 1."
+  },
+  "materiality_summary": {
+    "dominant_lifecycle_stages_for_vertical": ["manufacturing", "use_phase"],
+    "short_summary": "Pour les fours domestiques, les phases de fabrication et d’utilisation sont prédominantes dans le bilan environnemental. La production mobilise des métaux, du verre et de l’énergie, ce qui génère une forte empreinte carbone en amont (jusqu’à ~80 % des émissions totales dans un contexte électrique bas-carbone):contentReference[oaicite:25]{index=25}. L’usage électrique du four contribue également significativement – surtout avec un mix électrique carboné – car il s’agit d’un des appareils les plus énergivores du foyer (plusieurs centaines de kWh par an):contentReference[oaicite:26]{index=26}:contentReference[oaicite:27]{index=27}. En comparaison, la distribution (transport) et la fin de vie jouent un rôle moindre (recyclage utile mais compensant partiellement la fabrication):contentReference[oaicite:28]{index=28}. Nos pondérations reflètent donc cette matérialité : l’efficacité énergétique et l’impact matériaux ont les poids les plus élevés, tout en intégrant la durabilité (garantie) pour tenir compte de l’allongement de la vie du produit:contentReference[oaicite:29]{index=29}."
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "type": "other",
+      "title": "Quelle est la durée de vie de vos appareils électroménagers ?",
+      "authors_or_org": "Promotelec (données GIFAM)",
+      "year": 2024,
+      "publisher": "Promotelec.com",
+      "url": "https://www.promotelec.com/particuliers/fiche/quelle-est-la-duree-de-vie-de-vos-appareils-electromenagers/",
+      "accessed_date": "2026-02-04",
+      "reliability": "medium",
+      "used": true,
+      "used_for": ["lifetime reference (four 13 ans)"],
+      "notes": "Article citant le baromètre GIFAM 2021-2019 : la durée de vie moyenne d’un four en France est passée de ~15 à 13 ans. Base pour la durée de référence."
+    },
+    {
+      "id": "S2",
+      "type": "peer_reviewed",
+      "title": "Comparative life cycle assessment of electric and gas ovens in the Italian context: An environmental and technical evaluation",
+      "authors_or_org": "Landi D. et al.",
+      "year": 2019,
+      "publisher": "Journal of Cleaner Production (Elsevier)",
+      "url": "https://doi.org/10.1016/j.jclepro.2019.02.196",
+      "accessed_date": "2026-02-04",
+      "reliability": "high",
+      "used": true,
+      "used_for": ["energy use-phase materiality", "relative comparison usefulness"],
+      "notes": "Étude ACV comparative four électrique vs gaz (10 ans d’usage, Italie). Montre que l’électricité (usage) domine l’impact climatique du four électrique (mix fossile), justifiant le poids de l’énergie. Souligne l’intérêt d’une comparaison pour guider les choix."
+    },
+    {
+      "id": "S3",
+      "type": "peer_reviewed",
+      "title": "LCA analysis of a freestanding cooker: environmental assessment and comparison with other cooking appliances (Proc. CIRP 2024)",
+      "authors_or_org": "Brahem S. et al.",
+      "year": 2024,
+      "publisher": "Procedia CIRP (Elsevier)",
+      "url": "https://doi.org/10.1016/j.procir.2024.02.025",
+      "accessed_date": "2026-02-04",
+      "reliability": "high",
+      "used": true,
+      "used_for": ["use-phase vs manufacturing impacts", "energy & materials rationale"],
+      "notes": "Analyse ACV d’une cuisinière (four + plaques) aux USA. Montre que l’usage (consommation électrique) est l’aspect critique en impact, surtout avec un mix carboné, et que certains matériaux (cartes électroniques, acier) dominent l’impact fabrication."
+    },
+    {
+      "id": "S4",
+      "type": "public_agency",
+      "title": "Four électrique – Détail de l’impact carbone (Base Empreinte ADEME)",
+      "authors_or_org": "ADEME (ImpactCO2.fr)",
+      "year": 2023,
+      "publisher": "ADEME / Impact CO₂",
+      "url": "https://impactco2.fr/outils/electromenager/fourelectrique",
+      "accessed_date": "2026-02-04",
+      "reliability": "high",
+      "used": true,
+      "used_for": ["manufacturing vs use phase breakdown", "weight criterion evidence"],
+      "notes": "Estimation ADEME de l’empreinte carbone d’un four électrique sur 12 ans (~273 kgCO₂e). Données: ~80% fabrication (matières, prod., transport) vs 20% usage+fin de vie. Sert de base chiffrée pour pondérer poids vs énergie."
+    },
+    {
+      "id": "S5",
+      "type": "industry_methodology",
+      "title": "Référentiel LONGTIME v2 – Four électrique (extrait)",
+      "authors_or_org": "Longtime (Ethikis)",
+      "year": 2023,
+      "publisher": "longtimelabel.com",
+      "url": "https://longtimelabel.com/wp-content/uploads/2023/06/LONGTIME_Referentiel_Four-electrique_fr.pdf",
+      "accessed_date": "2026-02-04",
+      "reliability": "medium",
+      "used": true,
+      "used_for": ["durability rationale", "warranty guardrail"],
+      "notes": "Référentiel d’un label de durabilité pour fours. Indique qu’allonger la durée de vie réduit les impacts des catégories dominées par la production, et que remplacer un four avant 10 ans n’est écologiquement rentable que si le nouveau est beaucoup plus efficient (≥20%)."
+    },
+    {
+      "id": "S6",
+      "type": "other",
+      "title": "L’impact environnemental d’un four (article de blog)",
+      "authors_or_org": "Nudger.fr",
+      "year": 2026,
+      "publisher": "Nudger",
+      "url": "https://nudger.fr/blog/l-impact-environnemental-d-un-four",
+      "accessed_date": "2026-02-04",
+      "reliability": "medium",
+      "used": true,
+      "used_for": ["materiality summary", "data quality rationale"],
+      "notes": "Article pédagogique (plateforme Nudger) synthétisant les postes d’impact d’un four. Confirme que fabrication et usage sont les principaux contributeurs, donne des chiffres (consommation kWh, 273 kgCO₂e dont majorité fabrication) et insiste sur la durabilité (15 vs 8 ans) et la transparence/ESG du fabricant."
+    },
+    {
+      "id": "S7",
+      "type": "public_agency",
+      "title": "Méthode et données – Affichage environnemental (secteur textile, ADEME)",
+      "authors_or_org": "ADEME / Ministère Transition Écologique",
+      "year": 2022,
+      "publisher": "affichage-environnemental.ademe.fr",
+      "url": "https://affichage-environnemental.ademe.fr/node/38",
+      "accessed_date": "2026-02-04",
+      "reliability": "high",
+      "used": true,
+      "used_for": ["missing data approach", "positioning rationale"],
+      "notes": "Page officielle expliquant la méthodologie d’affichage environnemental. Mentionne que sans données déclarées, des valeurs par défaut pénalisantes sont appliquées. Illustre la logique de ne pas avantager les produits non transparents."
+    },
+    {
+      "id": "S8",
+      "type": "other",
+      "title": "Written contributions – Ecodesign requirements for cooking appliances (R2R Europe)",
+      "authors_or_org": "Right to Repair Europe",
+      "year": 2024,
+      "publisher": "repair.eu",
+      "url": "https://repair.eu/wp-content/uploads/2024/04/Written-contributions-Ecodesign-for-cooking-appliances-R2R-HOP-Ifixit-EEB.pdf",
+      "accessed_date": "2026-02-04",
+      "reliability": "medium",
+      "used": false,
+      "used_for": ["market lifespan trend insight"],
+      "notes": "Contribution d’ONG sur l’écoconception des appareils de cuisson. Données Fnac-Darty montrant une baisse récente de la durée de vie moyenne (≈11 ans en 2022, 9 ans en 2023) pour ces appareils, soulevant l’importance de garantir les pièces sur au moins 10 ans."
+    },
+    {
+      "id": "S9",
+      "type": "peer_reviewed",
+      "title": "Life Cycle Assessment for Stoves and Ovens",
+      "authors_or_org": "N. Jungbluth",
+      "year": 1997,
+      "publisher": "ETH Zurich (Working Paper UNS)",
+      "url": "https://esu-services.ch/fileadmin/download/jungbluth-1997-WP16-LCA-cooking.pdf",
+      "accessed_date": "2026-02-04",
+      "reliability": "medium",
+      "used": false,
+      "used_for": ["historical LCA reference"],
+      "notes": "Étude ACV comparative (datée) de différentes options de cuisson (bois, gaz, élec, etc.) en Suisse. Utile en arrière-plan mais données obsolètes."
+    },
+    {
+      "id": "S10",
+      "type": "peer_reviewed",
+      "title": "Sustainable manufacturing of consumer appliances: Reducing life cycle environmental impacts and costs of domestic ovens",
+      "authors_or_org": "Amienyo D. et al.",
+      "year": 2016,
+      "publisher": "Sustainable Production and Consumption (Elsevier)",
+      "url": "https://doi.org/10.1016/j.spc.2015.12.004",
+      "accessed_date": "2026-02-04",
+      "reliability": "high",
+      "used": false,
+      "used_for": ["energy efficiency improvement context"],
+      "notes": "Article sur un four domestique innovant à haute efficacité (HEO). Montre qu’améliorer l’efficacité réduit nettement les impacts (jusqu’à -62%). Contexte confirmant l’importance du critère énergie, mais pas cité directement."
+    }
+  ],
+  "search_log": [
+    {
+      "query": "life cycle analysis oven manufacturing use energy",
+      "date": "2026-02-04",
+      "notes": "Recherché des études ACV sur les fours pour identifier les contributions relatives de la fabrication et de l’usage."
+    },
+    {
+      "query": "durée de vie moyenne four électrique",
+      "date": "2026-02-04",
+      "notes": "Cherché des sources (France/UE) sur la durée d’usage typique des fours (données fabricants, agences)."
+    },
+    {
+      "query": "EU Ecodesign domestic oven lifetime assumption",
+      "date": "2026-02-04",
+      "notes": "Vérifier s’il existe une valeur standardisée au niveau européen pour la durée de vie des fours (exigences Ecoconception)."
+    },
+    {
+      "query": "allonger durée de vie impact environnemental four électrique",
+      "date": "2026-02-04",
+      "notes": "Recherché des études ou infographies (ADEME, labels) quantifiant les gains environnementaux d’une durée de vie prolongée du four."
+    },
+    {
+      "query": "affichage environnemental transparence données fabricant",
+      "date": "2026-02-04",
+      "notes": "Cherché des références sur la prise en compte de la qualité des données ou la pénalisation des données manquantes dans les méthodes d’affichage environnemental."
+    }
+  ]
+}

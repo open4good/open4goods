@@ -38,6 +38,11 @@ public class PromptConfig {
     private RetrievalMode retrievalMode = RetrievalMode.EXTERNAL_SOURCES;
 
     /**
+     * The JSON schema expected for the structured output.
+     */
+    private String jsonSchema;
+
+    /**
      * Provider-agnostic options for the chat model (e.g., temperature, max tokens).
      */
     private PromptOptions options = new PromptOptions();
@@ -87,6 +92,14 @@ public class PromptConfig {
         this.retrievalMode = retrievalMode;
     }
 
+    public String getJsonSchema() {
+        return jsonSchema;
+    }
+
+    public void setJsonSchema(String jsonSchema) {
+        this.jsonSchema = jsonSchema;
+    }
+
     public PromptOptions getOptions() {
         return options;
     }
@@ -124,12 +137,13 @@ public class PromptConfig {
                 ", retrievalMode=" + retrievalMode +
                 ", options=" + options +
                 ", providerOptions=" + providerOptions +
+                ", jsonSchema='" + jsonSchema + '\'' +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, aiService, systemPrompt, userPrompt, retrievalMode, options, providerOptions);
+        return Objects.hash(key, aiService, systemPrompt, userPrompt, retrievalMode, options, providerOptions, jsonSchema);
     }
 
     @Override
@@ -143,6 +157,7 @@ public class PromptConfig {
                Objects.equals(userPrompt, that.userPrompt) &&
                retrievalMode == that.retrievalMode &&
                Objects.equals(options, that.options) &&
-               Objects.equals(providerOptions, that.providerOptions);
+               Objects.equals(providerOptions, that.providerOptions) &&
+               Objects.equals(jsonSchema, that.jsonSchema);
     }
 }

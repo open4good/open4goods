@@ -1,0 +1,4 @@
+minDistinctValuesForSigma: 5
+criteriasPonderation:
+  TEST_CRITERIA: 0.5
+  ANOTHER_CRITERIA: 0.5

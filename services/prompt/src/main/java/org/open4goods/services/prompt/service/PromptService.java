@@ -351,6 +351,11 @@ public class PromptService implements HealthIndicator {
         resolvedConfig.setSystemPrompt(systemPromptEvaluated);
         resolvedConfig.setUserPrompt(userPromptEvaluated);
 
+        if (type != null) {
+            BeanOutputConverter<?> converter = new BeanOutputConverter<>(type);
+            resolvedConfig.setJsonSchema(converter.getJsonSchema());
+        }
+
         return resolvedConfig;
     }
 
@@ -387,8 +392,16 @@ public class PromptService implements HealthIndicator {
     	   logger.error("Error while retrieving AifieldScanner instructions");
        }
 
+        PromptConfig pConf = getPromptConfig(promptKey);
+        pConf.setJsonSchema(jsonSchema); // Set schema on original config (or consider cloning if shared)
+        // Ideally we should enable "jsonSchema" pass-through in promptNativ so it ends up in the record.
+        // However, promptNativ calls getPromptConfig(promptKey) internally again.
 
         PromptResponse<ProviderResult> nativ = promptNativ(promptKey, variables, jsonSchema, instructions);
+        // We might want to ensure the returned prompt config in nativ has the schema too
+        if (nativ.getPrompt() != null) {
+            nativ.getPrompt().setJsonSchema(jsonSchema);
+        }
         String raw = cleanJsonMarkdown(nativ.getBody().getContent());
         try {
             ret.setBody(outputConverter.convert(raw));
