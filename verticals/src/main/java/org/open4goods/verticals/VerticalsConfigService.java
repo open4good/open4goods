@@ -61,10 +61,12 @@ public class VerticalsConfigService {
 	private static final String CLASSPATH_ATTRIBUTES = "classpath:/attributes/*.yml";
 	private static final String CLASSPATH_IMPACT_SCORES = "classpath:/verticals/impactscores/*.yml";
 	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:/verticals/impactscores/_default.yml";
+	private static final String CLASSPATH_ASSISTANTS = "classpath:/assistant/*.yml";
 
 	private SerialisationService serialisationService;
 
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
+	private final Map<String, NudgeToolConfig> assistantConfigs = new ConcurrentHashMap<>(50);
 
 	// The cache of categories to verticalconfig association. datasource (or all) ->
 	// category -> VerticalConfig
@@ -130,6 +132,7 @@ public class VerticalsConfigService {
 		/////////////////////////////////////////
 		
 		Map<String, ImpactScoreConfig> impactScores = loadImpactScoreConfigs();
+		refreshAssistantConfigs();
 
 		for (VerticalConfig uc : loadFromClasspath(impactScores)) {
 			logger.info("Adding config {} from classpath", uc.getId());
@@ -171,6 +174,62 @@ public class VerticalsConfigService {
 			byTaxonomy.put(vc.getGoogleTaxonomyId(), vc);
 		}));
 
+	}
+
+	/**
+	 * Reloads assistant definitions from the classpath.
+	 */
+	private void refreshAssistantConfigs() {
+		Map<String, NudgeToolConfig> loadedConfigs = new ConcurrentHashMap<>(50);
+		Resource[] resources;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_ASSISTANTS);
+		} catch (IOException e) {
+			logger.error("Cannot load assistants from {} : {}", CLASSPATH_ASSISTANTS, e.getMessage());
+			return;
+		}
+
+		for (Resource resource : resources) {
+			String filename = resource.getFilename();
+			if (filename == null || !filename.endsWith(".yml")) {
+				logger.warn("Skipping assistant resource without filename: {}", resource);
+				continue;
+			}
+			String id = filename.substring(0, filename.length() - 4);
+			try (InputStream inputStream = resource.getInputStream()) {
+				NudgeToolConfig config = serialisationService.fromYaml(inputStream, NudgeToolConfig.class);
+				if (config != null) {
+					loadedConfigs.put(id, config);
+					logger.info("Loaded assistant config {}", id);
+				}
+			} catch (Exception e) {
+				logger.error("Cannot retrieve assistant config : {}", filename, e);
+			}
+		}
+
+		synchronized (assistantConfigs) {
+			assistantConfigs.clear();
+			assistantConfigs.putAll(loadedConfigs);
+		}
+	}
+
+	/**
+	 * Retrieve the assistant configuration by its identifier.
+	 *
+	 * @param assistantId the assistant identifier
+	 * @return the assistant configuration, or {@code null} when missing
+	 */
+	public NudgeToolConfig getAssistantConfigById(String assistantId) {
+		return assistantConfigs.get(assistantId);
+	}
+
+	/**
+	 * Returns all assistant configurations keyed by identifier.
+	 *
+	 * @return a snapshot of the assistant configurations map
+	 */
+	public Map<String, NudgeToolConfig> getAssistantConfigs() {
+		return Map.copyOf(assistantConfigs);
 	}
 
 	/**
