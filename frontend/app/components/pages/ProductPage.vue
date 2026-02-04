@@ -211,6 +211,7 @@ import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
+import { buildProductJsonLdGraph } from '~/utils/product-jsonld'
 
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
@@ -957,48 +958,6 @@ const ogImageUrl = computed(() => {
 })
 
 const ogImageAlt = computed(() => productTitle.value)
-
-const internalProductImageSource = computed(() => {
-  const galleryImages = product.value?.resources?.images ?? []
-  const firstGalleryImage =
-    galleryImages.find(image => Boolean(image?.url))?.url ??
-    galleryImages.find(image => Boolean(image?.originalUrl))?.originalUrl
-
-  return (
-    product.value?.resources?.coverImagePath ??
-    product.value?.base?.coverImagePath ??
-    firstGalleryImage ??
-    null
-  )
-})
-
-const schemaImageUrl = computed(() =>
-  internalProductImageSource.value
-    ? toAbsoluteUrl(internalProductImageSource.value)
-    : undefined
-)
-
-useSeoMeta({
-  title: () => productMetaTitle.value,
-  description: () => productMetaDescription.value,
-  ogTitle: () => product.value?.names?.ogTitle ?? productMetaTitle.value,
-  ogDescription: () =>
-    product.value?.names?.ogDescription ?? productMetaDescription.value,
-  ogUrl: () => canonicalUrl.value,
-  ogType: 'product',
-  ogImage: () => ogImageUrl.value,
-  ogImageAlt: () => ogImageAlt.value,
-})
-
-useHead(() => ({
-  meta: productRobotsContent.value
-    ? [{ name: 'robots', content: productRobotsContent.value }]
-    : [],
-}))
-
-useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
-}))
 const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(
   () => {
     return (product.value?.scores?.scores ?? {}) as Record<
@@ -2089,40 +2048,6 @@ const errorMessage = computed(() => {
   return null
 })
 
-const structuredOffers = computed(() => {
-  const offersByCondition = product.value?.offers?.offersByCondition ?? {}
-  const normalizedOffers = Object.values(offersByCondition)
-    .flatMap(entries => entries ?? [])
-    .filter(
-      (
-        offer
-      ): offer is {
-        price: number
-        url: string
-        currency?: string | null
-        condition?: string | null
-        datasourceName?: string | null
-      } => typeof offer?.price === 'number' && Boolean(offer?.url)
-    )
-    .map(offer => ({
-      '@type': 'Offer',
-      price: offer.price,
-      priceCurrency: offer.currency ?? 'EUR',
-      url: offer.url,
-      availability: 'https://schema.org/InStock',
-      itemCondition:
-        offer.condition === 'NEW'
-          ? 'https://schema.org/NewCondition'
-          : 'https://schema.org/UsedCondition',
-      seller: {
-        '@type': 'Organization',
-        name: offer.datasourceName ?? 'Unknown',
-      },
-    }))
-
-  return normalizedOffers.length > 0 ? normalizedOffers : undefined
-})
-
 const impactScoreValue = computed(() => {
   if (!product.value) {
     return null
@@ -2184,79 +2109,74 @@ const reviewStructuredData = computed(() => {
   }
 })
 
-const breadcrumbStructuredData = computed(() => {
-  if (!productBreadcrumbs.value.length) {
-    return null
-  }
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: productBreadcrumbs.value.map((crumb, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: crumb.title,
-      item: crumb.link ? toAbsoluteUrl(crumb.link) : undefined,
-    })),
-  }
-})
-
-const productStructuredData = computed(() => {
-  if (!product.value) {
-    return null
-  }
-
-  const aggregateRatingValue =
-    typeof product.value.scores?.ecoscore?.absolute?.value === 'number'
-      ? product.value.scores.ecoscore.absolute.value
-      : null
-
-  const offers = structuredOffers.value
-  const imageUrl = schemaImageUrl.value
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: productTitle.value,
-    description: productMetaDescription.value,
-    sku: product.value.base?.gtin ?? String(product.value.gtin ?? ''),
-    brand: {
-      '@type': 'Brand',
-      name: product.value.identity?.brand ?? '',
-    },
-    offers,
-    aggregateRating: aggregateRatingValue
-      ? {
-          '@type': 'AggregateRating',
-          ratingValue: aggregateRatingValue,
-          reviewCount: product.value.scores?.ranking?.globalCount ?? 1,
-        }
-      : undefined,
-    review: reviewStructuredData.value ?? undefined,
-    image: imageUrl ?? undefined,
-    url: canonicalUrl.value,
-    gtin13: String(
-      product.value.base?.gtin ?? product.value.gtin ?? ''
-    ).padStart(13, '0'),
-    additionalProperty: aggregateRatingValue
-      ? [
-          {
-            '@type': 'PropertyValue',
-            name: 'EcoScore',
-            value: aggregateRatingValue,
-            minValue: 0,
-            maxValue: 100,
-          },
-        ]
-      : undefined,
-  }
-})
-
 const impactScoreOn20 = computed(() => {
   const ecoScore = impactScores.value.find(
     s => s.id?.toUpperCase() === 'ECOSCORE'
   )
   return ecoScore?.on20 != null ? ecoScore.on20 : null
+})
+
+const siteName = computed(() => String(t('siteIdentity.siteName')))
+
+const jsonLdBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
+  const crumbs = [...productBreadcrumbs.value]
+  const productName = productTitle.value.trim()
+
+  if (!crumbs.length) {
+    crumbs.push({
+      title: t('navigation.home'),
+      link: '/',
+    })
+  }
+
+  const hasProduct = crumbs.some(
+    crumb => crumb.title.trim().toLowerCase() === productName.toLowerCase()
+  )
+
+  if (productName.length && !hasProduct) {
+    crumbs.push({
+      title: productName,
+      link: canonicalPath.value,
+    })
+  }
+
+  return crumbs
+})
+
+const jsonLdImageUrls = computed(() => {
+  const resources = product.value?.resources
+  const images = resources?.images ?? []
+  const urls = [
+    resources?.coverImagePath ?? undefined,
+    resources?.externalCover ?? undefined,
+    product.value?.base?.coverImagePath ?? undefined,
+    ...images
+      .map(image => image?.url ?? image?.originalUrl ?? undefined)
+      .filter(Boolean),
+  ]
+
+  return urls.filter(Boolean) as string[]
+})
+
+const productJsonLdGraph = computed(() => {
+  if (!product.value) {
+    return null
+  }
+
+  return buildProductJsonLdGraph({
+    product: product.value,
+    productTitle: productTitle.value,
+    canonicalUrl: canonicalUrl.value,
+    locale: locale.value,
+    breadcrumbs: jsonLdBreadcrumbs.value,
+    site: {
+      url: requestURL.origin,
+      name: siteName.value,
+    },
+    review: reviewStructuredData.value ?? undefined,
+    impactScoreOn20: impactScoreOn20.value,
+    imageUrls: jsonLdImageUrls.value,
+  })
 })
 
 const metaTitle = computed(() => {
@@ -2295,19 +2215,11 @@ useHead(() => ({
 useHead(() => {
   const scripts = [] as { type: string; key: string; children: string }[]
 
-  if (productStructuredData.value) {
+  if (productJsonLdGraph.value) {
     scripts.push({
-      key: 'product-structured-data',
+      key: 'product-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(productStructuredData.value),
-    })
-  }
-
-  if (breadcrumbStructuredData.value) {
-    scripts.push({
-      key: 'breadcrumb-structured-data',
-      type: 'application/ld+json',
-      children: JSON.stringify(breadcrumbStructuredData.value),
+      children: JSON.stringify(productJsonLdGraph.value),
     })
   }
 
