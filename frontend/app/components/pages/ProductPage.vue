@@ -1544,9 +1544,11 @@ const radarData = computed<RadarDataset>(() => {
 const { data: commercialEventsData } = await useAsyncData<
   CommercialEvent[] | null
 >(
-  'commercial-events',
+  () => `commercial-events-${locale.value}`,
   async () => {
     try {
+      // Keep the async-data cache key aligned with the domain/language-aware
+      // server cache strategy (`Vary: Host, X-Forwarded-Host`).
       return await $fetch<CommercialEvent[]>('/api/commercial-events')
     } catch (eventError) {
       console.error('Failed to load commercial events', eventError)
