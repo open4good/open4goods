@@ -124,4 +124,47 @@ describe('buildProductJsonLdGraph', () => {
       'https://schema.org/UsedCondition'
     )
   })
+
+  it('resolves additional properties from normalized attribute aliases', () => {
+    const result = buildProductJsonLdGraph({
+      ...baseInput,
+      product: {
+        gtin: 1234567890123,
+        names: {
+          prettyName: 'Sample Product',
+        },
+        attributes: {
+          referentialAttributes: {
+            "RESOLUTION DE L'ECRAN": '3840 x 2160',
+            QUANTITEDEPORTSUSB20: '2',
+            NOMDELACOULEUR: 'Noir',
+          },
+          indexedAttributes: {
+            WEIGHT: { numericValue: 12.5 },
+            HEIGHT: { numericValue: 720 },
+          },
+        },
+      },
+    })
+
+    const graph = result?.['@graph'] as Array<Record<string, unknown>>
+    const productEntry = graph.find(
+      entry => entry['@type'] === 'Product'
+    ) as Record<string, unknown>
+
+    expect(productEntry?.color).toBe('Noir')
+    expect((productEntry?.weight as Record<string, unknown>)?.value).toBe(12.5)
+    expect((productEntry?.height as Record<string, unknown>)?.value).toBe(720)
+
+    const additionalProperty = (productEntry?.additionalProperty ?? []) as Array<
+      Record<string, unknown>
+    >
+    const resolutionEntry = additionalProperty.find(
+      entry => entry.name === 'Résolution'
+    )
+    const usbEntry = additionalProperty.find(entry => entry.name === 'Ports USB')
+
+    expect(resolutionEntry?.value).toBe('3840 x 2160')
+    expect(usbEntry?.value).toBe('2')
+  })
 })
