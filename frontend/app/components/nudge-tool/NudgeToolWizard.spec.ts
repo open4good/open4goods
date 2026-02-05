@@ -215,8 +215,8 @@ describe('NudgeToolWizard', () => {
 
     expect(stepKeys).toEqual([
       'category',
-      'scores',
       'subset',
+      'scores',
       'condition',
       'recommendations',
     ])
