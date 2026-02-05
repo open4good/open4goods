@@ -296,6 +296,9 @@ export default defineNuxtConfig({
     '/offline': { prerender: true },
     '/ecoscore': { redirect: { to: '/impact-score', statusCode: 301 } },
     '/eco-score': { redirect: { to: '/impact-score', statusCode: 301 } },
+    // Fix SWR handler error by disabling cache for assistant configs (conflicts with cookie setting)
+    '/assistant-configs/**': { cache: false },
+    '/api/assistant-configs/**': { cache: false },
   },
   modules: [
     'vuetify-nuxt-module',
