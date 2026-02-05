@@ -108,7 +108,7 @@ i18n:
     productMetaOpenGraphType: "product"
 
     # Vertical page elements
-    verticalHomeUrl: "refrigerators"
+    verticalHomeUrl: "frigos"
     verticalHomeTitle: "Réfrigérateurs"
     verticalHomeDescription: "Comparez les réfrigérateurs selon leur impact environnemental, leur classe énergétique et leur prix. Trouvez le meilleur modèle pour vos besoins."
 
