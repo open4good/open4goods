@@ -184,7 +184,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		}
 		return switch (attrConfig.getScoring().getMissingValuePolicy()) {
 			case WORST -> min;
-			case NEUTRAL -> (min + max) / 2.0;
+			case NEUTRAL -> null;
 		};
 	}
 	/**

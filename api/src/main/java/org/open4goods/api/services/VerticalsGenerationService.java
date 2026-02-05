@@ -121,7 +121,7 @@ public class VerticalsGenerationService {
 						newScore.setMdiIcon(score.getMdiIcon());
 						newScore.setDisabled(score.getDisabled());
 						newScore.setDescription(score.getDescription());
-						
+
 						// If fromPercent is set, use percentile-based config; otherwise calculate threshold
 						if (score.getFromPercent() != null) {
 							newScore.setFromPercent(score.getFromPercent());
@@ -148,7 +148,7 @@ public class VerticalsGenerationService {
 			ScoreThresholds thresholds = computeImpactScoreThresholds(verticalId);
 			String lowerThreshold = formatScoreValue(thresholds.lower());
 			String upperThreshold = formatScoreValue(thresholds.upper());
-	
+
 			// Build subsets (impact score only for now as requested)
 			List<VerticalSubset> subsets = buildImpactScoreSubsetsList(lowerThreshold, upperThreshold);
 			result.getNudgeToolConfig().setSubsets(subsets);
@@ -881,11 +881,7 @@ public class VerticalsGenerationService {
      * @throws Exception if generation fails.
      */
     public org.open4goods.services.prompt.config.PromptConfig generateEcoscoreDryRun(VerticalConfig vConf) throws Exception {
-        Map<String, Object> context = new HashMap<String, Object>();
-        // TODO : Enforce, log
-        context.put("AVAILABLE_CRITERIAS", getCriterias(vConf));
-        context.put("VERTICAL_NAME", vConf.getI18n().get("fr").getVerticalHomeTitle());
-
+        Map<String, Object> context = buildEcoscoreContext(vConf);
         return genAiService.resolvePrompt("impactscore-generation", context, org.open4goods.model.ai.ImpactScoreAiResult.class);
     }
 
@@ -898,15 +894,12 @@ public class VerticalsGenerationService {
 		// Translate to YAML
 		String ret = null;
 		try {
-			Map<String, Object> context = new HashMap<String, Object>();
-
-			// TODO : Enforce, log
-
-			context.put("AVAILABLE_CRITERIAS", getCriterias(vConf));
-			context.put("VERTICAL_NAME", vConf.getI18n().get("fr").getVerticalHomeTitle());
+            Map<String, Object> context = buildEcoscoreContext(vConf);
 
 			// Prompt
 			PromptResponse<org.open4goods.model.ai.ImpactScoreAiResult> response = genAiService.objectPrompt("impactscore-generation", context, org.open4goods.model.ai.ImpactScoreAiResult.class);
+
+            // Dry run creates the prompt configuration, so we can potentially leverage that here if needed.
 
 			ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
 			impactScoreConfig.setAiResult(response.getBody());
@@ -936,6 +929,35 @@ public class VerticalsGenerationService {
 		return ret;
 
 	}
+
+    /**
+     * Builds the context map for ecoscore generation, enforcing validation on required fields.
+     *
+     * @param vConf the vertical configuration.
+     * @return a map containing the context variables.
+     */
+    private Map<String, Object> buildEcoscoreContext(VerticalConfig vConf) {
+        Map<String, Object> context = new HashMap<>();
+
+        String availableCriterias = getCriterias(vConf);
+        if (StringUtils.isBlank(availableCriterias)) {
+            LOGGER.warn("AVAILABLE_CRITERIAS is empty for vertical {}", vConf.getId());
+        }
+        context.put("AVAILABLE_CRITERIAS", availableCriterias);
+
+        String verticalName = null;
+        if (vConf.getI18n() != null && vConf.getI18n().get("fr") != null) {
+            verticalName = vConf.getI18n().get("fr").getVerticalHomeTitle();
+        }
+
+        if (StringUtils.isBlank(verticalName)) {
+            LOGGER.warn("VERTICAL_NAME is missing for vertical {}", vConf.getId());
+            // Fallback or error handling could be added here
+        }
+        context.put("VERTICAL_NAME", verticalName);
+
+        return context;
+    }
 
 	/**
 	 * Return known criterias with description for a vertical

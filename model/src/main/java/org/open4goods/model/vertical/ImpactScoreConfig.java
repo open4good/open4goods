@@ -28,6 +28,7 @@ public class ImpactScoreConfig {
 
 	// For auditability. Strange in config file, but to be marbered with with criterias generation 
 	private String yamlPrompt;
+	
 	private String aiJsonResponse;
 	
 	private org.open4goods.model.ai.ImpactScoreAiResult aiResult;

@@ -353,13 +353,20 @@ const dataQualityScore = computed(
   () => product.value.scores?.scores?.['DATA_QUALITY']
 )
 
-const dataQualityScoreValue = computed(() => dataQualityScore.value?.value ?? 0)
-const dataQualityAvg = computed(
-  () =>
-    dataQualityScore.value?.relativ?.avg ??
-    dataQualityScore.value?.absolute?.avg ??
-    0
-)
+const dataQualityScoreValue = computed(() => {
+  // Convert 0-5 scale to 0-20
+  const val = (dataQualityScore.value?.value ?? 0) * 4
+  return val.toFixed(1)
+})
+
+const dataQualityAvg = computed(() => {
+  // Convert 0-5 scale to 0-20
+  const val =
+    (dataQualityScore.value?.relativ?.avg ??
+      dataQualityScore.value?.absolute?.avg ??
+      0) * 4
+  return val.toFixed(1)
+})
 
 const isLowDataQuality = computed(() => {
   if (!dataQualityScore.value) return false

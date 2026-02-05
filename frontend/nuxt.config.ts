@@ -287,7 +287,9 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/blog/**': { swr: 60 }, // revalidates the cache after 60s
+    // Disabled SWR for blog pages - conflicts with useCookie composable during SSR
+    // When SWR returns cached responses, headers are already sent and any cookie write fails
+    // '/blog/**': { swr: 60 },
     //'/blog/**': { isr: { expiration: 60 } } // regenerates every 60s
     // Pages generated once as static output
     //'/articles/**': { static: true },

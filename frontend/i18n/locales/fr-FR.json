@@ -614,7 +614,7 @@
           "cards": {
             "openSource": {
               "title": "Méthodologie open-source",
-              "description": "Consulte nos dépôts publics pour suivre l'amélioration de l'Impact Score des {category}.",
+              "description": "Consultez nos dépôts publics pour suivre l'amélioration de l'Impact Score des {category}.",
               "cta": "Découvrir notre démarche open-source",
               "aria": "Découvrir les ressources open-source pour l'Impact Score des {category}"
             },
@@ -2194,7 +2194,7 @@
       "subtitle": "Ces indicateurs nécessitent votre attention avant l'achat.",
       "quality": {
         "title": "Qualité de la donnée faible",
-        "description": "Le score de qualité de données ({score}/100) est inférieur à la moyenne de la catégorie ({avg}/100). Les informations peuvent être incomplètes."
+        "description": "Le score de qualité de données ({score}/20) est inférieur à la moyenne de la catégorie ({avg}/20). Les informations peuvent être incomplètes."
       },
       "conflicts": {
         "title": "Informations contradictoires",
@@ -2215,7 +2215,7 @@
         },
         "quality": {
           "title": "Qualité de la donnée faible",
-          "description": "Le score de qualité de données ({score}/100) est inférieur à la moyenne de la catégorie ({avg}/100). Les informations peuvent être incomplètes."
+          "description": "Le score de qualité de données ({score}/20) est inférieur à la moyenne de la catégorie ({avg}/20). Les informations peuvent être incomplètes."
         }
       },
       "subtitle": "Outils réservés à l'équipe Nudger. Affichés uniquement après connexion.",

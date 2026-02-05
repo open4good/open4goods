@@ -573,22 +573,6 @@ const steps = computed<WizardStep[]>(() => {
     })
   }
 
-  if ((nudgeConfig.value?.scores?.length ?? 0) > 0) {
-    sequence.push({
-      key: 'scores',
-      component: NudgeToolStepScores,
-      title: t('nudge-tool.steps.scores.title'),
-      subtitle: t('nudge-tool.steps.scores.subtitle'),
-      icon: 'mdi-earth',
-      props: {
-        modelValue: selectedScores.value,
-        scores: nudgeConfig.value?.scores ?? [],
-        isZeroResults: hasZeroMatches.value,
-      },
-      onUpdate: (value: string[]) => (selectedScores.value = value),
-    })
-  }
-
   let subsetStepNumber = sequence.length + 1
 
   subsetGroups.value.forEach(group => {
@@ -620,6 +604,23 @@ const steps = computed<WizardStep[]>(() => {
 
     subsetStepNumber += 1
   })
+
+  // Scores step moved after subset groups (Distance, Budget, etc.)
+  if ((nudgeConfig.value?.scores?.length ?? 0) > 0) {
+    sequence.push({
+      key: 'scores',
+      component: NudgeToolStepScores,
+      title: t('nudge-tool.steps.scores.title'),
+      subtitle: t('nudge-tool.steps.scores.subtitle'),
+      icon: 'mdi-earth',
+      props: {
+        modelValue: selectedScores.value,
+        scores: nudgeConfig.value?.scores ?? [],
+        isZeroResults: hasZeroMatches.value,
+      },
+      onUpdate: (value: string[]) => (selectedScores.value = value),
+    })
+  }
 
   sequence.push({
     key: 'condition',

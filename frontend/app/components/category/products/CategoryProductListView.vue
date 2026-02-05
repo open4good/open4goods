@@ -139,6 +139,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 import type {
   AttributeConfigDto,
   FieldMetadataDto,
@@ -157,9 +158,7 @@ import {
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
-import {
-  resolveSortedFieldDisplay,
-} from '~/utils/_sort-attribute-display'
+import { resolveSortedFieldDisplay } from '~/utils/_sort-attribute-display'
 
 const props = defineProps<{
   products: ProductDto[]
@@ -190,7 +189,6 @@ const productLink = (product: ProductDto) =>
 
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)
-
 
 const resolveBaseLine = (product: ProductDto) =>
   product.aiReview?.baseLine ?? null
@@ -250,6 +248,13 @@ const sortedFieldDisplay = (
   )
 
   if (!display) {
+    return null
+  }
+
+  if (
+    display.key === ECOSCORE_RELATIVE_FIELD ||
+    display.key === 'price.minPrice.price'
+  ) {
     return null
   }
 

@@ -226,6 +226,7 @@ public class VerticalsGenerationController {
 		return verticalsGenService.generateEcoscoreDryRun(vc);
 	}
 
+	// TODO : Create a postcontroller updateImpactScore. We will paste result of getImpactScorePrompt, then it will act like updateVerticalFileWithImpactScore but in the json file, also updating other fields (criteriasPonderation, jsonprompt, ...) This is the major TODO
 
 
 	@GetMapping(path="/update/{vertical}/categories/")

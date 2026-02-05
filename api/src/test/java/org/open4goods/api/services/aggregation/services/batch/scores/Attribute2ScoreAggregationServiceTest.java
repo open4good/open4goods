@@ -156,4 +156,45 @@ class Attribute2ScoreAggregationServiceTest {
         verticalConfig.setAttributesConfig(attributesConfig);
         return verticalConfig;
     }
+
+    @Test
+    void neutralFallbackUsesPopulationAverage() {
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey("TEST_SCORE");
+        attributeConfig.setAsScore(true);
+        attributeConfig.setFilteringType(AttributeType.NUMERIC);
+        
+        org.open4goods.model.vertical.scoring.ScoreScoringConfig scoring = new org.open4goods.model.vertical.scoring.ScoreScoringConfig();
+        scoring.setMissingValuePolicy(org.open4goods.model.vertical.scoring.ScoreMissingValuePolicy.NEUTRAL);
+        org.open4goods.model.vertical.scoring.ScoreScaleConfig scale = new org.open4goods.model.vertical.scoring.ScoreScaleConfig();
+        scale.setMin(0.0);
+        scale.setMax(10.0);
+        scoring.setScale(scale);
+        attributeConfig.setScoring(scoring);
+
+        AttributesConfig attributesConfig = new AttributesConfig();
+        attributesConfig.setConfigs(List.of(attributeConfig));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setAttributesConfig(attributesConfig);
+
+        Product p1 = productWithAttribute(1L, "TEST_SCORE", "0.0");
+        Product p2 = productWithAttribute(2L, "TEST_SCORE", "2.0");
+        Product pMalformed = productWithAttribute(3L, "TEST_SCORE", "invalid");
+        
+        // P1 (0) + P2 (2) -> Avg 1.0. 
+        // Malformed triggers handleMissingScore.
+        // If neutral=midpoint (0-10) -> 5.0. 
+        // If implementation is fixed to skip fallback -> it should get Avg (1.0) eventually via done().
+
+        List<Product> products = List.of(p1, p2, pMalformed);
+
+        aggregate(products, verticalConfig);
+
+        Score missingScore = pMalformed.getScores().get("TEST_SCORE");
+        assertThat(missingScore).isNotNull();
+        // We expect the absolute value to be the average of existing values (1.0)
+        // Current implementation gives 5.0 (midpoint), so this assertion SHOULD FAIL.
+        assertThat(missingScore.getAbsolute().getValue()).isEqualTo(1.0);
+    }
 }

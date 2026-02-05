@@ -104,10 +104,10 @@
           class="impact-score-panel__footer-icon"
         />
         <NuxtLink to="/ecoscore" class="impact-score-panel__footer-link">
-          Impact Score
-          <span v-if="category" class="impact-score-panel__footer-category">
+          <div class="impact-score-panel__footer-title">Impact Score</div>
+          <div v-if="category" class="impact-score-panel__footer-category">
             {{ category }}
-          </span>
+          </div>
         </NuxtLink>
       </div>
 
@@ -115,9 +115,12 @@
 
       <!-- Center: Brand - Model -->
       <div class="impact-score-panel__footer-center">
-        <span v-if="brand">{{ brand }}</span>
-        <span v-if="brand && model" class="mx-1">-</span>
-        <span v-if="model">{{ model }}</span>
+        <div v-if="brand" class="impact-score-panel__footer-brand">
+          {{ brand }}
+        </div>
+        <div v-if="model" class="impact-score-panel__footer-model">
+          {{ model }}
+        </div>
       </div>
 
       <div class="impact-score-panel__separator" />
@@ -583,11 +586,16 @@ const formattedDate = computed(() => {
   text-decoration: none;
   transition: color 0.2s;
   display: flex;
-  align-items: center;
-  gap: 4px;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
 }
 
 .impact-score-panel__footer-link:hover {
+  text-decoration: none;
+}
+
+.impact-score-panel__footer-link:hover .impact-score-panel__footer-title {
   text-decoration: underline;
   color: var(--impact-accent);
 }
@@ -595,6 +603,7 @@ const formattedDate = computed(() => {
 .impact-score-panel__footer-category {
   opacity: 0.85;
   font-weight: 500;
+  font-size: 0.75rem;
 }
 
 .impact-score-panel__footer-center {
@@ -603,6 +612,20 @@ const formattedDate = computed(() => {
   color: rgba(var(--v-theme-text-neutral-strong), 0.8);
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+.impact-score-panel__footer-brand {
+  font-weight: 800;
+}
+
+.impact-score-panel__footer-model {
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.8;
 }
 
 .impact-score-panel__footer-right {
