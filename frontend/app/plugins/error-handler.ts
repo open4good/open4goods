@@ -9,7 +9,7 @@ export default defineNuxtPlugin(nuxtApp => {
 
     // Ensure we trigger the Nuxt error page for better visibility if it's a fatal error
     // check if showError is available (it is a nuanced auto-import)
-    if (process.client) {
+    if (import.meta.client) {
       // We can optionally show a toast here if we had a toast system
     }
   })

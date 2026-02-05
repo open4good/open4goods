@@ -2,7 +2,7 @@ import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi, afterEach } from 'vitest'
 
 // Mock defineNuxtPlugin to just return the setup function
-mockNuxtImport('defineNuxtPlugin', () => (plugin: any) => plugin)
+mockNuxtImport('defineNuxtPlugin', () => (plugin: unknown) => plugin)
 
 describe('error-handler plugin', () => {
   const consoleGroupMock = vi
@@ -32,7 +32,9 @@ describe('error-handler plugin', () => {
   })
 
   it('logs error to console when vue:error hook is triggered', async () => {
-    let vueErrorCallback: Function | undefined
+    let vueErrorCallback:
+      | ((error: unknown, instance: unknown, info: unknown) => void)
+      | undefined
     const nuxtApp = {
       hook: vi.fn((name, callback) => {
         if (name === 'vue:error') {
@@ -63,7 +65,7 @@ describe('error-handler plugin', () => {
   })
 
   it('logs error to console when app:error hook is triggered', async () => {
-    let appErrorCallback: Function | undefined
+    let appErrorCallback: ((error: unknown) => void) | undefined
     const nuxtApp = {
       hook: vi.fn((name, callback) => {
         if (name === 'app:error') {

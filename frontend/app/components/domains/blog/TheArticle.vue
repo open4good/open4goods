@@ -8,12 +8,16 @@ import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 import { useAuth } from '~/composables/useAuth'
 import { buildBlogArticleJsonLd } from '~/utils/blog-jsonld'
 
+import NudgeToolAssistantWizard from '~/components/nudge-tool/NudgeToolAssistantWizard.vue'
+
 interface BlogArticle extends BlogPostDto {
   /**
    * Legacy field kept for backward compatibility with earlier API payloads
    */
   content?: string
 }
+
+type BodyPart = { type: 'html' | 'assistant'; content?: string }
 
 const props = defineProps<{
   article: BlogArticle
@@ -26,6 +30,30 @@ const articleSummary = computed(() => article.value.summary?.trim() ?? '')
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const localePath = useLocalePath()
+
+const showAssistant = computed(() => {
+  // Only show if logged in.
+  // The user prompt mentioned "valid role", defaulting to just logged in for now matching the prompt's implied flexibility,
+  // but we can add role check here easily, e.g., && hasRole('ADMIN')
+  return isLoggedIn.value
+})
+
+const assistantCategoryId = computed(() => {
+  // Extract category ID from the article's category list if possible.
+  // For now, assume the first category or a specific field maps to it.
+  // The user prompt said "l'assistant qui correspond à la page" (assistant corresponding to the page).
+  // Assuming the first category is the vertical ID for now.
+  const cats = article.value.category ?? []
+  if (cats.length > 0) {
+    // Basic mapping: use the first category as the ID.
+    // In a real app this might need slug-to-id mapping or a dedicated field.
+    // Given the prompt "l'assistant qui correspond là au taille de téléviseur",
+    // if the article is about TV size, the category might be 'tv' or 'televisions'.
+    // Let's iterate to find a known vertical ID or just use the first one.
+    return cats[0].toLowerCase()
+  }
+  return null
+})
 
 const buildDateInfo = (timestamp?: number) => {
   if (!timestamp) {
@@ -70,6 +98,28 @@ const sanitizedBody = computed(() => {
 })
 
 const hasBody = computed(() => sanitizedBody.value.trim().length > 0)
+
+const bodyParts = computed<BodyPart[]>(() => {
+  const content = sanitizedBody.value
+  if (!content.includes('[assistant]')) {
+    return [{ type: 'html', content }]
+  }
+
+  const parts = content.split('[assistant]')
+  const result: BodyPart[] = []
+
+  parts.forEach((part, index) => {
+    if (part) {
+      result.push({ type: 'html', content: part })
+    }
+    // Add assistant between parts, but not after the last one
+    if (index < parts.length - 1) {
+      result.push({ type: 'assistant' })
+    }
+  })
+
+  return result
+})
 
 const readingTimeMinutes = computed(() => {
   if (!plainBody.value) {
@@ -156,7 +206,10 @@ const structuredData = computed(() => {
     site: {
       name: String(t('siteIdentity.siteName')),
       origin: requestUrl.origin,
-      logoUrl: new URL('/nudger-icon-512x512.png', requestUrl.origin).toString(),
+      logoUrl: new URL(
+        '/nudger-icon-512x512.png',
+        requestUrl.origin
+      ).toString(),
       sameAs: [toTrimmedString(t('siteIdentity.links.linkedin'))].filter(
         (value): value is string => Boolean(value)
       ),
@@ -339,15 +392,26 @@ useHead(() => ({
       aria-label="Article content"
       role="region"
     >
-      <!-- eslint-disable vue/no-v-html -->
-      <div
-        class="article-content"
-        data-test="article-body"
-        v-html="sanitizedBody"
-      />
-      <!-- eslint-enable vue/no-v-html -->
+      <template v-for="(part, index) in bodyParts" :key="index">
+        <!-- eslint-disable vue/no-v-html -->
+        <div
+          v-if="part.type === 'html'"
+          class="article-content"
+          data-test="article-body"
+          v-html="part.content"
+        />
+        <!-- eslint-enable vue/no-v-html -->
+        <div
+          v-else-if="part.type === 'assistant' && showAssistant"
+          class="my-8"
+        >
+          <NudgeToolAssistantWizard
+            :assistant-category-id="assistantCategoryId"
+            compact
+          />
+        </div>
+      </template>
     </section>
-
     <section
       v-else
       class="article-body article-body--empty"

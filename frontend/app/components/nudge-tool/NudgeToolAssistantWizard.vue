@@ -14,7 +14,7 @@ const props = withDefaults(
   }
 )
 
-const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host', 'cookie'])
 
 const resolvedAssistantId = computed(() => props.assistantId?.trim() ?? '')
 
