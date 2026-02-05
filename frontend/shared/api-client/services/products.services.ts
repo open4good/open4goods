@@ -15,6 +15,7 @@ import type {
 } from '..'
 import type {
   FilterableFieldsForVerticalRequest,
+  ProductIncludeEnum,
   ProductsRequest,
   SortableFieldsForVerticalRequest,
 } from '../apis/ProductApi'
@@ -42,7 +43,8 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
   }
 
   const getProductByGtin = async (
-    gtin: string | number
+    gtin: string | number,
+    include?: ProductIncludeEnum[]
   ): Promise<ProductDto> => {
     const parsedGtin =
       typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
@@ -55,6 +57,7 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
       return await resolveApi().product({
         gtin: parsedGtin,
         domainLanguage,
+        include,
       })
     } catch (error) {
       console.error('Error fetching product:', error)

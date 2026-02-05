@@ -1,4 +1,9 @@
-import { createError, defineEventHandler, getRouterParam } from 'h3'
+import {
+  createError,
+  defineEventHandler,
+  getQuery,
+  getRouterParam,
+} from 'h3'
 import { useProductService } from '~~/shared/api-client/services/products.services'
 import type { ProductDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
@@ -6,6 +11,7 @@ import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 import { normaliseProductDto } from '../../utils/normalise-product-sourcing'
+import { parseProductIncludes } from '../../utils/product-include'
 
 export default defineEventHandler(async (event): Promise<ProductDto> => {
   setDomainLanguageCacheHeaders(event, 'public, max-age=300, s-maxage=300')
@@ -28,6 +34,9 @@ export default defineEventHandler(async (event): Promise<ProductDto> => {
     })
   }
 
+  const query = getQuery(event)
+  const include = parseProductIncludes(query.include)
+
   const rawHost =
     event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
   const { domainLanguage } = resolveDomainLanguage(rawHost)
@@ -35,7 +44,7 @@ export default defineEventHandler(async (event): Promise<ProductDto> => {
   const productService = useProductService(domainLanguage)
 
   try {
-    const product = await productService.getProductByGtin(parsedGtin)
+    const product = await productService.getProductByGtin(parsedGtin, include)
     return normaliseProductDto(product)
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)

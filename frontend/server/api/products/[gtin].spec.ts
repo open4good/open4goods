@@ -4,6 +4,7 @@ import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import ProductAttributeSourcingLabel from '~~/app/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import type { ProductDto } from '~~/shared/api-client'
+import { ProductIncludeEnum } from '~~/shared/api-client/apis/ProductApi'
 
 type ProductRouteHandler = (typeof import('./[gtin]'))['default']
 
@@ -19,6 +20,7 @@ const setDomainLanguageCacheHeadersMock = vi.hoisted(() => vi.fn())
 const getRouterParamMock = vi.hoisted(() =>
   vi.fn<(event: unknown, name: string) => string | undefined>()
 )
+const getQueryMock = vi.hoisted(() => vi.fn<(event: unknown) => Record<string, unknown>>())
 const createErrorMock = vi.hoisted(() =>
   vi.fn(
     (input: {
@@ -142,6 +144,7 @@ const i18n = createI18n({
 vi.mock('h3', () => ({
   defineEventHandler: (fn: ProductRouteHandler) => fn,
   getRouterParam: getRouterParamMock,
+  getQuery: getQueryMock,
   createError: createErrorMock,
 }))
 
@@ -181,6 +184,9 @@ describe('server/api/products/[gtin]', () => {
       isResponseError: false,
       logMessage: 'HTTP 502 - Bad Gateway',
     })
+    getQueryMock.mockImplementation(event =>
+      ((event as { context?: { query?: Record<string, unknown> } }).context?.query ?? {})
+    )
     getRouterParamMock.mockImplementation((event, name) => {
       const context = (
         event as {
@@ -227,8 +233,32 @@ describe('server/api/products/[gtin]', () => {
     )
     expect(resolveDomainLanguageMock).toHaveBeenCalledWith('nudger.example')
     expect(useProductServiceMock).toHaveBeenCalledWith('fr')
-    expect(getProductByGtinMock).toHaveBeenCalledWith(1234567890123)
+    expect(getProductByGtinMock).toHaveBeenCalledWith(1234567890123, [])
     expect(response).toEqual(productResponse)
+  })
+
+  it('parses include query parameters and forwards valid includes', async () => {
+    getProductByGtinMock.mockResolvedValue({ gtin: 1234567890123, slug: 'test-product' })
+
+    const event = {
+      node: {
+        req: {
+          headers: { host: 'nudger.example' },
+        },
+      },
+      context: {
+        params: { gtin: '1234567890123' },
+        query: { include: ['base,attributes', 'invalid', ProductIncludeEnum.Scores] },
+      },
+    } as unknown as Parameters<ProductRouteHandler>[0]
+
+    await handler(event)
+
+    expect(getProductByGtinMock).toHaveBeenCalledWith(1234567890123, [
+      ProductIncludeEnum.Base,
+      ProductIncludeEnum.Attributes,
+      ProductIncludeEnum.Scores,
+    ])
   })
 
   it('serialises sourcing sets to arrays consumable by the UI', async () => {

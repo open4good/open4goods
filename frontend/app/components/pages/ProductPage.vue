@@ -195,28 +195,21 @@ import {
 } from 'vue'
 import { createError } from 'h3'
 import type {
-  Agg,
   AggregationBucketDto,
-  AggregationResponseDto,
-  AttributeConfigDto,
-  CommercialEvent,
   FilterRequestDto,
   ProductIndexedAttributeDto,
-  ProductDto,
   ProductReferenceDto,
   ProductScoreDto,
-  ProductSearchResponseDto,
 } from '~~/shared/api-client'
-import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
+import type { ProductPageData } from '~~/shared/types/product-page-data'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import { buildProductJsonLdGraph } from '~/utils/product-jsonld'
 
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
-import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
 import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
@@ -285,7 +278,7 @@ const PRODUCT_COMPONENTS = [
   'offers',
   'timeline',
   'eprel',
-].join(',')
+] as const
 
 const impactSectionRef = ref<HTMLElement | null>(null)
 const { top: _impactSectionTop } = useElementBounding(impactSectionRef)
@@ -329,17 +322,17 @@ const { categorySlug, gtin } = productRoute
 const productLoadError = ref<Error | null>(null)
 
 const {
-  data: productData,
+  data: productPageDataResponse,
   pending,
   error,
-} = await useAsyncData<ProductDto | null>(
-  `product-${gtin}`,
+} = await useAsyncData<ProductPageData | null>(
+  `product-page-${gtin}`,
   async () => {
     productLoadError.value = null
     try {
       const baseUrl = import.meta.server ? requestURL.origin : ''
-      return await $fetch<ProductDto>(`${baseUrl}/api/products/${gtin}`, {
-        query: { include: PRODUCT_COMPONENTS },
+      return await $fetch<ProductPageData>(`${baseUrl}/api/product-page/${gtin}`, {
+        query: { include: PRODUCT_COMPONENTS, categorySlug },
       })
     } catch (fetchError) {
       if (isBackendNotFoundError(fetchError)) {
@@ -370,7 +363,16 @@ const {
   { server: true, immediate: true }
 )
 
-const product = computed(() => productData.value)
+const productPageData = computed(
+  () =>
+    productPageDataResponse.value ?? {
+      product: null,
+      categoryDetail: null,
+      aggregations: {},
+      commercialEvents: [],
+    }
+)
+const product = computed(() => productPageData.value.product)
 
 if (product.value?.fullSlug) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
@@ -390,35 +392,20 @@ if (product.value?.fullSlug) {
   }
 }
 
-const { selectCategoryBySlug } = useCategories()
-
-const categoryDetail = ref<Awaited<
-  ReturnType<typeof selectCategoryBySlug>
-> | null>(null)
-const loadingAggregations = ref(false)
-const aggregations = ref<Record<string, AggregationResponseDto>>({})
+const categoryDetail = computed(() => productPageData.value.categoryDetail)
+const aggregations = computed(() => productPageData.value.aggregations)
 
 const requestedScoreIds = computed(() => {
-  const ids: string[] = []
-
-  const pushId = (candidate: unknown) => {
-    if (typeof candidate !== 'string') {
-      return
-    }
-
-    const normalized = candidate.trim()
-    if (!normalized.length || ids.includes(normalized)) {
-      return
-    }
-
-    ids.push(normalized)
-  }
-
-  pushId('ECOSCORE')
-
+  const ids: string[] = ['ECOSCORE']
   const ponderations =
     categoryDetail.value?.impactScoreConfig?.criteriasPonderation ?? {}
-  Object.keys(ponderations).forEach(key => pushId(key))
+
+  Object.keys(ponderations).forEach(key => {
+    const normalized = key.trim()
+    if (normalized.length > 0 && !ids.includes(normalized)) {
+      ids.push(normalized)
+    }
+  })
 
   return ids
 })
@@ -453,11 +440,11 @@ const attributeConfigMap = computed(() => {
   return configs.reduce((map, attribute) => {
     const normalizedKey = attribute.key?.toString().trim().toUpperCase()
     if (normalizedKey?.length) {
-      map.set(normalizedKey, attribute as AttributeConfigDto)
+      map.set(normalizedKey, attribute)
     }
 
     return map
-  }, new Map<string, AttributeConfigDto>())
+  }, new Map<string, (typeof configs)[number]>())
 })
 
 const availableImpactCriteriaMap = computed(() => {
@@ -477,63 +464,6 @@ const availableImpactCriteriaMap = computed(() => {
     return map
   }, new Map<string, { title: string; description: string | null; utility: string | null }>())
 })
-
-if (categorySlug) {
-  try {
-    categoryDetail.value = await selectCategoryBySlug(categorySlug)
-  } catch (categoryError) {
-    console.error(
-      'Failed to resolve category detail for product page.',
-      categoryError
-    )
-  }
-}
-
-const scoreAggregations = async () => {
-  if (!product.value || !categoryDetail.value?.id) {
-    return
-  }
-
-  const scores = requestedScoreIds.value
-  if (!scores.length) {
-    return
-  }
-
-  loadingAggregations.value = true
-
-  const aggs: Agg[] = scores.map(scoreId => ({
-    name: `score_${scoreId}`,
-    field: `scores.${scoreId}.value`,
-    type: AggTypeEnum.Range,
-    step: 0.5,
-  }))
-
-  try {
-    const response = await $fetch<ProductSearchResponseDto>('/api/products', {
-      method: 'POST',
-      body: {
-        verticalId: categoryDetail.value.id,
-        pageSize: 0,
-        aggs: { aggs },
-      },
-    })
-
-    const resolved: Record<string, AggregationResponseDto> = {}
-    ;(response.aggregations ?? []).forEach(aggregation => {
-      if (aggregation.name) {
-        resolved[aggregation.name] = aggregation
-      }
-    })
-
-    aggregations.value = resolved
-  } catch (aggregationError) {
-    console.error('Failed to fetch impact aggregations', aggregationError)
-  } finally {
-    loadingAggregations.value = false
-  }
-}
-
-await scoreAggregations()
 
 const productTitle = computed(() => {
   const rawSlug = product.value?.slug ?? ''
@@ -1541,22 +1471,7 @@ const radarData = computed<RadarDataset>(() => {
   }
 })
 
-const { data: commercialEventsData } = await useAsyncData<
-  CommercialEvent[] | null
->(
-  'commercial-events',
-  async () => {
-    try {
-      return await $fetch<CommercialEvent[]>('/api/commercial-events')
-    } catch (eventError) {
-      console.error('Failed to load commercial events', eventError)
-      return []
-    }
-  },
-  { server: true }
-)
-
-const commercialEvents = computed(() => commercialEventsData.value ?? [])
+const commercialEvents = computed(() => productPageData.value.commercialEvents ?? [])
 
 const hcaptchaSiteKey = computed(
   () => runtimeConfig.public.hcaptchaSiteKey ?? ''
