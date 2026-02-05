@@ -125,7 +125,7 @@ describe('ProductAlternatives', () => {
 
     expect(fetchMock).toHaveBeenCalled()
     const lastCall = fetchMock.mock.calls.at(-1)
-    expect(lastCall?.[0]).toBe('/api/products')
+    expect(lastCall?.[0]).toBe('/api/products/search')
     const requestBody = (
       lastCall?.[1] as {
         body?: { filters?: { filters?: Array<Record<string, unknown>> } }
