@@ -86,6 +86,13 @@ const isNonEmptyString = (value: unknown): value is string =>
 const normalizeString = (value: unknown): string | undefined =>
   isNonEmptyString(value) ? value.trim() : undefined
 
+const normalizeAttributeKey = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9]/g, '')
+    .toUpperCase()
+
 const normalizeSet = (value?: Set<string> | string[] | null): string[] => {
   if (!value) {
     return []
@@ -137,13 +144,33 @@ const resolveAttributeValue = (
   indexedAttributes: Record<string, { numericValue?: number | null }>,
   keys: string[]
 ): string | number | undefined => {
+  const normalizedIndexed = Object.entries(indexedAttributes).reduce(
+    (acc, [key, value]) => {
+      acc.set(normalizeAttributeKey(key), value)
+      return acc
+    },
+    new Map<string, { numericValue?: number | null }>()
+  )
+
+  const normalizedReferential = Object.entries(referentialAttributes).reduce(
+    (acc, [key, value]) => {
+      acc.set(normalizeAttributeKey(key), value)
+      return acc
+    },
+    new Map<string, string>()
+  )
+
   for (const key of keys) {
-    const indexed = indexedAttributes[key]?.numericValue
+    const indexed =
+      indexedAttributes[key]?.numericValue ??
+      normalizedIndexed.get(normalizeAttributeKey(key))?.numericValue
     if (typeof indexed === 'number') {
       return indexed
     }
 
-    const referential = referentialAttributes[key]
+    const referential =
+      referentialAttributes[key] ??
+      normalizedReferential.get(normalizeAttributeKey(key))
     if (isNonEmptyString(referential)) {
       return referential
     }
@@ -450,19 +477,26 @@ export const buildProductJsonLdGraph = (
   }
 
   const brandName = normalizeString(product.identity?.brand)
-  const weightValue = resolveAttributeValue(referentialAttributes, indexedAttributes, [
-    'POIDS (SANS SUPPORT)',
-    'POIDS (AVEC SUPPORT)',
-  ])
-  const widthValue = resolveAttributeValue(referentialAttributes, indexedAttributes, [
-    'LARGEUR (SANS SUPPORT)',
-  ])
-  const heightValue = resolveAttributeValue(referentialAttributes, indexedAttributes, [
-    'HAUTEUR (SANS SUPPORT)',
-  ])
-  const depthValue = resolveAttributeValue(referentialAttributes, indexedAttributes, [
-    'PROFONDEUR (SANS SUPPORT)',
-  ])
+  const weightValue = resolveAttributeValue(
+    referentialAttributes,
+    indexedAttributes,
+    ['WEIGHT', 'POIDS (SANS SUPPORT)', 'POIDS (AVEC SUPPORT)']
+  )
+  const widthValue = resolveAttributeValue(
+    referentialAttributes,
+    indexedAttributes,
+    ['WIDTH', 'LARGEUR (SANS SUPPORT)']
+  )
+  const heightValue = resolveAttributeValue(
+    referentialAttributes,
+    indexedAttributes,
+    ['HEIGHT', 'HAUTEUR (SANS SUPPORT)']
+  )
+  const depthValue = resolveAttributeValue(
+    referentialAttributes,
+    indexedAttributes,
+    ['DEPTH', 'PROFONDEUR (SANS SUPPORT)']
+  )
 
   const productEntry = {
     '@type': 'Product',
@@ -487,6 +521,7 @@ export const buildProductJsonLdGraph = (
     mpn: normalizeString(normalizeSet(product.base?.externalIds?.mpn)[0]),
     sku: normalizeString(normalizeSet(product.base?.externalIds?.sku)[0]),
     color: resolveAttributeValue(referentialAttributes, indexedAttributes, [
+      'COLOR',
       'COULEUR GENERIQUE',
       'NOM DE LA COULEUR',
     ]),
