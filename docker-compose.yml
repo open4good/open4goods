@@ -51,7 +51,7 @@ services:
 # API (Backend)
 ###################################################################
   api:
-    image: eclipse-temurin:25.0.1_8-jre
+    image: eclipse-temurin:25.0.2_10-jre
     container_name: api
     volumes:
       - ./api/target/api-0.0.1-SNAPSHOT.jar:/app/app.jar
@@ -72,7 +72,7 @@ services:
 # Front API (Backend for Frontend)
 ###################################################################
   front-api:
-    image: eclipse-temurin:25.0.1_8-jre
+    image: eclipse-temurin:25.0.2_10-jre
     container_name: front-api
     volumes:
       - ./front-api/target/front-api-0.0.1-SNAPSHOT.jar:/app/app.jar
