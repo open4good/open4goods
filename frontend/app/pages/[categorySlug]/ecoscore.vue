@@ -1160,15 +1160,17 @@ useSeoMeta({
 
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__link)
   color: rgb(var(--v-theme-text-neutral-strong))
-  background: rgba(var(--v-theme-surface-primary-080), 0.35)
+  background: rgba(var(--v-theme-surface-glass-strong), 0.9)
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.4)
 
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__link:hover),
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__link:focus-visible)
-  background: rgba(var(--v-theme-surface-primary-080), 0.6)
+  background: rgba(var(--v-theme-surface-primary-100), 0.75)
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.65)
 
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__link--active)
-  background: rgba(var(--v-theme-surface-primary-120), 0.9)
-  border-color: rgba(var(--v-theme-border-primary-strong), 0.85)
+  background: rgba(var(--v-theme-surface-primary-120), 0.95)
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.9)
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__icon)
