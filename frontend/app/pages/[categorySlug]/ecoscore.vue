@@ -1275,11 +1275,19 @@ useSeoMeta({
   margin: 0
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
   line-height: 1.4
+  display: -webkit-box
+  -webkit-line-clamp: 3
+  -webkit-box-orient: vertical
+  overflow: hidden
 
 .category-ecoscore__criteria-description
   margin: 0 0 0.5rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
   line-height: 1.5
+  display: -webkit-box
+  -webkit-line-clamp: 4
+  -webkit-box-orient: vertical
+  overflow: hidden
 
 .category-ecoscore__criteria-footer
   display: flex
