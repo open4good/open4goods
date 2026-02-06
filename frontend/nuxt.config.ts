@@ -535,6 +535,7 @@ export default defineNuxtConfig({
         siteId: HOTJAR_SITE_ID,
         snippetVersion: HOTJAR_SNIPPET_VERSION,
       },
+      siteUrl: process.env.SITE_URL || 'https://nudger.fr',
     },
   },
   hooks: {

@@ -46,17 +46,23 @@ export interface ProductJsonLdInput {
     resources?: {
       coverImagePath?: string | null
       externalCover?: string | null
-      images?: Array<{ url?: string | null; originalUrl?: string | null }> | null
+      images?: Array<{
+        url?: string | null
+        originalUrl?: string | null
+      }> | null
     } | null
     offers?: {
       offersCount?: number | null
-      offersByCondition?: Record<string, Array<{
-        url?: string | null
-        price?: number | null
-        currency?: string | null
-        condition?: string | null
-        datasourceName?: string | null
-      }>> | null
+      offersByCondition?: Record<
+        string,
+        Array<{
+          url?: string | null
+          price?: number | null
+          currency?: string | null
+          condition?: string | null
+          datasourceName?: string | null
+        }>
+      > | null
     } | null
     scores?: {
       ecoscore?: {
@@ -67,7 +73,10 @@ export interface ProductJsonLdInput {
     } | null
     attributes?: {
       referentialAttributes?: Record<string, string> | null
-      indexedAttributes?: Record<string, { numericValue?: number | null }> | null
+      indexedAttributes?: Record<
+        string,
+        { numericValue?: number | null }
+      > | null
     } | null
   }
   productTitle: string
@@ -204,7 +213,11 @@ const resolveImageUrls = (origin: string, input?: string[]): string[] => {
       continue
     }
 
-    const absolute = toAbsoluteUrl(origin, normalized) ?? normalized
+    // Force absolute URL using origin
+    const absolute = normalized.startsWith('http')
+      ? normalized
+      : (toAbsoluteUrl(origin, normalized) ?? normalized)
+
     if (seen.has(absolute)) {
       continue
     }
@@ -217,34 +230,47 @@ const resolveImageUrls = (origin: string, input?: string[]): string[] => {
 }
 
 const buildOfferList = (
-  offersByCondition: Record<string, Array<{
-    url?: string | null
-    price?: number | null
-    currency?: string | null
-    condition?: string | null
-    datasourceName?: string | null
-  }>>
+  origin: string,
+  offersByCondition: Record<
+    string,
+    Array<{
+      url?: string | null
+      price?: number | null
+      currency?: string | null
+      condition?: string | null
+      datasourceName?: string | null
+    }>
+  >
 ): Array<Record<string, JsonLdValue>> => {
   const offers = Object.values(offersByCondition)
     .flat()
-    .filter(offer => typeof offer?.price === 'number' && isNonEmptyString(offer?.url))
-    .map(offer => ({
-      '@type': 'Offer',
-      url: normalizeString(offer.url),
-      price: offer.price,
-      priceCurrency: normalizeString(offer.currency),
-      availability: 'https://schema.org/InStock',
-      itemCondition:
-        offer.condition === 'NEW'
-          ? 'https://schema.org/NewCondition'
-          : offer.condition === 'OCCASION'
-            ? 'https://schema.org/UsedCondition'
-            : undefined,
-      seller: {
-        '@type': 'Organization',
-        name: normalizeString(offer.datasourceName),
-      },
-    }))
+    .filter(
+      offer => typeof offer?.price === 'number' && isNonEmptyString(offer?.url)
+    )
+    .map(offer => {
+      const url = normalizeString(offer.url)
+      return {
+        '@type': 'Offer',
+        url: url
+          ? url.startsWith('http')
+            ? url
+            : toAbsoluteUrl(origin, url)
+          : undefined,
+        price: offer.price,
+        priceCurrency: normalizeString(offer.currency),
+        availability: 'https://schema.org/InStock',
+        itemCondition:
+          offer.condition === 'NEW'
+            ? 'https://schema.org/NewCondition'
+            : offer.condition === 'OCCASION'
+              ? 'https://schema.org/UsedCondition'
+              : undefined,
+        seller: {
+          '@type': 'Organization',
+          name: normalizeString(offer.datasourceName),
+        },
+      }
+    })
 
   return offers
 }
@@ -257,28 +283,27 @@ export const buildProductJsonLdGraph = (
   const breadcrumbId = `${input.canonicalUrl}#breadcrumb`
   const webpageId = `${input.canonicalUrl}#webpage`
 
-  const referentialAttributes =
-    product.attributes?.referentialAttributes ?? {}
+  const referentialAttributes = product.attributes?.referentialAttributes ?? {}
   const indexedAttributes = product.attributes?.indexedAttributes ?? {}
 
   const gtinValue =
-    product.base?.gtin ?? product.gtin ?? product.gtin?.toString() ?? undefined
-  const gtin13 = gtinValue
-    ? String(gtinValue).padStart(13, '0')
-    : undefined
+    product.gtin ??
+    (typeof product.gtin === 'number' ? product.gtin : undefined)
+  const gtin13 = gtinValue ? String(gtinValue).padStart(13, '0') : undefined
 
   const images = resolveImageUrls(input.site.url, input.imageUrls ?? [])
 
   const offersByCondition = product.offers?.offersByCondition ?? {}
-  const offers = buildOfferList(offersByCondition)
+  const offers = buildOfferList(input.site.url, offersByCondition)
   const offerPrices = offers
     .map(offer => offer.price)
     .filter((price): price is number => typeof price === 'number')
 
-  const offerCurrency = offers.find(offer => isNonEmptyString(offer.priceCurrency))
-    ?.priceCurrency
+  const offerCurrency = offers.find(offer =>
+    isNonEmptyString(offer.priceCurrency)
+  )?.priceCurrency
 
-  const additionalProperty = compactJsonLd([
+  const rawAdditionalProperty = compactJsonLd([
     input.impactScoreOn20 != null
       ? {
           '@type': 'PropertyValue',
@@ -414,7 +439,18 @@ export const buildProductJsonLdGraph = (
         'NOM DE LA COULEUR',
       ]),
     },
-  ]) as JsonLdValue
+  ])
+
+  const additionalProperty = (
+    Array.isArray(rawAdditionalProperty) ? rawAdditionalProperty : []
+  ).filter(
+    (item: JsonLdValue) =>
+      item &&
+      typeof item === 'object' &&
+      !Array.isArray(item) &&
+      (item as Record<string, JsonLdValue>).value !== undefined &&
+      (item as Record<string, JsonLdValue>).value !== null
+  ) as JsonLdValue
 
   const energyDetails = compactJsonLd(
     [
@@ -470,9 +506,7 @@ export const buildProductJsonLdGraph = (
       '@type': 'ListItem',
       position: index + 1,
       name: crumb.title,
-      item: crumb.link
-        ? toAbsoluteUrl(input.site.url, crumb.link)
-        : undefined,
+      item: crumb.link ? toAbsoluteUrl(input.site.url, crumb.link) : undefined,
     })),
   }
 
@@ -562,13 +596,9 @@ export const buildProductJsonLdGraph = (
             priceCurrency: offerCurrency,
             offerCount: product.offers?.offersCount ?? offers.length,
             lowPrice:
-              offerPrices.length > 0
-                ? Math.min(...offerPrices)
-                : undefined,
+              offerPrices.length > 0 ? Math.min(...offerPrices) : undefined,
             highPrice:
-              offerPrices.length > 0
-                ? Math.max(...offerPrices)
-                : undefined,
+              offerPrices.length > 0 ? Math.max(...offerPrices) : undefined,
             offers,
           }
         : undefined,
@@ -579,6 +609,43 @@ export const buildProductJsonLdGraph = (
     '@context': 'https://schema.org',
     '@graph': [breadcrumbEntry, productEntry, webPageEntry],
   })
+
+  // Fix Review Ratings
+  if (graph && typeof graph === 'object' && !Array.isArray(graph)) {
+    const graphRecord = graph as Record<string, JsonLdValue>
+    const graphNodes = graphRecord['@graph']
+
+    if (Array.isArray(graphNodes)) {
+      const productNode = (graphNodes as JsonLdValue[]).find(
+        (node: JsonLdValue) =>
+          node &&
+          typeof node === 'object' &&
+          !Array.isArray(node) &&
+          (node as Record<string, JsonLdValue>)['@type'] === 'Product'
+      ) as unknown as
+        | {
+            review?: {
+              reviewRating?: {
+                worstRating?: number
+              }
+              datePublished?: string
+              dateCreated?: string
+            }
+          }
+        | undefined
+      if (productNode?.review?.reviewRating) {
+        productNode.review.reviewRating.worstRating = 1
+      }
+      if (productNode?.review) {
+        if (
+          !productNode.review.datePublished &&
+          productNode.review.dateCreated
+        ) {
+          productNode.review.datePublished = productNode.review.dateCreated
+        }
+      }
+    }
+  }
 
   return (graph as Record<string, JsonLdValue>) ?? null
 }

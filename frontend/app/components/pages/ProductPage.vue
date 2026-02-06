@@ -2145,7 +2145,11 @@ const jsonLdBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
     })
   }
 
-  return crumbs
+  // Sanitize links (remove hashes/queries)
+  return crumbs.map(crumb => ({
+    ...crumb,
+    link: crumb.link?.split('#')[0]?.split('?')[0],
+  }))
 })
 
 const jsonLdImageUrls = computed(() => {
@@ -2175,7 +2179,7 @@ const productJsonLdGraph = computed(() => {
     locale: locale.value,
     breadcrumbs: jsonLdBreadcrumbs.value,
     site: {
-      url: requestURL.origin,
+      url: (runtimeConfig.public.siteUrl as string) ?? requestURL.origin,
       name: siteName.value,
     },
     review: reviewStructuredData.value ?? undefined,
@@ -2224,7 +2228,7 @@ useHead(() => {
     scripts.push({
       key: 'product-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(productJsonLdGraph.value),
+      innerHTML: JSON.stringify(productJsonLdGraph.value),
     })
   }
 
