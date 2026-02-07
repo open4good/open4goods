@@ -159,7 +159,7 @@ importers:
         version: 7.6.0(magicast@0.5.1)(vite@7.3.1(@types/node@25.2.0)(jiti@2.6.1)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))(zod@3.25.76)
       '@openapitools/openapi-generator-cli':
         specifier: ^2.23.1
-        version: 2.28.1(@types/node@25.2.0)
+        version: 2.28.2(@types/node@25.2.0)
       '@playwright/test':
         specifier: ^1.57.0
         version: 1.58.1
@@ -2213,8 +2213,8 @@ packages:
   '@one-ini/wasm@0.1.1':
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
 
-  '@openapitools/openapi-generator-cli@2.28.1':
-    resolution: {integrity: sha512-5N2fX1B+qr9pS4+OPWI02bzNGOX/xegltMbsHHDi8+T3LgWhxvITRRxNQspt05yvG/ZVnDtI2qH1KX87HUqLvA==}
+  '@openapitools/openapi-generator-cli@2.28.2':
+    resolution: {integrity: sha512-iUBOVBbABSc+ygVJ1/xhdpZrH2Aj5ymGyN0QojoLG8RsQFJ9IUHR/i6bih4H2lOPdqzKeIO2PhPsgCvXYqLJFA==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -12341,7 +12341,7 @@ snapshots:
 
   '@one-ini/wasm@0.1.1': {}
 
-  '@openapitools/openapi-generator-cli@2.28.1(@types/node@25.2.0)':
+  '@openapitools/openapi-generator-cli@2.28.2(@types/node@25.2.0)':
     dependencies:
       '@nestjs/axios': 4.0.1(@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.4)(rxjs@7.8.2)
       '@nestjs/common': 11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2)
