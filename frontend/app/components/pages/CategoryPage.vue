@@ -373,6 +373,11 @@ import {
   resolveSortFieldTitle,
 } from '~/utils/_field-localization'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
+import {
+  deduplicateFieldMetadataList,
+  normalizeFieldOptionsResponse,
+} from '~/utils/_field-options-normalizer'
+import { deduplicateSortItemsByTitle } from '~/utils/_sort-options-normalizer'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
 
 const route = useRoute()
@@ -745,8 +750,12 @@ const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
   { server: false, immediate: true, watch: [verticalId] }
 )
 
-const filterOptions = computed(() => filterOptionsData.value ?? null)
-const sortOptions = computed(() => sortOptionsData.value ?? null)
+const filterOptions = computed(() =>
+  normalizeFieldOptionsResponse(filterOptionsData.value)
+)
+const sortOptions = computed(() =>
+  normalizeFieldOptionsResponse(sortOptionsData.value)
+)
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
 const DEFAULT_FILTERS_COLLAPSED_STATE = true
@@ -1317,15 +1326,38 @@ const sortFieldEntries = computed(() => {
 
   const seen = new Set<string>()
   return fields
-    .filter(
-      field => typeof field.mapping === 'string' && !seen.has(field.mapping)
-    )
+    .filter(field => typeof field.mapping === 'string' && Boolean(field.mapping))
+    .filter(field => {
+      const mapping = field.mapping as string
+      if (seen.has(mapping)) {
+        return false
+      }
+
+      seen.add(mapping)
+      return true
+    })
     .map(field => {
       const mapping = field.mapping as string
-      seen.add(mapping)
       return { mapping, field }
     })
 })
+
+const computeSortEntryPriority = (
+  mapping: string,
+  popularKeys: Set<string>
+): number => {
+  if (STANDARD_SORT_FIELDS.includes(mapping)) {
+    return 300 - STANDARD_SORT_FIELDS.indexOf(mapping)
+  }
+
+  const attributeKey = extractAttributeKeyFromMapping(mapping)
+
+  if (attributeKey && popularKeys.has(attributeKey)) {
+    return 200
+  }
+
+  return 100
+}
 
 const sortFieldItems = computed<SortFieldItem[]>(() => {
   const fieldMap = new Map(
@@ -1379,7 +1411,10 @@ const sortFieldItems = computed<SortFieldItem[]>(() => {
     .map(entry => buildItem(entry.mapping))
     .sort((a, b) => a.title.localeCompare(b.title))
 
-  return [...standardItems, ...popularItems, ...otherItems]
+  return deduplicateSortItemsByTitle(
+    [...standardItems, ...popularItems, ...otherItems],
+    item => computeSortEntryPriority(item.value, popularKeys)
+  )
 })
 
 const sortItems = computed<SortMenuItem[]>(() => {
@@ -1718,7 +1753,7 @@ const tableFields = computed<FieldMetadataDto[]>(() => {
     fields.push(...adminFilterFields.value)
   }
 
-  return fields
+  return deduplicateFieldMetadataList(fields)
 })
 
 const filterFieldMap = computed<Record<string, FieldMetadataDto>>(() => {
