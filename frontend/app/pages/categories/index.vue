@@ -243,12 +243,12 @@ useHead(() => ({
     {
       key: 'categories-index-breadcrumb-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(breadcrumbJsonLd.value),
+      innerHTML: JSON.stringify(breadcrumbJsonLd.value),
     },
     {
       key: 'categories-index-itemlist-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(itemListJsonLd.value),
+      innerHTML: JSON.stringify(itemListJsonLd.value),
     },
   ],
 }))
