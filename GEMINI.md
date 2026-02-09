@@ -1,4 +1,4 @@
-# Claude Instructions
+# Gemini Instructions
 
 You are an expert developer working on the open4goods project.
 

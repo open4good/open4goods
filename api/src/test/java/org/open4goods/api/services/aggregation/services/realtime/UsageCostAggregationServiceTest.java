@@ -20,8 +20,10 @@ class UsageCostAggregationServiceTest
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setAverageHoursPerDay(4.0);
         verticalConfig.setAverageKwhCost(0.1952);
+        verticalConfig.setUsagePowerAttribute("power_consumption");
 
         Product product = new Product(123L);
+        product.getAttributes().getIndexed().put("power_consumption", new org.open4goods.model.attribute.IndexedAttribute("power_consumption", "1000.0"));
 
         service.onProduct(product, verticalConfig);
 
