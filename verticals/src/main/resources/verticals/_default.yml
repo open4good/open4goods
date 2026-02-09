@@ -17,7 +17,7 @@ parsers:
 forceNameGeneration: true
 
 # Average electricity cost per kilowatt-hour (EUR).
-averageKwhCost: 0.1952
+averageKwhCost: 0.194
 
 # These datasources will be excluded from categories matching (for generation assistance)
 generationExcludedFromCategoriesMatching:
@@ -230,7 +230,7 @@ globalTechnicalFilters:
   - "YEAR"
   - "COLOR"
   - "WEIGHT"
-  - "usageCostYear"
+  - "USAGE_COST_YEAR"
 
 ####################################################################################
 # Brands configuration
@@ -372,7 +372,7 @@ attributesConfig:
     - key: "HDMI_PORTS_QUANTITY"
     - key: "COLOR"
     - key: "WEIGHT"
-    - key: "usageCostYear"
+    - key: "USAGE_COST_YEAR"
     - key: "POWER_CONSUMPTION_TYPICAL"
     - key: "POWER_CONSUMPTION_OFF"
     - key: "FEATURES"

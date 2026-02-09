@@ -25,9 +25,9 @@ class UsageCostAggregationServiceTest
 
         service.onProduct(product, verticalConfig);
 
-        assertThat(product.getAttributes().getIndexed()).containsKey("usageCostYear");
-        assertThat(product.getAttributes().getIndexed().get("usageCostYear").getValue()).isEqualTo("284.99");
-        assertThat(product.getAttributes().getIndexed().get("usageCostYear").getNumericValue()).isEqualTo(284.99);
+        assertThat(product.getAttributes().getIndexed()).containsKey("USAGE_COST_YEAR");
+        assertThat(product.getAttributes().getIndexed().get("USAGE_COST_YEAR").getValue()).isEqualTo("284.99");
+        assertThat(product.getAttributes().getIndexed().get("USAGE_COST_YEAR").getNumericValue()).isEqualTo(284.99);
     }
 
     @Test
@@ -40,6 +40,6 @@ class UsageCostAggregationServiceTest
 
         service.onProduct(product, verticalConfig);
 
-        assertThat(product.getAttributes().getIndexed()).doesNotContainKey("usageCostYear");
+        assertThat(product.getAttributes().getIndexed()).doesNotContainKey("USAGE_COST_YEAR");
     }
 }

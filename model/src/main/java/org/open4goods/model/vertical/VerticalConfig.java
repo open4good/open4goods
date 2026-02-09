@@ -193,6 +193,16 @@ public class VerticalConfig {
 	private Double averageKwhCost;
 
 	/**
+	 * The attribute key holding the power consumption in Watts during usage.
+	 */
+	private String usagePowerAttribute;
+
+	/**
+	 * The attribute key holding the power consumption in Watts during standby.
+	 */
+	private String standbyPowerAttribute;
+
+	/**
 	 * The I18n URL Mappings. Think SEO !
 	 */
 	@JsonMerge
@@ -799,6 +809,38 @@ public class VerticalConfig {
 		this.googleTaxonomyId = taxonomyId;
 	}
 
+	public Double getAverageHoursPerDay() {
+		return averageHoursPerDay;
+	}
+
+	public void setAverageHoursPerDay(Double averageHoursPerDay) {
+		this.averageHoursPerDay = averageHoursPerDay;
+	}
+
+	public Double getAverageKwhCost() {
+		return averageKwhCost;
+	}
+
+	public void setAverageKwhCost(Double averageKwhCost) {
+		this.averageKwhCost = averageKwhCost;
+	}
+
+	public String getUsagePowerAttribute() {
+		return usagePowerAttribute;
+	}
+
+	public void setUsagePowerAttribute(String usagePowerAttribute) {
+		this.usagePowerAttribute = usagePowerAttribute;
+	}
+
+	public String getStandbyPowerAttribute() {
+		return standbyPowerAttribute;
+	}
+
+	public void setStandbyPowerAttribute(String standbyPowerAttribute) {
+		this.standbyPowerAttribute = standbyPowerAttribute;
+	}
+
 	public Map<String, ProductI18nElements> getI18n() {
 		return i18n;
 	}
@@ -999,41 +1041,7 @@ public class VerticalConfig {
 		this.order = order;
 	}
 
-	/**
-	 * Returns the average number of hours per day that products in this vertical are used.
-	 *
-	 * @return average hours per day, or {@code null} when not configured
-	 */
-	public Double getAverageHoursPerDay() {
-		return averageHoursPerDay;
-	}
 
-	/**
-	 * Sets the average daily usage in hours for this vertical.
-	 *
-	 * @param averageHoursPerDay average hours per day
-	 */
-	public void setAverageHoursPerDay(Double averageHoursPerDay) {
-		this.averageHoursPerDay = averageHoursPerDay;
-	}
-
-	/**
-	 * Returns the average cost per kilowatt-hour used to compute usage costs.
-	 *
-	 * @return average kWh cost in euros, or {@code null} when not configured
-	 */
-	public Double getAverageKwhCost() {
-		return averageKwhCost;
-	}
-
-	/**
-	 * Sets the average cost per kilowatt-hour in euros.
-	 *
-	 * @param averageKwhCost average kWh cost in euros
-	 */
-	public void setAverageKwhCost(Double averageKwhCost) {
-		this.averageKwhCost = averageKwhCost;
-	}
 
 	public String getVerticalImage() {
 		return verticalImage;
