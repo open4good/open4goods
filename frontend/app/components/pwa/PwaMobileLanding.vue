@@ -81,50 +81,38 @@
         </v-col>
       </v-row>
 
-      <v-row class="justify-center mt-4" dense>
-        <v-col
-          v-for="action in quickActions"
-          :key="action.key"
-          cols="12"
-          sm="6"
-          lg="3"
-        >
-          <v-card
-            class="pwa-landing__action-card"
-            border
-            rounded="xl"
-            color="surface-default"
-            :data-testid="`pwa-quick-action-${action.key}`"
-            @click="action.onClick()"
+      <v-sheet
+        class="pwa-landing__action-bar mt-4"
+        rounded="xl"
+        border
+        color="surface-default"
+      >
+        <v-row class="ma-0" no-gutters>
+          <v-col
+            v-for="action in quickActions"
+            :key="action.key"
+            cols="4"
+            class="pwa-landing__action-item"
           >
-            <v-card-item>
-              <div class="d-flex align-center justify-space-between mb-2">
-                <v-avatar size="40" color="surface-primary-120">
-                  <v-icon
-                    :icon="action.icon"
-                    color="accent-primary-highlight"
-                  />
-                </v-avatar>
-                <v-chip
-                  v-if="action.badge"
-                  size="x-small"
-                  color="accent-supporting"
-                  variant="flat"
-                  class="font-weight-bold text-uppercase"
-                >
-                  {{ action.badge }}
-                </v-chip>
-              </div>
-              <v-card-title class="text-subtitle-1 font-weight-bold px-0">
-                {{ action.title }}
-              </v-card-title>
-              <v-card-subtitle class="text-body-2 text-neutral-secondary px-0">
-                {{ action.description }}
-              </v-card-subtitle>
-            </v-card-item>
-          </v-card>
-        </v-col>
-      </v-row>
+            <v-btn
+              variant="text"
+              block
+              class="pwa-landing__action-button"
+              :data-testid="`pwa-quick-action-${action.key}`"
+              @click="action.onClick()"
+            >
+              <span class="pwa-landing__action-content">
+                <v-icon
+                  :icon="action.icon"
+                  color="accent-primary-highlight"
+                  size="24"
+                />
+                <span class="pwa-landing__action-label">{{ action.title }}</span>
+              </span>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-sheet>
     </v-container>
 
     <ClientOnly>
@@ -235,24 +223,19 @@ const quickActions = computed(() => [
     key: 'scan',
     icon: 'mdi-barcode-scan',
     title: t('pwa.landing.actions.scan.title'),
-    description: t('pwa.landing.actions.scan.description'),
     onClick: () => (isScannerOpen.value = true),
   },
   {
     key: 'wizard',
     icon: 'mdi-sparkles',
     title: t('pwa.landing.actions.wizard.title'),
-    description: t('pwa.landing.actions.wizard.description'),
     onClick: () => (isWizardOpen.value = true),
-    badge: null,
   },
   {
     key: 'search',
     icon: 'mdi-magnify',
     title: t('pwa.landing.actions.search.title'),
-    description: t('pwa.landing.actions.search.description'),
     onClick: () => emit('submit'),
-    badge: null,
   },
 ])
 
@@ -303,23 +286,39 @@ const verticals = computed(() => props.verticals)
 .pwa-landing__search
   background: rgb(var(--v-theme-surface-default))
 
-.pwa-landing__action-card
-  cursor: pointer
-  transition: transform 0.2s ease, box-shadow 0.2s ease
-  height: 100%
-  background: rgba(var(--v-theme-surface-default), 0.92)
-
-  &:hover
-    transform: translateY(-4px)
-    box-shadow: 0 16px 40px rgba(var(--v-theme-shadow-primary-600), 0.16)
-
-
-
 .pwa-landing__dialog-card
   background: rgb(var(--v-theme-surface-default))
 
 .pwa-landing__action-bar
+  position: sticky
+  bottom: calc(env(safe-area-inset-bottom) + 12px)
+  z-index: 5
+  background: rgba(var(--v-theme-surface-default), 0.95)
+  backdrop-filter: blur(12px)
   box-shadow: 0 -10px 32px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
+.pwa-landing__action-item
+  display: flex
+  justify-content: center
+
+.pwa-landing__action-button
+  min-height: 78px
+  border-radius: 0
+
+.pwa-landing__action-content
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  gap: 0.3rem
+  width: 100%
+
+.pwa-landing__action-label
+  color: rgb(var(--v-theme-text-neutral-secondary))
+  font-size: 0.78rem
+  font-weight: 600
+  line-height: 1
+  text-transform: uppercase
 
 @media (min-width: 960px)
   .pwa-landing
