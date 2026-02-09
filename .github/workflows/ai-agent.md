@@ -48,3 +48,38 @@ tests reproductibles sur les PRs ciblant la branche par défaut.
   - télécharge les artefacts et poste un commentaire de synthèse sur la PR
   - applique le label `agent:DEV_CHECKS` en cas de succès ou `agent:needs_human`
     si un contrôle échoue
+
+
+## Cody orchestration conventions
+
+Cody orchestration settings are documented in `.github/ai/README.md` and configured in `.github/ai/cody.json`.
+
+Current agreed behavior:
+
+- Default flow: `UNDERSTANDING -> PLANNING -> READY_TO_CODE`.
+- `evaluate` is not in default flow.
+- Resume after `needs_human` is manual, using `cody:retry` (and optionally `cody:evaluate` for compatibility).
+- `cody:ask` is a free-form assistant response (simple comment).
+- Single updated thread comment should be used for assistant output.
+- Coding mode should open a PR linked to the issue, with auto-close keyword configurable in `cody.json`.
+
+## Runner check mode
+
+The runner supports a prerequisite validation mode:
+
+```bash
+node scripts/ai/run_agent.mjs --check --config .github/ai/agent.config.json --provider codex --out ai_check.json
+```
+
+This validates provider configuration and required secrets (for example `OPENAI_API_KEY` for `codex`).
+
+
+## Preflight check (`--check`)
+
+The active workflow `.github/workflows/ai-agent.yml` runs a preflight step before provider calls:
+
+```bash
+node scripts/ai/run_agent.mjs --check --config .github/ai/agent.config.json --provider <provider> --template <template> --schema <schema> --context <context> --out ai_preflight.json
+```
+
+This fails fast when required provider secrets are missing.

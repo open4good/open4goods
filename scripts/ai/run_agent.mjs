@@ -19,6 +19,7 @@ function arg(name) {
 }
 
 const configPath = arg("--config");
+const checkMode = process.argv.includes("--check");
 const provider = (arg("--provider") || "").toLowerCase();
 const state = (arg("--state") || "").toUpperCase();
 const templatePath = arg("--template");
@@ -26,12 +27,87 @@ const schemaPath = arg("--schema");
 const contextPath = arg("--context");
 const outPath = arg("--out") || "ai_result.json";
 
+if (!configPath) {
+  console.error("Missing args. Required: --config");
+  process.exit(2);
+}
+
+const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+
+function assertPathExists(filePath, label) {
+  if (!filePath) {
+    throw new Error(`${label} path is missing`);
+  }
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`${label} path does not exist: ${filePath}`);
+  }
+}
+
+function requiredSecretForProvider(p) {
+  const kind = cfg.providers?.[p]?.kind;
+  if (kind === "openai") return "OPENAI_API_KEY";
+  if (kind === "anthropic") return "ANTHROPIC_API_KEY";
+  if (kind === "gemini") return "GEMINI_API_KEY";
+  return null;
+}
+
+if (checkMode) {
+  const providersToValidate = provider
+    ? [provider]
+    : Object.keys(cfg.providers || {});
+
+  const missingSecrets = [];
+  const checks = [];
+
+  for (const p of providersToValidate) {
+    if (!cfg.providers?.[p]) {
+      throw new Error(`Unknown provider in --check: ${p}`);
+    }
+    const secretName = requiredSecretForProvider(p);
+    if (secretName && !process.env[secretName]) {
+      missingSecrets.push(secretName);
+    }
+    checks.push({
+      provider: p,
+      model: cfg.providers[p].model,
+      kind: cfg.providers[p].kind,
+      secret: secretName,
+      secret_present: Boolean(secretName && process.env[secretName])
+    });
+  }
+
+  const requiredFiles = [
+    { label: "config", path: configPath },
+    { label: "template", path: templatePath },
+    { label: "schema", path: schemaPath },
+    { label: "context", path: contextPath }
+  ].filter(entry => entry.path);
+
+  for (const entry of requiredFiles) {
+    assertPathExists(entry.path, entry.label);
+  }
+
+  const report = {
+    ok: missingSecrets.length === 0,
+    checked_at: new Date().toISOString(),
+    providers: checks,
+    missing_secrets: [...new Set(missingSecrets)]
+  };
+
+  fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
+  console.log(`Wrote ${outPath}`);
+  if (missingSecrets.length > 0) {
+    console.error(`Missing required secrets: ${[...new Set(missingSecrets)].join(", ")}`);
+    process.exit(1);
+  }
+  process.exit(0);
+}
+
 if (!configPath || !provider || !state || !templatePath || !schemaPath || !contextPath) {
   console.error("Missing args. Required: --config --provider --state --template --schema --context --out");
   process.exit(2);
 }
 
-const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
 const provCfg = cfg.providers?.[provider];
 if (!provCfg) {
   console.error(`Unknown provider: ${provider}`);
