@@ -422,19 +422,20 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   overflow-x: auto;
   padding-bottom: 0.25rem;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  scroll-padding-inline-start: 0.5rem;
 }
 
 .product-life-timeline__rail {
   display: flex;
   gap: 1.75rem;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
   width: max-content;
   min-width: 100%;
   padding: 0.25rem 0.5rem;
   scroll-snap-type: x mandatory;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .product-life-timeline--vertical .product-life-timeline__rail {
@@ -609,5 +610,18 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   margin: 0;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .product-life-timeline__body {
+    justify-content: flex-start;
+    scroll-padding-inline-start: 0.75rem;
+  }
+
+  .product-life-timeline__rail {
+    justify-content: flex-start;
+    margin: 0;
+    padding-inline-start: 0.75rem;
+  }
 }
 </style>
