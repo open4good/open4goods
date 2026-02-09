@@ -12,7 +12,9 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoreStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoresStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
+import org.open4goods.nudgerfrontapi.dto.stats.VerticalDatavizPlanDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.service.DatavizStatsService;
 import org.open4goods.nudgerfrontapi.service.StatsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,9 +44,11 @@ public class StatsController {
     private static final Logger logger = LoggerFactory.getLogger(StatsController.class);
 
     private final StatsService statsService;
+    private final DatavizStatsService datavizStatsService;
 
-    public StatsController(StatsService statsService) {
+    public StatsController(StatsService statsService, DatavizStatsService datavizStatsService) {
         this.statsService = statsService;
+        this.datavizStatsService = datavizStatsService;
     }
 
     @GetMapping("/categories")
@@ -71,6 +75,41 @@ public class StatsController {
         CategoriesStatsDto body = statsService.categories(domainLanguage);
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
+                .body(body);
+    }
+
+    @GetMapping("/verticals/{verticalId}/dataviz/plan")
+    @Operation(
+            summary = "Get dataviz presets for a vertical",
+            description = "Return the default filters and chart presets used by the frontend dataviz gallery for a vertical.",
+            parameters = {
+                    @io.swagger.v3.oas.annotations.Parameter(name = "verticalId", in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH, required = true,
+                            description = "Vertical identifier resolved from YAML configuration.",
+                            schema = @Schema(type = "string", example = "televisions")),
+                    @io.swagger.v3.oas.annotations.Parameter(name = "domainLanguage", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Dataviz plan returned",
+                            headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
+                                    description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr")),
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = VerticalDatavizPlanDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Vertical not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<VerticalDatavizPlanDto> datavizPlan(@PathVariable("verticalId") String verticalId,
+                                                               @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        logger.info("Entering datavizPlan(verticalId={}, domainLanguage={})", verticalId, domainLanguage);
+        VerticalDatavizPlanDto body = datavizStatsService.getVerticalPlan(verticalId, domainLanguage);
+        if (body == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
                 .body(body);
     }
 
