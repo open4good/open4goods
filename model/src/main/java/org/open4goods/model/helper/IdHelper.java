@@ -171,6 +171,16 @@ public class IdHelper {
 		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9_-]",string);
 	}
 
+	/**
+	 * Creates a datasource ID by keeping only alphanumeric characters, dots, dashes and underscores.
+	 * @param input the input string
+	 * @return cleaned string
+	 */
+	public static String toDatasourceId(String input) {
+		if (input == null) return null;
+		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9_.-]", "");
+	}
+
 
 	/**
 	 * Return a clean hashed name

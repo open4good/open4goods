@@ -13,23 +13,29 @@
     </v-btn>
 
     <div ref="scrollContainer" class="category-badges-row__scroller">
-      <v-hover v-for="category in displayedCategories" :key="category.id">
-        <template #default="{ isHovering, props: hoverProps }"
-          ><v-chip
-            v-bind="hoverProps"
-            :to="getCategoryUrl(category)"
-            variant="elevated"
-            color="surface"
-            size="small"
-            rounded="pill"
-            class="category-badges-row__chip text-secondary"
-            :elevation="isHovering ? 24 : 1"
+      <div
+        v-for="category in displayedCategories"
+        :key="category.id"
+        class="category-badges-row__item"
+      >
+        <v-hover>
+          <template #default="{ isHovering, props: hoverProps }"
+            ><v-chip
+              v-bind="hoverProps"
+              :to="getCategoryUrl(category)"
+              variant="elevated"
+              color="surface"
+              size="small"
+              rounded="pill"
+              class="category-badges-row__chip text-secondary"
+              :elevation="isHovering ? 24 : 1"
+            >
+              <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
+              {{ category.verticalHomeTitle ?? category.id }}
+            </v-chip></template
           >
-            <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
-            {{ category.verticalHomeTitle ?? category.id }}
-          </v-chip></template
-        >
-      </v-hover>
+        </v-hover>
+      </div>
     </div>
 
     <v-btn
@@ -44,23 +50,25 @@
       <v-icon icon="mdi-chevron-double-right" size="18" />
     </v-btn>
 
-    <v-hover>
-      <template #default="{ isHovering, props: hoverProps }"
-        ><v-chip
-          v-bind="hoverProps"
-          :to="categoriesUrl"
-          variant="elevated"
-          color="surface"
-          size="small"
-          rounded="pill"
-          class="category-badges-row__chip text-neutral-secondary"
-          :elevation="isHovering ? 24 : 1"
+    <div class="category-badges-row__item">
+      <v-hover>
+        <template #default="{ isHovering, props: hoverProps }"
+          ><v-chip
+            v-bind="hoverProps"
+            :to="categoriesUrl"
+            variant="elevated"
+            color="surface"
+            size="small"
+            rounded="pill"
+            class="category-badges-row__chip text-neutral-secondary"
+            :elevation="isHovering ? 24 : 1"
+          >
+            <v-icon icon="mdi-view-grid-outline" start size="16" />
+            {{ t('home.hero.categoryBadges.viewAll') }}
+          </v-chip></template
         >
-          <v-icon icon="mdi-view-grid-outline" start size="16" />
-          {{ t('home.hero.categoryBadges.viewAll') }}
-        </v-chip></template
-      >
-    </v-hover>
+      </v-hover>
+    </div>
   </div>
 </template>
 
@@ -194,6 +202,10 @@ watch(displayedCategories, () => {
 
     &::-webkit-scrollbar
       display: none
+
+  &__item
+    flex: 0 0 auto
+    display: flex
 
   &__chip
     flex: 0 0 auto

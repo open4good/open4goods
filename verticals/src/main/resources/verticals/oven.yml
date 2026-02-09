@@ -467,7 +467,6 @@ ecoFilters:
 
 technicalFilters:
   - "POWER_CONSUMPTION_TYPICAL"
-  - "WEIGHT"
   - "OVEN_CAPACITY"
   - "OVEN_INSTALLATION_TYPE"
   - "OVEN_ENERGY_TYPE"

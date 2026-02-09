@@ -3,11 +3,12 @@
     <header class="product-vigilance__header">
       <div class="product-vigilance__header-content">
         <h2 class="product-vigilance__title">
-          {{ $t('product.vigilance.title') }}
+          {{ t('product.vigilance.title') }}
         </h2>
-        <p class="product-vigilance__subtitle">
-          {{ $t('product.vigilance.subtitle') }}
-        </p>
+        <p
+          class="product-vigilance__subtitle"
+          v-html="sanitize(t('product.vigilance.subtitle'))"
+        />
       </div>
     </header>
 
@@ -28,11 +29,12 @@
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
-                  {{ $t('product.impact.endOfLifeTitle') }}
+                  {{ t('product.impact.endOfLifeTitle') }}
                 </p>
-                <p class="product-vigilance__card-description">
-                  {{ endOfLifeDescription }}
-                </p>
+                <p
+                  class="product-vigilance__card-description"
+                  v-html="sanitize(endOfLifeDescription)"
+                />
 
                 <div
                   v-if="minAttributes.length"
@@ -74,11 +76,14 @@
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
-                  {{ $t('product.vigilance.conflicts.title') }}
+                  {{ t('product.vigilance.conflicts.title') }}
                 </p>
-                <p class="product-vigilance__card-description">
-                  {{ $t('product.vigilance.conflicts.description') }}
-                </p>
+                <p
+                  class="product-vigilance__card-description"
+                  v-html="
+                    sanitize(t('product.vigilance.conflicts.description'))
+                  "
+                />
 
                 <div class="product-vigilance__conflicts-list">
                   <div
@@ -107,8 +112,8 @@
                 >
                   {{
                     showAllConflicts
-                      ? $t('product.vigilance.conflicts.showLess')
-                      : $t('product.vigilance.conflicts.showMore')
+                      ? t('product.vigilance.conflicts.showLess')
+                      : t('product.vigilance.conflicts.showMore')
                   }}
                 </v-btn>
               </div>
@@ -133,16 +138,19 @@
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
-                  {{ $t('product.vigilance.quality.title') }}
+                  {{ t('product.vigilance.quality.title') }}
                 </p>
-                <p class="product-vigilance__card-description">
-                  {{
-                    $t('product.vigilance.quality.description', {
-                      score: dataQualityScoreValue,
-                      avg: dataQualityAvg,
-                    })
-                  }}
-                </p>
+                <p
+                  class="product-vigilance__card-description"
+                  v-html="
+                    sanitize(
+                      t('product.vigilance.quality.description', {
+                        score: dataQualityScoreValue,
+                        avg: dataQualityAvg,
+                      })
+                    )
+                  "
+                />
               </div>
             </div>
           </v-card-text>
@@ -165,11 +173,12 @@
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
-                  {{ $t('product.vigilance.obsolescence.title') }}
+                  {{ t('product.vigilance.obsolescence.title') }}
                 </p>
-                <p class="product-vigilance__card-description">
-                  {{ obsolescenceWarning }}
-                </p>
+                <p
+                  class="product-vigilance__card-description"
+                  v-html="sanitize(obsolescenceWarning)"
+                />
               </div>
             </div>
           </v-card-text>
@@ -192,11 +201,14 @@
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
-                  {{ $t('product.price.competition.title') }}
+                  {{ t('product.price.competition.title') }}
                 </p>
-                <p class="product-vigilance__card-description">
-                  {{ $t('product.price.competition.lowDescription') }}
-                </p>
+                <p
+                  class="product-vigilance__card-description"
+                  v-html="
+                    sanitize(t('product.price.competition.lowDescription'))
+                  "
+                />
                 <v-btn
                   class="mt-2 align-self-start"
                   size="small"
@@ -226,6 +238,7 @@ import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
+import DOMPurify from 'isomorphic-dompurify'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductDto } from '~~/shared/api-client'
 
@@ -353,25 +366,32 @@ const dataQualityScore = computed(
   () => product.value.scores?.scores?.['DATA_QUALITY']
 )
 
+const dataQualityScoreValueNum = computed(() => {
+  return (dataQualityScore.value?.value ?? 0) * 4
+})
+
 const dataQualityScoreValue = computed(() => {
   // Convert 0-5 scale to 0-20
-  const val = (dataQualityScore.value?.value ?? 0) * 4
-  return val.toFixed(1)
+  return dataQualityScoreValueNum.value.toFixed(1)
+})
+
+const dataQualityAvgNum = computed(() => {
+  return (
+    (dataQualityScore.value?.relativ?.avg ??
+      dataQualityScore.value?.absolute?.avg ??
+      0) * 4
+  )
 })
 
 const dataQualityAvg = computed(() => {
   // Convert 0-5 scale to 0-20
-  const val =
-    (dataQualityScore.value?.relativ?.avg ??
-      dataQualityScore.value?.absolute?.avg ??
-      0) * 4
-  return val.toFixed(1)
+  return dataQualityAvgNum.value.toFixed(1)
 })
 
 const isLowDataQuality = computed(() => {
   if (!dataQualityScore.value) return false
   // Alert if score is strictly lower than average
-  return dataQualityScoreValue.value < dataQualityAvg.value
+  return dataQualityScoreValueNum.value < dataQualityAvgNum.value
 })
 
 // --- Obsolescence Vigilance Logic ---
@@ -425,6 +445,13 @@ const cardColumnSize = computed(() => {
   return 3
 })
 console.log('DEBUG COUNT:', competitionCount.value)
+
+function sanitize(content: string | null | undefined): string {
+  if (!content) return ''
+  return DOMPurify.sanitize(content, {
+    ADD_ATTR: ['target', 'rel', 'class'],
+  })
+}
 </script>
 
 <style scoped>

@@ -505,7 +505,6 @@ technicalFilters:
   - "PROGRAM_DURATION_ECO"
   - "PROGRAM_COUNT"
   - "INSTALLATION_TYPE"
-  - "WEIGHT"
 
 ####################################################################################
 # ATTRIBUTES CONFIGURATION

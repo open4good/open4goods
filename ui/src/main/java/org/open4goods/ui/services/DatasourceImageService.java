@@ -54,7 +54,7 @@ public class DatasourceImageService {
      * @return ImageResult containing bytes and content type
      */
     public ImageResult getDatasourceImage(String dsName, boolean allowFaviconFallback) {
-        String datasourceName = IdHelper.azCharAndDigitsPointsDash(dsName.toLowerCase());
+        String datasourceName = IdHelper.toDatasourceId(dsName);
 
         try {
             ImageResult result = loadDatasourceImage(datasourceName, allowFaviconFallback);
@@ -73,7 +73,7 @@ public class DatasourceImageService {
     }
 
     public String cleanName(String datasourceName) {
-        return IdHelper.azCharAndDigitsPointsDash(datasourceName.toLowerCase());
+        return IdHelper.toDatasourceId(datasourceName);
     }
 
     public boolean hasLogo(String datasourceName) {

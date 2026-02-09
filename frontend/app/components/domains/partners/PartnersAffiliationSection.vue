@@ -50,42 +50,53 @@
                 :key="partner.id ?? partner.name"
                 class="partners-affiliation__card"
               >
-                <v-hover v-slot="{ isHovering, props: hoverProps }">
-                  <v-card
-                    v-bind="hoverProps"
-                    class="partners-affiliation__card-surface"
-                    :elevation="isHovering ? 6 : 1"
-                    rounded="lg"
-                    :href="partner.affiliationLink ?? undefined"
-                    :target="partner.affiliationLink ? '_blank' : undefined"
-                    :rel="
-                      partner.affiliationLink ? 'noopener nofollow' : undefined
-                    "
-                    :aria-label="linkAriaLabel(partner)"
-                  >
-                    <div class="partners-affiliation__card-media">
-                      <v-img
-                        :src="partner.logoUrl"
-                        :alt="logoAlt(partner)"
-                        :width="logoSize"
-                        :height="logoSize"
-                        cover
-                        class="partners-affiliation__logo"
-                      />
-                    </div>
-                    <div class="partners-affiliation__card-content">
-                      <h3
-                        class="text-subtitle-1 font-weight-medium mb-1 text-center"
-                      >
-                        {{ partner.name }}
-                      </h3>
-                      <div class="partners-affiliation__cta" aria-hidden="true">
-                        {{ linkLabel }}
-                        <v-icon icon="mdi-open-in-new" size="16" class="ms-1" />
+                <div class="partners-affiliation__hover-wrapper">
+                  <v-hover v-slot="{ isHovering, props: hoverProps }">
+                    <v-card
+                      v-bind="hoverProps"
+                      class="partners-affiliation__card-surface"
+                      :elevation="isHovering ? 6 : 1"
+                      rounded="lg"
+                      :href="partner.affiliationLink ?? undefined"
+                      :target="partner.affiliationLink ? '_blank' : undefined"
+                      :rel="
+                        partner.affiliationLink
+                          ? 'noopener nofollow'
+                          : undefined
+                      "
+                      :aria-label="linkAriaLabel(partner)"
+                    >
+                      <div class="partners-affiliation__card-media">
+                        <v-img
+                          :src="partner.logoUrl"
+                          :alt="logoAlt(partner)"
+                          :width="logoSize"
+                          :height="logoSize"
+                          cover
+                          class="partners-affiliation__logo"
+                        />
                       </div>
-                    </div>
-                  </v-card>
-                </v-hover>
+                      <div class="partners-affiliation__card-content">
+                        <h3
+                          class="text-subtitle-1 font-weight-medium mb-1 text-center"
+                        >
+                          {{ partner.name }}
+                        </h3>
+                        <div
+                          class="partners-affiliation__cta"
+                          aria-hidden="true"
+                        >
+                          {{ linkLabel }}
+                          <v-icon
+                            icon="mdi-open-in-new"
+                            size="16"
+                            class="ms-1"
+                          />
+                        </div>
+                      </div>
+                    </v-card>
+                  </v-hover>
+                </div>
               </article>
             </div>
           </v-carousel-item>
@@ -236,6 +247,10 @@ const linkAriaLabel = (partner: AffiliationPartnerDto) => {
 
   &__card {
     display: flex;
+  }
+
+  &__hover-wrapper {
+    display: contents;
   }
 
   &__card-surface {
