@@ -183,7 +183,6 @@ i18n:
     #        - key: "ecological-description"
     #          prompt: "écris un texte de maximum 100 mots, dans un style académique, une analyse de l'impact environnemental de [(${p.brand()})] [(${p.model()})], sur la base des caracteriques suivantes : [(${p.caracteristics()})]"
 
-
 # GenAiConfig for this vertical
 genAiConfig:
   # If false, will bypass the generativ ia texts generation
@@ -380,4 +379,50 @@ attributesConfig:
     - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "DATA_QUALITY"
     - key: "WARRANTY"
+
     - key: "ESG"
+
+#####################################################################################################################################
+# NUDGE TOOL CONFIGURATION
+#####################################################################################################################################
+nudgeToolConfig:
+  scores:
+    - scoreName: "ENERGY_CONSUMPTION"
+      fromPercent: 50
+      mdiIcon: "mdi-lightning-bolt"
+      title:
+        en: "Energy consumption"
+        fr: "Consommation explication"
+      description:
+        en: "Products with low energy consumption"
+        fr: "Produits faible consommation"
+
+    - scoreName: "DURABILITY"
+      fromPercent: 50
+      mdiIcon: "mdi-archive-outline"
+      title:
+        en: "Durability"
+        fr: "Durabilité"
+      description:
+        en: "Products with a good durability"
+        fr: "Produits durables"
+    - scoreName: "REPARABILITY"
+      fromPercent: 50
+      mdiIcon: "mdi-tools"
+      title:
+        en: "Reparability"
+        fr: "Réparabilité"
+      description:
+        en: "Products with a good reparability"
+        fr: "Produits réparables"
+
+    - scoreName: "ESG"
+      disabled: true
+      fromPercent: 50
+      mdiIcon: "mdi-scale-balance"
+      title:
+        en: "ESG criterias"
+        fr: "Critères ESG"
+      description:
+        en: "Models from brands with good ESG ratings"
+        fr: "Modèles dont la marque dispose d'un bon indice ESG"

@@ -169,48 +169,6 @@ i18n:
 # NUDGE TOOL CONFIGURATION
 #####################################################################################################################################
 nudgeToolConfig:
-  scores:
-    - scoreName: "ENERGY_CONSUMPTION"
-      fromPercent: 67
-      mdiIcon: "mdi-lightning-bolt"
-      title:
-        en: "Energy consumption"
-        fr: "Consommation énergétique"
-      description:
-        en: "dishwashers with a low energy consumption"
-        fr: "Lave-vaisselles avec une faible consommation énergétique"
-
-    - scoreName: "DURABILITY"
-      fromPercent: 67
-      mdiIcon: "mdi-archive-outline"
-      title:
-        en: "Durability"
-        fr: "Durabilité"
-      description:
-        en: "dishwashers with a good durability"
-        fr: "Lave-vaisselles avec une bonne durabilité"
-
-    - scoreName: "REPARABILITY"
-      fromPercent: 67
-      mdiIcon: "mdi-tools"
-      title:
-        en: "Reparability"
-        fr: "Réparabilité"
-      description:
-        en: "dishwashers with a good reparability"
-        fr: "Lave-vaisselles avec une bonne réparabilité"
-
-    - scoreName: "BRAND_SUSTAINALYTICS_SCORING"
-      fromPercent: 67
-      mdiIcon: "mdi-scale-balance"
-      disabled: true
-      title:
-        en: "ESG criterias"
-        fr: "Critères ESG"
-      description:
-        en: "Models with a brand having good ESG rating"
-        fr: "Modèles dont la marque dispose d'un bon indice ESG"
-
   subsetGroups:
     - id: "price"
       mdiIcon: "mdi-currency-eur"

@@ -315,59 +315,8 @@ i18n:
     # The image used as a logo
 
 nudgeToolConfig:
-  scores:
-    - scoreName: "ENERGY_CONSUMPTION"
-      fromPercent: 50
-      mdiIcon: "mdi-lightning-bolt"
-      title:
-        en: "Energy consumption"
-        fr: "Consommation énergétique"
-      description:
-        en: "Televisions with low energy consumption"
-        fr: "Téléviseurs avec une faible consommation énergétique"
-    - scoreName: "DURABILITY"
-      fromPercent: 50
-      mdiIcon: "mdi-archive-outline"
-      title:
-        en: "Durability"
-        fr: "Durabilité"
-      description:
-        en: "Televisions with a good durability"
-        fr: "Téléviseurs avec une bonne durabilité"
-
-    - scoreName: "REPARABILITY"
-      fromPercent: 50
-      mdiIcon: "mdi-tools"
-      title:
-        en: "Reparability"
-        fr: "Réparabilité"
-      description:
-        en: "Televisions with a good reparability"
-        fr: "Téléviseurs avec une bonne réparabilité"
-    - scoreName: "ESG"
-      disabled: true
-      fromPercent: 50
-      mdiIcon: "mdi-scale-balance"
-      title:
-        en: "ESG criterias"
-        fr: "Critères ESG"
-      description:
-        en: "Models from brands with good ESG ratings"
-        fr: "Modèles dont la marque dispose d'un bon indice ESG"
   subsetGroups:
-    - id: "distance"
-      mdiIcon: "mdi-ruler-square"
-      layout: "grid"
-      title:
-        en: "Distance from TV"
-        fr: "Distance à laquelle on est installé"
-      description:
-        en: "Find the diagonal that fits your space."
-        fr: "Quelle est la distance entre votre canapé et la TV ?"
-      ctaLabel:
-        en: "Continue"
-        fr: "Continuer"
-    - id: "budget"
+    - id: "price"
       mdiIcon: "mdi-currency-eur"
       layout: "grid"
       title:
@@ -375,7 +324,19 @@ nudgeToolConfig:
         fr: "Budget"
       description:
         en: "Pick a price comfort zone."
-        fr: "Quel est votre budget ?"
+        fr: "Votre budget"
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+    - id: "screen_size"
+      mdiIcon: "mdi-television-classic"
+      layout: "grid"
+      title:
+        en: "Screen size"
+        fr: "Taille d'écran"
+      description:
+        en: "Find the diagonal that fits your space."
+        fr: "Trouvez la diagonale adaptée à votre espace."
       ctaLabel:
         en: "Continue"
         fr: "Continuer"
@@ -461,7 +422,7 @@ nudgeToolConfig:
         fr: "petits-prix"
       caption:
         en: "TVs priced under €500."
-        fr: "< 500 €"
+        fr: "Les TV dont le prix est inférieur à 500€."
       title:
         en: "< 500 €"
         fr: "< 500 €"
@@ -484,7 +445,7 @@ nudgeToolConfig:
         fr: "tv-500-1000-euros"
       caption:
         en: "TVs priced between €500 and €1000."
-        fr: "500 - 1000 €"
+        fr: "Les TV dont le prix est compris entre 500€ et 1000€."
       title:
         en: "500 - 1000 €"
         fr: "500 - 1000 €"
@@ -504,7 +465,7 @@ nudgeToolConfig:
         fr: "haut-de-gamme"
       caption:
         en: "Premium TVs"
-        fr: "> 1000 €"
+        fr: "Les TV dont le prix est supérieur à 1000€."
       title:
         en: "> 1000 €"
         fr: "> 1000 €"
@@ -516,7 +477,7 @@ nudgeToolConfig:
     # Screen Size
     ################
     - id: "small_screens"
-      group: "distance"
+      group: "screen_size"
       criterias:
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
           operator: "LOWER_THAN"
@@ -526,17 +487,17 @@ nudgeToolConfig:
         en: "small-screens"
         fr: "petits-ecrans"
       caption:
-        en: "Small distance (< 2m)"
-        fr: "Moins de 2m"
+        en: 'Small screens (< 32")'
+        fr: "Diagonale < 32 pouces"
       title:
-        en: "Small Distance"
-        fr: "Moins de 2m"
+        en: "Small Screen TVs"
+        fr: "Petits écrans"
       description:
-        en: "TVs for small distance (< 2m)."
-        fr: "Pour une distance de visionnage inférieure à 2m."
+        en: "TVs with a screen size smaller than 32 inches."
+        fr: "Les TV avec une taille d'écran inférieure à 32 pouces."
 
     - id: "medium_screens"
-      group: "distance"
+      group: "screen_size"
       criterias:
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
           operator: "GREATER_THAN"
@@ -549,17 +510,17 @@ nudgeToolConfig:
         en: "medium-screens"
         fr: "ecrans-moyens"
       caption:
-        en: "Medium distance (2m - 3m)"
-        fr: "Entre 2m et 3m"
+        en: 'Medium screens (32" - 55")'
+        fr: "Diagonale entre 32 et 55 pouces"
       title:
-        en: "Medium Distance"
-        fr: "Entre 2m et 3m"
+        en: "Medium Screen TVs"
+        fr: "Écrans moyens"
       description:
-        en: "TVs for medium distance (2m - 3m)."
-        fr: "Pour une distance de visionnage entre 2m et 3m."
+        en: "TVs with a screen size between 32 and 55 inches."
+        fr: "Les TV avec une taille d'écran comprise entre 32 et 55 pouces."
 
     - id: "large_screens"
-      group: "distance"
+      group: "screen_size"
       criterias:
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
           operator: "GREATER_THAN"
@@ -569,14 +530,14 @@ nudgeToolConfig:
         en: "large-screens"
         fr: "grands-ecrans"
       caption:
-        en: "Large distance (> 3m)"
-        fr: "Plus de 3m"
+        en: 'Large screens (> 55")'
+        fr: "Diagonale > 55 pouces"
       title:
-        en: "Large Distance"
-        fr: "Plus de 3m"
+        en: "Large Screen TVs"
+        fr: "Grands écrans"
       description:
-        en: "TVs for large distance (> 3m)."
-        fr: "Pour une distance de visionnage supérieure à 3m."
+        en: "TVs with a screen size greater than 55 inches."
+        fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
 
 # Fast filters; with classical attributes range values for the product category page
 subsets:

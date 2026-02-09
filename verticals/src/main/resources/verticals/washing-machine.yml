@@ -265,34 +265,6 @@ matchingCategories:
     - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | GROS ELECTROMENAGER | LAVE-LINGE"
 
 nudgeToolConfig:
-  scores:
-    - scoreName: "CLASSE_ENERGY"
-      fromPercent: 67 # Class A
-      mdiIcon: "mdi-lightning-bolt"
-      title:
-        en: "Energy Class A"
-        fr: "Classe Énergie A"
-      description:
-        en: "Top energy efficiency"
-        fr: "Efficacité énergétique optimale"
-    - scoreName: "REPAIRABILITY_INDEX"
-      fromPercent: 67
-      mdiIcon: "mdi-tools"
-      title:
-        en: "Repairability"
-        fr: "Réparabilité"
-      description:
-        en: "Repairable washing machines"
-        fr: "Lave-linges avec un bon indice de réparabilité"
-    - scoreName: "ECOSCORE"
-      fromPercent: 67
-      mdiIcon: "mdi-leaf"
-      title:
-        en: "Eco Score"
-        fr: "Eco Score"
-      description:
-        en: "Overall eco-friendly choice"
-        fr: "Choix éco-responsable global"
 
   subsetGroups:
     - id: "price"
@@ -425,7 +397,7 @@ nudgeToolConfig:
         fr: "400 - 700 €"
       title:
         en: "Best Value"
-        fr: "Meilleur rapport qualité/prix"
+        fr: "Moyen de gamme"
       description:
         en: "Great balance of features and price."
         fr: "Bon équilibre entre fonctionnalités et prix."
@@ -536,7 +508,7 @@ subsets:
       fr: "< 400 €"
     title:
       en: "Budget Friendly"
-      fr: "Petit Budget"
+      fr: "Entrée de gamme"
     description:
       en: "Washing machines under 400€."
       fr: "Lave-linges à moins de 400€."
