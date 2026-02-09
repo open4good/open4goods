@@ -240,8 +240,9 @@ const resolveTrendColor = (tone: string): string | undefined => {
   }
 }
 
-// Helpers for alternatives
-const randomId = () => Math.random().toString(36).substring(2, 9)
+// Generate deterministic ID from offer URL to avoid SSR hydration mismatches
+const deterministicId = (url?: string, index: number = 0) =>
+  url ? `row-${url.slice(-12).replace(/[^a-z0-9]/gi, '-')}` : `row-${index}`
 
 type AlternativeOffer = {
   id: string
@@ -260,8 +261,8 @@ const getAlternatives = (
 
   return offers
     .filter(o => o.url !== bestOfferUrl)
-    .map(o => ({
-      id: randomId(),
+    .map((o, index) => ({
+      id: deterministicId(o.url, index),
       merchantName: o.datasourceName ?? o.merchantName ?? 'Unknown',
       priceLabel: formatOfferPrice(o) || 'N/A',
       favicon: o.favicon ?? o.merchantFavicon,

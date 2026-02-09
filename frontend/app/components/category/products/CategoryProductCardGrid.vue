@@ -8,8 +8,10 @@
     ]"
   >
     <v-col
-      v-for="product in products"
-      :key="product.gtin ?? resolveCardProductName(product) ?? Math.random()"
+      v-for="(product, index) in products"
+      :key="
+        product.gtin ?? resolveCardProductName(product) ?? `product-${index}`
+      "
       cols="12"
       :sm="normalizedSize === 'small' ? 6 : 6"
       :md="normalizedSize === 'small' ? 4 : normalizedSize === 'big' ? 4 : 6"

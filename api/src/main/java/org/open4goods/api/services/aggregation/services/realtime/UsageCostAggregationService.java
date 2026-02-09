@@ -58,7 +58,6 @@ public class UsageCostAggregationService extends AbstractAggregationService
      * @throws AggregationSkipException if aggregation must be aborted
      */
     @Override
-    @Override
     public void onProduct(final Product data, final VerticalConfig vConf) throws AggregationSkipException
     {
         if (data == null || vConf == null) {
@@ -131,13 +130,13 @@ public class UsageCostAggregationService extends AbstractAggregationService
             IndexedAttribute attr = product.getAttributes().getIndexed().get(key);
             return attr.getNumericValue();
         }
-        
+
         // Then product attributes
         if (product.getAttributes().getAll().containsKey(key)) {
         	org.open4goods.model.attribute.ProductAttribute attr = product.getAttributes().getAll().get(key);
             return attr.getNumericValue();
         }
-        
+
         return null;
     }
 }

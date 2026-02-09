@@ -638,7 +638,11 @@ const HomeHeroSectionStub = defineComponent({
 
     return () =>
       h('section', { class: 'home-hero' }, [
-        h('h1', { class: 'home-hero__title' }, messages['home.hero.title']),
+        h(
+          'h1',
+          { class: 'home-hero__title' },
+          messages['home.hero.title'] as string
+        ),
         h('span', { class: 'home-hero__title-subtitle' }, subtitle),
       ])
   },
@@ -720,11 +724,13 @@ describe('Home page', () => {
           typeof entry === 'object' &&
           'key' in entry &&
           (entry as { key: string }).key === 'home-faq-jsonld'
-      ) as { children?: string } | undefined
+      ) as { innerHTML?: string } | undefined
 
     expect(scriptEntry).toBeTruthy()
 
-    const json = scriptEntry?.children ? JSON.parse(scriptEntry.children) : null
+    const json = scriptEntry?.innerHTML
+      ? JSON.parse(scriptEntry.innerHTML)
+      : null
 
     expect(json).toBeTruthy()
     expect(json).toMatchObject({
