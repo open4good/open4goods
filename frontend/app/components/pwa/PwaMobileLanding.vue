@@ -56,6 +56,18 @@
                   >
                     {{ t('pwa.landing.search.cta') }}
                   </v-btn>
+                  <v-btn
+                    block
+                    color="primary"
+                    variant="tonal"
+                    size="large"
+                    class="font-weight-bold mt-3"
+                    prepend-icon="mdi-sparkles"
+                    data-testid="pwa-open-wizard"
+                    @click="isWizardOpen = true"
+                  >
+                    {{ t('pwa.landing.actions.wizard.title') }}
+                  </v-btn>
                 </v-card-text>
               </v-card>
 
@@ -82,6 +94,7 @@
             border
             rounded="xl"
             color="surface-default"
+            :data-testid="`pwa-quick-action-${action.key}`"
             @click="action.onClick()"
           >
             <v-card-item>
@@ -166,7 +179,6 @@
             <NudgeToolWizard
               :verticals="verticals"
               @navigate="handleWizardNavigate"
-              @close="isWizardOpen = false"
             />
           </v-card-text>
         </v-card>
