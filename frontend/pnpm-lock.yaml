@@ -159,7 +159,7 @@ importers:
         version: 7.6.0(magicast@0.5.2)(vite@7.3.1(@types/node@25.2.2)(jiti@2.6.1)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.28(typescript@5.9.3))(zod@3.25.76)
       '@openapitools/openapi-generator-cli':
         specifier: ^2.23.1
-        version: 2.28.2(@types/node@25.2.2)
+        version: 2.28.3(@types/node@25.2.2)
       '@playwright/test':
         specifier: ^1.57.0
         version: 1.58.2
@@ -2369,8 +2369,8 @@ packages:
   '@one-ini/wasm@0.1.1':
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
 
-  '@openapitools/openapi-generator-cli@2.28.2':
-    resolution: {integrity: sha512-iUBOVBbABSc+ygVJ1/xhdpZrH2Aj5ymGyN0QojoLG8RsQFJ9IUHR/i6bih4H2lOPdqzKeIO2PhPsgCvXYqLJFA==}
+  '@openapitools/openapi-generator-cli@2.28.3':
+    resolution: {integrity: sha512-ZLJwijwRcbxlCW+vzQ4mufgux80aFo07xQBHNiSbaOQFVGtI566xY1cYf1kmld+BksJiGwRVEbnkYSQnsMGrMQ==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -4523,8 +4523,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios@1.13.4:
-    resolution: {integrity: sha512-1wVkUaAO6WyaYtCkcYCOx12ZgpGf9Zif+qXa4n+oYzK558YryKqiL6UWwd5DqiH3VRW0GYhTZQ/vlgJrCoNQlg==}
+  axios@1.13.5:
+    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
   b4a@1.7.3:
     resolution: {integrity: sha512-5Q2mfq2WfGuFp3uS//0s6baOJLMoVduPYVeNmDYxu5OUA1/cBfvr2RIS7vi62LdNj/urk1hfmj867I3qt6uZ7Q==}
@@ -5967,8 +5967,8 @@ packages:
     resolution: {integrity: sha512-XxwI8EOhVQgWp6iDL+3b0r86f4d6AX6zSU55HfB4ydCEuXLXc5FcYeOu+nnGftS4TEju/11rt4KJPTMgbfmv4A==}
     engines: {node: '>=10.13.0'}
 
-  glob@13.0.1:
-    resolution: {integrity: sha512-B7U/vJpE3DkJ5WXTgTpTRN63uV42DseiXXKMwG14LQBXmsdeIoHAPbU/MEo6II0k5ED74uc2ZGTC6MwHFQhF6w==}
+  glob@13.0.2:
+    resolution: {integrity: sha512-035InabNu/c1lW0tzPhAgapKctblppqsKKG9ZaNzbr+gXwWMjXoiyGSyB9sArzrjG7jY+zntRq5ZSUYemrnWVQ==}
     engines: {node: 20 || >=22}
 
   global-directory@4.0.1:
@@ -6816,6 +6816,10 @@ packages:
 
   lru-cache@11.2.5:
     resolution: {integrity: sha512-vFrFJkWtJvJnD5hg+hJvVE8Lh/TcMzKnTgCWmtBipwI5yLX/iX+5UB2tfuyODF5E7k9xEzMdYgGqaSb1c0c5Yw==}
+    engines: {node: 20 || >=22}
+
+  lru-cache@11.2.6:
+    resolution: {integrity: sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==}
     engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
@@ -8572,8 +8576,8 @@ packages:
     engines: {node: '>=20.16.0'}
     hasBin: true
 
-  srvx@0.11.2:
-    resolution: {integrity: sha512-u6NbjE84IJwm1XUnJ53WqylLTQ3BdWRw03lcjBNNeMBD+EFjkl0Cnw1RVaGSqRAo38pOHOPXJH30M6cuTINUxw==}
+  srvx@0.11.3:
+    resolution: {integrity: sha512-QnQwqpNcu+nVkpRv/CI+mtHNcYNc6SR/A0J7EB22KINixRf2sbjFFu7U3rNrBPWmVhjicEuH9+1rEIDHw8CDeA==}
     engines: {node: '>=20.16.0'}
     hasBin: true
 
@@ -8969,6 +8973,10 @@ packages:
 
   type-fest@5.4.3:
     resolution: {integrity: sha512-AXSAQJu79WGc79/3e9/CR77I/KQgeY1AhNvcShIH4PTcGYyC4xv6H4R4AUOwkPS5799KlVDAu8zExeCrkGquiA==}
+    engines: {node: '>=20'}
+
+  type-fest@5.4.4:
+    resolution: {integrity: sha512-JnTrzGu+zPV3aXIUhnyWJj4z/wigMsdYajGLIYakqyOW1nPllzXEJee0QQbHj+CTIQtXGlAjuK0UY+2xTyjVAw==}
     engines: {node: '>=20'}
 
   type-is@2.0.1:
@@ -11538,10 +11546,10 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
-  '@nestjs/axios@4.0.1(@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.4)(rxjs@7.8.2)':
+  '@nestjs/axios@4.0.1(@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.5)(rxjs@7.8.2)':
     dependencies:
       '@nestjs/common': 11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      axios: 1.13.4
+      axios: 1.13.5
       rxjs: 7.8.2
 
   '@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2)':
@@ -12645,20 +12653,20 @@ snapshots:
 
   '@one-ini/wasm@0.1.1': {}
 
-  '@openapitools/openapi-generator-cli@2.28.2(@types/node@25.2.2)':
+  '@openapitools/openapi-generator-cli@2.28.3(@types/node@25.2.2)':
     dependencies:
-      '@nestjs/axios': 4.0.1(@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.4)(rxjs@7.8.2)
+      '@nestjs/axios': 4.0.1(@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.5)(rxjs@7.8.2)
       '@nestjs/common': 11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.13(@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nuxtjs/opencollective': 0.3.2
-      axios: 1.13.4
+      axios: 1.13.5
       chalk: 4.1.2
       commander: 8.3.0
       compare-versions: 6.1.1
       concurrently: 9.2.1
       console.table: 0.10.0
       fs-extra: 11.3.3
-      glob: 13.0.1
+      glob: 13.0.2
       inquirer: 8.2.7(@types/node@25.2.2)
       proxy-agent: 6.5.0
       reflect-metadata: 0.2.2
@@ -13969,7 +13977,7 @@ snapshots:
       async-sema: 3.1.1
       bindings: 1.5.0
       estree-walker: 2.0.2
-      glob: 13.0.1
+      glob: 13.0.2
       graceful-fs: 4.2.11
       node-gyp-build: 4.8.4
       picomatch: 4.0.3
@@ -14485,7 +14493,7 @@ snapshots:
 
   archiver-utils@5.0.2:
     dependencies:
-      glob: 13.0.1
+      glob: 13.0.2
       graceful-fs: 4.2.11
       is-stream: 2.0.1
       lazystream: 1.0.1
@@ -14578,7 +14586,7 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios@1.13.4:
+  axios@1.13.5:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5
@@ -15336,7 +15344,7 @@ snapshots:
 
   dot-prop@10.1.0:
     dependencies:
-      type-fest: 5.4.3
+      type-fest: 5.4.4
 
   dot-prop@5.3.0:
     dependencies:
@@ -16236,7 +16244,7 @@ snapshots:
     dependencies:
       is-glob: 4.0.3
 
-  glob@13.0.1:
+  glob@13.0.2:
     dependencies:
       minimatch: 10.1.2
       minipass: 7.1.2
@@ -16289,7 +16297,7 @@ snapshots:
   h3@2.0.1-rc.14:
     dependencies:
       rou3: 0.7.12
-      srvx: 0.11.2
+      srvx: 0.11.3
 
   handlebars@4.7.8:
     dependencies:
@@ -16980,7 +16988,7 @@ snapshots:
     dependencies:
       config-chain: 1.1.13
       editorconfig: 1.0.4
-      glob: 13.0.1
+      glob: 13.0.2
       js-cookie: 3.0.5
       nopt: 7.2.1
 
@@ -17205,6 +17213,8 @@ snapshots:
   lru-cache@10.4.3: {}
 
   lru-cache@11.2.5: {}
+
+  lru-cache@11.2.6: {}
 
   lru-cache@5.1.1:
     dependencies:
@@ -18597,7 +18607,7 @@ snapshots:
 
   path-scurry@2.0.1:
     dependencies:
-      lru-cache: 11.2.5
+      lru-cache: 11.2.6
       minipass: 7.1.2
 
   path-to-regexp@8.3.0: {}
@@ -19230,7 +19240,7 @@ snapshots:
 
   rimraf@6.1.2:
     dependencies:
-      glob: 13.0.1
+      glob: 13.0.2
       package-json-from-dist: 1.0.1
 
   rollup-plugin-visualizer@6.0.5(rollup@4.57.1):
@@ -19724,7 +19734,7 @@ snapshots:
 
   srvx@0.10.1: {}
 
-  srvx@0.11.2: {}
+  srvx@0.11.3: {}
 
   stable-hash-x@0.2.0: {}
 
@@ -19974,7 +19984,7 @@ snapshots:
   test-exclude@7.0.1:
     dependencies:
       '@istanbuljs/schema': 0.1.3
-      glob: 13.0.1
+      glob: 13.0.2
       minimatch: 9.0.5
 
   text-decoder@1.2.3:
@@ -20128,6 +20138,10 @@ snapshots:
       tagged-tag: 1.0.0
 
   type-fest@5.4.3:
+    dependencies:
+      tagged-tag: 1.0.0
+
+  type-fest@5.4.4:
     dependencies:
       tagged-tag: 1.0.0
 
@@ -21014,7 +21028,7 @@ snapshots:
       common-tags: 1.8.2
       fast-json-stable-stringify: 2.1.0
       fs-extra: 9.1.0
-      glob: 13.0.1
+      glob: 13.0.2
       lodash: 4.17.23
       pretty-bytes: 5.6.0
       rollup: 2.79.2
