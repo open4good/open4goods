@@ -596,6 +596,7 @@ public class SearchService {
 	 * @return a {@link SearchResult} bundling {@link SearchHits} and aggregation
 	 *         metadata
 	 */
+	@io.micrometer.core.annotation.Timed(value = "search.products", description = "Time taken to search products", extraTags = {"service", "search"})
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public ProductSearchResponseDto searchProducts(Pageable pageable, Locale locale, Set<String> includes,
             AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query,
@@ -635,6 +636,7 @@ public class SearchService {
 	 * @return a {@link SearchResult} bundling {@link SearchHits} and aggregation
 	 *         metadata
 	 */
+	@io.micrometer.core.annotation.Timed(value = "search.internal", description = "Time taken to execute internal search", extraTags = {"service", "search"})
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
 	public SearchResult search(Pageable pageable, String verticalId, String query,
 			AggregationRequestDto aggregationQuery, FilterRequestDto filters, boolean allowSemanticFallback, String searchType) {
@@ -822,6 +824,8 @@ public class SearchService {
 	 * @param missingVerticalPageable  pagination for missing-vertical results
 	 * @return grouped search results and unassigned hits when necessary
 	 */
+	@io.micrometer.core.annotation.Timed(value = "search.global", description = "Time taken to execute global search", extraTags = {"service", "search"})
+	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
 	public GlobalSearchResult globalSearch(String query, DomainLanguage domainLanguage, FilterRequestDto filters,
 			Sort sort, String searchType, Pageable missingVerticalPageable) {
 
@@ -876,6 +880,7 @@ public class SearchService {
 	 * @param domainLanguage localisation hint for categories
 	 * @return bundle of category and product suggestions
 	 */
+	@io.micrometer.core.annotation.Timed(value = "search.suggest", description = "Time taken to execute suggest", extraTags = {"service", "search"})
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
 	public SuggestResult suggest(String query, DomainLanguage domainLanguage) {
 		String sanitizedQuery = sanitize(query);

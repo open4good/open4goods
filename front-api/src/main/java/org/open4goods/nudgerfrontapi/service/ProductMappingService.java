@@ -220,6 +220,12 @@ public class ProductMappingService {
     public ProductDto mapProduct(Product product, Locale locale, Set<String> includes, DomainLanguage domainLanguage,
             boolean resolveProductReferences) {
 
+    	/*
+    	 * // TODO : this part is CRITICAL for performance.
+    	 * We should add a timer here to monitor the impact of the mapping
+    	 */
+    	io.micrometer.core.instrument.Timer.Sample sample = io.micrometer.core.instrument.Timer.start(io.micrometer.core.instrument.Metrics.globalRegistry);
+    	
         VerticalConfig vConfig = resolveVerticalConfig(product.getVertical());
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
 
@@ -271,7 +277,7 @@ public class ProductMappingService {
             }
         }
 
-        return new ProductDto(
+        ProductDto dto = new ProductDto(
                 product.getId(),
                 slug,
                 fullSlug,
@@ -286,6 +292,12 @@ public class ProductMappingService {
                 eprel,
                 offers,
                 timeline);
+        
+        sample.stop(io.micrometer.core.instrument.Timer.builder("product.mapping")
+        		.tag("vertical", product.getVertical() != null ? product.getVertical() : "unknown")
+        		.register(io.micrometer.core.instrument.Metrics.globalRegistry));
+        
+        return dto;
     }
 
     /**
