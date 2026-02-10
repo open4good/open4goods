@@ -97,7 +97,8 @@
                           <v-tooltip
                             v-if="criterion.utility"
                             location="top"
-                            max-width="260"
+                            max-width="360"
+                            content-class="category-ecoscore__criteria-utility-overlay"
                           >
                             <template #activator="{ props }">
                               <v-btn
@@ -116,7 +117,9 @@
                             <div
                               class="category-ecoscore__criteria-utility-tooltip"
                             >
-                              <strong>
+                              <strong
+                                class="category-ecoscore__criteria-utility-label"
+                              >
                                 {{
                                   t(
                                     'category.ecoscorePage.sections.criteria.utilityLabel'
@@ -1277,17 +1280,26 @@ useSeoMeta({
   display: flex
   flex-direction: column
   gap: 0.35rem
-  max-width: 240px
+  width: min(320px, 70vw)
+
+.category-ecoscore__criteria-utility-overlay
+  background: rgb(var(--v-theme-surface-default)) !important
+  color: rgb(var(--v-theme-text-neutral-strong)) !important
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.24)
+  border-radius: 12px
+  box-shadow: 0 10px 28px rgba(var(--v-theme-shadow-primary-600), 0.16)
+  padding: 0.85rem 0.95rem
+
+.category-ecoscore__criteria-utility-label
+  color: rgb(var(--v-theme-text-neutral-strong))
+  font-weight: 700
 
 .category-ecoscore__criteria-utility-tooltip p
   margin: 0
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-  background : rgba(var(--v-theme-surface-glass), 0.9)
+  background: transparent
   line-height: 1.4
-  display: -webkit-box
-  -webkit-line-clamp: 3
-  -webkit-box-orient: vertical
-  overflow: hidden
+  display: block
 
 .category-ecoscore__criteria-description
   margin: 0 0 0.5rem
