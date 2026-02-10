@@ -723,6 +723,11 @@ const availableCriteriaMap = computed(() => {
   }, new Map<string, { key: string; label: string; description: string; utility: string | null }>())
 })
 
+const defaultCriteriaIcons: Record<string, string> = {
+  BRAND_SUSTAINALYTICS_SCORING: 'mdi-earth',
+  DATA_QUALITY: 'mdi-database-check-outline',
+}
+
 const criteriaCards = computed(() => {
   const weights = impactScoreConfig.value?.criteriasPonderation ?? {}
   const analysis = impactScoreTexts.value?.criteriasAnalysis ?? {}
@@ -755,7 +760,7 @@ const criteriaCards = computed(() => {
       description,
       utility,
       coefficient,
-      icon: attribute?.icon ?? null,
+      icon: attribute?.icon ?? defaultCriteriaIcons[key] ?? null,
       fallback: fallbackTitle.charAt(0).toUpperCase(),
     }
   })
@@ -1241,10 +1246,13 @@ useSeoMeta({
 
 .category-ecoscore__criteria-icon
   display: inline-flex
+  flex: 0 0 48px
   align-items: center
   justify-content: center
   width: 48px
+  min-width: 48px
   height: 48px
+  min-height: 48px
   border-radius: 16px
   background: rgba(var(--v-theme-surface-primary-100), 0.9)
   color: rgb(var(--v-theme-accent-primary-highlight))
@@ -1285,7 +1293,7 @@ useSeoMeta({
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
   line-height: 1.5
   display: -webkit-box
-  -webkit-line-clamp: 4
+  -webkit-line-clamp: 2
   -webkit-box-orient: vertical
   overflow: hidden
 
