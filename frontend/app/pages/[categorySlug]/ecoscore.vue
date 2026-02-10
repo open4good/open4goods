@@ -570,21 +570,21 @@
 </template>
 
 <script setup lang="ts">
+import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
+import { useDisplay } from 'vuetify'
+import AiAuditDisplay from '~/components/category/AiAuditDisplay.vue'
+import CategoryHero from '~/components/category/CategoryHero.vue'
+import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
+import { useCategories } from '~/composables/categories/useCategories'
+import { loadHighlightJs } from '~/utils/highlight-loader'
 import type {
   AttributeConfigDto,
   CategoryBreadcrumbItemDto,
   ImpactScoreConfigDto,
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
-import CategoryHero from '~/components/category/CategoryHero.vue'
-import AiAuditDisplay from '~/components/category/AiAuditDisplay.vue'
-import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
-import { loadHighlightJs } from '~/utils/highlight-loader'
-import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
-import { useCategories } from '~/composables/categories/useCategories'
 
 definePageMeta({ lazy: true })
 
@@ -1282,6 +1282,7 @@ useSeoMeta({
 .category-ecoscore__criteria-utility-tooltip p
   margin: 0
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
+  background : rgba(var(--v-theme-surface-glass), 0.9)
   line-height: 1.4
   display: -webkit-box
   -webkit-line-clamp: 3
