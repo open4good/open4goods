@@ -250,6 +250,8 @@ const categoryFixture = {
     criteriasPonderation: {
       POWER: 0.3,
       REPAIRABILITY: 0.2,
+      DATA_QUALITY: 0.05,
+      BRAND_SUSTAINALYTICS_SCORING: 0.1,
     },
     texts: {
       purpose: 'Purpose text for televisions.',
@@ -258,6 +260,8 @@ const categoryFixture = {
       criteriasAnalysis: {
         POWER: 'Power analysis.',
         REPAIRABILITY: 'Repairability analysis.',
+        DATA_QUALITY: 'Data quality analysis.',
+        BRAND_SUSTAINALYTICS_SCORING: 'Brand ESG analysis.',
       },
     },
     yamlPrompt: 'key: value',
@@ -268,7 +272,12 @@ const categoryFixture = {
       },
     }),
   },
-  availableImpactScoreCriterias: ['POWER', 'REPAIRABILITY'],
+  availableImpactScoreCriterias: [
+    'POWER',
+    'REPAIRABILITY',
+    'DATA_QUALITY',
+    'BRAND_SUSTAINALYTICS_SCORING',
+  ],
   attributesConfig: {
     configs: [
       {
@@ -282,6 +291,16 @@ const categoryFixture = {
         name: 'Repairability index',
         icon: 'mdi-tools',
         participateInACV: new Set(['MANUFACTURING', 'END_OF_LIFE']),
+      },
+      {
+        key: 'DATA_QUALITY',
+        name: 'Data quality',
+        participateInACV: new Set(['EXTRACTION']),
+      },
+      {
+        key: 'BRAND_SUSTAINALYTICS_SCORING',
+        name: 'Brand ESG rating',
+        participateInACV: new Set(['USE']),
       },
     ],
   },
@@ -319,7 +338,18 @@ const vuetifyStubs = {
         )
     },
   }),
-  'v-icon': { template: '<i class="v-icon-stub"><slot /></i>' },
+  'v-icon': defineComponent({
+    name: 'VIconStub',
+    props: { icon: { type: String, default: '' } },
+    setup(props, { slots }) {
+      return () =>
+        h(
+          'i',
+          { class: 'v-icon-stub', 'data-icon': props.icon || undefined },
+          slots.default?.()
+        )
+    },
+  }),
   'v-avatar': { template: '<div class="v-avatar-stub"><slot /></div>' },
   'v-img': defineComponent({
     name: 'VImgStub',
@@ -396,9 +426,17 @@ describe('Category ecosystem Impact Score page', () => {
     ])
 
     const criteriaCards = wrapper.findAll('[data-test="impact-criteria-card"]')
-    expect(criteriaCards).toHaveLength(2)
+    expect(criteriaCards).toHaveLength(4)
     expect(criteriaCards[0].text()).toContain('Energy efficiency')
     expect(criteriaCards[0].text()).toContain('30%')
+
+    const criteriaIcons = wrapper
+      .findAll('.category-ecoscore__criteria-card .v-icon-stub')
+      .map(icon => icon.attributes('data-icon'))
+    expect(criteriaIcons).toContain('mdi-flash')
+    expect(criteriaIcons).toContain('mdi-tools')
+    expect(criteriaIcons).toContain('mdi-database-check-outline')
+    expect(criteriaIcons).toContain('mdi-earth')
 
     const yamlBlock = wrapper.get('[data-test="ai-yaml"]').text()
     expect(yamlBlock).toContain('key: value')
