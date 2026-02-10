@@ -72,3 +72,14 @@ node scripts/ai/run_agent.mjs --check --config .github/ai/agent.config.json --pr
 ```
 
 This validates provider configuration and required secrets (for example `OPENAI_API_KEY` for `codex`).
+
+
+## Preflight check (`--check`)
+
+The active workflow `.github/workflows/ai-agent.yml` runs a preflight step before provider calls:
+
+```bash
+node scripts/ai/run_agent.mjs --check --config .github/ai/agent.config.json --provider <provider> --template <template> --schema <schema> --context <context> --out ai_preflight.json
+```
+
+This fails fast when required provider secrets are missing.

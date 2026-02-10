@@ -113,3 +113,20 @@ For production usage, prefer a **GitHub App named Cody** over a personal bot acc
 - Principle of least privilege.
 - Easier key rotation and permission scoping.
 
+
+
+## Enable the workflow (`ai-agent.yml`)
+
+The executable workflow is `.github/workflows/ai-agent.yml` (not `.old`).
+
+Quick activation checklist:
+
+1. Ensure repository secrets are present: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`.
+2. Add labels on the target issue/PR:
+   - `agent:on`
+   - one provider label (`codex` / `claude` / `gemini`)
+   - one state label (`agent:UNDERSTANDING` by default)
+3. Trigger with an issue/PR comment containing `/agent` or `@agent`.
+4. The workflow now runs a preflight step (`run_agent.mjs --check`) before calling provider APIs.
+
+If preflight fails, fix missing secrets/files first.
