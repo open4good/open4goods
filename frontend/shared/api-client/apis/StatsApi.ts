@@ -19,6 +19,7 @@ import type {
   CategoriesScoresStatsDto,
   CategoriesStatsDto,
   ProductDto,
+  VerticalDatavizPlanDto,
 } from '../models/index';
 import {
     CategoriesScoreStatsDtoFromJSON,
@@ -29,6 +30,8 @@ import {
     CategoriesStatsDtoToJSON,
     ProductDtoFromJSON,
     ProductDtoToJSON,
+    VerticalDatavizPlanDtoFromJSON,
+    VerticalDatavizPlanDtoToJSON,
 } from '../models/index';
 
 export interface CategoriesRequest {
@@ -42,6 +45,11 @@ export interface CategoriesScoreRequest {
 
 export interface CategoriesScoresRequest {
     domainLanguage: CategoriesScoresDomainLanguageEnum;
+}
+
+export interface DatavizPlanRequest {
+    verticalId: string;
+    domainLanguage: DatavizPlanDomainLanguageEnum;
 }
 
 export interface RandomRequest {
@@ -224,6 +232,67 @@ export class StatsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Return the default filters and chart presets used by the frontend dataviz gallery for a vertical.
+     * Get dataviz presets for a vertical
+     */
+    async datavizPlanRaw(requestParameters: DatavizPlanRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<VerticalDatavizPlanDto>> {
+        if (requestParameters['verticalId'] == null) {
+            throw new runtime.RequiredError(
+                'verticalId',
+                'Required parameter "verticalId" was null or undefined when calling datavizPlan().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling datavizPlan().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stats/verticals/{verticalId}/dataviz/plan`;
+        urlPath = urlPath.replace(`{${"verticalId"}}`, encodeURIComponent(String(requestParameters['verticalId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => VerticalDatavizPlanDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Return the default filters and chart presets used by the frontend dataviz gallery for a vertical.
+     * Get dataviz presets for a vertical
+     */
+    async datavizPlan(requestParameters: DatavizPlanRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<VerticalDatavizPlanDto> {
+        const response = await this.datavizPlanRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Return a list of random products.
      * Get random products
      */
@@ -314,6 +383,14 @@ export const CategoriesScoresDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type CategoriesScoresDomainLanguageEnum = typeof CategoriesScoresDomainLanguageEnum[keyof typeof CategoriesScoresDomainLanguageEnum];
+/**
+ * @export
+ */
+export const DatavizPlanDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type DatavizPlanDomainLanguageEnum = typeof DatavizPlanDomainLanguageEnum[keyof typeof DatavizPlanDomainLanguageEnum];
 /**
  * @export
  */

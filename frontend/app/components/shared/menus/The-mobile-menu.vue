@@ -314,7 +314,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue'
 import { storeToRefs } from 'pinia'
 import ThemeToggle from './ThemeToggle.vue'
 import AccountPrivacyCard from './AccountPrivacyCard.vue'
@@ -332,10 +331,7 @@ import {
 } from '~/composables/menus/useMenuSearchControls'
 import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
-const SearchSuggestField = defineAsyncComponent({
-  loader: () => import('~/components/search/SearchSuggestField.vue'),
-  suspensible: false,
-})
+import SearchSuggestField from '~/components/search/SearchSuggestField.vue'
 
 const { t, locale } = useI18n()
 const {
