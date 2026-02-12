@@ -623,6 +623,23 @@ subsets:
       fr: "Pour les grandes familles."
 
 ####################################################################################
+# DATAVIZ CONFIGURATION
+####################################################################################
+dataviz:
+  chartOverrides:
+    capacity-distribution:
+      title: "Répartition des capacités de lavage"
+      description: "Découvrez les capacités les plus populaires"
+  heroKpis:
+    - field: "attributes.indexed.WASHING_CAPACITY"
+      label: "Capacité moyenne"
+      unit: "kg"
+      aggregation: "avg"
+    - field: "scores.ECOSCORE.value"
+      label: "Eco-score moyen"
+      aggregation: "avg"
+
+####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################
 attributesConfig:

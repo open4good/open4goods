@@ -12,6 +12,9 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoreStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoresStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
+import org.open4goods.nudgerfrontapi.dto.stats.DatavizChartQueryRequestDto;
+import org.open4goods.nudgerfrontapi.dto.stats.DatavizChartQueryResponseDto;
+import org.open4goods.nudgerfrontapi.dto.stats.DatavizHeroStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.VerticalDatavizPlanDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.DatavizStatsService;
@@ -21,6 +24,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +38,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * REST controller exposing aggregated statistics for the frontend.
+ *
+ * <p>
+ * Provides category-level analytics, dataviz chart presets, chart query
+ * execution and hero KPI statistics for the Nuxt frontend dataviz pages.
+ * </p>
  */
 @RestController
 @RequestMapping("/stats")
@@ -110,6 +120,94 @@ public class StatsController {
         }
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE)
+                .body(body);
+    }
+
+    /**
+     * Execute a chart aggregation query for the given vertical and chart preset.
+     *
+     * @param verticalId     vertical identifier
+     * @param request        chart query request containing chart ID and optional filter overrides
+     * @param domainLanguage language for localised chart metadata
+     * @return chart query response with labels and values ready for charting
+     */
+    @PostMapping("/verticals/{verticalId}/charts/query")
+    @Operation(
+            summary = "Execute a chart aggregation query",
+            description = "Execute an Elasticsearch aggregation query for a specific chart preset and return labels/values arrays ready for the frontend charting library.",
+            parameters = {
+                    @io.swagger.v3.oas.annotations.Parameter(name = "verticalId", in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH, required = true,
+                            description = "Vertical identifier scoping the query.",
+                            schema = @Schema(type = "string", example = "televisions")),
+                    @io.swagger.v3.oas.annotations.Parameter(name = "domainLanguage", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of chart titles and descriptions.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Chart data returned",
+                            headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
+                                    description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr")),
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = DatavizChartQueryResponseDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Vertical or chart preset not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<DatavizChartQueryResponseDto> chartQuery(
+            @PathVariable("verticalId") String verticalId,
+            @RequestBody DatavizChartQueryRequestDto request,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        logger.info("Entering chartQuery(verticalId={}, chartId={}, domainLanguage={})", verticalId, request.chartId(), domainLanguage);
+        DatavizChartQueryResponseDto body = datavizStatsService.executeChartQuery(verticalId, request, domainLanguage);
+        if (body == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
+                .body(body);
+    }
+
+    /**
+     * Get hero-level KPI statistics for the dataviz page.
+     *
+     * @param verticalId     vertical identifier
+     * @param domainLanguage language for localisation
+     * @return hero statistics or 404 when the vertical is unknown
+     */
+    @GetMapping("/verticals/{verticalId}/dataviz/hero")
+    @Operation(
+            summary = "Get dataviz hero KPI statistics",
+            description = "Return headline KPIs (total products, average price, top brand, etc.) displayed in the hero section of the dataviz page.",
+            parameters = {
+                    @io.swagger.v3.oas.annotations.Parameter(name = "verticalId", in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH, required = true,
+                            description = "Vertical identifier.",
+                            schema = @Schema(type = "string", example = "televisions")),
+                    @io.swagger.v3.oas.annotations.Parameter(name = "domainLanguage", in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Hero statistics returned",
+                            headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
+                                    description = "Resolved locale for textual payloads.",
+                                    schema = @Schema(type = "string", example = "fr")),
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = DatavizHeroStatsDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Vertical not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<DatavizHeroStatsDto> datavizHero(
+            @PathVariable("verticalId") String verticalId,
+            @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        logger.info("Entering datavizHero(verticalId={}, domainLanguage={})", verticalId, domainLanguage);
+        DatavizHeroStatsDto body = datavizStatsService.computeHeroStats(verticalId, domainLanguage);
+        if (body == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .body(body);
     }
 
@@ -196,7 +294,7 @@ public class StatsController {
                                     description = "Resolved locale for textual payloads.",
                                     schema = @Schema(type = "string", example = "fr-FR")),
                             content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ProductDto.class))), // Should be ArraySchema but for simplicity using implementation
+                                    schema = @Schema(implementation = ProductDto.class))),
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
@@ -211,7 +309,7 @@ public class StatsController {
         }
         List<ProductDto> body = statsService.random(num, minOffersCount, verticalId, domainLanguage);
         return ResponseEntity.ok()
-                .cacheControl(org.springframework.http.CacheControl.noCache()) // Random content should not be cached typically, or very short duration
+                .cacheControl(org.springframework.http.CacheControl.noCache())
                 .body(body);
     }
 }

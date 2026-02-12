@@ -258,6 +258,12 @@ public class VerticalConfig {
 	 */
 	private ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
 
+	/**
+	 * Configuration relativ to dataviz statistics page.
+	 */
+	@JsonMerge
+	private DatavizConfig dataviz = new DatavizConfig();
+
 	////////////////////
 	// The subsets for this vertical
 	////////////////////
@@ -804,6 +810,16 @@ public class VerticalConfig {
 	public void setImpactScoreConfig(ImpactScoreConfig impactScoreConfig) {
 		this.impactScoreConfig = impactScoreConfig;
 	}
+
+	public DatavizConfig getDataviz() {
+		return dataviz;
+	}
+
+	public void setDataviz(DatavizConfig dataviz) {
+		this.dataviz = dataviz;
+	}
+
+
 
 	public void setGoogleTaxonomyId(Integer taxonomyId) {
 		this.googleTaxonomyId = taxonomyId;

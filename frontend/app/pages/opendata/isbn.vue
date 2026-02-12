@@ -357,9 +357,8 @@ useHead(() => ({
             ]
           : [],
         creator: {
-          '@type': 'Organization',
-          name: 'Nudger',
-          url: requestURL.origin,
+          '@type': 'Person',
+          name: t('opendata.datasets.creator.name'),
         },
       }),
     },

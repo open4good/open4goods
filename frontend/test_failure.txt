@@ -1,0 +1,46 @@
+
+> nudger-nuxt-front@ test /home/goulven/git/open4goods/frontend
+> vitest run app/components/category/repro_filter_issue.spec.ts
+
+[info] [@nuxtjs/sitemap] `zeroRuntime` enabled - sitemap routes will be prerendered.
+
+ RUN  v3.2.4 /home/goulven/git/open4goods/frontend
+
+[33m[1m  ➜  MCP:     [22m[39mServer is running at http://localhost:5173/__mcp/sse
+ ❯ app/components/category/repro_filter_issue.spec.ts (2 tests | 2 failed) 29ms
+   × CategoryFiltersPanel Reproduction > should exclude specific impact filters 24ms
+     → Need to install with `app.use` function
+   × CategoryFiltersPanel Reproduction > should have duplicated technical filters 4ms
+     → Need to install with `app.use` function
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  app/components/category/repro_filter_issue.spec.ts > CategoryFiltersPanel Reproduction > should exclude specific impact filters
+ FAIL  app/components/category/repro_filter_issue.spec.ts > CategoryFiltersPanel Reproduction > should have duplicated technical filters
+SyntaxError: Need to install with `app.use` function
+ ❯ createCompileError node_modules/.pnpm/@intlify+message-compiler@11.2.8/node_modules/@intlify/message-compiler/dist/message-compiler.mjs:77:19
+     75|         ? format((messages || errorMessages)[code] || '', ...(args || …
+     76|         : code;
+     77|     const error = new SyntaxError(String(msg));
+       |                   ^
+     78|     error.code = code;
+     79|     if (loc) {
+ ❯ createI18nError node_modules/.pnpm/vue-i18n@11.2.8_vue@3.5.28_typescript@5.9.3_/node_modules/vue-i18n/dist/vue-i18n.mjs:62:12
+ ❯ useI18n node_modules/.pnpm/vue-i18n@11.2.8_vue@3.5.28_typescript@5.9.3_/node_modules/vue-i18n/dist/vue-i18n.mjs:2155:15
+ ❯ setup app/components/category/CategoryFiltersPanel.vue:195:15
+ ❯ callWithErrorHandling node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ setupStatefulComponent node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:7999:25
+ ❯ setupComponent node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:7961:36
+ ❯ mountComponent node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5903:7
+ ❯ processComponent node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5869:9
+ ❯ patch node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5386:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  23:15:14
+   Duration  8.46s (transform 5.80s, setup 5.63s, collect 1.97s, tests 29ms, environment 269ms, prepare 186ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

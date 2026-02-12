@@ -8,9 +8,13 @@
     :rounded="rounded"
     elevation="2"
     hover
-    :to="resolvedProductLink"
-    :rel="linkRel"
   >
+    <NuxtLink
+      :to="resolvedProductLink"
+      :rel="linkRel"
+      class="product-card__overlay-link"
+      :aria-label="resolveCardProductName(product)"
+    />
     <div class="product-card__media-wrapper">
       <div class="product-card__media">
         <!-- Header Overlay -->
@@ -135,9 +139,7 @@ import {
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
-import {
-  resolveSortedFieldDisplay,
-} from '~/utils/_sort-attribute-display'
+import { resolveSortedFieldDisplay } from '~/utils/_sort-attribute-display'
 
 const props = withDefaults(
   defineProps<{
@@ -246,9 +248,7 @@ const popularAttributesByProduct = computed<DisplayedAttribute[]>(() => {
   return entries.slice(0, effectiveMax)
 })
 
-const shouldShowSortedField = computed(() =>
-  Boolean(sortedFieldDisplay.value)
-)
+const shouldShowSortedField = computed(() => Boolean(sortedFieldDisplay.value))
 </script>
 
 <style scoped lang="sass">
@@ -262,6 +262,13 @@ const shouldShowSortedField = computed(() =>
     background: rgb(var(--v-theme-surface-glass))
     overflow: hidden
     border: 1px solid rgba(var(--v-theme-border-primary), 0.1)
+
+    &__overlay-link
+        position: absolute
+        inset: 0
+        z-index: 1
+        outline: none /* Focus ring handled by card or custom */
+
 
     &:hover
         transform: translateY(-4px)
@@ -316,6 +323,7 @@ const shouldShowSortedField = computed(() =>
         pointer-events: none /* let clicks pass through to image link */
         padding: 0
         background: rgba(var(--v-theme-surface-default), 0.5)
+        z-index: 2 /* Above overlay */
 
     &__corner
         /* pointer-events: auto - corner fallback might not need pointer events, but keep if needed */
@@ -336,6 +344,8 @@ const shouldShowSortedField = computed(() =>
 
     &__actions
         pointer-events: auto
+        position: relative /* Ensure z-index works */
+        z-index: 2
         margin: 0.5rem 0.5rem 0 0 /* top right spacing */
         display: inline-flex
         align-items: center
@@ -412,6 +422,8 @@ const shouldShowSortedField = computed(() =>
         background: rgba(var(--v-theme-surface-default), 0.5)
         backdrop-filter: blur(4px)
         width: 100%
+        position: relative /* Ensure z-index works */
+        z-index: 2 /* External links need to be clickable above overlay */
 
 /* Size variants */
 .product-card

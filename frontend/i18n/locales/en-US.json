@@ -1641,6 +1641,9 @@
           "updated": "Last updated"
         }
       },
+      "creator": {
+        "name": "Goulven Furet"
+      },
       "gtin": {
         "columns": {
           "brand": {

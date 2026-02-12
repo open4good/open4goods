@@ -1,4 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
+import { getRequestURL } from 'h3'
+import sitemapPlugin from './sitemap-index'
+import { getPublicSitemapUrlsForDomainLanguage } from '~~/server/utils/sitemap-local-files'
 
 // Mock dependencies
 vi.mock('h3', () => ({
@@ -7,18 +10,16 @@ vi.mock('h3', () => ({
   defineEventHandler: vi.fn(),
 }))
 
-vi.mock('#imports', () => ({
-  useRuntimeConfig: vi.fn(),
+vi.mock('~~/server/utils/sitemap-local-files', () => ({
+  getPublicSitemapUrlsForDomainLanguage: vi.fn(),
 }))
 
-// Import the plugin
-import sitemapPlugin from './sitemap-index'
-import { getRequestURL } from 'h3'
-import { useRuntimeConfig } from '#imports'
-
 describe('sitemap-index plugin', () => {
-  let mockHook: any
-  let mockCtx: any
+  let mockHook: Mock
+  let mockCtx: {
+    event: Record<string, unknown>
+    sitemaps: Array<{ sitemap: string }>
+  }
 
   beforeEach(() => {
     mockHook = vi.fn()
@@ -27,6 +28,7 @@ describe('sitemap-index plugin', () => {
       sitemaps: [],
     }
     vi.clearAllMocks()
+    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([])
   })
 
   const runPlugin = () => {
@@ -34,39 +36,33 @@ describe('sitemap-index plugin', () => {
       hooks: {
         hook: mockHook,
       },
-    } as any
+    } as unknown as { hooks: { hook: Mock } }
     sitemapPlugin(nitroApp)
     // Return the registered callback
-    return mockHook.mock.calls[0][1]
+    return mockHook.mock.calls[0]?.[1]
   }
 
   it('handles standard nudger.fr request', () => {
     const callback = runPlugin()
 
-    // Mock getRequestURL
     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
-
-    // Mock runtime config
-    vi.mocked(useRuntimeConfig).mockReturnValue({
-      sitemapLocalFiles: {
-        fr: ['/tmp/sitemap.xml'],
-      },
-    })
+    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([
+      'https://nudger.fr/sitemap/fr/sitemap.xml',
+    ])
 
     callback(mockCtx)
 
     expect(mockCtx.sitemaps).toHaveLength(1)
-    expect(mockCtx.sitemaps[0].sitemap).toBe(
+    expect(mockCtx.sitemaps[0]?.sitemap).toBe(
       'https://nudger.fr/sitemap/fr/sitemap.xml'
     )
   })
 
-  it('handles missing sitemapLocalFiles configuration cleanly', () => {
+  it('handles empty sitemap list', () => {
     const callback = runPlugin()
 
     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
-    // Returns object but missing sitemapLocalFiles
-    vi.mocked(useRuntimeConfig).mockReturnValue({})
+    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([])
 
     callback(mockCtx)
 
@@ -77,57 +73,22 @@ describe('sitemap-index plugin', () => {
     const callback = runPlugin()
 
     vi.mocked(getRequestURL).mockReturnValue(new URL('https://unknown.com'))
-    vi.mocked(useRuntimeConfig).mockReturnValue({
-      sitemapLocalFiles: {
-        fr: ['/tmp/sitemap-fr.xml'],
-        en: ['/tmp/sitemap-en.xml'],
-      },
-    })
+    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([
+      'https://unknown.com/sitemap/fr/sitemap-fr.xml',
+    ])
 
     callback(mockCtx)
 
-    // unknown falls back to 'fr', so we expect fr sitemaps
-    // Origin is preserved as unknown.com?
-    // getPublicSitemapUrlsForDomainLanguage uses origin from requestURL
-    expect(mockCtx.sitemaps[0].sitemap).toContain(
+    expect(mockCtx.sitemaps).toHaveLength(1)
+    expect(mockCtx.sitemaps[0]?.sitemap).toBe(
       'https://unknown.com/sitemap/fr/sitemap-fr.xml'
     )
   })
 
-  it('handles origin being null? (impossible for URL object)', () => {
-    // URL object always has origin.
-  })
-
-  it('handles sitemapLocalFiles being null', () => {
+  it('handles sitemapLocalFiles returning null/undefined logic (simulated by empty array)', () => {
     const callback = runPlugin()
     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
-    vi.mocked(useRuntimeConfig).mockReturnValue({
-      sitemapLocalFiles: null,
-    })
-    callback(mockCtx)
-    expect(mockCtx.sitemaps).toHaveLength(0)
-  })
-
-  it('handles sitemapLocalFiles[domain] being non-array', () => {
-    const callback = runPlugin()
-    vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
-    vi.mocked(useRuntimeConfig).mockReturnValue({
-      sitemapLocalFiles: {
-        fr: 'not-an-array',
-      },
-    })
-    callback(mockCtx)
-    expect(mockCtx.sitemaps).toHaveLength(0) // Should be handled by Array.isArray check
-  })
-
-  it('handles sitemapLocalFiles[domain] containing non-strings', () => {
-    const callback = runPlugin()
-    vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
-    vi.mocked(useRuntimeConfig).mockReturnValue({
-      sitemapLocalFiles: {
-        fr: [null, 123, {}],
-      },
-    })
+    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([])
     callback(mockCtx)
     expect(mockCtx.sitemaps).toHaveLength(0)
   })

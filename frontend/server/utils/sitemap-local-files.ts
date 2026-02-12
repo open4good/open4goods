@@ -30,7 +30,14 @@ const normalizeSitemapPaths = (paths: unknown): string[] => {
 
 const getRuntimeConfig = (
   runtimeConfig?: SitemapLocalFilesRuntimeConfig
-): SitemapLocalFilesRuntimeConfig => runtimeConfig ?? useRuntimeConfig()
+): SitemapLocalFilesRuntimeConfig => {
+  const config = runtimeConfig ?? useRuntimeConfig()
+  console.log(
+    'sitemap-local-files used config:',
+    JSON.stringify(config.sitemapLocalFiles, null, 2)
+  )
+  return config
+}
 
 const buildPublicPath = (
   domainLanguage: DomainLanguage,

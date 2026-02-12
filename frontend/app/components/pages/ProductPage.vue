@@ -9,176 +9,180 @@
       />
     </ClientOnly>
 
-    <v-alert
-      v-if="errorMessage"
-      type="error"
-      variant="tonal"
-      border="start"
-      class="mb-6"
-    >
-      {{ errorMessage }}
-    </v-alert>
-
-    <v-skeleton-loader v-else-if="pending" type="article" class="mb-6" />
-
-    <div
-      v-else-if="product"
-      class="product-page__layout"
-      :class="{ 'product-page__layout--nav-collapsed': isNavCollapsed }"
-    >
-      <aside
-        class="product-page__nav"
-        :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
+    <v-container fluid class="product-page__container">
+      <v-alert
+        v-if="errorMessage"
+        type="error"
+        variant="tonal"
+        border="start"
+        class="mb-6"
       >
-        <ProductSummaryNavigation
-          :sections="navigableSections"
-          :admin-sections="adminNavigableSections"
-          :admin-title="$t('product.navigation.adminPanel.title')"
-          :admin-helper="$t('product.navigation.adminPanel.helper')"
-          :active-section="activeSection"
-          :orientation="orientation"
-          :aria-label="$t('product.navigation.label')"
-          @navigate="scrollToSection"
-          @collapse-change="handleNavCollapseChange"
-        />
-      </aside>
+        {{ errorMessage }}
+      </v-alert>
 
-      <main class="product-page__content">
-        <section
-          :id="sectionIds.hero"
-          ref="heroSectionRef"
-          class="product-page__section"
+      <v-skeleton-loader v-else-if="pending" type="article" class="mb-6" />
+
+      <div
+        v-else-if="product"
+        class="product-page__layout"
+        :class="{ 'product-page__layout--nav-collapsed': isNavCollapsed }"
+      >
+        <aside
+          class="product-page__nav"
+          :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
         >
-          <div class="product-page__hero">
-            <ProductHero
-              :product="product"
-              :breadcrumbs="productBreadcrumbs"
-              :impact-score="impactScoreOutOf20"
-              :impact-score-min="impactScoreMin"
-              :impact-score-max="impactScoreMax"
-              :popular-attributes="heroPopularAttributes"
-              :has-category="!!categoryDetail"
+          <ProductSummaryNavigation
+            :sections="navigableSections"
+            :admin-sections="adminNavigableSections"
+            :admin-title="$t('product.navigation.adminPanel.title')"
+            :admin-helper="$t('product.navigation.adminPanel.helper')"
+            :active-section="activeSection"
+            :orientation="orientation"
+            :aria-label="$t('product.navigation.label')"
+            @navigate="scrollToSection"
+            @collapse-change="handleNavCollapseChange"
+          />
+        </aside>
+
+        <main class="product-page__content">
+          <section
+            :id="sectionIds.hero"
+            ref="heroSectionRef"
+            class="product-page__section"
+          >
+            <div class="product-page__hero">
+              <ProductHero
+                :product="product"
+                :breadcrumbs="productBreadcrumbs"
+                :impact-score="impactScoreOutOf20"
+                :impact-score-min="impactScoreMin"
+                :impact-score-max="impactScoreMax"
+                :popular-attributes="heroPopularAttributes"
+                :has-category="!!categoryDetail"
+              />
+            </div>
+          </section>
+
+          <section
+            v-if="categoryDetail"
+            :id="sectionIds.impact"
+            ref="impactSectionRef"
+            class="product-page__section"
+          >
+            <ProductImpactSection
+              :scores="impactScores"
+              :radar-data="radarData"
+              :product-name="productTitle"
+              :product-brand="productBrand"
+              :product-model="productModel"
+              :product-image="resolvedProductImageSource"
+              :vertical-home-url="verticalHomeUrl"
+              :vertical-title="normalizedVerticalTitle"
+              :subtitle-params="impactSubtitleParams"
+              :expanded-score-id="expandedScoreId"
+              :ai-impact-text="product.aiReview?.ecologicalOneline"
+              :on-market-end-date="product.eprel?.onMarketEndDate"
+              :score-min="impactScoreMin"
+              :score-max="impactScoreMax"
             />
-          </div>
-        </section>
+          </section>
 
-        <section
-          v-if="categoryDetail"
-          :id="sectionIds.impact"
-          ref="impactSectionRef"
-          class="product-page__section"
-        >
-          <ProductImpactSection
-            :scores="impactScores"
-            :radar-data="radarData"
-            :product-name="productTitle"
-            :product-brand="productBrand"
-            :product-model="productModel"
-            :product-image="resolvedProductImageSource"
-            :vertical-home-url="verticalHomeUrl"
-            :vertical-title="normalizedVerticalTitle"
-            :subtitle-params="impactSubtitleParams"
-            :expanded-score-id="expandedScoreId"
-            :ai-impact-text="product.aiReview?.ecologicalOneline"
-            :on-market-end-date="product.eprel?.onMarketEndDate"
-            :score-min="impactScoreMin"
-            :score-max="impactScoreMax"
-          />
-        </section>
+          <section
+            v-if="showAiReviewSection"
+            :id="sectionIds.ai"
+            class="product-page__section"
+          >
+            <ProductAiReviewSection
+              :gtin="product.gtin ?? gtin"
+              :initial-review="product.aiReview?.review ?? null"
+              :review-created-at="product.aiReview?.createdMs ?? undefined"
+              :site-key="hcaptchaSiteKey"
+              :title-params="aiTitleParams"
+              :product-name="productTitle"
+              :product-image="resolvedProductImageSource"
+              :product-slug="product.fullSlug ?? product.slug ?? undefined"
+              :failure-reason="product.aiReview?.failureReason ?? null"
+              :enough-data="product.aiReview?.enoughData ?? true"
+            />
+          </section>
 
-        <section
-          v-if="showAiReviewSection"
-          :id="sectionIds.ai"
-          class="product-page__section"
-        >
-          <ProductAiReviewSection
-            :gtin="product.gtin ?? gtin"
-            :initial-review="product.aiReview?.review ?? null"
-            :review-created-at="product.aiReview?.createdMs ?? undefined"
-            :site-key="hcaptchaSiteKey"
-            :title-params="aiTitleParams"
-            :product-name="productTitle"
-            :product-image="resolvedProductImageSource"
-            :product-slug="product.fullSlug ?? product.slug ?? undefined"
-            :failure-reason="product.aiReview?.failureReason ?? null"
-            :enough-data="product.aiReview?.enoughData ?? true"
-          />
-        </section>
+          <section :id="sectionIds.price" class="product-page__section">
+            <ProductPriceSection
+              v-if="product.offers"
+              :offers="product.offers"
+              :commercial-events="commercialEvents"
+              :title-params="priceTitleParams"
+            />
+          </section>
 
-        <section :id="sectionIds.price" class="product-page__section">
-          <ProductPriceSection
-            v-if="product.offers"
-            :offers="product.offers"
-            :commercial-events="commercialEvents"
-            :title-params="priceTitleParams"
-          />
-        </section>
+          <section
+            v-if="product.timeline"
+            :id="sectionIds.timeline"
+            class="product-page__section"
+          >
+            <ProductLifeTimeline :timeline="product.timeline" />
+          </section>
 
-        <section
-          v-if="product.timeline"
-          :id="sectionIds.timeline"
-          class="product-page__section"
-        >
-          <ProductLifeTimeline :timeline="product.timeline" />
-        </section>
+          <section
+            v-if="showAlternativesSection"
+            :id="sectionIds.alternatives"
+            class="product-page__section"
+          >
+            <ProductAlternatives
+              :product="product"
+              :vertical-id="categoryDetail?.id ?? ''"
+              :popular-attributes="categoryDetail?.popularAttributes ?? []"
+              :subtitle-params="alternativesSubtitleParams"
+              @alternatives-updated="handleAlternativesUpdated"
+            />
+          </section>
 
-        <section
-          v-if="showAlternativesSection"
-          :id="sectionIds.alternatives"
-          class="product-page__section"
-        >
-          <ProductAlternatives
-            :product="product"
-            :vertical-id="categoryDetail?.id ?? ''"
-            :popular-attributes="categoryDetail?.popularAttributes ?? []"
-            :subtitle-params="alternativesSubtitleParams"
-            @alternatives-updated="handleAlternativesUpdated"
-          />
-        </section>
+          <section
+            v-if="showVigilanceSection"
+            :id="sectionIds.vigilance"
+            class="product-page__section"
+          >
+            <ProductVigilanceSection
+              :product="product"
+              :on-market-end-date="product.eprel?.onMarketEndDate"
+              @click:offers="scrollToSection(subSectionIds.priceOffers)"
+            />
+          </section>
 
-        <section
-          v-if="showVigilanceSection"
-          :id="sectionIds.vigilance"
-          class="product-page__section"
-        >
-          <ProductVigilanceSection
-            :product="product"
-            :on-market-end-date="product.eprel?.onMarketEndDate"
-            @click:offers="scrollToSection(subSectionIds.priceOffers)"
-          />
-        </section>
+          <section
+            v-if="showAttributesSection"
+            :id="sectionIds.attributes"
+            class="product-page__section"
+          >
+            <ProductAttributesSection
+              :product="product"
+              :attribute-configs="
+                categoryDetail?.attributesConfig?.configs ?? []
+              "
+              :title-params="attributesTitleParams"
+            />
+          </section>
 
-        <section
-          v-if="showAttributesSection"
-          :id="sectionIds.attributes"
-          class="product-page__section"
-        >
-          <ProductAttributesSection
-            :product="product"
-            :attribute-configs="categoryDetail?.attributesConfig?.configs ?? []"
-            :title-params="attributesTitleParams"
-          />
-        </section>
+          <section
+            v-if="product.resources?.pdfs?.length"
+            :id="sectionIds.docs"
+            class="product-page__section"
+          >
+            <ProductDocumentationSection :pdfs="product.resources.pdfs" />
+          </section>
 
-        <section
-          v-if="product.resources?.pdfs?.length"
-          :id="sectionIds.docs"
-          class="product-page__section"
-        >
-          <ProductDocumentationSection :pdfs="product.resources.pdfs" />
-        </section>
-
-        <section v-if="showAdminSection" class="product-page__section">
-          <ProductAdminSection
-            :product="product"
-            :panel-id="sectionIds.adminPanel"
-            :json-section-id="sectionIds.adminJson"
-            :datasources-section-id="sectionIds.adminDatasources"
-            :vertical-config="categoryDetail"
-          />
-        </section>
-      </main>
-    </div>
+          <section v-if="showAdminSection" class="product-page__section">
+            <ProductAdminSection
+              :product="product"
+              :panel-id="sectionIds.adminPanel"
+              :json-section-id="sectionIds.adminJson"
+              :datasources-section-id="sectionIds.adminDatasources"
+              :vertical-config="categoryDetail"
+            />
+          </section>
+        </main>
+      </div>
+    </v-container>
   </div>
 </template>
 
@@ -193,6 +197,7 @@ import {
   ref,
   watch,
 } from 'vue'
+import { useDisplay } from 'vuetify'
 import { createError } from 'h3'
 import type {
   Agg,
@@ -218,7 +223,6 @@ import ProductHero from '~/components/product/ProductHero.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
-import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import { buildCategoryHash } from '~/utils/_category-filter-state'
 import { resolveScoreNumericValue } from '~/utils/score-values'
@@ -266,8 +270,8 @@ const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
-const display = useDisplay()
 const { y: scrollY } = useWindowScroll()
+const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
 
@@ -2080,40 +2084,6 @@ const impactScoreMax = computed(() => {
   return typeof absolute?.max === 'number' ? absolute.max : 20
 })
 
-const reviewStructuredData = computed(() => {
-  const review = product.value?.aiReview?.review
-  const score = impactScoreValue.value
-
-  if (!review?.summary && !score) {
-    return null
-  }
-
-  const createdTimestamp = product.value?.aiReview?.createdMs
-
-  return {
-    '@type': 'Review',
-    reviewBody: review?.summary ?? undefined,
-    name: review?.shortTitle ?? productTitle.value,
-    author: {
-      '@type': 'Organization',
-      name: 'Nudger IA',
-    },
-    reviewRating:
-      typeof score === 'number'
-        ? {
-            '@type': 'Rating',
-            ratingValue: score,
-            bestRating: 5,
-            worstRating: 0,
-          }
-        : undefined,
-    dateCreated:
-      typeof createdTimestamp === 'number'
-        ? new Date(createdTimestamp).toISOString()
-        : undefined,
-  }
-})
-
 const impactScoreOn20 = computed(() => {
   const ecoScore = impactScores.value.find(
     s => s.id?.toUpperCase() === 'ECOSCORE'
@@ -2182,9 +2152,9 @@ const productJsonLdGraph = computed(() => {
       url: (runtimeConfig.public.siteUrl as string) ?? requestURL.origin,
       name: siteName.value,
     },
-    review: reviewStructuredData.value ?? undefined,
-    impactScoreOn20: impactScoreOn20.value,
     imageUrls: jsonLdImageUrls.value,
+    punchline: product.value.aiReview?.punchline,
+    impactScore: impactScoreOn20.value,
   })
 })
 
@@ -2241,7 +2211,12 @@ useHead(() => {
 <style scoped>
 .product-page {
   position: relative;
-  padding: 2rem 0;
+  padding-block: 2rem;
+}
+
+.product-page__container {
+  max-width: 1400px;
+  margin-inline: auto;
 }
 
 .product-page::before {
@@ -2407,7 +2382,7 @@ useHead(() => {
 
 @media (max-width: 768px) {
   .product-page {
-    padding: 1rem 0;
+    padding-block: 1rem;
   }
 
   .product-page__content {

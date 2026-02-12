@@ -1,10 +1,6 @@
 import { basename } from 'node:path'
 
 // ---- Mocks ----
-let mockRuntimeConfig: any = {}
-const useRuntimeConfig = () => mockRuntimeConfig
-
-// ---- Code from sitemap-local-files.ts ----
 type DomainLanguage = 'en' | 'fr'
 
 interface LocalSitemapFileDescriptor {
@@ -14,8 +10,12 @@ interface LocalSitemapFileDescriptor {
 }
 
 type SitemapLocalFilesRuntimeConfig = {
-  sitemapLocalFiles?: Partial<Record<DomainLanguage, unknown>>
+  sitemapLocalFiles?: Partial<Record<DomainLanguage, unknown>> | null
 }
+
+// ---- Mocks ----
+let mockRuntimeConfig: SitemapLocalFilesRuntimeConfig = {}
+const useRuntimeConfig = () => mockRuntimeConfig
 
 const normalizeSitemapPaths = (paths: unknown): string[] => {
   if (!Array.isArray(paths)) {

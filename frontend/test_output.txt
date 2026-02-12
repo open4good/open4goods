@@ -1,0 +1,100 @@
+[info] [@nuxtjs/sitemap] `zeroRuntime` enabled - sitemap routes will be prerendered.
+
+ RUN  v3.2.4 /home/goulven/git/open4goods/frontend
+
+[33m[1m  ➜  MCP:     [22m[39mServer is running at http://localhost:5173/__mcp/sse
+ ❯ server/plugins/sitemap-crash-repro.spec.ts (7 tests | 6 failed) 10ms
+   × sitemap-index plugin > handles standard nudger.fr request 5ms
+     → vi.mocked(...).mockReturnValue is not a function
+   × sitemap-index plugin > handles missing sitemapLocalFiles configuration cleanly 1ms
+     → vi.mocked(...).mockReturnValue is not a function
+   × sitemap-index plugin > handles unknown domain by falling back to default 0ms
+     → vi.mocked(...).mockReturnValue is not a function
+   ✓ sitemap-index plugin > handles origin being null? (impossible for URL object) 0ms
+   × sitemap-index plugin > handles sitemapLocalFiles being null 0ms
+     → vi.mocked(...).mockReturnValue is not a function
+   × sitemap-index plugin > handles sitemapLocalFiles[domain] being non-array 1ms
+     → vi.mocked(...).mockReturnValue is not a function
+   × sitemap-index plugin > handles sitemapLocalFiles[domain] containing non-strings 0ms
+     → vi.mocked(...).mockReturnValue is not a function
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/plugins/sitemap-crash-repro.spec.ts > sitemap-index plugin > handles standard nudger.fr request
+TypeError: vi.mocked(...).mockReturnValue is not a function
+ ❯ server/plugins/sitemap-crash-repro.spec.ts:50:33
+     48| 
+     49|     // Mock runtime config
+     50|     vi.mocked(useRuntimeConfig).mockReturnValue({
+       |                                 ^
+     51|       sitemapLocalFiles: {
+     52|         fr: ['/tmp/sitemap.xml'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  server/plugins/sitemap-crash-repro.spec.ts > sitemap-index plugin > handles missing sitemapLocalFiles configuration cleanly
+TypeError: vi.mocked(...).mockReturnValue is not a function
+ ❯ server/plugins/sitemap-crash-repro.spec.ts:69:33
+     67|     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.f…
+     68|     // Returns object but missing sitemapLocalFiles
+     69|     vi.mocked(useRuntimeConfig).mockReturnValue({})
+       |                                 ^
+     70| 
+     71|     callback(mockCtx)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  server/plugins/sitemap-crash-repro.spec.ts > sitemap-index plugin > handles unknown domain by falling back to default
+TypeError: vi.mocked(...).mockReturnValue is not a function
+ ❯ server/plugins/sitemap-crash-repro.spec.ts:80:33
+     78| 
+     79|     vi.mocked(getRequestURL).mockReturnValue(new URL('https://unknown.…
+     80|     vi.mocked(useRuntimeConfig).mockReturnValue({
+       |                                 ^
+     81|       sitemapLocalFiles: {
+     82|         fr: ['/tmp/sitemap-fr.xml'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  server/plugins/sitemap-crash-repro.spec.ts > sitemap-index plugin > handles sitemapLocalFiles being null
+TypeError: vi.mocked(...).mockReturnValue is not a function
+ ❯ server/plugins/sitemap-crash-repro.spec.ts:104:33
+    102|     const callback = runPlugin()
+    103|     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.f…
+    104|     vi.mocked(useRuntimeConfig).mockReturnValue({
+       |                                 ^
+    105|       sitemapLocalFiles: null,
+    106|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  server/plugins/sitemap-crash-repro.spec.ts > sitemap-index plugin > handles sitemapLocalFiles[domain] being non-array
+TypeError: vi.mocked(...).mockReturnValue is not a function
+ ❯ server/plugins/sitemap-crash-repro.spec.ts:114:33
+    112|     const callback = runPlugin()
+    113|     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.f…
+    114|     vi.mocked(useRuntimeConfig).mockReturnValue({
+       |                                 ^
+    115|       sitemapLocalFiles: {
+    116|         fr: 'not-an-array',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  server/plugins/sitemap-crash-repro.spec.ts > sitemap-index plugin > handles sitemapLocalFiles[domain] containing non-strings
+TypeError: vi.mocked(...).mockReturnValue is not a function
+ ❯ server/plugins/sitemap-crash-repro.spec.ts:126:33
+    124|     const callback = runPlugin()
+    125|     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.f…
+    126|     vi.mocked(useRuntimeConfig).mockReturnValue({
+       |                                 ^
+    127|       sitemapLocalFiles: {
+    128|         fr: [null, 123, {}],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 1 passed (7)
+   Start at  08:55:38
+   Duration  7.13s (transform 4.82s, setup 6.30s, collect 63ms, tests 10ms, environment 177ms, prepare 198ms)
+

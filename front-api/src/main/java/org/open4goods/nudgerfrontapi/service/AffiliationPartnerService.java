@@ -1,6 +1,8 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import jakarta.annotation.PostConstruct;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -141,7 +143,7 @@ public class AffiliationPartnerService {
         if (base.endsWith("/")) {
             base = base.substring(0, base.length() - 1);
         }
-        // No URL encoding is applied because partner names are constrained upstream.
-        return base + pathSuffix + partnerName;
+        String encodedName = URLEncoder.encode(partnerName, StandardCharsets.UTF_8);
+        return base + pathSuffix + encodedName;
     }
 }

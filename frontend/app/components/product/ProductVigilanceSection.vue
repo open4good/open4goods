@@ -5,10 +5,12 @@
         <h2 class="product-vigilance__title">
           {{ t('product.vigilance.title') }}
         </h2>
+        <!-- eslint-disable vue/no-v-html -->
         <p
           class="product-vigilance__subtitle"
           v-html="sanitize(t('product.vigilance.subtitle'))"
         />
+        <!-- eslint-enable vue/no-v-html -->
       </div>
     </header>
 
@@ -31,10 +33,12 @@
                 <p class="product-vigilance__card-title">
                   {{ t('product.impact.endOfLifeTitle') }}
                 </p>
+                <!-- eslint-disable vue/no-v-html -->
                 <p
                   class="product-vigilance__card-description"
                   v-html="sanitize(endOfLifeDescription)"
                 />
+                <!-- eslint-enable vue/no-v-html -->
 
                 <div
                   v-if="minAttributes.length"
@@ -78,12 +82,14 @@
                 <p class="product-vigilance__card-title">
                   {{ t('product.vigilance.conflicts.title') }}
                 </p>
+                <!-- eslint-disable vue/no-v-html -->
                 <p
                   class="product-vigilance__card-description"
                   v-html="
                     sanitize(t('product.vigilance.conflicts.description'))
                   "
                 />
+                <!-- eslint-enable vue/no-v-html -->
 
                 <div class="product-vigilance__conflicts-list">
                   <div
@@ -140,6 +146,7 @@
                 <p class="product-vigilance__card-title">
                   {{ t('product.vigilance.quality.title') }}
                 </p>
+                <!-- eslint-disable vue/no-v-html -->
                 <p
                   class="product-vigilance__card-description"
                   v-html="
@@ -151,6 +158,7 @@
                     )
                   "
                 />
+                <!-- eslint-enable vue/no-v-html -->
               </div>
             </div>
           </v-card-text>
@@ -175,10 +183,12 @@
                 <p class="product-vigilance__card-title">
                   {{ t('product.vigilance.obsolescence.title') }}
                 </p>
+                <!-- eslint-disable vue/no-v-html -->
                 <p
                   class="product-vigilance__card-description"
                   v-html="sanitize(obsolescenceWarning)"
                 />
+                <!-- eslint-enable vue/no-v-html -->
               </div>
             </div>
           </v-card-text>
@@ -203,12 +213,14 @@
                 <p class="product-vigilance__card-title">
                   {{ t('product.price.competition.title') }}
                 </p>
+                <!-- eslint-disable vue/no-v-html -->
                 <p
                   class="product-vigilance__card-description"
                   v-html="
                     sanitize(t('product.price.competition.lowDescription'))
                   "
                 />
+                <!-- eslint-enable vue/no-v-html -->
                 <v-btn
                   class="mt-2 align-self-start"
                   size="small"

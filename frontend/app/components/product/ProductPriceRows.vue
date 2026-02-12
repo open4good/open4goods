@@ -142,7 +142,7 @@ const props = defineProps<{
   variant?: 'default' | 'compact'
 }>()
 
-const { t, n } = useI18n()
+const { t, n, locale } = useI18n()
 
 // Reusing logic from ProductHeroPricing for contrib links
 // Since we don't have direct access to 'useAnalytics' inside helpers in the same way, we'll inline some logic or use the composable if available.
@@ -174,7 +174,7 @@ const resolveCurrencySymbol = (currency?: string | null): string | null => {
     return currencySymbolCache.get(upperCaseCurrency) ?? null
 
   try {
-    const formatter = new Intl.NumberFormat(undefined, {
+    const formatter = new Intl.NumberFormat(locale.value, {
       style: 'currency',
       currency: upperCaseCurrency,
       minimumFractionDigits: 0,

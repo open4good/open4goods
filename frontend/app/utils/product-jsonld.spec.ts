@@ -48,27 +48,17 @@ describe('product-jsonld', () => {
       url: 'https://nudger.fr',
       name: 'Nudger',
     },
-    impactScoreOn20: 15,
-    review: {
-      '@type': 'Review',
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: 4.5,
-        bestRating: 5,
-        worstRating: 0, // Old value, to be fixed by the logic
-      },
-    },
   }
 
   interface TestProductNode {
     '@type': string
     offers: {
-      offers: { url: string }[]
-    }
-    review: {
-      reviewRating: {
-        worstRating: number
-      }
+      offers: {
+        url: string
+        priceValidUntil: string
+        itemCondition: string
+      }[]
+      offerCount: number
     }
     additionalProperty?: Array<{ name: string }>
   }
@@ -86,7 +76,7 @@ describe('product-jsonld', () => {
     expect(productNode!.offers.offers[0].url).toBe('https://nudger.fr/offer/1')
   })
 
-  it('enforces worstRating = 1', () => {
+  it('sets priceValidUntil to 10 days in the future', () => {
     const graph = buildProductJsonLdGraph(
       mockInput as unknown as ProductJsonLdInput
     )
@@ -94,20 +84,62 @@ describe('product-jsonld', () => {
       graph?.['@graph'] as unknown as TestProductNode[]
     )?.find(n => n['@type'] === 'Product')
 
-    expect(productNode!.review.reviewRating.worstRating).toBe(1)
+    const offer = productNode!.offers.offers[0]
+
+    const expectedDate = new Date()
+    expectedDate.setDate(expectedDate.getDate() + 10)
+    const expectedDateString = expectedDate.toISOString().split('T')[0]
+
+    expect(offer.priceValidUntil).toBe(expectedDateString)
   })
 
-  it('removes incomplete additionalProperties', () => {
-    const graph = buildProductJsonLdGraph({
-      ...mockInput,
-      impactScoreOn20: undefined,
-    } as unknown as ProductJsonLdInput)
+  it('sets correct itemCondition for NEW products', () => {
+    const graph = buildProductJsonLdGraph(
+      mockInput as unknown as ProductJsonLdInput
+    )
     const productNode = (
       graph?.['@graph'] as unknown as TestProductNode[]
     )?.find(n => n['@type'] === 'Product')
 
-    const props = productNode?.additionalProperty || []
-    const scoreProp = props.find(p => p.name === 'Nudger Impact Score')
-    expect(scoreProp).toBeUndefined()
+    const offer = productNode!.offers.offers[0]
+    expect(offer.itemCondition).toBe('https://schema.org/NewCondition')
+  })
+
+  it('correctly sets offerCount', () => {
+    const graph = buildProductJsonLdGraph(
+      mockInput as unknown as ProductJsonLdInput
+    )
+    const productNode = (
+      graph?.['@graph'] as unknown as TestProductNode[]
+    )?.find(n => n['@type'] === 'Product')
+
+    // mockProduct has offersCount: 1 and offers array length 1
+    expect(productNode!.offers.offerCount).toBe(1)
+  })
+
+  it('filters out breadcrumb items without links', () => {
+    const inputWithMissingLink = {
+      ...mockInput,
+      breadcrumbs: [
+        { title: 'Home', link: '/' },
+        { title: 'No Link Item', link: undefined },
+        { title: 'Category', link: '/category' },
+      ],
+    } as unknown as ProductJsonLdInput
+
+    const graph = buildProductJsonLdGraph(inputWithMissingLink)
+    const breadcrumbNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        itemListElement: Array<{ position: number; name: string }>
+      }>
+    )?.find(n => n['@type'] === 'BreadcrumbList')
+
+    expect(breadcrumbNode).toBeDefined()
+    expect(breadcrumbNode!.itemListElement).toHaveLength(2)
+    expect(breadcrumbNode!.itemListElement[0].name).toBe('Home')
+    expect(breadcrumbNode!.itemListElement[0].position).toBe(1)
+    expect(breadcrumbNode!.itemListElement[1].name).toBe('Category')
+    expect(breadcrumbNode!.itemListElement[1].position).toBe(2)
   })
 })

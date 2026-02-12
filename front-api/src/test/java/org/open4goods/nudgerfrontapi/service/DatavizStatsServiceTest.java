@@ -21,11 +21,12 @@ class DatavizStatsServiceTest {
     @Test
     void getVerticalPlanReturnsCatalogAndDefaultFilters() {
         VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
+        SearchService searchService = mock(SearchService.class);
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("televisions");
         given(verticalsConfigService.getConfigById("televisions")).willReturn(verticalConfig);
 
-        DatavizStatsService service = new DatavizStatsService(verticalsConfigService);
+        DatavizStatsService service = new DatavizStatsService(verticalsConfigService, searchService);
 
         VerticalDatavizPlanDto result = service.getVerticalPlan("televisions", DomainLanguage.fr);
 
@@ -46,9 +47,10 @@ class DatavizStatsServiceTest {
     @Test
     void getVerticalPlanReturnsNullWhenVerticalIsUnknown() {
         VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
+        SearchService searchService = mock(SearchService.class);
         given(verticalsConfigService.getConfigById("unknown")).willReturn(null);
 
-        DatavizStatsService service = new DatavizStatsService(verticalsConfigService);
+        DatavizStatsService service = new DatavizStatsService(verticalsConfigService, searchService);
 
         assertThat(service.getVerticalPlan("unknown", DomainLanguage.en)).isNull();
     }
