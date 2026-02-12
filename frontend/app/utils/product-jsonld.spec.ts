@@ -48,10 +48,13 @@ describe('product-jsonld', () => {
       url: 'https://nudger.fr',
       name: 'Nudger',
     },
+    punchline: 'Best product ever',
+    impactScore: 18.5,
   }
 
   interface TestProductNode {
     '@type': string
+    description?: string
     offers: {
       offers: {
         url: string
@@ -60,7 +63,7 @@ describe('product-jsonld', () => {
       }[]
       offerCount: number
     }
-    additionalProperty?: Array<{ name: string }>
+    additionalProperty?: Array<{ name: string; value?: string | number }>
   }
 
   it('generates valid JSON-LD graph with absolute URLs', () => {
@@ -141,5 +144,31 @@ describe('product-jsonld', () => {
     expect(breadcrumbNode!.itemListElement[0].position).toBe(1)
     expect(breadcrumbNode!.itemListElement[1].name).toBe('Category')
     expect(breadcrumbNode!.itemListElement[1].position).toBe(2)
+  })
+
+  it('appends punchline to description', () => {
+    const graph = buildProductJsonLdGraph(
+      mockInput as unknown as ProductJsonLdInput
+    )
+    const productNode = (
+      graph?.['@graph'] as unknown as TestProductNode[]
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.description).toContain('Best product ever')
+  })
+
+  it('includes impactScore in additionalProperty', () => {
+    const graph = buildProductJsonLdGraph(
+      mockInput as unknown as ProductJsonLdInput
+    )
+    const productNode = (
+      graph?.['@graph'] as unknown as TestProductNode[]
+    )?.find(n => n['@type'] === 'Product')
+
+    const impactScoreProp = productNode?.additionalProperty?.find(
+      p => p.name === 'Nudger Impact Score'
+    )
+    expect(impactScoreProp).toBeDefined()
+    expect(impactScoreProp?.value).toBe(18.5)
   })
 })

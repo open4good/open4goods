@@ -60,7 +60,12 @@ models/ContactDetails.ts
 models/ContactRequestDto.ts
 models/ContactResponseDto.ts
 models/DatavizChartPresetDto.ts
+models/DatavizChartQueryRequestDto.ts
+models/DatavizChartQueryResponseDto.ts
 models/DatavizDefaultFilterDto.ts
+models/DatavizFilterOverrideDto.ts
+models/DatavizHeroKpiValueDto.ts
+models/DatavizHeroStatsDto.ts
 models/DescriptionsAggregationConfig.ts
 models/DistanceResponse.ts
 models/ExposedDocsCategoryDto.ts
