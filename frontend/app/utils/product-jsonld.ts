@@ -548,6 +548,13 @@ export const buildProductJsonLdGraph = (
     url: input.canonicalUrl,
     name: productTitle,
     description:
+      [
+        normalizeString(product.names?.metaDescription) ??
+          normalizeString(product.names?.ogDescription),
+        normalizeString(input.punchline),
+      ]
+        .filter(isNonEmptyString)
+        .join(' - ') || undefined,
     image: images,
     category:
       normalizeString(product.names?.singular) ??
