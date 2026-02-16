@@ -284,22 +284,26 @@ const categoryFixture = {
         key: 'POWER',
         name: 'Energy efficiency',
         icon: 'mdi-flash',
+        scoreUtility: 'Helps compare energy consumption.',
         participateInACV: new Set(['USE', 'TRANSPORTATION']),
       },
       {
         key: 'REPAIRABILITY',
         name: 'Repairability index',
         icon: 'mdi-tools',
+        scoreUtility: 'Highlights product repair potential.',
         participateInACV: new Set(['MANUFACTURING', 'END_OF_LIFE']),
       },
       {
         key: 'DATA_QUALITY',
         name: 'Data quality',
+        scoreUtility: 'Shows confidence level in sourced data.',
         participateInACV: new Set(['EXTRACTION']),
       },
       {
         key: 'BRAND_SUSTAINALYTICS_SCORING',
         name: 'Brand ESG rating',
+        scoreUtility: 'Provides external ESG context for the brand.',
         participateInACV: new Set(['USE']),
       },
     ],
@@ -370,7 +374,16 @@ const vuetifyStubs = {
     },
   }),
   'v-divider': { template: '<hr class="v-divider-stub" />' },
-  'v-tooltip': { template: '<div class="v-tooltip-stub"><slot /></div>' },
+  'v-tooltip': defineComponent({
+    name: 'VTooltipStub',
+    setup(_props, { slots }) {
+      return () =>
+        h('div', { class: 'v-tooltip-stub' }, [
+          slots.activator?.({ props: {} }),
+          slots.default?.(),
+        ])
+    },
+  }),
   'v-skeleton-loader': { template: '<div class="v-skeleton-loader-stub" />' },
 }
 
@@ -437,6 +450,14 @@ describe('Category ecosystem Impact Score page', () => {
     expect(criteriaIcons).toContain('mdi-tools')
     expect(criteriaIcons).toContain('mdi-database-check-outline')
     expect(criteriaIcons).toContain('mdi-earth')
+
+    const utilityButtons = wrapper.findAll(
+      '.category-ecoscore__criteria-utility-trigger'
+    )
+    expect(utilityButtons).toHaveLength(4)
+    expect(utilityButtons[0]?.attributes('aria-label')).toBe(
+      'Display criterion utility'
+    )
 
     const yamlBlock = wrapper.get('[data-test="ai-yaml"]').text()
     expect(yamlBlock).toContain('key: value')

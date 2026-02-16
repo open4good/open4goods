@@ -94,25 +94,38 @@
                           <h3 class="category-ecoscore__criteria-title">
                             {{ criterion.label }}
                           </h3>
+                          <v-tooltip v-if="criterion.utility" location="top">
+                            <template #activator="{ props }">
+                              <v-btn
+                                v-bind="props"
+                                class="category-ecoscore__criteria-utility-trigger"
+                                variant="text"
+                                size="small"
+                                icon="mdi-help-circle-outline"
+                                :aria-label="
+                                  t(
+                                    'category.ecoscorePage.sections.criteria.utilityAria'
+                                  )
+                                "
+                              />
+                            </template>
+                            <span>
+                              <strong>
+                                {{
+                                  t(
+                                    'category.ecoscorePage.sections.criteria.utilityLabel'
+                                  )
+                                }}:
+                              </strong>
+                              {{ criterion.utility }}
+                            </span>
+                          </v-tooltip>
                         </div>
                         <p
                           v-if="criterion.description"
                           class="category-ecoscore__criteria-description"
                         >
                           {{ criterion.description }}
-                        </p>
-                        <p
-                          v-if="criterion.utility"
-                          class="category-ecoscore__criteria-utility-text"
-                        >
-                          <strong>
-                            {{
-                              t(
-                                'category.ecoscorePage.sections.criteria.utilityLabel'
-                              )
-                            }}:
-                          </strong>
-                          {{ criterion.utility }}
                         </p>
                         <footer
                           v-if="criterion.coefficient !== null"
@@ -707,6 +720,8 @@ const availableCriteriaMap = computed(() => {
 const defaultCriteriaIcons: Record<string, string> = {
   BRAND_SUSTAINALYTICS_SCORING: 'mdi-earth',
   DATA_QUALITY: 'mdi-database-check-outline',
+  QUALITE_DONNEE: 'mdi-database-check-outline',
+  QUALITY_OF_DATA: 'mdi-database-check-outline',
 }
 
 const criteriaCards = computed(() => {
@@ -1260,14 +1275,15 @@ useSeoMeta({
   overflow: hidden
 
 
-.category-ecoscore__criteria-utility-text
-  margin: 0 0 0.6rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.92)
-  line-height: 1.5
+.category-ecoscore__criteria-utility-trigger
+  margin-top: -0.25rem
+  min-width: auto
 
-  strong
-    color: rgb(var(--v-theme-text-neutral-strong))
-    font-weight: 600
+.category-ecoscore__criteria-utility-trigger :deep(.v-btn__content)
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
+
+.category-ecoscore__criteria-utility-trigger:hover :deep(.v-btn__content)
+  color: rgb(var(--v-theme-accent-primary-highlight))
 
 .category-ecoscore__criteria-footer
   display: flex
