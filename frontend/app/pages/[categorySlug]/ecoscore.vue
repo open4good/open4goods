@@ -1281,10 +1281,11 @@ useSeoMeta({
   flex-direction: column
   gap: 0.35rem
   width: min(320px, 70vw)
+  background : rgba(var(--v-theme-surface-glass), 0.9)
 
 .category-ecoscore__criteria-utility-overlay
-  background: rgb(var(--v-theme-surface-default)) !important
   color: rgb(var(--v-theme-text-neutral-strong)) !important
+  background : rgb(var(--v-theme-surface-primary-080)) !important
   border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.24)
   border-radius: 12px
   box-shadow: 0 10px 28px rgba(var(--v-theme-shadow-primary-600), 0.16)
