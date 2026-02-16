@@ -94,47 +94,25 @@
                           <h3 class="category-ecoscore__criteria-title">
                             {{ criterion.label }}
                           </h3>
-                          <v-tooltip
-                            v-if="criterion.utility"
-                            location="top"
-                            max-width="360"
-                            content-class="category-ecoscore__criteria-utility-overlay"
-                          >
-                            <template #activator="{ props }">
-                              <v-btn
-                                v-bind="props"
-                                class="category-ecoscore__criteria-utility-btn"
-                                icon="mdi-information-outline"
-                                size="small"
-                                variant="text"
-                                :aria-label="
-                                  t(
-                                    'category.ecoscorePage.sections.criteria.utilityAria'
-                                  )
-                                "
-                              />
-                            </template>
-                            <div
-                              class="category-ecoscore__criteria-utility-tooltip"
-                            >
-                              <strong
-                                class="category-ecoscore__criteria-utility-label"
-                              >
-                                {{
-                                  t(
-                                    'category.ecoscorePage.sections.criteria.utilityLabel'
-                                  )
-                                }}
-                              </strong>
-                              <p>{{ criterion.utility }}</p>
-                            </div>
-                          </v-tooltip>
                         </div>
                         <p
                           v-if="criterion.description"
                           class="category-ecoscore__criteria-description"
                         >
                           {{ criterion.description }}
+                        </p>
+                        <p
+                          v-if="criterion.utility"
+                          class="category-ecoscore__criteria-utility-text"
+                        >
+                          <strong>
+                            {{
+                              t(
+                                'category.ecoscorePage.sections.criteria.utilityLabel'
+                              )
+                            }}:
+                          </strong>
+                          {{ criterion.utility }}
                         </p>
                         <footer
                           v-if="criterion.coefficient !== null"
@@ -1272,36 +1250,6 @@ useSeoMeta({
   justify-content: space-between
   gap: 0.5rem
 
-.category-ecoscore__criteria-utility-btn
-  margin-top: -0.2rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-
-.category-ecoscore__criteria-utility-tooltip
-  display: flex
-  flex-direction: column
-  gap: 0.35rem
-  width: min(320px, 70vw)
-  background : rgba(var(--v-theme-surface-glass), 0.9)
-
-.category-ecoscore__criteria-utility-overlay
-  color: rgb(var(--v-theme-text-neutral-strong)) !important
-  background : rgb(var(--v-theme-surface-primary-080)) !important
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.24)
-  border-radius: 12px
-  box-shadow: 0 10px 28px rgba(var(--v-theme-shadow-primary-600), 0.16)
-  padding: 0.85rem 0.95rem
-
-.category-ecoscore__criteria-utility-label
-  color: rgb(var(--v-theme-text-neutral-strong))
-  font-weight: 700
-
-.category-ecoscore__criteria-utility-tooltip p
-  margin: 0
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-  background: transparent
-  line-height: 1.4
-  display: block
-
 .category-ecoscore__criteria-description
   margin: 0 0 0.5rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
@@ -1310,6 +1258,16 @@ useSeoMeta({
   -webkit-line-clamp: 2
   -webkit-box-orient: vertical
   overflow: hidden
+
+
+.category-ecoscore__criteria-utility-text
+  margin: 0 0 0.6rem
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.92)
+  line-height: 1.5
+
+  strong
+    color: rgb(var(--v-theme-text-neutral-strong))
+    font-weight: 600
 
 .category-ecoscore__criteria-footer
   display: flex
