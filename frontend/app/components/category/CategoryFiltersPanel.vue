@@ -13,7 +13,7 @@
           />
           <span>{{ t('category.filters.globalTitle') }}</span>
         </div>
-        <v-icon 
+        <v-icon
           :icon="isGlobalOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
           color="medium-emphasis"
         />
@@ -231,17 +231,37 @@ const impactPrimary = computed<FieldMetadataDto[]>(() => {
 const impactRemaining = computed<FieldMetadataDto[]>(() => {
   const entries = props.filterOptions?.impact ?? []
   const primary = new Set(impactPrimary.value.map(entry => entry.mapping))
-  return entries.filter(entry => entry.mapping && !primary.has(entry.mapping))
+  const excluded = new Set([
+    'scores.ECOSCORE.ranking',
+    'scores.ECOSCORE.relativ.value',
+    'scores.ECOSCORE.relative.value',
+  ])
+
+  return entries.filter(
+    entry =>
+      entry.mapping &&
+      !primary.has(entry.mapping) &&
+      !excluded.has(entry.mapping)
+  )
+})
+
+const normalizedTechnical = computed<FieldMetadataDto[]>(() => {
+  const entries = props.filterOptions?.technical ?? []
+  const seen = new Set<string>()
+  return entries.filter(entry => {
+    if (!entry.mapping) return false
+    if (seen.has(entry.mapping)) return false
+    seen.add(entry.mapping)
+    return true
+  })
 })
 
 const technicalPrimary = computed<FieldMetadataDto[]>(() => {
-  const entries = props.filterOptions?.technical ?? []
-  return entries.slice(0, 3)
+  return normalizedTechnical.value.slice(0, 3)
 })
 
 const technicalRemaining = computed<FieldMetadataDto[]>(() => {
-  const entries = props.filterOptions?.technical ?? []
-  return entries.slice(3)
+  return normalizedTechnical.value.slice(3)
 })
 
 const emitFilters = (filters: Filter[]) => {

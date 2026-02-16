@@ -1,8 +1,10 @@
 <template>
   <v-list class="category-product-list" lines="three" density="comfortable">
     <v-list-item
-      v-for="product in products"
-      :key="product.gtin ?? resolveListProductName(product) ?? Math.random()"
+      v-for="(product, index) in products"
+      :key="
+        product.gtin ?? resolveListProductName(product) ?? `product-${index}`
+      "
       class="category-product-list__item"
       :to="productLink(product)"
       link

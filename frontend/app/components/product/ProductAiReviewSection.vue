@@ -109,7 +109,9 @@
                         class="product-ai-review__list-icon mt-1"
                       />
                       <!-- eslint-disable vue/no-v-html -->
-                      <span v-html="pro" />
+                      <!-- eslint-disable vue/no-v-html -->
+                      <div v-html="pro" />
+                      <!-- eslint-enable vue/no-v-html -->
                       <!-- eslint-enable vue/no-v-html -->
                     </li>
                   </ul>
@@ -148,7 +150,9 @@
                         class="product-ai-review__list-icon mt-1"
                       />
                       <!-- eslint-disable vue/no-v-html -->
-                      <span v-html="con" />
+                      <!-- eslint-disable vue/no-v-html -->
+                      <div v-html="con" />
+                      <!-- eslint-enable vue/no-v-html -->
                       <!-- eslint-enable vue/no-v-html -->
                     </li>
                   </ul>

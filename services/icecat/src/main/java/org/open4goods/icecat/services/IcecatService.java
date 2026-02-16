@@ -251,6 +251,7 @@ public class IcecatService {
 	 */
 	// TODO : perf, quiet expensive with the "iteration" model. Must be fixed by proper injection
 	// of icecat stuff to open4goods attribute model
+	@io.micrometer.core.annotation.Timed(value = "icecat.features", description = "Time taken to resolve icecat features", extraTags = {"service", "icecat"})
 	public List<AttributesFeatureGroups> features(VerticalConfig vertical, String language, Product product) {
 		List<AttributesFeatureGroups> ret = new ArrayList<>();
 

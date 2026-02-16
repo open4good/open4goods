@@ -20,14 +20,16 @@ class UsageCostAggregationServiceTest
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setAverageHoursPerDay(4.0);
         verticalConfig.setAverageKwhCost(0.1952);
+        verticalConfig.setUsagePowerAttribute("power_consumption");
 
         Product product = new Product(123L);
+        product.getAttributes().getIndexed().put("power_consumption", new org.open4goods.model.attribute.IndexedAttribute("power_consumption", "1000.0"));
 
         service.onProduct(product, verticalConfig);
 
-        assertThat(product.getAttributes().getIndexed()).containsKey("usageCostYear");
-        assertThat(product.getAttributes().getIndexed().get("usageCostYear").getValue()).isEqualTo("284.99");
-        assertThat(product.getAttributes().getIndexed().get("usageCostYear").getNumericValue()).isEqualTo(284.99);
+        assertThat(product.getAttributes().getIndexed()).containsKey("USAGE_COST_YEAR");
+        assertThat(product.getAttributes().getIndexed().get("USAGE_COST_YEAR").getValue()).isEqualTo("284.99");
+        assertThat(product.getAttributes().getIndexed().get("USAGE_COST_YEAR").getNumericValue()).isEqualTo(284.99);
     }
 
     @Test
@@ -40,6 +42,6 @@ class UsageCostAggregationServiceTest
 
         service.onProduct(product, verticalConfig);
 
-        assertThat(product.getAttributes().getIndexed()).doesNotContainKey("usageCostYear");
+        assertThat(product.getAttributes().getIndexed()).doesNotContainKey("USAGE_COST_YEAR");
     }
 }

@@ -111,7 +111,7 @@ export function useHeaderSeo(options: UseHeaderSeoOptions) {
       {
         key: 'page-header-main-entity-jsonld',
         type: 'application/ld+json',
-        children: JSON.stringify(mainEntityJsonLd.value),
+        innerHTML: JSON.stringify(mainEntityJsonLd.value),
       },
       // Separate breadcrumb JSON-LD only if not included in main entity
       ...(breadcrumbJsonLd.value && !options.schemaType
@@ -119,7 +119,7 @@ export function useHeaderSeo(options: UseHeaderSeoOptions) {
             {
               key: 'page-header-breadcrumb-jsonld',
               type: 'application/ld+json',
-              children: JSON.stringify(breadcrumbJsonLd.value),
+              innerHTML: JSON.stringify(breadcrumbJsonLd.value),
             },
           ]
         : []),

@@ -30,7 +30,14 @@ const normalizeSitemapPaths = (paths: unknown): string[] => {
 
 const getRuntimeConfig = (
   runtimeConfig?: SitemapLocalFilesRuntimeConfig
-): SitemapLocalFilesRuntimeConfig => runtimeConfig ?? useRuntimeConfig()
+): SitemapLocalFilesRuntimeConfig => {
+  const config = runtimeConfig ?? useRuntimeConfig()
+  console.log(
+    'sitemap-local-files used config:',
+    JSON.stringify(config.sitemapLocalFiles, null, 2)
+  )
+  return config
+}
 
 const buildPublicPath = (
   domainLanguage: DomainLanguage,
@@ -80,11 +87,24 @@ export const getPublicSitemapUrlsForDomainLanguage = (
   domainLanguage: DomainLanguage,
   origin: string,
   runtimeConfig?: SitemapLocalFilesRuntimeConfig
-): string[] =>
-  getLocalSitemapFileDescriptorsForDomainLanguage(
+): string[] => {
+  return getLocalSitemapFileDescriptorsForDomainLanguage(
     domainLanguage,
     runtimeConfig
-  ).map(descriptor => new URL(descriptor.publicPath, origin).toString())
+  )
+    .map(descriptor => {
+      try {
+        return new URL(descriptor.publicPath, origin).toString()
+      } catch (error) {
+        console.warn(
+          `[Sitemap] Failed to construct URL for ${descriptor.publicPath} with origin ${origin}`,
+          error
+        )
+        return null
+      }
+    })
+    .filter((url): url is string => url !== null)
+}
 
 export const getLocalSitemapFilePath = (
   domainLanguage: DomainLanguage,

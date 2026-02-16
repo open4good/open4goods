@@ -1,4 +1,4 @@
-key: "usageCostYear"
+key: "USAGE_COST_YEAR"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
 faIcon: "mdi-currency-eur"

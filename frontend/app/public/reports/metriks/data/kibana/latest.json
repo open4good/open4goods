@@ -1,0 +1,214 @@
+{
+  "schemaVersion": "2.0",
+  "type": "latest",
+  "meta": {
+    "type": "meta",
+    "schemaVersion": "2.0",
+    "provider": "kibana",
+    "providerDisplayName": "Kibana (Discover)",
+    "createdAt": "2026-02-12T14:39:44.897423Z",
+    "config": {
+      "checks": {
+        "env": [
+          "ELASTICSEARCH_BASE_URL"
+        ]
+      },
+      "provider": {
+        "displayName": "Kibana (Discover)",
+        "groups": [
+          "observability",
+          "logs"
+        ],
+        "tags": [
+          "kibana",
+          "elasticsearch"
+        ]
+      },
+      "defaults": {
+        "unit": "count",
+        "params": {
+          "provider": "kibana"
+        }
+      },
+      "eventMode": "static",
+      "kibana": {
+        "baseUrl": "https://kibana.example.com",
+        "discoverPath": "/app/discover#/",
+        "indexPatternId": "YOUR_INDEX_PATTERN_ID",
+        "timeField": "@timestamp",
+        "spaceId": "",
+        "dataViewId": "YOUR_INDEX_PATTERN_ID",
+        "discover": {
+          "path": "/app/discover#/",
+          "queryLanguage": "kuery",
+          "columns": [],
+          "sort": [
+            [
+              "@timestamp",
+              "desc"
+            ]
+          ]
+        }
+      },
+      "elasticsearch": {
+        "baseUrl": "https://elasticsearch.example.com",
+        "index": "logs-*"
+      },
+      "events": [
+        {
+          "event_id": "products.total_count",
+          "eventName": "Total Products",
+          "eventDescription": "Total number of products in the index",
+          "unit": "count",
+          "params": {
+            "esIndex": "products-moustik",
+            "noTimeFilter": true
+          },
+          "groups": [
+            "products"
+          ],
+          "tags": [
+            "elasticsearch",
+            "products"
+          ]
+        },
+        {
+          "event_id": "products.active_offers",
+          "eventName": "Products with Active Offers",
+          "eventDescription": "Products updated in last 2 days with at least 1 offer (lastChange within 172800000ms and offersCount > 0)",
+          "unit": "count",
+          "params": {
+            "esIndex": "products-moustik",
+            "noTimeFilter": true,
+            "esQuery": {
+              "bool": {
+                "must": [
+                  {
+                    "range": {
+                      "lastChange": {
+                        "gte": "now-2d"
+                      }
+                    }
+                  },
+                  {
+                    "range": {
+                      "offersCount": {
+                        "gt": 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "groups": [
+            "products",
+            "offers"
+          ],
+          "tags": [
+            "elasticsearch",
+            "products",
+            "offers"
+          ]
+        }
+      ]
+    }
+  },
+  "run": {
+    "type": "run",
+    "schemaVersion": "2.0",
+    "provider": "kibana",
+    "runId": "2026-02-12T14:39:44.897423Z",
+    "collectedAt": "2026-02-12T14:39:44.897423Z",
+    "period": {
+      "dateFrom": "2026-02-05",
+      "dateTo": "2026-02-12"
+    },
+    "git": {
+      "repository": "open4good/open4goods-config",
+      "sha": "e9544971728407ddc12d1dc151522f49f78f2d0d",
+      "ref": "refs/heads/main",
+      "event": "workflow_dispatch"
+    },
+    "events": [
+      {
+        "schemaVersion": "2.0",
+        "id": "products.total_count",
+        "name": "Total Products",
+        "description": "Total number of products in the index",
+        "value": 73561545,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "kibana",
+          "esIndex": "products-moustik",
+          "noTimeFilter": true,
+          "kql": "",
+          "timeField": "@timestamp"
+        },
+        "groups": [
+          "observability",
+          "logs",
+          "products"
+        ],
+        "tags": [
+          "kibana",
+          "elasticsearch",
+          "products"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "products.active_offers",
+        "name": "Products with Active Offers",
+        "description": "Products updated in last 2 days with at least 1 offer (lastChange within 172800000ms and offersCount > 0)",
+        "value": 12855574,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "kibana",
+          "esIndex": "products-moustik",
+          "noTimeFilter": true,
+          "esQuery": {
+            "bool": {
+              "must": [
+                {
+                  "range": {
+                    "lastChange": {
+                      "gte": "now-2d"
+                    }
+                  }
+                },
+                {
+                  "range": {
+                    "offersCount": {
+                      "gt": 0
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "kql": "",
+          "timeField": "@timestamp"
+        },
+        "groups": [
+          "observability",
+          "logs",
+          "products",
+          "offers"
+        ],
+        "tags": [
+          "kibana",
+          "elasticsearch",
+          "products",
+          "offers"
+        ]
+      }
+    ]
+  }
+}

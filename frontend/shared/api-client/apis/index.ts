@@ -3,8 +3,8 @@
 export * from './AdministrationApi'
 export * from './AffiliationApi'
 export * from './AgentsApi'
-export * from './AssistantConfigsApi'
 export * from './AssistantsApi'
+export * from './AssistantConfigsApi'
 export * from './AuthenticationApi'
 export * from './BlogApi'
 export * from './CategoriesApi'
@@ -19,6 +19,11 @@ export * from './OpenDataApi'
 export * from './PartnerApi'
 export * from './ProductApi'
 export * from './QuotaApi'
+export {
+  SearchApi,
+  SemanticSearchRequest,
+  SemanticSearchDomainLanguageEnum,
+} from './SearchApi'
 export * from './ShareApi'
 export * from './StatsApi'
 export * from './TeamApi'

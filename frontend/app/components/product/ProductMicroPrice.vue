@@ -99,8 +99,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
-// Helper for random IDs
-const randomId = () => Math.random().toString(36).substring(2, 9)
+// Generate deterministic ID from offer URL to avoid SSR hydration mismatches
+const deterministicId = (url?: string, fallback: string = 'offer') =>
+  url ? `offer-${url.slice(-12).replace(/[^a-z0-9]/gi, '-')}` : fallback
 
 // We need to define a local type or import it if shared, based on ProductHeroPricingPanel it seems ad-hoc there
 // But here we rely on the DTOs from props.
@@ -139,7 +140,7 @@ const bestOffer = computed<MicroPriceOffer | null>(() => {
   if (!raw) return null
 
   return {
-    id: randomId(),
+    id: deterministicId(raw.url, 'best'),
     label: raw.merchantName || 'Unknown',
     priceLabel: raw.priceLabel || 'N/A',
     favicon: raw.merchantFavicon,
@@ -162,8 +163,8 @@ const alternatives = computed<MicroPriceOffer[]>(() => {
   // Let's assume URL is a good enough proxy for uniqueness here along with price.
   return offers
     .filter(o => o.url !== bestOffer.value?.url)
-    .map(o => ({
-      id: randomId(),
+    .map((o, index) => ({
+      id: deterministicId(o.url, `alt-${index}`),
       label: o.merchantName || 'Unknown',
       priceLabel: o.priceLabel || 'N/A',
       favicon: o.merchantFavicon,

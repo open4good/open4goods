@@ -143,7 +143,7 @@
                               {{ t('product.hero.aiSummary.technical') }}
                             </span>
                             <!-- eslint-disable vue/no-v-html -->
-                            <span
+                            <div
                               class="product-hero__ai-summary-text"
                               v-html="technicalOnelineHtml"
                             />
@@ -164,7 +164,7 @@
                               {{ t('product.hero.aiSummary.ecological') }}
                             </span>
                             <!-- eslint-disable vue/no-v-html -->
-                            <span
+                            <div
                               class="product-hero__ai-summary-text"
                               v-html="ecologicalOnelineHtml"
                             />
@@ -185,7 +185,7 @@
                               {{ t('product.hero.aiSummary.community') }}
                             </span>
                             <!-- eslint-disable vue/no-v-html -->
-                            <span
+                            <div
                               class="product-hero__ai-summary-text"
                               v-html="communityOnelineHtml"
                             />
@@ -304,7 +304,7 @@
                                   class="product-hero__icon mr-2"
                                 />
                                 <!-- eslint-disable-next-line vue/no-v-html -->
-                                <span v-if="displayHtml" v-html="displayHtml" />
+                                <div v-if="displayHtml" v-html="displayHtml" />
                                 <span v-else>{{ displayValue }}</span>
                               </span>
                             </template>
@@ -924,7 +924,6 @@ const heroBreadcrumbProps = computed(() => ({
   items: visibleBreadcrumbs.value,
   ariaLabel: t('product.hero.breadcrumbAriaLabel'),
 }))
-
 </script>
 
 <style scoped>

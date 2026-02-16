@@ -785,27 +785,27 @@ useHead(() => ({
     {
       key: 'home-faq-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(faqJsonLd.value),
+      innerHTML: JSON.stringify(faqJsonLd.value),
     },
     {
       key: 'home-organization-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(organizationJsonLd.value),
+      innerHTML: JSON.stringify(organizationJsonLd.value),
     },
     {
       key: 'home-website-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(websiteJsonLd.value),
+      innerHTML: JSON.stringify(websiteJsonLd.value),
     },
     {
       key: 'home-webpage-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(webPageJsonLd.value),
+      innerHTML: JSON.stringify(webPageJsonLd.value),
     },
     {
       key: 'home-breadcrumb-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(breadcrumbJsonLd.value),
+      innerHTML: JSON.stringify(breadcrumbJsonLd.value),
     },
   ],
 }))

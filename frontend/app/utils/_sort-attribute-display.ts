@@ -5,11 +5,8 @@ import {
   formatAttributeValue,
   type ResolvedProductAttribute,
 } from '~/utils/_product-attributes'
-import {
-  formatBestPrice,
-  formatOffersCount,
-} from '~/utils/_product-pricing'
-import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { formatOffersCount } from '~/utils/_product-pricing'
+
 import {
   resolveFilterFieldTitle,
   resolveSortFieldTitle,
@@ -112,35 +109,14 @@ const resolveStaticSortDisplay = (
 ): SortedFieldDisplay | null => {
   const label = resolveSortFieldLabel(sortField, fieldMetadata, t)
 
+  // Impact score and price already have dedicated UI in the product card
+  // (ImpactScore badge and ProductPriceRows), so skip sorted-field display.
   if (sortField === ECOSCORE_RELATIVE_FIELD) {
-    const score = resolvePrimaryImpactScore(product)
-    if (score == null) {
-      return null
-    }
-
-    const formattedScore = n(score, {
-      maximumFractionDigits: 1,
-      minimumFractionDigits: 0,
-    })
-
-    return {
-      key: sortField,
-      label,
-      value: t('category.products.sort.values.impactScore', {
-        score: formattedScore,
-        max: 5,
-      }),
-      type: 'static',
-    }
+    return null
   }
 
   if (sortField === 'price.minPrice.price') {
-    return {
-      key: sortField,
-      label,
-      value: formatBestPrice(product, t, n),
-      type: 'static',
-    }
+    return null
   }
 
   if (sortField === 'offersCount') {
@@ -158,8 +134,7 @@ const resolveStaticSortDisplay = (
 
   if (sortField === 'attributes.referentielAttributes.BRAND') {
     const brand =
-      product.identity?.brand ??
-      resolveAttributeRawValueByKey(product, 'BRAND')
+      product.identity?.brand ?? resolveAttributeRawValueByKey(product, 'BRAND')
 
     if (!brand) {
       return null
@@ -175,8 +150,7 @@ const resolveStaticSortDisplay = (
 
   if (sortField === 'attributes.referentielAttributes.MODEL') {
     const model =
-      product.identity?.model ??
-      resolveAttributeRawValueByKey(product, 'MODEL')
+      product.identity?.model ?? resolveAttributeRawValueByKey(product, 'MODEL')
 
     if (!model) {
       return null

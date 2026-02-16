@@ -18,7 +18,11 @@ import type {
   CategoriesScoreStatsDto,
   CategoriesScoresStatsDto,
   CategoriesStatsDto,
+  DatavizChartQueryRequestDto,
+  DatavizChartQueryResponseDto,
+  DatavizHeroStatsDto,
   ProductDto,
+  VerticalDatavizPlanDto,
 } from '../models/index';
 import {
     CategoriesScoreStatsDtoFromJSON,
@@ -27,8 +31,16 @@ import {
     CategoriesScoresStatsDtoToJSON,
     CategoriesStatsDtoFromJSON,
     CategoriesStatsDtoToJSON,
+    DatavizChartQueryRequestDtoFromJSON,
+    DatavizChartQueryRequestDtoToJSON,
+    DatavizChartQueryResponseDtoFromJSON,
+    DatavizChartQueryResponseDtoToJSON,
+    DatavizHeroStatsDtoFromJSON,
+    DatavizHeroStatsDtoToJSON,
     ProductDtoFromJSON,
     ProductDtoToJSON,
+    VerticalDatavizPlanDtoFromJSON,
+    VerticalDatavizPlanDtoToJSON,
 } from '../models/index';
 
 export interface CategoriesRequest {
@@ -42,6 +54,22 @@ export interface CategoriesScoreRequest {
 
 export interface CategoriesScoresRequest {
     domainLanguage: CategoriesScoresDomainLanguageEnum;
+}
+
+export interface ChartQueryRequest {
+    verticalId: string;
+    domainLanguage: ChartQueryDomainLanguageEnum;
+    datavizChartQueryRequestDto: DatavizChartQueryRequestDto;
+}
+
+export interface DatavizHeroRequest {
+    verticalId: string;
+    domainLanguage: DatavizHeroDomainLanguageEnum;
+}
+
+export interface DatavizPlanRequest {
+    verticalId: string;
+    domainLanguage: DatavizPlanDomainLanguageEnum;
 }
 
 export interface RandomRequest {
@@ -224,6 +252,199 @@ export class StatsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Execute an Elasticsearch aggregation query for a specific chart preset and return labels/values arrays ready for the frontend charting library.
+     * Execute a chart aggregation query
+     */
+    async chartQueryRaw(requestParameters: ChartQueryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DatavizChartQueryResponseDto>> {
+        if (requestParameters['verticalId'] == null) {
+            throw new runtime.RequiredError(
+                'verticalId',
+                'Required parameter "verticalId" was null or undefined when calling chartQuery().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling chartQuery().'
+            );
+        }
+
+        if (requestParameters['datavizChartQueryRequestDto'] == null) {
+            throw new runtime.RequiredError(
+                'datavizChartQueryRequestDto',
+                'Required parameter "datavizChartQueryRequestDto" was null or undefined when calling chartQuery().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stats/verticals/{verticalId}/charts/query`;
+        urlPath = urlPath.replace(`{${"verticalId"}}`, encodeURIComponent(String(requestParameters['verticalId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: DatavizChartQueryRequestDtoToJSON(requestParameters['datavizChartQueryRequestDto']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DatavizChartQueryResponseDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Execute an Elasticsearch aggregation query for a specific chart preset and return labels/values arrays ready for the frontend charting library.
+     * Execute a chart aggregation query
+     */
+    async chartQuery(requestParameters: ChartQueryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DatavizChartQueryResponseDto> {
+        const response = await this.chartQueryRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Return headline KPIs (total products, average price, top brand, etc.) displayed in the hero section of the dataviz page.
+     * Get dataviz hero KPI statistics
+     */
+    async datavizHeroRaw(requestParameters: DatavizHeroRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<DatavizHeroStatsDto>> {
+        if (requestParameters['verticalId'] == null) {
+            throw new runtime.RequiredError(
+                'verticalId',
+                'Required parameter "verticalId" was null or undefined when calling datavizHero().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling datavizHero().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stats/verticals/{verticalId}/dataviz/hero`;
+        urlPath = urlPath.replace(`{${"verticalId"}}`, encodeURIComponent(String(requestParameters['verticalId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => DatavizHeroStatsDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Return headline KPIs (total products, average price, top brand, etc.) displayed in the hero section of the dataviz page.
+     * Get dataviz hero KPI statistics
+     */
+    async datavizHero(requestParameters: DatavizHeroRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<DatavizHeroStatsDto> {
+        const response = await this.datavizHeroRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Return the default filters and chart presets used by the frontend dataviz gallery for a vertical.
+     * Get dataviz presets for a vertical
+     */
+    async datavizPlanRaw(requestParameters: DatavizPlanRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<VerticalDatavizPlanDto>> {
+        if (requestParameters['verticalId'] == null) {
+            throw new runtime.RequiredError(
+                'verticalId',
+                'Required parameter "verticalId" was null or undefined when calling datavizPlan().'
+            );
+        }
+
+        if (requestParameters['domainLanguage'] == null) {
+            throw new runtime.RequiredError(
+                'domainLanguage',
+                'Required parameter "domainLanguage" was null or undefined when calling datavizPlan().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['domainLanguage'] != null) {
+            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/stats/verticals/{verticalId}/dataviz/plan`;
+        urlPath = urlPath.replace(`{${"verticalId"}}`, encodeURIComponent(String(requestParameters['verticalId'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => VerticalDatavizPlanDtoFromJSON(jsonValue));
+    }
+
+    /**
+     * Return the default filters and chart presets used by the frontend dataviz gallery for a vertical.
+     * Get dataviz presets for a vertical
+     */
+    async datavizPlan(requestParameters: DatavizPlanRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<VerticalDatavizPlanDto> {
+        const response = await this.datavizPlanRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Return a list of random products.
      * Get random products
      */
@@ -314,6 +535,30 @@ export const CategoriesScoresDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type CategoriesScoresDomainLanguageEnum = typeof CategoriesScoresDomainLanguageEnum[keyof typeof CategoriesScoresDomainLanguageEnum];
+/**
+ * @export
+ */
+export const ChartQueryDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type ChartQueryDomainLanguageEnum = typeof ChartQueryDomainLanguageEnum[keyof typeof ChartQueryDomainLanguageEnum];
+/**
+ * @export
+ */
+export const DatavizHeroDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type DatavizHeroDomainLanguageEnum = typeof DatavizHeroDomainLanguageEnum[keyof typeof DatavizHeroDomainLanguageEnum];
+/**
+ * @export
+ */
+export const DatavizPlanDomainLanguageEnum = {
+    Fr: 'fr',
+    En: 'en'
+} as const;
+export type DatavizPlanDomainLanguageEnum = typeof DatavizPlanDomainLanguageEnum[keyof typeof DatavizPlanDomainLanguageEnum];
 /**
  * @export
  */

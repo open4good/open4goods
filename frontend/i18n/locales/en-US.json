@@ -69,7 +69,9 @@
       "eyebrow": "Responsible shopping",
       "title": "Nudger: The eco-friendly comparator",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Buy better. Spend smarter."],
+      "titleSubtitle": [
+        "Buy better. Spend smarter."
+      ],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -134,7 +136,9 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": ["Search a product (e.g. television, smartphone...)"]
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {
@@ -1640,6 +1644,9 @@
           "size": "Compressed size",
           "updated": "Last updated"
         }
+      },
+      "creator": {
+        "name": "Goulven Furet"
       },
       "gtin": {
         "columns": {
@@ -3675,6 +3682,58 @@
         "title": "Documentation browser",
         "description": "Explore the documentation tree, search pages, and read content inline."
       }
+    }
+  },
+  "dataviz": {
+    "page": {
+      "title": "{category} Statistics",
+      "metaTitle": "Statistics & Data - {category} | {siteName}",
+      "metaDescription": "Explore detailed statistics for {category}: prices, brands, scores and more.",
+      "breadcrumbLeaf": "Statistics",
+      "heroTitle": "Dashboard - {category}",
+      "heroDescription": "Overview of the {category} category data.",
+      "chartsTitle": "Charts",
+      "chartsSubtitle": "Detailed analytics for this category."
+    },
+    "hero": {
+      "totalProducts": "Active products",
+      "totalOffers": "Active offers",
+      "averagePrice": "Average price",
+      "medianPrice": "Median price",
+      "averageEcoscore": "Average ecoscore",
+      "topBrand": "Top brand",
+      "newPercent": "New products",
+      "countriesCount": "Countries"
+    },
+    "chart": {
+      "noData": "No data available",
+      "loading": "Loading..."
+    }
+  },
+  "metriks": {
+    "pageTitle": "Metriks Dashboard",
+    "pageSubtitle": "Tracking key indicators collected automatically from multiple sources.",
+    "period": "Period: {from} → {to}",
+    "seo": {
+      "title": "Metriks - Dashboard | Nudger",
+      "description": "Visualise performance indicators gathered automatically: analytics, products, infrastructure."
+    },
+    "table": {
+      "title": "All metrics",
+      "search": "Search metrics...",
+      "filterGroups": "Filter by group",
+      "filterTags": "Filter by tag",
+      "provider": "Provider",
+      "name": "Name",
+      "value": "Value",
+      "trend": "Trend",
+      "unit": "Unit",
+      "status": "Status"
+    },
+    "chart": {
+      "title": "Evolution over time",
+      "selected": "selected",
+      "empty": "Click a metric in the table to display its evolution here."
     }
   }
 }

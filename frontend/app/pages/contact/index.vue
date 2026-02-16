@@ -407,7 +407,7 @@ useHead(() => ({
     {
       key: 'contact-page-jsonld',
       type: 'application/ld+json',
-      children: JSON.stringify(contactPageJsonLd.value),
+      innerHTML: JSON.stringify(contactPageJsonLd.value),
     },
   ],
 }))

@@ -69,7 +69,9 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Nudger : le comparateur écologique"],
+      "titleSubtitle": [
+        "Nudger : le comparateur écologique"
+      ],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -1515,6 +1517,9 @@
           "size": "Taille compressée",
           "updated": "Dernière mise à jour"
         }
+      },
+      "creator": {
+        "name": "Goulven Furet"
       },
       "gtin": {
         "columns": {
@@ -3578,6 +3583,58 @@
   "products": {
     "compare": {
       "addToList": "Ajouter à la comparaison"
+    }
+  },
+  "dataviz": {
+    "page": {
+      "title": "Statistiques {category}",
+      "metaTitle": "Statistiques et données - {category} | {siteName}",
+      "metaDescription": "Explorez les statistiques détaillées pour {category} : prix, marques, scores et plus encore.",
+      "breadcrumbLeaf": "Statistiques",
+      "heroTitle": "Tableau de bord - {category}",
+      "heroDescription": "Vue d'ensemble des données de la catégorie {category}.",
+      "chartsTitle": "Graphiques",
+      "chartsSubtitle": "Analytics détaillés de la catégorie."
+    },
+    "hero": {
+      "totalProducts": "Produits actifs",
+      "totalOffers": "Offres actives",
+      "averagePrice": "Prix moyen",
+      "medianPrice": "Prix médian",
+      "averageEcoscore": "Éco-score moyen",
+      "topBrand": "Marque n°1",
+      "newPercent": "Produits neufs",
+      "countriesCount": "Pays"
+    },
+    "chart": {
+      "noData": "Aucune donnée disponible",
+      "loading": "Chargement..."
+    }
+  },
+  "metriks": {
+    "pageTitle": "Tableau de bord Metriks",
+    "pageSubtitle": "Suivi des indicateurs clés collectés automatiquement depuis différentes sources.",
+    "period": "Période : {from} → {to}",
+    "seo": {
+      "title": "Metriks - Tableau de bord | Nudger",
+      "description": "Visualisez les indicateurs de performance collectés automatiquement : analytics, produits, infrastructure."
+    },
+    "table": {
+      "title": "Toutes les métriques",
+      "search": "Rechercher une metrique...",
+      "filterGroups": "Filtrer par groupe",
+      "filterTags": "Filtrer par tag",
+      "provider": "Source",
+      "name": "Nom",
+      "value": "Valeur",
+      "trend": "Tendance",
+      "unit": "Unité",
+      "status": "État"
+    },
+    "chart": {
+      "title": "Évolution dans le temps",
+      "selected": "sélectionnée(s)",
+      "empty": "Cliquez sur une métrique dans le tableau pour afficher son évolution ici."
     }
   }
 }

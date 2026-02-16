@@ -1,78 +1,46 @@
+
+> nudger-nuxt-front@ test /home/goulven/git/open4goods/frontend
+> vitest run app/components/category/repro_filter_issue.spec.ts
+
 [info] [@nuxtjs/sitemap] `zeroRuntime` enabled - sitemap routes will be prerendered.
 
  RUN  v3.2.4 /home/goulven/git/open4goods/frontend
 
 [33m[1m  ➜  MCP:     [22m[39mServer is running at http://localhost:5173/__mcp/sse
-stdout | app/components/product/ProductHeroPricing.spec.ts
-DEBUG: Validating themedAssetIndex keys...
-DEBUG: Total keys: [33m108[39m
-DEBUG: Sample keys: [
-  [32m'common/christmas/blog-background.svg'[39m,
-  [32m'common/christmas/categories-background.svg'[39m,
-  [32m'common/christmas/contact-background.svg'[39m,
-  [32m'common/christmas/hero-background.svg'[39m,
-  [32m'common/christmas/open-data-background.svg'[39m
-]
+ ❯ app/components/category/repro_filter_issue.spec.ts (2 tests | 2 failed) 29ms
+   × CategoryFiltersPanel Reproduction > should exclude specific impact filters 24ms
+     → Need to install with `app.use` function
+   × CategoryFiltersPanel Reproduction > should have duplicated technical filters 4ms
+     → Need to install with `app.use` function
 
-stdout | app/components/product/ProductHeroPricing.spec.ts
-DEBUG: Validating themedAssetIndex keys...
-DEBUG: Total keys: [33m108[39m
-DEBUG: Sample keys: [
-  [32m'common/christmas/blog-background.svg'[39m,
-  [32m'common/christmas/categories-background.svg'[39m,
-  [32m'common/christmas/contact-background.svg'[39m,
-  [32m'common/christmas/hero-background.svg'[39m,
-  [32m'common/christmas/open-data-background.svg'[39m
-]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
-stderr | app/components/product/ProductHeroPricing.spec.ts > ProductHeroPricing > renders both condition panels with price and merchant
-[Vue warn]: Component "i18n-t" has already been registered in target app.
-[Vue warn]: Component "I18nT" has already been registered in target app.
-[Vue warn]: Component "i18n-n" has already been registered in target app.
-[Vue warn]: Component "I18nN" has already been registered in target app.
-[Vue warn]: Component "i18n-d" has already been registered in target app.
-[Vue warn]: Component "I18nD" has already been registered in target app.
-[Vue warn]: Directive "t" has already been registered in target app.
+ FAIL  app/components/category/repro_filter_issue.spec.ts > CategoryFiltersPanel Reproduction > should exclude specific impact filters
+ FAIL  app/components/category/repro_filter_issue.spec.ts > CategoryFiltersPanel Reproduction > should have duplicated technical filters
+SyntaxError: Need to install with `app.use` function
+ ❯ createCompileError node_modules/.pnpm/@intlify+message-compiler@11.2.8/node_modules/@intlify/message-compiler/dist/message-compiler.mjs:77:19
+     75|         ? format((messages || errorMessages)[code] || '', ...(args || …
+     76|         : code;
+     77|     const error = new SyntaxError(String(msg));
+       |                   ^
+     78|     error.code = code;
+     79|     if (loc) {
+ ❯ createI18nError node_modules/.pnpm/vue-i18n@11.2.8_vue@3.5.28_typescript@5.9.3_/node_modules/vue-i18n/dist/vue-i18n.mjs:62:12
+ ❯ useI18n node_modules/.pnpm/vue-i18n@11.2.8_vue@3.5.28_typescript@5.9.3_/node_modules/vue-i18n/dist/vue-i18n.mjs:2155:15
+ ❯ setup app/components/category/CategoryFiltersPanel.vue:195:15
+ ❯ callWithErrorHandling node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ setupStatefulComponent node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:7999:25
+ ❯ setupComponent node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:7961:36
+ ❯ mountComponent node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5903:7
+ ❯ processComponent node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5869:9
+ ❯ patch node_modules/.pnpm/@vue+runtime-core@3.5.28/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5386:11
 
-stderr | app/components/product/ProductHeroPricing.spec.ts > ProductHeroPricing > renders empty state when a condition has no offers
-[Vue warn]: Component "i18n-t" has already been registered in target app.
-[Vue warn]: Component "I18nT" has already been registered in target app.
-[Vue warn]: Component "i18n-n" has already been registered in target app.
-[Vue warn]: Component "I18nN" has already been registered in target app.
-[Vue warn]: Component "i18n-d" has already been registered in target app.
-[Vue warn]: Component "I18nD" has already been registered in target app.
-[Vue warn]: Directive "t" has already been registered in target app.
-
- ❯ app/components/product/ProductHeroPricing.spec.ts (2 tests | 1 failed) 54ms
-   ✓ ProductHeroPricing > renders both condition panels with price and merchant 44ms
-   × ProductHeroPricing > renders empty state when a condition has no offers 8ms
-     → Cannot read properties of undefined (reading 'variation')
-
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
-
- FAIL  app/components/product/ProductHeroPricing.spec.ts > ProductHeroPricing > renders empty state when a condition has no offers
-TypeError: Cannot read properties of undefined (reading 'variation')
- ❯ formatTrendTooltip app/components/product/ProductHeroPricing.spec.ts:29:38
-     27|           : 'mdi-trending-neutral',
-     28|     formatTrendTooltip: (trend: any) =>
-     29|       `Deviation of ${Math.abs(trend.variation)} over ${trend.period}`,
-       |                                      ^
-     30|   }),
-     31| }))
- ❯ app/components/product/ProductHeroPricing.vue:479:26
- ❯ ComputedRefImpl.fn app/components/product/ProductHeroPricing.vue:466:31
- ❯ refreshComputed node_modules/.pnpm/@vue+reactivity@3.5.27/node_modules/@vue/reactivity/dist/reactivity.cjs.js:395:28
- ❯ ComputedRefImpl.get value [as value] node_modules/.pnpm/@vue+reactivity@3.5.27/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1709:5
- ❯ unref node_modules/.pnpm/@vue+reactivity@3.5.27/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1534:45
- ❯ Object.get node_modules/.pnpm/@vue+reactivity@3.5.27/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1540:64
- ❯ Proxy._sfc_render app/components/product/ProductHeroPricing.vue:17:25
- ❯ renderComponentRoot node_modules/.pnpm/@vue+runtime-core@3.5.27/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4475:16
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
 
 
  Test Files  1 failed (1)
-      Tests  1 failed | 1 passed (2)
-   Start at  16:22:16
-   Duration  7.64s (transform 5.34s, setup 5.89s, collect 1.02s, tests 54ms, environment 205ms, prepare 156ms)
+      Tests  2 failed (2)
+   Start at  23:15:14
+   Duration  8.46s (transform 5.80s, setup 5.63s, collect 1.97s, tests 29ms, environment 269ms, prepare 186ms)
 
+ ELIFECYCLE  Test failed. See above for more details.

@@ -339,7 +339,7 @@ useHead(() => ({
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify({
+      innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'Dataset',
         name: t('opendata.datasets.isbn.seo.title'),
@@ -357,9 +357,8 @@ useHead(() => ({
             ]
           : [],
         creator: {
-          '@type': 'Organization',
-          name: 'Nudger',
-          url: requestURL.origin,
+          '@type': 'Person',
+          name: t('opendata.datasets.creator.name'),
         },
       }),
     },

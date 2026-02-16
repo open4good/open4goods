@@ -84,9 +84,9 @@ export interface ProductJsonLdInput {
   locale: string
   breadcrumbs: ProductJsonLdBreadcrumb[]
   site: ProductJsonLdSiteInfo
-  review?: { [key: string]: JsonLdValue } | null
-  impactScoreOn20?: number | null
   imageUrls?: string[]
+  punchline?: string | null
+  impactScore?: number | null
 }
 
 const isNonEmptyString = (value: unknown): value is string =>
@@ -229,7 +229,7 @@ const resolveImageUrls = (origin: string, input?: string[]): string[] => {
   return resolved
 }
 
-const buildOfferList = (
+export const buildOfferList = (
   origin: string,
   offersByCondition: Record<
     string,
@@ -242,6 +242,10 @@ const buildOfferList = (
     }>
   >
 ): Array<Record<string, JsonLdValue>> => {
+  const validUntilDate = new Date()
+  validUntilDate.setDate(validUntilDate.getDate() + 10)
+  const priceValidUntil = validUntilDate.toISOString().split('T')[0]
+
   const offers = Object.values(offersByCondition)
     .flat()
     .filter(
@@ -258,6 +262,7 @@ const buildOfferList = (
           : undefined,
         price: offer.price,
         priceCurrency: normalizeString(offer.currency),
+        priceValidUntil,
         availability: 'https://schema.org/InStock',
         itemCondition:
           offer.condition === 'NEW'
@@ -304,13 +309,14 @@ export const buildProductJsonLdGraph = (
   )?.priceCurrency
 
   const rawAdditionalProperty = compactJsonLd([
-    input.impactScoreOn20 != null
+    input.impactScore != null
       ? {
           '@type': 'PropertyValue',
           name: 'Nudger Impact Score',
-          value: input.impactScoreOn20,
+          value: input.impactScore,
         }
       : undefined,
+
     {
       '@type': 'PropertyValue',
       name: 'Indice de réparabilité',
@@ -502,12 +508,16 @@ export const buildProductJsonLdGraph = (
   const breadcrumbEntry = {
     '@type': 'BreadcrumbList',
     '@id': breadcrumbId,
-    itemListElement: input.breadcrumbs.map((crumb, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: crumb.title,
-      item: crumb.link ? toAbsoluteUrl(input.site.url, crumb.link) : undefined,
-    })),
+    itemListElement: input.breadcrumbs
+      .filter(crumb => crumb.link)
+      .map((crumb, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: crumb.title,
+        item: crumb.link
+          ? toAbsoluteUrl(input.site.url, crumb.link)
+          : undefined,
+      })),
   }
 
   const brandName = normalizeString(product.identity?.brand)
@@ -538,8 +548,13 @@ export const buildProductJsonLdGraph = (
     url: input.canonicalUrl,
     name: productTitle,
     description:
-      normalizeString(product.names?.metaDescription) ??
-      normalizeString(product.names?.ogDescription),
+      [
+        normalizeString(product.names?.metaDescription) ??
+          normalizeString(product.names?.ogDescription),
+        normalizeString(input.punchline),
+      ]
+        .filter(isNonEmptyString)
+        .join(' - ') || undefined,
     image: images,
     category:
       normalizeString(product.names?.singular) ??
@@ -594,7 +609,10 @@ export const buildProductJsonLdGraph = (
         ? {
             '@type': 'AggregateOffer',
             priceCurrency: offerCurrency,
-            offerCount: product.offers?.offersCount ?? offers.length,
+            offerCount: Math.max(
+              product.offers?.offersCount ?? 0,
+              offers.length
+            ),
             lowPrice:
               offerPrices.length > 0 ? Math.min(...offerPrices) : undefined,
             highPrice:
@@ -602,50 +620,12 @@ export const buildProductJsonLdGraph = (
             offers,
           }
         : undefined,
-    review: input.review ?? undefined,
   }
 
   const graph = compactJsonLd({
     '@context': 'https://schema.org',
     '@graph': [breadcrumbEntry, productEntry, webPageEntry],
   })
-
-  // Fix Review Ratings
-  if (graph && typeof graph === 'object' && !Array.isArray(graph)) {
-    const graphRecord = graph as Record<string, JsonLdValue>
-    const graphNodes = graphRecord['@graph']
-
-    if (Array.isArray(graphNodes)) {
-      const productNode = (graphNodes as JsonLdValue[]).find(
-        (node: JsonLdValue) =>
-          node &&
-          typeof node === 'object' &&
-          !Array.isArray(node) &&
-          (node as Record<string, JsonLdValue>)['@type'] === 'Product'
-      ) as unknown as
-        | {
-            review?: {
-              reviewRating?: {
-                worstRating?: number
-              }
-              datePublished?: string
-              dateCreated?: string
-            }
-          }
-        | undefined
-      if (productNode?.review?.reviewRating) {
-        productNode.review.reviewRating.worstRating = 1
-      }
-      if (productNode?.review) {
-        if (
-          !productNode.review.datePublished &&
-          productNode.review.dateCreated
-        ) {
-          productNode.review.datePublished = productNode.review.dateCreated
-        }
-      }
-    }
-  }
 
   return (graph as Record<string, JsonLdValue>) ?? null
 }

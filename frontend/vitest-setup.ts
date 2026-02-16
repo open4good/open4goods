@@ -11,3 +11,10 @@ vi.stubGlobal('$fetch', (request: string) => {
   // Individual tests that need to mock $fetch will call vi.stubGlobal('$fetch', ...) themselves.
   return Promise.resolve(null)
 })
+
+// Mock window.performance for tests that rely on it (e.g. some i18n libraries)
+if (typeof window !== 'undefined' && !window.performance) {
+  vi.stubGlobal('performance', {
+    now: vi.fn(() => Date.now()),
+  })
+}

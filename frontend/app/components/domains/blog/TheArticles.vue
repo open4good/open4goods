@@ -378,7 +378,9 @@ const toTrimmedString = (value: unknown): string | undefined => {
 }
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
-const linkedinUrl = computed(() => toTrimmedString(t('siteIdentity.links.linkedin')))
+const linkedinUrl = computed(() =>
+  toTrimmedString(t('siteIdentity.links.linkedin'))
+)
 const logoUrl = computed(() => {
   if (!requestUrl) {
     return undefined
@@ -417,8 +419,8 @@ const structuredData = computed(() => {
       name: siteName.value,
       origin: requestUrl.origin,
       logoUrl: logoUrl.value,
-      sameAs: [linkedinUrl.value].filter(
-        (value): value is string => Boolean(value)
+      sameAs: [linkedinUrl.value].filter((value): value is string =>
+        Boolean(value)
       ),
     },
     breadcrumbs: [
@@ -451,7 +453,7 @@ useHead(() => ({
     ? [
         {
           type: 'application/ld+json',
-          children: JSON.stringify(structuredData.value),
+          innerHTML: JSON.stringify(structuredData.value),
         },
       ]
     : [],

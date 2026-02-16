@@ -171,4 +171,68 @@ describe('ProductVigilanceSection', () => {
       false
     )
   })
+
+  it('renders HTML in obsolescence warning', async () => {
+    const htmlWarning =
+      '<strong>Warning!</strong> This is <a href="#">AI generated</a>.'
+    const wrapper = await mountComponent({
+      product: {
+        aiReview: {
+          review: {
+            obsolescenceWarning: htmlWarning,
+          },
+        },
+      },
+    })
+
+    const description = wrapper.find(
+      '.product-vigilance__card--obsolescence .product-vigilance__card-description'
+    )
+    expect(description.html()).toContain('<strong>Warning!</strong>')
+    expect(description.html()).toContain('<a href="#">AI generated</a>')
+  })
+
+  it('renders HTML in data quality description', async () => {
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'fr-FR',
+      messages: {
+        'fr-FR': {
+          product: {
+            vigilance: {
+              quality: {
+                description: 'Score: <strong>{score}</strong>/20',
+              },
+            },
+          },
+        },
+      },
+    })
+
+    const wrapper = mount(ProductVigilanceSection, {
+      props: {
+        product: {
+          scores: {
+            scores: {
+              DATA_QUALITY: {
+                value: 2, // 2 * 4 = 8.0
+                relativ: { avg: 4 }, // 4 * 4 = 16.0
+              },
+            },
+          },
+        },
+      },
+      global: {
+        plugins: [vuetify, i18n],
+        stubs: {
+          ProductAttributeSourcingLabel,
+        },
+      },
+    })
+
+    const description = wrapper.find(
+      '.product-vigilance__card--quality .product-vigilance__card-description'
+    )
+    expect(description.html()).toContain('<strong>8.0</strong>')
+  })
 })

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "labels": {
+    "enabled": "cody:enabled",
+    "triggers": {
+      "ask": "cody:ask",
+      "clarify": "cody:clarify",
+      "code": "cody:code",
+      "retry": "cody:retry",
+      "evaluate": "cody:evaluate"
+    }
+  },
+  "workflow": {
+    "default_sequence": [
+      "UNDERSTANDING",
+      "PLANNING",
+      "READY_TO_CODE"
+    ],
+    "auto_transition": true,
+    "manual_retry_labels": [
+      "cody:retry",
+      "cody:evaluate"
+    ],
+    "single_thread_comment": true
+  },
+  "providers": {
+    "default": "codex",
+    "by_step": {
+      "ASK": "claude",
+      "UNDERSTANDING": "claude",
+      "PLANNING": "claude",
+      "READY_TO_CODE": "codex",
+      "CODE": "codex"
+    },
+    "fallback_order": [
+      "codex",
+      "claude",
+      "gemini"
+    ]
+  },
+  "pull_request": {
+    "enabled": true,
+    "link_mode": "close",
+    "closing_keyword": "Closes",
+    "link_template": "Closes #{issue_number}",
+    "branch_prefix": "cody/issue-",
+    "commit_message_template": "feat(cody): implement issue #{issue_number}",
+    "title_template": "[Cody] #{issue_number} {issue_title}"
+  },
+  "check_mode": {
+    "validate_required_secrets": true,
+    "required_secrets_by_provider": {
+      "codex": [
+        "OPENAI_API_KEY"
+      ],
+      "claude": [
+        "ANTHROPIC_API_KEY"
+      ],
+      "gemini": [
+        "GEMINI_API_KEY"
+      ]
+    }
+  },
+  "comment_thread": {
+    "marker": "<!-- AI_MULTI_AGENT_THREAD v1 -->",
+    "title": "🤖 Cody Assistant"
+  }
+}

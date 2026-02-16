@@ -142,7 +142,7 @@ const props = defineProps<{
   variant?: 'default' | 'compact'
 }>()
 
-const { t, n } = useI18n()
+const { t, n, locale } = useI18n()
 
 // Reusing logic from ProductHeroPricing for contrib links
 // Since we don't have direct access to 'useAnalytics' inside helpers in the same way, we'll inline some logic or use the composable if available.
@@ -174,7 +174,7 @@ const resolveCurrencySymbol = (currency?: string | null): string | null => {
     return currencySymbolCache.get(upperCaseCurrency) ?? null
 
   try {
-    const formatter = new Intl.NumberFormat(undefined, {
+    const formatter = new Intl.NumberFormat(locale.value, {
       style: 'currency',
       currency: upperCaseCurrency,
       minimumFractionDigits: 0,
@@ -240,8 +240,9 @@ const resolveTrendColor = (tone: string): string | undefined => {
   }
 }
 
-// Helpers for alternatives
-const randomId = () => Math.random().toString(36).substring(2, 9)
+// Generate deterministic ID from offer URL to avoid SSR hydration mismatches
+const deterministicId = (url?: string, index: number = 0) =>
+  url ? `row-${url.slice(-12).replace(/[^a-z0-9]/gi, '-')}` : `row-${index}`
 
 type AlternativeOffer = {
   id: string
@@ -260,8 +261,8 @@ const getAlternatives = (
 
   return offers
     .filter(o => o.url !== bestOfferUrl)
-    .map(o => ({
-      id: randomId(),
+    .map((o, index) => ({
+      id: deterministicId(o.url, index),
       merchantName: o.datasourceName ?? o.merchantName ?? 'Unknown',
       priceLabel: formatOfferPrice(o) || 'N/A',
       favicon: o.favicon ?? o.merchantFavicon,
