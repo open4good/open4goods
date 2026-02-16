@@ -101,7 +101,7 @@
                                 class="category-ecoscore__criteria-utility-trigger"
                                 variant="text"
                                 size="small"
-                                icon="mdi-help-circle-outline"
+                                icon="mdi-information-outline"
                                 :aria-label="
                                   t(
                                     'category.ecoscorePage.sections.criteria.utilityAria'
@@ -109,7 +109,7 @@
                                 "
                               />
                             </template>
-                            <span>
+                            <span class="category-ecoscore__criteria-utility-tooltip">
                               <strong>
                                 {{
                                   t(
@@ -1284,6 +1284,12 @@ useSeoMeta({
 
 .category-ecoscore__criteria-utility-trigger:hover :deep(.v-btn__content)
   color: rgb(var(--v-theme-accent-primary-highlight))
+
+.category-ecoscore__criteria-utility-tooltip
+  display: block
+  max-inline-size: 18rem
+  white-space: normal
+  line-height: 1.4
 
 .category-ecoscore__criteria-footer
   display: flex
