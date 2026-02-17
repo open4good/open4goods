@@ -13,6 +13,19 @@ const PROVIDER_NAMES = ['plausible', 'kibana', 'hello'] as const
 
 const BASE_PATH = '/reports/metriks/data'
 
+/** Supported period presets (in days). */
+export type MetrikPeriodPreset = '7d' | '3w' | '3m'
+
+/** Maps period preset labels to their approximate day count. */
+export const PERIOD_DAYS: Record<MetrikPeriodPreset, number> = {
+  '7d': 7,
+  '3w': 21,
+  '3m': 90,
+}
+
+/** Supported chart types. */
+export type MetrikChartType = 'bar' | 'line'
+
 /**
  * Parse an NDJSON string into an array of JSON records.
  */
@@ -73,16 +86,33 @@ export function getMetrikIcon(groups: string[], id: string): string {
 }
 
 /**
+ * Filter runs that fall within a given number of days from the latest run.
+ */
+function filterRunsByPeriod(
+  runs: MetrikRun[],
+  periodDays: number
+): MetrikRun[] {
+  if (runs.length === 0) return []
+
+  const latestDate = new Date(runs[runs.length - 1]!.period.dateTo).getTime()
+  const cutoff = latestDate - periodDays * 24 * 60 * 60 * 1000
+
+  return runs.filter(r => new Date(r.period.dateTo).getTime() >= cutoff)
+}
+
+/**
  * Composable that loads all metriks data into memory and computes trends.
  *
  * Data is loaded client-side from static JSON/NDJSON files served from
- * the public directory.
+ * the public directory. Supports period-based filtering for trend computation.
  */
 export function useMetriks() {
   const providers = ref<Map<string, MetrikProviderData>>(new Map())
+  const allRawProviders = ref<Map<string, MetrikProviderData>>(new Map())
   const allMetriks = ref<MetrikWithTrend[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const periodPreset = ref<MetrikPeriodPreset>('3m')
 
   /** All unique groups across every metric. */
   const allGroups = computed(() => {
@@ -189,6 +219,46 @@ export function useMetriks() {
   }
 
   /**
+   * Build enriched metrics from raw provider data, filtered by period.
+   */
+  function buildEnrichedMetriks(
+    rawProviders: Map<string, MetrikProviderData>,
+    days: number
+  ): MetrikWithTrend[] {
+    const enriched: MetrikWithTrend[] = []
+
+    for (const [providerName, data] of rawProviders) {
+      const runsInPeriod = filterRunsByPeriod(data.runs, days)
+      if (runsInPeriod.length === 0) continue
+
+      const latestRun = runsInPeriod[runsInPeriod.length - 1]!
+      const previousRun =
+        runsInPeriod.length >= 2 ? runsInPeriod[runsInPeriod.length - 2]! : null
+
+      for (const event of latestRun.events) {
+        const previousEvent = previousRun?.events.find(e => e.id === event.id)
+        const { absoluteChange, percentChange } = computeTrend(
+          event.value,
+          previousEvent?.value ?? null
+        )
+
+        enriched.push({
+          ...event,
+          provider: providerName,
+          providerDisplayName: data.meta.providerDisplayName,
+          period: latestRun.period,
+          previousValue: previousEvent?.value ?? null,
+          absoluteChange,
+          percentChange,
+          history: buildHistory(event.id, runsInPeriod),
+        })
+      }
+    }
+
+    return enriched
+  }
+
+  /**
    * Load all providers and build enriched metrics.
    */
   async function loadAll(): Promise<void> {
@@ -197,7 +267,6 @@ export function useMetriks() {
 
     try {
       const providerMap = new Map<string, MetrikProviderData>()
-      const enriched: MetrikWithTrend[] = []
 
       await Promise.all(
         PROVIDER_NAMES.map(async providerName => {
@@ -208,47 +277,21 @@ export function useMetriks() {
 
           if (!latest || !meta) return
 
-          const latestRun = latest.run
-          // Find the previous run (second-to-last with ok events)
           const successfulRuns = runs.filter(r =>
             r.events.some(e => e.status === 'ok')
           )
-          const previousRun =
-            successfulRuns.length >= 2
-              ? successfulRuns[successfulRuns.length - 2]
-              : null
 
           providerMap.set(providerName, {
             meta,
             runs: successfulRuns,
-            latest: latestRun,
+            latest: latest.run,
           })
-
-          for (const event of latestRun.events) {
-            const previousEvent = previousRun?.events.find(
-              e => e.id === event.id
-            )
-            const { absoluteChange, percentChange } = computeTrend(
-              event.value,
-              previousEvent?.value ?? null
-            )
-
-            enriched.push({
-              ...event,
-              provider: providerName,
-              providerDisplayName: meta.providerDisplayName,
-              period: latestRun.period,
-              previousValue: previousEvent?.value ?? null,
-              absoluteChange,
-              percentChange,
-              history: buildHistory(event.id, successfulRuns),
-            })
-          }
         })
       )
 
+      allRawProviders.value = providerMap
       providers.value = providerMap
-      allMetriks.value = enriched
+      recomputeMetriks()
     } catch (e) {
       error.value = e instanceof Error ? e.message : String(e)
       console.error('[useMetriks] Failed to load metriks', e)
@@ -256,6 +299,21 @@ export function useMetriks() {
       loading.value = false
     }
   }
+
+  /**
+   * Recompute enriched metrics based on current period preset.
+   */
+  function recomputeMetriks(): void {
+    const days = PERIOD_DAYS[periodPreset.value]
+    allMetriks.value = buildEnrichedMetriks(allRawProviders.value, days)
+  }
+
+  /** Watch period changes to rebuild metrics. */
+  watch(periodPreset, () => {
+    if (allRawProviders.value.size > 0) {
+      recomputeMetriks()
+    }
+  })
 
   return {
     providers,
@@ -265,6 +323,7 @@ export function useMetriks() {
     allProviderNames,
     loading,
     error,
+    periodPreset,
     loadAll,
     formatMetrikValue,
     getMetrikIcon,

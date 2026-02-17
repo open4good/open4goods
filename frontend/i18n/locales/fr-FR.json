@@ -69,9 +69,7 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": [
-        "Nudger : le comparateur écologique"
-      ],
+      "titleSubtitle": ["Nudger : le comparateur écologique"],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -3093,8 +3091,8 @@
           "showMore": "Voir plus..."
         },
         "nudge": {
-          "title": "Envie d'un raccourci ?",
-          "description": "Répondez à quelques questions pour pré-filtrer cette catégorie automatiquement.",
+          "title": "Un peu perdu ?",
+          "description": "Répondez à quelques questions pour accéder aux meilleurs produits",
           "button": "Assistant"
         },
         "cta": {
@@ -3635,6 +3633,21 @@
       "title": "Évolution dans le temps",
       "selected": "sélectionnée(s)",
       "empty": "Cliquez sur une métrique dans le tableau pour afficher son évolution ici."
+    },
+    "toolbar": {
+      "period": "Période",
+      "periods": {
+        "7d": "7 jours",
+        "3w": "3 semaines",
+        "3m": "3 mois"
+      },
+      "chartType": "Type de graphique",
+      "chartTypes": {
+        "bar": "Barres",
+        "line": "Courbe"
+      },
+      "providers": "Sources",
+      "drilldown": "Ouvrir dans la source"
     }
   }
 }

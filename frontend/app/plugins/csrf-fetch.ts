@@ -50,7 +50,13 @@ export default defineNuxtPlugin(nuxtApp => {
       )
 
       const headers = new Headers(options.headers || {})
+
       if (!headers.has(CSRF_HEADER_NAME)) {
+        console.log(
+          '[CSRF-Plugin] Adding header:',
+          CSRF_HEADER_NAME,
+          csrfCookie.value
+        )
         headers.set(CSRF_HEADER_NAME, csrfCookie.value)
       }
 
@@ -59,7 +65,8 @@ export default defineNuxtPlugin(nuxtApp => {
         headers.append('Cookie', `${CSRF_COOKIE_NAME}=${csrfCookie.value}`)
       }
 
-      options.headers = headers
+      // Convert back to plain object to ensure compatibility
+      options.headers = Object.fromEntries(headers.entries())
     },
   })
 

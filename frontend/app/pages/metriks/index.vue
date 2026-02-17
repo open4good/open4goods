@@ -1,11 +1,18 @@
 <script setup lang="ts">
 /**
  * /metriks — Dashboard page showing all collected metrics
- * with interactive chart and filterable table.
+ * with interactive chart, filterable table, and URL-driven state.
+ *
+ * Query params: period, metrics, groups, tags, providers, chart
  */
 import type { MetrikWithTrend } from '~/types/metriks'
+import type {
+  MetrikPeriodPreset,
+  MetrikChartType,
+} from '~/composables/useMetriks'
 
 const { t } = useI18n()
+const route = useRoute()
 
 // SEO metadata
 useHead({
@@ -17,10 +24,58 @@ useHead({
   ],
 })
 
-const { allMetriks, loading, error, loadAll } = useMetriks()
+const {
+  allMetriks,
+  allGroups,
+  allTags,
+  allProviderNames,
+  loading,
+  error,
+  periodPreset,
+  loadAll,
+} = useMetriks()
 
-/** Set of metric IDs currently shown on the chart. */
-const selectedIds = ref(new Set<string>())
+// ---------- URL-driven state ----------
+
+const validPeriods: MetrikPeriodPreset[] = ['7d', '3w', '3m']
+const validChartTypes: MetrikChartType[] = ['bar', 'line']
+
+function parseQueryArray(param: string | string[] | undefined): string[] {
+  if (!param) return []
+  const raw = Array.isArray(param) ? param[0] : param
+  if (!raw) return []
+  return raw.split(',').filter(Boolean)
+}
+
+/** Initialise state from query params. */
+const initialPeriod = validPeriods.includes(
+  route.query.period as MetrikPeriodPreset
+)
+  ? (route.query.period as MetrikPeriodPreset)
+  : '3m'
+
+const chartType = ref<MetrikChartType>(
+  validChartTypes.includes(route.query.chart as MetrikChartType)
+    ? (route.query.chart as MetrikChartType)
+    : 'bar'
+)
+
+const selectedIds = ref(
+  new Set<string>(parseQueryArray(route.query.metrics as string | undefined))
+)
+
+const selectedProviders = ref<string[]>(
+  parseQueryArray(route.query.providers as string | undefined)
+)
+const selectedGroups = ref<string[]>(
+  parseQueryArray(route.query.groups as string | undefined)
+)
+const selectedTags = ref<string[]>(
+  parseQueryArray(route.query.tags as string | undefined)
+)
+
+// Sync composable period
+periodPreset.value = initialPeriod
 
 /** Ordered list of selected metrics (for the chart). */
 const selectedMetriks = computed(() =>
@@ -28,15 +83,45 @@ const selectedMetriks = computed(() =>
 )
 
 /** Top KPI metrics for the hero section (first 4 global analytics metrics). */
-const heroMetriks = computed(() =>
-  allMetriks.value
-    .filter(m => m.status === 'ok' && m.tags.includes('global'))
-    .slice(0, 4)
-)
+const heroMetriks = computed(() => {
+  let pool = allMetriks.value.filter(
+    m => m.status === 'ok' && m.tags.includes('global')
+  )
 
-/**
- * Toggle a metric in/out of the chart selection.
- */
+  if (selectedProviders.value.length > 0) {
+    pool = pool.filter(m => selectedProviders.value.includes(m.provider))
+  }
+
+  return pool.slice(0, 4)
+})
+
+// ---------- Event handlers ----------
+
+function onPeriodChange(val: MetrikPeriodPreset): void {
+  periodPreset.value = val
+  syncUrl()
+}
+
+function onChartTypeChange(val: MetrikChartType): void {
+  chartType.value = val
+  syncUrl()
+}
+
+function onProvidersChange(val: string[]): void {
+  selectedProviders.value = val
+  syncUrl()
+}
+
+function onGroupsChange(val: string[]): void {
+  selectedGroups.value = val
+  syncUrl()
+}
+
+function onTagsChange(val: string[]): void {
+  selectedTags.value = val
+  syncUrl()
+}
+
 function onMetrikSelect(metrik: MetrikWithTrend): void {
   const ids = new Set(selectedIds.value)
   if (ids.has(metrik.id)) {
@@ -45,13 +130,32 @@ function onMetrikSelect(metrik: MetrikWithTrend): void {
     ids.add(metrik.id)
   }
   selectedIds.value = ids
+  syncUrl()
 }
 
-/** Remove a metric from chart selection. */
 function removeFromChart(metrikId: string): void {
   const ids = new Set(selectedIds.value)
   ids.delete(metrikId)
   selectedIds.value = ids
+  syncUrl()
+}
+
+// ---------- URL sync ----------
+
+function syncUrl(): void {
+  const query: Record<string, string> = {}
+
+  if (periodPreset.value !== '3m') query.period = periodPreset.value
+  if (chartType.value !== 'bar') query.chart = chartType.value
+  if (selectedIds.value.size > 0)
+    query.metrics = Array.from(selectedIds.value).join(',')
+  if (selectedProviders.value.length > 0)
+    query.providers = selectedProviders.value.join(',')
+  if (selectedGroups.value.length > 0)
+    query.groups = selectedGroups.value.join(',')
+  if (selectedTags.value.length > 0) query.tags = selectedTags.value.join(',')
+
+  navigateTo({ path: '/metriks', query }, { replace: true })
 }
 
 onMounted(() => {
@@ -89,6 +193,23 @@ onMounted(() => {
     </v-alert>
 
     <template v-else>
+      <!-- Toolbar -->
+      <MetriksToolbar
+        :period="periodPreset"
+        :chart-type="chartType"
+        :available-providers="allProviderNames"
+        :available-groups="allGroups"
+        :available-tags="allTags"
+        :selected-providers="selectedProviders"
+        :selected-groups="selectedGroups"
+        :selected-tags="selectedTags"
+        @update:period="onPeriodChange"
+        @update:chart-type="onChartTypeChange"
+        @update:selected-providers="onProvidersChange"
+        @update:selected-groups="onGroupsChange"
+        @update:selected-tags="onTagsChange"
+      />
+
       <!-- Hero KPI cards -->
       <v-row v-if="heroMetriks.length > 0" class="mb-6">
         <v-col v-for="m in heroMetriks" :key="m.id" cols="12" sm="6" md="3">
@@ -99,7 +220,10 @@ onMounted(() => {
       <!-- Chart section -->
       <v-row class="mb-6">
         <v-col cols="12">
-          <MetriksChart :selected-metriks="selectedMetriks" />
+          <MetriksChart
+            :selected-metriks="selectedMetriks"
+            :chart-type="chartType"
+          />
 
           <!-- Selected metrics chips -->
           <div
@@ -126,6 +250,9 @@ onMounted(() => {
         <v-col cols="12">
           <MetriksTable
             :metriks="allMetriks"
+            :filter-providers="selectedProviders"
+            :filter-groups="selectedGroups"
+            :filter-tags="selectedTags"
             :selected-ids="selectedIds"
             @select="onMetrikSelect"
           />

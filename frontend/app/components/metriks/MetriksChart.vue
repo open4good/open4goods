@@ -2,15 +2,24 @@
 /**
  * MetriksChart — ECharts time-series chart showing the evolution of selected metrics.
  *
+ * Supports bar and line chart types, with DataZoom for interactive exploration.
  * Uses the existing echarts-loader from the project for lazy-loading.
  */
 import type { MetrikWithTrend } from '~/types/metriks'
+import type { MetrikChartType } from '~/composables/useMetriks'
 import { formatMetrikValue } from '~/composables/useMetriks'
 
-const props = defineProps<{
-  /** Metrics currently selected for charting. */
-  selectedMetriks: MetrikWithTrend[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    /** Metrics currently selected for charting. */
+    selectedMetriks: MetrikWithTrend[]
+    /** Chart type: bar or line. */
+    chartType?: MetrikChartType
+  }>(),
+  {
+    chartType: 'bar',
+  }
+)
 
 const { t } = useI18n()
 
@@ -49,17 +58,54 @@ const chartOption = computed(() => {
     (a, b) => new Date(a).getTime() - new Date(b).getTime()
   )
 
+  const isLine = props.chartType === 'line'
+
   const series = props.selectedMetriks.map((m, idx) => {
     const values = dates.map(date => {
       const point = m.history.find(p => p.date === date)
       return point?.value ?? null
     })
+
+    const color = SERIES_COLORS[idx % SERIES_COLORS.length]
+
+    if (isLine) {
+      return {
+        name: m.name,
+        type: 'line' as const,
+        data: values,
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 6,
+        lineStyle: { color, width: 2 },
+        itemStyle: { color },
+        areaStyle: {
+          color: {
+            type: 'linear' as const,
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: `${color}40` },
+              { offset: 1, color: `${color}05` },
+            ],
+          },
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 8,
+            shadowColor: 'rgba(0, 0, 0, 0.15)',
+          },
+        },
+      }
+    }
+
     return {
       name: m.name,
       type: 'bar' as const,
       data: values,
       itemStyle: {
-        color: SERIES_COLORS[idx % SERIES_COLORS.length],
+        color,
         borderRadius: [4, 4, 0, 0],
       },
       emphasis: {
@@ -71,10 +117,12 @@ const chartOption = computed(() => {
     }
   })
 
+  const showDataZoom = dates.length > 8
+
   return {
     tooltip: {
       trigger: 'axis' as const,
-      axisPointer: { type: 'shadow' as const },
+      axisPointer: { type: isLine ? ('cross' as const) : ('shadow' as const) },
       formatter: (
         params: Array<{
           seriesName: string
@@ -98,13 +146,19 @@ const chartOption = computed(() => {
     },
     legend: {
       show: props.selectedMetriks.length > 1,
-      bottom: 0,
+      bottom: showDataZoom ? 30 : 0,
       type: 'scroll' as const,
     },
     grid: {
       left: '3%',
       right: '4%',
-      bottom: props.selectedMetriks.length > 1 ? '15%' : '3%',
+      bottom: showDataZoom
+        ? props.selectedMetriks.length > 1
+          ? '25%'
+          : '18%'
+        : props.selectedMetriks.length > 1
+          ? '15%'
+          : '3%',
       containLabel: true,
     },
     xAxis: {
@@ -117,6 +171,24 @@ const chartOption = computed(() => {
     yAxis: {
       type: 'value' as const,
     },
+    ...(showDataZoom
+      ? {
+          dataZoom: [
+            {
+              type: 'inside' as const,
+              start: 0,
+              end: 100,
+            },
+            {
+              type: 'slider' as const,
+              start: 0,
+              end: 100,
+              bottom: 0,
+              height: 20,
+            },
+          ],
+        }
+      : {}),
     series,
   }
 })
@@ -128,10 +200,12 @@ async function initChart(): Promise<void> {
   const { ensureECharts } = await import('~/utils/echarts-loader')
   const result = await ensureECharts([
     'BarChart',
+    'LineChart',
     'CanvasRenderer',
     'GridComponent',
     'TooltipComponent',
     'LegendComponent',
+    'DataZoomComponent',
   ])
 
   if (result) {

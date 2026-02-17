@@ -149,6 +149,7 @@ const renderChart = async () => {
   const echartsResult = await ensureECharts([
     'BarChart',
     'LineChart',
+    'ScatterChart',
     'GridComponent',
     'TooltipComponent',
     'LegendComponent',

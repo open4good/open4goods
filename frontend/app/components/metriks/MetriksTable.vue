@@ -3,6 +3,7 @@
  * MetriksTable — Vuetify data table showing all metrics with filtering, search, and sorting.
  *
  * Clicking a row emits 'select' to add a metric to the chart.
+ * Supports provider, group, and tag filtering.
  */
 import type { MetrikWithTrend } from '~/types/metriks'
 import { formatMetrikValue } from '~/composables/useMetriks'
@@ -15,12 +16,15 @@ const props = withDefaults(
     filterTags?: string[]
     /** Optional: only show metrics matching these groups. */
     filterGroups?: string[]
+    /** Optional: only show metrics matching these providers. */
+    filterProviders?: string[]
     /** Set of currently selected metric IDs (shown in chart). */
     selectedIds?: Set<string>
   }>(),
   {
     filterTags: () => [],
     filterGroups: () => [],
+    filterProviders: () => [],
     selectedIds: () => new Set<string>(),
   }
 )
@@ -32,52 +36,27 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const search = ref('')
-const groupFilter = ref<string[]>([])
-const tagFilter = ref<string[]>([])
 
-/** Unique groups extracted from all metrics. */
-const availableGroups = computed(() => {
-  const groups = new Set<string>()
-  for (const m of props.metriks) {
-    for (const g of m.groups) groups.add(g)
-  }
-  return Array.from(groups).sort()
-})
-
-/** Unique tags extracted from all metrics. */
-const availableTags = computed(() => {
-  const tags = new Set<string>()
-  for (const m of props.metriks) {
-    for (const t of m.tags) tags.add(t)
-  }
-  return Array.from(tags).sort()
-})
-
-/** Filtered metrics based on search, group and tag filters. */
+/** Filtered metrics based on search, provider, group and tag filters. */
 const filteredMetriks = computed(() => {
   let result = props.metriks
 
-  // Apply prop-level filters
-  if (props.filterTags.length > 0) {
-    result = result.filter(m =>
-      props.filterTags.some((tag: string) => m.tags.includes(tag))
-    )
+  // Apply provider filter
+  if (props.filterProviders.length > 0) {
+    result = result.filter(m => props.filterProviders.includes(m.provider))
   }
+
+  // Apply group filter
   if (props.filterGroups.length > 0) {
     result = result.filter(m =>
       props.filterGroups.some((grp: string) => m.groups.includes(grp))
     )
   }
 
-  // Apply user interactive filters
-  if (groupFilter.value.length > 0) {
+  // Apply tag filter
+  if (props.filterTags.length > 0) {
     result = result.filter(m =>
-      groupFilter.value.some((grp: string) => m.groups.includes(grp))
-    )
-  }
-  if (tagFilter.value.length > 0) {
-    result = result.filter(m =>
-      tagFilter.value.some((tag: string) => m.tags.includes(tag))
+      props.filterTags.some((tag: string) => m.tags.includes(tag))
     )
   }
 
@@ -108,6 +87,7 @@ const headers = computed(() => [
   { title: t('metriks.table.trend'), key: 'percentChange', sortable: true },
   { title: t('metriks.table.unit'), key: 'unit', sortable: true },
   { title: t('metriks.table.status'), key: 'status', sortable: true },
+  { title: '', key: 'drilldown', sortable: false, width: '40px' },
 ])
 
 function onRowClick(item: MetrikWithTrend): void {
@@ -145,40 +125,6 @@ function trendColor(m: MetrikWithTrend): string {
         style="max-width: 300px"
       />
     </v-card-title>
-
-    <!-- Filters row -->
-    <v-card-text class="pt-0 pb-2">
-      <v-row dense>
-        <v-col cols="12" sm="6" md="4">
-          <v-select
-            v-model="groupFilter"
-            :items="availableGroups"
-            :label="t('metriks.table.filterGroups')"
-            multiple
-            chips
-            closable-chips
-            variant="outlined"
-            density="compact"
-            hide-details
-            clearable
-          />
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
-          <v-select
-            v-model="tagFilter"
-            :items="availableTags"
-            :label="t('metriks.table.filterTags')"
-            multiple
-            chips
-            closable-chips
-            variant="outlined"
-            density="compact"
-            hide-details
-            clearable
-          />
-        </v-col>
-      </v-row>
-    </v-card-text>
 
     <v-data-table
       :items="filteredMetriks"
@@ -245,6 +191,30 @@ function trendColor(m: MetrikWithTrend): string {
             >
               {{ item.name }}
             </span>
+          </template>
+        </v-tooltip>
+      </template>
+
+      <!-- Drilldown link column -->
+      <template #[`item.drilldown`]="{ item }">
+        <v-tooltip
+          v-if="item.url"
+          :text="t('metriks.toolbar.drilldown')"
+          location="top"
+        >
+          <template #activator="{ props: tp }">
+            <v-btn
+              v-bind="tp"
+              :href="item.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              icon
+              size="x-small"
+              variant="text"
+              @click.stop
+            >
+              <v-icon icon="mdi-open-in-new" size="16" />
+            </v-btn>
           </template>
         </v-tooltip>
       </template>
