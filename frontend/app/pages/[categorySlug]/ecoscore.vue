@@ -94,18 +94,14 @@
                           <h3 class="category-ecoscore__criteria-title">
                             {{ criterion.label }}
                           </h3>
-                          <v-tooltip
-                            v-if="criterion.utility"
-                            location="top"
-                            max-width="260"
-                          >
+                          <v-tooltip v-if="criterion.utility" location="top">
                             <template #activator="{ props }">
                               <v-btn
                                 v-bind="props"
-                                class="category-ecoscore__criteria-utility-btn"
-                                icon="mdi-information-outline"
-                                size="small"
+                                class="category-ecoscore__criteria-utility-trigger"
                                 variant="text"
+                                size="small"
+                                icon="mdi-information-outline"
                                 :aria-label="
                                   t(
                                     'category.ecoscorePage.sections.criteria.utilityAria'
@@ -113,18 +109,16 @@
                                 "
                               />
                             </template>
-                            <div
-                              class="category-ecoscore__criteria-utility-tooltip"
-                            >
+                            <span class="category-ecoscore__criteria-utility-tooltip">
                               <strong>
                                 {{
                                   t(
                                     'category.ecoscorePage.sections.criteria.utilityLabel'
                                   )
-                                }}
+                                }}:
                               </strong>
-                              <p>{{ criterion.utility }}</p>
-                            </div>
+                              {{ criterion.utility }}
+                            </span>
                           </v-tooltip>
                         </div>
                         <p
@@ -570,21 +564,21 @@
 </template>
 
 <script setup lang="ts">
+import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
+import { useDisplay } from 'vuetify'
+import AiAuditDisplay from '~/components/category/AiAuditDisplay.vue'
+import CategoryHero from '~/components/category/CategoryHero.vue'
+import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
+import { useCategories } from '~/composables/categories/useCategories'
+import { loadHighlightJs } from '~/utils/highlight-loader'
 import type {
   AttributeConfigDto,
   CategoryBreadcrumbItemDto,
   ImpactScoreConfigDto,
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
-import CategoryHero from '~/components/category/CategoryHero.vue'
-import AiAuditDisplay from '~/components/category/AiAuditDisplay.vue'
-import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
-import { loadHighlightJs } from '~/utils/highlight-loader'
-import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
-import { useCategories } from '~/composables/categories/useCategories'
 
 definePageMeta({ lazy: true })
 
@@ -723,6 +717,13 @@ const availableCriteriaMap = computed(() => {
   }, new Map<string, { key: string; label: string; description: string; utility: string | null }>())
 })
 
+const defaultCriteriaIcons: Record<string, string> = {
+  BRAND_SUSTAINALYTICS_SCORING: 'mdi-earth',
+  DATA_QUALITY: 'mdi-database-check-outline',
+  QUALITE_DONNEE: 'mdi-database-check-outline',
+  QUALITY_OF_DATA: 'mdi-database-check-outline',
+}
+
 const criteriaCards = computed(() => {
   const weights = impactScoreConfig.value?.criteriasPonderation ?? {}
   const analysis = impactScoreTexts.value?.criteriasAnalysis ?? {}
@@ -755,7 +756,7 @@ const criteriaCards = computed(() => {
       description,
       utility,
       coefficient,
-      icon: attribute?.icon ?? null,
+      icon: attribute?.icon ?? defaultCriteriaIcons[key] ?? null,
       fallback: fallbackTitle.charAt(0).toUpperCase(),
     }
   })
@@ -1160,15 +1161,17 @@ useSeoMeta({
 
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__link)
   color: rgb(var(--v-theme-text-neutral-strong))
-  background: rgba(var(--v-theme-surface-primary-080), 0.35)
+  background: rgba(var(--v-theme-surface-glass-strong), 0.9)
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.4)
 
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__link:hover),
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__link:focus-visible)
-  background: rgba(var(--v-theme-surface-primary-080), 0.6)
+  background: rgba(var(--v-theme-surface-primary-100), 0.75)
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.65)
 
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__link--active)
-  background: rgba(var(--v-theme-surface-primary-120), 0.9)
-  border-color: rgba(var(--v-theme-border-primary-strong), 0.85)
+  background: rgba(var(--v-theme-surface-primary-120), 0.95)
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.9)
   color: rgb(var(--v-theme-text-neutral-strong))
 
 .category-ecoscore__section-toggle :deep(.sticky-section-navigation__icon)
@@ -1239,10 +1242,13 @@ useSeoMeta({
 
 .category-ecoscore__criteria-icon
   display: inline-flex
+  flex: 0 0 48px
   align-items: center
   justify-content: center
   width: 48px
+  min-width: 48px
   height: 48px
+  min-height: 48px
   border-radius: 16px
   background: rgba(var(--v-theme-surface-primary-100), 0.9)
   color: rgb(var(--v-theme-accent-primary-highlight))
@@ -1259,25 +1265,31 @@ useSeoMeta({
   justify-content: space-between
   gap: 0.5rem
 
-.category-ecoscore__criteria-utility-btn
-  margin-top: -0.2rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-
-.category-ecoscore__criteria-utility-tooltip
-  display: flex
-  flex-direction: column
-  gap: 0.35rem
-  max-width: 240px
-
-.category-ecoscore__criteria-utility-tooltip p
-  margin: 0
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-  line-height: 1.4
-
 .category-ecoscore__criteria-description
   margin: 0 0 0.5rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
   line-height: 1.5
+  display: -webkit-box
+  -webkit-line-clamp: 2
+  -webkit-box-orient: vertical
+  overflow: hidden
+
+
+.category-ecoscore__criteria-utility-trigger
+  margin-top: -0.25rem
+  min-width: auto
+
+.category-ecoscore__criteria-utility-trigger :deep(.v-btn__content)
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.85)
+
+.category-ecoscore__criteria-utility-trigger:hover :deep(.v-btn__content)
+  color: rgb(var(--v-theme-accent-primary-highlight))
+
+.category-ecoscore__criteria-utility-tooltip
+  display: block
+  max-inline-size: 18rem
+  white-space: normal
+  line-height: 1.4
 
 .category-ecoscore__criteria-footer
   display: flex

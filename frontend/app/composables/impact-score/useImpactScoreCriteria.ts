@@ -33,6 +33,7 @@ export const buildCriteriaFromCategory = (
   return available.map(key => {
     const attribute = attributeMap.get(key)
     const fallbackName = attribute?.scoreTitle ?? attribute?.name ?? key
+    const resolvedIcon = attribute?.icon ?? null
 
     return {
       key,
