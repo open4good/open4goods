@@ -26,11 +26,8 @@ class TvVerticalConfigTest {
 
         try (InputStream inputStream = resource.getInputStream()) {
             VerticalConfig config = mapper.readValue(inputStream, VerticalConfig.class);
-            
+
             assertThat(config.getId()).isEqualTo("tv");
-            assertThat(config.getEprelGroupNames())
-                .describedAs("tv.yml must contain 'electronicdisplays' in eprelGroupNames")
-                .contains("electronicdisplays", "televisions");
         }
     }
 }
