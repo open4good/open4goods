@@ -86,18 +86,36 @@ export function getMetrikIcon(groups: string[], id: string): string {
 }
 
 /**
- * Filter runs that fall within a given number of days from the latest run.
+ * Find the run that is closest to (latestDate - days).
  */
-function filterRunsByPeriod(
+function findComparisonRun(
   runs: MetrikRun[],
-  periodDays: number
-): MetrikRun[] {
-  if (runs.length === 0) return []
+  latestRun: MetrikRun,
+  days: number
+): MetrikRun | null {
+  if (runs.length < 2) return null
 
-  const latestDate = new Date(runs[runs.length - 1]!.period.dateTo).getTime()
-  const cutoff = latestDate - periodDays * 24 * 60 * 60 * 1000
+  const latestTime = new Date(latestRun.period.dateTo).getTime()
+  const targetTime = latestTime - days * 24 * 60 * 60 * 1000
 
-  return runs.filter(r => new Date(r.period.dateTo).getTime() >= cutoff)
+  // Find run with dateTo closest to targetTime
+  let closestRun: MetrikRun | null = null
+  let minDiff = Infinity
+
+  for (const run of runs) {
+    if (run === latestRun) continue // Don't compare with self
+    const runTime = new Date(run.period.dateTo).getTime()
+    // We only want to compare with past runs
+    if (runTime > latestTime) continue
+
+    const diff = Math.abs(targetTime - runTime)
+    if (diff < minDiff) {
+      minDiff = diff
+      closestRun = run
+    }
+  }
+
+  return closestRun
 }
 
 /**
@@ -112,7 +130,7 @@ export function useMetriks() {
   const allMetriks = ref<MetrikWithTrend[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const periodPreset = ref<MetrikPeriodPreset>('3m')
+  const comparePeriod = ref<MetrikPeriodPreset>('3m')
 
   /** All unique groups across every metric. */
   const allGroups = computed(() => {
@@ -219,7 +237,8 @@ export function useMetriks() {
   }
 
   /**
-   * Build enriched metrics from raw provider data, filtered by period.
+   * Build enriched metrics using the latest run for values and
+   * a historical run for trend comparison.
    */
   function buildEnrichedMetriks(
     rawProviders: Map<string, MetrikProviderData>,
@@ -228,29 +247,35 @@ export function useMetriks() {
     const enriched: MetrikWithTrend[] = []
 
     for (const [providerName, data] of rawProviders) {
-      const runsInPeriod = filterRunsByPeriod(data.runs, days)
-      if (runsInPeriod.length === 0) continue
+      if (data.runs.length === 0) continue
 
-      const latestRun = runsInPeriod[runsInPeriod.length - 1]!
-      const previousRun =
-        runsInPeriod.length >= 2 ? runsInPeriod[runsInPeriod.length - 2]! : null
+      // 1. Always use the absolute latest run for current values
+      const latestRun = data.runs[data.runs.length - 1]!
+
+      // 2. Find comparison run based on selected period
+      const compareRun = findComparisonRun(data.runs, latestRun, days)
 
       for (const event of latestRun.events) {
-        const previousEvent = previousRun?.events.find(e => e.id === event.id)
+        // Find corresponding event in comparison run
+        const previousEvent = compareRun?.events.find(e => e.id === event.id)
+
         const { absoluteChange, percentChange } = computeTrend(
           event.value,
           previousEvent?.value ?? null
         )
 
+        // 3. History includes ALL runs for the sparkline/chart
+        const history = buildHistory(event.id, data.runs)
+
         enriched.push({
           ...event,
           provider: providerName,
           providerDisplayName: data.meta.providerDisplayName,
-          period: latestRun.period,
+          period: latestRun.period, // Current period
           previousValue: previousEvent?.value ?? null,
           absoluteChange,
           percentChange,
-          history: buildHistory(event.id, runsInPeriod),
+          history,
         })
       }
     }
@@ -277,6 +302,10 @@ export function useMetriks() {
 
           if (!latest || !meta) return
 
+          // Filter out runs that have NO successful events?
+          // Or just keep them all to maintain timeline continuity?
+          // Let's keep runs but maybe we only want runs that have *some* data?
+          // For now, keeping the original logic of filtering runs with at least one ok event
           const successfulRuns = runs.filter(r =>
             r.events.some(e => e.status === 'ok')
           )
@@ -301,15 +330,15 @@ export function useMetriks() {
   }
 
   /**
-   * Recompute enriched metrics based on current period preset.
+   * Recompute enriched metrics based on current comparison period.
    */
   function recomputeMetriks(): void {
-    const days = PERIOD_DAYS[periodPreset.value]
+    const days = PERIOD_DAYS[comparePeriod.value]
     allMetriks.value = buildEnrichedMetriks(allRawProviders.value, days)
   }
 
   /** Watch period changes to rebuild metrics. */
-  watch(periodPreset, () => {
+  watch(comparePeriod, () => {
     if (allRawProviders.value.size > 0) {
       recomputeMetriks()
     }
@@ -323,7 +352,9 @@ export function useMetriks() {
     allProviderNames,
     loading,
     error,
-    periodPreset,
+    comparePeriod, // Export as comparePeriod
+    // Actually, let's rename the property in return to match future usage
+    // But wait, I should rename the ref too to be clean.
     loadAll,
     formatMetrikValue,
     getMetrikIcon,

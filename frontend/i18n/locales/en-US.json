@@ -3172,7 +3172,8 @@
           },
           "ctas": {
             "openSource": "Open source",
-            "dataPrivacy": "Personal data"
+            "dataPrivacy": "Personal data",
+            "login": "Login"
           },
           "compare": {
             "count": "{count} product in the comparator | {count} products in the comparator",
@@ -3714,25 +3715,35 @@
       "title": "Metriks - Dashboard | Nudger",
       "description": "Visualise performance indicators gathered automatically: analytics, products, infrastructure."
     },
+    "accessDenied": "Access Denied",
+    "loginCta": "Login",
+    "chart": {
+      "title": "Evolution over time",
+      "empty": "No data to display for the selection.",
+      "selected": "selected",
+      "type": "Chart type"
+    },
     "table": {
-      "title": "All metrics",
-      "search": "Search metrics...",
-      "filterGroups": "Filter by group",
-      "filterTags": "Filter by tag",
-      "provider": "Provider",
-      "name": "Name",
+      "title": "Metrics Detail",
+      "search": "Search...",
+      "filterGroups": "Groups",
+      "filterTags": "Tags",
+      "filterProviders": "Providers",
+      "provider": "Source",
+      "name": "Metric",
       "value": "Value",
       "trend": "Trend",
       "unit": "Unit",
-      "status": "Status"
-    },
-    "chart": {
-      "title": "Evolution over time",
-      "selected": "selected",
-      "empty": "Click a metric in the table to display its evolution here."
+      "status": "Status",
+      "historyTooltipTitle": "History (last 10 points)",
+      "noData": "No data available",
+      "itemsPerPage": "Items per page:",
+      "itemsAll": "All",
+      "paginationInfo": "{0}-{1} of {2}"
     },
     "toolbar": {
       "period": "Period",
+      "compareTo": "Compare to",
       "periods": {
         "7d": "7 days",
         "3w": "3 weeks",
@@ -3744,7 +3755,7 @@
         "line": "Line"
       },
       "providers": "Providers",
-      "drilldown": "Open in source"
+      "drilldown": "See details"
     }
   }
 }

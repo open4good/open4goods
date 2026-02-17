@@ -212,4 +212,26 @@ class AttributeRealtimeAggregationServiceTest {
 		assertThat(product.getAttributes().getAll()).containsKey("required_attr");
 		assertThat(product.getAttributes().getAll()).doesNotContainKey("DESCRIPTION");
 	}
+	@Test
+	void testColorMappingIdentity() throws Exception {
+		// Arrange
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setTokenMatch(java.util.List.of("NOIR", "BLANC"));
+		
+		// Simulate the fixed state where mappings include identity for French values
+		attrConfig.getMappings().put("BLACK", "NOIR");
+		attrConfig.getMappings().put("WHITE", "BLANC");
+		attrConfig.getMappings().put("NOIR", "NOIR");
+		attrConfig.getMappings().put("BLANC", "BLANC");
+		
+		// Act
+		String resultNoir = service.parseValue("NOIR", attrConfig, verticalConfig);
+		String resultBlanc = service.parseValue("BLANC", attrConfig, verticalConfig);
+
+		// Assert
+		assertThat(resultNoir).isEqualTo("NOIR"); 
+		assertThat(resultBlanc).isEqualTo("BLANC");
+	}
 }

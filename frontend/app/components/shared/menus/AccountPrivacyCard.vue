@@ -274,6 +274,16 @@
           {{ t('siteIdentity.menu.account.privacy.ctas.openSource') }}
         </v-btn>
         <v-btn
+          v-if="!isLoggedIn"
+          :to="loginPath"
+          color="primary"
+          variant="flat"
+          size="small"
+          prepend-icon="mdi-login"
+        >
+          {{ t('siteIdentity.menu.account.privacy.ctas.login') }}
+        </v-btn>
+        <v-btn
           :to="dataPrivacyPath"
           color="primary"
           variant="text"
@@ -293,18 +303,25 @@ import { storeToRefs } from 'pinia'
 import { computed, ref, onMounted } from 'vue'
 import { useIpQuota } from '~/composables/useIpQuota'
 import { useProductCompareStore } from '~/stores/useProductCompareStore'
+import { useAuth } from '~/composables/useAuth'
 import {
   normalizeLocale,
   resolveLocalizedRoutePath,
 } from '~~/shared/utils/localized-routes'
 
 const { t, locale } = useI18n()
+const route = useRoute()
+const { isLoggedIn } = useAuth()
 const requestHeaders = useRequestHeaders(['x-forwarded-for', 'x-real-ip'])
 const currentLocale = computed(() => normalizeLocale(locale.value))
 const dataPrivacyPath = computed(() =>
   resolveLocalizedRoutePath('data-privacy', currentLocale.value)
 )
 const openSourcePath = computed(() => '/opensource')
+
+const loginPath = computed(() => {
+  return `/auth/login?redirect=${encodeURIComponent(route.fullPath)}`
+})
 
 // --- IP Logic ---
 const resolveIpAddress = () => {

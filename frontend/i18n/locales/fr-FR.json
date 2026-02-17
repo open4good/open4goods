@@ -1360,7 +1360,7 @@
       "subtitle": "Ce qu'il faut garder en tête pour comprendre la note.",
       "items": {
         "method": "Une méthode unique, inspirée de l'Écoscore et commune à toutes les catégories.",
-        "criteria": "5 critères pondérés pour comparer rapidement des produits similaires.",
+        "criteria": "De multiples critères pondérés pour comparer rapidement des produits similaires.",
         "data": "Des données vérifiées, mises à jour et reliées à leurs sources.",
         "usage": "Une note sur 20, lisible en un coup d'œil pour guider vos achats responsables."
       }
@@ -3066,7 +3066,8 @@
           },
           "ctas": {
             "openSource": "Open source",
-            "dataPrivacy": "Données personnelles"
+            "dataPrivacy": "Données personnelles",
+            "login": "Se connecter"
           },
           "compare": {
             "count": "{count} produit dans le comparateur | {count} produits dans le comparateur",
@@ -3617,25 +3618,35 @@
       "title": "Metriks - Tableau de bord | Nudger",
       "description": "Visualisez les indicateurs de performance collectés automatiquement : analytics, produits, infrastructure."
     },
+    "accessDenied": "Accès refusé",
+    "loginCta": "Se connecter",
+    "chart": {
+      "title": "Évolution dans le temps",
+      "empty": "Aucune donnée à afficher pour la sélection.",
+      "selected": "sélectionnés",
+      "type": "Type de graphique"
+    },
     "table": {
-      "title": "Toutes les métriques",
-      "search": "Rechercher une metrique...",
-      "filterGroups": "Filtrer par groupe",
-      "filterTags": "Filtrer par tag",
+      "title": "Détail des métriques",
+      "search": "Rechercher...",
+      "filterGroups": "Groupes",
+      "filterTags": "Tags",
+      "filterProviders": "Sources",
       "provider": "Source",
-      "name": "Nom",
+      "name": "Métrique",
       "value": "Valeur",
       "trend": "Tendance",
       "unit": "Unité",
-      "status": "État"
-    },
-    "chart": {
-      "title": "Évolution dans le temps",
-      "selected": "sélectionnée(s)",
-      "empty": "Cliquez sur une métrique dans le tableau pour afficher son évolution ici."
+      "status": "Statut",
+      "historyTooltipTitle": "Historique (10 derniers points)",
+      "noData": "Aucune donnée disponible",
+      "itemsPerPage": "Éléments par page :",
+      "itemsAll": "Tous",
+      "paginationInfo": "{0}-{1} de {2}"
     },
     "toolbar": {
       "period": "Période",
+      "compareTo": "Comparer à",
       "periods": {
         "7d": "7 jours",
         "3w": "3 semaines",
@@ -3644,10 +3655,10 @@
       "chartType": "Type de graphique",
       "chartTypes": {
         "bar": "Barres",
-        "line": "Courbe"
+        "line": "Ligne"
       },
       "providers": "Sources",
-      "drilldown": "Ouvrir dans la source"
+      "drilldown": "Voir le détail"
     }
   }
 }

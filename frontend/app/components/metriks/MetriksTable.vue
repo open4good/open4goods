@@ -12,6 +12,8 @@ const props = withDefaults(
   defineProps<{
     /** Full list of enriched metrics. */
     metriks: MetrikWithTrend[]
+    loading?: boolean
+    compareLabel?: string
     /** Optional: only show metrics matching these tags. */
     filterTags?: string[]
     /** Optional: only show metrics matching these groups. */
@@ -26,6 +28,7 @@ const props = withDefaults(
     filterGroups: () => [],
     filterProviders: () => [],
     selectedIds: () => new Set<string>(),
+    compareLabel: undefined,
   }
 )
 
@@ -134,6 +137,8 @@ function trendColor(m: MetrikWithTrend): string {
       hover
       items-per-page="-1"
       class="metriks-table"
+      :no-data-text="t('metriks.table.noData')"
+      :items-per-page-text="t('metriks.table.itemsPerPage')"
       @click:row="
         (_e: Event, { item }: { item: MetrikWithTrend }) => onRowClick(item)
       "
@@ -150,12 +155,44 @@ function trendColor(m: MetrikWithTrend): string {
 
       <!-- Value column -->
       <template #[`item.value`]="{ item }">
-        <span
-          class="font-weight-bold"
-          :class="{ 'text-error': item.status === 'error' }"
-        >
-          {{ formatMetrikValue(item.value, item.unit) }}
-        </span>
+        <div class="text-right font-weight-bold">
+          <v-tooltip location="top" activator="parent">
+            <div class="text-caption font-weight-bold mb-1">
+              {{ t('metriks.table.historyTooltipTitle') }}
+            </div>
+            <table class="history-table">
+              <tbody>
+                <tr
+                  v-for="(point, i) in item.history.slice(-10).reverse()"
+                  :key="i"
+                >
+                  <td class="pr-2">{{ point.date }}</td>
+                  <td class="text-right">
+                    {{ formatMetrikValue(point.value, item.unit) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </v-tooltip>
+          <span :class="{ 'text-error': item.status === 'error' }">
+            {{ formatMetrikValue(item.value, item.unit) }}
+          </span>
+          <span class="text-caption text-medium-emphasis ml-1">{{
+            item.unit
+          }}</span>
+        </div>
+      </template>
+
+      <template #[`header.percentChange`]>
+        <div class="text-right">
+          {{ t('metriks.table.trend') }}
+          <div
+            v-if="compareLabel"
+            class="text-caption text-medium-emphasis font-weight-normal"
+          >
+            {{ compareLabel }}
+          </div>
+        </div>
       </template>
 
       <!-- Trend column -->
@@ -225,5 +262,13 @@ function trendColor(m: MetrikWithTrend): string {
 <style scoped>
 .metriks-table :deep(tr) {
   cursor: pointer;
+}
+
+.history-table {
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+.history-table td {
+  padding: 2px 4px;
 }
 </style>

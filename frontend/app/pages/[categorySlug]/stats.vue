@@ -173,7 +173,7 @@ const chartResults = reactive<
 >({})
 const chartLoadingStates = reactive<Record<string, boolean>>({})
 
-const loadChartData = async (chartId: string, queryPreset: string) => {
+const loadChartData = async (chartId: string, _queryPreset: string) => {
   chartLoadingStates[chartId] = true
   try {
     const result = await fetchChartData({ chartId: chartId })

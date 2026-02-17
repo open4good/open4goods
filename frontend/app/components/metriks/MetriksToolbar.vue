@@ -10,8 +10,8 @@ import type {
 
 withDefaults(
   defineProps<{
-    /** Current period preset. */
-    period?: MetrikPeriodPreset
+    /** Current comparison period. */
+    comparePeriod?: MetrikPeriodPreset
     /** Current chart type. */
     chartType?: MetrikChartType
     /** Available providers. */
@@ -28,7 +28,7 @@ withDefaults(
     selectedTags?: string[]
   }>(),
   {
-    period: '3m',
+    comparePeriod: '3m',
     chartType: 'bar',
     selectedProviders: () => [],
     selectedGroups: () => [],
@@ -37,7 +37,7 @@ withDefaults(
 )
 
 const emit = defineEmits<{
-  'update:period': [value: MetrikPeriodPreset]
+  'update:comparePeriod': [value: MetrikPeriodPreset]
   'update:chartType': [value: MetrikChartType]
   'update:selectedProviders': [value: string[]]
   'update:selectedGroups': [value: string[]]
@@ -50,7 +50,7 @@ const periodOptions: MetrikPeriodPreset[] = ['7d', '3w', '3m']
 const chartTypeOptions: MetrikChartType[] = ['bar', 'line']
 
 function onPeriodChange(val: MetrikPeriodPreset): void {
-  emit('update:period', val)
+  emit('update:comparePeriod', val)
 }
 
 function onChartTypeChange(val: MetrikChartType): void {
@@ -62,13 +62,13 @@ function onChartTypeChange(val: MetrikChartType): void {
   <v-card variant="outlined" rounded="lg" class="mb-4">
     <v-card-text class="pa-3 pa-md-4">
       <v-row dense align="center">
-        <!-- Period selector -->
+        <!-- Compare period selector -->
         <v-col cols="12" sm="6" md="auto">
           <div class="text-caption text-medium-emphasis mb-1">
-            {{ t('metriks.toolbar.period') }}
+            {{ t('metriks.toolbar.compareTo') }}
           </div>
           <v-btn-toggle
-            :model-value="period"
+            :model-value="comparePeriod"
             mandatory
             density="compact"
             variant="outlined"

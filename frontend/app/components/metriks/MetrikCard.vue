@@ -18,14 +18,15 @@ const props = withDefaults(
     variant?: MetrikVariant
     /** Whether to show the trend indicator. */
     showTrend?: boolean
+    /** Comparison period label (e.g. 'vs 7 days'). */
+    compareLabel?: string
   }>(),
   {
     variant: 'lg',
     showTrend: true,
+    compareLabel: '',
   }
 )
-
-const { t } = useI18n()
 
 const formattedValue = computed(() =>
   formatMetrikValue(props.metrik.value, props.metrik.unit)
@@ -49,8 +50,17 @@ const trendColor = computed(() => {
 
 const trendLabel = computed(() => {
   if (props.metrik.percentChange === null) return '—'
+
   const sign = props.metrik.percentChange > 0 ? '+' : ''
-  return `${sign}${props.metrik.percentChange.toFixed(1)}%`
+  const percent = `${sign}${props.metrik.percentChange.toFixed(1)}%`
+
+  if (props.metrik.absoluteChange !== null) {
+    const absSign = props.metrik.absoluteChange > 0 ? '+' : ''
+    const abs = `${absSign}${formatMetrikValue(props.metrik.absoluteChange, props.metrik.unit)}`
+    return `${abs} (${percent})`
+  }
+
+  return percent
 })
 
 const isError = computed(() => props.metrik.status === 'error')
@@ -156,12 +166,7 @@ const isError = computed(() => props.metrik.status === 'error')
         {{ trendLabel }}
       </v-chip>
       <div class="text-caption text-medium-emphasis">
-        {{
-          t('metriks.period', {
-            from: metrik.period.dateFrom,
-            to: metrik.period.dateTo,
-          })
-        }}
+        {{ compareLabel }}
       </div>
     </v-card-text>
     <v-tooltip

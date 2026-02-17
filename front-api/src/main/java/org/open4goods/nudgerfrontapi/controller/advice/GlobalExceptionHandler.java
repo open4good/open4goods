@@ -13,6 +13,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 /**
@@ -100,6 +101,20 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         pd.setTitle("Internal Server Error");
         pd.setDetail(ex.getMessage() != null ? ex.getMessage() : ex.toString());
+        return pd;
+    }
+    @ExceptionHandler(ResponseStatusException.class)
+    public ProblemDetail handleResponseStatusException(ResponseStatusException ex) {
+        if (ex.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
+            notFoundCounter.increment();
+            log.error("Resource not found: {}", ex.getMessage());
+        } else {
+            unhandledExceptionCounter.increment();
+            log.error("Unhandled exception", ex); // Keep stack trace for non-404
+        }
+        ProblemDetail pd = ProblemDetail.forStatus(ex.getStatusCode());
+        pd.setTitle(ex.getStatusCode().toString());
+        pd.setDetail(ex.getReason() != null ? ex.getReason() : ex.getMessage());
         return pd;
     }
 }

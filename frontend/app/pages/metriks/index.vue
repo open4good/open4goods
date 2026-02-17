@@ -10,9 +10,13 @@ import type {
   MetrikPeriodPreset,
   MetrikChartType,
 } from '~/composables/useMetriks'
+import { useAuth } from '~/composables/useAuth'
+import { hasAdminAccess } from '~~/shared/utils/_roles'
 
 const { t } = useI18n()
 const route = useRoute()
+const { isLoggedIn, roles } = useAuth()
+const isAdmin = computed(() => isLoggedIn.value && hasAdminAccess(roles.value))
 
 // SEO metadata
 useHead({
@@ -31,7 +35,7 @@ const {
   allProviderNames,
   loading,
   error,
-  periodPreset,
+  comparePeriod,
   loadAll,
 } = useMetriks()
 
@@ -75,7 +79,7 @@ const selectedTags = ref<string[]>(
 )
 
 // Sync composable period
-periodPreset.value = initialPeriod
+comparePeriod.value = initialPeriod
 
 /** Ordered list of selected metrics (for the chart). */
 const selectedMetriks = computed(() =>
@@ -98,7 +102,7 @@ const heroMetriks = computed(() => {
 // ---------- Event handlers ----------
 
 function onPeriodChange(val: MetrikPeriodPreset): void {
-  periodPreset.value = val
+  comparePeriod.value = val
   syncUrl()
 }
 
@@ -133,19 +137,14 @@ function onMetrikSelect(metrik: MetrikWithTrend): void {
   syncUrl()
 }
 
-function removeFromChart(metrikId: string): void {
-  const ids = new Set(selectedIds.value)
-  ids.delete(metrikId)
-  selectedIds.value = ids
-  syncUrl()
-}
-
 // ---------- URL sync ----------
 
 function syncUrl(): void {
+  if (!isAdmin.value) return
+
   const query: Record<string, string> = {}
 
-  if (periodPreset.value !== '3m') query.period = periodPreset.value
+  if (comparePeriod.value !== '3m') query.period = comparePeriod.value
   if (chartType.value !== 'bar') query.chart = chartType.value
   if (selectedIds.value.size > 0)
     query.metrics = Array.from(selectedIds.value).join(',')
@@ -159,105 +158,123 @@ function syncUrl(): void {
 }
 
 onMounted(() => {
-  loadAll()
+  if (isAdmin.value) {
+    loadAll()
+  }
 })
 </script>
 
 <template>
   <v-container fluid class="pa-4 pa-md-6">
-    <!-- Page header -->
-    <v-row class="mb-4">
-      <v-col>
-        <h1 class="text-h4 font-weight-bold d-flex align-center ga-2">
-          <v-icon
-            icon="mdi-chart-box-multiple-outline"
-            color="primary"
-            size="36"
-          />
-          {{ t('metriks.pageTitle') }}
-        </h1>
-        <p class="text-body-1 text-medium-emphasis mt-1">
-          {{ t('metriks.pageSubtitle') }}
-        </p>
-      </v-col>
-    </v-row>
-
-    <!-- Loading state -->
-    <v-row v-if="loading" justify="center" class="py-12">
-      <v-progress-circular indeterminate size="48" color="primary" />
-    </v-row>
-
-    <!-- Error state -->
-    <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4">
-      {{ error }}
-    </v-alert>
+    <div v-if="!isAdmin">
+      <v-empty-state
+        icon="mdi-lock"
+        :headline="t('metriks.accessDenied')"
+        :title="t('metriks.pageSubtitle')"
+      >
+        <template #actions>
+          <v-btn color="primary" to="/auth/login">{{
+            t('metriks.loginCta')
+          }}</v-btn>
+        </template>
+      </v-empty-state>
+    </div>
 
     <template v-else>
-      <!-- Toolbar -->
-      <MetriksToolbar
-        :period="periodPreset"
-        :chart-type="chartType"
-        :available-providers="allProviderNames"
-        :available-groups="allGroups"
-        :available-tags="allTags"
-        :selected-providers="selectedProviders"
-        :selected-groups="selectedGroups"
-        :selected-tags="selectedTags"
-        @update:period="onPeriodChange"
-        @update:chart-type="onChartTypeChange"
-        @update:selected-providers="onProvidersChange"
-        @update:selected-groups="onGroupsChange"
-        @update:selected-tags="onTagsChange"
-      />
-
-      <!-- Hero KPI cards -->
-      <v-row v-if="heroMetriks.length > 0" class="mb-6">
-        <v-col v-for="m in heroMetriks" :key="m.id" cols="12" sm="6" md="3">
-          <MetrikCard :metrik="m" variant="xl" />
-        </v-col>
-      </v-row>
-
-      <!-- Chart section -->
-      <v-row class="mb-6">
-        <v-col cols="12">
-          <MetriksChart
-            :selected-metriks="selectedMetriks"
-            :chart-type="chartType"
-          />
-
-          <!-- Selected metrics chips -->
-          <div
-            v-if="selectedMetriks.length > 0"
-            class="d-flex flex-wrap ga-2 mt-3"
-          >
-            <v-chip
-              v-for="m in selectedMetriks"
-              :key="m.id"
-              closable
+      <!-- Page header -->
+      <v-row class="mb-4">
+        <v-col>
+          <h1 class="text-h4 font-weight-bold d-flex align-center ga-2">
+            <v-icon
+              icon="mdi-chart-box-multiple-outline"
               color="primary"
-              variant="tonal"
-              size="small"
-              @click:close="removeFromChart(m.id)"
-            >
-              {{ m.name }}
-            </v-chip>
-          </div>
+              size="36"
+            />
+            {{ t('metriks.pageTitle') }}
+          </h1>
+          <p class="text-body-1 text-medium-emphasis mt-1">
+            {{ t('metriks.pageSubtitle') }}
+          </p>
         </v-col>
       </v-row>
 
-      <!-- Table section -->
-      <v-row>
-        <v-col cols="12">
-          <MetriksTable
-            :metriks="allMetriks"
-            :filter-providers="selectedProviders"
-            :filter-groups="selectedGroups"
-            :filter-tags="selectedTags"
-            :selected-ids="selectedIds"
-            @select="onMetrikSelect"
-          />
-        </v-col>
+      <!-- Loading state -->
+      <v-row v-if="loading" justify="center" class="py-12">
+        <v-progress-circular indeterminate size="48" color="primary" />
       </v-row>
+
+      <!-- Error state -->
+      <v-alert v-else-if="error" type="error" variant="tonal" class="mb-4">
+        {{ error }}
+      </v-alert>
+
+      <template v-else>
+        <!-- Toolbar -->
+        <MetriksToolbar
+          :period="comparePeriod"
+          :chart-type="chartType"
+          :available-providers="allProviderNames"
+          :available-groups="allGroups"
+          :available-tags="allTags"
+          :selected-providers="selectedProviders"
+          :selected-groups="selectedGroups"
+          :selected-tags="selectedTags"
+          @update:period="onPeriodChange"
+          @update:chart-type="onChartTypeChange"
+          @update:selected-providers="onProvidersChange"
+          @update:selected-groups="onGroupsChange"
+          @update:selected-tags="onTagsChange"
+        />
+
+        <!-- Hero KPI cards -->
+        <v-row v-if="heroMetriks.length > 0" class="mb-6">
+          <v-col v-for="m in heroMetriks" :key="m.id" cols="12" sm="6" md="3">
+            <MetrikCard :metrik="m" variant="xl" />
+          </v-col>
+        </v-row>
+
+        <!-- Chart section -->
+        <v-row class="mb-6">
+          <v-col cols="12">
+            <MetriksChart
+              :selected-metriks="selectedMetriks"
+              :chart-type="chartType"
+            />
+
+            <!-- Selected metrics chips -->
+            <div
+              v-if="selectedMetriks.length > 0"
+              class="d-flex flex-wrap ga-2 mt-3"
+            >
+              <v-chip
+                v-for="m in selectedMetriks"
+                :key="m.id"
+                closable
+                color="primary"
+                variant="tonal"
+                size="small"
+                @click:close="onMetrikSelect(m)"
+              >
+                {{ m.name }}
+              </v-chip>
+            </div>
+          </v-col>
+        </v-row>
+
+        <!-- Table section -->
+        <v-row>
+          <v-col cols="12">
+            <MetriksTable
+              :metriks="allMetriks"
+              :filter-providers="selectedProviders"
+              :filter-groups="selectedGroups"
+              :filter-tags="selectedTags"
+              :selected-ids="selectedIds"
+              @select="onMetrikSelect"
+            />
+          </v-col>
+        </v-row>
+      </template>
     </template>
   </v-container>
 </template>
