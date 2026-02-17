@@ -562,7 +562,7 @@
           "subtitle": "Chaque critère est pondéré afin de mettre en avant les signaux les plus utiles pour comparer les {category}.",
           "coefficientPrefix": "Compte pour",
           "coefficientSuffix": "dans la note globale",
-          "utilityLabel": "Utilité",
+          "utilityLabel": "Utilité ",
           "utilityAria": "Afficher l'utilité du critère"
         },
         "availableCriteria": {
