@@ -1,7 +1,7 @@
 apis/AdministrationApi.ts
 apis/AffiliationApi.ts
 apis/AgentsApi.ts
-apis/AssistantsApi.ts
+apis/AssistantConfigsApi.ts
 apis/AuthenticationApi.ts
 apis/BlogApi.ts
 apis/CategoriesApi.ts

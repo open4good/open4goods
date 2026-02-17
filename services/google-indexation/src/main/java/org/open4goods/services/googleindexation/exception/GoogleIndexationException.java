@@ -1,4 +1,4 @@
-package org.open4goods.services.googleindexation.service.exception;
+package org.open4goods.services.googleindexation.exception;
 
 /**
  * Exception raised when the Google Indexing API cannot be invoked.

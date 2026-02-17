@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.open4goods.services.googleindexation.config.GoogleIndexationConfig;
 import org.open4goods.services.googleindexation.dto.GoogleIndexationResult;
 import org.open4goods.services.googleindexation.dto.GoogleIndexationResultItem;
-import org.open4goods.services.googleindexation.service.exception.GoogleIndexationException;
+import org.open4goods.services.googleindexation.exception.GoogleIndexationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

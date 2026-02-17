@@ -1,30 +1,24 @@
 /* tslint:disable */
 /* eslint-disable */
-export * from './AdministrationApi'
-export * from './AffiliationApi'
-export * from './AgentsApi'
-export * from './AssistantsApi'
-export * from './AssistantConfigsApi'
-export * from './AuthenticationApi'
-export * from './BlogApi'
-export * from './CategoriesApi'
-export * from './CommercialEventsApi'
-export * from './ContactApi'
-export * from './ContentApi'
-export * from './ExposedDocsApi'
-export * from './FeedbackApi'
-export * from './GeocodeControllerApi'
-export * from './IndexationApi'
-export * from './OpenDataApi'
-export * from './PartnerApi'
-export * from './ProductApi'
-export * from './QuotaApi'
-export {
-  SearchApi,
-  SemanticSearchRequest,
-  SemanticSearchDomainLanguageEnum,
-} from './SearchApi'
-export * from './ShareApi'
-export * from './StatsApi'
-export * from './TeamApi'
-export * from './UserApi'
+export * from './AdministrationApi';
+export * from './AffiliationApi';
+export * from './AgentsApi';
+export * from './AssistantConfigsApi';
+export * from './AuthenticationApi';
+export * from './BlogApi';
+export * from './CategoriesApi';
+export * from './CommercialEventsApi';
+export * from './ContactApi';
+export * from './ContentApi';
+export * from './ExposedDocsApi';
+export * from './FeedbackApi';
+export * from './GeocodeControllerApi';
+export * from './IndexationApi';
+export * from './OpenDataApi';
+export * from './PartnerApi';
+export * from './ProductApi';
+export * from './QuotaApi';
+export * from './ShareApi';
+export * from './StatsApi';
+export * from './TeamApi';
+export * from './UserApi';

@@ -50,7 +50,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/assistant-configs")
 @Validated
 @PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
-@Tag(name = "Assistants", description = "Expose YAML-based assistant configurations for the frontend.")
+@Tag(name = "AssistantConfigs", description = "Expose YAML-based assistant configurations for the frontend.")
 public class AssistantConfigController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AssistantConfigController.class);
@@ -70,6 +70,7 @@ public class AssistantConfigController {
     @GetMapping
     @Operation(
             summary = "List assistant configurations",
+            operationId = "assistantConfigs",
             description = "Return YAML-based assistant configurations available for the nudge tool wizard.",
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
@@ -109,6 +110,7 @@ public class AssistantConfigController {
     @GetMapping("/{assistantId}")
     @Operation(
             summary = "Get assistant configuration",
+            operationId = "assistantConfig",
             description = "Return the assistant configuration identified by its id.",
             parameters = {
                     @Parameter(name = "assistantId", in = ParameterIn.PATH, required = true,
