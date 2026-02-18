@@ -326,7 +326,7 @@
           "enabled": false
         },
         "value": {
-          "type": "double"
+          "type": "boolean"
         },
         "virtual": {
           "type": "boolean"
