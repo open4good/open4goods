@@ -55,7 +55,7 @@ public class Product implements Standardisable {
 	/**
 	 * Name of the elastic index
 	 */
-	public static final String DEFAULT_REPO = "products-moustik";
+	public static final String DEFAULT_REPO = "products-x";
 
 	/**
 	 * Name of the ecoscore
