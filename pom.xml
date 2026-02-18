@@ -17,7 +17,7 @@
                 <maven.compiler.target>21</maven.compiler.target>
                 <global.version>0.0.1-SNAPSHOT</global.version>
                 <swagger.version>2.9.2</swagger.version>
-                <swagger.core.v3.version>2.2.42</swagger.core.v3.version>
+                <swagger.core.v3.version>2.2.43</swagger.core.v3.version>
                 <jacoco.version>0.8.14</jacoco.version>
                 <barcode4j.version>2.1</barcode4j.version>
                 <sleepycat-je.version>18.3.12</sleepycat-je.version>
