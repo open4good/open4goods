@@ -2189,6 +2189,7 @@
     "offers": {
       "bestPrice": "Meilleur prix"
     },
+
     "vigilance": {
       "title": "Points de vigilance",
       "obsolescence": {
@@ -2931,6 +2932,7 @@
       "noScore": "Pas d'évaluation sur ce produit !"
     },
     "meta": {
+      "defaultDescriptionWithVertical": "Découvrez {productTitle} ({brandModel}) dans la catégorie {verticalTitle}. Comparez son impact environnemental et ses prix sur Nudger.",
       "impactScore": " - Impact Score : {score}/20",
       "gtinFallback": "GTIN non disponible : {gtin}"
     }
@@ -3648,6 +3650,7 @@
       "period": "Période",
       "compareTo": "Comparer à",
       "periods": {
+        "latest": "Dernier",
         "7d": "7 jours",
         "3w": "3 semaines",
         "3m": "3 mois"

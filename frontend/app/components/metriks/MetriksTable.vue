@@ -79,6 +79,7 @@ const filteredMetriks = computed(() => {
 })
 
 const headers = computed(() => [
+  { title: '', key: 'data-table-expand', sortable: false, width: '40px' },
   { title: '', key: 'selected', sortable: false, width: '40px' },
   {
     title: t('metriks.table.provider'),
@@ -92,10 +93,6 @@ const headers = computed(() => [
   { title: t('metriks.table.status'), key: 'status', sortable: true },
   { title: '', key: 'drilldown', sortable: false, width: '40px' },
 ])
-
-function onRowClick(item: MetrikWithTrend): void {
-  emit('select', item)
-}
 
 function trendDisplay(m: MetrikWithTrend): string {
   if (m.percentChange === null) return '—'
@@ -136,21 +133,30 @@ function trendColor(m: MetrikWithTrend): string {
       density="comfortable"
       hover
       items-per-page="-1"
+      show-expand
+      expand-on-click
       class="metriks-table"
       :no-data-text="t('metriks.table.noData')"
       :items-per-page-text="t('metriks.table.itemsPerPage')"
-      @click:row="
-        (_e: Event, { item }: { item: MetrikWithTrend }) => onRowClick(item)
-      "
     >
-      <!-- Selected indicator -->
+      <!-- Chart selection toggle -->
       <template #[`item.selected`]="{ item }">
-        <v-icon
-          v-if="selectedIds.has(item.id)"
-          icon="mdi-chart-line"
-          color="primary"
-          size="18"
-        />
+        <v-btn
+          icon
+          size="x-small"
+          variant="text"
+          :color="selectedIds.has(item.id) ? 'primary' : undefined"
+          @click.stop="emit('select', item)"
+        >
+          <v-icon
+            :icon="
+              selectedIds.has(item.id)
+                ? 'mdi-chart-line'
+                : 'mdi-chart-line-variant'
+            "
+            size="18"
+          />
+        </v-btn>
       </template>
 
       <!-- Value column -->
@@ -254,6 +260,15 @@ function trendColor(m: MetrikWithTrend): string {
             </v-btn>
           </template>
         </v-tooltip>
+      </template>
+
+      <!-- Expanded row with timeline -->
+      <template #expanded-row="{ item, columns }">
+        <tr>
+          <td :colspan="columns.length" class="pa-0">
+            <MetriksTimeline :metrik="item" :height="140" />
+          </td>
+        </tr>
       </template>
     </v-data-table>
   </v-card>

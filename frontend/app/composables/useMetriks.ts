@@ -13,11 +13,12 @@ const PROVIDER_NAMES = ['plausible', 'kibana', 'hello'] as const
 
 const BASE_PATH = '/reports/metriks/data'
 
-/** Supported period presets (in days). */
-export type MetrikPeriodPreset = '7d' | '3w' | '3m'
+/** Supported period presets (in days). 'latest' = compare to the previous run. */
+export type MetrikPeriodPreset = 'latest' | '7d' | '3w' | '3m'
 
-/** Maps period preset labels to their approximate day count. */
+/** Maps period preset labels to their approximate day count (0 = previous run). */
 export const PERIOD_DAYS: Record<MetrikPeriodPreset, number> = {
+  latest: 0,
   '7d': 7,
   '3w': 21,
   '3m': 90,
@@ -130,7 +131,7 @@ export function useMetriks() {
   const allMetriks = ref<MetrikWithTrend[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const comparePeriod = ref<MetrikPeriodPreset>('3m')
+  const comparePeriod = ref<MetrikPeriodPreset>('latest')
 
   /** All unique groups across every metric. */
   const allGroups = computed(() => {
@@ -165,9 +166,10 @@ export function useMetriks() {
       const url = `${BASE_PATH}/${providerName}/latest.json`
       const response = await $fetch<MetrikLatest>(url)
       return response
-    } catch {
+    } catch (e: any) {
       console.warn(
-        `[useMetriks] Could not load latest.json for ${providerName}`
+        `[useMetriks] Could not load latest.json for ${providerName}`,
+        e
       )
       return null
     }
@@ -193,9 +195,10 @@ export function useMetriks() {
       }
 
       return { meta, runs }
-    } catch {
+    } catch (e: any) {
       console.warn(
-        `[useMetriks] Could not load events.ndjson for ${providerName}`
+        `[useMetriks] Could not load events.ndjson for ${providerName}`,
+        e
       )
       return { meta: null, runs: [] }
     }
@@ -203,18 +206,17 @@ export function useMetriks() {
 
   /**
    * Build the history data points for a specific event id across runs.
+   * Produces a data point for every run date – uses null when the event
+   * is absent or its value is null, so the timeline x-axis stays complete.
    */
   function buildHistory(eventId: string, runs: MetrikRun[]): MetrikDataPoint[] {
-    const points: MetrikDataPoint[] = []
-    for (const run of runs) {
+    const points: MetrikDataPoint[] = runs.map(run => {
       const ev = run.events.find(e => e.id === eventId)
-      if (ev) {
-        points.push({
-          date: run.period.dateTo,
-          value: ev.value,
-        })
+      return {
+        date: run.period.dateTo,
+        value: ev?.value ?? null,
       }
-    }
+    })
     return points.sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     )
@@ -253,7 +255,13 @@ export function useMetriks() {
       const latestRun = data.runs[data.runs.length - 1]!
 
       // 2. Find comparison run based on selected period
-      const compareRun = findComparisonRun(data.runs, latestRun, days)
+      // days === 0 means "latest" → compare with immediately preceding run
+      const compareRun =
+        days === 0
+          ? data.runs.length >= 2
+            ? data.runs[data.runs.length - 2]!
+            : null
+          : findComparisonRun(data.runs, latestRun, days)
 
       for (const event of latestRun.events) {
         // Find corresponding event in comparison run
@@ -302,17 +310,9 @@ export function useMetriks() {
 
           if (!latest || !meta) return
 
-          // Filter out runs that have NO successful events?
-          // Or just keep them all to maintain timeline continuity?
-          // Let's keep runs but maybe we only want runs that have *some* data?
-          // For now, keeping the original logic of filtering runs with at least one ok event
-          const successfulRuns = runs.filter(r =>
-            r.events.some(e => e.status === 'ok')
-          )
-
           providerMap.set(providerName, {
             meta,
-            runs: successfulRuns,
+            runs,
             latest: latest.run,
           })
         })

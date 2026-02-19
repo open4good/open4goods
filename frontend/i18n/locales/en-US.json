@@ -2314,6 +2314,7 @@
     "offers": {
       "bestPrice": "Best price"
     },
+
     "vigilance": {
       "title": "Vigilance Points",
       "subtitle": "These indicators require your attention before purchase.",
@@ -3745,6 +3746,7 @@
       "period": "Period",
       "compareTo": "Compare to",
       "periods": {
+        "latest": "Latest",
         "7d": "7 days",
         "3w": "3 weeks",
         "3m": "3 months"

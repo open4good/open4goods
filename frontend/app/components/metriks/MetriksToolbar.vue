@@ -28,7 +28,7 @@ withDefaults(
     selectedTags?: string[]
   }>(),
   {
-    comparePeriod: '3m',
+    comparePeriod: 'latest',
     chartType: 'bar',
     selectedProviders: () => [],
     selectedGroups: () => [],
@@ -46,7 +46,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const periodOptions: MetrikPeriodPreset[] = ['7d', '3w', '3m']
+const periodOptions: MetrikPeriodPreset[] = ['latest', '7d', '3w', '3m']
 const chartTypeOptions: MetrikChartType[] = ['bar', 'line']
 
 function onPeriodChange(val: MetrikPeriodPreset): void {

@@ -46,6 +46,7 @@ const PRECACHE_EXTENSIONS = [
   'webm',
   'webmanifest',
   'woff2',
+  'ndjson',
 ]
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
 const WORKBOX_GLOB_IGNORES = [

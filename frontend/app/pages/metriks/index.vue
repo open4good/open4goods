@@ -41,7 +41,7 @@ const {
 
 // ---------- URL-driven state ----------
 
-const validPeriods: MetrikPeriodPreset[] = ['7d', '3w', '3m']
+const validPeriods: MetrikPeriodPreset[] = ['latest', '7d', '3w', '3m']
 const validChartTypes: MetrikChartType[] = ['bar', 'line']
 
 function parseQueryArray(param: string | string[] | undefined): string[] {
@@ -56,7 +56,7 @@ const initialPeriod = validPeriods.includes(
   route.query.period as MetrikPeriodPreset
 )
   ? (route.query.period as MetrikPeriodPreset)
-  : '3m'
+  : 'latest'
 
 const chartType = ref<MetrikChartType>(
   validChartTypes.includes(route.query.chart as MetrikChartType)
@@ -144,7 +144,7 @@ function syncUrl(): void {
 
   const query: Record<string, string> = {}
 
-  if (comparePeriod.value !== '3m') query.period = comparePeriod.value
+  if (comparePeriod.value !== 'latest') query.period = comparePeriod.value
   if (chartType.value !== 'bar') query.chart = chartType.value
   if (selectedIds.value.size > 0)
     query.metrics = Array.from(selectedIds.value).join(',')
