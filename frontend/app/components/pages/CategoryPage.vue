@@ -233,6 +233,10 @@
             @update:view-mode="viewMode = $event"
           />
 
+          <div class="category-page__score-guide mb-4">
+            <ScoreReadingGuideDialog :mappings="scoreGuideMappings" />
+          </div>
+
           <v-alert
             v-if="productError"
             type="error"
@@ -346,6 +350,7 @@ import CategoryProductListView from '~/components/category/products/CategoryProd
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import CtaCard from '~/components/shared/CtaCard.vue'
+import ScoreReadingGuideDialog from '~/components/shared/ScoreReadingGuideDialog.vue'
 import {
   CATEGORY_DEFAULT_VIEW_MODE,
   CATEGORY_PAGE_SIZES,
@@ -756,6 +761,13 @@ const filterOptions = computed(() =>
 const sortOptions = computed(() =>
   normalizeFieldOptionsResponse(sortOptionsData.value)
 )
+
+const scoreGuideMappings = computed(() => [
+  ...(filterOptions.value?.impact ?? []).map(field => field.mapping),
+  ...(filterOptions.value?.technical ?? []).map(field => field.mapping),
+  ...(filterOptions.value?.global ?? []).map(field => field.mapping),
+  'gtin',
+])
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
 const DEFAULT_FILTERS_COLLAPSED_STATE = true
