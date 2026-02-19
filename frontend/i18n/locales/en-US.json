@@ -69,7 +69,9 @@
       "eyebrow": "Responsible shopping",
       "title": "Nudger: The eco-friendly comparator",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Buy better. Spend smarter."],
+      "titleSubtitle": [
+        "Buy better. Spend smarter."
+      ],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -134,7 +136,9 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": ["Search a product (e.g. television, smartphone...)"]
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {
@@ -2279,7 +2283,8 @@
       "pricing": "Pricing",
       "ecological": "Ecological impact",
       "technical": "Technical attributes",
-      "technicalGroupFallback": "Additional specifications"
+      "technicalGroupFallback": "Additional specifications",
+      "explicitTitle": "Comparing {count} selected products"
     },
     "a11y": {
       "featureColumn": "Comparison criteria",
@@ -2307,14 +2312,20 @@
       "dataQuality": "Data quality"
     },
     "errors": {
-      "loadFailed": "We could not load the comparison. Please refresh and try again."
+      "loadFailed": "We could not load the comparison. Please refresh and try again.",
+      "invalidNotEnoughProducts": "Comparison requires at least two different products.",
+      "incomplete": "{count} product is unavailable. Remove it or adjust your selection."
+    },
+    "provenance": {
+      "sourceLabel": "Source",
+      "updatedLabel": "Last update",
+      "unknown": "Source unavailable"
     }
   },
   "product": {
     "offers": {
       "bestPrice": "Best price"
     },
-
     "vigilance": {
       "title": "Vigilance Points",
       "subtitle": "These indicators require your attention before purchase.",

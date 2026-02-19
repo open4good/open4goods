@@ -100,6 +100,7 @@ const messages: Record<string, string> = {
   'compare.sections.ecological': 'Impact écologique',
   'compare.sections.technical': 'Fiche technique',
   'compare.sections.technicalGroupFallback': 'Autres',
+  'compare.sections.explicitTitle': 'Comparaison de {count} produits sélectionnés',
   'compare.alerts.verticalMismatch': 'Alerte',
   'compare.actions.remove': 'Retirer {name}',
   'compare.actions.removeShort': 'Retirer',
@@ -107,6 +108,11 @@ const messages: Record<string, string> = {
   'compare.empty.title': 'Ajoutez des produits',
   'compare.empty.description': 'Utilisez le bouton comparer.',
   'compare.errors.loadFailed': 'Échec de chargement',
+  'compare.errors.invalidNotEnoughProducts': 'La comparaison nécessite au moins deux produits différents.',
+  'compare.errors.incomplete': '{count} produit est indisponible. Retirez-le ou modifiez votre sélection.',
+  'compare.provenance.sourceLabel': 'Source',
+  'compare.provenance.updatedLabel': 'Dernière mise à jour',
+  'compare.provenance.unknown': 'Source non disponible',
   'category.products.compare.itemsCount': '{count} produits',
   'components.impactScore.tooltip': '{value} sur {max}',
 }
@@ -462,5 +468,73 @@ describe('Ecological scores', () => {
     expect(brandCells[0].text()).toContain('1,5')
     expect(brandCells[1].text()).toContain('4')
     expect(brandCells[1].classes()).toContain('compare-grid__value--highlight')
+  })
+})
+
+
+describe('Comparison integrity states', () => {
+  beforeEach(() => {
+    loadProductsMock.mockReset()
+    loadVerticalMock.mockReset()
+    hasMixedVerticalsMock.mockReset()
+    compareStore.clear.mockReset()
+    compareStore.addProduct.mockReset()
+    compareStore.removeById.mockReset()
+    routerReplace.mockReset()
+    route.hash = '#compare=1234567890123Vs9999999999999'
+    localeRef.value = 'fr-FR'
+    hasMixedVerticalsMock.mockReturnValue(false)
+  })
+
+  it('renders an explicit section heading and provenance metadata for compared products', async () => {
+    loadProductsMock.mockResolvedValue([
+      createEntry({
+        gtin: '1234567890123',
+        product: {
+          identity: { brand: 'Brand', model: 'Model' },
+          base: { lastChange: 1735689600000 },
+          offers: {},
+          scores: {},
+          attributes: {},
+          datasources: { datasourceCodes: { amazon: 10, icecat: 20 } },
+        },
+      }),
+      createEntry({
+        gtin: '9999999999999',
+        title: 'Produit 2',
+        model: 'Model 2',
+      }),
+    ])
+    loadVerticalMock.mockResolvedValue(null)
+
+    const wrapper = await mountPage()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Comparaison de 2 produits sélectionnés')
+    expect(wrapper.text()).toContain('Source')
+    expect(wrapper.text()).toContain('amazon, icecat')
+    expect(wrapper.text()).toContain('Dernière mise à jour')
+  })
+
+  it('shows a clear invalid state when deduplication leaves fewer than two products', async () => {
+    loadProductsMock.mockResolvedValue([
+      createEntry({
+        gtin: '1234567890123',
+        product: { gtin: 111, identity: { brand: 'A', model: 'A' }, base: {}, offers: {}, scores: {}, attributes: {} },
+      }),
+      createEntry({
+        gtin: '9999999999999',
+        product: { gtin: 111, identity: { brand: 'A', model: 'A' }, base: {}, offers: {}, scores: {}, attributes: {} },
+      }),
+    ])
+    loadVerticalMock.mockResolvedValue(null)
+
+    const wrapper = await mountPage()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(
+      'La comparaison nécessite au moins deux produits différents.'
+    )
+    expect(wrapper.find('.compare-grid').exists()).toBe(false)
   })
 })
