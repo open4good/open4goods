@@ -69,7 +69,9 @@
       "eyebrow": "Responsible shopping",
       "title": "Nudger: The eco-friendly comparator",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Buy better. Spend smarter."],
+      "titleSubtitle": [
+        "Buy better. Spend smarter."
+      ],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -134,7 +136,9 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": ["Search a product (e.g. television, smartphone...)"]
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {
@@ -2314,7 +2318,6 @@
     "offers": {
       "bestPrice": "Best price"
     },
-
     "vigilance": {
       "title": "Vigilance Points",
       "subtitle": "These indicators require your attention before purchase.",
@@ -3758,6 +3761,67 @@
       },
       "providers": "Providers",
       "drilldown": "See details"
+    }
+  },
+  "technicalFieldGuide": {
+    "cta": "How to read these scores",
+    "title": "How to read these scores",
+    "intro": "Here are the technical fields shown in Nudger, with a human-readable label, what they are for, and the data/calculation source.",
+    "table": {
+      "technicalField": "Technical field",
+      "readableLabel": "Readable label",
+      "tooltip": "What this is for",
+      "source": "Source"
+    },
+    "showAdvanced": "Show advanced technical attributes ({count})",
+    "hideAdvanced": "Hide advanced technical attributes",
+    "advancedVisible": "Advanced attributes are shown. They stay optional for purchase decisions.",
+    "fields": {
+      "gtin": {
+        "label": "Product identifier (GTIN)",
+        "tooltip": "Uniquely identifies a product and secures matching across data sources.",
+        "source": "GTIN code embedded in the manufacturer barcode."
+      },
+      "gtinCountry": {
+        "label": "GTIN country prefix",
+        "tooltip": "Indicates the allocation area of the barcode prefix.",
+        "source": "GS1 prefix from GTIN (not the actual manufacturing country)."
+      },
+      "ecoscoreRelative": {
+        "label": "Normalized eco-score (/20)",
+        "tooltip": "Lets users compare environmental impact within the same category on a shared scale.",
+        "source": "Nudger computation based on impact subscores and statistical normalization."
+      },
+      "ecoscoreAbsolute": {
+        "label": "Raw eco-score",
+        "tooltip": "Keeps the raw value before normalization for audit and diagnostics.",
+        "source": "Internal aggregation of environmental impact criteria."
+      },
+      "ecoscoreRanking": {
+        "label": "Eco-score rank",
+        "tooltip": "Shows where this product stands against comparable products in its category.",
+        "source": "Ranking derived from computed category scores."
+      },
+      "bestPrice": {
+        "label": "Lowest observed price",
+        "tooltip": "Shows the lowest observed market price to compare purchase value.",
+        "source": "Merchant offer history collected by Nudger."
+      },
+      "offerCondition": {
+        "label": "Offer condition",
+        "tooltip": "Separates new and used offers for fair comparisons.",
+        "source": "Metadata provided by merchant feeds."
+      },
+      "offersCount": {
+        "label": "Number of offers",
+        "tooltip": "Measures product availability on the market.",
+        "source": "Count of indexed active offers."
+      },
+      "datasourceCodes": {
+        "label": "Data sources used",
+        "tooltip": "Lists which datasets feed the product sheet to assess confidence.",
+        "source": "Traceability metadata from Nudger ingestion pipelines."
+      }
     }
   }
 }
