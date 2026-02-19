@@ -14,6 +14,17 @@
       <p class="product-ai-review-request-panel__description">
         {{ t('product.aiReview.request.description') }}
       </p>
+      <v-btn
+        variant="text"
+        density="comfortable"
+        size="small"
+        color="secondary"
+        class="product-ai-review-request-panel__methodology-link"
+        :to="methodologyPath"
+        @click="trackMethodologyClick"
+      >
+        {{ t('product.aiReview.request.methodologyLink') }}
+      </v-btn>
 
       <div class="product-ai-review-request-panel__controls">
         <div class="product-ai-review-request-panel__quota">
@@ -103,6 +114,7 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAnalytics } from '~/composables/useAnalytics'
 
 const props = defineProps({
   productName: {
@@ -166,6 +178,8 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const localePath = useLocalePath()
+const { trackEvent } = useAnalytics()
 const VueHcaptcha = defineAsyncComponent(
   () => import('@hcaptcha/vue3-hcaptcha')
 )
@@ -184,6 +198,16 @@ const productLabel = computed(() =>
     ? props.productName
     : t('product.aiReview.request.productFallback')
 )
+
+const methodologyPath = computed(() => localePath('/impact-score'))
+
+const trackMethodologyClick = () => {
+  trackEvent('ai-review-methodology-click', {
+    props: {
+      location: 'request-panel',
+    },
+  })
+}
 
 const submitDisabled = computed(() => {
   if (!agreementModel.value || props.requesting) {
@@ -259,6 +283,16 @@ const handleCaptchaVerify = (token: string) => {
   margin: 0;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   line-height: 1.6;
+}
+
+.product-ai-review-request-panel__methodology-link {
+  align-self: flex-start;
+  margin-top: -0.25rem;
+}
+
+.product-ai-review-request-panel__methodology-link :deep(.v-btn__content) {
+  text-transform: none;
+  font-size: 0.8rem;
 }
 
 .product-ai-review-request-panel__controls {

@@ -34,7 +34,7 @@
               }}</span>
             </div>
 
-            <p class="product-ai-review__subtitle mb-4">
+            <p class="product-ai-review__subtitle mb-2">
               {{
                 $t(
                   sourcesCount === 1
@@ -44,6 +44,17 @@
                 )
               }}
             </p>
+            <v-btn
+              variant="text"
+              density="comfortable"
+              size="small"
+              color="secondary"
+              class="product-ai-review__methodology-link mb-4"
+              :to="methodologyPath"
+              @click="trackMethodologyClick"
+            >
+              {{ $t('product.aiReview.request.methodologyLink') }}
+            </v-btn>
 
             <div
               v-if="reviewContent?.summary"
@@ -621,6 +632,7 @@ import type {
 import { IpQuotaCategory } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
 import { useIpQuota } from '~/composables/useIpQuota'
+import { useAnalytics } from '~/composables/useAnalytics'
 
 import ProductAiReviewInsightBlock from '~/components/product/ProductAiReviewInsightBlock.vue'
 import ProductAiReviewRequestPanel from '~/components/product/ProductAiReviewRequestPanel.vue'
@@ -705,6 +717,8 @@ const props = defineProps({
 })
 
 const { locale, t, n } = useI18n()
+const localePath = useLocalePath()
+const { trackEvent } = useAnalytics()
 const theme = useTheme()
 const { isLoggedIn } = useAuth()
 const { getRemaining, invalidateQuota, refreshQuota, recordUsage } =
@@ -794,6 +808,8 @@ const sourcesToggleLabel = computed(() =>
     : t('product.aiReview.sources.showMore')
 )
 
+const methodologyPath = computed(() => localePath('/impact-score'))
+
 const levelOptions = computed(() => [
   {
     value: 'novice',
@@ -864,6 +880,14 @@ const communityContent = computed(() =>
     advanced: reviewContent.value?.communityReviewAdvanced,
   })
 )
+
+const trackMethodologyClick = () => {
+  trackEvent('ai-review-methodology-click', {
+    props: {
+      location: 'review-section',
+    },
+  })
+}
 
 function sanitizeHtml(content: string | null): string | null {
   if (!content) {

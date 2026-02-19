@@ -69,7 +69,9 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Nudger : le comparateur écologique"],
+      "titleSubtitle": [
+        "Nudger : le comparateur écologique"
+      ],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -721,6 +723,11 @@
         "title": "Notre assistant",
         "description": "Laissez-vous guider",
         "ariaLabel": "Ouvrir l'assistant Nudger"
+      },
+      "axis": {
+        "products": "Produits",
+        "value": "Valeur ({unit})",
+        "defaultUnit": "valeur"
       }
     },
     "admin": {
@@ -2154,7 +2161,8 @@
       "pricing": "Tarifs",
       "ecological": "Impact écologique",
       "technical": "Caractéristiques techniques",
-      "technicalGroupFallback": "Autres caractéristiques"
+      "technicalGroupFallback": "Autres caractéristiques",
+      "explicitTitle": "Comparaison de {count} produits sélectionnés"
     },
     "a11y": {
       "featureColumn": "Critères de comparaison",
@@ -2182,14 +2190,20 @@
       "dataQuality": "Qualité des données"
     },
     "errors": {
-      "loadFailed": "Impossible de charger la comparaison. Actualisez la page et réessayez."
+      "loadFailed": "Impossible de charger la comparaison. Actualisez la page et réessayez.",
+      "invalidNotEnoughProducts": "La comparaison nécessite au moins deux produits différents.",
+      "incomplete": "{count} produit est indisponible. Retirez-le ou modifiez votre sélection."
+    },
+    "provenance": {
+      "sourceLabel": "Source",
+      "updatedLabel": "Dernière mise à jour",
+      "unknown": "Source non disponible"
     }
   },
   "product": {
     "offers": {
       "bestPrice": "Meilleur prix"
     },
-
     "vigilance": {
       "title": "Points de vigilance",
       "obsolescence": {
@@ -2299,7 +2313,9 @@
         "cancel": "Annuler",
         "close": "Fermer",
         "description": "Nous utilisons des outils puissants d'IA, d'analyse et d'agrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est coûteuse (financièrement et énergétiquement). À utiliser si vous avez un réel intérêt pour ce produit. Et si vous voulez nous aider : faites vos achats via Nudger 😊",
+        "methodologyLink": "Comment c'est généré ?",
         "eyebrow": "Synthèse IA",
+        "eyebrowNeutral": "Synthèse",
         "productFallback": "ce produit",
         "remainingUnknown": "Indisponible",
         "submit": "Valider",
@@ -2830,6 +2846,7 @@
         }
       },
       "ai": "Synthèse IA",
+      "aiShort": "Synthèse",
       "attributes": "Caractéristiques",
       "collapse": "Réduire la navigation",
       "collapseSubmenu": "Réduire le sous-menu {section}",
@@ -3662,6 +3679,67 @@
       },
       "providers": "Sources",
       "drilldown": "Voir le détail"
+    }
+  },
+  "technicalFieldGuide": {
+    "cta": "Comment lire ces scores",
+    "title": "Comment lire ces scores",
+    "intro": "Voici les champs techniques affichés dans Nudger, leur libellé lisible, leur utilité et leur source de données/calcul.",
+    "table": {
+      "technicalField": "Champ technique",
+      "readableLabel": "Libellé lisible",
+      "tooltip": "À quoi ça sert",
+      "source": "Source"
+    },
+    "showAdvanced": "Afficher les attributs techniques avancés ({count})",
+    "hideAdvanced": "Masquer les attributs techniques avancés",
+    "advancedVisible": "Les attributs avancés sont affichés. Ils restent optionnels pour la décision d'achat.",
+    "fields": {
+      "gtin": {
+        "label": "Identifiant produit (GTIN)",
+        "tooltip": "Identifie de manière unique le produit et sécurise les correspondances entre sources.",
+        "source": "Code GTIN encodé dans le code-barres fabricant."
+      },
+      "gtinCountry": {
+        "label": "Pays associé au GTIN",
+        "tooltip": "Donne une indication de la zone d'attribution du code-barres.",
+        "source": "Préfixe GS1 du GTIN (pas le pays réel de fabrication)."
+      },
+      "ecoscoreRelative": {
+        "label": "Eco-score normalisé (/20)",
+        "tooltip": "Permet de comparer l'impact environnemental de produits d'une même catégorie sur une échelle commune.",
+        "source": "Calcul Nudger à partir des sous-scores d'impact et d'une normalisation statistique."
+      },
+      "ecoscoreAbsolute": {
+        "label": "Eco-score brut",
+        "tooltip": "Conserve la valeur brute avant normalisation pour l'audit et le diagnostic.",
+        "source": "Agrégation interne des critères d'impact environnemental."
+      },
+      "ecoscoreRanking": {
+        "label": "Rang de l'eco-score",
+        "tooltip": "Positionne le produit par rapport aux autres produits comparables de la catégorie.",
+        "source": "Classement dérivé des scores calculés sur le référentiel de la catégorie."
+      },
+      "bestPrice": {
+        "label": "Prix le plus bas observé",
+        "tooltip": "Donne le prix plancher constaté pour comparer la valeur d'achat.",
+        "source": "Historique d'offres marchands collectées par Nudger."
+      },
+      "offerCondition": {
+        "label": "État de l'offre",
+        "tooltip": "Distingue les offres neuves et d'occasion pour une comparaison équitable.",
+        "source": "Métadonnées remontées par les flux marchands."
+      },
+      "offersCount": {
+        "label": "Nombre d'offres",
+        "tooltip": "Mesure la disponibilité du produit sur le marché.",
+        "source": "Comptage des offres actives indexées."
+      },
+      "datasourceCodes": {
+        "label": "Sources de données utilisées",
+        "tooltip": "Indique les jeux de données qui alimentent la fiche pour juger la fiabilité.",
+        "source": "Traçabilité des pipelines d'ingestion Nudger."
+      }
     }
   }
 }

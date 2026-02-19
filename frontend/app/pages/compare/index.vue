@@ -48,6 +48,17 @@
     </v-alert>
 
     <v-alert
+      v-else-if="invalidReason"
+      type="warning"
+      variant="tonal"
+      border="start"
+      class="mb-6"
+      role="alert"
+    >
+      {{ invalidReason }}
+    </v-alert>
+
+    <v-alert
       v-else-if="hasMixedVerticals"
       type="warning"
       variant="tonal"
@@ -74,12 +85,15 @@
       />
       <h2 class="compare-page__empty-title">{{ t('compare.empty.title') }}</h2>
       <p class="compare-page__empty-text">
-        {{ t('compare.empty.description') }}
+        {{ emptyDescription }}
       </p>
     </div>
 
-    <v-container v-else fluid class="compare-page__content">
+    <v-container v-else-if="canDisplayComparison" fluid class="compare-page__content">
       <section class="compare-section">
+        <h2 class="compare-section__title">
+          {{ explicitComparisonTitle }}
+        </h2>
         <div class="compare-grid" role="table">
           <div class="compare-grid__media" role="row" aria-hidden="true">
             <div
@@ -215,6 +229,14 @@
                 >
                   {{ t('compare.actions.removeShort') }}
                 </v-btn>
+                <dl class="compare-grid__product-provenance">
+                  <dt>{{ t('compare.provenance.sourceLabel') }}</dt>
+                  <dd>{{ provenanceSourceLabel(product) }}</dd>
+                  <template v-if="provenanceUpdatedLabel(product)">
+                    <dt>{{ t('compare.provenance.updatedLabel') }}</dt>
+                    <dd>{{ provenanceUpdatedLabel(product) }}</dd>
+                  </template>
+                </dl>
               </article>
             </div>
           </div>
@@ -1112,12 +1134,52 @@ const loadError = ref<string | null>(null)
 const products = ref<CompareProductEntry[]>([])
 const verticalConfig = ref<VerticalConfigFullDto | null>(null)
 const requestedGtins = ref<string[]>([])
+const unresolvedProductsCount = ref(0)
 
 const comparePath = computed(() =>
   resolveLocalizedRoutePath('compare', locale.value)
 )
 
 const productCount = computed(() => products.value.length)
+
+const canDisplayComparison = computed(() => productCount.value >= 2)
+
+const missingProductsCount = computed(() => {
+  const missing = unresolvedProductsCount.value
+  return missing > 0 ? missing : 0
+})
+
+const invalidReason = computed(() => {
+  if (!requestedGtins.value.length || loading.value || loadError.value) {
+    return null
+  }
+
+  if (missingProductsCount.value > 0) {
+    return t('compare.errors.incomplete', { count: missingProductsCount.value })
+  }
+
+  if (!canDisplayComparison.value) {
+    return t('compare.errors.invalidNotEnoughProducts')
+  }
+
+  return null
+})
+
+const emptyDescription = computed(() => {
+  if (!requestedGtins.value.length) {
+    return t('compare.empty.description')
+  }
+
+  if (invalidReason.value) {
+    return invalidReason.value
+  }
+
+  return t('compare.empty.description')
+})
+
+const explicitComparisonTitle = computed(() =>
+  t('compare.sections.explicitTitle', { count: productCount.value })
+)
 
 const compareSummary = computed(() => {
   if (!productCount.value) {
@@ -1390,24 +1452,66 @@ const syncHash = async (hash: string) => {
     }
 
     const loadedProducts = await service.loadProducts(parsedGtins)
-    products.value = loadedProducts
+    unresolvedProductsCount.value = Math.max(
+      parsedGtins.length - loadedProducts.length,
+      0
+    )
+    const uniqueProducts = loadedProducts.filter((entry, index, entries) => {
+      const uniqueId = String(entry.product.gtin ?? entry.gtin)
+      return (
+        entries.findIndex(candidate => {
+          return String(candidate.product.gtin ?? candidate.gtin) === uniqueId
+        }) === index
+      )
+    })
+    products.value = uniqueProducts
 
     compareStore.clear()
-    loadedProducts.forEach(entry => {
+    uniqueProducts.forEach(entry => {
       compareStore.addProduct(entry.product)
     })
 
     const verticalId =
-      loadedProducts.find(entry => entry.verticalId)?.verticalId ?? null
+      uniqueProducts.find(entry => entry.verticalId)?.verticalId ?? null
     verticalConfig.value = await service.loadVertical(verticalId)
   } catch (error) {
     console.error('Failed to load comparison', error)
     loadError.value = t('compare.errors.loadFailed')
     products.value = []
     verticalConfig.value = null
+    unresolvedProductsCount.value = 0
   } finally {
     loading.value = false
   }
+}
+
+const provenanceSourceLabel = (entry: CompareProductEntry): string => {
+  const datasourceCodes = entry.product.datasources?.datasourceCodes
+  if (!datasourceCodes) {
+    return t('compare.provenance.unknown')
+  }
+
+  const sources = Object.keys(datasourceCodes)
+    .map(source => source.trim())
+    .filter(source => source.length > 0)
+
+  if (!sources.length) {
+    return t('compare.provenance.unknown')
+  }
+
+  return sources.join(', ')
+}
+
+const provenanceUpdatedLabel = (entry: CompareProductEntry): string | null => {
+  const updatedAt = entry.product.base?.lastChange
+  if (typeof updatedAt !== 'number' || !Number.isFinite(updatedAt)) {
+    return null
+  }
+
+  return new Intl.DateTimeFormat(locale.value, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(updatedAt)
 }
 
 onMounted(async () => {

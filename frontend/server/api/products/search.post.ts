@@ -13,6 +13,10 @@ import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 import { normaliseProductDto } from '../../utils/normalise-product-sourcing'
+import {
+  logFacetQualityIssues,
+  sanitizeFacetAggregations,
+} from '../../utils/facet-quality'
 
 interface ProductsSearchPayload {
   verticalId?: string
@@ -142,6 +146,8 @@ export default defineEventHandler(
       response.products?.data?.forEach(product => {
         normaliseProductDto(product)
       })
+      logFacetQualityIssues(response.aggregations)
+      response.aggregations = sanitizeFacetAggregations(response.aggregations)
 
       return response
     } catch (error) {

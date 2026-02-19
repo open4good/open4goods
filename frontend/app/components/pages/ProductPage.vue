@@ -274,6 +274,16 @@ const { y: scrollY } = useWindowScroll()
 const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
+const aiNavigationLabelVariant = useState<'ai' | 'neutral'>(
+  'product-ai-navigation-label-variant',
+  () => (Math.random() < 0.5 ? 'ai' : 'neutral')
+)
+const aiNavigationLabel = computed(() =>
+  aiNavigationLabelVariant.value === 'neutral'
+    ? t('product.navigation.aiShort')
+    : t('product.navigation.ai')
+)
+
 
 const heroSectionRef = ref<HTMLElement | null>(null)
 const { bottom: _heroSectionBottom } = useElementBounding(heroSectionRef)
@@ -1780,7 +1790,7 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
   },
   {
     id: sectionIds.ai,
-    label: t('product.navigation.ai'),
+    label: aiNavigationLabel.value,
     icon: 'mdi-robot-outline',
     condition: showAiReviewSection.value,
     subsections: aiSubsections.value,
