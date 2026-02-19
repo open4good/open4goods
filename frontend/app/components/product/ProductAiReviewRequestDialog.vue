@@ -16,7 +16,7 @@
             </div>
             <div>
               <p class="product-ai-review-request__eyebrow">
-                {{ t('product.aiReview.request.eyebrow') }}
+                {{ requestEyebrowLabel }}
               </p>
               <h3 class="product-ai-review-request__headline">
                 {{ productLabel }}
@@ -34,6 +34,19 @@
         <p class="product-ai-review-request__description">
           {{ t('product.aiReview.request.description') }}
         </p>
+
+        <div class="product-ai-review-request__methodology-link">
+          <v-btn
+            variant="text"
+            density="comfortable"
+            size="small"
+            color="secondary"
+            :to="methodologyPath"
+            @click="trackMethodologyClick"
+          >
+            {{ t('product.aiReview.request.methodologyLink') }}
+          </v-btn>
+        </div>
 
         <div class="product-ai-review-request__controls">
           <div class="product-ai-review-request__quota">
@@ -117,8 +130,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAnalytics } from '~/composables/useAnalytics'
 
 const props = defineProps({
   modelValue: {
@@ -193,10 +207,16 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const localePath = useLocalePath()
+const { trackEvent } = useAnalytics()
 const VueHcaptcha = defineAsyncComponent(
   () => import('@hcaptcha/vue3-hcaptcha')
 )
 const captchaRef = ref<InstanceType<typeof VueHcaptcha> | null>(null)
+const labelVariant = useState<'ai' | 'neutral'>(
+  'product-ai-review-request-label-variant',
+  () => (Math.random() < 0.5 ? 'ai' : 'neutral')
+)
 
 const dialogModel = computed({
   get: () => props.modelValue,
@@ -216,6 +236,12 @@ const productLabel = computed(() =>
     ? props.productName
     : t('product.aiReview.request.productFallback')
 )
+const requestEyebrowLabel = computed(() =>
+  labelVariant.value === 'neutral'
+    ? t('product.aiReview.request.eyebrowNeutral')
+    : t('product.aiReview.request.eyebrow')
+)
+const methodologyPath = computed(() => localePath('/impact-score'))
 
 watch(
   () => props.modelValue,
@@ -255,6 +281,24 @@ const handleCaptchaVerify = (token: string) => {
   emit('captcha-verify', token)
   emit('submit')
 }
+
+const trackMethodologyClick = () => {
+  trackEvent('ai-review-methodology-click', {
+    props: {
+      location: 'request-dialog',
+      labelVariant: labelVariant.value,
+    },
+  })
+}
+
+onMounted(() => {
+  trackEvent('ai-review-request-variant-view', {
+    props: {
+      location: 'request-dialog',
+      labelVariant: labelVariant.value,
+    },
+  })
+})
 </script>
 
 <style scoped>
@@ -320,6 +364,18 @@ const handleCaptchaVerify = (token: string) => {
   margin: 0;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   line-height: 1.6;
+}
+
+.product-ai-review-request__methodology-link {
+  margin-top: -0.25rem;
+}
+
+.product-ai-review-request__methodology-link :deep(.v-btn) {
+  min-height: auto;
+  padding-inline: 0;
+  font-size: 0.8rem;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .product-ai-review-request__controls {

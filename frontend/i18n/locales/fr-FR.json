@@ -2299,7 +2299,9 @@
         "cancel": "Annuler",
         "close": "Fermer",
         "description": "Nous utilisons des outils puissants d'IA, d'analyse et d'agrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est coûteuse (financièrement et énergétiquement). À utiliser si vous avez un réel intérêt pour ce produit. Et si vous voulez nous aider : faites vos achats via Nudger 😊",
+        "methodologyLink": "Comment c'est généré ?",
         "eyebrow": "Synthèse IA",
+        "eyebrowNeutral": "Synthèse",
         "productFallback": "ce produit",
         "remainingUnknown": "Indisponible",
         "submit": "Valider",
@@ -2830,6 +2832,7 @@
         }
       },
       "ai": "Synthèse IA",
+      "aiShort": "Synthèse",
       "attributes": "Caractéristiques",
       "collapse": "Réduire la navigation",
       "collapseSubmenu": "Réduire le sous-menu {section}",
