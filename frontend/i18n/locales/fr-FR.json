@@ -2161,7 +2161,8 @@
       "pricing": "Tarifs",
       "ecological": "Impact écologique",
       "technical": "Caractéristiques techniques",
-      "technicalGroupFallback": "Autres caractéristiques"
+      "technicalGroupFallback": "Autres caractéristiques",
+      "explicitTitle": "Comparaison de {count} produits sélectionnés"
     },
     "a11y": {
       "featureColumn": "Critères de comparaison",
@@ -2189,7 +2190,14 @@
       "dataQuality": "Qualité des données"
     },
     "errors": {
-      "loadFailed": "Impossible de charger la comparaison. Actualisez la page et réessayez."
+      "loadFailed": "Impossible de charger la comparaison. Actualisez la page et réessayez.",
+      "invalidNotEnoughProducts": "La comparaison nécessite au moins deux produits différents.",
+      "incomplete": "{count} produit est indisponible. Retirez-le ou modifiez votre sélection."
+    },
+    "provenance": {
+      "sourceLabel": "Source",
+      "updatedLabel": "Dernière mise à jour",
+      "unknown": "Source non disponible"
     }
   },
   "product": {
