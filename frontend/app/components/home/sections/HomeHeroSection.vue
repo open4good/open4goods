@@ -387,7 +387,8 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 <style scoped lang="sass">
 .home-hero
   position: relative
-  overflow: hidden
+  overflow-x: clip
+  overflow-y: visible
   min-height: 100dvh
   box-sizing: border-box
   --home-hero-padding: clamp(2.5rem, 7vw, 1.75rem)
@@ -556,7 +557,7 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 @media (max-width: 959px)
   .home-hero
-    min-height: clamp(520px, 68dvh, 760px)
+    min-height: auto
     padding-block: clamp(2rem, 10vw, 4rem)
 
   .home-hero__panel

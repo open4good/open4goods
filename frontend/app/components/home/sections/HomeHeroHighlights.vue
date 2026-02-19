@@ -567,12 +567,7 @@ const resolveAiSummaryStyle = () => {
   // margin now handled by utility class: ma-0
   color: rgb(var(--v-theme-text-neutral-secondary))
   line-height: 1.35
-
-.home-hero-highlights__description--compact
-  display: -webkit-box
-  -webkit-line-clamp: 1
-  -webkit-box-orient: vertical
-  overflow: hidden
+  overflow-wrap: anywhere
 
 .home-hero-highlights__link
   color: rgb(var(--v-theme-text-neutral-strong))
@@ -636,12 +631,10 @@ const resolveAiSummaryStyle = () => {
   color: rgb(var(--v-theme-text-neutral-secondary))
   font-size: 0.85rem
   line-height: 1.4
+  overflow-wrap: anywhere
 
 .home-hero-highlights__ai-summary-description--compact
-  display: -webkit-box
-  -webkit-line-clamp: 1
-  -webkit-box-orient: vertical
-  overflow: hidden
+  font-size: 0.85rem
 
 // .home-hero-highlights__ai-summary-actions styles now handled by utility classes: d-flex flex-wrap align-center justify-center ga-4 mt-4
 

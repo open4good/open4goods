@@ -529,3 +529,7 @@ Refer to [`/frontend/docs/internationalisation.md`](/frontend/docs/international
 
 Happy coding!
 Keep this guide nearby as you work on Nudger.
+
+## Additional docs
+
+- [UI acceptance criteria](docs/ui-acceptance-criteria.md)
