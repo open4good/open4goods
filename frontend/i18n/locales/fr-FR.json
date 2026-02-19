@@ -723,6 +723,11 @@
         "title": "Notre assistant",
         "description": "Laissez-vous guider",
         "ariaLabel": "Ouvrir l'assistant Nudger"
+      },
+      "axis": {
+        "products": "Produits",
+        "value": "Valeur ({unit})",
+        "defaultUnit": "valeur"
       }
     },
     "admin": {

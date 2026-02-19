@@ -57,6 +57,10 @@ import type {
   Filter,
 } from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
+import {
+  hasRenderableFacetLabel,
+  normalizeFacetLabel,
+} from '~~/shared/utils/facet-normalization'
 
 const props = defineProps<{
   field: FieldMetadataDto
@@ -94,7 +98,13 @@ const toTermValue = (value: unknown): string | undefined => {
   return String(value)
 }
 
-const normalizeTermKey = (key?: string | null) => key ?? MISSING_TERM_KEY
+const normalizeTermKey = (key?: string | null) => {
+  if (!hasRenderableFacetLabel(key)) {
+    return MISSING_TERM_KEY
+  }
+
+  return normalizeFacetLabel(key)
+}
 
 type TermOption = {
   key?: string
@@ -108,6 +118,10 @@ const currentCounts = computed(() => {
   const map = new Map<string, number>()
 
   currentBuckets.value.forEach(bucket => {
+    if (!hasRenderableFacetLabel(bucket.key)) {
+      return
+    }
+
     const key = normalizeTermKey(toTermValue(bucket.key))
     map.set(key, bucket.count ?? 0)
   })
@@ -138,6 +152,10 @@ const mergedOptions = computed<TermOption[]>(() => {
 
   baselineBuckets.value.forEach(bucket => {
     const key = toTermValue(bucket.key)
+    if (!hasRenderableFacetLabel(key)) {
+      return
+    }
+
     const normalized = normalizeTermKey(key)
     const currentCount = currentCounts.value.get(normalized) ?? 0
     upsertOption(key, currentCount)
@@ -145,12 +163,16 @@ const mergedOptions = computed<TermOption[]>(() => {
 
   currentBuckets.value.forEach(bucket => {
     const key = toTermValue(bucket.key)
+    if (!hasRenderableFacetLabel(key)) {
+      return
+    }
+
     const normalized = normalizeTermKey(key)
     const count = currentCounts.value.get(normalized) ?? bucket.count ?? 0
     upsertOption(key, count)
   })
 
-  const selectedTerms = new Set(localTerms.value)
+  const selectedTerms = new Set(localTerms.value.filter(hasRenderableFacetLabel))
   selectedTerms.forEach(term => {
     const normalized = normalizeTermKey(term)
     if (!seen.has(normalized)) {
@@ -165,12 +187,13 @@ const mergedOptions = computed<TermOption[]>(() => {
 
 const filteredOptions = computed(() => {
   const query = search.value.trim().toLowerCase()
-  if (!query) {
+  const normalizedQuery = normalizeFacetLabel(query)
+  if (!normalizedQuery) {
     return mergedOptions.value
   }
 
   return mergedOptions.value.filter(option =>
-    option.key?.toLowerCase().includes(query)
+    normalizeFacetLabel(option.key).includes(normalizedQuery)
   )
 })
 
@@ -216,7 +239,7 @@ const onCheckboxChange = (
   term: string | undefined,
   selected: boolean | null
 ) => {
-  if (!term) {
+  if (!hasRenderableFacetLabel(term)) {
     return
   }
 
@@ -225,7 +248,7 @@ const onCheckboxChange = (
   if (!selected) {
     next.delete(term)
   } else {
-    next.add(term)
+    next.add(term.trim())
   }
 
   localTerms.value = Array.from(next)

@@ -2,14 +2,15 @@ import type {
   FieldMetadataDto,
   ProductFieldOptionsResponse,
 } from '~~/shared/api-client'
+import {
+  hasRenderableFacetLabel,
+  normalizeFacetLabel,
+} from '~~/shared/utils/facet-normalization'
 
 type FieldMetadataGroup = FieldMetadataDto[]
 
 const normalizeText = (value: string | null | undefined): string => {
-  return String(value ?? '')
-    .trim()
-    .replace(/\s+/g, ' ')
-    .toLowerCase()
+  return normalizeFacetLabel(value)
 }
 
 const buildFieldDeduplicationKey = (field: FieldMetadataDto): string => {
@@ -59,6 +60,10 @@ export const deduplicateFieldMetadataList = (
   const indexByKey = new Map<string, number>()
 
   fields.forEach(field => {
+    if (!normalizeText(field.mapping) && !hasRenderableFacetLabel(field.title)) {
+      return
+    }
+
     const key = buildFieldDeduplicationKey(field)
     const currentIndex = indexByKey.get(key)
 
