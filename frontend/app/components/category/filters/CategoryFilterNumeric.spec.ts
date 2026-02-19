@@ -93,7 +93,7 @@ describe('CategoryFilterNumeric', () => {
 
     const wrapper = mountComponent(filter)
     expect(wrapper.find('.category-filter-numeric__range').text()).toBe(
-      '1.2 → 5.7'
+      '1.2 kg → 5.7 kg'
     )
   })
 })

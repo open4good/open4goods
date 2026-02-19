@@ -73,6 +73,7 @@ import {
   sliderValueToPrice,
 } from './price-scale'
 import { ensureECharts } from '~/utils/echarts-loader'
+import { resolveFacetUnit } from '~~/shared/utils/facet-normalization'
 
 let echartsRegistered = false
 
@@ -127,6 +128,7 @@ const { t, n, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
 const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
+const valueUnit = computed(() => resolveFacetUnit(props.field.mapping))
 
 const ariaLabel = computed(
   () => `${displayTitle.value} ${t('category.filters.rangeAriaSuffix')}`
@@ -268,9 +270,11 @@ const formatSliderValue = (value: number): string => {
   }
 
   const resolvedValue = priceField.value ? sliderValueToPrice(value) : value
-  return formatNumericRangeValue(resolvedValue, n, {
+  const formatted = formatNumericRangeValue(resolvedValue, n, {
     isPrice: priceField.value,
   })
+
+  return valueUnit.value ? `${formatted} ${valueUnit.value}` : formatted
 }
 
 const formatBoundary = (value: number | string | null | undefined): string => {
@@ -287,7 +291,8 @@ const formatBoundary = (value: number | string | null | undefined): string => {
     }).format(new Date(parsed))
   }
 
-  return formatNumericRangeValue(value, n, { isPrice: priceField.value })
+  const formatted = formatNumericRangeValue(value, n, { isPrice: priceField.value })
+  return valueUnit.value ? `${formatted} ${valueUnit.value}` : formatted
 }
 
 const localValue = ref<[number, number]>([
@@ -388,8 +393,13 @@ const pointerShadowColor = computed(() =>
 )
 const CHART_HORIZONTAL_PADDING = 8
 
+const hasInformativeBuckets = computed(() => {
+  const nonEmpty = buckets.value.filter(bucket => (bucket.count ?? 0) > 0)
+  return nonEmpty.length > 1
+})
+
 const chartHeight = computed(() => {
-  if (!buckets.value.length) {
+  if (!buckets.value.length || !hasInformativeBuckets.value) {
     return '0px'
   }
 
@@ -421,7 +431,7 @@ const labelStep = computed(() => {
 })
 
 const chartOptions = computed<EChartsOption | null>(() => {
-  if (!buckets.value.length) {
+  if (!buckets.value.length || !hasInformativeBuckets.value) {
     return null
   }
 
@@ -532,6 +542,9 @@ const chartOptions = computed<EChartsOption | null>(() => {
         },
       },
       axisTick: { show: false },
+      name: t('category.filters.axis.value', {
+        unit: valueUnit.value || t('category.filters.axis.defaultUnit'),
+      }),
       axisLabel: {
         show: false,
         color: axisColor.value,
@@ -548,6 +561,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
     },
     yAxis: {
       type: 'value',
+      name: t('category.filters.axis.products'),
       axisLine: { show: false },
       axisTick: { show: false },
       splitLine: {
@@ -569,7 +583,7 @@ const chartOptions = computed<EChartsOption | null>(() => {
 })
 
 const chartAriaLabel = computed(() => {
-  if (!buckets.value.length) {
+  if (!buckets.value.length || !hasInformativeBuckets.value) {
     return ''
   }
 

@@ -69,7 +69,9 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Nudger : le comparateur écologique"],
+      "titleSubtitle": [
+        "Nudger : le comparateur écologique"
+      ],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -721,6 +723,11 @@
         "title": "Notre assistant",
         "description": "Laissez-vous guider",
         "ariaLabel": "Ouvrir l'assistant Nudger"
+      },
+      "axis": {
+        "products": "Produits",
+        "value": "Valeur ({unit})",
+        "defaultUnit": "valeur"
       }
     },
     "admin": {
@@ -2189,7 +2196,6 @@
     "offers": {
       "bestPrice": "Meilleur prix"
     },
-
     "vigilance": {
       "title": "Points de vigilance",
       "obsolescence": {
