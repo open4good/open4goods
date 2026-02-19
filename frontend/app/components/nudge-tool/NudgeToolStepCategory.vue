@@ -578,7 +578,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
 
-const { t } = useI18n()
 const { mobile } = useDisplay()
 const selected = ref<string | null>(props.selectedCategoryId ?? null)
 const allowDisabledSelection = computed(() => props.isAuthenticated ?? false)

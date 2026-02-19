@@ -166,7 +166,7 @@ export function useMetriks() {
       const url = `${BASE_PATH}/${providerName}/latest.json`
       const response = await $fetch<MetrikLatest>(url)
       return response
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.warn(
         `[useMetriks] Could not load latest.json for ${providerName}`,
         e
@@ -195,7 +195,7 @@ export function useMetriks() {
       }
 
       return { meta, runs }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.warn(
         `[useMetriks] Could not load events.ndjson for ${providerName}`,
         e
