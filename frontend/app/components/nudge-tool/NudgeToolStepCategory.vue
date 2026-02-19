@@ -6,6 +6,7 @@
     <!-- Header removed, moved to Wizard -->
 
     <v-slide-group
+      v-if="!mobile"
       v-model="selected"
       class="nudge-step-category__slider"
       show-arrows
@@ -286,10 +287,286 @@
         </template>
       </v-slide-group-item>
     </v-slide-group>
+
+    <div v-else class="nudge-step-category__grid">
+      <v-item-group v-model="selected" mandatory>
+        <v-row dense justify="center" class="ma-0">
+          <v-col
+            v-for="category in categories"
+            :key="category.id"
+            cols="6"
+            sm="4"
+          >
+            <v-item
+              v-slot="{ isSelected, toggle }"
+              :value="category.id ?? ''"
+              :disabled="isCategoryDisabled(category)"
+            >
+              <v-tooltip
+                v-if="category.tooltip"
+                location="top"
+                :text="category.tooltip"
+              >
+                <template #activator="{ props: tooltipProps }">
+                  <ClientOnly v-if="isStaticCategory(category)">
+                    <component
+                      :is="category.externalLink ? 'a' : 'div'"
+                      class="nudge-step-category__card-link"
+                      :href="category.externalLink"
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      v-bind="tooltipProps"
+                    >
+                      <v-card
+                        class="nudge-step-category__card nudge-option-card"
+                        :class="{
+                          'nudge-option-card--selected':
+                            !isExternalCategory(category) && isSelected,
+                          'nudge-option-card--disabled':
+                            isCategoryDisabled(category),
+                          'nudge-step-category__card--static':
+                            isStaticCategory(category),
+                        }"
+                        variant="flat"
+                        rounded="xl"
+                        :role="category.externalLink ? 'link' : 'button'"
+                        :aria-pressed="
+                          (
+                            !isExternalCategory(category) && isSelected
+                          ).toString()
+                        "
+                        :ripple="!isCategoryDisabled(category)"
+                        :tabindex="isCategoryDisabled(category) ? -1 : 0"
+                        @click="() => handleSelect(category, toggle)"
+                      >
+                        <div class="nudge-step-category__image">
+                          <v-img
+                            :src="category.imageMedium || category.imageSmall"
+                            :alt="
+                              category.verticalHomeTitle ?? category.id ?? ''
+                            "
+                            aspect-ratio="1"
+                            class="nudge-step-category__img"
+                            cover
+                          >
+                            <template #placeholder>
+                              <div class="nudge-step-category__fallback">
+                                <v-icon
+                                  :icon="category.mdiIcon ?? 'mdi-tag'"
+                                  size="28"
+                                />
+                              </div>
+                            </template>
+
+                            <template #error>
+                              <div class="nudge-step-category__fallback">
+                                <v-icon
+                                  :icon="category.mdiIcon ?? 'mdi-tag'"
+                                  size="28"
+                                />
+                              </div>
+                            </template>
+                          </v-img>
+                        </div>
+                        <p class="nudge-step-category__name">
+                          {{ category.verticalHomeTitle ?? category.id }}
+                        </p>
+                      </v-card>
+                    </component>
+                  </ClientOnly>
+                  <component
+                    :is="category.externalLink ? 'a' : 'div'"
+                    v-else
+                    class="nudge-step-category__card-link"
+                    :href="category.externalLink"
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    v-bind="tooltipProps"
+                  >
+                    <v-card
+                      class="nudge-step-category__card nudge-option-card"
+                      :class="{
+                        'nudge-option-card--selected':
+                          !isExternalCategory(category) && isSelected,
+                        'nudge-option-card--disabled':
+                          isCategoryDisabled(category),
+                        'nudge-step-category__card--static':
+                          isStaticCategory(category),
+                      }"
+                      variant="flat"
+                      rounded="xl"
+                      :role="category.externalLink ? 'link' : 'button'"
+                      :aria-pressed="
+                        (!isExternalCategory(category) && isSelected).toString()
+                      "
+                      :ripple="!isCategoryDisabled(category)"
+                      :tabindex="isCategoryDisabled(category) ? -1 : 0"
+                      @click="() => handleSelect(category, toggle)"
+                    >
+                      <div class="nudge-step-category__image">
+                        <v-img
+                          :src="category.imageMedium || category.imageSmall"
+                          :alt="category.verticalHomeTitle ?? category.id ?? ''"
+                          aspect-ratio="1"
+                          class="nudge-step-category__img"
+                          cover
+                        >
+                          <template #placeholder>
+                            <div class="nudge-step-category__fallback">
+                              <v-icon
+                                :icon="category.mdiIcon ?? 'mdi-tag'"
+                                size="28"
+                              />
+                            </div>
+                          </template>
+
+                          <template #error>
+                            <div class="nudge-step-category__fallback">
+                              <v-icon
+                                :icon="category.mdiIcon ?? 'mdi-tag'"
+                                size="28"
+                              />
+                            </div>
+                          </template>
+                        </v-img>
+                      </div>
+                      <p class="nudge-step-category__name">
+                        {{ category.verticalHomeTitle ?? category.id }}
+                      </p>
+                    </v-card>
+                  </component>
+                </template>
+              </v-tooltip>
+              <ClientOnly v-else-if="isStaticCategory(category)">
+                <component
+                  :is="category.externalLink ? 'a' : 'div'"
+                  class="nudge-step-category__card-link"
+                  :href="category.externalLink"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                >
+                  <v-card
+                    class="nudge-step-category__card nudge-option-card"
+                    :class="{
+                      'nudge-option-card--selected':
+                        !isExternalCategory(category) && isSelected,
+                      'nudge-option-card--disabled':
+                        isCategoryDisabled(category),
+                      'nudge-step-category__card--static':
+                        isStaticCategory(category),
+                    }"
+                    variant="flat"
+                    rounded="xl"
+                    :role="category.externalLink ? 'link' : 'button'"
+                    :aria-pressed="
+                      (!isExternalCategory(category) && isSelected).toString()
+                    "
+                    :ripple="!isCategoryDisabled(category)"
+                    :tabindex="isCategoryDisabled(category) ? -1 : 0"
+                    @click="() => handleSelect(category, toggle)"
+                  >
+                    <div class="nudge-step-category__image">
+                      <v-img
+                        :src="category.imageMedium || category.imageSmall"
+                        :alt="category.verticalHomeTitle ?? category.id ?? ''"
+                        aspect-ratio="1"
+                        class="nudge-step-category__img"
+                        cover
+                      >
+                        <template #placeholder>
+                          <div class="nudge-step-category__fallback">
+                            <v-icon
+                              :icon="category.mdiIcon ?? 'mdi-tag'"
+                              size="28"
+                            />
+                          </div>
+                        </template>
+
+                        <template #error>
+                          <div class="nudge-step-category__fallback">
+                            <v-icon
+                              :icon="category.mdiIcon ?? 'mdi-tag'"
+                              size="28"
+                            />
+                          </div>
+                        </template>
+                      </v-img>
+                    </div>
+                    <p class="nudge-step-category__name">
+                      {{ category.verticalHomeTitle ?? category.id }}
+                    </p>
+                  </v-card>
+                </component>
+              </ClientOnly>
+              <component
+                :is="category.externalLink ? 'a' : 'div'"
+                v-else
+                class="nudge-step-category__card-link"
+                :href="category.externalLink"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+              >
+                <v-card
+                  class="nudge-step-category__card nudge-option-card"
+                  :class="{
+                    'nudge-option-card--selected':
+                      !isExternalCategory(category) && isSelected,
+                    'nudge-option-card--disabled': isCategoryDisabled(category),
+                    'nudge-step-category__card--static':
+                      isStaticCategory(category),
+                  }"
+                  variant="flat"
+                  rounded="xl"
+                  :role="category.externalLink ? 'link' : 'button'"
+                  :aria-pressed="
+                    (!isExternalCategory(category) && isSelected).toString()
+                  "
+                  :ripple="!isCategoryDisabled(category)"
+                  :tabindex="isCategoryDisabled(category) ? -1 : 0"
+                  @click="() => handleSelect(category, toggle)"
+                >
+                  <div class="nudge-step-category__image">
+                    <v-img
+                      :src="category.imageMedium || category.imageSmall"
+                      :alt="category.verticalHomeTitle ?? category.id ?? ''"
+                      aspect-ratio="1"
+                      class="nudge-step-category__img"
+                      cover
+                    >
+                      <template #placeholder>
+                        <div class="nudge-step-category__fallback">
+                          <v-icon
+                            :icon="category.mdiIcon ?? 'mdi-tag'"
+                            size="28"
+                          />
+                        </div>
+                      </template>
+
+                      <template #error>
+                        <div class="nudge-step-category__fallback">
+                          <v-icon
+                            :icon="category.mdiIcon ?? 'mdi-tag'"
+                            size="28"
+                          />
+                        </div>
+                      </template>
+                    </v-img>
+                  </div>
+                  <p class="nudge-step-category__name">
+                    {{ category.verticalHomeTitle ?? category.id }}
+                  </p>
+                </v-card>
+              </component>
+            </v-item>
+          </v-col>
+        </v-row>
+      </v-item-group>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useDisplay } from 'vuetify'
 import type { NudgeToolCategory } from '~/types/nudge-tool'
 
 const props = defineProps<{
@@ -301,6 +578,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (event: 'select', categoryId: string): void }>()
 
+const { t } = useI18n()
+const { mobile } = useDisplay()
 const selected = ref<string | null>(props.selectedCategoryId ?? null)
 const allowDisabledSelection = computed(() => props.isAuthenticated ?? false)
 
@@ -313,7 +592,7 @@ const isExternalCategory = (category: NudgeToolCategory) =>
 const isStaticCategory = (category: NudgeToolCategory) =>
   category.id === 'static'
 
-const handleSelect = (category: NudgeToolCategory, toggle: () => void) => {
+const handleSelect = (category: NudgeToolCategory, toggle?: () => void) => {
   if (isCategoryDisabled(category)) {
     return
   }
@@ -322,7 +601,7 @@ const handleSelect = (category: NudgeToolCategory, toggle: () => void) => {
     return
   }
 
-  toggle()
+  toggle?.()
 }
 
 watch(
@@ -533,6 +812,20 @@ watch(
 
     &__name {
       font-size: 0.95rem;
+    }
+  }
+
+  &__grid {
+    width: 100%;
+
+    :deep(.nudge-step-category__card) {
+      width: 100%;
+      max-width: unset;
+      margin: 0;
+    }
+
+    :deep(.nudge-step-category__card-link) {
+      width: 100%;
     }
   }
 }

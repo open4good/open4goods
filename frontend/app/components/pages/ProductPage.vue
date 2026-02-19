@@ -513,17 +513,16 @@ const scoreAggregations = async () => {
   }))
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>(
-      '/api/products/search',
-      {
-        method: 'POST',
-        body: {
-          verticalId: categoryDetail.value.id,
-          pageSize: 0,
-          aggs: { aggs },
-        },
-      }
-    )
+    const response = await $fetch<ProductSearchResponseDto>('/api/products', {
+      method: 'POST',
+      query: {
+        verticalId: categoryDetail.value.id,
+        size: 0,
+      },
+      body: {
+        aggs: { aggs },
+      },
+    })
 
     const resolved: Record<string, AggregationResponseDto> = {}
     ;(response.aggregations ?? []).forEach(aggregation => {
