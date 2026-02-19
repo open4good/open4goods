@@ -2417,7 +2417,9 @@
         "cancel": "Cancel",
         "close": "Close",
         "description": "blabla",
+        "methodologyLink": "How is this generated?",
         "eyebrow": "AI summary",
+        "eyebrowNeutral": "Summary",
         "productFallback": "this product",
         "remainingUnknown": "Unavailable",
         "submit": "Confirm",
@@ -2944,6 +2946,7 @@
         }
       },
       "ai": "AI summary",
+      "aiShort": "Summary",
       "attributes": "Specifications",
       "collapse": "Collapse navigation",
       "collapseSubmenu": "Collapse {section} submenu",

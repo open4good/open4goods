@@ -327,6 +327,7 @@ const i18nMessages = {
           cancel: 'Cancel',
           close: 'Close',
           description: 'blabla',
+          methodologyLink: 'How is this generated?',
           eyebrow: 'AI summary',
           productFallback: 'this product',
           remainingUnknown: 'Unavailable',
