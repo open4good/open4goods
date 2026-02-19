@@ -813,10 +813,10 @@
           "price": "Prix le plus bas"
         },
         "groups": {
-          "standard": "Tri standards",
-          "popularAttributes": "Attributs populaires",
-          "otherAttributes": "Autres attributs"
+          "main": "Tris principaux",
+          "advanced": "Tris avancés"
         },
+        "defaultLabel": "{label} (par défaut)",
         "values": {
           "impactScore": "{score} / {max}"
         }
