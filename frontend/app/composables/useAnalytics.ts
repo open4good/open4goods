@@ -70,6 +70,19 @@ type FilterChangeContext = {
   subsetIds?: string[]
 }
 
+type SortUsageContext = {
+  categoryId?: string | number | null
+  categorySlug?: string | null
+  action: 'exposed' | 'selected' | 'order-updated'
+  selectedField?: string | null
+  selectedGroup?: 'primary' | 'advanced' | 'unknown'
+  sortOrder?: 'asc' | 'desc'
+  defaultField?: string | null
+  primaryOptions?: string[]
+  advancedOptions?: string[]
+  totalOptions?: number
+}
+
 type SearchContext = {
   query: string
   source: SearchSource
@@ -219,6 +232,34 @@ export const useAnalytics = () => {
     })
   }
 
+  const trackSortUsage = ({
+    categoryId,
+    categorySlug,
+    action,
+    selectedField,
+    selectedGroup,
+    sortOrder,
+    defaultField,
+    primaryOptions,
+    advancedOptions,
+    totalOptions,
+  }: SortUsageContext) => {
+    trackEvent('category-sort-usage', {
+      props: {
+        categoryId,
+        categorySlug,
+        action,
+        selectedField,
+        selectedGroup,
+        sortOrder,
+        defaultField,
+        primaryOptions,
+        advancedOptions,
+        totalOptions,
+      },
+    })
+  }
+
   const trackOpenDataDownload = ({
     datasetId,
     method,
@@ -282,6 +323,7 @@ export const useAnalytics = () => {
     trackFileDownload,
     trackSectionView,
     trackFilterChange,
+    trackSortUsage,
     isAnalyticsEnabled: isEnabled,
     extractTokenFromLink,
     isClientContribLink,

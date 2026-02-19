@@ -13,7 +13,7 @@ describe('deduplicateSortItemsByTitle', () => {
       },
       {
         value: 'attributes.indexedAttributes.HDR_B.numericValue',
-        title: '  consommation   électrique (hdr) ',
+        title: '  consommation   electrique (hdr) ',
       },
       {
         value: 'price.minPrice.price',
@@ -21,14 +21,12 @@ describe('deduplicateSortItemsByTitle', () => {
       },
     ]
 
-    const deduplicated = deduplicateSortItemsByTitle(items, item =>
-      item.value.includes('HDR_B') ? 100 : 10
-    )
+    const deduplicated = deduplicateSortItemsByTitle(items)
 
     expect(deduplicated).toEqual([
       {
-        value: 'attributes.indexedAttributes.HDR_B.numericValue',
-        title: '  consommation   électrique (hdr) ',
+        value: 'attributes.indexedAttributes.HDR_A.numericValue',
+        title: 'Consommation électrique (HDR)',
       },
       {
         value: 'price.minPrice.price',

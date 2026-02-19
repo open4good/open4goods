@@ -939,10 +939,10 @@
           "price": "Lowest price"
         },
         "groups": {
-          "standard": "Standard",
-          "popularAttributes": "Popular attributes",
-          "otherAttributes": "Other attributes"
+          "main": "Main sorting",
+          "advanced": "Advanced sorting"
         },
+        "defaultLabel": "{label} (default)",
         "values": {
           "impactScore": "{score} / {max}"
         }
