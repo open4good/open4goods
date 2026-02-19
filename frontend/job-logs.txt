@@ -1,0 +1,414 @@
+﻿2026-02-19T11:50:59.4160651Z Current runner version: '2.331.0'
+2026-02-19T11:50:59.4165737Z Runner name: 'NUDGER-BETA'
+2026-02-19T11:50:59.4166250Z Runner group name: 'default'
+2026-02-19T11:50:59.4166874Z Machine name: 'NUDGER-BETA'
+2026-02-19T11:50:59.4170269Z ##[group]GITHUB_TOKEN Permissions
+2026-02-19T11:50:59.4171982Z Actions: write
+2026-02-19T11:50:59.4172374Z ArtifactMetadata: write
+2026-02-19T11:50:59.4172830Z Attestations: write
+2026-02-19T11:50:59.4173621Z Checks: write
+2026-02-19T11:50:59.4173959Z Contents: write
+2026-02-19T11:50:59.4174307Z Deployments: write
+2026-02-19T11:50:59.4174662Z Discussions: write
+2026-02-19T11:50:59.4174997Z Issues: write
+2026-02-19T11:50:59.4175327Z Metadata: read
+2026-02-19T11:50:59.4175654Z Models: read
+2026-02-19T11:50:59.4175977Z Packages: write
+2026-02-19T11:50:59.4176309Z Pages: write
+2026-02-19T11:50:59.4176640Z PullRequests: write
+2026-02-19T11:50:59.4177003Z RepositoryProjects: write
+2026-02-19T11:50:59.4177395Z SecurityEvents: write
+2026-02-19T11:50:59.4177834Z Statuses: write
+2026-02-19T11:50:59.4178193Z ##[endgroup]
+2026-02-19T11:50:59.4179724Z Secret source: Actions
+2026-02-19T11:50:59.4180194Z Prepare workflow directory
+2026-02-19T11:50:59.4581334Z Prepare all required actions
+2026-02-19T11:50:59.4615064Z Getting action download info
+2026-02-19T11:51:00.1402257Z Download action repository 'actions/checkout@v6' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-02-19T11:51:00.5924342Z Download action repository 'actions/setup-node@v6' (SHA:6044e13b5dc448c55e2357c09f80417699197238)
+2026-02-19T11:51:01.0956271Z Download action repository 'actions/setup-python@v6' (SHA:a309ff8b426b58ec0e2a45f0f869d46889d02405)
+2026-02-19T11:51:01.5549041Z Download action repository 'actions/upload-artifact@v6' (SHA:b7c566a772e6b6bfb58ed0dc250532a479d7789f)
+2026-02-19T11:51:02.1898022Z Complete job name: lighthouse
+2026-02-19T11:51:02.2946244Z ##[group]Run actions/checkout@v6
+2026-02-19T11:51:02.2947331Z with:
+2026-02-19T11:51:02.2948021Z   repository: open4good/open4goods-config
+2026-02-19T11:51:02.2949147Z   token: ***
+2026-02-19T11:51:02.2949774Z   ssh-strict: true
+2026-02-19T11:51:02.2950420Z   ssh-user: git
+2026-02-19T11:51:02.2951089Z   persist-credentials: true
+2026-02-19T11:51:02.2951829Z   clean: true
+2026-02-19T11:51:02.2952504Z   sparse-checkout-cone-mode: true
+2026-02-19T11:51:02.2953391Z   fetch-depth: 1
+2026-02-19T11:51:02.2954052Z   fetch-tags: false
+2026-02-19T11:51:02.2954728Z   show-progress: true
+2026-02-19T11:51:02.2955410Z   lfs: false
+2026-02-19T11:51:02.2956023Z   submodules: false
+2026-02-19T11:51:02.2956705Z   set-safe-directory: true
+2026-02-19T11:51:02.2957664Z ##[endgroup]
+2026-02-19T11:51:02.3807376Z Syncing repository: open4good/open4goods-config
+2026-02-19T11:51:02.3809568Z ##[group]Getting Git version info
+2026-02-19T11:51:02.3811027Z Working directory is '/home/runner/actions-runner/_work/open4goods-config/open4goods-config'
+2026-02-19T11:51:02.3813288Z [command]/usr/bin/git version
+2026-02-19T11:51:02.3814058Z git version 2.43.0
+2026-02-19T11:51:02.3816771Z ##[endgroup]
+2026-02-19T11:51:02.3832792Z Temporarily overriding HOME='/home/runner/actions-runner/_work/_temp/1d3cbb81-f912-4615-86a2-a2b35b9e2fa9' before making global git config changes
+2026-02-19T11:51:02.3836562Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-19T11:51:02.3838734Z [command]/usr/bin/git config --global --add safe.directory /home/runner/actions-runner/_work/open4goods-config/open4goods-config
+2026-02-19T11:51:02.3865157Z [command]/usr/bin/git config --local --get remote.origin.url
+2026-02-19T11:51:02.3882318Z https://github.com/open4good/open4goods-config
+2026-02-19T11:51:02.3893845Z ##[group]Removing previously created refs, to avoid conflicts
+2026-02-19T11:51:02.3896225Z [command]/usr/bin/git rev-parse --symbolic-full-name --verify --quiet HEAD
+2026-02-19T11:51:02.3914910Z refs/heads/main
+2026-02-19T11:51:02.3922044Z [command]/usr/bin/git checkout --detach
+2026-02-19T11:51:02.3962423Z HEAD is now at 1169faba chore(metriks): append runs (dateTo=2026-02-19)
+2026-02-19T11:51:02.3964584Z M	scripts/metriks/kibana/run.sh
+2026-02-19T11:51:02.3965584Z M	scripts/metriks/plausible/run.sh
+2026-02-19T11:51:02.3996321Z [command]/usr/bin/git branch --delete --force main
+2026-02-19T11:51:02.4019387Z Deleted branch main (was 1169faba).
+2026-02-19T11:51:02.4048096Z ##[endgroup]
+2026-02-19T11:51:02.4049175Z [command]/usr/bin/git submodule status
+2026-02-19T11:51:02.4215020Z ##[group]Cleaning the repository
+2026-02-19T11:51:02.4217029Z [command]/usr/bin/git clean -ffdx
+2026-02-19T11:51:02.4242424Z Removing scripts/metriks/_lib/__pycache__/
+2026-02-19T11:51:02.4248033Z [command]/usr/bin/git reset --hard HEAD
+2026-02-19T11:51:02.4284398Z HEAD is now at 1169faba chore(metriks): append runs (dateTo=2026-02-19)
+2026-02-19T11:51:02.4287684Z ##[endgroup]
+2026-02-19T11:51:02.4289241Z ##[group]Disabling automatic garbage collection
+2026-02-19T11:51:02.4292650Z [command]/usr/bin/git config --local gc.auto 0
+2026-02-19T11:51:02.4313751Z ##[endgroup]
+2026-02-19T11:51:02.4315166Z ##[group]Setting up auth
+2026-02-19T11:51:02.4316003Z Removing SSH command configuration
+2026-02-19T11:51:02.4318766Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-19T11:51:02.4343490Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-19T11:51:02.4509662Z Removing HTTP extra header
+2026-02-19T11:51:02.4516306Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-19T11:51:02.4547534Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-19T11:51:02.4707900Z Removing includeIf entries pointing to credentials config files
+2026-02-19T11:51:02.4712477Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-19T11:51:02.4737587Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-19T11:51:02.4909288Z [command]/usr/bin/git config --file /home/runner/actions-runner/_work/_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-02-19T11:51:02.4942850Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/actions-runner/_work/open4goods-config/open4goods-config/.git.path /home/runner/actions-runner/_work/_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:02.4967209Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/actions-runner/_work/open4goods-config/open4goods-config/.git/worktrees/*.path /home/runner/actions-runner/_work/_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:02.4993779Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:02.5026457Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:02.5050496Z ##[endgroup]
+2026-02-19T11:51:02.5051801Z ##[group]Fetching the repository
+2026-02-19T11:51:02.5059067Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +1169faba3bfd54ebc26ae1f70e1e02855ec5aeae:refs/remotes/origin/main
+2026-02-19T11:51:02.8940927Z [command]/usr/bin/git branch --list --remote origin/main
+2026-02-19T11:51:02.8968120Z   origin/main
+2026-02-19T11:51:02.8980102Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+2026-02-19T11:51:02.9006711Z 1169faba3bfd54ebc26ae1f70e1e02855ec5aeae
+2026-02-19T11:51:02.9013081Z ##[endgroup]
+2026-02-19T11:51:02.9015716Z ##[group]Determining the checkout info
+2026-02-19T11:51:02.9019334Z ##[endgroup]
+2026-02-19T11:51:02.9021078Z [command]/usr/bin/git sparse-checkout disable
+2026-02-19T11:51:02.9072505Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-02-19T11:51:02.9106732Z ##[group]Checking out the ref
+2026-02-19T11:51:02.9110927Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-02-19T11:51:02.9159072Z Switched to a new branch 'main'
+2026-02-19T11:51:02.9160991Z branch 'main' set up to track 'origin/main'.
+2026-02-19T11:51:02.9167022Z ##[endgroup]
+2026-02-19T11:51:02.9207905Z [command]/usr/bin/git log -1 --format=%H
+2026-02-19T11:51:02.9235731Z 1169faba3bfd54ebc26ae1f70e1e02855ec5aeae
+2026-02-19T11:51:02.9660094Z ##[group]Run actions/setup-node@v6
+2026-02-19T11:51:02.9661696Z with:
+2026-02-19T11:51:02.9662982Z   node-version: 24
+2026-02-19T11:51:02.9664276Z   check-latest: false
+2026-02-19T11:51:02.9666066Z   token: ***
+2026-02-19T11:51:02.9667442Z   package-manager-cache: true
+2026-02-19T11:51:02.9668891Z ##[endgroup]
+2026-02-19T11:51:03.0881758Z Found in cache @ /home/runner/actions-runner/_work/_tool/node/24.13.0/x64
+2026-02-19T11:51:03.0883573Z ##[group]Environment details
+2026-02-19T11:51:03.1943234Z node: v24.13.0
+2026-02-19T11:51:03.1943857Z npm: 11.6.2
+2026-02-19T11:51:03.1944348Z yarn: 
+2026-02-19T11:51:03.1945345Z ##[endgroup]
+2026-02-19T11:51:03.2114096Z ##[group]Run actions/setup-python@v6
+2026-02-19T11:51:03.2114823Z with:
+2026-02-19T11:51:03.2115330Z   python-version: 3.14
+2026-02-19T11:51:03.2115923Z   check-latest: false
+2026-02-19T11:51:03.2116690Z   token: ***
+2026-02-19T11:51:03.2117234Z   update-environment: true
+2026-02-19T11:51:03.2117886Z   allow-prereleases: false
+2026-02-19T11:51:03.2118512Z   freethreaded: false
+2026-02-19T11:51:03.2119082Z ##[endgroup]
+2026-02-19T11:51:03.3231236Z ##[group]Installed versions
+2026-02-19T11:51:03.3277690Z Successfully set up CPython (3.14.3)
+2026-02-19T11:51:03.3278888Z ##[endgroup]
+2026-02-19T11:51:03.3382741Z ##[group]Run python -m pip install --upgrade pip
+2026-02-19T11:51:03.3384200Z [36;1mpython -m pip install --upgrade pip[0m
+2026-02-19T11:51:03.3385038Z [36;1mpip install -r requirements.txt[0m
+2026-02-19T11:51:03.3385820Z [36;1mpip install playwright[0m
+2026-02-19T11:51:03.3414006Z shell: /usr/bin/bash -e {0}
+2026-02-19T11:51:03.3414647Z env:
+2026-02-19T11:51:03.3415468Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:03.3416964Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:03.3418442Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:03.3430202Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:03.3431579Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:03.3434721Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:03.3438476Z ##[endgroup]
+2026-02-19T11:51:03.6087497Z Requirement already satisfied: pip in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (26.0.1)
+2026-02-19T11:51:04.0310584Z Requirement already satisfied: requests>=2.31.0 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from -r requirements.txt (line 1)) (2.32.5)
+2026-02-19T11:51:04.0313894Z Requirement already satisfied: PyYAML>=6.0.1 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from -r requirements.txt (line 2)) (6.0.3)
+2026-02-19T11:51:04.0316212Z Requirement already satisfied: lxml>=5.2.2 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from -r requirements.txt (line 3)) (6.0.2)
+2026-02-19T11:51:04.0319595Z Requirement already satisfied: pandas>=2.2.2 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from -r requirements.txt (line 4)) (3.0.0)
+2026-02-19T11:51:04.0331538Z Requirement already satisfied: charset_normalizer<4,>=2 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from requests>=2.31.0->-r requirements.txt (line 1)) (3.4.4)
+2026-02-19T11:51:04.0335684Z Requirement already satisfied: idna<4,>=2.5 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from requests>=2.31.0->-r requirements.txt (line 1)) (3.11)
+2026-02-19T11:51:04.0339797Z Requirement already satisfied: urllib3<3,>=1.21.1 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from requests>=2.31.0->-r requirements.txt (line 1)) (2.6.3)
+2026-02-19T11:51:04.0343462Z Requirement already satisfied: certifi>=2017.4.17 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from requests>=2.31.0->-r requirements.txt (line 1)) (2026.1.4)
+2026-02-19T11:51:04.0413143Z Requirement already satisfied: numpy>=2.3.3 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from pandas>=2.2.2->-r requirements.txt (line 4)) (2.4.2)
+2026-02-19T11:51:04.0417871Z Requirement already satisfied: python-dateutil>=2.8.2 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from pandas>=2.2.2->-r requirements.txt (line 4)) (2.9.0.post0)
+2026-02-19T11:51:04.0484062Z Requirement already satisfied: six>=1.5 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from python-dateutil>=2.8.2->pandas>=2.2.2->-r requirements.txt (line 4)) (1.17.0)
+2026-02-19T11:51:04.3659168Z Requirement already satisfied: playwright in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (1.58.0)
+2026-02-19T11:51:04.3670351Z Requirement already satisfied: pyee<14,>=13 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from playwright) (13.0.0)
+2026-02-19T11:51:04.3674826Z Requirement already satisfied: greenlet<4.0.0,>=3.1.1 in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from playwright) (3.3.1)
+2026-02-19T11:51:04.3688324Z Requirement already satisfied: typing-extensions in /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/python3.14/site-packages (from pyee<14,>=13->playwright) (4.15.0)
+2026-02-19T11:51:04.4333742Z ##[group]Run python -m playwright install chromium
+2026-02-19T11:51:04.4334135Z [36;1mpython -m playwright install chromium[0m
+2026-02-19T11:51:04.4348264Z shell: /usr/bin/bash -e {0}
+2026-02-19T11:51:04.4348495Z env:
+2026-02-19T11:51:04.4348791Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:04.4349340Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:04.4349879Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:04.4350372Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:04.4350862Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:04.4351372Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:04.4351741Z ##[endgroup]
+2026-02-19T11:51:04.8156751Z ##[group]Run mkdir -p "$OUT"
+2026-02-19T11:51:04.8157026Z [36;1mmkdir -p "$OUT"[0m
+2026-02-19T11:51:04.8157661Z [36;1mpython scripts/sample_sitemap_urls.py             --sitemap "https://nudger.fr/sitemap/fr/product-pages.xml"             --n 3             --out "$OUT/urls.txt"[0m
+2026-02-19T11:51:04.8171824Z shell: /usr/bin/bash -e {0}
+2026-02-19T11:51:04.8172066Z env:
+2026-02-19T11:51:04.8172342Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:04.8172927Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:04.8173867Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:04.8174329Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:04.8174920Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:04.8175421Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:04.8175784Z   OUT: out/lighthouse
+2026-02-19T11:51:04.8175973Z   PYTHONUNBUFFERED: 1
+2026-02-19T11:51:04.8176153Z ##[endgroup]
+2026-02-19T11:51:05.1207785Z ##[group]Run python scripts/playwright_console_check.py --urls "$OUT/urls.txt" --out "$OUT/console" --timeout-ms 20000
+2026-02-19T11:51:05.1208587Z [36;1mpython scripts/playwright_console_check.py --urls "$OUT/urls.txt" --out "$OUT/console" --timeout-ms 20000[0m
+2026-02-19T11:51:05.1222464Z shell: /usr/bin/bash -e {0}
+2026-02-19T11:51:05.1222739Z env:
+2026-02-19T11:51:05.1223264Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:05.1223925Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:05.1224456Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:05.1224916Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:05.1225381Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:05.1225869Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:05.1226228Z   OUT: out/lighthouse
+2026-02-19T11:51:05.1226414Z   PYTHONUNBUFFERED: 1
+2026-02-19T11:51:05.1226597Z ##[endgroup]
+2026-02-19T11:51:12.1975661Z 
+2026-02-19T11:51:12.1976643Z ==========================================
+2026-02-19T11:51:12.1977317Z PLAYWRIGHT CONSOLE CHECK FAILED: 3 failures
+2026-02-19T11:51:12.1977767Z ==========================================
+2026-02-19T11:51:12.1977939Z 
+2026-02-19T11:51:12.1978522Z ❌ URL: https://nudger.fr/frigos/8690842441028-refrigerateur-beko-b5rcne405lxp7282343701
+2026-02-19T11:51:12.1979041Z    Reason: console_error_or_pageerror
+2026-02-19T11:51:12.1979430Z    CONSOLE ERRORS:
+2026-02-19T11:51:12.1979796Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1980321Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1980813Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1982378Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1982969Z 
+2026-02-19T11:51:12.1983414Z ❌ URL: https://nudger.fr/lave-linges/8033675151366-machine-a-laver-sangiorgio-ses710d
+2026-02-19T11:51:12.1983869Z    Reason: console_error_or_pageerror
+2026-02-19T11:51:12.1984110Z    CONSOLE ERRORS:
+2026-02-19T11:51:12.1984462Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1984967Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1985460Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1985967Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1986241Z 
+2026-02-19T11:51:12.1986550Z ❌ URL: https://nudger.fr/frigos/6901018091278-frigo-haier-hbw7519c
+2026-02-19T11:51:12.1986921Z    Reason: console_error_or_pageerror
+2026-02-19T11:51:12.1987159Z    CONSOLE ERRORS:
+2026-02-19T11:51:12.1987495Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1988009Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1988508Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1988993Z      - Failed to load resource: the server responded with a status of 500 ()
+2026-02-19T11:51:12.1989271Z 
+2026-02-19T11:51:12.1989404Z ==========================================
+2026-02-19T11:51:12.1989572Z 
+2026-02-19T11:51:12.2225367Z ##[error]Process completed with exit code 1.
+2026-02-19T11:51:12.2264139Z ##[group]Run npm i -g lighthouse
+2026-02-19T11:51:12.2264409Z [36;1mnpm i -g lighthouse[0m
+2026-02-19T11:51:12.2277854Z shell: /usr/bin/bash -e {0}
+2026-02-19T11:51:12.2278063Z env:
+2026-02-19T11:51:12.2278341Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:12.2278857Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:12.2279366Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:12.2279826Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:12.2280279Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:12.2280748Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:12.2281099Z ##[endgroup]
+2026-02-19T11:51:19.2896382Z 
+2026-02-19T11:51:19.2896946Z changed 198 packages in 7s
+2026-02-19T11:51:19.2897190Z 
+2026-02-19T11:51:19.2897347Z 16 packages are looking for funding
+2026-02-19T11:51:19.2897638Z   run `npm fund` for details
+2026-02-19T11:51:19.3218080Z ##[group]Run node scripts/run_lighthouse.mjs --urls "$OUT/urls.txt" --out "$OUT/reports" --thresholds .lighthouserc.json
+2026-02-19T11:51:19.3218880Z [36;1mnode scripts/run_lighthouse.mjs --urls "$OUT/urls.txt" --out "$OUT/reports" --thresholds .lighthouserc.json[0m
+2026-02-19T11:51:19.3232470Z shell: /usr/bin/bash -e {0}
+2026-02-19T11:51:19.3232760Z env:
+2026-02-19T11:51:19.3233042Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:19.3233568Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:19.3234091Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:19.3234559Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:19.3235030Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:19.3235532Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:19.3235897Z   OUT: out/lighthouse
+2026-02-19T11:51:19.3236076Z ##[endgroup]
+2026-02-19T11:51:19.9396102Z Runtime error encountered: The CHROME_PATH environment variable must be set to a Chrome/Chromium executable no older than Chrome stable.
+2026-02-19T11:51:19.9397319Z Error
+2026-02-19T11:51:19.9398016Z     at new LauncherError (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/utils.js:22:22)
+2026-02-19T11:51:19.9400766Z     at new ChromePathNotSetError (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/utils.js:28:9)
+2026-02-19T11:51:19.9403677Z     at Module.linux (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-finder.js:124:15)
+2026-02-19T11:51:19.9405026Z     at Launcher.getFirstInstallation (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:135:43)
+2026-02-19T11:51:19.9406370Z     at Launcher.launch (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:203:43)
+2026-02-19T11:51:19.9407630Z     at Module.launch (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:33:20)
+2026-02-19T11:51:19.9408708Z     at getDebuggableChrome (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/run.js:85:25)
+2026-02-19T11:51:19.9409632Z     at runLighthouse (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/run.js:204:30)
+2026-02-19T11:51:19.9410489Z     at begin (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/bin.js:129:10)
+2026-02-19T11:51:19.9411532Z     at async file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/index.js:10:1
+2026-02-19T11:51:20.5421895Z Runtime error encountered: The CHROME_PATH environment variable must be set to a Chrome/Chromium executable no older than Chrome stable.
+2026-02-19T11:51:20.5422895Z Error
+2026-02-19T11:51:20.5423589Z     at new LauncherError (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/utils.js:22:22)
+2026-02-19T11:51:20.5424797Z     at new ChromePathNotSetError (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/utils.js:28:9)
+2026-02-19T11:51:20.5426016Z     at Module.linux (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-finder.js:124:15)
+2026-02-19T11:51:20.5427581Z     at Launcher.getFirstInstallation (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:135:43)
+2026-02-19T11:51:20.5429047Z     at Launcher.launch (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:203:43)
+2026-02-19T11:51:20.5430272Z     at Module.launch (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:33:20)
+2026-02-19T11:51:20.5431348Z     at getDebuggableChrome (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/run.js:85:25)
+2026-02-19T11:51:20.5432262Z     at runLighthouse (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/run.js:204:30)
+2026-02-19T11:51:20.5433579Z     at begin (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/bin.js:129:10)
+2026-02-19T11:51:20.5434410Z     at async file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/index.js:10:1
+2026-02-19T11:51:21.1457672Z Runtime error encountered: The CHROME_PATH environment variable must be set to a Chrome/Chromium executable no older than Chrome stable.
+2026-02-19T11:51:21.1458297Z Error
+2026-02-19T11:51:21.1459407Z     at new LauncherError (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/utils.js:22:22)
+2026-02-19T11:51:21.1460939Z     at new ChromePathNotSetError (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/utils.js:28:9)
+2026-02-19T11:51:21.1462878Z     at Module.linux (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-finder.js:124:15)
+2026-02-19T11:51:21.1464357Z     at Launcher.getFirstInstallation (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:135:43)
+2026-02-19T11:51:21.1465686Z     at Launcher.launch (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:203:43)
+2026-02-19T11:51:21.1466911Z     at Module.launch (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/node_modules/chrome-launcher/dist/chrome-launcher.js:33:20)
+2026-02-19T11:51:21.1467987Z     at getDebuggableChrome (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/run.js:85:25)
+2026-02-19T11:51:21.1476016Z     at runLighthouse (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/run.js:204:30)
+2026-02-19T11:51:21.1477207Z     at begin (file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/bin.js:129:10)
+2026-02-19T11:51:21.1478286Z     at async file:///home/runner/actions-runner/_work/_tool/node/24.13.0/x64/lib/node_modules/lighthouse/cli/index.js:10:1
+2026-02-19T11:51:21.1587401Z ##[error]Process completed with exit code 1.
+2026-02-19T11:51:21.1615360Z ##[group]Run echo "## Lighthouse Monitoring Summary" >> $GITHUB_STEP_SUMMARY
+2026-02-19T11:51:21.1615858Z [36;1mecho "## Lighthouse Monitoring Summary" >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1616185Z [36;1m[0m
+2026-02-19T11:51:21.1616418Z [36;1mif [ -f "out/lighthouse/console/console_report.md" ]; then[0m
+2026-02-19T11:51:21.1616856Z [36;1m  cat out/lighthouse/console/console_report.md >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1617206Z [36;1melse[0m
+2026-02-19T11:51:21.1617452Z [36;1m   echo "⚠️ No console report found." >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1617752Z [36;1mfi[0m
+2026-02-19T11:51:21.1617911Z [36;1m[0m
+2026-02-19T11:51:21.1618149Z [36;1mif [ -f "out/lighthouse/reports/lighthouse_report.md" ]; then[0m
+2026-02-19T11:51:21.1618492Z [36;1m   echo "" >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1618869Z [36;1m   cat out/lighthouse/reports/lighthouse_report.md >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1619253Z [36;1melse[0m
+2026-02-19T11:51:21.1619504Z [36;1m   echo "⚠️ No lighthouse report found." >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1619815Z [36;1mfi[0m
+2026-02-19T11:51:21.1619958Z [36;1m[0m
+2026-02-19T11:51:21.1620119Z [36;1mecho "" >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1620388Z [36;1mecho "### Artifacts" >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1620771Z [36;1mecho "See artifacts for detailed HTML reports." >> $GITHUB_STEP_SUMMARY[0m
+2026-02-19T11:51:21.1634747Z shell: /usr/bin/bash -e {0}
+2026-02-19T11:51:21.1634946Z env:
+2026-02-19T11:51:21.1635224Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1635751Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:21.1636259Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1636721Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1637182Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1637653Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:21.1638004Z ##[endgroup]
+2026-02-19T11:51:21.1735231Z ##[group]Run failures=0
+2026-02-19T11:51:21.1735465Z [36;1mfailures=0[0m
+2026-02-19T11:51:21.1735661Z [36;1mif [ "failure" == "failure" ]; then[0m
+2026-02-19T11:51:21.1735955Z [36;1m  echo "❌ Playwright console check failed."[0m
+2026-02-19T11:51:21.1736217Z [36;1m  failures=1[0m
+2026-02-19T11:51:21.1736391Z [36;1mfi[0m
+2026-02-19T11:51:21.1736563Z [36;1mif [ "failure" == "failure" ]; then[0m
+2026-02-19T11:51:21.1736847Z [36;1m  echo "❌ Lighthouse checks failed."[0m
+2026-02-19T11:51:21.1737093Z [36;1m  failures=1[0m
+2026-02-19T11:51:21.1737262Z [36;1mfi[0m
+2026-02-19T11:51:21.1737429Z [36;1mif [ "$failures" -eq 1 ]; then[0m
+2026-02-19T11:51:21.1737651Z [36;1m  exit 1[0m
+2026-02-19T11:51:21.1737808Z [36;1mfi[0m
+2026-02-19T11:51:21.1750712Z shell: /usr/bin/bash -e {0}
+2026-02-19T11:51:21.1750921Z env:
+2026-02-19T11:51:21.1751197Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1751743Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:21.1752250Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1752753Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1753576Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1754037Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:21.1754509Z ##[endgroup]
+2026-02-19T11:51:21.1784027Z ❌ Playwright console check failed.
+2026-02-19T11:51:21.1784346Z ❌ Lighthouse checks failed.
+2026-02-19T11:51:21.1786208Z ##[error]Process completed with exit code 1.
+2026-02-19T11:51:21.1830635Z ##[group]Run actions/upload-artifact@v6
+2026-02-19T11:51:21.1830884Z with:
+2026-02-19T11:51:21.1831047Z   name: lighthouse-report
+2026-02-19T11:51:21.1831249Z   path: out/lighthouse
+2026-02-19T11:51:21.1831437Z   if-no-files-found: warn
+2026-02-19T11:51:21.1831631Z   compression-level: 6
+2026-02-19T11:51:21.1831815Z   overwrite: false
+2026-02-19T11:51:21.1831993Z   include-hidden-files: false
+2026-02-19T11:51:21.1832188Z env:
+2026-02-19T11:51:21.1832457Z   pythonLocation: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1833041Z   PKG_CONFIG_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib/pkgconfig
+2026-02-19T11:51:21.1833545Z   Python_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1834011Z   Python2_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1834474Z   Python3_ROOT_DIR: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64
+2026-02-19T11:51:21.1834956Z   LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.14.3/x64/lib
+2026-02-19T11:51:21.1835307Z ##[endgroup]
+2026-02-19T11:51:21.3225515Z With the provided path, there will be 6 files uploaded
+2026-02-19T11:51:21.3230170Z Artifact name is valid!
+2026-02-19T11:51:21.3230442Z Root directory input is valid!
+2026-02-19T11:51:21.6969128Z Beginning upload of artifact content to blob storage
+2026-02-19T11:51:22.1633702Z Uploaded bytes 2648
+2026-02-19T11:51:22.2809946Z Finished uploading artifact content to blob storage!
+2026-02-19T11:51:22.2814533Z SHA256 digest of uploaded artifact zip is 2ae71c2d0002cd87fc845e3c8e3e1bc9fcb38482d6b6b53a9818b0f4e9fda0dc
+2026-02-19T11:51:22.2819300Z Finalizing artifact upload
+2026-02-19T11:51:22.6728398Z Artifact lighthouse-report.zip successfully finalized. Artifact ID 5571804613
+2026-02-19T11:51:22.6734103Z Artifact lighthouse-report has been successfully uploaded! Final size is 2648 bytes. Artifact ID is 5571804613
+2026-02-19T11:51:22.6745461Z Artifact download URL: https://github.com/open4good/open4goods-config/actions/runs/22180601866/artifacts/5571804613
+2026-02-19T11:51:22.7297841Z Post job cleanup.
+2026-02-19T11:51:22.8208008Z [command]/usr/bin/git version
+2026-02-19T11:51:22.8237917Z git version 2.43.0
+2026-02-19T11:51:22.8271104Z Temporarily overriding HOME='/home/runner/actions-runner/_work/_temp/34edfaae-8838-4ddb-840f-5e6c55701bff' before making global git config changes
+2026-02-19T11:51:22.8271994Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-19T11:51:22.8275324Z [command]/usr/bin/git config --global --add safe.directory /home/runner/actions-runner/_work/open4goods-config/open4goods-config
+2026-02-19T11:51:22.8297235Z Removing SSH command configuration
+2026-02-19T11:51:22.8301768Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-19T11:51:22.8327474Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-19T11:51:22.8501048Z Removing HTTP extra header
+2026-02-19T11:51:22.8504582Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-19T11:51:22.8530514Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-19T11:51:22.8699361Z Removing includeIf entries pointing to credentials config files
+2026-02-19T11:51:22.8705084Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-19T11:51:22.8723475Z includeif.gitdir:/home/runner/actions-runner/_work/open4goods-config/open4goods-config/.git.path
+2026-02-19T11:51:22.8724544Z includeif.gitdir:/home/runner/actions-runner/_work/open4goods-config/open4goods-config/.git/worktrees/*.path
+2026-02-19T11:51:22.8725343Z includeif.gitdir:/github/workspace/.git.path
+2026-02-19T11:51:22.8725843Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-02-19T11:51:22.8731255Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/actions-runner/_work/open4goods-config/open4goods-config/.git.path
+2026-02-19T11:51:22.8746568Z /home/runner/actions-runner/_work/_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:22.8753965Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/actions-runner/_work/open4goods-config/open4goods-config/.git.path /home/runner/actions-runner/_work/_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:22.8778858Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/actions-runner/_work/open4goods-config/open4goods-config/.git/worktrees/*.path
+2026-02-19T11:51:22.8794680Z /home/runner/actions-runner/_work/_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:22.8802301Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/actions-runner/_work/open4goods-config/open4goods-config/.git/worktrees/*.path /home/runner/actions-runner/_work/_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:22.8824884Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-02-19T11:51:22.8840876Z /github/runner_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:22.8847146Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:22.8871148Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-02-19T11:51:22.8886871Z /github/runner_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:22.8893499Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config
+2026-02-19T11:51:22.8916993Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-19T11:51:22.9096487Z Removing credentials config '/home/runner/actions-runner/_work/_temp/git-credentials-352fc405-a852-486a-8100-7ee404f5b182.config'
+2026-02-19T11:51:22.9187811Z Cleaning up orphan processes

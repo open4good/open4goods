@@ -2215,8 +2215,9 @@ useHead(() => {
 }
 
 .product-page__container {
-  max-width: 1400px;
+  max-width: none;
   margin-inline: auto;
+  padding-inline: clamp(1rem, 5vw, 6rem);
 }
 
 .product-page::before {

@@ -197,6 +197,39 @@ describe('ProductHero', () => {
       wrapper.findComponent({ name: 'ProductHeroBackgroundStub' }).exists()
     ).toBe(false)
 
+    // Default product has no images, so gallery should be hidden
+    expect(wrapper.find('.product-hero__gallery-section').exists()).toBe(false)
+
+    await wrapper.unmount()
+  })
+
+  it('renders gallery when images are present', async () => {
+    const productWithImages: ProductDto = {
+      ...baseProduct,
+      resources: {
+        images: [
+          {
+            url: 'https://example.com/image.jpg',
+            width: 1000,
+            height: 1000,
+          },
+        ],
+      },
+    }
+
+    const wrapper = await mountSuspended(ProductHero, {
+      props: {
+        product: productWithImages,
+        breadcrumbs: [{ title: 'Category' }],
+        popularAttributes: [],
+      },
+      global: {
+        plugins: [createI18nInstance()],
+        stubs,
+      },
+    })
+
+    expect(wrapper.find('.product-hero__gallery-section').exists()).toBe(true)
     await wrapper.unmount()
   })
 })

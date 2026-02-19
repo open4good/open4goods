@@ -44,7 +44,10 @@
             />
           </Transition>
           <div class="product-hero__main-content">
-            <div class="product-hero__gallery-section">
+            <div
+              v-if="galleryItems.length > 0"
+              class="product-hero__gallery-section"
+            >
               <ProductHeroGallery
                 class="product-hero__gallery"
                 :product="product"

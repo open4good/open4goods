@@ -269,10 +269,12 @@ public class IcecatService {
 						ufg.getAttributes().add(a);
 						// Updating attribute name
                                                 IcecatFeature f = featureLoader.getFeaturesById().get(fId);
-						// TODO : Perf
-						IcecatName i18nName = f.getNames().getNames().stream().filter(e->e.getLangId() == icecatLanguage).findFirst().orElse(null);
-						if (null != i18nName) {
-							a.setName(i18nName.getTextValue());
+						if (f != null) {
+							// TODO : Perf
+							IcecatName i18nName = f.getNames().getNames().stream().filter(e->e.getLangId() == icecatLanguage).findFirst().orElse(null);
+							if (null != i18nName) {
+								a.setName(i18nName.getTextValue());
+							}
 						}
 
 
