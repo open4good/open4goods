@@ -73,7 +73,7 @@
     "@nuxt/test-utils": "3.23.0",
     "@nuxtjs/device": "^4.0.0",
     "@nuxtjs/i18n": "10.2.3",
-    "@nuxtjs/plausible": "^2.0.0",
+    "@nuxtjs/plausible": "^3.0.0",
     "@nuxtjs/robots": "^5.5.1",
     "@nuxtjs/seo": "^3.1.0",
     "@nuxtjs/sitemap": "^7.5.2",
