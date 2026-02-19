@@ -4,28 +4,30 @@ export type SortFieldItem = {
 }
 
 const normalizeSortTitle = (value: string): string => {
-  return value.trim().replace(/\s+/g, ' ').toLowerCase()
+  return value
+    .trim()
+    .replace(/\s+/g, ' ')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
 }
 
 /**
  * Deduplicates sort options by normalized visible title while preserving the
- * highest-priority option for each title.
+ * first option order from the provided list.
  */
 export const deduplicateSortItemsByTitle = (
-  items: SortFieldItem[],
-  computePriority: (item: SortFieldItem) => number
+  items: SortFieldItem[]
 ): SortFieldItem[] => {
-  const byTitle = new Map<string, { item: SortFieldItem; priority: number }>()
+  const byTitle = new Map<string, SortFieldItem>()
 
   items.forEach(item => {
     const normalizedTitle = normalizeSortTitle(item.title)
-    const current = byTitle.get(normalizedTitle)
-    const priority = computePriority(item)
 
-    if (!current || priority > current.priority) {
-      byTitle.set(normalizedTitle, { item, priority })
+    if (!byTitle.has(normalizedTitle)) {
+      byTitle.set(normalizedTitle, item)
     }
   })
 
-  return Array.from(byTitle.values()).map(entry => entry.item)
+  return Array.from(byTitle.values())
 }

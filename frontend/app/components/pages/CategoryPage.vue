@@ -228,8 +228,8 @@
             :show-filters-button="true"
             @toggle-filters="filtersDrawer = true"
             @update:search-term="searchTerm = $event"
-            @update:sort-field="sortField = $event"
-            @update:sort-order="sortOrder = $event"
+            @update:sort-field="onToolbarSortFieldUpdate"
+            @update:sort-order="onToolbarSortOrderUpdate"
             @update:view-mode="viewMode = $event"
           />
 
@@ -390,7 +390,7 @@ const router = useRouter()
 const { locale, t } = useI18n()
 const requestURL = useRequestURL()
 const { isLoggedIn, roles } = useAuth()
-const { trackFilterChange } = useAnalytics()
+const { trackFilterChange, trackSortUsage } = useAnalytics()
 const listComponents = [
   'base',
   'identity',
@@ -1307,29 +1307,36 @@ type SortMenuItem =
       type: 'divider'
     }
 
-const STANDARD_SORT_FIELDS = [
-  ECOSCORE_RELATIVE_FIELD,
-  'price.minPrice.price',
-  'offersCount',
-]
+const PRIMARY_SORT_STRATEGY = [
+  {
+    key: 'relevance',
+    candidates: ['_score', 'relevance', 'scores.RELEVANCE.value'],
+  },
+  {
+    key: 'impact',
+    candidates: [ECOSCORE_RELATIVE_FIELD],
+  },
+  {
+    key: 'price',
+    candidates: ['price.minPrice.price'],
+  },
+  {
+    key: 'popularity',
+    candidates: ['offersCount', 'offers.offersCount', 'popularity'],
+  },
+  {
+    key: 'novelty',
+    candidates: ['createdAt', 'updatedAt', 'releaseDate', 'dateCreated'],
+    matcher: /(created|updated|release|novel|new|date)/i,
+  },
+] as const
 
-const extractAttributeKeyFromMapping = (mapping: string): string | null => {
-  const patterns = [
-    /attributes\.(?:indexed(?:Attributes)?|referential(?:Attributes)?|referentielAttributes|indexedAttributes)\.([^.]+)/i,
-    /attributes\.([^.]+)/i,
-  ]
-
-  for (const pattern of patterns) {
-    const match = mapping.match(pattern)
-    if (match?.[1]) {
-      return match[1]
-    }
-  }
-
-  return null
+type SortFieldEntry = {
+  mapping: string
+  field: FieldMetadataDto
 }
 
-const sortFieldEntries = computed(() => {
+const allSortFieldEntries = computed<SortFieldEntry[]>(() => {
   const fields = [
     ...(sortOptions.value?.global ?? []),
     ...(sortOptions.value?.impact ?? []),
@@ -1337,10 +1344,12 @@ const sortFieldEntries = computed(() => {
   ]
 
   const seen = new Set<string>()
+
   return fields
     .filter(field => typeof field.mapping === 'string' && Boolean(field.mapping))
     .filter(field => {
       const mapping = field.mapping as string
+
       if (seen.has(mapping)) {
         return false
       }
@@ -1348,28 +1357,13 @@ const sortFieldEntries = computed(() => {
       seen.add(mapping)
       return true
     })
-    .map(field => {
-      const mapping = field.mapping as string
-      return { mapping, field }
-    })
+    .map(field => ({
+      mapping: field.mapping as string,
+      field,
+    }))
 })
 
-const computeSortEntryPriority = (
-  mapping: string,
-  popularKeys: Set<string>
-): number => {
-  if (STANDARD_SORT_FIELDS.includes(mapping)) {
-    return 300 - STANDARD_SORT_FIELDS.indexOf(mapping)
-  }
-
-  const attributeKey = extractAttributeKeyFromMapping(mapping)
-
-  if (attributeKey && popularKeys.has(attributeKey)) {
-    return 200
-  }
-
-  return 100
-}
+const sortFieldEntries = computed(() => allSortFieldEntries.value)
 
 const sortFieldItems = computed<SortFieldItem[]>(() => {
   const fieldMap = new Map(
@@ -1385,48 +1379,61 @@ const sortFieldItems = computed<SortFieldItem[]>(() => {
     ]
   }
 
-  const popularKeys = new Set(
-    popularAttributes.value
-      .map(config => config.key)
-      .filter(Boolean) as string[]
-  )
+  const items = sortFieldEntries.value
+    .map(entry => ({
+      value: entry.mapping,
+      title: resolveSortFieldTitle(entry.field, t),
+    }))
+    .sort((a, b) => a.title.localeCompare(b.title))
 
-  const buildItem = (mapping: string): SortFieldItem => {
-    const field = fieldMap.get(mapping)
-    return {
-      value: mapping,
-      title: resolveSortFieldTitle(field ?? { mapping, title: '' }, t),
+  return deduplicateSortItemsByTitle(items)
+})
+
+const primarySortItems = computed<SortFieldItem[]>(() => {
+  const byValue = new Map(sortFieldItems.value.map(item => [item.value, item]))
+  const primary: SortFieldItem[] = []
+  const used = new Set<string>()
+
+  PRIMARY_SORT_STRATEGY.forEach(strategy => {
+    let selected: SortFieldItem | undefined
+
+    for (const candidate of strategy.candidates) {
+      const current = byValue.get(candidate)
+      if (current) {
+        selected = current
+        break
+      }
     }
+
+    if (!selected && strategy.matcher) {
+      selected = sortFieldItems.value.find(item => strategy.matcher?.test(item.value))
+    }
+
+    if (selected && !used.has(selected.value)) {
+      primary.push(selected)
+      used.add(selected.value)
+    }
+  })
+
+  return primary
+})
+
+const advancedSortItems = computed<SortFieldItem[]>(() => {
+  const primaryValues = new Set(primarySortItems.value.map(item => item.value))
+
+  return sortFieldItems.value.filter(item => !primaryValues.has(item.value))
+})
+
+const defaultSortField = computed<string | null>(() => {
+  if (primarySortItems.value.length > 0) {
+    return primarySortItems.value[0].value
   }
 
-  const standardItems = STANDARD_SORT_FIELDS.filter(mapping =>
-    fieldMap.has(mapping)
-  ).map(buildItem)
+  if (advancedSortItems.value.length > 0) {
+    return advancedSortItems.value[0].value
+  }
 
-  const remainingEntries = sortFieldEntries.value.filter(
-    entry => !STANDARD_SORT_FIELDS.includes(entry.mapping)
-  )
-
-  const popularItems = remainingEntries
-    .filter(entry => {
-      const attributeKey = extractAttributeKeyFromMapping(entry.mapping)
-      return attributeKey ? popularKeys.has(attributeKey) : false
-    })
-    .map(entry => buildItem(entry.mapping))
-    .sort((a, b) => a.title.localeCompare(b.title))
-
-  const otherItems = remainingEntries
-    .filter(entry => {
-      const attributeKey = extractAttributeKeyFromMapping(entry.mapping)
-      return attributeKey ? !popularKeys.has(attributeKey) : true
-    })
-    .map(entry => buildItem(entry.mapping))
-    .sort((a, b) => a.title.localeCompare(b.title))
-
-  return deduplicateSortItemsByTitle(
-    [...standardItems, ...popularItems, ...otherItems],
-    item => computeSortEntryPriority(item.value, popularKeys)
-  )
+  return hasSortOptions.value ? null : ECOSCORE_RELATIVE_FIELD
 })
 
 const sortItems = computed<SortMenuItem[]>(() => {
@@ -1434,11 +1441,19 @@ const sortItems = computed<SortMenuItem[]>(() => {
     return []
   }
 
-  if (sortFieldEntries.value.length === 0) {
-    return sortFieldItems.value
-  }
-
   const items: SortMenuItem[] = []
+  const defaultField = defaultSortField.value
+
+  const withDefaultLabel = (option: SortFieldItem): SortFieldItem => {
+    if (option.value !== defaultField) {
+      return option
+    }
+
+    return {
+      ...option,
+      title: t('category.products.sort.defaultLabel', { label: option.title }),
+    }
+  }
 
   const group = (title: string, options: SortFieldItem[]) => {
     if (!options.length) {
@@ -1450,50 +1465,13 @@ const sortItems = computed<SortMenuItem[]>(() => {
     }
 
     items.push({ type: 'subheader', title })
-    items.push(...options)
+    items.push(...options.map(withDefaultLabel))
   }
 
-  const standardItems = sortFieldItems.value.filter(item =>
-    STANDARD_SORT_FIELDS.includes(item.value)
-  )
-  const popularKeys = new Set(
-    popularAttributes.value
-      .map(config => config.key)
-      .filter(Boolean) as string[]
-  )
-
-  const popularItems = sortFieldItems.value.filter(item => {
-    if (STANDARD_SORT_FIELDS.includes(item.value)) {
-      return false
-    }
-
-    const attributeKey = extractAttributeKeyFromMapping(item.value)
-    return attributeKey ? popularKeys.has(attributeKey) : false
-  })
-
-  const otherItems = sortFieldItems.value.filter(item => {
-    if (STANDARD_SORT_FIELDS.includes(item.value)) {
-      return false
-    }
-
-    const attributeKey = extractAttributeKeyFromMapping(item.value)
-    return attributeKey ? !popularKeys.has(attributeKey) : true
-  })
-
-  group(t('category.products.sort.groups.standard'), standardItems)
-  group(t('category.products.sort.groups.popularAttributes'), popularItems)
-  group(t('category.products.sort.groups.otherAttributes'), otherItems)
+  group(t('category.products.sort.groups.main'), primarySortItems.value)
+  group(t('category.products.sort.groups.advanced'), advancedSortItems.value)
 
   return items
-})
-
-const defaultSortField = computed<string | null>(() => {
-  const options = sortFieldItems.value
-  if (options.length > 0) {
-    return options[0].value
-  }
-
-  return hasSortOptions.value ? null : ECOSCORE_RELATIVE_FIELD
 })
 
 const applyDefaultSort = () => {
@@ -1509,7 +1487,6 @@ const applyDefaultSort = () => {
   lastAppliedDefaultSort.value = defaultSortField.value
   return true
 }
-
 const sortFieldMap = computed<Record<string, FieldMetadataDto>>(() => {
   return sortFieldEntries.value.reduce<Record<string, FieldMetadataDto>>(
     (accumulator, entry) => {
@@ -2104,16 +2081,67 @@ const hashState = computed<CategoryHashState>(() => ({
   technicalExpanded: technicalExpanded.value || undefined,
 }))
 
-const onTableSortFieldUpdate = (field: string | null) => {
-  if (sortField.value !== field) {
-    sortField.value = field
+
+const resolveSortGroup = (field: string | null): 'primary' | 'advanced' | 'unknown' => {
+  if (!field) {
+    return 'unknown'
   }
+
+  if (primarySortItems.value.some(item => item.value === field)) {
+    return 'primary'
+  }
+
+  if (advancedSortItems.value.some(item => item.value === field)) {
+    return 'advanced'
+  }
+
+  return 'unknown'
+}
+
+const trackSortUsageEvent = (
+  action: 'exposed' | 'selected' | 'order-updated',
+  overrides: {
+    selectedField?: string | null
+    sortOrder?: 'asc' | 'desc'
+  } = {}
+) => {
+  trackSortUsage({
+    categoryId: category.value?.id ?? null,
+    categorySlug: slug,
+    action,
+    selectedField: overrides.selectedField ?? sortField.value,
+    selectedGroup: resolveSortGroup(overrides.selectedField ?? sortField.value),
+    sortOrder: overrides.sortOrder ?? sortOrder.value,
+    defaultField: defaultSortField.value,
+    primaryOptions: primarySortItems.value.map(item => item.value),
+    advancedOptions: advancedSortItems.value.map(item => item.value),
+    totalOptions: sortFieldItems.value.length,
+  })
+}
+
+const onToolbarSortFieldUpdate = (field: string | null) => {
+  if (sortField.value === field) {
+    return
+  }
+
+  sortField.value = field
+  trackSortUsageEvent('selected', { selectedField: field })
+}
+
+const onToolbarSortOrderUpdate = (order: 'asc' | 'desc') => {
+  if (sortOrder.value === order) {
+    return
+  }
+
+  sortOrder.value = order
+  trackSortUsageEvent('order-updated', { sortOrder: order })
+}
+const onTableSortFieldUpdate = (field: string | null) => {
+  onToolbarSortFieldUpdate(field)
 }
 
 const onTableSortOrderUpdate = (order: 'asc' | 'desc') => {
-  if (sortOrder.value !== order) {
-    sortOrder.value = order
-  }
+  onToolbarSortOrderUpdate(order)
 }
 
 watch(
@@ -2158,6 +2186,7 @@ onMounted(async () => {
       if (!sortField.value) {
         applyDefaultSort()
       }
+      trackSortUsageEvent('exposed')
     } catch (err) {
       console.error('Failed to load filter/sort options:', err)
     }
