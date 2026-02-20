@@ -103,3 +103,4 @@ feed:
     cron: 30 43 1 * * ?
     enabled: true
     cache-ttl-days: 1
+    max-jitter-seconds: 30

@@ -14,3 +14,12 @@ mvn test
 ```
 
 See the [main project](../../README.md) for details.
+
+### Effiliation scheduler
+
+Effiliation refresh is controlled by `feed.effiliation.*` properties:
+
+- `cron`: refresh schedule
+- `enabled`: enables/disables all Effiliation retrieval methods
+- `cache-ttl-days`: remote cache TTL
+- `max-jitter-seconds`: random delay applied before scheduled execution

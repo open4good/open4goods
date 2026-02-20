@@ -44,6 +44,7 @@ public class FeedConfiguration {
         private String cron = "30 43 1 * * ?";
         private boolean enabled = true;
         private int cacheTtlDays = 1;
+        private int maxJitterSeconds = 30;
 
         public String getCron() { return cron; }
         public void setCron(String cron) { this.cron = cron; }
@@ -51,6 +52,8 @@ public class FeedConfiguration {
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
         public int getCacheTtlDays() { return cacheTtlDays; }
         public void setCacheTtlDays(int cacheTtlDays) { this.cacheTtlDays = cacheTtlDays; }
+        public int getMaxJitterSeconds() { return maxJitterSeconds; }
+        public void setMaxJitterSeconds(int maxJitterSeconds) { this.maxJitterSeconds = maxJitterSeconds; }
     }
     
 	public String getCatalogUrl() {
