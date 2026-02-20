@@ -408,7 +408,7 @@ nudgeToolConfig:
     - id: "installation_builtin"
       group: "installation"
       criterias:
-        - field: "attributes.indexed.INSTALLATION_TYPE.normalizedValue"
+        - field: "attributes.indexed.INSTALLATION_TYPE.value"
           operator: "EQUALS"
           value: "ENCASTRABLE"
       image: "builtin.png"
@@ -428,7 +428,7 @@ nudgeToolConfig:
     - id: "installation_freestanding"
       group: "installation"
       criterias:
-        - field: "attributes.indexed.INSTALLATION_TYPE.normalizedValue"
+        - field: "attributes.indexed.INSTALLATION_TYPE.value"
           operator: "EQUALS"
           value: "POSE LIBRE"
       image: "freestanding.png"
