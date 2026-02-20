@@ -216,7 +216,7 @@ const resolveCardStyle = (index: number) => {
 
 .home-blog__media
   position: relative
-  aspect-ratio: 16 / 10
+  aspect-ratio: 16 / 9
   background: rgba(var(--v-theme-surface-primary-050), 0.8)
 
 .home-blog__media :deep(.v-img)

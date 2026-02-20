@@ -664,7 +664,7 @@
       "fields": {
         "brand": "Marque",
         "condition": "État des offres",
-        "country": "Code pays du GTIN",
+        "country": "Code pays du code barre",
         "creationDate": "Date de création",
         "datasource": "Sources de données",
         "ecoscore": "Impact Score",
@@ -1544,7 +1544,7 @@
             "label": "gs1_country"
           },
           "gtin": {
-            "description": "Identifiant GTIN (EAN13/UPC).",
+            "description": "Identifiant code barre (EAN13/UPC/GTIN).",
             "label": "gtin"
           },
           "gtinType": {
@@ -2392,7 +2392,7 @@
           "akaModels": "Autres appellations",
           "knownSince": "Présent depuis",
           "lastUpdated": "Mise à jour",
-          "gtin": "GTIN",
+          "gtin": "Code Barre",
           "gtinLabel": "Référence code-barres GTIN",
           "gtinImageAlt": "Code-barres GTIN pour {gtin}",
           "barcodeType": {
@@ -2561,7 +2561,7 @@
         "showMore": "Afficher plus",
         "showLess": "Afficher moins"
       },
-      "gtin": "Code GTIN",
+      "gtin": "Code Baarre (GTIN)",
       "gtinTooltip": "Basé sur le code GTIN du produit, cela n'indique pas nécessairement le lieu de fabrication.",
       "mediaType": {
         "image": "l'image",
@@ -2800,6 +2800,7 @@
         }
       },
       "radarAria": "Radar des scores pour {product}",
+      "positioning": "Positionnement",
       "radarControls": {
         "ariaLabel": "Afficher ou masquer les produits à comparer sur le radar",
         "current": "Ce produit : {product}",

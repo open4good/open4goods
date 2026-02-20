@@ -5,6 +5,9 @@
     role="img"
     :aria-label="ariaLabel"
   >
+    <h3 class="impact-radar__title text-center mb-4">
+      {{ $t('product.impact.positioning') }}
+    </h3>
     <ClientOnly>
       <VueECharts
         v-if="option && canRenderChart"
@@ -219,6 +222,12 @@ const option = computed<EChartsOption | null>(() => {
   border-radius: 24px;
   padding: 1.5rem;
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
+}
+
+.impact-radar__title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .impact-radar__chart {
