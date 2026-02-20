@@ -391,8 +391,8 @@ const offerBadges = computed<Badge[]>(() => {
   &__row
     display: flex
     align-items: center
-    padding: 0.35rem 0.5rem
-    gap: 0.5rem
+    padding: 0.25rem 0.5rem
+    gap: 0.25rem
     min-height: 32px /* Consistent height */
 
     &:not(:last-child)
@@ -425,7 +425,7 @@ const offerBadges = computed<Badge[]>(() => {
     display: flex
     align-items: center
     flex: 1
-    gap: 0.5rem
+    gap: 0.35rem
     text-decoration: none
     color: inherit
     padding: 2px 4px
@@ -454,7 +454,8 @@ const offerBadges = computed<Badge[]>(() => {
 
   &__more-btn
     opacity: 0.6
-    margin-left: -4px /* Tighten layout */
+    flex-shrink: 0
+    margin-left: -2px /* Tighten layout */
     &:hover
       opacity: 1
       background: rgba(0,0,0,0.05)

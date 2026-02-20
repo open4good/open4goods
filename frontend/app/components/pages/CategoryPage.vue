@@ -63,6 +63,12 @@
               </v-btn>
             </template>
           </v-tooltip>
+          <span
+            v-if="isDesktop"
+            class="text-button font-weight-bold text-medium-emphasis"
+          >
+            {{ $t('category.filters.advanced') }}
+          </span>
 
           <CategoryFastFilters
             class="category-page__fast-filters-groups"
@@ -233,10 +239,6 @@
             @update:view-mode="viewMode = $event"
           />
 
-          <div class="category-page__score-guide mb-4">
-            <ScoreReadingGuideDialog :mappings="scoreGuideMappings" />
-          </div>
-
           <v-alert
             v-if="productError"
             type="error"
@@ -350,7 +352,6 @@ import CategoryProductListView from '~/components/category/products/CategoryProd
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import CtaCard from '~/components/shared/CtaCard.vue'
-import ScoreReadingGuideDialog from '~/components/shared/ScoreReadingGuideDialog.vue'
 import {
   CATEGORY_DEFAULT_VIEW_MODE,
   CATEGORY_PAGE_SIZES,
@@ -761,13 +762,6 @@ const filterOptions = computed(() =>
 const sortOptions = computed(() =>
   normalizeFieldOptionsResponse(sortOptionsData.value)
 )
-
-const scoreGuideMappings = computed(() => [
-  ...(filterOptions.value?.impact ?? []).map(field => field.mapping),
-  ...(filterOptions.value?.technical ?? []).map(field => field.mapping),
-  ...(filterOptions.value?.global ?? []).map(field => field.mapping),
-  'gtin',
-])
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
 const DEFAULT_FILTERS_COLLAPSED_STATE = true
@@ -1346,7 +1340,9 @@ const allSortFieldEntries = computed<SortFieldEntry[]>(() => {
   const seen = new Set<string>()
 
   return fields
-    .filter(field => typeof field.mapping === 'string' && Boolean(field.mapping))
+    .filter(
+      field => typeof field.mapping === 'string' && Boolean(field.mapping)
+    )
     .filter(field => {
       const mapping = field.mapping as string
 
@@ -1406,7 +1402,9 @@ const primarySortItems = computed<SortFieldItem[]>(() => {
     }
 
     if (!selected && strategy.matcher) {
-      selected = sortFieldItems.value.find(item => strategy.matcher?.test(item.value))
+      selected = sortFieldItems.value.find(item =>
+        strategy.matcher?.test(item.value)
+      )
     }
 
     if (selected && !used.has(selected.value)) {
@@ -2081,8 +2079,9 @@ const hashState = computed<CategoryHashState>(() => ({
   technicalExpanded: technicalExpanded.value || undefined,
 }))
 
-
-const resolveSortGroup = (field: string | null): 'primary' | 'advanced' | 'unknown' => {
+const resolveSortGroup = (
+  field: string | null
+): 'primary' | 'advanced' | 'unknown' => {
   if (!field) {
     return 'unknown'
   }

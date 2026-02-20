@@ -127,13 +127,16 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
       icon: 'mdi-shield-check',
       segments: [
         {
-          text: 'Indépendant. Ouvert. Transparent',
-          icon: 'breton-flag',
-          iconPosition: 'after',
+          text: 'Indépendant. Ouvert. Transparent'
+
         },
-        { text: ', hébergé en Europe. Plus de ' },
+        { text: 'Hébergé en Europe, Made in France'        ,
+                  icon: 'breton-flag',
+                  iconPosition: 'after',
+
+        },
         { text: openDataMillions, to: '/opendata' },
-        { text: ' de produits en ' },
+        { text: 'M de produits en ' },
         { text: 'données ouvertes.', to: '/opendata' },
         { text: ' Nudger est aussi ' },
         { text: 'open source', to: '/opensource' },

@@ -11,14 +11,6 @@ const FILTER_FIELD_TRANSLATION_KEYS: Record<string, string> = {
   'attributes.referentielAttributes.BRAND': 'category.filters.fields.brand',
   'gtinInfos.country': 'category.filters.fields.country',
   datasourceCodes: 'category.filters.fields.datasource',
-  gtin: 'technicalFieldGuide.fields.gtin.label',
-  'scores.ECOSCORE.relative.value':
-    'technicalFieldGuide.fields.ecoscoreRelative.label',
-  'scores.ECOSCORE.relativ.value':
-    'technicalFieldGuide.fields.ecoscoreRelative.label',
-  'scores.ECOSCORE.value': 'technicalFieldGuide.fields.ecoscoreAbsolute.label',
-  'scores.ECOSCORE.ranking':
-    'technicalFieldGuide.fields.ecoscoreRanking.label',
 }
 
 const SORT_FIELD_TRANSLATION_KEYS: Record<string, string> = {

@@ -47,6 +47,18 @@ const convertCriteria = (
     }
   }
 
+  if (criteria.operator === 'CONTAINS') {
+    if (!criteria.value) {
+      return null
+    }
+
+    return {
+      field: criteria.field,
+      operator: 'contains',
+      terms: [criteria.value],
+    }
+  }
+
   const numericValue = parseNumericValue(criteria.value)
 
   if (numericValue == null) {

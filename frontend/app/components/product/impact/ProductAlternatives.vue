@@ -579,33 +579,36 @@ const fetchAlternatives = async () => {
   errorMessage.value = null
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>('/api/products', {
-      method: 'POST',
-      query: {
-        verticalId: props.verticalId,
-        pageSize: props.maxResults,
-        pageNumber: 0,
-        include: [
-          ProductsIncludeEnum.Base,
-          ProductsIncludeEnum.Identity,
-          ProductsIncludeEnum.Offers,
-          ProductsIncludeEnum.Scores,
-          ProductsIncludeEnum.Resources,
-        ],
-      },
-      headers: {
-        'X-XSRF-TOKEN': useCookie('XSRF-TOKEN').value || '',
-      },
-      body: {
-        sort: {
-          field: ECOSCORE_RELATIVE_FIELD,
-          order: 'DESC',
+    const response = await $fetch<ProductSearchResponseDto>(
+      '/api/products/search',
+      {
+        method: 'POST',
+        query: {
+          verticalId: props.verticalId,
+          pageSize: props.maxResults,
+          pageNumber: 0,
+          include: [
+            ProductsIncludeEnum.Base,
+            ProductsIncludeEnum.Identity,
+            ProductsIncludeEnum.Offers,
+            ProductsIncludeEnum.Scores,
+            ProductsIncludeEnum.Resources,
+          ],
         },
-        filters: activeClauses.value.length
-          ? { filters: activeClauses.value }
-          : undefined,
-      },
-    })
+        headers: {
+          'X-XSRF-TOKEN': useCookie('XSRF-TOKEN').value || '',
+        },
+        body: {
+          sort: {
+            field: ECOSCORE_RELATIVE_FIELD,
+            order: 'DESC',
+          },
+          filters: activeClauses.value.length
+            ? { filters: activeClauses.value }
+            : undefined,
+        },
+      }
+    )
 
     if (currentToken !== requestToken) {
       return

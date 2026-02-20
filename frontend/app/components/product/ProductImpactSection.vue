@@ -9,7 +9,6 @@
           {{ $t('product.impact.subtitle', subtitleParams) }}
         </p>
       </div>
-      <ScoreReadingGuideDialog :mappings="scoreGuideMappings" />
     </header>
 
     <div class="product-impact__primary">
@@ -44,7 +43,6 @@
 import { computed, toRef } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ScoreReadingGuideDialog from '~/components/shared/ScoreReadingGuideDialog.vue'
 import type { ScoreView } from './impact/impact-types'
 import type { ProductEprelDto } from '~~/shared/api-client'
 
@@ -242,14 +240,6 @@ const chartSeries = computed<ChartSeriesEntry[]>(() => {
 const showRadar = computed(
   () => radarAxes.value.length >= 3 && chartSeries.value.length > 0
 )
-
-const scoreGuideMappings = computed(() => [
-  'gtin',
-  'scores.ECOSCORE.relative.value',
-  'scores.ECOSCORE.value',
-  'scores.ECOSCORE.ranking',
-  ...props.scores.map(score => `scores.${score.id}.value`),
-])
 
 const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
 </script>

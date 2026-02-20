@@ -1326,9 +1326,10 @@ const cornerIconDimensions = computed(() => {
 
   &__window-wrapper {
     width: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     padding: clamp(0.5rem, 1vw, 1rem) 0;
     flex-grow: 1; /* Allow it to fill the fixed height */
@@ -1426,7 +1427,7 @@ const cornerIconDimensions = computed(() => {
 .nudge-wizard--category {
   .nudge-wizard__window {
     justify-content: flex-start;
-    overflow-y: hidden;
+    overflow-y: auto;
 
     :deep(.v-window__container) {
       align-items: flex-start;

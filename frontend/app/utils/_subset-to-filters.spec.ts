@@ -128,6 +128,57 @@ describe('_subset-to-filters helpers', () => {
     })
   })
 
+  it('converts CONTAINS subsets into contains filters within should groups', () => {
+    const subsets: VerticalSubsetDto[] = [
+      {
+        id: 'cleaning_pyrolysis',
+        group: 'cleaning',
+        criterias: [
+          {
+            field: 'attributes.indexed.OVEN_CLEANING_MODE',
+            operator: 'CONTAINS',
+            value: 'PYROLYSE',
+          },
+        ],
+      },
+      {
+        id: 'cleaning_catalysis',
+        group: 'cleaning',
+        criterias: [
+          {
+            field: 'attributes.indexed.OVEN_CLEANING_MODE',
+            operator: 'CONTAINS',
+            value: 'CATALYSE',
+          },
+        ],
+      },
+    ]
+
+    const request = buildFilterRequestFromSubsets(subsets, [
+      'cleaning_pyrolysis',
+      'cleaning_catalysis',
+    ])
+
+    expect(request).toEqual({
+      filterGroups: [
+        {
+          should: [
+            {
+              field: 'attributes.indexed.OVEN_CLEANING_MODE',
+              operator: 'contains',
+              terms: ['PYROLYSE'],
+            },
+            {
+              field: 'attributes.indexed.OVEN_CLEANING_MODE',
+              operator: 'contains',
+              terms: ['CATALYSE'],
+            },
+          ],
+        },
+      ],
+    })
+  })
+
   it('keeps distinct range buckets when they cannot be merged', () => {
     const subsets: VerticalSubsetDto[] = [
       {

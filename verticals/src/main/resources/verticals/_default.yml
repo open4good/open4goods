@@ -392,10 +392,10 @@ nudgeToolConfig:
       mdiIcon: "mdi-lightning-bolt"
       title:
         en: "Energy consumption"
-        fr: "Consommation explication"
+        fr: "Consommation d'énergie"
       description:
         en: "Products with low energy consumption"
-        fr: "Produits faible consommation"
+        fr: "Produits avec faible consommation énergétiqe"
 
     - scoreName: "DURABILITY"
       fromPercent: 50
