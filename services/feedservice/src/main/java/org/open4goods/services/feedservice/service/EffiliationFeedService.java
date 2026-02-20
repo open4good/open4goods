@@ -1,7 +1,6 @@
 package org.open4goods.services.feedservice.service;
 
 import java.io.File;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -9,13 +8,17 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.commons.util.HttpUtils;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.feedservice.model.EffiliationProgram;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -55,21 +58,9 @@ public class EffiliationFeedService extends AbstractFeedService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EffiliationFeedService.class);
 
-    /**
-     * Remote cache TTL in days.
-     *
-     * <p>Effiliation refreshes data every ~2 hours per documentation, so a 1-day cache is safe
-     * and avoids excess calls while still updating regularly. :contentReference[oaicite:1]{index=1}
-     */
-    /**
-     * Remote cache TTL in days.
-     *
-     * <p>Effiliation refreshes data every ~2 hours per documentation, so a 1-day cache is safe
-     * and avoids excess calls while still updating regularly. :contentReference[oaicite:1]{index=1}
-     */
-    // private static final int CACHE_TTL_DAYS = 1;
+    private static final Pattern NUMERIC_PATTERN = Pattern.compile("^\\d+$");
 
-    /** Effiliation filter value: "mines" = programs publisher is registered to. :contentReference[oaicite:2]{index=2} */
+        /** Effiliation filter value: "mines" = programs publisher is registered to. :contentReference[oaicite:2]{index=2} */
     private static final String FILTER_MINES = "mines";
 
     /**
@@ -102,22 +93,18 @@ public class EffiliationFeedService extends AbstractFeedService {
     }
 
     /**
-     * Scheduled refresh of Effiliation datasource properties every day at a random time
-     * (with a 30-second offset).
-     * TODO : should be configurable from yaml config, through feedConfig.schedule.classname
-     * TODO : In config cron expression + doc
-     * TODO : Add schedule at 1h43 AM every day in yaml config
-     * Should add the random seconds
-     */
-    /**
      * Scheduled refresh of Effiliation datasource properties according to configuration.
+     *
+     * <p>A random jitter is applied before each execution to avoid synchronized bursts
+     * when several instances are running simultaneously.</p>
      */
     @Scheduled(cron = "${feed.effiliation.cron:-}")
     public void scheduledLoad() {
-        if (!feedConfig.getEffiliation().isEnabled()) {
+        if (!isEnabled()) {
             LOGGER.info("Effiliation feed service is disabled. Skipping scheduled load.");
             return;
         }
+        applySchedulingJitter();
         LOGGER.info("Scheduled refresh of Effiliation datasources initiated.");
         load();
     }
@@ -125,6 +112,11 @@ public class EffiliationFeedService extends AbstractFeedService {
     @Override
     protected Set<DataSourceProperties> loadDatasources() throws Exception {
         Set<DataSourceProperties> result = new HashSet<>();
+
+        if (!isEnabled()) {
+            LOGGER.info("Effiliation feed service is disabled. Returning empty datasource set.");
+            return result;
+        }
 
         if (isBlank(effiliationApiKey)) {
             LOGGER.error("Effiliation API key is blank; skipping datasource load.");
@@ -186,20 +178,27 @@ public class EffiliationFeedService extends AbstractFeedService {
                 LOGGER.warn("Skipping Effiliation feed '{}' due to missing feed URL field (code/url).", feedKey);
                 continue;
             }
+            feedUrl = HttpUtils.normalizeUrl(feedUrl);
 
             String idAffilieur = firstNonBlank(
                     textOrNull(feedNode, "id_affilieur"),
                     textOrNull(feedNode, "idAffilieur") // fallback alias
             );
-            if (isBlank(idAffilieur)) {
-                LOGGER.warn("Skipping Effiliation feed '{}' due to missing 'id_affilieur'.", feedKey);
+            if (!isValidAffilieurId(idAffilieur)) {
+                LOGGER.warn("Skipping Effiliation feed '{}' due to invalid 'id_affilieur' value '{}'.", feedKey, idAffilieur);
                 continue;
             }
 
             EffiliationProgram program = programs.get(idAffilieur);
             if (program == null) {
                 // Keep previous behavior: do not emit datasource if program is missing.
-                LOGGER.error("Program with affiliation id {} not found (feed='{}').", idAffilieur, feedKey);
+                LOGGER.warn("Program with affiliation id {} not found (feed='{}').", idAffilieur, feedKey);
+                continue;
+            }
+
+            if (!isProgramActive(program)) {
+                LOGGER.info("Skipping Effiliation feed '{}' because advertiser {} is not active (etat='{}').",
+                        feedKey, idAffilieur, program.getEtat());
                 continue;
             }
 
@@ -211,11 +210,11 @@ public class EffiliationFeedService extends AbstractFeedService {
                     textOrNull(feedNode, "urlannonceur"), // some APIs name it this way
                     textOrNull(feedNode, "portal_url")    // fallback alias
             );
-            ds.setPortalUrl(nullSafe(portalUrl));
+            ds.setPortalUrl(HttpUtils.normalizeUrl(portalUrl));
 
             // Program enrichment from programs API fields. :contentReference[oaicite:7]{index=7}
-            ds.setAffiliatedPortalUrl(nullSafe(program.getUrlTracke()));
-            ds.setLogo(nullSafe(program.getUrlLogo())); // assuming your model maps urllo/url_logo to getUrlLogo()
+            ds.setAffiliatedPortalUrl(HttpUtils.normalizeUrl(program.getUrlTracke()));
+            ds.setLogo(HttpUtils.normalizeUrl(program.getUrlLogo())); // assuming your model maps urllo/url_logo to getUrlLogo()
 
             // Keep existing behavior: derive name from portal URL.
             ds.setName(extractNameAndTld(ds.getPortalUrl()));
@@ -242,48 +241,36 @@ public class EffiliationFeedService extends AbstractFeedService {
             return Collections.emptyMap();
         }
 
-        String endpoint = buildProgramsEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, null, null);
-
         try {
-            int cacheTtl = feedConfig.getEffiliation().getCacheTtlDays();
-            File cachedResponse = remoteFileCachingService.getResource(endpoint, cacheTtl);
-            if (cachedResponse == null || !cachedResponse.exists()) {
-                LOGGER.error("Effiliation cached programs response file not found (endpoint='{}').",
-                        safeEndpointForLogs(endpoint));
-                return Collections.emptyMap();
-            }
+            Map<String, EffiliationProgram> programs = new LinkedHashMap<>();
+            int page = 1;
+            while (true) {
+                JsonNode root = readCachedJson(
+                        buildProgramsEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, null, null, page));
+                JsonNode programsNode = root.path("programs");
 
-            String jsonResponse = Files.readString(cachedResponse.toPath(), StandardCharsets.UTF_8);
-            if (isBlank(jsonResponse)) {
-                LOGGER.error("Effiliation cached programs response is empty (endpoint='{}').",
-                        safeEndpointForLogs(endpoint));
-                return Collections.emptyMap();
-            }
-
-            JsonNode root = objectMapper.readTree(jsonResponse);
-            JsonNode programsNode = root.path("programs");
-
-            if (!programsNode.isArray()) {
-                LOGGER.error("Effiliation programs payload has no 'programs' array (endpoint='{}').",
-                        safeEndpointForLogs(endpoint));
-                return Collections.emptyMap();
-            }
-
-            List<EffiliationProgram> programList =
-                    objectMapper.convertValue(programsNode, new TypeReference<List<EffiliationProgram>>() {});
-
-            Map<String, EffiliationProgram> programs = new HashMap<>();
-            for (EffiliationProgram p : programList) {
-                if (p != null && p.getIdAffilieur() != null) {
-                    programs.put(String.valueOf(p.getIdAffilieur()), p);
+                if (!programsNode.isArray()) {
+                    LOGGER.error("Effiliation programs payload has no 'programs' array (page={}).", page);
+                    return Collections.emptyMap();
                 }
+
+                List<EffiliationProgram> programList =
+                        objectMapper.convertValue(programsNode, new TypeReference<List<EffiliationProgram>>() {});
+                for (EffiliationProgram program : programList) {
+                    if (program != null && program.getIdAffilieur() != null) {
+                        programs.putIfAbsent(String.valueOf(program.getIdAffilieur()), program);
+                    }
+                }
+
+                if (!hasNextPage(root, page)) {
+                    break;
+                }
+                page++;
             }
 
             return programs;
-
         } catch (Exception e) {
-            LOGGER.error("Failed to retrieve/parse Effiliation programs (endpoint='{}').",
-                    safeEndpointForLogs(endpoint), e);
+            LOGGER.warn("Failed to retrieve/parse Effiliation programs.", e);
             return Collections.emptyMap();
         }
     }
@@ -300,27 +287,43 @@ public class EffiliationFeedService extends AbstractFeedService {
      * @throws Exception on missing cache file or invalid JSON
      */
     public JsonNode retrieveEffiliationFeeds(String apiKey, String lg, String country) throws Exception {
+        assertEnabled();
         if (isBlank(apiKey)) {
             throw new IllegalArgumentException("Effiliation API key is blank.");
         }
 
-        String endpoint = buildProductFeedsEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, country, null);
+        JsonNode mergedRoot = null;
+        List<JsonNode> mergedFeeds = new ArrayList<>();
+        int page = 1;
 
-        // Security: do not log the key.
-        LOGGER.info("Retrieving Effiliation productfeeds (endpoint='{}').", safeEndpointForLogs(endpoint));
+        while (true) {
+            String endpoint = buildProductFeedsEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, country, null, page);
+            LOGGER.info("Retrieving Effiliation productfeeds (endpoint='{}').", safeEndpointForLogs(endpoint));
 
-        int cacheTtl = feedConfig.getEffiliation().getCacheTtlDays();
-        File cachedResponse = remoteFileCachingService.getResource(endpoint, cacheTtl);
-        if (cachedResponse == null || !cachedResponse.exists()) {
-            throw new Exception("Effiliation cached response file not found.");
+            JsonNode root = readCachedJson(endpoint);
+            if (mergedRoot == null) {
+                mergedRoot = root.deepCopy();
+            }
+
+            JsonNode feedsNode = root.path("feeds");
+            if (feedsNode.isArray()) {
+                for (JsonNode feed : feedsNode) {
+                    mergedFeeds.add(feed);
+                }
+            }
+
+            if (!hasNextPage(root, page)) {
+                break;
+            }
+            page++;
         }
 
-        String jsonResponse = Files.readString(cachedResponse.toPath(), StandardCharsets.UTF_8);
-        if (isBlank(jsonResponse)) {
-            throw new Exception("Effiliation cached response is empty.");
+        if (mergedRoot == null) {
+            return objectMapper.createObjectNode();
         }
 
-        return objectMapper.readTree(jsonResponse);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) mergedRoot).set("feeds", objectMapper.valueToTree(mergedFeeds));
+        return mergedRoot;
     }
 
     /* ==========================================================================================
@@ -333,6 +336,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * Links API: banners/text/flash links. :contentReference[oaicite:9]{index=9}
      */
     public JsonNode retrieveEffiliationLinks(String apiKey, String lg, String country) throws Exception {
+        assertEnabled();
         String endpoint = buildLinksEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, country, null, null, null, null);
         LOGGER.info("Retrieving Effiliation links (endpoint='{}').", safeEndpointForLogs(endpoint));
         return readCachedJson(endpoint);
@@ -342,6 +346,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * Promotional offers (voucher codes / promotions). Listed in Link API methods. :contentReference[oaicite:10]{index=10}
      */
     public JsonNode retrieveEffiliationPromotionalOffers(String apiKey, String lg, String country) throws Exception {
+        assertEnabled();
         String endpoint = buildPromotionalOffersEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, country, null, null);
         LOGGER.info("Retrieving Effiliation promotionaloffers (endpoint='{}').", safeEndpointForLogs(endpoint));
         return readCachedJson(endpoint);
@@ -351,6 +356,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * Categories API. Listed under "Others". :contentReference[oaicite:11]{index=11}
      */
     public JsonNode retrieveEffiliationCategories(String apiKey, String lg) throws Exception {
+        assertEnabled();
         String endpoint = buildCategoriesEndpoint(apiKey, normalizeLg(lg));
         LOGGER.info("Retrieving Effiliation categories (endpoint='{}').", safeEndpointForLogs(endpoint));
         return readCachedJson(endpoint);
@@ -360,6 +366,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * Acturss (news/rss) endpoint under "Others". :contentReference[oaicite:12]{index=12}
      */
     public JsonNode retrieveEffiliationActuRss(String apiKey, String lg) throws Exception {
+        assertEnabled();
         String endpoint = buildActuRssEndpoint(apiKey, normalizeLg(lg));
         LOGGER.info("Retrieving Effiliation acturss (endpoint='{}').", safeEndpointForLogs(endpoint));
         return readCachedJson(endpoint);
@@ -369,6 +376,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * Reporting endpoint. :contentReference[oaicite:13]{index=13}
      */
     public JsonNode retrieveEffiliationReporting(String apiKey, String lg, String type, String start, String end) throws Exception {
+        assertEnabled();
         String endpoint = buildReportingEndpoint(apiKey, normalizeLg(lg), type, start, end, null, null);
         LOGGER.info("Retrieving Effiliation reporting (endpoint='{}').", safeEndpointForLogs(endpoint));
         return readCachedJson(endpoint);
@@ -378,6 +386,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * Transactions endpoint. :contentReference[oaicite:14]{index=14}
      */
     public JsonNode retrieveEffiliationTransactions(String apiKey, String lg, String start, String end, String dateType) throws Exception {
+        assertEnabled();
         String endpoint = buildTransactionsEndpoint(apiKey, normalizeLg(lg), start, end, dateType, null, null);
         LOGGER.info("Retrieving Effiliation transactions (endpoint='{}').", safeEndpointForLogs(endpoint));
         return readCachedJson(endpoint);
@@ -389,6 +398,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * <p>Kept generic because parameters vary depending on how you use it in your project.</p>
      */
     public JsonNode retrieveEffiliationUpdatedTransactions(String apiKey, String lg, String start, String end) throws Exception {
+        assertEnabled();
         String endpoint = buildUpdatedTransactionsEndpoint(apiKey, normalizeLg(lg), start, end, null);
         LOGGER.info("Retrieving Effiliation updatedtransactions (endpoint='{}').", safeEndpointForLogs(endpoint));
         return readCachedJson(endpoint);
@@ -402,28 +412,32 @@ public class EffiliationFeedService extends AbstractFeedService {
                                          String lg,
                                          String filter,
                                          String country,
-                                         String categories) {
+                                         String categories,
+                                         Integer page) {
         // Official: /programs.json supports filter, lg, country, categories... :contentReference[oaicite:16]{index=16}
         return "https://apiv2.effiliation.com/apiv2/programs.json"
                 + "?key=" + urlEncode(apiKey)
                 + "&filter=" + urlEncode(nullSafe(filter))
                 + "&lg=" + urlEncode(lg)
                 + (isBlank(country) ? "" : "&country=" + urlEncode(country))
-                + (isBlank(categories) ? "" : "&categories=" + urlEncode(categories));
+                + (isBlank(categories) ? "" : "&categories=" + urlEncode(categories))
+                + (page == null ? "" : "&page=" + page);
     }
 
     private String buildProductFeedsEndpoint(String apiKey,
                                             String lg,
                                             String filter,
                                             String country,
-                                            String type) {
+                                            String type,
+                                            Integer page) {
         // Official: /productfeeds.json supports filter, lg, country, type... :contentReference[oaicite:17]{index=17}
         return "https://apiv2.effiliation.com/apiv2/productfeeds.json"
                 + "?key=" + urlEncode(apiKey)
                 + "&filter=" + urlEncode(nullSafe(filter))
                 + "&lg=" + urlEncode(lg)
                 + (isBlank(country) ? "" : "&country=" + urlEncode(country))
-                + (isBlank(type) ? "" : "&type=" + urlEncode(type));
+                + (isBlank(type) ? "" : "&type=" + urlEncode(type))
+                + (page == null ? "" : "&page=" + page);
     }
 
     private String buildLinksEndpoint(String apiKey,
@@ -532,10 +546,25 @@ public class EffiliationFeedService extends AbstractFeedService {
 
     private JsonNode readCachedJson(String endpoint) throws Exception {
         int cacheTtl = feedConfig.getEffiliation().getCacheTtlDays();
-        File cachedResponse = remoteFileCachingService.getResource(endpoint, cacheTtl);
+        File cachedResponse;
+        try {
+            cachedResponse = remoteFileCachingService.getResource(endpoint, cacheTtl);
+        } catch (Exception exception) {
+            LOGGER.warn("Effiliation live cache refresh failed, retrying using stale cache (endpoint='{}').",
+                    safeEndpointForLogs(endpoint), exception);
+            cachedResponse = null;
+        }
+
+        if (cachedResponse == null || !cachedResponse.exists()) {
+            LOGGER.warn("Effiliation response unavailable with configured TTL, retrying using stale cache (endpoint='{}').",
+                    safeEndpointForLogs(endpoint));
+            cachedResponse = remoteFileCachingService.getResource(endpoint, Integer.MAX_VALUE);
+        }
+
         if (cachedResponse == null || !cachedResponse.exists()) {
             throw new Exception("Effiliation cached response file not found.");
         }
+
         String jsonResponse = Files.readString(cachedResponse.toPath(), StandardCharsets.UTF_8);
         if (isBlank(jsonResponse)) {
             throw new Exception("Effiliation cached response is empty.");
@@ -558,7 +587,7 @@ public class EffiliationFeedService extends AbstractFeedService {
         // Attempt to detect from program "pays" / "country"-like fields (model dependent).
         // If model does not provide it, we fall back to always include FR.
         for (EffiliationProgram p : programs.values()) {
-            String pays = tryGetPays(p);
+            String pays = p == null ? null : p.getPays();
             if (!isBlank(pays)) {
                 for (String c : splitCountries(pays)) {
                     langs.add(Lg.fromCountry(c));
@@ -576,36 +605,6 @@ public class EffiliationFeedService extends AbstractFeedService {
         return out;
     }
 
-    /**
-     * Best-effort extraction of program coverage countries from EffiliationProgram.
-     *
-     * <p>The official field in programs API is "pays". :contentReference[oaicite:22]{index=22}
-     * Your model may expose it as getPays(), getCountry(), etc. We try a few reflective patterns,
-     * but avoid throwing (hardening).</p>
-     */
-    private String tryGetPays(EffiliationProgram p) {
-        if (p == null) {
-            return null;
-        }
-        // If your model has getCountry(), you previously referenced it; try it first.
-        try {
-            //noinspection JavaReflectionMemberAccess
-            Object v = p.getClass().getMethod("getCountry").invoke(p);
-            return v == null ? null : String.valueOf(v);
-        } catch (Exception ignore) {
-            // ignore
-        }
-        // Then try getPays() which matches the documented field name.
-        try {
-            //noinspection JavaReflectionMemberAccess
-            Object v = p.getClass().getMethod("getPays").invoke(p);
-            return v == null ? null : String.valueOf(v);
-        } catch (Exception ignore) {
-            // ignore
-        }
-        return null;
-    }
-
     private List<String> splitCountries(String pays) {
         if (isBlank(pays)) {
             return List.of();
@@ -619,6 +618,86 @@ public class EffiliationFeedService extends AbstractFeedService {
             }
         }
         return out;
+    }
+
+    private boolean isEnabled() {
+        return feedConfig.getEffiliation().isEnabled();
+    }
+
+    private void assertEnabled() {
+        if (!isEnabled()) {
+            throw new IllegalStateException("Effiliation feed service is disabled.");
+        }
+    }
+
+    private void applySchedulingJitter() {
+        int maxJitterSeconds = Math.max(0, feedConfig.getEffiliation().getMaxJitterSeconds());
+        if (maxJitterSeconds == 0) {
+            return;
+        }
+
+        int jitter = ThreadLocalRandom.current().nextInt(maxJitterSeconds + 1);
+        if (jitter == 0) {
+            return;
+        }
+
+        try {
+            LOGGER.info("Applying Effiliation scheduler jitter: {} second(s).", jitter);
+            Thread.sleep(jitter * 1000L);
+        } catch (InterruptedException interruptedException) {
+            Thread.currentThread().interrupt();
+            LOGGER.warn("Effiliation scheduler jitter interrupted; skipping this run.");
+        }
+    }
+
+    private boolean isValidAffilieurId(String idAffilieur) {
+        return !isBlank(idAffilieur) && NUMERIC_PATTERN.matcher(idAffilieur.trim()).matches();
+    }
+
+    private boolean isProgramActive(EffiliationProgram program) {
+        if (program == null || isBlank(program.getEtat())) {
+            return true;
+        }
+        String normalizedStatus = program.getEtat().trim().toLowerCase(Locale.ROOT);
+        return "active".equals(normalizedStatus)
+                || "actif".equals(normalizedStatus)
+                || "1".equals(normalizedStatus)
+                || "on".equals(normalizedStatus)
+                || "enabled".equals(normalizedStatus);
+    }
+
+    private boolean hasNextPage(JsonNode root, int currentPage) {
+        JsonNode nextPage = root.path("next_page");
+        if (nextPage.isInt()) {
+            return nextPage.asInt() > currentPage;
+        }
+        if (!nextPage.isMissingNode() && !nextPage.isNull() && nextPage.asText() != null) {
+            String value = nextPage.asText().trim();
+            if (!value.isEmpty()) {
+                try {
+                    return Integer.parseInt(value) > currentPage;
+                } catch (NumberFormatException ignored) {
+                    return true;
+                }
+            }
+        }
+
+        JsonNode totalPages = root.path("total_pages");
+        if (totalPages.isInt()) {
+            return currentPage < totalPages.asInt();
+        }
+        if (!totalPages.isMissingNode() && !totalPages.isNull()) {
+            String value = totalPages.asText().trim();
+            if (!value.isEmpty()) {
+                try {
+                    return currentPage < Integer.parseInt(value);
+                } catch (NumberFormatException ignored) {
+                    return false;
+                }
+            }
+        }
+
+        return false;
     }
 
     private String normalizeLg(String lg) {
@@ -676,19 +755,15 @@ public class EffiliationFeedService extends AbstractFeedService {
      * ========================================================================================== */
 
     private String safeEndpointForLogs(String endpoint) {
-        if (endpoint == null) {
-            return null;
-        }
-        // Mask key=... (best-effort).
-        return endpoint.replaceAll("(key=)([^&]+)", "$1****");
+        return HttpUtils.safeEndpointForLogs(endpoint);
     }
 
     private String urlEncode(String value) {
-        return URLEncoder.encode(value == null ? "" : value, StandardCharsets.UTF_8);
+        return HttpUtils.urlEncode(value);
     }
 
     private boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
+        return HttpUtils.isBlank(s);
     }
 
     private String nullSafe(String s) {
