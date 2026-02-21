@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>de.codecentric</groupId>
 			<artifactId>spring-boot-admin-server-ui</artifactId>
-			<version>4.0.0</version>
+			<version>4.0.1</version>
 		</dependency>
 
 		<dependency>
