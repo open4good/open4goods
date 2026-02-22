@@ -47,7 +47,7 @@ class EcoScoreAggregationServiceTest {
         assertThat(ecoscore).isNotNull();
         assertThat(ecoscore.getRelativ()).isNotNull();
         assertThat(ecoscore.getRelativ().getValue())
-                .isEqualTo(product.getScores().get("DATA_QUALITY").getRelativ().getValue() * 4.0);
+                .isEqualTo(product.getScores().get("DATA_QUALITY").getRelativ().getValue());
     }
 
     @Test

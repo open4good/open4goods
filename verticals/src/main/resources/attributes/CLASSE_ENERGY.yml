@@ -53,6 +53,25 @@ parser:
     - "CLASSE"
     - "(ÉCHELLE A++ À E)"
     - "NOT AVAILABLE"
+    - "N/A"
+    - "CLASS 3"
+  tokenMatch:
+    - "A+++"
+    - "A++"
+    - "A+"
+    - "A"
+    - "B"
+    - "C"
+    - "D"
+    - "E"
+    - "F"
+    - "G"
+mappings:
+  APPP: "A+++"
+  APP: "A++"
+  AP: "A+"
+  "A ++": "A++"
+  "A-40%": "A"
 numericMapping:
   A+++: 100.0
   A++: 100.0

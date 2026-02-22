@@ -380,8 +380,8 @@ nudgeToolConfig:
     - id: "cleaning_pyrolysis"
       group: "cleaning"
       criterias:
-        - field: "attributes.indexed.OVEN_CLEANING_MODE"
-          operator: "CONTAINS"
+        - field: "attributes.indexed.OVEN_CLEANING_MODE.value"
+          operator: "EQUALS"
           value: "PYROLYSE"
       image: "example-image.png"
       url:
@@ -400,8 +400,8 @@ nudgeToolConfig:
     - id: "cleaning_catalysis"
       group: "cleaning"
       criterias:
-        - field: "attributes.indexed.OVEN_CLEANING_MODE"
-          operator: "CONTAINS"
+        - field: "attributes.indexed.OVEN_CLEANING_MODE.value"
+          operator: "EQUALS"
           value: "CATALYSE"
       image: "example-image.png"
       url:
@@ -416,6 +416,26 @@ nudgeToolConfig:
       description:
         en: "Continuous cleaning during cooking."
         fr: "Nettoyage continu pendant la cuisson."
+
+    - id: "cleaning_hydrolysis"
+      group: "cleaning"
+      criterias:
+        - field: "attributes.indexed.OVEN_CLEANING_MODE.value"
+          operator: "EQUALS"
+          value: "HYDROLYSE"
+      image: "example-image.png"
+      url:
+        en: "hydrolysis"
+        fr: "hydrolyse"
+      caption:
+        en: "Hydrolysis"
+        fr: "Hydrolyse"
+      title:
+        en: "Hydrolysis"
+        fr: "Hydrolyse"
+      description:
+        en: "Steam-based cleaning."
+        fr: "Nettoyage à la vapeur."
 
 ##############################################################################
 # Custom search filters : the following filters

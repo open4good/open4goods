@@ -14,3 +14,12 @@ parser:
   lowerCase: false
   upperCase: true
   removeParenthesis: false
+  tokenMatch:
+    - "FROID VENTILÉ"
+    - "FROID STATIQUE"
+    - "FROID BRASSÉ"
+mappings:
+  STATIQUE: "FROID STATIQUE"
+  "FROID VENTIL?": "FROID VENTILÉ"
+  "FROID BRASS?": "FROID BRASSÉ"
+  "FROID VENTILÉ TOTAL": "FROID VENTILÉ"

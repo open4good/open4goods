@@ -137,13 +137,9 @@ const normalizedScore = computed(() => {
     return 0
   }
 
-  // If value is small (<=5), scale it to 20.
-  // If it's already > 5, assume it's out of 20 (or 100, but we cap at 20).
-  if (rawValue <= 5) {
-    return rawValue * 4
-  }
-
-  return Math.min(rawValue, 20)
+  // The ECOSCORE value is already on the 0-20 scale from the backend.
+  // Clamp to [0, 20] to prevent display issues.
+  return Math.max(0, Math.min(rawValue, 20))
 })
 
 const normalizedVerticalEcoscorePath = computed(() => {

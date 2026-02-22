@@ -15,3 +15,12 @@ parser:
   lowerCase: false
   upperCase: true
   removeParenthesis: false
+  tokenMatch:
+    - "FRONTAL"
+    - "TOP"
+mappings:
+  FRONT-LOAD: "FRONTAL"
+  "CHARGE AVANT": "FRONTAL"
+  TOP-LOAD: "TOP"
+  "CHARGE PAR DESSUS": "TOP"
+  "CHARGE SUPÉRIEURE": "TOP"

@@ -41,7 +41,7 @@
     <template #[`item.impactScore`]="{ value }">
       <ImpactScore
         v-if="value != null"
-        :score="(value ?? 0) * 4"
+        :score="value ?? 0"
         :max="20"
         size="xxs"
         flat

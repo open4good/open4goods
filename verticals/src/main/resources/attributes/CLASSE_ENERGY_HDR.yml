@@ -49,6 +49,7 @@ parser:
     - "CLASSE"
     - "(ÉCHELLE A++ À E)"
     - "NOT AVAILABLE"
+    - "NA"
 numericMapping:
   A+++: 100.0
   A++: 100.0

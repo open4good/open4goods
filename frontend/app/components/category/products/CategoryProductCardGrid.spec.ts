@@ -152,7 +152,7 @@ const mountGrid = async (
           template: `
             <div class="product-card" :class="{ 'product-card--disabled': disabled }" :rel="nofollowLinks ? 'nofollow' : undefined">
               <div class="product-card__media">
-                <ImpactScore v-if="product.scores?.scores?.ECOSCORE" :score="(product.scores.scores.ECOSCORE.value || 0) * 4" :max="20" />
+                <ImpactScore v-if="product.scores?.scores?.ECOSCORE" :score="product.scores.scores.ECOSCORE.value || 0" :max="20" />
               </div>
               <div class="product-card__body">
                 <ProductPriceRows :product="product" />
@@ -339,12 +339,12 @@ describe('CategoryProductCardGrid', () => {
     )
   })
 
-  it('renders impact score scaled by 4 (e.g. 3/5 -> 12/20)', async () => {
+  it('renders impact score directly on 0-20 scale', async () => {
     const product = buildProduct({
       scores: {
         scores: {
           ECOSCORE: {
-            value: 3,
+            value: 12,
             label: 'C',
             color: '#ffcc00',
           },
@@ -356,7 +356,7 @@ describe('CategoryProductCardGrid', () => {
 
     const impactScore = wrapper.findComponent({ name: 'ImpactScore' })
     expect(impactScore.exists()).toBe(true)
-    expect(impactScore.props('score')).toBe(12) // 3 * 4
+    expect(impactScore.props('score')).toBe(12) // value passed directly, already on 0-20 scale
     expect(impactScore.props('max')).toBe(20)
   })
 })

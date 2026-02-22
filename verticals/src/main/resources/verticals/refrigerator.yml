@@ -401,9 +401,9 @@ nudgeToolConfig:
     - id: "cooling_static"
       group: "cooling_system"
       criterias:
-        - field: "attributes.indexed.COOLING_SYSTEM"
-          operator: "CONTAINS"
-          value: "Statique"
+        - field: "attributes.indexed.COOLING_SYSTEM.value"
+          operator: "EQUALS"
+          value: "FROID STATIQUE"
       image: "example-image.png"
       url:
         en: "static-cooling"
@@ -421,9 +421,9 @@ nudgeToolConfig:
     - id: "cooling_ventilated"
       group: "cooling_system"
       criterias:
-        - field: "attributes.indexed.COOLING_SYSTEM"
-          operator: "CONTAINS"
-          value: "Ventilé"
+        - field: "attributes.indexed.COOLING_SYSTEM.value"
+          operator: "EQUALS"
+          value: "FROID VENTILÉ"
       image: "example-image.png"
       url:
         en: "ventilated-cooling"
@@ -437,6 +437,26 @@ nudgeToolConfig:
       description:
         en: "No frost technology for better preservation"
         fr: "Plus de technologies de conservation"
+
+    - id: "cooling_brassed"
+      group: "cooling_system"
+      criterias:
+        - field: "attributes.indexed.COOLING_SYSTEM.value"
+          operator: "EQUALS"
+          value: "FROID BRASSÉ"
+      image: "example-image.png"
+      url:
+        en: "brassed-cooling"
+        fr: "froid-brasse"
+      caption:
+        en: "Stirred"
+        fr: "Brassé"
+      title:
+        en: "Stirred Cooling"
+        fr: "Froid Brassé"
+      description:
+        en: "Fan-assisted cooling for even temperature"
+        fr: "Froid brassé pour une température homogène"
 
 ##############################################################################
 # Custom search filters : the following filters

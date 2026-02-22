@@ -284,7 +284,6 @@ const aiNavigationLabel = computed(() =>
     : t('product.navigation.ai')
 )
 
-
 const heroSectionRef = ref<HTMLElement | null>(null)
 const { bottom: _heroSectionBottom } = useElementBounding(heroSectionRef)
 
@@ -2080,7 +2079,7 @@ const impactScoreOutOf20 = computed(() => {
     return null
   }
 
-  return Number((score * 4).toFixed(1))
+  return Number(score.toFixed(1))
 })
 
 const impactScoreMin = computed(() => {
@@ -2091,13 +2090,6 @@ const impactScoreMin = computed(() => {
 const impactScoreMax = computed(() => {
   const absolute = product.value?.scores?.scores?.ECOSCORE?.absolute
   return typeof absolute?.max === 'number' ? absolute.max : 20
-})
-
-const impactScoreOn20 = computed(() => {
-  const ecoScore = impactScores.value.find(
-    s => s.id?.toUpperCase() === 'ECOSCORE'
-  )
-  return ecoScore?.on20 != null ? ecoScore.on20 : null
 })
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
@@ -2163,13 +2155,13 @@ const productJsonLdGraph = computed(() => {
     },
     imageUrls: jsonLdImageUrls.value,
     punchline: product.value.aiReview?.punchline,
-    impactScore: impactScoreOn20.value,
+    impactScore: impactScoreOutOf20.value,
   })
 })
 
 const metaTitle = computed(() => {
   const title = productTitle.value
-  const score = impactScoreOn20.value
+  const score = impactScoreOutOf20.value
 
   if (title.length < 35 && score != null) {
     return `${title}${t('product.meta.impactScore', { score })}`

@@ -1,13 +1,11 @@
 import type { ProductDto } from '~~/shared/api-client'
 
-const clampScore = (score: number) => Math.max(0, Math.min(score, 5))
-
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value)
 
 /**
- * Resolve the ECOSCORE value for a product on a five-point scale.
- * The ECOSCORE value is already expected to be between 0 and 5.
+ * Resolve the ECOSCORE value for a product on a twenty-point scale.
+ * The ECOSCORE value from the backend is already between 0 and 20.
  */
 export const resolvePrimaryImpactScore = (
   product: ProductDto
@@ -18,9 +16,5 @@ export const resolvePrimaryImpactScore = (
     return null
   }
 
-  if (value > 5) {
-    return clampScore(value / 4)
-  }
-
-  return clampScore(value)
+  return Math.max(0, Math.min(value, 20))
 }

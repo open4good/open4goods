@@ -23,7 +23,7 @@
           <div class="product-card__corner" role="presentation">
             <ImpactScore
               v-if="impactScoreValue != null"
-              :score="(impactScoreValue ?? 0) * 4"
+              :score="impactScoreValue ?? 0"
               :max="20"
               size="small"
               flat

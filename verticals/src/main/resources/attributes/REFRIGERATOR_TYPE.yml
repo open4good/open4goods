@@ -16,3 +16,17 @@ parser:
   lowerCase: false
   upperCase: true
   removeParenthesis: false
+  tokenMatch:
+    - "CONGÉLATEUR BAS"
+    - "CONGÉLATEUR HAUT"
+    - "CÔTE-À-CÔTE"
+    - "PORTE FRANÇAISE"
+    - "STYLE AMÉRICAIN"
+    - "TABLE TOP"
+    - "TIROIR"
+    - "CONGÉLATEUR COFFRE"
+    - "CONGÉLATEUR VERTICAL"
+mappings:
+  "CONGÉLATEUR INFÉRIEUR À PORTE FRANÇAISE": "PORTE FRANÇAISE"
+  "STYLE FRANÇAIS": "PORTE FRANÇAISE"
+  "CONGÉLATEUR-ARMOIRE": "CONGÉLATEUR VERTICAL"

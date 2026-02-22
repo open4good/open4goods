@@ -39,7 +39,7 @@ describe('ProductImpactEcoScoreCard', () => {
     label: 'Eco score',
     description: 'Overall environmental score',
     relativeValue: 4.2,
-    value: 3.6,
+    value: 14.4,
     absoluteValue: 78.123,
   }
 
@@ -128,7 +128,7 @@ describe('ProductImpactEcoScoreCard', () => {
     expect(wrapper.text()).toContain('Access the methodology')
   })
 
-  it('uses value (0-5) score directly', () => {
+  it('uses value directly on 0-20 scale', () => {
     const wrapper = mount(ProductImpactEcoScoreCard, {
       props: {
         score: stubScore,
@@ -170,7 +170,7 @@ describe('ProductImpactEcoScoreCard', () => {
       },
     })
 
-    // Component uses normalizedScore which is stubScore.value (3.6) * 4 = 14.4
+    // Component uses normalizedScore which clamps value to [0, 20]: 14.4 -> 14.4
     expect(wrapper.text()).toContain('score:14.4')
   })
 })

@@ -16,3 +16,8 @@ parser:
   lowerCase: false
   upperCase: true
   removeParenthesis: false
+  tokenMatch:
+    - "POSE LIBRE"
+    - "ENCASTRABLE"
+    - "INTÉGRÉ"
+    - "PORTABLE"

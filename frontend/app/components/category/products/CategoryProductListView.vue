@@ -99,7 +99,7 @@
         <div class="category-product-list__score">
           <ImpactScore
             v-if="impactScoreValue(product) != null"
-            :score="(impactScoreValue(product) ?? 0) * 4"
+            :score="impactScoreValue(product) ?? 0"
             :max="20"
             size="xs"
             flat

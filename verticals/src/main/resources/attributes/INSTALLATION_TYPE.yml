@@ -17,3 +17,20 @@ parser:
   lowerCase: false
   upperCase: true
   removeParenthesis: false
+  tokenMatch:
+    - "POSE LIBRE"
+    - "ENCASTRABLE"
+    - "INTÉGRÉ"
+    - "SEMI-INTÉGRÉ"
+    - "PORTABLE"
+mappings:
+  FREE_STANDING: "POSE LIBRE"
+  AUTONOME: "POSE LIBRE"
+  "FREESTANDING/COMPACT": "POSE LIBRE"
+  BUILT_IN: "ENCASTRABLE"
+  "ENCASTRABLE SOUS PLAN": "ENCASTRABLE"
+  "ENCASTRABLE SOUS-PLAN": "ENCASTRABLE"
+  "SOUS COMPTOIR": "ENCASTRABLE"
+  "ENTIÈREMENT INTÉGRÉ": "INTÉGRÉ"
+  "TOUT INTÉGRABLE": "INTÉGRÉ"
+  "INT?GR?": "INTÉGRÉ"

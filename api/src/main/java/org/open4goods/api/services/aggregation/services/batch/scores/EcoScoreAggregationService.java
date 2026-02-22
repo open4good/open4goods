@@ -204,10 +204,17 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		}
 
 		try {
-			// EcoScore stays on its absolute value (no relativisation)
+			// EcoScore absolute stays on 0-20 scale; relativ is scaled to 0-5
+			// so that Score.on20() and Score.percent() produce correct values.
+			double relativScale = StandardiserService.DEFAULT_MAX_RATING / ECOSCORE_TARGET_SCALE;
 			for (Product product : productsWithRealEcoScore) {
 				Cardinality absolute = product.ecoscore().getAbsolute();
-				product.ecoscore().setRelativ(new Cardinality(absolute));
+				Cardinality relativ = new Cardinality(absolute);
+				relativ.setValue(absolute.getValue() * relativScale);
+				relativ.setMin(absolute.getMin() != null ? absolute.getMin() * relativScale : null);
+				relativ.setMax(absolute.getMax() != null ? absolute.getMax() * relativScale : null);
+				relativ.setAvg(absolute.getAvg() != null ? absolute.getAvg() * relativScale : null);
+				product.ecoscore().setRelativ(relativ);
 				product.ecoscore().setValue(absolute.getValue());
 			}
 	

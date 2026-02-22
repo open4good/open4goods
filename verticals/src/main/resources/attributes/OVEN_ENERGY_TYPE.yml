@@ -18,3 +18,15 @@ parser:
   lowerCase: false
   upperCase: true
   removeParenthesis: false
+  tokenMatch:
+    - "ELECTRIQUE"
+    - "INDUCTION"
+    - "GAZ"
+    - "VAPEUR"
+    - "MICRO-ONDES"
+    - "VITRO"
+    - "BOIS"
+    - "MIXTE"
+mappings:
+  ELECTRIC: "ELECTRIQUE"
+  GAS: "GAZ"

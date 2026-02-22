@@ -27,3 +27,23 @@ parser:
   deleteTokens:
     - "TV"
     - "_LCD"
+  tokenMatch:
+    - "LED"
+    - "OLED"
+    - "QLED"
+    - "LCD"
+    - "NEO QLED"
+    - "QNED"
+    - "NANOCELL"
+    - "MINI LED"
+    - "PLASMA"
+    - "MICRO_LED"
+    - "QD-OLED"
+mappings:
+  "OLED EVO": "OLED"
+  "QLED PRO": "QLED"
+  "QNED MINILED": "QNED"
+  DLED: "LED"
+  ULED: "LED"
+  CRYSTAL: "LED"
+  IPS: "LCD"
