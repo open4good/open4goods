@@ -546,7 +546,7 @@
                  <DynamicDependency>
                    <groupId>org.apache.maven.surefire</groupId>
                     <artifactId>surefire-junit-platform</artifactId>
-                    <version>3.5.4</version>
+                    <version>3.5.5</version>
                     <repositoryType>PLUGIN</repositoryType>
                 </DynamicDependency>
                  <DynamicDependency>
