@@ -59,7 +59,6 @@ genAiConfig:
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
   #  - POWER_CONSUMPTION_TYPICAL
-  - WEIGHT
   - WARRANTY
   - REPAIRABILITY_INDEX
   - BRAND_SUSTAINALYTICS_SCORING
@@ -2509,7 +2508,6 @@ attributesConfig:
     #        - "..."
     - key: "CLASSE_ENERGY"
     - key: "POWER_CONSUMPTION_TYPICAL"
-    - key: "WEIGHT"
     - key: "OVEN_CAPACITY"
     - key: "OVEN_ENERGY_TYPE"
     - key: "OVEN_INSTALLATION_TYPE"

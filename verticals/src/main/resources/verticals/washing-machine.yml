@@ -45,7 +45,6 @@ availableImpactScoreCriterias:
   # Durability and repairability
   - REPAIRABILITY_INDEX    # 222% coverage
   - WARRANTY               # 105% coverage
-  - WEIGHT                 # 179% coverage
   # Brand and data quality
   - BRAND_SUSTAINALYTICS_SCORING  # inherited from _default
   - DATA_QUALITY           # 176% coverage

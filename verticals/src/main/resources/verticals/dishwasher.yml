@@ -63,7 +63,6 @@ availableImpactScoreCriterias:
   - CLASSE_ENERGY
   - WARRANTY
   - BRAND_SUSTAINALYTICS_SCORING
-  - WEIGHT
   - REPAIRABILITY_INDEX
   - MINAVAILABILITYSPAREPARTSYEARS
 
@@ -520,7 +519,6 @@ attributesConfig:
     - key: "PROGRAM_DURATION_ECO"
     - key: "PROGRAM_COUNT"
     - key: "INSTALLATION_TYPE"
-    - key: "WEIGHT"
     - key: "HEIGHT"
     - key: "WIDTH"
     - key: "DEPTH"

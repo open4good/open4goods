@@ -511,7 +511,6 @@ ecoFilters:
 
 technicalFilters:
   - "POWER_CONSUMPTION_TYPICAL"
-  - "WEIGHT"
   - "TOTAL_VOLUME"
   - "FRIDGE_NET_CAPACITY"
   - "FREEZER_NET_CAPACITY"
@@ -4621,7 +4620,6 @@ attributesConfig:
     - key: "WIDTH"
     - key: "HEIGHT"
     - key: "DEPTH"
-    - key: "WEIGHT"
     - key: "COLOR"
     - key: "YEAR"
     - key: "WARRANTY"
