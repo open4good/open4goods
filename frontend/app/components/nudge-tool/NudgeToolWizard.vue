@@ -1104,8 +1104,8 @@ const baseTotalHeight = computed(() => {
 })
 
 const categoryHeight = computed(() => {
-  // Add 16px to account for footer margin and subpixel rendering
-  return clampHeight(baseSpacing.value + activeStepHeight.value + 16)
+  // Add 48px to pad the height more generously to prevent any scrollbars
+  return clampHeight(baseSpacing.value + activeStepHeight.value + 48)
 })
 
 watch(
