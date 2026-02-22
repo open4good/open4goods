@@ -989,7 +989,6 @@ const { height: activeStepHeight } = useElementSize(activeStepRef)
 const isContentMode = computed(() => activeStepKey.value !== 'category')
 
 const WIZARD_MIN_HEIGHT = 300
-const CATEGORY_HEIGHT_OFFSET = 275
 const WINDOW_MIN_HEIGHT = 370
 const VIEWPORT_PADDING = 32
 
@@ -1105,7 +1104,8 @@ const baseTotalHeight = computed(() => {
 })
 
 const categoryHeight = computed(() => {
-  return clampHeight(baseTotalHeight.value - CATEGORY_HEIGHT_OFFSET)
+  // Add 16px to account for footer margin and subpixel rendering
+  return clampHeight(baseSpacing.value + activeStepHeight.value + 16)
 })
 
 watch(
