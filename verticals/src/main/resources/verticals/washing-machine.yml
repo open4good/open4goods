@@ -21747,7 +21747,6 @@ attributesConfig:
     - key: "ENERGY_CONSUMPTION_100_CYCLES"
     - key: "PROGRAM_DURATION_ECO"
     - key: "NOISE_LEVEL_SPIN"
-    - key: "STYLE"
     - key: "COLOR"
 
   ################################################################################
