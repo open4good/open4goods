@@ -15,7 +15,7 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (k: string) => k }),
 }))
 vi.mock('vuetify', () => ({
-  useDisplay: () => ({ smAndDown: { value: false } }),
+  useDisplay: () => ({ smAndDown: { value: false }, mobile: { value: false } }),
 }))
 const currentCategory = ref<VerticalCategoryDto | null>(null)
 
