@@ -790,6 +790,7 @@
         "creationDate": "Creation date",
         "datasource": "Data sources",
         "ecoscore": "Impact score",
+        "ecoscoreRanking": "Impact Score Ranking",
         "googleTaxonomyId": "Google product category",
         "lastChange": "Last updated",
         "offersCount": "Number of offers",

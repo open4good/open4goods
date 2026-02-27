@@ -65,7 +65,12 @@
           </v-tooltip>
           <span
             v-if="isDesktop"
-            class="text-button font-weight-bold text-medium-emphasis"
+            class="text-button font-weight-bold text-medium-emphasis cursor-pointer text-no-wrap"
+            role="button"
+            tabindex="0"
+            @click="onToggleFiltersVisibility"
+            @keydown.enter="onToggleFiltersVisibility"
+            @keydown.space.prevent="onToggleFiltersVisibility"
           >
             {{ $t('category.filters.advanced') }}
           </span>

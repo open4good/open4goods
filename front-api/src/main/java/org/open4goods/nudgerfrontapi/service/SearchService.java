@@ -220,6 +220,12 @@ public class SearchService {
 
         List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(immutableGlobal, config);
         List<FieldMetadataDto> impactFields = new ArrayList<>();
+
+        // Prepend the main ECOSCORE entries so they appear first in the impact section.
+        FieldMetadataDto.AggregationMetadata ecoscoreAgg = resolveAggregationMetadata(config, "scores.ECOSCORE.value", "ECOSCORE");
+        String ecoscoreTitle = resolveEcoscoreTitle(domainLanguage);
+        impactFields.add(new FieldMetadataDto("scores.ECOSCORE.value", ecoscoreTitle, null, VALUE_TYPE_NUMERIC, ecoscoreAgg));
+
         mapImpactScores(config, domainLanguage).forEach(impactFields::add);
 
         List<FieldMetadataDto> technicalFields = new ArrayList<>();
@@ -505,6 +511,13 @@ public class SearchService {
         }
         String localizedDescription = localise(attributeConfig.getScoreDescription(), domainLanguage);
         return StringUtils.hasText(localizedDescription) ? localizedDescription : null;
+    }
+
+    private String resolveEcoscoreTitle(DomainLanguage domainLanguage) {
+        if (domainLanguage == DomainLanguage.fr) {
+            return "Impact Score";
+        }
+        return "Impact Score";
     }
 
     private List<FieldMetadataDto> mapVerticalAttributeFilters(List<String> filters, VerticalConfig config,

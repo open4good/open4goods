@@ -59,6 +59,8 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 		}
 
 		Score score = new Score(aggregateName, aggregatedValue);
+		score.setAbsolute(new Cardinality());
+		score.getAbsolute().setValue(aggregatedValue);
 		score.setAggregates(new HashMap<>(participants));
 		product.getScores().put(aggregateName, score);
 	}

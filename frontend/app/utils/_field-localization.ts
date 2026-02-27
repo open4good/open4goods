@@ -11,6 +11,9 @@ const FILTER_FIELD_TRANSLATION_KEYS: Record<string, string> = {
   'attributes.referentielAttributes.BRAND': 'category.filters.fields.brand',
   'gtinInfos.country': 'category.filters.fields.country',
   datasourceCodes: 'category.filters.fields.datasource',
+  'scores.ECOSCORE.relativ.value': 'category.filters.fields.ecoscore',
+  'scores.ECOSCORE.relative.value': 'category.filters.fields.ecoscore',
+  'scores.ECOSCORE.ranking': 'category.filters.fields.ecoscoreRanking',
 }
 
 const SORT_FIELD_TRANSLATION_KEYS: Record<string, string> = {

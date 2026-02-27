@@ -660,7 +660,7 @@
       "reset": "Réinitialiser les filtres rapides"
     },
     "filters": {
-      "advanced": "Avancée",
+      "advanced": "Filtres avancés",
       "fields": {
         "brand": "Marque",
         "condition": "État des offres",
@@ -668,6 +668,7 @@
         "creationDate": "Date de création",
         "datasource": "Sources de données",
         "ecoscore": "Impact Score",
+        "ecoscoreRanking": "Classement Impact Score",
         "googleTaxonomyId": "Catégorie produit Google",
         "lastChange": "Dernière mise à jour",
         "offersCount": "Nombre d'offres",
@@ -675,7 +676,7 @@
         "title": "Filtres"
       },
       "title": "Filtres",
-      "globalTitle": "Filtres globaux",
+      "globalTitle": "Filtres économiques",
       "hideImpact": "Masquer les filtres d'impact",
       "hideTechnical": "Masquer les filtres techniques",
       "impactTitle": "Filtres d'impact",

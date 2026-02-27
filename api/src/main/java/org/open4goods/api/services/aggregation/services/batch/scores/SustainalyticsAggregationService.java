@@ -10,6 +10,7 @@ import org.open4goods.brand.service.BrandScoreService;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -71,6 +72,8 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 			// Processing cardinality
 			incrementCardinality(BRAND_SUSTAINABILITY_SCORENAME, score, vConf);			
 			Score s = new Score(BRAND_SUSTAINABILITY_SCORENAME, score);
+			s.setAbsolute(new Cardinality());
+			s.getAbsolute().setValue(score);
 			
 			// Setting metadatas
 			Map<String, String> metadatas = new HashMap<>();

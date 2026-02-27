@@ -476,6 +476,7 @@ watch(
   flex-direction: column;
   gap: clamp(0.5rem, 1.5vw, 1rem);
   padding-bottom: 0px;
+  height: 100%;
 
   &__header {
     display: flex;
@@ -541,7 +542,8 @@ watch(
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 280px; /* ~3 items */
+    height: 100%;
+    flex-grow: 1;
     overflow-y: auto;
     width: 100%;
     padding-inline: 8px;

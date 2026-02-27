@@ -276,6 +276,7 @@ import {
   NudgeToolStepSubsetGroup,
   RoundedCornerCard,
 } from '#components'
+import { useDisplay } from 'vuetify'
 import type {
   Filter,
   FilterRequestDto,
@@ -313,6 +314,7 @@ const props = defineProps<{
 const emit = defineEmits<{ (event: 'navigate', target: string): void }>()
 
 const { t } = useI18n()
+const { mobile } = useDisplay()
 const { isLoggedIn } = useAuth()
 const router = useRouter()
 const prefersReducedMotion = usePreferredReducedMotion()
@@ -1105,6 +1107,9 @@ const baseTotalHeight = computed(() => {
 })
 
 const categoryHeight = computed(() => {
+  if (mobile.value) {
+    return clampHeight(baseTotalHeight.value)
+  }
   return clampHeight(baseTotalHeight.value - CATEGORY_HEIGHT_OFFSET)
 })
 
@@ -1430,17 +1435,27 @@ const cornerIconDimensions = computed(() => {
     overflow-y: hidden;
 
     :deep(.v-window__container) {
-      align-items: flex-start;
+      align-items: stretch;
+      height: 100%;
     }
 
     :deep(.v-window-item) {
-      align-items: flex-start;
+      align-items: stretch;
       justify-content: flex-start;
+      height: 100%;
     }
+  }
+
+  .nudge-wizard__step-content {
+    margin-block: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   .nudge-wizard__window-wrapper {
     padding-block: clamp(0.25rem, 0.6vw, 0.5rem);
+    height: 100%;
   }
 }
 

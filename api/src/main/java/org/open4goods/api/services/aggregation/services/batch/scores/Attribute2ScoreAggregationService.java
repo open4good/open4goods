@@ -66,6 +66,8 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 						incrementCardinality(attrConfig.getKey(), score, vConf);
 
 						Score s = new Score(attrConfig.getKey(), score);
+						s.setAbsolute(new Cardinality());
+						s.getAbsolute().setValue(score);
 						// Saving in product
 						data.getScores().put(s.getName(), s);
 					} catch (ValidationException e) {
@@ -165,6 +167,8 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 					incrementCardinality(attrConfig.getKey(), fallback, vConf);
 					Score s = new Score(attrConfig.getKey(), fallback);
 					s.setVirtual(true);
+					s.setAbsolute(new Cardinality());
+					s.getAbsolute().setValue(fallback);
 					data.getScores().put(s.getName(), s);
 				} catch (ValidationException validationException) {
 					dedicatedLogger.warn("Attribute missing value fallback failed for {}", aga, validationException);

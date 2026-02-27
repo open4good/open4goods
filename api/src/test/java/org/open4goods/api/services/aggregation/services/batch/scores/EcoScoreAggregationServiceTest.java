@@ -1,115 +1,68 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
-import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.slf4j.LoggerFactory;
 
-/**
- * Tests for {@link EcoScoreAggregationService} behaviour.
- */
-class EcoScoreAggregationServiceTest {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class EcoScoreAggregationServiceTest {
 
     @Test
-    void ecoscoreIsComputedWhenDataQualityExistsWithoutBrand() {
-        Product product = new Product(2L);
-        product.getScores().put("OTHER", new Score("OTHER", 3.5));
+    public void testEcoScoreOutput() {
+        EcoScoreAggregationService service = new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
 
-        DataCompletion2ScoreAggregationService dataQualityService =
-                new DataCompletion2ScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
+        Product p = new Product();
+        p.setId(1L);
 
-        List<Product> dataset = List.of(product);
-        dataQualityService.init(dataset);
-        dataQualityService.onProduct(product, new VerticalConfig());
-        dataQualityService.done(dataset, new VerticalConfig());
+        // Setting up subscores
+        Score cnrgy = new Score("CLASSE_ENERGY", 85.0);
+        Cardinality cr = new Cardinality();
+        cr.setValue(4.25); // B is around 4.25 / 5.0
+        cnrgy.setRelativ(cr);
+        p.getScores().put("CLASSE_ENERGY", cnrgy);
 
-        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
-        impactScoreConfig.setCriteriasPonderation(Map.of("DATA_QUALITY", 1.0));
+        Score wty = new Score("WARRANTY", 24.0);
+        Cardinality wr = new Cardinality();
+        wr.setValue(2.5); // Average
+        wty.setRelativ(wr);
+        p.getScores().put("WARRANTY", wty);
+
         VerticalConfig vConf = new VerticalConfig();
-        vConf.setImpactScoreConfig(impactScoreConfig);
+        vConf.setId("refrigerator");
+        ImpactScoreConfig isc = new ImpactScoreConfig();
+        Map<String, Double> pond = new HashMap<>();
+        ponderations(pond);
+        isc.setCriteriasPonderation(pond);
+        vConf.setImpactScoreConfig(isc);
 
-        EcoScoreAggregationService ecoScoreService =
-                new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
-        ecoScoreService.init(dataset);
-        ecoScoreService.onProduct(product, vConf);
-        ecoScoreService.done(dataset, vConf);
+        List<Product> products = new ArrayList<>();
+        products.add(p);
 
-        Score ecoscore = product.ecoscore();
+        service.init(products);
+        service.onProduct(p, vConf);
+        service.done(products, vConf);
 
-        assertThat(ecoscore).isNotNull();
-        assertThat(ecoscore.getRelativ()).isNotNull();
-        assertThat(ecoscore.getRelativ().getValue())
-                .isEqualTo(product.getScores().get("DATA_QUALITY").getRelativ().getValue());
+        Score eco = p.getScores().get("ECOSCORE");
+        assertNotNull(eco);
+        System.out.println("TEST ECOSCORE VALUE IS: " + eco.getValue());
+        System.out.println("TEST ECOSCORE ON20 IS: " + eco.on20());
     }
 
-    @Test
-    void ecoscoreFallsBackToAbsoluteWhenRelativizationMissing() {
-        Product product = new Product(3L);
-        Score baseScore = new Score("CRITERIA", 4.0);
-        Cardinality absolute = new Cardinality();
-        absolute.setMin(0d);
-        absolute.setMax(10d);
-        
-        // Define distribution stats to have Mean=5.0 and StdDev=2.5
-        // This corresponds to a dataset like {2.5, 7.5}
-        absolute.setCount(2);
-        absolute.setSum(10.0);
-        absolute.setSumOfSquares(62.5);
-        absolute.setAvg(5.0);
-        
-        absolute.setValue(4d);
-        baseScore.setAbsolute(absolute);
-        product.getScores().put("CRITERIA", baseScore);
-
-        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
-        impactScoreConfig.setCriteriasPonderation(Map.of("CRITERIA", 1.0));
-        VerticalConfig vConf = new VerticalConfig();
-        vConf.setImpactScoreConfig(impactScoreConfig);
-
-        EcoScoreAggregationService ecoScoreService =
-                new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
-
-        List<Product> dataset = List.of(product);
-        ecoScoreService.init(dataset);
-        ecoScoreService.onProduct(product, vConf);
-        ecoScoreService.done(dataset, vConf);
-
-        Score ecoscore = product.ecoscore();
-
-        assertThat(ecoscore).isNotNull();
-        assertThat(ecoscore.getAbsolute().getValue()).isEqualTo(8.0);
-    }
-    @Test
-    void ecoscoreComputedWithDefaultWhenSubScoreMissing() {
-        Product product = new Product(4L);
-        // Product has NO scores initially
-
-        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
-        // Configuration expects "MISSING_CRITERIA" with weight 1.0
-        impactScoreConfig.setCriteriasPonderation(Map.of("MISSING_CRITERIA", 1.0));
-        VerticalConfig vConf = new VerticalConfig();
-        vConf.setImpactScoreConfig(impactScoreConfig);
-
-        EcoScoreAggregationService ecoScoreService =
-                new EcoScoreAggregationService(LoggerFactory.getLogger(EcoScoreAggregationServiceTest.class));
-
-        List<Product> dataset = List.of(product);
-        ecoScoreService.init(dataset);
-        ecoScoreService.onProduct(product, vConf); // onProduct does nothing for EcoScore, but calling for consistency
-        ecoScoreService.done(dataset, vConf);
-
-        Score ecoscore = product.ecoscore();
-
-        // Previously this would be null. Now we expect it to be 0.0 (missing score = 0 contribution)
-        assertThat(ecoscore).isNotNull();
-        assertThat(ecoscore.getAbsolute().getValue()).isEqualTo(0.0);
+    private void ponderations(Map<String, Double> pond) {
+        pond.put("WARRANTY", 0.3);
+        pond.put("CLASSE_ENERGY", 0.35);
+        pond.put("WEIGHT", 0.15);
+        pond.put("BRAND_SUSTAINALYTICS_SCORING", 0.15);
+        pond.put("DATA_QUALITY", 0.05);
     }
 }

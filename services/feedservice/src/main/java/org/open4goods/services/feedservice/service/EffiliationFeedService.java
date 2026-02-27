@@ -663,7 +663,8 @@ public class EffiliationFeedService extends AbstractFeedService {
                 || "actif".equals(normalizedStatus)
                 || "1".equals(normalizedStatus)
                 || "on".equals(normalizedStatus)
-                || "enabled".equals(normalizedStatus);
+                || "enabled".equals(normalizedStatus)
+                || "inscrit".equals(normalizedStatus);
     }
 
     private boolean hasNextPage(JsonNode root, int currentPage) {

@@ -241,7 +241,8 @@ const impactRemaining = computed<FieldMetadataDto[]>(() => {
     entry =>
       entry.mapping &&
       !primary.has(entry.mapping) &&
-      !excluded.has(entry.mapping)
+      !excluded.has(entry.mapping) &&
+      !entry.mapping.endsWith('.relativ.value')
   )
 })
 

@@ -5,6 +5,7 @@ import java.util.Map;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 
@@ -40,6 +41,8 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
                         // Processing cardinality
                         incrementCardinality(DATA_QUALITY_SCORENAME, score, vConf);
                         Score s = new Score(DATA_QUALITY_SCORENAME, score);
+                        s.setAbsolute(new Cardinality());
+                        s.getAbsolute().setValue(score);
                         // Saving in product
                         data.getScores().put(s.getName(),s);
                 } catch (ValidationException e) {
