@@ -43,8 +43,6 @@ popular: true
 popularAttributes:
   - PLACE_SETTINGS
   - NOISE_LEVEL
-  - WATER_CONSUMPTION
-  - CLASSE_ENERGY
   - INSTALLATION_TYPE
 
 # GenAiConfig for this vertical
@@ -65,6 +63,12 @@ availableImpactScoreCriterias:
   - BRAND_SUSTAINALYTICS_SCORING
   - REPAIRABILITY_INDEX
   - MINAVAILABILITYSPAREPARTSYEARS
+  - WEIGHT
+  - WATER_CONSUMPTION
+  - NOISE_LEVEL
+  - ENERGY_CONSUMPTION_100_CYCLES
+  - POWER_CONSUMPTION_STANDBY
+  - POWER_CONSUMPTION_OFF
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -529,8 +533,8 @@ attributesConfig:
     - key: "POWERDELAYSTART"
     - key: "DRYINGPERFORMANCEINDEXV2"
     - key: "CLEANINGPERFORMANCEINDEXV2"
-    - key: "POWERSTANDBYMODE"
-    - key: "POWEROFFMODE"
+    - key: "POWER_CONSUMPTION_STANDBY"
+    - key: "POWER_CONSUMPTION_OFF"
     - key: "LOADING_TYPE"
 
 ####################################################################################

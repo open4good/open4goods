@@ -7,7 +7,18 @@ suffix:
   default: "dB"
   fr: "dB"
 filteringType: "NUMERIC"
-asScore: false
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
+
 synonyms:
   all:
     - "NOISE"

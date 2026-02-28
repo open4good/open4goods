@@ -42,7 +42,6 @@ popular: true
 popularAttributes:
   - OVEN_CAPACITY
   - OVEN_CLEANING_MODE
-  - TYPE_DE_PRODUIT
 
 # GenAiConfig for this vertical
 genAiConfig:
@@ -58,11 +57,14 @@ genAiConfig:
 # Scores from _default.yml are merged
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
+  - OVEN_ENERGY_CONSUMPTION_CYCLE
+  - OVEN_ENERGY_EFFICIENCY_INDEX
   #  - POWER_CONSUMPTION_TYPICAL
   - WARRANTY
   - REPAIRABILITY_INDEX
   - BRAND_SUSTAINALYTICS_SCORING
   - DATA_QUALITY
+  - WEIGHT
 
 #####################################################################################################################################
 # I18N CONFIGURATION
@@ -477,6 +479,15 @@ aggregationConfiguration:
   "attributes.indexed.OVEN_ENERGY_CONSUMPTION_CYCLE":
     interval: 0.1
     buckets: 12
+  "attributes.indexed.OVEN_ENERGY_EFFICIENCY_INDEX":
+    interval: 5
+    buckets: 12
+  "scores.OVEN_ENERGY_CONSUMPTION_CYCLE.value":
+    interval: 1
+    buckets: 5
+  "scores.OVEN_ENERGY_EFFICIENCY_INDEX.value":
+    interval: 1
+    buckets: 5
   "price.minPrice.price":
     interval: 50
     buckets: 30
@@ -2516,6 +2527,7 @@ attributesConfig:
     - key: "OVEN_CAVITY_COUNT"
     - key: "OVEN_POWER"
     - key: "OVEN_ENERGY_CONSUMPTION_CYCLE"
+    - key: "OVEN_ENERGY_EFFICIENCY_INDEX"
     - key: "WARRANTY"
     - key: "YEAR"
     - key: "COLOR"

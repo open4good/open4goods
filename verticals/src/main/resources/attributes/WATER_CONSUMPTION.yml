@@ -1,4 +1,6 @@
 key: "WATER_CONSUMPTION"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
 faIcon: "mdi-water"
 name:
   default: "Water consumption per cycle"
@@ -7,7 +9,28 @@ suffix:
   default: "L/cycle"
   fr: "L/cycle"
 filteringType: "NUMERIC"
-asScore: false
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Consommation d'eau"
+scoreDescription:
+  fr: "La consommation d'eau par cycle de lavage"
+scoreUtility:
+  fr: "Mesure la quantité d'eau consommée par cycle, une ressource naturelle précieuse dont la préservation réduit la pression sur les écosystèmes."
+  en: "Measures water used per wash cycle, a precious natural resource whose conservation reduces pressure on ecosystems."
+participateInScores:
+  - WATER_CONSUMPTION
+participateInACV:
+  - USE
 synonyms:
   all:
     - "WATERCONS"

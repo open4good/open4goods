@@ -1,0 +1,41 @@
+key: "OVEN_ENERGY_EFFICIENCY_INDEX"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
+faIcon: "mdi-speedometer"
+name:
+  default: "Energy Efficiency Index"
+  fr: "Indice d'efficacité énergétique"
+filteringType: "NUMERIC"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Indice d'efficacité énergétique (EEI)"
+scoreDescription:
+  fr: "L'indice d'efficacité énergétique du four (EEI), issu de la réglementation EU"
+scoreUtility:
+  fr: "Synthétise le rendement énergétique global du four selon le protocole de test européen."
+  en: "Summarises overall oven energy efficiency per the EU test protocol."
+participateInScores:
+  - ENERGY_CONSUMPTION
+participateInACV:
+  - USE
+synonyms:
+  all:
+    - "CAVITIES[0]-ENERGYEFFICIENCYINDEX"
+    - "ENERGYEFFICIENCYINDEX"
+    - "INDICE D'EFFICACITE ENERGETIQUE"
+    - "INDICE D'EFFICACITÉ ÉNERGÉTIQUE"
+    - "EEI"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

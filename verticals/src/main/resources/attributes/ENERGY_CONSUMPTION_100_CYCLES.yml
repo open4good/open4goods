@@ -1,4 +1,6 @@
 key: "ENERGY_CONSUMPTION_100_CYCLES"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
 faIcon: "mdi-flash"
 name:
   default: "Energy consumption per 100 cycles"
@@ -7,7 +9,28 @@ suffix:
   default: "kWh/100 cycles"
   fr: "kWh/100 cycles"
 filteringType: "NUMERIC"
-asScore: false
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "SIGMA"
+    params:
+      sigmaK: 2.0
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Consommation d'énergie (100 cycles)"
+scoreDescription:
+  fr: "La consommation d'énergie pour 100 cycles de lavage"
+scoreUtility:
+  fr: "Mesure la consommation électrique réelle sur 100 cycles, principal poste d'énergie pendant la durée de vie de l'appareil."
+  en: "Measures actual electricity consumption over 100 cycles, the main energy cost during the appliance's lifetime."
+participateInScores:
+  - ENERGY_CONSUMPTION
+participateInACV:
+  - USE
 synonyms:
   all:
     - "ENERGYCONS100"

@@ -13,6 +13,7 @@ userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
 eprelFeatureNames:
   - powerStandbyNetworked
+  - powerNetworkStandby
 filteringType: "NUMERIC"
 asScore: true
 scoring:

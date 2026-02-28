@@ -44,10 +44,7 @@ popular: true
 
 # The mainly presented attributes for this category
 popularAttributes:
-  - CLASSE_ENERGY
   - TOTAL_VOLUME
-  - REPAIRABILITY_INDEX
-  - NOISE_LEVEL
   - COOLING_SYSTEM
   - DOOR_COUNT
 
@@ -68,6 +65,10 @@ availableImpactScoreCriterias:
   - REPAIRABILITY_INDEX
   - WARRANTY
   - BRAND_SUSTAINALYTICS_SCORING
+  - WEIGHT
+  - NOISE_LEVEL
+  - ENERGY_CONSUMPTION_ANNUAL
+  - POWER_CONSUMPTION_TYPICAL
 
 #####################################################################################################################################
 # I18N CONFIGURATION

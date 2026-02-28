@@ -6,6 +6,7 @@ userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
 eprelFeatureNames:
   - powerStandby
+  - powerStandbyMode
 faIcon: "mdi-power-standby"
 name:
   default: "Power consumption (standby)"
@@ -37,6 +38,7 @@ participateInACV:
 synonyms:
   all:
     - "POWERSTANDBY"
+    - "POWERSTANDBYMODE"
 parser:
   normalize: true
   trim: true

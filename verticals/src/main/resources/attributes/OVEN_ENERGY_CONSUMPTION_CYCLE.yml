@@ -1,4 +1,6 @@
 key: "OVEN_ENERGY_CONSUMPTION_CYCLE"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
 faIcon: "mdi-flash"
 name:
   default: "Energy consumption per cycle"
@@ -7,7 +9,26 @@ suffix:
   default: "kWh/cycle"
   fr: "kWh/cycle"
 filteringType: "NUMERIC"
-asScore: false
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Consommation par cycle"
+scoreDescription:
+  fr: "L'énergie consommée par le four lors d'un cycle de cuisson standard"
+scoreUtility:
+  fr: "Reflète la consommation réelle d'énergie par cuisson, indicateur direct de l'impact environnemental à l'usage."
+  en: "Reflects actual energy use per cooking cycle, a direct indicator of use-phase environmental impact."
+participateInScores:
+  - ENERGY_CONSUMPTION
+participateInACV:
+  - USE
 synonyms:
   all:
     - "CAVITIES[0]-ENERGYCONSUMPTIONCYCLE"

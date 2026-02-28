@@ -7,7 +7,24 @@ suffix:
   default: "kWh/year"
   fr: "kWh/an"
 filteringType: "NUMERIC"
-asScore: false
+asScore: true
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Consommation annuelle"
+scoreDescription:
+  fr: "Consommation d'énergie annuelle en kWh"
+scoreUtility:
+  fr: "La consommation annuelle mesure directement l'impact environnemental en phase d'usage, principal contributeur à l'empreinte carbone."
+  en: "Annual consumption directly measures the use-phase environmental impact, the main contributor to the carbon footprint."
 synonyms:
   all:
     - "ENERGYCONSANNUALV2"

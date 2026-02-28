@@ -443,6 +443,9 @@ public class WeightParser extends AttributeParser {
                 // Common separators.
                 s = s.replace(',', '.');
 
+                // Fix typos like "43, 1" or "43. 1" where a space was incorrectly added after the decimal separator
+                s = s.replaceAll("(?<=\\d)\\s*\\.\\s*(?=\\d)", ".");
+
                 // Keep it lower-cased for pattern matching.
                 s = s.toLowerCase(Locale.ROOT);
 

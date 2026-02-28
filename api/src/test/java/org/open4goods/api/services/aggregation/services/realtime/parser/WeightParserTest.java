@@ -81,4 +81,16 @@ class WeightParserTest {
         // verify simple parse with datasource
         assertThat(parser.parse("100", null, vc, "test-source")).isEqualTo("100"); // assumes kg
     }
+
+    @Test
+    void parseWithSpaceAfterComma() throws ParseException {
+        VerticalConfig vc = new VerticalConfig();
+        vc.setParsers(new ParsersConfig());
+        vc.getParsers().getWeight().setMinKg(0.001);
+        vc.getParsers().getWeight().setMaxKg(2000.0);
+
+        assertThat(parser.parse("43, 1 KG", null, vc)).isEqualTo("43.1");
+        assertThat(parser.parse("43 ,1 KG", null, vc)).isEqualTo("43.1");
+        assertThat(parser.parse("43 , 1 KG", null, vc)).isEqualTo("43.1");
+    }
 }
