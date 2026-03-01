@@ -904,6 +904,32 @@ public class VerticalsGenerationService {
 
 	}
 
+	public ImpactScoreConfig generateEcoscoreConfigFromJson(VerticalConfig vConf, String aiJsonResponse) throws Exception {
+		org.open4goods.model.ai.ImpactScoreAiResult aiResult = serialisationService.fromJson(aiJsonResponse, org.open4goods.model.ai.ImpactScoreAiResult.class);
+
+		ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+		impactScoreConfig.setAiResult(aiResult);
+
+		// Legacy mapping
+		Map<String, Double> criteriasPonderation = new HashMap<>();
+		if (aiResult != null && aiResult.getCriteriaWeights() != null) {
+			for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : aiResult.getCriteriaWeights()) {
+				criteriasPonderation.put(cw.criterion, cw.weight);
+			}
+		}
+		impactScoreConfig.setCriteriasPonderation(criteriasPonderation);
+
+		// Completing
+		org.open4goods.services.prompt.config.PromptConfig prompt = generateEcoscoreDryRun(vConf);
+		impactScoreConfig.setYamlPrompt(serialisationService.toYaml(prompt));
+
+		// Store cleaned up json
+		impactScoreConfig.setAiJsonResponse(serialisationService.toJson(aiResult, true));
+
+		return impactScoreConfig;
+	}
+
+
     /**
      * Builds the context map for ecoscore generation, enforcing validation on required fields.
      *

@@ -13,6 +13,7 @@ import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -174,6 +177,19 @@ public class VerticalsGenerationController {
 
 	// TODO : Create a postcontroller updateImpactScore. We will paste result of getImpactScorePrompt, then it will act like updateVerticalFileWithImpactScore but in the json file, also updating other fields (criteriasPonderation, jsonprompt, ...) This is the major TODO
 
+	@PostMapping(path="/update/{vertical}/impactscore/generate")
+	@Operation(summary="Generate full ImpactScoreConfig", description="Generate the full ImpactScoreConfig in JSON form by providing the vertical id and the LLM JSON result.")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public ImpactScoreConfig generateImpactScoreConfig(
+			@PathVariable String vertical,
+			@RequestBody String aiJsonResponse) throws Exception {
+
+		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+		if (vc == null) {
+			throw new ResourceNotFoundException("Vertical not found: " + vertical);
+		}
+		return verticalsGenService.generateEcoscoreConfigFromJson(vc, aiJsonResponse);
+	}
 
 	@GetMapping(path="/update/{vertical}/categories/")
 	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")

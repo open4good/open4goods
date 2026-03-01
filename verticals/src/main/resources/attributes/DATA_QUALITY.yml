@@ -1,7 +1,7 @@
 key: "DATA_QUALITY"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
-faIcon: "mdi-file-shield-outline"
+faIcon: "database-sync"
 #    attributePath: attributes.features
 name:
   default: "Data quality"

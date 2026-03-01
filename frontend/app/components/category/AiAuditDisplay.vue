@@ -104,9 +104,9 @@
         <v-list-item
           v-for="source in aiResult.sources"
           :key="source.id"
-          :href="source.url"
+          :href="cleanUrl(source.url)"
           target="_blank"
-          rel="noopener"
+          rel="noopener nofollow"
           prepend-icon="mdi-link"
         >
           <v-list-item-title>
@@ -166,6 +166,16 @@ function formatPercent(value: number) {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   }).format(value)
+}
+
+function cleanUrl(url?: string): string | undefined {
+  if (!url) return undefined
+  // Match markdown links: [text](link)
+  const match = url.match(/\[.*?\]\((.*?)\)/)
+  if (match && match[1]) {
+    return match[1]
+  }
+  return url
 }
 </script>
 

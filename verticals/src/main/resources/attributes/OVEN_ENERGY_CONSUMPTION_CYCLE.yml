@@ -19,7 +19,7 @@ scoring:
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
-  fr: "Consommation par cycle"
+  fr: "Consommation d'énergie par cycle"
 scoreDescription:
   fr: "L'énergie consommée par le four lors d'un cycle de cuisson standard"
 scoreUtility:

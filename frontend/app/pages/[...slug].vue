@@ -43,6 +43,10 @@ const categorySlug = computed(() => {
 })
 
 if (!productRoute.value && !categorySlug.value && !wikiRoute.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Page not found' })
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Page not found',
+    fatal: true,
+  })
 }
 </script>

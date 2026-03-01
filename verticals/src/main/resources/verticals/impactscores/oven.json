@@ -1,284 +1,313 @@
 {
-  "use_case": "consumer_comparison",
-  "geo_scope": "EU/France",
-  "vertical": "Fours",
-  "available_criterias": ["WARRANTY", "DATA_QUALITY", "WEIGHT", "CLASSE_ENERGY"],
-  "positioning": {
-    "claim": "relative LCA-inspired score (ACV best-effort) for within-category comparison",
-    "not_an_absolute_footprint": true,
-    "what_it_means_for_users": "Ce score compare les fours entre eux sur la base de critères environnementaux clés (énergie, matériaux, durabilité), sans fournir d'empreinte carbone absolue. Il vise à guider les consommateurs vers les modèles les plus écologiques de la catégorie, tout en incitant les fabricants à améliorer leurs pratiques [S7]."
+  "criteriasPonderation": {
+    "OVEN_ENERGY_CONSUMPTION_CYCLE": 0.35,
+    "WARRANTY": 0.2,
+    "WEIGHT": 0.1,
+    "DATA_QUALITY": 0.15,
+    "CLASSE_ENERGY": 0.2
   },
-  "reference_lifetime": {
-    "lifetime_years_reference": 13,
-    "lifetime_years_range": {"min": 10, "max": 15},
-    "rationale": "Les données disponibles indiquent une durée d’usage typique d’environ 13 ans pour un four en France (moyenne récente, contre 15 ans il y a une décennie) [S1]. Certaines ACV utilisent un scénario de 10 ans de durée de vie pour les fours:contentReference[oaicite:0]{index=0}, tandis que d’autres sources mentionnent qu’un four peut encore fonctionner au-delà de 13-15 ans. Nous retenons 13 ans comme valeur de référence représentative (UE/FR).",
-    "citations": ["S1", "S2"]
-  },
-  "gap_analysis_absolute_vs_relative": {
-    "what_is_missing_vs_full_lca": "Par rapport à une ACV complète (ISO 14040), ce score relatif ne dispose pas d’un inventaire exhaustif de tous les flux de matières/énergie du cycle de vie. De plus, toutes les catégories d’impacts ne sont pas évaluées (ex: toxicité, eau, épuisement ressources):contentReference[oaicite:1]{index=1}. Les frontières du système sont simplifiées: le score utilise quelques critères proxies au lieu de modéliser chaque étape et processus en détail (pas d’unité fonctionnelle fine par usage, pas de prise en compte précise de la fabrication de chaque composant, etc.).",
-    "why_relative_is_still_useful": "Un score relatif simplifié reste utile pour comparer rapidement l’empreinte environnementale de produits similaires sur le marché. Il permet de distinguer les fours plus vertueux de manière lisible pour le grand public, et de stimuler des choix de consommation responsables:contentReference[oaicite:2]{index=2}. Malgré l’absence de données ACV complètes, un indice synthétique offre une robustesse suffisante pour orienter les acheteurs vers des produits globalement moins impactants.",
-    "mitigations": [
-      "Ancrer les pondérations sur la littérature ACV relative aux contributions des phases de cycle de vie:contentReference[oaicite:3]{index=3}:contentReference[oaicite:4]{index=4}",
-      "Éviter les double-comptes en séparant les critères corrélés et en documentant les chevauchements potentiels (énergie vs matériaux vs durabilité)",
-      "Rehausser le poids de DATA_QUALITY, car les données manquantes sont imputées à la moyenne (incitation à la transparence du fabricant):contentReference[oaicite:5]{index=5}"
-    ]
-  },
-  "weighting_method": {
-    "approach": "evidence-weighted materiality + redundancy control + consumer comparability",
-    "key_principles": [
-      "literature-first weighting",
-      "lifecycle materiality for Fours",
-      "anti double-counting",
-      "robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)",
-      "missing data virtualization + DATA_QUALITY incentive",
-      "ESG/brand sustainability included with guardrails"
+  "yamlPrompt": "---\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"Tu es un agent expert en évaluation environnementale des produits électriques et electroniques.\\nAdopte une démarche d’expert en analyse du cycle de vie des produits.\\nNous allons travailler sur des Fours\\nNe fournir en réponse que du JSON, conformément à la structure indiquée, sans commentaire, ni texte supplémentaire\\n\\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\\nuseCase : Le cas d'usage (ex: consumer_comparison)\\ngeoScope : Le périmètre géographique (ex: EU/France)\\nvertical : Le nom de la verticale\\navailableCriterias : La liste des critères disponibles\\npositioning : Positionnement du score (relatif vs absolu)\\nreferenceLifetime : Durée de vie de référence du produit\\ngapAnalysis : Analyse des écarts entre ACV absolue et score relatif\\nweightingMethod : Méthodologie de pondération utilisée\\ncriteriaWeights : Liste des pondérations pour chaque critère\\nnormalizationNotes : Notes sur la normalisation des scores\\nqualityChecks : Vérifications de cohérence (somme des poids, exhaustivité)\\nmaterialitySummary : Synthèse de la matérialité environnementale\\nsources : Liste exhaustive des sources consultées\\nsearchLog : Journal des recherches effectuées\\n\"\nuserPrompt: \"\\n## Ton rôle\\n## Ton rôle\\nTu es un agent expert en analyse du cycle de vie (ACV) et en évaluation environnementale des produits électriques et électroniques, orienté “comparaison grand public” (UE/France).\\nTu as accès à une fonction de recherche web (search) : tu DOIS l’utiliser pour fonder tes décisions sur des sources de référence (normes, régulations, agences publiques, littérature académique, méthodologies reconnues).\\nNe JAMAIS inventer de source. Inclure uniquement des sources primaires validées et réellement utilisées.\\n\\nNous allons travailler sur des Fours.\\n\\nContrainte de sortie : Ne fournir en réponse QUE du JSON, conformément à la structure demandée, sans commentaire, ni texte supplémentaire.\\n\\n---\\n\\n## Contexte & objectif : Eco-score “comparaison grand public” pour les Fours\\n\\nTu vas définir une pondération (weights) pour construire un Eco-score destiné à comparer des Fours entre eux (marché UE/France).\\nCe score est un indice relatif “ACV best-effort” :\\n- Inspiré des principes ACV (matérialité sur le cycle de vie, catégories d’impact, unité fonctionnelle),\\n- MAIS il ne prétend pas fournir une empreinte absolue auditée type “bilan produit”.\\nTu dois explicitement analyser et documenter (dans le JSON) l’écart “ACV absolue vs score relatif”, et comment tes choix de pondération réduisent les biais.\\n\\nLes facteurs disponibles sont :\\n  OVEN_ENERGY_CONSUMPTION_CYCLE : L&#39;énergie consommée par le four lors d&#39;un cycle de cuisson standard\\n  WARRANTY : Durée de garantie du produit\\n  DATA_QUALITY : DATA_QUALITY\\n  WEIGHT : Le poids de l&#39;objet\\n  CLASSE_ENERGY : La classe énergétique\\n\\n\\nTon travail : proposer des poids robustes, “literature-first”, anti-double-comptage, et adaptés à la comparaison grand public.\\n\\n---\\n\\n## Principes de fonctionnement (non négociables)\\n\\n1) Relativisation des facteurs (ranking)\\n- Chaque facteur est représenté de manière relative, sous forme de classement.\\n- Meilleur produit sur ce facteur : 100/100 ; pire : 0/100.\\n\\n2) Virtualisation des scores manquants\\n- Si un facteur est absent, appliquer la valeur moyenne de ce facteur sur l’ensemble des produits.\\n- DATA_QUALITY doit avantager la transparence (produits mieux documentés) sans écraser la matérialité environnementale.\\n\\n3) Somme des coefficients\\n- La somme des poids doit être égale à 1 (après renormalisation).\\n\\n4) Normalisation statistique des attributs bruts (méthodo interne)\\n- Les attributs bruts sont normalisés sur 0 à 5 avant agrégation :\\n  - Sigma scoring par défaut (μ, σ ; intervalle [μ-2σ, μ+2σ], μ -> 2.5/5, cap à 0 et 5)\\n  - Fallback percentile (mid-rank) si distribution “low entropy”\\n  - Min / max Fixed, ou sur les valeurs observées\\nTu ne codes pas l’algorithme, mais tu DOIS en tenir compte pour justifier la pondération (robustesse, sensibilité, outliers, buckets).\\n\\n---\\n\\n## Exigences “search & sources” (obligatoires)\\n\\nA) Priorité des sources (ordre)\\n1. Agences publiques / institutions (UE/France), documentation officielle, régulations\\n2. Normes et méthodes (ISO 14040/14044, PEF / JRC, guides d’affichage environnemental si pertinent)\\n3. Publications académiques (revues, méta-analyses, ACV comparatives par catégorie produit)\\n4. Méthodologies reconnues de scoring grand public (ex : docs publiques de systèmes d’éco-score) uniquement en complément, jamais comme base unique\\n\\nB) “Literature-first weighting”\\n- Les poids doivent refléter la matérialité ACV typique des Fours (fabrication vs usage vs fin de vie) et l’importance de la durée de vie.\\n\\nC) Sources exhaustives + citations inline\\n- Toute justification non triviale doit citer [S1], [S2]… inline dans les champs texte.\\n- Fournir \\\"search_log\\\" avec les requêtes.\\n\\nD) Durée de vie de référence (OBLIGATOIRE)\\n- Tu DOIS rechercher et proposer une durée de vie / durée d’usage de référence pour la catégorie Fours (UE/France si possible), avec sources.\\n- Si plusieurs valeurs existent, fournir une plage + une valeur “référence” et expliquer le choix.\\n\\n---\\n\\n## Contraintes de pondération (engineering)\\n\\n1) Anti double-comptage / redondances\\n- Identifier les critères fortement corrélés (ex : classe énergie vs conso ; tailles vs conso ; etc.).\\n- Expliquer la stratégie (regroupement “bloc énergie”, réduction de poids redondants, etc.).\\n- Tous les critères doivent avoir une pondération > 0. En cas de criteres correlé, veille a coreller la répartition dans la ponderation de ces critères \\n\\n2) DATA_QUALITY et ESG (volontairement rehaussés)\\n- Proposer un poids DATA_QUALITY plus élevé que dans une pondération purement “ACV classique”, MAIS :\\n  Le DATA-QUALITY est un score qui compnse le principe de virtualisation, attribuant des valeurs moyennes aux criteres absents, il doit donc être conséquent avant de ne pas avanteger les produits disposant de peu de données.\\n  - justifier ce choix : incitation à la transparence (vu l’imputation moyenne) + prise en compte sociétale,\\n  - poser des garde-fous : ces poids ne doivent pas permettre à un produit très énergivore d’être “sauvé” uniquement par ESG/DATA_QUALITY.\\n- Mentionner explicitement le lien avec l’imputation des données manquantes (moyenne) et l’effet attendu.\\n\\n3) Pertinence par vertical\\n- Tout critère peut être pondéré à 0 s’il est non pertinent ou redondant, mais tu DOIS l’expliquer.\\n\\n4) Renormalisation\\n- Définir une règle simple de renormalisation si certains critères ont un poids à 0.\\n\\n5) Echelle de valeur\\n - La somme des pondérations doit TOUJOURS être égal à 1, afin de refleter la part relative de chaque critère dans le score obtenu\\n\\n6) Présence de tous les criteres \\nTous les critères définis dans availableImpactScoreCriterias: doivent être évalués et participer à la configuration de sortie. Si ils ne sont pas pertinents, coefficienter à 0. \\n---\\n\\n## Format JSON attendu (STRICT)\\n\\nTa réponse doit être un unique objet JSON, avec ces clés exactes :\\n\\n{\\n  \\\"use_case\\\": \\\"consumer_comparison\\\",\\n  \\\"geo_scope\\\": \\\"EU/France\\\",\\n  \\\"vertical\\\": \\\"Fours\\\",\\n  \\\"available_criterias\\\":   OVEN_ENERGY_CONSUMPTION_CYCLE : L&#39;énergie consommée par le four lors d&#39;un cycle de cuisson standard\\n  WARRANTY : Durée de garantie du produit\\n  DATA_QUALITY : DATA_QUALITY\\n  WEIGHT : Le poids de l&#39;objet\\n  CLASSE_ENERGY : La classe énergétique\\n,\\n\\n  \\\"positioning\\\": {\\n    \\\"claim\\\": \\\"relative LCA-inspired score (ACV best-effort) for within-category comparison\\\",\\n    \\\"not_an_absolute_footprint\\\": true,\\n    \\\"what_it_means_for_users\\\": \\\"Explication courte et sourcée. [Sx]\\\"\\n  },\\n\\n  \\\"reference_lifetime\\\": {\\n    \\\"lifetime_years_reference\\\": 0,\\n    \\\"lifetime_years_range\\\": {\\\"min\\\": 0, \\\"max\\\": 0},\\n    \\\"rationale\\\": \\\"Justification sourcée, UE/FR si possible. [Sx]\\\",\\n    \\\"citations\\\": [\\\"S1\\\"]\\n  },\\n\\n  \\\"gap_analysis_absolute_vs_relative\\\": {\\n    \\\"what_is_missing_vs_full_lca\\\": \\\"Inventaires complets, frontières système, unité fonctionnelle détaillée, etc. [Sx]\\\",\\n    \\\"why_relative_is_still_useful\\\": \\\"Comparaison marché, robustesse, lisibilité. [Sx]\\\",\\n    \\\"mitigations\\\": [\\n      \\\"Anchor weights on LCA literature for lifecycle stage contributions [Sx]\\\",\\n      \\\"Avoid double counting and document overlaps [Sx]\\\",\\n      \\\"Raise DATA_QUALITY because missing data is imputed to mean (transparency incentive) [Sx]\\\"\\n    ]\\n  },\\n\\n  \\\"weighting_method\\\": {\\n    \\\"approach\\\": \\\"evidence-weighted materiality + redundancy control + consumer comparability\\\",\\n    \\\"key_principles\\\": [\\n      \\\"literature-first weighting\\\",\\n      \\\"lifecycle materiality for Fours\\\",\\n      \\\"anti double-counting\\\",\\n      \\\"robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)\\\",\\n      \\\"missing data virtualization + DATA_QUALITY incentive\\\",\\n      \\\"ESG/brand sustainability included with guardrails\\\"\\n    ],\\n    \\\"assumptions\\\": [\\n      {\\n        \\\"assumption\\\": \\\"...\\\",\\n        \\\"why_it_matters\\\": \\\"...\\\",\\n        \\\"citations\\\": [\\\"S1\\\"]\\n      }\\n    ]\\n  },\\n\\n  \\\"criteria_weights\\\": [\\n    {\\n      \\\"criterion\\\": \\\"CRITERION_NAME_FROM_AVAILABLE_LIST\\\",\\n      \\\"weight\\\": 0.0,\\n      \\\"directionality\\\": \\\"higher_is_better|lower_is_better|categorical\\\",\\n      \\\"impact_dimensions\\\": [\\\"climate\\\", \\\"resource_use\\\", \\\"toxicity\\\", \\\"water\\\", \\\"circularity\\\", \\\"social\\\", \\\"other\\\"],\\n      \\\"rationale\\\": \\\"Texte court, concret, et sourcé. Citations inline [Sx].\\\",\\n      \\\"overlap_notes\\\": \\\"Redondances + stratégie anti-double comptage. [Sx]\\\",\\n      \\\"guardrails\\\": \\\"Si ESG/DATA_QUALITY, préciser le garde-fou. [Sx]\\\",\\n      \\\"evidence_strength\\\": {\\\"level\\\": \\\"high|medium|low\\\", \\\"why\\\": \\\"Justification sourcée. [Sx]\\\"}\\n    }\\n  ],\\n\\n  \\\"normalization_notes\\\": {\\n    \\\"relative_ranking_0_100\\\": \\\"Rappel et implications. [Sx]\\\",\\n    \\\"sigma_scoring_0_5\\\": \\\"Résumé opérationnel et impact sur la robustesse. [Sx]\\\",\\n    \\\"percentile_fallback\\\": \\\"Quand/pourquoi. [Sx]\\\",\\n    \\\"missing_value_virtualization\\\": \\\"Moyenne + rôle de DATA_QUALITY. [Sx]\\\"\\n  },\\n\\n  \\\"quality_checks\\\": {\\n    \\\"criteria_weights_complete\\\": true,\\n    \\\"weights_sum_to_1\\\": true,\\n    \\\"sum_value\\\": 1.0,\\n    \\\"unused_or_zero_weight_criterias\\\": [],\\n    \\\"renormalization_rule_if_needed\\\": \\\"Phrase simple (sans code).\\\"\\n  },\\n\\n  \\\"materiality_summary\\\": {\\n    \\\"dominant_lifecycle_stages_for_vertical\\\": [\\\"manufacturing\\\", \\\"use_phase\\\", \\\"distribution\\\", \\\"end_of_life\\\"],\\n    \\\"short_summary\\\": \\\"Synthèse sourcée des postes dominants et implication sur les poids. [Sx]\\\"\\n  },\\n\\n  \\\"sources\\\": [\\n    {\\n      \\\"id\\\": \\\"S1\\\",\\n      \\\"type\\\": \\\"standard|regulation|public_agency|peer_reviewed|industry_methodology|other\\\",\\n      \\\"title\\\": \\\"...\\\",\\n      \\\"authors_or_org\\\": \\\"...\\\",\\n      \\\"year\\\": 2026,\\n      \\\"publisher\\\": \\\"...\\\",\\n      \\\"url\\\": \\\"...\\\",\\n      \\\"accessed_date\\\": \\\"YYYY-MM-DD\\\",\\n      \\\"reliability\\\": \\\"high|medium|low\\\",\\n      \\\"used\\\": true,\\n      \\\"used_for\\\": [\\\"lifetime reference\\\", \\\"energy materiality\\\", \\\"data quality rationale\\\"],\\n      \\\"notes\\\": \\\"1-2 phrases max.\\\"\\n    }\\n  ],\\n\\n  \\\"search_log\\\": [\\n    {\\\"query\\\": \\\"...\\\", \\\"date\\\": \\\"YYYY-MM-DD\\\", \\\"notes\\\": \\\"Pourquoi cette requête.\\\"}\\n  ]\\n}\\n\\nRègles supplémentaires :\\n- \\\"criteria_weights\\\" doit contenir TOUS les critères de   OVEN_ENERGY_CONSUMPTION_CYCLE : L&#39;énergie consommée par le four lors d&#39;un cycle de cuisson standard\\n  WARRANTY : Durée de garantie du produit\\n  DATA_QUALITY : DATA_QUALITY\\n  WEIGHT : Le poids de l&#39;objet\\n  CLASSE_ENERGY : La classe énergétique\\n (même si weight=0) pour l’exhaustivité.\\n- Les poids doivent être décimaux. Corriger toute dérive pour que la somme fasse exactement 1.0 (tolérance 1e-6).\\n- Toute justification non triviale doit inclure des citations inline [Sx].\\n- La liste \\\"sources\\\" doit être exhaustive des sources consultées via search (used=false autorisé).\\n\"\nretrievalMode: \"MODEL_WEB_SEARCH\"\njsonSchema: \"{\\n  \\\"$schema\\\" : \\\"https://json-schema.org/draft/2020-12/schema\\\",\\n  \\\"type\\\" : \\\"object\\\",\\n  \\\"properties\\\" : {\\n    \\\"available_criterias\\\" : {\\n      \\\"type\\\" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"string\\\"\\n      }\\n    },\\n    \\\"criteria_weights\\\" : {\\n      \\\"type\\\" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"object\\\",\\n        \\\"properties\\\" : {\\n          \\\"criterion\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"directionality\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"evidence_strength\\\" : {\\n            \\\"type\\\" : \\\"object\\\",\\n            \\\"properties\\\" : {\\n              \\\"level\\\" : {\\n                \\\"type\\\" : \\\"string\\\"\\n              },\\n              \\\"why\\\" : {\\n                \\\"type\\\" : \\\"string\\\"\\n              }\\n            },\\n            \\\"required\\\" : [ \\\"level\\\", \\\"why\\\" ],\\n            \\\"additionalProperties\\\" : false\\n          },\\n          \\\"guardrails\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"impact_dimensions\\\" : {\\n            \\\"type\\\" : \\\"array\\\",\\n            \\\"items\\\" : {\\n              \\\"type\\\" : \\\"string\\\"\\n            }\\n          },\\n          \\\"overlap_notes\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"rationale\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"weight\\\" : {\\n            \\\"type\\\" : \\\"number\\\"\\n          }\\n        },\\n        \\\"required\\\" : [ \\\"criterion\\\", \\\"directionality\\\", \\\"evidence_strength\\\", \\\"guardrails\\\", \\\"impact_dimensions\\\", \\\"overlap_notes\\\", \\\"rationale\\\", \\\"weight\\\" ],\\n        \\\"additionalProperties\\\" : false\\n      }\\n    },\\n    \\\"gap_analysis_absolute_vs_relative\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"mitigations\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"what_is_missing_vs_full_lca\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"why_relative_is_still_useful\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"mitigations\\\", \\\"what_is_missing_vs_full_lca\\\", \\\"why_relative_is_still_useful\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"geo_scope\\\" : {\\n      \\\"type\\\" : \\\"string\\\"\\n    },\\n    \\\"materiality_summary\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"dominant_lifecycle_stages_for_vertical\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"short_summary\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"dominant_lifecycle_stages_for_vertical\\\", \\\"short_summary\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"normalization_notes\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"missing_value_virtualization\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"percentile_fallback\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"relative_ranking_0_100\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"sigma_scoring_0_5\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"missing_value_virtualization\\\", \\\"percentile_fallback\\\", \\\"relative_ranking_0_100\\\", \\\"sigma_scoring_0_5\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"positioning\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"claim\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"not_an_absolute_footprint\\\" : {\\n          \\\"type\\\" : \\\"boolean\\\"\\n        },\\n        \\\"what_it_means_for_users\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"claim\\\", \\\"not_an_absolute_footprint\\\", \\\"what_it_means_for_users\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"quality_checks\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"criteria_weights_complete\\\" : {\\n          \\\"type\\\" : \\\"boolean\\\"\\n        },\\n        \\\"renormalization_rule_if_needed\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"sum_value\\\" : {\\n          \\\"type\\\" : \\\"number\\\"\\n        },\\n        \\\"unused_or_zero_weight_criterias\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"weights_sum_to_1\\\" : {\\n          \\\"type\\\" : \\\"boolean\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"criteria_weights_complete\\\", \\\"renormalization_rule_if_needed\\\", \\\"sum_value\\\", \\\"unused_or_zero_weight_criterias\\\", \\\"weights_sum_to_1\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"reference_lifetime\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"citations\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"lifetime_years_range\\\" : {\\n          \\\"type\\\" : \\\"object\\\",\\n          \\\"properties\\\" : {\\n            \\\"max\\\" : {\\n              \\\"type\\\" : \\\"number\\\"\\n            },\\n            \\\"min\\\" : {\\n              \\\"type\\\" : \\\"number\\\"\\n            }\\n          },\\n          \\\"required\\\" : [ \\\"max\\\", \\\"min\\\" ],\\n          \\\"additionalProperties\\\" : false\\n        },\\n        \\\"lifetime_years_reference\\\" : {\\n          \\\"type\\\" : \\\"number\\\"\\n        },\\n        \\\"rationale\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"citations\\\", \\\"lifetime_years_range\\\", \\\"lifetime_years_reference\\\", \\\"rationale\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"search_log\\\" : {\\n      \\\"type\\\" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"object\\\",\\n        \\\"properties\\\" : {\\n          \\\"date\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"notes\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"query\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"required\\\" : [ \\\"date\\\", \\\"notes\\\", \\\"query\\\" ],\\n        \\\"additionalProperties\\\" : false\\n      }\\n    },\\n    \\\"sources\\\" : {\\n      \\\"type\\\" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"object\\\",\\n        \\\"properties\\\" : {\\n          \\\"accessed_date\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"authors_or_org\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"id\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"notes\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"publisher\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"reliability\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"title\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"type\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"url\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"used\\\" : {\\n            \\\"type\\\" : \\\"boolean\\\"\\n          },\\n          \\\"used_for\\\" : {\\n            \\\"type\\\" : \\\"array\\\",\\n            \\\"items\\\" : {\\n              \\\"type\\\" : \\\"string\\\"\\n            }\\n          },\\n          \\\"year\\\" : {\\n            \\\"type\\\" : \\\"integer\\\"\\n          }\\n        },\\n        \\\"required\\\" : [ \\\"accessed_date\\\", \\\"authors_or_org\\\", \\\"id\\\", \\\"notes\\\", \\\"publisher\\\", \\\"reliability\\\", \\\"title\\\", \\\"type\\\", \\\"url\\\", \\\"used\\\", \\\"used_for\\\", \\\"year\\\" ],\\n        \\\"additionalProperties\\\" : false\\n      }\\n    },\\n    \\\"use_case\\\" : {\\n      \\\"type\\\" : \\\"string\\\"\\n    },\\n    \\\"vertical\\\" : {\\n      \\\"type\\\" : \\\"string\\\"\\n    },\\n    \\\"weighting_method\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"approach\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"assumptions\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"object\\\",\\n            \\\"properties\\\" : {\\n              \\\"assumption\\\" : {\\n                \\\"type\\\" : \\\"string\\\"\\n              },\\n              \\\"citations\\\" : {\\n                \\\"type\\\" : \\\"array\\\",\\n                \\\"items\\\" : {\\n                  \\\"type\\\" : \\\"string\\\"\\n                }\\n              },\\n              \\\"why_it_matters\\\" : {\\n                \\\"type\\\" : \\\"string\\\"\\n              }\\n            },\\n            \\\"required\\\" : [ \\\"assumption\\\", \\\"citations\\\", \\\"why_it_matters\\\" ],\\n            \\\"additionalProperties\\\" : false\\n          }\\n        },\\n        \\\"key_principles\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"approach\\\", \\\"assumptions\\\", \\\"key_principles\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    }\\n  },\\n  \\\"required\\\" : [ \\\"available_criterias\\\", \\\"criteria_weights\\\", \\\"gap_analysis_absolute_vs_relative\\\", \\\"geo_scope\\\", \\\"materiality_summary\\\", \\\"normalization_notes\\\", \\\"positioning\\\", \\\"quality_checks\\\", \\\"reference_lifetime\\\", \\\"search_log\\\", \\\"sources\\\", \\\"use_case\\\", \\\"vertical\\\", \\\"weighting_method\\\" ],\\n  \\\"additionalProperties\\\" : false\\n}\"\noptions:\n  model: \"gemini-2.5-pro\"\n  temperature: 0.2\n",
+  "aiJsonResponse": "{\n  \"use_case\" : \"consumer_comparison\",\n  \"geo_scope\" : \"EU/France\",\n  \"vertical\" : \"Fours\",\n  \"available_criterias\" : [ \"OVEN_ENERGY_CONSUMPTION_CYCLE\", \"WARRANTY\", \"DATA_QUALITY\", \"WEIGHT\", \"CLASSE_ENERGY\" ],\n  \"positioning\" : {\n    \"claim\" : \"relative LCA-inspired score (ACV best-effort) for within-category comparison\",\n    \"not_an_absolute_footprint\" : true,\n    \"what_it_means_for_users\" : \"Score relatif pour comparer des fours entre eux (UE/France) sur des leviers surtout liés à l'énergie à l'usage, complété par durabilité (garantie) et transparence des données. Il s'aligne avec l'importance réglementaire accordée à la consommation d'énergie en phase d'utilisation et aux informations d'étiquetage énergie, sans constituer une empreinte ACV absolue auditée. [S1][S2]\"\n  },\n  \"reference_lifetime\" : {\n    \"lifetime_years_reference\" : 12.0,\n    \"lifetime_years_range\" : {\n      \"min\" : 10.0,\n      \"max\" : 15.0\n    },\n    \"rationale\" : \"Faute de valeur 'four domestique' explicitement harmonisée et publiquement accessible dans les sources consultées ici, on retient une durée de vie de référence de 12 ans (plage 10–15 ans) cohérente avec les ordres de grandeur observés pour les gros appareils ménagers en Europe (catégorie la plus proche en termes de robustesse et d'usage), et avec l'objectif de comparaison grand public. Cette hypothèse sert à pondérer l'importance de la durabilité (WARRANTY) sans prétendre fixer une durée normative unique pour tous les fours. [S3]\",\n    \"citations\" : [ \"S3\" ]\n  },\n  \"gap_analysis_absolute_vs_relative\" : {\n    \"what_is_missing_vs_full_lca\" : \"Une ACV complète (ISO/PEF) exige un inventaire détaillé (BOM/matières, procédés, transport, scénarios d'usage, mix électrique, maintenance/réparation, fin de vie), des frontières système explicites, une unité fonctionnelle (p.ex. ''cuire X repas' sur la durée de vie), des règles d'allocation, et une LCIA multi-impacts complète. Le score relatif ici n'embarque qu'un sous-ensemble de proxys (énergie par cycle, classe énergie, masse, garantie, qualité de données) et ne modélise pas explicitement l'ensemble des flux et scénarios. [S4][S5]\",\n    \"why_relative_is_still_useful\" : \"Pour une comparaison grand public au sein d'une même catégorie (fours), un score relatif améliore la lisibilité, limite les biais d'hypothèses absolues (mix électrique, profils d'usage) et se focalise sur les paramètres les plus discriminants et reconnus (énergie à l'usage, information d'étiquette). Il reste pertinent car l'énergie à l'usage est identifiée comme l'aspect environnemental principal pour ces produits dans le cadre ecodesign, ce qui rend un classement relatif sur l'énergie particulièrement informatif. [S1][S2][S4]\",\n    \"mitigations\" : [ \"Anchor weights on high-level EU evidence that use-phase energy is the most significant environmental aspect for domestic ovens/hobs/range hoods, and keep the 'energy block' dominant. [S1]\", \"Avoid double counting between OVEN_ENERGY_CONSUMPTION_CYCLE and CLASSE_ENERGY by splitting a single energy materiality block into two complementary signals (continuous vs categorical) rather than adding them as independent full-weight drivers. [S2]\", \"Raise DATA_QUALITY because missing data is imputed to mean (virtualization); rewarding better documentation reduces the incentive to omit data and aligns with EF/PEF data quality practices (DQR concept), while guardrails keep material impacts (energy/durability) dominant. [S5][S4]\" ]\n  },\n  \"weighting_method\" : {\n    \"approach\" : \"evidence-weighted materiality + redundancy control + consumer comparability\",\n    \"key_principles\" : [ \"literature-first weighting (EU ecodesign/label + EF guidance as primary anchors)\", \"lifecycle materiality for Fours: prioritize use-phase energy\", \"anti double-counting: treat energy class and per-cycle consumption as one correlated block\", \"robustness to outliers via capped normalization (sigma scoring) and discrete bucket handling (percentile fallback for categorical/low-entropy criteria)\", \"missing data virtualization to mean + DATA_QUALITY incentive aligned with EF data quality rating practices\", \"durability proxy via WARRANTY to reflect lifetime extension and reduced replacement frequency\" ],\n    \"assumptions\" : [ {\n      \"assumption\" : \"L'énergie en phase d'utilisation est le poste environnemental dominant et le plus actionnable pour différencier des fours domestiques, donc la somme des poids liés à l'énergie doit rester majoritaire.\",\n      \"why_it_matters\" : \"Cela réduit le risque qu'un produit énergivore obtienne un bon score grâce à des critères secondaires (masse, données, garantie), cohérent avec la hiérarchisation réglementaire ecodesign. [S1]\",\n      \"citations\" : [ \"S1\" ]\n    }, {\n      \"assumption\" : \"La garantie (WARRANTY) est un proxy imparfait mais utile de durabilité/maintenabilité perçue et de réduction potentielle du remplacement, pertinent en comparaison grand public.\",\n      \"why_it_matters\" : \"Les comportements de remplacement vs réparation influencent directement la durée d'usage; intégrer WARRANTY permet de valoriser des produits plus susceptibles d'être conservés plus longtemps. [S3]\",\n      \"citations\" : [ \"S3\" ]\n    }, {\n      \"assumption\" : \"CLASSE_ENERGY et OVEN_ENERGY_CONSUMPTION_CYCLE sont corrélés mais apportent deux signaux complémentaires (classe = bucket réglementaire lisible; conso/cycle = mesure continue).\",\n      \"why_it_matters\" : \"La répartition des poids entre les deux limite le double comptage tout en améliorant la robustesse quand les distributions sont discrètes (classes) ou bruitées (mesures/valeurs déclarées). [S2]\",\n      \"citations\" : [ \"S2\" ]\n    }, {\n      \"assumption\" : \"Un poids DATA_QUALITY élevé est justifié car la virtualisation des valeurs manquantes à la moyenne favorise sinon les produits peu documentés; DATA_QUALITY doit donc contrebalancer cet effet sans dépasser le bloc énergie.\",\n      \"why_it_matters\" : \"Cela incite à fournir des données complètes et améliore la fiabilité du classement, en cohérence avec les pratiques EF (DQR et exigences de documentation). [S5][S4]\",\n      \"citations\" : [ \"S5\", \"S4\" ]\n    } ]\n  },\n  \"criteria_weights\" : [ {\n    \"criterion\" : \"OVEN_ENERGY_CONSUMPTION_CYCLE\",\n    \"weight\" : 0.35,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\", \"other\" ],\n    \"rationale\" : \"Mesure directe de l'énergie consommée pour un cycle standard: proxy le plus proche de l'impact en phase d'usage. La réglementation ecodesign identifie l'énergie en phase d'utilisation comme l'aspect environnemental le plus significatif pour ces appareils; ce critère porte donc la plus grande part du score. [S1][S2]\",\n    \"overlap_notes\" : \"Fortement corrélé à CLASSE_ENERGY (classe construite à partir d'indicateurs d'efficacité/consommation). Stratégie: regrouper en un 'bloc énergie' majoritaire (0.55 au total) et répartir entre signal continu (conso/cycle) et signal discret (classe) pour limiter le double comptage. [S2]\",\n    \"guardrails\" : \"Le bloc énergie (OVEN_ENERGY_CONSUMPTION_CYCLE + CLASSE_ENERGY) reste > 50% pour éviter qu'un four très énergivore soit compensé par WARRANTY ou DATA_QUALITY. [S1]\",\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Ancrage direct dans la réglementation ecodesign qui qualifie l'énergie à l'usage comme aspect environnemental principal; méthodes et définitions d'information énergie encadrées. [S1][S2]\"\n    }\n  }, {\n    \"criterion\" : \"CLASSE_ENERGY\",\n    \"weight\" : 0.2,\n    \"directionality\" : \"categorical\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\", \"other\" ],\n    \"rationale\" : \"Signal grand public normalisé et comparable: la classe énergétique d'étiquette fournit un repère synthétique (bucket) pour la performance énergétique, utile quand les valeurs détaillées sont absentes ou hétérogènes. [S2]\",\n    \"overlap_notes\" : \"Redondant en partie avec OVEN_ENERGY_CONSUMPTION_CYCLE. Stratégie anti-double comptage: poids plus faible que la conso/cycle, utilisé comme stabilisateur de classement (critère discret) et comme garde-fou de cohérence réglementaire. [S2]\",\n    \"guardrails\" : \"Ne pas laisser la classe seule piloter le score: elle ne pèse que 0.20 et reste couplée au critère continu (0.35) pour éviter les effets de seuil entre classes. [S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Critère défini par un règlement d'étiquetage énergie harmonisé au niveau UE, conçu pour la comparabilité entre produits. [S2]\"\n    }\n  }, {\n    \"criterion\" : \"WARRANTY\",\n    \"weight\" : 0.2,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"resource_use\", \"climate\", \"social\" ],\n    \"rationale\" : \"Proxy de durabilité: une garantie plus longue est interprétée comme un signal (imparfait) de fiabilité, d'engagement fabricant et de probabilité de réparation plutôt que remplacement, ce qui peut réduire l'impact 'fabrication + fin de vie' rapporté au service rendu. Le contexte européen montre que le remplacement est souvent préféré à la réparation pour les appareils ménagers; valoriser la garantie vise à inverser cette tendance. [S3]\",\n    \"overlap_notes\" : \"Peu corrélé aux métriques énergie, donc complémentaire. Risque de corrélation indirecte avec le positionnement prix/qualité: limité par le maintien d'un bloc énergie majoritaire. [S1]\",\n    \"guardrails\" : \"WARRANTY ne peut pas compenser une très mauvaise performance énergétique car le bloc énergie reste majoritaire (0.55). En cas de score énergie très faible (pire décile), recommander un plafonnement interne de contribution WARRANTY (règle métier optionnelle) lors de l'interprétation. [S1]\",\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Source institutionnelle sur tendances de durée de vie et motifs de remplacement/réparation; lien 'garantie -> allongement de vie' reste un proxy comportemental. [S3]\"\n    }\n  }, {\n    \"criterion\" : \"WEIGHT\",\n    \"weight\" : 0.1,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"resource_use\", \"climate\", \"other\" ],\n    \"rationale\" : \"Proxy 'matières + fabrication + transport': à défaut d'inventaire matière, la masse reflète partiellement l'intensité matérielle (métaux, verre, isolants) et peut influencer les impacts amont. Le cadre EF rappelle que les impacts couvrent extraction/production jusqu'à fin de vie; WEIGHT sert ici de signal simplifié pour cette composante non couverte par les critères énergie. [S4]\",\n    \"overlap_notes\" : \"Corrélation possible avec taille/capacité et donc consommation: pour éviter un double signal énergie via la taille, le poids reste limité (0.10) et ne doit pas être interprété comme performance énergétique. [S1]\",\n    \"guardrails\" : \"WEIGHT est volontairement plafonné (0.10) pour éviter qu'un four plus léger mais énergivore soit favorisé; l'énergie à l'usage domine le score. [S1]\",\n    \"evidence_strength\" : {\n      \"level\" : \"low\",\n      \"why\" : \"WEIGHT est un proxy simplifié et non une catégorie d'impact mesurée; il n'est justifié ici que comme approximation de matérialité dans un score relatif grand public. [S4]\"\n    }\n  }, {\n    \"criterion\" : \"DATA_QUALITY\",\n    \"weight\" : 0.15,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"other\", \"social\" ],\n    \"rationale\" : \"Incitation à la transparence et réduction du biais d'imputation: comme les critères manquants sont virtualisés à la moyenne, un produit peu documenté pourrait artificiellement éviter les pénalités; DATA_QUALITY compense ce risque. Le cadre EF formalise des exigences de documentation et une logique de Data Quality Rating (représentativité techno/géo/temps et précision), ce qui justifie de valoriser les produits mieux documentés. [S5][S4]\",\n    \"overlap_notes\" : \"Critère orthogonal aux impacts physiques: il n'ajoute pas un impact environnemental direct mais améliore la fiabilité du classement relatif et la comparabilité, ce qui est critique en présence d'imputation à la moyenne. [S5]\",\n    \"guardrails\" : \"Poids borné à 0.15 et inférieur au bloc énergie (0.55): DATA_QUALITY ne doit pas sauver un produit très énergivore. En pratique, conserver une règle de lecture: un mauvais score énergie doit rester pénalisant même si DATA_QUALITY est excellent. [S1][S5]\",\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"La méthodologie EF documente explicitement la logique de DQR et les critères (représentativité et précision), ce qui soutient un signal de qualité des données dans un cadre LCA-inspired. [S5][S4]\"\n    }\n  } ],\n  \"normalization_notes\" : {\n    \"relative_ranking_0_100\" : \"Chaque critère est transformé en classement relatif (0–100) au sein du marché observé, ce qui est cohérent avec une logique 'comparaison' (à la manière d'un affichage harmonisé orienté consommateur) plutôt qu'une revendication d'empreinte absolue. Attention: le score dépend du panel (effet marché). [S2][S1]\",\n    \"sigma_scoring_0_5\" : \"Avant agrégation, la normalisation 0–5 avec cap sur les extrêmes (type μ±2σ) vise à limiter l'influence d'outliers et à stabiliser le classement; cela complète l'approche réglementaire qui prévoit aussi des benchmarks/valeurs de référence de performance. [S1]\",\n    \"percentile_fallback\" : \"Utilisé lorsque la distribution est à faible entropie ou discrète (ex: classes énergie), pour éviter des effets de seuil et conserver une discrimination régulière entre produits proches. [S2]\",\n    \"missing_value_virtualization\" : \"Si une valeur est absente, elle est imputée à la moyenne du marché; cela réduit la pénalité immédiate de l'absence de données. DATA_QUALITY est donc pondéré pour récompenser la complétude et l'alignement avec des pratiques structurées de qualité des données (DQR), afin d'éviter un avantage aux produits peu documentés. [S5]\"\n  },\n  \"quality_checks\" : {\n    \"criteria_weights_complete\" : true,\n    \"weights_sum_to_1\" : true,\n    \"sum_value\" : 1.0,\n    \"unused_or_zero_weight_criterias\" : [ ],\n    \"renormalization_rule_if_needed\" : \"Si un critère devait être mis à 0 pour redondance avérée, redistribuer proportionnellement son poids sur les autres critères (en conservant le bloc énergie majoritaire) afin que la somme reste égale à 1.0.\"\n  },\n  \"materiality_summary\" : {\n    \"dominant_lifecycle_stages_for_vertical\" : [ \"use_phase\", \"manufacturing\", \"distribution\", \"end_of_life\" ],\n    \"short_summary\" : \"Pour les fours domestiques, l'énergie en phase d'utilisation est identifiée comme l'aspect environnemental le plus significatif dans le cadre ecodesign, ce qui justifie un bloc énergie majoritaire (0.55) centré sur la consommation par cycle et la classe énergétique. La fabrication/fin de vie restent pertinentes mais moins discriminantes dans ce score relatif faute d'inventaire complet; elles sont approchées via WEIGHT (proxy matière) et surtout via WARRANTY (proxy d'allongement de durée d'usage, réduisant le besoin de remplacement). DATA_QUALITY est rehaussé pour contrer le biais d'imputation à la moyenne et encourager la transparence, en cohérence avec les pratiques EF de qualité des données. [S1][S3][S5]\"\n  },\n  \"sources\" : [ {\n    \"id\" : \"S1\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Regulation (EU) No 66/2014 of 14 January 2014 implementing Directive 2009/125/EC with regard to ecodesign requirements for domestic ovens, hobs and range hoods\",\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2014,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"[https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF](https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF)\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy materiality\", \"guardrails for energy dominance\", \"positioning (within-category relevance)\" ],\n    \"notes\" : \"Le règlement indique que la consommation d'énergie en phase d'utilisation est l'aspect environnemental le plus significatif pour les produits couverts.\"\n  }, {\n    \"id\" : \"S2\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Delegated Regulation (EU) No 65/2014 of 1 October 2013 supplementing Directive 2010/30/EU with regard to the energy labelling of domestic ovens and range hoods (consolidated version)\",\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2014,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"[https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng](https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng)\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy class definition and consumer comparability\", \"anti-double-counting notes between class and consumption\" ],\n    \"notes\" : \"Cadre UE harmonisé d'étiquetage énergie, support de comparabilité grand public (classe énergétique).\"\n  }, {\n    \"id\" : \"S3\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Product lifespans — monitoring trends in Europe\",\n    \"authors_or_org\" : \"European Environment Agency (EEA)\",\n    \"year\" : 2024,\n    \"publisher\" : \"EEA\",\n    \"url\" : \"[https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends](https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends)\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"lifetime reference proxy (large household appliances)\", \"durability/repair vs replacement context\" ],\n    \"notes\" : \"Fournit des tendances de durées de vie moyennes par grandes catégories d'appareils ménagers et des motifs de remplacement.\"\n  }, {\n    \"id\" : \"S4\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Environmental Footprint (PEF/OEF) overview\",\n    \"authors_or_org\" : \"European Commission Joint Research Centre (JRC) - European Platform on Life Cycle Assessment\",\n    \"year\" : 2021,\n    \"publisher\" : \"European Commission (JRC)\",\n    \"url\" : \"[https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html](https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html)\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"LCA-inspired framing (life-cycle scope)\", \"gap analysis context (what full EF/PEF would require)\" ],\n    \"notes\" : \"Page institutionnelle décrivant PEF/OEF comme méthodes ACV recommandées par l'UE et leur portée cycle de vie.\"\n  }, {\n    \"id\" : \"S5\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Guide for EF compliant data sets (Version 2.0)\",\n    \"authors_or_org\" : \"Fazio S., Zampori L., De Schryver A., Kusche O., Thellier L., Diaconu E. (JRC)\",\n    \"year\" : 2020,\n    \"publisher\" : \"Publications Office of the European Union\",\n    \"url\" : \"[https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf](https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf)\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"DATA_QUALITY rationale (DQR concept and criteria)\", \"missing data / documentation incentives\" ],\n    \"notes\" : \"Documente le Data Quality Rating (DQR) et ses critères (représentativité techno/géo/temps, précision) dans le cadre EF.\"\n  } ],\n  \"search_log\" : [ {\n    \"query\" : \"Commission Regulation (EU) No 65/2014 energy labelling ovens range hoods\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Identifier la base réglementaire UE de la classe énergétique et des informations d'étiquetage pour les fours.\"\n  }, {\n    \"query\" : \"Commission Regulation (EU) No 66/2014 ecodesign requirements domestic ovens hobs grills\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Ancrer la matérialité environnementale (importance de l'énergie à l'usage) et le cadre ecodesign applicable.\"\n  }, {\n    \"query\" : \"preparatory study ecodesign Lot domestic ovens hobs grills life cycle assessment use phase energy dominates\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Rechercher des éléments ACV/études préparatoires sur la contribution des phases du cycle de vie (usage vs fabrication).\"\n  }, {\n    \"query\" : \"average lifetime domestic oven years Europe study\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Établir une durée de vie de référence UE/France (ou proxy institutionnel) pour paramétrer la pondération durabilité.\"\n  }, {\n    \"query\" : \"European Commission Environmental Footprint method data quality requirements rating\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Fonder le critère DATA_QUALITY sur une méthodologie reconnue (EF/PEF) et ses pratiques de Data Quality Rating.\"\n  } ]\n}",
+  "aiResult": {
+    "use_case": "consumer_comparison",
+    "geo_scope": "EU/France",
+    "vertical": "Fours",
+    "available_criterias": [
+      "OVEN_ENERGY_CONSUMPTION_CYCLE",
+      "WARRANTY",
+      "DATA_QUALITY",
+      "WEIGHT",
+      "CLASSE_ENERGY"
     ],
-    "assumptions": [
+    "positioning": {
+      "claim": "relative LCA-inspired score (ACV best-effort) for within-category comparison",
+      "not_an_absolute_footprint": true,
+      "what_it_means_for_users": "Score relatif pour comparer des fours entre eux (UE/France) sur des leviers surtout liés à l'énergie à l'usage, complété par durabilité (garantie) et transparence des données. Il s'aligne avec l'importance réglementaire accordée à la consommation d'énergie en phase d'utilisation et aux informations d'étiquetage énergie, sans constituer une empreinte ACV absolue auditée. [S1][S2]"
+    },
+    "reference_lifetime": {
+      "lifetime_years_reference": 12,
+      "lifetime_years_range": {
+        "min": 10,
+        "max": 15
+      },
+      "rationale": "Faute de valeur 'four domestique' explicitement harmonisée et publiquement accessible dans les sources consultées ici, on retient une durée de vie de référence de 12 ans (plage 10–15 ans) cohérente avec les ordres de grandeur observés pour les gros appareils ménagers en Europe (catégorie la plus proche en termes de robustesse et d'usage), et avec l'objectif de comparaison grand public. Cette hypothèse sert à pondérer l'importance de la durabilité (WARRANTY) sans prétendre fixer une durée normative unique pour tous les fours. [S3]",
+      "citations": [
+        "S3"
+      ]
+    },
+    "gap_analysis_absolute_vs_relative": {
+      "what_is_missing_vs_full_lca": "Une ACV complète (ISO/PEF) exige un inventaire détaillé (BOM/matières, procédés, transport, scénarios d'usage, mix électrique, maintenance/réparation, fin de vie), des frontières système explicites, une unité fonctionnelle (p.ex. ''cuire X repas' sur la durée de vie), des règles d'allocation, et une LCIA multi-impacts complète. Le score relatif ici n'embarque qu'un sous-ensemble de proxys (énergie par cycle, classe énergie, masse, garantie, qualité de données) et ne modélise pas explicitement l'ensemble des flux et scénarios. [S4][S5]",
+      "why_relative_is_still_useful": "Pour une comparaison grand public au sein d'une même catégorie (fours), un score relatif améliore la lisibilité, limite les biais d'hypothèses absolues (mix électrique, profils d'usage) et se focalise sur les paramètres les plus discriminants et reconnus (énergie à l'usage, information d'étiquette). Il reste pertinent car l'énergie à l'usage est identifiée comme l'aspect environnemental principal pour ces produits dans le cadre ecodesign, ce qui rend un classement relatif sur l'énergie particulièrement informatif. [S1][S2][S4]",
+      "mitigations": [
+        "Anchor weights on high-level EU evidence that use-phase energy is the most significant environmental aspect for domestic ovens/hobs/range hoods, and keep the 'energy block' dominant. [S1]",
+        "Avoid double counting between OVEN_ENERGY_CONSUMPTION_CYCLE and CLASSE_ENERGY by splitting a single energy materiality block into two complementary signals (continuous vs categorical) rather than adding them as independent full-weight drivers. [S2]",
+        "Raise DATA_QUALITY because missing data is imputed to mean (virtualization); rewarding better documentation reduces the incentive to omit data and aligns with EF/PEF data quality practices (DQR concept), while guardrails keep material impacts (energy/durability) dominant. [S5][S4]"
+      ]
+    },
+    "weighting_method": {
+      "approach": "evidence-weighted materiality + redundancy control + consumer comparability",
+      "key_principles": [
+        "literature-first weighting (EU ecodesign/label + EF guidance as primary anchors)",
+        "lifecycle materiality for Fours: prioritize use-phase energy",
+        "anti double-counting: treat energy class and per-cycle consumption as one correlated block",
+        "robustness to outliers via capped normalization (sigma scoring) and discrete bucket handling (percentile fallback for categorical/low-entropy criteria)",
+        "missing data virtualization to mean + DATA_QUALITY incentive aligned with EF data quality rating practices",
+        "durability proxy via WARRANTY to reflect lifetime extension and reduced replacement frequency"
+      ],
+      "assumptions": [
+        {
+          "assumption": "L'énergie en phase d'utilisation est le poste environnemental dominant et le plus actionnable pour différencier des fours domestiques, donc la somme des poids liés à l'énergie doit rester majoritaire.",
+          "why_it_matters": "Cela réduit le risque qu'un produit énergivore obtienne un bon score grâce à des critères secondaires (masse, données, garantie), cohérent avec la hiérarchisation réglementaire ecodesign. [S1]",
+          "citations": [
+            "S1"
+          ]
+        },
+        {
+          "assumption": "La garantie (WARRANTY) est un proxy imparfait mais utile de durabilité/maintenabilité perçue et de réduction potentielle du remplacement, pertinent en comparaison grand public.",
+          "why_it_matters": "Les comportements de remplacement vs réparation influencent directement la durée d'usage; intégrer WARRANTY permet de valoriser des produits plus susceptibles d'être conservés plus longtemps. [S3]",
+          "citations": [
+            "S3"
+          ]
+        },
+        {
+          "assumption": "CLASSE_ENERGY et OVEN_ENERGY_CONSUMPTION_CYCLE sont corrélés mais apportent deux signaux complémentaires (classe = bucket réglementaire lisible; conso/cycle = mesure continue).",
+          "why_it_matters": "La répartition des poids entre les deux limite le double comptage tout en améliorant la robustesse quand les distributions sont discrètes (classes) ou bruitées (mesures/valeurs déclarées). [S2]",
+          "citations": [
+            "S2"
+          ]
+        },
+        {
+          "assumption": "Un poids DATA_QUALITY élevé est justifié car la virtualisation des valeurs manquantes à la moyenne favorise sinon les produits peu documentés; DATA_QUALITY doit donc contrebalancer cet effet sans dépasser le bloc énergie.",
+          "why_it_matters": "Cela incite à fournir des données complètes et améliore la fiabilité du classement, en cohérence avec les pratiques EF (DQR et exigences de documentation). [S5][S4]",
+          "citations": [
+            "S5",
+            "S4"
+          ]
+        }
+      ]
+    },
+    "criteria_weights": [
       {
-        "assumption": "Une garantie plus longue implique une durée de vie réelle plus longue du produit (fiabilité accrue).",
-        "why_it_matters": "Si un four est utilisé 15 ans au lieu de 8 ans, l’impact de sa fabrication est amorti sur une période plus longue, réduisant son impact annuel:contentReference[oaicite:6]{index=6}. Nous supposons donc qu’une garantie élevée reflète un produit plus durable, ce qui est bénéfique pour l’environnement.",
-        "citations": ["S6"]
+        "criterion": "OVEN_ENERGY_CONSUMPTION_CYCLE",
+        "weight": 0.35,
+        "directionality": "lower_is_better",
+        "impact_dimensions": [
+          "climate",
+          "resource_use",
+          "other"
+        ],
+        "rationale": "Mesure directe de l'énergie consommée pour un cycle standard: proxy le plus proche de l'impact en phase d'usage. La réglementation ecodesign identifie l'énergie en phase d'utilisation comme l'aspect environnemental le plus significatif pour ces appareils; ce critère porte donc la plus grande part du score. [S1][S2]",
+        "overlap_notes": "Fortement corrélé à CLASSE_ENERGY (classe construite à partir d'indicateurs d'efficacité/consommation). Stratégie: regrouper en un 'bloc énergie' majoritaire (0.55 au total) et répartir entre signal continu (conso/cycle) et signal discret (classe) pour limiter le double comptage. [S2]",
+        "guardrails": "Le bloc énergie (OVEN_ENERGY_CONSUMPTION_CYCLE + CLASSE_ENERGY) reste > 50% pour éviter qu'un four très énergivore soit compensé par WARRANTY ou DATA_QUALITY. [S1]",
+        "evidence_strength": {
+          "level": "high",
+          "why": "Ancrage direct dans la réglementation ecodesign qui qualifie l'énergie à l'usage comme aspect environnemental principal; méthodes et définitions d'information énergie encadrées. [S1][S2]"
+        }
+      },
+      {
+        "criterion": "CLASSE_ENERGY",
+        "weight": 0.2,
+        "directionality": "categorical",
+        "impact_dimensions": [
+          "climate",
+          "resource_use",
+          "other"
+        ],
+        "rationale": "Signal grand public normalisé et comparable: la classe énergétique d'étiquette fournit un repère synthétique (bucket) pour la performance énergétique, utile quand les valeurs détaillées sont absentes ou hétérogènes. [S2]",
+        "overlap_notes": "Redondant en partie avec OVEN_ENERGY_CONSUMPTION_CYCLE. Stratégie anti-double comptage: poids plus faible que la conso/cycle, utilisé comme stabilisateur de classement (critère discret) et comme garde-fou de cohérence réglementaire. [S2]",
+        "guardrails": "Ne pas laisser la classe seule piloter le score: elle ne pèse que 0.20 et reste couplée au critère continu (0.35) pour éviter les effets de seuil entre classes. [S2]",
+        "evidence_strength": {
+          "level": "high",
+          "why": "Critère défini par un règlement d'étiquetage énergie harmonisé au niveau UE, conçu pour la comparabilité entre produits. [S2]"
+        }
+      },
+      {
+        "criterion": "WARRANTY",
+        "weight": 0.2,
+        "directionality": "higher_is_better",
+        "impact_dimensions": [
+          "circularity",
+          "resource_use",
+          "climate",
+          "social"
+        ],
+        "rationale": "Proxy de durabilité: une garantie plus longue est interprétée comme un signal (imparfait) de fiabilité, d'engagement fabricant et de probabilité de réparation plutôt que remplacement, ce qui peut réduire l'impact 'fabrication + fin de vie' rapporté au service rendu. Le contexte européen montre que le remplacement est souvent préféré à la réparation pour les appareils ménagers; valoriser la garantie vise à inverser cette tendance. [S3]",
+        "overlap_notes": "Peu corrélé aux métriques énergie, donc complémentaire. Risque de corrélation indirecte avec le positionnement prix/qualité: limité par le maintien d'un bloc énergie majoritaire. [S1]",
+        "guardrails": "WARRANTY ne peut pas compenser une très mauvaise performance énergétique car le bloc énergie reste majoritaire (0.55). En cas de score énergie très faible (pire décile), recommander un plafonnement interne de contribution WARRANTY (règle métier optionnelle) lors de l'interprétation. [S1]",
+        "evidence_strength": {
+          "level": "medium",
+          "why": "Source institutionnelle sur tendances de durée de vie et motifs de remplacement/réparation; lien 'garantie -> allongement de vie' reste un proxy comportemental. [S3]"
+        }
+      },
+      {
+        "criterion": "WEIGHT",
+        "weight": 0.1,
+        "directionality": "lower_is_better",
+        "impact_dimensions": [
+          "resource_use",
+          "climate",
+          "other"
+        ],
+        "rationale": "Proxy 'matières + fabrication + transport': à défaut d'inventaire matière, la masse reflète partiellement l'intensité matérielle (métaux, verre, isolants) et peut influencer les impacts amont. Le cadre EF rappelle que les impacts couvrent extraction/production jusqu'à fin de vie; WEIGHT sert ici de signal simplifié pour cette composante non couverte par les critères énergie. [S4]",
+        "overlap_notes": "Corrélation possible avec taille/capacité et donc consommation: pour éviter un double signal énergie via la taille, le poids reste limité (0.10) et ne doit pas être interprété comme performance énergétique. [S1]",
+        "guardrails": "WEIGHT est volontairement plafonné (0.10) pour éviter qu'un four plus léger mais énergivore soit favorisé; l'énergie à l'usage domine le score. [S1]",
+        "evidence_strength": {
+          "level": "low",
+          "why": "WEIGHT est un proxy simplifié et non une catégorie d'impact mesurée; il n'est justifié ici que comme approximation de matérialité dans un score relatif grand public. [S4]"
+        }
+      },
+      {
+        "criterion": "DATA_QUALITY",
+        "weight": 0.15,
+        "directionality": "higher_is_better",
+        "impact_dimensions": [
+          "other",
+          "social"
+        ],
+        "rationale": "Incitation à la transparence et réduction du biais d'imputation: comme les critères manquants sont virtualisés à la moyenne, un produit peu documenté pourrait artificiellement éviter les pénalités; DATA_QUALITY compense ce risque. Le cadre EF formalise des exigences de documentation et une logique de Data Quality Rating (représentativité techno/géo/temps et précision), ce qui justifie de valoriser les produits mieux documentés. [S5][S4]",
+        "overlap_notes": "Critère orthogonal aux impacts physiques: il n'ajoute pas un impact environnemental direct mais améliore la fiabilité du classement relatif et la comparabilité, ce qui est critique en présence d'imputation à la moyenne. [S5]",
+        "guardrails": "Poids borné à 0.15 et inférieur au bloc énergie (0.55): DATA_QUALITY ne doit pas sauver un produit très énergivore. En pratique, conserver une règle de lecture: un mauvais score énergie doit rester pénalisant même si DATA_QUALITY est excellent. [S1][S5]",
+        "evidence_strength": {
+          "level": "high",
+          "why": "La méthodologie EF documente explicitement la logique de DQR et les critères (représentativité et précision), ce qui soutient un signal de qualité des données dans un cadre LCA-inspired. [S5][S4]"
+        }
+      }
+    ],
+    "normalization_notes": {
+      "relative_ranking_0_100": "Chaque critère est transformé en classement relatif (0–100) au sein du marché observé, ce qui est cohérent avec une logique 'comparaison' (à la manière d'un affichage harmonisé orienté consommateur) plutôt qu'une revendication d'empreinte absolue. Attention: le score dépend du panel (effet marché). [S2][S1]",
+      "sigma_scoring_0_5": "Avant agrégation, la normalisation 0–5 avec cap sur les extrêmes (type μ±2σ) vise à limiter l'influence d'outliers et à stabiliser le classement; cela complète l'approche réglementaire qui prévoit aussi des benchmarks/valeurs de référence de performance. [S1]",
+      "percentile_fallback": "Utilisé lorsque la distribution est à faible entropie ou discrète (ex: classes énergie), pour éviter des effets de seuil et conserver une discrimination régulière entre produits proches. [S2]",
+      "missing_value_virtualization": "Si une valeur est absente, elle est imputée à la moyenne du marché; cela réduit la pénalité immédiate de l'absence de données. DATA_QUALITY est donc pondéré pour récompenser la complétude et l'alignement avec des pratiques structurées de qualité des données (DQR), afin d'éviter un avantage aux produits peu documentés. [S5]"
+    },
+    "quality_checks": {
+      "criteria_weights_complete": true,
+      "weights_sum_to_1": true,
+      "sum_value": 1,
+      "renormalization_rule_if_needed": "Si un critère devait être mis à 0 pour redondance avérée, redistribuer proportionnellement son poids sur les autres critères (en conservant le bloc énergie majoritaire) afin que la somme reste égale à 1.0."
+    },
+    "materiality_summary": {
+      "dominant_lifecycle_stages_for_vertical": [
+        "use_phase",
+        "manufacturing",
+        "distribution",
+        "end_of_life"
+      ],
+      "short_summary": "Pour les fours domestiques, l'énergie en phase d'utilisation est identifiée comme l'aspect environnemental le plus significatif dans le cadre ecodesign, ce qui justifie un bloc énergie majoritaire (0.55) centré sur la consommation par cycle et la classe énergétique. La fabrication/fin de vie restent pertinentes mais moins discriminantes dans ce score relatif faute d'inventaire complet; elles sont approchées via WEIGHT (proxy matière) et surtout via WARRANTY (proxy d'allongement de durée d'usage, réduisant le besoin de remplacement). DATA_QUALITY est rehaussé pour contrer le biais d'imputation à la moyenne et encourager la transparence, en cohérence avec les pratiques EF de qualité des données. [S1][S3][S5]"
+    },
+    "sources": [
+      {
+        "id": "S1",
+        "type": "regulation",
+        "title": "Commission Regulation (EU) No 66/2014 of 14 January 2014 implementing Directive 2009/125/EC with regard to ecodesign requirements for domestic ovens, hobs and range hoods",
+        "authors_or_org": "European Commission",
+        "year": 2014,
+        "publisher": "Official Journal of the European Union (EUR-Lex)",
+        "url": "[https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF](https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF)",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "energy materiality",
+          "guardrails for energy dominance",
+          "positioning (within-category relevance)"
+        ],
+        "notes": "Le règlement indique que la consommation d'énergie en phase d'utilisation est l'aspect environnemental le plus significatif pour les produits couverts."
+      },
+      {
+        "id": "S2",
+        "type": "regulation",
+        "title": "Commission Delegated Regulation (EU) No 65/2014 of 1 October 2013 supplementing Directive 2010/30/EU with regard to the energy labelling of domestic ovens and range hoods (consolidated version)",
+        "authors_or_org": "European Commission",
+        "year": 2014,
+        "publisher": "Official Journal of the European Union (EUR-Lex)",
+        "url": "[https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng](https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng)",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "energy class definition and consumer comparability",
+          "anti-double-counting notes between class and consumption"
+        ],
+        "notes": "Cadre UE harmonisé d'étiquetage énergie, support de comparabilité grand public (classe énergétique)."
+      },
+      {
+        "id": "S3",
+        "type": "public_agency",
+        "title": "Product lifespans — monitoring trends in Europe",
+        "authors_or_org": "European Environment Agency (EEA)",
+        "year": 2024,
+        "publisher": "EEA",
+        "url": "[https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends](https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends)",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "lifetime reference proxy (large household appliances)",
+          "durability/repair vs replacement context"
+        ],
+        "notes": "Fournit des tendances de durées de vie moyennes par grandes catégories d'appareils ménagers et des motifs de remplacement."
+      },
+      {
+        "id": "S4",
+        "type": "public_agency",
+        "title": "Environmental Footprint (PEF/OEF) overview",
+        "authors_or_org": "European Commission Joint Research Centre (JRC) - European Platform on Life Cycle Assessment",
+        "year": 2021,
+        "publisher": "European Commission (JRC)",
+        "url": "[https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html](https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html)",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "LCA-inspired framing (life-cycle scope)",
+          "gap analysis context (what full EF/PEF would require)"
+        ],
+        "notes": "Page institutionnelle décrivant PEF/OEF comme méthodes ACV recommandées par l'UE et leur portée cycle de vie."
+      },
+      {
+        "id": "S5",
+        "type": "public_agency",
+        "title": "Guide for EF compliant data sets (Version 2.0)",
+        "authors_or_org": "Fazio S., Zampori L., De Schryver A., Kusche O., Thellier L., Diaconu E. (JRC)",
+        "year": 2020,
+        "publisher": "Publications Office of the European Union",
+        "url": "[https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf](https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf)",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "DATA_QUALITY rationale (DQR concept and criteria)",
+          "missing data / documentation incentives"
+        ],
+        "notes": "Documente le Data Quality Rating (DQR) et ses critères (représentativité techno/géo/temps, précision) dans le cadre EF."
+      }
+    ],
+    "search_log": [
+      {
+        "query": "Commission Regulation (EU) No 65/2014 energy labelling ovens range hoods",
+        "date": "2026-03-01",
+        "notes": "Identifier la base réglementaire UE de la classe énergétique et des informations d'étiquetage pour les fours."
+      },
+      {
+        "query": "Commission Regulation (EU) No 66/2014 ecodesign requirements domestic ovens hobs grills",
+        "date": "2026-03-01",
+        "notes": "Ancrer la matérialité environnementale (importance de l'énergie à l'usage) et le cadre ecodesign applicable."
+      },
+      {
+        "query": "preparatory study ecodesign Lot domestic ovens hobs grills life cycle assessment use phase energy dominates",
+        "date": "2026-03-01",
+        "notes": "Rechercher des éléments ACV/études préparatoires sur la contribution des phases du cycle de vie (usage vs fabrication)."
+      },
+      {
+        "query": "average lifetime domestic oven years Europe study",
+        "date": "2026-03-01",
+        "notes": "Établir une durée de vie de référence UE/France (ou proxy institutionnel) pour paramétrer la pondération durabilité."
+      },
+      {
+        "query": "European Commission Environmental Footprint method data quality requirements rating",
+        "date": "2026-03-01",
+        "notes": "Fonder le critère DATA_QUALITY sur une méthodologie reconnue (EF/PEF) et ses pratiques de Data Quality Rating."
       }
     ]
-  },
-  "criteria_weights": [
-    {
-      "criterion": "CLASSE_ENERGY",
-      "weight": 0.35,
-      "directionality": "categorical",
-      "impact_dimensions": ["climate", "resource_use"],
-      "rationale": "La classe énergétique mesure l’efficacité du four pendant son utilisation. Un modèle mieux classé (ex : A) consomme moins d’électricité pour un même usage, ce qui réduit les émissions de CO₂ et la consommation de ressources énergétiques sur son cycle de vie d’utilisation:contentReference[oaicite:7]{index=7}. Comme la phase d’usage contribue significativement à l’impact climat d’un four (surtout avec un mix électrique carboné):contentReference[oaicite:8]{index=8}:contentReference[oaicite:9]{index=9}, ce critère est déterminant pour comparer l’empreinte carbone en utilisation.",
-      "overlap_notes": "Ce critère couvre l’impact lié à l’énergie consommée en usage, sans double-comptage avec d’autres critères. Il peut y avoir corrélation indirecte avec la taille du four (un grand four consomme plus) mais l’étiquette énergie standardise la mesure, limitant les biais. Aucune autre mesure de consommation n’est utilisée dans le score, évitant tout recouvrement.",
-      "guardrails": "La notation étant basée sur une échelle normalisée (A→G), les écarts extrêmes sont plafonnés par la méthode de scoring (ex : cap à 0 et 100) pour qu’un très mauvais appareil n’écrase pas les autres critères. Par ailleurs, un four très inefficace ne pourra pas compenser uniquement avec une bonne durabilité ou transparence, car l’énergie pèse le plus lourd.",
-      "evidence_strength": {
-        "level": "high",
-        "why": "De nombreuses études ACV confirment que l’énergie consommée à l’usage est un facteur majeur d’impact pour les fours:contentReference[oaicite:10]{index=10}:contentReference[oaicite:11]{index=11}. Par exemple, en Italie l’essentiel de la charge environnementale d’un four électrique provient de l’électricité utilisée (mix fossile):contentReference[oaicite:12]{index=12}. La confiance dans ce critère est élevée du fait de la convergence des données."
-      }
-    },
-    {
-      "criterion": "WEIGHT",
-      "weight": 0.30,
-      "directionality": "lower_is_better",
-      "impact_dimensions": ["climate", "resource_use", "toxicity"],
-      "rationale": "Le poids d’un four reflète la quantité de matériaux mobilisés (acier, aluminium, verre, composants électroniques…). Un four plus lourd nécessite plus de ressources et d’énergie à fabriquer, ce qui accroît les émissions de GES et autres impacts liés à l’extraction et à la transformation des matières:contentReference[oaicite:13]{index=13}. En France, la fabrication représente ainsi ~80 % de l’empreinte carbone totale d’un four électrique standard (≈218 kg CO₂e sur 273 kg):contentReference[oaicite:14]{index=14}, illustrant l’importance de l’étape matériaux/production.",
-      "overlap_notes": "Le critère poids capture l’empreinte environnementale de la phase de fabrication, non prise en compte par la classe énergie. Il peut être corrélé à la robustesse ou à la taille du four (un modèle plus solide ou volumineux étant plus lourd), mais la durabilité est traitée à part via la garantie. Ainsi, on évite de pénaliser deux fois un design durable : le poids couvre l’impact de fabrication initial, tandis que la garantie valorise la longévité.",
-      "guardrails": "Pour ne pas pénaliser indûment les fours de grande capacité, les scores sont établis relativement entre produits de format comparable. Les valeurs extrêmes de poids sont lissées par la normalisation statistique (méthode sigma), évitant qu’un four exceptionnellement lourd ou léger ne domine outrageusement le score global.",
-      "evidence_strength": {
-        "level": "high",
-        "why": "Les données ACV montrent de façon cohérente que la phase de production (corrélée au poids et aux matériaux) pèse lourd dans le bilan environnemental:contentReference[oaicite:15]{index=15}:contentReference[oaicite:16]{index=16}. Des sources ADEME et études scientifiques soulignent l’impact majeur des matériaux (métaux, électronique) sur le changement climatique et d’autres catégories (épuisement des ressources, écotoxicité) lors de la fabrication d’un four."
-      }
-    },
-    {
-      "criterion": "WARRANTY",
-      "weight": 0.2,
-      "directionality": "higher_is_better",
-      "impact_dimensions": ["climate", "resource_use", "circularity"],
-      "rationale": "La durée de garantie est prise comme indicateur de la longévité potentielle du produit. Un four garanti plus longtemps a plus de chances d’être utilisé ou maintenu pendant une période étendue, ce qui répartit l’impact de sa fabrication sur un laps de temps plus long:contentReference[oaicite:17]{index=17}:contentReference[oaicite:18]{index=18}. En prolongeant la durée de vie d’un appareil, on réduit la fréquence de remplacement et donc l’épuisement de ressources et les déchets produits sur le long terme.",
-      "overlap_notes": "La garantie prolonge la perspective d’usage et agit en complément des autres critères. Elle n’est pas redondante avec la classe énergie (efficacité) ni avec le poids (fabrication initiale), mais vient moduler l’impact de la fabrication en cas de durée d’utilisation étendue. Un lien indirect existe avec le poids (un produit très robuste peut être plus lourd), mais en pondérant séparément la durabilité et la fabrication, on évite de double-compter et on permet aux produits lourds mais durables d’être en partie compensés par leur longue vie.",
-      "guardrails": "Nous avons limité le poids de la garantie à 20 % pour qu’un appareil très inefficace ne soit pas \"sauvé\" par une simple garantie longue. Les études montrent qu’un remplacement anticipé peut être écologiquement justifié si le nouvel appareil est beaucoup plus efficient (>20 % d’économie d’énergie):contentReference[oaicite:19]{index=19}. Ainsi, un four classé mauvais en énergie ne pourra pas compenser entièrement avec une garantie élevée, assurant que l’efficacité prime sur la seule promesse de durabilité.",
-      "evidence_strength": {
-        "level": "high",
-        "why": "L’importance de la durabilité est appuyée par des analyses institutionnelles (ADEME) et académiques. Elles montrent qu’allonger la durée d’usage d’un équipement réduit nettement ses impacts annuels, surtout pour les impacts dominés par la production:contentReference[oaicite:20]{index=20}. La corrélation entre fiabilité (garantie) et bénéfice environnemental est donc crédible, bien que dépendante des progrès d’efficacité du remplaçant éventuel."
-      }
-    },
-    {
-      "criterion": "DATA_QUALITY",
-      "weight": 0.15,
-      "directionality": "higher_is_better",
-      "impact_dimensions": ["social", "other"],
-      "rationale": "Ce critère valorise la transparence des informations environnementales du produit (données complètes, spécifiques, vérifiées). Un fabricant fournissant des données précises (ex : consommation réelle, composition) démontre un engagement et permet un calcul plus fiable du score. À l’inverse, l’absence de données implique d’utiliser des valeurs moyennes par défaut, ce qui risque de masquer des contre-performances:contentReference[oaicite:21]{index=21}. En attribuant un poids dédié à la qualité des données, on incite les marques à être transparentes (sinon leur produit n’obtient qu’un score moyen sur les critères manquants, plus une pénalité de transparence).",
-      "overlap_notes": "DATA_QUALITY n’a pas d’équivalent direct dans les impacts ACV et n’entre pas en collision avec les critères physiques. Cependant il interagit de manière transversale : en cas de donnée manquante sur un facteur (énergie, etc.), la moyenne est attribuée, et parallèlement le score de qualité de données du produit baisse. Ce mécanisme garantit qu’un produit ne tirera pas avantage d’une donnée cachée (score moyen seulement) et qu’il sera en outre pénalisé pour non-transparence, sans double-compter l’impact en lui-même.",
-      "guardrails": "Le poids de 15 % alloué à la transparence reste modéré pour éviter qu’un produit polluant ne compense ses impacts par la seule fourniture d’informations. Comme souligné par l’approche ESG, la transparence et la durabilité de la marque sont importantes:contentReference[oaicite:22]{index=22}, mais ici elles ne peuvent supplanter la performance énergie/matériaux. Ainsi, même un produit très bien documenté ne pourra dépasser un concurrent propre mais moins transparent. La pénalité par données manquantes (imputation moyenne + score DATA_QUALITY réduit) est calibrée pour être dissuasive sans dominer les autres critères.",
-      "evidence_strength": {
-        "level": "medium",
-        "why": "La prise en compte de la qualité des données repose sur une approche méthodologique plutôt que sur un impact direct. Elle est justifiée par le besoin de fiabilité et d’éthique dans l’évaluation environnementale. Les initiatives publiques d’affichage imposent d’ailleurs des pénalités par défaut en cas de données non fournies:contentReference[oaicite:23]{index=23}. L’intégration de DATA_QUALITY s’aligne sur ces pratiques, mais son lien indirect avec les impacts concrets justifie un niveau de preuve moyen."
-      }
-    }
-  ],
-  "normalization_notes": {
-    "relative_ranking_0_100": "Chaque critère est converti en score relatif de 0 à 100 en fonction du classement des produits sur ce critère (meilleur = 100, pire = 0). Cette échelle relative garantit qu’il y a toujours une différenciation maximale entre produits, même si les écarts absolus sont faibles. Pour l’utilisateur, cela signifie qu’un score élevé indique un produit en tête de sa catégorie sur l’aspect considéré, sans pour autant quantifier l’impact réel en valeur absolue.",
-    "sigma_scoring_0_5": "Les attributs bruts sont normalisés de 0 à 5 par une méthode statistique sigma. On fixe 2,5/5 au niveau de la moyenne des produits, et on attribue 0 et 5 respectivement aux performances situées à ~2 écarts-types en-dessous ou au-dessus de la moyenne (avec plafonnement). Ce procédé réduit l’influence des valeurs aberrantes (outliers) et évite qu’un critère à forte dispersion ne domine ou n’écrase le score global. Il assure également une certaine stabilité : la plupart des produits \"moyens\" obtiennent autour de 2,5/5, ce qui rend les différences vraiment marquantes seulement pour les produits nettement supérieurs ou inférieurs à la moyenne.",
-    "percentile_fallback": "Si la distribution d’un critère est trop resserrée ou peu entropique (par ex. si presque tous les produits ont des valeurs similaires), on utilise un classement par paliers percentiles. Concrètement, on peut assigner des scores par quartiles ou déciles afin de maintenir une différenciation. Ce fallback évite qu’un critère où tout le monde est semblable n’attribue qu’un score ~2,5/5 à tous les produits. À la place, même de faibles différences se traduisent par des écarts de score, ce qui reflète un avantage compétitif pour les meilleurs et une marge de progrès pour les moins bien placés, malgré une faible variance initiale.",
-    "missing_value_virtualization": "Lorsqu’une donnée produit est manquante, la valeur moyenne du marché est imputée pour ce critère. Ainsi, le produit n’est ni sur-avantagé ni sur-pénalisé initialement : il obtient un score moyen par défaut sur ce point. Cependant, combiné avec le critère DATA_QUALITY, cela crée un malus global : le produit ne dépassera pas la moyenne sur le critère en question et perd des points de transparence. Cette approche est cohérente avec les pratiques recommandées (ex. utilisation de valeurs par défaut pénalisantes en affichage environnemental):contentReference[oaicite:24]{index=24}. Elle vise à encourager les fabricants à fournir leurs données réelles, sous peine d’avoir un score médiocre dû à l’imputation et à la pénalité de qualité des données."
-  },
-  "quality_checks": {
-    "criteria_weights_complete": true,
-    "weights_sum_to_1": true,
-    "sum_value": 1.0,
-    "unused_or_zero_weight_criterias": [],
-    "renormalization_rule_if_needed": "Si un ou plusieurs critères étaient exclus (poids 0), les poids des critères restants seraient rééchelonnés proportionnellement de sorte à conserver une somme de 1."
-  },
-  "materiality_summary": {
-    "dominant_lifecycle_stages_for_vertical": ["manufacturing", "use_phase"],
-    "short_summary": "Pour les fours domestiques, les phases de fabrication et d’utilisation sont prédominantes dans le bilan environnemental. La production mobilise des métaux, du verre et de l’énergie, ce qui génère une forte empreinte carbone en amont (jusqu’à ~80 % des émissions totales dans un contexte électrique bas-carbone):contentReference[oaicite:25]{index=25}. L’usage électrique du four contribue également significativement – surtout avec un mix électrique carboné – car il s’agit d’un des appareils les plus énergivores du foyer (plusieurs centaines de kWh par an):contentReference[oaicite:26]{index=26}:contentReference[oaicite:27]{index=27}. En comparaison, la distribution (transport) et la fin de vie jouent un rôle moindre (recyclage utile mais compensant partiellement la fabrication):contentReference[oaicite:28]{index=28}. Nos pondérations reflètent donc cette matérialité : l’efficacité énergétique et l’impact matériaux ont les poids les plus élevés, tout en intégrant la durabilité (garantie) pour tenir compte de l’allongement de la vie du produit:contentReference[oaicite:29]{index=29}."
-  },
-  "sources": [
-    {
-      "id": "S1",
-      "type": "other",
-      "title": "Quelle est la durée de vie de vos appareils électroménagers ?",
-      "authors_or_org": "Promotelec (données GIFAM)",
-      "year": 2024,
-      "publisher": "Promotelec.com",
-      "url": "https://www.promotelec.com/particuliers/fiche/quelle-est-la-duree-de-vie-de-vos-appareils-electromenagers/",
-      "accessed_date": "2026-02-04",
-      "reliability": "medium",
-      "used": true,
-      "used_for": ["lifetime reference (four 13 ans)"],
-      "notes": "Article citant le baromètre GIFAM 2021-2019 : la durée de vie moyenne d’un four en France est passée de ~15 à 13 ans. Base pour la durée de référence."
-    },
-    {
-      "id": "S2",
-      "type": "peer_reviewed",
-      "title": "Comparative life cycle assessment of electric and gas ovens in the Italian context: An environmental and technical evaluation",
-      "authors_or_org": "Landi D. et al.",
-      "year": 2019,
-      "publisher": "Journal of Cleaner Production (Elsevier)",
-      "url": "https://doi.org/10.1016/j.jclepro.2019.02.196",
-      "accessed_date": "2026-02-04",
-      "reliability": "high",
-      "used": true,
-      "used_for": ["energy use-phase materiality", "relative comparison usefulness"],
-      "notes": "Étude ACV comparative four électrique vs gaz (10 ans d’usage, Italie). Montre que l’électricité (usage) domine l’impact climatique du four électrique (mix fossile), justifiant le poids de l’énergie. Souligne l’intérêt d’une comparaison pour guider les choix."
-    },
-    {
-      "id": "S3",
-      "type": "peer_reviewed",
-      "title": "LCA analysis of a freestanding cooker: environmental assessment and comparison with other cooking appliances (Proc. CIRP 2024)",
-      "authors_or_org": "Brahem S. et al.",
-      "year": 2024,
-      "publisher": "Procedia CIRP (Elsevier)",
-      "url": "https://doi.org/10.1016/j.procir.2024.02.025",
-      "accessed_date": "2026-02-04",
-      "reliability": "high",
-      "used": true,
-      "used_for": ["use-phase vs manufacturing impacts", "energy & materials rationale"],
-      "notes": "Analyse ACV d’une cuisinière (four + plaques) aux USA. Montre que l’usage (consommation électrique) est l’aspect critique en impact, surtout avec un mix carboné, et que certains matériaux (cartes électroniques, acier) dominent l’impact fabrication."
-    },
-    {
-      "id": "S4",
-      "type": "public_agency",
-      "title": "Four électrique – Détail de l’impact carbone (Base Empreinte ADEME)",
-      "authors_or_org": "ADEME (ImpactCO2.fr)",
-      "year": 2023,
-      "publisher": "ADEME / Impact CO₂",
-      "url": "https://impactco2.fr/outils/electromenager/fourelectrique",
-      "accessed_date": "2026-02-04",
-      "reliability": "high",
-      "used": true,
-      "used_for": ["manufacturing vs use phase breakdown", "weight criterion evidence"],
-      "notes": "Estimation ADEME de l’empreinte carbone d’un four électrique sur 12 ans (~273 kgCO₂e). Données: ~80% fabrication (matières, prod., transport) vs 20% usage+fin de vie. Sert de base chiffrée pour pondérer poids vs énergie."
-    },
-    {
-      "id": "S5",
-      "type": "industry_methodology",
-      "title": "Référentiel LONGTIME v2 – Four électrique (extrait)",
-      "authors_or_org": "Longtime (Ethikis)",
-      "year": 2023,
-      "publisher": "longtimelabel.com",
-      "url": "https://longtimelabel.com/wp-content/uploads/2023/06/LONGTIME_Referentiel_Four-electrique_fr.pdf",
-      "accessed_date": "2026-02-04",
-      "reliability": "medium",
-      "used": true,
-      "used_for": ["durability rationale", "warranty guardrail"],
-      "notes": "Référentiel d’un label de durabilité pour fours. Indique qu’allonger la durée de vie réduit les impacts des catégories dominées par la production, et que remplacer un four avant 10 ans n’est écologiquement rentable que si le nouveau est beaucoup plus efficient (≥20%)."
-    },
-    {
-      "id": "S6",
-      "type": "other",
-      "title": "L’impact environnemental d’un four (article de blog)",
-      "authors_or_org": "Nudger.fr",
-      "year": 2026,
-      "publisher": "Nudger",
-      "url": "https://nudger.fr/blog/l-impact-environnemental-d-un-four",
-      "accessed_date": "2026-02-04",
-      "reliability": "medium",
-      "used": true,
-      "used_for": ["materiality summary", "data quality rationale"],
-      "notes": "Article pédagogique (plateforme Nudger) synthétisant les postes d’impact d’un four. Confirme que fabrication et usage sont les principaux contributeurs, donne des chiffres (consommation kWh, 273 kgCO₂e dont majorité fabrication) et insiste sur la durabilité (15 vs 8 ans) et la transparence/ESG du fabricant."
-    },
-    {
-      "id": "S7",
-      "type": "public_agency",
-      "title": "Méthode et données – Affichage environnemental (secteur textile, ADEME)",
-      "authors_or_org": "ADEME / Ministère Transition Écologique",
-      "year": 2022,
-      "publisher": "affichage-environnemental.ademe.fr",
-      "url": "https://affichage-environnemental.ademe.fr/node/38",
-      "accessed_date": "2026-02-04",
-      "reliability": "high",
-      "used": true,
-      "used_for": ["missing data approach", "positioning rationale"],
-      "notes": "Page officielle expliquant la méthodologie d’affichage environnemental. Mentionne que sans données déclarées, des valeurs par défaut pénalisantes sont appliquées. Illustre la logique de ne pas avantager les produits non transparents."
-    },
-    {
-      "id": "S8",
-      "type": "other",
-      "title": "Written contributions – Ecodesign requirements for cooking appliances (R2R Europe)",
-      "authors_or_org": "Right to Repair Europe",
-      "year": 2024,
-      "publisher": "repair.eu",
-      "url": "https://repair.eu/wp-content/uploads/2024/04/Written-contributions-Ecodesign-for-cooking-appliances-R2R-HOP-Ifixit-EEB.pdf",
-      "accessed_date": "2026-02-04",
-      "reliability": "medium",
-      "used": false,
-      "used_for": ["market lifespan trend insight"],
-      "notes": "Contribution d’ONG sur l’écoconception des appareils de cuisson. Données Fnac-Darty montrant une baisse récente de la durée de vie moyenne (≈11 ans en 2022, 9 ans en 2023) pour ces appareils, soulevant l’importance de garantir les pièces sur au moins 10 ans."
-    },
-    {
-      "id": "S9",
-      "type": "peer_reviewed",
-      "title": "Life Cycle Assessment for Stoves and Ovens",
-      "authors_or_org": "N. Jungbluth",
-      "year": 1997,
-      "publisher": "ETH Zurich (Working Paper UNS)",
-      "url": "https://esu-services.ch/fileadmin/download/jungbluth-1997-WP16-LCA-cooking.pdf",
-      "accessed_date": "2026-02-04",
-      "reliability": "medium",
-      "used": false,
-      "used_for": ["historical LCA reference"],
-      "notes": "Étude ACV comparative (datée) de différentes options de cuisson (bois, gaz, élec, etc.) en Suisse. Utile en arrière-plan mais données obsolètes."
-    },
-    {
-      "id": "S10",
-      "type": "peer_reviewed",
-      "title": "Sustainable manufacturing of consumer appliances: Reducing life cycle environmental impacts and costs of domestic ovens",
-      "authors_or_org": "Amienyo D. et al.",
-      "year": 2016,
-      "publisher": "Sustainable Production and Consumption (Elsevier)",
-      "url": "https://doi.org/10.1016/j.spc.2015.12.004",
-      "accessed_date": "2026-02-04",
-      "reliability": "high",
-      "used": false,
-      "used_for": ["energy efficiency improvement context"],
-      "notes": "Article sur un four domestique innovant à haute efficacité (HEO). Montre qu’améliorer l’efficacité réduit nettement les impacts (jusqu’à -62%). Contexte confirmant l’importance du critère énergie, mais pas cité directement."
-    }
-  ],
-  "search_log": [
-    {
-      "query": "life cycle analysis oven manufacturing use energy",
-      "date": "2026-02-04",
-      "notes": "Recherché des études ACV sur les fours pour identifier les contributions relatives de la fabrication et de l’usage."
-    },
-    {
-      "query": "durée de vie moyenne four électrique",
-      "date": "2026-02-04",
-      "notes": "Cherché des sources (France/UE) sur la durée d’usage typique des fours (données fabricants, agences)."
-    },
-    {
-      "query": "EU Ecodesign domestic oven lifetime assumption",
-      "date": "2026-02-04",
-      "notes": "Vérifier s’il existe une valeur standardisée au niveau européen pour la durée de vie des fours (exigences Ecoconception)."
-    },
-    {
-      "query": "allonger durée de vie impact environnemental four électrique",
-      "date": "2026-02-04",
-      "notes": "Recherché des études ou infographies (ADEME, labels) quantifiant les gains environnementaux d’une durée de vie prolongée du four."
-    },
-    {
-      "query": "affichage environnemental transparence données fabricant",
-      "date": "2026-02-04",
-      "notes": "Cherché des références sur la prise en compte de la qualité des données ou la pénalisation des données manquantes dans les méthodes d’affichage environnemental."
-    }
-  ]
+  }
 }

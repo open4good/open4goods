@@ -60,7 +60,11 @@ const { selectCategoryBySlug } = useCategories()
 const categorySlug = computed(() => String(route.params.categorySlug ?? ''))
 
 if (!categorySlug.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Category not found' })
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Category not found',
+    fatal: true,
+  })
 }
 
 const rawSlugParam = route.params.guideSlug
@@ -80,7 +84,11 @@ const slugPath = slugSegments.join('/')
 const normalisedSlug = normaliseSlug(slugPath)
 
 if (!normalisedSlug) {
-  throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Guide not found',
+    fatal: true,
+  })
 }
 
 let categoryDetail: VerticalConfigFullDto
@@ -93,6 +101,7 @@ try {
       statusCode: 404,
       statusMessage: 'Category not found',
       cause: error,
+      fatal: true,
     })
   }
 
@@ -101,6 +110,7 @@ try {
     statusCode: 500,
     statusMessage: 'Failed to load category',
     cause: error,
+    fatal: true,
   })
 }
 
@@ -110,13 +120,21 @@ const matchedPage =
   ) ?? null
 
 if (!matchedPage) {
-  throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Guide not found',
+    fatal: true,
+  })
 }
 
 const resolvedPageId = matchedPage.wikiUrl?.trim().replace(/^\/+/, '') ?? null
 
 if (!resolvedPageId) {
-  throw createError({ statusCode: 404, statusMessage: 'Guide not found' })
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Guide not found',
+    fatal: true,
+  })
 }
 
 pageId.value = resolvedPageId

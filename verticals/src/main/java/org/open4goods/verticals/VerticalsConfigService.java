@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.vertical.AttributeComparisonRule;
-import org.open4goods.model.ai.ImpactScoreAiResult;
+
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.AttributesConfig;
@@ -373,31 +373,45 @@ public class VerticalsConfigService {
 						String jsonBasename = filename.substring(0, filename.lastIndexOf('.'));
 						String yamlKey = jsonBasename;
 
-						ImpactScoreAiResult aiResult = serialisationService.fromJson(inputStream, ImpactScoreAiResult.class);
+						ImpactScoreConfig loadedJsonConfig = serialisationService.fromJson(inputStream, ImpactScoreConfig.class);
 
 						ImpactScoreConfig config = configs.get(yamlKey);
 						if (config == null) {
-							config = new ImpactScoreConfig();
+							config = loadedJsonConfig;
 							configs.put(yamlKey, config);
 							logger.info("Created new ImpactScoreConfig for '{}' from JSON '{}' (no YAML found).", yamlKey, filename);
 						} else {
 							logger.info("Updating existing ImpactScoreConfig for '{}' from JSON '{}'.", yamlKey, filename);
-						}
 
-						if (config.getAiResult() != null) {
-							logger.warn("ImpactScoreConfig for '{}' already has an aiResult loaded from YAML. It will be overwritten by the JSON file '{}'.", yamlKey, filename);
-						}
-
-						config.setAiResult(aiResult);
-
-						// Map weights from AI result to config
-						if (aiResult.getCriteriaWeights() != null) {
-							Map<String, Double> weights = new HashMap<>();
-							for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : aiResult.getCriteriaWeights()) {
-								weights.put(cw.criterion, cw.weight);
+							if (config.getAiResult() != null && loadedJsonConfig.getAiResult() != null) {
+								logger.warn("ImpactScoreConfig for '{}' already has an aiResult loaded from YAML. It will be overwritten by the JSON file '{}'.", yamlKey, filename);
 							}
-							config.setCriteriasPonderation(weights);
-							logger.debug("Mapped {} weights from JSON for {}", weights.size(), yamlKey);
+
+							if (loadedJsonConfig.getAiResult() != null) {
+								config.setAiResult(loadedJsonConfig.getAiResult());
+							}
+							if (loadedJsonConfig.getCriteriasPonderation() != null && !loadedJsonConfig.getCriteriasPonderation().isEmpty()) {
+								config.setCriteriasPonderation(loadedJsonConfig.getCriteriasPonderation());
+							}
+							if (loadedJsonConfig.getYamlPrompt() != null) {
+								config.setYamlPrompt(loadedJsonConfig.getYamlPrompt());
+							}
+							if (loadedJsonConfig.getAiJsonResponse() != null) {
+								config.setAiJsonResponse(loadedJsonConfig.getAiJsonResponse());
+							}
+						}
+
+						// Fallback: If AI result has weights but not explicitly saved in criteriasPonderation, map them.
+						// This helps support older or simpler configurations if applicable.
+						if (config.getCriteriasPonderation() == null || config.getCriteriasPonderation().isEmpty()) {
+							if (config.getAiResult() != null && config.getAiResult().getCriteriaWeights() != null) {
+								Map<String, Double> weights = new HashMap<>();
+								for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : config.getAiResult().getCriteriaWeights()) {
+									weights.put(cw.criterion, cw.weight);
+								}
+								config.setCriteriasPonderation(weights);
+								logger.debug("Mapped {} weights from JSON for {}", weights.size(), yamlKey);
+							}
 						}
 
 					} catch (Exception e) {

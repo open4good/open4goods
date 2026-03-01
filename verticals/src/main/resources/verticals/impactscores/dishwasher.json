@@ -1,0 +1,453 @@
+{
+  "criteriasPonderation": {
+    "WATER_CONSUMPTION": 0.16,
+    "ENERGY_CONSUMPTION_100_CYCLES": 0.34,
+    "POWER_CONSUMPTION_STANDBY": 0.01,
+    "WARRANTY": 0.1,
+    "NOISE_LEVEL": 0.05,
+    "DATA_QUALITY": 0.12,
+    "REPAIRABILITY_INDEX": 0.12,
+    "WEIGHT": 0.03,
+    "POWER_CONSUMPTION_OFF": 0.01,
+    "CLASSE_ENERGY": 0.06
+  },
+  "yamlPrompt": "---\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"Tu es un agent expert en évaluation environnementale des produits électriques et electroniques.\\nAdopte une démarche d’expert en analyse du cycle de vie des produits.\\nNous allons travailler sur des Lave-vaisselles\\nNe fournir en réponse que du JSON, conformément à la structure indiquée, sans commentaire, ni texte supplémentaire\\nMaximum 5 requêtes de recherche.\\nMaximum 8 sources citées au total.\\n\\n. En complément du schéma JSON, voici les instructions concernant chaque champs que tu dois fournir.\\nuseCase : Le cas d'usage (ex: consumer_comparison)\\ngeoScope : Le périmètre géographique (ex: EU/France)\\nvertical : Le nom de la verticale\\navailableCriterias : La liste des critères disponibles\\npositioning : Positionnement du score (relatif vs absolu)\\nreferenceLifetime : Durée de vie de référence du produit\\ngapAnalysis : Analyse des écarts entre ACV absolue et score relatif\\nweightingMethod : Méthodologie de pondération utilisée\\ncriteriaWeights : Liste des pondérations pour chaque critère\\nnormalizationNotes : Notes sur la normalisation des scores\\nqualityChecks : Vérifications de cohérence (somme des poids, exhaustivité)\\nmaterialitySummary : Synthèse de la matérialité environnementale\\nsources : Liste exhaustive des sources consultées\\nsearchLog : Journal des recherches effectuées\\n\"\nuserPrompt: \"\\n## Ton rôle\\n## Ton rôle\\nTu es un agent expert en analyse du cycle de vie (ACV) et en évaluation environnementale des produits électriques et électroniques, orienté “comparaison grand public” (UE/France).\\nTu as accès à une fonction de recherche web (search) : tu DOIS l’utiliser pour fonder tes décisions sur des sources de référence (normes, régulations, agences publiques, littérature académique, méthodologies reconnues).\\nNe JAMAIS inventer de source. Inclure uniquement des sources primaires validées et réellement utilisées.\\n\\nNous allons travailler sur des Lave-vaisselles.\\n\\nContrainte de sortie : Ne fournir en réponse QUE du JSON, conformément à la structure demandée, sans commentaire, ni texte supplémentaire.\\n\\n---\\n\\n## Contexte & objectif : Eco-score “comparaison grand public” pour les Lave-vaisselles\\n\\nTu vas définir une pondération (weights) pour construire un Eco-score destiné à comparer des Lave-vaisselles entre eux (marché UE/France).\\nCe score est un indice relatif “ACV best-effort” :\\n- Inspiré des principes ACV (matérialité sur le cycle de vie, catégories d’impact, unité fonctionnelle),\\n- MAIS il ne prétend pas fournir une empreinte absolue auditée type “bilan produit”.\\nTu dois explicitement analyser et documenter (dans le JSON) l’écart “ACV absolue vs score relatif”, et comment tes choix de pondération réduisent les biais.\\n\\nLes facteurs disponibles sont :\\n  WATER_CONSUMPTION : La consommation d&#39;eau par cycle de lavage\\n  ENERGY_CONSUMPTION_100_CYCLES : La consommation d&#39;énergie pour 100 cycles de lavage\\n  POWER_CONSUMPTION_STANDBY : La consommation électrique de l&#39;appareil en mode veille\\n  WARRANTY : Durée de garantie du produit\\n  NOISE_LEVEL : NOISE_LEVEL\\n  DATA_QUALITY : DATA_QUALITY\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  WEIGHT : Le poids de l&#39;objet\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY : La classe énergétique\\n\\n\\nTon travail : proposer des poids robustes, “literature-first”, anti-double-comptage, et adaptés à la comparaison grand public.\\n\\n---\\n\\n## Principes de fonctionnement (non négociables)\\n\\n1) Relativisation des facteurs (ranking)\\n- Chaque facteur est représenté de manière relative, sous forme de classement.\\n- Meilleur produit sur ce facteur : 100/100 ; pire : 0/100.\\n\\n2) Virtualisation des scores manquants\\n- Si un facteur est absent, appliquer la valeur moyenne de ce facteur sur l’ensemble des produits.\\n- DATA_QUALITY doit avantager la transparence (produits mieux documentés) sans écraser la matérialité environnementale.\\n\\n3) Somme des coefficients\\n- La somme des poids doit être égale à 1 (après renormalisation).\\n\\n4) Normalisation statistique des attributs bruts (méthodo interne)\\n- Les attributs bruts sont normalisés sur 0 à 5 avant agrégation :\\n  - Sigma scoring par défaut (μ, σ ; intervalle [μ-2σ, μ+2σ], μ -> 2.5/5, cap à 0 et 5)\\n  - Fallback percentile (mid-rank) si distribution “low entropy”\\n  - Min / max Fixed, ou sur les valeurs observées\\nTu ne codes pas l’algorithme, mais tu DOIS en tenir compte pour justifier la pondération (robustesse, sensibilité, outliers, buckets).\\n\\n---\\n\\n## Exigences “search & sources” (obligatoires)\\n\\nA) Priorité des sources (ordre)\\n1. Agences publiques / institutions (UE/France), documentation officielle, régulations\\n2. Normes et méthodes (ISO 14040/14044, PEF / JRC, guides d’affichage environnemental si pertinent)\\n3. Publications académiques (revues, méta-analyses, ACV comparatives par catégorie produit)\\n4. Méthodologies reconnues de scoring grand public (ex : docs publiques de systèmes d’éco-score) uniquement en complément, jamais comme base unique\\n\\nB) “Literature-first weighting”\\n- Les poids doivent refléter la matérialité ACV typique des Lave-vaisselles (fabrication vs usage vs fin de vie) et l’importance de la durée de vie.\\n\\nC) Sources exhaustives + citations inline\\n- Toute justification non triviale doit citer [S1], [S2]… inline dans les champs texte.\\n- Fournir \\\"search_log\\\" avec les requêtes.\\n\\nD) Durée de vie de référence (OBLIGATOIRE)\\n- Tu DOIS rechercher et proposer une durée de vie / durée d’usage de référence pour la catégorie Lave-vaisselles (UE/France si possible), avec sources.\\n- Si plusieurs valeurs existent, fournir une plage + une valeur “référence” et expliquer le choix.\\n\\n---\\n\\n## Contraintes de pondération (engineering)\\n\\n1) Anti double-comptage / redondances\\n- Identifier les critères fortement corrélés (ex : classe énergie vs conso ; tailles vs conso ; etc.).\\n- Expliquer la stratégie (regroupement “bloc énergie”, réduction de poids redondants, etc.).\\n- Tous les critères doivent avoir une pondération > 0. En cas de criteres correlé, veille a coreller la répartition dans la ponderation de ces critères \\n\\n2) DATA_QUALITY et ESG (volontairement rehaussés)\\n- Proposer un poids DATA_QUALITY plus élevé que dans une pondération purement “ACV classique”, MAIS :\\n  Le DATA-QUALITY est un score qui compnse le principe de virtualisation, attribuant des valeurs moyennes aux criteres absents, il doit donc être conséquent avant de ne pas avanteger les produits disposant de peu de données.\\n  - justifier ce choix : incitation à la transparence (vu l’imputation moyenne) + prise en compte sociétale,\\n  - poser des garde-fous : ces poids ne doivent pas permettre à un produit très énergivore d’être “sauvé” uniquement par ESG/DATA_QUALITY.\\n- Mentionner explicitement le lien avec l’imputation des données manquantes (moyenne) et l’effet attendu.\\n\\n3) Pertinence par vertical\\n- Tout critère peut être pondéré à 0 s’il est non pertinent ou redondant, mais tu DOIS l’expliquer.\\n\\n4) Renormalisation\\n- Définir une règle simple de renormalisation si certains critères ont un poids à 0.\\n\\n5) Echelle de valeur\\n - La somme des pondérations doit TOUJOURS être égal à 1, afin de refleter la part relative de chaque critère dans le score obtenu\\n\\n6) Présence de tous les criteres \\nTous les critères définis dans availableImpactScoreCriterias: doivent être évalués et participer à la configuration de sortie. Si ils ne sont pas pertinents, coefficienter à 0. \\n---\\n\\n## Format JSON attendu (STRICT)\\n\\nTa réponse doit être un unique objet JSON, avec ces clés exactes :\\n\\n{\\n  \\\"use_case\\\": \\\"consumer_comparison\\\",\\n  \\\"geo_scope\\\": \\\"EU/France\\\",\\n  \\\"vertical\\\": \\\"Lave-vaisselles\\\",\\n  \\\"available_criterias\\\":   WATER_CONSUMPTION : La consommation d&#39;eau par cycle de lavage\\n  ENERGY_CONSUMPTION_100_CYCLES : La consommation d&#39;énergie pour 100 cycles de lavage\\n  POWER_CONSUMPTION_STANDBY : La consommation électrique de l&#39;appareil en mode veille\\n  WARRANTY : Durée de garantie du produit\\n  NOISE_LEVEL : NOISE_LEVEL\\n  DATA_QUALITY : DATA_QUALITY\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  WEIGHT : Le poids de l&#39;objet\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY : La classe énergétique\\n,\\n\\n  \\\"positioning\\\": {\\n    \\\"claim\\\": \\\"relative LCA-inspired score (ACV best-effort) for within-category comparison\\\",\\n    \\\"not_an_absolute_footprint\\\": true,\\n    \\\"what_it_means_for_users\\\": \\\"Explication courte et sourcée. [Sx]\\\"\\n  },\\n\\n  \\\"reference_lifetime\\\": {\\n    \\\"lifetime_years_reference\\\": 0,\\n    \\\"lifetime_years_range\\\": {\\\"min\\\": 0, \\\"max\\\": 0},\\n    \\\"rationale\\\": \\\"Justification sourcée, UE/FR si possible. [Sx]\\\",\\n    \\\"citations\\\": [\\\"S1\\\"]\\n  },\\n\\n  \\\"gap_analysis_absolute_vs_relative\\\": {\\n    \\\"what_is_missing_vs_full_lca\\\": \\\"Inventaires complets, frontières système, unité fonctionnelle détaillée, etc. [Sx]\\\",\\n    \\\"why_relative_is_still_useful\\\": \\\"Comparaison marché, robustesse, lisibilité. [Sx]\\\",\\n    \\\"mitigations\\\": [\\n      \\\"Anchor weights on LCA literature for lifecycle stage contributions [Sx]\\\",\\n      \\\"Avoid double counting and document overlaps [Sx]\\\",\\n      \\\"Raise DATA_QUALITY because missing data is imputed to mean (transparency incentive) [Sx]\\\"\\n    ]\\n  },\\n\\n  \\\"weighting_method\\\": {\\n    \\\"approach\\\": \\\"evidence-weighted materiality + redundancy control + consumer comparability\\\",\\n    \\\"key_principles\\\": [\\n      \\\"literature-first weighting\\\",\\n      \\\"lifecycle materiality for Lave-vaisselles\\\",\\n      \\\"anti double-counting\\\",\\n      \\\"robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)\\\",\\n      \\\"missing data virtualization + DATA_QUALITY incentive\\\",\\n      \\\"ESG/brand sustainability included with guardrails\\\"\\n    ],\\n    \\\"assumptions\\\": [\\n      {\\n        \\\"assumption\\\": \\\"...\\\",\\n        \\\"why_it_matters\\\": \\\"...\\\",\\n        \\\"citations\\\": [\\\"S1\\\"]\\n      }\\n    ]\\n  },\\n\\n  \\\"criteria_weights\\\": [\\n    {\\n      \\\"criterion\\\": \\\"CRITERION_NAME_FROM_AVAILABLE_LIST\\\",\\n      \\\"weight\\\": 0.0,\\n      \\\"directionality\\\": \\\"higher_is_better|lower_is_better|categorical\\\",\\n      \\\"impact_dimensions\\\": [\\\"climate\\\", \\\"resource_use\\\", \\\"toxicity\\\", \\\"water\\\", \\\"circularity\\\", \\\"social\\\", \\\"other\\\"],\\n      \\\"rationale\\\": \\\"Texte court, concret, et sourcé. Citations inline [Sx].\\\",\\n      \\\"overlap_notes\\\": \\\"Redondances + stratégie anti-double comptage. [Sx]\\\",\\n      \\\"guardrails\\\": \\\"Si ESG/DATA_QUALITY, préciser le garde-fou. [Sx]\\\",\\n      \\\"evidence_strength\\\": {\\\"level\\\": \\\"high|medium|low\\\", \\\"why\\\": \\\"Justification sourcée. [Sx]\\\"}\\n    }\\n  ],\\n\\n  \\\"normalization_notes\\\": {\\n    \\\"relative_ranking_0_100\\\": \\\"Rappel et implications. [Sx]\\\",\\n    \\\"sigma_scoring_0_5\\\": \\\"Résumé opérationnel et impact sur la robustesse. [Sx]\\\",\\n    \\\"percentile_fallback\\\": \\\"Quand/pourquoi. [Sx]\\\",\\n    \\\"missing_value_virtualization\\\": \\\"Moyenne + rôle de DATA_QUALITY. [Sx]\\\"\\n  },\\n\\n  \\\"quality_checks\\\": {\\n    \\\"criteria_weights_complete\\\": true,\\n    \\\"weights_sum_to_1\\\": true,\\n    \\\"sum_value\\\": 1.0,\\n    \\\"unused_or_zero_weight_criterias\\\": [],\\n    \\\"renormalization_rule_if_needed\\\": \\\"Phrase simple (sans code).\\\"\\n  },\\n\\n  \\\"materiality_summary\\\": {\\n    \\\"dominant_lifecycle_stages_for_vertical\\\": [\\\"manufacturing\\\", \\\"use_phase\\\", \\\"distribution\\\", \\\"end_of_life\\\"],\\n    \\\"short_summary\\\": \\\"Synthèse sourcée des postes dominants et implication sur les poids. [Sx]\\\"\\n  },\\n\\n  \\\"sources\\\": [\\n    {\\n      \\\"id\\\": \\\"S1\\\",\\n      \\\"type\\\": \\\"standard|regulation|public_agency|peer_reviewed|industry_methodology|other\\\",\\n      \\\"title\\\": \\\"...\\\",\\n      \\\"authors_or_org\\\": \\\"...\\\",\\n      \\\"year\\\": 2026,\\n      \\\"publisher\\\": \\\"...\\\",\\n      \\\"url\\\": \\\"...\\\",\\n      \\\"accessed_date\\\": \\\"YYYY-MM-DD\\\",\\n      \\\"reliability\\\": \\\"high|medium|low\\\",\\n      \\\"used\\\": true,\\n      \\\"used_for\\\": [\\\"lifetime reference\\\", \\\"energy materiality\\\", \\\"data quality rationale\\\"],\\n      \\\"notes\\\": \\\"1-2 phrases max.\\\"\\n    }\\n  ],\\n\\n  \\\"search_log\\\": [\\n    {\\\"query\\\": \\\"...\\\", \\\"date\\\": \\\"YYYY-MM-DD\\\", \\\"notes\\\": \\\"Pourquoi cette requête.\\\"}\\n  ]\\n}\\n\\nRègles supplémentaires :\\n- \\\"criteria_weights\\\" doit contenir TOUS les critères de   WATER_CONSUMPTION : La consommation d&#39;eau par cycle de lavage\\n  ENERGY_CONSUMPTION_100_CYCLES : La consommation d&#39;énergie pour 100 cycles de lavage\\n  POWER_CONSUMPTION_STANDBY : La consommation électrique de l&#39;appareil en mode veille\\n  WARRANTY : Durée de garantie du produit\\n  NOISE_LEVEL : NOISE_LEVEL\\n  DATA_QUALITY : DATA_QUALITY\\n  REPAIRABILITY_INDEX : L&#39;indice de réparabilité de l&#39;objet\\n  WEIGHT : Le poids de l&#39;objet\\n  POWER_CONSUMPTION_OFF : La consommation électrique à l&#39;arrêt, ou en veille\\n  CLASSE_ENERGY : La classe énergétique\\n (même si weight=0) pour l’exhaustivité.\\n- Les poids doivent être décimaux. Corriger toute dérive pour que la somme fasse exactement 1.0 (tolérance 1e-6).\\n- Toute justification non triviale doit inclure des citations inline [Sx].\\n- La liste \\\"sources\\\" doit être exhaustive des sources consultées via search (used=false autorisé).\\n\"\nretrievalMode: \"MODEL_WEB_SEARCH\"\njsonSchema: \"{\\n  \\\"$schema\\\" : \\\"https://json-schema.org/draft/2020-12/schema\\\",\\n  \\\"type\\\" : \\\"object\\\",\\n  \\\"properties\\\" : {\\n    \\\"available_criterias\\\" : {\\n      \\\"type\\\" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"string\\\"\\n      }\\n    },\\n    \\\"criteria_weights\\\" : {\\n      \\\"type\\\" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"object\\\",\\n        \\\"properties\\\" : {\\n          \\\"criterion\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"directionality\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"evidence_strength\\\" : {\\n            \\\"type\\\" : \\\"object\\\",\\n            \\\"properties\\\" : {\\n              \\\"level\\\" : {\\n                \\\"type\\\" : \\\"string\\\"\\n              },\\n              \\\"why\\\" : {\\n                \\\"type\\\" : \\\"string\\\"\\n              }\\n            },\\n            \\\"required\\\" : [ \\\"level\\\", \\\"why\\\" ],\\n            \\\"additionalProperties\\\" : false\\n          },\\n          \\\"guardrails\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"impact_dimensions\\\" : {\\n            \\\"type\\\" : \\\"array\\\",\\n            \\\"items\\\" : {\\n              \\\"type\\\" : \\\"string\\\"\\n            }\\n          },\\n          \\\"overlap_notes\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"rationale\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"weight\\\" : {\\n            \\\"type\\\" : \\\"number\\\"\\n          }\\n        },\\n        \\\"required\\\" : [ \\\"criterion\\\", \\\"directionality\\\", \\\"evidence_strength\\\", \\\"guardrails\\\", \\\"impact_dimensions\\\", \\\"overlap_notes\\\", \\\"rationale\\\", \\\"weight\\\" ],\\n        \\\"additionalProperties\\\" : false\\n      }\\n    },\\n    \\\"gap_analysis_absolute_vs_relative\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"mitigations\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"what_is_missing_vs_full_lca\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"why_relative_is_still_useful\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"mitigations\\\", \\\"what_is_missing_vs_full_lca\\\", \\\"why_relative_is_still_useful\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"geo_scope\\\" : {\\n      \\\"type\\\" : \\\"string\\\"\\n    },\\n    \\\"materiality_summary\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"dominant_lifecycle_stages_for_vertical\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"short_summary\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"dominant_lifecycle_stages_for_vertical\\\", \\\"short_summary\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"normalization_notes\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"missing_value_virtualization\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"percentile_fallback\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"relative_ranking_0_100\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"sigma_scoring_0_5\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"missing_value_virtualization\\\", \\\"percentile_fallback\\\", \\\"relative_ranking_0_100\\\", \\\"sigma_scoring_0_5\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"positioning\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"claim\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"not_an_absolute_footprint\\\" : {\\n          \\\"type\\\" : \\\"boolean\\\"\\n        },\\n        \\\"what_it_means_for_users\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"claim\\\", \\\"not_an_absolute_footprint\\\", \\\"what_it_means_for_users\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"quality_checks\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"criteria_weights_complete\\\" : {\\n          \\\"type\\\" : \\\"boolean\\\"\\n        },\\n        \\\"renormalization_rule_if_needed\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"sum_value\\\" : {\\n          \\\"type\\\" : \\\"number\\\"\\n        },\\n        \\\"unused_or_zero_weight_criterias\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"weights_sum_to_1\\\" : {\\n          \\\"type\\\" : \\\"boolean\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"criteria_weights_complete\\\", \\\"renormalization_rule_if_needed\\\", \\\"sum_value\\\", \\\"unused_or_zero_weight_criterias\\\", \\\"weights_sum_to_1\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"reference_lifetime\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"citations\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"lifetime_years_range\\\" : {\\n          \\\"type\\\" : \\\"object\\\",\\n          \\\"properties\\\" : {\\n            \\\"max\\\" : {\\n              \\\"type\\\" : \\\"number\\\"\\n            },\\n            \\\"min\\\" : {\\n              \\\"type\\\" : \\\"number\\\"\\n            }\\n          },\\n          \\\"required\\\" : [ \\\"max\\\", \\\"min\\\" ],\\n          \\\"additionalProperties\\\" : false\\n        },\\n        \\\"lifetime_years_reference\\\" : {\\n          \\\"type\\\" : \\\"number\\\"\\n        },\\n        \\\"rationale\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"citations\\\", \\\"lifetime_years_range\\\", \\\"lifetime_years_reference\\\", \\\"rationale\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    },\\n    \\\"search_log\\\" : {\\n      \\\"type\\\" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"object\\\",\\n        \\\"properties\\\" : {\\n          \\\"date\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"notes\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"query\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        },\\n        \\\"required\\\" : [ \\\"date\\\", \\\"notes\\\", \\\"query\\\" ],\\n        \\\"additionalProperties\\\" : false\\n      }\\n    },\\n    \\\"sources\\\" : {\\n      \\\"type\\\" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"object\\\",\\n        \\\"properties\\\" : {\\n          \\\"accessed_date\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"authors_or_org\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"id\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"notes\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"publisher\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"reliability\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"title\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"type\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"url\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          },\\n          \\\"used\\\" : {\\n            \\\"type\\\" : \\\"boolean\\\"\\n          },\\n          \\\"used_for\\\" : {\\n            \\\"type\\\" : \\\"array\\\",\\n            \\\"items\\\" : {\\n              \\\"type\\\" : \\\"string\\\"\\n            }\\n          },\\n          \\\"year\\\" : {\\n            \\\"type\\\" : \\\"integer\\\"\\n          }\\n        },\\n        \\\"required\\\" : [ \\\"accessed_date\\\", \\\"authors_or_org\\\", \\\"id\\\", \\\"notes\\\", \\\"publisher\\\", \\\"reliability\\\", \\\"title\\\", \\\"type\\\", \\\"url\\\", \\\"used\\\", \\\"used_for\\\", \\\"year\\\" ],\\n        \\\"additionalProperties\\\" : false\\n      }\\n    },\\n    \\\"use_case\\\" : {\\n      \\\"type\\\" : \\\"string\\\"\\n    },\\n    \\\"vertical\\\" : {\\n      \\\"type\\\" : \\\"string\\\"\\n    },\\n    \\\"weighting_method\\\" : {\\n      \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n        \\\"approach\\\" : {\\n          \\\"type\\\" : \\\"string\\\"\\n        },\\n        \\\"assumptions\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"object\\\",\\n            \\\"properties\\\" : {\\n              \\\"assumption\\\" : {\\n                \\\"type\\\" : \\\"string\\\"\\n              },\\n              \\\"citations\\\" : {\\n                \\\"type\\\" : \\\"array\\\",\\n                \\\"items\\\" : {\\n                  \\\"type\\\" : \\\"string\\\"\\n                }\\n              },\\n              \\\"why_it_matters\\\" : {\\n                \\\"type\\\" : \\\"string\\\"\\n              }\\n            },\\n            \\\"required\\\" : [ \\\"assumption\\\", \\\"citations\\\", \\\"why_it_matters\\\" ],\\n            \\\"additionalProperties\\\" : false\\n          }\\n        },\\n        \\\"key_principles\\\" : {\\n          \\\"type\\\" : \\\"array\\\",\\n          \\\"items\\\" : {\\n            \\\"type\\\" : \\\"string\\\"\\n          }\\n        }\\n      },\\n      \\\"required\\\" : [ \\\"approach\\\", \\\"assumptions\\\", \\\"key_principles\\\" ],\\n      \\\"additionalProperties\\\" : false\\n    }\\n  },\\n  \\\"required\\\" : [ \\\"available_criterias\\\", \\\"criteria_weights\\\", \\\"gap_analysis_absolute_vs_relative\\\", \\\"geo_scope\\\", \\\"materiality_summary\\\", \\\"normalization_notes\\\", \\\"positioning\\\", \\\"quality_checks\\\", \\\"reference_lifetime\\\", \\\"search_log\\\", \\\"sources\\\", \\\"use_case\\\", \\\"vertical\\\", \\\"weighting_method\\\" ],\\n  \\\"additionalProperties\\\" : false\\n}\"\noptions:\n  model: \"gemini-2.5-pro\"\n  temperature: 0.2\n",
+  "aiJsonResponse": "{\n  \"use_case\" : \"consumer_comparison\",\n  \"geo_scope\" : \"EU/France\",\n  \"vertical\" : \"Lave-vaisselles\",\n  \"available_criterias\" : [ \"WATER_CONSUMPTION\", \"ENERGY_CONSUMPTION_100_CYCLES\", \"POWER_CONSUMPTION_STANDBY\", \"WARRANTY\", \"NOISE_LEVEL\", \"DATA_QUALITY\", \"REPAIRABILITY_INDEX\", \"WEIGHT\", \"POWER_CONSUMPTION_OFF\", \"CLASSE_ENERGY\" ],\n  \"positioning\" : {\n    \"claim\" : \"relative LCA-inspired score (ACV best-effort) for within-category comparison\",\n    \"not_an_absolute_footprint\" : true,\n    \"what_it_means_for_users\" : \"Indice RELATIF conçu pour comparer des lave-vaisselles entre eux (mêmes fonctions), en s’appuyant sur des paramètres harmonisés et réglementés (étiquette énergie : kWh/100 cycles, L/cycle, bruit) et sur des signaux de durabilité/réparabilité. Ce score aide à choisir « le meilleur du marché » mais ne remplace pas une ACV complète vérifiée (inventaires détaillés, frontières complètes, multi-impacts exhaustifs). [S1][S2][S5]\"\n  },\n  \"reference_lifetime\" : {\n    \"lifetime_years_reference\" : 12.5,\n    \"lifetime_years_range\" : {\n      \"min\" : 10.0,\n      \"max\" : 12.5\n    },\n    \"rationale\" : \"Référence fixée à 12,5 ans sur la base de l’estimation de « service lifetime » citée dans la réglementation d’éco-conception des lave-vaisselles ménagers. [S2] Pour la plage, le minimum (10 ans) est aligné sur l’exigence d’éco-conception d’accessibilité de certaines pièces détachées aux réparateurs et aux utilisateurs finaux pendant 10 ans après mise sur le marché de la dernière unité, ce qui constitue un plancher réglementaire de support à la réparation (proxy de durée d’usage minimale visée). [S2]\",\n    \"citations\" : [ \"S2\" ]\n  },\n  \"gap_analysis_absolute_vs_relative\" : {\n    \"what_is_missing_vs_full_lca\" : \"Par rapport à une ACV/PEF complète : inventaire détaillé des matières et procédés de fabrication, transport/distribution, scénarios fins de vie (réemploi/recyclage/WEEE), consommables (détergents), variabilité du mix électrique et comportements d’usage, et couverture explicite d’un ensemble complet de catégories d’impact avec règles de modélisation (frontières, allocation, qualité de données, incertitudes). [S5][S6]\",\n    \"why_relative_is_still_useful\" : \"Un score relatif « best-effort » est utile pour une comparaison grand public car il exploite des paramètres réglementés, mesurés de façon harmonisée et comparables entre modèles (étiquette énergie / exigences éco-conception), ce qui réduit une partie des biais de mesure tout en restant lisible. [S1][S2][S5]\",\n    \"mitigations\" : [ \"Ancrer les poids sur la matérialité : les textes UE identifient l’énergie et l’eau en phase d’usage comme aspects significatifs, et la littérature LCA sur la consommation européenne indique que la phase d’usage est souvent dominante pour les appareils. [S2][S7]\", \"Contrôler les redondances (anti double-comptage) : la classe énergie est dérivée de la performance énergétique, donc pondérée faiblement et adossée à l’indicateur quantitatif kWh/100 cycles. [S1][S2]\", \"Rehausser DATA_QUALITY parce que les données manquantes sont imputées à la moyenne : l’incitation à la transparence est cohérente avec l’approche EF/PEFCR qui met l’accent sur les besoins de qualité de données et l’identification des lacunes/proxys. [S6][S5]\" ]\n  },\n  \"weighting_method\" : {\n    \"approach\" : \"evidence-weighted materiality + redundancy control + consumer comparability\",\n    \"key_principles\" : [ \"literature-first weighting\", \"lifecycle materiality for Lave-vaisselles\", \"anti double-counting\", \"robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)\", \"missing data virtualization + DATA_QUALITY incentive\", \"ESG/brand sustainability included with guardrails\" ],\n    \"assumptions\" : [ {\n      \"assumption\" : \"Les principaux « hotspots » environnementaux comparables entre lave-vaisselles sont capturés par les indicateurs d’usage harmonisés (énergie et eau) complétés par les modes basse puissance et des signaux de circularité (réparabilité/durée d’usage).\",\n      \"why_it_matters\" : \"Cela justifie un poids majoritaire au bloc usage (énergie+eau+veilles), cohérent avec l’identification réglementaire des aspects significatifs et avec la littérature LCA sur les appareils. [S2][S7]\",\n      \"citations\" : [ \"S2\", \"S7\" ]\n    }, {\n      \"assumption\" : \"Durée de vie de référence 12,5 ans (plage 10–12,5 ans) pour raisonner « par cycle » et valoriser la durabilité sans prétendre modéliser une ACV absolue.\",\n      \"why_it_matters\" : \"La durée de vie influence fortement la part relative fabrication/fin de vie ramenée à l’usage ; elle soutient la pondération de WARRANTY et REPAIRABILITY_INDEX. [S2]\",\n      \"citations\" : [ \"S2\" ]\n    }, {\n      \"assumption\" : \"La qualité/transparence des données doit être suffisamment pondérée pour limiter l’avantage indu de l’imputation à la moyenne des valeurs manquantes.\",\n      \"why_it_matters\" : \"L’approche EF/PEF insiste sur la qualité des données (DQR) et sur la gestion des lacunes/proxys ; dans un score relatif avec imputation moyenne, un signal DATA_QUALITY réduit les biais de sous-déclaration. [S6][S5]\",\n      \"citations\" : [ \"S6\", \"S5\" ]\n    } ]\n  },\n  \"criteria_weights\" : [ {\n    \"criterion\" : \"WATER_CONSUMPTION\",\n    \"weight\" : 0.16,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"water\", \"resource_use\", \"other\" ],\n    \"rationale\" : \"Indicateur harmonisé et affiché (consommation d’eau du programme éco en L/cycle) ; l’éco-conception identifie l’eau en phase d’usage comme ressource essentielle et aspect significatif. [S1][S2] Pondération élevée car elle reflète une matérialité directe (eau) et influence aussi des impacts indirects (traitement eau/usées), même si non modélisés exhaustivement ici. [S2][S6]\",\n    \"overlap_notes\" : \"Corrélé partiellement à l’énergie (chauffage de l’eau) mais conservé séparément car l’UE distingue explicitement énergie et eau comme aspects significatifs et l’étiquette les reporte séparément. [S1][S2]\",\n    \"guardrails\" : \"Le bloc usage (énergie+eau+veilles) pèse 0,58 : un mauvais profil d’usage ne peut pas être compensé par DATA_QUALITY/durabilité. [S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Paramètre réglementé, mesuré et affiché de manière harmonisée, explicitement identifié comme aspect significatif. [S1][S2]\"\n    }\n  }, {\n    \"criterion\" : \"ENERGY_CONSUMPTION_100_CYCLES\",\n    \"weight\" : 0.34,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\", \"other\" ],\n    \"rationale\" : \"Indicateur quantitatif d’étiquette énergie (kWh/100 cycles, programme éco) directement lié à la consommation d’électricité en phase d’usage ; la réglementation UE identifie l’énergie en phase d’usage (et les émissions associées à l’électricité) comme aspect significatif. [S1][S2] La littérature EF/LCA sur la consommation européenne indique que la phase d’usage est souvent la plus importante pour les appareils. [S7]\",\n    \"overlap_notes\" : \"Fort recouvrement avec CLASSE_ENERGY (classe dérivée d’un index/ratio de performance) : on donne la primauté à la valeur continue (kWh/100 cycles) et on réserve un poids secondaire à la classe pour la lisibilité grand public. [S1][S2]\",\n    \"guardrails\" : \"Poids dominant au sein du score : empêche qu’un modèle énergivore soit « sauvé » par des critères non-usage. [S2][S7]\",\n    \"evidence_strength\" : {\n      \"level\" : \"high\",\n      \"why\" : \"Paramètre réglementé, harmonisé et directement relié à des impacts majeurs (électricité). Matérialité corroborée par l’approche EF/PEF et la littérature sur les appareils. [S1][S2][S7]\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_STANDBY\",\n    \"weight\" : 0.01,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"Les modes basse puissance sont encadrés (seuils de consommation en standby/off et bascule automatique) ; même si l’ordre de grandeur est faible par rapport au cycle, cela capte les usages réels (appareil connecté en permanence) et complète l’évaluation d’usage. [S2] Cohérent avec l’existence d’une politique UE transversale sur les pertes en veille. [S8]\",\n    \"overlap_notes\" : \"Redondant avec POWER_CONSUMPTION_OFF (mêmes « low power modes ») : partage d’un micro-bloc « veilles » pour limiter le double-comptage, avec un poids total faible (0,02). [S2][S8]\",\n    \"guardrails\" : \"Poids volontairement faible (0,01) car l’éco-conception fixe déjà des plafonds, et l’essentiel des impacts d’usage est porté par l’énergie/eau du cycle. [S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Exigences et définitions réglementaires claires, mais contribution environnementale typiquement secondaire face à l’énergie par cycle. [S2][S8]\"\n    }\n  }, {\n    \"criterion\" : \"WARRANTY\",\n    \"weight\" : 0.1,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"resource_use\", \"other\" ],\n    \"rationale\" : \"La durée de garantie est un signal grand public de durabilité/engagement du fabricant pouvant réduire le risque de remplacement prématuré, ce qui amortit les impacts de fabrication/fin de vie sur une plus longue durée d’usage. Cela s’aligne avec l’orientation « circular economy » et la préoccupation de baisse de durée de vie évoquées dans la réglementation d’éco-conception. [S2] Le poids reste inférieur au bloc usage, car la garantie est un proxy (pas une mesure directe d’impacts). [S6]\",\n    \"overlap_notes\" : \"Corrélé avec REPAIRABILITY_INDEX (durabilité) : on sépare « engagement contractuel » (garantie) et « capacité de réparation » (réparabilité), avec un total durabilité de 0,22 pour éviter d’écraser la matérialité d’usage. [S2][S6]\",\n    \"guardrails\" : \"Durabilité (WARRANTY+REPAIRABILITY_INDEX=0,22) < bloc usage (0,58) : ne peut pas compenser un appareil très énergivore/consommateur d’eau. [S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Pertinent comme proxy consommateur de durée d’usage, cohérent avec les objectifs de circularité, mais lien d’impact indirect. [S2][S6]\"\n    }\n  }, {\n    \"criterion\" : \"NOISE_LEVEL\",\n    \"weight\" : 0.05,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"social\", \"other\" ],\n    \"rationale\" : \"Le bruit est un paramètre normalisé et affiché (dB(A) et classe bruit) ; il relève surtout du confort/acceptabilité d’usage (dimension sociétale), avec un poids modéré pour refléter l’intérêt consommateur sans détourner le score de la matérialité environnementale. [S1]\",\n    \"overlap_notes\" : \"Peu de recouvrement direct avec les impacts environnementaux ; on maintient un poids limité (0,05) pour éviter qu’un gain de confort masque un mauvais profil énergie/eau. [S1][S2]\",\n    \"guardrails\" : \"Poids plafonné à 0,05 ; le bloc usage reste largement dominant. [S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"low\",\n      \"why\" : \"Mesure harmonisée et comparable, mais impact environnemental indirect (principalement social/confort). [S1]\"\n    }\n  }, {\n    \"criterion\" : \"DATA_QUALITY\",\n    \"weight\" : 0.12,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"other\", \"social\" ],\n    \"rationale\" : \"Comme les données manquantes sont imputées à la moyenne, un produit peu documenté pourrait être artificiellement « protégé » ; un poids DATA_QUALITY incite à publier des données complètes et réduit le biais de sous-déclaration. [S5][S6] La méthode EF/PEFCR met explicitement l’accent sur les besoins de qualité de données (DQR) et sur la focalisation des efforts de collecte via le screening. [S6]\",\n    \"overlap_notes\" : \"Ne recouvre pas directement énergie/eau, mais agit comme correctif méthodologique (incitation à fournir les paramètres réglementés/pertinents). On le maintient en dessous du bloc usage (0,58) pour éviter un « greenwashing par transparence ». [S6][S2]\",\n    \"guardrails\" : \"Garde-fou structurel : DATA_QUALITY=0,12 < ENERGY_CONSUMPTION_100_CYCLES à lui seul (0,34) et << bloc usage (0,58). Un appareil énergivore ne peut pas être « sauvé » par la seule transparence. [S2][S6]\",\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Très bien fondé méthodologiquement (DQR/gestion des lacunes), mais ce n’est pas une catégorie d’impact environnemental directe. [S6][S5]\"\n    }\n  }, {\n    \"criterion\" : \"REPAIRABILITY_INDEX\",\n    \"weight\" : 0.12,\n    \"directionality\" : \"higher_is_better\",\n    \"impact_dimensions\" : [ \"circularity\", \"resource_use\", \"climate\" ],\n    \"rationale\" : \"L’indice de réparabilité des lave-vaisselles est défini par un arrêté spécifique (critères/sous-critères et notation) et vise à informer et favoriser la réparation. [S3] Il est cohérent avec les exigences UE d’éco-conception sur la disponibilité des pièces détachées et l’accès aux informations de réparation. [S2] En ACV, prolonger l’usage réduit la fréquence de remplacement et répartit les impacts de fabrication/fin de vie sur davantage d’années/cycles. [S6]\",\n    \"overlap_notes\" : \"Corrélé avec WARRANTY : on répartit la durabilité entre « réparabilité » (capacité technique/organisationnelle) et « garantie » (engagement), total 0,22 pour éviter de surpondérer la durabilité vs impacts d’usage. [S2][S3][S6]\",\n    \"guardrails\" : \"Poids durabilité (0,22) inférieur au bloc usage (0,58) ; la réparabilité ne compense pas un mauvais profil énergie/eau, mais améliore le score à performance d’usage comparable. [S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Cadre réglementaire français explicite pour les lave-vaisselles + alignement avec exigences UE de réparabilité, mais traduction en impacts reste indirecte (proxy de durée d’usage). [S3][S2]\"\n    }\n  }, {\n    \"criterion\" : \"WEIGHT\",\n    \"weight\" : 0.03,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"resource_use\", \"climate\", \"other\" ],\n    \"rationale\" : \"Le poids sert de proxy imparfait de quantité de matière/transport (donc potentiellement d’impacts de fabrication/distribution), mais il est fortement confondu par la capacité, les options et les matériaux ; on lui attribue un poids faible pour capter un signal matière sans biaiser la comparaison. L’approche PEFCR insiste sur l’identification des étapes pertinentes (matières/fabrication) mais recommande de focaliser là où cela compte réellement. [S6]\",\n    \"overlap_notes\" : \"Risque de double-comptage indirect avec ENERGY_CONSUMPTION_100_CYCLES/WATER_CONSUMPTION via la taille/capacité (non explicitée ici). Poids minimisé (0,03) pour limiter l’effet « taille » tout en conservant un signal matière. [S6]\",\n    \"guardrails\" : \"Poids très faible (0,03) ; ne peut pas renverser le classement face aux critères d’usage. [S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"low\",\n      \"why\" : \"Proxy très indirect et confondu ; utile uniquement comme signal secondaire de matérialité matière/transport. [S6]\"\n    }\n  }, {\n    \"criterion\" : \"POWER_CONSUMPTION_OFF\",\n    \"weight\" : 0.01,\n    \"directionality\" : \"lower_is_better\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\" ],\n    \"rationale\" : \"Complément au standby : l’éco-conception définit l’« off mode » et fixe des exigences de consommation maximale des modes off/standby ainsi que la mesure/arrondi des valeurs. [S2] Convergence avec la politique UE historique sur les pertes en veille/off. [S8]\",\n    \"overlap_notes\" : \"Très proche de POWER_CONSUMPTION_STANDBY : micro-bloc « veilles » total 0,02 avec répartition symétrique pour éviter redondance tout en conservant les deux champs disponibles. [S2][S8]\",\n    \"guardrails\" : \"Poids faible (0,01) car déjà plafonné par exigences d’éco-conception ; l’essentiel des impacts d’usage est porté par l’énergie/eau du cycle. [S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Définitions/exigences harmonisées, mais matérialité généralement faible vs énergie par cycle. [S2][S8]\"\n    }\n  }, {\n    \"criterion\" : \"CLASSE_ENERGY\",\n    \"weight\" : 0.06,\n    \"directionality\" : \"categorical\",\n    \"impact_dimensions\" : [ \"climate\", \"resource_use\", \"other\" ],\n    \"rationale\" : \"La classe énergie (A–G) est un signal synthétique extrêmement lisible pour le consommateur et directement issu de l’étiquette énergie ; elle facilite la comparaison rapide en point de vente, mais doit rester secondaire car redondante avec les kWh/100 cycles. [S1]\",\n    \"overlap_notes\" : \"Double-comptage potentiel élevé avec ENERGY_CONSUMPTION_100_CYCLES : poids limité (0,06) et justification explicite d’un bloc « énergie » dominé par l’indicateur quantitatif. [S1][S2]\",\n    \"guardrails\" : \"Poids plafonné (0,06) et inférieur à l’énergie quantitative (0,34) pour éviter qu’un changement de classe « compense » artificiellement une consommation absolue défavorable dans la distribution observée. [S1][S2]\",\n    \"evidence_strength\" : {\n      \"level\" : \"medium\",\n      \"why\" : \"Très robuste et harmonisé comme information consommateur, mais redondant avec l’indicateur quantitatif et donc moins informatif pour la matérialité fine. [S1]\"\n    }\n  } ],\n  \"normalization_notes\" : {\n    \"relative_ranking_0_100\" : \"Chaque critère est converti en score relatif (meilleur=100, pire=0) pour permettre une comparaison intra-catégorie sur des paramètres harmonisés (étiquette énergie/éco-conception) sans prétendre à une empreinte absolue. [S1][S2][S5]\",\n    \"sigma_scoring_0_5\" : \"Les attributs bruts (ou scores 0–100) sont ensuite normalisés 0–5 via une approche type « sigma scoring » pour limiter l’influence d’outliers (cap à ±2σ) et stabiliser l’agrégation pondérée ; cette logique est cohérente avec l’exigence de robustesse/sensibilité (analyses de sensibilité recommandées dans les démarches EF/PEFCR). [S6]\",\n    \"percentile_fallback\" : \"En cas de distribution « low entropy » (beaucoup de valeurs identiques/peu dispersées), un fallback percentile (mid-rank) évite des effets de seuil artificiels et maintient une discrimination utile au consommateur ; cohérent avec l’idée EF/PEFCR de focaliser et de tester la sensibilité des choix méthodologiques. [S6]\",\n    \"missing_value_virtualization\" : \"Si un facteur est absent, l’imputation à la moyenne évite d’exclure des produits mais crée un risque d’avantage aux produits peu transparents ; DATA_QUALITY (0,12) agit comme contrepoids incitatif, en ligne avec l’importance donnée à la qualité de données (DQR) et à la gestion des lacunes/proxys dans les cadres EF/PEFCR. [S6][S5]\"\n  },\n  \"quality_checks\" : {\n    \"criteria_weights_complete\" : true,\n    \"weights_sum_to_1\" : true,\n    \"sum_value\" : 1.0,\n    \"unused_or_zero_weight_criterias\" : [ ],\n    \"renormalization_rule_if_needed\" : \"Si, à l’avenir, un critère est mis à 0, renormaliser proportionnellement les autres poids pour retrouver une somme à 1, en conservant le principe de dominance du bloc usage (énergie+eau+veilles) sur les critères de transparence/durabilité. [S2]\"\n  },\n  \"materiality_summary\" : {\n    \"dominant_lifecycle_stages_for_vertical\" : [ \"use_phase\", \"manufacturing\", \"end_of_life\", \"distribution\" ],\n    \"short_summary\" : \"Pour les lave-vaisselles, la réglementation UE identifie comme aspects significatifs l’énergie et l’eau en phase d’usage, ainsi que des contributions de la production (matières/extraction/traitement) et de la fin de vie (déchets). [S2][S1] La littérature EF/LCA sur la consommation européenne conclut que la phase d’usage est souvent dominante pour les appareils, ce qui justifie la priorité donnée au bloc usage, tout en gardant un bloc durabilité (réparabilité/garantie) pour adresser la circularité et la baisse de durée de vie. [S7][S2][S6]\"\n  },\n  \"sources\" : [ {\n    \"id\" : \"S1\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Delegated Regulation (EU) 2019/2017 of 11 March 2019 with regard to energy labelling of household dishwashers\",\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2019,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"https://eur-lex.europa.eu/eli/reg/2019/2017/oj\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"energy/water/noise criteria definitions\", \"materiality signals from EU labelling\", \"consumer comparability rationale\" ],\n    \"notes\" : \"Source primaire UE : définit les informations d’étiquette (kWh/100 cycles, L/cycle, classes bruit, etc.).\"\n  }, {\n    \"id\" : \"S2\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Regulation (EU) 2019/2022 of 1 October 2019 laying down ecodesign requirements for household dishwashers\",\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2019,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"https://eur-lex.europa.eu/eli/reg/2019/2022/oj/eng\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"reference lifetime\", \"energy/water/low-power materiality\", \"repairability/spare parts policy anchors\", \"guardrails rationale\" ],\n    \"notes\" : \"Source primaire UE : aspects environnementaux significatifs, exigences modes basse puissance, pièces détachées, estimation de durée de vie (~12,5 ans).\"\n  }, {\n    \"id\" : \"S3\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Arrêté du 22 avril 2022 relatif aux critères, aux sous-critères et au système de notation pour le calcul et l'affichage de l'indice de réparabilité des lave-vaisselle ménagers\",\n    \"authors_or_org\" : \"Gouvernement français (Ministère de la transition écologique & Ministère de l’économie)\",\n    \"year\" : 2022,\n    \"publisher\" : \"Journal officiel de la République française (Légifrance)\",\n    \"url\" : \"https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000045742695\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"repairability index criterion grounding\", \"durability/circularity rationale\" ],\n    \"notes\" : \"Source primaire France : fixe les paramètres de calcul de l’indice de réparabilité pour les lave-vaisselles.\"\n  }, {\n    \"id\" : \"S4\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Indice de réparabilité (informations et textes applicables, dont lave-vaisselle)\",\n    \"authors_or_org\" : \"Ministères Aménagement du territoire & Transition écologique (France)\",\n    \"year\" : 2026,\n    \"publisher\" : \"ecologie.gouv.fr\",\n    \"url\" : \"https://www.ecologie.gouv.fr/politiques-publiques/indice-reparabilite\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"policy context for repairability index coverage (dishwashers included)\", \"consumer-facing durability context\" ],\n    \"notes\" : \"Page institutionnelle listant l’extension de l’indice de réparabilité aux lave-vaisselles et renvoyant vers les textes.\"\n  }, {\n    \"id\" : \"S5\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Recommendation of 9 April 2013 on the use of common methods to measure and communicate the life cycle environmental performance of products and organisations (2013/179/EU)\",\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2013,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32013H0179\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"LCA/PEF framing and limitations\", \"communication/comparability rationale\", \"data quality and trust framing\" ],\n    \"notes\" : \"Acte officiel UE : promeut des méthodes communes « cycle de vie » (PEF/OEF) pour comparabilité et information fiable.\"\n  }, {\n    \"id\" : \"S6\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Product Environmental Footprint Category Rules Guidance (PEFCR Guidance) Version 6.3 – May 2018 (Please cite as December 2017)\",\n    \"authors_or_org\" : \"European Commission (Joint Research Centre / Environmental Footprint)\",\n    \"year\" : 2018,\n    \"publisher\" : \"European Commission JRC (EPLCA)\",\n    \"url\" : \"https://eplca.jrc.ec.europa.eu/permalink/PEFCR_guidance_v6.3-2.pdf\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"materiality approach and screening\", \"data quality requirements (DQR)\", \"handling data gaps/proxies and sensitivity\" ],\n    \"notes\" : \"Guide méthodologique de référence : matérialité/hotspots, screening, exigences de qualité de données et sensibilité.\"\n  }, {\n    \"id\" : \"S7\",\n    \"type\" : \"peer_reviewed\",\n    \"title\" : \"The consumer footprint: Monitoring sustainable development goal 12 with process-based life cycle assessment\",\n    \"authors_or_org\" : \"Sala S. et al.\",\n    \"year\" : 2019,\n    \"publisher\" : \"Journal of Cleaner Production (via PubMed Central)\",\n    \"url\" : \"https://pmc.ncbi.nlm.nih.gov/articles/PMC6886560/\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"evidence that use phase is often dominant for appliances\", \"materiality justification for weighting\" ],\n    \"notes\" : \"Article évalué par les pairs : indique notamment l’importance de la phase d’usage pour de nombreux impacts, en particulier pour les appareils.\"\n  }, {\n    \"id\" : \"S8\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Regulation (EC) No 1275/2008 of 17 December 2008 with regard to ecodesign requirements for standby and off mode electric power consumption\",\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2008,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"https://eur-lex.europa.eu/eli/reg/2008/1275/oj/eng\",\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [ \"context on standby/off policy and definitions\", \"supporting rationale for low-power mode criteria\" ],\n    \"notes\" : \"Règlement UE transversal sur les pertes en veille/off (contexte ; les lave-vaisselles sont ensuite couverts par des exigences spécifiques via l’éco-conception).\"\n  } ],\n  \"search_log\" : [ {\n    \"query\" : \"EUR-Lex Commission Delegated Regulation (EU) 2019/2017 dishwashers energy label 100 cycles water per cycle noise\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Identifier le cadre UE d’étiquetage : définitions/paramètres harmonisés (kWh/100 cycles, L/cycle, bruit) pour les critères d’usage.\"\n  }, {\n    \"query\" : \"EUR-Lex Commission Regulation (EU) 2019/2022 ecodesign requirements household dishwashers\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Ancrer la matérialité et la durabilité sur l’éco-conception UE (aspects significatifs, exigences modes basse puissance, pièces détachées, durée de vie estimée).\"\n  }, {\n    \"query\" : \"EUR-Lex Regulation (EC) No 1275/2008 standby off mode electric power consumption\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Contexte réglementaire UE sur les pertes en veille/off pour appuyer les critères POWER_CONSUMPTION_OFF/STANDBY.\"\n  }, {\n    \"query\" : \"France indice de réparabilité lave-vaisselle décret\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Trouver les textes français applicables spécifiquement à l’indice de réparabilité des lave-vaisselles (cadre et méthode de calcul).\"\n  }, {\n    \"query\" : \"Product Environmental Footprint Recommendation 2013/179/EU dishwasher preparatory study life cycle assessment lifetime years\",\n    \"date\" : \"2026-03-01\",\n    \"notes\" : \"Récupérer les références de méthode (PEF/EF, PEFCR Guidance) pour justifier l’approche « ACV inspirée » et la place de la qualité de données.\"\n  } ]\n}",
+  "aiResult": {
+    "use_case": "consumer_comparison",
+    "geo_scope": "EU/France",
+    "vertical": "Lave-vaisselles",
+    "available_criterias": [
+      "WATER_CONSUMPTION",
+      "ENERGY_CONSUMPTION_100_CYCLES",
+      "POWER_CONSUMPTION_STANDBY",
+      "WARRANTY",
+      "NOISE_LEVEL",
+      "DATA_QUALITY",
+      "REPAIRABILITY_INDEX",
+      "WEIGHT",
+      "POWER_CONSUMPTION_OFF",
+      "CLASSE_ENERGY"
+    ],
+    "positioning": {
+      "claim": "relative LCA-inspired score (ACV best-effort) for within-category comparison",
+      "not_an_absolute_footprint": true,
+      "what_it_means_for_users": "Indice RELATIF conçu pour comparer des lave-vaisselles entre eux (mêmes fonctions), en s’appuyant sur des paramètres harmonisés et réglementés (étiquette énergie : kWh/100 cycles, L/cycle, bruit) et sur des signaux de durabilité/réparabilité. Ce score aide à choisir « le meilleur du marché » mais ne remplace pas une ACV complète vérifiée (inventaires détaillés, frontières complètes, multi-impacts exhaustifs). [S1][S2][S5]"
+    },
+    "reference_lifetime": {
+      "lifetime_years_reference": 12.5,
+      "lifetime_years_range": {
+        "min": 10,
+        "max": 12.5
+      },
+      "rationale": "Référence fixée à 12,5 ans sur la base de l’estimation de « service lifetime » citée dans la réglementation d’éco-conception des lave-vaisselles ménagers. [S2] Pour la plage, le minimum (10 ans) est aligné sur l’exigence d’éco-conception d’accessibilité de certaines pièces détachées aux réparateurs et aux utilisateurs finaux pendant 10 ans après mise sur le marché de la dernière unité, ce qui constitue un plancher réglementaire de support à la réparation (proxy de durée d’usage minimale visée). [S2]",
+      "citations": [
+        "S2"
+      ]
+    },
+    "gap_analysis_absolute_vs_relative": {
+      "what_is_missing_vs_full_lca": "Par rapport à une ACV/PEF complète : inventaire détaillé des matières et procédés de fabrication, transport/distribution, scénarios fins de vie (réemploi/recyclage/WEEE), consommables (détergents), variabilité du mix électrique et comportements d’usage, et couverture explicite d’un ensemble complet de catégories d’impact avec règles de modélisation (frontières, allocation, qualité de données, incertitudes). [S5][S6]",
+      "why_relative_is_still_useful": "Un score relatif « best-effort » est utile pour une comparaison grand public car il exploite des paramètres réglementés, mesurés de façon harmonisée et comparables entre modèles (étiquette énergie / exigences éco-conception), ce qui réduit une partie des biais de mesure tout en restant lisible. [S1][S2][S5]",
+      "mitigations": [
+        "Ancrer les poids sur la matérialité : les textes UE identifient l’énergie et l’eau en phase d’usage comme aspects significatifs, et la littérature LCA sur la consommation européenne indique que la phase d’usage est souvent dominante pour les appareils. [S2][S7]",
+        "Contrôler les redondances (anti double-comptage) : la classe énergie est dérivée de la performance énergétique, donc pondérée faiblement et adossée à l’indicateur quantitatif kWh/100 cycles. [S1][S2]",
+        "Rehausser DATA_QUALITY parce que les données manquantes sont imputées à la moyenne : l’incitation à la transparence est cohérente avec l’approche EF/PEFCR qui met l’accent sur les besoins de qualité de données et l’identification des lacunes/proxys. [S6][S5]"
+      ]
+    },
+    "weighting_method": {
+      "approach": "evidence-weighted materiality + redundancy control + consumer comparability",
+      "key_principles": [
+        "literature-first weighting",
+        "lifecycle materiality for Lave-vaisselles",
+        "anti double-counting",
+        "robustness to outliers (sigma scoring) and discrete buckets (percentile fallback)",
+        "missing data virtualization + DATA_QUALITY incentive",
+        "ESG/brand sustainability included with guardrails"
+      ],
+      "assumptions": [
+        {
+          "assumption": "Les principaux « hotspots » environnementaux comparables entre lave-vaisselles sont capturés par les indicateurs d’usage harmonisés (énergie et eau) complétés par les modes basse puissance et des signaux de circularité (réparabilité/durée d’usage).",
+          "why_it_matters": "Cela justifie un poids majoritaire au bloc usage (énergie+eau+veilles), cohérent avec l’identification réglementaire des aspects significatifs et avec la littérature LCA sur les appareils. [S2][S7]",
+          "citations": [
+            "S2",
+            "S7"
+          ]
+        },
+        {
+          "assumption": "Durée de vie de référence 12,5 ans (plage 10–12,5 ans) pour raisonner « par cycle » et valoriser la durabilité sans prétendre modéliser une ACV absolue.",
+          "why_it_matters": "La durée de vie influence fortement la part relative fabrication/fin de vie ramenée à l’usage ; elle soutient la pondération de WARRANTY et REPAIRABILITY_INDEX. [S2]",
+          "citations": [
+            "S2"
+          ]
+        },
+        {
+          "assumption": "La qualité/transparence des données doit être suffisamment pondérée pour limiter l’avantage indu de l’imputation à la moyenne des valeurs manquantes.",
+          "why_it_matters": "L’approche EF/PEF insiste sur la qualité des données (DQR) et sur la gestion des lacunes/proxys ; dans un score relatif avec imputation moyenne, un signal DATA_QUALITY réduit les biais de sous-déclaration. [S6][S5]",
+          "citations": [
+            "S6",
+            "S5"
+          ]
+        }
+      ]
+    },
+    "criteria_weights": [
+      {
+        "criterion": "WATER_CONSUMPTION",
+        "weight": 0.16,
+        "directionality": "lower_is_better",
+        "impact_dimensions": [
+          "water",
+          "resource_use",
+          "other"
+        ],
+        "rationale": "Indicateur harmonisé et affiché (consommation d’eau du programme éco en L/cycle) ; l’éco-conception identifie l’eau en phase d’usage comme ressource essentielle et aspect significatif. [S1][S2] Pondération élevée car elle reflète une matérialité directe (eau) et influence aussi des impacts indirects (traitement eau/usées), même si non modélisés exhaustivement ici. [S2][S6]",
+        "overlap_notes": "Corrélé partiellement à l’énergie (chauffage de l’eau) mais conservé séparément car l’UE distingue explicitement énergie et eau comme aspects significatifs et l’étiquette les reporte séparément. [S1][S2]",
+        "guardrails": "Le bloc usage (énergie+eau+veilles) pèse 0,58 : un mauvais profil d’usage ne peut pas être compensé par DATA_QUALITY/durabilité. [S2]",
+        "evidence_strength": {
+          "level": "high",
+          "why": "Paramètre réglementé, mesuré et affiché de manière harmonisée, explicitement identifié comme aspect significatif. [S1][S2]"
+        }
+      },
+      {
+        "criterion": "ENERGY_CONSUMPTION_100_CYCLES",
+        "weight": 0.34,
+        "directionality": "lower_is_better",
+        "impact_dimensions": [
+          "climate",
+          "resource_use",
+          "other"
+        ],
+        "rationale": "Indicateur quantitatif d’étiquette énergie (kWh/100 cycles, programme éco) directement lié à la consommation d’électricité en phase d’usage ; la réglementation UE identifie l’énergie en phase d’usage (et les émissions associées à l’électricité) comme aspect significatif. [S1][S2] La littérature EF/LCA sur la consommation européenne indique que la phase d’usage est souvent la plus importante pour les appareils. [S7]",
+        "overlap_notes": "Fort recouvrement avec CLASSE_ENERGY (classe dérivée d’un index/ratio de performance) : on donne la primauté à la valeur continue (kWh/100 cycles) et on réserve un poids secondaire à la classe pour la lisibilité grand public. [S1][S2]",
+        "guardrails": "Poids dominant au sein du score : empêche qu’un modèle énergivore soit « sauvé » par des critères non-usage. [S2][S7]",
+        "evidence_strength": {
+          "level": "high",
+          "why": "Paramètre réglementé, harmonisé et directement relié à des impacts majeurs (électricité). Matérialité corroborée par l’approche EF/PEF et la littérature sur les appareils. [S1][S2][S7]"
+        }
+      },
+      {
+        "criterion": "POWER_CONSUMPTION_STANDBY",
+        "weight": 0.01,
+        "directionality": "lower_is_better",
+        "impact_dimensions": [
+          "climate",
+          "resource_use"
+        ],
+        "rationale": "Les modes basse puissance sont encadrés (seuils de consommation en standby/off et bascule automatique) ; même si l’ordre de grandeur est faible par rapport au cycle, cela capte les usages réels (appareil connecté en permanence) et complète l’évaluation d’usage. [S2] Cohérent avec l’existence d’une politique UE transversale sur les pertes en veille. [S8]",
+        "overlap_notes": "Redondant avec POWER_CONSUMPTION_OFF (mêmes « low power modes ») : partage d’un micro-bloc « veilles » pour limiter le double-comptage, avec un poids total faible (0,02). [S2][S8]",
+        "guardrails": "Poids volontairement faible (0,01) car l’éco-conception fixe déjà des plafonds, et l’essentiel des impacts d’usage est porté par l’énergie/eau du cycle. [S2]",
+        "evidence_strength": {
+          "level": "medium",
+          "why": "Exigences et définitions réglementaires claires, mais contribution environnementale typiquement secondaire face à l’énergie par cycle. [S2][S8]"
+        }
+      },
+      {
+        "criterion": "WARRANTY",
+        "weight": 0.1,
+        "directionality": "higher_is_better",
+        "impact_dimensions": [
+          "circularity",
+          "resource_use",
+          "other"
+        ],
+        "rationale": "La durée de garantie est un signal grand public de durabilité/engagement du fabricant pouvant réduire le risque de remplacement prématuré, ce qui amortit les impacts de fabrication/fin de vie sur une plus longue durée d’usage. Cela s’aligne avec l’orientation « circular economy » et la préoccupation de baisse de durée de vie évoquées dans la réglementation d’éco-conception. [S2] Le poids reste inférieur au bloc usage, car la garantie est un proxy (pas une mesure directe d’impacts). [S6]",
+        "overlap_notes": "Corrélé avec REPAIRABILITY_INDEX (durabilité) : on sépare « engagement contractuel » (garantie) et « capacité de réparation » (réparabilité), avec un total durabilité de 0,22 pour éviter d’écraser la matérialité d’usage. [S2][S6]",
+        "guardrails": "Durabilité (WARRANTY+REPAIRABILITY_INDEX=0,22) < bloc usage (0,58) : ne peut pas compenser un appareil très énergivore/consommateur d’eau. [S2]",
+        "evidence_strength": {
+          "level": "medium",
+          "why": "Pertinent comme proxy consommateur de durée d’usage, cohérent avec les objectifs de circularité, mais lien d’impact indirect. [S2][S6]"
+        }
+      },
+      {
+        "criterion": "NOISE_LEVEL",
+        "weight": 0.05,
+        "directionality": "lower_is_better",
+        "impact_dimensions": [
+          "social",
+          "other"
+        ],
+        "rationale": "Le bruit est un paramètre normalisé et affiché (dB(A) et classe bruit) ; il relève surtout du confort/acceptabilité d’usage (dimension sociétale), avec un poids modéré pour refléter l’intérêt consommateur sans détourner le score de la matérialité environnementale. [S1]",
+        "overlap_notes": "Peu de recouvrement direct avec les impacts environnementaux ; on maintient un poids limité (0,05) pour éviter qu’un gain de confort masque un mauvais profil énergie/eau. [S1][S2]",
+        "guardrails": "Poids plafonné à 0,05 ; le bloc usage reste largement dominant. [S2]",
+        "evidence_strength": {
+          "level": "low",
+          "why": "Mesure harmonisée et comparable, mais impact environnemental indirect (principalement social/confort). [S1]"
+        }
+      },
+      {
+        "criterion": "DATA_QUALITY",
+        "weight": 0.12,
+        "directionality": "higher_is_better",
+        "impact_dimensions": [
+          "other",
+          "social"
+        ],
+        "rationale": "Comme les données manquantes sont imputées à la moyenne, un produit peu documenté pourrait être artificiellement « protégé » ; un poids DATA_QUALITY incite à publier des données complètes et réduit le biais de sous-déclaration. [S5][S6] La méthode EF/PEFCR met explicitement l’accent sur les besoins de qualité de données (DQR) et sur la focalisation des efforts de collecte via le screening. [S6]",
+        "overlap_notes": "Ne recouvre pas directement énergie/eau, mais agit comme correctif méthodologique (incitation à fournir les paramètres réglementés/pertinents). On le maintient en dessous du bloc usage (0,58) pour éviter un « greenwashing par transparence ». [S6][S2]",
+        "guardrails": "Garde-fou structurel : DATA_QUALITY=0,12 < ENERGY_CONSUMPTION_100_CYCLES à lui seul (0,34) et << bloc usage (0,58). Un appareil énergivore ne peut pas être « sauvé » par la seule transparence. [S2][S6]",
+        "evidence_strength": {
+          "level": "medium",
+          "why": "Très bien fondé méthodologiquement (DQR/gestion des lacunes), mais ce n’est pas une catégorie d’impact environnemental directe. [S6][S5]"
+        }
+      },
+      {
+        "criterion": "REPAIRABILITY_INDEX",
+        "weight": 0.12,
+        "directionality": "higher_is_better",
+        "impact_dimensions": [
+          "circularity",
+          "resource_use",
+          "climate"
+        ],
+        "rationale": "L’indice de réparabilité des lave-vaisselles est défini par un arrêté spécifique (critères/sous-critères et notation) et vise à informer et favoriser la réparation. [S3] Il est cohérent avec les exigences UE d’éco-conception sur la disponibilité des pièces détachées et l’accès aux informations de réparation. [S2] En ACV, prolonger l’usage réduit la fréquence de remplacement et répartit les impacts de fabrication/fin de vie sur davantage d’années/cycles. [S6]",
+        "overlap_notes": "Corrélé avec WARRANTY : on répartit la durabilité entre « réparabilité » (capacité technique/organisationnelle) et « garantie » (engagement), total 0,22 pour éviter de surpondérer la durabilité vs impacts d’usage. [S2][S3][S6]",
+        "guardrails": "Poids durabilité (0,22) inférieur au bloc usage (0,58) ; la réparabilité ne compense pas un mauvais profil énergie/eau, mais améliore le score à performance d’usage comparable. [S2]",
+        "evidence_strength": {
+          "level": "medium",
+          "why": "Cadre réglementaire français explicite pour les lave-vaisselles + alignement avec exigences UE de réparabilité, mais traduction en impacts reste indirecte (proxy de durée d’usage). [S3][S2]"
+        }
+      },
+      {
+        "criterion": "WEIGHT",
+        "weight": 0.03,
+        "directionality": "lower_is_better",
+        "impact_dimensions": [
+          "resource_use",
+          "climate",
+          "other"
+        ],
+        "rationale": "Le poids sert de proxy imparfait de quantité de matière/transport (donc potentiellement d’impacts de fabrication/distribution), mais il est fortement confondu par la capacité, les options et les matériaux ; on lui attribue un poids faible pour capter un signal matière sans biaiser la comparaison. L’approche PEFCR insiste sur l’identification des étapes pertinentes (matières/fabrication) mais recommande de focaliser là où cela compte réellement. [S6]",
+        "overlap_notes": "Risque de double-comptage indirect avec ENERGY_CONSUMPTION_100_CYCLES/WATER_CONSUMPTION via la taille/capacité (non explicitée ici). Poids minimisé (0,03) pour limiter l’effet « taille » tout en conservant un signal matière. [S6]",
+        "guardrails": "Poids très faible (0,03) ; ne peut pas renverser le classement face aux critères d’usage. [S2]",
+        "evidence_strength": {
+          "level": "low",
+          "why": "Proxy très indirect et confondu ; utile uniquement comme signal secondaire de matérialité matière/transport. [S6]"
+        }
+      },
+      {
+        "criterion": "POWER_CONSUMPTION_OFF",
+        "weight": 0.01,
+        "directionality": "lower_is_better",
+        "impact_dimensions": [
+          "climate",
+          "resource_use"
+        ],
+        "rationale": "Complément au standby : l’éco-conception définit l’« off mode » et fixe des exigences de consommation maximale des modes off/standby ainsi que la mesure/arrondi des valeurs. [S2] Convergence avec la politique UE historique sur les pertes en veille/off. [S8]",
+        "overlap_notes": "Très proche de POWER_CONSUMPTION_STANDBY : micro-bloc « veilles » total 0,02 avec répartition symétrique pour éviter redondance tout en conservant les deux champs disponibles. [S2][S8]",
+        "guardrails": "Poids faible (0,01) car déjà plafonné par exigences d’éco-conception ; l’essentiel des impacts d’usage est porté par l’énergie/eau du cycle. [S2]",
+        "evidence_strength": {
+          "level": "medium",
+          "why": "Définitions/exigences harmonisées, mais matérialité généralement faible vs énergie par cycle. [S2][S8]"
+        }
+      },
+      {
+        "criterion": "CLASSE_ENERGY",
+        "weight": 0.06,
+        "directionality": "categorical",
+        "impact_dimensions": [
+          "climate",
+          "resource_use",
+          "other"
+        ],
+        "rationale": "La classe énergie (A–G) est un signal synthétique extrêmement lisible pour le consommateur et directement issu de l’étiquette énergie ; elle facilite la comparaison rapide en point de vente, mais doit rester secondaire car redondante avec les kWh/100 cycles. [S1]",
+        "overlap_notes": "Double-comptage potentiel élevé avec ENERGY_CONSUMPTION_100_CYCLES : poids limité (0,06) et justification explicite d’un bloc « énergie » dominé par l’indicateur quantitatif. [S1][S2]",
+        "guardrails": "Poids plafonné (0,06) et inférieur à l’énergie quantitative (0,34) pour éviter qu’un changement de classe « compense » artificiellement une consommation absolue défavorable dans la distribution observée. [S1][S2]",
+        "evidence_strength": {
+          "level": "medium",
+          "why": "Très robuste et harmonisé comme information consommateur, mais redondant avec l’indicateur quantitatif et donc moins informatif pour la matérialité fine. [S1]"
+        }
+      }
+    ],
+    "normalization_notes": {
+      "relative_ranking_0_100": "Chaque critère est converti en score relatif (meilleur=100, pire=0) pour permettre une comparaison intra-catégorie sur des paramètres harmonisés (étiquette énergie/éco-conception) sans prétendre à une empreinte absolue. [S1][S2][S5]",
+      "sigma_scoring_0_5": "Les attributs bruts (ou scores 0–100) sont ensuite normalisés 0–5 via une approche type « sigma scoring » pour limiter l’influence d’outliers (cap à ±2σ) et stabiliser l’agrégation pondérée ; cette logique est cohérente avec l’exigence de robustesse/sensibilité (analyses de sensibilité recommandées dans les démarches EF/PEFCR). [S6]",
+      "percentile_fallback": "En cas de distribution « low entropy » (beaucoup de valeurs identiques/peu dispersées), un fallback percentile (mid-rank) évite des effets de seuil artificiels et maintient une discrimination utile au consommateur ; cohérent avec l’idée EF/PEFCR de focaliser et de tester la sensibilité des choix méthodologiques. [S6]",
+      "missing_value_virtualization": "Si un facteur est absent, l’imputation à la moyenne évite d’exclure des produits mais crée un risque d’avantage aux produits peu transparents ; DATA_QUALITY (0,12) agit comme contrepoids incitatif, en ligne avec l’importance donnée à la qualité de données (DQR) et à la gestion des lacunes/proxys dans les cadres EF/PEFCR. [S6][S5]"
+    },
+    "quality_checks": {
+      "criteria_weights_complete": true,
+      "weights_sum_to_1": true,
+      "sum_value": 1,
+      "renormalization_rule_if_needed": "Si, à l’avenir, un critère est mis à 0, renormaliser proportionnellement les autres poids pour retrouver une somme à 1, en conservant le principe de dominance du bloc usage (énergie+eau+veilles) sur les critères de transparence/durabilité. [S2]"
+    },
+    "materiality_summary": {
+      "dominant_lifecycle_stages_for_vertical": [
+        "use_phase",
+        "manufacturing",
+        "end_of_life",
+        "distribution"
+      ],
+      "short_summary": "Pour les lave-vaisselles, la réglementation UE identifie comme aspects significatifs l’énergie et l’eau en phase d’usage, ainsi que des contributions de la production (matières/extraction/traitement) et de la fin de vie (déchets). [S2][S1] La littérature EF/LCA sur la consommation européenne conclut que la phase d’usage est souvent dominante pour les appareils, ce qui justifie la priorité donnée au bloc usage, tout en gardant un bloc durabilité (réparabilité/garantie) pour adresser la circularité et la baisse de durée de vie. [S7][S2][S6]"
+    },
+    "sources": [
+      {
+        "id": "S1",
+        "type": "regulation",
+        "title": "Commission Delegated Regulation (EU) 2019/2017 of 11 March 2019 with regard to energy labelling of household dishwashers",
+        "authors_or_org": "European Commission",
+        "year": 2019,
+        "publisher": "Official Journal of the European Union (EUR-Lex)",
+        "url": "https://eur-lex.europa.eu/eli/reg/2019/2017/oj",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "energy/water/noise criteria definitions",
+          "materiality signals from EU labelling",
+          "consumer comparability rationale"
+        ],
+        "notes": "Source primaire UE : définit les informations d’étiquette (kWh/100 cycles, L/cycle, classes bruit, etc.)."
+      },
+      {
+        "id": "S2",
+        "type": "regulation",
+        "title": "Commission Regulation (EU) 2019/2022 of 1 October 2019 laying down ecodesign requirements for household dishwashers",
+        "authors_or_org": "European Commission",
+        "year": 2019,
+        "publisher": "Official Journal of the European Union (EUR-Lex)",
+        "url": "https://eur-lex.europa.eu/eli/reg/2019/2022/oj/eng",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "reference lifetime",
+          "energy/water/low-power materiality",
+          "repairability/spare parts policy anchors",
+          "guardrails rationale"
+        ],
+        "notes": "Source primaire UE : aspects environnementaux significatifs, exigences modes basse puissance, pièces détachées, estimation de durée de vie (~12,5 ans)."
+      },
+      {
+        "id": "S3",
+        "type": "regulation",
+        "title": "Arrêté du 22 avril 2022 relatif aux critères, aux sous-critères et au système de notation pour le calcul et l'affichage de l'indice de réparabilité des lave-vaisselle ménagers",
+        "authors_or_org": "Gouvernement français (Ministère de la transition écologique & Ministère de l’économie)",
+        "year": 2022,
+        "publisher": "Journal officiel de la République française (Légifrance)",
+        "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000045742695",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "repairability index criterion grounding",
+          "durability/circularity rationale"
+        ],
+        "notes": "Source primaire France : fixe les paramètres de calcul de l’indice de réparabilité pour les lave-vaisselles."
+      },
+      {
+        "id": "S4",
+        "type": "public_agency",
+        "title": "Indice de réparabilité (informations et textes applicables, dont lave-vaisselle)",
+        "authors_or_org": "Ministères Aménagement du territoire & Transition écologique (France)",
+        "year": 2026,
+        "publisher": "ecologie.gouv.fr",
+        "url": "https://www.ecologie.gouv.fr/politiques-publiques/indice-reparabilite",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "policy context for repairability index coverage (dishwashers included)",
+          "consumer-facing durability context"
+        ],
+        "notes": "Page institutionnelle listant l’extension de l’indice de réparabilité aux lave-vaisselles et renvoyant vers les textes."
+      },
+      {
+        "id": "S5",
+        "type": "regulation",
+        "title": "Commission Recommendation of 9 April 2013 on the use of common methods to measure and communicate the life cycle environmental performance of products and organisations (2013/179/EU)",
+        "authors_or_org": "European Commission",
+        "year": 2013,
+        "publisher": "Official Journal of the European Union (EUR-Lex)",
+        "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32013H0179",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "LCA/PEF framing and limitations",
+          "communication/comparability rationale",
+          "data quality and trust framing"
+        ],
+        "notes": "Acte officiel UE : promeut des méthodes communes « cycle de vie » (PEF/OEF) pour comparabilité et information fiable."
+      },
+      {
+        "id": "S6",
+        "type": "public_agency",
+        "title": "Product Environmental Footprint Category Rules Guidance (PEFCR Guidance) Version 6.3 – May 2018 (Please cite as December 2017)",
+        "authors_or_org": "European Commission (Joint Research Centre / Environmental Footprint)",
+        "year": 2018,
+        "publisher": "European Commission JRC (EPLCA)",
+        "url": "https://eplca.jrc.ec.europa.eu/permalink/PEFCR_guidance_v6.3-2.pdf",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "materiality approach and screening",
+          "data quality requirements (DQR)",
+          "handling data gaps/proxies and sensitivity"
+        ],
+        "notes": "Guide méthodologique de référence : matérialité/hotspots, screening, exigences de qualité de données et sensibilité."
+      },
+      {
+        "id": "S7",
+        "type": "peer_reviewed",
+        "title": "The consumer footprint: Monitoring sustainable development goal 12 with process-based life cycle assessment",
+        "authors_or_org": "Sala S. et al.",
+        "year": 2019,
+        "publisher": "Journal of Cleaner Production (via PubMed Central)",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6886560/",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "evidence that use phase is often dominant for appliances",
+          "materiality justification for weighting"
+        ],
+        "notes": "Article évalué par les pairs : indique notamment l’importance de la phase d’usage pour de nombreux impacts, en particulier pour les appareils."
+      },
+      {
+        "id": "S8",
+        "type": "regulation",
+        "title": "Commission Regulation (EC) No 1275/2008 of 17 December 2008 with regard to ecodesign requirements for standby and off mode electric power consumption",
+        "authors_or_org": "European Commission",
+        "year": 2008,
+        "publisher": "Official Journal of the European Union (EUR-Lex)",
+        "url": "https://eur-lex.europa.eu/eli/reg/2008/1275/oj/eng",
+        "accessed_date": "2026-03-01",
+        "reliability": "high",
+        "used": true,
+        "used_for": [
+          "context on standby/off policy and definitions",
+          "supporting rationale for low-power mode criteria"
+        ],
+        "notes": "Règlement UE transversal sur les pertes en veille/off (contexte ; les lave-vaisselles sont ensuite couverts par des exigences spécifiques via l’éco-conception)."
+      }
+    ],
+    "search_log": [
+      {
+        "query": "EUR-Lex Commission Delegated Regulation (EU) 2019/2017 dishwashers energy label 100 cycles water per cycle noise",
+        "date": "2026-03-01",
+        "notes": "Identifier le cadre UE d’étiquetage : définitions/paramètres harmonisés (kWh/100 cycles, L/cycle, bruit) pour les critères d’usage."
+      },
+      {
+        "query": "EUR-Lex Commission Regulation (EU) 2019/2022 ecodesign requirements household dishwashers",
+        "date": "2026-03-01",
+        "notes": "Ancrer la matérialité et la durabilité sur l’éco-conception UE (aspects significatifs, exigences modes basse puissance, pièces détachées, durée de vie estimée)."
+      },
+      {
+        "query": "EUR-Lex Regulation (EC) No 1275/2008 standby off mode electric power consumption",
+        "date": "2026-03-01",
+        "notes": "Contexte réglementaire UE sur les pertes en veille/off pour appuyer les critères POWER_CONSUMPTION_OFF/STANDBY."
+      },
+      {
+        "query": "France indice de réparabilité lave-vaisselle décret",
+        "date": "2026-03-01",
+        "notes": "Trouver les textes français applicables spécifiquement à l’indice de réparabilité des lave-vaisselles (cadre et méthode de calcul)."
+      },
+      {
+        "query": "Product Environmental Footprint Recommendation 2013/179/EU dishwasher preparatory study life cycle assessment lifetime years",
+        "date": "2026-03-01",
+        "notes": "Récupérer les références de méthode (PEF/EF, PEFCR Guidance) pour justifier l’approche « ACV inspirée » et la place de la qualité de données."
+      }
+    ]
+  }
+}
