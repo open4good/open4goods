@@ -89,10 +89,7 @@
                 :to="item.categoryLink"
                 @click.stop
               >
-                <span>{{
-                  t('impactScorePage.sections.methodology.verticalCta')
-                }}</span>
-                <v-icon icon="mdi-arrow-top-right" size="16" />
+
               </v-btn>
             </div>
           </v-card>

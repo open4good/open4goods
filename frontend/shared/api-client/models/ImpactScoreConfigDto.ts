@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { ImpactScoreTexts } from './ImpactScoreTexts';
-import {
-    ImpactScoreTextsFromJSON,
-    ImpactScoreTextsFromJSONTyped,
-    ImpactScoreTextsToJSON,
-    ImpactScoreTextsToJSONTyped,
-} from './ImpactScoreTexts';
-
 /**
  * 
  * @export
@@ -33,12 +25,6 @@ export interface ImpactScoreConfigDto {
      * @memberof ImpactScoreConfigDto
      */
     criteriasPonderation?: { [key: string]: number; };
-    /**
-     * Localised explanatory texts for the impact score.
-     * @type {ImpactScoreTexts}
-     * @memberof ImpactScoreConfigDto
-     */
-    texts?: ImpactScoreTexts;
     /**
      * Prompt used to produce the YAML configuration.
      * @type {string}
@@ -71,7 +57,6 @@ export function ImpactScoreConfigDtoFromJSONTyped(json: any, ignoreDiscriminator
     return {
         
         'criteriasPonderation': json['criteriasPonderation'] == null ? undefined : json['criteriasPonderation'],
-        'texts': json['texts'] == null ? undefined : ImpactScoreTextsFromJSON(json['texts']),
         'yamlPrompt': json['yamlPrompt'] == null ? undefined : json['yamlPrompt'],
         'aiJsonResponse': json['aiJsonResponse'] == null ? undefined : json['aiJsonResponse'],
     };
@@ -89,7 +74,6 @@ export function ImpactScoreConfigDtoToJSONTyped(value?: ImpactScoreConfigDto | n
     return {
         
         'criteriasPonderation': value['criteriasPonderation'],
-        'texts': ImpactScoreTextsToJSON(value['texts']),
         'yamlPrompt': value['yamlPrompt'],
         'aiJsonResponse': value['aiJsonResponse'],
     };

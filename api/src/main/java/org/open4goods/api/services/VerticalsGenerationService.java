@@ -23,14 +23,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.model.AttributesStats;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
 import org.open4goods.icecat.services.IcecatService;
-import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
@@ -314,31 +313,6 @@ public class VerticalsGenerationService {
 
 	}
 
-	/**
-	 * Generate a vertical to a local file
-	 *
-	 * @param googleTaxonomyId
-	 * @param matchingCategories
-	 * @param urlPrefix
-	 * @param h1Prefix
-	 * @param verticalHomeUrl
-	 * @param verticalHomeTitle
-	 */
-	public void verticalTemplatetoFile(String googleTaxonomyId, String matchingCategories, String urlPrefix, String h1Prefix, String verticalHomeUrl, String verticalHomeTitle) {
-
-		// TODO(p3, conf) : from conf
-		try {
-			String id = IdHelper.normalizeFileName(googleTaxonomyService.byId(Integer.valueOf(googleTaxonomyId)).getGoogleNames().i18n("en"));
-
-			File f = new File("/opt/open4goods/tmp/");
-			f.mkdirs();
-			f = new File(f.getAbsolutePath() + "/" + id + ".yml");
-
-			FileUtils.write(f, verticalTemplate(id, googleTaxonomyId, matchingCategories, urlPrefix, h1Prefix, verticalHomeUrl, verticalHomeTitle));
-		} catch (IOException e) {
-			LOGGER.error("Error while writing template file for gtaxonomy {} ", googleTaxonomyId, e);
-		}
-	}
 
 	/**
 	 * A hacky method that hard updates the categorys from predicted ones in the vertical yaml files

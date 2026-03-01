@@ -19,7 +19,7 @@ scoring:
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
-  fr: "Consommation annuelle"
+  fr: "Consommation annuelle d'énergie"
 scoreDescription:
   fr: "Consommation d'énergie annuelle en kWh"
 scoreUtility:

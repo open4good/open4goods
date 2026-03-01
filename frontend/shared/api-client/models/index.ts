@@ -73,7 +73,6 @@ export * from './GlobalSearchVerticalGroupDto';
 export * from './GoogleCategoryDto';
 export * from './GoogleIndexationMetricsDto';
 export * from './ImpactScoreConfigDto';
-export * from './ImpactScoreTexts';
 export * from './IpGeolocationResponse';
 export * from './IpQuotaCategory';
 export * from './IpQuotaStatusDto';

@@ -7,7 +7,6 @@
         class="impact-score-page__section"
         :verticals="verticals"
       />
-      <ImpactScoreExamples class="impact-score-page__section" />
       <ImpactScoreAvailableCriteria class="impact-score-page__section" />
       <ImpactScorePrinciples class="impact-score-page__section" />
       <ImpactScoreSummary class="impact-score-page__section" />
@@ -40,7 +39,6 @@ import type { VerticalConfigDto } from '~~/shared/api-client'
 import ImpactScoreApproach from '~/components/impact-score/ImpactScoreApproach.vue'
 import ImpactScoreAvailableCriteria from '~/components/impact-score/ImpactScoreAvailableCriteria.vue'
 import ImpactScoreDetails from '~/components/impact-score/ImpactScoreDetails.vue'
-import ImpactScoreExamples from '~/components/impact-score/ImpactScoreExamples.vue'
 import ImpactScoreHero from '~/components/impact-score/ImpactScoreHero.vue'
 import ImpactScoreMethodology from '~/components/impact-score/ImpactScoreMethodology.vue'
 import ImpactScorePrinciples from '~/components/impact-score/ImpactScorePrinciples.vue'

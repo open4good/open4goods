@@ -3,8 +3,6 @@ package org.open4goods.model.vertical;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.open4goods.model.Localisable;
-
 public class ImpactScoreConfig {
 
 	/**
@@ -22,18 +20,15 @@ public class ImpactScoreConfig {
 	////////////////////////
 	// Audit / justification
 	///////////////////////
-	
-	private Localisable<String, ImpactScoreTexts> texts = new Localisable<>();
-	
 
-	// For auditability. Strange in config file, but to be marbered with with criterias generation 
+
+	// For auditability. Strange in config file, but to be marbered with with criterias generation
 	private String yamlPrompt;
-	
+
 	private String aiJsonResponse;
-	
+
 	private org.open4goods.model.ai.ImpactScoreAiResult aiResult;
-	
-	// TODO : The validate method (check sums is 1)
+
 	public Map<String, Double> getCriteriasPonderation() {
 		return criteriasPonderation;
 	}
@@ -45,12 +40,6 @@ public class ImpactScoreConfig {
 	}
 	public void setMinDistinctValuesForSigma(Integer minDistinctValuesForSigma) {
 		this.minDistinctValuesForSigma = minDistinctValuesForSigma;
-	}
-	public Localisable<String, ImpactScoreTexts> getTexts() {
-		return texts;
-	}
-	public void setTexts(Localisable<String, ImpactScoreTexts> texts) {
-		this.texts = texts;
 	}
 	public String getYamlPrompt() {
 		return yamlPrompt;

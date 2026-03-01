@@ -513,7 +513,6 @@ public class CategoryMappingService {
         }
         return new ImpactScoreConfigDto(
                 defaultMap(impactScoreConfig.getCriteriasPonderation()),
-                localise(impactScoreConfig.getTexts(), domainLanguage),
                 impactScoreConfig.getYamlPrompt(),
                 impactScoreConfig.getAiJsonResponse());
     }

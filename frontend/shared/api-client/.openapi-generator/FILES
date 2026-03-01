@@ -95,7 +95,6 @@ models/GlobalSearchVerticalGroupDto.ts
 models/GoogleCategoryDto.ts
 models/GoogleIndexationMetricsDto.ts
 models/ImpactScoreConfigDto.ts
-models/ImpactScoreTexts.ts
 models/IpGeolocationResponse.ts
 models/IpQuotaCategory.ts
 models/IpQuotaStatusDto.ts
