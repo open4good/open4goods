@@ -221,6 +221,7 @@ useSeoMeta({
   ogUrl: () => canonicalUrl.value,
   ogType: () => 'website',
   ogImage: () => ogImageUrl.value,
+  robots: 'noindex, nofollow',
 })
 
 useHead(() => ({
