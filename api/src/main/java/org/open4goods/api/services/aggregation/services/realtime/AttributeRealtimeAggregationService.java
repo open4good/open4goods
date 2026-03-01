@@ -790,7 +790,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		/////////////////////////////////
 		// FIXED TEXT MAPPING
 		/////////////////////////////////
-		if (!attrConf.getMappings().isEmpty()) {
+		if (!attrConf.getMappings().isEmpty() && attrConf.getMappings().containsKey(string)) {
 
 			string = attrConf.getMappings().get(string);
 		}
