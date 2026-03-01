@@ -1,6 +1,3 @@
-resourcesConfig:
-  overrideResources: true
-
 # Unique identifier for this vertical.
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
