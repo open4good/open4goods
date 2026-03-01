@@ -332,6 +332,12 @@ public class ReviewGenerationService implements HealthIndicator {
 				return status;
 			}
 		});
+
+		int waiting = executorService.getQueue().size();
+		ReviewGenerationStatus queueStatus = processStatusMap.get(upc);
+		queueStatus.setStatus(ReviewGenerationStatus.Status.QUEUED);
+		queueStatus.addMessage("Queued for execution. Number waiting in queue: " + waiting);
+
 		executorService.submit(() -> {
 			ReviewGenerationStatus status = processStatusMap.get(upc);
 			AiReviewHolder holder = new AiReviewHolder();
@@ -441,10 +447,6 @@ public class ReviewGenerationService implements HealthIndicator {
 			product.getReviews().put("fr", holder);
 			productRepository.forceIndex(product);
 		});
-		int waiting = executorService.getQueue().size();
-		ReviewGenerationStatus status = processStatusMap.get(upc);
-		status.setStatus(ReviewGenerationStatus.Status.QUEUED);
-		status.addMessage("Queued for execution. Number waiting in queue: " + waiting);
 		return upc;
 	}
 
