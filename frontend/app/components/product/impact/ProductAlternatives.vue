@@ -116,7 +116,7 @@ const props = defineProps({
   },
   maxResults: {
     type: Number,
-    default: 5,
+    default: 4,
   },
   subtitleParams: {
     type: Object as PropType<Record<string, string> | undefined>,
@@ -183,6 +183,25 @@ const resolveScoreNumericValue = (
   return null
 }
 
+const resolveScoreAbsoluteValue = (
+  score:
+    | { relativ?: { value?: number | null } | null; value?: number | null }
+    | null
+    | undefined
+): number | null => {
+  const absolute = score?.value
+  if (typeof absolute === 'number' && Number.isFinite(absolute)) {
+    return absolute
+  }
+
+  const relative = score?.relativ?.value
+  if (typeof relative === 'number' && Number.isFinite(relative)) {
+    return relative
+  }
+
+  return null
+}
+
 const ecoscoreValue = computed<number | null>(() => {
   const ecoscoreScore = resolveScoreNumericValue(
     props.product?.scores?.ecoscore ?? null
@@ -192,6 +211,29 @@ const ecoscoreValue = computed<number | null>(() => {
   }
 
   const mapValue = resolveScoreNumericValue(
+    props.product?.scores?.scores?.ECOSCORE
+  )
+  if (mapValue != null) {
+    return mapValue
+  }
+
+  const base = props.product?.base?.ecoscoreValue
+  if (typeof base === 'number' && Number.isFinite(base)) {
+    return base
+  }
+
+  return null
+})
+
+const ecoscoreAbsoluteValue = computed<number | null>(() => {
+  const ecoscoreScore = resolveScoreAbsoluteValue(
+    props.product?.scores?.ecoscore ?? null
+  )
+  if (ecoscoreScore != null) {
+    return ecoscoreScore
+  }
+
+  const mapValue = resolveScoreAbsoluteValue(
     props.product?.scores?.scores?.ECOSCORE
   )
   if (mapValue != null) {
@@ -307,11 +349,12 @@ type AlternativeFilterDefinition = {
 
 const ecoscoreFilterDefinition = computed<AlternativeFilterDefinition | null>(
   () => {
-    if (ecoscoreValue.value == null) {
+    if (ecoscoreValue.value == null || ecoscoreAbsoluteValue.value == null) {
       return null
     }
 
     const value = ecoscoreValue.value
+    const absoluteValue = ecoscoreAbsoluteValue.value
     return {
       key: 'ecoscore',
       label: t('product.impact.alternatives.filters.ecoscore'),
@@ -323,7 +366,7 @@ const ecoscoreFilterDefinition = computed<AlternativeFilterDefinition | null>(
       resolveClause: () => ({
         field: ECOSCORE_RELATIVE_FIELD,
         operator: 'range',
-        min: value,
+        min: absoluteValue,
       }),
     }
   }
