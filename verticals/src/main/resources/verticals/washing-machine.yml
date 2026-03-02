@@ -659,7 +659,6 @@ attributesConfig:
     - key: WATER_CONSUMPTION
     - key: NOISE_LEVEL
     - key: NOISE_CLASS
-    - key: PROGRAM_DURATION_ECO
     - key: PROGRAM_COUNT
     - key: REPAIRABILITY_INDEX
     - key: WARRANTY

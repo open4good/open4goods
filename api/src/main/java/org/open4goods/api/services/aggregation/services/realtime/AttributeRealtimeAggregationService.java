@@ -190,7 +190,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				dedicatedLogger.error("Error parsing attribute with custom parser", e);
 			}
 		}
-		
+
 		if (bestValue == null) {
 			bestValue = indexedAttr.bestValue();
 		}
@@ -204,7 +204,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		indexedAttr.setValue(bestValue);
-		indexedAttr.setBoolValue(IndexedAttribute.getBool(bestValue));
 
 		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
 			indexedAttr.setNumericValue(indexedAttr.numericOrNull(bestValue));
@@ -215,7 +214,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				indexedAttr.setNumericValue(null);
 			}
 		}
-		
+
 		attr.setValue(bestValue);
 	}
 

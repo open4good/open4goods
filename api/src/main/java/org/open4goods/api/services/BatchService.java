@@ -374,7 +374,6 @@ public class BatchService {
 						String best = attr.bestValue();
 						attr.setValue(best);
 						attr.setNumericValue(parseNumericOrNull(best));
-						attr.setBoolValue(IndexedAttribute.getBool(best));
 					}
 					changed = true;
 				}

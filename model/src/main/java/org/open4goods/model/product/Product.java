@@ -295,7 +295,6 @@ public class Product implements Standardisable {
 			String bestValue = attribute.bestValue();
 			attribute.setValue(bestValue);
 			attribute.setNumericValue(parseNumericOrNull(bestValue));
-			attribute.setBoolValue(IndexedAttribute.getBool(bestValue));
 		}
 	}
 

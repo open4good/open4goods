@@ -17,11 +17,6 @@ public class IndexedAttribute extends SourcableAttribute{
 	 */
 	private Double numericValue;
 
-	/**
-	 * The numeric value (if any) of this aggregated attribute
-	 */
-	private Boolean boolValue;
-	
 
 	public IndexedAttribute() {
 		super();
@@ -30,9 +25,9 @@ public class IndexedAttribute extends SourcableAttribute{
 
 
 	public IndexedAttribute(String key, String cleanedValue) {
-		this.name = key; 
+		this.name = key;
 		this.value = cleanedValue;
-		
+
 		// Trying to specialize as numeric
 		String num = cleanedValue.trim().replace(",", ".");
 		try {
@@ -41,7 +36,6 @@ public class IndexedAttribute extends SourcableAttribute{
 		} catch (final NumberFormatException e) {
 		}
 
-		boolValue= getBool(cleanedValue);
 	}
 
 
@@ -54,7 +48,7 @@ public class IndexedAttribute extends SourcableAttribute{
 		} else {
 			return null;
 		};
-		
+
 		switch (tmp) {
 		case "true":
 		case "yes":
@@ -74,19 +68,19 @@ public class IndexedAttribute extends SourcableAttribute{
 			return null;
 		}
 	}
-		
-	
+
+
 
 	/**
-	 * The associated icecat taxonomyIds 
+	 * The associated icecat taxonomyIds
 	 */
 //	@Field(index = false, store = false, type = FieldType.Keyword)
 //	private Set<Integer> icecatTaxonomyIds = new HashSet<>();
-	
-//	
+
+//
 //	/**
 //	 * Number of sources for this attribute
-//	 * 
+//	 *
 //	 * @return
 //	 */
 //	public int sourcesCount() {
@@ -95,7 +89,7 @@ public class IndexedAttribute extends SourcableAttribute{
 //
 //	/**
 //	 * The number of different values for this item
-//	 * 
+//	 *
 //	 * @return
 //	 */
 //	public long distinctValues() {
@@ -104,7 +98,7 @@ public class IndexedAttribute extends SourcableAttribute{
 //
 //	/**
 //	 * For UI, a String representation of all providers names
-//	 * 
+//	 *
 //	 * @return
 //	 */
 //	public String providersToString() {
@@ -113,7 +107,7 @@ public class IndexedAttribute extends SourcableAttribute{
 //
 //	/**
 //	 * For UI, a String representation of all providers names and values
-//	 * 
+//	 *
 //	 * @return
 //	 */
 //	public String sourcesToString() {
@@ -162,7 +156,7 @@ public class IndexedAttribute extends SourcableAttribute{
 
 //	/**
 //	 * Add a "matched" attribute, with dynamic type detection
-//	 * 
+//	 *
 //	 * @param parsed Should handle language ?
 //	 */
 //	public void addSourceAttribute(Attribute attr, AttributeConfig attrConfig, UnindexedKeyValTimestamp sourcedValue)
@@ -199,7 +193,7 @@ public class IndexedAttribute extends SourcableAttribute{
 //	}
 //
 //	/**
-//	 * 
+//	 *
 //	 * @return the best value
 //	 */
 //	public String bestValue() {
@@ -229,7 +223,7 @@ public class IndexedAttribute extends SourcableAttribute{
 //
 //	/**
 //	 * Return the number of distinct values
-//	 * 
+//	 *
 //	 * @return
 //	 */
 //	public long ponderedvalues() {
@@ -292,15 +286,5 @@ public class IndexedAttribute extends SourcableAttribute{
 	public void setNumericValue(Double numericValue) {
 		this.numericValue = numericValue;
 	}
-
-	public Boolean getBoolValue() {
-		return boolValue;
-	}
-
-	public void setBoolValue(Boolean boolValue) {
-		this.boolValue = boolValue;
-	}
-
-	
 
 }

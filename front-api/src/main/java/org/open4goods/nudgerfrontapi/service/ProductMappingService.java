@@ -18,6 +18,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.open4goods.commons.model.IpQuotaCategory;
+import org.open4goods.commons.services.IpQuotaService;
+import org.open4goods.commons.services.textgen.BlaBlaSecGenerator;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
@@ -25,8 +28,8 @@ import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
-import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.attribute.SourcableAttribute;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.price.AggregatedPrice;
@@ -34,10 +37,10 @@ import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.price.PriceTrend;
 import org.open4goods.model.product.AiReviewHolder;
+import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
-import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.ProductTexts;
@@ -47,7 +50,6 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.review.ReviewGenerationStatus;
-import org.open4goods.commons.services.textgen.BlaBlaSecGenerator;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -71,6 +73,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductClassifiedAttributeGroup
 import org.open4goods.nudgerfrontapi.dto.product.ProductDatasourcesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
+import org.open4goods.nudgerfrontapi.dto.product.ProductEprelDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductExternalIdsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductGtinInfoDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIdentityDto;
@@ -90,7 +93,6 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductTimelineDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductEprelDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductVideoDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
@@ -98,8 +100,6 @@ import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;
-import org.open4goods.commons.model.IpQuotaCategory;
-import org.open4goods.commons.services.IpQuotaService;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -225,7 +225,7 @@ public class ProductMappingService {
     	 * We should add a timer here to monitor the impact of the mapping
     	 */
     	io.micrometer.core.instrument.Timer.Sample sample = io.micrometer.core.instrument.Timer.start(io.micrometer.core.instrument.Metrics.globalRegistry);
-    	
+
         VerticalConfig vConfig = resolveVerticalConfig(product.getVertical());
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
 
@@ -292,11 +292,11 @@ public class ProductMappingService {
                 eprel,
                 offers,
                 timeline);
-        
+
         sample.stop(io.micrometer.core.instrument.Timer.builder("product.mapping")
         		.tag("vertical", product.getVertical() != null ? product.getVertical() : "unknown")
         		.register(io.micrometer.core.instrument.Metrics.globalRegistry));
-        
+
         return dto;
     }
 
@@ -811,7 +811,7 @@ public class ProductMappingService {
         if (product.getDescriptionsByDatasource() == null || product.getDescriptionsByDatasource().isEmpty()) {
             return Collections.emptyMap();
         }
-        
+
         Map<String, String> favicons = new LinkedHashMap<>();
         for (String datasource : product.getDescriptionsByDatasource().keySet()) {
              String url = buildSourceFavicon(datasource);
@@ -1145,7 +1145,7 @@ public class ProductMappingService {
             logger.info("Force review generation requested by authenticated user for product {}", gtin);
         }
         Product product = repository.getById(gtin);
-        
+
         boolean shouldForce = force;
         if (!authenticatedUser) {
         	// For anonymous users, we only allow forcing if the current review is broken/insufficient
@@ -1153,10 +1153,10 @@ public class ProductMappingService {
         	if (force) {
         		AiReviewHolder holder = product.getReviews() != null ? product.getReviews().i18n("fr") : null;
         		if (holder != null) {
-        			boolean isBroken = !holder.isEnoughData() 
+        			boolean isBroken = !holder.isEnoughData()
         					|| (holder.getFailureReason() != null && !holder.getFailureReason().isEmpty())
         					|| holder.getReview() == null;
-        			
+
         			if (isBroken) {
         				logger.info("Allowing forced regeneration for anonymous user on broken review for product {}", gtin);
         				shouldForce = true;
@@ -1164,7 +1164,7 @@ public class ProductMappingService {
         		}
         	}
         }
-        
+
         long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId(), shouldForce);
         if (!authenticatedUser) {
             ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
@@ -1209,9 +1209,9 @@ public class ProductMappingService {
         if (gtinInfo == null) {
             return null;
         }
-        
+
         BarcodeType upcType = gtinInfo.detectOriginalBarcodeType().orElse(gtinInfo.getUpcType());
-        
+
         String countryCode = gtinInfo.getCountry();
         if (!StringUtils.hasText(countryCode)) {
             return new ProductGtinInfoDto(upcType, null, null, null);
@@ -1331,7 +1331,7 @@ public class ProductMappingService {
      */
     /**
      * Map indexed attributes which include localisation hints and scoring flags.
-     * 
+     *
      * <p>
      * This method applies defensive null handling to prevent NPE when
      * AttributeConfig
@@ -1341,7 +1341,7 @@ public class ProductMappingService {
      * <li>'default' locale if requested locale missing</li>
      * <li>Raw attribute key if name field is null</li>
      * </ol>
-     * 
+     *
      * @param attribute      the indexed attribute to map
      * @param vConfig        the vertical configuration containing attribute
      *                       metadata
@@ -1406,7 +1406,6 @@ public class ProductMappingService {
                 displayName,
                 attribute.getValue(),
                 attribute.getNumericValue(),
-                attribute.getBoolValue(),
                 sourcing);
     }
 

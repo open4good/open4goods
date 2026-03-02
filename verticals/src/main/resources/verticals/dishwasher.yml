@@ -652,9 +652,6 @@ aggregationConfiguration:
   "attributes.indexed.PLACE_SETTINGS":
     interval: 1
     buckets: 16
-  "attributes.indexed.PROGRAM_DURATION_ECO":
-    interval: 20
-    buckets: 12
   "attributes.indexed.WEIGHT":
     interval: 2
     buckets: 12
@@ -674,7 +671,6 @@ ecoFilters:
 technicalFilters:
   - "NOISE_LEVEL"
   - "PLACE_SETTINGS"
-  - "PROGRAM_DURATION_ECO"
   - "PROGRAM_COUNT"
   - "INSTALLATION_TYPE"
 
@@ -689,7 +685,6 @@ attributesConfig:
     - key: "NOISE_LEVEL"
     - key: "NOISE_CLASS"
     - key: "PLACE_SETTINGS"
-    - key: "PROGRAM_DURATION_ECO"
     - key: "PROGRAM_COUNT"
     - key: "INSTALLATION_TYPE"
     - key: "HEIGHT"
