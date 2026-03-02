@@ -1,0 +1,9 @@
+{
+  "filters": [
+    {
+      "field": "scores.ENERGY_CONSUMPTION.ranking",
+      "operator": "rankingPercentile",
+      "min": 50
+    }
+  ]
+}
