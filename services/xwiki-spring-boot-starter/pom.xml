@@ -57,7 +57,7 @@
 			<plugin>
 				<groupId>org.kordamp.maven</groupId>
 				<artifactId>pomchecker-maven-plugin</artifactId>
-				<version>1.14.0</version>
+				<version>1.15.0</version>
 				<executions>
 					<execution>
 						<id>check-release</id>
