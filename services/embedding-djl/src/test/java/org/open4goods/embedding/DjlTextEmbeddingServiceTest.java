@@ -17,6 +17,7 @@ import ai.djl.repository.zoo.ZooModel;
 class DjlTextEmbeddingServiceTest
 {
     @Test
+    @SuppressWarnings("resource")
     void embedsWithPrimaryModelWhenAvailable() throws Exception
     {
         DjlEmbeddingProperties properties = baseProperties();
@@ -24,12 +25,12 @@ class DjlTextEmbeddingServiceTest
         AbstractTextModelFactory factory = new StubFactory(textModel);
 
         DjlTextEmbeddingService service = new DjlTextEmbeddingService(properties, factory);
-        service.initialize();
 
         assertThat(service.embed("hello")).containsExactly(0.1f, 0.2f);
     }
 
     @Test
+    @SuppressWarnings("resource")
     void fallsBackToMultimodalModelWhenPrimaryFails() throws Exception
     {
         DjlEmbeddingProperties properties = baseProperties();
@@ -51,7 +52,6 @@ class DjlTextEmbeddingServiceTest
         };
 
         DjlTextEmbeddingService service = new DjlTextEmbeddingService(properties, factory);
-        service.initialize();
 
         assertThat(service.embed("hello")).containsExactly(0.3f, 0.4f);
     }
@@ -71,8 +71,7 @@ class DjlTextEmbeddingServiceTest
             }
         };
 
-        DjlTextEmbeddingService service = new DjlTextEmbeddingService(properties, factory);
-        assertThatThrownBy(service::initialize)
+        assertThatThrownBy(() -> new DjlTextEmbeddingService(properties, factory))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Failed to load any DJL text embedding model");
     }

@@ -9,11 +9,15 @@ import org.springframework.util.StringUtils;
 
 import ai.djl.inference.Predictor;
 import ai.djl.repository.zoo.ZooModel;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 /**
  * Base class handling DJL model lifecycle and error reporting for embedding services.
+ * <p>
+ * Models are loaded eagerly in the constructor. {@link Predictor} instances are cached per-thread
+ * via {@link ThreadLocal} to avoid the overhead of creating a new predictor on every call while
+ * remaining thread-safe (DJL {@code Predictor} is not thread-safe).
+ * </p>
  */
 public abstract class AbstractDjlEmbeddingService implements AutoCloseable
 {
@@ -22,20 +26,25 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
     private final DjlEmbeddingProperties properties;
     private final AbstractTextModelFactory modelFactory;
 
-    private ZooModel<String, float[]> textModel;
-    private ZooModel<String, float[]> visionModel;
-    private String resolvedTextModelLocation;
-    private String resolvedVisionModelLocation;
+    private final ZooModel<String, float[]> textModel;
+    private final ZooModel<String, float[]> visionModel;
+    private final String resolvedTextModelLocation;
+    private final String resolvedVisionModelLocation;
+
+    /**
+     * Thread-local predictors: one per thread, lazily created from the loaded models.
+     * This avoids the cost of {@code model.newPredictor()} on every {@link #embed} call
+     * while keeping thread safety (DJL {@code Predictor} is not thread-safe).
+     */
+    private final ThreadLocal<Predictor<String, float[]>> textPredictor;
+    private final ThreadLocal<Predictor<String, float[]>> visionPredictor;
 
     protected AbstractDjlEmbeddingService(DjlEmbeddingProperties properties, AbstractTextModelFactory modelFactory)
     {
         this.properties = properties;
         this.modelFactory = modelFactory;
-    }
 
-    @PostConstruct
-    public void initialize()
-    {
+        // Model loading (eagerly in constructor)
         resolvedTextModelLocation = properties.getTextModelUrl();
         resolvedVisionModelLocation = properties.getVisionModelUrl();
 
@@ -46,10 +55,25 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
         {
             throw new IllegalStateException("Failed to load any DJL text embedding model (text or multimodal)");
         }
+
+        // ThreadLocal predictors: lazily created per thread from the loaded models
+        textPredictor = ThreadLocal.withInitial(() ->
+                textModel != null ? textModel.newPredictor() : null);
+        visionPredictor = ThreadLocal.withInitial(() ->
+                visionModel != null ? visionModel.newPredictor() : null);
+
         LOGGER.info("DJL embedding initialised. textModelLoaded={}, multimodalLoaded={}, dimension={}.",
                 textModel != null, visionModel != null, properties.getEmbeddingDimension());
     }
 
+    /**
+     * Embeds the given text using the first available model (text, then multimodal fallback).
+     *
+     * @param text the text to embed, must not be blank
+     * @return the embedding vector
+     * @throws IllegalArgumentException if the text is blank
+     * @throws IllegalStateException    if no model is available
+     */
     public float[] embed(String text)
     {
         if (!StringUtils.hasText(text))
@@ -57,12 +81,12 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
             throw new IllegalArgumentException("Text to embed must not be null or blank");
         }
 
-        float[] vector = embedWithModel(textModel, text, "text");
+        float[] vector = embedWithPredictor(textPredictor, text, "text");
         if (vector != null)
         {
             return vector;
         }
-        vector = embedWithModel(visionModel, text, "multimodal");
+        vector = embedWithPredictor(visionPredictor, text, "multimodal");
         if (vector != null)
         {
             return vector;
@@ -94,6 +118,8 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
     @Override
     public void close()
     {
+        textPredictor.remove();
+        visionPredictor.remove();
         closeQuietly(textModel);
         closeQuietly(visionModel);
     }
@@ -116,13 +142,22 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
         }
     }
 
-    private float[] embedWithModel(ZooModel<String, float[]> model, String text, String label)
+    /**
+     * Runs prediction using the thread-local cached {@link Predictor}.
+     *
+     * @param predictorHolder thread-local predictor supplier
+     * @param text            text to embed
+     * @param label           label for logging
+     * @return the embedding vector, or {@code null} if the predictor is unavailable
+     */
+    private float[] embedWithPredictor(ThreadLocal<Predictor<String, float[]>> predictorHolder, String text, String label)
     {
-        if (model == null)
+        Predictor<String, float[]> predictor = predictorHolder.get();
+        if (predictor == null)
         {
             return null;
         }
-        try (Predictor<String, float[]> predictor = model.newPredictor())
+        try
         {
             return predictor.predict(text);
         }

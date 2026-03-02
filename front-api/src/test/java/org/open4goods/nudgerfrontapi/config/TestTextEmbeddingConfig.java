@@ -45,7 +45,6 @@ public class TestTextEmbeddingConfig
         };
 
         DjlTextEmbeddingService service = new DjlTextEmbeddingService(properties, factory);
-        service.initialize();
         return service;
     }
 

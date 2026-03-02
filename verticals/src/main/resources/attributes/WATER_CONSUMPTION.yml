@@ -27,8 +27,6 @@ scoreDescription:
 scoreUtility:
   fr: "Mesure la quantité d'eau consommée par cycle, une ressource naturelle précieuse dont la préservation réduit la pression sur les écosystèmes."
   en: "Measures water used per wash cycle, a precious natural resource whose conservation reduces pressure on ecosystems."
-participateInScores:
-  - WATER_CONSUMPTION
 participateInACV:
   - USE
 synonyms:

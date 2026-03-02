@@ -111,7 +111,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 			return; // Nothing to do
 		}
 
-		logger.info("Name generation for product {}", data.getId());
+		logger.debug("Name generation for product {}", data.getId());
 
 		// Cleaning offer names too long (can happen on some CSV parsing bugs)
 		if (data.getOfferNames() != null && !data.getOfferNames().isEmpty()) {
@@ -201,10 +201,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 
 
-					// SEO meta generation intentionally left commented-out (as in original),
-					// because of previous disk-space / stack-trace issues and template evaluation failures.
-					// Keeping behavior unchanged.
-
 					// ---- Card Title ----
 					if (tConf.getCardTitle() != null) {
 						String computed = computeTemplate(data, tConf.getCardTitle());
@@ -241,16 +237,23 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 		// ---- Embedding computation  ----
 		// Compute embeddings whenever enough descriptive text is available.
+		// Uses a hash of the input text to skip redundant computations.
 		try {
 			String textToEmbed = buildEmbeddingText(data, resolvedVertical);
 			String prefixedText = applyEmbeddingPrefix(textToEmbed);
 
 			if (StringUtils.isNotBlank(prefixedText)) {
-				final float[] embedding = embeddingService.embed(prefixedText);
-				if (embedding != null) {
-					// Forcing to a 512 dims vector
-					float[] padded = IdHelper.to512(embedding);
-					data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
+				long textHash = prefixedText.hashCode();
+				if (data.getEmbedding() != null && textHash == data.getEmbeddingTextHash()) {
+					logger.debug("Embedding text unchanged for product {}, skipping", data.getId());
+				} else {
+					final float[] embedding = embeddingService.embed(prefixedText);
+					if (embedding != null) {
+						// Forcing to a 512 dims vector
+						float[] padded = IdHelper.to512(embedding);
+						data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
+						data.setEmbeddingTextHash(textHash);
+					}
 				}
 			}
 		} catch (Exception ex) {

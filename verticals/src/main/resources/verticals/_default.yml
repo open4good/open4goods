@@ -72,6 +72,7 @@ compositeScores:
   - DURABILITY
   - REPARABILITY
   - ESG
+  - ENERGY_CONSUMPTION
 
 # Fast filters; with classical attributes range values for the product category page
 subsets:

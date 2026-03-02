@@ -456,6 +456,200 @@ nudgeToolConfig:
         en: "Fan-assisted cooling for even temperature"
         fr: "Froid brassé pour une température homogène"
 
+# Fast filters; with classical attributes range values for the product category page
+subsets:
+# Price Subsets
+- id: "price_lower_400"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "LOWER_THAN"
+      value: "400"
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "0"
+  image: "example-image.png"
+  url:
+    en: "low-price"
+    fr: "petits-prix"
+  caption:
+    en: "< 400 €"
+    fr: "< 400 €"
+  title:
+    en: "Budget-friendly"
+    fr: "Petits prix"
+  description:
+    en: "Refrigerators under €400"
+    fr: "Réfrigérateurs à moins de 400 €"
+
+- id: "price_400_800"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "400"
+    - field: "price.minPrice.price"
+      operator: "LOWER_THAN"
+      value: "800"
+  image: "example-image.png"
+  url:
+    en: "mid-range-price"
+    fr: "milieu-de-gamme"
+  caption:
+    en: "400 - 800 €"
+    fr: "400 - 800 €"
+  title:
+    en: "Standard range"
+    fr: "Milieu de gamme"
+  description:
+    en: "Refrigerators between €400 and €800"
+    fr: "Réfrigérateurs entre 400 € et 800 €"
+
+- id: "price_greater_800"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "800"
+  image: "example-image.png"
+  url:
+    en: "premium-price"
+    fr: "haut-de-gamme"
+  caption:
+    en: "> 800 €"
+    fr: "> 800 €"
+  title:
+    en: "Premium"
+    fr: "Haut de gamme"
+  description:
+    en: "Refrigerators over €800"
+    fr: "Réfrigérateurs à plus de 800 €"
+
+# Volume Subsets
+- id: "volume_small"
+  group: "volume"
+  criterias:
+    - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+      operator: "LOWER_THAN"
+      value: "250"
+  image: "example-image.png"
+  url:
+    en: "small-capacity"
+    fr: "petite-capacite"
+  caption:
+    en: "< 250 L"
+    fr: "< 250 L"
+  title:
+    en: "Small capacity"
+    fr: "Petite capacité"
+  description:
+    en: "Ideal for small spaces or couples"
+    fr: "Idéal pour les petits espaces ou les couples"
+
+- id: "volume_medium"
+  group: "volume"
+  criterias:
+    - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+      operator: "GREATER_THAN"
+      value: "250"
+    - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+      operator: "LOWER_THAN"
+      value: "400"
+  image: "example-image.png"
+  url:
+    en: "medium-capacity"
+    fr: "capacite-standard"
+  caption:
+    en: "250 - 400 L"
+    fr: "250 - 400 L"
+  title:
+    en: "Standard capacity"
+    fr: "Capacité standard"
+  description:
+    en: "Standard size for families"
+    fr: "Taille standard pour les familles"
+
+- id: "volume_large"
+  group: "volume"
+  criterias:
+    - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+      operator: "GREATER_THAN"
+      value: "400"
+  image: "example-image.png"
+  url:
+    en: "large-capacity"
+    fr: "grande-capacite"
+  caption:
+    en: "> 400 L"
+    fr: "> 400 L"
+  title:
+    en: "Large capacity"
+    fr: "Grande capacité"
+  description:
+    en: "Generous space for large families"
+    fr: "Espace généreux pour les grandes familles"
+
+# Cooling System Subsets
+- id: "cooling_static"
+  group: "cooling_system"
+  criterias:
+    - field: "attributes.indexed.COOLING_SYSTEM.value"
+      operator: "EQUALS"
+      value: "FROID STATIQUE"
+  image: "example-image.png"
+  url:
+    en: "static-cooling"
+    fr: "froid-statique"
+  caption:
+    en: "Static"
+    fr: "Statique"
+  title:
+    en: "Static Cooling"
+    fr: "Froid Statique"
+  description:
+    en: "Traditional cooling"
+    fr: "Le froid traditionnel"
+
+- id: "cooling_ventilated"
+  group: "cooling_system"
+  criterias:
+    - field: "attributes.indexed.COOLING_SYSTEM.value"
+      operator: "EQUALS"
+      value: "FROID VENTILÉ"
+  image: "example-image.png"
+  url:
+    en: "ventilated-cooling"
+    fr: "froid-ventile"
+  caption:
+    en: "Ventilated"
+    fr: "Ventilé"
+  title:
+    en: "Ventilated Cooling"
+    fr: "Froid Ventilé"
+  description:
+    en: "No frost technology for better preservation"
+    fr: "Plus de technologies de conservation"
+
+- id: "cooling_brassed"
+  group: "cooling_system"
+  criterias:
+    - field: "attributes.indexed.COOLING_SYSTEM.value"
+      operator: "EQUALS"
+      value: "FROID BRASSÉ"
+  image: "example-image.png"
+  url:
+    en: "brassed-cooling"
+    fr: "froid-brasse"
+  caption:
+    en: "Stirred"
+    fr: "Brassé"
+  title:
+    en: "Stirred Cooling"
+    fr: "Froid Brassé"
+  description:
+    en: "Fan-assisted cooling for even temperature"
+    fr: "Froid brassé pour une température homogène"
+
 ##############################################################################
 # Custom search filters : the following filters
 # will also be availlable in search for this vertical (must be an attribute or a score)

@@ -374,6 +374,122 @@ nudgeToolConfig:
 
 
 
+# Fast filters; with classical attributes range values for the product category page
+subsets:
+################
+# Price
+################
+- id: "price_lower_400"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "LOWER_THAN"
+      value: "400"
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "0"
+  image: "example-image.png"
+  url:
+    en: "low-price"
+    fr: "petits-prix"
+  caption:
+    en: "< 400 €"
+    fr: "< 400 €"
+  title:
+    en: "Affordable ovens"
+    fr: "Fours entrée de gamme"
+  description:
+    en: "Ovens priced under €400."
+    fr: "Les fours dont le prix est inférieur à 400€."
+
+- id: "price_400_800"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "400"
+    - field: "price.minPrice.price"
+      operator: "LOWER_THAN"
+      value: "800"
+  image: "example-image.png"
+  url:
+    en: "oven-400-800-euros"
+    fr: "four-400-800-euros"
+  caption:
+    en: "400 - 800 €"
+    fr: "400 - 800 €"
+  title:
+    en: "Mid-range ovens"
+    fr: "Fours milieu de gamme"
+  description:
+    en: "Ovens priced between €400 and €800."
+    fr: "Les fours dont le prix est compris entre 400€ et 800€."
+
+- id: "price_greater_800"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "800"
+  image: "example-image.png"
+  url:
+    en: "premium-price"
+    fr: "haut-de-gamme"
+  caption:
+    en: "> 800 €"
+    fr: "> 800 €"
+  title:
+    en: "Premium ovens"
+    fr: "Fours haut de gamme"
+  description:
+    en: "Ovens priced over €800."
+    fr: "Les fours dont le prix est supérieur à 800€."
+
+################
+# Capacity
+################
+- id: "capacity_standard"
+  group: "capacity"
+  criterias:
+    - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
+      operator: "GREATER_THAN"
+      value: "60"
+  image: "example-image.png"
+  url:
+    en: "standard-capacity"
+    fr: "grande-capacite"
+  caption:
+    en: "Standard (> 60L)"
+    fr: "Standard (> 60L)"
+  title:
+    en: "Standard Capacity"
+    fr: "Four standard"
+  description:
+    en: "Standard size ovens for family cooking."
+    fr: "Fours de taille standard pour cuisiner pour toute la famille."
+
+- id: "capacity_compact"
+  group: "capacity"
+  criterias:
+    - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
+      operator: "LOWER_THAN"
+      value: "60"
+  image: "example-image.png"
+  url:
+    en: "compact-capacity"
+    fr: "fours-compacts"
+  caption:
+    en: "Compact (< 60L)"
+    fr: "Compact (< 60L)"
+  title:
+    en: "Compact Ovens"
+    fr: "Fours compacts"
+  description:
+    en: "Compact ovens for smaller spaces or occasional cooking."
+    fr: "Fours compacts pour les petits espaces."
+
+
+
 ##############################################################################
 # Custom search filters : the following filters
 # will also be availlable in search for this vertical (must be an attribute or a score)

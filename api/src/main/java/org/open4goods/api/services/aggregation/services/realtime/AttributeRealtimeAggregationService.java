@@ -182,7 +182,19 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		indexedAttr.getSource().addAll(attr.getSource());
 
-		String bestValue = indexedAttr.bestValue();
+		String bestValue = null;
+		if (attrConf != null && attrConf.getParser() != null && !StringUtils.isEmpty(attrConf.getParser().getClazz())) {
+			try {
+				bestValue = attrConf.getParserInstance().parse(attr, attrConf, vConf);
+			} catch (Exception e) {
+				dedicatedLogger.error("Error parsing attribute with custom parser", e);
+			}
+		}
+		
+		if (bestValue == null) {
+			bestValue = indexedAttr.bestValue();
+		}
+
 		if (null == bestValue) {
 			return;
 		}
@@ -203,6 +215,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				indexedAttr.setNumericValue(null);
 			}
 		}
+		
+		attr.setValue(bestValue);
 	}
 
 	/**
@@ -707,6 +721,24 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 */
 	public String parseAttributeValue(final ProductAttribute attr, final AttributeConfig attrConf, VerticalConfig vConf)
 			throws ValidationException {
+
+		if (attrConf != null && attrConf.getParser() != null && !StringUtils.isEmpty(attrConf.getParser().getClazz())) {
+			try {
+				final AttributeParser parser = attrConf.getParserInstance();
+				String string = parser.parse(attr, attrConf, vConf);
+				if (AttributeType.NUMERIC.equals(attrConf.getFilteringType()) && string != null) {
+					string = sanitizeNumericValue(string);
+				}
+				return string;
+			} catch (final ResourceNotFoundException e) {
+				dedicatedLogger.warn("Error while applying specific parser for {}", attrConf.getParser().getClazz(), e);
+				throw new ValidationException(e.getMessage());
+			} catch (final Exception e) {
+				dedicatedLogger.error("Unexpected exception while parsing with {}",
+						attrConf.getParser().getClazz(), e);
+				throw new ValidationException(e.getMessage());
+			}
+		}
 
 		return parseValue(attr.getValue(), attrConf, vConf);
 

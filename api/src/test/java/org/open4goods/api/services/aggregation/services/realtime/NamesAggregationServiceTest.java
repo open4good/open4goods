@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -208,4 +210,31 @@ class NamesAggregationServiceTest {
 		// Attribute resolution + whitespace normalization (empty attribute replaced by empty string)
 		assertThat(product.getNames().getLongName().get("fr")).isEqualTo("Samsung Galaxy TV - 55");
 	}
+	@Test
+	void onProduct_shouldSkipEmbeddingWhenTextUnchanged() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("pref");
+		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
+
+		Product product = new Product(8L);
+		product.setVertical("vertical-id");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
+		product.getOfferNames().add("offre");
+
+		// First call: Should compute embedding
+		service.onProduct(product, config);
+
+		assertNotNull(product.getEmbedding());
+		long hashAfterFirstCall = product.getEmbeddingTextHash();
+		
+		// Second call: Input hasn't changed, should skip embeddingService.embed()
+		service.onProduct(product, config);
+
+		// Verify embed() was only called once, not twice
+		verify(embeddingService, times(1)).embed(anyString());
+		assertThat(product.getEmbeddingTextHash()).isEqualTo(hashAfterFirstCall);
+	}
+
 }

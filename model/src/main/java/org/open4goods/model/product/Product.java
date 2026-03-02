@@ -181,6 +181,12 @@ public class Product implements Standardisable {
 	@Field(type = FieldType.Dense_Vector, dims = 512)
 	private float[] embedding;
 
+	/**
+	 * Hash of the text that produced the current {@link #embedding}.
+	 * Used to skip redundant embedding computations when the input text has not changed.
+	 */
+	private long embeddingTextHash;
+
 	public Map<String, String> getDescriptionsByDatasource() {
 		return descriptionsByDatasource;
 	}
@@ -1116,6 +1122,14 @@ public class Product implements Standardisable {
 
 	public void setEprelDatas(EprelProduct eprelDatas) {
 		this.eprelDatas = eprelDatas;
+	}
+
+	public long getEmbeddingTextHash() {
+		return embeddingTextHash;
+	}
+
+	public void setEmbeddingTextHash(long embeddingTextHash) {
+		this.embeddingTextHash = embeddingTextHash;
 	}
 
 }

@@ -173,6 +173,10 @@
       "index": true,
       "similarity": "cosine"
     },
+    "embeddingTextHash": {
+      "type": "long",
+      "index": false
+    },
 
     "externalIds": {
       "type": "object",

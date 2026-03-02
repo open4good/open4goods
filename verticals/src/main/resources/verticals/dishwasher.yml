@@ -446,6 +446,177 @@ nudgeToolConfig:
         en: "Dishwashers that can be placed anywhere."
         fr: "Lave-vaisselles pouvant être installés n'importe où."
 
+# Fast filters; with classical attributes range values for the product category page
+subsets:
+- id: "price_lower_400"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "LOWER_THAN"
+      value: "400"
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "0"
+  image: "example-image.png"
+  url:
+    en: "low-price"
+    fr: "petits-prix"
+  caption:
+    en: "< 400 €"
+    fr: "< 400 €"
+  title:
+    en: "Affordable dishwashers"
+    fr: "Lave-vaisselles entrée de gamme"
+  description:
+    en: "dishwashers priced under €400."
+    fr: "Les lave-vaisselles dont le prix est inférieur à 400€."
+
+- id: "price_400_700"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "400"
+    - field: "price.minPrice.price"
+      operator: "LOWER_THAN"
+      value: "700"
+  image: "example-image.png"
+  url:
+    en: "dishwasher-400-700-euros"
+    fr: "lave-vaisselle-400-700-euros"
+  caption:
+    en: "400 - 700 €"
+    fr: "400 - 700 €"
+  title:
+    en: "Mid-range dishwashers"
+    fr: "Lave-vaisselles milieu de gamme"
+  description:
+    en: "dishwashers priced between €400 and €700."
+    fr: "Les lave-vaisselles dont le prix est compris entre 400€ et 700€."
+
+- id: "price_greater_700"
+  group: "price"
+  criterias:
+    - field: "price.minPrice.price"
+      operator: "GREATER_THAN"
+      value: "700"
+  image: "example-image.png"
+  url:
+    en: "premium-price"
+    fr: "haut-de-gamme"
+  caption:
+    en: "> 700 €"
+    fr: "> 700 €"
+  title:
+    en: "Premium dishwashers"
+    fr: "Lave-vaisselles haut de gamme"
+  description:
+    en: "dishwashers priced over €700."
+    fr: "Les lave-vaisselles dont le prix est supérieur à 700€."
+
+- id: "capacity_small"
+  group: "capacity"
+  criterias:
+    - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
+      operator: "LOWER_THAN"
+      value: "10"
+  image: "small-capacity.png"
+  url:
+    en: "small-capacity"
+    fr: "petite-capacite"
+  caption:
+    en: "< 10 settings"
+    fr: "< 10 couverts"
+  title:
+    en: "Small Capacity"
+    fr: "Petite Capacité"
+  description:
+    en: "Dishwashers with less than 10 place settings."
+    fr: "Lave-vaisselles de moins de 10 couverts."
+
+- id: "capacity_standard"
+  group: "capacity"
+  criterias:
+    - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
+      operator: "GREATER_THAN"
+      value: "10"
+    - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
+      operator: "LOWER_THAN"
+      value: "14"
+  image: "medium-capacity.png"
+  url:
+    en: "standard-capacity"
+    fr: "capacite-scandard"
+  caption:
+    en: "10 - 14 settings"
+    fr: "10 - 14 couverts"
+  title:
+    en: "Standard Capacity"
+    fr: "Capacité Standard"
+  description:
+    en: "Dishwashers with 10 to 14 place settings."
+    fr: "Lave-vaisselles de 10 à 14 couverts."
+
+- id: "capacity_large"
+  group: "capacity"
+  criterias:
+    - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
+      operator: "GREATER_THAN"
+      value: "14"
+  image: "large-capacity.png"
+  url:
+    en: "large-capacity"
+    fr: "grande-capacite"
+  caption:
+    en: "> 14 settings"
+    fr: "> 14 couverts"
+  title:
+    en: "Large Capacity"
+    fr: "Grande Capacité"
+  description:
+    en: "Dishwashers with more than 14 place settings."
+    fr: "Lave-vaisselles de plus de 14 couverts."
+
+- id: "installation_builtin"
+  group: "installation"
+  criterias:
+    - field: "attributes.indexed.INSTALLATION_TYPE.value"
+      operator: "EQUALS"
+      value: "ENCASTRABLE"
+  image: "builtin.png"
+  url:
+    en: "builtin-dishwashers"
+    fr: "lave-vaisselles-encastrables"
+  caption:
+    en: "Built-in"
+    fr: "Encastrable"
+  title:
+    en: "Built-in Dishwashers"
+    fr: "Lave-vaisselles encastrables"
+  description:
+    en: "Dishwashers designed to be built into your kitchen cabinets."
+    fr: "Lave-vaisselles conçus pour être encastrés."
+
+- id: "installation_freestanding"
+  group: "installation"
+  criterias:
+    - field: "attributes.indexed.INSTALLATION_TYPE.value"
+      operator: "EQUALS"
+      value: "POSE LIBRE"
+  image: "freestanding.png"
+  url:
+    en: "freestanding-dishwashers"
+    fr: "lave-vaisselles-pose-libre"
+  caption:
+    en: "Freestanding"
+    fr: "Pose libre"
+  title:
+    en: "Freestanding Dishwashers"
+    fr: "Lave-vaisselles pose libre"
+  description:
+    en: "Dishwashers that can be placed anywhere."
+    fr: "Lave-vaisselles pouvant être installés n'importe où."
+
 ##############################################################################
 # Custom search filters : the following filters
 # will also be availlable in search for this vertical (must be an attribute or a score)
