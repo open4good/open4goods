@@ -1,363 +1,382 @@
 {
-  "dynamic": "strict",
-  "dynamic_templates": [
-    {
-      "score_absolute_count_as_integer": {
-        "path_match": "scores.*.absolute.count",
-        "mapping": {
-          "type": "integer"
-        }
-      }
-    },
-    {
-      "disable_score_absolute": {
-        "path_match": "scores.*.absolute.*",
-        "path_unmatch": "scores.*.absolute.count",
-        "mapping": {
-          "enabled": false,
-          "type": "object"
-        }
-      }
-    },
-    {
-      "disable_score_relativ": {
-        "path_match": "scores.*.relativ",
-        "mapping": {
-          "enabled": false,
-          "type": "object"
-        }
-      }
-    },
-    {
-      "disable_score_aggregates": {
-        "path_match": "scores.*.aggregates",
-        "mapping": {
-          "enabled": false,
-          "type": "object"
-        }
-      }
-    },
-    {
-      "scorename_as_keyword": {
-        "path_match": "scores.*.name",
-        "mapping": {
-          "type": "keyword",
-          "ignore_above": 256
-        }
-      }
-    },
-    {
-      "disable_indexed_source_attributes": {
-        "path_match": "attributes.indexed.*.source",
-        "mapping": {
-          "enabled": false,
-          "type": "object"
-        }
-      }
-    },
-    {
-      "name_as_keyword_in_indexedAttributes": {
-        "path_match": "attributes.indexed.*.name",
-        "mapping": {
-          "type": "keyword",
-          "ignore_above": 256
-        }
-      }
-    },
-    {
-      "value_as_keyword_in_indexedAttributes": {
-        "path_match": "attributes.indexed.*.value",
-        "mapping": {
-          "type": "keyword",
-          "ignore_above": 256
-        }
-      }
-    },
-    {
-      "numericValue_as_double_in_indexedAttributes": {
-        "path_match": "attributes.indexed.*.numericValue",
-        "mapping": {
-          "type": "double"
-        }
-      }
-    },
-    {
-      "boolValue_as_boolean_in_indexedAttributes": {
-        "path_match": "attributes.indexed.*.boolValue",
-        "mapping": {
-          "type": "boolean"
-        }
-      }
-    }
-  ],
-  "properties": {
-    "id": {
-      "type": "long",
-      "index": false
-    },
-    "akaBrands": {
-      "type": "object",
-      "enabled": false
-    },
-    "akaModels": {
-      "type": "keyword",
-      "index": false
-    },
-    "datasourceCodes": {
-      "type": "object",
-      "enabled": false
-    },
-    "attributes": {
-      "properties": {
-        "indexed": {
-          "dynamic": "true",
-          "properties": {
-            "name": {
-              "type": "keyword",
-              "ignore_above": 256
+    "dynamic": "strict",
+    "dynamic_templates": [
+        {
+            "score_absolute_count_as_integer": {
+                "path_match": "scores.*.absolute.count",
+                "mapping": {
+                    "type": "integer"
+                }
             }
-          }
         },
-        "referentielAttributes": {
-          "properties": {
-            "BRAND": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "GTIN": {
-              "type": "long",
-              "index": false
-            },
-            "MODEL": {
-              "type": "keyword",
-              "ignore_above": 256,
-              "index": false
+        {
+            "disable_score_metadatas": {
+                "path_match": "scores.*.metadatas",
+                "mapping": {
+                    "type": "object",
+                    "enabled": false
+                }
             }
-          }
         },
-        "all": {
-          "type": "object",
-          "enabled": false
-        },
-        "features": {
-          "type": "object",
-          "enabled": false
-        }
-      }
-    },
-    "coverImagePath": {
-      "type": "keyword",
-      "index": false
-    },
-    "creationDate": {
-      "type": "date",
-      "format": "date_optional_time||epoch_millis"
-    },
-    "datasourceCategories": {
-      "type": "keyword"
-    },
-    "datasourceNames": {
-      "type": "keyword",
-      "index": false
-    },
-    "excluded": {
-      "type": "boolean"
-    },
-    "excludedCauses": {
-      "type": "keyword",
-      "index": true
-    },
-    "embedding": {
-      "type": "dense_vector",
-      "dims": 512,
-      "index": true,
-      "similarity": "cosine"
-    },
-    "embeddingTextHash": {
-      "type": "long",
-      "index": false
-    },
-
-    "externalIds": {
-      "type": "object",
-      "dynamic": "false"
-    },
-
-    "eprelDatas": {
-      "type": "object",
-      "dynamic": "false"
-    },
-    "categoriesByDatasources": {
-      "type": "object",
-      "enabled": false
-    },
-    "descriptionsByDatasource": {
-      "type": "object",
-      "enabled": false
-    },
-    "reviews": {
-      "type": "object",
-      "enabled": false
-    },
-
-    "googleTaxonomyId": {
-      "type": "integer",
-      "index": false
-    },
-    "lastChange": {
-      "type": "date",
-      "format": "date_optional_time||epoch_millis"
-    },
-    "names": {
-      "type": "object",
-      "enabled": false
-    },
-    "offersCount": {
-      "type": "integer"
-    },
-    "price": {
-      "properties": {
-        "conditions": {
-          "type": "keyword"
-        },
-        "minPrice": {
-          "properties": {
-            "compensation": {
-              "type": "double",
-              "index": false
-            },
-            "currency": {
-              "type": "keyword",
-              "index": false
-            },
-            "offerName": {
-              "type": "keyword",
-              "index": false
-            },
-            "datasourceName": {
-              "type": "keyword",
-              "index": false
-            },
-            "price": {
-              "type": "double"
-            },
-            "productState": {
-              "type": "keyword"
-            },
-            "timeStamp": {
-              "type": "date",
-              "format": "epoch_millis"
-            },
-            "url": {
-              "type": "keyword",
-              "index": false
+        {
+            "disable_score_absolute": {
+                "path_match": "scores.*.absolute.*",
+                "path_unmatch": "scores.*.absolute.count",
+                "mapping": {
+                    "enabled": false,
+                    "type": "object"
+                }
             }
-          }
         },
-        "newPricehistory": {
-          "type": "object",
-          "enabled": false
+        {
+            "disable_score_relativ": {
+                "path_match": "scores.*.relativ",
+                "mapping": {
+                    "enabled": false,
+                    "type": "object"
+                }
+            }
         },
-        "occasionPricehistory": {
-          "type": "object",
-          "enabled": false
+        {
+            "disable_score_aggregates": {
+                "path_match": "scores.*.aggregates",
+                "mapping": {
+                    "enabled": false,
+                    "type": "object"
+                }
+            }
         },
-        "offers": {
-          "type": "object",
-          "enabled": false
+        {
+            "scorename_as_keyword": {
+                "path_match": "scores.*.name",
+                "mapping": {
+                    "type": "keyword",
+                    "index": false,
+                    "doc_values": false,
+                    "ignore_above": 256
+                }
+            }
         },
-        "trend": {
-          "type": "integer",
-          "index": false
+        {
+            "disable_indexed_source_attributes": {
+                "path_match": "attributes.indexed.*.source",
+                "mapping": {
+                    "enabled": false,
+                    "type": "object"
+                }
+            }
         },
-        "trends": {
-          "type": "object",
-          "enabled": false
+        {
+            "name_as_keyword_in_indexedAttributes": {
+                "path_match": "attributes.indexed.*.name",
+                "mapping": {
+                    "type": "keyword",
+                    "index": false,
+                    "doc_values": false,
+                    "ignore_above": 256
+                }
+            }
+        },
+        {
+            "value_as_keyword_in_indexedAttributes": {
+                "path_match": "attributes.indexed.*.value",
+                "mapping": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                }
+            }
+        },
+        {
+            "numericValue_as_double_in_indexedAttributes": {
+                "path_match": "attributes.indexed.*.numericValue",
+                "mapping": {
+                    "type": "double"
+                }
+            }
         }
-      }
-    },
-    "ranking": {
-      "type": "object",
-      "enabled": false
-    },
-    "resources": {
-      "type": "object",
-      "dynamic": "false",
-      "properties": {
-        "url": {
-          "type": "keyword",
-          "index": false
+    ],
+    "properties": {
+        "id": {
+            "type": "long",
+            "index": false,
+            "doc_values": false
         },
-        "resourceType": {
-          "type": "keyword"
+        "akaBrands": {
+            "type": "object",
+            "enabled": false
         },
-        "imageInfo": {
-          "type": "object",
-          "enabled": false
-        }
-      }
-    },
-
-    "scores": {
-      "dynamic": "true",
-      "properties": {
-        "metadatas": {
-          "type": "object",
-          "enabled": false
+        "akaModels": {
+            "type": "keyword",
+            "index": false,
+            "doc_values": false
         },
-
-        "name": {
-          "type": "keyword",
-          "index": false
+        "datasourceCodes": {
+            "type": "object",
+            "enabled": false
+        },
+        "attributes": {
+            "properties": {
+                "indexed": {
+                    "dynamic": "true",
+                    "properties": {
+                        "name": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "referentielAttributes": {
+                    "properties": {
+                        "BRAND": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        },
+                        "GTIN": {
+                            "type": "long",
+                            "index": false,
+                            "doc_values": false
+                        },
+                        "MODEL": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "index": false,
+                            "doc_values": false
+                        }
+                    }
+                },
+                "all": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "features": {
+                    "type": "object",
+                    "enabled": false
+                }
+            }
+        },
+        "coverImagePath": {
+            "type": "keyword",
+            "index": false,
+            "doc_values": false
+        },
+        "creationDate": {
+            "type": "date",
+            "format": "date_optional_time||epoch_millis"
+        },
+        "datasourceCategories": {
+            "type": "keyword"
+        },
+        "datasourceNames": {
+            "type": "keyword",
+            "index": false,
+            "doc_values": false
+        },
+        "excluded": {
+            "type": "boolean"
+        },
+        "excludedCauses": {
+            "type": "keyword",
+            "index": true
+        },
+        "embedding": {
+            "type": "dense_vector",
+            "dims": 512,
+            "index": true,
+            "similarity": "cosine"
+        },
+        "embeddingTextHash": {
+            "type": "long",
+            "index": false,
+            "doc_values": false
+        },
+        "externalIds": {
+            "type": "object",
+            "dynamic": "false"
+        },
+        "eprelDatas": {
+            "type": "object",
+            "dynamic": "false"
+        },
+        "categoriesByDatasources": {
+            "type": "object",
+            "enabled": false
+        },
+        "descriptionsByDatasource": {
+            "type": "object",
+            "enabled": false
+        },
+        "reviews": {
+            "type": "object",
+            "enabled": false
+        },
+        "googleTaxonomyId": {
+            "type": "integer",
+            "index": false,
+            "doc_values": false
+        },
+        "lastChange": {
+            "type": "date",
+            "format": "date_optional_time||epoch_millis"
+        },
+        "names": {
+            "type": "object",
+            "enabled": false
+        },
+        "offersCount": {
+            "type": "integer"
+        },
+        "price": {
+            "properties": {
+                "conditions": {
+                    "type": "keyword"
+                },
+                "minPrice": {
+                    "properties": {
+                        "compensation": {
+                            "type": "double",
+                            "index": false,
+                            "doc_values": false
+                        },
+                        "currency": {
+                            "type": "keyword",
+                            "index": false,
+                            "doc_values": false
+                        },
+                        "offerName": {
+                            "type": "keyword",
+                            "index": false,
+                            "doc_values": false
+                        },
+                        "datasourceName": {
+                            "type": "keyword",
+                            "index": false,
+                            "doc_values": false
+                        },
+                        "price": {
+                            "type": "double"
+                        },
+                        "productState": {
+                            "type": "keyword"
+                        },
+                        "timeStamp": {
+                            "type": "date",
+                            "format": "epoch_millis"
+                        },
+                        "url": {
+                            "type": "keyword",
+                            "index": false,
+                            "doc_values": false
+                        }
+                    }
+                },
+                "newPricehistory": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "occasionPricehistory": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "offers": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "trend": {
+                    "type": "integer",
+                    "index": false,
+                    "doc_values": false
+                },
+                "trends": {
+                    "type": "object",
+                    "enabled": false
+                }
+            }
         },
         "ranking": {
-          "type": "integer",
-          "index": false
+            "type": "object",
+            "enabled": false
         },
-
-        "highestScoreId": {
-          "type": "long",
-          "index": false
+        "resources": {
+            "type": "object",
+            "dynamic": "false",
+            "properties": {
+                "url": {
+                    "type": "keyword",
+                    "index": false,
+                    "doc_values": false
+                },
+                "resourceType": {
+                    "type": "keyword"
+                },
+                "imageInfo": {
+                    "type": "object",
+                    "enabled": false
+                }
+            }
         },
-
-        "lowestScoreId": {
-          "type": "long",
-          "index": false
+        "scores": {
+            "dynamic": "true",
+            "properties": {
+                "metadatas": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "name": {
+                    "type": "keyword",
+                    "index": false,
+                    "doc_values": false
+                },
+                "ranking": {
+                    "type": "integer",
+                    "index": false,
+                    "doc_values": false
+                },
+                "highestScoreId": {
+                    "type": "long",
+                    "index": false,
+                    "doc_values": false
+                },
+                "lowestScoreId": {
+                    "type": "long",
+                    "index": false,
+                    "doc_values": false
+                },
+                "relativ": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "value": {
+                    "type": "double"
+                },
+                "virtual": {
+                    "type": "boolean",
+                    "index": false,
+                    "doc_values": false
+                }
+            }
         },
-
-        "relativ": {
-          "type": "object",
-          "enabled": false
+        "vertical": {
+            "type": "keyword"
         },
-        "value": {
-          "type": "boolean"
+        "offerNames": {
+            "type": "text",
+            "analyzer": "french"
         },
-        "virtual": {
-          "type": "boolean"
+        "gtinInfos": {
+            "properties": {
+                "country": {
+                    "type": "keyword"
+                },
+                "gtinStrings": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "upcType": {
+                    "type": "keyword",
+                    "index": false,
+                    "doc_values": false
+                }
+            }
         }
-      }
-    },
-    "vertical": {
-      "type": "keyword"
-    },
-    "offerNames": {
-      "type": "text",
-      "analyzer": "french"
-    },
-    "gtinInfos": {
-      "properties": {
-        "country": {
-          "type": "keyword"
-        },
-        "gtinStrings": {
-          "type": "object",
-          "enabled": false
-        },
-        "upcType": {
-          "type": "keyword",
-          "index": false
-        }
-      }
     }
-  }
 }
