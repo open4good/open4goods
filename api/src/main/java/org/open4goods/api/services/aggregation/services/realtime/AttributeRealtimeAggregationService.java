@@ -183,7 +183,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		indexedAttr.getSource().addAll(attr.getSource());
 
 		String bestValue = null;
-		if (attrConf != null && attrConf.getParser() != null && !StringUtils.isEmpty(attrConf.getParser().getClazz())) {
+		if (attrConf.getParser() != null && !StringUtils.isEmpty(attrConf.getParser().getClazz())) {
 			try {
 				bestValue = attrConf.getParserInstance().parse(attr, attrConf, vConf);
 			} catch (Exception e) {
