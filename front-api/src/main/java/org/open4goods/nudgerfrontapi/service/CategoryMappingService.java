@@ -593,6 +593,7 @@ public class CategoryMappingService {
         }
         // Ensure operator is set for percentile ranking
         List<SubsetCriteria> criterias = defaultList(subset.getCriterias()).stream()
+            .filter(Objects::nonNull)
             .peek(c -> {
                 if ((c.getFromPercent() != null || c.getToPercent() != null) && c.getOperator() == null) {
                     c.setOperator(org.open4goods.model.vertical.SubsetCriteriaOperator.RANKING_PERCENTILE);

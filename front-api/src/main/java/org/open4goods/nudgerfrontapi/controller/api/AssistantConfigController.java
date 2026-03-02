@@ -255,6 +255,7 @@ public class AssistantConfigController {
         }
 
         List<SubsetCriteria> criterias = defaultList(subset.getCriterias()).stream()
+                .filter(Objects::nonNull)
                 .peek(criteria -> {
                     if ((criteria.getFromPercent() != null || criteria.getToPercent() != null)
                             && criteria.getOperator() == null) {
