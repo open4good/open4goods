@@ -722,7 +722,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	public String parseAttributeValue(final ProductAttribute attr, final AttributeConfig attrConf, VerticalConfig vConf)
 			throws ValidationException {
 
-		if (attrConf != null && attrConf.getParser() != null && !StringUtils.isEmpty(attrConf.getParser().getClazz())) {
+		if (attrConf.getParser() != null && !StringUtils.isEmpty(attrConf.getParser().getClazz())) {
 			try {
 				final AttributeParser parser = attrConf.getParserInstance();
 				String string = parser.parse(attr, attrConf, vConf);
