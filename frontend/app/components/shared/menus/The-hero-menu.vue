@@ -430,6 +430,7 @@
             </v-expand-x-transition>
           </div>
           <div class="d-flex align-center ga-2">
+            <!-- TODO: enable later
             <v-menu
               location="bottom"
               transition="fade-transition"
@@ -515,6 +516,7 @@
                 </div>
               </v-card>
             </v-menu>
+            -->
             <v-menu
               location="bottom"
               transition="fade-transition"
@@ -542,6 +544,7 @@
                     end
                   />
                 </v-btn>
+                <!-- TODO: enable later
                 <v-btn
                   v-else
                   v-bind="props"
@@ -556,11 +559,14 @@
                     />
                   </span>
                 </v-btn>
+                -->
               </template>
+              <!-- TODO: enable later
               <AccountPrivacyCard v-if="!isLoggedIn" />
+              -->
 
               <v-card
-                v-else
+                v-if="isLoggedIn"
                 class="account-menu"
                 color="surface-default"
                 elevation="4"
@@ -653,8 +659,12 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
+// TODO: enable later
+/*
 import { storeToRefs } from 'pinia'
-import AccountPrivacyCard from './AccountPrivacyCard.vue'
+*/
+// TODO: enable later
+// import AccountPrivacyCard from './AccountPrivacyCard.vue'
 import { useI18n } from 'vue-i18n'
 import { useCommunityMenu } from './useCommunityMenu'
 import type { CommunitySection } from './useCommunityMenu'
@@ -671,7 +681,12 @@ import {
   MIN_SEARCH_QUERY_LENGTH,
   useMenuSearchControls,
 } from '~/composables/menus/useMenuSearchControls'
+// TODO: enable later
+/*
 import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
+*/
+// TODO: enable later
+/*
 import { useTheme } from 'vuetify'
 import { useStorage } from '@vueuse/core'
 import {
@@ -679,6 +694,7 @@ import {
   resolveThemeName,
   type ThemeName,
 } from '~~/shared/constants/theme'
+*/
 
 import SearchSuggestField from '~/components/search/SearchSuggestField.vue'
 
@@ -693,24 +709,36 @@ const nuxtApp = useNuxtApp()
 const { isLoggedIn, logout, username, roles } = useAuth()
 const { t, locale } = useI18n()
 const currentLocale = computed(() => normalizeLocale(locale.value))
+
+// TODO: enable later
+/*
 const accessibilityStore = useAccessibilityStore()
 const { isZoomed } = storeToRefs(accessibilityStore)
 const { setZoomed } = accessibilityStore
 const accessibilityLabel = computed(() => t('siteIdentity.menu.zoom.label'))
+*/
 
 // Theme logic
+// TODO: enable later
+/*
 const theme = useTheme()
 const themeCookie = useCookie<string | null>(THEME_PREFERENCE_KEY, {
   sameSite: 'lax',
   path: '/',
   watch: false,
 })
+*/
 // Initialize storage with current cookie or theme value
+// TODO: enable later
+/*
 const storedPreference = useStorage<ThemeName>(
   THEME_PREFERENCE_KEY,
   resolveThemeName(themeCookie.value, theme.global.name.value as ThemeName)
 )
+*/
 
+// TODO: enable later
+/*
 const currentTheme = computed(() => theme.global.name.value)
 
 const setTheme = (value: ThemeName) => {
@@ -719,6 +747,7 @@ const setTheme = (value: ThemeName) => {
   // Persist to cookie for SSR
   themeCookie.value = value
 }
+*/
 const {
   navigation: categoryNavigation,
   fetchNavigation,
