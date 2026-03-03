@@ -224,15 +224,15 @@ public class CategoriesController {
     private List<ProductDto> resolveTopProducts(ProductCategory category,
                                                 DomainLanguage domainLanguage,
                                                 String condition) {
-        List<String> taxonomyIds = collectGoogleCategoryIds(category);
-        if (taxonomyIds.isEmpty()) {
+        List<String> verticalIds = collectVerticalIds(category);
+        if (verticalIds.isEmpty()) {
             return List.of();
         }
 
         Filter conditionFilter = new Filter(FilterField.condition.fieldPath(), FilterOperator.term,
                 List.of(condition), null, null);
-        Filter taxonomyFilter = new Filter(FilterField.googleTaxonomyId.fieldPath(), FilterOperator.term,
-                taxonomyIds, null, null);
+        Filter taxonomyFilter = new Filter(FilterField.vertical.fieldPath(), FilterOperator.term,
+                verticalIds, null, null);
         FilterRequestDto filters = new FilterRequestDto(List.of(conditionFilter, taxonomyFilter), List.of());
 
         Pageable pageable = PageRequest.of(0, TOP_PRODUCTS_LIMIT,
@@ -255,21 +255,21 @@ public class CategoriesController {
         return List.copyOf(uniqueProducts.values());
     }
 
-    private List<String> collectGoogleCategoryIds(ProductCategory category) {
+    private List<String> collectVerticalIds(ProductCategory category) {
         if (category == null) {
             return List.of();
         }
-        LinkedHashSet<Integer> identifiers = new LinkedHashSet<>();
-        if (category.getGoogleCategoryId() != null) {
-            identifiers.add(category.getGoogleCategoryId());
+        LinkedHashSet<String> identifiers = new LinkedHashSet<>();
+        if (category.getVertical() != null && category.getVertical().getId() != null) {
+            identifiers.add(category.getVertical().getId());
         }
         category.verticals().stream()
-                .map(ProductCategory::getGoogleCategoryId)
+                .map(ProductCategory::getVertical)
+                .filter(Objects::nonNull)
+                .map(VerticalConfig::getId)
                 .filter(Objects::nonNull)
                 .forEach(identifiers::add);
-        return identifiers.stream()
-                .map(String::valueOf)
-                .toList();
+        return identifiers.stream().toList();
     }
 
     private Locale resolveLocale(DomainLanguage domainLanguage) {

@@ -67,6 +67,8 @@ public record FilterRequestDto(
         condition("price.conditions", FilterValueType.keyword),
         @Schema(description = "Filter on the Google taxonomy identifier associated with the product", example = "1234")
         googleTaxonomyId("googleTaxonomyId", FilterValueType.numeric),
+        @Schema(description = "Filter on the vertical identifier associated with the product", example = "smartphone")
+        vertical("vertical", FilterValueType.keyword),
         @Schema(description = "Filter on the product brand reported by datasources", example = "brand")
         brand("attributes.referentielAttributes.BRAND", FilterValueType.keyword),
         @Schema(description = "Filter on the country resolved from the GTIN prefix", example = "country")
