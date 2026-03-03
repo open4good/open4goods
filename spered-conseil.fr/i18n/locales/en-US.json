@@ -1,0 +1,26 @@
+{
+  "header": {
+    "brand": "Spered Conseil",
+    "home": "Home",
+    "contact": "Contact"
+  },
+  "footer": {
+    "placeholder": "Footer (placeholder)",
+    "legal": "© Spered Conseil"
+  },
+  "contact": {
+    "form": {
+      "title": "Contact us",
+      "name": "Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send",
+      "captchaRequired": "Please complete hCaptcha first.",
+      "captchaError": "An hCaptcha error occurred.",
+      "missingSiteKey": "HCAPTCHA_SITE_KEY is not configured.",
+      "success": "Your message has been sent.",
+      "error": "Unable to send your message right now."
+    }
+  }
+}
