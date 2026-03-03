@@ -150,6 +150,7 @@ const renderChart = async () => {
     'BarChart',
     'LineChart',
     'ScatterChart',
+    'PieChart',
     'GridComponent',
     'TooltipComponent',
     'LegendComponent',

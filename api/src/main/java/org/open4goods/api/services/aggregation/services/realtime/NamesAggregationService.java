@@ -1,5 +1,6 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -237,22 +238,23 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 		// ---- Embedding computation  ----
 		// Compute embeddings whenever enough descriptive text is available.
-		// Uses a hash of the input text to skip redundant computations.
+		// Uses a structured matrix-based cache key to skip redundant computations.
 		try {
 			String textToEmbed = buildEmbeddingText(data, resolvedVertical);
 			String prefixedText = applyEmbeddingPrefix(textToEmbed);
 
 			if (StringUtils.isNotBlank(prefixedText)) {
-				long textHash = prefixedText.hashCode();
-				if (data.getEmbedding() != null && textHash == data.getEmbeddingTextHash()) {
-					logger.debug("Embedding text unchanged for product {}, skipping", data.getId());
+
+				long cacheKey = computeEmbeddingCacheKey(data, resolvedVertical);
+				if (cacheKey == data.getEmbeddingTextHash()) {
+					logger.debug("Embedding cache key unchanged for product {}, skipping", data.getId());
 				} else {
 					final float[] embedding = embeddingService.embed(prefixedText);
 					if (embedding != null) {
 						// Forcing to a 512 dims vector
 						float[] padded = IdHelper.to512(embedding);
 						data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
-						data.setEmbeddingTextHash(textHash);
+						data.setEmbeddingTextHash(cacheKey);
 					}
 				}
 			}
@@ -514,7 +516,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 			chunks.addAll(offers);
 		}
 
-		// TODO : Should be all attributes
 		// Popular attribute name/value pairs (whitelisted per vertical)
 		List<String> popularAttributeKeys = vConf != null ? vConf.getPopularAttributes() : List.of();
 		if (!popularAttributeKeys.isEmpty() && data.getAttributes() != null) {
@@ -549,6 +550,86 @@ public class NamesAggregationService extends AbstractAggregationService {
 			return combined.substring(0, 1000);
 		}
 		return combined;
+	}
+
+	/**
+	 * Computes a structured cache key for embedding inputs.
+	 * <p>
+	 * Instead of hashing the full text (which is prone to collisions), this method builds a
+	 * 6-slot feature matrix capturing the meaningful structural properties of the product data
+	 * that feeds into the embedding text. The matrix is hashed via {@link Arrays#hashCode(int[])}
+	 * to produce a compact {@code long} stored in {@link Product#getEmbeddingTextHash()}.
+	 * </p>
+	 *
+	 * <table>
+	 *   <tr><th>Slot</th><th>Feature</th><th>Range</th></tr>
+	 *   <tr><td>0</td><td>Brand present</td><td>0 or 1</td></tr>
+	 *   <tr><td>1</td><td>Model present</td><td>0 or 1</td></tr>
+	 *   <tr><td>2</td><td>Vertical prefix count</td><td>0..N</td></tr>
+	 *   <tr><td>3</td><td>Best name single-digit hash</td><td>0..9</td></tr>
+	 *   <tr><td>4</td><td>Offer names count (capped at 5)</td><td>0..5</td></tr>
+	 *   <tr><td>5</td><td>Populated attribute count (capped at 10)</td><td>0..10</td></tr>
+	 * </table>
+	 *
+	 * @param data  product to inspect
+	 * @param vConf resolved vertical configuration (may be null)
+	 * @return cache key as a long
+	 */
+	long computeEmbeddingCacheKey(final Product data, final VerticalConfig vConf) {
+		if (data == null) {
+			return 0L;
+		}
+
+		final int[] matrix = new int[6];
+
+		// Slot 0: brand present
+		if (data.getAttributes() != null && data.getAttributes().getReferentielAttributes() != null) {
+			String brand = data.getAttributes().getReferentielAttributes().get(ReferentielKey.BRAND);
+			matrix[0] = StringUtils.isNotBlank(brand) ? 1 : 0;
+		}
+
+		// Slot 1: model present
+		if (data.getAttributes() != null && data.getAttributes().getReferentielAttributes() != null) {
+			String model = data.getAttributes().getReferentielAttributes().get(ReferentielKey.MODEL);
+			matrix[1] = StringUtils.isNotBlank(model) ? 1 : 0;
+		}
+
+		// Slot 2: vertical prefix count
+		if (vConf != null && vConf.getI18n() != null) {
+			matrix[2] = (int) vConf.getI18n().values().stream()
+					.map(ProductI18nElements::getH1Title)
+					.filter(java.util.Objects::nonNull)
+					.map(PrefixedAttrText::getPrefix)
+					.filter(StringUtils::isNotBlank)
+					.count();
+		}
+
+		// Slot 3: single-digit hash of the best name (0-9)
+		String bestName = data.preferredName(null);
+		if (StringUtils.isNotBlank(bestName)) {
+			matrix[3] = Math.abs(bestName.hashCode()) % 10;
+		}
+
+		// Slot 4: offer names count (capped at 5)
+		if (data.getOfferNames() != null) {
+			matrix[4] = (int) Math.min(data.getOfferNames().stream()
+					.filter(StringUtils::isNotBlank).count(), 5);
+		}
+
+		// Slot 5: populated popular attribute count (capped at 10)
+		List<String> popularAttributeKeys = vConf != null ? vConf.getPopularAttributes() : List.of();
+		if (!popularAttributeKeys.isEmpty() && data.getAttributes() != null) {
+			int count = 0;
+			for (String key : popularAttributeKeys.stream().filter(StringUtils::isNotBlank).limit(10).toList()) {
+				String value = data.getAttributes().val(key);
+				if (StringUtils.isNotBlank(value)) {
+					count++;
+				}
+			}
+			matrix[5] = Math.min(count, 10);
+		}
+
+		return Arrays.hashCode(matrix);
 	}
 
 	/**

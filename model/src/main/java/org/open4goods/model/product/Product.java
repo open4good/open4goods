@@ -176,14 +176,17 @@ public class Product implements Standardisable {
 	private EcoScoreRanking ranking = new EcoScoreRanking();
 
 	/**
-	 * Multimodal embedding vector for semantic search (CLIP = 512 dims)
+	 * Text embedding vector for semantic search (CLIP = 512 dims)
 	 */
 	@Field(type = FieldType.Dense_Vector, dims = 512)
 	private float[] embedding;
 
 	/**
-	 * Hash of the text that produced the current {@link #embedding}.
-	 * Used to skip redundant embedding computations when the input text has not changed.
+	 * Structured cache key derived from a feature matrix of the product data that feeds into
+	 * the embedding text. Used to skip redundant embedding computations when the meaningful
+	 * input dimensions (brand, model, offer count, etc.) have not changed.
+	 *
+	 * @see org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService#computeEmbeddingCacheKey
 	 */
 	private long embeddingTextHash;
 

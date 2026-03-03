@@ -7,6 +7,12 @@ const moduleLoaders = {
   LineChart: async () =>
     (await import(/* webpackChunkName: "vendor-echarts" */ 'echarts/charts'))
       .LineChart,
+  ScatterChart: async () =>
+    (await import(/* webpackChunkName: "vendor-echarts" */ 'echarts/charts'))
+      .ScatterChart,
+  PieChart: async () =>
+    (await import(/* webpackChunkName: "vendor-echarts" */ 'echarts/charts'))
+      .PieChart,
   RadarChart: async () =>
     (await import(/* webpackChunkName: "vendor-echarts" */ 'echarts/charts'))
       .RadarChart,

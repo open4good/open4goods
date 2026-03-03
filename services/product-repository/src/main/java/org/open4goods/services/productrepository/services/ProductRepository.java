@@ -900,7 +900,6 @@ public class ProductRepository {
 //		}
 
 		// Fail, getting from elastic
-		logger.info("Cache miss, getting product {} from elastic", productId);
 		result = elasticsearchOperations.get(String.valueOf(productId), Product.class);
 
 		if (null == result) {

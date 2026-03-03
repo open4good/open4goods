@@ -283,6 +283,32 @@ public class DatavizStatsService {
             case "productsByCountry" -> new AggregationRequestDto.Agg("products-by-country",
                     "gtinInfos.country", AggregationRequestDto.AggType.terms, null, null, 30, null);
 
+            // Time-series: histogram over creation/update timestamps
+            case "newProductsOverTime" -> new AggregationRequestDto.Agg("new-products-over-time",
+                    "creationDate", AggregationRequestDto.AggType.range, null, null, DEFAULT_HISTOGRAM_BUCKETS, null);
+            case "updatedProductsOverTime" -> new AggregationRequestDto.Agg("updated-products-over-time",
+                    "lastChange", AggregationRequestDto.AggType.range, null, null, DEFAULT_HISTOGRAM_BUCKETS, null);
+            case "activeOffersOverTime" -> new AggregationRequestDto.Agg("active-offers-over-time",
+                    "lastChange", AggregationRequestDto.AggType.range, null, null, DEFAULT_HISTOGRAM_BUCKETS, null);
+            case "medianPriceOverTime" -> new AggregationRequestDto.Agg("median-price-over-time",
+                    "price.minPrice.price", AggregationRequestDto.AggType.range, null, null, DEFAULT_HISTOGRAM_BUCKETS, null);
+            case "priceVolatilityOverTime" -> new AggregationRequestDto.Agg("price-volatility-over-time",
+                    "price.minPrice.price", AggregationRequestDto.AggType.range, null, null, DEFAULT_HISTOGRAM_BUCKETS, null);
+
+            // Brand/platform approximations (terms-based, true boxplot/heatmap would need sub-aggs)
+            case "priceBoxplotByBrand" -> new AggregationRequestDto.Agg("price-boxplot-by-brand",
+                    "attributes.referentielAttributes.BRAND", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
+            case "priceDistributionByPlatform" -> new AggregationRequestDto.Agg("price-distribution-by-platform",
+                    "datasourceCodes", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
+
+            // Exclusion causes (pareto over top exclusion reasons)
+            case "excludedCausesPareto" -> new AggregationRequestDto.Agg("excluded-causes-pareto",
+                    "excludedCauses", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
+
+            // Brand × platform heatmap approximation (platform terms distribution)
+            case "brandPlatformHeatmap" -> new AggregationRequestDto.Agg("brand-platform-heatmap",
+                    "datasourceCodes", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
+
             // Price charts
             case "minimumPriceHistogram" -> new AggregationRequestDto.Agg("min-price-histogram",
                     "price.minPrice.price", AggregationRequestDto.AggType.range, null, null, DEFAULT_HISTOGRAM_BUCKETS, null);
@@ -299,9 +325,8 @@ public class DatavizStatsService {
             case "priceVsScore" -> new AggregationRequestDto.Agg("price-vs-score",
                     "scores.ECOSCORE.relativ.value", AggregationRequestDto.AggType.range, null, null, DEFAULT_HISTOGRAM_BUCKETS, null);
 
-            // Fallback: return null for unsupported presets (timeline, boxplot, etc.)
             default -> {
-                logger.info("Query preset '{}' is not yet mapped to an aggregation. Returning null.", preset.queryPreset());
+                logger.warn("Query preset '{}' is not mapped to an aggregation. Returning null.", preset.queryPreset());
                 yield null;
             }
         };
