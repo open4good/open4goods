@@ -609,19 +609,45 @@ const steps = computed<WizardStep[]>(() => {
 
   // Scores step moved after subset groups (Distance, Budget, etc.)
   if ((nudgeConfig.value?.scores?.length ?? 0) > 0) {
-    sequence.push({
-      key: 'scores',
-      component: NudgeToolStepScores,
-      title: t('nudge-tool.steps.scores.title'),
-      subtitle: t('nudge-tool.steps.scores.subtitle'),
-      icon: 'mdi-earth',
-      props: {
-        modelValue: selectedScores.value,
-        scores: nudgeConfig.value?.scores ?? [],
-        isZeroResults: hasZeroMatches.value,
-      },
-      onUpdate: (value: string[]) => (selectedScores.value = value),
+    const rawScores = nudgeConfig.value?.scores ?? []
+    const availableScores = rawScores.filter(score => {
+      // Hide if explicitly disabled in conf
+      if (score.disabled) {
+        return false
+      }
+
+      // Hide if composed scores return 0 results (i.e. not present in vertical aggregatedScores)
+      const aggScores = selectedCategory.value?.aggregatedScores
+      if (aggScores && score.scoreName) {
+        // Handle set or array
+        const hasScore =
+          aggScores instanceof Set
+            ? aggScores.has(score.scoreName)
+            : Array.isArray(aggScores) && aggScores.includes(score.scoreName)
+
+        if (!hasScore) {
+          return false
+        }
+      }
+
+      return true
     })
+
+    if (availableScores.length > 0) {
+      sequence.push({
+        key: 'scores',
+        component: NudgeToolStepScores,
+        title: t('nudge-tool.steps.scores.title'),
+        subtitle: t('nudge-tool.steps.scores.subtitle'),
+        icon: 'mdi-earth',
+        props: {
+          modelValue: selectedScores.value,
+          scores: availableScores,
+          isZeroResults: hasZeroMatches.value,
+        },
+        onUpdate: (value: string[]) => (selectedScores.value = value),
+      })
+    }
   }
 
   sequence.push({
