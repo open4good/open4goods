@@ -36,6 +36,9 @@ interface GlobalSearchPayload {
   filters?: FilterRequestDto
   sort?: SortRequestDto
   searchType?: string
+  pageNumber?: number
+  pageSize?: number
+  aggs?: AggregationRequestDto
 }
 
 type SearchPayload = ProductsSearchPayload | GlobalSearchPayload
@@ -48,9 +51,6 @@ const isGlobalSearchPayload = (
   'query' in payload &&
   !(
     'verticalId' in payload ||
-    'pageNumber' in payload ||
-    'pageSize' in payload ||
-    'aggs' in payload ||
     'semanticSearch' in payload ||
     'include' in payload
   )
@@ -83,6 +83,8 @@ export default defineEventHandler(
           filters: payload.filters,
           sort: payload.sort,
           searchType: payload.searchType,
+          pageNumber: payload.pageNumber,
+          pageSize: payload.pageSize,
         })
       } catch (error) {
         const backendError = await extractBackendErrorDetails(error)

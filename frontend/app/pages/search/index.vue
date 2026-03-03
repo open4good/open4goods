@@ -836,10 +836,10 @@ const {
 )
 
 const productResults = computed(
-  () => productSearchData.value?.products?.content ?? []
+  () => productSearchData.value?.products?.data ?? []
 )
 const baselineResults = computed(
-  () => baselineSearchData.value?.products?.content ?? []
+  () => baselineSearchData.value?.products?.data ?? []
 )
 const baselineAggregations = computed<Record<string, AggregationResponseDto>>(
   () => {
@@ -1168,7 +1168,10 @@ const rightColumnResultsCount = computed(() => {
     )
   }
 
-  return missingVerticalProducts.value.length
+  return (
+    data.value?.missingVerticalPage?.totalElements ??
+    missingVerticalProducts.value.length
+  )
 })
 
 const pageCount = computed(() => {
@@ -1180,8 +1183,13 @@ const pageCount = computed(() => {
     return baselineSearchData.value?.products?.page?.totalPages ?? 1
   }
 
-  const total = missingVerticalProducts.value.length
-  return Math.max(1, Math.ceil(total / pageSize.value))
+  return (
+    data.value?.missingVerticalPage?.totalPages ??
+    Math.max(
+      1,
+      Math.ceil(missingVerticalProducts.value.length / pageSize.value)
+    )
+  )
 })
 
 const hasVerticalResults = computed(() => limitedGroups.value.length > 0)
