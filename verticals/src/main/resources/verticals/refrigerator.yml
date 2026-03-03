@@ -59,7 +59,7 @@ genAiConfig:
 # Scores from _default.yml are merged
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
-  - REPAIRABILITY_INDEX
+  # - REPAIRABILITY_INDEX
   - WARRANTY
   - BRAND_SUSTAINALYTICS_SCORING
   - WEIGHT
