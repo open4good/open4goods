@@ -373,7 +373,8 @@
                 },
                 "upcType": {
                     "type": "keyword",
-                    "index": true
+                    "index": false,
+                    "doc_values": false
                 }
             }
         }

@@ -103,7 +103,7 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalHomeUrl(),
                 mapPopularAttributes(verticalConfig, domainLanguage),
                 defaultSet(verticalConfig.getAggregatedScores()),
-                mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), domainLanguage));
+                mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), verticalConfig, domainLanguage));
     }
 
     /**
@@ -164,7 +164,7 @@ public class CategoryMappingService {
                 defaultSet(verticalConfig.getAggregatedScores()),
                 mapImpactScoreConfig(verticalConfig.getImpactScoreConfig(), domainLanguage),
                 mapVerticalSubsets(verticalConfig.getSubsets(), domainLanguage),
-                mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), domainLanguage),
+                mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), verticalConfig, domainLanguage),
                 mapVerticalSubset(verticalConfig.getBrandsSubset(), domainLanguage),
                 verticalConfig.getBarcodeConfig(),
                 verticalConfig.getRecommandationsConfig(),
@@ -521,13 +521,13 @@ public class CategoryMappingService {
     /**
      * Map the nudge tool configuration to its DTO representation.
      */
-    private NudgeToolConfigDto mapNudgeToolConfig(NudgeToolConfig nudgeToolConfig, DomainLanguage domainLanguage) {
+    private NudgeToolConfigDto mapNudgeToolConfig(NudgeToolConfig nudgeToolConfig, VerticalConfig verticalConfig, DomainLanguage domainLanguage) {
         if (nudgeToolConfig == null) {
             return null;
         }
 
         List<NudgeToolScoreDto> scores = defaultList(nudgeToolConfig.getScores()).stream()
-                .map(score -> mapNudgeToolScore(score, domainLanguage))
+                .map(score -> mapNudgeToolScore(score, verticalConfig, domainLanguage))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -536,9 +536,25 @@ public class CategoryMappingService {
                 mapNudgeToolSubsetGroups(nudgeToolConfig.getSubsetGroups(), domainLanguage));
     }
 
-    private NudgeToolScoreDto mapNudgeToolScore(NudgeToolScore score, DomainLanguage domainLanguage) {
+    private NudgeToolScoreDto mapNudgeToolScore(NudgeToolScore score, VerticalConfig verticalConfig, DomainLanguage domainLanguage) {
         if (score == null) {
             return null;
+        }
+
+        Boolean disabled = score.getDisabled();
+
+        // Auto-disable composite scores that have no backing attributes active
+        // in the scoring pipeline for this vertical.
+        // A composite score is considered unsupported when none of the attributes
+        // contributing to it (via participateInScores) are listed in the vertical's
+        // availableImpactScoreCriterias.
+        if (!Boolean.TRUE.equals(disabled) && verticalConfig != null && score.getScoreName() != null) {
+            List<String> compositeScores = verticalConfig.getCompositeScores();
+            if (compositeScores != null && compositeScores.contains(score.getScoreName())) {
+                if (!hasActiveContributors(score.getScoreName(), verticalConfig)) {
+                    disabled = Boolean.TRUE;
+                }
+            }
         }
 
         return new NudgeToolScoreDto(
@@ -547,9 +563,39 @@ public class CategoryMappingService {
                 score.getFromPercent(),
                 score.getToPercent(),
                 score.getMdiIcon(),
-                score.getDisabled(),
+                disabled,
                 localise(score.getTitle(), domainLanguage),
                 localise(score.getDescription(), domainLanguage));
+    }
+
+    /**
+     * Check whether a composite score has at least one contributing attribute
+     * that is active in the vertical's scoring pipeline.
+     *
+     * @param compositeScoreName the composite score identifier
+     * @param verticalConfig     the vertical configuration
+     * @return {@code true} when at least one attribute feeds the composite score
+     *         and is listed in {@code availableImpactScoreCriterias}
+     */
+    private boolean hasActiveContributors(String compositeScoreName, VerticalConfig verticalConfig) {
+        if (verticalConfig.getAttributesConfig() == null
+                || verticalConfig.getAttributesConfig().getConfigs() == null
+                || verticalConfig.getAvailableImpactScoreCriterias() == null) {
+            return false;
+        }
+
+        List<String> activeCriterias = verticalConfig.getAvailableImpactScoreCriterias();
+
+        for (AttributeConfig attr : verticalConfig.getAttributesConfig().getConfigs()) {
+            if (attr == null || !attr.isAsScore() || attr.getParticipateInScores() == null) {
+                continue;
+            }
+            if (attr.getParticipateInScores().contains(compositeScoreName)
+                    && activeCriterias.contains(attr.getKey())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<NudgeToolSubsetGroupDto> mapNudgeToolSubsetGroups(List<NudgeToolSubsetGroup> subsetGroups,

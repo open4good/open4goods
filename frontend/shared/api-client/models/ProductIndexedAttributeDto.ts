@@ -46,12 +46,6 @@ export interface ProductIndexedAttributeDto {
      */
     numericValue?: number;
     /**
-     * Boolean interpretation when available
-     * @type {boolean}
-     * @memberof ProductIndexedAttributeDto
-     */
-    booleanValue?: boolean;
-    /**
      * Sourcing metadata attached to the indexed attribute
      * @type {ProductAttributeSourceDto}
      * @memberof ProductIndexedAttributeDto
@@ -79,7 +73,6 @@ export function ProductIndexedAttributeDtoFromJSONTyped(json: any, ignoreDiscrim
         'name': json['name'] == null ? undefined : json['name'],
         'value': json['value'] == null ? undefined : json['value'],
         'numericValue': json['numericValue'] == null ? undefined : json['numericValue'],
-        'booleanValue': json['booleanValue'] == null ? undefined : json['booleanValue'],
         'sourcing': json['sourcing'] == null ? undefined : ProductAttributeSourceDtoFromJSON(json['sourcing']),
     };
 }
@@ -98,7 +91,6 @@ export function ProductIndexedAttributeDtoToJSONTyped(value?: ProductIndexedAttr
         'name': value['name'],
         'value': value['value'],
         'numericValue': value['numericValue'],
-        'booleanValue': value['booleanValue'],
         'sourcing': ProductAttributeSourceDtoToJSON(value['sourcing']),
     };
 }
