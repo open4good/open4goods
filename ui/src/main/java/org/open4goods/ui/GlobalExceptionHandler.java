@@ -14,11 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * <p>
  * - Handles exceptions thrown by controllers.<br>
  * - Differentiates between client (4xx) and server (5xx) errors.<br>
- * - Provides structured JSON responses for API calls and Thymeleaf error pages for UI requests.<br>
+ * - Provides structured JSON error responses for all requests.<br>
  * - Tracks error occurrences per endpoint for monitoring.<br>
  * - Implements a custom health check indicating server error health status.<br>
  * </p>
@@ -43,27 +41,32 @@ public class GlobalExceptionHandler implements HealthIndicator {
     private final AtomicInteger clientErrorCount = new AtomicInteger(0);
     private final Map<String, Integer> serverErrorEndpoints = new ConcurrentHashMap<>();
     private final Map<String, Integer> clientErrorEndpoints = new ConcurrentHashMap<>();
-    
+
     // Max number of recorded failed urls (rendered in sb admin client)
     private static final int MAX_ENDPOINTS = 10;
+
     /**
-     * Handles all exceptions and determines the response format (JSON or Thymeleaf error page).
+     * Handles all exceptions and returns a structured JSON error response.
      *
      * @param ex      The exception that was thrown.
      * @param request The HTTP request that triggered the exception.
-     * @return JSON response for API requests, or a Thymeleaf error page for web requests.
+     * @return A {@link ResponseEntity} containing the JSON error response.
      */
     @ExceptionHandler(Exception.class)
-    public Object handleException(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> handleException(Exception ex, HttpServletRequest request) {
         String endpoint = request.getRequestURI();
         HttpStatus status = determineHttpStatus(ex);
 
         trackError(status, endpoint);
         logException(status, endpoint, ex);
 
-        return isApiCall(request)
-                ? createJsonErrorResponse(status, ex)
-                : createThymeleafErrorView(status, request, ex);
+        return ResponseEntity.status(status)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of(
+                        "status", String.valueOf(status.value()),
+                        "error", status.getReasonPhrase(),
+                        "message", ex.getMessage() != null ? ex.getMessage() : ex.toString()
+                ));
     }
 
     /**
@@ -82,8 +85,6 @@ public class GlobalExceptionHandler implements HealthIndicator {
         }
         return HttpStatus.INTERNAL_SERVER_ERROR; // Default 500
     }
-
-    
 
     private void trackError(HttpStatus status, String endpoint) {
         if (status.is4xxClientError()) {
@@ -116,9 +117,9 @@ public class GlobalExceptionHandler implements HealthIndicator {
     /**
      * Logs the exception with appropriate severity based on error type.
      *
-     * @param status  The HTTP status of the error.
+     * @param status   The HTTP status of the error.
      * @param endpoint The endpoint where the error occurred.
-     * @param ex      The thrown exception.
+     * @param ex       The thrown exception.
      */
     private void logException(HttpStatus status, String endpoint, Exception ex) {
         if (status.is5xxServerError()) {
@@ -126,52 +127,6 @@ public class GlobalExceptionHandler implements HealthIndicator {
         } else {
             logger.warn("Error on {}: {} (HTTP {})", endpoint, ex.getMessage() != null ? ex.getMessage() : ex.toString(), status.value());
         }
-    }
-
-    /**
-     * Determines if the request is an API call expecting a JSON response.
-     *
-     * @param request The incoming HTTP request.
-     * @return {@code true} if the request expects JSON, otherwise {@code false}.
-     */
-    private boolean isApiCall(HttpServletRequest request) {
-        String acceptHeader = request.getHeader("Accept");
-        return acceptHeader != null && acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE);
-    }
-
-    /**
-     * Creates a JSON error response for API requests.
-     *
-     * @param status The HTTP status of the error.
-     * @param ex     The thrown exception.
-     * @return A {@link ResponseEntity} containing the JSON error response.
-     */
-    private ResponseEntity<Map<String, String>> createJsonErrorResponse(HttpStatus status, Exception ex) {
-        return ResponseEntity.status(status)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Map.of(
-                        "status", String.valueOf(status.value()),
-                        "error", status.getReasonPhrase(),
-                        "message", ex.getMessage() != null ? ex.getMessage() : ex.toString()
-                ));
-    }
-
-    /**
-     * Creates a Thymeleaf error view for web requests.
-     *
-     * @param status  The HTTP status of the error.
-     * @param request The incoming HTTP request.
-     * @param ex      The thrown exception.
-     * @return A {@link ModelAndView} for rendering the error page.
-     */
-    private ModelAndView createThymeleafErrorView(HttpStatus status, HttpServletRequest request, Exception ex) {
-        ModelMap model = new ModelMap();
-        model.addAttribute("status", status.value());
-        model.addAttribute("error", status.getReasonPhrase());
-        model.addAttribute("message", ex.getMessage() != null ? ex.getMessage() : ex.toString());
-        model.addAttribute("path", request.getRequestURI());
-
-        return new ModelAndView("error/" + status.value(), model, status);
     }
 
     /**
@@ -195,3 +150,4 @@ public class GlobalExceptionHandler implements HealthIndicator {
                 .build();
     }
 }
+
