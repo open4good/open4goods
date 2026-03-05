@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
-import org.open4goods.nudgerfrontapi.config.TestTextEmbeddingConfig;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         "front.cache.path=${java.io.tmpdir}",
         "front.security.jwt-secret=0123456789ABCDEF0123456789ABCDEF"})
 @AutoConfigureMockMvc
-@Import(TestTextEmbeddingConfig.class)
+
 class AuthControllerIT {
 
     @Autowired

@@ -64,11 +64,7 @@
       <version>${global.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.open4goods</groupId>
-      <artifactId>embedding-djl</artifactId>
-      <version>${global.version}</version>
-    </dependency>
+
 
     <dependency>
       <groupId>org.open4goods</groupId>
@@ -207,10 +203,12 @@
 
 
     <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-configuration-processor</artifactId>
-    	<optional>true</optional>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
     </dependency>
+
+
   </dependencies>
 
   <build>
@@ -238,16 +236,6 @@
           <layers>
             <enabled>true</enabled>
           </layers>
-          <requiresUnpack>
-            <dependency>
-                <groupId>ai.djl.pytorch</groupId>
-                <artifactId>pytorch-native-cpu</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>ai.djl.huggingface</groupId>
-                <artifactId>tokenizers</artifactId>
-            </dependency>
-          </requiresUnpack>
         </configuration>
       </plugin>
     </plugins>

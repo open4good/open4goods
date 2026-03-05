@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
         "front.security.enabled=true",
         "front.security.shared-token=test-token"})
 @AutoConfigureMockMvc
-@Import(TestTextEmbeddingConfig.class)
+
 class SharedTokenFilterIT {
 
     @Autowired

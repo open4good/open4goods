@@ -19,9 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
-import org.open4goods.embedding.util.EmbeddingVectorUtils;
+// DJL dependencies replaced by EmbeddingProxyService
 import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.ReferentielKey;
@@ -158,21 +156,18 @@ public class SearchService {
 	private final ProductMappingService productMappingService;
 	private final ApiProperties apiProperties;
 	private final SearchProperties searchProperties;
-	private final DjlTextEmbeddingService textEmbeddingService;
-	private final DjlEmbeddingProperties embeddingProperties;
+	private final EmbeddingProxyService textEmbeddingService;
 	private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
 	public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
 			@Lazy ProductMappingService productMappingService, ApiProperties apiProperties,
-			SearchProperties searchProperties, DjlTextEmbeddingService textEmbeddingService,
-			DjlEmbeddingProperties embeddingProperties) {
+			SearchProperties searchProperties, EmbeddingProxyService textEmbeddingService) {
 		this.repository = repository;
 		this.verticalsConfigService = verticalsConfigService;
 		this.productMappingService = productMappingService;
 		this.apiProperties = apiProperties;
 		this.searchProperties = searchProperties;
 		this.textEmbeddingService = textEmbeddingService;
-		this.embeddingProperties = embeddingProperties;
 	}
 
 	@PostConstruct
@@ -1753,8 +1748,8 @@ public class SearchService {
 		float[] embedding;
 		try {
 			embedding = textEmbeddingService.embed(embeddingInput);
-		} catch (IllegalStateException ex) {
-			LOGGER.warn("Semantic search unavailable because no embedding model is loaded: {}", ex.getMessage());
+		} catch (Exception ex) {
+			LOGGER.warn("Semantic search unavailable: {}", ex.getMessage());
 			return List.of();
 		}
 
@@ -1767,7 +1762,7 @@ public class SearchService {
 
 		// To 512 dims
 		embedding = IdHelper.to512(embedding);
-		EmbeddingVectorUtils.normalizeL2(embedding);
+		normalizeL2(embedding);
 
 		List<Float> queryVector = new ArrayList<>(embedding.length);
 		for (float value : embedding) {
@@ -2041,8 +2036,8 @@ public class SearchService {
 		float[] embedding;
 		try {
 			embedding = textEmbeddingService.embed(embeddingInput);
-		} catch (IllegalStateException ex) {
-			LOGGER.warn("Semantic search unavailable because no embedding model is loaded: {}", ex.getMessage());
+		} catch (Exception ex) {
+			LOGGER.warn("Semantic search unavailable: {}", ex.getMessage());
 			return null;
 		}
 
@@ -2052,8 +2047,18 @@ public class SearchService {
 		}
 
 		embedding = IdHelper.to512(embedding);
-		EmbeddingVectorUtils.normalizeL2(embedding);
+		normalizeL2(embedding);
 		return embedding;
+	}
+
+	private void normalizeL2(float[] v) {
+		if (v == null) return;
+		float norm = 0;
+		for (float x : v) norm += x * x;
+		norm = (float) Math.sqrt(norm);
+		if (norm > 0) {
+			for (int i = 0; i < v.length; i++) v[i] /= norm;
+		}
 	}
 
 	private Locale resolveLocale(DomainLanguage domainLanguage) {
@@ -2253,13 +2258,10 @@ public class SearchService {
 		if (!StringUtils.hasText(sanitizedQuery)) {
 			return null;
 		}
-
-		String prefix = embeddingProperties.getQueryPrefix();
-		if (!StringUtils.hasText(prefix)) {
-			return sanitizedQuery;
-		}
-
-		return prefix.trim() + " " + sanitizedQuery;
+		// Prefixing configuration has been removed to decouple front-api from embedding-djl.
+		// If prefixing is strictly required for the embedding model, it should be applied 
+		// on the backend API side where the model is loaded.
+		return sanitizedQuery;
 	}
 
 	/**

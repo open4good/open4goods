@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -19,8 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.model.vertical.AttributeConfig;
-import org.open4goods.model.vertical.AttributesConfig;
+
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;

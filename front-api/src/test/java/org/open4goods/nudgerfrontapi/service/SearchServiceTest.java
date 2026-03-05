@@ -17,8 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.nudgerfrontapi.service.EmbeddingProxyService;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -51,9 +50,7 @@ class SearchServiceTest {
     private ApiProperties apiProperties;
     private SearchProperties searchProperties;
     @Mock
-    private DjlTextEmbeddingService textEmbeddingService;
-    @Mock
-    private DjlEmbeddingProperties embeddingProperties;
+    private EmbeddingProxyService textEmbeddingService;
 
     // Use a partial mock or spy if needed, but here we can stick to standard mocks
     private SearchService searchService;
@@ -62,7 +59,7 @@ class SearchServiceTest {
     void setUp() {
         searchProperties = new SearchProperties();
         searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties,
-                searchProperties, textEmbeddingService, embeddingProperties);
+                searchProperties, textEmbeddingService);
     }
 
     @Test

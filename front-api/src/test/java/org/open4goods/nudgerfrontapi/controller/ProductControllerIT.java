@@ -55,13 +55,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.mockito.ArgumentCaptor;
-import org.open4goods.nudgerfrontapi.config.TestTextEmbeddingConfig;
+
 
 @SpringBootTest(properties = {"front.cache.path=${java.io.tmpdir}",
         "front.security.enabled=true",
         "front.security.shared-token=test-token"})
 @AutoConfigureMockMvc
-@Import(TestTextEmbeddingConfig.class)
+
 class ProductControllerIT {
 
     @Autowired

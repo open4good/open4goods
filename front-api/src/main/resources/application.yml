@@ -48,6 +48,10 @@ front:
     api-base-url: ${FRONT_AFFILIATION_PARTNERS_API_BASE_URL:https://api.open4goods.org}
     api-key: ${FRONT_AFFILIATION_PARTNERS_API_KEY:CHANGE_ME_AFFILIATION_PARTNER_API_KEY}
 
+  embedding:
+    api-base-url: ${FRONT_EMBEDDING_API_BASE_URL:http://localhost:8080}
+
+
   google-taxonomy:
     french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
     english-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"
