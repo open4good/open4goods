@@ -388,8 +388,8 @@ public class PromptService implements HealthIndicator {
 
        Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
 
-       if (null == instructions || instructions.size() == 0) {
-    	   logger.error("Error while retrieving AifieldScanner instructions");
+       if (null == instructions || instructions.isEmpty()) {
+    	   logger.debug("No @AiGeneratedField annotations found on type {} for prompt {} (this is normal for unannotated types)", type, promptKey);
        }
 
         PromptConfig pConf = getPromptConfig(promptKey);
@@ -419,7 +419,7 @@ public class PromptService implements HealthIndicator {
                 throw new RuntimeException("JSON parsing failed for prompt " + promptKey + ": " + e.getMessage(), e);
             }
 
-            logger.warn("JSON parsing failed for prompt {}. Attempting repair.", promptKey, e);
+            logger.warn("JSON parsing failed for prompt {} ({}). Attempting repair.", promptKey, e.getMessage());
             String repaired = repairJson(promptKey, raw, jsonSchema, nativ.getPrompt());
             ret.setBody(outputConverter.convert(repaired));
             ret.setRaw(repaired);
