@@ -174,8 +174,13 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 			return false;
 		}
 
-		if (!ImageIO.write(sourceImage, "webp", cachedFile)) {
-			logger.error("Could not write file: {}", cachedFile.getAbsolutePath());
+		try {
+			if (!ImageIO.write(sourceImage, "webp", cachedFile)) {
+				logger.error("Could not write file: {}", cachedFile.getAbsolutePath());
+				return false;
+			}
+		} catch (IOException e) {
+			logger.error("Could not write file: {}", cachedFile.getAbsolutePath(), e);
 			return false;
 		}
 
