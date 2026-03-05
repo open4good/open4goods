@@ -22,7 +22,6 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.favicon.service.FaviconService;
-import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.gtinservice.service.GtinService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -65,7 +64,6 @@ public class ResourceController {
 	private final BrandService brandService;
 	private final ResourceService resourceService;
 	private final GtinService gtinService;
-	private final FeedService feedservice;
 	private final RemoteFileCachingService remoteFilecache;
 	private final FaviconService faviconService;
 	private final  DatasourceImageService datasourceImageService;
@@ -76,7 +74,7 @@ public class ResourceController {
 
 	private VerticalsConfigService verticalsConfigService;
 
-	public ResourceController( VerticalsConfigService verticalsConfigService,  ProductRepository productRepository,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService,  GtinService gtinService, FeedService feedservice, RemoteFileCachingService remoteFilecache, FaviconService faviconService, DatasourceImageService datasourceImageService) {
+	public ResourceController( VerticalsConfigService verticalsConfigService,  ProductRepository productRepository,  UiConfig config, DataSourceConfigService dsConfigService, ResourceService resourceService, BrandService brandService,  GtinService gtinService,  RemoteFileCachingService remoteFilecache, FaviconService faviconService, DatasourceImageService datasourceImageService) {
 		this.productRepository = productRepository;
 		this.config = config;
 		this.datasourceConfigService = dsConfigService;
@@ -84,7 +82,6 @@ public class ResourceController {
 		this.resourceService = resourceService;
 		this.gtinService = gtinService;
 		this.verticalsConfigService = verticalsConfigService;
-		this.feedservice = feedservice;
 		this.remoteFilecache = remoteFilecache;
 		this.faviconService = faviconService;
 		this.datasourceImageService = datasourceImageService;

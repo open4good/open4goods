@@ -52,6 +52,13 @@
       <artifactId>remotefilecaching</artifactId>
       <version>${global.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.open4goods</groupId>
+      <artifactId>favicon</artifactId>
+      <version>${global.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.open4goods</groupId>
       <artifactId>geocode</artifactId>

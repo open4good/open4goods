@@ -3,7 +3,6 @@ package org.open4goods.ui.config;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.brand.service.BrandService;
@@ -12,11 +11,6 @@ import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.services.blog.service.BlogService;
-import org.open4goods.services.feedservice.config.FeedConfiguration;
-import org.open4goods.services.feedservice.service.AbstractFeedService;
-import org.open4goods.services.feedservice.service.AwinFeedService;
-import org.open4goods.services.feedservice.service.EffiliationFeedService;
-import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
@@ -64,39 +58,6 @@ public class AppConfig {
 	}
 
 
-
-
-
-    @Bean
-    public AwinFeedService awinFeedService(
-                                           RemoteFileCachingService remoteFileCachingService,
-                                           DataSourceConfigService dataSourceConfigService,
-                                           SerialisationService serialisationService,
-                                           UiConfig uiConfig
-
-    		) {
-        // Retrieve Awin-specific feed configuration from the fetcher properties
-        FeedConfiguration awinConfig = uiConfig.getFeedConfigs().get("awin");
-        return new AwinFeedService(awinConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, uiConfig.getAffiliationConfig().getAwinAdvertiserId(), uiConfig.getAffiliationConfig().getAwinAccessToken());
-    }
-
-    @Bean
-    public EffiliationFeedService effiliationFeedService(
-                                                         RemoteFileCachingService remoteFileCachingService,
-                                                         DataSourceConfigService dataSourceConfigService,
-                                                         SerialisationService serialisationService,
-                                                         UiConfig uiConfig) {
-        // Retrieve Effiliation-specific feed configuration from the fetcher properties
-        FeedConfiguration effiliationConfig = uiConfig.getFeedConfigs().get("effiliation");
-        return new EffiliationFeedService(effiliationConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, uiConfig.getAffiliationConfig().getEffiliationApiKey());
-    }
-
-    @Bean
-    public FeedService feedService(List<AbstractFeedService> feedServices,
-                                   DataSourceConfigService dataSourceConfigService) {
-        // The FeedService aggregates all concrete feed implementations.
-        return new FeedService(feedServices, dataSourceConfigService);
-    }
 
 
 

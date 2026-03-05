@@ -138,7 +138,7 @@ public class ProductMappingService {
     private static final String PDFS_PATH = "/pdfs/";
     private static final String VIDEOS_PATH = "/videos/";
     private static final String ICON_PATH = "/icon/";
-    private static final String FAVICON_ENDPOINT = "/favicon?url=";
+    private static final String FAVICON_ENDPOINT = "/api/favicon?url=";
     private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
     private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
     private static final IpQuotaCategory REVIEW_GENERATION_QUOTA_CATEGORY = IpQuotaCategory.REVIEW_GENERATION;
@@ -1586,15 +1586,11 @@ public class ProductMappingService {
         if (!StringUtils.hasText(sourceUrl)) {
             return null;
         }
-        String resourceRoot = apiProperties.getResourceRootPath();
-        if (!StringUtils.hasText(resourceRoot)) {
-            return null;
-        }
         String root = safeCall(() -> extractRootUrl(sourceUrl));
         if (!StringUtils.hasText(root)) {
             return null;
         }
-        return resourceRoot + FAVICON_ENDPOINT + root;
+        return FAVICON_ENDPOINT + root;
     }
 
     /**
