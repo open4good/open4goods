@@ -6,16 +6,17 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doThrow;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -152,6 +153,60 @@ class ImageResizeInterceptorTest {
 
          assertThat(result).isFalse();
          verify(response).sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+    }
+
+
+    @Test
+    void saveToCacheReturnsFalseWhenParentFolderCannotBeCreated() throws IOException {
+        File tempDir = java.nio.file.Files.createTempDirectory("image-cache-test").toFile();
+        File blockingFile = new File(tempDir, "blocking-file");
+        assertThat(blockingFile.createNewFile()).isTrue();
+        File cachedFile = new File(new File(blockingFile, "C/H/E"), "cached.webp");
+
+        ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com");
+
+        boolean saved = interceptor.saveToCache(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), cachedFile);
+
+        assertThat(saved).isFalse();
+        assertThat(cachedFile.exists()).isFalse();
+    }
+
+    @Test
+    void preHandleReturns404AndResetsContentTypeWhenCachedFileIsMissing() throws Exception {
+        ResourceService resourceService = mock(ResourceService.class);
+        File missingFile = new File("/tmp/this-file-does-not-exist.webp");
+
+        ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, new HashSet<>(), "http://example.com") {
+            @Override
+            Resource buildResource(String requestURI) {
+                Resource resource = new Resource();
+                resource.setFileName(requestURI);
+                resource.setCacheKey("cached-file.webp");
+                return resource;
+            }
+
+            @Override
+            boolean saveToCache(BufferedImage sourceImage, File cachedFile) {
+                return true;
+            }
+
+            @Override
+            BufferedImage findSourceImage(String baseImageName, boolean hasDimensionsArgument) {
+                return new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+            }
+        };
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI("/images/example.webp");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(resourceService.getCacheFile(any(Resource.class))).thenReturn(missingFile);
+
+        boolean result = interceptor.preHandle(request, response, new Object());
+
+        assertThat(result).isFalse();
+        assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
+        assertThat(response.getContentType()).isEqualTo("application/json");
     }
 
     private byte[] createPngBytes() throws IOException {
