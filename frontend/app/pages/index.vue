@@ -11,7 +11,6 @@ import type {
   IpQuotaStatusDto,
 } from '~~/shared/api-client'
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
-import HomeProblemsSection from '~/components/home/sections/HomeProblemsSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
 import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
@@ -342,20 +341,7 @@ const { execute: _executeBlogFetch } = await useAsyncData(
   }
 )
 
-const problemItems = computed(() => [
-  {
-    icon: 'mdi-sign-direction',
-    text: String(t('home.problems.items.labelsOverload')),
-  },
-  {
-    icon: 'mdi-scale-balance',
-    text: String(t('home.problems.items.budgetVsEcology')),
-  },
-  {
-    icon: 'mdi-table-multiple',
-    text: String(t('home.problems.items.tooManyTabs')),
-  },
-])
+
 
 const solutionBenefits = computed(() => [
   {
@@ -861,11 +847,15 @@ useHead(() => ({
             id="home-essentials"
             class="home-page__section-wrapper home-page__stack"
           >
-            <SectionReveal class="home-page__section" transition="slide-y">
-              <template #default="{ reveal }">
-                <HomeProblemsSection :items="problemItems" :reveal="reveal" />
-              </template>
-            </SectionReveal>
+
+          <!--
+
+          <SectionReveal class="home-page__section" transition="slide-y">
+            <template #default="{ reveal }">
+              <HomeProblemsSection :items="problemItems" :reveal="reveal" />
+            </template>
+          </SectionReveal>
+          -->
 
             <SectionReveal
               class="home-page__section"
