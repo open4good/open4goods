@@ -12,9 +12,15 @@ vi.stubGlobal('$fetch', (request: string) => {
   return Promise.resolve(null)
 })
 
-// Mock window.performance for tests that rely on it (e.g. some i18n libraries)
-if (typeof window !== 'undefined' && !window.performance) {
-  vi.stubGlobal('performance', {
-    now: vi.fn(() => Date.now()),
-  })
+// Ensure window and performance exist to prevent ReferenceError in i18n libraries
+if (typeof globalThis.window === 'undefined') {
+  // @ts-expect-error global.window does not exist by default
+  globalThis.window = {}
+}
+if (!globalThis.performance) {
+  // @ts-expect-error global.performance does not exist by default
+  globalThis.performance = { now: vi.fn(() => Date.now()) }
+}
+if (!globalThis.window.performance) {
+  globalThis.window.performance = globalThis.performance
 }
