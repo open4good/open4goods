@@ -238,6 +238,16 @@
           <layers>
             <enabled>true</enabled>
           </layers>
+          <requiresUnpack>
+            <dependency>
+                <groupId>ai.djl.pytorch</groupId>
+                <artifactId>pytorch-native-cpu</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>ai.djl.huggingface</groupId>
+                <artifactId>tokenizers</artifactId>
+            </dependency>
+          </requiresUnpack>
         </configuration>
       </plugin>
     </plugins>
