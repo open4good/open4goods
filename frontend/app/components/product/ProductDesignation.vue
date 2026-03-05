@@ -12,7 +12,11 @@
       <div
         v-if="baseLine"
         class="product-designation__baseline"
-        :class="{ 'text-center': variant === 'card' }"
+        :class="{
+          'text-center': variant === 'card',
+          'product-designation__baseline--clamped': variant === 'card',
+        }"
+        :title="variant === 'card' ? baseLine : undefined"
       >
         {{ baseLine }}
       </div>
@@ -92,6 +96,14 @@ const rootClass = computed(() =>
     animation-delay: 1s;
     color: rgb(var(--v-theme-text-neutral-secondary));
     line-height: 1.2;
+
+    &--clamped {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: normal;
+    }
   }
 
   @keyframes fadeIn {

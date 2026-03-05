@@ -37,7 +37,7 @@
         :view-offers-label="panel.viewOffersLabel"
         @merchant-click="handleMerchantClick"
         @trend-click="scrollToSelector('#price-history')"
-        @view-offers="scrollToSelector('#prix', 136)"
+        @view-offers="handleViewOffers(panel)"
       />
     </div>
   </div>
@@ -45,6 +45,7 @@
 
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
+import { useRouter } from '#imports'
 import { useI18n } from 'vue-i18n'
 import { useAnalytics } from '~/composables/useAnalytics'
 import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
@@ -63,6 +64,7 @@ const props = defineProps({
 })
 
 const { n, t, locale } = useI18n()
+const router = useRouter()
 const {
   trackProductRedirect,
   trackAffiliateClick,
@@ -295,6 +297,23 @@ const scrollToSelector = (selector: string, offset = 120) => {
     (window.scrollY || window.pageYOffset || 0) -
     offset
   window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+}
+
+const handleViewOffers = (panel: any) => {
+  if (isSingleOffer.value && panel.merchant?.url) {
+    handleMerchantClick({
+      name: panel.merchant.name,
+      url: panel.merchant.url,
+    })
+
+    if (panel.merchant.isInternal) {
+      router.push(panel.merchant.url)
+    } else {
+      window.open(panel.merchant.url, '_blank', 'noopener,noreferrer')
+    }
+  } else {
+    scrollToSelector('#prix', 136)
+  }
 }
 
 const conditionPanels = computed(() => {

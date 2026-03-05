@@ -44,17 +44,6 @@
                 )
               }}
             </p>
-            <v-btn
-              variant="text"
-              density="comfortable"
-              size="small"
-              color="secondary"
-              class="product-ai-review__methodology-link mb-4"
-              :to="methodologyPath"
-              @click="trackMethodologyClick"
-            >
-              {{ $t('product.aiReview.request.methodologyLink') }}
-            </v-btn>
 
             <div
               v-if="reviewContent?.summary"

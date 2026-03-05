@@ -15,30 +15,30 @@
       class="product-card__overlay-link"
       :aria-label="resolveCardProductName(product)"
     />
+    <!-- Card Header -->
+    <div class="product-card__header">
+      <!-- Impact Score (Left) -->
+      <div class="product-card__corner" role="presentation">
+        <ImpactScore
+          v-if="impactScoreValue != null"
+          :score="impactScoreValue ?? 0"
+          :max="20"
+          size="small"
+          flat
+        />
+        <span v-else class="product-card__corner-fallback">
+          {{ $t('category.products.notRated') }}
+        </span>
+      </div>
+
+      <!-- Actions (Right) -->
+      <div class="product-card__actions">
+        <CompareToggleButton :product="product" size="compact" />
+      </div>
+    </div>
+
     <div class="product-card__media-wrapper">
       <div class="product-card__media">
-        <!-- Header Overlay -->
-        <div class="product-card__media-header">
-          <!-- Impact Score (Left) -->
-          <div class="product-card__corner" role="presentation">
-            <ImpactScore
-              v-if="impactScoreValue != null"
-              :score="impactScoreValue ?? 0"
-              :max="20"
-              size="small"
-              flat
-            />
-            <span v-else class="product-card__corner-fallback">
-              {{ $t('category.products.notRated') }}
-            </span>
-          </div>
-
-          <!-- Actions (Right) -->
-          <div class="product-card__actions">
-            <CompareToggleButton :product="product" size="compact" />
-          </div>
-        </div>
-
         <v-img
           :src="resolveImage(product)"
           :alt="
@@ -62,13 +62,6 @@
         :title-tag="titleTag"
         title-class="product-card__title"
       />
-      <div
-        v-if="product.aiReview?.review?.baseLine"
-        class="product-card__baseline text-truncate"
-        :title="product.aiReview.review.baseLine"
-      >
-        {{ product.aiReview.review.baseLine }}
-      </div>
     </div>
 
     <v-card-item class="product-card__body">
@@ -311,18 +304,12 @@ const shouldShowSortedField = computed(() => Boolean(sortedFieldDisplay.value))
     &:hover &__image
         transform: scale(1.05)
 
-    &__media-header
-        position: absolute
-        top: 0
-        left: 0
-        right: 0
-        z-index: 5
+    &__header
         display: flex
         align-items: flex-start
         justify-content: space-between
         pointer-events: none /* let clicks pass through to image link */
         padding: 0
-        background: rgba(var(--v-theme-surface-default), 0.5)
         z-index: 2 /* Above overlay */
 
     &__corner
@@ -370,13 +357,6 @@ const shouldShowSortedField = computed(() => Boolean(sortedFieldDisplay.value))
         white-space: nowrap
         overflow: hidden
         text-overflow: ellipsis
-
-    &__baseline
-        margin-top: 0.25rem
-        font-size: 0.85rem
-        line-height: 1.3
-        color: rgb(var(--v-theme-text-neutral-secondary))
-        opacity: 0.9
 
     &__attributes
         display: flex

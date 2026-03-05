@@ -817,7 +817,7 @@
           "impactScore": "Score d'impact",
           "model": "Modèle",
           "offersCount": "Nombre d'offres",
-          "price": "Prix le plus bas"
+          "price": "Prix"
         },
         "groups": {
           "main": "Tris principaux",
