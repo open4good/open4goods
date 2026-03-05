@@ -187,62 +187,6 @@
         </div>
       </v-list-group>
 
-      <v-list-group class="mobile-menu__accessibility">
-        <template #activator="{ props, isOpen }">
-          <v-list-item
-            v-bind="props"
-            class="px-6 py-4 mobile-menu__accessibility-activator"
-            :append-icon="isOpen ? 'mdi-menu-up' : 'mdi-menu-down'"
-          >
-            <template #prepend>
-              <v-icon icon="mdi-sunglasses" class="me-4" />
-            </template>
-            <v-list-item-title class="text-body-1">
-              {{ accessibilityLabel }}
-            </v-list-item-title>
-          </v-list-item>
-        </template>
-
-        <div class="mobile-menu__accessibility-content px-6 pb-4">
-          <div class="mobile-menu__accessibility-section">
-            <p class="mobile-menu__accessibility-title">
-              {{ t('siteIdentity.menu.themeToggle') }}
-            </p>
-            <ThemeToggle
-              test-id="mobile-theme-toggle"
-              density="compact"
-              size="small"
-              show-labels
-            />
-          </div>
-
-          <v-divider class="my-4" />
-
-          <v-list class="mobile-menu__accessibility-list" nav density="compact">
-            <v-list-item class="mobile-menu__accessibility-item">
-              <template #prepend>
-                <v-icon :icon="zoomIcon" class="me-4" />
-              </template>
-              <v-list-item-title class="text-body-1">
-                {{ t('siteIdentity.menu.zoom.label') }}
-              </v-list-item-title>
-              <template #append>
-                <v-switch
-                  :model-value="isZoomed"
-                  inset
-                  color="primary"
-                  density="compact"
-                  hide-details
-                  :aria-label="t('siteIdentity.menu.zoom.label')"
-                  @click.stop
-                  @update:model-value="setZoomed"
-                />
-              </template>
-            </v-list-item>
-          </v-list>
-        </div>
-      </v-list-group>
-
       <v-divider v-if="isLoggedIn" class="mx-6" />
 
       <v-list-item v-if="isLoggedIn" class="px-6 py-4 account-summary">
@@ -303,20 +247,11 @@
           {{ t('siteIdentity.menu.account.logout') }}
         </v-list-item-title>
       </v-list-item>
-
-      <v-divider v-if="!isLoggedIn" class="mx-6" />
-
-      <div v-if="!isLoggedIn" class="px-6 py-4">
-        <AccountPrivacyCard data-testid="mobile-privacy-card" />
-      </div>
     </v-list>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import ThemeToggle from './ThemeToggle.vue'
-import AccountPrivacyCard from './AccountPrivacyCard.vue'
 import { useI18n } from 'vue-i18n'
 
 import {
@@ -329,7 +264,6 @@ import {
   MIN_SEARCH_QUERY_LENGTH,
   useMenuSearchControls,
 } from '~/composables/menus/useMenuSearchControls'
-import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 import SearchSuggestField from '~/components/search/SearchSuggestField.vue'
 
@@ -341,14 +275,6 @@ const {
   requestInstall,
 } = usePwaInstallPromptBridge()
 const currentLocale = computed(() => normalizeLocale(locale.value))
-
-const accessibilityStore = useAccessibilityStore()
-const { isZoomed } = storeToRefs(accessibilityStore)
-const { setZoomed } = accessibilityStore
-const accessibilityLabel = computed(() => t('siteIdentity.menu.zoom.label'))
-const zoomIcon = computed(() =>
-  isZoomed.value ? 'mdi-magnify-minus' : 'mdi-magnify-plus'
-)
 
 const emit = defineEmits<{
   close: []
@@ -642,33 +568,6 @@ const menuItems = computed<MenuLink[]>(() =>
 .mobile-menu__community-link-description
   font-size: 0.8rem
   color: rgb(var(--v-theme-text-neutral-secondary))
-
-.mobile-menu__accessibility
-  --v-list-group-prepend-width: 36px
-
-.mobile-menu__accessibility-activator
-  transition: color 0.2s ease
-
-.mobile-menu__accessibility-content
-  background-color: rgba(var(--v-theme-surface-primary-080), 0.18)
-  border-block-start: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35)
-
-.mobile-menu__accessibility-section
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-
-.mobile-menu__accessibility-title
-  margin: 0
-  font-size: 0.85rem
-  font-weight: 600
-  color: rgb(var(--v-theme-text-neutral-secondary))
-
-.mobile-menu__accessibility-list
-  padding-inline: 0
-
-.mobile-menu__accessibility-item
-  padding-inline: 0
 
 .border-bottom
   border-bottom: 1px solid rgba(0, 0, 0, 0.12)

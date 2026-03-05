@@ -109,6 +109,12 @@ front:
           blocId: 'pages:partners:moovance'
           url: https://www.moovance.fr/
           imageUrl: /images/mentors/moovance.png
+          
+        - name: Wekey
+          blocId: 'pages:partners:wekey'
+          url: https://www.wekey.fr/
+          imageUrl: /images/mentors/wekey.png
+          
         - name: Les imparfaits
           blocId: 'pages:partners:les-imparfaits'
           url: https://www.les-imparfaits.com/
