@@ -135,11 +135,9 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 					logger.info("Image resized to {}x{}", dimensions[0], dimensions[1]);
 				}
 
-				// Save the resized image in WebP format to cache
-				if (!ImageIO.write(sourceImage, "webp", cachedFile)) {
-					logger.info("Could not write file: {}", cachedFile.getAbsolutePath());
-				} else {
-					logger.info("Cached image saved: {}", cachedFile.getAbsolutePath());
+				if (!saveToCache(sourceImage, cachedFile)) {
+					response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+					return false;
 				}
 			} else {
 				logger.info("Cache hit for file: {}", cachedFile.getAbsolutePath());
@@ -150,12 +148,43 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 				serveImage(response, cachedFile);
 			} catch (IOException e) {
 				logger.error("Error serving cached image: {}", cachedFile.getAbsolutePath(), e);
+				response.resetBuffer();
+				response.setContentType("application/json");
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
 				return false;
 			}
 			return false; // Prevent further request processing
 		}
 
+		return true;
+	}
+
+	/**
+	 * Saves the source image in cache as WebP and validates the generated file.
+	 *
+	 * @param sourceImage the source image to store
+	 * @param cachedFile  the cache file destination
+	 * @return {@code true} if the cache file was successfully generated and is
+	 *         readable, {@code false} otherwise
+	 */
+	boolean saveToCache(BufferedImage sourceImage, File cachedFile) {
+		File parent = cachedFile.getParentFile();
+		if (parent != null && !parent.exists() && !parent.mkdirs()) {
+			logger.error("Could not create cache folder for file: {}", cachedFile.getAbsolutePath());
+			return false;
+		}
+
+		if (!ImageIO.write(sourceImage, "webp", cachedFile)) {
+			logger.error("Could not write file: {}", cachedFile.getAbsolutePath());
+			return false;
+		}
+
+		if (!cachedFile.exists() || cachedFile.length() <= 0 || !cachedFile.isFile() || !cachedFile.canRead()) {
+			logger.error("Generated cache file is invalid: {}", cachedFile.getAbsolutePath());
+			return false;
+		}
+
+		logger.info("Cached image saved: {}", cachedFile.getAbsolutePath());
 		return true;
 	}
 
@@ -314,6 +343,9 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 	 * @throws IOException if an error occurs during file transfer
 	 */
 	private void serveImage(HttpServletResponse response, File cachedFile) throws IOException {
+		if (!cachedFile.isFile() || !cachedFile.canRead()) {
+			throw new IOException("Cached image does not exist or is unreadable");
+		}
 		response.setContentType("image/webp");
 		response.setHeader("Cache-Control", "public, max-age=86400");
 		FileUtils.copyFile(cachedFile, response.getOutputStream());
