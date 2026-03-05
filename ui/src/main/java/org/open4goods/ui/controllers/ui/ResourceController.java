@@ -154,7 +154,7 @@ public class ResourceController {
 		}
 	}
 
-	@GetMapping("/icon/{datasourceName}")
+	@GetMapping("/icon/{datasourceName:.+}")
 	public void datasourceIcon(@PathVariable String datasourceName, final HttpServletResponse response) {
 		   DatasourceImageService.ImageResult image = datasourceImageService.getDatasourceImage(datasourceName, false);
 		    response.setContentType(image.contentType());
@@ -168,7 +168,7 @@ public class ResourceController {
 			}
 	}
 
-	@GetMapping("/logo/{datasourceName}")
+	@GetMapping("/logo/{datasourceName:.+}")
 	public void datasourceLogo(@PathVariable String datasourceName, final HttpServletResponse response) {
 	    DatasourceImageService.ImageResult image = datasourceImageService.getDatasourceImage(datasourceName, true);
 	    response.setContentType(image.contentType());
