@@ -3342,8 +3342,8 @@
           "badge": "Live"
         },
         "wizard": {
-          "title": "Assistant Nudger",
-          "description": "Quelques questions pour des choix éco personnalisés.",
+          "title": "Nudger",
+          "description": "Quelques questions pour des choix plus responsables.",
           "badge": "Nouveau"
         },
         "search": {
