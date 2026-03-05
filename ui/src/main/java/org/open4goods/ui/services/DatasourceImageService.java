@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
-import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
@@ -32,16 +30,13 @@ public class DatasourceImageService {
     private static final String CONTENT_TYPE_IMAGE_PNG = "image/png";
 
     private final DataSourceConfigService datasourceConfigService;
-    private final FeedService feedService;
     private final RemoteFileCachingService remoteFileCachingService;
     private final FaviconService faviconService;
 
     public DatasourceImageService(DataSourceConfigService datasourceConfigService,
-                                  FeedService feedService,
                                   RemoteFileCachingService remoteFileCachingService,
                                   FaviconService faviconService) {
         this.datasourceConfigService = datasourceConfigService;
-        this.feedService = feedService;
         this.remoteFileCachingService = remoteFileCachingService;
         this.faviconService = faviconService;
     }
@@ -105,18 +100,8 @@ public class DatasourceImageService {
         DataSourceProperties ds = datasourceConfigService.getDatasourceConfig(datasourceName);
         String imageUrl = (ds != null) ? ds.getLogo() : null;
 
-        if (imageUrl == null) {
-            AffiliationPartner partner = feedService.getPartners().stream()
-                    .filter(e -> datasourceName.equalsIgnoreCase(cleanName(e.getName())) || datasourceName.equalsIgnoreCase(cleanName(e.getName())))
-                    .findAny().orElse(null);
-
-            if (partner != null) {
-            	imageUrl = partner.getLogoUrl();
-            }
-            if (imageUrl == null && allowFaviconFallback && ds != null) {
-
-            	imageUrl = ds.getFavico();
-            }
+        if (imageUrl == null && allowFaviconFallback && ds != null) {
+        	imageUrl = ds.getFavico();
         }
 
         if (allowFaviconFallback && (imageUrl == null || imageUrl.isBlank()) && ds != null && ds.getPortalUrl() != null) {

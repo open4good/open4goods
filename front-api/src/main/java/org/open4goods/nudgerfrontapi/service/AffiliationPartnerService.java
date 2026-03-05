@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProperties;
-import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.partner.AffiliationPartnerDto;
 import org.open4goods.services.contribution.model.ContributionVote;
 import org.open4goods.services.contribution.service.ContributionService;
@@ -38,14 +37,15 @@ public class AffiliationPartnerService {
 
     private final RestClient restClient;
     private final AffiliationPartnersProperties properties;
-    private final ApiProperties apiProperties;
     private final AtomicReference<List<AffiliationPartner>> partners = new AtomicReference<>(List.of());
+    private static final String LOGO_ENDPOINT = "/api/logo/";
+    private static final String FAVICON_ENDPOINT = "/api/favicon?url=";
+
     private final AffiliationService affiliationService;
 
     public AffiliationPartnerService(RestClient.Builder restClientBuilder, AffiliationPartnersProperties properties,
-            ApiProperties apiProperties, AffiliationService affiliationService) {
+            AffiliationService affiliationService) {
         this.properties = properties;
-        this.apiProperties = apiProperties;
         this.affiliationService = affiliationService;
         this.restClient = restClientBuilder.baseUrl(properties.getApiBaseUrl())
                 .defaultHeader(UrlConstants.APIKEY_PARAMETER, properties.getApiKey())
@@ -106,8 +106,8 @@ public class AffiliationPartnerService {
      * @return immutable DTO ready to be serialised
      */
     private AffiliationPartnerDto mapToDto(AffiliationPartner partner) {
-        String logoUrl = buildAssetUrl("/logo/", partner.getName());
-        String faviconUrl = buildAssetUrl("/favicon?url=", partner.getName());
+        String logoUrl = buildAssetUrl(LOGO_ENDPOINT, partner.getName());
+        String faviconUrl = buildAssetUrl(FAVICON_ENDPOINT, partner.getName());
         List<String> countryCodes = partner.getCountryCodes() == null
                 ? List.of()
                 : partner.getCountryCodes().stream()
@@ -128,22 +128,17 @@ public class AffiliationPartnerService {
     }
 
     /**
-     * Build an asset URL relative to the configured static resource root.
+     * Build an asset URL exposed through the Nuxt API proxy.
      *
      * @param pathSuffix suffix prepended with a slash (e.g. {@code /logo/})
      * @param partnerName partner name used as key in the asset storage
      * @return fully qualified asset URL or {@code null} when data is missing
      */
     private String buildAssetUrl(String pathSuffix, String partnerName) {
-        if (!StringUtils.hasText(pathSuffix) || !StringUtils.hasText(partnerName)
-                || !StringUtils.hasText(apiProperties.getResourceRootPath())) {
+        if (!StringUtils.hasText(pathSuffix) || !StringUtils.hasText(partnerName)) {
             return null;
         }
-        String base = apiProperties.getResourceRootPath();
-        if (base.endsWith("/")) {
-            base = base.substring(0, base.length() - 1);
-        }
         String encodedName = URLEncoder.encode(partnerName, StandardCharsets.UTF_8);
-        return base + pathSuffix + encodedName;
+        return pathSuffix + encodedName;
     }
 }
