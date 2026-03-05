@@ -127,13 +127,12 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
       icon: 'mdi-shield-check',
       segments: [
         {
-          text: 'Indépendant. Ouvert. Transparent'
-
+          text: 'Indépendant. Ouvert. Transparent',
         },
-        { text: 'Hébergé en Europe, Made in France'        ,
-                  icon: 'breton-flag',
-                  iconPosition: 'after',
-
+        {
+          text: 'Hébergé en Europe, Made in France',
+          icon: 'breton-flag',
+          iconPosition: 'after',
         },
         { text: openDataMillions, to: '/opendata' },
         { text: 'M de produits en ' },
@@ -158,6 +157,19 @@ const formatCount = (value?: number) => {
   }
 }
 
+const resolveSegmentIcon = (icon?: string) => {
+  if (!icon) {
+    return null
+  }
+
+  switch (icon) {
+    case 'breton-flag':
+      return '/images/icons/breton-flag.svg'
+    default:
+      return null
+  }
+}
+
 const formattedReviewedProductsCount = computed(() =>
   formatCount(props.reviewedProductsCount)
 )
@@ -175,19 +187,6 @@ const formattedAiSummaryRemainingCredits = computed(() => {
     return String(value)
   }
 })
-
-const resolveSegmentIcon = (icon?: string) => {
-  if (!icon) {
-    return null
-  }
-
-  switch (icon) {
-    case 'breton-flag':
-      return '/images/icons/breton-flag.svg'
-    default:
-      return null
-  }
-}
 
 const aiSummaryReviewedLabel = computed(() => {
   if (!props.reviewedProductsCount) {
@@ -419,7 +418,11 @@ const resolveAiSummaryStyle = () => {
         </SectionReveal>
       </v-col>
     </v-row>
-    <SectionReveal class="home-hero-highlights__ai-summary" transition="fade">
+    <SectionReveal
+      v-if="!isHeroVariant"
+      class="home-hero-highlights__ai-summary"
+      transition="fade"
+    >
       <RoundedCornerCard
         class="mt-8 home-hero-highlights__ai-summary-card"
         :class="{

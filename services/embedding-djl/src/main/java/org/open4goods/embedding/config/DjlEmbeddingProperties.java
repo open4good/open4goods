@@ -15,6 +15,17 @@ public class DjlEmbeddingProperties
 {
 
     /**
+     * Number of predictors to pool per model. Defaults to number of available processors.
+     */
+    @Min(1)
+    private int predictorPoolSize = Runtime.getRuntime().availableProcessors();
+
+    /**
+     * Whether to load the machine learning models asynchronously at startup.
+     */
+    private boolean asyncLoading = true;
+
+    /**
      * Toggle to enable or disable the DJL text embedding auto-configuration.
      */
     private boolean enabled = true;
@@ -173,5 +184,25 @@ public class DjlEmbeddingProperties
     public void setVisionModelUrl(String visionModelUrl)
     {
         this.visionModelUrl = visionModelUrl;
+    }
+
+    public int getPredictorPoolSize()
+    {
+        return predictorPoolSize;
+    }
+
+    public void setPredictorPoolSize(int predictorPoolSize)
+    {
+        this.predictorPoolSize = predictorPoolSize;
+    }
+
+    public boolean isAsyncLoading()
+    {
+        return asyncLoading;
+    }
+
+    public void setAsyncLoading(boolean asyncLoading)
+    {
+        this.asyncLoading = asyncLoading;
     }
 }

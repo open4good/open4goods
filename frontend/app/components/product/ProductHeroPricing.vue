@@ -299,7 +299,34 @@ const scrollToSelector = (selector: string, offset = 120) => {
   window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
 }
 
-const handleViewOffers = (panel: any) => {
+type ConditionPanel = {
+  condition: OfferCondition
+  conditionLabel: string
+  offersCountLabel: string | null
+  priceTitle: string
+  priceLabel: string
+  priceCurrency: string | null
+  hasOffer: boolean
+  emptyStateLabel: string
+  merchant: {
+    name: string
+    url: string | null
+    favicon: string | null
+    isInternal: boolean
+    clientOnly: boolean
+  } | null
+  offerName: string | null
+  alternativeOffers: AlternativeOfferOption[]
+  alternativeOffersLabel: string
+  alternativeOffersPlaceholder: string
+  trendLabel: string | null
+  trendTooltip: string | null
+  trendToneClass: string
+  trendIcon: string | null
+  viewOffersLabel: string
+}
+
+const handleViewOffers = (panel: ConditionPanel) => {
   if (isSingleOffer.value && panel.merchant?.url) {
     handleMerchantClick({
       name: panel.merchant.name,

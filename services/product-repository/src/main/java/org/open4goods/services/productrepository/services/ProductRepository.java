@@ -1304,7 +1304,7 @@ public class ProductRepository {
 
         NativeQuery query = new NativeQueryBuilder()
                 .withQuery(q -> q.bool(b -> b.filter(f -> f.script(s -> s.script(sc -> sc
-                        .source("params.types.contains(params._source.gtinInfos?.upcType)")
+                        .source("params._source.gtinInfos != null && params.types.contains(params._source.gtinInfos.upcType)")
                         .params(Map.of("types", JsonData.of(typeNames)))
                 )))))
                 .build();

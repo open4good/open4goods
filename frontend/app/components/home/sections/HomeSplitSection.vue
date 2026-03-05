@@ -104,7 +104,6 @@ const sectionClasses = computed(() => [
               <NudgerCard
                 :flat-corners="[]"
                 :accent-corners="[]"
-                base-radius="24px"
                 padding="0"
                 :border="false"
                 :shadow="false"

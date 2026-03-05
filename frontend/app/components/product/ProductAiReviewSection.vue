@@ -65,7 +65,7 @@
         <div class="product-ai-review__grid mx-4 mx-md-0">
           <!-- Pros/Cons, Technical, Eco, Community same as before. Using v-if="reviewContent" implicitly via template wrapper -->
           <!-- ... (Truncated purely for edit conciseness, ideally we wrap the whole existing block) ... -->
-          <!-- To avoid massive replace, I will assume the structure flows. 
+          <!-- To avoid massive replace, I will assume the structure flows.
                 Wait, I cannot use v-if twice or split the tree easily without big replace.
                 The prompt asks to replace the "empty state" logic mainly.
                 Let's target the v-else block and the script.
@@ -621,7 +621,6 @@ import type {
 import { IpQuotaCategory } from '~~/shared/api-client'
 import { useAuth } from '~/composables/useAuth'
 import { useIpQuota } from '~/composables/useIpQuota'
-import { useAnalytics } from '~/composables/useAnalytics'
 
 import ProductAiReviewInsightBlock from '~/components/product/ProductAiReviewInsightBlock.vue'
 import ProductAiReviewRequestPanel from '~/components/product/ProductAiReviewRequestPanel.vue'
@@ -706,8 +705,6 @@ const props = defineProps({
 })
 
 const { locale, t, n } = useI18n()
-const localePath = useLocalePath()
-const { trackEvent } = useAnalytics()
 const theme = useTheme()
 const { isLoggedIn } = useAuth()
 const { getRemaining, invalidateQuota, refreshQuota, recordUsage } =
@@ -797,8 +794,6 @@ const sourcesToggleLabel = computed(() =>
     : t('product.aiReview.sources.showMore')
 )
 
-const methodologyPath = computed(() => localePath('/impact-score'))
-
 const levelOptions = computed(() => [
   {
     value: 'novice',
@@ -869,14 +864,6 @@ const communityContent = computed(() =>
     advanced: reviewContent.value?.communityReviewAdvanced,
   })
 )
-
-const trackMethodologyClick = () => {
-  trackEvent('ai-review-methodology-click', {
-    props: {
-      location: 'review-section',
-    },
-  })
-}
 
 function sanitizeHtml(content: string | null): string | null {
   if (!content) {
@@ -1207,7 +1194,7 @@ const statusMessage = computed(() => {
   return displayed?.message ?? storeItem.value?.statusMessage
 })
 
-/* 
+/*
    Removed local polling logic (pollStatus, startPolling, stopPolling, pollHandle, status)
    as it is now handled by the store.
 */

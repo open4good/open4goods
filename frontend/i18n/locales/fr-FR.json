@@ -89,7 +89,7 @@
       "imageAlt": "Illustration du comparateur Nudger affichant des cartes produits et des graphiques d'impact.",
       "highlights": {
         "impact": {
-          "title": "🌿 ImpactScore : Guider vos achats",
+          "title": "🌿 ImpactScore : guider vos achats",
           "subtitle": "Acheter moins pire pour la planète"
         },
         "price": {
@@ -213,7 +213,7 @@
           "description": "Repérez les produits les plus responsables."
         },
         "trust": {
-          "title": "Confiance",
+          "title": "Ethique",
           "description": "Données ouvertes, comparateur indépendant"
         }
       },
@@ -1289,7 +1289,7 @@
     },
     "principles": {
       "eyebrow": "Nos principes",
-      "title": "Un impact mesuré sans compromis",
+      "title": "Les meilleurs choix dans le possible des achats",
       "subtitle": "La méthode reprend les fondamentaux de l'Écoscore : transparence, contextualisation et pédagogie.",
       "items": {
         "transparency": {
@@ -3342,7 +3342,7 @@
           "badge": "Live"
         },
         "wizard": {
-          "title": "Nudger",
+          "title": "Assistant",
           "description": "Quelques questions pour des choix plus responsables.",
           "badge": "Nouveau"
         },

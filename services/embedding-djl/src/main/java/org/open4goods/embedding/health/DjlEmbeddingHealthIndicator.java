@@ -19,6 +19,11 @@ public class DjlEmbeddingHealthIndicator implements HealthIndicator
     @Override
     public Health health()
     {
+        if (!embeddingService.isReady())
+        {
+            return Health.outOfService().withDetail("status", "loading models").build();
+        }
+
         boolean textLoaded = embeddingService.isTextModelLoaded();
         boolean multimodalLoaded = embeddingService.isMultimodalTextModelLoaded();
 

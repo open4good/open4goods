@@ -107,7 +107,6 @@ const styleVars = computed(() => ({
     }"
     :style="styleVars"
     :elevation="props.elevation"
-    rounded="0"
   >
     <slot />
   </v-sheet>
@@ -117,7 +116,7 @@ const styleVars = computed(() => ({
 .nudger-card
   padding: var(--nudger-card-padding)
   background: var(--nudger-card-background)
-  border-radius: var(--nudger-card-top-left) var(--nudger-card-top-right) var(--nudger-card-bottom-right) var(--nudger-card-bottom-left)
+  border-radius: var(--nudger-card-top-left) var(--nudger-card-top-right) var(--nudger-card-bottom-right) var(--nudger-card-bottom-left) !important
   transition: all 0.2s ease-in-out
   position: relative
   overflow: hidden

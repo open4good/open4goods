@@ -41,7 +41,7 @@ const isVisible = computed(() => Boolean(props.reveal))
           :shadow="true"
           :style="{
             '--reveal-delay': `${index * 90}ms`,
-            border: '1px solid rgba(var(--v-theme-secondary), 0.2)',
+            border: '1px solid rgba(var(--v-theme-border-primary-strong), 0.7)',
           }"
         >
           <v-avatar class="home-problems__icon" color="surface" size="64">
@@ -72,7 +72,6 @@ const isVisible = computed(() => Boolean(props.reveal))
   // Layout now handled by utility classes: d-flex align-center ga-4 w-100
 
 .home-problems__icon
-  border: 1px solid rgb(var(--v-theme-secondary))
   color: rgb(var(--v-theme-secondary))
 
 .home-problems__text

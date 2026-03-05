@@ -21,7 +21,9 @@ class DjlEmbeddingAutoConfigurationTest
 {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withPropertyValues("embedding.text-model-url=text-model",
-                    "embedding.multimodal-model-url=multi-model")
+                    "embedding.multimodal-model-url=multi-model",
+                    "embedding.async-loading=false",
+                    "embedding.predictor-pool-size=1")
             .withConfiguration(AutoConfigurations.of(DjlEmbeddingAutoConfiguration.class));
 
     @Test

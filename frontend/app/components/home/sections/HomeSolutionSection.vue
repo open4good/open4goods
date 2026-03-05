@@ -69,7 +69,8 @@ const unlockImageTilt = () => {
                 :shadow="true"
                 :style="{
                   '--reveal-delay': `${index * 90}ms`,
-                  border: '1px solid rgba(var(--v-theme-secondary), 0.2)',
+                  border:
+                    '1px solid rgba(var(--v-theme-border-primary-strong), 0.7)',
                 }"
               >
                 <v-avatar class="home-solution__icon" size="60" color="surface">
@@ -123,7 +124,6 @@ const unlockImageTilt = () => {
 
 .home-solution__item
   // d-flex align-center ga-4 w-100 now handled by utility classes
-  background: transparent !important;
 
 .home-solution__item::after
   display: none
@@ -131,7 +131,6 @@ const unlockImageTilt = () => {
 .home-solution__icon
   font-size: clamp(1.65rem, 5vw, 2rem)
   //background: rgba(var(--v-theme-surface-primary-080), 0.6)
-  border: 1px solid rgb(var(--v-theme-secondary))
   color: rgb(var(--v-theme-secondary))
 
 .home-solution
