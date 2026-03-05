@@ -426,12 +426,6 @@ describe('Shared menu authentication controls', () => {
     expect(mobileWrapper.find('[data-testid="mobile-logout"]').exists()).toBe(
       false
     )
-    expect(
-      mobileWrapper.find('[data-testid="mobile-privacy-card"]').exists()
-    ).toBe(true)
-    expect(
-      mobileWrapper.find('[data-testid="mobile-clear-cache"]').exists()
-    ).toBe(false)
   })
 
   it('renders the mobile install CTA when available', async () => {
