@@ -54,6 +54,7 @@
                     </span>
                     <ProductAttributeSourcingLabel
                       :sourcing="attr.sourcing"
+                      :value="attr.sourcing?.bestValue ?? attr.value ?? ''"
                       :enable-tooltip="true"
                     />
                   </div>
@@ -99,9 +100,10 @@
                   >
                     <ProductAttributeSourcingLabel
                       :sourcing="attr.sourcing"
+                      :value="attr.sourcing?.bestValue ?? attr.value ?? ''"
                       :enable-tooltip="true"
                     >
-                      {{ attr.name }}
+                      {{ resolveAttributeLabel(attr) }}
                     </ProductAttributeSourcingLabel>
                   </div>
                 </div>
@@ -252,7 +254,11 @@ import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import DOMPurify from 'isomorphic-dompurify'
 import { normalizeTimestamp } from '~/utils/date-parsing'
-import type { ProductDto } from '~~/shared/api-client'
+import type {
+  AttributeConfigDto,
+  ProductAttributeDto,
+  ProductDto,
+} from '~~/shared/api-client'
 
 const props = defineProps({
   sectionId: {
@@ -262,6 +268,10 @@ const props = defineProps({
   product: {
     type: Object as PropType<ProductDto>,
     required: true,
+  },
+  attributeConfigs: {
+    type: Array as PropType<AttributeConfigDto[]>,
+    default: () => [],
   },
   onMarketEndDate: {
     type: [String, Number, Date] as PropType<
@@ -273,6 +283,19 @@ const props = defineProps({
 
 const { t, locale } = useI18n()
 const product = toRef(props, 'product')
+
+const attributeConfigNameByKey = computed(() => {
+  return props.attributeConfigs.reduce<Map<string, string>>((map, config) => {
+    const key = config.key?.trim().toLowerCase()
+    const name = config.name?.trim()
+
+    if (key && name) {
+      map.set(key, name)
+    }
+
+    return map
+  }, new Map<string, string>())
+})
 
 // --- End of Life Logic ---
 const supportStartDate = computed<Date | null>(() => {
@@ -355,6 +378,24 @@ const conflictingAttributes = computed(() => {
     attr => attr.sourcing?.conflicts === true
   )
 })
+
+const resolveAttributeLabel = (
+  attribute: ProductAttributeDto | null | undefined
+) => {
+  if (!attribute) {
+    return ''
+  }
+
+  const rawKey = attribute.key?.trim().toLowerCase()
+  if (rawKey) {
+    const configuredName = attributeConfigNameByKey.value.get(rawKey)
+    if (configuredName) {
+      return configuredName
+    }
+  }
+
+  return attribute.name?.trim() || attribute.key?.trim() || ''
+}
 
 const hasConflictingAttributes = computed(
   () => conflictingAttributes.value.length > 0
@@ -456,8 +497,6 @@ const cardColumnSize = computed(() => {
   if (count === 3) return 4
   return 3
 })
-console.log('DEBUG COUNT:', competitionCount.value)
-
 function sanitize(content: string | null | undefined): string {
   if (!content) return ''
   return DOMPurify.sanitize(content, {

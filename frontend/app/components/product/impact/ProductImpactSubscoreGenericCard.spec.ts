@@ -20,6 +20,42 @@ const VIconStub = defineComponent({
       h('span', { class: 'v-icon-stub', 'data-icon': props.icon }, props.icon)
   },
 })
+const VCardStub = defineComponent({
+  name: 'VCardStub',
+  setup(_props, { slots }) {
+    return () => h('div', { class: 'v-card-stub' }, slots.default?.())
+  },
+})
+const VBtnStub = defineComponent({
+  name: 'VBtnStub',
+  setup(_props, { slots }) {
+    return () => h('button', { class: 'v-btn-stub' }, slots.default?.())
+  },
+})
+const VExpansionPanelsStub = defineComponent({
+  name: 'VExpansionPanelsStub',
+  setup(_props, { slots }) {
+    return () => h('div', { class: 'v-expansion-panels-stub' }, slots.default?.())
+  },
+})
+const VExpansionPanelStub = defineComponent({
+  name: 'VExpansionPanelStub',
+  setup(_props, { slots }) {
+    return () => h('section', { class: 'v-expansion-panel-stub' }, slots.default?.())
+  },
+})
+const VExpansionPanelTitleStub = defineComponent({
+  name: 'VExpansionPanelTitleStub',
+  setup(_props, { slots }) {
+    return () => h('h5', { class: 'v-expansion-panel-title-stub' }, slots.default?.())
+  },
+})
+const VExpansionPanelTextStub = defineComponent({
+  name: 'VExpansionPanelTextStub',
+  setup(_props, { slots }) {
+    return () => h('div', { class: 'v-expansion-panel-text-stub' }, slots.default?.())
+  },
+})
 
 describe('ProductImpactSubscoreGenericCard', () => {
   // ... existing i18n setup ...
@@ -129,6 +165,12 @@ describe('ProductImpactSubscoreGenericCard', () => {
           ProductImpactSubscoreChart: true,
           VChip: VChipStub,
           VIcon: VIconStub,
+          VCard: VCardStub,
+          VBtn: VBtnStub,
+          VExpansionPanels: VExpansionPanelsStub,
+          VExpansionPanel: VExpansionPanelStub,
+          VExpansionPanelTitle: VExpansionPanelTitleStub,
+          VExpansionPanelText: VExpansionPanelTextStub,
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
             props: [
@@ -192,6 +234,12 @@ describe('ProductImpactSubscoreGenericCard', () => {
           ProductImpactSubscoreChart: true,
           VChip: VChipStub,
           VIcon: VIconStub,
+          VCard: VCardStub,
+          VBtn: VBtnStub,
+          VExpansionPanels: VExpansionPanelsStub,
+          VExpansionPanel: VExpansionPanelStub,
+          VExpansionPanelTitle: VExpansionPanelTitleStub,
+          VExpansionPanelText: VExpansionPanelTextStub,
           ImpactCoefficientBadge: defineComponent({
             name: 'ImpactCoefficientBadgeStub',
             props: [
@@ -244,6 +292,12 @@ describe('ProductImpactSubscoreGenericCard', () => {
           ProductImpactSubscoreChart: true,
           VChip: VChipStub,
           VIcon: VIconStub,
+          VCard: VCardStub,
+          VBtn: VBtnStub,
+          VExpansionPanels: VExpansionPanelsStub,
+          VExpansionPanel: VExpansionPanelStub,
+          VExpansionPanelTitle: VExpansionPanelTitleStub,
+          VExpansionPanelText: VExpansionPanelTextStub,
           ImpactCoefficientBadge: true,
           ClientOnly: true,
         },
