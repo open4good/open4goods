@@ -12,6 +12,12 @@ import ai.djl.training.util.ProgressBar;
 
 /**
  * Default implementation that loads DJL models using HuggingFace tokenizers and translators.
+ * <p>
+ * This factory relies on tokenizer-native metadata shipped by DJL dependencies.
+ * Application resources must not provide a competing
+ * {@code /native/lib/tokenizers.properties} file, otherwise packaged Spring Boot
+ * jars can shadow DJL metadata and fail at startup.
+ * </p>
  */
 public class DefaultTextModelFactory extends AbstractTextModelFactory
 {
