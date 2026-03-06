@@ -30,8 +30,8 @@ importers:
         specifier: ^3.7.6
         version: 3.12.2(typescript@5.9.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.29(typescript@5.9.3))
       vuetify-nuxt-module:
-        specifier: ^0.18.6
-        version: 0.18.9(magicast@0.5.2)(typescript@5.9.3)(vite@7.3.1(jiti@2.6.1)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.29(typescript@5.9.3))
+        specifier: ^0.19.0
+        version: 0.19.5(magicast@0.5.2)(typescript@5.9.3)(vite@7.3.1(jiti@2.6.1)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.29(typescript@5.9.3))
     devDependencies:
       '@nuxt/eslint':
         specifier: ^0.7.4
@@ -57,8 +57,8 @@ packages:
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
 
-  '@antfu/utils@0.7.10':
-    resolution: {integrity: sha512-+562v9k4aI80m1+VuMHehNJWLOFjBnXn3tdOitzD0il5b7smkSBal4+a3oKiQTbrwMmN/TBUMDvbdoWDehgOww==}
+  '@antfu/utils@8.1.1':
+    resolution: {integrity: sha512-Mex9nXf9vR6AhcXmMrlz/HVgYYZpVGJ6YlPgwl7UnaFpnshXs6EK/oa5Gpf3CzENMjkvEx2tQtntGnb7UtSTOQ==}
 
   '@apidevtools/json-schema-ref-parser@11.9.3':
     resolution: {integrity: sha512-60vepv88RwcJtSHrD6MjIL6Ta3SOYbgfnkHb+ppAVK+o9mXprRtulx7VlRl3lN3bbvysAfCS7WMVfhUYemB0IQ==}
@@ -3197,8 +3197,8 @@ packages:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
     engines: {node: '>=6'}
 
-  importx@0.4.4:
-    resolution: {integrity: sha512-Lo1pukzAREqrBnnHC+tj+lreMTAvyxtkKsMxLY8H15M/bvLl54p3YuoTI70Tz7Il0AsgSlD7Lrk/FaApRcBL7w==}
+  importx@0.5.2:
+    resolution: {integrity: sha512-YEwlK86Ml5WiTxN/ECUYC5U7jd1CisAVw7ya4i9ZppBoHfFkT2+hChhr3PE2fYxUKLkNyivxEQpa5Ruil1LJBQ==}
 
   impound@1.0.0:
     resolution: {integrity: sha512-8lAJ+1Arw2sMaZ9HE2ZmL5zOcMnt18s6+7Xqgq2aUVy4P1nlzAyPtzCDxsk51KVFwHEEdc6OWvUyqwHwhRYaug==}
@@ -3336,14 +3336,6 @@ packages:
 
   jackspeak@3.4.3:
     resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
-
-  jiti@1.21.7:
-    resolution: {integrity: sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==}
-    hasBin: true
-
-  jiti@2.0.0-beta.3:
-    resolution: {integrity: sha512-pmfRbVRs/7khFrSAYnSiJ8C0D5GvzkE4Ey2pAvUcJsw1ly/p+7ut27jbJrjY79BpAJQJ4gXYFtK6d1Aub+9baQ==}
-    hasBin: true
 
   jiti@2.6.1:
     resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
@@ -4796,8 +4788,8 @@ packages:
   ultrahtml@1.6.0:
     resolution: {integrity: sha512-R9fBn90VTJrqqLDwyMph+HGne8eqY1iPfYhPzZrvKpIfwkWZbcYlfpsb8B9dTvBfpy1/hqAD7Wi8EKfP9e8zdw==}
 
-  unconfig@0.5.5:
-    resolution: {integrity: sha512-VQZ5PT9HDX+qag0XdgQi8tJepPhXiR/yVOkn707gJDKo31lGjRilPREiQJ9Z6zd/Ugpv6ZvO5VxVIcatldYcNQ==}
+  unconfig@0.6.1:
+    resolution: {integrity: sha512-cVU+/sPloZqOyJEAfNwnQSFCzFrZm85vcVkryH7lnlB/PiTycUkAjt5Ds79cfIshGOZ+M5v3PBDnKgpmlE5DtA==}
 
   uncrypto@0.1.3:
     resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
@@ -5224,8 +5216,8 @@ packages:
       typescript:
         optional: true
 
-  vuetify-nuxt-module@0.18.9:
-    resolution: {integrity: sha512-jr+Hujsw5U465LKJD1/SQgqJIXuJNbXM0HOp9vPmtPFPlGFwZ4kb1YfUPNmuCEDaSIY6rkb7+W+FEJvt9PQELQ==}
+  vuetify-nuxt-module@0.19.5:
+    resolution: {integrity: sha512-B4SgLFqNlxaF/PZacxy+Wdy09G33E/aZXAPjNbFIblT7JOs07+VuNPrGUQuAzKwiGmU30xgkm5PL9opNpVcXTg==}
 
   vuetify@3.12.2:
     resolution: {integrity: sha512-cVQa4+5iQpDs00ToMUnWRHlMdv1d5tEH2wcZIthqSCmBipQAG4rQKE55zFwZFYlPyiDhUVY1RcAFtXCuHNcCww==}
@@ -5375,7 +5367,7 @@ snapshots:
       package-manager-detector: 1.6.0
       tinyexec: 1.0.2
 
-  '@antfu/utils@0.7.10': {}
+  '@antfu/utils@8.1.1': {}
 
   '@apidevtools/json-schema-ref-parser@11.9.3':
     dependencies:
@@ -8696,14 +8688,13 @@ snapshots:
       parent-module: 1.0.1
       resolve-from: 4.0.0
 
-  importx@0.4.4:
+  importx@0.5.2:
     dependencies:
       bundle-require: 5.1.0(esbuild@0.23.1)
       debug: 4.4.3
       esbuild: 0.23.1
-      jiti: 2.0.0-beta.3
-      jiti-v1: jiti@1.21.7
-      pathe: 1.1.2
+      jiti: 2.6.1
+      pathe: 2.0.3
       tsx: 4.21.0
     transitivePeerDependencies:
       - supports-color
@@ -8826,10 +8817,6 @@ snapshots:
       '@isaacs/cliui': 8.0.2
     optionalDependencies:
       '@pkgjs/parseargs': 0.11.0
-
-  jiti@1.21.7: {}
-
-  jiti@2.0.0-beta.3: {}
 
   jiti@2.6.1: {}
 
@@ -10800,11 +10787,11 @@ snapshots:
 
   ultrahtml@1.6.0: {}
 
-  unconfig@0.5.5:
+  unconfig@0.6.1:
     dependencies:
-      '@antfu/utils': 0.7.10
+      '@antfu/utils': 8.1.1
       defu: 6.1.4
-      importx: 0.4.4
+      importx: 0.5.2
     transitivePeerDependencies:
       - supports-color
 
@@ -11280,16 +11267,17 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  vuetify-nuxt-module@0.18.9(magicast@0.5.2)(typescript@5.9.3)(vite@7.3.1(jiti@2.6.1)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.29(typescript@5.9.3)):
+  vuetify-nuxt-module@0.19.5(magicast@0.5.2)(typescript@5.9.3)(vite@7.3.1(jiti@2.6.1)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.29(typescript@5.9.3)):
     dependencies:
-      '@nuxt/kit': 3.21.1(magicast@0.5.2)
+      '@nuxt/kit': 4.3.1(magicast@0.5.2)
       defu: 6.1.4
       destr: 2.0.5
-      local-pkg: 0.5.1
+      local-pkg: 1.1.2
       pathe: 1.1.2
       perfect-debounce: 1.0.0
+      semver: 7.7.4
       ufo: 1.6.3
-      unconfig: 0.5.5
+      unconfig: 0.6.1
       upath: 2.0.1
       vite-plugin-vuetify: 2.1.3(vite@7.3.1(jiti@2.6.1)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(vue@3.5.29(typescript@5.9.3))(vuetify@3.12.2)
       vuetify: 3.12.2(typescript@5.9.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.29(typescript@5.9.3))
