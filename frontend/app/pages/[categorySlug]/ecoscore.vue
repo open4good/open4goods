@@ -645,13 +645,8 @@ const categoryLabel = computed(
     siteName.value
 )
 
-const categorySeoLabel = computed(
-  () =>
-    category.value?.verticalMetaTitle ??
-    category.value?.verticalHomeTitle ??
-    category.value?.breadCrumb?.at(-1)?.title ??
-    categorySlug.value ??
-    siteName.value
+const categorySeoTitle = computed(
+  () => category.value?.verticalHomeTitle ?? siteName.value
 )
 
 const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
@@ -1109,7 +1104,7 @@ const canonicalUrl = computed(() =>
   new URL(route.fullPath, requestURL.origin).toString()
 )
 const seoTitle = computed(() =>
-  t('category.ecoscorePage.seo.title', { category: categorySeoLabel.value })
+  t('category.ecoscorePage.seo.title', { category: categorySeoTitle.value })
 )
 const seoDescription = computed(() => {
   return (
@@ -1147,7 +1142,7 @@ useSeoMeta({
   ogImage: () => ogImage.value,
   ogSiteName: () => siteName.value,
   ogLocale: () => ogLocale.value,
-  ogImageAlt: () => categorySeoLabel.value,
+  ogImageAlt: () => categorySeoTitle.value,
 })
 </script>
 

@@ -501,7 +501,7 @@ describe('Category ecosystem Impact Score page', () => {
     expect(firstCall?.[0]).toMatchObject({ behavior: 'smooth' })
   })
 
-  it('builds a category-specific SEO title and falls back to verticalHomeTitle', async () => {
+  it('builds a category-specific SEO title from verticalHomeTitle', async () => {
     const ovensCategory = {
       ...categoryFixture,
       verticalMetaTitle: 'Ovens',
@@ -523,7 +523,7 @@ describe('Category ecosystem Impact Score page', () => {
     const firstSeoPayload = useSeoMetaMock.mock.calls[0]?.[0] as {
       title: () => string
     }
-    expect(firstSeoPayload.title()).toBe('Impact Score for Ovens')
+    expect(firstSeoPayload.title()).toBe('Impact Score for Cooking appliances')
 
     route.params.categorySlug = 'aspirateurs'
     route.fullPath = '/aspirateurs/ecoscore'
