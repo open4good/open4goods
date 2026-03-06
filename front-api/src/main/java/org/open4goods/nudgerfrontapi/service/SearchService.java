@@ -221,15 +221,17 @@ public class SearchService {
         String ecoscoreTitle = resolveEcoscoreTitle(domainLanguage);
         impactFields.add(new FieldMetadataDto("scores.ECOSCORE.value", ecoscoreTitle, null, VALUE_TYPE_NUMERIC, ecoscoreAgg));
 
+        // Eco filters are vertical-level ecological filters configured in YAML and
+        // should be rendered with impact filters in the frontend.
+        impactFields.addAll(mapVerticalAttributeFilters(config.getEcoFilters(), config, domainLanguage));
         mapImpactScores(config, domainLanguage).forEach(impactFields::add);
 
         List<FieldMetadataDto> technicalFields = new ArrayList<>();
-        technicalFields.addAll(mapVerticalAttributeFilters(config.getEcoFilters(), config, domainLanguage));
         technicalFields.addAll(mapVerticalAttributeFilters(config.getGlobalTechnicalFilters(), config, domainLanguage));
         technicalFields.addAll(mapVerticalAttributeFilters(config.getTechnicalFilters(), config, domainLanguage));
 
         // Deduplicate technical fields by mapping to prevent duplicates when the same
-        // attribute appears in multiple filter lists (ecoFilters, globalTechnicalFilters, technicalFilters)
+        // attribute appears in both technical filter lists (globalTechnicalFilters, technicalFilters)
         Map<String, FieldMetadataDto> deduplicatedTechnical = new LinkedHashMap<>();
         for (FieldMetadataDto field : technicalFields) {
             if (field != null && StringUtils.hasText(field.mapping())) {
