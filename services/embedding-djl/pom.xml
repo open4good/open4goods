@@ -13,6 +13,27 @@
     <properties>
         <djl.version>0.36.0</djl.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ai.djl.pytorch</groupId>
+                <artifactId>pytorch-engine</artifactId>
+                <version>${djl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ai.djl.huggingface</groupId>
+                <artifactId>tokenizers</artifactId>
+                <version>${djl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ai.djl.pytorch</groupId>
+                <artifactId>pytorch-model-zoo</artifactId>
+                <version>${djl.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
 
         <dependency>
@@ -28,7 +49,6 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- TODO : To import bad lglobal TextService interface...)-->
         <dependency>
             <groupId>org.open4goods</groupId>
             <artifactId>model</artifactId>
@@ -38,7 +58,6 @@
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
             <artifactId>pytorch-engine</artifactId>
-            <version>${djl.version}</version>
         </dependency>
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
@@ -48,13 +67,10 @@
         <dependency>
             <groupId>ai.djl.huggingface</groupId>
             <artifactId>tokenizers</artifactId>
-            <version>${djl.version}</version>
         </dependency>
-        <!-- IMPORTANT : PyTorch Model Zoo (sinon ton erreur arrive) -->
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
             <artifactId>pytorch-model-zoo</artifactId>
-            <version>${djl.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
