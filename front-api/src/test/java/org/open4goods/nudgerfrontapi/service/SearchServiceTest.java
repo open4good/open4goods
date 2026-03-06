@@ -268,9 +268,9 @@ class SearchServiceTest {
                 .map(field -> field.mapping())
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
 
-        assertThat(impactMappings).contains("attributes.indexed.CLASSE_ENERGY.keyword");
-        assertThat(technicalMappings).contains("attributes.indexed.DIAGONALE_POUCES.value");
-        assertThat(technicalMappings).contains("attributes.indexed.WEIGHT.value");
-        assertThat(technicalMappings).doesNotContain("attributes.indexed.CLASSE_ENERGY.keyword");
+        assertThat(impactMappings).contains("attributes.indexed.CLASSE_ENERGY.value");
+        assertThat(technicalMappings).contains("attributes.indexed.DIAGONALE_POUCES.numericValue");
+        assertThat(technicalMappings).contains("attributes.indexed.WEIGHT.numericValue");
+        assertThat(technicalMappings).doesNotContain("attributes.indexed.CLASSE_ENERGY.value");
     }
 }
