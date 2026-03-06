@@ -172,7 +172,9 @@ const mergedOptions = computed<TermOption[]>(() => {
     upsertOption(key, count)
   })
 
-  const selectedTerms = new Set(localTerms.value.filter(hasRenderableFacetLabel))
+  const selectedTerms = new Set(
+    localTerms.value.filter(hasRenderableFacetLabel)
+  )
   selectedTerms.forEach(term => {
     const normalized = normalizeTermKey(term)
     if (!seen.has(normalized)) {

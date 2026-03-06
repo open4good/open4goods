@@ -100,7 +100,8 @@ const messages: Record<string, string> = {
   'compare.sections.ecological': 'Impact écologique',
   'compare.sections.technical': 'Fiche technique',
   'compare.sections.technicalGroupFallback': 'Autres',
-  'compare.sections.explicitTitle': 'Comparaison de {count} produits sélectionnés',
+  'compare.sections.explicitTitle':
+    'Comparaison de {count} produits sélectionnés',
   'compare.alerts.verticalMismatch': 'Alerte',
   'compare.actions.remove': 'Retirer {name}',
   'compare.actions.removeShort': 'Retirer',
@@ -108,8 +109,10 @@ const messages: Record<string, string> = {
   'compare.empty.title': 'Ajoutez des produits',
   'compare.empty.description': 'Utilisez le bouton comparer.',
   'compare.errors.loadFailed': 'Échec de chargement',
-  'compare.errors.invalidNotEnoughProducts': 'La comparaison nécessite au moins deux produits différents.',
-  'compare.errors.incomplete': '{count} produit est indisponible. Retirez-le ou modifiez votre sélection.',
+  'compare.errors.invalidNotEnoughProducts':
+    'La comparaison nécessite au moins deux produits différents.',
+  'compare.errors.incomplete':
+    '{count} produit est indisponible. Retirez-le ou modifiez votre sélection.',
   'compare.provenance.sourceLabel': 'Source',
   'compare.provenance.updatedLabel': 'Dernière mise à jour',
   'compare.provenance.unknown': 'Source non disponible',
@@ -471,7 +474,6 @@ describe('Ecological scores', () => {
   })
 })
 
-
 describe('Comparison integrity states', () => {
   beforeEach(() => {
     loadProductsMock.mockReset()
@@ -520,11 +522,25 @@ describe('Comparison integrity states', () => {
     loadProductsMock.mockResolvedValue([
       createEntry({
         gtin: '1234567890123',
-        product: { gtin: 111, identity: { brand: 'A', model: 'A' }, base: {}, offers: {}, scores: {}, attributes: {} },
+        product: {
+          gtin: 111,
+          identity: { brand: 'A', model: 'A' },
+          base: {},
+          offers: {},
+          scores: {},
+          attributes: {},
+        },
       }),
       createEntry({
         gtin: '9999999999999',
-        product: { gtin: 111, identity: { brand: 'A', model: 'A' }, base: {}, offers: {}, scores: {}, attributes: {} },
+        product: {
+          gtin: 111,
+          identity: { brand: 'A', model: 'A' },
+          base: {},
+          offers: {},
+          scores: {},
+          attributes: {},
+        },
       }),
     ])
     loadVerticalMock.mockResolvedValue(null)

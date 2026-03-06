@@ -107,7 +107,9 @@
                   color="accent-primary-highlight"
                   size="24"
                 />
-                <span class="pwa-landing__action-label">{{ action.title }}</span>
+                <span class="pwa-landing__action-label">{{
+                  action.title
+                }}</span>
               </span>
             </v-btn>
           </v-col>

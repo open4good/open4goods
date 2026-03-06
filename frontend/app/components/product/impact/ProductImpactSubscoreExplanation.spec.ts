@@ -54,7 +54,8 @@ describe('ProductImpactSubscoreExplanation', () => {
   const VExpansionPanelStub = defineComponent({
     name: 'VExpansionPanelStub',
     setup(_props, { slots }) {
-      return () => h('section', { class: 'v-expansion-panel-stub' }, slots.default?.())
+      return () =>
+        h('section', { class: 'v-expansion-panel-stub' }, slots.default?.())
     },
   })
 

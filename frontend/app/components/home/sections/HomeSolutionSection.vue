@@ -43,7 +43,7 @@ const unlockImageTilt = () => {
         align="center"
         justify="space-between"
       >
-        <v-col cols="12" md="6" class="d-flex flex-column ga-3">
+        <v-col cols="12" md="8" class="d-flex flex-column ga-3">
           <header class="d-flex flex-column ga-2">
             <h2 id="home-solution-title">{{ sectionTitle }}</h2>
             <p class="home-section__subtitle subtitle-text ma-0">
@@ -88,7 +88,7 @@ const unlockImageTilt = () => {
             </v-col>
           </v-row>
         </v-col>
-        <v-col cols="12" md="6" class="home-solution__visual">
+        <v-col cols="12" md="4" class="home-solution__visual">
           <div
             class="home-solution__image-wrapper"
             @pointerenter="unlockImageTilt"

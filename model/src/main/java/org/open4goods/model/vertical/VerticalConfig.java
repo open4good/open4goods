@@ -165,6 +165,11 @@ public class VerticalConfig {
 	 */
 	private boolean forceNameGeneration = false;
 
+	/**
+	 * if true, will force recomputing of the embedding vector
+	 */
+	private boolean forceEmbeddingRecomputing = false;
+
 	@JsonMerge
 	/**
 	 * Brand alias mappings (eg : LG ELECTRONICS : LG)
@@ -983,6 +988,14 @@ public class VerticalConfig {
 
 	public void setForceNameGeneration(boolean forceUrlNameGeneration) {
 		this.forceNameGeneration = forceUrlNameGeneration;
+	}
+
+	public boolean isForceEmbeddingRecomputing() {
+		return forceEmbeddingRecomputing;
+	}
+
+	public void setForceEmbeddingRecomputing(boolean forceEmbeddingRecomputing) {
+		this.forceEmbeddingRecomputing = forceEmbeddingRecomputing;
 	}
 
 	public Set<String> getGenerationExcludedFromCategoriesMatching() {

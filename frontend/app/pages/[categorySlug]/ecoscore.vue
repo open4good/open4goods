@@ -109,7 +109,9 @@
                                 "
                               />
                             </template>
-                            <span class="category-ecoscore__criteria-utility-tooltip">
+                            <span
+                              class="category-ecoscore__criteria-utility-tooltip"
+                            >
                               <strong>
                                 {{
                                   t(

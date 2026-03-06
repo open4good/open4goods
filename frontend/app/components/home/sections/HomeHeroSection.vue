@@ -429,7 +429,12 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   position: absolute
   inset: 0
   height: 100%
-  background: radial-gradient(
+  background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.1) 40%,
+      transparent 100%
+    ), radial-gradient(
       circle at 16% 24%,
       rgba(var(--v-theme-hero-gradient-start), 0.22),
       transparent 32%
@@ -477,20 +482,20 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   line-height: 1.05
   margin: 0
   color: #ffffff
-  text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7), 0 6px 16px rgba(0,0,0,0.5), 0 0 30px rgba(0,0,0,0.3)
 
 .home-hero__title-subtitle
   margin: clamp(0.65rem, 1.8vw, 1rem) auto 0
-  color: rgba(var(--v-theme-surface-default), 0.94)
+  color: rgba(255, 255, 255, 0.94)
   font-size: clamp(1.4rem, 2.8vw, 1.4rem)
   line-height: 1.4
   display: block
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7), 0 6px 16px rgba(0,0,0,0.5), 0 0 30px rgba(0,0,0,0.3)
 
 .home-hero__title-animated-subtitle
-  font-size: clamp(0.95rem, 2.2vw, 1.2rem)
-  color: rgba(var(--v-theme-surface-default), 0.9)
+  color: rgba(255, 255, 255, 0.9)
   font-size: clamp(1.2rem, 5vw, 1.8rem)
-  text-shadow: rgb(var(--v-theme-text-neutral-secondary)) 1px 0 10px
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7), 0 6px 16px rgba(0,0,0,0.5), 0 0 30px rgba(0,0,0,0.3)
 
 // .home-hero__search styles now handled by utility classes
 

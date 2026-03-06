@@ -89,7 +89,7 @@ const buildBreadcrumbEntry = (
 
 const buildBlogPostingEntry = (siteOrigin: string, post: BlogJsonLdPosting) => {
   const url = normalizeString(post.url)
-  const absoluteUrl = url ? toAbsoluteUrl(siteOrigin, url) ?? url : undefined
+  const absoluteUrl = url ? (toAbsoluteUrl(siteOrigin, url) ?? url) : undefined
 
   return compactJsonLd({
     '@type': 'BlogPosting',
@@ -163,7 +163,9 @@ export const buildBlogCollectionJsonLd = (
     pageEntry
       ? {
           ...pageEntry,
-          mainEntity: blogEntry ? { '@id': `${input.canonicalUrl}#blog` } : undefined,
+          mainEntity: blogEntry
+            ? { '@id': `${input.canonicalUrl}#blog` }
+            : undefined,
           hasPart: blogPosts.length ? blogPosts : undefined,
         }
       : undefined,

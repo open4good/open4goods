@@ -9,68 +9,83 @@
 ## 1.1 ADEME / Etiquetage environnemental textile (FR)
 
 **Ce qui fonctionne**
+
 - **Lisibilité** : échelle simple (A à E), forte reconnaissance visuelle, code couleur immédiatement interprétable.
 - **Contexte** : présence d'une explication méthodologique côté institution (critères, périmètre, limites).
 - **Action** : aide à la comparaison rapide de produits entre eux.
 
 **Limites observées**
+
 - Lecture parfois "label d'autorité" sans accès immédiat au détail du calcul depuis le même écran produit.
 - Granularité limitée quand l'utilisateur veut comprendre pourquoi deux produits de même classe diffèrent.
 
 **Pattern réutilisable pour Nudger**
+
 - Utiliser un **code couleur discret mais explicite**, combiné à un **grade lisible** en un coup d'œil.
 
 ## 1.2 Back Market (indice réparabilité / reconditionné)
 
 **Ce qui fonctionne**
+
 - **Lisibilité** : score saillant près du prix et des attributs décisifs.
 - **Contexte** : focus sur un indicateur concret (réparabilité) avec wording pédagogique.
 - **Action** : pousse naturellement vers des alternatives mieux notées.
 
 **Limites observées**
+
 - Forte mise en avant du score principal, mais hétérogénéité possible de compréhension sur la méthode exacte selon les catégories.
 
 **Pattern réutilisable pour Nudger**
+
 - Placement du score dans la **zone de décision** (titre/prix/CTA), pas uniquement dans un onglet secondaire.
 
 ## 1.3 Amazon Climate Pledge Friendly
 
 **Ce qui fonctionne**
+
 - **Lisibilité** : badge visible et reconnaissable.
 - **Contexte** : rattachement du badge à des certifications identifiées.
 - **Action** : filtrage et repérage rapide des produits éligibles.
 
 **Limites observées**
+
 - Badge binaire (présent/absent) : peu d'information sur la performance relative fine.
 - Exige un clic supplémentaire pour comprendre les référentiels et leur couverture.
 
 **Pattern réutilisable pour Nudger**
+
 - Ajouter un **niveau de preuve/source** directement associé au score (pas seulement un label visuel).
 
 ## 1.4 Comparez / Idealo (comparateurs)
 
 **Ce qui fonctionne**
+
 - **Lisibilité** : informations normalisées en listing, forte comparabilité entre cartes produit.
 - **Contexte** : séparation claire entre critères principaux et détails techniques.
 - **Action** : tri, filtres et comparaison côte à côte.
 
 **Limites observées**
+
 - L'information environnementale reste souvent secondaire par rapport au prix/livraison.
 
 **Pattern réutilisable pour Nudger**
+
 - Prévoir un **tri par impact score** et un affichage de score compact dans toutes les cartes listées.
 
 ## 1.5 EcoScore (agroalimentaire, apps/retail)
 
 **Ce qui fonctionne**
+
 - **Lisibilité** : lettres + couleurs (A/E) robustes cognitivement.
 - **Contexte** : mention d'une base méthodologique (LCA, labels, etc.).
 - **Action** : compréhension instantanée + possibilité d'approfondir.
 
 **Limites observées**
+
 - Risque de confusion entre différentes méthodologies si les sources ne sont pas explicitées clairement.
 
 **Pattern réutilisable pour Nudger**
+
 - Combiner un **résumé très court** (score/grade/couleur) avec un **panneau d'explication détaillé**.
 
 ---
@@ -113,12 +128,14 @@
 ## 3.1 Variante liste (compacte)
 
 **Contenu minimal**
+
 - Valeur `x/20`.
 - Pastille niveau (`Bon`, `Moyen`, `Faible`).
 - Icône info avec tooltip 1 ligne.
 - Lien discret vers méthodologie.
 
 **Comportement**
+
 - Zone cliquable vers la fiche produit.
 - Tooltip accessible clavier + lecteur d'écran.
 - Affichage stable sur mobile (pas de saut de layout).
@@ -126,12 +143,14 @@
 ## 3.2 Variante fiche produit (détaillée)
 
 **Contenu minimal**
+
 - Score global + barre de progression.
 - Min/max de population de comparaison (si dispo).
 - Date de calcul.
 - Bouton "Comprendre le calcul".
 
 **Contenu explicatif**
+
 - Sous-scores (0..5), pondérations, sens d'interprétation (`impactBetterIs` vs `userBetterIs`).
 - Méthode statistique affichée de manière conditionnelle (SIGMA, PERCENTILE, MINMAX, etc.).
 - Bloc "Sources" : origine des données par critère (API, fournisseur, mapping, valeur manquante).
@@ -152,6 +171,7 @@
 ## 4.1 Conformité calcul
 
 La cible proposée est compatible avec les invariants méthodologiques documentés :
+
 - score global agrégé par somme pondérée,
 - sous-scores normalisés sur 0..5,
 - score final stabilisé sur 0..20,
@@ -162,6 +182,7 @@ La version cible impose explicitement que ces éléments soient visibles côté 
 ## 4.2 Conformité transparence des sources
 
 La cible impose :
+
 - un niveau "résumé" en listing,
 - un niveau "audit" en fiche (méthode + stats + contribution + source),
 - un fallback clair quand une donnée est manquante (neutralisation, qualité des données).

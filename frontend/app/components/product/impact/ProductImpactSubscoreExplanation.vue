@@ -20,7 +20,9 @@
       multiple
     >
       <v-expansion-panel v-if="hasReadIndicatorContent">
-        <v-expansion-panel-title class="impact-subscore-explanation__accordion-title">
+        <v-expansion-panel-title
+          class="impact-subscore-explanation__accordion-title"
+        >
           {{ readIndicatorTitle }}
         </v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -54,7 +56,9 @@
       </v-expansion-panel>
 
       <v-expansion-panel v-if="statisticalMethodItems.length">
-        <v-expansion-panel-title class="impact-subscore-explanation__accordion-title">
+        <v-expansion-panel-title
+          class="impact-subscore-explanation__accordion-title"
+        >
           {{ statisticalMethodTitle }}
         </v-expansion-panel-title>
         <v-expansion-panel-text>

@@ -65,7 +65,9 @@
         class="product-ai-review-request-panel__agreement mt-4"
         density="compact"
       >
-        {{ t('product.aiReview.request.agreement') }}
+        {{
+          t('product.aiReview.request.agreement', { productName: productLabel })
+        }}
       </v-alert>
 
       <v-alert

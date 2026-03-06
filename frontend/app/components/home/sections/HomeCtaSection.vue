@@ -35,8 +35,7 @@ const searchQueryValue = computed(() => props.searchQuery)
 
 const isVisible = computed(() => Boolean(props.reveal))
 
-const resolveSearchString = (key: string) =>
-  te(key) ? String(t(key)) : ''
+const resolveSearchString = (key: string) => (te(key) ? String(t(key)) : '')
 
 const resolveSearchPlaceholder = () => {
   if (te('home.hero.search.placeholders')) {

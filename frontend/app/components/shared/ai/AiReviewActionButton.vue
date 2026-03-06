@@ -1,10 +1,7 @@
 <template>
   <v-tooltip location="bottom" open-delay="150">
     <template #activator="{ props: tooltipProps }">
-      <span
-        v-bind="tooltipProps"
-        class="ai-review-action-button__wrapper"
-      >
+      <span v-bind="tooltipProps" class="ai-review-action-button__wrapper">
         <v-btn
           class="ai-review-action-button"
           :class="[

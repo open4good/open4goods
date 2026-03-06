@@ -291,7 +291,9 @@ const formatBoundary = (value: number | string | null | undefined): string => {
     }).format(new Date(parsed))
   }
 
-  const formatted = formatNumericRangeValue(value, n, { isPrice: priceField.value })
+  const formatted = formatNumericRangeValue(value, n, {
+    isPrice: priceField.value,
+  })
   return valueUnit.value ? `${formatted} ${valueUnit.value}` : formatted
 }
 

@@ -9,20 +9,12 @@
     "createdAt": "2026-02-12T14:39:44.897423Z",
     "config": {
       "checks": {
-        "env": [
-          "ELASTICSEARCH_BASE_URL"
-        ]
+        "env": ["ELASTICSEARCH_BASE_URL"]
       },
       "provider": {
         "displayName": "Kibana (Discover)",
-        "groups": [
-          "observability",
-          "logs"
-        ],
-        "tags": [
-          "kibana",
-          "elasticsearch"
-        ]
+        "groups": ["observability", "logs"],
+        "tags": ["kibana", "elasticsearch"]
       },
       "defaults": {
         "unit": "count",
@@ -42,12 +34,7 @@
           "path": "/app/discover#/",
           "queryLanguage": "kuery",
           "columns": [],
-          "sort": [
-            [
-              "@timestamp",
-              "desc"
-            ]
-          ]
+          "sort": [["@timestamp", "desc"]]
         }
       },
       "elasticsearch": {
@@ -64,13 +51,8 @@
             "esIndex": "products-moustik",
             "noTimeFilter": true
           },
-          "groups": [
-            "products"
-          ],
-          "tags": [
-            "elasticsearch",
-            "products"
-          ]
+          "groups": ["products"],
+          "tags": ["elasticsearch", "products"]
         },
         {
           "event_id": "products.active_offers",
@@ -101,15 +83,8 @@
               }
             }
           },
-          "groups": [
-            "products",
-            "offers"
-          ],
-          "tags": [
-            "elasticsearch",
-            "products",
-            "offers"
-          ]
+          "groups": ["products", "offers"],
+          "tags": ["elasticsearch", "products", "offers"]
         }
       ]
     }
@@ -148,16 +123,8 @@
           "kql": "",
           "timeField": "@timestamp"
         },
-        "groups": [
-          "observability",
-          "logs",
-          "products"
-        ],
-        "tags": [
-          "kibana",
-          "elasticsearch",
-          "products"
-        ]
+        "groups": ["observability", "logs", "products"],
+        "tags": ["kibana", "elasticsearch", "products"]
       },
       {
         "schemaVersion": "2.0",
@@ -196,18 +163,8 @@
           "kql": "",
           "timeField": "@timestamp"
         },
-        "groups": [
-          "observability",
-          "logs",
-          "products",
-          "offers"
-        ],
-        "tags": [
-          "kibana",
-          "elasticsearch",
-          "products",
-          "offers"
-        ]
+        "groups": ["observability", "logs", "products", "offers"],
+        "tags": ["kibana", "elasticsearch", "products", "offers"]
       }
     ]
   }

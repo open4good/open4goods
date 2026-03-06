@@ -787,9 +787,7 @@ describe('TheArticles.vue', () => {
     const breadcrumbList = graph.find(
       entry => entry['@type'] === 'BreadcrumbList'
     )
-    const blogPosting = graph.find(
-      entry => entry['@type'] === 'BlogPosting'
-    )
+    const blogPosting = graph.find(entry => entry['@type'] === 'BlogPosting')
 
     expect(collectionPage).toMatchObject({
       name: 'Open4Goods blog – Nuxt – Page 2',

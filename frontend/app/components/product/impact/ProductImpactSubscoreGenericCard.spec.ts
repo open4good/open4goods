@@ -35,25 +35,29 @@ const VBtnStub = defineComponent({
 const VExpansionPanelsStub = defineComponent({
   name: 'VExpansionPanelsStub',
   setup(_props, { slots }) {
-    return () => h('div', { class: 'v-expansion-panels-stub' }, slots.default?.())
+    return () =>
+      h('div', { class: 'v-expansion-panels-stub' }, slots.default?.())
   },
 })
 const VExpansionPanelStub = defineComponent({
   name: 'VExpansionPanelStub',
   setup(_props, { slots }) {
-    return () => h('section', { class: 'v-expansion-panel-stub' }, slots.default?.())
+    return () =>
+      h('section', { class: 'v-expansion-panel-stub' }, slots.default?.())
   },
 })
 const VExpansionPanelTitleStub = defineComponent({
   name: 'VExpansionPanelTitleStub',
   setup(_props, { slots }) {
-    return () => h('h5', { class: 'v-expansion-panel-title-stub' }, slots.default?.())
+    return () =>
+      h('h5', { class: 'v-expansion-panel-title-stub' }, slots.default?.())
   },
 })
 const VExpansionPanelTextStub = defineComponent({
   name: 'VExpansionPanelTextStub',
   setup(_props, { slots }) {
-    return () => h('div', { class: 'v-expansion-panel-text-stub' }, slots.default?.())
+    return () =>
+      h('div', { class: 'v-expansion-panel-text-stub' }, slots.default?.())
   },
 })
 

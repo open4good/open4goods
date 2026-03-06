@@ -36,14 +36,14 @@ The `PageHeader` (`app/components/shared/header/PageHeader.vue`) is the unified 
 
 ### Configuration Options
 
-| Prop                      | Type                                                       | Default             | Description                                       |
-| :------------------------ | :--------------------------------------------------------- | :------------------ | :------------------------------------------------ |
-| `title`                   | `string`                                                   | -                   | Main heading (H1).                                |
-| `subtitle`                | `string`                                                   | -                   | Subheading text.                                  |
-| `background`              | `'surface-variant' \| 'image' \| 'gradient' \| 'parallax'` | `'surface-variant'` | Background style.                                 |
+| Prop                      | Type                                                       | Default             | Description                                        |
+| :------------------------ | :--------------------------------------------------------- | :------------------ | :------------------------------------------------- |
+| `title`                   | `string`                                                   | -                   | Main heading (H1).                                 |
+| `subtitle`                | `string`                                                   | -                   | Subheading text.                                   |
+| `background`              | `'surface-variant' \| 'image' \| 'gradient' \| 'parallax'` | `'surface-variant'` | Background style.                                  |
 | `backgroundImageAssetKey` | `ThemeAssetKey`                                            | -                   | Key to resolve background image from theme assets. |
-| `container`               | `'fluid' \| 'semi-fluid' \| 'lg' \| 'xl'`                  | `'lg'`              | Container width.                                  |
-| `eyebrow`                 | `string`                                                   | -                   | Small uppercase label above title.                |
+| `container`               | `'fluid' \| 'semi-fluid' \| 'lg' \| 'xl'`                  | `'lg'`              | Container width.                                   |
+| `eyebrow`                 | `string`                                                   | -                   | Small uppercase label above title.                 |
 
 ### Theme Asset Integration
 

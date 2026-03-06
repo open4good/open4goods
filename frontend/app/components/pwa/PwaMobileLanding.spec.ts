@@ -62,11 +62,12 @@ describe('PwaMobileLanding', () => {
           SearchSuggestField: { template: '<div />' },
           CategoryBadgesRow: { template: '<div />' },
           PwaBarcodeScanner: { template: '<div />' },
-          NudgeToolWizard: { template: '<div data-testid="nudge-tool-wizard" />' },
+          NudgeToolWizard: {
+            template: '<div data-testid="nudge-tool-wizard" />',
+          },
           VBtn: {
             emits: ['click'],
-            template:
-              '<button @click="$emit(\'click\')"><slot /></button>',
+            template: '<button @click="$emit(\'click\')"><slot /></button>',
           },
           VDialog: {
             props: ['modelValue'],
@@ -101,7 +102,8 @@ describe('PwaMobileLanding', () => {
           VCard: {
             emits: ['click'],
             inheritAttrs: false,
-            template: '<div v-bind="$attrs" @click="$emit(\'click\')"><slot /></div>',
+            template:
+              '<div v-bind="$attrs" @click="$emit(\'click\')"><slot /></div>',
           },
           VCardTitle: { template: '<div><slot /></div>' },
           VCardText: { template: '<div><slot /></div>' },
@@ -115,11 +117,12 @@ describe('PwaMobileLanding', () => {
           SearchSuggestField: { template: '<div />' },
           CategoryBadgesRow: { template: '<div />' },
           PwaBarcodeScanner: { template: '<div />' },
-          NudgeToolWizard: { template: '<div data-testid="nudge-tool-wizard" />' },
+          NudgeToolWizard: {
+            template: '<div data-testid="nudge-tool-wizard" />',
+          },
           VBtn: {
             emits: ['click'],
-            template:
-              '<button @click="$emit(\'click\')"><slot /></button>',
+            template: '<button @click="$emit(\'click\')"><slot /></button>',
           },
           VDialog: {
             props: ['modelValue'],
@@ -134,7 +137,9 @@ describe('PwaMobileLanding', () => {
       false
     )
 
-    await wrapper.get('[data-testid="pwa-quick-action-wizard"]').trigger('click')
+    await wrapper
+      .get('[data-testid="pwa-quick-action-wizard"]')
+      .trigger('click')
 
     expect(wrapper.find('[data-testid="nudge-tool-wizard"]').exists()).toBe(
       true

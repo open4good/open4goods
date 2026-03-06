@@ -89,7 +89,11 @@
       </p>
     </div>
 
-    <v-container v-else-if="canDisplayComparison" fluid class="compare-page__content">
+    <v-container
+      v-else-if="canDisplayComparison"
+      fluid
+      class="compare-page__content"
+    >
       <section class="compare-section">
         <h2 class="compare-section__title">
           {{ explicitComparisonTitle }}

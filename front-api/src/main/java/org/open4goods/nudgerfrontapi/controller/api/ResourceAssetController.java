@@ -10,8 +10,6 @@ import java.util.Optional;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.nudgerfrontapi.service.AffiliationPartnerService;
-import org.open4goods.services.favicon.dto.FaviconResponse;
-import org.open4goods.services.favicon.service.FaviconService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +35,6 @@ public class ResourceAssetController {
 
     private final AffiliationPartnerService affiliationPartnerService;
     private final RemoteFileCachingService remoteFileCachingService;
-    private final FaviconService faviconService;
 
     /**
      * Build the resource controller.
@@ -47,11 +44,9 @@ public class ResourceAssetController {
      * @param faviconService favicon lookup service
      */
     public ResourceAssetController(AffiliationPartnerService affiliationPartnerService,
-            RemoteFileCachingService remoteFileCachingService,
-            FaviconService faviconService) {
+            RemoteFileCachingService remoteFileCachingService) {
         this.affiliationPartnerService = affiliationPartnerService;
         this.remoteFileCachingService = remoteFileCachingService;
-        this.faviconService = faviconService;
     }
 
     /**
@@ -85,24 +80,6 @@ public class ResourceAssetController {
         return logo(datasourceName);
     }
 
-    /**
-     * Return the favicon for a provided portal URL.
-     *
-     * @param url source URL used to derive the favicon
-     * @return favicon bytes or 404 when unavailable
-     */
-    @GetMapping("/favicon")
-    public ResponseEntity<byte[]> favicon(@RequestParam("url") String url) {
-        FaviconResponse faviconResponse = faviconService.getFavicon(url);
-        if (faviconResponse == null || faviconResponse.faviconData() == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        MediaType mediaType = parseMediaType(faviconResponse.contentType());
-        return ResponseEntity.ok()
-                .contentType(mediaType)
-                .body(faviconResponse.faviconData());
-    }
 
     private ResponseEntity<byte[]> fetchImage(String imageUrl) {
         try {

@@ -743,11 +743,17 @@ const remainingGenerationsLabel = computed(() => {
   return `${status} (${count})`
 })
 
-const productLabel = computed(() =>
-  props.productName.length > 0
-    ? props.productName
-    : t('product.aiReview.request.productFallback')
-)
+const productLabel = computed(() => {
+  const name =
+    props.productName.length > 0
+      ? props.productName
+      : t('product.aiReview.request.productFallback')
+
+  if (props.gtin && !name.includes(String(props.gtin))) {
+    return `${name} (${props.gtin})`
+  }
+  return name
+})
 
 watch(
   () => props.initialReview,

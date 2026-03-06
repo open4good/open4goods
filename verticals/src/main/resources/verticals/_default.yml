@@ -16,6 +16,9 @@ parsers:
 # If true, products url will be regenerated on each batch. Should not move too much, but...
 forceNameGeneration: true
 
+# If true, will force recomputing of the embedding vector
+forceEmbeddingRecomputing: true
+
 # Average electricity cost per kilowatt-hour (EUR).
 averageKwhCost: 0.194
 

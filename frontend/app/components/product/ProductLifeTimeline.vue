@@ -179,7 +179,8 @@ const eventLabelKeys: Record<string, string> = {
   EPREL_LAST_PUBLICATION:
     'product.attributes.timeline.events.eprelLastPublication',
   EPREL_EXPORT: 'product.attributes.timeline.events.eprelExport',
-  EPREL_SPARE_PARTS_END: 'product.attributes.timeline.events.eprelSparePartsEnd',
+  EPREL_SPARE_PARTS_END:
+    'product.attributes.timeline.events.eprelSparePartsEnd',
   EPREL_SOFTWARE_SUPPORT_END:
     'product.attributes.timeline.events.eprelSoftwareSupportEnd',
   EPREL_SUPPORT_END: 'product.attributes.timeline.events.eprelSupportEnd',

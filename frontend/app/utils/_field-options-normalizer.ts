@@ -60,7 +60,10 @@ export const deduplicateFieldMetadataList = (
   const indexByKey = new Map<string, number>()
 
   fields.forEach(field => {
-    if (!normalizeText(field.mapping) && !hasRenderableFacetLabel(field.title)) {
+    if (
+      !normalizeText(field.mapping) &&
+      !hasRenderableFacetLabel(field.title)
+    ) {
       return
     }
 

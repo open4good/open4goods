@@ -341,8 +341,6 @@ const { execute: _executeBlogFetch } = await useAsyncData(
   }
 )
 
-
-
 const solutionBenefits = computed(() => [
   {
     emoji: '⏱️',
@@ -847,8 +845,7 @@ useHead(() => ({
             id="home-essentials"
             class="home-page__section-wrapper home-page__stack"
           >
-
-          <!--
+            <!--
 
           <SectionReveal class="home-page__section" transition="slide-y">
             <template #default="{ reveal }">

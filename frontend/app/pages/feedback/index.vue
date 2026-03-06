@@ -323,7 +323,8 @@ const loadIssuesForCategory = async (category: FeedbackCategory) => {
   }
 }
 
-const { getRemaining, invalidateQuota, recordUsage, refreshQuota } = useIpQuota()
+const { getRemaining, invalidateQuota, recordUsage, refreshQuota } =
+  useIpQuota()
 const feedbackQuotaCategory: IpQuotaCategory = IpQuotaCategory.FeedbackVote
 
 const loadFeedbackQuota = async () => {

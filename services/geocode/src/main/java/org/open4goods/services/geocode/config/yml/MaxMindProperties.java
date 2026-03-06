@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "geocode.maxmind")
 public class MaxMindProperties
 {
-    private String url = "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=${MAXMIND_LICENSE_KEY}&suffix=tar.gz";
+    private String url = "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=${MAXMIND_LICENSE_KEY:}&suffix=tar.gz";
     private int refreshInDays = 7;
     private String databaseFileName = "GeoLite2-City.mmdb";
 

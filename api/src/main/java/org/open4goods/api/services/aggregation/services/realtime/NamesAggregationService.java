@@ -246,7 +246,9 @@ public class NamesAggregationService extends AbstractAggregationService {
 			if (StringUtils.isNotBlank(prefixedText)) {
 
 				long cacheKey = computeEmbeddingCacheKey(data, resolvedVertical);
-				if (cacheKey == data.getEmbeddingTextHash()) {
+				boolean forceRecomputing = resolvedVertical != null && resolvedVertical.isForceEmbeddingRecomputing();
+				
+				if (!forceRecomputing && cacheKey == data.getEmbeddingTextHash()) {
 					logger.debug("Embedding cache key unchanged for product {}, skipping", data.getId());
 				} else {
 					final float[] embedding = embeddingService.embed(prefixedText);

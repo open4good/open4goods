@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { FieldMetadataDto, ProductFieldOptionsResponse } from '~~/shared/api-client'
+import type {
+  FieldMetadataDto,
+  ProductFieldOptionsResponse,
+} from '~~/shared/api-client'
 import {
   deduplicateFieldMetadataList,
   normalizeFieldOptionsResponse,
@@ -51,8 +54,16 @@ describe('normalizeFieldOptionsResponse', () => {
   it('normalizes each section independently', () => {
     const options: ProductFieldOptionsResponse = {
       global: [
-        { mapping: 'price.minPrice.price', title: 'Prix', valueType: 'numeric' },
-        { mapping: 'price.minPrice.price', title: 'Prix', valueType: 'numeric' },
+        {
+          mapping: 'price.minPrice.price',
+          title: 'Prix',
+          valueType: 'numeric',
+        },
+        {
+          mapping: 'price.minPrice.price',
+          title: 'Prix',
+          valueType: 'numeric',
+        },
       ],
       impact: [
         {

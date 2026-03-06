@@ -6,10 +6,13 @@ import {
 
 describe('technical-field-guide', () => {
   it('resolves canonical entries and legacy aliases', () => {
-    expect(resolveTechnicalFieldGuideEntry('scores.ECOSCORE.relative.value')?.mapping).toBe('scores.ECOSCORE.relative.value')
-    expect(resolveTechnicalFieldGuideEntry('scores.ECOSCORE.relativ.value')?.mapping).toBe('scores.ECOSCORE.relative.value')
+    expect(
+      resolveTechnicalFieldGuideEntry('scores.ECOSCORE.relative.value')?.mapping
+    ).toBe('scores.ECOSCORE.relative.value')
+    expect(
+      resolveTechnicalFieldGuideEntry('scores.ECOSCORE.relativ.value')?.mapping
+    ).toBe('scores.ECOSCORE.relative.value')
   })
-
 
   it('provides understandable metadata for each visible field', () => {
     const entries = buildTechnicalFieldGuideEntries([

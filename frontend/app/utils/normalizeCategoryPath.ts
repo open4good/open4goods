@@ -1,6 +1,4 @@
-export const normalizeCategoryPath = (
-  path?: string | null
-): string | null => {
+export const normalizeCategoryPath = (path?: string | null): string | null => {
   if (!path) {
     return null
   }

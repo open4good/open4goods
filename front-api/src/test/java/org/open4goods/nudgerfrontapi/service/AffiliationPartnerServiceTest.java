@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProperties;
-import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -32,21 +31,16 @@ class AffiliationPartnerServiceTest {
     @Mock
     private AffiliationService affiliationService;
 
-    private ApiProperties apiProperties;
     private AffiliationPartnerService service;
     private Method buildAssetUrl;
 
     @BeforeEach
-    void setUp() throws Exception {
-        apiProperties = new ApiProperties();
-        apiProperties.setResourceRootPath("https://static.nudger.fr");
-
-        // Stub the properties used during construction
+    void setUp() throws Exception {        // Stub the properties used during construction
         when(affiliationPartnersProperties.getApiBaseUrl()).thenReturn("https://api.open4goods.org");
         when(affiliationPartnersProperties.getApiKey()).thenReturn("dummy-key");
 
         service = new AffiliationPartnerService(
-                RestClient.builder(), affiliationPartnersProperties, apiProperties, affiliationService);
+                RestClient.builder(), affiliationPartnersProperties, affiliationService);
 
         // Obtain access to the private buildAssetUrl method
         buildAssetUrl = AffiliationPartnerService.class.getDeclaredMethod(
@@ -62,7 +56,7 @@ class AffiliationPartnerServiceTest {
     void shouldEncodePartnerNameWithSpaces() throws Exception {
         String result = invoke("/logo/", "Boulanger Retail");
         assertNotNull(result);
-        assertEquals("https://static.nudger.fr/logo/Boulanger+Retail", result);
+        assertEquals("/logo/Boulanger+Retail", result);
     }
 
     @Test
@@ -70,14 +64,14 @@ class AffiliationPartnerServiceTest {
         String result = invoke("/logo/", "Moyenne & Co");
         assertNotNull(result);
         assertTrue(result.contains("%26"), "Ampersand should be encoded as %26");
-        assertEquals("https://static.nudger.fr/logo/Moyenne+%26+Co", result);
+        assertEquals("/logo/Moyenne+%26+Co", result);
     }
 
     @Test
     void shouldHandleSimplePartnerNameWithoutSpecialChars() throws Exception {
         String result = invoke("/logo/", "amazon.fr");
         assertNotNull(result);
-        assertEquals("https://static.nudger.fr/logo/amazon.fr", result);
+        assertEquals("/logo/amazon.fr", result);
     }
 
     @Test
@@ -86,25 +80,11 @@ class AffiliationPartnerServiceTest {
         assertNull(result);
     }
 
-    @Test
-    void shouldReturnNullWhenResourceRootPathIsBlank() throws Exception {
-        apiProperties.setResourceRootPath("");
-        String result = invoke("/logo/", "partner");
-        assertNull(result);
-    }
-
-    @Test
-    void shouldStripTrailingSlashFromResourceRoot() throws Exception {
-        apiProperties.setResourceRootPath("https://static.nudger.fr/");
-        String result = invoke("/logo/", "amazon.fr");
-        assertNotNull(result);
-        assertEquals("https://static.nudger.fr/logo/amazon.fr", result);
-    }
 
     @Test
     void shouldEncodePartnerNameInFaviconPath() throws Exception {
         String result = invoke("/favicon?url=", "Moyenne & Co");
         assertNotNull(result);
-        assertEquals("https://static.nudger.fr/favicon?url=Moyenne+%26+Co", result);
+        assertEquals("/favicon?url=Moyenne+%26+Co", result);
     }
 }

@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 export interface ContactDetailLink {
   label: string
@@ -24,8 +23,6 @@ withDefaults(
     eyebrow: undefined,
   }
 )
-
-
 </script>
 
 <style scoped lang="sass">

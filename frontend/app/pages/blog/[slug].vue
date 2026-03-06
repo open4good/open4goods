@@ -61,8 +61,8 @@ await useAsyncData(
 const article = computed(() => currentArticle.value as BlogArticle | null)
 
 const assistantConfigId = computed(() => slug.value)
-const assistantCategoryId = computed(
-  () => (slug.value ? assistantCategoryMappings[slug.value] ?? null : null)
+const assistantCategoryId = computed(() =>
+  slug.value ? (assistantCategoryMappings[slug.value] ?? null) : null
 )
 </script>
 

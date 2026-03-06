@@ -31,7 +31,9 @@
             </thead>
             <tbody>
               <tr v-for="entry in visibleEntries" :key="entry.mapping">
-                <td><code>{{ entry.mapping }}</code></td>
+                <td>
+                  <code>{{ entry.mapping }}</code>
+                </td>
                 <td>{{ t(entry.labelKey) }}</td>
                 <td>{{ t(entry.tooltipKey) }}</td>
                 <td>{{ t(entry.sourceKey) }}</td>
@@ -91,13 +93,15 @@ const entries = computed<TechnicalFieldGuideEntry[]>(() =>
   buildTechnicalFieldGuideEntries(props.mappings)
 )
 
-const essentialEntries = computed(() => entries.value.filter(entry => entry.essential))
-const hiddenEntries = computed(() => entries.value.filter(entry => !entry.essential))
+const essentialEntries = computed(() =>
+  entries.value.filter(entry => entry.essential)
+)
+const hiddenEntries = computed(() =>
+  entries.value.filter(entry => !entry.essential)
+)
 
 const visibleEntries = computed(() =>
-  showAdvanced.value
-    ? entries.value
-    : [...essentialEntries.value]
+  showAdvanced.value ? entries.value : [...essentialEntries.value]
 )
 </script>
 

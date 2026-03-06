@@ -144,7 +144,9 @@
           >
             <ProductVigilanceSection
               :product="product"
-              :attribute-configs="categoryDetail?.attributesConfig?.configs ?? []"
+              :attribute-configs="
+                categoryDetail?.attributesConfig?.configs ?? []
+              "
               :on-market-end-date="product.eprel?.onMarketEndDate"
               @click:offers="scrollToSection(subSectionIds.priceOffers)"
             />

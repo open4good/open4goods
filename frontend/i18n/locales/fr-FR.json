@@ -2312,7 +2312,7 @@
         },
         "cancel": "Annuler",
         "close": "Fermer",
-        "description": "Nous utilisons des outils puissants d'IA, d'analyse et d'agrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est coûteuse (financièrement et énergétiquement). À utiliser si vous avez un réel intérêt pour ce produit. Et si vous voulez nous aider : faites vos achats via Nudger 😊",
+        "description": "Nous utilisons des outils puissants d'IA, d'analyse et d'agrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est coûteuse (financièrement et énergétiquement). À utiliser si vous avez un réel intérêt pour ce produit.",
         "methodologyLink": "Comment c'est généré ?",
         "eyebrow": "Synthèse",
         "eyebrowNeutral": "Synthèse",
@@ -3018,7 +3018,7 @@
       "defaultSubtitle": "(Pack dev/demo) Démo vidéo hero...",
       "defaultTitle": "Titre par défaut",
       "mainSubtitle": "Acheter Mieux sans dépenser plus",
-      "mainTitle": "Nudger : Le comparateur écologique"
+      "mainTitle": "Nudger : Le comparateur écologique tech & electro"
     },
     "links": {
       "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"

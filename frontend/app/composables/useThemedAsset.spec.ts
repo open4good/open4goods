@@ -42,5 +42,4 @@ describe('useThemedAsset utilities', () => {
 
     expect(resolved).toBe('/_nuxt/light-logo-new.png')
   })
-
 })

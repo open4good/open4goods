@@ -17,12 +17,8 @@
       },
       "provider": {
         "displayName": "Plausible",
-        "groups": [
-          "analytics"
-        ],
-        "tags": [
-          "plausible"
-        ]
+        "groups": ["analytics"],
+        "tags": ["plausible"]
       },
       "defaults": {
         "params": {
@@ -78,13 +74,8 @@
           "topN": 5,
           "minVisitors": 10
         },
-        "groups": [
-          "analytics"
-        ],
-        "tags": [
-          "plausible",
-          "global"
-        ]
+        "groups": ["analytics"],
+        "tags": ["plausible", "global"]
       },
       {
         "schemaVersion": "2.0",
@@ -103,13 +94,8 @@
           "topN": 5,
           "minVisitors": 10
         },
-        "groups": [
-          "analytics"
-        ],
-        "tags": [
-          "plausible",
-          "global"
-        ]
+        "groups": ["analytics"],
+        "tags": ["plausible", "global"]
       },
       {
         "schemaVersion": "2.0",
@@ -128,13 +114,8 @@
           "topN": 5,
           "minVisitors": 10
         },
-        "groups": [
-          "analytics"
-        ],
-        "tags": [
-          "plausible",
-          "global"
-        ]
+        "groups": ["analytics"],
+        "tags": ["plausible", "global"]
       },
       {
         "schemaVersion": "2.0",
@@ -153,13 +134,8 @@
           "topN": 5,
           "minVisitors": 10
         },
-        "groups": [
-          "analytics"
-        ],
-        "tags": [
-          "plausible",
-          "global"
-        ]
+        "groups": ["analytics"],
+        "tags": ["plausible", "global"]
       },
       {
         "schemaVersion": "2.0",
@@ -178,13 +154,8 @@
           "topN": 5,
           "minVisitors": 10
         },
-        "groups": [
-          "analytics"
-        ],
-        "tags": [
-          "plausible",
-          "global"
-        ]
+        "groups": ["analytics"],
+        "tags": ["plausible", "global"]
       },
       {
         "schemaVersion": "2.0",
@@ -203,13 +174,8 @@
           "topN": 5,
           "minVisitors": 10
         },
-        "groups": [
-          "analytics"
-        ],
-        "tags": [
-          "plausible",
-          "global"
-        ]
+        "groups": ["analytics"],
+        "tags": ["plausible", "global"]
       },
       {
         "schemaVersion": "2.0",
@@ -231,14 +197,8 @@
           "goal_display_name": "Clic lien d'affiliation",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -260,14 +220,8 @@
           "goal_display_name": "Clic lien d'affiliation",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -289,14 +243,8 @@
           "goal_display_name": "Clic lien d'affiliation",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -318,14 +266,8 @@
           "goal_display_name": "Outbound Link: Click",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -347,14 +289,8 @@
           "goal_display_name": "Outbound Link: Click",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -376,14 +312,8 @@
           "goal_display_name": "Outbound Link: Click",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -405,14 +335,8 @@
           "goal_display_name": "category-filter-change",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -434,14 +358,8 @@
           "goal_display_name": "category-filter-change",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -463,14 +381,8 @@
           "goal_display_name": "category-filter-change",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -492,14 +404,8 @@
           "goal_display_name": "file-download",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -521,14 +427,8 @@
           "goal_display_name": "file-download",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -550,14 +450,8 @@
           "goal_display_name": "file-download",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -579,14 +473,8 @@
           "goal_display_name": "open-data-download",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -608,14 +496,8 @@
           "goal_display_name": "open-data-download",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -637,14 +519,8 @@
           "goal_display_name": "open-data-download",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -666,14 +542,8 @@
           "goal_display_name": "product-redirect",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -695,14 +565,8 @@
           "goal_display_name": "product-redirect",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -724,14 +588,8 @@
           "goal_display_name": "product-redirect",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -753,14 +611,8 @@
           "goal_display_name": "search",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -782,14 +634,8 @@
           "goal_display_name": "search",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -811,14 +657,8 @@
           "goal_display_name": "search",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -840,14 +680,8 @@
           "goal_display_name": "search-focus",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -869,14 +703,8 @@
           "goal_display_name": "search-focus",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -898,14 +726,8 @@
           "goal_display_name": "search-focus",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -927,14 +749,8 @@
           "goal_display_name": "section-view",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -956,14 +772,8 @@
           "goal_display_name": "section-view",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -985,14 +795,8 @@
           "goal_display_name": "section-view",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -1014,14 +818,8 @@
           "goal_display_name": "tab-click",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -1043,14 +841,8 @@
           "goal_display_name": "tab-click",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -1072,14 +864,8 @@
           "goal_display_name": "tab-click",
           "goal_type": null
         },
-        "groups": [
-          "analytics",
-          "goals"
-        ],
-        "tags": [
-          "plausible",
-          "goal"
-        ]
+        "groups": ["analytics", "goals"],
+        "tags": ["plausible", "goal"]
       },
       {
         "schemaVersion": "2.0",
@@ -1102,16 +888,8 @@
           "source": "Direct / None",
           "source_hash": "f05d576e"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1134,16 +912,8 @@
           "source": "Direct / None",
           "source_hash": "f05d576e"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1166,16 +936,8 @@
           "source": "Direct / None",
           "source_hash": "f05d576e"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1198,16 +960,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1230,16 +984,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1262,16 +1008,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1294,16 +1032,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1326,16 +1056,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1358,16 +1080,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1390,16 +1104,8 @@
           "source": "Direct / None",
           "source_hash": "f05d576e"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1422,16 +1128,8 @@
           "source": "Direct / None",
           "source_hash": "f05d576e"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1454,16 +1152,8 @@
           "source": "Direct / None",
           "source_hash": "f05d576e"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1486,16 +1176,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1518,16 +1200,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1550,16 +1224,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1582,16 +1248,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1614,16 +1272,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       },
       {
         "schemaVersion": "2.0",
@@ -1646,16 +1296,8 @@
           "source": "Google",
           "source_hash": "2b681c0a"
         },
-        "groups": [
-          "analytics",
-          "goals",
-          "sources"
-        ],
-        "tags": [
-          "plausible",
-          "goal",
-          "source"
-        ]
+        "groups": ["analytics", "goals", "sources"],
+        "tags": ["plausible", "goal", "source"]
       }
     ]
   }

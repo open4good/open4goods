@@ -89,7 +89,6 @@
                 :to="item.categoryLink"
                 @click.stop
               >
-
               </v-btn>
             </div>
           </v-card>
