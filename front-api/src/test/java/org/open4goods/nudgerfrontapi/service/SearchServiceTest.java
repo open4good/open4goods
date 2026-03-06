@@ -3,37 +3,39 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.nudgerfrontapi.service.EmbeddingProxyService;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
-
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
-
-import org.springframework.data.elasticsearch.core.TotalHitsRelation;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchHitsImpl;
-import org.mockito.ArgumentCaptor;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.TotalHitsRelation;
+
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 
@@ -130,7 +132,7 @@ class SearchServiceTest {
 
         // Setup repository to return empty results
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
-        
+
         // WHEN
         GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, null,
                 org.springframework.data.domain.Sort.unsorted(), null, null);
@@ -171,7 +173,7 @@ class SearchServiceTest {
         org.springframework.data.elasticsearch.core.query.Query capturedQuery = queryCaptor.getValue();
         assertThat(capturedQuery).isInstanceOf(NativeQuery.class);
         NativeQuery nativeQuery = (NativeQuery) capturedQuery;
-        
+
         Query esQuery = nativeQuery.getQuery();
         // After fix, it should NOT use FunctionScore query for empty input, but a BoolQuery directly
         assertThat(esQuery.isFunctionScore()).isFalse();
@@ -195,7 +197,7 @@ class SearchServiceTest {
         org.springframework.data.elasticsearch.core.query.Query capturedQuery = queryCaptor.getValue();
         assertThat(capturedQuery).isInstanceOf(NativeQuery.class);
         NativeQuery nativeQuery = (NativeQuery) capturedQuery;
-        
+
         Query esQuery = nativeQuery.getQuery();
         assertThat(esQuery.isBool()).isTrue();
         assertThat(esQuery.bool().must()).isNotEmpty();
@@ -217,7 +219,7 @@ class SearchServiceTest {
         config.setId("test-vertical");
         config.setAvailableImpactScoreCriterias(List.of("ECOSCORE"));
         // Ensure attributes config is not null to avoid potential NPEs, though logic handles nulls
-        config.setAttributesConfig(new org.open4goods.model.vertical.AttributesConfig()); 
+        config.setAttributesConfig(new org.open4goods.model.vertical.AttributesConfig());
 
         // WHEN
         org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse response = searchService.resolveVerticalFields(config, DomainLanguage.fr, Collections.emptyList());
@@ -227,5 +229,48 @@ class SearchServiceTest {
         assertThat(response.impact()).anyMatch(field -> field.mapping().equals("scores.ECOSCORE.value"));
         // Verify that the relativ.value mapping is ALSO present
         assertThat(response.impact()).anyMatch(field -> field.mapping().equals("scores.ECOSCORE.relativ.value"));
+    }
+
+    @Test
+    void resolveVerticalFields_shouldMapEcoFiltersToImpact_andNotToTechnical() {
+        // GIVEN
+        VerticalConfig config = new VerticalConfig();
+        config.setId("tv");
+        config.setEcoFilters(List.of("CLASSE_ENERGY"));
+        config.setTechnicalFilters(List.of("DIAGONALE_POUCES"));
+        config.setGlobalTechnicalFilters(List.of("WEIGHT"));
+
+        AttributesConfig attributesConfig = new AttributesConfig();
+        AttributeConfig energyClass = new AttributeConfig();
+        energyClass.setKey("CLASSE_ENERGY");
+        energyClass.setFilteringType(AttributeType.TEXT);
+
+        AttributeConfig diagonal = new AttributeConfig();
+        diagonal.setKey("DIAGONALE_POUCES");
+        diagonal.setFilteringType(AttributeType.NUMERIC);
+
+        AttributeConfig weight = new AttributeConfig();
+        weight.setKey("WEIGHT");
+        weight.setFilteringType(AttributeType.NUMERIC);
+
+        attributesConfig.setConfigs(List.of(energyClass, diagonal, weight));
+        config.setAttributesConfig(attributesConfig);
+
+        // WHEN
+        org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse response = searchService
+                .resolveVerticalFields(config, DomainLanguage.fr, Collections.emptyList());
+
+        // THEN
+        Set<String> impactMappings = response.impact().stream()
+                .map(field -> field.mapping())
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+        Set<String> technicalMappings = response.technical().stream()
+                .map(field -> field.mapping())
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+
+        assertThat(impactMappings).contains("attributes.indexed.CLASSE_ENERGY.value");
+        assertThat(technicalMappings).contains("attributes.indexed.DIAGONALE_POUCES.numericValue");
+        assertThat(technicalMappings).contains("attributes.indexed.WEIGHT.numericValue");
+        assertThat(technicalMappings).doesNotContain("attributes.indexed.CLASSE_ENERGY.value");
     }
 }

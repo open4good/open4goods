@@ -31,6 +31,10 @@ xwiki:
         
         
 spring:
+  boot:
+    admin:
+      client:
+        enabled: false
   docker:
     compose:
       enabled: true
