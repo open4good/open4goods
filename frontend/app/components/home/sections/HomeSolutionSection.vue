@@ -37,7 +37,10 @@ const unlockImageTilt = () => {
     class="home-solution"
     aria-labelledby="home-solution-title"
   >
-    <div class="home-solution__inner">
+    <div
+      class="home-solution__inner mx-auto px-4 w-100"
+      style="max-width: 1100px"
+    >
       <v-row
         class="home-solution__layout"
         align="center"
@@ -76,7 +79,7 @@ const unlockImageTilt = () => {
                 <v-avatar class="home-solution__icon" size="60" color="surface">
                   <span aria-hidden="true">{{ item.emoji }}</span>
                 </v-avatar>
-                <div class="d-flex flex-column ga-1">
+                <div class="home-solution__texts d-flex flex-column ga-1">
                   <p class="home-solution__label ma-0 font-weight-bold">
                     {{ item.label }}
                   </p>

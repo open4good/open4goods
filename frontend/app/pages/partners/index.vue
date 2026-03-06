@@ -56,6 +56,7 @@
         :empty-state-label="t('partners.affiliation.empty')"
         :carousel-aria-label="t('partners.affiliation.carouselAriaLabel')"
         :link-label="t('partners.affiliation.linkLabel')"
+        compact
       />
     </v-sheet>
 

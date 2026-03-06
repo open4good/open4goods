@@ -30,6 +30,10 @@ amazonConfig:
 
   
 spring:
+  boot:
+    admin:
+      client:
+        enabled: false
   ai:
     openai:
       chat:

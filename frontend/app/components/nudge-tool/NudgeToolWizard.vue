@@ -1120,6 +1120,9 @@ const baseSpacing = computed(
 )
 
 const clampHeight = (height: number) => {
+  if (activeStepKey.value === 'recommendations') {
+    return Math.max(height, WIZARD_MIN_HEIGHT)
+  }
   const maxHeight = Math.max(
     viewportHeight.value - VIEWPORT_PADDING,
     WIZARD_MIN_HEIGHT
@@ -1140,7 +1143,7 @@ const categoryHeight = computed(() => {
 })
 
 watch(
-  [isContentMode, viewportHeight],
+  [isContentMode, viewportHeight, baseTotalHeight],
   async () => {
     if (props.compact || !isContentMode.value) {
       lockedContentHeight.value = null
@@ -1156,7 +1159,7 @@ watch(
       lockedContentHeight.value === null ||
       viewportChanged ||
       (isContentMode.value &&
-        lockedContentHeight.value === categoryHeight.value)
+        lockedContentHeight.value !== clampHeight(baseTotalHeight.value))
     ) {
       await nextTick()
       lockedContentHeight.value = clampHeight(baseTotalHeight.value)

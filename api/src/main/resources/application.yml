@@ -45,6 +45,10 @@ management:
       show-details: always
 
 spring:
+  boot:
+    admin:
+      client:
+        enabled: false
   profiles:
     default: local
   docker:

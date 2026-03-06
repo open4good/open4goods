@@ -7,7 +7,7 @@
       <v-skeleton-loader type="image, article" />
     </div>
     <div v-else>
-      <CategoryProductListView
+      <CategoryProductCardGrid
         v-if="hasProducts"
         :products="products.slice(0, 10)"
         :popular-attributes="popularAttributes"
@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
-import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
+import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 
 const props = withDefaults(
   defineProps<{

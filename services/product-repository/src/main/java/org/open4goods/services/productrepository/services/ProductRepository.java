@@ -1286,12 +1286,6 @@ public class ProductRepository {
 
     /**
      * Counts products whose {@code gtinInfos.upcType} matches any of the supplied barcode types.
-     * <p>
-     * The {@code gtinInfos.upcType} field is intentionally <strong>not indexed</strong> in Elasticsearch,
-     * so a standard {@link Criteria} query cannot be used. Instead, a Painless script query reads the
-     * value directly from {@code _source}. The result is cached for one day, making the slower script
-     * execution acceptable.
-     * </p>
      *
      * @param barcodeTypes one or more barcode types to match
      * @return the number of matching products
@@ -1302,12 +1296,7 @@ public class ProductRepository {
                 .map(BarcodeType::name)
                 .toList();
 
-        NativeQuery query = new NativeQueryBuilder()
-                .withQuery(q -> q.bool(b -> b.filter(f -> f.script(s -> s.script(sc -> sc
-                        .source("params._source.containsKey('gtinInfos') && params._source.gtinInfos != null && params._source.gtinInfos.containsKey('upcType') && params.types.contains(params._source.gtinInfos.upcType)")
-                        .params(Map.of("types", JsonData.of(typeNames)))
-                )))))
-                .build();
+        CriteriaQuery query = new CriteriaQuery(new Criteria("gtinInfos.upcType").in(typeNames));
         return elasticsearchOperations.count(query, CURRENT_INDEX);
     }
 

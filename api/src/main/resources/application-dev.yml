@@ -32,6 +32,10 @@ crawlerKeys:
 
 
 spring:
+  boot:
+    admin:
+      client:
+        enabled: false
   thymeleaf:
       cache: false
 

@@ -36,7 +36,7 @@
           :show-arrows="slides.length > 1"
           :hide-delimiters="true"
           :hide-delimiter-background="true"
-          :interval="6000"
+          :interval="12000"
           :pause-on-hover="true"
           :aria-label="carouselAriaLabel"
         >
@@ -54,7 +54,13 @@
                   <v-hover v-slot="{ isHovering, props: hoverProps }">
                     <v-card
                       v-bind="hoverProps"
-                      class="partners-affiliation__card-surface"
+                      :class="[
+                        'partners-affiliation__card-surface',
+                        {
+                          'partners-affiliation__card-surface--compact':
+                            compact,
+                        },
+                      ]"
                       :elevation="isHovering ? 6 : 1"
                       rounded="lg"
                       :href="partner.affiliationLink ?? undefined"
@@ -72,7 +78,6 @@
                           :alt="logoAlt(partner)"
                           :width="logoSize"
                           :height="logoSize"
-                          cover
                           class="partners-affiliation__logo"
                         />
                       </div>
@@ -122,16 +127,22 @@ import { computed, ref, useId, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import type { AffiliationPartnerDto } from '~~/shared/api-client'
 
-const props = defineProps<{
-  title: string
-  subtitle: string
-  partners: AffiliationPartnerDto[]
-  searchLabel: string
-  searchPlaceholder: string
-  emptyStateLabel: string
-  carouselAriaLabel: string
-  linkLabel: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    subtitle: string
+    partners: AffiliationPartnerDto[]
+    searchLabel: string
+    searchPlaceholder: string
+    emptyStateLabel: string
+    carouselAriaLabel: string
+    linkLabel: string
+    compact?: boolean
+  }>(),
+  {
+    compact: false,
+  }
+)
 
 const display = useDisplay()
 const headingId = useId()
@@ -154,22 +165,22 @@ const filteredPartners = computed(() => {
 
 const itemsPerSlide = computed(() => {
   if (display.xlAndUp.value) {
-    return 7
+    return 14
   }
 
   if (display.lgAndUp.value) {
-    return 6
+    return 12
   }
 
   if (display.mdAndUp.value) {
-    return 4
+    return 8
   }
 
   if (display.smAndUp.value) {
-    return 3
+    return 6
   }
 
-  return 2
+  return 4
 })
 
 const slides = computed(() => {
@@ -188,8 +199,15 @@ watch(slides, () => {
   activeSlide.value = 0
 })
 
-const carouselHeight = computed(() => (display.mdAndUp.value ? 220 : 260))
-const logoSize = computed(() => (display.smAndUp.value ? 96 : 80))
+const carouselHeight = computed(() => {
+  if (props.compact) return display.mdAndUp.value ? 400 : 480
+  return display.mdAndUp.value ? 560 : 640
+})
+
+const logoSize = computed(() => {
+  if (props.compact) return display.smAndUp.value ? 64 : 48
+  return display.smAndUp.value ? 96 : 80
+})
 
 const logoAlt = (partner: AffiliationPartnerDto) =>
   partner.name ? `${partner.name} logo` : ''
@@ -232,16 +250,25 @@ const linkAriaLabel = (partner: AffiliationPartnerDto) => {
 
   &__slide {
     display: grid;
-    gap: 1rem;
+    gap: 1.5rem;
     justify-content: center;
     align-items: stretch;
+    grid-template-columns: repeat(2, 1fr);
 
     @media (min-width: 600px) {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
     }
 
-    @media (max-width: 599px) {
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    @media (min-width: 960px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (min-width: 1280px) {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    @media (min-width: 1920px) {
+      grid-template-columns: repeat(7, 1fr);
     }
   }
 
@@ -268,6 +295,11 @@ const linkAriaLabel = (partner: AffiliationPartnerDto) => {
     color: inherit;
     text-decoration: none;
 
+    &--compact {
+      padding: 0.75rem 0.5rem;
+      gap: 0.5rem;
+    }
+
     &:hover {
       transform: translateY(-4px);
     }
@@ -279,10 +311,15 @@ const linkAriaLabel = (partner: AffiliationPartnerDto) => {
     align-items: center;
     width: 100%;
     min-height: 80px;
+
+    .partners-affiliation__card-surface--compact & {
+      min-height: 60px;
+    }
   }
 
   &__logo {
-    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
+    padding: 0.5rem;
   }
 
   &__card-content {
