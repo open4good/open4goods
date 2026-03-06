@@ -48,6 +48,7 @@ const createI18nInstance = () =>
               differentCategory: 'Different',
               missingIdentifier: 'Missing identifier',
             },
+            moreCharacteristics: 'More characteristics',
           },
         },
       },
@@ -176,6 +177,7 @@ const mountComponent = async () =>
       product: baseProduct,
       breadcrumbs: [{ title: 'Category' }],
       popularAttributes: [],
+      hasCategory: true,
     },
     global: {
       plugins: [createI18nInstance()],
@@ -203,6 +205,47 @@ describe('ProductHero', () => {
     await wrapper.unmount()
   })
 
+
+  it('scrolls to the attributes section from the more characteristics link', async () => {
+    const scrollToMock = vi.fn()
+    const attributesSection = document.createElement('section')
+    attributesSection.id = 'caracteristiques'
+    document.body.appendChild(attributesSection)
+
+    Object.defineProperty(attributesSection, 'getBoundingClientRect', {
+      value: () => ({
+        top: 400,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }),
+    })
+
+    Object.defineProperty(window, 'scrollY', {
+      configurable: true,
+      value: 100,
+    })
+
+    vi.stubGlobal('scrollTo', scrollToMock)
+
+    const wrapper = await mountComponent()
+    const button = wrapper.find('.product-hero__more-characteristics')
+
+    expect(button.exists()).toBe(true)
+    await button.trigger('click')
+
+    expect(scrollToMock).toHaveBeenCalledWith({ top: 380, behavior: 'smooth' })
+
+    document.body.removeChild(attributesSection)
+    vi.unstubAllGlobals()
+    await wrapper.unmount()
+  })
+
   it('renders gallery when images are present', async () => {
     const productWithImages: ProductDto = {
       ...baseProduct,
@@ -222,6 +265,7 @@ describe('ProductHero', () => {
         product: productWithImages,
         breadcrumbs: [{ title: 'Category' }],
         popularAttributes: [],
+        hasCategory: true,
       },
       global: {
         plugins: [createI18nInstance()],
