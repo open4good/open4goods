@@ -159,7 +159,7 @@ const route = {
 mockNuxtImport('useRoute', () => () => route)
 mockNuxtImport(
   'useRequestURL',
-  () => () => new URL('https://example.com/televisions/ecoscore')
+  () => () => new URL(`https://example.com${route.fullPath}`)
 )
 mockNuxtImport('useSeoMeta', () => useSeoMetaMock)
 mockNuxtImport(
@@ -411,6 +411,8 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
+  route.params.categorySlug = 'televisions'
+  route.fullPath = '/televisions/ecoscore'
   mdAndDown.value = false
   localeRef.value = 'en-US'
   selectCategoryBySlugMock.mockClear()
@@ -497,5 +499,43 @@ describe('Category ecosystem Impact Score page', () => {
     expect(scrollSpy).toHaveBeenCalled()
     const [firstCall] = scrollSpy.mock.calls
     expect(firstCall?.[0]).toMatchObject({ behavior: 'smooth' })
+  })
+
+  it('builds a category-specific SEO title from verticalHomeTitle', async () => {
+    const ovensCategory = {
+      ...categoryFixture,
+      verticalMetaTitle: 'Ovens',
+      verticalHomeTitle: 'Cooking appliances',
+    } as VerticalConfigFullDto
+    const vacuumCategory = {
+      ...categoryFixture,
+      verticalMetaTitle: null,
+      verticalHomeTitle: 'Vacuum cleaners',
+    } as unknown as VerticalConfigFullDto
+
+    route.params.categorySlug = 'fours'
+    route.fullPath = '/fours/ecoscore'
+    selectCategoryBySlugMock.mockResolvedValueOnce(ovensCategory)
+
+    await mountPage()
+    await flushPromises()
+
+    const firstSeoPayload = useSeoMetaMock.mock.calls[0]?.[0] as {
+      title: () => string
+    }
+    expect(firstSeoPayload.title()).toBe('Impact Score for Cooking appliances')
+
+    route.params.categorySlug = 'aspirateurs'
+    route.fullPath = '/aspirateurs/ecoscore'
+    selectCategoryBySlugMock.mockResolvedValueOnce(vacuumCategory)
+
+    await mountPage()
+    await flushPromises()
+
+    const secondSeoPayload = useSeoMetaMock.mock.calls[1]?.[0] as {
+      title: () => string
+    }
+    expect(secondSeoPayload.title()).toBe('Impact Score for Vacuum cleaners')
+    expect(secondSeoPayload.title()).not.toBe(firstSeoPayload.title())
   })
 })
