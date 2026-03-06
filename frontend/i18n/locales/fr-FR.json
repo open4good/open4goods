@@ -2562,6 +2562,7 @@
         "showMore": "Afficher plus",
         "showLess": "Afficher moins"
       },
+      "moreCharacteristics": "Plus de caractéristiques",
       "gtin": "Code Baarre (GTIN)",
       "gtinTooltip": "Basé sur le code GTIN du produit, cela n'indique pas nécessairement le lieu de fabrication.",
       "mediaType": {
