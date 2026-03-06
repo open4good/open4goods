@@ -112,6 +112,14 @@
               </div>
 
               <div class="mt-6 product-hero__centered-info">
+                <v-btn
+                  v-if="hasCategory"
+                  variant="text"
+                  class="product-hero__more-characteristics"
+                  @click="handleMoreCharacteristicsClick"
+                >
+                  {{ t('product.hero.moreCharacteristics') }}
+                </v-btn>
                 <ul
                   v-if="heroAttributes.length"
                   class="product-hero__attributes"
@@ -507,6 +515,18 @@ const handleImpactScoreClick = () => {
   const element = document.getElementById('impact')
   if (element) {
     const offset = 120 // Adjust based on header height
+    const top = element.getBoundingClientRect().top + window.scrollY - offset
+    window.scrollTo({ top, behavior: 'smooth' })
+  }
+}
+
+const handleMoreCharacteristicsClick = () => {
+  const element =
+    document.getElementById('caracteristiques') ||
+    document.querySelector('.product-attributes')
+
+  if (element) {
+    const offset = 120
     const top = element.getBoundingClientRect().top + window.scrollY - offset
     window.scrollTo({ top, behavior: 'smooth' })
   }
@@ -1142,6 +1162,13 @@ const heroBreadcrumbProps = computed(() => ({
   justify-content: center;
   flex: 1;
   min-height: 0;
+}
+
+.product-hero__more-characteristics {
+  align-self: center;
+  text-transform: none;
+  letter-spacing: normal;
+  margin-bottom: 0.75rem;
 }
 
 .product-hero__heading-group {
