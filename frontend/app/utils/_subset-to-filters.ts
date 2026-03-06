@@ -73,7 +73,23 @@ const convertCriteria = (
     }
   }
 
+  if (criteria.operator === 'LOWER_THAN_OR_EQUAL') {
+    return {
+      field: criteria.field,
+      operator: 'range',
+      max: numericValue,
+    }
+  }
+
   if (criteria.operator === 'GREATER_THAN') {
+    return {
+      field: criteria.field,
+      operator: 'range',
+      min: numericValue,
+    }
+  }
+
+  if (criteria.operator === 'GREATER_THAN_OR_EQUAL') {
     return {
       field: criteria.field,
       operator: 'range',
