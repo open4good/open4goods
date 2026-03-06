@@ -322,7 +322,7 @@ jobs:
       # 📦 Always upload reports artifact (even in MODE=test)
       ############################################
       - name: 📦 Upload reports artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: reports-${{ steps.meta.outputs.safe_version }}
           path: frontend/app/public/reports
