@@ -12,77 +12,95 @@
       </p>
     </div>
 
-    <div
-      v-if="hasReadIndicatorContent"
-      class="impact-subscore-explanation__section"
+    <v-expansion-panels
+      v-if="hasEducationalPanels"
+      class="impact-subscore-explanation__accordion"
+      variant="accordion"
+      density="compact"
+      multiple
     >
-      <h5 class="impact-subscore-explanation__title">
-        {{ readIndicatorTitle }}
-      </h5>
-      <ul
-        v-if="readIndicatorHighlights.length"
-        class="impact-subscore-explanation__bullet-list"
-      >
-        <li
-          v-for="item in readIndicatorHighlights"
-          :key="item.id"
-          class="impact-subscore-explanation__bullet-item"
-        >
-          <v-icon
-            icon="mdi-check-circle-outline"
-            size="18"
-            class="impact-subscore-explanation__bullet-icon"
-          />
-          <!-- eslint-disable vue/no-v-html -->
-          <span v-html="item.text" />
-          <!-- eslint-enable vue/no-v-html -->
-        </li>
-      </ul>
-      <p
-        v-for="(paragraph, index) in readIndicatorDetails"
-        :key="`detail-${index}`"
-        class="impact-subscore-explanation__paragraph"
-      >
-        {{ paragraph }}
-      </p>
-    </div>
+      <v-expansion-panel v-if="hasReadIndicatorContent">
+        <v-expansion-panel-title class="impact-subscore-explanation__accordion-title">
+          {{ readIndicatorTitle }}
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <ul
+            v-if="readIndicatorHighlights.length"
+            class="impact-subscore-explanation__bullet-list"
+          >
+            <li
+              v-for="item in readIndicatorHighlights"
+              :key="item.id"
+              class="impact-subscore-explanation__bullet-item"
+            >
+              <v-icon
+                icon="mdi-check-circle-outline"
+                size="18"
+                class="impact-subscore-explanation__bullet-icon"
+              />
+              <!-- eslint-disable vue/no-v-html -->
+              <span v-html="item.text" />
+              <!-- eslint-enable vue/no-v-html -->
+            </li>
+          </ul>
+          <p
+            v-for="(paragraph, index) in readIndicatorDetails"
+            :key="`detail-${index}`"
+            class="impact-subscore-explanation__paragraph"
+          >
+            {{ paragraph }}
+          </p>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
 
-    <div
-      v-if="statisticalMethodItems.length"
-      class="impact-subscore-explanation__section"
-    >
-      <h5 class="impact-subscore-explanation__title">
-        {{ statisticalMethodTitle }}
-      </h5>
-      <ul class="impact-subscore-explanation__bullet-list">
-        <li
-          v-for="(item, index) in statisticalMethodItems"
-          :key="`method-${index}`"
-          class="impact-subscore-explanation__bullet-item"
-        >
-          <v-icon
-            icon="mdi-chart-bell-curve"
-            size="18"
-            class="impact-subscore-explanation__bullet-icon"
-          />
-          <span>{{ item }}</span>
-        </li>
-      </ul>
-      <v-card
-        v-if="statisticalMethodInfo"
-        variant="tonal"
-        class="impact-subscore-explanation__info-card"
-      >
-        <div class="impact-subscore-explanation__info-card-content">
-          <p class="impact-subscore-explanation__info-title">
-            {{ statisticalMethodInfo.title }}
-          </p>
-          <p class="impact-subscore-explanation__info-body">
-            {{ statisticalMethodInfo.body }}
-          </p>
-        </div>
-      </v-card>
-    </div>
+      <v-expansion-panel v-if="statisticalMethodItems.length">
+        <v-expansion-panel-title class="impact-subscore-explanation__accordion-title">
+          {{ statisticalMethodTitle }}
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <ul class="impact-subscore-explanation__bullet-list">
+            <li
+              v-for="(item, index) in statisticalMethodItems"
+              :key="`method-${index}`"
+              class="impact-subscore-explanation__bullet-item"
+            >
+              <v-icon
+                icon="mdi-chart-bell-curve"
+                size="18"
+                class="impact-subscore-explanation__bullet-icon"
+              />
+              <span>{{ item }}</span>
+            </li>
+          </ul>
+          <v-card
+            v-if="statisticalMethodInfo"
+            variant="tonal"
+            class="impact-subscore-explanation__info-card"
+          >
+            <div class="impact-subscore-explanation__info-card-content">
+              <p class="impact-subscore-explanation__info-title">
+                {{ statisticalMethodInfo.title }}
+              </p>
+              <p class="impact-subscore-explanation__info-body">
+                {{ statisticalMethodInfo.body }}
+              </p>
+            </div>
+          </v-card>
+          <v-btn
+            variant="text"
+            color="primary"
+            size="small"
+            class="impact-subscore-explanation__method-link"
+            :href="methodologyUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            :aria-label="t('product.impact.methodologyLinkAria')"
+          >
+            {{ t('product.impact.methodologyLink') }}
+          </v-btn>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
 
     <dl v-if="infoItems.length" class="impact-subscore-explanation__list">
       <div
@@ -610,6 +628,12 @@ const rankingBadgeText = computed(() => {
 const readIndicatorTitle = computed(() =>
   resolveTranslation('readIndicator.title', readIndicatorParams.value)
 )
+
+const hasEducationalPanels = computed(
+  () => hasReadIndicatorContent.value || statisticalMethodItems.value.length > 0
+)
+
+const methodologyUrl = 'https://nudger.fr/frigos/ecoscore'
 
 const readIndicatorHighlights = computed(() => {
   const items: Array<{ id: string; text: string }> = []
