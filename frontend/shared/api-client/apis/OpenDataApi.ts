@@ -46,7 +46,7 @@ export class OpenDataApi extends runtime.BaseAPI {
      * Return metadata describing the GTIN OpenData export.
      * Get GTIN dataset metadata
      */
-    async gtinRaw(requestParameters: GtinRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<OpenDataDatasetDto>> {
+    async gtinRaw(requestParameters: GtinRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -83,14 +83,18 @@ export class OpenDataApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => OpenDataDatasetDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return metadata describing the GTIN OpenData export.
      * Get GTIN dataset metadata
      */
-    async gtin(requestParameters: GtinRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<OpenDataDatasetDto> {
+    async gtin(requestParameters: GtinRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.gtinRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -99,7 +103,7 @@ export class OpenDataApi extends runtime.BaseAPI {
      * Return metadata describing the ISBN OpenData export.
      * Get ISBN dataset metadata
      */
-    async isbnRaw(requestParameters: IsbnRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<OpenDataDatasetDto>> {
+    async isbnRaw(requestParameters: IsbnRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -136,14 +140,18 @@ export class OpenDataApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => OpenDataDatasetDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return metadata describing the ISBN OpenData export.
      * Get ISBN dataset metadata
      */
-    async isbn(requestParameters: IsbnRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<OpenDataDatasetDto> {
+    async isbn(requestParameters: IsbnRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.isbnRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -152,7 +160,7 @@ export class OpenDataApi extends runtime.BaseAPI {
      * Return aggregated metadata about the available GTIN and ISBN datasets.
      * Get OpenData overview
      */
-    async overviewRaw(requestParameters: OverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<OpenDataOverviewDto>> {
+    async overviewRaw(requestParameters: OverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -189,14 +197,18 @@ export class OpenDataApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => OpenDataOverviewDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return aggregated metadata about the available GTIN and ISBN datasets.
      * Get OpenData overview
      */
-    async overview(requestParameters: OverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<OpenDataOverviewDto> {
+    async overview(requestParameters: OverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.overviewRaw(requestParameters, initOverrides);
         return await response.value();
     }

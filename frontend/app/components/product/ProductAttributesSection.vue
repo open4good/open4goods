@@ -215,6 +215,7 @@
                     class="product-attributes__table-value"
                     :sourcing="attribute.sourcing"
                     :value="attribute.value"
+                    :name="attribute.label"
                   />
                 </td>
               </tr>
@@ -293,6 +294,7 @@
           <ProductAttributeSourcingLabel
             :value="item.displayValue"
             :sourcing="item.sourcing"
+            :name="item.name"
             class="product-attributes__audit-value"
           />
         </template>
@@ -508,6 +510,7 @@
                                       class="product-attributes__table-value"
                                       :sourcing="attribute.sourcing"
                                       :value="attribute.value"
+                                      :name="attribute.name"
                                     />
                                   </td>
                                 </tr>
@@ -628,6 +631,7 @@
                                       class="product-attributes__table-value"
                                       :sourcing="attribute.sourcing"
                                       :value="attribute.value"
+                                      :name="attribute.name"
                                     />
                                   </td>
                                 </tr>
@@ -745,6 +749,7 @@
                                   class="product-attributes__table-value"
                                   :sourcing="attribute.sourcing"
                                   :value="attribute.value"
+                                  :name="attribute.name"
                                 />
                               </td>
                             </tr>

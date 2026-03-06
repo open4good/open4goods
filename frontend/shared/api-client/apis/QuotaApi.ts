@@ -39,7 +39,7 @@ export class QuotaApi extends runtime.BaseAPI {
      * Return the quota usage and remaining tokens for the requested category.
      * Get IP quota status
      */
-    async getQuotaStatusRaw(requestParameters: GetQuotaStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<IpQuotaStatusDto>> {
+    async getQuotaStatusRaw(requestParameters: GetQuotaStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['category'] == null) {
             throw new runtime.RequiredError(
                 'category',
@@ -84,14 +84,18 @@ export class QuotaApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => IpQuotaStatusDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the quota usage and remaining tokens for the requested category.
      * Get IP quota status
      */
-    async getQuotaStatus(requestParameters: GetQuotaStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<IpQuotaStatusDto> {
+    async getQuotaStatus(requestParameters: GetQuotaStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.getQuotaStatusRaw(requestParameters, initOverrides);
         return await response.value();
     }

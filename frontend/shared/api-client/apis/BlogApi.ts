@@ -57,7 +57,7 @@ export class BlogApi extends runtime.BaseAPI {
      * Return a single blog post identified by its slug.
      * Get blog post
      */
-    async postRaw(requestParameters: PostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BlogPostDto>> {
+    async postRaw(requestParameters: PostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['slug'] == null) {
             throw new runtime.RequiredError(
                 'slug',
@@ -102,14 +102,18 @@ export class BlogApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => BlogPostDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return a single blog post identified by its slug.
      * Get blog post
      */
-    async post(requestParameters: PostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BlogPostDto> {
+    async post(requestParameters: PostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.postRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -118,7 +122,7 @@ export class BlogApi extends runtime.BaseAPI {
      * Return paginated blog posts optionally filtered by tag.
      * List blog posts
      */
-    async postsRaw(requestParameters: PostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PageDto>> {
+    async postsRaw(requestParameters: PostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -167,14 +171,18 @@ export class BlogApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PageDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return paginated blog posts optionally filtered by tag.
      * List blog posts
      */
-    async posts(requestParameters: PostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PageDto> {
+    async posts(requestParameters: PostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.postsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -183,7 +191,7 @@ export class BlogApi extends runtime.BaseAPI {
      * Return an RSS feed for all blog posts.
      * Blog RSS feed
      */
-    async rssRaw(requestParameters: RssRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async rssRaw(requestParameters: RssRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -220,15 +228,20 @@ export class BlogApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return an RSS feed for all blog posts.
      * Blog RSS feed
      */
-    async rss(requestParameters: RssRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.rssRaw(requestParameters, initOverrides);
+    async rss(requestParameters: RssRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
+        const response = await this.rssRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**

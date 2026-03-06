@@ -49,7 +49,7 @@ export interface GetTreeRequest {
 export interface SearchRequest {
     domainLanguage: SearchDomainLanguageEnum;
     query?: string;
-    categories?: Array<string>;
+    categories?: string;
     pathPrefix?: string;
     searchContent?: boolean;
     includeContent?: boolean;
@@ -64,7 +64,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
      * Returns the raw content of a documentation resource.
      * Get exposed resource content
      */
-    async getContentRaw(requestParameters: GetContentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExposedDocsContentDto>> {
+    async getContentRaw(requestParameters: GetContentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['categoryId'] == null) {
             throw new runtime.RequiredError(
                 'categoryId',
@@ -117,14 +117,18 @@ export class ExposedDocsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ExposedDocsContentDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Returns the raw content of a documentation resource.
      * Get exposed resource content
      */
-    async getContent(requestParameters: GetContentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExposedDocsContentDto> {
+    async getContent(requestParameters: GetContentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.getContentRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -133,7 +137,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
      * Returns the categories of embedded resources exposed by the documentation service.
      * List exposed documentation categories
      */
-    async getOverviewRaw(requestParameters: GetOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExposedDocsOverviewDto>> {
+    async getOverviewRaw(requestParameters: GetOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -167,14 +171,18 @@ export class ExposedDocsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ExposedDocsOverviewDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Returns the categories of embedded resources exposed by the documentation service.
      * List exposed documentation categories
      */
-    async getOverview(requestParameters: GetOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExposedDocsOverviewDto> {
+    async getOverview(requestParameters: GetOverviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.getOverviewRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -183,7 +191,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
      * Returns the directory tree for a specific exposed resource category.
      * Get exposed resource tree
      */
-    async getTreeRaw(requestParameters: GetTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExposedDocsTreeNodeDto>> {
+    async getTreeRaw(requestParameters: GetTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['categoryId'] == null) {
             throw new runtime.RequiredError(
                 'categoryId',
@@ -225,14 +233,18 @@ export class ExposedDocsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ExposedDocsTreeNodeDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Returns the directory tree for a specific exposed resource category.
      * Get exposed resource tree
      */
-    async getTree(requestParameters: GetTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExposedDocsTreeNodeDto> {
+    async getTree(requestParameters: GetTreeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.getTreeRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -241,7 +253,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
      * Searches exposed documentation and prompt resources by path or content.
      * Search exposed resources
      */
-    async searchRaw(requestParameters: SearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExposedDocsSearchResultDto<any>>> {
+    async searchRaw(requestParameters: SearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ExposedDocsSearchResultDto<{ [key: string]: any; }>>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -302,7 +314,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
      * Searches exposed documentation and prompt resources by path or content.
      * Search exposed resources
      */
-    async search(requestParameters: SearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExposedDocsSearchResultDto<any>> {
+    async search(requestParameters: SearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ExposedDocsSearchResultDto<{ [key: string]: any; }>> {
         const response = await this.searchRaw(requestParameters, initOverrides);
         return await response.value();
     }

@@ -45,10 +45,6 @@ management:
       show-details: always
 
 spring:
-  boot:
-    admin:
-      client:
-        enabled: false
   profiles:
     default: local
   docker:
@@ -108,3 +104,13 @@ feed:
     enabled: true
     cache-ttl-days: 1
     max-jitter-seconds: 30
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "default"
+  boot:
+    admin:
+      client:
+        enabled: false

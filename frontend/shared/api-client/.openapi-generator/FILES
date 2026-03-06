@@ -9,6 +9,7 @@ apis/CommercialEventsApi.ts
 apis/ContactApi.ts
 apis/ContentApi.ts
 apis/ExposedDocsApi.ts
+apis/FaviconControllerApi.ts
 apis/FeedbackApi.ts
 apis/GeocodeControllerApi.ts
 apis/IndexationApi.ts
@@ -16,6 +17,7 @@ apis/OpenDataApi.ts
 apis/PartnerApi.ts
 apis/ProductApi.ts
 apis/QuotaApi.ts
+apis/ResourceAssetControllerApi.ts
 apis/ShareApi.ts
 apis/StatsApi.ts
 apis/TeamApi.ts

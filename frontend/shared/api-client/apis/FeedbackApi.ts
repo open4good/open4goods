@@ -72,7 +72,7 @@ export class FeedbackApi extends runtime.BaseAPI {
      * Indicate whether the caller may still vote today.
      * Check voting eligibility
      */
-    async canVoteRaw(requestParameters: CanVoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FeedbackVoteEligibilityDto>> {
+    async canVoteRaw(requestParameters: CanVoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -109,14 +109,18 @@ export class FeedbackApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FeedbackVoteEligibilityDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Indicate whether the caller may still vote today.
      * Check voting eligibility
      */
-    async canVote(requestParameters: CanVoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FeedbackVoteEligibilityDto> {
+    async canVote(requestParameters: CanVoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.canVoteRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -182,7 +186,7 @@ export class FeedbackApi extends runtime.BaseAPI {
      * Return the number of votes still available for the caller today.
      * Get remaining votes
      */
-    async remainingVotesRaw(requestParameters: RemainingVotesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FeedbackRemainingVotesDto>> {
+    async remainingVotesRaw(requestParameters: RemainingVotesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -219,14 +223,18 @@ export class FeedbackApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FeedbackRemainingVotesDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the number of votes still available for the caller today.
      * Get remaining votes
      */
-    async remainingVotes(requestParameters: RemainingVotesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FeedbackRemainingVotesDto> {
+    async remainingVotes(requestParameters: RemainingVotesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.remainingVotesRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -235,7 +243,7 @@ export class FeedbackApi extends runtime.BaseAPI {
      * Verify hCaptcha token then create a GitHub issue representing the feedback.
      * Submit a feedback entry
      */
-    async submitFeedbackRaw(requestParameters: SubmitFeedbackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FeedbackSubmissionResponseDto>> {
+    async submitFeedbackRaw(requestParameters: SubmitFeedbackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -282,14 +290,18 @@ export class FeedbackApi extends runtime.BaseAPI {
             body: FeedbackSubmissionRequestDtoToJSON(requestParameters['feedbackSubmissionRequestDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FeedbackSubmissionResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Verify hCaptcha token then create a GitHub issue representing the feedback.
      * Submit a feedback entry
      */
-    async submitFeedback(requestParameters: SubmitFeedbackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FeedbackSubmissionResponseDto> {
+    async submitFeedback(requestParameters: SubmitFeedbackRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.submitFeedbackRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -298,7 +310,7 @@ export class FeedbackApi extends runtime.BaseAPI {
      * Register a vote for the provided GitHub issue if quotas allow it.
      * Vote on a feedback issue
      */
-    async voteRaw(requestParameters: VoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FeedbackVoteResponseDto>> {
+    async voteRaw(requestParameters: VoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['issueId'] == null) {
             throw new runtime.RequiredError(
                 'issueId',
@@ -346,14 +358,18 @@ export class FeedbackApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FeedbackVoteResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Register a vote for the provided GitHub issue if quotas allow it.
      * Vote on a feedback issue
      */
-    async vote(requestParameters: VoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FeedbackVoteResponseDto> {
+    async vote(requestParameters: VoteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.voteRaw(requestParameters, initOverrides);
         return await response.value();
     }

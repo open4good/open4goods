@@ -30,10 +30,6 @@ amazonConfig:
 
   
 spring:
-  boot:
-    admin:
-      client:
-        enabled: false
   ai:
     openai:
       chat:
@@ -324,3 +320,12 @@ imageGenerationConfig:
  #   preProcessors: removeSourceMaps, cssImport, jsMin
     
 
+---
+spring:
+  config:
+    activate:
+      on-profile: "default"
+  boot:
+    admin:
+      client:
+        enabled: false

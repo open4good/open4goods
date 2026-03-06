@@ -32,7 +32,9 @@ const normalizePlural = (value: string): string => {
 /**
  * Canonical normalization used to compare facet labels across sources.
  */
-export const normalizeFacetLabel = (value: string | null | undefined): string => {
+export const normalizeFacetLabel = (
+  value: string | null | undefined
+): string => {
   const trimmed = String(value ?? '').trim()
   if (!trimmed) {
     return ''
@@ -62,7 +64,9 @@ const UNIT_BY_FIELD_PATTERN: Array<{ pattern: RegExp; unit: string }> = [
 /**
  * Resolves a display unit for known numeric facet fields.
  */
-export const resolveFacetUnit = (mapping: string | null | undefined): string => {
+export const resolveFacetUnit = (
+  mapping: string | null | undefined
+): string => {
   const key = String(mapping ?? '')
 
   const matched = UNIT_BY_FIELD_PATTERN.find(entry => entry.pattern.test(key))

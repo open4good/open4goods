@@ -44,7 +44,7 @@ export class ShareApi extends runtime.BaseAPI {
      * Accepts a shared URL and starts asynchronous resolution
      * Create a share resolution
      */
-    async createResolutionRaw(requestParameters: CreateResolutionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShareResolutionResponseDto>> {
+    async createResolutionRaw(requestParameters: CreateResolutionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -91,14 +91,18 @@ export class ShareApi extends runtime.BaseAPI {
             body: ShareResolutionRequestDtoToJSON(requestParameters['shareResolutionRequestDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ShareResolutionResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Accepts a shared URL and starts asynchronous resolution
      * Create a share resolution
      */
-    async createResolution(requestParameters: CreateResolutionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShareResolutionResponseDto> {
+    async createResolution(requestParameters: CreateResolutionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.createResolutionRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -107,7 +111,7 @@ export class ShareApi extends runtime.BaseAPI {
      * Poll for the current status of a share resolution token.
      * Get share resolution status
      */
-    async getResolutionRaw(requestParameters: GetResolutionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShareResolutionResponseDto>> {
+    async getResolutionRaw(requestParameters: GetResolutionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['token'] == null) {
             throw new runtime.RequiredError(
                 'token',
@@ -152,14 +156,18 @@ export class ShareApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ShareResolutionResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Poll for the current status of a share resolution token.
      * Get share resolution status
      */
-    async getResolution(requestParameters: GetResolutionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShareResolutionResponseDto> {
+    async getResolution(requestParameters: GetResolutionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.getResolutionRaw(requestParameters, initOverrides);
         return await response.value();
     }

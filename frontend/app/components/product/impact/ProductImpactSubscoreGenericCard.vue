@@ -27,6 +27,7 @@
             v-if="score.attributeSourcing"
             :sourcing="score.attributeSourcing"
             :value="absoluteValue ?? ''"
+            :name="score.label"
           />
         </div>
         <ImpactCoefficientBadge

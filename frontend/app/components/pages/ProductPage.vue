@@ -2218,9 +2218,7 @@ const socialMetaBase = computed(() =>
       withImpactVertical: String(
         t('product.meta.social.description.withImpactVertical')
       ),
-      withoutImpact: String(
-        t('product.meta.social.description.withoutImpact')
-      ),
+      withoutImpact: String(t('product.meta.social.description.withoutImpact')),
       withoutImpactVertical: String(
         t('product.meta.social.description.withoutImpactVertical')
       ),

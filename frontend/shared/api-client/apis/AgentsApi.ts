@@ -292,7 +292,7 @@ export class AgentsApi extends runtime.BaseAPI {
     /**
      * Submit a request to an agent
      */
-    async submitRequestRaw(requestParameters: SubmitRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AgentRequestResponseDto>> {
+    async submitRequestRaw(requestParameters: SubmitRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -339,13 +339,17 @@ export class AgentsApi extends runtime.BaseAPI {
             body: AgentRequestDtoToJSON(requestParameters['agentRequestDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AgentRequestResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Submit a request to an agent
      */
-    async submitRequest(requestParameters: SubmitRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AgentRequestResponseDto> {
+    async submitRequest(requestParameters: SubmitRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.submitRequestRaw(requestParameters, initOverrides);
         return await response.value();
     }

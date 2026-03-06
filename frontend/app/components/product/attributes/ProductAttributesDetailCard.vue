@@ -57,6 +57,7 @@
                 class="product-attributes__table-value"
                 :sourcing="attribute.sourcing"
                 :value="attribute.value"
+                :name="attribute.name"
               />
             </td>
           </tr>

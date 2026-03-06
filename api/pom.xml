@@ -238,7 +238,18 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
                     <requiresUnpack>
+                        <dependency>
+                            <groupId>ai.djl</groupId>
+                            <artifactId>api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <groupId>ai.djl.pytorch</groupId>
+                            <artifactId>pytorch-engine</artifactId>
+                        </dependency>
                         <dependency>
                             <groupId>ai.djl.huggingface</groupId>
                             <artifactId>tokenizers</artifactId>

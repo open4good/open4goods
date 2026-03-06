@@ -71,7 +71,8 @@ test.describe('home critical copy remains readable', () => {
               continue
             }
 
-            const elements = section.querySelectorAll<HTMLElement>(textSelectors)
+            const elements =
+              section.querySelectorAll<HTMLElement>(textSelectors)
 
             for (const element of elements) {
               const computedStyle = window.getComputedStyle(element)

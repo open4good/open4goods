@@ -115,7 +115,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of components that can be included in product responses.
      * Get available components
      */
-    async componentsRaw(requestParameters: ComponentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async componentsRaw(requestParameters: ComponentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -152,14 +152,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the list of components that can be included in product responses.
      * Get available components
      */
-    async components(requestParameters: ComponentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+    async components(requestParameters: ComponentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.componentsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -168,7 +172,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of fields accepted by the filters parameter.
      * Get filterable fields
      */
-    async filterableFieldsRaw(requestParameters: FilterableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async filterableFieldsRaw(requestParameters: FilterableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -205,14 +209,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the list of fields accepted by the filters parameter.
      * Get filterable fields
      */
-    async filterableFields(requestParameters: FilterableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+    async filterableFields(requestParameters: FilterableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.filterableFieldsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -221,7 +229,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the field metadata accepted by the filters parameter, grouped by scope and enriched with vertical specific filters.
      * Get filterable fields for a vertical
      */
-    async filterableFieldsForVerticalRaw(requestParameters: FilterableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductFieldOptionsResponse>> {
+    async filterableFieldsForVerticalRaw(requestParameters: FilterableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['verticalId'] == null) {
             throw new runtime.RequiredError(
                 'verticalId',
@@ -266,14 +274,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ProductFieldOptionsResponseFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the field metadata accepted by the filters parameter, grouped by scope and enriched with vertical specific filters.
      * Get filterable fields for a vertical
      */
-    async filterableFieldsForVertical(requestParameters: FilterableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductFieldOptionsResponse> {
+    async filterableFieldsForVertical(requestParameters: FilterableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.filterableFieldsForVerticalRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -282,7 +294,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Runs an embeddings-only search strategy with optional filters and sorting.
      * Execute a global search
      */
-    async globalSearchRaw(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GlobalSearchResponseDto>> {
+    async globalSearchRaw(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -329,14 +341,18 @@ export class ProductApi extends runtime.BaseAPI {
             body: GlobalSearchRequestDtoToJSON(requestParameters['globalSearchRequestDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => GlobalSearchResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Runs an embeddings-only search strategy with optional filters and sorting.
      * Execute a global search
      */
-    async globalSearch(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GlobalSearchResponseDto> {
+    async globalSearch(requestParameters: GlobalSearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.globalSearchRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -345,7 +361,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return high‑level product information, aggregated scores and optional AI review content, including datasource favicons for offers and AI source references.
      * Get product view
      */
-    async productRaw(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductDto>> {
+    async productRaw(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['gtin'] == null) {
             throw new runtime.RequiredError(
                 'gtin',
@@ -394,14 +410,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ProductDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return high‑level product information, aggregated scores and optional AI review content, including datasource favicons for offers and AI source references.
      * Get product view
      */
-    async product(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductDto> {
+    async product(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.productRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -410,7 +430,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return paginated products.
      * List products
      */
-    async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductSearchResponseDto>> {
+    async productsRaw(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -470,14 +490,18 @@ export class ProductApi extends runtime.BaseAPI {
             body: ProductSearchRequestDtoToJSON(requestParameters['productSearchRequestDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ProductSearchResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return paginated products.
      * List products
      */
-    async products(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductSearchResponseDto> {
+    async products(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.productsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -486,7 +510,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the latest status snapshot for the requested product.
      * Get AI review generation status
      */
-    async reviewStatusRaw(requestParameters: ReviewStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ReviewGenerationStatus>> {
+    async reviewStatusRaw(requestParameters: ReviewStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['gtin'] == null) {
             throw new runtime.RequiredError(
                 'gtin',
@@ -531,14 +555,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ReviewGenerationStatusFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the latest status snapshot for the requested product.
      * Get AI review generation status
      */
-    async reviewStatus(requestParameters: ReviewStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ReviewGenerationStatus> {
+    async reviewStatus(requestParameters: ReviewStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.reviewStatusRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -547,7 +575,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the list of fields accepted by the sort parameter.
      * Get sortable fields
      */
-    async sortableFieldsRaw(requestParameters: SortableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async sortableFieldsRaw(requestParameters: SortableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -584,14 +612,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the list of fields accepted by the sort parameter.
      * Get sortable fields
      */
-    async sortableFields(requestParameters: SortableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+    async sortableFields(requestParameters: SortableFieldsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.sortableFieldsRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -600,7 +632,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Return the field metadata accepted by the sort parameter, grouped by scope and enriched with vertical specific filters.
      * Get sortable fields for a vertical
      */
-    async sortableFieldsForVerticalRaw(requestParameters: SortableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ProductFieldOptionsResponse>> {
+    async sortableFieldsForVerticalRaw(requestParameters: SortableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['verticalId'] == null) {
             throw new runtime.RequiredError(
                 'verticalId',
@@ -645,14 +677,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ProductFieldOptionsResponseFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the field metadata accepted by the sort parameter, grouped by scope and enriched with vertical specific filters.
      * Get sortable fields for a vertical
      */
-    async sortableFieldsForVertical(requestParameters: SortableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ProductFieldOptionsResponse> {
+    async sortableFieldsForVertical(requestParameters: SortableFieldsForVerticalRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.sortableFieldsForVerticalRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -661,7 +697,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
      * Retrieve search suggestions
      */
-    async suggestRaw(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SearchSuggestResponseDto>> {
+    async suggestRaw(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['query'] == null) {
             throw new runtime.RequiredError(
                 'query',
@@ -709,14 +745,18 @@ export class ProductApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => SearchSuggestResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Returns category matches resolved from an in-memory index and product hits fetched from Elasticsearch.
      * Retrieve search suggestions
      */
-    async suggest(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SearchSuggestResponseDto> {
+    async suggest(requestParameters: SuggestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.suggestRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -725,7 +765,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Validate the provided hCaptcha token and forward the request to the back-office API. Authenticated users may bypass captcha and force generation.
      * Trigger AI review generation
      */
-    async triggerReviewRaw(requestParameters: TriggerReviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<number>> {
+    async triggerReviewRaw(requestParameters: TriggerReviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['gtin'] == null) {
             throw new runtime.RequiredError(
                 'gtin',
@@ -779,7 +819,7 @@ export class ProductApi extends runtime.BaseAPI {
         }, initOverrides);
 
         if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<number>(response);
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
         } else {
             return new runtime.TextApiResponse(response) as any;
         }
@@ -789,7 +829,7 @@ export class ProductApi extends runtime.BaseAPI {
      * Validate the provided hCaptcha token and forward the request to the back-office API. Authenticated users may bypass captcha and force generation.
      * Trigger AI review generation
      */
-    async triggerReview(requestParameters: TriggerReviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<number> {
+    async triggerReview(requestParameters: TriggerReviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.triggerReviewRaw(requestParameters, initOverrides);
         return await response.value();
     }

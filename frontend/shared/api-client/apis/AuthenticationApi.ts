@@ -45,7 +45,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
      * Validate credentials against XWiki and return JWT tokens as cookies.
      * Login with XWiki credentials
      */
-    async loginRaw(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthTokensDto>> {
+    async loginRaw(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['loginRequest'] == null) {
             throw new runtime.RequiredError(
                 'loginRequest',
@@ -81,14 +81,18 @@ export class AuthenticationApi extends runtime.BaseAPI {
             body: LoginRequestToJSON(requestParameters['loginRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AuthTokensDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Validate credentials against XWiki and return JWT tokens as cookies.
      * Login with XWiki credentials
      */
-    async login(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AuthTokensDto> {
+    async login(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.loginRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -97,7 +101,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
      * Expire the access and refresh token cookies so the session becomes invalid.
      * Logout user
      */
-    async logoutRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LogoutResponse>> {
+    async logoutRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -123,14 +127,18 @@ export class AuthenticationApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => LogoutResponseFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Expire the access and refresh token cookies so the session becomes invalid.
      * Logout user
      */
-    async logout(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LogoutResponse> {
+    async logout(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.logoutRaw(initOverrides);
         return await response.value();
     }
@@ -139,7 +147,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
      * Issue a new access token using the refresh token cookie.
      * Refresh access token
      */
-    async refreshRaw(requestParameters: RefreshRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthTokensDto>> {
+    async refreshRaw(requestParameters: RefreshRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['refreshToken'] == null) {
             throw new runtime.RequiredError(
                 'refreshToken',
@@ -172,14 +180,18 @@ export class AuthenticationApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AuthTokensDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Issue a new access token using the refresh token cookie.
      * Refresh access token
      */
-    async refresh(requestParameters: RefreshRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AuthTokensDto> {
+    async refresh(requestParameters: RefreshRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.refreshRaw(requestParameters, initOverrides);
         return await response.value();
     }

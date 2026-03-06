@@ -35,7 +35,7 @@ export class TeamApi extends runtime.BaseAPI {
      * Return the configured list of core team members and contributors.
      * Get eco-nudger team roster
      */
-    async teamRaw(requestParameters: TeamRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TeamProperties>> {
+    async teamRaw(requestParameters: TeamRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -72,14 +72,18 @@ export class TeamApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => TeamPropertiesFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the configured list of core team members and contributors.
      * Get eco-nudger team roster
      */
-    async team(requestParameters: TeamRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TeamProperties> {
+    async team(requestParameters: TeamRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.teamRaw(requestParameters, initOverrides);
         return await response.value();
     }

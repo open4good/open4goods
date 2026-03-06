@@ -1,5 +1,4 @@
-export interface ProductMetaTemplates
-{
+export interface ProductMetaTemplates {
   withImpactFull: string
   withImpactCompact: string
   withImpactMinimal: string
@@ -8,16 +7,14 @@ export interface ProductMetaTemplates
   withoutImpactMinimal: string
 }
 
-export interface ProductMetaDescriptionTemplates
-{
+export interface ProductMetaDescriptionTemplates {
   withImpact: string
   withImpactVertical: string
   withoutImpact: string
   withoutImpactVertical: string
 }
 
-export interface ProductMetaBuildOptions
-{
+export interface ProductMetaBuildOptions {
   productName: string
   brandModel: string
   score: number | null
@@ -31,7 +28,8 @@ export interface ProductMetaBuildOptions
 const DEFAULT_TITLE_LENGTH = 60
 const DEFAULT_DESCRIPTION_LENGTH = 160
 
-const normalizeText = (value: string): string => value.trim().replace(/\s+/g, ' ')
+const normalizeText = (value: string): string =>
+  value.trim().replace(/\s+/g, ' ')
 
 const formatScore = (score: number | null): string => {
   if (typeof score !== 'number') {

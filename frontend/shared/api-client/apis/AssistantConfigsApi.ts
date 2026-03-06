@@ -43,7 +43,7 @@ export class AssistantConfigsApi extends runtime.BaseAPI {
      * Return the assistant configuration identified by its id.
      * Get assistant configuration
      */
-    async assistantConfigRaw(requestParameters: AssistantConfigRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<NudgeToolConfigDto>> {
+    async assistantConfigRaw(requestParameters: AssistantConfigRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['assistantId'] == null) {
             throw new runtime.RequiredError(
                 'assistantId',
@@ -88,14 +88,18 @@ export class AssistantConfigsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => NudgeToolConfigDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the assistant configuration identified by its id.
      * Get assistant configuration
      */
-    async assistantConfig(requestParameters: AssistantConfigRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<NudgeToolConfigDto> {
+    async assistantConfig(requestParameters: AssistantConfigRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.assistantConfigRaw(requestParameters, initOverrides);
         return await response.value();
     }

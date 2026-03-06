@@ -39,7 +39,7 @@ export class ContactApi extends runtime.BaseAPI {
      * Verify captcha token and forward the message to the support mailbox. Supports optional template identifiers to prefill the subject and body.
      * Submit a contact message
      */
-    async submitRaw(requestParameters: SubmitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ContactResponseDto>> {
+    async submitRaw(requestParameters: SubmitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -86,14 +86,18 @@ export class ContactApi extends runtime.BaseAPI {
             body: ContactRequestDtoToJSON(requestParameters['contactRequestDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ContactResponseDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Verify captcha token and forward the message to the support mailbox. Supports optional template identifiers to prefill the subject and body.
      * Submit a contact message
      */
-    async submit(requestParameters: SubmitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ContactResponseDto> {
+    async submit(requestParameters: SubmitRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.submitRaw(requestParameters, initOverrides);
         return await response.value();
     }

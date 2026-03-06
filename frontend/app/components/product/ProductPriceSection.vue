@@ -8,7 +8,7 @@
 
     <div class="product-price__content">
       <!-- Best Offers Section -->
-      <div class="product-price__section">
+      <div id="offers-list" class="product-price__section">
         <h3 v-if="allOffers.length > 1" class="product-price__subtitle-h3">
           {{ offersTitle }}
         </h3>
@@ -175,19 +175,7 @@
                   {{ newTrendLabel }}
                 </p>
               </div>
-              <div
-                v-if="hasCommercialEvents"
-                class="product-price__chart-actions"
-              >
-                <v-checkbox
-                  v-model="showCommercialEvents"
-                  density="compact"
-                  hide-details
-                  color="primary"
-                  class="product-price__events-toggle"
-                  :label="$t('product.price.events.toggleLabel')"
-                />
-              </div>
+
             </header>
             <v-row class="ma-0">
               <v-col cols="12" md="4">

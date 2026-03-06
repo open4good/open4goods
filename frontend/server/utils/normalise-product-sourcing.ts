@@ -37,6 +37,11 @@ const normaliseAttributeWithSourcing = (
   }
 
   normaliseSourcesSet(attribute.sourcing)
+
+  if ('allAttributes' in attribute && attribute.allAttributes) {
+    // @ts-expect-error ProductSourcedAttributeDto has sourcing property
+    normaliseAttributeCollection(attribute.allAttributes)
+  }
 }
 
 const normaliseAttributeCollection = (

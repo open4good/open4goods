@@ -15,9 +15,9 @@ const serpTemplates = {
   },
   description: {
     withImpact:
-      'Comparez {productName} ({brandModel}) : score d\'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.',
+      "Comparez {productName} ({brandModel}) : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
     withImpactVertical:
-      'Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : score d\'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.',
+      "Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
     withoutImpact:
       'Comparez {productName} ({brandModel}) : meilleurs prix, manuels et caractéristiques sur Nudger.',
     withoutImpactVertical:
@@ -36,7 +36,7 @@ describe('buildProductMeta', () => {
     })
 
     expect(meta.title).toContain('ImpactScore : 16.4/20')
-    expect(meta.description).toContain('score d\'impact 16.4/20')
+    expect(meta.description).toContain("score d'impact 16.4/20")
   })
 
   it('does not mention impact score when score is missing', () => {
@@ -49,12 +49,13 @@ describe('buildProductMeta', () => {
     })
 
     expect(meta.title).not.toContain('ImpactScore')
-    expect(meta.description).not.toContain('score d\'impact')
+    expect(meta.description).not.toContain("score d'impact")
   })
 
   it('drops manuals/features phrase first when title is too long', () => {
     const meta = buildProductMeta({
-      productName: 'Aspirateur balai sans fil ultra puissant autonomie longue durée',
+      productName:
+        'Aspirateur balai sans fil ultra puissant autonomie longue durée',
       brandModel:
         'Marque Excellence Modèle Premium Hyper Edition Max Performance',
       score: 14.8,

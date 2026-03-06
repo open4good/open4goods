@@ -28,7 +28,12 @@
             <header class="product-attribute-sourcing__tooltip-header">
               <div class="product-attribute-sourcing__tooltip-legend">
                 <p class="product-attribute-sourcing__tooltip-title">
-                  {{ t('product.attributes.sourcing.bestValue') }}
+                  <template v-if="name">
+                    {{ name }}
+                  </template>
+                  <template v-else>
+                    {{ t('product.attributes.sourcing.bestValue') }}
+                  </template>
                 </p>
                 <p class="product-attribute-sourcing__tooltip-highlight">
                   {{ displayValue }}
@@ -123,6 +128,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  name: {
+    type: String,
+    default: '',
+  },
 })
 
 const { t, n } = useI18n()
@@ -182,6 +191,10 @@ const normalizeSources = (
 
   if (!resolvedSources) {
     return []
+  }
+
+  if (Array.isArray(resolvedSources)) {
+    return resolvedSources.filter(isDefinedSource)
   }
 
   const candidate =

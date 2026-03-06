@@ -110,7 +110,7 @@ export class CategoriesApi extends runtime.BaseAPI {
      * Return the detailed vertical configuration identified by its id.
      * Get category details
      */
-    async categoryRaw(requestParameters: CategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<VerticalConfigFullDto>> {
+    async categoryRaw(requestParameters: CategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['categoryId'] == null) {
             throw new runtime.RequiredError(
                 'categoryId',
@@ -155,14 +155,18 @@ export class CategoriesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => VerticalConfigFullDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the detailed vertical configuration identified by its id.
      * Get category details
      */
-    async category(requestParameters: CategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<VerticalConfigFullDto> {
+    async category(requestParameters: CategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.categoryRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -171,7 +175,7 @@ export class CategoriesApi extends runtime.BaseAPI {
      * Return the Google taxonomy navigation data required to display deep category navigation.
      * Get category navigation
      */
-    async navigationRaw(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoryNavigationDto>> {
+    async navigationRaw(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['domainLanguage'] == null) {
             throw new runtime.RequiredError(
                 'domainLanguage',
@@ -216,14 +220,18 @@ export class CategoriesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => CategoryNavigationDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the Google taxonomy navigation data required to display deep category navigation.
      * Get category navigation
      */
-    async navigation(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoryNavigationDto> {
+    async navigation(requestParameters: NavigationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.navigationRaw(requestParameters, initOverrides);
         return await response.value();
     }

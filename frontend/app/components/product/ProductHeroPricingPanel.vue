@@ -40,8 +40,8 @@
                         v-if="merchant.favicon"
                         :src="merchant.favicon"
                         :alt="merchant.name"
-                        width="52"
-                        height="52"
+                        width="40"
+                        height="40"
                         class="product-hero__pricing-panel-merchant-favicon"
                       />
                       <span
@@ -77,8 +77,8 @@
                         v-if="merchant?.favicon"
                         :src="merchant.favicon"
                         :alt="merchant.name"
-                        width="52"
-                        height="52"
+                        width="40"
+                        height="40"
                         class="product-hero__pricing-panel-merchant-favicon"
                       />
                       <span
@@ -123,8 +123,8 @@
                     v-if="merchant.favicon"
                     :src="merchant.favicon"
                     :alt="merchant.name"
-                    width="52"
-                    height="52"
+                    width="40"
+                    height="40"
                     class="product-hero__pricing-panel-merchant-favicon"
                   />
                   <span
@@ -162,8 +162,8 @@
                     v-if="merchant.favicon"
                     :src="merchant.favicon"
                     :alt="merchant.name"
-                    width="52"
-                    height="52"
+                    width="40"
+                    height="40"
                     class="product-hero__pricing-panel-merchant-favicon"
                   />
                   <span
@@ -548,8 +548,7 @@ watch(
 }
 
 .product-hero__pricing-panel-main-wrapper {
-  width: 80%;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .product-hero__pricing-panel-main {
@@ -557,7 +556,7 @@ watch(
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   padding: 0.5rem 0;
   border-radius: 0;
   width: 100%;
@@ -580,18 +579,27 @@ watch(
   gap: 0.65rem;
   font-weight: 600;
   color: var(--product-hero-panel-accent);
+  min-width: 0;
+}
+
+.product-hero__pricing-panel-merchant-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-hero__pricing-panel-merchant-favicon {
   border-radius: 8px;
-  width: 52px;
-  height: 52px;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .product-hero__pricing-panel-price {
   text-align: right;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .product-hero__pricing-panel-price-label {
@@ -739,17 +747,6 @@ watch(
 }
 
 @media (max-width: 600px) {
-  .product-hero__pricing-panel-main {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .product-hero__pricing-panel-price {
-    text-align: left;
-  }
-
-  .product-hero__pricing-panel-price-value {
-    justify-content: flex-start;
-  }
+  /* No changes required anymore, keeping row layout for mobile */
 }
 </style>

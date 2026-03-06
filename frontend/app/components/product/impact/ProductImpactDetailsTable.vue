@@ -110,6 +110,7 @@
             v-if="item.attributeSourcing"
             :sourcing="item.attributeSourcing"
             :value="item.attributeValue"
+            :name="item.label"
           />
           <span v-else>{{ item.attributeValue }}</span>
         </span>

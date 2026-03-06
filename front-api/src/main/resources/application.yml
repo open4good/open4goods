@@ -2,10 +2,6 @@ server:
   port: ${SERVER_PORT:8082}
   forward-headers-strategy: framework
 spring:
-  boot:
-    admin:
-      client:
-        enabled: false
   profiles:
     default: local
   application:
@@ -343,3 +339,13 @@ front.agent:
             fr: "Réponse concise"
             en: "Concise answer"
           content: "Question: {{prompt}}\n\nAnswer the user."
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "default"
+  boot:
+    admin:
+      client:
+        enabled: false

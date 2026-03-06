@@ -44,7 +44,7 @@ export class ContentApi extends runtime.BaseAPI {
      * Return the HTML content of the given XWiki bloc.
      * Get content bloc
      */
-    async contentBlocRaw(requestParameters: ContentBlocRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<XwikiContentBlocDto>> {
+    async contentBlocRaw(requestParameters: ContentBlocRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['blocId'] == null) {
             throw new runtime.RequiredError(
                 'blocId',
@@ -89,14 +89,18 @@ export class ContentApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => XwikiContentBlocDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the HTML content of the given XWiki bloc.
      * Get content bloc
      */
-    async contentBloc(requestParameters: ContentBlocRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<XwikiContentBlocDto> {
+    async contentBloc(requestParameters: ContentBlocRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.contentBlocRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -105,7 +109,7 @@ export class ContentApi extends runtime.BaseAPI {
      * Return the rendered XWiki page along with metadata.
      * Get XWiki page
      */
-    async pageRaw(requestParameters: PageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FullPageDto>> {
+    async pageRaw(requestParameters: PageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
         if (requestParameters['xwikiPageId'] == null) {
             throw new runtime.RequiredError(
                 'xwikiPageId',
@@ -150,14 +154,18 @@ export class ContentApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => FullPageDtoFromJSON(jsonValue));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Return the rendered XWiki page along with metadata.
      * Get XWiki page
      */
-    async page(requestParameters: PageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FullPageDto> {
+    async page(requestParameters: PageRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.pageRaw(requestParameters, initOverrides);
         return await response.value();
     }

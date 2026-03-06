@@ -205,7 +205,6 @@ describe('ProductHero', () => {
     await wrapper.unmount()
   })
 
-
   it('scrolls to the attributes section from the more characteristics link', async () => {
     const scrollToMock = vi.fn()
     const attributesSection = document.createElement('section')
