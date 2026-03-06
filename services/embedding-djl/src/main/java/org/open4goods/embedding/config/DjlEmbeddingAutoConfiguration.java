@@ -25,6 +25,13 @@ import org.springframework.context.annotation.Bean;
 public class DjlEmbeddingAutoConfiguration
 {
     @Bean
+    @ConditionalOnMissingBean
+    DjlTokenizersResourceValidator djlTokenizersResourceValidator()
+    {
+        return new DjlTokenizersResourceValidator();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(AbstractTextModelFactory.class)
     AbstractTextModelFactory embeddingModelFactory()
     {

@@ -16,3 +16,13 @@ A health indicator (`DjlEmbeddingHealthIndicator`) publishes which model was loa
 ## Usage
 
 Add the `embedding-djl` module as a dependency and configure the properties above. The service loads remote DJL models directly and logs failures on startup when configured to fail fast.
+
+## Runtime packaging guidance
+
+`embedding-djl` now performs a startup preflight (`DjlTokenizersResourceValidator`) that validates both DJL tokenizers metadata resources:
+
+- `native/lib/tokenizers.properties`
+- `tokenizers-engine.properties`
+
+If these files are not visible to the runtime classloader, startup fails fast with diagnostics.
+For container/server deployments, prefer an exploded classpath launch (`BOOT-INF/classes` + `BOOT-INF/lib/*`) when executable nested jars hide JNI metadata resources.
