@@ -9,8 +9,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,9 @@ import org.open4goods.nudgerfrontapi.service.EmbeddingProxyService;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributeType;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
 
@@ -227,5 +232,48 @@ class SearchServiceTest {
         assertThat(response.impact()).anyMatch(field -> field.mapping().equals("scores.ECOSCORE.value"));
         // Verify that the relativ.value mapping is ALSO present
         assertThat(response.impact()).anyMatch(field -> field.mapping().equals("scores.ECOSCORE.relativ.value"));
+    }
+
+    @Test
+    void resolveVerticalFields_shouldMapEcoFiltersToImpact_andNotToTechnical() {
+        // GIVEN
+        VerticalConfig config = new VerticalConfig();
+        config.setId("tv");
+        config.setEcoFilters(List.of("CLASSE_ENERGY"));
+        config.setTechnicalFilters(List.of("DIAGONALE_POUCES"));
+        config.setGlobalTechnicalFilters(List.of("WEIGHT"));
+
+        AttributesConfig attributesConfig = new AttributesConfig();
+        AttributeConfig energyClass = new AttributeConfig();
+        energyClass.setKey("CLASSE_ENERGY");
+        energyClass.setFilteringType(AttributeType.TEXT);
+
+        AttributeConfig diagonal = new AttributeConfig();
+        diagonal.setKey("DIAGONALE_POUCES");
+        diagonal.setFilteringType(AttributeType.NUMERIC);
+
+        AttributeConfig weight = new AttributeConfig();
+        weight.setKey("WEIGHT");
+        weight.setFilteringType(AttributeType.NUMERIC);
+
+        attributesConfig.setConfigs(List.of(energyClass, diagonal, weight));
+        config.setAttributesConfig(attributesConfig);
+
+        // WHEN
+        org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse response = searchService
+                .resolveVerticalFields(config, DomainLanguage.fr, Collections.emptyList());
+
+        // THEN
+        Set<String> impactMappings = response.impact().stream()
+                .map(field -> field.mapping())
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+        Set<String> technicalMappings = response.technical().stream()
+                .map(field -> field.mapping())
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+
+        assertThat(impactMappings).contains("attributes.indexed.CLASSE_ENERGY.keyword");
+        assertThat(technicalMappings).contains("attributes.indexed.DIAGONALE_POUCES.value");
+        assertThat(technicalMappings).contains("attributes.indexed.WEIGHT.value");
+        assertThat(technicalMappings).doesNotContain("attributes.indexed.CLASSE_ENERGY.keyword");
     }
 }
