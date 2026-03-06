@@ -69,7 +69,9 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Nudger : le comparateur écologique tech & électro"],
+      "titleSubtitle": [
+        "Nudger : le comparateur écologique tech & électro"
+      ],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -2951,9 +2953,47 @@
       "noScore": "Pas d'évaluation sur ce produit !"
     },
     "meta": {
-      "defaultDescriptionWithVertical": "Découvrez {productTitle} ({brandModel}) dans la catégorie {verticalTitle}. Comparez son impact environnemental et ses prix sur Nudger.",
-      "impactScore": " - Impact Score : {score}/20",
-      "gtinFallback": "GTIN non disponible : {gtin}"
+      "gtinFallback": "GTIN non disponible : {gtin}",
+      "serp": {
+        "title": {
+          "withImpact": {
+            "full": "{productName} : ImpactScore : {score}/20 | Meilleurs prix, manuels, et caractéristiques pour le {brandModel}",
+            "compact": "{productName} : ImpactScore : {score}/20 | Meilleurs prix pour {brandModel}",
+            "minimal": "{productName} : ImpactScore : {score}/20"
+          },
+          "withoutImpact": {
+            "full": "{productName} | Meilleurs prix, manuels, et caractéristiques pour le {brandModel}",
+            "compact": "{productName} | Meilleurs prix pour {brandModel}",
+            "minimal": "{productName}"
+          }
+        },
+        "description": {
+          "withImpact": "Comparez {productName} ({brandModel}) : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
+          "withImpactVertical": "Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
+          "withoutImpact": "Comparez {productName} ({brandModel}) : meilleurs prix, manuels et caractéristiques sur Nudger.",
+          "withoutImpactVertical": "Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : meilleurs prix, manuels et caractéristiques sur Nudger."
+        }
+      },
+      "social": {
+        "title": {
+          "withImpact": {
+            "full": "{productName} noté {score}/20 : prix, infos clés et alternatives",
+            "compact": "{productName} : noté {score}/20 sur Nudger",
+            "minimal": "{productName} : {score}/20"
+          },
+          "withoutImpact": {
+            "full": "{productName} : prix, infos clés et alternatives sur Nudger",
+            "compact": "{productName} : comparez prix et infos clés",
+            "minimal": "{productName}"
+          }
+        },
+        "description": {
+          "withImpact": "Voyez en un coup d'œil le score d'impact ({score}/20), les meilleurs prix et les infos clés de {productName}.",
+          "withImpactVertical": "Découvrez {productName} en {verticalTitle} : score d'impact ({score}/20), prix et informations utiles.",
+          "withoutImpact": "Découvrez {productName} : meilleurs prix, informations utiles et alternatives pour mieux choisir.",
+          "withoutImpactVertical": "Découvrez {productName} dans {verticalTitle} : meilleurs prix, informations utiles et alternatives."
+        }
+      }
     }
   },
   "siteIdentity": {

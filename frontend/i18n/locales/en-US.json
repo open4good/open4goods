@@ -69,7 +69,9 @@
       "eyebrow": "Responsible shopping",
       "title": "Nudger: The eco-friendly comparator",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Buy better. Spend smarter."],
+      "titleSubtitle": [
+        "Buy better. Spend smarter."
+      ],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -134,7 +136,9 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": ["Search a product (e.g. television, smartphone...)"]
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {
@@ -3056,9 +3060,47 @@
       "noScore": "No evaluation available for this product!"
     },
     "meta": {
-      "defaultDescription": "Compare {productTitle}{brandModel} on Nudger for pricing, environmental impact, and buying options.",
-      "defaultDescriptionWithVertical": "Compare {productTitle}{brandModel} on Nudger for pricing, environmental impact, and top options in {verticalTitle}.",
-      "gtinFallback": "GTIN {gtin}"
+      "gtinFallback": "GTIN {gtin}",
+      "serp": {
+        "title": {
+          "withImpact": {
+            "full": "{productName}: ImpactScore {score}/20 | Best prices, manuals and specs for {brandModel}",
+            "compact": "{productName}: ImpactScore {score}/20 | Best prices for {brandModel}",
+            "minimal": "{productName}: ImpactScore {score}/20"
+          },
+          "withoutImpact": {
+            "full": "{productName} | Best prices, manuals and specs for {brandModel}",
+            "compact": "{productName} | Best prices for {brandModel}",
+            "minimal": "{productName}"
+          }
+        },
+        "description": {
+          "withImpact": "Compare {productName} ({brandModel}) with impact score {score}/20, best prices, manuals and key specs on Nudger.",
+          "withImpactVertical": "Compare {productName} ({brandModel}) in {verticalTitle} with impact score {score}/20, best prices, manuals and key specs on Nudger.",
+          "withoutImpact": "Compare {productName} ({brandModel}) for best prices, manuals and key specs on Nudger.",
+          "withoutImpactVertical": "Compare {productName} ({brandModel}) in {verticalTitle} for best prices, manuals and key specs on Nudger."
+        }
+      },
+      "social": {
+        "title": {
+          "withImpact": {
+            "full": "{productName} rated {score}/20: prices, highlights and alternatives",
+            "compact": "{productName}: rated {score}/20 on Nudger",
+            "minimal": "{productName}: {score}/20"
+          },
+          "withoutImpact": {
+            "full": "{productName}: prices, highlights and alternatives on Nudger",
+            "compact": "{productName}: compare prices and highlights",
+            "minimal": "{productName}"
+          }
+        },
+        "description": {
+          "withImpact": "See {productName} at a glance with impact score ({score}/20), best prices and key buying insights.",
+          "withImpactVertical": "Explore {productName} in {verticalTitle} with impact score ({score}/20), prices and key buying insights.",
+          "withoutImpact": "Explore {productName} with best prices, useful highlights and alternatives to choose with confidence.",
+          "withoutImpactVertical": "Explore {productName} in {verticalTitle} with best prices, useful highlights and alternatives."
+        }
+      }
     }
   },
   "siteIdentity": {

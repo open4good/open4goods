@@ -220,6 +220,7 @@ import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import { buildProductJsonLdGraph } from '~/utils/product-jsonld'
+import { buildProductMeta } from '~/utils/seo/product-meta'
 
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
@@ -898,23 +899,7 @@ const productMetaDescription = computed(() => {
     return explicit
   }
 
-  const brandModelSuffix =
-    brandModelTitle.value && brandModelTitle.value !== productMetaTitle.value
-      ? ` ${brandModelTitle.value}`
-      : ''
-
-  if (normalizedVerticalTitle.value) {
-    return t('product.meta.defaultDescriptionWithVertical', {
-      productTitle: productMetaTitle.value,
-      brandModel: brandModelSuffix,
-      verticalTitle: normalizedVerticalTitle.value,
-    })
-  }
-
-  return t('product.meta.defaultDescription', {
-    productTitle: productMetaTitle.value,
-    brandModel: brandModelSuffix,
-  })
+  return seoMetaDescription.value
 })
 
 const toAbsoluteUrl = (value?: string | null) => {
@@ -2163,23 +2148,98 @@ const productJsonLdGraph = computed(() => {
   })
 })
 
-const metaTitle = computed(() => {
-  const title = productTitle.value
-  const score = impactScoreOutOf20.value
+const seoMetaBase = computed(() =>
+  buildProductMeta({
+    productName: productMetaTitle.value,
+    brandModel: brandModelTitle.value,
+    score: impactScoreOutOf20.value,
+    verticalTitle: normalizedVerticalTitle.value,
+    maxTitleLength: 60,
+    maxDescriptionLength: 160,
+    titleTemplates: {
+      withImpactFull: String(t('product.meta.serp.title.withImpact.full')),
+      withImpactCompact: String(
+        t('product.meta.serp.title.withImpact.compact')
+      ),
+      withImpactMinimal: String(
+        t('product.meta.serp.title.withImpact.minimal')
+      ),
+      withoutImpactFull: String(
+        t('product.meta.serp.title.withoutImpact.full')
+      ),
+      withoutImpactCompact: String(
+        t('product.meta.serp.title.withoutImpact.compact')
+      ),
+      withoutImpactMinimal: String(
+        t('product.meta.serp.title.withoutImpact.minimal')
+      ),
+    },
+    descriptionTemplates: {
+      withImpact: String(t('product.meta.serp.description.withImpact')),
+      withImpactVertical: String(
+        t('product.meta.serp.description.withImpactVertical')
+      ),
+      withoutImpact: String(t('product.meta.serp.description.withoutImpact')),
+      withoutImpactVertical: String(
+        t('product.meta.serp.description.withoutImpactVertical')
+      ),
+    },
+  })
+)
 
-  if (title.length < 35 && score != null) {
-    return `${title}${t('product.meta.impactScore', { score })}`
-  }
+const socialMetaBase = computed(() =>
+  buildProductMeta({
+    productName: productMetaTitle.value,
+    brandModel: brandModelTitle.value,
+    score: impactScoreOutOf20.value,
+    verticalTitle: normalizedVerticalTitle.value,
+    maxTitleLength: 70,
+    maxDescriptionLength: 180,
+    titleTemplates: {
+      withImpactFull: String(t('product.meta.social.title.withImpact.full')),
+      withImpactCompact: String(
+        t('product.meta.social.title.withImpact.compact')
+      ),
+      withImpactMinimal: String(
+        t('product.meta.social.title.withImpact.minimal')
+      ),
+      withoutImpactFull: String(
+        t('product.meta.social.title.withoutImpact.full')
+      ),
+      withoutImpactCompact: String(
+        t('product.meta.social.title.withoutImpact.compact')
+      ),
+      withoutImpactMinimal: String(
+        t('product.meta.social.title.withoutImpact.minimal')
+      ),
+    },
+    descriptionTemplates: {
+      withImpact: String(t('product.meta.social.description.withImpact')),
+      withImpactVertical: String(
+        t('product.meta.social.description.withImpactVertical')
+      ),
+      withoutImpact: String(
+        t('product.meta.social.description.withoutImpact')
+      ),
+      withoutImpactVertical: String(
+        t('product.meta.social.description.withoutImpactVertical')
+      ),
+    },
+  })
+)
 
-  return title
-})
+const seoMetaTitle = computed(() => seoMetaBase.value.title)
+const seoMetaDescription = computed(() => seoMetaBase.value.description)
+
+const socialMetaTitle = computed(() => socialMetaBase.value.title)
+const socialMetaDescription = computed(() => socialMetaBase.value.description)
 
 useSeoMeta({
-  title: () => metaTitle.value,
+  title: () => seoMetaTitle.value,
   description: () => productMetaDescription.value,
-  ogTitle: () => product.value?.names?.ogTitle ?? metaTitle.value,
+  ogTitle: () => product.value?.names?.ogTitle ?? socialMetaTitle.value,
   ogDescription: () =>
-    product.value?.names?.ogDescription ?? productMetaDescription.value,
+    product.value?.names?.ogDescription ?? socialMetaDescription.value,
   ogUrl: () => canonicalUrl.value,
   ogType: 'product',
   ogImage: () => ogImageUrl.value,
