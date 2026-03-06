@@ -81,9 +81,9 @@ subsets:
   - id: "distance_close"
     group: "distance"
     criterias:
-      - field: "assistant.viewingDistanceCm"
-        operator: "LOWER_THAN"
-        value: "150"
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "LOWER_THAN_OR_EQUAL"
+        value: "24"
     image: "distance-close.png"
     url:
       en: "distance-close"
@@ -101,12 +101,12 @@ subsets:
   - id: "distance_comfort"
     group: "distance"
     criterias:
-      - field: "assistant.viewingDistanceCm"
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
         operator: "GREATER_THAN_OR_EQUAL"
-        value: "150"
-      - field: "assistant.viewingDistanceCm"
-        operator: "LOWER_THAN"
-        value: "300"
+        value: "24"
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
+        operator: "LOWER_THAN_OR_EQUAL"
+        value: "47"
     image: "distance-comfort.png"
     url:
       en: "distance-comfort"
@@ -124,9 +124,9 @@ subsets:
   - id: "distance_far"
     group: "distance"
     criterias:
-      - field: "assistant.viewingDistanceCm"
+      - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
         operator: "GREATER_THAN_OR_EQUAL"
-        value: "300"
+        value: "47"
     image: "distance-far.png"
     url:
       en: "distance-far"

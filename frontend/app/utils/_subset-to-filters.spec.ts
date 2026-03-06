@@ -213,4 +213,42 @@ describe('_subset-to-filters helpers', () => {
       ],
     })
   })
+
+  it('supports GREATER_THAN_OR_EQUAL and LOWER_THAN_OR_EQUAL operators', () => {
+    const subsets: VerticalSubsetDto[] = [
+      {
+        id: 'distance-comfort',
+        group: 'distance',
+        criterias: [
+          {
+            field: 'attributes.indexed.DIAGONALE_POUCES.numericValue',
+            operator: 'GREATER_THAN_OR_EQUAL',
+            value: '24',
+          },
+          {
+            field: 'attributes.indexed.DIAGONALE_POUCES.numericValue',
+            operator: 'LOWER_THAN_OR_EQUAL',
+            value: '47',
+          },
+        ],
+      },
+    ]
+
+    const request = buildFilterRequestFromSubsets(subsets, ['distance-comfort'])
+
+    expect(request).toEqual({
+      filterGroups: [
+        {
+          should: [
+            {
+              field: 'attributes.indexed.DIAGONALE_POUCES.numericValue',
+              operator: 'range',
+              min: 24,
+              max: 47,
+            },
+          ],
+        },
+      ],
+    })
+  })
 })

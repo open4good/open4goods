@@ -21,6 +21,8 @@ type BodyPart = { type: 'html' | 'assistant'; content?: string }
 
 const props = defineProps<{
   article: BlogArticle
+  assistantId?: string | null
+  assistantCategoryId?: string | null
 }>()
 
 const article = computed(() => props.article)
@@ -39,6 +41,10 @@ const showAssistant = computed(() => {
 })
 
 const assistantCategoryId = computed(() => {
+  if (props.assistantCategoryId?.trim()) {
+    return props.assistantCategoryId
+  }
+
   // Extract category ID from the article's category list if possible.
   // For now, assume the first category or a specific field maps to it.
   // The user prompt said "l'assistant qui correspond à la page" (assistant corresponding to the page).
@@ -52,6 +58,19 @@ const assistantCategoryId = computed(() => {
     // Let's iterate to find a known vertical ID or just use the first one.
     return cats[0].toLowerCase()
   }
+  return null
+})
+
+const assistantId = computed(() => {
+  if (props.assistantId?.trim()) {
+    return props.assistantId
+  }
+
+  const articleUrl = article.value.url?.trim()
+  if (articleUrl) {
+    return articleUrl
+  }
+
   return null
 })
 
@@ -406,6 +425,7 @@ useHead(() => ({
           class="my-8"
         >
           <NudgeToolAssistantWizard
+            :assistant-id="assistantId"
             :assistant-category-id="assistantCategoryId"
             compact
           />

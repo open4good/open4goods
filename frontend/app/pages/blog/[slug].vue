@@ -85,10 +85,9 @@ const assistantCategoryId = computed(() =>
           {{ error }}
         </v-alert>
 
-        <TheArticle v-else-if="article" :article="article" />
-
-        <NudgeToolAssistantWizard
-          v-if="article && assistantConfigId"
+        <TheArticle
+          v-else-if="article"
+          :article="article"
           :assistant-id="assistantConfigId"
           :assistant-category-id="assistantCategoryId"
         />
