@@ -45,6 +45,10 @@ const i18n = createI18n({
               eprelOrganisationClosed: 'Organisation closed',
               generic: 'Lifecycle event',
             },
+            notes: {
+              eprelOnMarketEndFarFutureHidden:
+                'Events with market end dates beyond {maxYears} years are hidden because manufacturers can adjust them later in EPREL.',
+            },
             descriptions: {
               priceFirstSeenNew: 'First new offer detected.',
               priceFirstSeenOccasion: 'First second-hand offer detected.',
@@ -161,6 +165,30 @@ describe('ProductLifeTimeline', () => {
     expect(wrapper.find('.product-life-timeline--horizontal').exists()).toBe(
       true
     )
+  })
+
+
+  it('hides EPREL market end dates beyond 15 years and shows explanatory note', async () => {
+    const timeline: ProductTimelineDto = {
+      events: [
+        {
+          type: ProductTimelineEventType.EprelOnMarketEnd,
+          source: ProductTimelineEventSource.Eprel,
+          timestamp: Date.UTC(new Date().getFullYear() + 16, 0, 1),
+        },
+        {
+          type: ProductTimelineEventType.EprelOnMarketStart,
+          source: ProductTimelineEventSource.Eprel,
+          timestamp: Date.UTC(2024, 5, 1),
+        },
+      ],
+    }
+
+    const wrapper = await mountComponent(timeline)
+
+    expect(wrapper.text()).not.toContain('Market end')
+    expect(wrapper.text()).toContain('Market start')
+    expect(wrapper.text()).toContain('beyond 15 years are hidden')
   })
 
   it('renders empty state when no events', async () => {

@@ -2461,6 +2461,9 @@
           "eprelImported": "Date d'import de l'entrée EPREL.",
           "eprelOrganisationClosed": "Date de fermeture de l'organisation EPREL.",
           "generic": "Événement du cycle de vie"
+        },
+        "notes": {
+          "eprelOnMarketEndFarFutureHidden": "Les événements de fin de commercialisation au-delà de {maxYears} ans sont masqués car les fabricants peuvent ajuster cette date ensuite dans EPREL."
         }
       },
       "detailed": {
@@ -2992,6 +2995,14 @@
           "withoutImpactVertical": "Découvrez {productName} dans {verticalTitle} : meilleurs prix, informations utiles et alternatives."
         }
       }
+    },
+    "eprel": {
+      "detailsTitle": "Registre européen de l'étiquetage énergétique",
+      "marketEndDate": "Date de fin de commercialisation",
+      "minSoftwareUpdates": "Mises à jour logicielles minimales",
+      "minSpareParts": "Disponibilité minimale des pièces détachées",
+      "outOfMarketDuration": "Hors marché depuis",
+      "supportGuaranteedUntil": "Support garanti jusqu'en"
     }
   },
   "siteIdentity": {
