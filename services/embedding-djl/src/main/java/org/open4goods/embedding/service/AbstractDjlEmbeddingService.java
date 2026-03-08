@@ -61,7 +61,13 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
         if (properties.isAsyncLoading())
         {
             LOGGER.info("DJL embedding: async model loading enabled");
-            initFuture = CompletableFuture.runAsync(this::loadModels);
+            // Capture Spring Boot's LaunchedURLClassLoader so ForkJoinPool
+            // threads can locate resources inside BOOT-INF/ of the fat jar.
+            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+            initFuture = CompletableFuture.runAsync(() -> {
+                Thread.currentThread().setContextClassLoader(contextClassLoader);
+                loadModels();
+            });
         }
         else
         {
