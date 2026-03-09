@@ -2,8 +2,7 @@ import { execFile } from 'node:child_process'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { promisify } from 'node:util'
-import createDOMPurify from 'isomorphic-dompurify'
-import { JSDOM, type DOMWindow } from 'jsdom'
+import DOMPurify from 'isomorphic-dompurify'
 import MarkdownIt from 'markdown-it'
 import type { ReleaseNote } from '~~/types/releases'
 
@@ -13,7 +12,6 @@ const markdown = new MarkdownIt({
   linkify: true,
   breaks: true,
 })
-const DOMPurify = createDOMPurify(new JSDOM('').window as unknown as DOMWindow)
 
 const PROJECT_ROOT = path.resolve(process.cwd())
 const RELEASES_DIRECTORY_CANDIDATES = [
