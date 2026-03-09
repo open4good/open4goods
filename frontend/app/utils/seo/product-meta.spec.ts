@@ -12,6 +12,9 @@ const serpTemplates = {
       '{productName} | Meilleurs prix, manuels, et caractéristiques pour le {brandModel}',
     withoutImpactCompact: '{productName} | Meilleurs prix pour {brandModel}',
     withoutImpactMinimal: '{productName}',
+    noCategoryFull: '{productName} : Meilleurs prix et historique',
+    noCategoryCompact: '{productName} : Meilleurs prix et historique',
+    noCategoryMinimal: '{productName} : Meilleurs prix et historique',
   },
   description: {
     withImpact:
@@ -83,5 +86,32 @@ describe('buildProductMeta', () => {
 
     expect(meta.title.length).toBeLessThanOrEqual(60)
     expect(meta.description.length).toBeLessThanOrEqual(120)
+  })
+
+  it('handles already-interpolated strings correctly for uncategorized products', () => {
+    // If vue-i18n already interpolated the string, it won't have {productName} anymore
+    const interpolatedTemplates = {
+      withImpactFull: 'Pre-interpolated full',
+      withImpactCompact: 'Pre-interpolated compact',
+      withImpactMinimal: 'Pre-interpolated minimal',
+      withoutImpactFull: 'Uncategorized Product : Meilleurs prix et historique',
+      withoutImpactCompact:
+        'Uncategorized Product : Meilleurs prix et historique',
+      withoutImpactMinimal:
+        'Uncategorized Product : Meilleurs prix et historique',
+    }
+
+    const meta = buildProductMeta({
+      productName: 'Uncategorized Product',
+      brandModel: 'Unknown brand',
+      score: null,
+      maxTitleLength: 60,
+      titleTemplates: interpolatedTemplates,
+      descriptionTemplates: serpTemplates.description,
+    })
+
+    expect(meta.title).toBe(
+      'Uncategorized Product : Meilleurs prix et historique'
+    )
   })
 })
