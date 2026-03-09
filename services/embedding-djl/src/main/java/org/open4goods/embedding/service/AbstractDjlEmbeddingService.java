@@ -64,12 +64,16 @@ public abstract class AbstractDjlEmbeddingService implements AutoCloseable
             // Capture Spring Boot's LaunchedURLClassLoader so ForkJoinPool
             // threads can locate resources inside BOOT-INF/ of the fat jar.
             ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+            LOGGER.info("Captured classloader: {} / parent: {}", contextClassLoader.getClass().getName(), contextClassLoader.getParent() != null ? contextClassLoader.getParent().getClass().getName() : "null");
             initFuture = CompletableFuture.runAsync(() -> {
+                LOGGER.info("ForkJoin thread classloader before: {}", Thread.currentThread().getContextClassLoader().getClass().getName());
                 Thread.currentThread().setContextClassLoader(contextClassLoader);
+                LOGGER.info("ForkJoin thread classloader after: {}", Thread.currentThread().getContextClassLoader().getClass().getName());
                 loadModels();
             });
         }
         else
+
         {
             loadModels();
         }

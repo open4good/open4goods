@@ -59,7 +59,13 @@ public class DjlImageEmbeddingService
         if (properties.isAsyncLoading())
         {
             LOGGER.info("DJL image embedding: async model loading enabled");
-            initFuture = CompletableFuture.runAsync(this::doInitialize);
+            // Capture Spring Boot's LaunchedURLClassLoader so ForkJoinPool
+            // threads can locate resources inside BOOT-INF/ of the fat jar.
+            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+            initFuture = CompletableFuture.runAsync(() -> {
+                Thread.currentThread().setContextClassLoader(contextClassLoader);
+                doInitialize();
+            });
         }
         else
         {
