@@ -2567,6 +2567,9 @@
           "eprelImported": "Date when the EPREL entry was imported.",
           "eprelOrganisationClosed": "EPREL organisation close date.",
           "generic": "Lifecycle event"
+        },
+        "notes": {
+          "eprelOnMarketEndFarFutureHidden": "Events with market end dates beyond {maxYears} years are hidden because manufacturers can adjust them later in EPREL."
         }
       },
       "detailed": {

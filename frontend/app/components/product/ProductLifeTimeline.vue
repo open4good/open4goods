@@ -110,6 +110,14 @@
     <p v-else class="product-life-timeline__empty">
       {{ $t('product.attributes.timeline.empty') }}
     </p>
+
+    <p v-if="hasFilteredFarFutureEndDate" class="product-life-timeline__note">
+      {{
+        $t('product.attributes.timeline.notes.eprelOnMarketEndFarFutureHidden', {
+          maxYears: MAX_ALLOWED_MARKET_END_YEARS,
+        })
+      }}
+    </p>
   </v-card>
 </template>
 
@@ -135,6 +143,21 @@ const props = withDefaults(
 )
 
 const { t, locale } = useI18n()
+const MAX_ALLOWED_MARKET_END_YEARS = 15
+
+const isFarFutureMarketEndDate = (
+  event: ProductTimelineEventDto & { timestamp: number }
+) => {
+  if (event.type !== 'EPREL_ON_MARKET_END') {
+    return false
+  }
+
+  const now = new Date()
+  const maxAllowedDate = new Date(now)
+  maxAllowedDate.setFullYear(now.getFullYear() + MAX_ALLOWED_MARKET_END_YEARS)
+
+  return event.timestamp > maxAllowedDate.getTime()
+}
 
 type TimelineEventViewModel = {
   key: string
@@ -264,16 +287,7 @@ const eventDescriptionKeys: Record<string, string> = {
 
 const groupedEvents = computed<TimelineYearGroup[]>(() => {
   const rawEvents = props.timeline?.events ?? []
-  const yearGroups = new Map<
-    number,
-    {
-      key: string
-      year: number
-      months: Map<number, TimelineMonthGroup>
-    }
-  >()
-
-  rawEvents
+  const normalizedEvents = rawEvents
     .filter(
       (event): event is ProductTimelineEventDto & { timestamp: number } =>
         typeof event?.timestamp === 'number' &&
@@ -285,6 +299,18 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
       ...event,
       timestamp: normalizeTimestamp(event.timestamp) ?? 0,
     }))
+
+  const yearGroups = new Map<
+    number,
+    {
+      key: string
+      year: number
+      months: Map<number, TimelineMonthGroup>
+    }
+  >()
+
+  normalizedEvents
+    .filter(event => !isFarFutureMarketEndDate(event))
     .sort((a, b) => a.timestamp - b.timestamp)
     .forEach((event, index) => {
       const type = event.type
@@ -381,6 +407,20 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
 })
 
 const hasEvents = computed(() => groupedEvents.value.length > 0)
+const hasFilteredFarFutureEndDate = computed(() => {
+  const rawEvents = props.timeline?.events ?? []
+
+  return rawEvents
+    .filter(
+      (event): event is ProductTimelineEventDto & { timestamp: number } =>
+        typeof event?.timestamp === 'number'
+    )
+    .map(event => ({
+      ...event,
+      timestamp: normalizeTimestamp(event.timestamp) ?? 0,
+    }))
+    .some(event => isFarFutureMarketEndDate(event))
+})
 </script>
 
 <style scoped>
@@ -611,6 +651,15 @@ const hasEvents = computed(() => groupedEvents.value.length > 0)
   margin: 0;
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   font-style: italic;
+}
+
+.product-life-timeline__note {
+  margin: 0;
+  margin-left: auto;
+  text-align: right;
+  font-size: 0.82rem;
+  color: rgba(var(--v-theme-text-neutral-soft), 0.95);
+  max-width: 54ch;
 }
 
 @media (max-width: 600px) {
