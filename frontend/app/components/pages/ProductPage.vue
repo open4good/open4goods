@@ -2148,6 +2148,13 @@ const productJsonLdGraph = computed(() => {
   })
 })
 
+const metaVariables = computed(() => ({
+  productName: productMetaTitle.value,
+  brandModel: brandModelTitle.value,
+  score: impactScoreOutOf20.value ?? '',
+  verticalTitle: normalizedVerticalTitle.value,
+}))
+
 const seoMetaBase = computed(() =>
   buildProductMeta({
     productName: productMetaTitle.value,
@@ -2157,31 +2164,58 @@ const seoMetaBase = computed(() =>
     maxTitleLength: 60,
     maxDescriptionLength: 160,
     titleTemplates: {
-      withImpactFull: String(t('product.meta.serp.title.withImpact.full')),
+      withImpactFull: String(
+        t('product.meta.serp.title.withImpact.full', metaVariables.value)
+      ),
       withImpactCompact: String(
-        t('product.meta.serp.title.withImpact.compact')
+        t('product.meta.serp.title.withImpact.compact', metaVariables.value)
       ),
       withImpactMinimal: String(
-        t('product.meta.serp.title.withImpact.minimal')
+        t('product.meta.serp.title.withImpact.minimal', metaVariables.value)
       ),
       withoutImpactFull: String(
-        t('product.meta.serp.title.withoutImpact.full')
+        t(
+          !categoryDetail.value
+            ? 'product.meta.serp.title.noCategory.full'
+            : 'product.meta.serp.title.withoutImpact.full',
+          metaVariables.value
+        )
       ),
       withoutImpactCompact: String(
-        t('product.meta.serp.title.withoutImpact.compact')
+        t(
+          !categoryDetail.value
+            ? 'product.meta.serp.title.noCategory.compact'
+            : 'product.meta.serp.title.withoutImpact.compact',
+          metaVariables.value
+        )
       ),
       withoutImpactMinimal: String(
-        t('product.meta.serp.title.withoutImpact.minimal')
+        t(
+          !categoryDetail.value
+            ? 'product.meta.serp.title.noCategory.minimal'
+            : 'product.meta.serp.title.withoutImpact.minimal',
+          metaVariables.value
+        )
       ),
     },
     descriptionTemplates: {
-      withImpact: String(t('product.meta.serp.description.withImpact')),
-      withImpactVertical: String(
-        t('product.meta.serp.description.withImpactVertical')
+      withImpact: String(
+        t('product.meta.serp.description.withImpact', metaVariables.value)
       ),
-      withoutImpact: String(t('product.meta.serp.description.withoutImpact')),
+      withImpactVertical: String(
+        t(
+          'product.meta.serp.description.withImpactVertical',
+          metaVariables.value
+        )
+      ),
+      withoutImpact: String(
+        t('product.meta.serp.description.withoutImpact', metaVariables.value)
+      ),
       withoutImpactVertical: String(
-        t('product.meta.serp.description.withoutImpactVertical')
+        t(
+          'product.meta.serp.description.withoutImpactVertical',
+          metaVariables.value
+        )
       ),
     },
   })
@@ -2196,31 +2230,58 @@ const socialMetaBase = computed(() =>
     maxTitleLength: 70,
     maxDescriptionLength: 180,
     titleTemplates: {
-      withImpactFull: String(t('product.meta.social.title.withImpact.full')),
+      withImpactFull: String(
+        t('product.meta.social.title.withImpact.full', metaVariables.value)
+      ),
       withImpactCompact: String(
-        t('product.meta.social.title.withImpact.compact')
+        t('product.meta.social.title.withImpact.compact', metaVariables.value)
       ),
       withImpactMinimal: String(
-        t('product.meta.social.title.withImpact.minimal')
+        t('product.meta.social.title.withImpact.minimal', metaVariables.value)
       ),
       withoutImpactFull: String(
-        t('product.meta.social.title.withoutImpact.full')
+        t(
+          !categoryDetail.value
+            ? 'product.meta.social.title.noCategory.full'
+            : 'product.meta.social.title.withoutImpact.full',
+          metaVariables.value
+        )
       ),
       withoutImpactCompact: String(
-        t('product.meta.social.title.withoutImpact.compact')
+        t(
+          !categoryDetail.value
+            ? 'product.meta.social.title.noCategory.compact'
+            : 'product.meta.social.title.withoutImpact.compact',
+          metaVariables.value
+        )
       ),
       withoutImpactMinimal: String(
-        t('product.meta.social.title.withoutImpact.minimal')
+        t(
+          !categoryDetail.value
+            ? 'product.meta.social.title.noCategory.minimal'
+            : 'product.meta.social.title.withoutImpact.minimal',
+          metaVariables.value
+        )
       ),
     },
     descriptionTemplates: {
-      withImpact: String(t('product.meta.social.description.withImpact')),
-      withImpactVertical: String(
-        t('product.meta.social.description.withImpactVertical')
+      withImpact: String(
+        t('product.meta.social.description.withImpact', metaVariables.value)
       ),
-      withoutImpact: String(t('product.meta.social.description.withoutImpact')),
+      withImpactVertical: String(
+        t(
+          'product.meta.social.description.withImpactVertical',
+          metaVariables.value
+        )
+      ),
+      withoutImpact: String(
+        t('product.meta.social.description.withoutImpact', metaVariables.value)
+      ),
       withoutImpactVertical: String(
-        t('product.meta.social.description.withoutImpactVertical')
+        t(
+          'product.meta.social.description.withoutImpactVertical',
+          metaVariables.value
+        )
       ),
     },
   })

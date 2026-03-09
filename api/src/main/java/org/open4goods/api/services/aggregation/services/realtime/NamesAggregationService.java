@@ -77,6 +77,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	 * @param vConf vertical config provided to this aggregation pass
 	 * @return contract kept as-is (null)
 	 * @throws AggregationSkipException if aggregation must be skipped
+	 * TODO : investigate and propose robustness and performance enhancements.
 	 */
 	@Override
 	public Map<String, Object> onDataFragment(final DataFragment df, final Product output, final VerticalConfig vConf)
@@ -140,6 +141,11 @@ public class NamesAggregationService extends AbstractAggregationService {
 				}
 
 				try {
+
+
+
+
+					// TODO : Check if existing url has changes against new one, log.warn if url updates
 					// ---- URL ----
 					// High cognitive load note:
 					// data.getNames().getUrl() is assumed existing by domain model, but we still guard nulls
@@ -161,6 +167,11 @@ public class NamesAggregationService extends AbstractAggregationService {
 					} else {
 						logger.debug("Skipping URL generation for productId={} lang={}", data.getId(), lang);
 					}
+
+
+					// TODO : Investigate an optimisation opiton. Add a no indexed no dos_count fields that contains hashcode for concatenation of all those following computed txts. Than apply regen only if has changed.
+					// TODO : Should also concern the computed url
+
 
 					// ---- H1 Title ----
 					final boolean h1Missing =
@@ -247,7 +258,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 				long cacheKey = computeEmbeddingCacheKey(data, resolvedVertical);
 				boolean forceRecomputing = resolvedVertical != null && resolvedVertical.isForceEmbeddingRecomputing();
-				
+
 				if (!forceRecomputing && cacheKey == data.getEmbeddingTextHash()) {
 					logger.debug("Embedding cache key unchanged for product {}, skipping", data.getId());
 				} else {

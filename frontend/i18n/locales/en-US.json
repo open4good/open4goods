@@ -3065,9 +3065,14 @@
             "minimal": "{productName}: ImpactScore {score}/20"
           },
           "withoutImpact": {
-            "full": "{productName} | Best prices, manuals and specs for {brandModel}",
+            "full": "{productName} | Best prices, manuals, and features for {brandModel}",
             "compact": "{productName} | Best prices for {brandModel}",
             "minimal": "{productName}"
+          },
+          "noCategory": {
+            "full": "{productName} : Best prices and history",
+            "compact": "{productName} : Best prices and history",
+            "minimal": "{productName} : Best prices and history"
           }
         },
         "description": {
@@ -3085,9 +3090,14 @@
             "minimal": "{productName}: {score}/20"
           },
           "withoutImpact": {
-            "full": "{productName}: prices, highlights and alternatives on Nudger",
-            "compact": "{productName}: compare prices and highlights",
+            "full": "{productName}: pricing, key specs, and alternatives on Nudger",
+            "compact": "{productName}: compare prices and key specs",
             "minimal": "{productName}"
+          },
+          "noCategory": {
+            "full": "{productName} : Best prices and history",
+            "compact": "{productName} : Best prices and history",
+            "minimal": "{productName} : Best prices and history"
           }
         },
         "description": {

@@ -2963,6 +2963,11 @@
             "full": "{productName} | Meilleurs prix, manuels, et caractéristiques pour le {brandModel}",
             "compact": "{productName} | Meilleurs prix pour {brandModel}",
             "minimal": "{productName}"
+          },
+          "noCategory": {
+            "full": "{productName} : Meilleurs prix et historique",
+            "compact": "{productName} : Meilleurs prix et historique",
+            "minimal": "{productName} : Meilleurs prix et historique"
           }
         },
         "description": {
@@ -2983,6 +2988,11 @@
             "full": "{productName} : prix, infos clés et alternatives sur Nudger",
             "compact": "{productName} : comparez prix et infos clés",
             "minimal": "{productName}"
+          },
+          "noCategory": {
+            "full": "{productName} : Meilleurs prix et historique",
+            "compact": "{productName} : Meilleurs prix et historique",
+            "minimal": "{productName} : Meilleurs prix et historique"
           }
         },
         "description": {

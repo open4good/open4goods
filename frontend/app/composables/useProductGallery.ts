@@ -75,6 +75,46 @@ export const useProductGallery = (
     const imageItems: ProductGalleryItem[] = []
     const videoItems: ProductGalleryItem[] = []
 
+    const hasCoverInImages = images.some(img => {
+      const u = img.originalUrl ?? img.url
+      return u && u === coverImageRaw.value
+    })
+
+    if (coverImageRaw.value && !hasCoverInImages) {
+      const source = coverImageRaw.value
+      const preview =
+        resolveImageUrl(source, {
+          width: 1200,
+          height: 900,
+          fit: 'cover',
+          format: 'webp',
+        }) || source
+
+      const thumbnail =
+        resolveImageUrl(source, {
+          width: DEFAULT_THUMBNAIL_SIZE,
+          height: DEFAULT_THUMBNAIL_SIZE,
+          fit: 'cover',
+          format: 'webp',
+        }) || preview
+
+      imageItems.push({
+        id: `image-cover-fallback-${source}`,
+        type: 'image',
+        originalUrl: source,
+        previewUrl: preview,
+        thumbnailUrl: thumbnail,
+        thumbnailWidth: DEFAULT_THUMBNAIL_SIZE,
+        thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
+        width: DEFAULT_IMAGE_WIDTH,
+        height: DEFAULT_IMAGE_HEIGHT,
+        alt: fallbackTitle,
+        caption: fallbackTitle,
+        group: 'cover',
+        posterUrl: preview,
+      })
+    }
+
     images.forEach(image => {
       const original = image.originalUrl ?? image.url ?? ''
       if (!original) return
