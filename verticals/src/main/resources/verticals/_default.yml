@@ -17,7 +17,7 @@ parsers:
 forceNameGeneration: true
 
 # If true, will force recomputing of the embedding vector
-forceEmbeddingRecomputing: true
+forceEmbeddingRecomputing: false
 
 # Average electricity cost per kilowatt-hour (EUR).
 averageKwhCost: 0.194
