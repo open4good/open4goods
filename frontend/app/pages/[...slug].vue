@@ -11,6 +11,10 @@ import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
 import ProductPage from '~/components/pages/ProductPage.vue'
 import CategoryPage from '~/components/pages/CategoryPage.vue'
 
+defineRouteRules({
+  isr: 3600, // Cache products, categories and wiki pages for 1 hour
+})
+
 const XwikiFullPageRenderer = defineAsyncComponent(
   () => import('~/components/cms/XwikiFullPageRenderer.vue')
 )

@@ -10,6 +10,7 @@ import type {
   CategoriesStatsDto,
   IpQuotaStatusDto,
 } from '~~/shared/api-client'
+
 import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
 import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
@@ -38,6 +39,10 @@ import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 import { resolveThemeName } from '~~/shared/constants/theme'
 import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
+
+defineRouteRules({
+  isr: 3600, // Cache home page for 1 hour
+})
 
 definePageMeta({
   ssr: true,
