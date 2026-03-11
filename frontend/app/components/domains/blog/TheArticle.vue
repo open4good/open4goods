@@ -393,6 +393,8 @@ useHead(() => ({
       <RobustImage
         :src="article.image"
         :alt="t('blog.article.featuredImageAlt', { title: articleTitle })"
+        width="100%"
+        height="100%"
         class="article-hero__image"
       />
       <figcaption class="d-sr-only">
