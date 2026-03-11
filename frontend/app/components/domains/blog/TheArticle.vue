@@ -393,8 +393,6 @@ useHead(() => ({
       <RobustImage
         :src="article.image"
         :alt="t('blog.article.featuredImageAlt', { title: articleTitle })"
-        width="70%"
-        :height="360"
         class="article-hero__image"
       />
       <figcaption class="d-sr-only">
@@ -515,13 +513,15 @@ useHead(() => ({
     gap: 0.35rem
 
 .article-hero
+  width: 100%
   margin: 0
+  aspect-ratio: 16 / 9
   border-radius: 16px
   overflow: hidden
 
   &__image
     width: 100%
-    height: auto
+    height: 100%
 
 .article-divider
   opacity: 0.4
