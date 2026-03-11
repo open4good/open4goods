@@ -272,6 +272,7 @@ export default defineNuxtConfig({
 
   experimental: {
     payloadExtraction: false,
+    inlineRouteRules: true,
   },
 
   typescript: {
