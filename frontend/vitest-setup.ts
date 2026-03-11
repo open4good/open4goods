@@ -12,15 +12,18 @@ vi.stubGlobal('$fetch', (request: string) => {
   return Promise.resolve(null)
 })
 
+vi.stubGlobal('defineRouteRules', vi.fn())
+
 // Ensure window and performance exist to prevent ReferenceError in i18n libraries
 if (typeof globalThis.window === 'undefined') {
-  // @ts-expect-error global.window does not exist by default
-  globalThis.window = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  globalThis.window = globalThis as any
 }
 if (!globalThis.performance) {
   // @ts-expect-error global.performance does not exist by default
   globalThis.performance = { now: vi.fn(() => Date.now()) }
 }
 if (!globalThis.window.performance) {
-  globalThis.window.performance = globalThis.performance
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  globalThis.window.performance = globalThis.performance as any
 }

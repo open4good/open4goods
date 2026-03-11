@@ -245,15 +245,23 @@ const parallaxBackgrounds = computed<
       [section]: {
         backgroundLight: parallaxLayersLight[section] || [],
         backgroundDark: parallaxLayersDark[section] || [],
-        overlayOpacity: parallaxConfig.value[section].overlay,
-        parallaxAmount: parallaxConfig.value[section].parallaxAmount,
-        maxOffsetRatio: parallaxConfig.value[section].maxOffsetRatio,
+        overlayOpacity: parallaxConfig.value?.[section]?.overlay ?? 0,
+        parallaxAmount: parallaxConfig.value?.[section]?.parallaxAmount ?? 0,
+        maxOffsetRatio: parallaxConfig.value?.[section]?.maxOffsetRatio ?? null,
       },
     }),
     {} as Record<ParallaxSectionKey, ParallaxSectionRenderConfig>
   )
 )
 
+console.log(
+  'parallaxConfig type:',
+  typeof parallaxConfig,
+  'isRef:',
+  isRef(parallaxConfig)
+)
+console.log('parallaxConfig.value:', parallaxConfig.value)
+console.log('parallaxBackgrounds.value:', parallaxBackgrounds.value)
 const themeName = computed(() =>
   resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
 )
@@ -837,12 +845,12 @@ useHead(() => ({
           class="home-page__parallax"
           reverse
           :gapless="true"
-          :background-light="parallaxBackgrounds.essentials.backgroundLight"
-          :background-dark="parallaxBackgrounds.essentials.backgroundDark"
-          :overlay-opacity="parallaxBackgrounds.essentials.overlayOpacity"
-          :parallax-amount="parallaxBackgrounds.essentials.parallaxAmount"
+          :background-light="parallaxBackgrounds?.essentials?.backgroundLight"
+          :background-dark="parallaxBackgrounds?.essentials?.backgroundDark"
+          :overlay-opacity="parallaxBackgrounds?.essentials?.overlayOpacity"
+          :parallax-amount="parallaxBackgrounds?.essentials?.parallaxAmount"
           :aria-label="t('home.parallax.essentials.ariaLabel')"
-          :max-offset-ratio="parallaxBackgrounds.essentials.maxOffsetRatio"
+          :max-offset-ratio="parallaxBackgrounds?.essentials?.maxOffsetRatio"
           :enable-aplats="true"
           :aplat-svg="parallaxAplatEssentials"
         >
