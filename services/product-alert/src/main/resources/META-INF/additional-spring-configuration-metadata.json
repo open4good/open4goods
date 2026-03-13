@@ -1,0 +1,21 @@
+{
+  "properties": [
+    {
+      "name": "product-alert.security.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable API key enforcement on the internal price-events endpoint.",
+      "defaultValue": false
+    },
+    {
+      "name": "product-alert.internal.api-key",
+      "type": "java.lang.String",
+      "description": "Expected API key for internal price-event ingestion requests."
+    },
+    {
+      "name": "product-alert.dedup-window",
+      "type": "java.time.Duration",
+      "description": "Window during which the same subscription and price should not create a duplicate notification candidate.",
+      "defaultValue": "24h"
+    }
+  ]
+}

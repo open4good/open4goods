@@ -1,0 +1,28 @@
+server:
+  port: ${SERVER_PORT:8087}
+
+spring:
+  application:
+    name: product-alert
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+
+product-alert:
+  security:
+    enabled: ${PRODUCT_ALERT_SECURITY_ENABLED:false}
+  internal:
+    api-key: ${PRODUCT_ALERT_INTERNAL_API_KEY:}
+  dedup-window: ${PRODUCT_ALERT_DEDUP_WINDOW:24h}

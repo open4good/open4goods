@@ -61,11 +61,32 @@ services:
       - "${SERVER_PORT_API:-8086}:8086"
     depends_on:
       - elastic
+      - product-alert
     networks:
       - o4g-network
     env_file: .env
     environment:
       - SERVER_PORT=8086
+      - SPRING_ELASTICSEARCH_URIS=http://elastic:9200
+      - PRICE_ALERTING_ENABLED=true
+      - PRICE_ALERTING_BASE_URL=http://product-alert:8087
+
+####################################################################
+# Product Alert
+###################################################################
+  product-alert:
+    image: eclipse-temurin:25.0.2_10-jre
+    container_name: product-alert
+    volumes:
+      - ./services/product-alert/target/product-alert-0.0.1-SNAPSHOT.jar:/app/app.jar
+    command: java -jar /app/app.jar
+    depends_on:
+      - elastic
+    networks:
+      - o4g-network
+    env_file: .env
+    environment:
+      - SERVER_PORT=8087
       - SPRING_ELASTICSEARCH_URIS=http://elastic:9200
 
 ####################################################################

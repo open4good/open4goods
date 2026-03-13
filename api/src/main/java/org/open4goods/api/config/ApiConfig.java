@@ -11,9 +11,11 @@ import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
+import org.open4goods.api.config.yml.PriceAlertingProperties;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
+import org.open4goods.api.services.pricealert.PriceAlertingService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.brand.service.BrandScoreService;
@@ -76,6 +78,7 @@ import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
@@ -389,8 +392,15 @@ public class ApiConfig {
         }
 
 	@Bean
-	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
-		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, config.getIndexationConfig());
+	PriceAlertingService priceAlertingService(PriceAlertingProperties properties,
+			RestTemplateBuilder restTemplateBuilder,
+			MeterRegistry meterRegistry) {
+		return new PriceAlertingService(properties, restTemplateBuilder, meterRegistry);
+	}
+
+	@Bean
+	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository, @Autowired PriceAlertingService priceAlertingService) {
+		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, config.getIndexationConfig(), priceAlertingService);
 	}
 
 	/**

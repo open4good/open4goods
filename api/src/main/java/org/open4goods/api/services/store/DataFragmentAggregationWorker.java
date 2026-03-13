@@ -1,7 +1,7 @@
 package org.open4goods.api.services.store;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.open4goods.model.datafragment.DataFragment;
 import org.slf4j.Logger;
@@ -42,18 +42,16 @@ public class DataFragmentAggregationWorker implements Runnable {
 		this.workerName = workerName;
 	}
 
-        @Override
-        public void run() {
+	        @Override
+	        public void run() {
 
-                while (!service.getServiceShutdown().get()) {
-                        try {
+	                while (!service.getServiceShutdown().get()) {
+	                        try {
 				if (!service.getQueue().isEmpty()) {
 					// There is data to consume and queue consummation is enabled
-					final Set<DataFragment> buffer = new HashSet<>();	
-					
-					for (int i = 0; i < dequeuePageSize; i++) {
-							buffer.add(service.getQueue().take());
-					}
+					final List<DataFragment> buffer = new ArrayList<>();
+					buffer.add(service.getQueue().take());
+					service.getQueue().drainTo(buffer, dequeuePageSize - 1);
 					
 					// Aggregating
 					service.aggregateAndstore(buffer);
