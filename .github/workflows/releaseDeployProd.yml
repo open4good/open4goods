@@ -479,7 +479,7 @@ jobs:
 
       - name: Create Release
         if: env.MODE != 'test' && steps.meta.outputs.is_tag == 'true'
-        uses: mikepenz/action-gh-release@v1
+        uses: mikepenz/action-gh-release@v2
         with:
           body_path: ${{ github.workspace }}/RELEASE-NOTES.md
           files: |
