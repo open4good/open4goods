@@ -109,7 +109,7 @@
     "vite-plugin-vuetify": "^2.1.2",
     "vitest": "^3.2.4",
     "vue-tsc": "^3.0.6",
-    "vuetify": "^3.9.7"
+    "vuetify": "^4.0.0"
   },
   "packageManager": "pnpm@10.32.1",
   "engines": {
