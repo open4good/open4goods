@@ -51,6 +51,9 @@ export const ensureCsrfCookie = (event: H3Event) => {
 
   if (existingToken) {
     console.log('[CSRF] Existing token found:', existingToken)
+    // Expose the token in the event context so the Nuxt plugin can read it during SSR
+    // even on the first request when useCookie only sees incoming (request) cookies.
+    event.context.csrfToken = existingToken
     return existingToken
   }
 
@@ -63,6 +66,11 @@ export const ensureCsrfCookie = (event: H3Event) => {
     path: '/',
     maxAge: CSRF_COOKIE_MAX_AGE_SECONDS,
   })
+
+  // Expose the freshly-generated token in the event context so the Nuxt plugin
+  // can attach it to internal SSR $fetch calls (the response cookie is not yet
+  // readable through useCookie at render time).
+  event.context.csrfToken = token
 
   return token
 }

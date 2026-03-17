@@ -39,33 +39,45 @@ export default defineNuxtPlugin(nuxtApp => {
         return
       }
 
-      if (!csrfCookie.value) {
-        console.log('[CSRF-Plugin] No CSRF cookie found in plugin')
+      // On the very first SSR request, the CSRF cookie hasn't been sent back to
+      // the browser yet (it lives only in the Set-Cookie response header).
+      // useCookie() reads the *incoming* request cookie, so it returns undefined.
+      // We therefore fall back to event.context.csrfToken which the server
+      // middleware sets immediately after generating (or reading) the token.
+      let token = csrfCookie.value
+      if (import.meta.server && !token) {
+        const event = useRequestEvent()
+        if (event?.context.csrfToken) {
+          console.log(
+            '[CSRF-Plugin] Using context token for SSR:',
+            event.context.csrfToken
+          )
+          token = event.context.csrfToken as string
+        }
+      }
+
+      if (!token) {
+        console.log(
+          '[CSRF-Plugin] No CSRF token found – request will proceed without it'
+        )
         return
       }
 
-      console.log(
-        '[CSRF-Plugin] Found cookie, adding header:',
-        csrfCookie.value
-      )
+      console.log('[CSRF-Plugin] Attaching CSRF token:', token)
 
       const headers = new Headers(options.headers || {})
 
       if (!headers.has(CSRF_HEADER_NAME)) {
-        console.log(
-          '[CSRF-Plugin] Adding header:',
-          CSRF_HEADER_NAME,
-          csrfCookie.value
-        )
-        headers.set(CSRF_HEADER_NAME, csrfCookie.value)
+        headers.set(CSRF_HEADER_NAME, token)
       }
 
-      // On server side, we need to manually pass the cookie so the middleware can verify it
+      // On the server side we must also pass the cookie so the middleware can
+      // verify that the header and the cookie match.
       if (import.meta.server) {
-        headers.append('Cookie', `${CSRF_COOKIE_NAME}=${csrfCookie.value}`)
+        headers.append('Cookie', `${CSRF_COOKIE_NAME}=${token}`)
       }
 
-      // Convert back to plain object to ensure compatibility
+      // Convert back to a plain object to ensure ofetch compatibility
       options.headers = Object.fromEntries(headers.entries())
     },
   })

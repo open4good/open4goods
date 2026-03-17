@@ -24,7 +24,9 @@ vi.mock('h3', async importOriginal => ({
 }))
 
 describe('csrf utilities', () => {
-  const event = {} as Parameters<typeof ensureCsrfCookie>[0]
+  const event = { context: {} } as unknown as Parameters<
+    typeof ensureCsrfCookie
+  >[0]
   const originalEnv = process.env.NODE_ENV
 
   beforeEach(() => {
@@ -46,6 +48,11 @@ describe('csrf utilities', () => {
 
     expect(token).toBe('existing-token')
     expect(setCookieMock).not.toHaveBeenCalled()
+    // Token should be stored in event context so SSR plugin can read it
+    expect(
+      (event as unknown as { context: Record<string, unknown> }).context
+        .csrfToken
+    ).toBe('existing-token')
   })
 
   it('sets a CSRF cookie when missing', () => {
@@ -61,6 +68,11 @@ describe('csrf utilities', () => {
       path: '/',
       maxAge: 60 * 60 * 24,
     })
+    // Token should be stored in event context so SSR plugin can read it on first visit
+    expect(
+      (event as unknown as { context: Record<string, unknown> }).context
+        .csrfToken
+    ).toBe('csrf-token-123')
   })
 
   it('allows same-origin requests', () => {
