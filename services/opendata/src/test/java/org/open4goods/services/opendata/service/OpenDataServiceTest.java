@@ -143,6 +143,10 @@ class OpenDataServiceTest {
         List<String> gtinLines = readZipLines(tmpGtin, "open4goods-gtin-dataset.csv");
 
         assertThat(isbnLines).hasSize(2);
+        assertThat(isbnLines.get(0))
+                .doesNotContain("classification_decitre_1")
+                .doesNotContain("classification_decitre_2")
+                .doesNotContain("classification_decitre_3");
         assertThat(isbnLines.get(1)).contains("Test Editor", "https://nudger.fr/9781234567890");
         assertThat(gtinLines).hasSize(2);
         assertThat(gtinLines.get(1)).contains("TestBrand", "https://nudger.fr/1234567890123");
@@ -204,9 +208,6 @@ class OpenDataServiceTest {
         addIndexedAttribute(attributes, "EDITEUR", "Test Editor");
         addIndexedAttribute(attributes, "FORMAT", "Broché");
         addIndexedAttribute(attributes, "NB DE PAGES", "320");
-        addIndexedAttribute(attributes, "CLASSIFICATION DECITRE 1", "Class1");
-        addIndexedAttribute(attributes, "CLASSIFICATION DECITRE 2", "Class2");
-        addIndexedAttribute(attributes, "CLASSIFICATION DECITRE 3", "Class3");
         addIndexedAttribute(attributes, "SOUSCATEGORIE", "SousCat1");
         addIndexedAttribute(attributes, "SOUSCATEGORIE2", "SousCat2");
         product.setAttributes(attributes);
@@ -251,4 +252,3 @@ class OpenDataServiceTest {
         throw new IllegalStateException("Unable to locate entry " + entryName + " in " + file);
     }
 }
-
