@@ -91,9 +91,6 @@ public class OpenDataService implements HealthIndicator {
             "editeur",
             "format",
             "nb_page",
-            "classification_decitre_1",
-            "classification_decitre_2",
-            "classification_decitre_3",
             "souscategorie",
             "souscategorie2"
     };
@@ -123,9 +120,6 @@ public class OpenDataService implements HealthIndicator {
             "EDITEUR",
             "FORMAT",
             "NB DE PAGES",
-            "CLASSIFICATION DECITRE 1",
-            "CLASSIFICATION DECITRE 2",
-            "CLASSIFICATION DECITRE 3",
             "SOUSCATEGORIE",
             "SOUSCATEGORIE2"
     );
@@ -468,11 +462,8 @@ public class OpenDataService implements HealthIndicator {
         line[7] = StringUtils.defaultString(isbnAttributes.get("EDITEUR"));
         line[8] = StringUtils.defaultString(isbnAttributes.get("FORMAT"));
         line[9] = StringUtils.defaultString(isbnAttributes.get("NB DE PAGES"));
-        line[10] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 1"));
-        line[11] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 2"));
-        line[12] = StringUtils.defaultString(isbnAttributes.get("CLASSIFICATION DECITRE 3"));
-        line[13] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
-        line[14] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
+        line[10] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
+        line[11] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
 
         return line;
     }

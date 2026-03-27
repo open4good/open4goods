@@ -1477,7 +1477,7 @@
           },
           "description": "Export dédié aux livres avec informations de prix, de catégories, de classifications, ...",
           "features": {
-            "catalogue": "Inclut éditeur, format et classifications Decitre",
+            "catalogue": "Inclut éditeur, format et sous-catégories éditoriales",
             "refresh": "Mise à jour chaque semaine",
             "research": "Parfait pour l'enrichissement de catalogue, la recherche et les analyses culturelles"
           },
@@ -1648,18 +1648,6 @@
       },
       "isbn": {
         "columns": {
-          "classification_decitre_1": {
-            "description": "Classification Decitre - niveau 1.",
-            "label": "classification_decitre_1"
-          },
-          "classification_decitre_2": {
-            "description": "Classification Decitre - niveau 2.",
-            "label": "classification_decitre_2"
-          },
-          "classification_decitre_3": {
-            "description": "Classification Decitre - niveau 3.",
-            "label": "classification_decitre_3"
-          },
           "currency": {
             "description": "Devise du prix le plus bas.",
             "label": "currency"

@@ -1602,7 +1602,7 @@
           },
           "description": "Dedicated export for books with pricing, availability and classification information.",
           "features": {
-            "catalogue": "Includes publisher, format and Decitre classifications",
+            "catalogue": "Includes publisher, format and editorial subcategories",
             "refresh": "Weekly refreshed snapshot",
             "research": "Great for catalogue enrichment, research and cultural analytics"
           },
@@ -1773,18 +1773,6 @@
       },
       "isbn": {
         "columns": {
-          "classification_decitre_1": {
-            "description": "Decitre classification - level 1.",
-            "label": "classification_decitre_1"
-          },
-          "classification_decitre_2": {
-            "description": "Decitre classification - level 2.",
-            "label": "classification_decitre_2"
-          },
-          "classification_decitre_3": {
-            "description": "Decitre classification - level 3.",
-            "label": "classification_decitre_3"
-          },
           "currency": {
             "description": "Currency code of the lowest price.",
             "label": "currency"
