@@ -197,8 +197,8 @@ importers:
         specifier: ^2.4.6
         version: 2.4.6
       '@vuetify/mcp':
-        specifier: ^0.5.0
-        version: 0.5.0(hono@4.11.4)
+        specifier: ^0.6.0
+        version: 0.6.0(hono@4.11.4)
       dayjs-nuxt:
         specifier: ^2.1.11
         version: 2.1.11(magicast@0.5.2)
@@ -4530,8 +4530,8 @@ packages:
       vue: ^3.0.0
       vuetify: '>=3'
 
-  '@vuetify/mcp@0.5.0':
-    resolution: {integrity: sha512-98Fq2LVstgNcvaJKYlj6rqpmVvsa4aoSCcjOWWWalOzXpXN1tRQwNgJo+tx3V1SnURnvutR1EtsywnUl0Rl5cQ==}
+  '@vuetify/mcp@0.6.0':
+    resolution: {integrity: sha512-hSwDeGOp3UrGVX2o74PtGuyAG4cRVi+uvK5y7MozyiZdQZROKqRuuYvsK+FzU4qEKWcummmQgnwwFvpCQDwxEw==}
     hasBin: true
 
   '@vueuse/core@14.2.1':
@@ -6777,10 +6777,6 @@ packages:
   is-wsl@2.2.0:
     resolution: {integrity: sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==}
     engines: {node: '>=8'}
-
-  is-wsl@3.1.0:
-    resolution: {integrity: sha512-UcVfVfaK4Sc4m7X3dUSoHoozQGBEFeDC+zVo06t98xe8CzHSZZBekNXH+tu0NalHolcJ/QAGqS46Hef7QXBIMw==}
-    engines: {node: '>=16'}
 
   is-wsl@3.1.1:
     resolution: {integrity: sha512-e6rvdUCiQCAuumZslxRJWR/Doq4VpPR82kqclvcS0efgt430SlGIk05vdCN58+VrzgtIcfNODjozVielycD4Sw==}
@@ -10240,7 +10236,7 @@ snapshots:
   '@antfu/install-pkg@1.1.0':
     dependencies:
       package-manager-detector: 1.6.0
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
 
   '@antfu/utils@8.1.1': {}
 
@@ -12058,7 +12054,7 @@ snapshots:
       srvx: 0.11.9
       std-env: 3.10.0
       tinyclip: 0.1.12
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
       ufo: 1.6.3
       youch: 4.1.0
     optionalDependencies:
@@ -14801,19 +14797,19 @@ snapshots:
       vue: 3.5.31(typescript@5.9.3)
       vuetify: 3.12.4(typescript@5.9.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.31(typescript@5.9.3))
 
-  '@vuetify/mcp@0.5.0(hono@4.11.4)':
+  '@vuetify/mcp@0.6.0(hono@4.11.4)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.4)(zod@3.25.76)
       citty: 0.1.6
       dotenv: 16.6.1
-      is-wsl: 3.1.0
+      is-wsl: 3.1.1
       jsonc-parser: 3.3.1
       kolorist: 1.8.0
       octokit: 5.0.5
       pathe: 2.0.3
       std-env: 3.10.0
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
       which: 5.0.0
       zod: 3.25.76
     transitivePeerDependencies:
@@ -17381,10 +17377,6 @@ snapshots:
     dependencies:
       is-docker: 2.2.1
 
-  is-wsl@3.1.0:
-    dependencies:
-      is-inside-container: 1.0.0
-
   is-wsl@3.1.1:
     dependencies:
       is-inside-container: 1.0.0
@@ -18709,7 +18701,7 @@ snapshots:
       consola: 3.4.2
       pathe: 2.0.3
       pkg-types: 2.3.0
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
 
   nypm@0.6.5:
     dependencies:
