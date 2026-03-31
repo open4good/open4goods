@@ -60,13 +60,13 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-            <version>3.2.3</version> <!-- or the latest version -->
+            <version>3.3.0</version> <!-- or the latest version -->
         </dependency>
 
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parser-html-module</artifactId>
-            <version>3.2.3</version>
+            <version>3.3.0</version>
         </dependency>
 
         <dependency>
