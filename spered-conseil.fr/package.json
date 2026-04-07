@@ -24,7 +24,7 @@
     "@nuxt/eslint": "^1.0.0",
     "eslint": "^10.0.0",
     "sass": "^1.83.1",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0",
     "vitest": "^2.1.8",
     "vue-tsc": "^3.2.5"
   }
