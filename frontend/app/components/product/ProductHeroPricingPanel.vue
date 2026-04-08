@@ -212,25 +212,28 @@
           menu-icon="mdi-chevron-down"
         >
           <template #selection="{ item }">
-            <div class="product-hero__pricing-panel-select-value">
-              <img
-                v-if="item.raw.favicon"
-                :src="item.raw.favicon"
-                :alt="item.raw.label"
-                width="20"
-                height="20"
-                class="product-hero__pricing-panel-select-avatar"
-              />
-              <span class="product-hero__pricing-panel-select-name ml-4">
-                {{ item.raw.label }}
-              </span>
-              <span class="product-hero__pricing-panel-select-price">
-                {{ item.raw.priceLabel }}
-              </span>
-            </div>
+            <template v-if="item?.raw">
+              <div class="product-hero__pricing-panel-select-value">
+                <img
+                  v-if="item.raw.favicon"
+                  :src="item.raw.favicon"
+                  :alt="item.raw.label"
+                  width="20"
+                  height="20"
+                  class="product-hero__pricing-panel-select-avatar"
+                />
+                <span class="product-hero__pricing-panel-select-name ml-4">
+                  {{ item.raw.label }}
+                </span>
+                <span class="product-hero__pricing-panel-select-price">
+                  {{ item.raw.priceLabel }}
+                </span>
+              </div>
+            </template>
           </template>
           <template #item="{ item, props: itemProps }">
             <v-list-item
+              v-if="item?.raw"
               v-bind="itemProps"
               :title="null"
               @click="onAlternativeSelected(item.raw)"
