@@ -1,11 +1,13 @@
 ---
 title: "Impact Score methodology"
 description: "A structured view of criteria, weightings, and the statistical principles that power the Impact Score."
-tags: ["impact-score", "methodology", "scoring"]
+tags: ["language:en", "impact-score", "methodology", "scoring"]
 icon: "mdi-flask-outline"
 weight: 20
 updatedAt: "2026-02-12"
 draft: false
+
+type: "guide"
 ---
 
 # Impact Score methodology

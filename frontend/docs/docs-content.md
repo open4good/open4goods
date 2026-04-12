@@ -26,10 +26,13 @@ Each markdown file can define:
 title: 'Human title'
 description: 'Short SEO summary'
 tags: ['tag1', 'tag2']
+type: 'guide'
 icon: 'mdi-book-open-page-variant'
 weight: 10
 updatedAt: '2026-02-10'
 draft: false
+published: true
+navigation: true
 ---
 ```
 
@@ -37,7 +40,9 @@ draft: false
 
 1. Create the markdown file under `/docs/<locale>/...`.
 2. Add frontmatter (title + description recommended).
-3. The page becomes available at `/docs/<slug>`.
+3. Add the language tag (`language:en` or `language:fr`) so rendering is
+   restricted to matching domain language.
+4. The page becomes available at `/docs/<slug>`.
 
 ## Components
 

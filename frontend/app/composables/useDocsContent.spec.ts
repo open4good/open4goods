@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  getLanguageTags,
+  isDocVisibleForLocale,
   normalizeSlugOrPath,
   resolveDocPath,
 } from '~/composables/useDocsContent'
@@ -33,5 +35,32 @@ describe('useDocsContent helpers', () => {
         slugOrPath: '/docs/fr/impact-score/methodology',
       })
     ).toBe('/docs/fr/impact-score/methodology')
+  })
+
+  it('extracts and enforces language tags', () => {
+    expect(getLanguageTags(['overview', 'language:en', 'LANGUAGE:FR'])).toEqual([
+      'en',
+      'fr',
+    ])
+
+    expect(
+      isDocVisibleForLocale(
+        {
+          path: '/docs/en/sample',
+          tags: ['language:en', 'guide'],
+        },
+        'en'
+      )
+    ).toBe(true)
+
+    expect(
+      isDocVisibleForLocale(
+        {
+          path: '/docs/en/sample',
+          tags: ['language:en', 'guide'],
+        },
+        'fr'
+      )
+    ).toBe(false)
   })
 })

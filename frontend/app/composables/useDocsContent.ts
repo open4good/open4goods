@@ -11,11 +11,18 @@ export type DocsDoc = {
   path: string
   title?: string | null
   description?: string | null
+  type?: string | null
   tags?: string[] | null
   icon?: string | null
   weight?: number | null
   updatedAt?: string | null
   draft?: boolean | null
+  published?: boolean | null
+  requiresAuth?: boolean | null
+  layout?: string | null
+  navigation?: boolean | null
+  ogImage?: string | null
+  noindex?: boolean | null
   body?: unknown
 }
 
@@ -38,6 +45,7 @@ export type DocsSearchSection = {
 const DEFAULT_DOCS_LOCALE: DocsLocale = 'en'
 const DEFAULT_DOCS_BASE_PATH = '/docs'
 const INVALID_PATH_PATTERN = /(\.\.|\\|%00)/u
+const LANGUAGE_TAG_PREFIX = 'language:'
 
 const toPlainText = (value: unknown): string => {
   if (!value) {
@@ -223,14 +231,44 @@ const buildNormalizedDoc = (doc: DocsDoc): DocsDoc => {
     ...doc,
     title: derivedTitle,
     description: derivedDescription,
+    type: doc.type ?? 'guide',
     tags: (doc.tags ?? []).filter(Boolean),
+    draft: doc.draft ?? false,
+    published: doc.published ?? true,
+    navigation: doc.navigation ?? true,
+    noindex: doc.noindex ?? false,
   }
 }
 
 const isDraftAllowed = () => import.meta.dev
 
-const filterDrafts = (docs: DocsDoc[]) =>
-  docs.filter(doc => (doc.draft ? isDraftAllowed() : true))
+export const getLanguageTags = (tags?: string[] | null): DocsLocale[] =>
+  (tags ?? [])
+    .map(tag => tag.trim().toLowerCase())
+    .filter(tag => tag.startsWith(LANGUAGE_TAG_PREFIX))
+    .map(tag => tag.slice(LANGUAGE_TAG_PREFIX.length))
+    .filter((tag): tag is DocsLocale => tag === 'en' || tag === 'fr')
+
+export const isDocVisibleForLocale = (
+  doc: DocsDoc,
+  locale: DocsLocale
+): boolean => {
+  if (doc.published === false) {
+    return false
+  }
+
+  if (doc.draft && !isDraftAllowed()) {
+    return false
+  }
+
+  const languageTags = getLanguageTags(doc.tags)
+
+  if (!languageTags.length) {
+    return true
+  }
+
+  return languageTags.includes(locale)
+}
 
 const sortDocs = (docs: DocsDoc[]) =>
   [...docs].sort((a, b) => {
@@ -315,9 +353,11 @@ export const useDocsContent = () => {
 
   const getDocByPath = async ({
     path,
+    locale,
     fields,
   }: {
     path: string
+    locale?: DocsLocale
     fields?: string[]
   }) => {
     if (!isAllowedPath(path)) {
@@ -334,11 +374,14 @@ export const useDocsContent = () => {
       return null
     }
 
-    if (doc.draft && !isDraftAllowed()) {
+    const normalizedDoc = buildNormalizedDoc(doc)
+    const docLocale = normalizeDocsLocale(locale ?? getDocPathInfo(path).locale)
+
+    if (!isDocVisibleForLocale(normalizedDoc, docLocale)) {
       return null
     }
 
-    return buildNormalizedDoc(doc)
+    return normalizedDoc
   }
 
   const listDocs = async ({
@@ -355,7 +398,11 @@ export const useDocsContent = () => {
       .where('path', 'LIKE', `${prefix}%`)
       .all()) as DocsDoc[]
 
-    return sortDocs(filterDrafts(docs)).map(buildNormalizedDoc)
+    return sortDocs(
+      docs
+        .map(buildNormalizedDoc)
+        .filter(doc => isDocVisibleForLocale(doc, resolvedLocale))
+    )
   }
 
   const getNavigationTree = async ({

@@ -1,11 +1,13 @@
 ---
 title: "Vue d’ensemble de l’Impact Score"
 description: "Comprenez comment l’Impact Score combine données vérifiées, pondérations IA et méthodologie transparente."
-tags: ["impact-score", "methodologie", "overview"]
+tags: ["language:fr", "impact-score", "methodologie", "overview"]
 icon: "mdi-compass-rose"
 weight: 10
 updatedAt: "2026-02-12"
 draft: false
+
+type: "guide"
 ---
 
 # Vue d’ensemble de l’Impact Score

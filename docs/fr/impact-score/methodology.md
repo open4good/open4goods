@@ -1,11 +1,13 @@
 ---
 title: "Méthodologie de l’Impact Score"
 description: "Une vue structurée des critères, pondérations et principes statistiques qui fondent l’Impact Score."
-tags: ["impact-score", "methodologie", "scoring"]
+tags: ["language:fr", "impact-score", "methodologie", "scoring"]
 icon: "mdi-flask-outline"
 weight: 20
 updatedAt: "2026-02-12"
 draft: false
+
+type: "guide"
 ---
 
 # Méthodologie de l’Impact Score
