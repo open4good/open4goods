@@ -1,11 +1,13 @@
 ---
 title: "NudgerCard : cartes à coins modulaires"
 description: "Guide d’utilisation du composant NudgerCard pour mutualiser les styles de cartes à coins arrondis."
-tags: ["frontend", "ui", "cartes"]
+tags: ["language:fr", "frontend", "ui", "cartes"]
 icon: "mdi-card-bulleted-outline"
 weight: 20
 updatedAt: "2026-02-10"
 draft: false
+
+type: "guide"
 ---
 
 # NudgerCard : guide d’usage

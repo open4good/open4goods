@@ -188,7 +188,7 @@ const {
   error,
 } = await useAsyncData(
   () => `docs-page:${resolvedPath.value}`,
-  () => getDocByPath({ path: resolvedPath.value }),
+  () => getDocByPath({ path: resolvedPath.value, locale: resolvedLocale.value }),
   { watch: [resolvedPath] }
 )
 
@@ -293,6 +293,7 @@ const { data: translations } = await useAsyncData(
 
         const exists = await getDocByPath({
           path: localizedPath,
+          locale,
           fields: ['path'],
         })
 

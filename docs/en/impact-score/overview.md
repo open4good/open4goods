@@ -1,11 +1,13 @@
 ---
 title: "Impact Score overview"
 description: "Discover how the Impact Score combines verified data, AI weighting, and transparent methodology to explain environmental impact."
-tags: ["impact-score", "methodology", "overview"]
+tags: ["language:en", "impact-score", "methodology", "overview"]
 icon: "mdi-compass-rose"
 weight: 10
 updatedAt: "2026-02-12"
 draft: false
+
+type: "guide"
 ---
 
 # Impact Score overview

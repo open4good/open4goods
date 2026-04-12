@@ -1,11 +1,13 @@
 ---
 title: "Accueil documentation"
 description: "Point d’entrée rapide vers la documentation Nudger, avec des exemples Impact Score et des astuces de navigation."
-tags: ["docs", "overview"]
+tags: ["language:fr", "docs", "overview"]
 icon: "mdi-book-open-page-variant"
 weight: 1
 updatedAt: "2026-02-10"
 draft: false
+
+type: "guide"
 ---
 
 # Accueil documentation

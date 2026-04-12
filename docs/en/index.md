@@ -1,11 +1,13 @@
 ---
 title: "Documentation home"
 description: "Quick entry point to the Nudger documentation stack, with Impact Score examples and navigation tips."
-tags: ["docs", "overview"]
+tags: ["language:en", "docs", "overview"]
 icon: "mdi-book-open-page-variant"
 weight: 1
 updatedAt: "2026-02-10"
 draft: false
+
+type: "guide"
 ---
 
 # Documentation home

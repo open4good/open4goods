@@ -1,11 +1,13 @@
 ---
 title: "Impact Score data sources"
 description: "Inventory of the main data sources and validation rules used in Impact Score calculations."
-tags: ["impact-score", "data", "sources"]
+tags: ["language:en", "impact-score", "data", "sources"]
 icon: "mdi-database-search-outline"
 weight: 30
 updatedAt: "2026-02-12"
 draft: false
+
+type: "guide"
 ---
 
 # Impact Score data sources
