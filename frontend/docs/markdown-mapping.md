@@ -52,3 +52,22 @@ Sample mapped pages are available at:
 - `/docs/fr/guides/markdown-mapping-sample`
 
 They demonstrate the required `language:*` tag contract.
+
+
+## Embedded product widgets
+
+Markdown pages can directly use the `ProductEmbed` Vue component.
+
+Supported identifiers:
+- `gtin`
+- `brand` + `model`
+
+Default rendering is a text link (`style="text"`) with `size="m"`.
+If `brand` + `model` resolves to multiple products, no link is rendered (conservative fallback).
+
+Example:
+
+```vue
+<ProductEmbed gtin="8806092074061" />
+<ProductEmbed brand="Samsung" model="QE55QN90A" size="s" />
+```
