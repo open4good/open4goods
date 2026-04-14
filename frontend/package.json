@@ -98,7 +98,7 @@
     "eslint-plugin-vue": "^10.4.0",
     "happy-dom": "^20.0.0",
     "husky": "^9.1.7",
-    "nuxt-site-config": "^3.2.14",
+    "nuxt-site-config": "^4.0.0",
     "prettier": "^3.6.2",
     "resize-observer-polyfill": "^1.5.1",
     "sass": "^1.92.1",
