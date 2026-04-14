@@ -18,22 +18,20 @@
         :key="category.id"
         class="category-badges-row__item"
       >
-        <v-hover>
-          <template #default="{ isHovering, props: hoverProps }"
-            ><v-chip
-              v-bind="hoverProps"
-              :to="getCategoryUrl(category)"
-              variant="elevated"
-              color="surface"
-              size="small"
-              rounded="pill"
-              class="category-badges-row__chip text-secondary"
-              :elevation="isHovering ? 24 : 1"
-            >
-              <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
-              {{ category.verticalHomeTitle ?? category.id }}
-            </v-chip></template
+        <v-hover v-slot="{ isHovering, props: hoverProps }">
+          <v-chip
+            v-bind="hoverProps"
+            :to="getCategoryUrl(category)"
+            variant="elevated"
+            color="surface"
+            size="small"
+            rounded="pill"
+            class="category-badges-row__chip text-secondary"
+            :elevation="isHovering ? 24 : 1"
           >
+            <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
+            {{ category.verticalHomeTitle ?? category.id }}
+          </v-chip>
         </v-hover>
       </div>
     </div>
@@ -51,22 +49,20 @@
     </v-btn>
 
     <div class="category-badges-row__item">
-      <v-hover>
-        <template #default="{ isHovering, props: hoverProps }"
-          ><v-chip
-            v-bind="hoverProps"
-            :to="categoriesUrl"
-            variant="elevated"
-            color="surface"
-            size="small"
-            rounded="pill"
-            class="category-badges-row__chip text-neutral-secondary"
-            :elevation="isHovering ? 24 : 1"
-          >
-            <v-icon icon="mdi-view-grid-outline" start size="16" />
-            {{ t('home.hero.categoryBadges.viewAll') }}
-          </v-chip></template
+      <v-hover v-slot="{ isHovering, props: hoverProps }">
+        <v-chip
+          v-bind="hoverProps"
+          :to="categoriesUrl"
+          variant="elevated"
+          color="surface"
+          size="small"
+          rounded="pill"
+          class="category-badges-row__chip text-neutral-secondary"
+          :elevation="isHovering ? 24 : 1"
         >
+          <v-icon icon="mdi-view-grid-outline" start size="16" />
+          {{ t('home.hero.categoryBadges.viewAll') }}
+        </v-chip>
       </v-hover>
     </div>
   </div>

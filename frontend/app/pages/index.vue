@@ -254,14 +254,6 @@ const parallaxBackgrounds = computed<
   )
 )
 
-console.log(
-  'parallaxConfig type:',
-  typeof parallaxConfig,
-  'isRef:',
-  isRef(parallaxConfig)
-)
-console.log('parallaxConfig.value:', parallaxConfig.value)
-console.log('parallaxBackgrounds.value:', parallaxBackgrounds.value)
 const themeName = computed(() =>
   resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
 )

@@ -442,6 +442,7 @@ export default defineNuxtConfig({
         : []),
     ],
     build: {
+      cssMinify: 'lightningcss',
       chunkSizeWarningLimit: 3000,
       rollupOptions: {
         output: {

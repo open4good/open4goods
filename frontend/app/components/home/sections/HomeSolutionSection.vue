@@ -56,7 +56,7 @@ const unlockImageTilt = () => {
           <v-row
             class="home-solution__list home-reveal-group"
             :class="{ 'is-ready': true, 'is-visible': isVisible }"
-            dense
+            density="comfortable"
             align="stretch"
           >
             <v-col
