@@ -161,7 +161,8 @@ public class ProductRepository {
 
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
+		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close)
 				.map(SearchHit::getContent);
 
 	}
@@ -175,9 +176,9 @@ public class ProductRepository {
             Query query = Query.findAll();
             query.setPageable(EXPORT_STREAM_PAGE); // Fetch larger batches
             // Stream sequentially to avoid parallel overhead
-            return elasticsearchOperations
-                    .searchForStream(query, Product.class, CURRENT_INDEX)
-                    .stream()
+            var iterator = elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX);
+            return iterator.stream().onClose(iterator::close)
                     .map(SearchHit::getContent);
         }
 
@@ -190,9 +191,9 @@ public class ProductRepository {
         public Stream<Product> exportAll(int pageSize) {
             Query query = Query.findAll();
             query.setPageable(PageRequest.of(0, pageSize));
-            return elasticsearchOperations
-                    .searchForStream(query, Product.class, CURRENT_INDEX)
-                    .stream()
+            var iterator = elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX);
+            return iterator.stream().onClose(iterator::close)
                     .map(SearchHit::getContent);
         }
 
@@ -233,7 +234,8 @@ public class ProductRepository {
 
 	    initialQuery.setPageable(PageRequest.of(0, 1000));
 
-	    return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
+	    var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
+	    return iterator.stream().onClose(iterator::close)
 	            .map(SearchHit::getContent);
 	}
 
@@ -246,7 +248,8 @@ public class ProductRepository {
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
 
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
+		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close)
 				.map(SearchHit::getContent);
 	}
 
@@ -268,7 +271,8 @@ public class ProductRepository {
                 		.withPageable(EXPORT_STREAM_PAGE)
                 		.build();
 
-                return elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX).stream()
+                var iterator = elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX);
+                return iterator.stream().onClose(iterator::close)
                                 .map(SearchHit::getContent);
         }
 
@@ -344,7 +348,8 @@ public class ProductRepository {
 
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
+		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close)
 				.map(SearchHit::getContent);
 	}
 
@@ -368,7 +373,8 @@ public class ProductRepository {
 
 		final NativeQuery initialQuery = new NativeQueryBuilder()
 				.withQuery(new CriteriaQuery(c)).build();
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream()
+		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close)
 				.map(SearchHit::getContent);
 	}
 
@@ -397,7 +403,8 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream().map(SearchHit::getContent);
+		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close).map(SearchHit::getContent);
 	}
 
 
@@ -449,9 +456,9 @@ public class ProductRepository {
 	    NativeQuery query = queryBuilder.build();
 
 	    try {
-	        return elasticsearchOperations
-	            .searchForStream(query, Product.class, CURRENT_INDEX)
-	            .stream()
+	        var iterator = elasticsearchOperations
+	            .searchForStream(query, Product.class, CURRENT_INDEX);
+	        return iterator.stream().onClose(iterator::close)
 	            .map(SearchHit::getContent);
 	    } catch (Exception e) {
 	        elasticLog(e);
@@ -482,7 +489,8 @@ public class ProductRepository {
 
 		NativeQuery initialQuery = initialQueryBuilder.build();
 
-		return elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX).stream().map(SearchHit::getContent);
+		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close).map(SearchHit::getContent);
 
 	}
 
@@ -541,9 +549,9 @@ public class ProductRepository {
         NativeQuery query = queryBuilder.build();
 
         try {
-            return elasticsearchOperations
-                    .searchForStream(query, Product.class, CURRENT_INDEX)
-                    .stream()
+            var iterator = elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX);
+            return iterator.stream().onClose(iterator::close)
                     .map(SearchHit::getContent);
         } catch (Exception e) {
             elasticLog(e);
@@ -608,9 +616,9 @@ public class ProductRepository {
         NativeQuery query = queryBuilder.build();
 
         try {
-            return elasticsearchOperations
-                    .searchForStream(query, Product.class, CURRENT_INDEX)
-                    .stream()
+            var iterator = elasticsearchOperations
+                    .searchForStream(query, Product.class, CURRENT_INDEX);
+            return iterator.stream().onClose(iterator::close)
                     .map(SearchHit::getContent);
         } catch (Exception e) {
             elasticLog(e);
@@ -1357,8 +1365,9 @@ public class ProductRepository {
 
 		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
 
-		return getElasticsearchOperations()
-				.searchForStream(initialQuery, Product.class, ProductRepository.CURRENT_INDEX).stream()
+		var iterator = getElasticsearchOperations()
+				.searchForStream(initialQuery, Product.class, ProductRepository.CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close)
 				.map(SearchHit::getContent);
 				// We have all categories matching, refine here to match the standard agg behaviour
 //				.filter(e -> {
