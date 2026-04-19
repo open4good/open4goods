@@ -120,7 +120,9 @@ public class BatchService {
 		logger.info("Loading products in memory for vertical {}", vertical);
 
 		// We take all products that are typed with the given vertical
-		allProducts = 	dataRepository.getProductsMatchingVerticalId(vertical).collect(Collectors.toSet());
+		try (java.util.stream.Stream<Product> stream = dataRepository.getProductsMatchingVerticalId(vertical)) {
+			allProducts = stream.collect(Collectors.toSet());
+		}
 
 		logger.info("Sanitisation of {} products", allProducts);
 
@@ -313,25 +315,27 @@ public class BatchService {
 
 
 		AtomicInteger counter = new AtomicInteger();
-		dataRepository.exportAll().forEach(p -> {
-			int i = counter.incrementAndGet();
-			if (i % 1000 == 0) {
-				logger.warn("Batched items : {}", i);
-			}
-			String textVersion = null;
-			try {
-				textVersion = serialisationService.toJson(p);
-				if (textVersion.contains("openfoodfacts")) {
-					logger.error("Will remove {}", p);
-					dataRepository.delete(p);
+		try (java.util.stream.Stream<Product> stream = dataRepository.exportAll()) {
+			stream.forEach(p -> {
+				int i = counter.incrementAndGet();
+				if (i % 1000 == 0) {
+					logger.warn("Batched items : {}", i);
+				}
+				String textVersion = null;
+				try {
+					textVersion = serialisationService.toJson(p);
+					if (textVersion.contains("openfoodfacts")) {
+						logger.error("Will remove {}", p);
+						dataRepository.delete(p);
+					}
+
+
+				} catch (SerialisationException e) {
+					e.printStackTrace();
 				}
 
-
-			} catch (SerialisationException e) {
-				e.printStackTrace();
-			}
-
-		});
+			});
+		}
 
 
 	}
@@ -351,8 +355,9 @@ public class BatchService {
 	 */
 	public void cleanAiData(VerticalConfig vertical) {
 		logger.info("Cleaning AI data for vertical {}", vertical);
-		dataRepository.getProductsMatchingVerticalId(vertical).forEach(p -> {
-			boolean changed = false;
+		try (java.util.stream.Stream<Product> stream = dataRepository.getProductsMatchingVerticalId(vertical)) {
+			stream.forEach(p -> {
+				boolean changed = false;
 
 			// 1. Reset/Delete aireview field
 			if (p.getReviews() != null && !p.getReviews().isEmpty()) {
@@ -400,6 +405,7 @@ public class BatchService {
 				dataRepository.index(p);
 			}
 		});
+		}
 	}
 
 	private Double parseNumericOrNull(String rawValue) {

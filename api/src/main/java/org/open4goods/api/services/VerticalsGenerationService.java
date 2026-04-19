@@ -196,9 +196,11 @@ public class VerticalsGenerationService {
 		VerticalAttributesStats ret = new VerticalAttributesStats() ;
 		if (null != vc) {
 			LOGGER.info("Attributes stats for vertical {} is running",vertical);
-			repository.exportVerticalWithValidDate(vc, true).forEach(p -> {
-				ret.process(p.getAttributes().getAll());
-			});
+			try (java.util.stream.Stream<Product> stream = repository.exportVerticalWithValidDate(vc, true)) {
+				stream.forEach(p -> {
+					ret.process(p.getAttributes().getAll());
+				});
+			}
 
 			// Cleaning the values
 			ret.clean();
@@ -270,9 +272,12 @@ public class VerticalsGenerationService {
 	public String generateMapping(VerticalConfig vc, Integer minOfferscount) {
 
 		// Exporting products
-		List<String> items =  repository.exportVerticalWithOffersCountGreater(vc, minOfferscount)
-				.map(e->e.gtin())
-				.toList();
+		List<String> items;
+		try (java.util.stream.Stream<Product> stream = repository.exportVerticalWithOffersCountGreater(vc, minOfferscount)) {
+			items = stream
+					.map(e->e.gtin())
+					.toList();
+		}
 
 		return generateCategoryMappingFragmentForGtin(items,vc.getGenerationExcludedFromCategoriesMatching());
 	}
