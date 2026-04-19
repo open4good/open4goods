@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">85.71% </span>
+                <span class="strong">85.5% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>120/140</span>
+                <span class='fraction'>118/138</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">85.71% </span>
+                <span class="strong">85.5% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>120/140</span>
+                <span class='fraction'>118/138</span>
             </div>
         
             
@@ -318,11 +318,7 @@
 <a name='L253'></a><a href='#L253'>253</a>
 <a name='L254'></a><a href='#L254'>254</a>
 <a name='L255'></a><a href='#L255'>255</a>
-<a name='L256'></a><a href='#L256'>256</a>
-<a name='L257'></a><a href='#L257'>257</a>
-<a name='L258'></a><a href='#L258'>258</a>
-<a name='L259'></a><a href='#L259'>259</a>
-<a name='L260'></a><a href='#L260'>260</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L256'></a><a href='#L256'>256</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -342,7 +338,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -357,7 +352,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -374,7 +368,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -390,7 +383,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -601,22 +593,20 @@
         :key="category.id"
         class="category-badges-row__item"
       &gt;
-        &lt;v-hover&gt;
-          &lt;template #default="{ isHovering, props: hoverProps }"
-            &gt;&lt;v-chip
-              v-bind="hoverProps"
-              :to="getCategoryUrl(category)"
-              variant="elevated"
-              color="surface"
-              size="small"
-              rounded="pill"
-              class="category-badges-row__chip text-secondary"
-              :elevation="<span class="branch-0 cbranch-no" title="branch not covered" >isHovering ? 24 : 1"</span>
-            &gt;
-              &lt;v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" /&gt;
-              {{ category.<span class="branch-0 cbranch-no" title="branch not covered" >verticalHomeTitle ?? category.id </span>}}
-            &lt;/v-chip&gt;&lt;/template
+        &lt;v-hover v-slot="{ isHovering, props: hoverProps }"&gt;
+          &lt;v-chip
+            v-bind="hoverProps"
+            :to="getCategoryUrl(category)"
+            variant="elevated"
+            color="surface"
+            size="small"
+            rounded="pill"
+            class="category-badges-row__chip text-secondary"
+            :elevation="<span class="branch-0 cbranch-no" title="branch not covered" >isHovering ? 24 : 1"</span>
           &gt;
+            &lt;v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" /&gt;
+            {{ category.<span class="branch-0 cbranch-no" title="branch not covered" >verticalHomeTitle ?? category.id </span>}}
+          &lt;/v-chip&gt;
         &lt;/v-hover&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -634,22 +624,20 @@
     &lt;/v-btn&gt;
 &nbsp;
     &lt;div class="category-badges-row__item"&gt;
-      &lt;v-hover&gt;
-        &lt;template #default="{ isHovering, props: hoverProps }"
-          &gt;&lt;v-chip
-            v-bind="hoverProps"
-            :to="categoriesUrl"
-            variant="elevated"
-            color="surface"
-            size="small"
-            rounded="pill"
-            class="category-badges-row__chip text-neutral-secondary"
-            :elevation="<span class="branch-0 cbranch-no" title="branch not covered" >isHovering ? 24 : 1"</span>
-          &gt;
-            &lt;v-icon icon="mdi-view-grid-outline" start size="16" /&gt;
-            {{ t('home.hero.categoryBadges.viewAll') }}
-          &lt;/v-chip&gt;&lt;/template
+      &lt;v-hover v-slot="{ isHovering, props: hoverProps }"&gt;
+        &lt;v-chip
+          v-bind="hoverProps"
+          :to="categoriesUrl"
+          variant="elevated"
+          color="surface"
+          size="small"
+          rounded="pill"
+          class="category-badges-row__chip text-neutral-secondary"
+          :elevation="<span class="branch-0 cbranch-no" title="branch not covered" >isHovering ? 24 : 1"</span>
         &gt;
+          &lt;v-icon icon="mdi-view-grid-outline" start size="16" /&gt;
+          {{ t('home.hero.categoryBadges.viewAll') }}
+        &lt;/v-chip&gt;
       &lt;/v-hover&gt;
     &lt;/div&gt;
   &lt;/div&gt;
@@ -847,7 +835,7 @@ watch(displayedCategories, () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-10T07:11:18.677Z
+                at 2026-04-19T14:57:32.313Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

@@ -941,7 +941,7 @@
               <comment>(p3,conf) : schedule from conf</comment>
             </comment>
             <comment>
-              <lineNumber>306</lineNumber>
+              <lineNumber>308</lineNumber>
               <comment>(p3,design) : remove</comment>
             </comment>
           </comments>
@@ -1153,39 +1153,39 @@
               <comment>(p3,perf) : Virtual threads, but ko with visualVM profiling</comment>
             </comment>
             <comment>
-              <lineNumber>207</lineNumber>
+              <lineNumber>208</lineNumber>
               <comment>Should throw</comment>
             </comment>
             <comment>
-              <lineNumber>290</lineNumber>
+              <lineNumber>294</lineNumber>
               <comment>(P2,design) : in a stat service</comment>
             </comment>
             <comment>
-              <lineNumber>310</lineNumber>
+              <lineNumber>314</lineNumber>
               <comment>(p2, conf) : threshold from conf</comment>
             </comment>
             <comment>
-              <lineNumber>953</lineNumber>
+              <lineNumber>961</lineNumber>
               <comment>(P1,perf) : Heavy cache</comment>
             </comment>
             <comment>
-              <lineNumber>1183</lineNumber>
+              <lineNumber>1191</lineNumber>
               <comment>Does not works because fiels is not indexed in product mapping (    "reviews": { "type": "object", "enabled": false }, How to proceed ?</comment>
             </comment>
             <comment>
-              <lineNumber>1195</lineNumber>
+              <lineNumber>1203</lineNumber>
               <comment>Handle i18n</comment>
             </comment>
             <comment>
-              <lineNumber>1198</lineNumber>
+              <lineNumber>1206</lineNumber>
               <comment>Weak, relying on baseline...</comment>
             </comment>
             <comment>
-              <lineNumber>1318</lineNumber>
+              <lineNumber>1326</lineNumber>
               <comment>(p3,safety) : this cast should be avoided</comment>
             </comment>
             <comment>
-              <lineNumber>1344</lineNumber>
+              <lineNumber>1352</lineNumber>
               <comment>Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....</comment>
             </comment>
           </comments>
@@ -1601,7 +1601,7 @@
         <file name="org.open4goods.api.services.VerticalsGenerationService" count="1">
           <comments>
             <comment>
-              <lineNumber>742</lineNumber>
+              <lineNumber>747</lineNumber>
               <comment>(conf,p2) : numberofsamples from conf</comment>
             </comment>
           </comments>
