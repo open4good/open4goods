@@ -491,7 +491,8 @@ export default defineNuxtConfig({
   // These can be overridden via a .env file
   runtimeConfig: {
     // Shared token for server-to-server authentication (server-only)
-    machineToken: process.env.MACHINE_TOKEN || 'CHANGE_ME_SHARED_TOKEN',
+    // NUXT_MACHINE_TOKEN is the canonical path on prod, but we keep MACHINE_TOKEN as fallback
+    machineToken: process.env.NUXT_MACHINE_TOKEN || process.env.MACHINE_TOKEN || 'CHANGE_ME_SHARED_TOKEN',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {

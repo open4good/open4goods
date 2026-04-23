@@ -306,7 +306,6 @@ jobs:
         run: pnpm build
         env:
           API_URL: ${{ secrets.API_URL }}
-          MACHINE_TOKEN: ${{ secrets.MACHINE_TOKEN }}
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
           APP_ENV: production
 
