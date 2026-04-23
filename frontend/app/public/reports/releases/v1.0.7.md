@@ -1,12 +1,12 @@
 ## 🥳 Welcome to **v1.0.7**
 
-This release covers **3 day(s)** of work, from **2026-04-19T14:52:02.000Z** to **2026-04-23T05:19:24.000Z**.
+This release covers **3 day(s)** of work, from **2026-04-19T14:52:02.000Z** to **2026-04-23T07:14:08.000Z**.
 
 ### 📦 Stats
 - Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.6...v1.0.7)
-- Changed files: **13**
-- Commits: **15**
-- Additions: **807** / Deletions: **1001**
+- Changed files: **16**
+- Commits: **18**
+- Additions: **815** / Deletions: **1026**
 
 ---
 

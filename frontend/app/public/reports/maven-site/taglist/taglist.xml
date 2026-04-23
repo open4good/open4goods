@@ -1466,18 +1466,6 @@
             </comment>
           </comments>
         </file>
-        <file name="org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService" count="2">
-          <comments>
-            <comment>
-              <lineNumber>149</lineNumber>
-              <comment>Disabling google taxonomy for now</comment>
-            </comment>
-            <comment>
-              <lineNumber>193</lineNumber>
-              <comment>The language (should not be needed), will bug when other languages</comment>
-            </comment>
-          </comments>
-        </file>
         <file name="org.open4goods.api.services.backup.BackupService" count="5">
           <comments>
             <comment>
@@ -1499,6 +1487,18 @@
             <comment>
               <lineNumber>551</lineNumber>
               <comment>Check count</comment>
+            </comment>
+          </comments>
+        </file>
+        <file name="org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService" count="2">
+          <comments>
+            <comment>
+              <lineNumber>149</lineNumber>
+              <comment>Disabling google taxonomy for now</comment>
+            </comment>
+            <comment>
+              <lineNumber>193</lineNumber>
+              <comment>The language (should not be needed), will bug when other languages</comment>
             </comment>
           </comments>
         </file>
