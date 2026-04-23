@@ -28,7 +28,7 @@ importers:
         version: 11.3.2(vue@3.5.32(typescript@6.0.3))
       vuetify:
         specifier: ^4.0.0
-        version: 4.0.5(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3))
+        version: 4.0.6(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3))
       vuetify-nuxt-module:
         specifier: ^0.19.0
         version: 0.19.5(magicast@0.5.2)(typescript@6.0.3)(vite@7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))
@@ -5495,8 +5495,8 @@ packages:
   vuetify-nuxt-module@0.19.5:
     resolution: {integrity: sha512-B4SgLFqNlxaF/PZacxy+Wdy09G33E/aZXAPjNbFIblT7JOs07+VuNPrGUQuAzKwiGmU30xgkm5PL9opNpVcXTg==}
 
-  vuetify@4.0.5:
-    resolution: {integrity: sha512-pFysKOHuY3dROTVh9PdlhVz50ZR0E5/goY5ecTXc8F8tajUA2ee3xZ8Lqs1WtEw/X3w93wx/LogyjgaQCAL/Ig==}
+  vuetify@4.0.6:
+    resolution: {integrity: sha512-a4kasYa3SuFI5IOG/0Fx04M4TWeef5mCdTTKFlaxt86oz16RMQ/DJ3BynlOnIdUODt7NxYIkdLYud070/vVEUQ==}
     peerDependencies:
       typescript: '>=4.7'
       vite-plugin-vuetify: '>=2.1.0'
@@ -7741,11 +7741,11 @@ snapshots:
 
   '@vue/shared@3.5.32': {}
 
-  '@vuetify/loader-shared@2.1.2(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.5)':
+  '@vuetify/loader-shared@2.1.2(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.6)':
     dependencies:
       upath: 2.0.1
       vue: 3.5.32(typescript@6.0.3)
-      vuetify: 4.0.5(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3))
+      vuetify: 4.0.6(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3))
 
   '@webcontainer/env@1.1.1': {}
 
@@ -11621,14 +11621,14 @@ snapshots:
       vite: 7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
       vue: 3.5.32(typescript@6.0.3)
 
-  vite-plugin-vuetify@2.1.3(vite@7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.5):
+  vite-plugin-vuetify@2.1.3(vite@7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.6):
     dependencies:
-      '@vuetify/loader-shared': 2.1.2(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.5)
+      '@vuetify/loader-shared': 2.1.2(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.6)
       debug: 4.4.3
       upath: 2.0.1
       vite: 7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
       vue: 3.5.32(typescript@6.0.3)
-      vuetify: 4.0.5(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3))
+      vuetify: 4.0.6(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3))
     transitivePeerDependencies:
       - supports-color
 
@@ -11778,8 +11778,8 @@ snapshots:
       ufo: 1.6.3
       unconfig: 0.6.1
       upath: 2.0.1
-      vite-plugin-vuetify: 2.1.3(vite@7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.5)
-      vuetify: 4.0.5(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3))
+      vite-plugin-vuetify: 2.1.3(vite@7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.6)
+      vuetify: 4.0.6(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3))
     transitivePeerDependencies:
       - magicast
       - supports-color
@@ -11788,12 +11788,12 @@ snapshots:
       - vue
       - webpack-plugin-vuetify
 
-  vuetify@4.0.5(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3)):
+  vuetify@4.0.6(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.32(typescript@6.0.3)):
     dependencies:
       vue: 3.5.32(typescript@6.0.3)
     optionalDependencies:
       typescript: 6.0.3
-      vite-plugin-vuetify: 2.1.3(vite@7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.5)
+      vite-plugin-vuetify: 2.1.3(vite@7.3.1(jiti@2.6.1)(sass@1.99.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))(vuetify@4.0.6)
 
   web-namespaces@2.0.1: {}
 
