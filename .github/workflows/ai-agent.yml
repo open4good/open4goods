@@ -46,7 +46,7 @@ jobs:
 
       - name: Prep (route + context)
         id: prep
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{ github.token }}
           script: |
@@ -203,7 +203,7 @@ jobs:
 
       - name: Add working label
         if: steps.prep.outputs.should_run == 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{ github.token }}
           script: |
@@ -248,7 +248,7 @@ jobs:
 
       - name: Apply result (comment + labels)
         if: steps.prep.outputs.should_run == 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{ github.token }}
           script: |
