@@ -9,7 +9,7 @@ overrides:
   tar: ^7.5.4
   lodash: ^4.17.23
   lodash-es: ^4.17.23
-  undici: ^7.0.0
+  undici: ^8.0.0
 
 importers:
 
@@ -10349,13 +10349,9 @@ packages:
   undici-types@7.24.5:
     resolution: {integrity: sha512-kNh333UBSbgK35OIW7FwJTr9tTfVIG51Fm1tSVT7m8foPHfDVjsb7OIee/q/rs3bB2aV/3qOPgG5mHNWl1odiA==}
 
-  undici@7.22.0:
-    resolution: {integrity: sha512-RqslV2Us5BrllB+JeiZnK4peryVTndy9Dnqq62S3yYRRTj0tFQCwEniUy2167skdGOy3vqRzEvl1Dm4sV2ReDg==}
-    engines: {node: '>=20.18.1'}
-
-  undici@7.25.0:
-    resolution: {integrity: sha512-xXnp4kTyor2Zq+J1FfPI6Eq3ew5h6Vl0F/8d9XU5zZQf1tX9s2Su1/3PiMmUANFULpmksxkClamIZcaUqryHsQ==}
-    engines: {node: '>=20.18.1'}
+  undici@8.1.0:
+    resolution: {integrity: sha512-E9MkTS4xXLnRPYqxH2e6Hr2/49e7WFDKczKcCaFH4VaZs2iNvHMqeIkyUAD9vM8kujy9TjVrRlQ5KkdEJxB2pw==}
+    engines: {node: '>=22.19.0'}
 
   unenv@2.0.0-rc.24:
     resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
@@ -11270,7 +11266,7 @@ snapshots:
   '@actions/http-client@4.0.0':
     dependencies:
       tunnel: 0.0.6
-      undici: 7.25.0
+      undici: 8.1.0
 
   '@actions/io@3.0.2': {}
 
@@ -15360,7 +15356,7 @@ snapshots:
       p-filter: 4.1.0
       semantic-release: 25.0.3(typescript@6.0.3)
       tinyglobby: 0.2.15
-      undici: 7.22.0
+      undici: 8.1.0
       url-join: 5.0.0
     transitivePeerDependencies:
       - supports-color
@@ -19380,7 +19376,7 @@ snapshots:
       saxes: 6.0.0
       symbol-tree: 3.2.4
       tough-cookie: 6.0.1
-      undici: 7.25.0
+      undici: 8.1.0
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
@@ -23068,9 +23064,7 @@ snapshots:
 
   undici-types@7.24.5: {}
 
-  undici@7.22.0: {}
-
-  undici@7.25.0: {}
+  undici@8.1.0: {}
 
   unenv@2.0.0-rc.24:
     dependencies:
