@@ -318,6 +318,16 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ---
 
+### rag-engine
+
+**Purpose**: Reusable retrieval-augmented generation engine for document ingestion, indexing, and query orchestration.
+
+**Key Responsibilities**:
+- Scan Markdown content from GitHub using configurable include rules and tags
+- Support pluggable provider contracts for chat, embeddings, and summaries
+- Support raw and annotated markdown indexing workflows with shared metadata contracts
+- Expose reusable Spring Boot auto-configuration for downstream services
+
 ### remotefilecaching
 
 **Purpose**: Remote file fetching and caching service.
