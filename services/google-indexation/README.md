@@ -29,3 +29,8 @@ The service records:
 A health indicator is exposed through Spring Boot Actuator. When disabled, the
 indicator reports `UP` with `enabled=false`. When enabled, it reports `DOWN` if
 credentials are missing or the last request failed.
+
+## Review-generation integration
+
+Use `GoogleIndexationService.submitUrl(...)` from asynchronous hooks/listeners.
+The method applies a short deduplication window (5 minutes) and a single immediate retry on failure.

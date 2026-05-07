@@ -11,6 +11,7 @@ via the batch API.
 - Realtime and batch review generation flows.
 - Scheduled processing of batch jobs.
 - Exposes health metrics.
+- Triggers Google URL indexation hook when review generation completes successfully.
 
 ## Configuration
 
