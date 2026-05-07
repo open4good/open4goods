@@ -81,6 +81,8 @@ public class VerticalsConfigService {
 
 	private Map<Integer, VerticalConfig> byTaxonomy = new HashMap<>();
 
+	private Map<Integer, VerticalConfig> byIcecatCategoryId = new HashMap<>();
+
 	private Map<String, AttributeConfig> attributeCatalog = new HashMap<>();
 
 	private ResourcePatternResolver resourceResolver;
@@ -140,6 +142,7 @@ public class VerticalsConfigService {
 		byUrl.clear();
 		toLang.clear();
 		byTaxonomy.clear();
+		byIcecatCategoryId.clear();
 
 		// Setting the default config
 		try {
@@ -198,6 +201,9 @@ public class VerticalsConfigService {
 			toLang.put(value.getVerticalHomeUrl(), key);
 			byUrl.put(value.getVerticalHomeUrl(), vc);
 			byTaxonomy.put(vc.getGoogleTaxonomyId(), vc);
+			if (vc.getIcecatTaxonomyId() != null) {
+				byIcecatCategoryId.put(vc.getIcecatTaxonomyId(), vc);
+			}
 		}));
 
 	}
@@ -819,12 +825,10 @@ public class VerticalsConfigService {
 	 * Return a config by it's icecat categoryId
 	 *
 	 * @param icecatCategoryId
-	 *                         TODO(p2,perf) : Maintain a map for key/val access
 	 * @return
 	 */
 	public VerticalConfig getByIcecatCategoryId(Integer icecatCategoryId) {
-		return configs.values().stream().filter(e -> icecatCategoryId.equals(e.getIcecatTaxonomyId())).findFirst()
-				.orElse(null);
+		return byIcecatCategoryId.get(icecatCategoryId);
 	}
 
 	/**

@@ -1,49 +1,33 @@
 package org.open4goods.icecat.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+/** Unit-of-measure definition from the Icecat catalog (e.g. kg, MHz, GB). */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatMeasure {
-	@JacksonXmlProperty(isAttribute = true)
-	private String ID;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Sign;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private Integer id;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Updated;
+    @JacksonXmlProperty(isAttribute = true, localName = "Sign")
+    private String sign;
 
-	@JacksonXmlProperty(localName = "Signs")
-	private IcecatSigns signs;
+    @JacksonXmlProperty(isAttribute = true, localName = "Updated")
+    private String updated;
 
-	public String getID() {
-		return ID;
-	}
+    @JacksonXmlProperty(localName = "Signs")
+    private IcecatSigns signs;
 
-	public void setID(String ID) {
-		this.ID = ID;
-	}
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-	public String getSign() {
-		return Sign;
-	}
+    public String getSign() { return sign; }
+    public void setSign(String sign) { this.sign = sign; }
 
-	public void setSign(String Sign) {
-		this.Sign = Sign;
-	}
+    public String getUpdated() { return updated; }
+    public void setUpdated(String updated) { this.updated = updated; }
 
-	public String getUpdated() {
-		return Updated;
-	}
-
-	public void setUpdated(String Updated) {
-		this.Updated = Updated;
-	}
-
-	public IcecatSigns getSigns() {
-		return signs;
-	}
-
-	public void setSigns(IcecatSigns signs) {
-		this.signs = signs;
-	}
+    public IcecatSigns getSigns() { return signs; }
+    public void setSigns(IcecatSigns signs) { this.signs = signs; }
 }

@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.config;
 
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
+import org.open4goods.icecat.services.IcecatFileDownloadService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
@@ -54,27 +55,31 @@ public class AppConfig {
     }
 
     @Bean
-    FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService,
+    IcecatFileDownloadService icecatFileDownloadService(RemoteFileCachingService fileCachingService,
             @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {
-        return new FeatureLoader(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(),
-                brandService);
+        return new IcecatFileDownloadService(fileCachingService, cacheProperties.getPath(), icecatFeatureConfig);
     }
 
     @Bean
-    CategoryLoader categoryLoader(RemoteFileCachingService fileCachingService,
+    FeatureLoader featureLoader(IcecatFileDownloadService icecatFileDownloadService, BrandService brandService,
+            @Autowired IcecatConfiguration icecatFeatureConfig) {
+        return new FeatureLoader(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService, brandService);
+    }
+
+    @Bean
+    CategoryLoader categoryLoader(IcecatFileDownloadService icecatFileDownloadService,
             VerticalsConfigService verticalConfigService, FeatureLoader featureLoader,
-            @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired CacheProperties cacheProperties) {
-        return new CategoryLoader(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(),
+            @Autowired IcecatConfiguration icecatFeatureConfig) {
+        return new CategoryLoader(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService,
                 verticalConfigService, featureLoader);
     }
 
     @Bean
-    IcecatService icecatFeatureService(@Autowired RemoteFileCachingService fileCachingService,
+    IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService,
             @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired FeatureLoader featureLoader,
-            @Autowired CategoryLoader categoryLoader, @Autowired CacheProperties cacheProperties) {
-        // NOTE : xmlMapper not injected because corruct the springdoc used one. Could
-        // use a @Primary derivation
-        return new IcecatService(new XmlMapper(), icecatFeatureConfig, fileCachingService, cacheProperties.getPath(),
+            @Autowired CategoryLoader categoryLoader) {
+        // NOTE: xmlMapper not injected because sharing the Spring-managed one corrupts springdoc.
+        return new IcecatService(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService,
                 featureLoader, categoryLoader);
     }
 

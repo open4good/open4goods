@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.api.services.AbstractCompletionService;
+import org.open4goods.commons.services.AbstractCompletionService;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.commons.exceptions.AggregationSkipException;

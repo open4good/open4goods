@@ -70,7 +70,7 @@ public class AttributeConfig {
 	/**
 	 * The icecat features id's this attribute is mapped to
 	 */
-	private Set<String> icecatFeaturesIds = new HashSet<String>();
+	private Set<Integer> icecatFeaturesIds = new HashSet<Integer>();
 
 	/**
 	 * The associated eprel features names.
@@ -484,11 +484,11 @@ public class AttributeConfig {
 	}
 
 
-	public Set<String> getIcecatFeaturesIds() {
+	public Set<Integer> getIcecatFeaturesIds() {
 		return icecatFeaturesIds;
 	}
 
-	public void setIcecatFeaturesIds(Set<String> icecatFeaturesIds) {
+	public void setIcecatFeaturesIds(Set<Integer> icecatFeaturesIds) {
 		this.icecatFeaturesIds = icecatFeaturesIds;
 	}
 

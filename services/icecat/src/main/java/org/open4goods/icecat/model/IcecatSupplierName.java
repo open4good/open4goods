@@ -1,74 +1,52 @@
 package org.open4goods.icecat.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 
+/** A localized supplier (brand) name entry from the Icecat catalog. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatSupplierName {
 
-    @JacksonXmlProperty(isAttribute = true)
-    private Integer ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private Integer id;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private Integer langid;
+    @JacksonXmlProperty(isAttribute = true, localName = "langid")
+    private Integer langId;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Value;
+    @JacksonXmlProperty(isAttribute = true, localName = "Value")
+    private String value;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Name;
+    @JacksonXmlProperty(isAttribute = true, localName = "Name")
+    private String name;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Updated;
+    @JacksonXmlProperty(isAttribute = true, localName = "Updated")
+    private String updated;
 
     @JacksonXmlText
     private String content;
 
-    // Getters et setters
-
-    public Integer getID() {
-        return ID;
-    }
-
-    public void setID(Integer ID) {
-        this.ID = ID;
-    }
-
-    public Integer getLangid() {
-        return langid;
-    }
-
-    public void setLangid(Integer langid) {
-        this.langid = langid;
-    }
-
-    public String getValue() {
-        return Value;
-    }
-
-    public void setValue(String value) {
-        Value = value;
-    }
-
-    public String getName() {
-        return Name;
-    }
-
-    public void setName(String name) {
-        Name = name;
-    }
-
-    public String getUpdated() {
-        return Updated;
-    }
-
-    public void setUpdated(String updated) {
-        Updated = updated;
-    }
-
-    public String getContent() {
+    public String getEffectiveName() {
+        if (name != null) return name;
+        if (value != null) return value;
         return content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public Integer getLangId() { return langId; }
+    public void setLangId(Integer langId) { this.langId = langId; }
+
+    public String getValue() { return value; }
+    public void setValue(String value) { this.value = value; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getUpdated() { return updated; }
+    public void setUpdated(String updated) { this.updated = updated; }
+
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
 }

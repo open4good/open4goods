@@ -1,50 +1,46 @@
 package org.open4goods.icecat.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 
+/** A localized unit-of-measure sign (e.g. "kg", "Go") from the Icecat catalog. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatSign {
-	@JacksonXmlProperty(isAttribute = true)
-	private String ID;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String langid;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private Integer id;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Updated;
+    @JacksonXmlProperty(isAttribute = true, localName = "langid")
+    private int langId;
 
-	@JacksonXmlText
-	private String value;
+    @JacksonXmlProperty(isAttribute = true, localName = "Value")
+    private String value;
 
-	public String getID() {
-		return ID;
-	}
+    @JacksonXmlProperty(isAttribute = true, localName = "Updated")
+    private String updated;
 
-	public void setID(String ID) {
-		this.ID = ID;
-	}
+    /** Sign text carried as element text content (alternative to Value attribute). */
+    @JacksonXmlText
+    private String textValue;
 
-	public String getLangid() {
-		return langid;
-	}
+    /** Returns the effective sign symbol regardless of which Icecat XML representation is used. */
+    public String getEffectiveSign() {
+        return value != null ? value : textValue;
+    }
 
-	public void setLangid(String langid) {
-		this.langid = langid;
-	}
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-	public String getUpdated() {
-		return Updated;
-	}
+    public int getLangId() { return langId; }
+    public void setLangId(int langId) { this.langId = langId; }
 
-	public void setUpdated(String Updated) {
-		this.Updated = Updated;
-	}
+    public String getValue() { return value; }
+    public void setValue(String value) { this.value = value; }
 
-	public String getValue() {
-		return value;
-	}
+    public String getUpdated() { return updated; }
+    public void setUpdated(String updated) { this.updated = updated; }
 
-	public void setValue(String value) {
-		this.value = value;
-	}
+    public String getTextValue() { return textValue; }
+    public void setTextValue(String textValue) { this.textValue = textValue; }
 }

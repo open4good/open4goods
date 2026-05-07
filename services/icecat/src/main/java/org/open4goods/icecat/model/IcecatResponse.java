@@ -1,107 +1,70 @@
 package org.open4goods.icecat.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+/**
+ * The {@code <Response>} element wrapping all Icecat bulk XML data exports.
+ * Different files populate different child elements; unused elements are null.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatResponse {
-	@JacksonXmlProperty(isAttribute = true)
-	private String Date;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "Date")
+    private String date;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Request_ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private String id;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Status;
+    @JacksonXmlProperty(isAttribute = true, localName = "Request_ID")
+    private String requestId;
 
-	@JacksonXmlProperty(localName = "FeaturesList")
-	private IcecatFeaturesList featuresList;
+    @JacksonXmlProperty(isAttribute = true, localName = "Status")
+    private String status;
 
-	@JacksonXmlProperty(localName = "SuppliersList")
-	private IcecatSuppliersList suppliersList;
-	
-    @JacksonXmlProperty(localName = "CategoryFeaturesList")
-    private CategoryFeaturesList categoryFeaturesList;
- 
-    @JacksonXmlProperty(localName = "CategoriesList")
-    private IcecatCategoriesList categoryList;
-    
+    @JacksonXmlProperty(localName = "FeaturesList")
+    private IcecatFeaturesList featuresList;
+
     @JacksonXmlProperty(localName = "FeatureGroupsList")
     private IcecatFeatureGroupsList featureGroupsList;
-    
-    
-	public String getDate() {
-		return Date;
-	}
 
-	public void setDate(String Date) {
-		this.Date = Date;
-	}
+    @JacksonXmlProperty(localName = "SuppliersList")
+    private IcecatSuppliersList suppliersList;
 
-	public String getID() {
-		return ID;
-	}
+    @JacksonXmlProperty(localName = "CategoriesList")
+    private IcecatCategoriesList categoryList;
 
-	public void setID(String ID) {
-		this.ID = ID;
-	}
+    @JacksonXmlProperty(localName = "CategoryFeaturesList")
+    private CategoryFeaturesList categoryFeaturesList;
 
-	public String getRequest_ID() {
-		return Request_ID;
-	}
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
 
-	public void setRequest_ID(String Request_ID) {
-		this.Request_ID = Request_ID;
-	}
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-	public String getStatus() {
-		return Status;
-	}
+    public String getRequestId() { return requestId; }
+    public void setRequestId(String requestId) { this.requestId = requestId; }
 
-	public void setStatus(String Status) {
-		this.Status = Status;
-	}
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-	public IcecatFeaturesList getFeaturesList() {
-		return featuresList;
-	}
+    public IcecatFeaturesList getFeaturesList() { return featuresList; }
+    public void setFeaturesList(IcecatFeaturesList featuresList) { this.featuresList = featuresList; }
 
-	public void setFeaturesList(IcecatFeaturesList featuresList) {
-		this.featuresList = featuresList;
-	}
+    public IcecatFeatureGroupsList getFeatureGroupsList() { return featureGroupsList; }
+    public void setFeatureGroupsList(IcecatFeatureGroupsList featureGroupsList) {
+        this.featureGroupsList = featureGroupsList;
+    }
 
-	public CategoryFeaturesList getCategoryFeaturesList() {
-		return categoryFeaturesList;
-	}
+    public IcecatSuppliersList getSuppliersList() { return suppliersList; }
+    public void setSuppliersList(IcecatSuppliersList suppliersList) { this.suppliersList = suppliersList; }
 
-	public void setCategoryFeaturesList(CategoryFeaturesList categoryFeaturesList) {
-		this.categoryFeaturesList = categoryFeaturesList;
-	}
+    public IcecatCategoriesList getCategoryList() { return categoryList; }
+    public void setCategoryList(IcecatCategoriesList categoryList) { this.categoryList = categoryList; }
 
-	public IcecatSuppliersList getSuppliersList() {
-		return suppliersList;
-	}
-
-	public void setSuppliersList(IcecatSuppliersList suppliersList) {
-		this.suppliersList = suppliersList;
-	}
-
-	public IcecatCategoriesList getCategoryList() {
-		return categoryList;
-	}
-
-	public void setCategoryList(IcecatCategoriesList categoryList) {
-		this.categoryList = categoryList;
-	}
-
-	public IcecatFeatureGroupsList getFeatureGroupsList() {
-		return featureGroupsList;
-	}
-
-	public void setFeatureGroupsList(IcecatFeatureGroupsList featureGroupsList) {
-		this.featureGroupsList = featureGroupsList;
-	}
-	
-	
+    public CategoryFeaturesList getCategoryFeaturesList() { return categoryFeaturesList; }
+    public void setCategoryFeaturesList(CategoryFeaturesList categoryFeaturesList) {
+        this.categoryFeaturesList = categoryFeaturesList;
+    }
 }

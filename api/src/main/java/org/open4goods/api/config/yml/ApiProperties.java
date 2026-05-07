@@ -11,6 +11,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.services.feedservice.config.AffiliationConfig;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.crawler.config.yml.FetcherProperties;
+import org.open4goods.icecat.config.yml.IcecatCompletionConfig;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.model.vertical.DescriptionsAggregationConfig;
 import org.open4goods.services.productrepository.config.IndexationConfig;

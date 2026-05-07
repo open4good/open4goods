@@ -46,6 +46,11 @@
       <artifactId>jackson-dataformat-xml</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+    </dependency>
+
     <!-- Dependency on commons services (for RemoteFileCachingService) -->
 
     <dependency>

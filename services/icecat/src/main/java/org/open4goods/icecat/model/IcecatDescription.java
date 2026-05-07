@@ -2,56 +2,49 @@ package org.open4goods.icecat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-@JsonIgnoreProperties(value = { "" })
-class IcecatDescription {
-	@JacksonXmlProperty(isAttribute = true)
-	private String ID;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String langid;
+/** A localized textual description entry from the Icecat catalog. */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class IcecatDescription {
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Updated;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private Integer id;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Value;
+    @JacksonXmlProperty(isAttribute = true, localName = "langid")
+    private int langId;
 
-	
-	@Override
-	public String toString() {
-		return  ID + ", langid=" + langid + ":" + Value;
-	}
-	public String getID() {
-		return ID;
-	}
+    @JacksonXmlProperty(isAttribute = true, localName = "Updated")
+    private String updated;
 
-	public void setID(String ID) {
-		this.ID = ID;
-	}
+    @JacksonXmlProperty(isAttribute = true, localName = "Value")
+    private String value;
 
-	public String getLangid() {
-		return langid;
-	}
+    @JacksonXmlText
+    private String textValue;
 
-	public void setLangid(String langid) {
-		this.langid = langid;
-	}
+    /** Returns the effective description text regardless of which Icecat XML representation is used. */
+    public String getEffectiveValue() {
+        return value != null ? value : textValue;
+    }
 
-	public String getUpdated() {
-		return Updated;
-	}
+    @Override
+    public String toString() {
+        return id + ", langid=" + langId + ":" + getEffectiveValue();
+    }
 
-	public void setUpdated(String Updated) {
-		this.Updated = Updated;
-	}
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-	public String getValue() {
-		return Value;
-	}
+    public int getLangId() { return langId; }
+    public void setLangId(int langId) { this.langId = langId; }
 
-	public void setValue(String value) {
-		Value = value;
-	}
+    public String getUpdated() { return updated; }
+    public void setUpdated(String updated) { this.updated = updated; }
 
+    public String getValue() { return value; }
+    public void setValue(String value) { this.value = value; }
 
+    public String getTextValue() { return textValue; }
+    public void setTextValue(String textValue) { this.textValue = textValue; }
 }

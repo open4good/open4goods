@@ -1,84 +1,51 @@
 package org.open4goods.icecat.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+/** Brand customer-service contact information for a specific country. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatCustomerService {
 
-    @JacksonXmlProperty(isAttribute = true)
-    private Integer ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private Integer id;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private Integer Country_ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "Country_ID")
+    private Integer countryId;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Country_Code;
+    @JacksonXmlProperty(isAttribute = true, localName = "Country_Code")
+    private String countryCode;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Country;
+    @JacksonXmlProperty(isAttribute = true, localName = "Country")
+    private String country;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Phone;
+    @JacksonXmlProperty(isAttribute = true, localName = "Phone")
+    private String phone;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String AddressDetails;
+    @JacksonXmlProperty(isAttribute = true, localName = "AddressDetails")
+    private String addressDetails;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Website;
+    @JacksonXmlProperty(isAttribute = true, localName = "Website")
+    private String website;
 
-    // Getters et setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public Integer getID() {
-        return ID;
-    }
+    public Integer getCountryId() { return countryId; }
+    public void setCountryId(Integer countryId) { this.countryId = countryId; }
 
-    public void setID(Integer ID) {
-        this.ID = ID;
-    }
+    public String getCountryCode() { return countryCode; }
+    public void setCountryCode(String countryCode) { this.countryCode = countryCode; }
 
-    public Integer getCountry_ID() {
-        return Country_ID;
-    }
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
 
-    public void setCountry_ID(Integer country_ID) {
-        Country_ID = country_ID;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public String getCountry_Code() {
-        return Country_Code;
-    }
+    public String getAddressDetails() { return addressDetails; }
+    public void setAddressDetails(String addressDetails) { this.addressDetails = addressDetails; }
 
-    public void setCountry_Code(String country_Code) {
-        Country_Code = country_Code;
-    }
-
-    public String getCountry() {
-        return Country;
-    }
-
-    public void setCountry(String country) {
-        Country = country;
-    }
-
-    public String getPhone() {
-        return Phone;
-    }
-
-    public void setPhone(String phone) {
-        Phone = phone;
-    }
-
-    public String getAddressDetails() {
-        return AddressDetails;
-    }
-
-    public void setAddressDetails(String addressDetails) {
-        AddressDetails = addressDetails;
-    }
-
-    public String getWebsite() {
-        return Website;
-    }
-
-    public void setWebsite(String website) {
-        Website = website;
-    }
+    public String getWebsite() { return website; }
+    public void setWebsite(String website) { this.website = website; }
 }

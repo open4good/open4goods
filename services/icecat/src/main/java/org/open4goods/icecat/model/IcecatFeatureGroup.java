@@ -2,57 +2,38 @@ package org.open4goods.icecat.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+/** A logical grouping of related features in the Icecat taxonomy (e.g. "Display", "Connectivity"). */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JacksonXmlRootElement(localName = "FeatureGroup")
 public class IcecatFeatureGroup {
 
-    @JacksonXmlProperty(isAttribute = true)
-    private Integer ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private Integer id;
 
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(isAttribute = true, localName = "sid")
     private Integer sid;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Updated;
+    @JacksonXmlProperty(isAttribute = true, localName = "Updated")
+    private String updated;
 
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "Name")
     private List<IcecatName> names;
 
-    // Getters et setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public Integer getID() {
-        return ID;
-    }
+    public Integer getSid() { return sid; }
+    public void setSid(Integer sid) { this.sid = sid; }
 
-    public void setID(Integer ID) {
-        this.ID = ID;
-    }
+    public String getUpdated() { return updated; }
+    public void setUpdated(String updated) { this.updated = updated; }
 
-    public Integer getSid() {
-        return sid;
-    }
-
-    public void setSid(Integer sid) {
-        this.sid = sid;
-    }
-
-    public String getUpdated() {
-        return Updated;
-    }
-
-    public void setUpdated(String updated) {
-        Updated = updated;
-    }
-
-    public List<IcecatName> getNames() {
-        return names;
-    }
-
-    public void setNames(List<IcecatName> names) {
-        this.names = names;
-    }
+    public List<IcecatName> getNames() { return names; }
+    public void setNames(List<IcecatName> names) { this.names = names; }
 }

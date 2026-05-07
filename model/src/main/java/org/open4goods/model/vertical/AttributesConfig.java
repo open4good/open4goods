@@ -51,7 +51,7 @@ public class AttributesConfig {
 	/**
 	 * icecat Attributes config by feature groups
 	 */
-	private Map<String, AttributeConfig> byIcecatFeatureGroup = new HashMap<String, AttributeConfig>();
+	private Map<Integer, AttributeConfig> byIcecatFeatureGroup = new HashMap<Integer, AttributeConfig>();
 
 
 	/**
@@ -103,7 +103,7 @@ public class AttributesConfig {
 			if (null != configs) {
 				for (final AttributeConfig ac : configs) {
 
-					for (String id : ac.getIcecatFeaturesIds()) {
+					for (Integer id : ac.getIcecatFeaturesIds()) {
 						byIcecatFeatureGroup.put(id, ac);
 					}
 
@@ -146,7 +146,7 @@ public class AttributesConfig {
 		for (SourcedAttribute source : attr.getSource()) {
 
 			if (null != source.getIcecatTaxonomyId()) {
-				ret = byIcecatFeatureGroup.get(String.valueOf(source.getIcecatTaxonomyId()));
+				ret = byIcecatFeatureGroup.get(source.getIcecatTaxonomyId());
 			}
 
 			if (null != ret) {
@@ -158,7 +158,7 @@ public class AttributesConfig {
 		for (SourcedAttribute source : attr.getSource()) {
 
 			if (null != source.getIcecatTaxonomyId()) {
-				ret = byIcecatFeatureGroup.get(String.valueOf(source.getIcecatTaxonomyId()));
+				ret = byIcecatFeatureGroup.get(source.getIcecatTaxonomyId());
 			}
 
 			if (null != ret) {

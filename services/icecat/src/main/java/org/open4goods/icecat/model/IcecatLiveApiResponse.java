@@ -1,10 +1,13 @@
-package org.open4goods.api.model;
+package org.open4goods.icecat.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-// TODO : Merge with xml model ?
-public class IcecatData {
+/**
+ * Response model for the Icecat live API (JSON format).
+ * Renamed from IcecatData; import from org.open4goods.icecat.model.
+ */
+public class IcecatLiveApiResponse {
 
     @JsonProperty("msg")
     public String msg;

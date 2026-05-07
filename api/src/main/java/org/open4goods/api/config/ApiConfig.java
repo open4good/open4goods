@@ -37,6 +37,12 @@ import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
+import org.open4goods.icecat.repository.IcecatCategoryRepository;
+import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
+import org.open4goods.icecat.repository.IcecatFeatureRepository;
+import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.icecat.services.IcecatFileDownloadService;
+import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
@@ -148,22 +154,34 @@ public class ApiConfig {
 	}
 
 
-	@Bean
-	FeatureLoader featureLoader(RemoteFileCachingService fileCachingService, BrandService brandService) {
-                return new FeatureLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), brandService);
-        }
-
-	@Bean
-	CategoryLoader categoryLoader(RemoteFileCachingService fileCachingService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
-                return new CategoryLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), verticalConfigService, featureLoader);
-        }
+    @Bean
+    IcecatFileDownloadService icecatFileDownloadService(RemoteFileCachingService fileCachingService) {
+        return new IcecatFileDownloadService(fileCachingService, apiProperties.remoteCachingFolder(), apiProperties.getIcecatFeatureConfig());
+    }
 
     @Bean
-    IcecatService icecatFeatureService(RemoteFileCachingService fileCachingService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
-                // NOTE : xmlMapper not injected because corruct the springdoc used one. Could
-                // use a @Primary derivation
-                return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), fileCachingService, apiProperties.remoteCachingFolder(), featureLoader, categoryLoader);
-        }
+    FeatureLoader featureLoader(IcecatFileDownloadService icecatFileDownloadService, BrandService brandService) {
+        return new FeatureLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, brandService);
+    }
+
+    @Bean
+    CategoryLoader categoryLoader(IcecatFileDownloadService icecatFileDownloadService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
+        return new CategoryLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, verticalConfigService, featureLoader);
+    }
+
+    @Bean
+    IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
+        // NOTE: xmlMapper not injected here because sharing the Spring-managed one corrupts springdoc. Uses a fresh XmlMapper instance.
+        return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, featureLoader, categoryLoader);
+    }
+
+	@Bean
+	IcecatIndexService icecatIndexService(FeatureLoader featureLoader, CategoryLoader categoryLoader,
+			IcecatFeatureRepository featureRepository, IcecatCategoryRepository categoryRepository,
+			IcecatFeatureGroupRepository featureGroupRepository, IcecatSupplierRepository supplierRepository) {
+		return new IcecatIndexService(featureLoader, categoryLoader, featureRepository, categoryRepository,
+				featureGroupRepository, supplierRepository);
+	}
 
 	@Bean
 	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {

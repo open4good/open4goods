@@ -13,47 +13,55 @@ import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatName;
 import org.open4goods.icecat.model.IcecatNames;
+import org.open4goods.icecat.services.IcecatFileDownloadService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
-import org.open4goods.model.helper.IdHelper;
-import org.open4goods.brand.service.BrandService;
-import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
-import org.open4goods.verticals.VerticalsConfigService;
-
 import org.open4goods.model.Localisable;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.brand.service.BrandService;
+import org.open4goods.verticals.VerticalsConfigService;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class IcecatServiceTest {
 
+    /** Builds a mocked IcecatFileDownloadService for unit tests (no actual downloads). */
+    private static IcecatFileDownloadService mockDownloader() {
+        IcecatConfiguration cfg = new IcecatConfiguration();
+        return new IcecatFileDownloadService(
+                Mockito.mock(org.open4goods.services.remotefilecaching.service.RemoteFileCachingService.class),
+                ".",
+                cfg);
+    }
+
     @Test
     public void testConstructorDoesNotThrow() {
         IcecatConfiguration cfg = new IcecatConfiguration();
-        RemoteFileCachingService cache = Mockito.mock(RemoteFileCachingService.class);
         BrandService brand = Mockito.mock(BrandService.class);
         VerticalsConfigService vertical = Mockito.mock(VerticalsConfigService.class);
+        IcecatFileDownloadService downloader = mockDownloader();
 
-        FeatureLoader fl = new FeatureLoader(new XmlMapper(), cfg, cache, ".", brand);
-        CategoryLoader cl = new CategoryLoader(new XmlMapper(), cfg, cache, ".", vertical, fl);
+        FeatureLoader fl = new FeatureLoader(new XmlMapper(), cfg, downloader, brand);
+        CategoryLoader cl = new CategoryLoader(new XmlMapper(), cfg, downloader, vertical, fl);
 
-        assertDoesNotThrow(() -> new IcecatService(new XmlMapper(), cfg, cache, ".", fl, cl));
+        assertDoesNotThrow(() -> new IcecatService(new XmlMapper(), cfg, downloader, fl, cl));
     }
 
     @Test
     public void testGetOriginalEnglishName() throws Exception {
         IcecatConfiguration cfg = new IcecatConfiguration();
-        RemoteFileCachingService cache = Mockito.mock(RemoteFileCachingService.class);
         BrandService brand = Mockito.mock(BrandService.class);
         VerticalsConfigService vertical = Mockito.mock(VerticalsConfigService.class);
+        IcecatFileDownloadService downloader = mockDownloader();
 
-        FeatureLoader fl = new FeatureLoader(new XmlMapper(), cfg, cache, ".", brand);
-        CategoryLoader cl = new CategoryLoader(new XmlMapper(), cfg, cache, ".", vertical, fl);
+        FeatureLoader fl = new FeatureLoader(new XmlMapper(), cfg, downloader, brand);
+        CategoryLoader cl = new CategoryLoader(new XmlMapper(), cfg, downloader, vertical, fl);
 
-        IcecatService service = new IcecatService(new XmlMapper(), cfg, cache, ".", fl, cl);
+        IcecatService service = new IcecatService(new XmlMapper(), cfg, downloader, fl, cl);
 
         IcecatName nameEn = new IcecatName();
         nameEn.setLangId(1);
@@ -62,7 +70,7 @@ public class IcecatServiceTest {
         names.setNames(Arrays.asList(nameEn));
 
         IcecatFeature feature = new IcecatFeature();
-        feature.setID("1");
+        feature.setId(1);
         feature.setNames(names);
 
         Map<Integer, IcecatFeature> map = fl.getFeaturesById();
@@ -74,24 +82,18 @@ public class IcecatServiceTest {
         assertEquals("Color", resolved);
     }
 
-
     @Test
     public void testFeaturesWithNullAttributeValue() {
-        // Setup Mocks
         IcecatConfiguration cfg = new IcecatConfiguration();
-        RemoteFileCachingService cache = Mockito.mock(RemoteFileCachingService.class);
-        BrandService brand = Mockito.mock(BrandService.class);
-        VerticalsConfigService verticalService = Mockito.mock(VerticalsConfigService.class);
+        IcecatFileDownloadService downloader = mockDownloader();
         FeatureLoader fl = Mockito.mock(FeatureLoader.class);
         CategoryLoader cl = Mockito.mock(CategoryLoader.class);
 
-        IcecatService service = new IcecatService(new XmlMapper(), cfg, cache, ".", fl, cl);
+        IcecatService service = new IcecatService(new XmlMapper(), cfg, downloader, fl, cl);
 
-        // Setup Data
         int featureId = 123;
         String language = "fr";
-        
-        // Mock VerticalConfig
+
         VerticalConfig verticalConfig = Mockito.mock(VerticalConfig.class);
         FeatureGroup featureGroup = new FeatureGroup();
         featureGroup.setFeaturesId(Collections.singletonList(featureId));
@@ -100,27 +102,25 @@ public class IcecatServiceTest {
         featureGroup.setName(groupName);
         Mockito.when(verticalConfig.getFeatureGroups()).thenReturn(Collections.singletonList(featureGroup));
 
-        // Mock Product and Attribute
         Product product = Mockito.mock(Product.class);
-        org.open4goods.model.attribute.ProductAttributes attributes = Mockito.mock(org.open4goods.model.attribute.ProductAttributes.class);
-        org.open4goods.model.attribute.ProductAttribute attribute = new org.open4goods.model.attribute.ProductAttribute();
-        attribute.setValue(null); // The cause of NPE
-        
+        org.open4goods.model.attribute.ProductAttributes attributes =
+                Mockito.mock(org.open4goods.model.attribute.ProductAttributes.class);
+        org.open4goods.model.attribute.ProductAttribute attribute =
+                new org.open4goods.model.attribute.ProductAttribute();
+        attribute.setValue(null);
+
         Mockito.when(product.getAttributes()).thenReturn(attributes);
         Mockito.when(attributes.attributeByFeatureId(featureId)).thenReturn(attribute);
 
-        // Mock FeatureLoader behavior
         IcecatFeature icecatFeature = new IcecatFeature();
-        IcecatNames names = new IcecatNames();
-        names.setNames(Collections.emptyList());
-        icecatFeature.setNames(names);
-        
+        IcecatNames icecatNames = new IcecatNames();
+        icecatNames.setNames(Collections.emptyList());
+        icecatFeature.setNames(icecatNames);
+
         Map<Integer, IcecatFeature> featuresMap = Mockito.mock(Map.class);
         Mockito.when(fl.getFeaturesById()).thenReturn(featuresMap);
         Mockito.when(featuresMap.get(featureId)).thenReturn(icecatFeature);
 
-        // Execute and Assert
-        // This should NOT throw NPE after fix
         assertDoesNotThrow(() -> service.features(verticalConfig, language, product));
     }
 }

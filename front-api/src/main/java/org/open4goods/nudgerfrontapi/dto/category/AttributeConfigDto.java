@@ -28,7 +28,7 @@ public record AttributeConfigDto(
         @Schema(description = "Type of filtering applied for this attribute.")
         AttributeType filteringType,
         @Schema(description = "Identifiers of the Icecat features mapped to this attribute.")
-        Set<String> icecatFeaturesIds,
+        Set<Integer> icecatFeaturesIds,
         @Schema(description = "Indicates whether this attribute is exposed as a score.")
         boolean asScore,
         @Schema(description = "Localised label used when the attribute is rendered as a score.")

@@ -30,7 +30,7 @@ import org.apache.tika.language.detect.LanguageDetector;
 import org.apache.tika.language.detect.LanguageResult;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
-import org.open4goods.api.services.AbstractCompletionService;
+import org.open4goods.commons.services.AbstractCompletionService;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;

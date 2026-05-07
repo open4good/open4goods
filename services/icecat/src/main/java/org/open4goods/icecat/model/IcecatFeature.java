@@ -3,194 +3,107 @@ package org.open4goods.icecat.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+/**
+ * A product feature (specification) definition from the Icecat catalog.
+ * Features have a unique ID, a data type, optional unit of measure, and multilingual names.
+ * The feature ID is stable across Icecat data exports and the live API.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatFeature {
-	@JacksonXmlProperty(isAttribute = true, localName = "Class")
-	private String Clazz;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String DefaultDisplayUnit;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private Integer id;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "Type")
+    private String type;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Type;
+    @JacksonXmlProperty(isAttribute = true, localName = "Updated")
+    private String updated;
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String Updated;
+    @JacksonXmlProperty(isAttribute = true, localName = "CategoryFeatureGroup_ID")
+    private int categoryFeatureGroupId;
 
-	@JacksonXmlProperty(localName = "Descriptions")
-	private IcecatDescriptions descriptions;
+    @JacksonXmlProperty(isAttribute = true, localName = "CategoryFeature_ID")
+    private int categoryFeatureId;
 
-	@JacksonXmlProperty(localName = "Measure")
-	private IcecatMeasure measure;
+    @JacksonXmlProperty(isAttribute = true, localName = "LimitDirection")
+    private int limitDirection;
 
-	@JacksonXmlProperty(localName = "Names")
-	private IcecatNames names;
-	
-	
-	
-	   @JacksonXmlProperty(isAttribute = true)
-       private int CategoryFeatureGroup_ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "Mandatory")
+    private int mandatory;
 
-       @JacksonXmlProperty(isAttribute = true)
-       private int CategoryFeature_ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "Searchable")
+    private int searchable;
 
+    @JacksonXmlProperty(isAttribute = true, localName = "No")
+    private String no;
 
-       @JacksonXmlProperty(isAttribute = true)
-       private int LimitDirection;
+    @JacksonXmlProperty(isAttribute = true, localName = "Class")
+    private String clazz;
 
-       @JacksonXmlProperty(isAttribute = true)
-       private int Mandatory;
+    @JacksonXmlProperty(isAttribute = true, localName = "DefaultDisplayUnit")
+    private String defaultDisplayUnit;
 
-       @JacksonXmlProperty(isAttribute = true)
-       private String No;
+    @JacksonXmlProperty(isAttribute = true, localName = "Use_Dropdown_Input")
+    private String useDropdownInput;
 
-       @JacksonXmlProperty(isAttribute = true)
-       private int Searchable;
+    @JacksonXmlProperty(isAttribute = true, localName = "ValueSorting")
+    private int valueSorting;
 
-   
-       @JacksonXmlProperty(isAttribute = true)
-       private String Use_Dropdown_Input;
+    @JacksonXmlProperty(localName = "Descriptions")
+    private IcecatDescriptions descriptions;
 
-       @JacksonXmlProperty(isAttribute = true)
-       private int ValueSorting;
+    @JacksonXmlProperty(localName = "Measure")
+    private IcecatMeasure measure;
 
-       
-       
-       
+    @JacksonXmlProperty(localName = "Names")
+    private IcecatNames names;
 
-	public String getClazz() {
-		return Clazz;
-	}
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-	public void setClazz(String clazz) {
-		Clazz = clazz;
-	}
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-	public String getDefaultDisplayUnit() {
-		return DefaultDisplayUnit;
-	}
+    public String getUpdated() { return updated; }
+    public void setUpdated(String updated) { this.updated = updated; }
 
-	public void setDefaultDisplayUnit(String DefaultDisplayUnit) {
-		this.DefaultDisplayUnit = DefaultDisplayUnit;
-	}
+    public int getCategoryFeatureGroupId() { return categoryFeatureGroupId; }
+    public void setCategoryFeatureGroupId(int categoryFeatureGroupId) { this.categoryFeatureGroupId = categoryFeatureGroupId; }
 
-	public String getID() {
-		return ID;
-	}
+    public int getCategoryFeatureId() { return categoryFeatureId; }
+    public void setCategoryFeatureId(int categoryFeatureId) { this.categoryFeatureId = categoryFeatureId; }
 
-	public void setID(String ID) {
-		this.ID = ID;
-	}
+    public int getLimitDirection() { return limitDirection; }
+    public void setLimitDirection(int limitDirection) { this.limitDirection = limitDirection; }
 
-	public String getType() {
-		return Type;
-	}
+    public int getMandatory() { return mandatory; }
+    public void setMandatory(int mandatory) { this.mandatory = mandatory; }
 
-	public void setType(String Type) {
-		this.Type = Type;
-	}
+    public int getSearchable() { return searchable; }
+    public void setSearchable(int searchable) { this.searchable = searchable; }
 
-	public String getUpdated() {
-		return Updated;
-	}
+    public String getNo() { return no; }
+    public void setNo(String no) { this.no = no; }
 
-	public void setUpdated(String Updated) {
-		this.Updated = Updated;
-	}
+    public String getClazz() { return clazz; }
+    public void setClazz(String clazz) { this.clazz = clazz; }
 
-	public IcecatDescriptions getDescriptions() {
-		return descriptions;
-	}
+    public String getDefaultDisplayUnit() { return defaultDisplayUnit; }
+    public void setDefaultDisplayUnit(String defaultDisplayUnit) { this.defaultDisplayUnit = defaultDisplayUnit; }
 
-	public void setDescriptions(IcecatDescriptions descriptions) {
-		this.descriptions = descriptions;
-	}
+    public String getUseDropdownInput() { return useDropdownInput; }
+    public void setUseDropdownInput(String useDropdownInput) { this.useDropdownInput = useDropdownInput; }
 
-	public IcecatMeasure getMeasure() {
-		return measure;
-	}
+    public int getValueSorting() { return valueSorting; }
+    public void setValueSorting(int valueSorting) { this.valueSorting = valueSorting; }
 
-	public void setMeasure(IcecatMeasure measure) {
-		this.measure = measure;
-	}
+    public IcecatDescriptions getDescriptions() { return descriptions; }
+    public void setDescriptions(IcecatDescriptions descriptions) { this.descriptions = descriptions; }
 
-	public IcecatNames getNames() {
-		return names;
-	}
+    public IcecatMeasure getMeasure() { return measure; }
+    public void setMeasure(IcecatMeasure measure) { this.measure = measure; }
 
-	public void setNames(IcecatNames names) {
-		this.names = names;
-	}
-
-	
-
-	public int getCategoryFeatureGroup_ID() {
-		return CategoryFeatureGroup_ID;
-	}
-
-	public void setCategoryFeatureGroup_ID(int categoryFeatureGroup_ID) {
-		CategoryFeatureGroup_ID = categoryFeatureGroup_ID;
-	}
-
-	public int getCategoryFeature_ID() {
-		return CategoryFeature_ID;
-	}
-
-	public void setCategoryFeature_ID(int categoryFeature_ID) {
-		CategoryFeature_ID = categoryFeature_ID;
-	}
-
-	public int getLimitDirection() {
-		return LimitDirection;
-	}
-
-	public void setLimitDirection(int limitDirection) {
-		LimitDirection = limitDirection;
-	}
-
-	public int getMandatory() {
-		return Mandatory;
-	}
-
-	public void setMandatory(int mandatory) {
-		Mandatory = mandatory;
-	}
-
-
-	public String getNo() {
-		return No;
-	}
-
-	public void setNo(String no) {
-		No = no;
-	}
-
-	public int getSearchable() {
-		return Searchable;
-	}
-
-	public void setSearchable(int searchable) {
-		Searchable = searchable;
-	}
-
-	public String getUse_Dropdown_Input() {
-		return Use_Dropdown_Input;
-	}
-
-	public void setUse_Dropdown_Input(String use_Dropdown_Input) {
-		Use_Dropdown_Input = use_Dropdown_Input;
-	}
-
-	public int getValueSorting() {
-		return ValueSorting;
-	}
-
-	public void setValueSorting(int valueSorting) {
-		ValueSorting = valueSorting;
-	}
-	
-	
+    public IcecatNames getNames() { return names; }
+    public void setNames(IcecatNames names) { this.names = names; }
 }

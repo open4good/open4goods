@@ -1,44 +1,47 @@
 package org.open4goods.icecat.model;
-import java.net.URI;
+
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-@JsonIgnoreProperties(value = { "Versions","Keywords","VirtualCategories" })
+/**
+ * A product category from the Icecat taxonomy.
+ * Categories are hierarchical (via {@link #parentCategory}) and each carries a set of
+ * {@link IcecatCategoryFeatureGroup}s that define which features apply to products in that category.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatCategory {
-    @JacksonXmlProperty(isAttribute = true)
-    private String UNCATID;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Searchable;
+    @JacksonXmlProperty(isAttribute = true, localName = "ID")
+    private Integer id;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Visible;
+    @JacksonXmlProperty(isAttribute = true, localName = "UNCATID")
+    private String uncatId;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private Integer Score;
+    @JacksonXmlProperty(isAttribute = true, localName = "Searchable")
+    private String searchable;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private URI ThumbPic;
+    @JacksonXmlProperty(isAttribute = true, localName = "Visible")
+    private String visible;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private Integer ID;
+    @JacksonXmlProperty(isAttribute = true, localName = "Score")
+    private Integer score;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private URI LowPic;
+    @JacksonXmlProperty(isAttribute = true, localName = "ThumbPic")
+    private String thumbPic;
 
-    @JacksonXmlProperty(isAttribute = true)
-    private String Updated;
+    @JacksonXmlProperty(isAttribute = true, localName = "LowPic")
+    private String lowPic;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "Updated")
+    private String updated;
 
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "CategoryFeatureGroup")
     private List<IcecatCategoryFeatureGroup> categoryFeatureGroups;
-
-//    @JacksonXmlElementWrapper(useWrapping = false)
-//    @JacksonXmlProperty(localName = "Versions")
-//    private List<Versions> versions;
 
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "Description")
@@ -47,10 +50,6 @@ public class IcecatCategory {
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "Feature")
     private List<IcecatFeature> features;
-
-//    @JacksonXmlElementWrapper(useWrapping = false)
-//    @JacksonXmlProperty(localName = "Keywords")
-//    private List<IcecatKeywords> keywords;
 
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "Name")
@@ -63,139 +62,66 @@ public class IcecatCategory {
     @JacksonXmlProperty(localName = "ParentCategory")
     private IcecatParentCategory parentCategory;
 
-    
     @Override
     public String toString() {
-    	return ID+":"+names;
-    	
+        return id + ":" + names;
     }
-	public String getUNCATID() {
-		return UNCATID;
-	}
 
-	public void setUNCATID(String uNCATID) {
-		UNCATID = uNCATID;
-	}
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-	public String getSearchable() {
-		return Searchable;
-	}
+    public String getUncatId() { return uncatId; }
+    public void setUncatId(String uncatId) { this.uncatId = uncatId; }
 
-	public void setSearchable(String searchable) {
-		Searchable = searchable;
-	}
+    public String getSearchable() { return searchable; }
+    public void setSearchable(String searchable) { this.searchable = searchable; }
 
+    public String getVisible() { return visible; }
+    public void setVisible(String visible) { this.visible = visible; }
 
+    public Integer getScore() { return score; }
+    public void setScore(Integer score) { this.score = score; }
 
-	public String getVisible() {
-		return Visible;
-	}
+    public String getThumbPic() { return thumbPic; }
+    public void setThumbPic(String thumbPic) { this.thumbPic = thumbPic; }
 
-	public void setVisible(String visible) {
-		Visible = visible;
-	}
+    public String getLowPic() { return lowPic; }
+    public void setLowPic(String lowPic) { this.lowPic = lowPic; }
 
-	public Integer getScore() {
-		return Score;
-	}
+    public String getUpdated() { return updated; }
+    public void setUpdated(String updated) { this.updated = updated; }
 
-	public void setScore(Integer score) {
-		Score = score;
-	}
+    public List<IcecatCategoryFeatureGroup> getCategoryFeatureGroups() {
+        return categoryFeatureGroups != null ? categoryFeatureGroups : Collections.emptyList();
+    }
+    public void setCategoryFeatureGroups(List<IcecatCategoryFeatureGroup> categoryFeatureGroups) {
+        this.categoryFeatureGroups = categoryFeatureGroups;
+    }
 
-	public URI getThumbPic() {
-		return ThumbPic;
-	}
+    public List<IcecatDescription> getDescriptions() {
+        return descriptions != null ? descriptions : Collections.emptyList();
+    }
+    public void setDescriptions(List<IcecatDescription> descriptions) {
+        this.descriptions = descriptions;
+    }
 
-	public void setThumbPic(URI thumbPic) {
-		ThumbPic = thumbPic;
-	}
+    public List<IcecatFeature> getFeatures() {
+        return features != null ? features : Collections.emptyList();
+    }
+    public void setFeatures(List<IcecatFeature> features) { this.features = features; }
 
-	public Integer getID() {
-		return ID;
-	}
+    public List<IcecatName> getNames() {
+        return names != null ? names : Collections.emptyList();
+    }
+    public void setNames(List<IcecatName> names) { this.names = names; }
 
-	public void setID(Integer iD) {
-		ID = iD;
-	}
+    public List<IcecatNames> getNamesList() {
+        return namesList != null ? namesList : Collections.emptyList();
+    }
+    public void setNamesList(List<IcecatNames> namesList) { this.namesList = namesList; }
 
-	public URI getLowPic() {
-		return LowPic;
-	}
-
-	public void setLowPic(URI lowPic) {
-		LowPic = lowPic;
-	}
-
-	public String getUpdated() {
-		return Updated;
-	}
-
-	public void setUpdated(String updated) {
-		Updated = updated;
-	}
-
-	public List<IcecatCategoryFeatureGroup> getCategoryFeatureGroups() {
-		return categoryFeatureGroups;
-	}
-
-	public void setCategoryFeatureGroups(List<IcecatCategoryFeatureGroup> categoryFeatureGroups) {
-		this.categoryFeatureGroups = categoryFeatureGroups;
-	}
-
-	public List<IcecatDescription> getDescriptions() {
-		return descriptions;
-	}
-
-	public void setDescriptions(List<IcecatDescription> descriptions) {
-		this.descriptions = descriptions;
-	}
-
-	public List<IcecatFeature> getFeatures() {
-		return features;
-	}
-
-	public void setFeatures(List<IcecatFeature> features) {
-		this.features = features;
-	}
-
-	public List<IcecatName> getNames() {
-		return names;
-	}
-
-	public void setNames(List<IcecatName> names) {
-		this.names = names;
-	}
-
-	public List<IcecatNames> getNamesList() {
-		return namesList;
-	}
-
-	public void setNamesList(List<IcecatNames> namesList) {
-		this.namesList = namesList;
-	}
-
-	public IcecatParentCategory getParentCategory() {
-		return parentCategory;
-	}
-
-	public void setParentCategory(IcecatParentCategory parentCategory) {
-		this.parentCategory = parentCategory;
-	}
-
-//    @JacksonXmlElementWrapper(useWrapping = false)
-//    @JacksonXmlProperty(localName = "UNCATID")
-//    private List<String> uncategorizedIds;
-
-//    @JacksonXmlProperty(localName = "VirtualCategories")
-//    private VirtualCategories virtualCategories;
-
+    public IcecatParentCategory getParentCategory() { return parentCategory; }
+    public void setParentCategory(IcecatParentCategory parentCategory) {
+        this.parentCategory = parentCategory;
+    }
 }
-
-
-
-
-
-
-
-

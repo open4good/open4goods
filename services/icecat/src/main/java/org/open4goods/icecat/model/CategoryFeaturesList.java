@@ -1,33 +1,31 @@
 package org.open4goods.icecat.model;
 
+import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public  class CategoryFeaturesList {
-        @JacksonXmlProperty(isAttribute = true)
-        private int Code;
+/** Wrapper for the {@code <CategoryFeaturesList>} response element. */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CategoryFeaturesList {
 
-        @JacksonXmlElementWrapper(useWrapping = false)
-        @JacksonXmlProperty(localName = "Category")
-        private List<IcecatCategory> categories;
+    @JacksonXmlProperty(isAttribute = true, localName = "Code")
+    private Integer code;
 
-		public int getCode() {
-			return Code;
-		}
+    @JacksonXmlElementWrapper(useWrapping = false)
+    @JacksonXmlProperty(localName = "Category")
+    private List<IcecatCategory> categories;
 
-		public void setCode(int code) {
-			Code = code;
-		}
+    public Integer getCode() { return code; }
+    public void setCode(Integer code) { this.code = code; }
 
-		public List<IcecatCategory> getCategories() {
-			return categories;
-		}
-
-		public void setCategories(List<IcecatCategory> categories) {
-			this.categories = categories;
-		}
-
-        // Getters and setters
+    public List<IcecatCategory> getCategories() {
+        return categories != null ? categories : Collections.emptyList();
     }
+
+    public void setCategories(List<IcecatCategory> categories) {
+        this.categories = categories;
+    }
+}

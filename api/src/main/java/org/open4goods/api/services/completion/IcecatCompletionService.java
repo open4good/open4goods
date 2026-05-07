@@ -1,29 +1,25 @@
 package org.open4goods.api.services.completion;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.api.config.yml.IcecatCompletionConfig;
-import org.open4goods.api.model.IcecatData;
-import org.open4goods.api.model.IcecatData.FeaturesGroups;
-import org.open4goods.api.model.IcecatData.Gallery;
-import org.open4goods.api.model.IcecatData.GeneralInfo;
-import org.open4goods.api.model.IcecatData.IceDataItem;
-import org.open4goods.api.model.IcecatData.Image;
-import org.open4goods.api.model.IcecatData.Multimedia;
-import org.open4goods.api.services.AbstractCompletionService;
+import org.open4goods.commons.services.AbstractCompletionService;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.icecat.config.yml.IcecatCompletionConfig;
+import org.open4goods.icecat.model.IcecatLiveApiResponse;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.FeaturesGroups;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.Gallery;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.GeneralInfo;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.IceDataItem;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.Image;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.Multimedia;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;
@@ -35,15 +31,12 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.google.common.collect.Sets;
-
-// TODO : The duplicate GTIN
-// TODO : Add specific attributes :       
-// -"ReleaseDate": "31-05-2023",
-// - "EndOfLifeDate": "31-12-2023",
 
 
 
@@ -58,13 +51,10 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 */
 	private static final int REFRESH_IN_DAYS = 30;
 
-	private ObjectMapper objectMapper = new ObjectMapper();
-	
-	// The specific icecat fetching properties
-	private IcecatCompletionConfig icecatConfig;
-
-	// We re-use the realtime aggregator, from the AggregationFavcade
-	private StandardAggregator aggregator;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final IcecatCompletionConfig icecatConfig;
+    private final StandardAggregator aggregator;
+    private final RestClient restClient = RestClient.create();
 
 
 
@@ -130,12 +120,13 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		// Setting the timestamp flag
 		data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
 
-		try {
-			Thread.sleep(icecatConfig.getPolitnessDelayMs());
-		} catch (InterruptedException e) {
-			logger.error("Errot while sleeping");
-		}
-	}
+        try {
+            Thread.sleep(icecatConfig.getPolitenessDelayMs());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Icecat politeness sleep interrupted");
+        }
+    }
 
 	/**
 	 * Proceed to the search api call on icecat
@@ -150,31 +141,22 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		String url = icecatConfig.getIceCatUrlPrefix()+data.getId();
 		logger.info("Loading icecat data {}",url);
 		
-		try {
-			String content = IOUtils.toString(new URL(url));
-			IceDataItem iceItem = objectMapper.readValue(content, IcecatData.class).data;
-			
-			data.getExternalIds().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
-			
-			ret.add(convert(iceItem, data));
-
-			
-		} catch (UnrecognizedPropertyException e) {
-			logger.error("Unknown property at {} : {}",url,e.getOriginalMessage());
-		}  catch (FileNotFoundException e) {
-			logger.info("Gtin {} is not found",data.gtin());
-		} catch (IOException e) {
-			// TODO : Not nice, use real httpclient
-			if (e.getMessage().contains("response code: 400 ")) {
-				logger.info("Gtin {} does not exists in Icecat",data.gtin());
-			} else if (e.getMessage().contains("response code: 403 ")) {
-				logger.info("Gtin {} is restricted to upgraded plan in Icecat",data.gtin());
-			} else {
-				logger.error("Unexpected error in icecat parsing",e);
-			}
-		}catch (Exception e) {
-			logger.error("Unexpected error in icecat parsing",e);
-		}
+        try {
+            String content = restClient.get().uri(url).retrieve().body(String.class);
+            IceDataItem iceItem = objectMapper.readValue(content, IcecatLiveApiResponse.class).data;
+            data.getExternalIds().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
+            ret.add(convert(iceItem, data));
+        } catch (UnrecognizedPropertyException e) {
+            logger.error("Unknown property at {} : {}", url, e.getOriginalMessage());
+        } catch (HttpClientErrorException.NotFound e) {
+            logger.info("Gtin {} is not found in Icecat", data.gtin());
+        } catch (HttpClientErrorException.BadRequest e) {
+            logger.info("Gtin {} does not exist in Icecat", data.gtin());
+        } catch (HttpClientErrorException.Forbidden e) {
+            logger.info("Gtin {} is restricted to an upgraded Icecat plan", data.gtin());
+        } catch (Exception e) {
+            logger.error("Unexpected error in icecat parsing for gtin {}", data.gtin(), e);
+        }
 		return ret;
 	}
 
