@@ -10,3 +10,4 @@ apache-maven-*-bin.tar.gz
 /frontend/components/dev/generations
 /logs/
 /jstack.log
+/.claude/
