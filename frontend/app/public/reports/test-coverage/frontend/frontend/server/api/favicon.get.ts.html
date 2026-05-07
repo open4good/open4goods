@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>0/18</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>0/18</span>
             </div>
         
             
@@ -72,7 +72,28 @@
 <a name='L7'></a><a href='#L7'>7</a>
 <a name='L8'></a><a href='#L8'>8</a>
 <a name='L9'></a><a href='#L9'>9</a>
-<a name='L10'></a><a href='#L10'>10</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -81,14 +102,32 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { proxyRequest } from 'h3'<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { setDomainLanguageCacheHeaders } from '../utils/cache-headers'<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export default defineEventHandler(event =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >export default defineEventHandler(async event =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const config = useRuntimeConfig(event)</span>
-<span class="cstat-no" title="statement not covered" >  return proxyRequest(</span>
+<span class="cstat-no" title="statement not covered" >  const upstreamUrl = `${config.apiUrl}${event.path.replace('/api', '')}`</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  const res = await $fetch.raw&lt;ArrayBuffer&gt;(upstreamUrl, {</span>
+<span class="cstat-no" title="statement not covered" >    responseType: 'arrayBuffer',</span>
+<span class="cstat-no" title="statement not covered" >  })</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  setDomainLanguageCacheHeaders(</span>
 <span class="cstat-no" title="statement not covered" >    event,</span>
-<span class="cstat-no" title="statement not covered" >    `${config.apiUrl}${event.path.replace('/api', '')}`</span>
+<span class="cstat-no" title="statement not covered" >    'public, max-age=604800, s-maxage=604800, stale-while-revalidate=86400'</span>
 <span class="cstat-no" title="statement not covered" >  )</span>
+<span class="cstat-no" title="statement not covered" >  setResponseHeader(</span>
+<span class="cstat-no" title="statement not covered" >    event,</span>
+<span class="cstat-no" title="statement not covered" >    'Content-Type',</span>
+<span class="cstat-no" title="statement not covered" >    res.headers.get('content-type') ?? 'image/x-icon'</span>
+<span class="cstat-no" title="statement not covered" >  )</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return Buffer.from(res._data as ArrayBuffer)</span>
 <span class="cstat-no" title="statement not covered" >})</span>
 &nbsp;</pre></td></tr></table></pre>
 
@@ -97,7 +136,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-16T10:04:16.926Z
+                at 2026-05-07T16:01:05.351Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

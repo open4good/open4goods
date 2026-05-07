@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">97.53% </span>
+                <span class="strong">97.75% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>79/81</span>
+                <span class='fraction'>87/89</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.33% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>5/6</span>
+                <span class='fraction'>4/5</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">97.53% </span>
+                <span class="strong">97.75% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>79/81</span>
+                <span class='fraction'>87/89</span>
             </div>
         
             
@@ -238,7 +238,19 @@
 <a name='L173'></a><a href='#L173'>173</a>
 <a name='L174'></a><a href='#L174'>174</a>
 <a name='L175'></a><a href='#L175'>175</a>
-<a name='L176'></a><a href='#L176'>176</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -320,6 +332,15 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -349,6 +370,9 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -420,7 +444,7 @@ import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 const solutionImageSrc = '/homepage/gain/nudger-screaming.webp'
 &nbsp;
 type SolutionBenefit = {
-  emoji: string
+  icon: string
   label: string
   description: string
 }
@@ -491,8 +515,17 @@ const unlockImageTilt = () =&gt; {
                     '1px solid rgba(var(--v-theme-border-primary-strong), 0.7)',
                 }"
               &gt;
-                &lt;v-avatar class="home-solution__icon" size="60" color="surface"&gt;
-                  &lt;span aria-hidden="true"&gt;{{ item.emoji }}&lt;/span&gt;
+                &lt;v-avatar
+                  class="home-solution__icon"
+                  size="60"
+                  color="surface-primary-120"
+                &gt;
+                  &lt;v-icon
+                    :icon="item.icon"
+                    size="32"
+                    color="primary"
+                    aria-hidden="true"
+                  /&gt;
                 &lt;/v-avatar&gt;
                 &lt;div class="home-solution__texts d-flex flex-column ga-1"&gt;
                   &lt;p class="home-solution__label ma-0 font-weight-bold"&gt;
@@ -548,8 +581,11 @@ const unlockImageTilt = () =&gt; {
 &nbsp;
 .home-solution__icon
   font-size: clamp(1.65rem, 5vw, 2rem)
-  //background: rgba(var(--v-theme-surface-primary-080), 0.6)
-  color: rgb(var(--v-theme-secondary))
+  color: rgb(var(--v-theme-primary))
+  transition: transform 0.3s ease
+&nbsp;
+.home-solution__item:hover .home-solution__icon
+  transform: scale(1.1) rotate(5deg)
 &nbsp;
 .home-solution
   display: flex;
@@ -595,7 +631,7 @@ const unlockImageTilt = () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-16T10:04:16.926Z
+                at 2026-05-07T16:01:05.351Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

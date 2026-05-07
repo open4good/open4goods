@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>150/150</span>
+                <span class='fraction'>151/151</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>150/150</span>
+                <span class='fraction'>151/151</span>
             </div>
         
             
@@ -494,7 +494,11 @@
 <a name='L429'></a><a href='#L429'>429</a>
 <a name='L430'></a><a href='#L430'>430</a>
 <a name='L431'></a><a href='#L431'>431</a>
-<a name='L432'></a><a href='#L432'>432</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L432'></a><a href='#L432'>432</a>
+<a name='L433'></a><a href='#L433'>433</a>
+<a name='L434'></a><a href='#L434'>434</a>
+<a name='L435'></a><a href='#L435'>435</a>
+<a name='L436'></a><a href='#L436'>436</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -543,6 +547,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -631,6 +636,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -654,6 +660,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -738,6 +745,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -974,6 +982,7 @@
           "
           contain
           class="product-card__image"
+          :fetchpriority="isPriority ? 'high' : undefined"
         &gt;
           &lt;template #placeholder&gt;
             &lt;v-skeleton-loader type="image" class="h-100" /&gt;
@@ -1072,6 +1081,7 @@ const props = withDefaults(
     showAttributeIcons?: boolean
     disabled?: boolean
     nofollowLinks?: boolean
+    isPriority?: boolean
   }&gt;(),
   {
     popularAttributes: () =&gt; [],
@@ -1082,6 +1092,7 @@ const props = withDefaults(
     showAttributeIcons: true,
     disabled: false,
     nofollowLinks: false,
+    isPriority: false,
   }
 )
 &nbsp;
@@ -1177,11 +1188,12 @@ const shouldShowSortedField = computed(() =&gt; Boolean(sortedFieldDisplay.value
     display: flex
     flex-direction: column
     text-decoration: none
-    transition: transform 0.2s ease, box-shadow 0.2s ease
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease
     position: relative
     background: rgb(var(--v-theme-surface-glass))
     overflow: hidden
-    border: 1px solid rgba(var(--v-theme-border-primary), 0.1)
+    border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
+    box-shadow: 0 10px 30px -15px rgba(var(--v-theme-shadow-primary-600), 0.15)
 &nbsp;
     &amp;__overlay-link
         position: absolute
@@ -1191,9 +1203,9 @@ const shouldShowSortedField = computed(() =&gt; Boolean(sortedFieldDisplay.value
 &nbsp;
 &nbsp;
     &amp;:hover
-        transform: translateY(-4px)
-        box-shadow: 0 16px 30px rgba(21, 46, 73, 0.08)
-        border-color: rgba(var(--v-theme-primary), 0.3)
+        transform: translateY(-6px)
+        box-shadow: 0 20px 40px -20px rgba(var(--v-theme-shadow-primary-600), 0.3)
+        border-color: rgba(var(--v-theme-primary), 0.4)
 &nbsp;
     &amp;--disabled
         filter: grayscale(1)
@@ -1229,7 +1241,7 @@ const shouldShowSortedField = computed(() =&gt; Boolean(sortedFieldDisplay.value
 &nbsp;
     /* Hover effect on image */
     &amp;:hover &amp;__image
-        transform: scale(1.05)
+        transform: scale(1.08) rotate(1deg)
 &nbsp;
     &amp;__header
         display: flex
@@ -1363,7 +1375,7 @@ const shouldShowSortedField = computed(() =&gt; Boolean(sortedFieldDisplay.value
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-16T10:04:16.926Z
+                at 2026-05-07T16:01:05.351Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

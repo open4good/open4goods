@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75.48% </span>
+                <span class="strong">75.51% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>508/673</span>
+                <span class='fraction'>509/674</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75.48% </span>
+                <span class="strong">75.51% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>508/673</span>
+                <span class='fraction'>509/674</span>
             </div>
         
             
@@ -1572,7 +1572,27 @@
 <a name='L1507'></a><a href='#L1507'>1507</a>
 <a name='L1508'></a><a href='#L1508'>1508</a>
 <a name='L1509'></a><a href='#L1509'>1509</a>
-<a name='L1510'></a><a href='#L1510'>1510</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1510'></a><a href='#L1510'>1510</a>
+<a name='L1511'></a><a href='#L1511'>1511</a>
+<a name='L1512'></a><a href='#L1512'>1512</a>
+<a name='L1513'></a><a href='#L1513'>1513</a>
+<a name='L1514'></a><a href='#L1514'>1514</a>
+<a name='L1515'></a><a href='#L1515'>1515</a>
+<a name='L1516'></a><a href='#L1516'>1516</a>
+<a name='L1517'></a><a href='#L1517'>1517</a>
+<a name='L1518'></a><a href='#L1518'>1518</a>
+<a name='L1519'></a><a href='#L1519'>1519</a>
+<a name='L1520'></a><a href='#L1520'>1520</a>
+<a name='L1521'></a><a href='#L1521'>1521</a>
+<a name='L1522'></a><a href='#L1522'>1522</a>
+<a name='L1523'></a><a href='#L1523'>1523</a>
+<a name='L1524'></a><a href='#L1524'>1524</a>
+<a name='L1525'></a><a href='#L1525'>1525</a>
+<a name='L1526'></a><a href='#L1526'>1526</a>
+<a name='L1527'></a><a href='#L1527'>1527</a>
+<a name='L1528'></a><a href='#L1528'>1528</a>
+<a name='L1529'></a><a href='#L1529'>1529</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -3081,6 +3101,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&lt;template&gt;
   &lt;section class="product-hero"&gt;
     &lt;div class="product-hero__background" aria-hidden="true"&gt;
@@ -3090,6 +3128,7 @@
         alt=""
         decoding="async"
         loading="eager"
+        fetchpriority="high"
       /&gt;
       &lt;div class="product-hero__background-overlay" /&gt;
     &lt;/div&gt;
@@ -4313,11 +4352,16 @@ const heroBreadcrumbProps = computed(() =&gt; ({
 &nbsp;
 .product-hero__ai-summary-list {
   list-style: none;
-  padding: 0;
+  padding: 1.25rem;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.15);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 &nbsp;
 .product-hero__ai-summary-item {
@@ -4387,6 +4431,12 @@ const heroBreadcrumbProps = computed(() =&gt; ({
 &nbsp;
 .product-hero__compare-button:hover {
   background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(var(--v-theme-shadow-primary-600), 0.12);
+}
+&nbsp;
+.product-hero__compare-button:active {
+  transform: translateY(0);
 }
 &nbsp;
 .product-hero__ai-btn-wrapper {
@@ -4415,6 +4465,12 @@ const heroBreadcrumbProps = computed(() =&gt; ({
 &nbsp;
 .product-hero__ai-button:hover {
   background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(var(--v-theme-shadow-primary-600), 0.12);
+}
+&nbsp;
+.product-hero__ai-button:active {
+  transform: translateY(0);
 }
 &nbsp;
 .product-hero__brand-line {
@@ -4553,11 +4609,12 @@ const heroBreadcrumbProps = computed(() =&gt; ({
 }
 &nbsp;
 .product-hero__tab-content {
-  background: rgba(var(--v-theme-surface-default), 0.4);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
-  padding: 1rem;
-  border: 1px solid rgba(var(--v-theme-outline), 0.1);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 1.25rem;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
 }
 &nbsp;
 .product-hero__description-body {
@@ -4597,7 +4654,7 @@ const heroBreadcrumbProps = computed(() =&gt; ({
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-16T10:04:16.926Z
+                at 2026-05-07T16:01:05.351Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

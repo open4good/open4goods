@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <tags>
     <tag name="@todo" count="0" />
-    <tag name="TODO" count="331">
+    <tag name="TODO" count="330">
       <files>
         <file name="org.open4goods.xwiki.services.XwikiMappingService" count="3">
           <comments>
@@ -941,7 +941,7 @@
               <comment>(p3,conf) : schedule from conf</comment>
             </comment>
             <comment>
-              <lineNumber>306</lineNumber>
+              <lineNumber>308</lineNumber>
               <comment>(p3,design) : remove</comment>
             </comment>
           </comments>
@@ -1046,14 +1046,6 @@
             </comment>
           </comments>
         </file>
-        <file name="org.open4goods.services.eprelservice.service.EprelSearchService" count="1">
-          <comments>
-            <comment>
-              <lineNumber>27</lineNumber>
-              <comment>PErf : restict search on product defined vertical (against eprel associated categorie)if any</comment>
-            </comment>
-          </comments>
-        </file>
         <file name="org.open4goods.crawler.extractors.XpathExtractor" count="1">
           <comments>
             <comment>
@@ -1113,7 +1105,7 @@
               <comment>do not process each time</comment>
             </comment>
             <comment>
-              <lineNumber>117</lineNumber>
+              <lineNumber>125</lineNumber>
               <comment>Filter per vertical</comment>
             </comment>
           </comments>
@@ -1381,7 +1373,7 @@
         <file name="org.open4goods.api.config.ApiConfig" count="1">
           <comments>
             <comment>
-              <lineNumber>418</lineNumber>
+              <lineNumber>419</lineNumber>
               <comment>(feature, 0.5, P3) : implements standardisation</comment>
             </comment>
           </comments>
@@ -1601,7 +1593,7 @@
         <file name="org.open4goods.api.services.VerticalsGenerationService" count="1">
           <comments>
             <comment>
-              <lineNumber>742</lineNumber>
+              <lineNumber>747</lineNumber>
               <comment>(conf,p2) : numberofsamples from conf</comment>
             </comment>
           </comments>

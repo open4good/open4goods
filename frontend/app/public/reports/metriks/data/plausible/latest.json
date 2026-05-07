@@ -180,7 +180,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_a80c9ef1.unique_conversions",
-        "name": "Conversions uniques – Clic lien d'affiliation",
+        "name": "Conversions uniques - Clic lien d'affiliation",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 10,
         "unit": "count",
@@ -203,7 +203,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_a80c9ef1.total_conversions",
-        "name": "Conversions totales – Clic lien d'affiliation",
+        "name": "Conversions totales - Clic lien d'affiliation",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 10,
         "unit": "count",
@@ -226,7 +226,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_a80c9ef1.conversion_rate",
-        "name": "Taux de conversion – Clic lien d'affiliation",
+        "name": "Taux de conversion - Clic lien d'affiliation",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 0.61,
         "unit": "percent",
@@ -249,7 +249,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_88980e45.unique_conversions",
-        "name": "Conversions uniques – Outbound Link: Click",
+        "name": "Conversions uniques - Outbound Link: Click",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 29,
         "unit": "count",
@@ -272,7 +272,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_88980e45.total_conversions",
-        "name": "Conversions totales – Outbound Link: Click",
+        "name": "Conversions totales - Outbound Link: Click",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 34,
         "unit": "count",
@@ -295,7 +295,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_88980e45.conversion_rate",
-        "name": "Taux de conversion – Outbound Link: Click",
+        "name": "Taux de conversion - Outbound Link: Click",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 1.78,
         "unit": "percent",
@@ -318,7 +318,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_f3605e9a.unique_conversions",
-        "name": "Conversions uniques – category-filter-change",
+        "name": "Conversions uniques - category-filter-change",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 6,
         "unit": "count",
@@ -341,7 +341,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_f3605e9a.total_conversions",
-        "name": "Conversions totales – category-filter-change",
+        "name": "Conversions totales - category-filter-change",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 19,
         "unit": "count",
@@ -364,7 +364,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_f3605e9a.conversion_rate",
-        "name": "Taux de conversion – category-filter-change",
+        "name": "Taux de conversion - category-filter-change",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 0.37,
         "unit": "percent",
@@ -387,7 +387,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_f4a658bc.unique_conversions",
-        "name": "Conversions uniques – file-download",
+        "name": "Conversions uniques - file-download",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 1,
         "unit": "count",
@@ -410,7 +410,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_f4a658bc.total_conversions",
-        "name": "Conversions totales – file-download",
+        "name": "Conversions totales - file-download",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 1,
         "unit": "count",
@@ -433,7 +433,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_f4a658bc.conversion_rate",
-        "name": "Taux de conversion – file-download",
+        "name": "Taux de conversion - file-download",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 0.06,
         "unit": "percent",
@@ -456,7 +456,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_1977a418.unique_conversions",
-        "name": "Conversions uniques – open-data-download",
+        "name": "Conversions uniques - open-data-download",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 22,
         "unit": "count",
@@ -479,7 +479,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_1977a418.total_conversions",
-        "name": "Conversions totales – open-data-download",
+        "name": "Conversions totales - open-data-download",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 24,
         "unit": "count",
@@ -502,7 +502,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_1977a418.conversion_rate",
-        "name": "Taux de conversion – open-data-download",
+        "name": "Taux de conversion - open-data-download",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 1.35,
         "unit": "percent",
@@ -525,7 +525,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_39ec8814.unique_conversions",
-        "name": "Conversions uniques – product-redirect",
+        "name": "Conversions uniques - product-redirect",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 10,
         "unit": "count",
@@ -548,7 +548,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_39ec8814.total_conversions",
-        "name": "Conversions totales – product-redirect",
+        "name": "Conversions totales - product-redirect",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 10,
         "unit": "count",
@@ -571,7 +571,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_39ec8814.conversion_rate",
-        "name": "Taux de conversion – product-redirect",
+        "name": "Taux de conversion - product-redirect",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 0.61,
         "unit": "percent",
@@ -594,7 +594,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_3559d7ac.unique_conversions",
-        "name": "Conversions uniques – search",
+        "name": "Conversions uniques - search",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 6,
         "unit": "count",
@@ -617,7 +617,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_3559d7ac.total_conversions",
-        "name": "Conversions totales – search",
+        "name": "Conversions totales - search",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 8,
         "unit": "count",
@@ -640,7 +640,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_3559d7ac.conversion_rate",
-        "name": "Taux de conversion – search",
+        "name": "Taux de conversion - search",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 0.37,
         "unit": "percent",
@@ -663,7 +663,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.unique_conversions",
-        "name": "Conversions uniques – search-focus",
+        "name": "Conversions uniques - search-focus",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 52,
         "unit": "count",
@@ -686,7 +686,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.total_conversions",
-        "name": "Conversions totales – search-focus",
+        "name": "Conversions totales - search-focus",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 113,
         "unit": "count",
@@ -709,7 +709,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.conversion_rate",
-        "name": "Taux de conversion – search-focus",
+        "name": "Taux de conversion - search-focus",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 3.19,
         "unit": "percent",
@@ -732,7 +732,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.unique_conversions",
-        "name": "Conversions uniques – section-view",
+        "name": "Conversions uniques - section-view",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 54,
         "unit": "count",
@@ -755,7 +755,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.total_conversions",
-        "name": "Conversions totales – section-view",
+        "name": "Conversions totales - section-view",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 100,
         "unit": "count",
@@ -778,7 +778,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.conversion_rate",
-        "name": "Taux de conversion – section-view",
+        "name": "Taux de conversion - section-view",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 3.31,
         "unit": "percent",
@@ -801,7 +801,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_6ac2b397.unique_conversions",
-        "name": "Conversions uniques – tab-click",
+        "name": "Conversions uniques - tab-click",
         "description": "Plausible: nombre de visiteurs uniques ayant converti sur ce goal",
         "value": 3,
         "unit": "count",
@@ -824,7 +824,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_6ac2b397.total_conversions",
-        "name": "Conversions totales – tab-click",
+        "name": "Conversions totales - tab-click",
         "description": "Plausible: total des conversions (events) pour ce goal",
         "value": 9,
         "unit": "count",
@@ -847,7 +847,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_6ac2b397.conversion_rate",
-        "name": "Taux de conversion – tab-click",
+        "name": "Taux de conversion - tab-click",
         "description": "Plausible: conversion rate (%) pour ce goal",
         "value": 0.18,
         "unit": "percent",
@@ -870,7 +870,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.source.f05d576e.unique_conversions",
-        "name": "Conversions uniques — search-focus — Source Direct / None",
+        "name": "Conversions uniques - search-focus - Source Direct / None",
         "description": "Plausible: conversions uniques (visitors) pour ce couple goal/source",
         "value": 21,
         "unit": "count",
@@ -894,7 +894,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.source.f05d576e.total_conversions",
-        "name": "Conversions totales — search-focus — Source Direct / None",
+        "name": "Conversions totales - search-focus - Source Direct / None",
         "description": "Plausible: conversions totales (events) pour ce couple goal/source",
         "value": 43,
         "unit": "count",
@@ -918,7 +918,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.source.f05d576e.conversion_rate",
-        "name": "Taux de conversion — search-focus — Source Direct / None",
+        "name": "Taux de conversion - search-focus - Source Direct / None",
         "description": "Plausible: group_conversion_rate (%) pour ce couple goal/source",
         "value": 0.0,
         "unit": "percent",
@@ -942,7 +942,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.source.2b681c0a.unique_conversions",
-        "name": "Conversions uniques — search-focus — Source Google",
+        "name": "Conversions uniques - search-focus - Source Google",
         "description": "Plausible: conversions uniques (visitors) pour ce couple goal/source",
         "value": 10,
         "unit": "count",
@@ -966,7 +966,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.source.2b681c0a.total_conversions",
-        "name": "Conversions totales — search-focus — Source Google",
+        "name": "Conversions totales - search-focus - Source Google",
         "description": "Plausible: conversions totales (events) pour ce couple goal/source",
         "value": 10,
         "unit": "count",
@@ -990,7 +990,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_8983a59b.source.2b681c0a.conversion_rate",
-        "name": "Taux de conversion — search-focus — Source Google",
+        "name": "Taux de conversion - search-focus - Source Google",
         "description": "Plausible: group_conversion_rate (%) pour ce couple goal/source",
         "value": 0.0,
         "unit": "percent",
@@ -1014,7 +1014,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.source.2b681c0a.unique_conversions",
-        "name": "Conversions uniques — section-view — Source Google",
+        "name": "Conversions uniques - section-view - Source Google",
         "description": "Plausible: conversions uniques (visitors) pour ce couple goal/source",
         "value": 27,
         "unit": "count",
@@ -1038,7 +1038,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.source.2b681c0a.total_conversions",
-        "name": "Conversions totales — section-view — Source Google",
+        "name": "Conversions totales - section-view - Source Google",
         "description": "Plausible: conversions totales (events) pour ce couple goal/source",
         "value": 44,
         "unit": "count",
@@ -1062,7 +1062,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.source.2b681c0a.conversion_rate",
-        "name": "Taux de conversion — section-view — Source Google",
+        "name": "Taux de conversion - section-view - Source Google",
         "description": "Plausible: group_conversion_rate (%) pour ce couple goal/source",
         "value": 0.0,
         "unit": "percent",
@@ -1086,7 +1086,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.source.f05d576e.unique_conversions",
-        "name": "Conversions uniques — section-view — Source Direct / None",
+        "name": "Conversions uniques - section-view - Source Direct / None",
         "description": "Plausible: conversions uniques (visitors) pour ce couple goal/source",
         "value": 19,
         "unit": "count",
@@ -1110,7 +1110,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.source.f05d576e.total_conversions",
-        "name": "Conversions totales — section-view — Source Direct / None",
+        "name": "Conversions totales - section-view - Source Direct / None",
         "description": "Plausible: conversions totales (events) pour ce couple goal/source",
         "value": 45,
         "unit": "count",
@@ -1134,7 +1134,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_fc9f1400.source.f05d576e.conversion_rate",
-        "name": "Taux de conversion — section-view — Source Direct / None",
+        "name": "Taux de conversion - section-view - Source Direct / None",
         "description": "Plausible: group_conversion_rate (%) pour ce couple goal/source",
         "value": 0.0,
         "unit": "percent",
@@ -1158,7 +1158,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_1977a418.source.2b681c0a.unique_conversions",
-        "name": "Conversions uniques — open-data-download — Source Google",
+        "name": "Conversions uniques - open-data-download - Source Google",
         "description": "Plausible: conversions uniques (visitors) pour ce couple goal/source",
         "value": 18,
         "unit": "count",
@@ -1182,7 +1182,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_1977a418.source.2b681c0a.total_conversions",
-        "name": "Conversions totales — open-data-download — Source Google",
+        "name": "Conversions totales - open-data-download - Source Google",
         "description": "Plausible: conversions totales (events) pour ce couple goal/source",
         "value": 20,
         "unit": "count",
@@ -1206,7 +1206,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_1977a418.source.2b681c0a.conversion_rate",
-        "name": "Taux de conversion — open-data-download — Source Google",
+        "name": "Taux de conversion - open-data-download - Source Google",
         "description": "Plausible: group_conversion_rate (%) pour ce couple goal/source",
         "value": 0.0,
         "unit": "percent",
@@ -1230,7 +1230,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_88980e45.source.2b681c0a.unique_conversions",
-        "name": "Conversions uniques — Outbound Link: Click — Source Google",
+        "name": "Conversions uniques - Outbound Link: Click - Source Google",
         "description": "Plausible: conversions uniques (visitors) pour ce couple goal/source",
         "value": 21,
         "unit": "count",
@@ -1254,7 +1254,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_88980e45.source.2b681c0a.total_conversions",
-        "name": "Conversions totales — Outbound Link: Click — Source Google",
+        "name": "Conversions totales - Outbound Link: Click - Source Google",
         "description": "Plausible: conversions totales (events) pour ce couple goal/source",
         "value": 24,
         "unit": "count",
@@ -1278,7 +1278,7 @@
       {
         "schemaVersion": "2.0",
         "id": "plausible.goal.g_88980e45.source.2b681c0a.conversion_rate",
-        "name": "Taux de conversion — Outbound Link: Click — Source Google",
+        "name": "Taux de conversion - Outbound Link: Click - Source Google",
         "description": "Plausible: group_conversion_rate (%) pour ce couple goal/source",
         "value": 0.0,
         "unit": "percent",
