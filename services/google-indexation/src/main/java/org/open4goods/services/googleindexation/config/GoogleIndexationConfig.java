@@ -2,11 +2,13 @@ package org.open4goods.services.googleindexation.config;
 
 import java.time.Duration;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Configuration properties for Google Indexing API access.
  */
+@Configuration
 @ConfigurationProperties(prefix = "google-indexation")
 public class GoogleIndexationConfig {
 
