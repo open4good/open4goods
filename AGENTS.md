@@ -1,11 +1,11 @@
-# open4goods – Agents Guide (Root)
+# open4goods - Agents Guide (Root)
 
 This guide defines **project-wide conventions** for all human contributors **and AI coding agents** working on the open4goods repository.  
 Adhering to these rules keeps every sub-project consistent, maintainable, and predictable for automated tools (LLMs included).
 
 > **Where to look next**  
 > Each sub-module (e.g. `/api`, `/crawler`, `/services/*`) ships its own `agents.md` that may add or override rules.  
-> The standards below are **mandatory everywhere** unless a module’s guide explicitly says otherwise.
+> The standards below are **mandatory everywhere** unless a module's guide explicitly says otherwise.
 
 ---
 
@@ -98,12 +98,36 @@ To compile **all modules**:
 mvn --offline clean install
 ```
 
+Run the canonical lint suite before handoff:
+
+```bash
+./scripts/lint.sh
+./scripts/lint.sh --fix
+```
+
+The suite covers Markdown/JSON text normalization, YAML, shell scripts, GitHub
+Actions, Docker Compose, Dockerfiles when `hadolint` is installed, and the Nuxt
+frontend lint/generation checks.
+
+## 6.1  Documentation policy
+
+- Use [docs/README.md](docs/README.md) as the documentation entry point.
+- Put significant architecture decisions in `docs/adr/` and link them from
+  [docs/adr/README.md](docs/adr/README.md).
+- Put shared designs and contracts in `docs/architecture/`.
+- Put repeatable operational procedures in `docs/operations/`.
+- Update the nearest durable document when code changes behavior, contracts,
+  deployment, developer workflow, or AI-agent workflow.
+- Markdown and JSON must use ASCII punctuation normalized by
+  `scripts/python/text_replacements.py`.
+
 ## 7  Pull-request checklist
 
 1. Clear commit & PR description (**why** and **what**).  
 2. `mvn --offline clean install` passes locally.  
 3. Tests added/updated; coverage not reduced.  
-4. Docs (agents.md, README, Javadoc, spring-configuration-metadata.json) updated.  
+4. `./scripts/lint.sh` passes locally.
+5. Docs (agents.md, README, ADR, Javadoc, spring-configuration-metadata.json) updated.
 
 ---
 
@@ -121,11 +145,11 @@ and before 5am) with major Maven upgrades disabled.
 
 For detailed module-specific conventions, see:
 
-- **Frontend**: [frontend/AGENTS.md](frontend/AGENTS.md) – Nuxt 4 / Vue 3 / Vuetify
-- **Front API**: [front-api/AGENTS.md](front-api/AGENTS.md) – SpringDoc / OpenAPI
-- **Services**: [services/AGENTS.md](services/AGENTS.md) – Microservices (19 services)
+- **Frontend**: [frontend/AGENTS.md](frontend/AGENTS.md) - Nuxt 4 / Vue 3 / Vuetify
+- **Front API**: [front-api/AGENTS.md](front-api/AGENTS.md) - SpringDoc / OpenAPI
+- **Services**: [services/AGENTS.md](services/AGENTS.md) - Microservices (19 services)
 - **Core Modules**: [admin](admin/AGENTS.md), [api](api/AGENTS.md), [commons](commons/AGENTS.md), [crawler](crawler/AGENTS.md), [model](model/AGENTS.md), [verticals](verticals/AGENTS.md)
-- **UI (deprecated)**: [ui/AGENTS.md](ui/AGENTS.md) – Being replaced by frontend
+- **UI (deprecated)**: [ui/AGENTS.md](ui/AGENTS.md) - Being replaced by frontend
 
 ---
 

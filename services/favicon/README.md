@@ -9,9 +9,9 @@ fetch icons with optional fallback mechanisms.
 - Cache icons in memory and on disk via `RemoteFileCachingService`.
 - Exposes metrics and health status.
 - REST endpoints:
-  - `GET /favicon/exists?url=...` – check if a favicon is available.
-  - `GET /favicon?url=...` – retrieve the favicon bytes.
-  - `DELETE /favicon/cache` – clear the cache.
+  - `GET /favicon/exists?url=...` - check if a favicon is available.
+  - `GET /favicon?url=...` - retrieve the favicon bytes.
+  - `DELETE /favicon/cache` - clear the cache.
 
 ## Configuration
 

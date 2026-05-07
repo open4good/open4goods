@@ -58,14 +58,14 @@ mvn --offline -pl nudger-front-api -am clean install
 The module exposes configurable security settings via
 `front.security.*` mapped by `SecurityProperties`:
 
-- `front.security.enabled` – toggle Spring Security.
-- `front.security.cors-allowed-hosts` – list of allowed CORS origins.
+- `front.security.enabled` - toggle Spring Security.
+- `front.security.cors-allowed-hosts` - list of allowed CORS origins.
 
 Rate limiting is configured via `front.rate-limit.*` mapped by
 `RateLimitProperties`:
 
-- `front.rate-limit.anonymous` – requests per minute for unauthenticated users.
-- `front.rate-limit.authenticated` – requests per minute for authenticated users.
+- `front.rate-limit.anonymous` - requests per minute for unauthenticated users.
+- `front.rate-limit.authenticated` - requests per minute for authenticated users.
 
 ---
 
@@ -105,7 +105,7 @@ Every controller MUST declare at the class level :
     parameters = {
         @Parameter(
             name = "gtin",
-            description = "GTIN 8–14 digits",
+            description = "GTIN 8-14 digits",
             required = true,
             example = "00012345600012")
     },
@@ -116,7 +116,7 @@ Every controller MUST declare at the class level :
         @ApiResponse(responseCode = "404", description = "Product not found")
     }
 )
-public ResponseEntity<List<OfferDto>> getOffers(@PathVariable String gtin) { … }
+public ResponseEntity<List<OfferDto>> getOffers(@PathVariable String gtin) { ... }
 ~~~
 
 ### 6.4 Domain language contract

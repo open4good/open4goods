@@ -12,7 +12,7 @@ type: "guide"
 
 # Sources de données Impact Score
 
-L’Impact Score s’appuie sur **un ensemble de sources structurées**. Chaque
+L'Impact Score s'appuie sur **un ensemble de sources structurées**. Chaque
 source est associée à des métadonnées de provenance et de fraîcheur pour garder
 le score auditable.
 

@@ -2,7 +2,7 @@
 
 ## Choix méthodologique : Kanban Agile
 
-Pour la gestion opérationnelle, Nudger adopte une approche **Kanban agile** souple, s’appuyant sur GitHub Projects pour le suivi des tâches. Ce choix favorise un flux continu d’intégration des évolutions, adapté à une équipe hétérogène dont les disponibilités peuvent varier, évitant ainsi la rigidité de sprints fixes après le lancement du produit. L’**intelligence artificielle générative** est intégrée pour assister ce processus Kanban.
+Pour la gestion opérationnelle, Nudger adopte une approche **Kanban agile** souple, s'appuyant sur GitHub Projects pour le suivi des tâches. Ce choix favorise un flux continu d'intégration des évolutions, adapté à une équipe hétérogène dont les disponibilités peuvent varier, évitant ainsi la rigidité de sprints fixes après le lancement du produit. L'**intelligence artificielle générative** est intégrée pour assister ce processus Kanban.
 
 ---
 
@@ -21,9 +21,9 @@ Les tâches techniques détaillées associées sont généralement créées sous
 
 ---
 
-### Board PMO – Global Board
+### Board PMO - Global Board
 
-Le board `PMO - Global Board` permet le suivi macro et la gestion des tâches transverses ou non affectées à une squad spécifique. Il agrège l’ensemble des issues et s'appuie notamment sur les labels `EPIC` et/ou `USER STORY` pour assurer une visibilité d'ensemble cohérente.
+Le board `PMO - Global Board` permet le suivi macro et la gestion des tâches transverses ou non affectées à une squad spécifique. Il agrège l'ensemble des issues et s'appuie notamment sur les labels `EPIC` et/ou `USER STORY` pour assurer une visibilité d'ensemble cohérente.
 
 La PMO porte ainsi une attention particulière aux tickets identifiés comme stratégiques ou impactant le produit à un niveau global.
 
@@ -51,9 +51,9 @@ Exemple concret de combinaison :
 
 ### Vues GitHub Projects : publique vs interne
 
-Deux vues principales sont configurées pour répondre aux besoins spécifiques des utilisateurs externes et de l’équipe interne.
+Deux vues principales sont configurées pour répondre aux besoins spécifiques des utilisateurs externes et de l'équipe interne.
 
-**Vue publique – backlog communautaire :**  
+**Vue publique - backlog communautaire :**  
 - Accessible publiquement (via README et site Nudger).
 - Filtrage sur `visibility:public`.
 - Affichage principalement des issues de type feature requests, suggestions d'amélioration.
@@ -61,6 +61,6 @@ Deux vues principales sont configurées pour répondre aux besoins spécifiques 
 - Utilisée pour identifier les demandes prioritaires via le nombre de votes.
 - N'affiche pas les informations techniques internes (assignation, complexité technique, etc.).
 
-**Vue interne – pilotage technique :**  
-- Destinée à l’équipe Nudger (mais accessible publiquement pour transparence).
+**Vue interne - pilotage technique :**  
+- Destinée à l'équipe Nudger (mais accessible publiquement pour transparence).
 - Affichage de toutes les issues (

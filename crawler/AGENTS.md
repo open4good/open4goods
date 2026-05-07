@@ -12,10 +12,10 @@ This module is part of the open4goods multi-module Maven project.
 
 ## Directory structure
 
-- `src/main/java` – crawler implementation
-- `src/main/resources` – configuration
-- `src/test/java` – unit tests
-- `libs` – third party crawler libs
+- `src/main/java` - crawler implementation
+- `src/main/resources` - configuration
+- `src/test/java` - unit tests
+- `libs` - third party crawler libs
 
 ## Purpose
 

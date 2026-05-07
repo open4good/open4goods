@@ -74,7 +74,7 @@ else
 
 $$ Percentile = \frac{CountBelow + 0.5 \times CountAt}{TotalCount} $$
 
-The percentile is then scaled to the same 0–5 range and clamped as usual.
+The percentile is then scaled to the same 0-5 range and clamped as usual.
 
 ### 3. Impact Score Aggregation
 

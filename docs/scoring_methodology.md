@@ -58,7 +58,7 @@ Percentile = (CountBelow + 0.5 * CountAt) / TotalCount
 Score = Percentile * 5
 ```
 
-This preserves a smooth ranking even for discrete values while keeping scores on the same 0–5 scale.
+This preserves a smooth ranking even for discrete values while keeping scores on the same 0-5 scale.
 
 ## Technical Implementation
 

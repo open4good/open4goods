@@ -32,13 +32,13 @@ Open4goods (o4g) is an open-source and open-data product aggregator, search engi
 
 Open4goods is organised as a multi‑module Maven **modulith**. Core modules are:
 
-- `crawler` – scrapes external product sources.
-- `api` – central service exposing REST endpoints and aggregation logic.
-- `front-api` – lightweight API consumed by the Nuxt 3 `frontend`.
-- `frontend` – Nuxt 3 application working with `front-api`.
-- `commons` and `model` – shared utilities and domain objects.
-- `services/*` – independent Spring Boot microservices extracted from the monolith.
-- `ui` – historical Thymeleaf interface (deprecated).
+- `crawler` - scrapes external product sources.
+- `api` - central service exposing REST endpoints and aggregation logic.
+- `front-api` - lightweight API consumed by the Nuxt 3 `frontend`.
+- `frontend` - Nuxt 3 application working with `front-api`.
+- `commons` and `model` - shared utilities and domain objects.
+- `services/*` - independent Spring Boot microservices extracted from the monolith.
+- `ui` - historical Thymeleaf interface (deprecated).
 
 # <i class="icon-upload"></i> How to contribute
 

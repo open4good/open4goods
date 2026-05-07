@@ -1,0 +1,37 @@
+---
+extends: default
+
+ignore: |
+  .git/
+  **/node_modules/
+  **/target/
+  **/.nuxt/
+  **/.output/
+  **/pnpm-lock.yaml
+  api/src/main/resources/templates/
+  src/main/site/assets/
+  admin/src/main/resources/application-devsec.yml
+  api/src/main/resources/application*.yml
+  **/src/main/resources/application*.yml
+  **/src/test/resources/*.yml
+  **/src/test/resources/*.yaml
+  commons/src/test/resources/
+  ui/src/main/resources/application*.yml
+  ui/src/test/resources/
+  verticals/src/main/resources/attributes/
+  verticals/src/main/resources/verticals/
+
+rules:
+  braces:
+    max-spaces-inside: 1
+  brackets:
+    max-spaces-inside: 1
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: disable
+  document-start: disable
+  line-length:
+    max: 140
+    level: warning
+  truthy:
+    allowed-values: ["true", "false", "on", "off"]

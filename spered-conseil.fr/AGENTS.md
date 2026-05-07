@@ -1,4 +1,4 @@
-# spered-conseil.fr – Lightweight Agent Guide
+# spered-conseil.fr - Lightweight Agent Guide
 
 This guide applies to everything under `spered-conseil.fr/`.
 

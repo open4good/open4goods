@@ -2,7 +2,7 @@ version: '3.3'
 services:
 ####################################################################
 # Xwiki
-###################################################################             
+###################################################################
   xwiki:
     # Use an already built XWiki image from DockerHub.
     image: "xwiki:stable-mysql-tomcat"
@@ -26,7 +26,7 @@ services:
 
 ####################################################################
 # Mysql
-###################################################################  
+###################################################################
   # The container that runs MySQL
   mysql:
     image: "mysql:9.6"
@@ -50,7 +50,7 @@ services:
       - MYSQL_USER=xwiki
       - MYSQL_PASSWORD=xwiki
       - MYSQL_DATABASE=xwiki
-                 
+
     networks:
       - o4g-network
     ports:

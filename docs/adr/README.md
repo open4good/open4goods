@@ -1,0 +1,15 @@
+# Architecture Decision Records
+
+Store ADR files as `NNNN-short-title.md`, for example
+`0001-documentation-layout.md`.
+
+Each ADR should include:
+
+- Status: proposed, accepted, superseded, or rejected.
+- Context: the constraint or problem that made the decision necessary.
+- Decision: the selected option.
+- Consequences: expected tradeoffs, follow-up work, and operational impact.
+
+Agents should enrich or link an ADR when a change alters architecture,
+cross-module contracts, infrastructure, data layout, security posture, or
+developer workflow.

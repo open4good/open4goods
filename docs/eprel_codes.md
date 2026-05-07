@@ -21,12 +21,12 @@ can be one of the following url_code :
 | SOLID_FUEL_BOILER_PACKAGE | solidfuelboilerpackages | Ensembles de chaudières à combustible solide |
 | TELEVISION | televisions | Téléviseurs |
 | SPACE_HEATER | spaceheaters | Appareils de chauffage / chauffages combinés |
-| SPACE_HEATER_PACKAGE | spaceheaterpackages | Ensembles d’appareils de chauffage |
+| SPACE_HEATER_PACKAGE | spaceheaterpackages | Ensembles d'appareils de chauffage |
 | SPACE_HEATER_TEMPERATURE_CONTROL | spaceheatertemperaturecontrol | Dispositifs de régulation de température |
 | SPACE_HEATER_SOLAR_DEVICE | spaceheatersolardevice | Dispositifs solaires pour appareils de chauffage |
 | WATER_HEATERS | waterheaters | Chauffe-eau |
 | WATER_HEATER_PACKAGE | waterheaterpackages | Ensembles de chauffe-eau |
-| HOT_WATER_STORAGE_TANK | hotwaterstoragetanks | Ballons de stockage d’eau chaude |
+| HOT_WATER_STORAGE_TANK | hotwaterstoragetanks | Ballons de stockage d'eau chaude |
 | WATER_HEATER_SOLAR_DEVICE | waterheatersolardevices | Dispositifs solaires pour chauffe-eau |
 | DIRECT_SALES_REFRIGERATION_APPLIANCE | refrigeratingappliancesdirectsalesfunction | Appareils frigorifiques à fonction de vente directe |
 | ELECTRONIC_DISPLAY | electronicdisplays | Écrans électroniques |

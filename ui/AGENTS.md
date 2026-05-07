@@ -1,4 +1,4 @@
-# UI Module – DEPRECATED ⚠️
+# UI Module - DEPRECATED ⚠️
 
 > **Status**: This module is being replaced by [frontend](../frontend) (Nuxt 3 / Vue 3).  
 > **Action**: Do not add new features. For current UI development, see [frontend/AGENTS.md](../frontend/AGENTS.md).
@@ -22,10 +22,10 @@ This module is part of the open4goods multi-module Maven project.
 
 ## Directory structure
 
-- `src/main/java` – web controllers
-- `src/main/resources` – templates and configuration
-- `src/test/java` – unit tests
-- `package.json` and `gulpfile.mjs` – frontend build tasks
+- `src/main/java` - web controllers
+- `src/main/resources` - templates and configuration
+- `src/test/java` - unit tests
+- `package.json` and `gulpfile.mjs` - frontend build tasks
 
 ## Purpose
 

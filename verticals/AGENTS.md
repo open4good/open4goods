@@ -13,8 +13,8 @@ This module is part of the open4goods multi-module Maven project.
 
 ## Directory structure
 
-- `src/main/resources/verticals` – vertical definitions
-- `src/test/java` – unit tests
+- `src/main/resources/verticals` - vertical definitions
+- `src/test/java` - unit tests
 
 ## Purpose
 

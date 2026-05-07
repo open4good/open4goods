@@ -1,4 +1,4 @@
-# Plan complet — Dataviz statistiques verticales (front-api + frontend)
+# Plan complet - Dataviz statistiques verticales (front-api + frontend)
 
 ## 1. Objectif
 

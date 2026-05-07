@@ -7,8 +7,8 @@ Use the main `api` service for search operations.
 
 ### Content endpoints
 
-- `GET /blocs/{blocId}` – return a small HTML bloc from XWiki.
-- `GET /pages/{xwikiPageId}` – return a rendered XWiki page with metadata.
+- `GET /blocs/{blocId}` - return a small HTML bloc from XWiki.
+- `GET /pages/{xwikiPageId}` - return a rendered XWiki page with metadata.
 
 ## Default Port
 
@@ -25,9 +25,9 @@ via the `FRONT_SECURITY_CORS_ALLOWED_HOSTS` environment variable. By default it 
 
 Additional properties configure token generation:
 
-- `front.security.jwt-secret` – secret key used to sign JWT tokens.
-- `front.security.access-token-expiry` – duration before an access token expires (default `PT30M`).
-- `front.security.refresh-token-expiry` – duration before a refresh token expires (default `P7D`).
+- `front.security.jwt-secret` - secret key used to sign JWT tokens.
+- `front.security.access-token-expiry` - duration before an access token expires (default `PT30M`).
+- `front.security.refresh-token-expiry` - duration before a refresh token expires (default `P7D`).
 
 With this configuration all calls stay on the same origin and the built-in CORS
 rules apply correctly.
@@ -37,8 +37,8 @@ rules apply correctly.
 Requests are limited using an in-memory token bucket. Defaults can be changed in
 `application.yml`:
 
-- `front.rate-limit.anonymous` – requests per minute allowed for unauthenticated users.
-- `front.rate-limit.authenticated` – requests per minute allowed for authenticated users.
+- `front.rate-limit.anonymous` - requests per minute allowed for unauthenticated users.
+- `front.rate-limit.authenticated` - requests per minute allowed for authenticated users.
 
 When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
 
@@ -49,18 +49,18 @@ succeeds. The integration is disabled by default and must be enabled explicitly.
 
 Front API dispatch configuration:
 
-- `front.google-indexation.enabled` – master toggle (default `false`).
-- `front.google-indexation.realtime-enabled` – dispatch immediately on success.
-- `front.google-indexation.batch-enabled` – dispatch queued URLs on schedule.
-- `front.google-indexation.batch-interval` – schedule delay (default `30m`).
-- `front.google-indexation.batch-size` – maximum URLs per batch.
-- `front.google-indexation.max-attempts` – retry limit for failed URLs.
-- `front.google-indexation.site-base-url` – public base URL used to build product URLs.
+- `front.google-indexation.enabled` - master toggle (default `false`).
+- `front.google-indexation.realtime-enabled` - dispatch immediately on success.
+- `front.google-indexation.batch-enabled` - dispatch queued URLs on schedule.
+- `front.google-indexation.batch-interval` - schedule delay (default `30m`).
+- `front.google-indexation.batch-size` - maximum URLs per batch.
+- `front.google-indexation.max-attempts` - retry limit for failed URLs.
+- `front.google-indexation.site-base-url` - public base URL used to build product URLs.
 
 Google Indexing API credentials:
 
-- `google-indexation.service-account-json` – raw service account JSON.
-- `google-indexation.service-account-path` – file path to the service account JSON.
+- `google-indexation.service-account-json` - raw service account JSON.
+- `google-indexation.service-account-path` - file path to the service account JSON.
 
 Credentials are required when `front.google-indexation.enabled=true`. You can
 provide them via environment variables:

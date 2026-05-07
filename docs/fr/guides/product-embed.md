@@ -14,14 +14,14 @@ navigation: true
 
 Utilisez `ProductEmbed` directement dans le contenu markdown des docs.
 
-## Modes d’identification
+## Modes d'identification
 
 Identifiants supportés :
 
 - `gtin`
 - `brand` + `model`
 
-Quand `brand` + `model` produisent plusieurs correspondances, le composant applique une politique conservative et **n’affiche pas** de lien produit.
+Quand `brand` + `model` produisent plusieurs correspondances, le composant applique une politique conservative et **n'affiche pas** de lien produit.
 
 ## Comportement par défaut
 

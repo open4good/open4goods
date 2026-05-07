@@ -15,10 +15,10 @@ model
 
 The main packages are:
 
-- `org.open4goods.model.product` – product entities and helpers
-- `org.open4goods.model.vertical` – configuration of product categories ("verticals")
-- `org.open4goods.model.resource` – information about images, PDFs and other resources
-- `org.open4goods.model.ai` – annotations used for AI generated content
+- `org.open4goods.model.product` - product entities and helpers
+- `org.open4goods.model.vertical` - configuration of product categories ("verticals")
+- `org.open4goods.model.resource` - information about images, PDFs and other resources
+- `org.open4goods.model.ai` - annotations used for AI generated content
 
 
 

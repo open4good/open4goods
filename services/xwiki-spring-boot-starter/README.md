@@ -4,12 +4,12 @@ This module provides helper services and configuration to consume the XWiki REST
 
 ## Provided Services
 
-* **XwikiFacadeService** – high level facade combining the read/object/html services.
-* **XWikiReadService** – access pages, page lists and attachments via REST calls.
-* **XWikiHtmlService** – fetch HTML content from the XWiki web endpoints.
-* **XWikiObjectService** – retrieve page properties and objects.
-* **XWikiAuthenticationService** – authenticate against XWiki and obtain user groups.
-* **XwikiAuthenticationProvider** – Spring Security provider delegating to `XWikiAuthenticationService`.
+* **XwikiFacadeService** - high level facade combining the read/object/html services.
+* **XWikiReadService** - access pages, page lists and attachments via REST calls.
+* **XWikiHtmlService** - fetch HTML content from the XWiki web endpoints.
+* **XWikiObjectService** - retrieve page properties and objects.
+* **XWikiAuthenticationService** - authenticate against XWiki and obtain user groups.
+* **XwikiAuthenticationProvider** - Spring Security provider delegating to `XWikiAuthenticationService`.
 
 All services are auto-configured by `XWikiServiceConfiguration` when the starter is on the classpath.
 
@@ -19,9 +19,9 @@ Properties are loaded under the prefix `xwiki` and can be configured in `applica
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `xwiki.baseUrl` | Base URL to the XWiki instance. | – |
-| `xwiki.username` | Username used for API calls. | – |
-| `xwiki.password` | Password used for API calls. | – |
+| `xwiki.baseUrl` | Base URL to the XWiki instance. | - |
+| `xwiki.username` | Username used for API calls. | - |
+| `xwiki.password` | Password used for API calls. | - |
 | `xwiki.httpsOnly` | Force HTTPS for all generated URLs. | `false` |
 | `xwiki.media` | Media format requested from the API. | `json` |
 | `xwiki.apiEntrypoint` | REST entry point path. | `rest` |

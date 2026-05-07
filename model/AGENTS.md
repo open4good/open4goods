@@ -12,9 +12,9 @@ This module is part of the open4goods multi-module Maven project.
 
 ## Directory structure
 
-- `src/main/java` – domain model classes
-- `src/main/resources` – configuration
-- `src/test/java` – unit tests
+- `src/main/java` - domain model classes
+- `src/main/resources` - configuration
+- `src/test/java` - unit tests
 
 ## Purpose
 

@@ -121,7 +121,7 @@ jobs:
               `;
               await github.graphql(mutation, { projectId, itemId });
             }
-            
+
             function desiredProjectsForLabels(labels, mapping, ifUnmatch) {
               const projects = new Set();
               labels.forEach(l => {
@@ -135,7 +135,7 @@ jobs:
             async function processOneIssue(issueNumber, dryRun, mapping, IF_UNMATCH) {
               const { owner, repo } = context.repo;
               const issue = (await github.rest.issues.get({ owner, repo, issue_number: issueNumber })).data;
-              
+
               // Si c'est un PR, on skippe (REST renvoie un champ pull_request pour les PR)
                if (issue.pull_request) {
                  core.info(`PR #${issueNumber} détecté, ignoré.`);

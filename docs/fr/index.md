@@ -1,6 +1,6 @@
 ---
 title: "Accueil documentation"
-description: "Point d’entrée rapide vers la documentation Nudger, avec des exemples Impact Score et des astuces de navigation."
+description: "Point d'entrée rapide vers la documentation Nudger, avec des exemples Impact Score et des astuces de navigation."
 tags: ["language:fr", "docs", "overview"]
 icon: "mdi-book-open-page-variant"
 weight: 1
@@ -13,7 +13,7 @@ type: "guide"
 # Accueil documentation
 
 Bienvenue dans le hub de documentation **Nudger**. Cette section est écrite en
-Markdown et rendue via Nuxt Content. Utilisez l’arborescence (ou les cartes) pour
+Markdown et rendue via Nuxt Content. Utilisez l'arborescence (ou les cartes) pour
 parcourir chaque section.
 
 ## Ce que vous trouverez ici

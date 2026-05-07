@@ -1,4 +1,4 @@
-# Services – Agents Guide
+# Services - Agents Guide
 
 > **Parent Guide**: [Root AGENTS.md](../AGENTS.md)  
 > This guide documents conventions for all microservices under `/services/`.

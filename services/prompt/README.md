@@ -90,7 +90,7 @@ aiService: "OPEN_AI"
 # No system prompt with o1
 #systemPrompt: |
 #  Tu es un agent expert en évaluation environnementale des produits électriques et electroniques.
-#  Adopte une démarche d’expert en analyse du cycle de vie des produits. 
+#  Adopte une démarche d'expert en analyse du cycle de vie des produits. 
 #  Nous allons travailler sur des [[${VERTICAL_NAME}]]
 #  Ne fournir en réponse que du JSON, conformément à la structure indiquée, sans commentaire, ni texte supplémentaire
 
@@ -100,7 +100,7 @@ userPrompt: |
 
     ## Ton rôle
     Tu es un agent expert en évaluation environnementale des produits électriques et electroniques.
-    Adopte une démarche d’expert en analyse du cycle de vie des produits. 
+    Adopte une démarche d'expert en analyse du cycle de vie des produits. 
     Nous allons travailler sur des [[${VERTICAL_NAME}]]
     Ne fournir en réponse que du JSON, conformément à la structure indiquée, sans commentaire, ni texte supplémentaire
 
@@ -124,7 +124,7 @@ userPrompt: |
         
      Tout écart par rapport à la structure JSON fournie est inacceptable.
      Aucune information supplémentaire ne doit être fournie en dehors du JSON (pas de phrases avant ou après).
-     Conserve l’ordre des clés et leur orthographe. Les clés doivent correspondre exactement à celles indiquées. Si un champ est nul ou non applicable, omets-le de la réponse.
+     Conserve l'ordre des clés et leur orthographe. Les clés doivent correspondre exactement à celles indiquées. Si un champ est nul ou non applicable, omets-le de la réponse.
      Fournis une réponse JSON respectant strictement la structure suivante :
 
      {

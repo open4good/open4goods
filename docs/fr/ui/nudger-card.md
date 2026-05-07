@@ -1,6 +1,6 @@
 ---
 title: "NudgerCard : cartes à coins modulaires"
-description: "Guide d’utilisation du composant NudgerCard pour mutualiser les styles de cartes à coins arrondis."
+description: "Guide d'utilisation du composant NudgerCard pour mutualiser les styles de cartes à coins arrondis."
 tags: ["language:fr", "frontend", "ui", "cartes"]
 icon: "mdi-card-bulleted-outline"
 weight: 20
@@ -10,20 +10,20 @@ draft: false
 type: "guide"
 ---
 
-# NudgerCard : guide d’usage
+# NudgerCard : guide d'usage
 
 Le composant `NudgerCard` centralise les styles de cartes “nudger” afin de garder
 un **rendu homogène** et de **limiter les classes ad-hoc** dans les sections
 frontend.
 
-## Pourquoi l’utiliser ?
+## Pourquoi l'utiliser ?
 
 - **Cohérence visuelle** : un seul point de vérité pour les rayons et bordures.
 - **Maintenance simplifiée** : les ajustements se font dans un seul composant.
 - **Variantes explicites** : les coins modifiés sont déclarés par props.
 - **Design system** : facilite la revue UX et les ajustements globaux.
 
-## Quand l’utiliser ?
+## Quand l'utiliser ?
 
 Utilisez `NudgerCard` pour les cartes de contenu qui reprennent le style “nudger”
 dans les sections marketing (home, landing pages, etc.).  
@@ -112,7 +112,7 @@ Pour un style plus plat :
 
 ## Bonnes pratiques
 
-- **Préférez les props** plutôt que d’ajouter de nouvelles classes globales.
+- **Préférez les props** plutôt que d'ajouter de nouvelles classes globales.
 - **Ciblez uniquement les coins nécessaires** (ex. un seul coin accentué).
 - **Centralisez la logique** : si un nouveau style devient récurrent, ajoutez une
   prop ou une variante dans `NudgerCard` plutôt que de dupliquer.
