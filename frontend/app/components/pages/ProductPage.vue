@@ -5,6 +5,7 @@
         :open="isStickyBannerOpen"
         :product="product ?? undefined"
         :offers-count-label="bannerOffersCountLabel"
+        :impact-score="impactScoreOutOf20"
         @scroll-to-offers="scrollToSection(sectionIds.price)"
       />
     </ClientOnly>
@@ -20,7 +21,35 @@
         {{ errorMessage }}
       </v-alert>
 
-      <v-skeleton-loader v-else-if="pending" type="article" class="mb-6" />
+      <div v-else-if="pending" class="product-page__layout product-page__skeleton">
+        <aside class="product-page__nav">
+          <v-skeleton-loader
+            type="list-item-three-line,list-item-three-line,list-item-three-line"
+            class="rounded-xl product-page__skeleton-nav"
+          />
+        </aside>
+        <main class="product-page__content">
+          <div class="product-page__skeleton-hero-grid mb-8">
+            <v-skeleton-loader
+              type="image,article"
+              class="rounded-xl"
+              style="grid-column: span 2;"
+            />
+            <v-skeleton-loader
+              type="card"
+              class="rounded-xl"
+            />
+          </div>
+          <v-skeleton-loader
+            type="heading, paragraph, paragraph"
+            class="rounded-xl mb-8"
+          />
+          <v-skeleton-loader
+            type="table-heading, table-row-divider, table-row, table-row, table-row"
+            class="rounded-xl mb-8"
+          />
+        </main>
+      </div>
 
       <div
         v-else-if="product"
@@ -48,7 +77,8 @@
           <section
             :id="sectionIds.hero"
             ref="heroSectionRef"
-            class="product-page__section"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
           >
             <div class="product-page__hero">
               <ProductHero
@@ -67,7 +97,8 @@
             v-if="categoryDetail"
             :id="sectionIds.impact"
             ref="impactSectionRef"
-            class="product-page__section"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
           >
             <ProductImpactSection
               :scores="impactScores"
@@ -90,7 +121,8 @@
           <section
             v-if="showAiReviewSection"
             :id="sectionIds.ai"
-            class="product-page__section"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
           >
             <ProductAiReviewSection
               :gtin="product.gtin ?? gtin"
@@ -106,7 +138,11 @@
             />
           </section>
 
-          <section :id="sectionIds.price" class="product-page__section">
+          <section
+            :id="sectionIds.price"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
+          >
             <ProductPriceSection
               v-if="product.offers"
               :offers="product.offers"
@@ -118,7 +154,8 @@
           <section
             v-if="product.timeline"
             :id="sectionIds.timeline"
-            class="product-page__section"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
           >
             <ProductLifeTimeline :timeline="product.timeline" />
           </section>
@@ -126,7 +163,8 @@
           <section
             v-if="showAlternativesSection"
             :id="sectionIds.alternatives"
-            class="product-page__section"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
           >
             <ProductAlternatives
               :product="product"
@@ -140,7 +178,8 @@
           <section
             v-if="showVigilanceSection"
             :id="sectionIds.vigilance"
-            class="product-page__section"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
           >
             <ProductVigilanceSection
               :product="product"
@@ -155,7 +194,8 @@
           <section
             v-if="showAttributesSection"
             :id="sectionIds.attributes"
-            class="product-page__section"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
           >
             <ProductAttributesSection
               :product="product"
@@ -169,7 +209,8 @@
           <section
             v-if="product.resources?.pdfs?.length"
             :id="sectionIds.docs"
-            class="product-page__section"
+            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            class="product-page__section reveal-on-scroll"
           >
             <ProductDocumentationSection :pdfs="product.resources.pdfs" />
           </section>
@@ -190,7 +231,7 @@
 </template>
 
 <script setup lang="ts">
-import { useElementBounding, useWindowScroll } from '@vueuse/core'
+import { useWindowScroll } from '@vueuse/core'
 import {
   computed,
   defineAsyncComponent,
@@ -289,7 +330,15 @@ const aiNavigationLabel = computed(() =>
 )
 
 const heroSectionRef = ref<HTMLElement | null>(null)
-const { bottom: _heroSectionBottom } = useElementBounding(heroSectionRef)
+
+const onSectionIntersect = (
+  isIntersecting: boolean,
+  entries: IntersectionObserverEntry[]
+) => {
+  if (isIntersecting) {
+    entries[0].target.classList.add('revealed')
+  }
+}
 
 const PRODUCT_COMPONENTS = [
   'base',
@@ -305,7 +354,6 @@ const PRODUCT_COMPONENTS = [
 ].join(',')
 
 const impactSectionRef = ref<HTMLElement | null>(null)
-const { top: _impactSectionTop } = useElementBounding(impactSectionRef)
 
 const bannerOffersCountLabel = computed(() => {
   const count = product.value?.offers?.offersCount ?? 0
@@ -412,8 +460,6 @@ const { selectCategoryBySlug } = useCategories()
 const categoryDetail = ref<Awaited<
   ReturnType<typeof selectCategoryBySlug>
 > | null>(null)
-const loadingAggregations = ref(false)
-const aggregations = ref<Record<string, AggregationResponseDto>>({})
 
 const requestedScoreIds = computed(() => {
   const ids: string[] = []
@@ -506,54 +552,51 @@ if (categorySlug) {
   }
 }
 
-const scoreAggregations = async () => {
-  if (!product.value || !categoryDetail.value?.id) {
-    return
-  }
+const { data: aggregationsData } = await useAsyncData<
+  Record<string, AggregationResponseDto>
+>(
+  `product-aggregations-${categorySlug ?? gtin}`,
+  async () => {
+    if (!product.value || !categoryDetail.value?.id) return {}
+    const scores = requestedScoreIds.value
+    if (!scores.length) return {}
 
-  const scores = requestedScoreIds.value
-  if (!scores.length) {
-    return
-  }
+    const aggs: Agg[] = scores.map(scoreId => ({
+      name: `score_${scoreId}`,
+      field: `scores.${scoreId}.value`,
+      type: AggTypeEnum.Range,
+      step: 0.5,
+    }))
 
-  loadingAggregations.value = true
+    try {
+      const response = await $fetch<ProductSearchResponseDto>(
+        '/api/products/search',
+        {
+          method: 'POST',
+          body: {
+            verticalId: categoryDetail.value.id,
+            pageSize: 0,
+            aggs: { aggs },
+          },
+        }
+      )
 
-  const aggs: Agg[] = scores.map(scoreId => ({
-    name: `score_${scoreId}`,
-    field: `scores.${scoreId}.value`,
-    type: AggTypeEnum.Range,
-    step: 0.5,
-  }))
+      const resolved: Record<string, AggregationResponseDto> = {}
+      ;(response.aggregations ?? []).forEach(aggregation => {
+        if (aggregation.name) {
+          resolved[aggregation.name] = aggregation
+        }
+      })
+      return resolved
+    } catch (aggregationError) {
+      console.error('Failed to fetch impact aggregations', aggregationError)
+      return {}
+    }
+  },
+  { server: true, immediate: true }
+)
 
-  try {
-    const response = await $fetch<ProductSearchResponseDto>(
-      '/api/products/search',
-      {
-        method: 'POST',
-        body: {
-          verticalId: categoryDetail.value.id,
-          pageSize: 0,
-          aggs: { aggs },
-        },
-      }
-    )
-
-    const resolved: Record<string, AggregationResponseDto> = {}
-    ;(response.aggregations ?? []).forEach(aggregation => {
-      if (aggregation.name) {
-        resolved[aggregation.name] = aggregation
-      }
-    })
-
-    aggregations.value = resolved
-  } catch (aggregationError) {
-    console.error('Failed to fetch impact aggregations', aggregationError)
-  } finally {
-    loadingAggregations.value = false
-  }
-}
-
-await scoreAggregations()
+const aggregations = computed(() => aggregationsData.value ?? {})
 
 const productTitle = computed(() => {
   const rawSlug = product.value?.slug ?? ''
@@ -1907,7 +1950,9 @@ const handleNavCollapseChange = (collapsed: boolean) => {
 const activeSection = ref<string>(sectionIds.hero)
 
 const observer = ref<IntersectionObserver | null>(null)
+const revealObserver = ref<IntersectionObserver | null>(null)
 const visibleSectionRatios = new Map<string, number>()
+const revealedSections = new Set<string>()
 const MIN_SECTION_RATIO = 0.6
 
 const refreshActiveSection = () => {
@@ -1931,6 +1976,7 @@ const observeSections = () => {
   }
 
   observer.value?.disconnect()
+  revealObserver.value?.disconnect()
   visibleSectionRatios.clear()
   refreshActiveSection()
 
@@ -1953,26 +1999,34 @@ const observeSections = () => {
     }
   )
 
+  revealObserver.value = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (
+          entry.isIntersecting &&
+          !revealedSections.has(entry.target.id)
+        ) {
+          revealedSections.add(entry.target.id)
+          entry.target.classList.add('product-page__section--revealed')
+          revealObserver.value?.unobserve(entry.target)
+        }
+      })
+    },
+    { threshold: 0.05 }
+  )
+
   nextTick(() => {
     sections.value.forEach(section => {
       const element = document.getElementById(section.id)
       if (element) {
         observer.value?.observe(element)
+        if (!revealedSections.has(section.id)) {
+          revealObserver.value?.observe(element)
+        }
       }
     })
   })
 }
-
-/*
-watch(
-  () => scrollY.value,
-  (current, previous) => {
-    // ... removed redundant logic that was causing ReferenceError (stickyBannerThresholdRatio undefined)
-    // Sticky banner toggle is already handled by IntersectionObserver on the impact section
-  },
-  { flush: 'post' }
-)
-*/
 
 onMounted(() => {
   observeSections()
@@ -1988,7 +2042,9 @@ watch(
 
 onBeforeUnmount(() => {
   observer.value?.disconnect()
+  revealObserver.value?.disconnect()
   visibleSectionRatios.clear()
+  revealedSections.clear()
 })
 
 const expandedScoreId = ref<string | null>(null)
@@ -2410,8 +2466,50 @@ useHead(() => {
   min-width: 0;
 }
 
+.product-page__skeleton-hero-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2.75rem;
+}
+
+@media (max-width: 960px) {
+  .product-page__skeleton-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
 .product-page__section {
   scroll-margin-top: 108px; /* Match sticky nav + banner */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .product-page__section--revealed {
+    animation: sectionReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes sectionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-page__skeleton-nav {
+  height: 300px;
+}
+
+.product-page__skeleton-hero {
+  height: 420px;
+}
+
+.product-page__skeleton-section {
+  height: 200px;
 }
 
 .product-page__hero {
@@ -2578,5 +2676,28 @@ useHead(() => {
   transform: translateY(-2px);
   background: rgba(var(--v-theme-surface-default), 1);
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+}
+
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 1, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 1, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 </style>

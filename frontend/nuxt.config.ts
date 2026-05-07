@@ -303,6 +303,10 @@ export default defineNuxtConfig({
     // Fix SWR handler error by disabling cache for assistant configs (conflicts with cookie setting)
     '/assistant-configs/**': { cache: false },
     '/api/assistant-configs/**': { cache: false },
+    // Merchant favicons are stable - cache for 1 hour at CDN and browser level
+    '/api/favicon**': {
+      headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=3600' },
+    },
   },
   modules: [
     'vuetify-nuxt-module',
@@ -431,6 +435,23 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    optimizeDeps: {
+      include: [
+        'jwt-decode',
+        'vue-hotjar',
+        'lz-string',
+        'isomorphic-dompurify',
+        'date-fns',
+        'date-fns/locale',
+        'vue-echarts',
+        'echarts/charts',
+        'echarts/components',
+        'echarts/renderers',
+        'echarts/core',
+        '@hcaptcha/vue3-hcaptcha',
+        'vue-pdf-embed',
+      ],
+    },
     plugins: [
       ...(process.env.NODE_ENV !== 'production'
         ? [

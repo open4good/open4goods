@@ -31,6 +31,17 @@
         </div>
 
         <div class="product-sticky-banner__right">
+          <v-chip
+            v-if="impactScore != null"
+            size="small"
+            class="product-sticky-banner__score-chip"
+            :color="impactScoreColor"
+            variant="tonal"
+            prepend-icon="mdi-leaf"
+          >
+            {{ impactScore }}/20
+          </v-chip>
+
           <div class="product-sticky-banner__prices">
             <ProductPriceRows
               v-if="product"
@@ -55,12 +66,13 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
 
 const { t } = useI18n()
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     open?: boolean
     color?: string
@@ -69,6 +81,7 @@ withDefaults(
     offersCountLabel?: string
     partnersLink?: string
     product?: ProductDto
+    impactScore?: number | null
   }>(),
   {
     open: false,
@@ -78,8 +91,17 @@ withDefaults(
     offersCountLabel: undefined,
     partnersLink: '/partners',
     product: undefined,
+    impactScore: null,
   }
 )
+
+const impactScoreColor = computed(() => {
+  const score = props.impactScore
+  if (score == null) return 'grey'
+  if (score >= 14) return 'success'
+  if (score >= 9) return 'warning'
+  return 'error'
+})
 
 defineEmits<{
   'scroll-to-offers': []
@@ -91,15 +113,17 @@ defineEmits<{
   position: fixed;
   top: 64px;
   inset-inline: 0;
-  height: 44px;
+  height: 52px;
   z-index: 29;
-  padding: 0 1rem;
-  background: rgb(var(--v-theme-surface));
-  color: rgb(var(--v-theme-on-surface));
-  box-shadow: 0 4px 12px rgba(var(--v-theme-shadow-primary-600), 0.08);
+  padding: 0 1.5rem;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.9);
+  backdrop-filter: blur(16px);
+  color: rgb(var(--v-theme-text-neutral-strong));
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.15);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .product-sticky-banner__content {
@@ -121,13 +145,14 @@ defineEmits<{
 
 .product-sticky-banner__text {
   margin: 0;
-  font-size: 0.825rem;
-  line-height: 1.2;
-  color: rgba(var(--v-theme-on-surface), 0.85);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: rgb(var(--v-theme-text-neutral-secondary));
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+  font-weight: 500;
 }
 
 .product-sticky-banner__icon {
@@ -156,6 +181,12 @@ defineEmits<{
 .product-sticky-banner__prices {
   display: flex;
   gap: 0.5rem;
+}
+
+.product-sticky-banner__score-chip {
+  font-weight: 700;
+  font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
 .product-sticky-banner__count-btn {

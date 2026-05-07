@@ -7,6 +7,7 @@
         alt=""
         decoding="async"
         loading="eager"
+        fetchpriority="high"
       />
       <div class="product-hero__background-overlay" />
     </div>
@@ -1230,11 +1231,16 @@ const heroBreadcrumbProps = computed(() => ({
 
 .product-hero__ai-summary-list {
   list-style: none;
-  padding: 0;
+  padding: 1.25rem;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.15);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
 .product-hero__ai-summary-item {
@@ -1304,6 +1310,12 @@ const heroBreadcrumbProps = computed(() => ({
 
 .product-hero__compare-button:hover {
   background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(var(--v-theme-shadow-primary-600), 0.12);
+}
+
+.product-hero__compare-button:active {
+  transform: translateY(0);
 }
 
 .product-hero__ai-btn-wrapper {
@@ -1332,6 +1344,12 @@ const heroBreadcrumbProps = computed(() => ({
 
 .product-hero__ai-button:hover {
   background: rgba(var(--v-theme-accent-primary-highlight), 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(var(--v-theme-shadow-primary-600), 0.12);
+}
+
+.product-hero__ai-button:active {
+  transform: translateY(0);
 }
 
 .product-hero__brand-line {
@@ -1470,11 +1488,12 @@ const heroBreadcrumbProps = computed(() => ({
 }
 
 .product-hero__tab-content {
-  background: rgba(var(--v-theme-surface-default), 0.4);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
-  padding: 1rem;
-  border: 1px solid rgba(var(--v-theme-outline), 0.1);
+  background: rgba(var(--v-theme-surface-glass-strong), 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 1.25rem;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
 }
 
 .product-hero__description-body {

@@ -502,13 +502,21 @@ watch(
 
 <style scoped>
 .product-hero__pricing-panel {
-  border-radius: 20px;
-  padding: 1.1rem 1rem;
-  background: rgba(var(--v-theme-surface-glass), 0.95);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.35);
+  border-radius: 24px;
+  padding: 1.25rem;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-hero__pricing-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
 }
 
 .product-hero__pricing-panel--new {
@@ -569,11 +577,18 @@ watch(
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
+.product-hero__pricing-panel-main--link {
+  transition: all 0.2s ease;
+  padding: 0.75rem;
+  margin: -0.75rem;
+  border-radius: 16px;
+}
+
 .product-hero__pricing-panel-main--link:hover,
 .product-hero__pricing-panel-main--link:focus-visible {
   box-shadow: none;
   cursor: pointer;
-  background: rgba(var(--v-theme-surface-default), 0.5);
+  background: rgba(var(--v-theme-surface-primary-080), 0.4);
 }
 
 .product-hero__pricing-panel-merchant {
@@ -632,12 +647,13 @@ watch(
 .product-hero__pricing-panel-empty {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.75rem;
+  gap: 0.6rem;
+  padding: 1rem;
   border-radius: 16px;
-  background: rgba(var(--v-theme-surface-primary-050), 0.8);
+  background: rgba(var(--v-theme-surface-primary-050), 0.6);
   color: rgb(var(--v-theme-text-neutral-secondary));
   font-weight: 600;
+  border: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.2);
 }
 
 .product-hero__pricing-panel-select {

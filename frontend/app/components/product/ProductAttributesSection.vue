@@ -400,7 +400,7 @@
               <v-row
                 v-if="shouldSplitDetailTables"
                 class="product-attributes__details-table-grid"
-                dense
+                density="comfortable"
               >
                 <v-col cols="12" md="6">
                   <v-data-table
@@ -762,7 +762,7 @@
               </v-data-table>
             </template>
 
-            <v-row v-else class="product-attributes__details-grid" dense>
+            <v-row v-else class="product-attributes__details-grid" density="comfortable">
               <ProductAttributesDetailCard
                 v-for="group in filteredGroups"
                 :key="group.id"
