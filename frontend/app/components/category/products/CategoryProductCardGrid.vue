@@ -17,6 +17,8 @@
       :md="normalizedSize === 'small' ? 4 : normalizedSize === 'big' ? 4 : 6"
       :lg="normalizedSize === 'small' ? 3 : normalizedSize === 'big' ? 4 : 4"
       :xl="normalizedSize === 'small' ? 2 : normalizedSize === 'big' ? 4 : 3"
+      class="category-product-card-col"
+      :style="{ animationDelay: `${Math.min(index * 60, 480)}ms` }"
     >
       <ProductCard
         :product="product"
@@ -28,6 +30,7 @@
         :show-attribute-icons="showAttributeIcons"
         :disabled="isDisabledCategory"
         :nofollow-links="nofollowLinks"
+        :is-priority="index < 4"
       />
     </v-col>
   </v-row>
@@ -80,4 +83,19 @@ const isDisabledCategory = computed(() => props.isCategoryDisabled ?? false)
     :deep(.product-card)
       filter: grayscale(1)
       opacity: 0.6
+
+.category-product-card-col
+  animation: card-entrance 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both
+
+@keyframes card-entrance
+  from
+    opacity: 0
+    transform: translateY(12px) scale(0.97)
+  to
+    opacity: 1
+    transform: translateY(0) scale(1)
+
+@media (prefers-reduced-motion: reduce)
+  .category-product-card-col
+    animation: none
 </style>

@@ -26,7 +26,9 @@
           size="small"
           rounded="pill"
           class="category-badges-row__chip text-secondary"
-          :class="{ 'category-badges-row__chip--lifted': hoveredId === category.id }"
+          :class="{
+            'category-badges-row__chip--lifted': hoveredId === category.id,
+          }"
         >
           <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
           {{ category.verticalHomeTitle ?? category.id }}
@@ -57,7 +59,9 @@
         size="small"
         rounded="pill"
         class="category-badges-row__chip text-neutral-secondary"
-        :class="{ 'category-badges-row__chip--lifted': hoveredId === '__view-all__' }"
+        :class="{
+          'category-badges-row__chip--lifted': hoveredId === '__view-all__',
+        }"
       >
         <v-icon icon="mdi-view-grid-outline" start size="16" />
         {{ t('home.hero.categoryBadges.viewAll') }}

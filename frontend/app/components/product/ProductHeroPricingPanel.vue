@@ -511,7 +511,9 @@ watch(
   flex-direction: column;
   gap: 1.25rem;
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .product-hero__pricing-panel:hover {

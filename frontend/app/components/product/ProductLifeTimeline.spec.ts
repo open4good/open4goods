@@ -167,7 +167,6 @@ describe('ProductLifeTimeline', () => {
     )
   })
 
-
   it('hides EPREL market end dates beyond 15 years and shows explanatory note', async () => {
     const timeline: ProductTimelineDto = {
       events: [

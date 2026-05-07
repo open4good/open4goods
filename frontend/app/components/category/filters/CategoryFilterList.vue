@@ -66,7 +66,7 @@
 
     <!-- Row Mode (Legacy/Fallback) -->
     <template v-else>
-      <v-row dense class="category-filter-list__row">
+      <v-row density="comfortable" class="category-filter-list__row">
         <v-col
           v-for="field in fields"
           :key="field.mapping ?? field.title"

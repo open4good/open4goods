@@ -175,7 +175,6 @@
                   {{ newTrendLabel }}
                 </p>
               </div>
-
             </header>
             <v-row class="ma-0">
               <v-col cols="12" md="4">

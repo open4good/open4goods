@@ -20,7 +20,10 @@
       {{ visibleLabel }}
     </NuxtLink>
 
-    <span v-else-if="pending" class="product-embed__placeholder" aria-hidden="true"
+    <span
+      v-else-if="pending"
+      class="product-embed__placeholder"
+      aria-hidden="true"
       >…</span
     >
   </span>

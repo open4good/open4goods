@@ -793,6 +793,7 @@
         "remainingAttributes": "Autres attributs"
       },
       "noResults": "Aucun produit ne correspond aux filtres sélectionnés.",
+      "noResultsHelper": "Essayez d'ajuster vos filtres ou vos termes de recherche pour trouver ce que vous cherchez.",
       "notRated": "Non noté",
       "offerCount": {
         "one": "{count} offre",

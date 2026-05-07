@@ -16,17 +16,17 @@ Each doc can expose:
 
 ```yaml
 ---
-title: "Page title"
-description: "SEO summary"
-type: "guide"
-tags: ["language:en", "sample"]
-updatedAt: "2026-04-12"
+title: 'Page title'
+description: 'SEO summary'
+type: 'guide'
+tags: ['language:en', 'sample']
+updatedAt: '2026-04-12'
 draft: false
 published: true
 navigation: true
 requiresAuth: false
-layout: "default"
-ogImage: "/images/og/docs.png"
+layout: 'default'
+ogImage: '/images/og/docs.png'
 noindex: false
 ---
 ```
@@ -53,12 +53,12 @@ Sample mapped pages are available at:
 
 They demonstrate the required `language:*` tag contract.
 
-
 ## Embedded product widgets
 
 Markdown pages can directly use the `ProductEmbed` Vue component.
 
 Supported identifiers:
+
 - `gtin`
 - `brand` + `model`
 

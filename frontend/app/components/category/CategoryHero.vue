@@ -23,21 +23,21 @@
         <CategoryNavigationBreadcrumbs
           v-if="heroBreadcrumbs.length"
           v-bind="heroBreadcrumbProps"
-          class="category-hero__breadcrumbs"
+          class="category-hero__breadcrumbs animate-in-up"
         />
 
         <div class="category-hero__copy">
-          <p v-if="eyebrow" class="category-hero__eyebrow">
+          <p v-if="eyebrow" class="category-hero__eyebrow animate-in-up" style="--delay: 100ms">
             {{ eyebrow }}
           </p>
-          <h1 :id="headingId" class="category-hero__title">
+          <h1 :id="headingId" class="category-hero__title animate-in-up" style="--delay: 200ms">
             {{ title }}
           </h1>
-          <p v-if="description" class="category-hero__description">
+          <p v-if="description" class="category-hero__description animate-in-up" style="--delay: 300ms">
             {{ description }}
           </p>
 
-          <v-row dense class="category-hero__actions-row">
+          <v-row density="comfortable" class="category-hero__actions-row animate-in-up" style="--delay: 400ms">
             <v-col cols="12" class="flex-grow-1">
               <slot name="actions" />
             </v-col>
@@ -232,4 +232,22 @@ defineExpose({ headingId, t })
 @media (max-width: 959px)
   .category-hero__media
     display: none
+
+.animate-in-up
+  animation: animate-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both
+  animation-delay: var(--delay, 0ms)
+
+@keyframes animate-in-up
+  from
+    opacity: 0
+    transform: translateY(20px)
+  to
+    opacity: 1
+    transform: translateY(0)
+
+@media (prefers-reduced-motion: reduce)
+  .animate-in-up
+    animation: none
+    opacity: 1
+    transform: none
 </style>

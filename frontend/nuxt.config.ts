@@ -450,6 +450,7 @@ export default defineNuxtConfig({
         'echarts/core',
         '@hcaptcha/vue3-hcaptcha',
         'vue-pdf-embed',
+        'vue-barcode-reader',
       ],
     },
     plugins: [

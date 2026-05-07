@@ -47,6 +47,7 @@
           "
           contain
           class="product-card__image"
+          :fetchpriority="isPriority ? 'high' : undefined"
         >
           <template #placeholder>
             <v-skeleton-loader type="image" class="h-100" />
@@ -145,6 +146,7 @@ const props = withDefaults(
     showAttributeIcons?: boolean
     disabled?: boolean
     nofollowLinks?: boolean
+    isPriority?: boolean
   }>(),
   {
     popularAttributes: () => [],
@@ -155,6 +157,7 @@ const props = withDefaults(
     showAttributeIcons: true,
     disabled: false,
     nofollowLinks: false,
+    isPriority: false,
   }
 )
 
@@ -250,11 +253,12 @@ const shouldShowSortedField = computed(() => Boolean(sortedFieldDisplay.value))
     display: flex
     flex-direction: column
     text-decoration: none
-    transition: transform 0.2s ease, box-shadow 0.2s ease
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease
     position: relative
     background: rgb(var(--v-theme-surface-glass))
     overflow: hidden
-    border: 1px solid rgba(var(--v-theme-border-primary), 0.1)
+    border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
+    box-shadow: 0 10px 30px -15px rgba(var(--v-theme-shadow-primary-600), 0.15)
 
     &__overlay-link
         position: absolute
@@ -264,9 +268,9 @@ const shouldShowSortedField = computed(() => Boolean(sortedFieldDisplay.value))
 
 
     &:hover
-        transform: translateY(-4px)
-        box-shadow: 0 16px 30px rgba(21, 46, 73, 0.08)
-        border-color: rgba(var(--v-theme-primary), 0.3)
+        transform: translateY(-6px)
+        box-shadow: 0 20px 40px -20px rgba(var(--v-theme-shadow-primary-600), 0.3)
+        border-color: rgba(var(--v-theme-primary), 0.4)
 
     &--disabled
         filter: grayscale(1)
@@ -302,7 +306,7 @@ const shouldShowSortedField = computed(() => Boolean(sortedFieldDisplay.value))
 
     /* Hover effect on image */
     &:hover &__image
-        transform: scale(1.05)
+        transform: scale(1.08) rotate(1deg)
 
     &__header
         display: flex

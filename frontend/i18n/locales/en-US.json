@@ -910,6 +910,7 @@
         "remainingAttributes": "Other attributes"
       },
       "noResults": "No products match the selected filters.",
+      "noResultsHelper": "Try adjusting your filters or search terms to find what you are looking for.",
       "notRated": "Not rated",
       "offerCount": {
         "one": "{count} offer",

@@ -256,17 +256,28 @@
 
           <template v-if="loadingProducts">
             <template v-if="viewMode === 'cards'">
-              <v-skeleton-loader
-                v-for="index in 3"
-                :key="`card-skeleton-${index}`"
-                type="image, article"
-                class="mb-4"
-              />
+              <v-row class="mb-6">
+                <v-col
+                  v-for="n in skeletonCardCount"
+                  :key="`card-skeleton-${n}`"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-skeleton-loader
+                    type="image, article"
+                    rounded="xl"
+                    class="h-100"
+                  />
+                </v-col>
+              </v-row>
             </template>
             <template v-else-if="viewMode === 'list'">
               <v-skeleton-loader
-                v-for="index in 5"
-                :key="`list-skeleton-${index}`"
+                v-for="n in 6"
+                :key="`list-skeleton-${n}`"
                 type="list-item-two-line"
                 class="mb-2"
               />
@@ -277,17 +288,46 @@
           </template>
 
           <template v-else>
-            <component
-              :is="viewComponent"
-              v-bind="viewComponentProps"
-              class="mb-6"
-              @update:sort-field="onTableSortFieldUpdate"
-              @update:sort-order="onTableSortOrderUpdate"
-            />
+            <v-fade-transition hide-on-leave>
+              <component
+                :is="viewComponent"
+                :key="viewMode"
+                v-bind="viewComponentProps"
+                class="mb-6"
+                @update:sort-field="onTableSortFieldUpdate"
+                @update:sort-order="onTableSortOrderUpdate"
+              />
+            </v-fade-transition>
 
-            <p v-if="!currentProducts.length" class="category-page__no-results">
-              {{ $t('category.products.noResults') }}
-            </p>
+            <div
+              v-if="!currentProducts.length"
+              class="category-page__empty-state"
+            >
+              <div class="category-page__empty-icon-wrapper">
+                <v-icon
+                  icon="mdi-magnify-scan"
+                  size="84"
+                  class="category-page__empty-icon"
+                />
+              </div>
+              <h3 class="text-h5 font-weight-bold mt-6 mb-2">
+                {{ $t('category.products.noResults') }}
+              </h3>
+              <p class="text-body-1 text-medium-emphasis mb-6 max-width-400 mx-auto">
+                {{ $t('category.products.noResultsHelper') }}
+              </p>
+              <v-btn
+                variant="flat"
+                color="primary"
+                prepend-icon="mdi-filter-off-outline"
+                size="large"
+                rounded="pill"
+                class="px-8 shadow-primary"
+                @click="clearAllFilters"
+              >
+                {{ $t('category.filters.clearAllTooltip') }}
+              </v-btn>
+            </div>
 
             <v-pagination
               v-if="pageCount > 1"
@@ -1034,7 +1074,7 @@ const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
 const pageNumber = ref(0)
 const searchTerm = ref('')
 const MIN_QUERY_LENGTH = 3
-const normalizedSearchTerm = computed(() => searchTerm.value.trim())
+const normalizedSearchTerm = computed(() => (searchTerm.value ?? '').trim())
 const hasMinimumSearchLength = computed(
   () => normalizedSearchTerm.value.length >= MIN_QUERY_LENGTH
 )
@@ -1853,13 +1893,18 @@ const loadingProducts = ref(false)
 const productError = ref<string | null>(null)
 const hasHydrated = ref(false)
 
+const skeletonCardCount = computed(() => (isDesktop.value ? 9 : 4))
+
 const isDefaultQueryState = computed(() => {
   const hasDefaultFilters = !manualFilters.value.filters?.length
   const hasDefaultSubsets = activeSubsetIds.value.length === 0
   const hasDefaultSearch = searchTerm.value === ''
   const hasDefaultPaging =
     pageNumber.value === 0 && viewMode.value === CATEGORY_DEFAULT_VIEW_MODE
-  const hasDefaultSort = !sortField.value && sortOrder.value === 'desc'
+  const hasDefaultSort =
+    (sortField.value === null ||
+      sortField.value === lastAppliedDefaultSort.value) &&
+    sortOrder.value === 'desc'
 
   return (
     hasDefaultFilters &&
@@ -2577,9 +2622,33 @@ const clearAllFilters = () => {
     min-height: 420px
     min-width: 0
 
-  &__no-results
-    font-size: 1rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
+  &__empty-state
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: 5rem 2rem
+    text-align: center
+    background: rgba(var(--v-theme-surface-glass), 0.4)
+    backdrop-filter: blur(8px)
+    border-radius: 2rem
+    border: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.25)
+    min-height: 400px
+    animation: fade-in 0.6s ease-out both
+
+  &__empty-icon-wrapper
+    background: rgba(var(--v-theme-surface-primary-050), 0.8)
+    padding: 2.5rem
+    border-radius: 50%
+    display: flex
+    align-items: center
+    justify-content: center
+    box-shadow: 0 20px 40px -20px rgba(var(--v-theme-shadow-primary-600), 0.3)
+    margin-bottom: 1rem
+
+  &__empty-icon
+    color: rgb(var(--v-theme-primary))
+    opacity: 0.8
 
   &__pagination
     justify-content: center
@@ -2623,6 +2692,10 @@ const clearAllFilters = () => {
     box-shadow:
       0 4px 6px -1px rgba(0, 0, 0, 0.1),
       0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-primary {
+    box-shadow: 0 12px 24px -8px rgba(var(--v-theme-primary), 0.5) !important;
   }
 }
 </style>

@@ -28,9 +28,10 @@ EXCLUDED_DIRS = {
 class LintSuite:
     """Small command runner that reports all lint failures before exiting."""
 
-    def __init__(self, root: Path, fix: bool) -> None:
+    def __init__(self, root: Path, fix: bool, skip_build: bool) -> None:
         self.root = root
         self.fix = fix
+        self.skip_build = skip_build
         self.failures: list[str] = []
 
     def run(self, label: str, command: list[str], cwd: Path | None = None) -> None:
@@ -147,17 +148,19 @@ def lint_frontend(suite: LintSuite) -> None:
         return
     command = ["pnpm", "lint:fix" if suite.fix else "lint"]
     suite.run("frontend lint", command, cwd=frontend)
-    suite.run("frontend generate", ["pnpm", "generate"], cwd=frontend)
+    if not suite.skip_build:
+        suite.run("frontend generate", ["pnpm", "generate"], cwd=frontend)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run the open4goods lint suite.")
     parser.add_argument("--fix", action="store_true", help="Apply supported automatic fixes.")
+    parser.add_argument("--skip-build", action="store_true", help="Skip slow build/generation steps.")
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
     os.chdir(root)
-    suite = LintSuite(root=root, fix=args.fix)
+    suite = LintSuite(root=root, fix=args.fix, skip_build=args.skip_build)
 
     lint_text(suite)
     lint_yaml(suite)

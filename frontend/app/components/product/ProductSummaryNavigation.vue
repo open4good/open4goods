@@ -368,7 +368,7 @@ watch(
   padding: 1.5rem 0.75rem;
   border-radius: 24px;
   background: rgba(var(--v-theme-surface-glass-strong), 0.85);
-  box-shadow: 
+  box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 20px 40px -1px rgba(15, 23, 42, 0.08);
   backdrop-filter: blur(16px);
@@ -535,7 +535,7 @@ watch(
 }
 
 .product-summary-navigation__link--active::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 20%;

@@ -21,7 +21,10 @@
         {{ errorMessage }}
       </v-alert>
 
-      <div v-else-if="pending" class="product-page__layout product-page__skeleton">
+      <div
+        v-else-if="pending"
+        class="product-page__layout product-page__skeleton"
+      >
         <aside class="product-page__nav">
           <v-skeleton-loader
             type="list-item-three-line,list-item-three-line,list-item-three-line"
@@ -33,12 +36,9 @@
             <v-skeleton-loader
               type="image,article"
               class="rounded-xl"
-              style="grid-column: span 2;"
+              style="grid-column: span 2"
             />
-            <v-skeleton-loader
-              type="card"
-              class="rounded-xl"
-            />
+            <v-skeleton-loader type="card" class="rounded-xl" />
           </div>
           <v-skeleton-loader
             type="heading, paragraph, paragraph"
@@ -77,7 +77,10 @@
           <section
             :id="sectionIds.hero"
             ref="heroSectionRef"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <div class="product-page__hero">
@@ -97,7 +100,10 @@
             v-if="categoryDetail"
             :id="sectionIds.impact"
             ref="impactSectionRef"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <ProductImpactSection
@@ -121,7 +127,10 @@
           <section
             v-if="showAiReviewSection"
             :id="sectionIds.ai"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <ProductAiReviewSection
@@ -140,7 +149,10 @@
 
           <section
             :id="sectionIds.price"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <ProductPriceSection
@@ -154,7 +166,10 @@
           <section
             v-if="product.timeline"
             :id="sectionIds.timeline"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <ProductLifeTimeline :timeline="product.timeline" />
@@ -163,7 +178,10 @@
           <section
             v-if="showAlternativesSection"
             :id="sectionIds.alternatives"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <ProductAlternatives
@@ -178,7 +196,10 @@
           <section
             v-if="showVigilanceSection"
             :id="sectionIds.vigilance"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <ProductVigilanceSection
@@ -194,7 +215,10 @@
           <section
             v-if="showAttributesSection"
             :id="sectionIds.attributes"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <ProductAttributesSection
@@ -209,7 +233,10 @@
           <section
             v-if="product.resources?.pdfs?.length"
             :id="sectionIds.docs"
-            v-intersect="{ handler: onSectionIntersect, options: { threshold: 0.1 } }"
+            v-intersect="{
+              handler: onSectionIntersect,
+              options: { threshold: 0.1 },
+            }"
             class="product-page__section reveal-on-scroll"
           >
             <ProductDocumentationSection :pdfs="product.resources.pdfs" />
@@ -2002,10 +2029,7 @@ const observeSections = () => {
   revealObserver.value = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
-        if (
-          entry.isIntersecting &&
-          !revealedSections.has(entry.target.id)
-        ) {
+        if (entry.isIntersecting && !revealedSections.has(entry.target.id)) {
           revealedSections.add(entry.target.id)
           entry.target.classList.add('product-page__section--revealed')
           revealObserver.value?.unobserve(entry.target)
@@ -2677,7 +2701,6 @@ useHead(() => {
   background: rgba(var(--v-theme-surface-default), 1);
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
 }
-
 
 .reveal-on-scroll {
   opacity: 0;

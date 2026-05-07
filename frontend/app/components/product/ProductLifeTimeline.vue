@@ -113,9 +113,12 @@
 
     <p v-if="hasFilteredFarFutureEndDate" class="product-life-timeline__note">
       {{
-        $t('product.attributes.timeline.notes.eprelOnMarketEndFarFutureHidden', {
-          maxYears: MAX_ALLOWED_MARKET_END_YEARS,
-        })
+        $t(
+          'product.attributes.timeline.notes.eprelOnMarketEndFarFutureHidden',
+          {
+            maxYears: MAX_ALLOWED_MARKET_END_YEARS,
+          }
+        )
       }}
     </p>
   </v-card>

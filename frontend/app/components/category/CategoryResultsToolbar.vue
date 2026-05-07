@@ -226,21 +226,28 @@ const hasSortItems = computed(() => availableSortItems.value.length > 0)
 .category-results-toolbar
   display: flex
   flex-direction: column
-  gap: 1rem
-  margin-bottom: 1.5rem
+  gap: 1.25rem
+  margin-bottom: 2rem
   width: 100%
+  background: rgb(var(--v-theme-surface-glass))
+  padding: 1.25rem
+  border-radius: 1.25rem
+  border: 1px solid rgba(var(--v-theme-border-primary), 0.1)
+  box-shadow: 0 10px 25px -12px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  backdrop-filter: blur(12px)
 
   &__section
     display: flex
     flex-wrap: wrap
     align-items: center
-    gap: 1rem
+    gap: 1.25rem
 
   &__section--left
     justify-content: flex-start
 
   &__section--center
     justify-content: center
+    flex-grow: 1
 
   &__section--right
     justify-content: flex-end
@@ -249,22 +256,31 @@ const hasSortItems = computed(() => availableSortItems.value.length > 0)
     display: flex
     flex-wrap: nowrap
     align-items: center
-    gap: 0.75rem
+    gap: 0.85rem
 
   &__sort-select
-    flex: 1 1 220px
+    flex: 0 1 240px
     min-width: 0
 
   &__sort-order
     flex-shrink: 0
     overflow: visible
+    border-radius: 999px
+    border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
+    background: rgba(var(--v-theme-surface-default), 0.4)
 
   &__search
     flex: 1 1 100%
     min-width: 0
+    max-width: 520px
 
   &__search-input
     width: 100%
+
+  &__view-toggle
+    border-radius: 999px
+    border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
+    background: rgba(var(--v-theme-surface-default), 0.4)
 
 @media (min-width: 960px)
   .category-results-toolbar

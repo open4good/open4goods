@@ -38,10 +38,9 @@ describe('useDocsContent helpers', () => {
   })
 
   it('extracts and enforces language tags', () => {
-    expect(getLanguageTags(['overview', 'language:en', 'LANGUAGE:FR'])).toEqual([
-      'en',
-      'fr',
-    ])
+    expect(getLanguageTags(['overview', 'language:en', 'LANGUAGE:FR'])).toEqual(
+      ['en', 'fr']
+    )
 
     expect(
       isDocVisibleForLocale(

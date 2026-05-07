@@ -1,5 +1,5 @@
 <template>
-  <v-row dense class="category-hero-actions" align="stretch">
+  <v-row density="comfortable" class="category-hero-actions" align="stretch">
     <v-col
       v-if="hasEcoscore"
       cols="12"

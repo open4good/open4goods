@@ -167,5 +167,4 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
 
 .home-hero__search-submit
   box-shadow: none
-
 </style>

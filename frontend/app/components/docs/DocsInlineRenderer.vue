@@ -82,7 +82,8 @@ const {
   error,
 } = await useAsyncData(
   () => `docs-inline:${resolvedPath.value}`,
-  () => getDocByPath({ path: resolvedPath.value, locale: resolvedLocale.value }),
+  () =>
+    getDocByPath({ path: resolvedPath.value, locale: resolvedLocale.value }),
   { watch: [resolvedPath] }
 )
 

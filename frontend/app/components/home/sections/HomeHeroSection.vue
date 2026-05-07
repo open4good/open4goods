@@ -238,7 +238,6 @@ const scrollToNext = () => {
   }
 }
 
-
 /* Preload removed: The hero image is loaded eagerly with fetchpriority="high",
    making the link preload redundant and causing browser warnings about unused preloads. */
 </script>
