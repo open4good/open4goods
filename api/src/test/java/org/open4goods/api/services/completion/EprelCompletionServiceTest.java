@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -75,5 +76,31 @@ class EprelCompletionServiceTest {
 
         assertThat(product.getEprelDatas()).isEqualTo(latest);
         assertThat(product.getExternalIds().getEprel()).isEqualTo("new");
+    }
+
+    @Test
+    void processProductUsesBrandFilterWhenSearchReturnsTooManyResults() {
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Candy");
+
+        EprelProduct candyProduct = new EprelProduct();
+        candyProduct.setEprelRegistrationNumber("candy-oven");
+        candyProduct.setLastVersion(true);
+        candyProduct.setSupplierOrTrademark("Candy");
+
+        EprelProduct otherProduct = new EprelProduct();
+        otherProduct.setEprelRegistrationNumber("other-oven");
+        otherProduct.setSupplierOrTrademark("Bosch");
+
+        List<EprelProduct> multipleResults = List.of(candyProduct, otherProduct);
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection()))
+                .thenReturn(multipleResults);
+        when(eprelSearchService.filterByBrand(multipleResults, "Candy"))
+                .thenReturn(List.of(candyProduct));
+
+        service.processProduct(vertical, product);
+
+        verify(eprelSearchService).filterByBrand(multipleResults, "Candy");
+        assertThat(product.getEprelDatas()).isEqualTo(candyProduct);
+        assertThat(product.getExternalIds().getEprel()).isEqualTo("candy-oven");
     }
 }

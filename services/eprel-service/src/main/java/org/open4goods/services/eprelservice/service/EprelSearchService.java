@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
@@ -24,7 +25,16 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 /**
  * Provides read access to the EPREL Elasticsearch index.
- * TODO : PErf : restict search on product defined vertical (against eprel associated categorie)if any
+ *
+ * <p>Search strategy (in order, stopping at first non-empty result):
+ * <ol>
+ *   <li>Exact GTIN match</li>
+ *   <li>Exact model identifier match</li>
+ *   <li>Prefix model match</li>
+ *   <li>Best-match (progressive prefix terms)</li>
+ *   <li>Contains match (wildcard {@code *model*}) — catches cases where EPREL
+ *       prepends a category prefix, e.g. our {@code N3B3HTX} vs EPREL {@code CA6 N3B3HTX}</li>
+ * </ol>
  */
 @Service
 public class EprelSearchService
@@ -32,6 +42,17 @@ public class EprelSearchService
     private static final Logger LOGGER = LoggerFactory.getLogger(EprelSearchService.class);
 
     private static final int MIN_PREFIX_LENGTH = 5;
+
+    /** Minimum number of alphanumeric characters required for a contains/wildcard search. */
+    private static final int MIN_CONTAINS_ALNUM_LENGTH = 5;
+
+    /**
+     * Pattern matching model candidates that are clearly not real model identifiers:
+     * purely numeric strings (likely order/reference IDs) or dimension codes such as
+     * {@code 568X500X430MM} or {@code L400XP700XH850}.
+     */
+    private static final Pattern DEGENERATE_MODEL_PATTERN =
+            Pattern.compile("^\\d+$|^[0-9]+[xX][0-9].*$|^[a-zA-Z][0-9]+[xX][0-9].*[a-zA-Z]{2,}$");
 
     private final ElasticsearchOperations elasticsearchOperations;
     private final EprelServiceProperties properties;
@@ -58,6 +79,13 @@ public class EprelSearchService
         return searchByGtin(gtin, null);
     }
 
+    /**
+     * Finds products matching the provided GTIN, optionally restricted to specific EPREL categories.
+     *
+     * @param gtin textual representation of the GTIN
+     * @param eprelCategories optional category restriction
+     * @return matching products
+     */
     public List<EprelProduct> searchByGtin(String gtin, Collection<String> eprelCategories)
     {
         Optional<Long> numericGtin = GtinHelper.toNumeric(gtin);
@@ -109,6 +137,43 @@ public class EprelSearchService
         return execute(query, eprelCategories);
     }
 
+    /**
+     * Filters the provided EPREL products by brand, matching {@code supplierOrTrademark}
+     * against the supplied brand string (case-insensitive containment check).
+     *
+     * <p>If no results survive the filter the original list is returned unchanged so that
+     * callers always have something to work with.
+     *
+     * @param results EPREL products to filter
+     * @param brand   product brand from the catalogue (may be {@code null})
+     * @return brand-filtered list, or the original list when the filter yields nothing
+     */
+    public List<EprelProduct> filterByBrand(List<EprelProduct> results, String brand)
+    {
+        if (brand == null || brand.isBlank() || results.isEmpty())
+        {
+            return results;
+        }
+        String normalizedBrand = brand.toLowerCase(Locale.ROOT).trim();
+        List<EprelProduct> brandMatches = results.stream()
+            .filter(p -> {
+                String supplier = p.getSupplierOrTrademark();
+                if (supplier == null)
+                {
+                    return false;
+                }
+                String normalizedSupplier = supplier.toLowerCase(Locale.ROOT);
+                return normalizedSupplier.contains(normalizedBrand) || normalizedBrand.contains(normalizedSupplier);
+            })
+            .toList();
+        if (brandMatches.isEmpty())
+        {
+            LOGGER.debug("Brand filter [{}] matched nothing out of {} results, keeping all", brand, results.size());
+            return results;
+        }
+        return brandMatches;
+    }
+
     public List<EprelProduct> search(String gtin, String model)
     {
         return search(gtin, model, (Collection<String>) null);
@@ -153,6 +218,14 @@ public class EprelSearchService
             return results;
         }
 
+        LOGGER.info("Searching by model contains : {}", model);
+        results = searchByModelContains(model, eprelCategories);
+        if (!results.isEmpty())
+        {
+            LOGGER.info("Found {} result by model contains : {}", results.size(), model);
+            return results;
+        }
+
         LOGGER.info("No eprel match for GTIN : {} , model : {}", gtin, model);
         return List.of();
     }
@@ -168,6 +241,15 @@ public class EprelSearchService
         return search(gtin, models, eprelCategory == null ? null : List.of(eprelCategory));
     }
 
+    /**
+     * Searches EPREL by GTIN then by model candidates, trying each strategy in turn
+     * and returning on the first non-empty result set.
+     *
+     * @param gtin GTIN of the product
+     * @param models all known model identifiers for the product
+     * @param eprelCategories EPREL product-group names to restrict the search
+     * @return matching EPREL products, or an empty list when nothing is found
+     */
     public List<EprelProduct> search(String gtin, List<String> models, Collection<String> eprelCategories)
     {
         List<String> candidates = sanitiseModelCandidates(models);
@@ -213,6 +295,17 @@ public class EprelSearchService
             }
         }
 
+        for (String model : candidates)
+        {
+            LOGGER.info("Searching by model contains : {}", model);
+            results = searchByModelContains(model, eprelCategories);
+            if (!results.isEmpty())
+            {
+                LOGGER.info("Found {} result by model contains : {}", results.size(), model);
+                return results;
+            }
+        }
+
         LOGGER.warn("No eprel match for GTIN : {} , models : {}", gtin, candidates);
         return List.of();
     }
@@ -240,10 +333,44 @@ public class EprelSearchService
         return execute(query, eprelCategories);
     }
 
+    /**
+     * Finds products whose model identifier contains the provided string (case insensitive wildcard
+     * search: {@code *model*}).
+     *
+     * <p>This catches cases where EPREL stores an additional prefix or suffix around the model code,
+     * for example our {@code N3B3HTX} matching EPREL's {@code CA6 N3B3HTX}.
+     *
+     * <p>Only executed when the alphanumeric content of the model is at least
+     * {@value #MIN_CONTAINS_ALNUM_LENGTH} characters to avoid overly broad matches.
+     *
+     * @param model model identifier fragment to search for
+     * @return matching products
+     */
+    public List<EprelProduct> searchByModelContains(String model)
+    {
+        return searchByModelContains(model, null);
+    }
 
+    private List<EprelProduct> searchByModelContains(String model, Collection<String> eprelCategories)
+    {
+        String normalized = normalize(model);
+        if (normalized == null)
+        {
+            return List.of();
+        }
+        long alnumCount = normalized.chars().filter(Character::isLetterOrDigit).count();
+        if (alnumCount < MIN_CONTAINS_ALNUM_LENGTH)
+        {
+            LOGGER.debug("Skipping contains search for [{}]: only {} alphanumeric chars (min={})",
+                model, alnumCount, MIN_CONTAINS_ALNUM_LENGTH);
+            return List.of();
+        }
+        Query query = Query.of(q -> q.wildcard(w -> w.field("modelIdentifier").value("*" + normalized + "*")));
+        return execute(query, eprelCategories);
+    }
 
     /**
-     * Performs an exact match, falling back to a prefix search.
+     * Performs an exact match, falling back to a prefix search and then a contains search.
      *
      * @param model model identifier to search for
      * @return matching products
@@ -260,7 +387,12 @@ public class EprelSearchService
         {
             return prefixMatches;
         }
-        return searchByModelBestMatch(model);
+        List<EprelProduct> bestMatches = searchByModelBestMatch(model);
+        if (!bestMatches.isEmpty())
+        {
+            return bestMatches;
+        }
+        return searchByModelContains(model);
     }
 
     private List<EprelProduct> searchByModelBestMatch(String model)
@@ -315,6 +447,16 @@ public class EprelSearchService
         return prefixes;
     }
 
+    /**
+     * Sanitises and ranks model candidates before searching.
+     *
+     * <p>In addition to the existing space-count filter, this method now also discards:
+     * <ul>
+     *   <li>Purely numeric strings — these are typically order reference IDs, not model codes</li>
+     *   <li>Strings with fewer than 3 alphanumeric characters — too generic to yield useful matches</li>
+     *   <li>Dimension codes such as {@code 568X500X430MM} or {@code L400XP700XH850}</li>
+     * </ul>
+     */
     private List<String> sanitiseModelCandidates(List<String> models)
     {
         if (models == null)
@@ -351,10 +493,25 @@ public class EprelSearchService
         long spaceCount = candidate.chars().filter(Character::isWhitespace).count();
         if (spaceCount > properties.getExcludeIfSpaces())
         {
-            LOGGER.debug("Skipping model candidate [{}] because it contains {} spaces (limit = {})", candidate, spaceCount,
+            LOGGER.debug("Skipping model candidate [{}]: {} spaces (limit={})", candidate, spaceCount,
                 properties.getExcludeIfSpaces());
             return true;
         }
+
+        long alnumCount = candidate.chars().filter(Character::isLetterOrDigit).count();
+        if (alnumCount < properties.getMinAlnumLength())
+        {
+            LOGGER.debug("Skipping model candidate [{}]: only {} alphanumeric chars (min={})", candidate, alnumCount,
+                properties.getMinAlnumLength());
+            return true;
+        }
+
+        if (DEGENERATE_MODEL_PATTERN.matcher(candidate).matches())
+        {
+            LOGGER.debug("Skipping model candidate [{}]: matches degenerate pattern", candidate);
+            return true;
+        }
+
         return false;
     }
 

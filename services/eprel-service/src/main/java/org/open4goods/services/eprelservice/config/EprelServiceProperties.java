@@ -42,6 +42,13 @@ public class EprelServiceProperties
     @Min(0)
     private int excludeIfSpaces = 2;
 
+    /**
+     * Minimum number of alphanumeric characters a model candidate must contain to be used
+     * in searches. Candidates with fewer characters are discarded as too generic.
+     */
+    @Min(1)
+    private int minAlnumLength = 3;
+
     public String getApiUrl()
     {
         return apiUrl;
@@ -90,5 +97,15 @@ public class EprelServiceProperties
     public void setExcludeIfSpaces(int excludeIfSpaces)
     {
         this.excludeIfSpaces = excludeIfSpaces;
+    }
+
+    public int getMinAlnumLength()
+    {
+        return minAlnumLength;
+    }
+
+    public void setMinAlnumLength(int minAlnumLength)
+    {
+        this.minAlnumLength = minAlnumLength;
     }
 }

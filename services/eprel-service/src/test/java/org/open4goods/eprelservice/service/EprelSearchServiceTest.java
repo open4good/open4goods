@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.PrefixQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.WildcardQuery;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,8 +43,8 @@ class EprelSearchServiceTest
         properties = new EprelServiceProperties();
         service = new EprelSearchService(elasticsearchOperations, properties);
         emptyHits = org.mockito.Mockito.mock(SearchHits.class);
-        when(emptyHits.stream()).thenAnswer(invocation -> Stream.empty());
-        when(elasticsearchOperations.search(any(NativeQuery.class), any(Class.class))).thenReturn(emptyHits);
+        org.mockito.Mockito.lenient().when(emptyHits.stream()).thenAnswer(invocation -> Stream.empty());
+        org.mockito.Mockito.lenient().when(elasticsearchOperations.search(any(NativeQuery.class), any(Class.class))).thenReturn(emptyHits);
     }
 
     @Test
@@ -99,13 +100,14 @@ class EprelSearchServiceTest
     }
 
     @Test
-    @DisplayName("searchByModel should fall back to keyword prefix bool query when needed")
+    @DisplayName("searchByModel should fall back to keyword prefix bool query then to contains when needed")
     void searchByModelShouldUseBestMatchFallback()
     {
         service.searchByModel("MODEL12345XYZ");
 
         ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
-        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(3)).search(captor.capture(), any(Class.class));
+        // exact(0), prefix(1), bestMatch(2), contains(3)
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(4)).search(captor.capture(), any(Class.class));
 
         Query boolQuery = captor.getAllValues().get(2).getQuery();
         assertThat(boolQuery.isBool()).isTrue();
@@ -113,6 +115,12 @@ class EprelSearchServiceTest
         assertThat(boolQuery.bool().should().getFirst().term().field()).isEqualTo("modelIdentifier");
         assertThat(boolQuery.bool().should().getFirst().term().value().stringValue()).isEqualTo("model12345xyz");
         assertThat(boolQuery.bool().minimumShouldMatch()).isEqualTo("1");
+
+        Query containsQuery = captor.getAllValues().get(3).getQuery();
+        assertThat(containsQuery.isWildcard()).isTrue();
+        WildcardQuery wildcardQuery = containsQuery.wildcard();
+        assertThat(wildcardQuery.field()).isEqualTo("modelIdentifier");
+        assertThat(wildcardQuery.value()).isEqualTo("*model12345xyz*");
     }
 
     @Test
@@ -123,12 +131,56 @@ class EprelSearchServiceTest
         service.search("INVALID", java.util.List.of("ACCEPTED", "TOO MANY SPACES"));
 
         ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
-        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(3)).search(captor.capture(), any(Class.class));
+        // GTIN "INVALID" is non-numeric so skips ES; for "ACCEPTED": exact(0), prefix(1), bestMatch(2), contains(3)
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(4)).search(captor.capture(), any(Class.class));
 
         java.util.List<Query> queries = captor.getAllValues().stream().map(NativeQuery::getQuery).toList();
-        assertThat(queries).hasSize(3);
+        assertThat(queries).hasSize(4);
         TermQuery termQuery = queries.getFirst().term();
         assertThat(termQuery.value().stringValue()).isEqualTo("accepted");
+    }
+
+    @Test
+    @DisplayName("search should filter out purely-numeric and degenerate model candidates")
+    void searchShouldSkipDegenerateModels()
+    {
+        // "33703828" is all-numeric, "1" has only 1 alphanumeric char (< minAlnumLength=3)
+        // "N3B3HTX" is the only valid candidate
+        service.search("INVALID", java.util.List.of("33703828", "1", "N3B3HTX"));
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        // Only "N3B3HTX" survives filtering: exact(0), prefix(1), bestMatch(2), contains(3)
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(4)).search(captor.capture(), any(Class.class));
+
+        java.util.List<Query> queries = captor.getAllValues().stream().map(NativeQuery::getQuery).toList();
+        TermQuery firstQuery = queries.getFirst().term();
+        assertThat(firstQuery.value().stringValue()).isEqualTo("n3b3htx");
+    }
+
+    @Test
+    @DisplayName("filterByBrand should narrow results to matching supplier")
+    void filterByBrandShouldMatchSupplier()
+    {
+        EprelProduct candy = new EprelProduct();
+        candy.setSupplierOrTrademark("Candy");
+
+        EprelProduct other = new EprelProduct();
+        other.setSupplierOrTrademark("Bosch");
+
+        java.util.List<EprelProduct> filtered = service.filterByBrand(java.util.List.of(candy, other), "CANDY");
+        assertThat(filtered).containsExactly(candy);
+    }
+
+    @Test
+    @DisplayName("filterByBrand should return original list when no supplier matches")
+    void filterByBrandShouldReturnAllWhenNoMatch()
+    {
+        EprelProduct p1 = new EprelProduct();
+        p1.setSupplierOrTrademark("Bosch");
+
+        java.util.List<EprelProduct> all = java.util.List.of(p1);
+        java.util.List<EprelProduct> filtered = service.filterByBrand(all, "UNKNOWN");
+        assertThat(filtered).isEqualTo(all);
     }
 
     private Query capturedQuery()

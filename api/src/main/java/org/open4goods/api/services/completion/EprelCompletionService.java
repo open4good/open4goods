@@ -91,10 +91,18 @@ public class EprelCompletionService extends AbstractCompletionService {
 			data.removeDatasourceData(getDatasourceName());
 			return;
 		} else if (results.size() > 1) {
-			logger.warn("Too many EPREL results ({}) when completing {}", results.size(), data);
-			data.removeDatasourceData(getDatasourceName());
-			return;
-		} else {
+			// Try to narrow down with brand before giving up
+			List<EprelProduct> byBrand = eprelSearchService.filterByBrand(results, data.brand());
+			if (byBrand.size() == 1) {
+				logger.info("Brand filter reduced {} EPREL results to 1 for {}-{}", results.size(), data.brand(), data.model());
+				results = byBrand;
+			} else {
+				logger.warn("Too many EPREL results ({}) when completing {}", results.size(), data);
+				data.removeDatasourceData(getDatasourceName());
+				return;
+			}
+		}
+		{
 			logger.info("Completing product {} with EPREL datas", data);
 
 			EprelProduct eprelData = resolveLatestVersion(results.get(0), vertical);
