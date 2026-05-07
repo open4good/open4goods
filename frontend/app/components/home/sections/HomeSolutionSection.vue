@@ -5,7 +5,7 @@ import NudgerCard from '~/components/shared/cards/NudgerCard.vue'
 const solutionImageSrc = '/homepage/gain/nudger-screaming.webp'
 
 type SolutionBenefit = {
-  emoji: string
+  icon: string
   label: string
   description: string
 }
@@ -76,8 +76,17 @@ const unlockImageTilt = () => {
                     '1px solid rgba(var(--v-theme-border-primary-strong), 0.7)',
                 }"
               >
-                <v-avatar class="home-solution__icon" size="60" color="surface">
-                  <span aria-hidden="true">{{ item.emoji }}</span>
+                <v-avatar
+                  class="home-solution__icon"
+                  size="60"
+                  color="surface-primary-120"
+                >
+                  <v-icon
+                    :icon="item.icon"
+                    size="32"
+                    color="primary"
+                    aria-hidden="true"
+                  />
                 </v-avatar>
                 <div class="home-solution__texts d-flex flex-column ga-1">
                   <p class="home-solution__label ma-0 font-weight-bold">
@@ -133,8 +142,11 @@ const unlockImageTilt = () => {
 
 .home-solution__icon
   font-size: clamp(1.65rem, 5vw, 2rem)
-  //background: rgba(var(--v-theme-surface-primary-080), 0.6)
-  color: rgb(var(--v-theme-secondary))
+  color: rgb(var(--v-theme-primary))
+  transition: transform 0.3s ease
+
+.home-solution__item:hover .home-solution__icon
+  transform: scale(1.1) rotate(5deg)
 
 .home-solution
   display: flex;

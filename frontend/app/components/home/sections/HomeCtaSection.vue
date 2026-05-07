@@ -160,9 +160,12 @@ const handleProductSelect = (value: ProductSuggestionItem) => {
 
 .home-hero__search-input
   border-radius: clamp(1.25rem, 3vw, 1.75rem)
-  background: rgba(var(--v-theme-surface-default), 0.92)
+  background: rgba(var(--v-theme-surface-default), 0.7) !important
+  backdrop-filter: blur(12px)
   box-shadow: 0 14px 22px rgba(var(--v-theme-shadow-primary-600), 0.12)
+  border: 1px solid rgba(255, 255, 255, 0.1)
 
 .home-hero__search-submit
   box-shadow: none
+
 </style>

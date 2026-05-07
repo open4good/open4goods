@@ -324,7 +324,12 @@ const resolveAiSummaryStyle = () => {
               class="home-hero-highlights__card-content d-flex flex-column align-center text-center ga-2"
               role="listitem"
             >
-              <v-icon v-if="item.icon" size="56" color="secondary" class="mb-4">
+              <v-icon
+                v-if="item.icon"
+                size="48"
+                color="primary"
+                class="home-hero-highlights__icon-main mb-2"
+              >
                 {{ item.icon }}
               </v-icon>
               <h2 class="home-hero-highlights__title ma-0 font-weight-bold">
@@ -572,8 +577,17 @@ const resolveAiSummaryStyle = () => {
 .home-hero-highlights__description
   // margin now handled by utility class: ma-0
   color: rgb(var(--v-theme-text-neutral-secondary))
-  line-height: 1.35
+  line-height: 1.5
+  font-size: 0.95rem
   overflow-wrap: anywhere
+
+.home-hero-highlights__icon-main
+  transition: transform 0.3s ease
+  filter: drop-shadow(0 2px 4px rgba(var(--v-theme-shadow-primary-600), 0.1))
+
+.home-hero-highlights__card:hover .home-hero-highlights__icon-main
+  transform: scale(1.1) translateY(-4px)
+
 
 .home-hero-highlights__link
   color: rgb(var(--v-theme-text-neutral-strong))

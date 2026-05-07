@@ -348,22 +348,22 @@ const { execute: _executeBlogFetch } = await useAsyncData(
 
 const solutionBenefits = computed(() => [
   {
-    emoji: '⏱️',
+    icon: 'mdi-clock-outline',
     label: String(t('home.solution.benefits.time.title')),
     description: String(t('home.solution.benefits.time.description')),
   },
   {
-    emoji: '💰',
+    icon: 'mdi-piggy-bank-outline',
     label: String(t('home.solution.benefits.savings.title')),
     description: String(t('home.solution.benefits.savings.description')),
   },
   {
-    emoji: '🌍',
+    icon: 'mdi-leaf-outline',
     label: String(t('home.solution.benefits.planet.title')),
     description: String(t('home.solution.benefits.planet.description')),
   },
   {
-    emoji: '🛡️',
+    icon: 'mdi-shield-check-outline',
     label: String(t('home.solution.benefits.trust.title')),
     description: String(t('home.solution.benefits.trust.description')),
   },
@@ -1016,13 +1016,21 @@ useHead(() => ({
   width: 100%
 
 .home-page__promises
-  padding: clamp(2rem, 6vw, 4rem) clamp(1.5rem, 6vw, 4rem)
+  padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 6vw, 4rem)
   background: linear-gradient(
     160deg,
-    rgba(var(--v-theme-surface-ice-050), 0.85) 0%,
-    rgba(var(--v-theme-surface-default), 0.95) 60%,
-    rgba(var(--v-theme-surface-ice-100), 0.95) 100%
+    rgba(var(--v-theme-surface-ice-050), 0.9) 0%,
+    rgba(var(--v-theme-surface-default), 0.98) 60%,
+    rgba(var(--v-theme-surface-ice-100), 0.9) 100%
   )
+  position: relative
+  &::before
+    content: ''
+    position: absolute
+    inset: 0
+    background: radial-gradient(circle at 10% 10%, rgba(var(--v-theme-hero-gradient-start), 0.05), transparent 30%), radial-gradient(circle at 90% 90%, rgba(var(--v-theme-hero-gradient-end), 0.05), transparent 30%)
+    pointer-events: none
+
 
 .home-page__promises-content
   max-width: 1100px

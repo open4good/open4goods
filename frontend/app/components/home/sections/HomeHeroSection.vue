@@ -230,6 +230,15 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
   emit('select-product', payload)
 }
 
+const scrollToNext = () => {
+  if (!import.meta.client) return
+  const element = document.getElementById('home-essentials')
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+
 /* Preload removed: The hero image is loaded eagerly with fetchpriority="high",
    making the link preload redundant and causing browser warnings about unused preloads. */
 </script>
@@ -271,26 +280,32 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             cols="12"
             class="d-flex flex-column align-center text-center ga-4"
           >
-            <span
-              id="home-hero-title"
-              class="home-hero__title home-reveal-item"
-              :style="{ '--reveal-delay': '0ms' }"
-            >
-              {{ resolveString('home.hero.title') }}
-            </span>
-            <p
-              v-if="animatedSubtitle"
-              class="home-hero__title-animated-subtitle home-reveal-item"
-              :style="{ '--reveal-delay': '1500ms' }"
-            >
-              {{ animatedSubtitle }}
-            </p>
-            <h1
-              class="home-hero__title-subtitle home-reveal-item"
-              :style="{ '--reveal-delay': '1000ms', fontSize: '1.82rem' }"
-            >
-              {{ resolveList('home.hero.titleSubtitle')[0] }}
-            </h1>
+            <v-slide-y-transition appear>
+              <h1
+                id="home-hero-title"
+                class="home-hero__title home-reveal-item font-weight-black"
+                :style="{ '--reveal-delay': '0ms' }"
+              >
+                {{ resolveString('home.hero.title') }}
+              </h1>
+            </v-slide-y-transition>
+            <v-slide-y-transition appear>
+              <p
+                v-if="animatedSubtitle"
+                class="home-hero__title-animated-subtitle home-reveal-item"
+                :style="{ '--reveal-delay': '300ms' }"
+              >
+                {{ animatedSubtitle }}
+              </p>
+            </v-slide-y-transition>
+            <v-slide-y-transition appear>
+              <p
+                class="home-hero__title-subtitle home-reveal-item"
+                :style="{ '--reveal-delay': '600ms' }"
+              >
+                {{ resolveList('home.hero.titleSubtitle')[0] }}
+              </p>
+            </v-slide-y-transition>
           </v-col>
         </v-row>
         <v-row justify="center" class="mt-0 home-hero__panel-row">
@@ -379,6 +394,19 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
             </v-sheet>
           </v-col>
         </v-row>
+      </div>
+      <div
+        class="home-hero__scroll-indicator d-flex flex-column align-center"
+        @click="scrollToNext"
+      >
+        <v-btn
+          icon="mdi-chevron-down"
+          variant="text"
+          color="white"
+          size="large"
+          class="home-hero__scroll-btn"
+          aria-label="Scroll to content"
+        />
       </div>
     </v-container>
   </HeroSurface>
@@ -512,8 +540,11 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 
 .home-hero__search-input
   border-radius: clamp(1.5rem, 4vw, 2rem)
-  background: rgba(var(--v-theme-surface-default), 0.85)
-  box-shadow: 0 18px 30px rgba(var(--v-theme-shadow-primary-600), 0.1)
+  background: rgba(var(--v-theme-surface-default), 0.7) !important
+  backdrop-filter: blur(12px)
+  box-shadow: 0 18px 30px rgba(var(--v-theme-shadow-primary-600), 0.15)
+  border: 1px solid rgba(255, 255, 255, 0.1)
+
 
 .home-hero__badges
   padding-inline: 1rem
@@ -598,4 +629,27 @@ const handleProductSelect = (payload: ProductSuggestionItem) => {
 @media (min-width: 90rem)
   .home-hero__panel
     max-width: clamp(60rem, 78vw, 74rem)
+
+.home-hero__scroll-indicator
+  position: absolute
+  bottom: 2rem
+  left: 50%
+  transform: translateX(-50%)
+  cursor: pointer
+  z-index: 10
+  animation: bounce 2s infinite
+
+.home-hero__scroll-btn
+  opacity: 0.8
+  transition: opacity 0.3s ease
+  &:hover
+    opacity: 1
+
+@keyframes bounce
+  0%, 20%, 50%, 80%, 100%
+    transform: translateX(-50%) translateY(0)
+  40%
+    transform: translateX(-50%) translateY(-10px)
+  60%
+    transform: translateX(-50%) translateY(-5px)
 </style>

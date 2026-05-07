@@ -17,22 +17,20 @@
         v-for="category in displayedCategories"
         :key="category.id"
         class="category-badges-row__item"
+        @mouseenter="hoveredId = category.id"
+        @mouseleave="hoveredId = null"
       >
-        <v-hover v-slot="{ isHovering, props: hoverProps }">
-          <v-chip
-            v-bind="hoverProps"
-            :to="getCategoryUrl(category)"
-            variant="elevated"
-            color="surface"
-            size="small"
-            rounded="pill"
-            class="category-badges-row__chip text-secondary"
-            :elevation="isHovering ? 24 : 1"
-          >
-            <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
-            {{ category.verticalHomeTitle ?? category.id }}
-          </v-chip>
-        </v-hover>
+        <v-chip
+          :to="getCategoryUrl(category)"
+          variant="flat"
+          size="small"
+          rounded="pill"
+          class="category-badges-row__chip text-secondary"
+          :class="{ 'category-badges-row__chip--lifted': hoveredId === category.id }"
+        >
+          <v-icon :icon="category.mdiIcon ?? 'mdi-tag'" start size="16" />
+          {{ category.verticalHomeTitle ?? category.id }}
+        </v-chip>
       </div>
     </div>
 
@@ -48,22 +46,22 @@
       <v-icon icon="mdi-chevron-double-right" size="18" />
     </v-btn>
 
-    <div class="category-badges-row__item">
-      <v-hover v-slot="{ isHovering, props: hoverProps }">
-        <v-chip
-          v-bind="hoverProps"
-          :to="categoriesUrl"
-          variant="elevated"
-          color="surface"
-          size="small"
-          rounded="pill"
-          class="category-badges-row__chip text-neutral-secondary"
-          :elevation="isHovering ? 24 : 1"
-        >
-          <v-icon icon="mdi-view-grid-outline" start size="16" />
-          {{ t('home.hero.categoryBadges.viewAll') }}
-        </v-chip>
-      </v-hover>
+    <div
+      class="category-badges-row__item"
+      @mouseenter="hoveredId = '__view-all__'"
+      @mouseleave="hoveredId = null"
+    >
+      <v-chip
+        :to="categoriesUrl"
+        variant="flat"
+        size="small"
+        rounded="pill"
+        class="category-badges-row__chip text-neutral-secondary"
+        :class="{ 'category-badges-row__chip--lifted': hoveredId === '__view-all__' }"
+      >
+        <v-icon icon="mdi-view-grid-outline" start size="16" />
+        {{ t('home.hero.categoryBadges.viewAll') }}
+      </v-chip>
     </div>
   </div>
 </template>
@@ -81,6 +79,8 @@ const props = defineProps<{
 }>()
 
 const { t, locale } = useI18n()
+
+const hoveredId = ref<string | null>(null)
 
 const displayedCategories = computed(() =>
   (props.categories ?? []).filter(category => category.enabled !== false)
@@ -178,7 +178,8 @@ watch(displayedCategories, () => {
   align-items: center
   gap: 0.75rem
   width: 100%
-  padding: 0.5rem 0
+  padding: 0.75rem 0
+
 
   &__label
     flex: 0 0 auto
@@ -193,11 +194,13 @@ watch(displayedCategories, () => {
     align-items: center
     gap: 0.5rem
     overflow-x: auto
+    padding: 0.5rem 0.25rem
     scrollbar-width: none
     scroll-behavior: smooth
 
     &::-webkit-scrollbar
       display: none
+
 
   &__item
     flex: 0 0 auto
@@ -207,7 +210,16 @@ watch(displayedCategories, () => {
     flex: 0 0 auto
     text-decoration: none
     font-weight: 500
-    border-width: 1.5px
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.15) !important
+    background: rgba(var(--v-theme-surface-default), 0.9) !important
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1)
+
+    &--lifted
+      transform: translateY(-2px) scale(1.04)
+      border-color: rgba(var(--v-theme-primary), 0.3) !important
+      background: rgb(var(--v-theme-surface-default)) !important
+      box-shadow: 0 6px 14px rgba(var(--v-theme-shadow-primary-600), 0.12)
+
 
   &__nav
     flex: 0 0 auto
