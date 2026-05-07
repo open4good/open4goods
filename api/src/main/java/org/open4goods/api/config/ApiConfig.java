@@ -97,6 +97,7 @@ import com.github.benmanes.caffeine.cache.Ticker;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 
+import org.springframework.beans.factory.ObjectProvider;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -261,8 +262,8 @@ public class ApiConfig {
 
 
 	@Bean
-	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties, @Autowired(required = false) DjlImageEmbeddingService imageEmbeddingService) {
-		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties, imageEmbeddingService);
+	ResourceCompletionService resourceCompletionService(ImageMagickService imageService, VerticalsConfigService verticalConfigService, ResourceService resourceService, ProductRepository dataRepository, ApiProperties apiProperties, ObjectProvider<DjlImageEmbeddingService> imageEmbeddingServiceProvider) {
+		return new ResourceCompletionService(imageService, verticalConfigService, resourceService, dataRepository, apiProperties, imageEmbeddingServiceProvider.getIfAvailable());
 
 	}
 
@@ -285,10 +286,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
-			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, @Autowired(required = false) DjlTextEmbeddingService embeddingService,
-			@Autowired(required = false) DjlEmbeddingProperties embeddingProperties) {
+			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, ObjectProvider<DjlTextEmbeddingService> embeddingServiceProvider,
+			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
-				serialisationService, brandScoreService, embeddingService, embeddingProperties);
+				serialisationService, brandScoreService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable());
 	}
 
 	//////////////////////////////////////////////////////////
