@@ -738,8 +738,10 @@ public class ResourceCompletionService extends AbstractCompletionService {
 
         // 3. Embedding (modern, category-agnostic representation)
         try {
-            float[] embedding = embeddingService.embed(src.toPath());
-            imageInfo.setEmbedding(embedding);
+            if (embeddingService != null) {
+                float[] embedding = embeddingService.embed(src.toPath());
+                imageInfo.setEmbedding(embedding);
+            }
         } catch (Exception e) {
             logger.error("Cannot compute embedding ({}) : {}", e.getMessage(), resource.getUrl());
 

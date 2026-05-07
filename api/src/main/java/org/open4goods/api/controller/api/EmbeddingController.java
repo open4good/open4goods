@@ -2,6 +2,7 @@ package org.open4goods.api.controller.api;
 
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.model.RolesConstants;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import jakarta.validation.constraints.NotBlank;
  * (e.g., front-api proxying).
  */
 @RestController
+@ConditionalOnBean(DjlTextEmbeddingService.class)
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 public class EmbeddingController {
 

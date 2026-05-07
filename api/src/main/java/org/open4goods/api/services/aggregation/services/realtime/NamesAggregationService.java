@@ -261,7 +261,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 				if (!forceRecomputing && cacheKey == data.getEmbeddingTextHash()) {
 					logger.debug("Embedding cache key unchanged for product {}, skipping", data.getId());
-				} else {
+				} else if (embeddingService != null) {
 					final float[] embedding = embeddingService.embed(prefixedText);
 					if (embedding != null) {
 						// Forcing to a 512 dims vector
@@ -462,7 +462,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 			return "";
 		}
 
-		final String prefix = embeddingProperties.getPassagePrefix();
+		final String prefix = embeddingProperties != null ? embeddingProperties.getPassagePrefix() : "";
 		if (StringUtils.isBlank(prefix)) {
 			return textToEmbed;
 		}
