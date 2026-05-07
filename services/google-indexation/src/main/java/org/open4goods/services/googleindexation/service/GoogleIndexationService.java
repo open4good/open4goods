@@ -11,8 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.open4goods.services.googleindexation.config.GoogleIndexationConfig;
@@ -35,6 +39,13 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 /**
  * Service responsible for publishing URLs to the Google Indexing API.
+ * <p>
+ * The service exposes:
+ * <ul>
+ * <li>{@link #submitUrl(String)} for asynchronous submission (recommended for hooks/event listeners),</li>
+ * <li>{@link #publishUrl(String)} for immediate synchronous publication,</li>
+ * <li>{@link #publishUrls(List)} for synchronous batch publication.</li>
+ * </ul>
  */
 @Service
 public class GoogleIndexationService implements HealthIndicator {
@@ -46,6 +57,8 @@ public class GoogleIndexationService implements HealthIndicator {
     private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient;
+    private final ExecutorService submitExecutor;
+    private final Map<String, Instant> recentSubmissions = java.util.Collections.synchronizedMap(new LinkedHashMap<>());
 
     private final AtomicReference<GoogleCredentials> credentials = new AtomicReference<>();
     private final CredentialsProvider credentialsProvider;
@@ -77,6 +90,46 @@ public class GoogleIndexationService implements HealthIndicator {
         this.meterRegistry = meterRegistry;
         this.httpClient = httpClient;
         this.credentialsProvider = credentialsProvider != null ? credentialsProvider : this::loadCredentials;
+        this.submitExecutor = Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "google-indexation-submit");
+            thread.setDaemon(true);
+            return thread;
+        });
+    }
+
+    /**
+     * Submit a URL for asynchronous publication with deduplication and retry.
+     *
+     * @param url URL to submit
+     */
+    public void submitUrl(String url) {
+        if (!StringUtils.hasText(url)) {
+            return;
+        }
+        if (wasSubmittedRecently(url, Instant.now())) {
+            meterRegistry.counter("google.indexation.submit.deduplicated").increment();
+            return;
+        }
+        submitExecutor.submit(() -> {
+            GoogleIndexationResultItem result = publishUrl(url);
+            if (!result.success()) {
+                GoogleIndexationResultItem retryResult = publishUrl(url);
+                if (!retryResult.success()) {
+                    LOGGER.warn("Google indexation submit failed for {} after retry: {}", url, retryResult.message());
+                }
+            }
+        });
+    }
+
+    private boolean wasSubmittedRecently(String url, Instant now) {
+        synchronized (recentSubmissions) {
+            recentSubmissions.entrySet().removeIf(entry -> entry.getValue().isBefore(now.minusSeconds(300)));
+            if (recentSubmissions.containsKey(url)) {
+                return true;
+            }
+            recentSubmissions.put(url, now);
+            return false;
+        }
     }
 
     /**
