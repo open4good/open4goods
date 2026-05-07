@@ -27,17 +27,33 @@
         />
 
         <div class="category-hero__copy">
-          <p v-if="eyebrow" class="category-hero__eyebrow animate-in-up" style="--delay: 100ms">
+          <p
+            v-if="eyebrow"
+            class="category-hero__eyebrow animate-in-up"
+            style="--delay: 100ms"
+          >
             {{ eyebrow }}
           </p>
-          <h1 :id="headingId" class="category-hero__title animate-in-up" style="--delay: 200ms">
+          <h1
+            :id="headingId"
+            class="category-hero__title animate-in-up"
+            style="--delay: 200ms"
+          >
             {{ title }}
           </h1>
-          <p v-if="description" class="category-hero__description animate-in-up" style="--delay: 300ms">
+          <p
+            v-if="description"
+            class="category-hero__description animate-in-up"
+            style="--delay: 300ms"
+          >
             {{ description }}
           </p>
 
-          <v-row density="comfortable" class="category-hero__actions-row animate-in-up" style="--delay: 400ms">
+          <v-row
+            density="comfortable"
+            class="category-hero__actions-row animate-in-up"
+            style="--delay: 400ms"
+          >
             <v-col cols="12" class="flex-grow-1">
               <slot name="actions" />
             </v-col>

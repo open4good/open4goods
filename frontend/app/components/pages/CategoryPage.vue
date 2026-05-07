@@ -313,7 +313,9 @@
               <h3 class="text-h5 font-weight-bold mt-6 mb-2">
                 {{ $t('category.products.noResults') }}
               </h3>
-              <p class="text-body-1 text-medium-emphasis mb-6 max-width-400 mx-auto">
+              <p
+                class="text-body-1 text-medium-emphasis mb-6 max-width-400 mx-auto"
+              >
                 {{ $t('category.products.noResultsHelper') }}
               </p>
               <v-btn
