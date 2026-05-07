@@ -16,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v6
         with:
-          version: 10.33.0
+          version: 10.33.2
       - run: pnpm install --frozen-lockfile
         working-directory: frontend
       - run: pnpm lint

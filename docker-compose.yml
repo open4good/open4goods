@@ -3,7 +3,7 @@ services:
 # Elastic Search
 ###################################################################
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.3.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.3.4
     container_name: elastic
     environment:
       - http.max_content_length=200mb
@@ -34,7 +34,7 @@ services:
 # Kibana
 ###################################################################
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.3.3
+    image: docker.elastic.co/kibana/kibana:9.3.4
     container_name: kibana
     depends_on:
       - elastic
@@ -51,7 +51,7 @@ services:
 # API (Backend)
 ###################################################################
   api:
-    image: eclipse-temurin:25.0.2_10-jre
+    image: eclipse-temurin:25.0.3_9-jre
     container_name: api
     volumes:
       - ./api/target/api-0.0.1-SNAPSHOT.jar:/app/app.jar
@@ -72,7 +72,7 @@ services:
 # Front API (Backend for Frontend)
 ###################################################################
   front-api:
-    image: eclipse-temurin:25.0.2_10-jre
+    image: eclipse-temurin:25.0.3_9-jre
     container_name: front-api
     volumes:
       - ./front-api/target/front-api-0.0.1-SNAPSHOT.jar:/app/app.jar
