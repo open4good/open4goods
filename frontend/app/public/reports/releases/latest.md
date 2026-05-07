@@ -1,56 +1,23 @@
-## 🥳 Welcome to **v1.0.9**
+## 🥳 Welcome to **v1.0.10**
 
-This release covers **14 day(s)** of work, from **2026-04-23T07:43:21.000Z** to **2026-05-07T10:01:18.000Z**.
+This release covers **0 day(s)** of work, from **2026-05-07T10:01:18.000Z** to **2026-05-07T15:56:09.000Z**.
 
 ### 📦 Stats
-- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.8...v1.0.9)
-- Changed files: **300**
-- Commits: **55**
-- Additions: **11710** / Deletions: **33189**
+- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.9...v1.0.10)
+- Changed files: **16**
+- Commits: **7**
+- Additions: **509** / Deletions: **24**
 
 ---
 
 
 
 <details>
-<summary>🙈 Other changes (34)</summary>
+<summary>🙈 Other changes (1)</summary>
 
 | PR | Title | Author |
 |---:|---|---|
-| [PR 3076](https://github.com/open4good/open4goods/pull/3076) | chore(deps): update pnpm to v10.33.1 | @renovate[bot] |
-| [PR 3077](https://github.com/open4good/open4goods/pull/3077) | chore(deps): update dependency @nuxtjs/robots to v6.0.8 | @renovate[bot] |
-| [PR 3078](https://github.com/open4good/open4goods/pull/3078) | chore(deps): update pnpm to v10.33.2 | @renovate[bot] |
-| [PR 3080](https://github.com/open4good/open4goods/pull/3080) | fix(deps): update vue monorepo to v3.5.33 | @renovate[bot] |
-| [PR 3079](https://github.com/open4good/open4goods/pull/3079) | fix(deps): update spring boot to v3.5.14 | @renovate[bot] |
-| [PR 3072](https://github.com/open4good/open4goods/pull/3072) | chore(deps): update actions/github-script action to v9 | @renovate[bot] |
-| [PR 3081](https://github.com/open4good/open4goods/pull/3081) | chore(deps): update dependency @vue/test-utils to v2.4.8 | @renovate[bot] |
-| [PR 3082](https://github.com/open4good/open4goods/pull/3082) | chore(deps): update dependency nodemailer to v8.0.6 | @renovate[bot] |
-| [PR 3083](https://github.com/open4good/open4goods/pull/3083) | chore(deps): update dependency @nuxtjs/i18n to v10.3.0 | @renovate[bot] |
-| [PR 3084](https://github.com/open4good/open4goods/pull/3084) | chore(deps): update dependency isomorphic-dompurify to v3.10.0 | @renovate[bot] |
-| [PR 3085](https://github.com/open4good/open4goods/pull/3085) | chore(deps): update dependency @nuxtjs/sitemap to v8.0.14 | @renovate[bot] |
-| [PR 3086](https://github.com/open4good/open4goods/pull/3086) | chore(deps): update dependency vue-i18n to v11.4.0 | @renovate[bot] |
-| [PR 3088](https://github.com/open4good/open4goods/pull/3088) | fix(deps): update dependency commons-io:commons-io to v2.22.0 | @renovate[bot] |
-| [PR 3091](https://github.com/open4good/open4goods/pull/3091) | chore(deps): update dependency jsdom to v29.1.0 | @renovate[bot] |
-| [PR 3092](https://github.com/open4good/open4goods/pull/3092) | chore(deps): update dependency @typescript-eslint/parser to v8.59.1 | @renovate[bot] |
-| [PR 3093](https://github.com/open4good/open4goods/pull/3093) | chore(deps): update dependency @vue/test-utils to v2.4.9 | @renovate[bot] |
-| [PR 3094](https://github.com/open4good/open4goods/pull/3094) | chore(deps): update dependency @vue/test-utils to v2.4.10 | @renovate[bot] |
-| [PR 3095](https://github.com/open4good/open4goods/pull/3095) | chore(deps): update dependency @nuxtjs/sitemap to v8.0.15 | @renovate[bot] |
-| [PR 3090](https://github.com/open4good/open4goods/pull/3090) | fix(deps): update dependency cookie-es to v3 | @renovate[bot] |
-| [PR 3089](https://github.com/open4good/open4goods/pull/3089) | chore(deps): update pnpm/action-setup action to v6 | @renovate[bot] |
-| [PR 3087](https://github.com/open4good/open4goods/pull/3087) | chore(deps): update mysql docker tag | @renovate[bot] |
-| [PR 3074](https://github.com/open4good/open4goods/pull/3074) | chore(deps): update dependency vue-router to v5 | @renovate[bot] |
-| [PR 3096](https://github.com/open4good/open4goods/pull/3096) | chore(deps): update dependency jsdom to v29.1.1 | @renovate[bot] |
-| [PR 3097](https://github.com/open4good/open4goods/pull/3097) | chore(deps): update dependency nodemailer to v8.0.7 | @renovate[bot] |
-| [PR 3099](https://github.com/open4good/open4goods/pull/3099) | chore(deps): update dependency vue-router to v5.0.6 | @renovate[bot] |
-| [PR 3103](https://github.com/open4good/open4goods/pull/3103) | chore(deps): update xwiki docker tag to v17.10.8 | @renovate[bot] |
-| [PR 3102](https://github.com/open4good/open4goods/pull/3102) | chore(deps): update eclipse-temurin docker tag to v25.0.3_9-jre | @renovate[bot] |
-| [PR 3101](https://github.com/open4good/open4goods/pull/3101) | chore(deps): update docker.elastic.co/kibana/kibana docker tag to v9.3.4 | @renovate[bot] |
-| [PR 3100](https://github.com/open4good/open4goods/pull/3100) | chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v9.3.4 | @renovate[bot] |
-| [PR 3098](https://github.com/open4good/open4goods/pull/3098) | chore(deps): update dependency nuxt to v4.4.4 | @renovate[bot] |
-| [PR 3106](https://github.com/open4good/open4goods/pull/3106) | chore(deps): update dependency @typescript-eslint/parser to v8.59.2 | @renovate[bot] |
-| [PR 3107](https://github.com/open4good/open4goods/pull/3107) | chore(deps): update dependency eslint-plugin-vue to v10.9.1 | @renovate[bot] |
-| [PR 3105](https://github.com/open4good/open4goods/pull/3105) | Add profile dashboard API, DTOs and service | @GoulvenF |
-| [PR 3073](https://github.com/open4good/open4goods/pull/3073) | chore(deps): update dependency @nuxt/scripts to v1 | @renovate[bot] |
+| [PR 3109](https://github.com/open4good/open4goods/pull/3109) | Add async Google Indexing submission with deduplication and review-generation hook | @GoulvenF |
 
 
 </details>
