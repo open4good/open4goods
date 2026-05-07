@@ -101,3 +101,80 @@ The `ReviewGenerationService` orchestrates the complex flow of gathering context
 5.  **Post-processing**:
     - `updateAiReviewReferences`: Replaces `[1]` with HTML links.
     - `populateAttributes`: Extracts dynamic attributes.
+
+## AI Usage Inventory Beyond Review Generation
+
+### LLM-related components
+
+- `services/prompt` is the main Spring AI integration module and already exposes provider abstraction and registry patterns.
+- `api` uses this layer for both review enrichment and impact-score matrix generation flows.
+
+### Embedding-related components
+
+- `services/embedding-djl` provides local DJL inference for:
+  - text embeddings (`DjlTextEmbeddingService`)
+  - image embeddings (`DjlImageEmbeddingService`)
+- `api` uses text embeddings in product aggregation and image embeddings in resource completion/clusterization.
+- `api` exposes a text embedding endpoint (`GET /api/product/embedding`) consumed by `front-api` proxy mode.
+- `front-api` can either compute local embeddings directly or proxy to the API endpoint depending on configuration.
+
+## Centralization Plan (OpenAI/LocalAI-compatible)
+
+### 1) Target: unified capability-based AI contract
+
+Create one logical gateway with capability interfaces:
+
+- chat generation
+- text embeddings
+- image embeddings
+- batch generation
+
+Each capability resolves provider by configuration (`openai`, `localai`, `gemini`, `djl-local`) and shares common resilience/observability behavior.
+
+### 2) Endpoint contract standardization
+
+Use OpenAI-compatible wire contracts by default:
+
+- Chat: `/v1/chat/completions`
+- Embeddings: `/v1/embeddings`
+- Batch/File (when available): `/v1/batches`, `/v1/files`
+
+Keep provider-specific translation only in adapter classes, not in business services.
+
+### 3) Config unification
+
+Introduce a single configuration namespace (example):
+
+- `open4goods.ai.capabilities.chat.provider`
+- `open4goods.ai.capabilities.text-embedding.provider`
+- `open4goods.ai.capabilities.image-embedding.provider`
+- `open4goods.ai.providers.openai.base-url`, `api-key`, `model`
+- `open4goods.ai.providers.localai.base-url`, `model`
+- `open4goods.ai.providers.djl.*`
+
+Add backward-compatible mapping from existing prompt/embedding properties during transition.
+
+### 4) Migration strategy
+
+1. Wrap existing `PromptService` and DJL services behind capability adapters (no behavior change).
+2. Migrate `api` callers (`GenAiController`, `VerticalsGenerationService`, aggregation and completion services) to gateway interfaces.
+3. Align `front-api` on one explicit embedding strategy (proxy-first or direct-first) with documented fallback.
+4. Add contract tests against OpenAI-compatible mock endpoints + health indicators per capability/provider.
+
+### 5) Non-functional requirements
+
+- Per-capability metrics (latency, errors, retries, tokens/cost where available).
+- Structured logs with correlation IDs and sensitive-data redaction.
+- Timeouts, retries, circuit-breakers, and idempotency for async/batch flows.
+- Feature flags for gradual rollout by capability.
+
+## Clarifications Needed Before Implementation
+
+1. Preferred deployment shape: in-process shared library first, or dedicated AI gateway microservice now?
+2. Embedding priority for next iterations:
+   - keep DJL local as default,
+   - move text embeddings first to OpenAI-compatible endpoints,
+   - or hybrid by environment/use case?
+3. Compatibility requirement level: strict OpenAI payload/response compatibility vs adapter-tolerant compatibility?
+4. Do you want centralized model routing per use case (impact matrix vs product enrichment) in configuration?
+5. Are there environments where external AI calls are forbidden (data residency/compliance), requiring forced-local mode?
