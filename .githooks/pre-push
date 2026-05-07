@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Run the repository lint suite before pushing.
+set -euo pipefail
+
+exec "$(git rev-parse --show-toplevel)/scripts/lint.sh"

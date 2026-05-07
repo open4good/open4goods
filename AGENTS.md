@@ -109,6 +109,13 @@ The suite covers Markdown/JSON text normalization, YAML, shell scripts, GitHub
 Actions, Docker Compose, Dockerfiles when `hadolint` is installed, and the Nuxt
 frontend lint/generation checks.
 
+The repository uses a tracked pre-push hook in `.githooks/pre-push`. Enable it
+with:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ## 6.1  Documentation policy
 
 - Use [docs/README.md](docs/README.md) as the documentation entry point.
