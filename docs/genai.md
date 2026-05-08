@@ -89,3 +89,26 @@ Notes:
 - **OpenAI batch failures**: verify `spring.ai.openai.api-key` and the OpenAI batch endpoint.
 - **Vertex batch failures**: verify `vertex.batch.project-id`, `vertex.batch.location`,
   and `vertex.batch.bucket`, plus service account JSON content.
+
+## Review generation retrieval pipeline (2026-05)
+
+The review-generation service now defaults to application-managed retrieval and keeps model-native grounding optional (`review.generation.use-grounded-prompt=false`).
+
+Pipeline:
+1. Google Search API query generation and retrieval.
+2. URL scoring/dedup and capped selection (`review.generation.max-urls-per-product`, default `10`).
+3. Intelligent multi-strategy fetching fallback:
+   - attempt 1: direct HTTP
+   - attempt 2: local Playwright strategy
+   - attempt 3: external anti-bot provider strategy (ZenRows)
+4. Markdown extraction and token filtering.
+5. Facts persistence on `Product.reviewFacts` with URL, markdown, language, freshness timestamp, strategy and hash.
+6. Merge new facts with existing facts by URL, preserving latest content.
+
+Config knobs:
+- `review.generation.max-urls-per-product`
+- `review.generation.facts-max-stored`
+- `review.generation.fact-max-markdown-chars`
+- `review.generation.use-grounded-prompt`
+
+This enables reprocessing from stored facts without requiring another web fetch pass.

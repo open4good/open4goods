@@ -2,6 +2,8 @@ package org.open4goods.services.reviewgeneration.service;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductFact;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
@@ -39,7 +42,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-// TODO : Class level documentation / javadoc
+/**
+ * Builds prompt variables by discovering and fetching web sources for a product.
+ * <p>
+ * The fetch workflow applies a deterministic fallback chain:
+ * HTTP simple, then Playwright local rendering, then ZenRows anti-bot provider.
+ * </p>
+ */
 public class ReviewGenerationPreprocessingService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationPreprocessingService.class);
@@ -187,11 +196,11 @@ public class ReviewGenerationPreprocessingService {
 
 		// Fetch URL contents concurrently.
 		Map<String, CompletableFuture<FetchResponse>> fetchFutures = new HashMap<>();
-		for (GoogleSearchResult result : sortedResults) {
+		for (GoogleSearchResult result : sortedResults.stream().limit(properties.getMaxUrlsPerProduct()).toList()) {
 			String url = result.link();
 			CompletableFuture<FetchResponse> future = CompletableFuture.supplyAsync(() -> {
 				try {
-					return urlFetchingService.fetchUrlAsync(url, customHeaders).get();
+					return fetchWithFallbacks(url, customHeaders);
 				} catch (Exception e) {
 					logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
 					return null;
@@ -264,8 +273,104 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("TOTAL_TOKENS", accumulatedTokens);
 		promptVariables.put("SOURCE_TOKENS", finalTokensMap);
 
+			List<ProductFact> newFacts = new ArrayList<>();
+			for (Map.Entry<String, String> entry : finalSourcesMap.entrySet()) {
+				String content = entry.getValue();
+				String normalized = content.length() > properties.getFactMaxMarkdownChars()
+						? content.substring(0, properties.getFactMaxMarkdownChars())
+						: content;
+				newFacts.add(new ProductFact(entry.getKey(), normalized, detectLanguage(normalized),
+						System.currentTimeMillis(), resolveFetchStrategy(fetchFutures.get(entry.getKey())),
+						finalTokensMap.get(entry.getKey()), sha256(normalized)));
+			}
+			Map<String, ProductFact> merged = new LinkedHashMap<>();
+			for (ProductFact fact : product.getReviewFacts()) {
+				merged.put(fact.getUrl(), fact);
+			}
+			for (ProductFact fact : newFacts) {
+				merged.put(fact.getUrl(), fact);
+			}
+			product.setReviewFacts(merged.values().stream().limit(properties.getFactsMaxStored()).toList());
+
 		return promptVariables;
 	}
+
+	private FetchResponse fetchWithFallbacks(String url, Map<String, String> customHeaders) {
+		FetchResponse response = fetchWithHeaders(url, customHeaders, "HTTP_SIMPLE");
+		if (isValidFetch(response)) {
+			return response;
+		}
+		Map<String, String> playwrightHeaders = new HashMap<>();
+		if (customHeaders != null) {
+			playwrightHeaders.putAll(customHeaders);
+		}
+		playwrightHeaders.put("X-Open4goods-Fetch-Mode", "playwright");
+		response = fetchWithHeaders(url, playwrightHeaders, "PLAYWRIGHT_LOCAL");
+		if (isValidFetch(response)) {
+			return response;
+		}
+		Map<String, String> antiBotHeaders = new HashMap<>(playwrightHeaders);
+		antiBotHeaders.put("X-Open4goods-Fetch-Provider", "zenrows");
+		return fetchWithHeaders(url, antiBotHeaders, "ZENROWS");
+	}
+
+	private FetchResponse fetchWithHeaders(String url, Map<String, String> headers, String strategy) {
+		try {
+			logger.debug("Fetching URL {} with strategy {}", url, strategy);
+			return urlFetchingService.fetchUrlAsync(url, headers).get();
+		} catch (Exception e) {
+			logger.warn("Fetch strategy {} failed for {}: {}", strategy, url, e.getMessage());
+			return null;
+		}
+	}
+
+	private boolean isValidFetch(FetchResponse response) {
+		return response != null && response.markdownContent() != null && !response.markdownContent().isBlank();
+	}
+
+	private String detectLanguage(String markdown) {
+		if (markdown == null || markdown.isBlank()) {
+			return "unknown";
+		}
+		String lower = markdown.toLowerCase();
+		if (lower.contains(" le ") || lower.contains(" la ") || lower.contains(" les ")) {
+			return "fr";
+		}
+		if (lower.contains(" the ") || lower.contains(" and ")) {
+			return "en";
+		}
+		return "unknown";
+	}
+
+	private String resolveFetchStrategy(CompletableFuture<FetchResponse> future) {
+		if (future == null) {
+			return "UNKNOWN";
+		}
+		try {
+			FetchResponse response = future.getNow(null);
+			if (response == null || response.fetchStrategy() == null) {
+				return "UNKNOWN";
+			}
+			return response.fetchStrategy().name();
+		} catch (Exception e) {
+			return "UNKNOWN";
+		}
+	}
+
+	private String sha256(String content) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+			StringBuilder hex = new StringBuilder();
+			for (byte b : hash) {
+				hex.append(String.format("%02x", b));
+			}
+			return hex.toString();
+		} catch (Exception e) {
+			return Integer.toHexString(content.hashCode());
+		}
+	}
+
 
 	public Map<String, Object> buildBasePromptVariables(Product product, VerticalConfig verticalConfig) {
 		Map<String, Object> promptVariables = new HashMap<>();

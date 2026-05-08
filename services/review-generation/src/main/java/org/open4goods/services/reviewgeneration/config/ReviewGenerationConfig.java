@@ -48,6 +48,15 @@ public class ReviewGenerationConfig {
     // Maximum concurrent URL fetch operations.
     private int maxConcurrentFetch = 3;
 
+    /** Maximum URLs to fetch per product in retrieval pipeline. */
+    private int maxUrlsPerProduct = 10;
+
+    /** Maximum number of stored facts per product. */
+    private int factsMaxStored = 40;
+
+    /** Maximum markdown size per stored fact. */
+    private int factMaxMarkdownChars = 20000;
+
     /**
      * The delay in months after which an existing AI review is considered outdated.
      * Default value is 6 months.
@@ -253,6 +262,24 @@ public class ReviewGenerationConfig {
 		this.minUrlCount = minUrlCount;
 	}
 
+	public int getMaxUrlsPerProduct() {
+		return maxUrlsPerProduct;
+	}
+	public void setMaxUrlsPerProduct(int maxUrlsPerProduct) {
+		this.maxUrlsPerProduct = maxUrlsPerProduct;
+	}
+	public int getFactsMaxStored() {
+		return factsMaxStored;
+	}
+	public void setFactsMaxStored(int factsMaxStored) {
+		this.factsMaxStored = factsMaxStored;
+	}
+	public int getFactMaxMarkdownChars() {
+		return factMaxMarkdownChars;
+	}
+	public void setFactMaxMarkdownChars(int factMaxMarkdownChars) {
+		this.factMaxMarkdownChars = factMaxMarkdownChars;
+	}
 
 	public boolean isResolveUrl() {
 		return resolveUrl;
