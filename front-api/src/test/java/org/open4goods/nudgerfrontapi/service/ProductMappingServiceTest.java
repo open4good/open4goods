@@ -120,7 +120,7 @@ class ProductMappingServiceTest {
         scores.put("ECOSCORE", ecoscore);
         product.setScores(scores);
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.en);
 
@@ -147,7 +147,7 @@ class ProductMappingServiceTest {
         product.setNames(names);
         product.setOfferNames(Set.of("Fallback offer"));
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.en);
 
@@ -173,7 +173,7 @@ class ProductMappingServiceTest {
         ranking.setGlobalBetter(222L);
         product.setRanking(ranking);
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
 
         Product lowest = new Product(111L);
         lowest.setVertical("phones");
@@ -196,7 +196,7 @@ class ProductMappingServiceTest {
         Map<String, Product> referenced = new HashMap<>();
         referenced.put("111", lowest);
         referenced.put("222", highest);
-        when(repository.multiGetById(anyCollection())).thenReturn(referenced);
+        when(repository.multiGetByIdWithoutEmbedding(anyCollection())).thenReturn(referenced);
 
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("phones");
@@ -263,7 +263,7 @@ class ProductMappingServiceTest {
 
         product.setResources(new HashSet<>(Set.of(image, pdf, video)));
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("resources"), DomainLanguage.en);
 
@@ -297,7 +297,7 @@ class ProductMappingServiceTest {
         urlLocalisable.put("en", "fairphone-4");
         product.getNames().setUrl(urlLocalisable);
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("electronics");
         VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1, null, null, null,
@@ -335,7 +335,7 @@ class ProductMappingServiceTest {
         product.setPrice(aggregatedPrices);
         product.setOffersCount(1);
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product"))
                 .thenReturn("encrypted-token");
 
@@ -359,7 +359,7 @@ class ProductMappingServiceTest {
         when(ipQuotaService.increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
                 eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(1);
         Product product = new Product(gtin);
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         when(reviewGenerationClient.triggerGeneration(gtin, false)).thenReturn(gtin);
 
         long scheduled = service.createReview(gtin, "token", httpServletRequest, false, false);
@@ -369,7 +369,7 @@ class ProductMappingServiceTest {
                 eq(reviewGenerationProperties.getQuota().getWindow()));
         verify(ipQuotaService).increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
                 eq(reviewGenerationProperties.getQuota().getWindow()));
-        verify(repository).getById(gtin);
+        verify(repository).getByIdWithoutEmbedding(gtin);
         verify(reviewGenerationClient).triggerGeneration(gtin, false);
         assertThat(scheduled).isEqualTo(gtin);
     }
@@ -400,7 +400,7 @@ class ProductMappingServiceTest {
         when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
         when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
         Product product = new Product(gtin);
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         when(reviewGenerationClient.triggerGeneration(gtin, true)).thenReturn(gtin);
 
         long scheduled = service.createReview(gtin, null, httpServletRequest, true, true);
@@ -459,7 +459,7 @@ class ProductMappingServiceTest {
         verticalConfig.setId("test-vertical");
         verticalConfig.setAttributesConfig(attrsConfig);
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         when(verticalsConfigService.getConfigById("test-vertical")).thenReturn(verticalConfig);
 
         // Execute - should NOT throw NPE, should fallback to attribute key
@@ -513,7 +513,7 @@ class ProductMappingServiceTest {
         verticalConfig.setId("test-vertical");
         verticalConfig.setAttributesConfig(attrsConfig);
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         when(verticalsConfigService.getConfigById("test-vertical")).thenReturn(verticalConfig);
 
         // Request French locale (which is missing)
@@ -561,7 +561,7 @@ class ProductMappingServiceTest {
         verticalConfig.setId("test-vertical");
         verticalConfig.setAttributesConfig(attrsConfig);
 
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         when(verticalsConfigService.getConfigById("test-vertical")).thenReturn(verticalConfig);
 
         // Request French locale (missing both 'fr' and 'default')
@@ -589,7 +589,7 @@ class ProductMappingServiceTest {
         reviews.put("en", holder);
         product.setReviews(reviews);
         
-        when(repository.getById(gtin)).thenReturn(product);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"), DomainLanguage.en);
         
