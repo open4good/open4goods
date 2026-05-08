@@ -990,8 +990,11 @@ public class ProductRepository {
 	public Product getByIdWithoutEmbedding(final Long productId) throws ResourceNotFoundException {
 
 		logger.info("Getting product {} without embedding", productId);
+		co.elastic.clients.elasticsearch._types.query_dsl.Query idsQuery =
+				co.elastic.clients.elasticsearch._types.query_dsl.Query.of(
+						q -> q.ids(i -> i.values(String.valueOf(productId))));
 		NativeQuery query = new NativeQueryBuilder()
-				.withIds(Set.of(String.valueOf(productId)))
+				.withQuery(idsQuery)
 				.withSourceFilter(productFieldsWithoutEmbeddingSourceFilter())
 				.build();
 
