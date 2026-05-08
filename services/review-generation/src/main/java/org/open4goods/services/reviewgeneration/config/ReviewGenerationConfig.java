@@ -28,6 +28,36 @@ public class ReviewGenerationConfig {
     // Property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";
 
+    /**
+     * Number of results requested for each search query.
+     */
+    private int searchResultsPerQuery = 10;
+
+    /**
+     * Google language restriction used for review-source discovery.
+     */
+    private String searchLanguageRestrict = "lang_fr";
+
+    /**
+     * Google country restriction used for review-source discovery.
+     */
+    private String searchCountryRestrict = "countryFR";
+
+    /**
+     * Google geo-location used for review-source discovery.
+     */
+    private String searchGeoLocation = "fr";
+
+    /**
+     * Google host language used for review-source discovery.
+     */
+    private String searchHostLanguage = "fr";
+
+    /**
+     * Safe-search mode used for review-source discovery.
+     */
+    private String searchSafe = "off";
+
     private List<String> excludedDomains = new ArrayList<>();
 
     // Limit the number of search queries.
@@ -56,6 +86,17 @@ public class ReviewGenerationConfig {
 
     /** Maximum markdown size per stored fact. */
     private int factMaxMarkdownChars = 20000;
+
+    /**
+     * Regex patterns for markdown lines to remove before token counting and prompt
+     * injection. Patterns are applied line by line.
+     */
+    private List<String> markdownLineRemovalPatterns = new ArrayList<>(List.of(
+            "(?i)^\\s*(menu|navigation|newsletter|footer|header)\\s*$",
+            "(?i)^\\s*(abonnez-vous|inscrivez-vous|suivez-nous|partagez cet article).*$",
+            "(?i)^\\s*(cookies?|gestion des cookies|politique de confidentialite|privacy policy).*$",
+            "(?i)^\\s*(copyright|\\u00a9|tous droits reserves).*$"
+    ));
 
     /**
      * The delay in months after which an existing AI review is considered outdated.
@@ -141,6 +182,48 @@ public class ReviewGenerationConfig {
     }
     public void setQueryTemplate(String queryTemplate) {
         this.queryTemplate = queryTemplate;
+    }
+
+    public int getSearchResultsPerQuery() {
+        return searchResultsPerQuery;
+    }
+    public void setSearchResultsPerQuery(int searchResultsPerQuery) {
+        this.searchResultsPerQuery = searchResultsPerQuery;
+    }
+
+    public String getSearchLanguageRestrict() {
+        return searchLanguageRestrict;
+    }
+    public void setSearchLanguageRestrict(String searchLanguageRestrict) {
+        this.searchLanguageRestrict = searchLanguageRestrict;
+    }
+
+    public String getSearchCountryRestrict() {
+        return searchCountryRestrict;
+    }
+    public void setSearchCountryRestrict(String searchCountryRestrict) {
+        this.searchCountryRestrict = searchCountryRestrict;
+    }
+
+    public String getSearchGeoLocation() {
+        return searchGeoLocation;
+    }
+    public void setSearchGeoLocation(String searchGeoLocation) {
+        this.searchGeoLocation = searchGeoLocation;
+    }
+
+    public String getSearchHostLanguage() {
+        return searchHostLanguage;
+    }
+    public void setSearchHostLanguage(String searchHostLanguage) {
+        this.searchHostLanguage = searchHostLanguage;
+    }
+
+    public String getSearchSafe() {
+        return searchSafe;
+    }
+    public void setSearchSafe(String searchSafe) {
+        this.searchSafe = searchSafe;
     }
 
     public List<String> getExcludedDomains() {
@@ -279,6 +362,13 @@ public class ReviewGenerationConfig {
 	}
 	public void setFactMaxMarkdownChars(int factMaxMarkdownChars) {
 		this.factMaxMarkdownChars = factMaxMarkdownChars;
+	}
+
+	public List<String> getMarkdownLineRemovalPatterns() {
+		return markdownLineRemovalPatterns;
+	}
+	public void setMarkdownLineRemovalPatterns(List<String> markdownLineRemovalPatterns) {
+		this.markdownLineRemovalPatterns = markdownLineRemovalPatterns;
 	}
 
 	public boolean isResolveUrl() {

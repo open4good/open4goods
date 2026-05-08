@@ -32,6 +32,42 @@
       "defaultValue": "test %s \"%s\""
     },
     {
+      "name": "review.generation.search-results-per-query",
+      "type": "java.lang.Integer",
+      "description": "Number of Google Custom Search results requested for each review-source query.",
+      "defaultValue": 10
+    },
+    {
+      "name": "review.generation.search-language-restrict",
+      "type": "java.lang.String",
+      "description": "Google Custom Search language restriction used for review-source discovery.",
+      "defaultValue": "lang_fr"
+    },
+    {
+      "name": "review.generation.search-country-restrict",
+      "type": "java.lang.String",
+      "description": "Google Custom Search country restriction used for review-source discovery.",
+      "defaultValue": "countryFR"
+    },
+    {
+      "name": "review.generation.search-geo-location",
+      "type": "java.lang.String",
+      "description": "Google Custom Search geo-location hint used for review-source discovery.",
+      "defaultValue": "fr"
+    },
+    {
+      "name": "review.generation.search-host-language",
+      "type": "java.lang.String",
+      "description": "Google Custom Search host language used for review-source discovery.",
+      "defaultValue": "fr"
+    },
+    {
+      "name": "review.generation.search-safe",
+      "type": "java.lang.String",
+      "description": "Google Custom Search safe-search mode used for review-source discovery.",
+      "defaultValue": "off"
+    },
+    {
       "name": "review.generation.max-search",
       "type": "java.lang.Integer",
       "description": "Maximum number of search queries allowed.",
@@ -54,6 +90,11 @@
       "type": "java.lang.Integer",
       "description": "Maximum number of tokens allowed per source.",
       "defaultValue": 10000
+    },
+    {
+      "name": "review.generation.markdown-line-removal-patterns",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Regex patterns applied line by line to remove header, footer, cookie, newsletter, and other markdown noise before token counting."
     },
     {
       "name": "review.generation.max-concurrent-fetch",

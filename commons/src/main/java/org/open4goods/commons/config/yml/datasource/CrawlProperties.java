@@ -144,9 +144,9 @@ public class CrawlProperties {
 
 
 	/**
-	 * The encoding to use for selenium fetched content
+	 * The encoding to use for browser-fetched content.
 	 */
-	private String seleniumPageEncoding = "ISO-8859-1";
+	private String browserPageEncoding = "ISO-8859-1";
 
 
 	/**
@@ -354,12 +354,12 @@ public class CrawlProperties {
 		this.threads = threads;
 	}
 
-	public String getSeleniumPageEncoding() {
-		return seleniumPageEncoding;
+	public String getBrowserPageEncoding() {
+		return browserPageEncoding;
 	}
 
-	public void setSeleniumPageEncoding(String seleniumPageEncoding) {
-		this.seleniumPageEncoding = seleniumPageEncoding;
+	public void setBrowserPageEncoding(String browserPageEncoding) {
+		this.browserPageEncoding = browserPageEncoding;
 	}
 
 

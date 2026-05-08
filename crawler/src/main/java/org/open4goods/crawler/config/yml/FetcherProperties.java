@@ -96,9 +96,9 @@ public class FetcherProperties {
 	private boolean logRejected = false;
 	
 	/**
-	 * The user agent to be used when Selenium mode
+	 * The user agent to be used for browser-backed fetching.
 	 */
-	private String seleniumUseragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36";
+	private String browserUseragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36";
 
 
 	public String indexationEndpoint() {
@@ -194,12 +194,12 @@ public class FetcherProperties {
 		this.logsDir = logsDir;
 	}
 
-	public String getSeleniumUseragent() {
-		return seleniumUseragent;
+	public String getBrowserUseragent() {
+		return browserUseragent;
 	}
 
-	public void setSeleniumUseragent(String seleniumUseragent) {
-		this.seleniumUseragent = seleniumUseragent;
+	public void setBrowserUseragent(String browserUseragent) {
+		this.browserUseragent = browserUseragent;
 	}
 
 

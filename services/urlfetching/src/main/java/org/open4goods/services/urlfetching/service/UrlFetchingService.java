@@ -17,7 +17,7 @@ import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.fetchers.HttpFetcher;
 import org.open4goods.services.urlfetching.service.fetchers.ProxifiedHttpFetcher;
-import org.open4goods.services.urlfetching.service.fetchers.SeleniumHttpFetcher;
+import org.open4goods.services.urlfetching.service.fetchers.PlaywrightHttpFetcher;
 import org.open4goods.services.urlfetching.service.Fetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,16 +82,19 @@ public class UrlFetchingService {
      * @return a CompletableFuture of FetchResponse
      */
     public CompletableFuture<FetchResponse> fetchUrlAsync(String url, Map<String, String> headers) {
-        logger.info("Initiating fetch for URL: {}", url);
+        logger.info("URL_FETCH url={} phase=select", url);
         String domain = getDomainFromUrl(url);
         DomainConfig domainConfig = urlFetcherConfig.getDomains().get(domain);
         if (domainConfig == null) {
-            logger.warn("No specific configuration found for domain '{}'. Using default configuration.", domain);
+            logger.warn("URL_FETCH domain={} phase=select outcome=defaultConfig strategy=HTTP", domain);
             domainConfig = new DomainConfig();
             domainConfig.setUserAgent("DefaultUserAgent/1.0");
             domainConfig.setStrategy(FetchStrategy.HTTP);
         }
 
+        logger.info("URL_FETCH domain={} phase=select strategy={} timeoutMs={} customHeaderNames={}",
+                domain, domainConfig.getStrategy(), domainConfig.getTimeout(),
+                domainConfig.getCustomHeaders() == null ? java.util.Set.of() : domainConfig.getCustomHeaders().keySet());
         Fetcher fetcher = getFetcherForStrategy(domainConfig);
         CompletableFuture<FetchResponse> future = fetcher.fetchUrlAsync(url, headers);
         return future.thenApply(response -> {
@@ -107,11 +110,11 @@ public class UrlFetchingService {
         });
     }
     public FetchResponse fetchUrlSync(String url) throws IOException, InterruptedException {
-        logger.info("Initiating fetch for URL: {}", url);
+        logger.info("URL_FETCH url={} phase=select", url);
         String domain = getDomainFromUrl(url);
         DomainConfig domainConfig = urlFetcherConfig.getDomains().get(domain);
         if (domainConfig == null) {
-            logger.warn("No specific configuration found for domain '{}'. Using default configuration.", domain);
+            logger.warn("URL_FETCH domain={} phase=select outcome=defaultConfig strategy=HTTP", domain);
             domainConfig = new DomainConfig();
             domainConfig.setUserAgent("DefaultUserAgent/1.0");
             domainConfig.setStrategy(FetchStrategy.HTTP);
@@ -137,17 +140,17 @@ public class UrlFetchingService {
         }
         switch (domainConfig.getStrategy()) {
             case PROXIFIED:
-                logger.info("Selected PROXIFIED strategy for fetching");
+                logger.info("URL_FETCH strategy=PROXIFIED phase=selected");
                 return new ProxifiedHttpFetcher(domainConfig, executor, meterRegistry);
-            case SELENIUM:
-                logger.info("Selected SELENIUM strategy for fetching");
-                return new SeleniumHttpFetcher(domainConfig, meterRegistry);
+            case PLAYWRIGHT:
+                logger.info("URL_FETCH strategy=PLAYWRIGHT phase=selected");
+                return new PlaywrightHttpFetcher(domainConfig, meterRegistry);
             case HTTP:
-                logger.info("Selected HTTP strategy for fetching");
+                logger.info("URL_FETCH strategy=HTTP phase=selected");
                 return new HttpFetcher(domainConfig, executor, meterRegistry);
             default:
-                logger.info("Selected SELENIUM strategy for fetching (default)");
-                return new SeleniumHttpFetcher(domainConfig, meterRegistry);
+                logger.info("URL_FETCH strategy=PLAYWRIGHT phase=selected defaultFallback=true");
+                return new PlaywrightHttpFetcher(domainConfig, meterRegistry);
         }
     }
 

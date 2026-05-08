@@ -95,7 +95,7 @@ public class UrlFetchingServiceMock {
                     return errorFuture;
                 } else if (url.contains("delayed.com")) {
                     return CompletableFuture.supplyAsync(() ->
-                            new FetchResponse(url, 200, "<html>Delayed Response</html>", "Delayed Response", FetchStrategy.SELENIUM));
+                            new FetchResponse(url, 200, "<html>Delayed Response</html>", "Delayed Response", FetchStrategy.PLAYWRIGHT));
                 } else if (url == null || url.trim().isEmpty()) {
                     CompletableFuture<FetchResponse> invalidFuture = new CompletableFuture<>();
                     invalidFuture.completeExceptionally(new IllegalArgumentException("Invalid URL provided"));

@@ -3,7 +3,7 @@
     {
       "name": "urlfetcher.domains",
       "type": "java.util.Map<java.lang.String, org.open4goods.services.urlfetching.config.UrlFetcherConfig$DomainConfig>",
-      "description": "Map of domain configurations for URL fetching"
+      "description": "Map of domain configurations for URL fetching. Supported strategies are HTTP, PROXIFIED, and PLAYWRIGHT."
     },
     {
       "name": "urlfetcher.threadPoolSize",

@@ -6,5 +6,5 @@ package org.open4goods.services.urlfetching.config;
 public enum FetchStrategy {
     HTTP,
     PROXIFIED,
-    SELENIUM
+    PLAYWRIGHT
 }

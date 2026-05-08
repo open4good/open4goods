@@ -88,6 +88,99 @@ remote-file-caching:
   connection-timeout: 30000
   read-timeout: 30000
 
+review:
+  generation:
+    preferred-domains:
+      - leclaireur.fnac.com
+      - quechoisir.org
+      - lcd-compare.com
+      - lesnumeriques.com
+      - 01net.com
+      - materiel.net
+      - 60millions-mag.com
+      - frandroid.com
+      - cnetfrance.fr
+      - rtings.com
+
+urlfetcher:
+  domains:
+    leclaireur.fnac.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    quechoisir.org:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.quechoisir.org:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    lcd-compare.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.lcd-compare.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    lesnumeriques.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.lesnumeriques.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    01net.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.01net.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    materiel.net:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.materiel.net:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    60millions-mag.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.60millions-mag.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    frandroid.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.frandroid.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    cnetfrance.fr:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.cnetfrance.fr:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    rtings.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+    www.rtings.com:
+      strategy: PLAYWRIGHT
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+      timeout: 15000
+
 google-taxonomy:
   fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
   en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt

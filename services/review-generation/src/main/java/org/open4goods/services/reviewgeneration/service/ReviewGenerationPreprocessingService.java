@@ -2,9 +2,9 @@ package org.open4goods.services.reviewgeneration.service;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -19,6 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.open4goods.model.exceptions.ResourceNotFoundException;
@@ -41,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-@Service
 /**
  * Builds prompt variables by discovering and fetching web sources for a product.
  * <p>
@@ -49,6 +49,7 @@ import org.springframework.stereotype.Service;
  * HTTP simple, then Playwright local rendering, then ZenRows anti-bot provider.
  * </p>
  */
+@Service
 public class ReviewGenerationPreprocessingService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationPreprocessingService.class);
@@ -71,6 +72,11 @@ public class ReviewGenerationPreprocessingService {
 		this.fetchExecutor = new ThreadPoolExecutor(properties.getMaxConcurrentFetch(), properties.getMaxQueueSize(),
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize() * 10),
 				new ThreadPoolExecutor.AbortPolicy());
+		logger.info(
+				"Review generation retrieval configured: maxSearch={}, resultsPerQuery={}, preferredDomains={}, lr={}, cr={}, gl={}, hl={}, safe={}",
+				properties.getMaxSearch(), properties.getSearchResultsPerQuery(), properties.getPreferredDomains(),
+				properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
+				properties.getSearchGeoLocation(), properties.getSearchHostLanguage(), properties.getSearchSafe());
 	}
 
 	/**
@@ -105,52 +111,13 @@ public class ReviewGenerationPreprocessingService {
 		String brand = product.brand();
 		String primaryModel = product.model();
 		Set<String> alternateModels = product.getAkaModels();
+		validateSearchKeys(product, brand, primaryModel);
 
 		// Build search queries.
-		List<String> queries = new ArrayList<>();
-		queries.add(String.format(properties.getQueryTemplate(), brand, primaryModel));
-		if (alternateModels != null) {
-			for (String akaModel : alternateModels) {
-				queries.add(String.format(properties.getQueryTemplate(), brand, akaModel));
-			}
-		}
-
-		// Add specific site queries if configured
-		List<String> injectSites = verticalConfig.getInjectSitesResults();
-		if (injectSites != null && !injectSites.isEmpty()) {
-			for (String site : injectSites) {
-				// Use the sane query template but restricted to the site
-				// Assuming query template is something like "%s %s avis" or similar,
-				// appending site:domain works well for Google.
-				queries.add(String.format(properties.getQueryTemplate() + " site:%s", brand, primaryModel, site));
-			}
-		}
-
-		// Add composite query for preferred domains and models
-		List<String> preferredDomains = properties.getPreferredDomains();
-		if (preferredDomains != null && !preferredDomains.isEmpty()) {
-			StringBuilder sitePart = new StringBuilder();
-			sitePart.append("(");
-			for (int i = 0; i < preferredDomains.size(); i++) {
-				sitePart.append("site:").append(preferredDomains.get(i));
-				if (i < preferredDomains.size() - 1) {
-					sitePart.append(" OR ");
-				}
-			}
-			sitePart.append(")");
-
-			StringBuilder modelPart = new StringBuilder();
-			modelPart.append("(");
-			modelPart.append("\"").append(brand).append(" ").append(primaryModel).append("\"");
-			if (alternateModels != null) {
-				for (String akaModel : alternateModels) {
-					modelPart.append(" OR \"").append(brand).append(" ").append(akaModel).append("\"");
-				}
-			}
-			modelPart.append(")");
-
-			queries.add(sitePart.toString() + " AND " + modelPart.toString());
-		}
+		List<String> queries = buildSearchQueries(brand, primaryModel, alternateModels, verticalConfig);
+		logger.info("SERP validation for UPC {}: brand='{}', model='{}', akaModels={}, preferredDomains={}, plannedQueries={}",
+				product.getId(), brand, primaryModel, alternateModels == null ? 0 : alternateModels.size(),
+				properties.getPreferredDomains(), queries.size());
 
 		status.addMessage("Searching the web...");
 		int searchesMade = 0;
@@ -161,15 +128,24 @@ public class ReviewGenerationPreprocessingService {
 				break;
 			}
 
-			logger.debug("Executing search query: {}", query);
+			logger.info("SERP query {}/{} for UPC {}: {}", searchesMade + 1, maxSearch, product.getId(), query);
 			status.addMessage("Executing search query: " + query);
-			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, "lang_fr", "countryFR");
+			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getSearchResultsPerQuery(),
+					properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
+					properties.getSearchSafe(), null, properties.getSearchGeoLocation(),
+					properties.getSearchHostLanguage());
 			GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
 			searchesMade++;
 			if (searchResponse != null && searchResponse.results() != null) {
+				logger.info("SERP query returned {} results for UPC {}: {}", searchResponse.results().size(),
+						product.getId(), query);
 				allResults.addAll(searchResponse.results());
+			} else {
+				logger.warn("SERP query returned no response for UPC {}: {}", product.getId(), query);
 			}
 		}
+		logger.info("SERP aggregation for UPC {}: searchesMade={}, rawResults={}", product.getId(), searchesMade,
+				allResults.size());
 
 		status.setStatus(ReviewGenerationStatus.Status.FETCHING);
 
@@ -193,6 +169,11 @@ public class ReviewGenerationPreprocessingService {
 						return 1;
 					return 0;
 				}).toList();
+		long preferredResultCount = sortedResults.stream()
+				.filter(result -> properties.getPreferredDomains().stream().anyMatch(domain -> result.link().contains(domain)))
+				.count();
+		logger.info("SERP selection for UPC {}: eligibleResults={}, preferredResults={}, maxUrlsPerProduct={}",
+				product.getId(), sortedResults.size(), preferredResultCount, properties.getMaxUrlsPerProduct());
 
 		// Fetch URL contents concurrently.
 		Map<String, CompletableFuture<FetchResponse>> fetchFutures = new HashMap<>();
@@ -230,7 +211,7 @@ public class ReviewGenerationPreprocessingService {
 					|| fetchResponse.markdownContent().isEmpty()) {
 				continue;
 			}
-			String content = fetchResponse.markdownContent();
+			String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
 			int tokenCount = genAiService.estimateTokens(content);
 			if (tokenCount < minTokens) {
 				logger.warn("Content from URL {} discarded due to insufficient tokens: {}", url, tokenCount);
@@ -248,6 +229,8 @@ public class ReviewGenerationPreprocessingService {
 			finalSourcesMap.put(url, content);
 			finalTokensMap.put(url, tokenCount);
 			accumulatedTokens += tokenCount;
+			logger.info("Accepted source for UPC {}: url={}, strategy={}, tokens={}, accumulatedTokens={}",
+					product.getId(), url, resolveFetchStrategy(fetchFutures.get(url)), tokenCount, accumulatedTokens);
 			try {
 				String domain = URI.create(url).toURL().getHost();
 				status.addMessage("Analysing " + domain);
@@ -295,6 +278,84 @@ public class ReviewGenerationPreprocessingService {
 		return promptVariables;
 	}
 
+	private void validateSearchKeys(Product product, String brand, String primaryModel) {
+		List<String> missing = new ArrayList<>();
+		if (brand == null || brand.isBlank()) {
+			missing.add("brand");
+		}
+		if (primaryModel == null || primaryModel.isBlank()) {
+			missing.add("model");
+		}
+		if (!missing.isEmpty()) {
+			throw new IllegalStateException("Cannot build review SERP queries for UPC " + product.getId()
+					+ ": missing " + String.join(", ", missing));
+		}
+	}
+
+	private List<String> buildSearchQueries(String brand, String primaryModel, Set<String> alternateModels,
+			VerticalConfig verticalConfig) {
+		List<String> queries = new ArrayList<>();
+		String modelExpression = modelExpression(brand, primaryModel, alternateModels);
+		String preferredDomainExpression = domainExpression(properties.getPreferredDomains());
+		if (!preferredDomainExpression.isBlank()) {
+			queries.add(preferredDomainExpression + " " + modelExpression);
+		}
+
+		List<String> injectSites = verticalConfig.getInjectSitesResults();
+		if (injectSites != null && !injectSites.isEmpty()) {
+			for (String site : injectSites) {
+				if (site != null && !site.isBlank()) {
+					queries.add("site:" + site.trim() + " " + formatQuery(brand, primaryModel));
+				}
+			}
+		}
+
+		queries.add(formatQuery(brand, primaryModel));
+		if (alternateModels != null) {
+			for (String akaModel : alternateModels) {
+				if (akaModel != null && !akaModel.isBlank()) {
+					queries.add(formatQuery(brand, akaModel));
+				}
+			}
+		}
+		return queries.stream().distinct().toList();
+	}
+
+	private String modelExpression(String brand, String primaryModel, Set<String> alternateModels) {
+		List<String> modelQueries = new ArrayList<>();
+		modelQueries.add(quoted(brand + " " + primaryModel));
+		if (alternateModels != null) {
+			for (String akaModel : alternateModels) {
+				if (akaModel != null && !akaModel.isBlank()) {
+					modelQueries.add(quoted(brand + " " + akaModel));
+				}
+			}
+		}
+		return "(" + String.join(" OR ", modelQueries) + ")";
+	}
+
+	private String domainExpression(List<String> domains) {
+		if (domains == null || domains.isEmpty()) {
+			return "";
+		}
+		List<String> sites = domains.stream()
+				.filter(domain -> domain != null && !domain.isBlank())
+				.map(domain -> "site:" + domain.trim())
+				.toList();
+		if (sites.isEmpty()) {
+			return "";
+		}
+		return "(" + String.join(" OR ", sites) + ")";
+	}
+
+	private String formatQuery(String brand, String model) {
+		return String.format(properties.getQueryTemplate(), brand, model);
+	}
+
+	private String quoted(String value) {
+		return "\"" + value.replace("\"", "") + "\"";
+	}
+
 	private FetchResponse fetchWithFallbacks(String url, Map<String, String> customHeaders) {
 		FetchResponse response = fetchWithHeaders(url, customHeaders, "HTTP_SIMPLE");
 		if (isValidFetch(response)) {
@@ -305,7 +366,7 @@ public class ReviewGenerationPreprocessingService {
 			playwrightHeaders.putAll(customHeaders);
 		}
 		playwrightHeaders.put("X-Open4goods-Fetch-Mode", "playwright");
-		response = fetchWithHeaders(url, playwrightHeaders, "PLAYWRIGHT_LOCAL");
+		response = fetchWithHeaders(url, playwrightHeaders, "PLAYWRIGHT_HEADLESS");
 		if (isValidFetch(response)) {
 			return response;
 		}
@@ -316,12 +377,49 @@ public class ReviewGenerationPreprocessingService {
 
 	private FetchResponse fetchWithHeaders(String url, Map<String, String> headers, String strategy) {
 		try {
-			logger.debug("Fetching URL {} with strategy {}", url, strategy);
-			return urlFetchingService.fetchUrlAsync(url, headers).get();
+			logger.info("Fetching URL {} with requested review strategy {}", url, strategy);
+			FetchResponse response = urlFetchingService.fetchUrlAsync(url, headers).get();
+			if (response != null) {
+				logger.info("Fetch completed for URL {}: requestedStrategy={}, actualStrategy={}, statusCode={}, markdownChars={}",
+						url, strategy, response.fetchStrategy(), response.statusCode(),
+						response.markdownContent() == null ? 0 : response.markdownContent().length());
+			}
+			return response;
 		} catch (Exception e) {
 			logger.warn("Fetch strategy {} failed for {}: {}", strategy, url, e.getMessage());
 			return null;
 		}
+	}
+
+	private String sanitizeMarkdown(String markdown, String url) {
+		if (markdown == null || markdown.isBlank()) {
+			return markdown;
+		}
+		List<Pattern> patterns = properties.getMarkdownLineRemovalPatterns() == null ? List.of()
+				: properties.getMarkdownLineRemovalPatterns().stream()
+						.filter(pattern -> pattern != null && !pattern.isBlank())
+						.map(Pattern::compile)
+						.toList();
+		if (patterns.isEmpty()) {
+			return markdown.trim();
+		}
+		String[] lines = markdown.split("\\R");
+		List<String> kept = new ArrayList<>();
+		int removed = 0;
+		for (String line : lines) {
+			boolean remove = patterns.stream().anyMatch(pattern -> pattern.matcher(line).find());
+			if (remove) {
+				removed++;
+			} else {
+				kept.add(line);
+			}
+		}
+		String sanitized = String.join("\n", kept).trim();
+		if (removed > 0) {
+			logger.info("Markdown cleanup for URL {} removed {} likely header/footer/noise lines (chars {} -> {}).",
+					url, removed, markdown.length(), sanitized.length());
+		}
+		return sanitized;
 	}
 
 	private boolean isValidFetch(FetchResponse response) {
@@ -385,11 +483,11 @@ public class ReviewGenerationPreprocessingService {
 				.filter(attrConf -> !attrConf.getSynonyms().isEmpty())
 				.map(attrConf -> String.format("        - %s (%s)", attrConf.getKey(), attrConf.getName().get("fr")))
 				.collect(Collectors.joining("\n"));
-        // Initialize standard variables to avoid NPE in template and service
-        promptVariables.put("sources", new HashMap<>());
-        promptVariables.put("tokens", new HashMap<>());
-        promptVariables.put("TOTAL_TOKENS", 0);
-        promptVariables.put("SOURCE_TOKENS", new HashMap<>());
+			// Initialize standard variables to avoid NPE in template and service.
+			promptVariables.put("sources", new HashMap<>());
+			promptVariables.put("tokens", new HashMap<>());
+			promptVariables.put("TOTAL_TOKENS", 0);
+			promptVariables.put("SOURCE_TOKENS", new HashMap<>());
 
 		promptVariables.put("ATTRIBUTES", attributesList);
 

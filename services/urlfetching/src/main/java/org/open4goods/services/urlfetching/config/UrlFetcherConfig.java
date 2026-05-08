@@ -42,7 +42,7 @@ public class UrlFetcherConfig {
     }
 
     public void setDomains(Map<String, DomainConfig> domains) {
-        this.domains = domains;
+        this.domains = domains == null ? new HashMap<>() : domains;
     }
 
     public int getThreadPoolSize() {
@@ -72,9 +72,9 @@ public class UrlFetcherConfig {
         private String userAgent;
 
         /**
-         * The fetching strategy to apply (HTTP, PROXIFIED, SELENIUM).
+         * The fetching strategy to apply (HTTP, PROXIFIED, PLAYWRIGHT).
          */
-        private FetchStrategy strategy = FetchStrategy.SELENIUM;
+        private FetchStrategy strategy = FetchStrategy.PLAYWRIGHT;
 
         /**
          * Custom headers to be added to the request.
@@ -240,4 +240,5 @@ public class UrlFetcherConfig {
             this.destinationFolder = destinationFolder;
         }
     }
+
 }
