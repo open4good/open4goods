@@ -201,7 +201,7 @@ public class ProductMappingService {
      */
     public ProductDto getProduct(long gtin, Locale locale, Set<String> includes, DomainLanguage domainLanguage)
             throws ResourceNotFoundException {
-        Product product = repository.getById(gtin);
+        Product product = repository.getByIdWithoutEmbedding(gtin);
         return mapProduct(product, locale, includes, domainLanguage, true);
     }
 
@@ -380,7 +380,7 @@ public class ProductMappingService {
         }
         if (!missing.isEmpty()) {
             try {
-                Map<String, Product> fetched = repository.multiGetById(missing);
+                Map<String, Product> fetched = repository.multiGetByIdWithoutEmbedding(missing);
                 for (Long id : missing) {
                     Product referencedProduct = fetched.get(String.valueOf(id));
                     if (referencedProduct != null) {
@@ -1144,7 +1144,7 @@ public class ProductMappingService {
         } else if (force) {
             logger.info("Force review generation requested by authenticated user for product {}", gtin);
         }
-        Product product = repository.getById(gtin);
+        Product product = repository.getByIdWithoutEmbedding(gtin);
 
         boolean shouldForce = force;
         if (!authenticatedUser) {

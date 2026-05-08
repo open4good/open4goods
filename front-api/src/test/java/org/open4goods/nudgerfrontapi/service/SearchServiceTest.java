@@ -35,6 +35,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
@@ -178,6 +179,7 @@ class SearchServiceTest {
         // After fix, it should NOT use FunctionScore query for empty input, but a BoolQuery directly
         assertThat(esQuery.isFunctionScore()).isFalse();
         assertThat(esQuery.isBool()).isTrue();
+        assertSearchUsesProductProjection(nativeQuery);
     }
 
     @Test
@@ -203,6 +205,15 @@ class SearchServiceTest {
         assertThat(esQuery.bool().must()).isNotEmpty();
         boolean hasMultiMatch = esQuery.bool().must().stream().anyMatch(Query::isMultiMatch);
         assertThat(hasMultiMatch).isTrue();
+        assertSearchUsesProductProjection(nativeQuery);
+    }
+
+    private void assertSearchUsesProductProjection(NativeQuery nativeQuery) {
+        assertThat(nativeQuery.getSourceFilter()).isInstanceOf(FetchSourceFilter.class);
+        FetchSourceFilter sourceFilter = (FetchSourceFilter) nativeQuery.getSourceFilter();
+        assertThat(sourceFilter.fetchSource()).isTrue();
+        assertThat(sourceFilter.getIncludes()).contains("id", "names", "price");
+        assertThat(sourceFilter.getIncludes()).doesNotContain("embedding");
     }
 
     @Test

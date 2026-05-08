@@ -26,6 +26,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.SourceFilter;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,6 +80,7 @@ class ProductRepositoryTest
         assertThat(knnSearch.queryVector()).containsExactly(0.1f, 0.2f);
         assertThat(knnSearch.filter()).isEmpty();
         assertThat(submittedQuery.getPageable().getPageSize()).isEqualTo(3);
+        assertProductProjection(submittedQuery.getSourceFilter());
     }
 
     @Test
@@ -108,6 +111,7 @@ class ProductRepositoryTest
         // We will verify that the query is not null and rely on the fact that if the code constructs it, it should be correct.
         // We can also check if valid.
         assertThat(submittedQuery).isNotNull();
+        assertProductProjection(submittedQuery.getSourceFilter());
         // If possible we could check if the verticalId is in the toString of the criteria if exposed
         // But for now, ensuring the method was called and query object formed is enough for this unit level verification
         // given the internal implementation is straightforward.
@@ -131,5 +135,25 @@ class ProductRepositoryTest
         Long count = repository.countMainIndexHavingScoreThreshold("ECOSCORE", "tv", SubsetCriteriaOperator.GREATER_THAN, 2.5);
 
         assertThat(count).isEqualTo(9L);
+    }
+
+    @Test
+    void productFieldsWithoutEmbeddingSourceFilterExplicitlyOmitsEmbedding()
+    {
+        FetchSourceFilter sourceFilter = ProductRepository.productFieldsWithoutEmbeddingSourceFilter();
+
+        assertThat(sourceFilter.fetchSource()).isTrue();
+        assertThat(sourceFilter.getIncludes()).contains("id", "names", "price", "resources");
+        assertThat(sourceFilter.getIncludes()).doesNotContain("embedding");
+        assertThat(sourceFilter.getExcludes()).isNull();
+    }
+
+    private void assertProductProjection(SourceFilter sourceFilter)
+    {
+        assertThat(sourceFilter).isInstanceOf(FetchSourceFilter.class);
+        FetchSourceFilter fetchSourceFilter = (FetchSourceFilter) sourceFilter;
+        assertThat(fetchSourceFilter.fetchSource()).isTrue();
+        assertThat(fetchSourceFilter.getIncludes()).contains("id", "names", "price");
+        assertThat(fetchSourceFilter.getIncludes()).doesNotContain("embedding");
     }
 }

@@ -57,7 +57,7 @@ public class ProductUrlService {
             return null;
         }
         try {
-            Product product = productRepository.getById(gtin);
+            Product product = productRepository.getByIdWithoutEmbedding(gtin);
             String slug = resolveLocalisedString(product.getNames() != null ? product.getNames().getUrl() : null, domainLanguage);
             String verticalHomeUrl = resolveVerticalHomeUrl(product.getVertical(), domainLanguage);
             String path = buildPath(gtin, slug, verticalHomeUrl);

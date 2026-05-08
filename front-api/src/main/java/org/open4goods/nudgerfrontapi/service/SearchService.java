@@ -682,8 +682,7 @@ public class SearchService {
 		List<AggregationDescriptor> descriptors = new ArrayList<>();
 		var nativeQueryBuilder = new org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder()
 				.withQuery(searchQuery)
-				.withSourceFilter(new org.springframework.data.elasticsearch.core.query.FetchSourceFilter(true, null,
-						new String[] { "embedding" }));
+				.withSourceFilter(ProductRepository.productFieldsWithoutEmbeddingSourceFilter());
 
 		if (useSemanticSearch) {
 			applySemanticSearch(nativeQueryBuilder, semanticEmbedding, searchQuery, pageable);
@@ -1677,7 +1676,7 @@ public class SearchService {
 		NativeQueryBuilder builder = new NativeQueryBuilder()
 				.withQuery(query)
 				.withPageable(pageable)
-				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+				.withSourceFilter(ProductRepository.productFieldsWithoutEmbeddingSourceFilter());
 
 		SearchHits<Product> hits;
 		try {
@@ -1717,7 +1716,7 @@ public class SearchService {
 		NativeQueryBuilder builder = new NativeQueryBuilder()
 				.withQuery(query)
 				.withPageable(pageable)
-				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+				.withSourceFilter(ProductRepository.productFieldsWithoutEmbeddingSourceFilter());
 
 		SearchHits<Product> hits;
 		try {
@@ -1781,7 +1780,7 @@ public class SearchService {
 		org.springframework.data.elasticsearch.client.elc.NativeQuery knnQuery = new org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder()
 				.withQuery(filterQuery).withKnnSearches(knnSearch)
 				.withPageable(org.springframework.data.domain.PageRequest.of(0, knnLimit))
-				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" })).build();
+				.withSourceFilter(ProductRepository.productFieldsWithoutEmbeddingSourceFilter()).build();
 
 		SearchHits<Product> hits;
 		try {
@@ -1873,7 +1872,7 @@ public class SearchService {
 
 		NativeQueryBuilder builder = new NativeQueryBuilder().withQuery(filterQuery).withKnnSearches(knnSearch)
 				.withPageable(PageRequest.of(0, knnLimit))
-				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }))
+				.withSourceFilter(ProductRepository.productFieldsWithoutEmbeddingSourceFilter())
 				.withMinScore(searchProperties.getSemanticMinScore());
 
 		try {
@@ -2202,7 +2201,7 @@ public class SearchService {
 		}
 
 		var builder = new NativeQueryBuilder().withQuery(query).withPageable(Pageable.unpaged())
-				.withSourceFilter(new FetchSourceFilter(true, null, new String[] { "embedding" }));
+				.withSourceFilter(ProductRepository.productFieldsWithoutEmbeddingSourceFilter());
 
 		List<AggregationDescriptor> descriptors = new ArrayList<>();
 		for (Agg agg : aggregations) {

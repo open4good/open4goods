@@ -104,6 +104,60 @@ public class ProductRepository {
                         "lastChange"
         };
 
+        /**
+         * Full product projection used by frontend read paths. These paths use explicit includes
+         * to avoid materialising the dense vector payload when products are mapped to DTOs.
+         */
+        public static final String[] PRODUCT_FIELDS_WITHOUT_EMBEDDING = {
+                        "akaBrands",
+                        "akaModels",
+                        "attributes",
+                        "categoriesByDatasources",
+                        "coverImagePath",
+                        "creationDate",
+                        "datasourceCategories",
+                        "datasourceCodes",
+                        "datasourceNames",
+                        "descriptionsByDatasource",
+                        "embeddingTextHash",
+                        "eprelDatas",
+                        "excluded",
+                        "excludedCauses",
+                        "externalIds",
+                        "googleTaxonomyId",
+                        "gtinInfos",
+                        "id",
+                        "lastChange",
+                        "names",
+                        "offerNames",
+                        "offersCount",
+                        "price",
+                        "ranking",
+                        "resources",
+                        "reviews",
+                        "scores",
+                        "vertical"
+        };
+
+        /**
+         * Builds the common product source filter used by public read paths that do not need the
+         * dense vector payload.
+         *
+         * @return a source filter explicitly including every public product field except embedding
+         */
+        public static FetchSourceFilter productFieldsWithoutEmbeddingSourceFilter() {
+                return new FetchSourceFilter(true, PRODUCT_FIELDS_WITHOUT_EMBEDDING.clone(), null);
+        }
+
+        /**
+         * Builds a source filter for queries that only need counts or aggregations.
+         *
+         * @return a source filter disabling hit source retrieval
+         */
+        public static FetchSourceFilter noSourceFilter() {
+                return new FetchSourceFilter(false, null, null);
+        }
+
 
 	// The file queue implementation for Full products (no partial updates)
 	private BlockingQueue<Product> fullProductQueue;
@@ -659,6 +713,7 @@ public class ProductRepository {
                 .withQuery(new CriteriaQuery(c))
                 .withSort(sortOptions)
                 .withMaxResults(limit)
+                .withSourceFilter(productFieldsWithoutEmbeddingSourceFilter())
                 .build();
 
         return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX)
@@ -698,6 +753,7 @@ public class ProductRepository {
                 .withQuery(new CriteriaQuery(c))
                 .withSort(sortOptions)
                 .withMaxResults(limit)
+                .withSourceFilter(productFieldsWithoutEmbeddingSourceFilter())
                 .build();
 
         return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX)
@@ -925,6 +981,34 @@ public class ProductRepository {
 	}
 
 	/**
+	 * Return a product by id without fetching the dense vector embedding.
+	 *
+	 * @param productId product identifier
+	 * @return product document projected without the public search embedding
+	 * @throws ResourceNotFoundException when the product does not exist
+	 */
+	public Product getByIdWithoutEmbedding(final Long productId) throws ResourceNotFoundException {
+
+		logger.info("Getting product {} without embedding", productId);
+		NativeQuery query = new NativeQueryBuilder()
+				.withIds(Set.of(String.valueOf(productId)))
+				.withSourceFilter(productFieldsWithoutEmbeddingSourceFilter())
+				.build();
+
+		Product result = elasticsearchOperations.search(query, Product.class, CURRENT_INDEX).stream()
+				.map(SearchHit::getContent)
+				.findFirst()
+				.orElse(null);
+
+		if (result == null) {
+			throw new ResourceNotFoundException("Product '" + productId + "' does not exists");
+		}
+
+		saveToRedis(result);
+		return result;
+	}
+
+	/**
 	 * Get multiple data from ids
 	 * @param title
 	 * @return
@@ -945,7 +1029,9 @@ public class ProductRepository {
 		// Setting the query
 
 		List<String> words = List.of(title.split(" "));
-		NativeQueryBuilder esQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(new Criteria("offerNames").matchesAll(words) ));
+		NativeQueryBuilder esQuery = new NativeQueryBuilder()
+				.withQuery(new CriteriaQuery(new Criteria("offerNames").matchesAll(words)))
+				.withSourceFilter(productFieldsWithoutEmbeddingSourceFilter());
 		SearchHits<Product> results = search(esQuery.withPageable(PageRequest.of(0, maxItems)).build(),ProductRepository.MAIN_INDEX_NAME);
 		return results.stream().map(SearchHit::getContent).collect(Collectors.toList());
 
@@ -1004,6 +1090,36 @@ public class ProductRepository {
 
 //			redisRepository.saveAll(redisItems);
 //			});
+		}
+
+		return ret;
+	}
+
+	/**
+	 * Get multiple products by id without fetching dense vector embeddings.
+	 *
+	 * @param ids product identifiers
+	 * @return products keyed by GTIN
+	 * @throws ResourceNotFoundException when Elasticsearch cannot resolve requested products
+	 */
+	public Map<String, Product> multiGetByIdWithoutEmbedding(final Collection<Long> ids)
+			throws ResourceNotFoundException {
+
+		logger.info("Getting {} products from default index without embedding", ids.size());
+		Map<String, Product> ret = new HashMap<String, Product>();
+		Set<String> missingIds = computeMissingIds(ids, ret);
+		logger.info("returned hits : {}, missing : {}", ret.size(), missingIds.size());
+
+		if (missingIds.size() != 0) {
+			NativeQuery query = new NativeQueryBuilder()
+					.withIds(missingIds)
+					.withSourceFilter(productFieldsWithoutEmbeddingSourceFilter())
+					.build();
+
+			elasticsearchOperations.multiGet(query, Product.class, CURRENT_INDEX)
+					.stream().map(MultiGetItem::getItem)
+					.filter(Objects::nonNull)
+					.forEach(e -> ret.put(e.gtin(), e));
 		}
 
 		return ret;
@@ -1257,7 +1373,8 @@ public class ProductRepository {
                 NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
                                 .withQuery(new CriteriaQuery(criteria))
                                 .withAggregation(aggregationName, Aggregation.of(a -> a.extendedStats(e -> e.field(fieldPath))))
-                                .withPageable(PageRequest.of(0, 1));
+                                .withPageable(PageRequest.of(0, 1))
+                                .withSourceFilter(noSourceFilter());
 
                 SearchHits<Product> results = search(queryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
                 if (results == null || results.getAggregations() == null) {
@@ -1317,6 +1434,7 @@ public class ProductRepository {
 		// Adding standard aggregations
 		esQuery = esQuery
 				.withAggregation("taxonomy", 	Aggregation.of(a -> a.terms(ta -> ta.field("googleTaxonomyId").size(50000))  ))
+				.withSourceFilter(noSourceFilter())
 				;
 
 		SearchHits<Product> results = search(esQuery.build(),ProductRepository.MAIN_INDEX_NAME);
@@ -1474,6 +1592,7 @@ public class ProductRepository {
                                 .withQuery(new CriteriaQuery(effectiveCriteria))
                                 .withKnnSearches(knnSearch)
                                 .withPageable(PageRequest.of(0, k))
+                                .withSourceFilter(productFieldsWithoutEmbeddingSourceFilter())
                                 .build();
 
                 return elasticsearchOperations.search(knnQuery, Product.class, CURRENT_INDEX);
