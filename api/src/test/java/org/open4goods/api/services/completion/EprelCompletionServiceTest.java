@@ -57,12 +57,14 @@ class EprelCompletionServiceTest {
     void processProductUsesLatestEprelVersionWhenAvailable() {
         EprelProduct current = new EprelProduct();
         current.setEprelRegistrationNumber("old");
+        current.setModelIdentifier("MODEL-A");
         current.setLastVersion(false);
         current.setProductModelCoreId(10L);
         current.setVersionId(1L);
 
         EprelProduct latest = new EprelProduct();
         latest.setEprelRegistrationNumber("new");
+        latest.setModelIdentifier("MODEL-A");
         latest.setLastVersion(true);
         latest.setProductModelCoreId(10L);
         latest.setVersionId(2L);
@@ -102,5 +104,54 @@ class EprelCompletionServiceTest {
         verify(eprelSearchService).filterByBrand(multipleResults, "Candy");
         assertThat(product.getEprelDatas()).isEqualTo(candyProduct);
         assertThat(product.getExternalIds().getEprel()).isEqualTo("candy-oven");
+    }
+
+    @Test
+    void processProductUsesModelLabelFilterWhenBrandStillMatchesMultipleResults() {
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Indesit");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "IM 760");
+        product.getAkaModels().add("IM 760 MY TIME IT machine a laver charge avant");
+
+        EprelProduct italy = new EprelProduct();
+        italy.setEprelRegistrationNumber("it");
+        italy.setModelIdentifier("IM 760 MY TIME IT");
+        italy.setLastVersion(true);
+        italy.setSupplierOrTrademark("INDESIT");
+
+        EprelProduct france = new EprelProduct();
+        france.setEprelRegistrationNumber("fr");
+        france.setModelIdentifier("IM 760 MY TIME FR");
+        france.setLastVersion(true);
+        france.setSupplierOrTrademark("INDESIT");
+
+        List<EprelProduct> multipleResults = List.of(italy, france);
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection()))
+                .thenReturn(multipleResults);
+        when(eprelSearchService.filterByBrand(multipleResults, "Indesit"))
+                .thenReturn(multipleResults);
+
+        service.processProduct(vertical, product);
+
+        assertThat(product.getEprelDatas()).isEqualTo(italy);
+        assertThat(product.getExternalIds().getEprel()).isEqualTo("it");
+    }
+
+    @Test
+    void processProductRejectsSingleResultWithoutModelEvidence() {
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Indesit");
+
+        EprelProduct unrelated = new EprelProduct();
+        unrelated.setEprelRegistrationNumber("unrelated");
+        unrelated.setModelIdentifier("IM 760 MY TIME IT");
+        unrelated.setLastVersion(true);
+        unrelated.setSupplierOrTrademark("INDESIT");
+
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection()))
+                .thenReturn(List.of(unrelated));
+
+        service.processProduct(vertical, product);
+
+        assertThat(product.getEprelDatas()).isNull();
+        assertThat(product.getExternalIds().getEprel()).isNull();
     }
 }

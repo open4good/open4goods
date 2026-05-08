@@ -1,15 +1,18 @@
 package org.open4goods.api.services.completion;
 
 import java.lang.reflect.Array;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.commons.services.AbstractCompletionService;
@@ -35,6 +38,9 @@ public class EprelCompletionService extends AbstractCompletionService {
 	public static final String EPREL_DS_NAME = "eprel";
 	// TODO : From conf, not every one days.
 	private static final int REFRESH_IN_DAYS = 1;
+	private static final int MIN_COMPACT_MODEL_CONTAINMENT_LENGTH = 7;
+	private static final Pattern DIACRITICS = Pattern.compile("\\p{M}+");
+	private static final Pattern NON_ALNUM = Pattern.compile("[^\\p{Alnum}]+");
 	private EprelSearchService eprelSearchService;
 
 	Logger logger = LoggerFactory.getLogger(EprelCompletionService.class);
@@ -80,32 +86,27 @@ public class EprelCompletionService extends AbstractCompletionService {
 	@Override
 	public void processProduct(VerticalConfig vertical, Product data) {
 
-		List<String> models = new ArrayList<>();
-		models.add(data.model());
-		models.addAll(data.getAkaModels());
+		List<String> models = modelCandidates(data);
 
-                List<EprelProduct> results = eprelSearchService.search(data.gtin(), models, vertical.getEprelGroupNames());
+		List<EprelProduct> results = eprelSearchService.search(data.gtin(), models, vertical.getEprelGroupNames());
 
 		if (null == results || results.size() == 0) {
 			logger.warn("No EPREL results when completing {}-{}", data.brand(), data.model());
+			data.setEprelDatas(null);
+			data.getExternalIds().setEprel(null);
 			data.removeDatasourceData(getDatasourceName());
 			return;
-		} else if (results.size() > 1) {
-			// Try to narrow down with brand before giving up
-			List<EprelProduct> byBrand = eprelSearchService.filterByBrand(results, data.brand());
-			if (byBrand.size() == 1) {
-				logger.info("Brand filter reduced {} EPREL results to 1 for {}-{}", results.size(), data.brand(), data.model());
-				results = byBrand;
-			} else {
-				logger.warn("Too many EPREL results ({}) when completing {}", results.size(), data);
-				data.removeDatasourceData(getDatasourceName());
-				return;
-			}
+		}
+		Optional<EprelProduct> selected = selectUniqueResult(results, data, models);
+		if (selected.isEmpty()) {
+			logger.warn("No safe unique EPREL result ({} candidates) when completing {}", results.size(), data);
+			data.removeDatasourceData(getDatasourceName());
+			return;
 		}
 		{
 			logger.info("Completing product {} with EPREL datas", data);
 
-			EprelProduct eprelData = resolveLatestVersion(results.get(0), vertical);
+			EprelProduct eprelData = resolveLatestVersion(selected.get(), vertical);
 
 			data.setEprelDatas(eprelData);
 			data.getExternalIds().setEprel(eprelData.getEprelRegistrationNumber());
@@ -131,6 +132,182 @@ public class EprelCompletionService extends AbstractCompletionService {
 
 		}
 	}
+
+    /**
+     * Selects exactly one EPREL candidate with conservative evidence.
+     *
+     * <p>GTIN matches are authoritative. Otherwise, multiple candidates are first
+     * narrowed by brand, then by a whole-label model containment check. This avoids
+     * accepting a broad prefix/wildcard EPREL hit unless the catalogue has a longer
+     * model label that uniquely names the EPREL variant.
+     *
+     * @param results raw EPREL search results
+     * @param product product being completed
+     * @param modelCandidates product model and alternate model labels
+     * @return selected candidate, or empty when selection is ambiguous
+     */
+    private Optional<EprelProduct> selectUniqueResult(List<EprelProduct> results, Product product,
+            List<String> modelCandidates) {
+        List<EprelProduct> gtinMatches = results.stream()
+                .filter(candidate -> hasSameGtin(product.gtin(), candidate))
+                .toList();
+        if (gtinMatches.size() == 1) {
+            return Optional.of(gtinMatches.getFirst());
+        }
+        if (gtinMatches.size() > 1) {
+            logger.info("EPREL GTIN matched {} candidates for {}", gtinMatches.size(), product);
+            return Optional.empty();
+        }
+
+        if (results.size() == 1) {
+            EprelProduct onlyResult = results.getFirst();
+            if (hasCompatibleBrand(product.brand(), onlyResult) && hasModelEvidence(onlyResult, modelCandidates)) {
+                return Optional.of(onlyResult);
+            }
+            logger.warn("Rejecting single EPREL result {} for {}: missing brand or model evidence",
+                    onlyResult.getEprelRegistrationNumber(), product);
+            return Optional.empty();
+        }
+
+        List<EprelProduct> narrowed = eprelSearchService.filterByBrand(results, product.brand());
+        if (narrowed.size() == 1) {
+            logger.info("Brand filter reduced {} EPREL results to 1 for {}-{}", results.size(), product.brand(),
+                    product.model());
+            return Optional.of(narrowed.getFirst());
+        }
+
+        List<EprelProduct> modelMatches = narrowed.stream()
+                .filter(candidate -> hasModelEvidence(candidate, modelCandidates))
+                .toList();
+        if (modelMatches.size() == 1) {
+            logger.info("Model label filter reduced {} EPREL results to 1 for {}-{}", results.size(), product.brand(),
+                    product.model());
+            return Optional.of(modelMatches.getFirst());
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Returns product model labels in priority order without duplicates.
+     *
+     * @param product source product
+     * @return model candidates
+     */
+    private List<String> modelCandidates(Product product) {
+        Set<String> candidates = new LinkedHashSet<>();
+        if (product.model() != null) {
+            candidates.add(product.model());
+        }
+        if (product.getAkaModels() != null) {
+            product.getAkaModels().stream()
+                    .filter(Objects::nonNull)
+                    .forEach(candidates::add);
+        }
+        return new ArrayList<>(candidates);
+    }
+
+    /**
+     * Checks whether EPREL and product GTINs are the same numeric value.
+     *
+     * @param productGtin product GTIN
+     * @param candidate EPREL candidate
+     * @return true when both sides expose the same GTIN
+     */
+    private boolean hasSameGtin(String productGtin, EprelProduct candidate) {
+        Long productNumericGtin = numericValue(productGtin);
+        if (productNumericGtin == null || candidate == null) {
+            return false;
+        }
+        if (productNumericGtin.equals(candidate.getNumericGtin())) {
+            return true;
+        }
+        return productNumericGtin.equals(numericValue(candidate.getGtinIdentifier()));
+    }
+
+    /**
+     * Checks whether the catalogue brand is compatible with the EPREL supplier.
+     *
+     * @param brand catalogue brand
+     * @param candidate EPREL candidate
+     * @return true when the brand is blank or matches the EPREL supplier
+     */
+    private boolean hasCompatibleBrand(String brand, EprelProduct candidate) {
+        String normalizedBrand = normalizePhrase(brand);
+        String normalizedSupplier = normalizePhrase(candidate == null ? null : candidate.getSupplierOrTrademark());
+        if (normalizedBrand == null) {
+            return true;
+        }
+        if (normalizedSupplier == null) {
+            return false;
+        }
+        return containsWholePhrase(normalizedSupplier, normalizedBrand)
+                || containsWholePhrase(normalizedBrand, normalizedSupplier);
+    }
+
+    /**
+     * Checks whether an EPREL model is explicitly named by one product model label.
+     *
+     * @param candidate EPREL candidate
+     * @param modelCandidates product model labels
+     * @return true when model identifiers match exactly or by safe containment
+     */
+    private boolean hasModelEvidence(EprelProduct candidate, List<String> modelCandidates) {
+        String eprelModel = candidate == null ? null : candidate.getModelIdentifier();
+        String normalizedEprelModel = normalizePhrase(eprelModel);
+        String compactEprelModel = compactModel(eprelModel);
+        if (normalizedEprelModel == null || compactEprelModel == null) {
+            return false;
+        }
+
+        for (String modelCandidate : modelCandidates) {
+            String normalizedCandidate = normalizePhrase(modelCandidate);
+            String compactCandidate = compactModel(modelCandidate);
+            if (normalizedCandidate == null || compactCandidate == null) {
+                continue;
+            }
+            if (normalizedEprelModel.equals(normalizedCandidate)
+                    || compactEprelModel.equals(compactCandidate)
+                    || containsWholePhrase(normalizedCandidate, normalizedEprelModel)
+                    || (compactEprelModel.length() >= MIN_COMPACT_MODEL_CONTAINMENT_LENGTH
+                            && compactCandidate.contains(compactEprelModel))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsWholePhrase(String container, String contained) {
+        return (" " + container + " ").contains(" " + contained + " ");
+    }
+
+    private Long numericValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Long.valueOf(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private String normalizePhrase(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String ascii = DIACRITICS.matcher(Normalizer.normalize(value, Normalizer.Form.NFD)).replaceAll("");
+        String normalized = NON_ALNUM.matcher(ascii.toLowerCase()).replaceAll(" ").trim();
+        return normalized.isEmpty() ? null : normalized;
+    }
+
+    private String compactModel(String value) {
+        String normalized = normalizePhrase(value);
+        if (normalized == null) {
+            return null;
+        }
+        String compact = normalized.replace(" ", "");
+        return compact.isEmpty() ? null : compact;
+    }
 
     /**
      * Resolves the most recent EPREL version when the current entry is not the latest.
