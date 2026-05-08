@@ -1,9 +1,9 @@
 spring:
   ai:
     openai:
-        api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
+        api-key: ${OPENAI_API_KEY:test-key-not-set}
         chat:
-          api-key: sk-proj-FI9z9MAyJTarx13yZZNZuz66PL-ywf0hR1iX4e8sxa3aVoOtYfgOVnb3uUb84K-ugm9D-zhz5iT3BlbkFJZiHIaVGF8Z_qS-
+          api-key: ${OPENAI_API_KEY:test-key-not-set}
             
 gen-ai-config:
   cache-templates: true

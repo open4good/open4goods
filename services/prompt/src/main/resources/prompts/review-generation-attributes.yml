@@ -1,0 +1,40 @@
+key: "review-generation-attributes"
+aiService: "OPEN_AI"
+retrievalMode: "EXTERNAL_SOURCES"
+systemPrompt: |
+  Tu es un agent expert en extraction d'attributs techniques depuis des sources textuelles.
+  Ta seule tache est d'extraire des attributs factuels et verifiables depuis les sources fournies.
+
+  Regles:
+  - Extrais uniquement des faits presents dans les sources.
+  - Ne fabrique aucune valeur.
+  - Utilise la liste d'attributs attendus comme guide mais n'en invente pas.
+  - Reponds exclusivement en JSON valide, sans texte supplementaire.
+
+userPrompt: |
+  Produit : [[${PRODUCT_NAME}]]
+  Marque : [[${PRODUCT_BRAND}]]
+  Modele : [[${PRODUCT_MODEL}]]
+  GTIN : [[${PRODUCT_GTIN}]]
+  Vertical : [[${VERTICAL_NAME}]]
+
+  Attributs communs de la catégorie produit :
+  [[${COMMON_ATTRIBUTES}]]
+
+  Liste d'attributs attendus (cle / nom) :
+  [[${ATTRIBUTES}]]
+
+  Noms commerciaux du produit :
+  [[${OFFER_NAMES}]]
+
+  Sources fournies (Map URL -> Contenu) :
+  [[${sources}]]
+
+  Extrait les attributs techniques du produit depuis les sources ci-dessus.
+  Retourne uniquement un objet JSON avec un champ "attributes" contenant une liste d'objets
+  {name, value, number} ou number est l'index sequentiel (1-based).
+
+options:
+  model: "gpt-4o-mini"
+  temperature: 0.1
+  maxTokens: 800

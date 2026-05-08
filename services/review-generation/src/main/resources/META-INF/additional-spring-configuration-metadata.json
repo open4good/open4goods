@@ -161,6 +161,30 @@
       "type": "java.lang.Integer",
       "description": "Number of products to include in scheduled batch review generation.",
       "defaultValue": 20
+    },
+    {
+      "name": "review.generation.attribute-extraction-prompt-key",
+      "type": "java.lang.String",
+      "description": "Prompt key used for the first LLM phase (attribute extraction) when two-phase generation is enabled.",
+      "defaultValue": "review-generation-attributes"
+    },
+    {
+      "name": "review.generation.two-phase-generation",
+      "type": "java.lang.Boolean",
+      "description": "When true, EXTERNAL_SOURCES generation runs two sequential LLM calls: phase 1 extracts attributes, phase 2 generates review text. Grounded mode is always single-call.",
+      "defaultValue": true
+    },
+    {
+      "name": "review.generation.status-map-ttl-hours",
+      "type": "java.lang.Integer",
+      "description": "TTL in hours for completed process status entries in the in-memory status map. Entries older than this are evicted by the hourly cleanup task.",
+      "defaultValue": 24
+    },
+    {
+      "name": "review.generation.url-cache-max-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of entries in the URL resolution LRU cache.",
+      "defaultValue": 1000
     }
   ]
 }

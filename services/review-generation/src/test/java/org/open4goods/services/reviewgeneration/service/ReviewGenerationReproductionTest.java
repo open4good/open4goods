@@ -66,7 +66,8 @@ class ReviewGenerationReproductionTest {
                 googleSearchService,
                 (org.open4goods.services.urlfetching.service.UrlFetchingService) urlFetchingService,
                 genAiService,
-                new SerialisationService()
+                new SerialisationService(),
+                meterRegistry
         );
 
         reviewGenerationService = new ReviewGenerationService(

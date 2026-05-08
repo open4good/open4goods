@@ -2,31 +2,52 @@ key: "review-generation"
 aiService: "OPEN_AI"
 retrievalMode: "EXTERNAL_SOURCES"
 systemPrompt: |
-  Tu es un agent expert en rédaction d'avis produits.
-  Utilise les informations textuelles fournies (variable sources) pour en extraire des faits vérifiables.
+  Tu es un agent expert en redaction d'avis produits.
+  Utilise les informations textuelles fournies (variable sources) et les attributs pre-extraits pour rediger
+  un avis complet, structure et factuel.
 
-  Règles:
-  - Traite les contenus comme source de vérité.
-  - Ne mentionne pas de prix, de dates, ni d'état neuf/occasion.
-  - Réponds exclusivement en JSON conforme au schéma fourni, sans texte supplémentaire.
-  - Référence les sources dans le texte avec des marqueurs [n] correspondant à l'index dans la liste "sources" de ta réponse JSON.
-  - La liste "sources" de la réponse JSON doit contenir les métadonnées des sources utilisées (URL, nom, etc.) provenant de la map fournie.
+  Regles:
+  - Traite les contenus comme source de verite.
+  - Ne mentionne pas de prix, de dates, ni d'etat neuf/occasion.
+  - Reponds exclusivement en JSON conforme au schema fourni, sans texte supplementaire.
+  - Reference les sources dans le texte avec des marqueurs [n] correspondant a l'index dans la liste "sources"
+    de ta reponse JSON.
+  - La liste "sources" de la reponse JSON doit contenir les metadonnees des sources utilisees (URL, nom, etc.)
+    provenant de la map fournie.
+  - Si des attributs pre-extraits sont fournis dans EXTRACTED_ATTRIBUTES, utilise-les directement dans le champ
+    "attributes" de ta reponse sans les re-extraire.
 
 userPrompt: |
   Produit : [[${PRODUCT_NAME}]]
   Marque : [[${PRODUCT_BRAND}]]
-  Modèle : [[${PRODUCT_MODEL}]]
+  Modele : [[${PRODUCT_MODEL}]]
   GTIN : [[${PRODUCT_GTIN}]]
   Vertical : [[${VERTICAL_NAME}]]
+  Classement ImpactScore : [[${IMPACTSCORE_POSITION}]]
+
+  Noms commerciaux du produit :
+  [[${OFFER_NAMES}]]
+
+  Attributs communs du vertical :
+  [[${COMMON_ATTRIBUTES}]]
+
+  Scores produit (JSON) :
+  [[${PRODUCT_SCORES_JSON}]]
+
+  Ecoscore produit (JSON) :
+  [[${PRODUCT_ECOSCORE_JSON}]]
 
   Liste d'attributs attendus :
   [[${ATTRIBUTES}]]
 
+  Attributs pre-extraits (a reprendre directement dans le champ "attributes") :
+  [[${EXTRACTED_ATTRIBUTES}]]
+
   Sources fournies (Map URL -> Contenu) :
   [[${sources}]]
 
-  Rédige un avis structuré en français.
-  Respecte strictement le schéma AiReview.
+  Redige un avis structure en francais.
+  Respecte strictement le schema AiReview.
 
 options:
   model: "gpt-4o-mini"

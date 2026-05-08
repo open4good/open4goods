@@ -31,6 +31,7 @@ import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
+import org.open4goods.services.reviewgeneration.dto.AttributeExtractionResult;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.open4goods.verticals.VerticalsConfigService;
 
@@ -118,7 +119,11 @@ class ReviewGenerationServiceReproductionTest {
         PromptResponse<AiReview> promptResponse = new PromptResponse<>();
         promptResponse.setBody(aiReview);
         promptResponse.setMetadata(metadata);
-        
+
+        // Two-phase: mock attribute extraction (phase 1) and text generation (phase 2).
+        PromptResponse<AttributeExtractionResult> attrResponse = new PromptResponse<>();
+        attrResponse.setBody(new AttributeExtractionResult(aiReview.getAttributes()));
+        when(genAiService.objectPrompt(anyString(), any(), eq(AttributeExtractionResult.class))).thenReturn(attrResponse);
         when(genAiService.objectPrompt(anyString(), any(), eq(AiReview.class))).thenReturn(promptResponse);
 
         // Execute

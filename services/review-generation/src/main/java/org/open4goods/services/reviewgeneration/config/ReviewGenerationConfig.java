@@ -135,9 +135,34 @@ public class ReviewGenerationConfig {
     private String groundedPromptKey = "review-generation-grounded";
 
     /**
+     * Prompt key used for the first LLM phase: attribute extraction.
+     * Only used when twoPhaseGeneration is true and retrievalMode is EXTERNAL_SOURCES.
+     */
+    private String attributeExtractionPromptKey = "review-generation-attributes";
+
+    /**
      * Flag to enable the grounded prompt flow.
      */
     private boolean useGroundedPrompt = false;
+
+    /**
+     * When true, EXTERNAL_SOURCES generation uses two sequential LLM calls:
+     * phase 1 extracts attributes, phase 2 generates the prose review using those attributes.
+     * Grounded (MODEL_WEB_SEARCH) mode is always single-call regardless of this flag.
+     */
+    private boolean twoPhaseGeneration = true;
+
+    /**
+     * TTL in hours for entries in the in-memory process status map.
+     * Completed (SUCCESS or FAILED) entries older than this are evicted by the scheduled cleanup.
+     * Default is 24 hours.
+     */
+    private int statusMapTtlHours = 24;
+
+    /**
+     * Maximum number of entries kept in the URL resolution cache.
+     */
+    private int urlCacheMaxSize = 1000;
 
     /**
      * Interval between batch status scans for review generation jobs.
@@ -384,5 +409,31 @@ public class ReviewGenerationConfig {
 		this.batchFolder = batchFolder;
 	}
 
+    public String getAttributeExtractionPromptKey() {
+        return attributeExtractionPromptKey;
+    }
+    public void setAttributeExtractionPromptKey(String attributeExtractionPromptKey) {
+        this.attributeExtractionPromptKey = attributeExtractionPromptKey;
+    }
 
+    public boolean isTwoPhaseGeneration() {
+        return twoPhaseGeneration;
+    }
+    public void setTwoPhaseGeneration(boolean twoPhaseGeneration) {
+        this.twoPhaseGeneration = twoPhaseGeneration;
+    }
+
+    public int getStatusMapTtlHours() {
+        return statusMapTtlHours;
+    }
+    public void setStatusMapTtlHours(int statusMapTtlHours) {
+        this.statusMapTtlHours = statusMapTtlHours;
+    }
+
+    public int getUrlCacheMaxSize() {
+        return urlCacheMaxSize;
+    }
+    public void setUrlCacheMaxSize(int urlCacheMaxSize) {
+        this.urlCacheMaxSize = urlCacheMaxSize;
+    }
 }

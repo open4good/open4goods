@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductFact;
@@ -42,6 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 /**
  * Builds prompt variables by discovering and fetching web sources for a product.
  * <p>
@@ -59,16 +62,18 @@ public class ReviewGenerationPreprocessingService {
 	private final UrlFetchingService urlFetchingService;
 	private final PromptService genAiService;
 	private final SerialisationService serialisationService;
+	private final MeterRegistry meterRegistry;
 	private final ThreadPoolExecutor fetchExecutor;
 
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
 			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
-			SerialisationService serialisationService) {
+			SerialisationService serialisationService, MeterRegistry meterRegistry) {
 		this.properties = properties;
 		this.googleSearchService = googleSearchService;
 		this.urlFetchingService = urlFetchingService;
 		this.genAiService = genAiService;
 		this.serialisationService = serialisationService;
+		this.meterRegistry = meterRegistry;
 		this.fetchExecutor = new ThreadPoolExecutor(properties.getMaxConcurrentFetch(), properties.getMaxQueueSize(),
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize() * 10),
 				new ThreadPoolExecutor.AbortPolicy());
@@ -78,6 +83,30 @@ public class ReviewGenerationPreprocessingService {
 				properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
 				properties.getSearchGeoLocation(), properties.getSearchHostLanguage(), properties.getSearchSafe());
 	}
+
+    /**
+     * Validates configuration at startup and logs actionable warnings for common misconfigurations.
+     */
+    @PostConstruct
+    public void validateConfig() {
+        if (properties.getPreferredDomains() == null || properties.getPreferredDomains().isEmpty()) {
+            logger.warn("review.generation.preferred-domains is empty. No preferred-domain SERP boost will be applied. "
+                    + "Configure e.g. lesnumeriques.com, fnac.com to improve source quality.");
+        }
+        else {
+            boolean hasInvalidDomain = properties.getPreferredDomains().stream()
+                    .anyMatch(d -> d != null && (d.startsWith("http://") || d.startsWith("https://") || d.contains("/")));
+            if (hasInvalidDomain) {
+                logger.warn("review.generation.preferred-domains contains entries with scheme or path. "
+                        + "Use bare hostnames only (e.g. 'lesnumeriques.com'), not full URLs.");
+            }
+        }
+        if (properties.getMinUrlCount() > properties.getMaxUrlsPerProduct()) {
+            logger.warn("review.generation.min-url-count ({}) exceeds max-urls-per-product ({}). "
+                    + "Generation will always fail with NotEnoughDataException.",
+                    properties.getMinUrlCount(), properties.getMaxUrlsPerProduct());
+        }
+    }
 
 	/**
 	 * Prepares the prompt variables used for review generation.
@@ -361,6 +390,8 @@ public class ReviewGenerationPreprocessingService {
 		if (isValidFetch(response)) {
 			return response;
 		}
+		logger.info("HTTP_SIMPLE produced no usable content for {}; falling back to PLAYWRIGHT_HEADLESS.", url);
+
 		Map<String, String> playwrightHeaders = new HashMap<>();
 		if (customHeaders != null) {
 			playwrightHeaders.putAll(customHeaders);
@@ -370,9 +401,15 @@ public class ReviewGenerationPreprocessingService {
 		if (isValidFetch(response)) {
 			return response;
 		}
+		logger.info("PLAYWRIGHT_HEADLESS produced no usable content for {}; falling back to ZENROWS.", url);
+
 		Map<String, String> antiBotHeaders = new HashMap<>(playwrightHeaders);
 		antiBotHeaders.put("X-Open4goods-Fetch-Provider", "zenrows");
-		return fetchWithHeaders(url, antiBotHeaders, "ZENROWS");
+		response = fetchWithHeaders(url, antiBotHeaders, "ZENROWS");
+		if (!isValidFetch(response)) {
+			logger.warn("All fetch strategies failed for URL {}. Giving up on this source.", url);
+		}
+		return response;
 	}
 
 	private FetchResponse fetchWithHeaders(String url, Map<String, String> headers, String strategy) {
@@ -380,12 +417,20 @@ public class ReviewGenerationPreprocessingService {
 			logger.info("Fetching URL {} with requested review strategy {}", url, strategy);
 			FetchResponse response = urlFetchingService.fetchUrlAsync(url, headers).get();
 			if (response != null) {
+				boolean valid = isValidFetch(response);
+				meterRegistry.counter("review.fetch.attempts",
+						"strategy", strategy,
+						"outcome", valid ? "success" : "empty").increment();
 				logger.info("Fetch completed for URL {}: requestedStrategy={}, actualStrategy={}, statusCode={}, markdownChars={}",
 						url, strategy, response.fetchStrategy(), response.statusCode(),
 						response.markdownContent() == null ? 0 : response.markdownContent().length());
 			}
+			else {
+				meterRegistry.counter("review.fetch.attempts", "strategy", strategy, "outcome", "null").increment();
+			}
 			return response;
 		} catch (Exception e) {
+			meterRegistry.counter("review.fetch.attempts", "strategy", strategy, "outcome", "error").increment();
 			logger.warn("Fetch strategy {} failed for {}: {}", strategy, url, e.getMessage());
 			return null;
 		}
@@ -440,6 +485,11 @@ public class ReviewGenerationPreprocessingService {
 		return "unknown";
 	}
 
+	/**
+	 * Returns the fetch strategy name for an already-completed future.
+	 * {@code getNow(null)} is safe here because this method is only called after
+	 * {@code future.get()} has already been awaited in the aggregation loop.
+	 */
 	private String resolveFetchStrategy(CompletableFuture<FetchResponse> future) {
 		if (future == null) {
 			return "UNKNOWN";
@@ -490,6 +540,8 @@ public class ReviewGenerationPreprocessingService {
 			promptVariables.put("SOURCE_TOKENS", new HashMap<>());
 
 		promptVariables.put("ATTRIBUTES", attributesList);
+		// Default empty value so templates that reference EXTRACTED_ATTRIBUTES don't fail.
+		promptVariables.put("EXTRACTED_ATTRIBUTES", "[]");
 
 		// Inject IMPACTSCORE_POSITION
 		String impactScorePosition = "Non classé";

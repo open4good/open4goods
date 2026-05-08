@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -25,6 +26,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.stream.Stream;
+
+import org.open4goods.services.reviewgeneration.dto.AttributeExtractionResult;
 
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.Attribute;
@@ -161,6 +164,13 @@ public class ReviewGenerationService implements HealthIndicator {
 		}
 		this.objectMapper = new ObjectMapper();
 		this.outputConverter = new BeanOutputConverter<>(AiReview.class);
+		int maxCacheSize = properties.getUrlCacheMaxSize();
+		this.urlCache = Collections.synchronizedMap(new LinkedHashMap<>(maxCacheSize, 0.75f, true) {
+			@Override
+			protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+				return size() > maxCacheSize;
+			}
+		});
 	}
 
 	// -------------------- Preprocessing Logic -------------------- //
@@ -383,7 +393,8 @@ public class ReviewGenerationService implements HealthIndicator {
 					reviewResponse = genAiService.objectPromptStream(promptKey, promptVariables, AiReview.class,
 							event -> handleProviderEvent(status, event));
 					logger.debug("Streaming review generation started for promptKey: {}", promptKey);
-
+				} else if (properties.isTwoPhaseGeneration()) {
+					reviewResponse = executeExternalSourcesTwoPhase(promptKey, promptVariables, status, product.getId());
 				} else {
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
 				}
@@ -450,6 +461,31 @@ public class ReviewGenerationService implements HealthIndicator {
 	}
 
 	// -------------------- Batch Review Generation Methods -------------------- //
+
+    /**
+     * Evicts completed (SUCCESS or FAILED) process status entries that are older than
+     * {@code review.generation.status-map-ttl-hours}. Runs hourly.
+     */
+    @Scheduled(fixedDelayString = "PT1H")
+    public void evictStaleProcessStatuses() {
+        Instant cutoff = Instant.now().minus(properties.getStatusMapTtlHours(), ChronoUnit.HOURS);
+        int before = processStatusMap.size();
+        processStatusMap.entrySet().removeIf(entry -> {
+            ReviewGenerationStatus s = entry.getValue();
+            boolean terminal = s.getStatus() == Status.SUCCESS || s.getStatus() == Status.FAILED
+                    || s.getStatus() == Status.ALREADY_PROCESSED;
+            if (!terminal) {
+                return false;
+            }
+            Long endTime = s.getEndTime();
+            return endTime != null && Instant.ofEpochMilli(endTime).isBefore(cutoff);
+        });
+        int evicted = before - processStatusMap.size();
+        if (evicted > 0) {
+            logger.info("Evicted {} stale process status entries (TTL={}h). Map size now: {}.",
+                    evicted, properties.getStatusMapTtlHours(), processStatusMap.size());
+        }
+    }
 
     /**
      * Scheduled batch trigger that runs every morning at 6 AM.
@@ -667,7 +703,11 @@ public class ReviewGenerationService implements HealthIndicator {
 				if (promptConfig != null && promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
 					promptVariablesList.add(preprocessingService.buildBasePromptVariables(product, verticalConfig));
 				} else {
-					promptVariablesList.add(preprocessingService.preparePromptVariables(product, verticalConfig, status));
+					Map<String, Object> vars = preprocessingService.preparePromptVariables(product, verticalConfig, status);
+					if (properties.isTwoPhaseGeneration()) {
+						injectExtractedAttributes(vars, product.getId());
+					}
+					promptVariablesList.add(vars);
 				}
 				productIds.add(String.valueOf(product.getId()));
 				gtins.add(product.gtin());
@@ -705,6 +745,65 @@ public class ReviewGenerationService implements HealthIndicator {
 			logger.error("Error writing tracking file for job {}: {}", jobId, e.getMessage());
 		}
 		return jobId;
+	}
+
+	/**
+	 * Executes the two-phase LLM flow for EXTERNAL_SOURCES mode:
+	 * <ol>
+	 *   <li>Phase 1 — attribute extraction via {@code attributeExtractionPromptKey}.</li>
+	 *   <li>Phase 2 — full review text generation with the extracted attributes injected.</li>
+	 * </ol>
+	 *
+	 * @param textPromptKey   the prompt key for phase 2 text generation
+	 * @param promptVariables shared variable map (mutated to add EXTRACTED_ATTRIBUTES)
+	 * @param status          the process status to update with progress messages
+	 * @param upc             the product UPC for log correlation
+	 * @return the phase-2 {@link PromptResponse}
+	 */
+	private PromptResponse<AiReview> executeExternalSourcesTwoPhase(String textPromptKey,
+			Map<String, Object> promptVariables, ReviewGenerationStatus status, long upc) throws Exception {
+		String attrPromptKey = properties.getAttributeExtractionPromptKey();
+		logger.info("Phase 1 (attribute extraction) starting for UPC {} with promptKey '{}'.", upc, attrPromptKey);
+		status.addMessage("Phase 1: extracting attributes...");
+
+		PromptResponse<AttributeExtractionResult> attrResponse =
+				genAiService.objectPrompt(attrPromptKey, promptVariables, AttributeExtractionResult.class);
+		List<AiReview.AiAttribute> extractedAttributes = attrResponse.getBody() != null
+				? attrResponse.getBody().attributes()
+				: List.of();
+		logger.info("Phase 1 complete for UPC {}: {} attributes extracted.", upc, extractedAttributes.size());
+
+		promptVariables.put("EXTRACTED_ATTRIBUTES",
+				objectMapper.writeValueAsString(extractedAttributes));
+
+		logger.info("Phase 2 (text generation) starting for UPC {} with promptKey '{}'.", upc, textPromptKey);
+		status.addMessage("Phase 2: generating review text...");
+		return genAiService.objectPrompt(textPromptKey, promptVariables, AiReview.class);
+	}
+
+	/**
+	 * Runs attribute extraction for a single product and injects the result as
+	 * {@code EXTRACTED_ATTRIBUTES} into the given variable map.
+	 * Used by the batch preprocessing loop when two-phase generation is enabled.
+	 *
+	 * @param vars the variable map to enrich (mutated in place)
+	 * @param upc  the product UPC for log correlation
+	 */
+	private void injectExtractedAttributes(Map<String, Object> vars, long upc) {
+		String attrPromptKey = properties.getAttributeExtractionPromptKey();
+		try {
+			logger.info("Batch phase 1 (attribute extraction) for UPC {} with promptKey '{}'.", upc, attrPromptKey);
+			PromptResponse<AttributeExtractionResult> attrResponse =
+					genAiService.objectPrompt(attrPromptKey, vars, AttributeExtractionResult.class);
+			List<AiReview.AiAttribute> attrs = attrResponse.getBody() != null
+					? attrResponse.getBody().attributes()
+					: List.of();
+			vars.put("EXTRACTED_ATTRIBUTES", objectMapper.writeValueAsString(attrs));
+			logger.info("Batch phase 1 complete for UPC {}: {} attributes extracted.", upc, attrs.size());
+		} catch (Exception e) {
+			logger.warn("Batch phase 1 failed for UPC {}; proceeding with empty EXTRACTED_ATTRIBUTES: {}", upc, e.getMessage());
+			vars.put("EXTRACTED_ATTRIBUTES", "[]");
+		}
 	}
 
 	private String resolvePromptKey() {
@@ -1180,7 +1279,11 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param urlString the URL to resolve
 	 * @return the final URL after following redirects, or the original if no redirect or error
 	 */
-	private final Map<String, String> urlCache = new ConcurrentHashMap<>();
+	/**
+	 * Bounded LRU cache for resolved URLs. Access-order LinkedHashMap keeps the most-recently-used
+	 * entries and evicts the oldest once {@code urlCacheMaxSize} is reached.
+	 */
+	private final Map<String, String> urlCache;
 
 	/**
 	 * Resolves a URL by following redirects (up to a limit).

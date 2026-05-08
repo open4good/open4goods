@@ -51,7 +51,7 @@ class ReviewGenerationPreprocessingServiceTest {
         properties.setSearchGeoLocation("fr");
         properties.setSearchHostLanguage("fr");
         service = new ReviewGenerationPreprocessingService(properties, googleSearchService, urlFetchingService,
-                promptService, serialisationService);
+                promptService, serialisationService, new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
     }
 
     @Test
