@@ -173,6 +173,11 @@ public class Product implements Standardisable {
 	 */
 	private Localisable<String, AiReviewHolder> reviews = new Localisable<String, AiReviewHolder>();
 
+	/**
+	 * Facts scraped from web sources and stored for AI reprocessing.
+	 */
+	private List<ProductFact> reviewFacts = new ArrayList<>();
+
 	private EcoScoreRanking ranking = new EcoScoreRanking();
 
 	/**
@@ -1120,6 +1125,15 @@ public class Product implements Standardisable {
 
 	public void setEmbedding(float[] embedding) {
 		this.embedding = embedding;
+	}
+
+
+	public List<ProductFact> getReviewFacts() {
+		return reviewFacts;
+	}
+
+	public void setReviewFacts(List<ProductFact> reviewFacts) {
+		this.reviewFacts = reviewFacts == null ? new ArrayList<>() : reviewFacts;
 	}
 
 	public void setEprelDatas(EprelProduct eprelDatas) {

@@ -209,6 +209,10 @@
             "type": "object",
             "enabled": false
         },
+        "reviewFacts": {
+            "type": "object",
+            "enabled": false
+        },
         "googleTaxonomyId": {
             "type": "integer",
             "index": false,
