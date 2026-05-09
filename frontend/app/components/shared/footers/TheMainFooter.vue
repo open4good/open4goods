@@ -23,7 +23,7 @@
   box-shadow: 0 -18px 48px rgba(var(--v-theme-shadow-primary-600), 0.22);
 }
 .v-theme--light.main-footer {
-  background: #0083a4 !important;
+  background: #00657f !important;
 }
 
 .v-theme--dark.main-footer {

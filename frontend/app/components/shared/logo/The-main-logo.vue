@@ -13,11 +13,11 @@ const logoSrc = useLogoAsset()
     id="main-logo-link"
     to="/"
     class="logo-link"
-    :aria-label="t('siteIdentity.logoAlt')"
   >
     <img
       :src="logoSrc"
-      :alt="t('siteIdentity.logoAlt')"
+      alt=""
+      aria-hidden="true"
       class="main-logo"
       loading="lazy"
     />

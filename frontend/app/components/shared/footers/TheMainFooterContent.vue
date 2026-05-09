@@ -371,11 +371,11 @@ const isRecording = computed(() =>
   align-items: center;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.98);
+  color: rgb(var(--v-theme-hero-overlay-strong));
 }
 
 .footer-section-title {
-  color: rgba(var(--v-theme-hero-overlay-strong), 0.88);
+  color: rgb(var(--v-theme-hero-overlay-strong));
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }

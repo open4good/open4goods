@@ -23,7 +23,6 @@ import {
 } from './shared/utils/localized-routes'
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
-import { icons } from './app/config/icons'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
@@ -64,7 +63,7 @@ const PLAUSIBLE_ENABLED = process.env.NODE_ENV === 'production'
 const PLAUSIBLE_IGNORED_HOSTNAMES = ['localhost', '127.0.0.1']
 const HOTJAR_ENABLED = true
 // ['always', 'never', 'query']
-const HOTJAR_MODE ='query'
+const HOTJAR_MODE = 'query'
 const HOTJAR_SITE_ID = Number(process.env.HOTJAR_SITE_ID ?? 1332067)
 
 const HOTJAR_SNIPPET_VERSION = Number(process.env.HOTJAR_SNIPPET_VERSION ?? 6)
@@ -289,6 +288,26 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    '/_nuxt/**': {
+      headers: {
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+    },
+    '/fonts/**': {
+      headers: {
+        'Cache-Control': 'public, max-age=2592000',
+      },
+    },
+    '/images/**': {
+      headers: {
+        'Cache-Control': 'public, max-age=2592000',
+      },
+    },
+    '/pwa-assets/**': {
+      headers: {
+        'Cache-Control': 'public, max-age=2592000',
+      },
+    },
     // Disabled SWR for blog pages - conflicts with useCookie composable during SSR
     // When SWR returns cached responses, headers are already sent and any cookie write fails
     // '/blog/**': { swr: 60 },
@@ -369,15 +388,6 @@ export default defineNuxtConfig({
     moduleOptions: {
       // Enable Vuetify CSS tree-shaking (only include CSS for used components)
       styles: 'sass',
-    },
-    icons: {
-      // Use SVG icons from @mdi/js instead of CDN font (eliminates render-blocking CSS)
-      defaultSet: 'mdi-svg',
-      svg: {
-        mdi: {
-          aliases: icons,
-        },
-      },
     },
     vuetifyOptions: {
       theme: {

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { useTheme } from 'vuetify'
+import { useDisplay, useTheme } from 'vuetify'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type {
   AffiliationPartnerDto,
@@ -11,7 +11,6 @@ import type {
   IpQuotaStatusDto,
 } from '~~/shared/api-client'
 
-import HomeHeroSection from '~/components/home/sections/HomeHeroSection.vue'
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
 import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
@@ -38,7 +37,13 @@ import {
 import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 import { resolveThemeName } from '~~/shared/constants/theme'
-import PwaMobileLanding from '~/components/pwa/PwaMobileLanding.vue'
+
+const HomeHeroSection = defineAsyncComponent(
+  () => import('~/components/home/sections/HomeHeroSection.vue')
+)
+const PwaMobileLanding = defineAsyncComponent(
+  () => import('~/components/pwa/PwaMobileLanding.vue')
+)
 
 defineRouteRules({
   isr: 3600, // Cache home page for 1 hour
@@ -53,10 +58,52 @@ const router = useRouter()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+const display = useDisplay()
 
 const searchQuery = ref('')
 
 const MIN_SUGGESTION_QUERY_LENGTH = 2
+
+const MOBILE_USER_AGENT_PATTERN =
+  /(Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Kindle|Silk|Opera Mini)/i
+
+const resolveUserAgentFromHeader = (
+  headerValue: string | string[] | undefined
+): string | null => {
+  if (!headerValue) {
+    return null
+  }
+
+  if (Array.isArray(headerValue)) {
+    return headerValue[0] ?? null
+  }
+
+  return headerValue
+}
+
+const initialIsMobileLayout = useState<boolean>(
+  'home-page-initial-is-mobile-layout',
+  () => {
+    if (import.meta.server) {
+      const userAgentHeader = useRequestHeaders(['user-agent'])['user-agent']
+      const userAgent = resolveUserAgentFromHeader(userAgentHeader)
+
+      return userAgent ? MOBILE_USER_AGENT_PATTERN.test(userAgent) : false
+    }
+
+    return display.smAndDown.value
+  }
+)
+
+const isHydrated = ref(false)
+
+onMounted(() => {
+  isHydrated.value = true
+})
+
+const isMobileLayout = computed(() =>
+  isHydrated.value ? display.smAndDown.value : initialIsMobileLayout.value
+)
 
 type HomeBlogItem = BlogPostDto & { formattedDate?: string; slug?: string }
 type EnrichedBlogItem = HomeBlogItem & { link: string; hasImage: boolean }
@@ -803,8 +850,8 @@ useHead(() => ({
 <template>
   <div>
     <PwaMobileLanding
+      v-if="isMobileLayout"
       v-model:search-query="searchQuery"
-      class="d-md-none"
       :verticals="rawCategories"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
       @submit="handleSearchSubmit"
@@ -813,8 +860,8 @@ useHead(() => ({
     />
     <div class="home-page">
       <HomeHeroSection
+        v-if="!isMobileLayout"
         v-model:search-query="searchQuery"
-        class="d-none d-md-block"
         :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
         :verticals="rawCategories"
         :partners-count="heroPartnersCount"
@@ -841,7 +888,6 @@ useHead(() => ({
           :background-dark="parallaxBackgrounds?.essentials?.backgroundDark"
           :overlay-opacity="parallaxBackgrounds?.essentials?.overlayOpacity"
           :parallax-amount="parallaxBackgrounds?.essentials?.parallaxAmount"
-          :aria-label="t('home.parallax.essentials.ariaLabel')"
           :max-offset-ratio="parallaxBackgrounds?.essentials?.maxOffsetRatio"
           :enable-aplats="true"
           :aplat-svg="parallaxAplatEssentials"
@@ -910,7 +956,6 @@ useHead(() => ({
           :background-dark="parallaxBackgrounds.blog.backgroundDark"
           :overlay-opacity="parallaxBackgrounds.blog.overlayOpacity"
           :parallax-amount="parallaxBackgrounds.blog.parallaxAmount"
-          :aria-label="t('home.parallax.knowledge.ariaLabel')"
           :max-offset-ratio="parallaxBackgrounds.blog.maxOffsetRatio"
           :enable-aplats="true"
           :aplat-svg="parallaxAplatBlog"
@@ -938,7 +983,6 @@ useHead(() => ({
           :background-dark="parallaxBackgrounds.cta.backgroundDark"
           :overlay-opacity="parallaxBackgrounds.cta.overlayOpacity"
           :parallax-amount="parallaxBackgrounds.cta.parallaxAmount"
-          :aria-label="t('home.parallax.cta.ariaLabel')"
           :max-offset-ratio="parallaxBackgrounds.cta.maxOffsetRatio"
           content-align="center"
         >

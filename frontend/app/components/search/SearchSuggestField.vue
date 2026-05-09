@@ -11,7 +11,7 @@
     >
       <template #activator="{ props: menuProps }">
         <v-text-field
-          v-bind="menuProps"
+          v-bind="textFieldActivatorProps(menuProps)"
           v-model="internalSearch"
           :label="label"
           :placeholder="currentPlaceholder"
@@ -287,6 +287,14 @@ const attrs = useAttrs()
 const filteredAttrs = computed(() => {
   return attrs
 })
+
+const textFieldActivatorProps = (menuProps: Record<string, unknown>) => {
+  const textFieldProps = { ...menuProps }
+  delete textFieldProps['aria-expanded']
+  delete textFieldProps['aria-owns']
+
+  return textFieldProps
+}
 
 const props = withDefaults(
   defineProps<{
