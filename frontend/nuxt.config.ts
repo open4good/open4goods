@@ -23,6 +23,7 @@ import {
 } from './shared/utils/localized-routes'
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
+import { icons } from './app/config/icons'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
@@ -342,7 +343,9 @@ export default defineNuxtConfig({
   ],
 
   vueuse: {
-    ssrHandlers: true,
+    // Keep browser storage in the browser. SSR cookie-backed storage emits
+    // anonymous Set-Cookie headers for UI state and prevents CDN page caching.
+    ssrHandlers: false,
   },
 
   device: {
@@ -388,6 +391,15 @@ export default defineNuxtConfig({
     moduleOptions: {
       // Enable Vuetify CSS tree-shaking (only include CSS for used components)
       styles: 'sass',
+    },
+    icons: {
+      // Use inline SVG icons instead of the remote MDI icon font.
+      defaultSet: 'mdi-svg',
+      svg: {
+        mdi: {
+          aliases: icons,
+        },
+      },
     },
     vuetifyOptions: {
       theme: {

@@ -8,6 +8,20 @@ import {
 
 const API_PREFIX = '/api'
 
+const createClientCsrfToken = () => {
+  if (!import.meta.client) {
+    return null
+  }
+
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID()
+  }
+
+  const bytes = new Uint8Array(16)
+  globalThis.crypto?.getRandomValues(bytes)
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
 const isApiRequest = (request: RequestInfo | URL) => {
   if (typeof request === 'string') {
     return request.startsWith(API_PREFIX)
@@ -57,13 +71,12 @@ export default defineNuxtPlugin(nuxtApp => {
       }
 
       if (!token) {
-        console.log(
-          '[CSRF-Plugin] No CSRF token found – request will proceed without it'
-        )
-        return
+        token = createClientCsrfToken()
+        if (!token) {
+          return
+        }
+        csrfCookie.value = token
       }
-
-      console.log('[CSRF-Plugin] Attaching CSRF token:', token)
 
       const headers = new Headers(options.headers || {})
 

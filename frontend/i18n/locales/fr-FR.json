@@ -2278,6 +2278,7 @@
         "notEnoughData": "Pas assez de données fiables pour générer une synthèse."
       },
       "generatedAt": "Synthèse générée le {date}",
+      "sourceReferenceAria": "Voir la source {reference}",
       "tooltip": {
         "generatedAt": "Synthèse avancée générée le {date}",
         "available": "Synthèse IA disponible",

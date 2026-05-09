@@ -2,12 +2,12 @@
   <article
     ref="chartContainer"
     class="impact-radar"
-    role="img"
-    :aria-label="ariaLabel"
+    :aria-labelledby="titleId"
   >
-    <h3 class="impact-radar__title text-center mb-4">
+    <h3 :id="titleId" class="impact-radar__title text-center mb-4">
       {{ $t('product.impact.positioning') }}
     </h3>
+    <p class="d-sr-only">{{ ariaLabel }}</p>
     <ClientOnly>
       <VueECharts
         v-if="option && canRenderChart"
@@ -83,6 +83,7 @@ const VueECharts = defineAsyncComponent(async () => {
 })
 
 const { t } = useI18n()
+const titleId = useId()
 
 const ariaLabel = computed(() =>
   t('product.impact.radarAria', { product: props.productName })

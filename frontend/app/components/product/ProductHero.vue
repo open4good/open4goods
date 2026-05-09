@@ -1,6 +1,10 @@
 <template>
   <section class="product-hero">
-    <div class="product-hero__background" aria-hidden="true">
+    <div
+      v-if="showDecorativeBackground"
+      class="product-hero__background"
+      aria-hidden="true"
+    >
       <img
         class="product-hero__background-media"
         :src="heroBackground"
@@ -13,14 +17,12 @@
     </div>
     <div class="product-hero__content">
       <header
-        class="product-hero__heading home-reveal-group d-flex flex-column align-center text-center"
-        :class="heroRevealClasses"
+        class="product-hero__heading d-flex flex-column align-center text-center"
       >
         <CategoryNavigationBreadcrumbs
           v-if="visibleBreadcrumbs.length"
           v-bind="heroBreadcrumbProps"
-          class="product-hero__breadcrumbs home-reveal-item ma-0 mb-2"
-          :style="{ '--reveal-delay': '60ms' }"
+          class="product-hero__breadcrumbs ma-0 mb-2"
         />
         <ProductDesignation
           :product="product"
@@ -28,8 +30,6 @@
           title-tag="h1"
           title-class="product-hero__title text-center"
           description-class="product-hero__short-description text-center"
-          class="home-reveal-item"
-          :style="{ '--reveal-delay': '0ms' }"
         />
       </header>
 
@@ -343,21 +343,16 @@
 import {
   computed,
   defineAsyncComponent,
-  nextTick,
-  onMounted,
   ref,
-  watch,
   type PropType,
 } from 'vue'
 import DOMPurify from 'isomorphic-dompurify'
 import { useI18n } from 'vue-i18n'
-import { usePreferredReducedMotion } from '@vueuse/core'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import AiReviewActionButton from '~/components/shared/ai/AiReviewActionButton.vue'
-import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -426,47 +421,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-})
-
-const prefersReducedMotion = usePreferredReducedMotion()
-const accessibilityStore = useAccessibilityStore()
-const shouldReduceMotion = computed(
-  () =>
-    accessibilityStore.prefersReducedMotionOverride ||
-    prefersReducedMotion.value === 'reduce'
-)
-
-const heroRevealReady = ref(false)
-const heroRevealVisible = ref(false)
-const heroRevealClasses = computed(() => ({
-  'is-ready': heroRevealReady.value,
-  'is-visible': heroRevealVisible.value,
-}))
-
-onMounted(async () => {
-  await nextTick()
-
-  if (shouldReduceMotion.value) {
-    heroRevealReady.value = true
-    heroRevealVisible.value = true
-    return
-  }
-
-  heroRevealReady.value = true
-  // Wait for the next frame to ensure the browser registers the 'ready' state
-  window.requestAnimationFrame(() => {
-    // And another frame to trigger the transition
-    window.requestAnimationFrame(() => {
-      heroRevealVisible.value = true
-    })
-  })
-})
-
-watch(shouldReduceMotion, value => {
-  if (value) {
-    heroRevealReady.value = true
-    heroRevealVisible.value = true
-  }
+  showDecorativeBackground: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const { t, te, n, locale } = useI18n()
@@ -482,9 +440,21 @@ const sanitizeAiReviewHtml = (content: string | null | undefined): string => {
     return ''
   }
 
-  return DOMPurify.sanitize(content, {
-    ADD_ATTR: ['class', 'target', 'rel'],
+  const sanitized = DOMPurify.sanitize(content, {
+    ADD_ATTR: ['class', 'target', 'rel', 'aria-label'],
   })
+
+  return sanitized.replace(
+    /<a([^>]*class="[^"]*\breview-ref\b[^"]*"[^>]*)>(\[[^\]]+\])<\/a>/g,
+    (_match, attributes: string, label: string) => {
+      if (attributes.includes('aria-label=')) {
+        return `<a${attributes}>${label}</a>`
+      }
+
+      const sourceLabel = label.replace(/[^\d,; ]/g, '').trim()
+      return `<a${attributes} aria-label="${t('product.aiReview.sourceReferenceAria', { reference: sourceLabel || label })}">${label}</a>`
+    }
+  )
 }
 
 const technicalOnelineHtml = computed(() =>

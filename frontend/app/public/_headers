@@ -1,7 +1,27 @@
 /*
-  Cache-Control: public, max-age=31536000, immutable
   Content-Security-Policy: default-src 'self'; img-src 'self' https:; script-src 'self'; style-src 'self' 'unsafe-inline'
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: same-origin
   Permissions-Policy: interest-cohort=()
+
+/_nuxt/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=2592000
+
+/images/*
+  Cache-Control: public, max-age=2592000
+
+/pwa-assets/*
+  Cache-Control: public, max-age=2592000
+
+/favicon.*
+  Cache-Control: public, max-age=2592000
+
+/site.webmanifest
+  Cache-Control: public, max-age=86400
+
+/robots.txt
+  Cache-Control: public, max-age=3600

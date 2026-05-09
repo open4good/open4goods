@@ -20,7 +20,7 @@
     </div>
 
     <div v-if="hasEvents" class="product-life-timeline__body">
-      <div class="product-life-timeline__rail" role="list">
+      <div class="product-life-timeline__rail">
         <div
           v-for="group in groupedEvents"
           :key="group.key"
@@ -48,7 +48,6 @@
                   v-for="event in month.events"
                   :key="event.key"
                   class="product-life-timeline__event"
-                  role="listitem"
                 >
                   <v-tooltip
                     location="top"

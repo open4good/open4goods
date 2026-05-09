@@ -596,7 +596,7 @@ describe('ProductAiReviewSection', () => {
     const summary = wrapper.find('.product-ai-review__summary')
 
     expect(summary.html()).toContain(
-      '<a href="#review-ref-1" class="review-ref" data-source-id="1">[1]</a>'
+      '<a href="#review-ref-1" class="review-ref" data-source-id="1" aria-label="Source 1">[1]</a>'
     )
   })
 
@@ -610,7 +610,7 @@ describe('ProductAiReviewSection', () => {
     const summary = wrapper.find('.product-ai-review__summary')
 
     expect(summary.html()).toContain(
-      '<sup class="citation"><a href="#review-ref-1" class="review-ref" data-source-id="1">[1]</a></sup>, <sup class="citation"><a href="#review-ref-2" class="review-ref" data-source-id="2">[2]</a></sup>'
+      '<sup class="citation"><a href="#review-ref-1" class="review-ref" data-source-id="1" aria-label="Source 1">[1]</a></sup>, <sup class="citation"><a href="#review-ref-2" class="review-ref" data-source-id="2" aria-label="Source 2">[2]</a></sup>'
     )
   })
 })

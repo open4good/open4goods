@@ -2393,6 +2393,7 @@
         "notEnoughData": "Not enough reliable data was found to generate a summary."
       },
       "generatedAt": "Summary generated on {date}",
+      "sourceReferenceAria": "View source {reference}",
       "tooltip": {
         "generatedAt": "Generated on {date}",
         "available": "AI summary available",

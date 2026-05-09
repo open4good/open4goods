@@ -227,7 +227,7 @@
                   />
 
                   <div v-if="newStats" class="product-price__metrics-summary">
-                    <dl>
+                    <div class="product-price__metrics-list">
                       <div class="product-price__metrics-row">
                         <v-icon
                           icon="mdi-trending-down"
@@ -236,8 +236,8 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <dt>{{ $t('product.price.metrics.lowest') }}</dt>
-                          <dd>
+                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.lowest') }}</span>
+                          <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
                                 newStats.min,
@@ -245,7 +245,7 @@
                                   props.offers?.bestPrice?.currency
                               )
                             }}
-                          </dd>
+                          </span>
                         </div>
                       </div>
                       <div class="product-price__metrics-row">
@@ -256,8 +256,8 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <dt>{{ $t('product.price.metrics.average') }}</dt>
-                          <dd>
+                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.average') }}</span>
+                          <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
                                 newStats.average,
@@ -265,7 +265,7 @@
                                   props.offers?.bestPrice?.currency
                               )
                             }}
-                          </dd>
+                          </span>
                         </div>
                       </div>
                       <div class="product-price__metrics-row">
@@ -276,8 +276,8 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <dt>{{ $t('product.price.metrics.highest') }}</dt>
-                          <dd>
+                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.highest') }}</span>
+                          <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
                                 newStats.max,
@@ -285,10 +285,10 @@
                                   props.offers?.bestPrice?.currency
                               )
                             }}
-                          </dd>
+                          </span>
                         </div>
                       </div>
-                    </dl>
+                    </div>
                   </div>
                 </div>
               </v-col>
@@ -426,7 +426,7 @@
                     v-if="occasionStats"
                     class="product-price__metrics-summary"
                   >
-                    <dl>
+                    <div class="product-price__metrics-list">
                       <div class="product-price__metrics-row">
                         <v-icon
                           icon="mdi-trending-down"
@@ -435,8 +435,8 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <dt>{{ $t('product.price.metrics.lowest') }}</dt>
-                          <dd>
+                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.lowest') }}</span>
+                          <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
                                 occasionStats.min,
@@ -444,7 +444,7 @@
                                   props.offers?.bestPrice?.currency
                               )
                             }}
-                          </dd>
+                          </span>
                         </div>
                       </div>
                       <div class="product-price__metrics-row">
@@ -455,8 +455,8 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <dt>{{ $t('product.price.metrics.average') }}</dt>
-                          <dd>
+                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.average') }}</span>
+                          <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
                                 occasionStats.average,
@@ -464,7 +464,7 @@
                                   props.offers?.bestPrice?.currency
                               )
                             }}
-                          </dd>
+                          </span>
                         </div>
                       </div>
                       <div class="product-price__metrics-row">
@@ -475,8 +475,8 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <dt>{{ $t('product.price.metrics.highest') }}</dt>
-                          <dd>
+                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.highest') }}</span>
+                          <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
                                 occasionStats.max,
@@ -484,10 +484,10 @@
                                   props.offers?.bestPrice?.currency
                               )
                             }}
-                          </dd>
+                          </span>
                         </div>
                       </div>
-                    </dl>
+                    </div>
                   </div>
                 </div>
               </v-col>
@@ -1685,7 +1685,7 @@ onBeforeUnmount(() => {
   width: min(100%, 520px);
 }
 
-.product-price__metrics-summary dl {
+.product-price__metrics-list {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -1699,14 +1699,14 @@ onBeforeUnmount(() => {
   align-items: center;
 }
 
-.product-price__metrics-stat-text dt {
+.product-price__metrics-stat-label {
   font-size: 0.85rem;
   color: rgba(var(--v-theme-text-neutral-soft), 0.9);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.product-price__metrics-stat-text dd {
+.product-price__metrics-stat-value {
   margin: 0;
   font-weight: 600;
   color: rgba(var(--v-theme-text-neutral-strong), 1);

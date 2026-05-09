@@ -940,7 +940,8 @@ function transformReferences(
     const refs = matches.map((raw: string) => {
       const mapped = referenceMap?.get(raw) ?? Number(raw)
       const referenceId = Number.isFinite(mapped) ? mapped : Number(raw)
-      return `<sup class="citation"><a href="#review-ref-${referenceId}" class="review-ref" data-source-id="${referenceId}">[${raw}]</a></sup>`
+      const label = `Source ${raw}`
+      return `<sup class="citation"><a href="#review-ref-${referenceId}" class="review-ref" data-source-id="${referenceId}" aria-label="${label}">[${raw}]</a></sup>`
     })
 
     return refs.join(', ')

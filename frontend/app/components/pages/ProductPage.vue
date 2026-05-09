@@ -81,7 +81,7 @@
               handler: onSectionIntersect,
               options: { threshold: 0.1 },
             }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <div class="product-page__hero">
               <ProductHero
@@ -107,6 +107,7 @@
             class="product-page__section reveal-on-scroll"
           >
             <ProductImpactSection
+              v-if="shouldRenderSection(sectionIds.impact)"
               :scores="impactScores"
               :radar-data="radarData"
               :product-name="productTitle"
@@ -122,6 +123,7 @@
               :score-min="impactScoreMin"
               :score-max="impactScoreMax"
             />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -134,6 +136,7 @@
             class="product-page__section reveal-on-scroll"
           >
             <ProductAiReviewSection
+              v-if="shouldRenderSection(sectionIds.ai)"
               :gtin="product.gtin ?? gtin"
               :initial-review="product.aiReview?.review ?? null"
               :review-created-at="product.aiReview?.createdMs ?? undefined"
@@ -145,6 +148,7 @@
               :failure-reason="product.aiReview?.failureReason ?? null"
               :enough-data="product.aiReview?.enoughData ?? true"
             />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -156,11 +160,12 @@
             class="product-page__section reveal-on-scroll"
           >
             <ProductPriceSection
-              v-if="product.offers"
+              v-if="product.offers && shouldRenderSection(sectionIds.price)"
               :offers="product.offers"
               :commercial-events="commercialEvents"
               :title-params="priceTitleParams"
             />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -172,7 +177,11 @@
             }"
             class="product-page__section reveal-on-scroll"
           >
-            <ProductLifeTimeline :timeline="product.timeline" />
+            <ProductLifeTimeline
+              v-if="shouldRenderSection(sectionIds.timeline)"
+              :timeline="product.timeline"
+            />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -185,12 +194,14 @@
             class="product-page__section reveal-on-scroll"
           >
             <ProductAlternatives
+              v-if="shouldRenderSection(sectionIds.alternatives)"
               :product="product"
               :vertical-id="categoryDetail?.id ?? ''"
               :popular-attributes="categoryDetail?.popularAttributes ?? []"
               :subtitle-params="alternativesSubtitleParams"
               @alternatives-updated="handleAlternativesUpdated"
             />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -203,6 +214,7 @@
             class="product-page__section reveal-on-scroll"
           >
             <ProductVigilanceSection
+              v-if="shouldRenderSection(sectionIds.vigilance)"
               :product="product"
               :attribute-configs="
                 categoryDetail?.attributesConfig?.configs ?? []
@@ -210,6 +222,7 @@
               :on-market-end-date="product.eprel?.onMarketEndDate"
               @click:offers="scrollToSection(subSectionIds.priceOffers)"
             />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -222,12 +235,14 @@
             class="product-page__section reveal-on-scroll"
           >
             <ProductAttributesSection
+              v-if="shouldRenderSection(sectionIds.attributes)"
               :product="product"
               :attribute-configs="
                 categoryDetail?.attributesConfig?.configs ?? []
               "
               :title-params="attributesTitleParams"
             />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -239,17 +254,27 @@
             }"
             class="product-page__section reveal-on-scroll"
           >
-            <ProductDocumentationSection :pdfs="product.resources.pdfs" />
+            <ProductDocumentationSection
+              v-if="shouldRenderSection(sectionIds.docs)"
+              :pdfs="product.resources.pdfs"
+            />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
-          <section v-if="showAdminSection" class="product-page__section">
+          <section
+            v-if="showAdminSection"
+            :id="sectionIds.adminPanel"
+            class="product-page__section"
+          >
             <ProductAdminSection
+              v-if="shouldRenderSection(sectionIds.adminPanel)"
               :product="product"
               :panel-id="sectionIds.adminPanel"
               :json-section-id="sectionIds.adminJson"
               :datasources-section-id="sectionIds.adminDatasources"
               :vertical-config="categoryDetail"
             />
+            <div v-else class="product-page__deferred-placeholder" />
           </section>
         </main>
       </div>
@@ -579,9 +604,11 @@ if (categorySlug) {
   }
 }
 
-const { data: aggregationsData } = await useAsyncData<
-  Record<string, AggregationResponseDto>
->(
+const {
+  data: aggregationsData,
+  execute: executeAggregationsFetch,
+  status: aggregationsStatus,
+} = await useAsyncData<Record<string, AggregationResponseDto>>(
   `product-aggregations-${categorySlug ?? gtin}`,
   async () => {
     if (!product.value || !categoryDetail.value?.id) return {}
@@ -620,7 +647,7 @@ const { data: aggregationsData } = await useAsyncData<
       return {}
     }
   },
-  { server: true, immediate: true }
+  { server: false, immediate: false }
 )
 
 const aggregations = computed(() => aggregationsData.value ?? {})
@@ -1978,9 +2005,58 @@ const activeSection = ref<string>(sectionIds.hero)
 
 const observer = ref<IntersectionObserver | null>(null)
 const revealObserver = ref<IntersectionObserver | null>(null)
+const renderObserver = ref<IntersectionObserver | null>(null)
 const visibleSectionRatios = new Map<string, number>()
 const revealedSections = new Set<string>()
 const MIN_SECTION_RATIO = 0.6
+const DEFERRED_SECTION_ROOT_MARGIN = '700px 0px 900px 0px'
+
+const renderedSections = ref<Record<string, boolean>>({
+  [sectionIds.hero]: true,
+})
+
+const markSectionForRender = (sectionId: string) => {
+  if (sectionId === sectionIds.impact) {
+    loadImpactAggregations()
+  }
+
+  if (renderedSections.value[sectionId]) {
+    return
+  }
+
+  renderedSections.value = {
+    ...renderedSections.value,
+    [sectionId]: true,
+  }
+}
+
+const shouldRenderSection = (sectionId: string) =>
+  renderedSections.value[sectionId] === true
+
+const subsectionParentMap: Record<string, string> = {
+  [subSectionIds.priceOffers]: sectionIds.price,
+  [subSectionIds.priceHistory]: sectionIds.price,
+  [subSectionIds.attributesMain]: sectionIds.attributes,
+  [subSectionIds.attributesTimeline]: sectionIds.attributes,
+  [subSectionIds.attributesDetails]: sectionIds.attributes,
+  [subSectionIds.aiTechnical]: sectionIds.ai,
+  [subSectionIds.aiEcological]: sectionIds.ai,
+  [subSectionIds.aiCommunity]: sectionIds.ai,
+}
+
+const resolveRenderableSectionId = (sectionId: string) =>
+  subsectionParentMap[sectionId] ?? sectionId
+
+const loadImpactAggregations = () => {
+  if (
+    aggregationsStatus.value === 'pending' ||
+    aggregationsStatus.value === 'success'
+  ) {
+    return
+  }
+
+  void executeAggregationsFetch()
+}
 
 const refreshActiveSection = () => {
   if (!visibleSectionRatios.size) {
@@ -2004,6 +2080,7 @@ const observeSections = () => {
 
   observer.value?.disconnect()
   revealObserver.value?.disconnect()
+  renderObserver.value?.disconnect()
   visibleSectionRatios.clear()
   refreshActiveSection()
 
@@ -2039,6 +2116,21 @@ const observeSections = () => {
     { threshold: 0.05 }
   )
 
+  renderObserver.value = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.target.id) {
+          markSectionForRender(entry.target.id)
+          renderObserver.value?.unobserve(entry.target)
+        }
+      })
+    },
+    {
+      rootMargin: DEFERRED_SECTION_ROOT_MARGIN,
+      threshold: 0,
+    }
+  )
+
   nextTick(() => {
     sections.value.forEach(section => {
       const element = document.getElementById(section.id)
@@ -2047,8 +2139,19 @@ const observeSections = () => {
         if (!revealedSections.has(section.id)) {
           revealObserver.value?.observe(element)
         }
+        if (!shouldRenderSection(section.id)) {
+          renderObserver.value?.observe(element)
+        }
       }
     })
+
+    document
+      .querySelectorAll<HTMLElement>('.product-page__section[id]')
+      .forEach(element => {
+        if (!shouldRenderSection(element.id)) {
+          renderObserver.value?.observe(element)
+        }
+      })
   })
 }
 
@@ -2067,6 +2170,7 @@ watch(
 onBeforeUnmount(() => {
   observer.value?.disconnect()
   revealObserver.value?.disconnect()
+  renderObserver.value?.disconnect()
   visibleSectionRatios.clear()
   revealedSections.clear()
 })
@@ -2092,6 +2196,9 @@ const scrollToSection = async (sectionId: string) => {
   if (!import.meta.client) {
     return
   }
+
+  markSectionForRender(resolveRenderableSectionId(sectionId))
+  await nextTick()
 
   let targetId = sectionId
   const scoreId = impactAnchorToScoreIdMap.value.get(sectionId)
@@ -2507,6 +2614,12 @@ useHead(() => {
   scroll-margin-top: 108px; /* Match sticky nav + banner */
 }
 
+.product-page__deferred-placeholder {
+  min-height: 220px;
+  content-visibility: auto;
+  contain-intrinsic-size: 220px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .product-page__section--revealed {
     animation: sectionReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -2703,12 +2816,9 @@ useHead(() => {
 }
 
 .reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(30px);
   transition:
     opacity 0.8s cubic-bezier(0.2, 1, 0.2, 1),
     transform 0.8s cubic-bezier(0.2, 1, 0.2, 1);
-  will-change: opacity, transform;
 }
 
 .reveal-on-scroll.revealed {

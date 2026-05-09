@@ -19,7 +19,10 @@ const logoSrc = useLogoAsset()
       alt=""
       aria-hidden="true"
       class="main-logo"
-      loading="lazy"
+      loading="eager"
+      fetchpriority="high"
+      width="44"
+      height="44"
     />
     <div class="logo-text">
       <span class="logo-title">{{ t('siteIdentity.title') }}</span>

@@ -541,7 +541,7 @@ watch(
   align-items: center;
   gap: 0.4rem;
   font-weight: 700;
-  color: var(--product-hero-panel-accent);
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__pricing-panel-title-icon {
@@ -598,7 +598,7 @@ watch(
   align-items: center;
   gap: 0.65rem;
   font-weight: 600;
-  color: var(--product-hero-panel-accent);
+  color: rgb(var(--v-theme-text-neutral-strong));
   min-width: 0;
 }
 
@@ -736,8 +736,8 @@ watch(
 }
 
 .product-hero__price-trend--decrease {
-  background: rgba(var(--v-theme-primary), 0.14);
-  color: rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-primary), 0.18);
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__price-trend--decrease .product-hero__price-trend-icon {
@@ -751,7 +751,7 @@ watch(
 
 .product-hero__price-trend--increase {
   background: rgba(var(--v-theme-error), 0.18);
-  color: rgb(var(--v-theme-error));
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 
 .product-hero__price-trend--increase .product-hero__price-trend-icon {
