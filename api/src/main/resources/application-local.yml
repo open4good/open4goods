@@ -34,7 +34,8 @@ api:
     copy-queue-size: 25
 
 embedding:
-  modelPath: ./models/distilcamembert-base
+  provider: djl
+  text-model-url: djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small
 
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods

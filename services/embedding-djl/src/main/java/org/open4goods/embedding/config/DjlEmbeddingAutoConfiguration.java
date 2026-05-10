@@ -4,6 +4,8 @@ import org.open4goods.embedding.health.DjlEmbeddingHealthIndicator;
 import org.open4goods.embedding.service.DefaultTextModelFactory;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.embedding.service.AbstractTextModelFactory;
+import org.open4goods.embedding.service.OpenAiCompatibleTextEmbeddingService;
+import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.AbstractImageModelFactory;
 import org.open4goods.embedding.service.image.DefaultImageModelFactory;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
@@ -16,8 +18,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
- * Auto-configuration that exposes a {@link DjlTextEmbeddingService} bean when the module is on the classpath.
+ * Auto-configuration for local DJL and OpenAI-compatible embedding backends.
  */
 @AutoConfiguration
 @EnableConfigurationProperties(DjlEmbeddingProperties.class)
@@ -32,10 +36,28 @@ public class DjlEmbeddingAutoConfiguration
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(TextEmbeddingService.class)
+    @ConditionalOnProperty(prefix = "embedding", name = "provider", havingValue = "djl", matchIfMissing = true)
     DjlTextEmbeddingService djlTextEmbeddingService(DjlEmbeddingProperties properties, AbstractTextModelFactory modelFactory)
     {
         return new DjlTextEmbeddingService(properties, modelFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TextEmbeddingService.class)
+    @ConditionalOnProperty(prefix = "embedding", name = "provider", havingValue = "openai-compatible")
+    OpenAiCompatibleTextEmbeddingService openAiCompatibleTextEmbeddingService(
+            DjlEmbeddingProperties properties,
+            ObjectMapper objectMapper)
+    {
+        return new OpenAiCompatibleTextEmbeddingService(properties, objectMapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ObjectMapper embeddingObjectMapper()
+    {
+        return new ObjectMapper();
     }
 
     @Bean

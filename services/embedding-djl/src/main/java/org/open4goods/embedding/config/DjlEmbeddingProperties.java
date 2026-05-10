@@ -1,7 +1,10 @@
 package org.open4goods.embedding.config;
 
+import java.time.Duration;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +16,17 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "embedding")
 public class DjlEmbeddingProperties
 {
+    /**
+     * Text embedding backend provider.
+     */
+    @NotNull
+    private Provider provider = Provider.DJL;
+
+    /**
+     * OpenAI-compatible embedding API settings, suitable for LocalAI.
+     */
+    @NotNull
+    private OpenAiCompatible openai = new OpenAiCompatible();
 
     /**
      * Number of predictors to pool per model. Defaults to number of available processors.
@@ -84,6 +98,40 @@ public class DjlEmbeddingProperties
      */
     @NotBlank
     private String visionModelUrl = "djl://ai.djl.pytorch/resnet18_embedding/0.0.1";
+
+    public Provider getProvider()
+    {
+        return provider;
+    }
+
+    public void setProvider(Provider provider)
+    {
+        this.provider = provider;
+    }
+
+    public OpenAiCompatible getOpenai()
+    {
+        return openai;
+    }
+
+    public void setOpenai(OpenAiCompatible openai)
+    {
+        this.openai = openai;
+    }
+
+    /**
+     * Returns the text embedding model identity used to invalidate cached vectors.
+     *
+     * @return provider and model endpoint identity
+     */
+    public String cacheModelIdentity()
+    {
+        if (provider == Provider.OPENAI_COMPATIBLE)
+        {
+            return provider + ":" + openai.getBaseUrl() + ":" + openai.getModel();
+        }
+        return provider + ":" + textModelUrl;
+    }
 
     public boolean isEnabled()
     {
@@ -204,5 +252,84 @@ public class DjlEmbeddingProperties
     public void setAsyncLoading(boolean asyncLoading)
     {
         this.asyncLoading = asyncLoading;
+    }
+
+    /**
+     * Supported text embedding providers.
+     */
+    public enum Provider
+    {
+        DJL,
+        OPENAI_COMPATIBLE
+    }
+
+    /**
+     * Configuration for OpenAI-compatible embeddings endpoints.
+     */
+    public static class OpenAiCompatible
+    {
+        /**
+         * Base API URL, without the /embeddings suffix.
+         */
+        @NotBlank
+        private String baseUrl = "http://localhost:8080/v1";
+
+        /**
+         * API key sent as a bearer token. LocalAI accepts any non-empty value when auth is disabled.
+         */
+        @NotBlank
+        private String apiKey = "localai";
+
+        /**
+         * Embedding model name exposed by the OpenAI-compatible server.
+         */
+        @NotBlank
+        private String model = "text-embedding-model";
+
+        /**
+         * HTTP request timeout.
+         */
+        @NotNull
+        private Duration timeout = Duration.ofSeconds(60);
+
+        public String getBaseUrl()
+        {
+            return baseUrl;
+        }
+
+        public void setBaseUrl(String baseUrl)
+        {
+            this.baseUrl = baseUrl;
+        }
+
+        public String getApiKey()
+        {
+            return apiKey;
+        }
+
+        public void setApiKey(String apiKey)
+        {
+            this.apiKey = apiKey;
+        }
+
+        public String getModel()
+        {
+            return model;
+        }
+
+        public void setModel(String model)
+        {
+            this.model = model;
+        }
+
+        public Duration getTimeout()
+        {
+            return timeout;
+        }
+
+        public void setTimeout(Duration timeout)
+        {
+            this.timeout = timeout;
+        }
     }
 }

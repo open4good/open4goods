@@ -7,6 +7,8 @@ import org.open4goods.embedding.config.DjlEmbeddingAutoConfiguration;
 import org.open4goods.embedding.health.DjlEmbeddingHealthIndicator;
 import org.open4goods.embedding.service.AbstractTextModelFactory;
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.service.OpenAiCompatibleTextEmbeddingService;
+import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.AbstractImageModelFactory;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -21,7 +23,6 @@ class DjlEmbeddingAutoConfigurationTest
 {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withPropertyValues("embedding.text-model-url=text-model",
-                    "embedding.multimodal-model-url=multi-model",
                     "embedding.async-loading=false",
                     "embedding.predictor-pool-size=1")
             .withConfiguration(AutoConfigurations.of(DjlEmbeddingAutoConfiguration.class));
@@ -33,10 +34,28 @@ class DjlEmbeddingAutoConfigurationTest
                 .withBean(AbstractImageModelFactory.class, StubImageFactory::new)
                 .run(context -> {
                     assertThat(context).hasSingleBean(DjlTextEmbeddingService.class);
+                    assertThat(context).hasSingleBean(TextEmbeddingService.class);
                     assertThat(context).hasSingleBean(DjlEmbeddingHealthIndicator.class);
 
                     DjlEmbeddingHealthIndicator indicator = context.getBean(DjlEmbeddingHealthIndicator.class);
                     assertThat(indicator.health().getStatus()).isEqualTo(Status.UP);
+                });
+    }
+
+    @Test
+    void autoConfigurationCanSwitchToOpenAiCompatibleService()
+    {
+        contextRunner.withPropertyValues(
+                    "embedding.provider=openai-compatible",
+                    "embedding.openai.base-url=http://localhost:8080/v1",
+                    "embedding.openai.api-key=localai",
+                    "embedding.openai.model=local-model")
+                .withBean(AbstractImageModelFactory.class, StubImageFactory::new)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(OpenAiCompatibleTextEmbeddingService.class);
+                    assertThat(context).hasSingleBean(TextEmbeddingService.class);
+                    assertThat(context).doesNotHaveBean(DjlTextEmbeddingService.class);
+                    assertThat(context).doesNotHaveBean(DjlEmbeddingHealthIndicator.class);
                 });
     }
 

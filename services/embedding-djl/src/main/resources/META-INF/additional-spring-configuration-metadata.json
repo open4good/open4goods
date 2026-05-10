@@ -3,20 +3,20 @@
     {
       "name": "embedding.enabled",
       "type": "java.lang.Boolean",
-      "description": "Enable or disable the DJL text embedding auto-configuration.",
+      "description": "Enable or disable text embedding auto-configuration.",
       "defaultValue": true
+    },
+    {
+      "name": "embedding.provider",
+      "type": "org.open4goods.embedding.config.DjlEmbeddingProperties$Provider",
+      "description": "Text embedding provider. Use djl for local inference or openai-compatible for a delegated /v1/embeddings endpoint.",
+      "defaultValue": "DJL"
     },
     {
       "name": "embedding.text-model-url",
       "type": "java.lang.String",
       "description": "Remote identifier or URL for the text embedding model.",
       "defaultValue": "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small"
-    },
-    {
-      "name": "embedding.multimodal-model-url",
-      "type": "java.lang.String",
-      "description": "Remote identifier or URL for the multimodal embedding model.",
-      "defaultValue": "djl://ai.djl.huggingface.pytorch/sentence-transformers/clip-ViT-B-32-multilingual-v1"
     },
     {
       "name": "embedding.fail-on-missing-model",
@@ -64,7 +64,31 @@
       "name": "embedding.vision-model-url",
       "type": "java.lang.String",
       "description": "Remote identifier or URL for the image embedding model.",
-      "defaultValue": "djl://ai.djl.pytorch/resnet/0.0.1?layers=18&dataset=imagenet"
+      "defaultValue": "djl://ai.djl.pytorch/resnet18_embedding/0.0.1"
+    },
+    {
+      "name": "embedding.openai.base-url",
+      "type": "java.lang.String",
+      "description": "Base URL for an OpenAI-compatible embeddings API, without the /embeddings suffix.",
+      "defaultValue": "http://localhost:8080/v1"
+    },
+    {
+      "name": "embedding.openai.api-key",
+      "type": "java.lang.String",
+      "description": "Bearer token sent to the OpenAI-compatible embeddings API.",
+      "defaultValue": "localai"
+    },
+    {
+      "name": "embedding.openai.model",
+      "type": "java.lang.String",
+      "description": "Embedding model name exposed by the OpenAI-compatible embeddings API.",
+      "defaultValue": "text-embedding-model"
+    },
+    {
+      "name": "embedding.openai.timeout",
+      "type": "java.time.Duration",
+      "description": "Timeout for OpenAI-compatible embeddings API requests.",
+      "defaultValue": "60s"
     }
   ]
 }

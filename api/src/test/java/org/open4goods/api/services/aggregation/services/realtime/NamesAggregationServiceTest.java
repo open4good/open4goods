@@ -259,6 +259,27 @@ class NamesAggregationServiceTest {
 	}
 
 	@Test
+	void onProduct_shouldRecomputeEmbeddingWhenOfferTextChangesWithSameCount()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("pref");
+		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.3f, 0.4f });
+
+		Product product = new Product(12L);
+		product.setVertical("vertical-id");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
+		product.getOfferNames().add("offre1");
+
+		service.onProduct(product, config);
+		product.getOfferNames().clear();
+		product.getOfferNames().add("offre2");
+		service.onProduct(product, config);
+
+		verify(embeddingService, times(2)).embed(anyString());
+	}
+
+	@Test
 	void onProduct_shouldSkipEmbeddingWhenTextUnchanged() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);

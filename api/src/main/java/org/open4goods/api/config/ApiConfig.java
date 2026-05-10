@@ -35,7 +35,7 @@ import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
 import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
@@ -304,7 +304,7 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
-			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, ObjectProvider<DjlTextEmbeddingService> embeddingServiceProvider,
+			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
 			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
 				serialisationService, brandScoreService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable());

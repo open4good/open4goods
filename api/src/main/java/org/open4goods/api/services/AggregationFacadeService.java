@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
+import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
@@ -88,7 +88,7 @@ public class AggregationFacadeService {
 
 	private IcecatService icecatFeatureService;
 	
-	private DjlTextEmbeddingService embeddingService;
+	private TextEmbeddingService embeddingService;
 	private DjlEmbeddingProperties embeddingProperties;
 
 	private SerialisationService serialisationService;
@@ -105,7 +105,7 @@ public class AggregationFacadeService {
 			IcecatService icecatFeatureService,
 			SerialisationService serialisationService,
 			BrandScoreService brandScoreService,
-			DjlTextEmbeddingService embeddingService,
+			TextEmbeddingService embeddingService,
 			DjlEmbeddingProperties embeddingProperties
 			) {
 		super();
