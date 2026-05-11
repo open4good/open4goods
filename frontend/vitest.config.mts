@@ -9,6 +9,11 @@ export default defineVitestConfig({
     exclude: [...configDefaults.exclude, 'tests/visual/**'],
     setupFiles: ['./vitest-setup.ts'],
   },
+  resolve: {
+    alias: {
+      '@plausible-analytics/tracker': '@plausible-analytics/tracker/plausible.js',
+    },
+  },
   server: {
     watch: {
       ignored: [
