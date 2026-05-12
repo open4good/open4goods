@@ -52,7 +52,7 @@ public class SitemapController {
 
 		sitemapService.generate();
 		ModelAndView mv = new ModelAndView("redirect:/");
-		mv.setStatus(HttpStatus.MOVED_TEMPORARILY);
+		mv.setStatus(HttpStatus.FOUND);
 		return mv;
 	}
 
