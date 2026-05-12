@@ -1,6 +1,7 @@
 package org.open4goods.api.controller.api;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationVerticalResult;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.http.ResponseEntity;
@@ -160,6 +163,154 @@ public class ReviewGenerationController {
         return ResponseEntity.ok(promptConfig);
     }
 
+    /**
+     * Run only the remote fetching stage for one product.
+     *
+     * @param upc product UPC
+     * @param request HTTP request carrying fetch headers
+     * @return persisted fetch-stage result
+     * @throws Exception when fetching fails
+     */
+    @PostMapping("/review/{id}/fetch")
+    @Operation(summary = "Run review remote fetching for a product",
+            description = "Fetch and persist review markdown sources without running LLM completions.")
+    public ResponseEntity<ReviewGenerationStepResult> fetchReviewSources(@PathVariable("id") long upc,
+            HttpServletRequest request) throws Exception {
+        Product product = productRepository.getById(upc);
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
+        return ResponseEntity.ok(reviewGenerationService.fetchReviewSources(product, verticalConfig,
+                requestHeaders(request)));
+    }
+
+    /**
+     * Run only the attribute extraction stage for one product.
+     *
+     * @param upc product UPC
+     * @return persisted attribute-stage result
+     * @throws Exception when extraction fails
+     */
+    @PostMapping("/review/{id}/attributes")
+    @Operation(summary = "Run review attribute extraction for a product",
+            description = "Use persisted reviewFacts to extract and persist product attributes.")
+    public ResponseEntity<ReviewGenerationStepResult> extractReviewAttributes(@PathVariable("id") long upc)
+            throws Exception {
+        Product product = productRepository.getById(upc);
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
+        return ResponseEntity.ok(reviewGenerationService.extractReviewAttributes(product, verticalConfig));
+    }
+
+    /**
+     * Run only the text completion stage for one product.
+     *
+     * @param upc product UPC
+     * @return persisted text-stage result
+     * @throws Exception when text generation fails
+     */
+    @PostMapping("/review/{id}/text")
+    @Operation(summary = "Run review text completion for a product",
+            description = "Use persisted reviewFacts and product attributes to generate and persist the AI review.")
+    public ResponseEntity<ReviewGenerationStepResult> generateReviewText(@PathVariable("id") long upc)
+            throws Exception {
+        Product product = productRepository.getById(upc);
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
+        return ResponseEntity.ok(reviewGenerationService.generateReviewText(product, verticalConfig));
+    }
+
+    /**
+     * Run the synchronous fetch, attribute and text workflow for one product.
+     *
+     * @param upc product UPC
+     * @param request HTTP request carrying fetch headers
+     * @return persisted text-stage result
+     * @throws Exception when any stage fails
+     */
+    @PostMapping("/review/{id}/workflow")
+    @Operation(summary = "Run full synchronous review workflow for a product",
+            description = "Fetch sources, extract attributes, then generate and persist review text.")
+    public ResponseEntity<ReviewGenerationStepResult> generateReviewWorkflow(@PathVariable("id") long upc,
+            HttpServletRequest request) throws Exception {
+        Product product = productRepository.getById(upc);
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
+        return ResponseEntity.ok(reviewGenerationService.generateReviewWorkflow(product, verticalConfig,
+                requestHeaders(request)));
+    }
+
+    /**
+     * Run only the remote fetching stage for a vertical.
+     *
+     * @param verticalId vertical identifier
+     * @param limit maximum products to process
+     * @param request HTTP request carrying fetch headers
+     * @return per-product synchronous results
+     * @throws IOException when product loading fails
+     */
+    @PostMapping("/review/vertical/{verticalId}/fetch")
+    @Operation(summary = "Run review remote fetching for a vertical")
+    public ResponseEntity<ReviewGenerationVerticalResult> fetchReviewSourcesForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit,
+            HttpServletRequest request) throws IOException {
+        Map<String, String> headers = requestHeaders(request);
+        return ResponseEntity.ok(runVerticalStage(verticalId, limit, "fetch",
+                (product, verticalConfig) -> reviewGenerationService.fetchReviewSources(product, verticalConfig,
+                        headers)));
+    }
+
+    /**
+     * Run only the attribute extraction stage for a vertical.
+     *
+     * @param verticalId vertical identifier
+     * @param limit maximum products to process
+     * @return per-product synchronous results
+     * @throws IOException when product loading fails
+     */
+    @PostMapping("/review/vertical/{verticalId}/attributes")
+    @Operation(summary = "Run review attribute extraction for a vertical")
+    public ResponseEntity<ReviewGenerationVerticalResult> extractReviewAttributesForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit) throws IOException {
+        return ResponseEntity.ok(runVerticalStage(verticalId, limit, "attributes",
+                reviewGenerationService::extractReviewAttributes));
+    }
+
+    /**
+     * Run only the text completion stage for a vertical.
+     *
+     * @param verticalId vertical identifier
+     * @param limit maximum products to process
+     * @return per-product synchronous results
+     * @throws IOException when product loading fails
+     */
+    @PostMapping("/review/vertical/{verticalId}/text")
+    @Operation(summary = "Run review text completion for a vertical")
+    public ResponseEntity<ReviewGenerationVerticalResult> generateReviewTextForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit) throws IOException {
+        return ResponseEntity.ok(runVerticalStage(verticalId, limit, "text",
+                reviewGenerationService::generateReviewText));
+    }
+
+    /**
+     * Run the synchronous fetch, attribute and text workflow for a vertical.
+     *
+     * @param verticalId vertical identifier
+     * @param limit maximum products to process
+     * @param request HTTP request carrying fetch headers
+     * @return per-product synchronous results
+     * @throws IOException when product loading fails
+     */
+    @PostMapping("/review/vertical/{verticalId}/workflow")
+    @Operation(summary = "Run full synchronous review workflow for a vertical")
+    public ResponseEntity<ReviewGenerationVerticalResult> generateReviewWorkflowForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit,
+            HttpServletRequest request) throws IOException {
+        Map<String, String> headers = requestHeaders(request);
+        return ResponseEntity.ok(runVerticalStage(verticalId, limit, "workflow",
+                (product, verticalConfig) -> reviewGenerationService.generateReviewWorkflow(product, verticalConfig,
+                        headers)));
+    }
+
 
     /**
      * Trigger batch review generation for a vertical.
@@ -225,5 +376,56 @@ public class ReviewGenerationController {
     public void processBatchResults(@RequestParam("jobId") String jobId)
             throws ResourceNotFoundException, IOException {
         reviewGenerationService.triggerResponseHandling(jobId);
+    }
+
+    private ReviewGenerationVerticalResult runVerticalStage(String verticalId, int limit, String step,
+            ReviewGenerationStageRunner runner) throws IOException {
+        VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(verticalId);
+        int effectiveLimit = Math.max(limit, 1);
+        List<Product> products;
+        try (Stream<Product> productStream = productRepository.exportVerticalWithValidDateOrderByImpactScore(
+                verticalId, effectiveLimit, false)) {
+            products = productStream.toList();
+        }
+
+        List<ReviewGenerationStepResult> results = new ArrayList<>();
+        for (Product product : products) {
+            try {
+                results.add(runner.run(product, verticalConfig));
+            } catch (Exception e) {
+                results.add(new ReviewGenerationStepResult(product.getId(), product.gtin(), verticalId, step,
+                        false, e.getMessage(), product.getReviewFacts() == null ? 0 : product.getReviewFacts().size(),
+                        product.getReviewFacts() == null ? 0 : product.getReviewFacts().stream()
+                                .filter(fact -> fact != null && fact.getTokenCount() != null)
+                                .mapToInt(fact -> fact.getTokenCount())
+                                .sum(),
+                        List.of(), null));
+            }
+        }
+        int succeeded = (int) results.stream().filter(ReviewGenerationStepResult::success).count();
+        return new ReviewGenerationVerticalResult(verticalId, step, effectiveLimit, results.size(), succeeded,
+                results.size() - succeeded, results);
+    }
+
+    private Map<String, String> requestHeaders(HttpServletRequest request) {
+        Map<String, String> headers = new HashMap<>();
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent != null) {
+            headers.put("User-Agent", userAgent);
+        }
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null) {
+            headers.put("X-Forwarded-For", xForwardedFor);
+        }
+        String xForwardedIp = request.getHeader("X-Forwarded-IP");
+        if (xForwardedIp != null) {
+            headers.put("X-Forwarded-IP", xForwardedIp);
+        }
+        return headers;
+    }
+
+    @FunctionalInterface
+    private interface ReviewGenerationStageRunner {
+        ReviewGenerationStepResult run(Product product, VerticalConfig verticalConfig) throws Exception;
     }
 }

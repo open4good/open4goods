@@ -11,16 +11,19 @@ realtime generation and OpenAI batch generation.
 2. SERP validation: require product brand and model, build preferred-domain
    queries first, then vertical-injected site queries, then broad model queries.
 3. Fetching: fetch selected URLs concurrently through `UrlFetchingService`.
-   The URL fetcher decides the real strategy from `urlfetcher.domains`
-   (`HTTP`, `PLAYWRIGHT`, `PROXIFIED`).
+   Review generation requests `HTTP`, then `PLAYWRIGHT`, then `PROXIFIED`
+   through internal strategy override headers; without an override, the URL
+   fetcher uses `urlfetcher.domains`.
 4. Markdown extraction: remove configured header, footer, cookie, newsletter,
    and other noise lines before token counting and prompt injection.
 5. Source gating: keep only sources within per-source token bounds and require
    minimum global tokens plus minimum source count.
-6. LLM generation: call the configured prompt (`review-generation` by default,
-   or `review-generation-grounded` for model-native web search), normalize
-   citations, validate URLs, populate product attributes, and index the product.
-7. Hooks: execute post-generation hooks, including Google indexation.
+6. Attribute extraction: call `review-generation-attributes` and persist the
+   extracted attributes on the product.
+7. Text completion: call `review-generation`, normalize citations, validate
+   URLs, persist the French review, populate product attributes, and index the
+   product.
+8. Hooks: execute post-generation hooks, including Google indexation.
 
 ## SERP Configuration
 
@@ -55,8 +58,10 @@ the global preferred-domain query and before broad fallback queries.
 ## Fetching Configuration
 
 Review generation requests fallback attempts in this order: simple HTTP,
-browser-like rendering, then external anti-bot provider. The concrete strategy
-comes from the URL fetching service:
+browser-like rendering, then external anti-bot provider. Runtime fallback
+overrides are consumed by the URL fetching service and are not forwarded to the
+target site. Without an override, the concrete default strategy comes from the
+URL fetching service:
 
 ```yaml
 urlfetcher:
@@ -92,21 +97,26 @@ review:
 Logs now expose the number of removed lines, accepted source URLs, fetch
 strategy, source token count, and accumulated token count.
 
-## LLM Split Plan
+## Decoupled API Stages
 
-The current prompt directly returns `AiReview`. To decouple the LLM phase,
-introduce two prompt templates and a small intermediate DTO:
+Back-office API endpoints expose the three stages independently for one GTIN or
+for a bounded set of products in a vertical:
 
-1. `review-generation-attributes`: consumes product metadata plus sources and
-   returns extracted facts, normalized attributes, source references, and data
-   quality. Its schema should be narrow and source-heavy.
-2. `review-generation-text`: consumes product metadata plus extracted facts and
-   returns the final `AiReview`. It should not read raw markdown, which reduces
-   token usage and hallucination pressure.
+- `POST /review/{id}/fetch`
+- `POST /review/{id}/attributes`
+- `POST /review/{id}/text`
+- `POST /review/{id}/workflow`
+- `POST /review/vertical/{verticalId}/fetch?limit=5`
+- `POST /review/vertical/{verticalId}/attributes?limit=5`
+- `POST /review/vertical/{verticalId}/text?limit=5`
+- `POST /review/vertical/{verticalId}/workflow?limit=5`
 
-Batch generation should run both phases in sequence per product before writing
-tracking metadata. Realtime generation can run the same sequence synchronously,
-streaming only the second call if UI progress needs text chunks.
+Each stage persists its result by default. Attribute extraction requires
+existing `Product.reviewFacts`, and text completion requires both
+`Product.reviewFacts` and persisted product attributes.
+
+Durable technical details are maintained in
+[docs/architecture/review-generation-service.md](../../docs/architecture/review-generation-service.md).
 
 ## Build & Test
 

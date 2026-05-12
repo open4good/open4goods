@@ -39,6 +39,8 @@ public class UrlFetchingService {
 
     private static final Logger logger = LoggerFactory.getLogger(UrlFetchingService.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String FETCH_MODE_HEADER = "X-Open4goods-Fetch-Mode";
+    private static final String FETCH_PROVIDER_HEADER = "X-Open4goods-Fetch-Provider";
 
     private final UrlFetcherConfig urlFetcherConfig;
     private final MeterRegistry meterRegistry;
@@ -91,12 +93,14 @@ public class UrlFetchingService {
             domainConfig.setUserAgent("DefaultUserAgent/1.0");
             domainConfig.setStrategy(FetchStrategy.HTTP);
         }
+        domainConfig = withRuntimeStrategyOverride(domainConfig, headers);
+        Map<String, String> outboundHeaders = outboundHeaders(headers);
 
         logger.info("URL_FETCH domain={} phase=select strategy={} timeoutMs={} customHeaderNames={}",
                 domain, domainConfig.getStrategy(), domainConfig.getTimeout(),
                 domainConfig.getCustomHeaders() == null ? java.util.Set.of() : domainConfig.getCustomHeaders().keySet());
         Fetcher fetcher = getFetcherForStrategy(domainConfig);
-        CompletableFuture<FetchResponse> future = fetcher.fetchUrlAsync(url, headers);
+        CompletableFuture<FetchResponse> future = fetcher.fetchUrlAsync(url, outboundHeaders);
         return future.thenApply(response -> {
             // Recording mode: if enabled, record the fetch response to file.
             if (urlFetcherConfig.getRecord() != null && urlFetcherConfig.getRecord().isEnabled()) {
@@ -152,6 +156,52 @@ public class UrlFetchingService {
                 logger.info("URL_FETCH strategy=PLAYWRIGHT phase=selected defaultFallback=true");
                 return new PlaywrightHttpFetcher(domainConfig, meterRegistry);
         }
+    }
+
+    private DomainConfig withRuntimeStrategyOverride(DomainConfig original, Map<String, String> headers) {
+        FetchStrategy override = requestedStrategy(headers);
+        if (override == null) {
+            return original;
+        }
+        DomainConfig overridden = new DomainConfig();
+        overridden.setUserAgent(original.getUserAgent());
+        overridden.setStrategy(override);
+        overridden.setCustomHeaders(original.getCustomHeaders());
+        overridden.setTimeout(original.getTimeout());
+        overridden.setRetryPolicy(original.getRetryPolicy());
+        overridden.setProxy(original.getProxy());
+        logger.info("URL_FETCH phase=select runtimeStrategyOverride={}", override);
+        return overridden;
+    }
+
+    private FetchStrategy requestedStrategy(Map<String, String> headers) {
+        if (headers == null || headers.isEmpty()) {
+            return null;
+        }
+        String provider = headers.get(FETCH_PROVIDER_HEADER);
+        if (provider != null && provider.equalsIgnoreCase("zenrows")) {
+            return FetchStrategy.PROXIFIED;
+        }
+        String mode = headers.get(FETCH_MODE_HEADER);
+        if (mode == null || mode.isBlank()) {
+            return null;
+        }
+        return switch (mode.trim().toLowerCase()) {
+            case "http", "http_simple" -> FetchStrategy.HTTP;
+            case "playwright", "playwright_headless" -> FetchStrategy.PLAYWRIGHT;
+            case "proxified", "zenrows" -> FetchStrategy.PROXIFIED;
+            default -> null;
+        };
+    }
+
+    private Map<String, String> outboundHeaders(Map<String, String> headers) {
+        if (headers == null || headers.isEmpty()) {
+            return headers;
+        }
+        Map<String, String> outbound = new java.util.HashMap<>(headers);
+        outbound.remove(FETCH_MODE_HEADER);
+        outbound.remove(FETCH_PROVIDER_HEADER);
+        return outbound.isEmpty() ? null : outbound;
     }
 
     /**

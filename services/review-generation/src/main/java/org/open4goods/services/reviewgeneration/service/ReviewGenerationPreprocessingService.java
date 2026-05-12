@@ -386,7 +386,12 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private FetchResponse fetchWithFallbacks(String url, Map<String, String> customHeaders) {
-		FetchResponse response = fetchWithHeaders(url, customHeaders, "HTTP_SIMPLE");
+		Map<String, String> httpHeaders = new HashMap<>();
+		if (customHeaders != null) {
+			httpHeaders.putAll(customHeaders);
+		}
+		httpHeaders.put("X-Open4goods-Fetch-Mode", "http");
+		FetchResponse response = fetchWithHeaders(url, httpHeaders, "HTTP_SIMPLE");
 		if (isValidFetch(response)) {
 			return response;
 		}
@@ -581,6 +586,48 @@ public class ReviewGenerationPreprocessingService {
 			promptVariables.put("PRODUCT_SCORES_JSON", "{}");
 		}
 
+		return promptVariables;
+	}
+
+	/**
+	 * Builds prompt variables from markdown facts already persisted on the product.
+	 *
+	 * @param product        the product carrying {@link ProductFact} review facts
+	 * @param verticalConfig the vertical configuration
+	 * @param requireFacts   whether to fail when no usable facts exist
+	 * @return prompt variables compatible with review-generation prompts
+	 * @throws NotEnoughDataException when facts are required but absent
+	 */
+	public Map<String, Object> buildPromptVariablesFromReviewFacts(Product product, VerticalConfig verticalConfig,
+			boolean requireFacts) throws NotEnoughDataException {
+		Map<String, Object> promptVariables = buildBasePromptVariables(product, verticalConfig);
+		Map<String, String> sources = new LinkedHashMap<>();
+		Map<String, Integer> tokens = new LinkedHashMap<>();
+		int totalTokens = 0;
+
+		if (product.getReviewFacts() != null) {
+			for (ProductFact fact : product.getReviewFacts()) {
+				if (fact == null || fact.getUrl() == null || fact.getUrl().isBlank()
+						|| fact.getMarkdown() == null || fact.getMarkdown().isBlank()) {
+					continue;
+				}
+				sources.put(fact.getUrl(), fact.getMarkdown());
+				int tokenCount = fact.getTokenCount() == null ? genAiService.estimateTokens(fact.getMarkdown())
+						: fact.getTokenCount();
+				tokens.put(fact.getUrl(), tokenCount);
+				totalTokens += tokenCount;
+			}
+		}
+
+		if (requireFacts && sources.isEmpty()) {
+			throw new NotEnoughDataException("No persisted review facts available for UPC " + product.getId()
+					+ ". Run the remote fetching stage first.");
+		}
+
+		promptVariables.put("sources", sources);
+		promptVariables.put("tokens", tokens);
+		promptVariables.put("TOTAL_TOKENS", totalTokens);
+		promptVariables.put("SOURCE_TOKENS", tokens);
 		return promptVariables;
 	}
 

@@ -70,6 +70,11 @@ public class ProxifiedHttpFetcher implements Fetcher {
      */
     @Override
     public CompletableFuture<FetchResponse> fetchUrlAsync(String url) {
+        return fetchUrlAsync(url, null);
+    }
+
+    @Override
+    public CompletableFuture<FetchResponse> fetchUrlAsync(String url, Map<String, String> headers) {
         logger.info("Fetching URL {} using ProxifiedHttpFetcher", url);
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -79,6 +84,9 @@ public class ProxifiedHttpFetcher implements Fetcher {
 
         if (customHeaders != null) {
             customHeaders.forEach(requestBuilder::header);
+        }
+        if (headers != null) {
+            headers.forEach(requestBuilder::setHeader);
         }
 
         HttpRequest request = requestBuilder.build();

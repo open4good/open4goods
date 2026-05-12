@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.stream.Stream;
 
 import org.open4goods.services.reviewgeneration.dto.AttributeExtractionResult;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
 
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.Attribute;
@@ -279,6 +280,118 @@ public class ReviewGenerationService implements HealthIndicator {
 
         return genAiService.resolvePrompt(promptKey, promptVariables, AiReview.class);
     }
+
+	/**
+	 * Runs only the remote-source fetching stage and persists accepted markdown facts
+	 * on the product.
+	 *
+	 * @param product        the product to enrich
+	 * @param verticalConfig the product vertical configuration
+	 * @param customHeaders  request headers forwarded to URL fetching
+	 * @return a synchronous step result
+	 * @throws Exception when source discovery or persistence fails
+	 */
+	public ReviewGenerationStepResult fetchReviewSources(Product product, VerticalConfig verticalConfig,
+			Map<String, String> customHeaders) throws Exception {
+		ReviewGenerationStatus status = new ReviewGenerationStatus();
+		status.setUpc(product.getId());
+		status.setGtin(product.gtin());
+		status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
+		status.setStartTime(Instant.now().toEpochMilli());
+
+		Map<String, Object> promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig,
+				status, customHeaders == null ? Map.of() : customHeaders);
+		productRepository.forceIndex(product);
+		return stepResult(product, verticalConfig, "fetch", true, "Remote sources fetched and persisted.",
+				promptVariables, List.of(), null);
+	}
+
+	/**
+	 * Runs only the attribute extraction stage using persisted review facts and
+	 * persists extracted attributes on the product.
+	 *
+	 * @param product        the product to enrich
+	 * @param verticalConfig the product vertical configuration
+	 * @return a synchronous step result
+	 * @throws Exception when extraction fails
+	 */
+	public ReviewGenerationStepResult extractReviewAttributes(Product product, VerticalConfig verticalConfig)
+			throws Exception {
+		Map<String, Object> promptVariables = preprocessingService.buildPromptVariablesFromReviewFacts(product,
+				verticalConfig, true);
+		PromptResponse<AttributeExtractionResult> attrResponse = genAiService.objectPrompt(
+				properties.getAttributeExtractionPromptKey(), promptVariables, AttributeExtractionResult.class);
+		List<AiReview.AiAttribute> attributes = attrResponse.getBody() == null ? List.of()
+				: attrResponse.getBody().attributes();
+		persistExtractedAttributes(product, attributes, attrResponse.getMetadata());
+		productRepository.forceIndex(product);
+		return stepResult(product, verticalConfig, "attributes", true, "Attributes extracted and persisted.",
+				promptVariables, attributes, null);
+	}
+
+	/**
+	 * Runs only the text completion stage from persisted facts and persisted product
+	 * attributes.
+	 *
+	 * @param product        the product to review
+	 * @param verticalConfig the product vertical configuration
+	 * @return a synchronous step result
+	 * @throws Exception when text generation fails
+	 */
+	public ReviewGenerationStepResult generateReviewText(Product product, VerticalConfig verticalConfig)
+			throws Exception {
+		Map<String, Object> promptVariables = preprocessingService.buildPromptVariablesFromReviewFacts(product,
+				verticalConfig, true);
+		List<AiReview.AiAttribute> attributes = aiAttributesFromProduct(product);
+		if (attributes.isEmpty()) {
+			throw new IllegalStateException("No persisted product attributes available for UPC " + product.getId()
+					+ ". Run the attribute extraction stage first.");
+		}
+		promptVariables.put("EXTRACTED_ATTRIBUTES", objectMapper.writeValueAsString(attributes));
+		PromptResponse<AiReview> reviewResponse = genAiService.objectPrompt(properties.getPromptKey(),
+				promptVariables, AiReview.class);
+		AiReview newReview = processAiReview(reviewResponse.getBody(), reviewResponse.getMetadata());
+		if (newReview == null) {
+			throw new IllegalStateException("Text completion returned no AI review for UPC " + product.getId());
+		}
+		populateAttributes(product, newReview, reviewResponse.getMetadata());
+		addResources(product, newReview);
+
+		AiReviewHolder holder = new AiReviewHolder();
+		holder.setCreatedMs(Instant.now().toEpochMilli());
+		holder.setReview(newReview);
+		holder.setEnoughData(true);
+		@SuppressWarnings("unchecked")
+		Map<String, Integer> sourceTokens = (Map<String, Integer>) promptVariables.getOrDefault("SOURCE_TOKENS",
+				new HashMap<>());
+		holder.setSources(sourceTokens);
+		holder.setTotalTokens((Integer) promptVariables.getOrDefault("TOTAL_TOKENS", 0));
+		product.getReviews().put("fr", holder);
+		try {
+			hooks.forEach(hook -> hook.onReviewGenerated(product));
+		} catch (Exception e) {
+			logger.error("Error executing review generation hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
+		}
+		productRepository.forceIndex(product);
+		return stepResult(product, verticalConfig, "text", true, "Review text generated and persisted.",
+				promptVariables, attributes, newReview);
+	}
+
+	/**
+	 * Runs the full synchronous workflow: fetch, attributes, then text.
+	 *
+	 * @param product        the product to review
+	 * @param verticalConfig the product vertical configuration
+	 * @param customHeaders  request headers forwarded to URL fetching
+	 * @return the text-generation result
+	 * @throws Exception when any stage fails
+	 */
+	public ReviewGenerationStepResult generateReviewWorkflow(Product product, VerticalConfig verticalConfig,
+			Map<String, String> customHeaders) throws Exception {
+		fetchReviewSources(product, verticalConfig, customHeaders);
+		extractReviewAttributes(product, verticalConfig);
+		return generateReviewText(product, verticalConfig);
+	}
 
 	/**
 	 * Asynchronous review generation using the realtime prompt service. (Uses a
@@ -987,6 +1100,9 @@ public class ReviewGenerationService implements HealthIndicator {
 	 */
 	private void populateAttributes(Product product, AiReview review, Map<String, Object> metadata) {
 		// Handling attributes
+		if (review == null || review.getAttributes() == null) {
+			return;
+		}
 		String providerName = determineProviderName(metadata);
 
 		review.getAttributes().stream().forEach(a -> {
@@ -1008,6 +1124,43 @@ public class ReviewGenerationService implements HealthIndicator {
 			}
 
 		});
+	}
+
+	private void persistExtractedAttributes(Product product, List<AiReview.AiAttribute> attributes,
+			Map<String, Object> metadata) {
+		if (attributes == null || attributes.isEmpty()) {
+			return;
+		}
+		AiReview review = new AiReview();
+		review.setAttributes(attributes);
+		populateAttributes(product, review, metadata);
+	}
+
+	private List<AiReview.AiAttribute> aiAttributesFromProduct(Product product) {
+		if (product.getAttributes() == null || product.getAttributes().getAll() == null
+				|| product.getAttributes().getAll().isEmpty()) {
+			return List.of();
+		}
+		AtomicInteger index = new AtomicInteger(1);
+		return product.getAttributes().getAll().values().stream()
+				.filter(attribute -> attribute.getName() != null && !attribute.getName().isBlank())
+				.filter(attribute -> attribute.getValue() != null && !attribute.getValue().isBlank())
+				.map(attribute -> new AiReview.AiAttribute(attribute.getName(), attribute.getValue(),
+						index.getAndIncrement()))
+				.toList();
+	}
+
+	@SuppressWarnings("unchecked")
+	private ReviewGenerationStepResult stepResult(Product product, VerticalConfig verticalConfig, String step,
+			boolean success, String message, Map<String, Object> promptVariables,
+			List<AiReview.AiAttribute> attributes, AiReview review) {
+		Map<String, Integer> sourceTokens = promptVariables == null ? Map.of()
+				: (Map<String, Integer>) promptVariables.getOrDefault("SOURCE_TOKENS", Map.of());
+		int totalTokens = promptVariables == null ? 0
+				: (Integer) promptVariables.getOrDefault("TOTAL_TOKENS", 0);
+		return new ReviewGenerationStepResult(product.getId(), product.gtin(),
+				verticalConfig == null ? product.getVertical() : verticalConfig.getId(), step, success, message,
+				sourceTokens.size(), totalTokens, attributes, review);
 	}
 
 	private String determineProviderName(Map<String, Object> metadata) {
