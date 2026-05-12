@@ -25,12 +25,12 @@ front:
   cache:
     path: ./cache
     one-minute-ttl: 1m
-    one-minute-maximum-size: 2000
+    one-minute-max-bytes: 32MB
     one-hour-ttl: 60m
-    one-hour-maximum-size: 5000
+    one-hour-max-bytes: 256MB
     one-day-ttl: 24h
-    one-day-maximum-size: 10000
-    forever-maximum-size: 20000
+    one-day-max-bytes: 256MB
+    forever-max-bytes: 128MB
   contact:
     email: ${FRONT_CONTACT_EMAIL}
   security:

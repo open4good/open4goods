@@ -1,11 +1,17 @@
 package org.open4goods.nudgerfrontapi.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.unit.DataSize;
 
 import java.time.Duration;
 
 /**
  * Configuration properties for front cache settings.
+ *
+ * <p>Each cache is bounded by a byte budget (<code>*-max-bytes</code>) rather than
+ * an entry count: a single fat response (e.g. a global search returning 100
+ * enriched products) can be megabytes on its own, so capping by entry count is
+ * not a memory-safety guarantee.</p>
  */
 @ConfigurationProperties(prefix = "front.cache")
 public class CacheProperties {
@@ -16,25 +22,23 @@ public class CacheProperties {
     /** Expiry applied to the ONE_MINUTE_LOCAL_CACHE_NAME cache. */
     private Duration oneMinuteTtl = Duration.ofMinutes(1);
 
-    /** Maximum entries stored in the ONE_MINUTE_LOCAL_CACHE_NAME cache. */
-    private long oneMinuteMaximumSize = 2_000L;
+    /** Byte budget for the ONE_MINUTE_LOCAL_CACHE_NAME cache. */
+    private DataSize oneMinuteMaxBytes = DataSize.ofMegabytes(32);
 
     /** Expiry applied to the ONE_HOUR_LOCAL_CACHE_NAME cache. */
     private Duration oneHourTtl = Duration.ofHours(1);
 
-    /** Maximum entries stored in the ONE_HOUR_LOCAL_CACHE_NAME cache. */
-    private long oneHourMaximumSize = 5_000L;
+    /** Byte budget for the ONE_HOUR_LOCAL_CACHE_NAME cache. */
+    private DataSize oneHourMaxBytes = DataSize.ofMegabytes(256);
 
     /** Expiry applied to the ONE_DAY_LOCAL_CACHE_NAME cache. */
     private Duration oneDayTtl = Duration.ofDays(1);
 
-    /** Maximum entries stored in the ONE_DAY_LOCAL_CACHE_NAME cache. */
-    private long oneDayMaximumSize = 10_000L;
+    /** Byte budget for the ONE_DAY_LOCAL_CACHE_NAME cache. */
+    private DataSize oneDayMaxBytes = DataSize.ofMegabytes(256);
 
-    /** Maximum entries stored in the FOREVER_LOCAL_CACHE_NAME cache. */
-    private long foreverMaximumSize = 20_000L;
-
-
+    /** Byte budget for the FOREVER_LOCAL_CACHE_NAME cache. */
+    private DataSize foreverMaxBytes = DataSize.ofMegabytes(128);
 
     public String getPath() {
         return path;
@@ -52,12 +56,12 @@ public class CacheProperties {
         this.oneMinuteTtl = oneMinuteTtl;
     }
 
-    public long getOneMinuteMaximumSize() {
-        return oneMinuteMaximumSize;
+    public DataSize getOneMinuteMaxBytes() {
+        return oneMinuteMaxBytes;
     }
 
-    public void setOneMinuteMaximumSize(long oneMinuteMaximumSize) {
-        this.oneMinuteMaximumSize = oneMinuteMaximumSize;
+    public void setOneMinuteMaxBytes(DataSize oneMinuteMaxBytes) {
+        this.oneMinuteMaxBytes = oneMinuteMaxBytes;
     }
 
     public Duration getOneHourTtl() {
@@ -68,12 +72,12 @@ public class CacheProperties {
         this.oneHourTtl = oneHourTtl;
     }
 
-    public long getOneHourMaximumSize() {
-        return oneHourMaximumSize;
+    public DataSize getOneHourMaxBytes() {
+        return oneHourMaxBytes;
     }
 
-    public void setOneHourMaximumSize(long oneHourMaximumSize) {
-        this.oneHourMaximumSize = oneHourMaximumSize;
+    public void setOneHourMaxBytes(DataSize oneHourMaxBytes) {
+        this.oneHourMaxBytes = oneHourMaxBytes;
     }
 
     public Duration getOneDayTtl() {
@@ -84,21 +88,19 @@ public class CacheProperties {
         this.oneDayTtl = oneDayTtl;
     }
 
-    public long getOneDayMaximumSize() {
-        return oneDayMaximumSize;
+    public DataSize getOneDayMaxBytes() {
+        return oneDayMaxBytes;
     }
 
-    public void setOneDayMaximumSize(long oneDayMaximumSize) {
-        this.oneDayMaximumSize = oneDayMaximumSize;
+    public void setOneDayMaxBytes(DataSize oneDayMaxBytes) {
+        this.oneDayMaxBytes = oneDayMaxBytes;
     }
 
-    public long getForeverMaximumSize() {
-        return foreverMaximumSize;
+    public DataSize getForeverMaxBytes() {
+        return foreverMaxBytes;
     }
 
-    public void setForeverMaximumSize(long foreverMaximumSize) {
-        this.foreverMaximumSize = foreverMaximumSize;
+    public void setForeverMaxBytes(DataSize foreverMaxBytes) {
+        this.foreverMaxBytes = foreverMaxBytes;
     }
-
-
 }
