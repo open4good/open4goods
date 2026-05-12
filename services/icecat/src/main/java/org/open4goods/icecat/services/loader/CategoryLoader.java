@@ -26,7 +26,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 /**
  * Loads Icecat product categories and category-feature mappings from bulk XML export files.

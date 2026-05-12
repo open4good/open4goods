@@ -28,9 +28,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Feed service implementation for Effiliation.
@@ -322,7 +322,7 @@ public class EffiliationFeedService extends AbstractFeedService {
             return objectMapper.createObjectNode();
         }
 
-        ((com.fasterxml.jackson.databind.node.ObjectNode) mergedRoot).set("feeds", objectMapper.valueToTree(mergedFeeds));
+        ((tools.jackson.databind.node.ObjectNode) mergedRoot).set("feeds", objectMapper.valueToTree(mergedFeeds));
         return mergedRoot;
     }
 

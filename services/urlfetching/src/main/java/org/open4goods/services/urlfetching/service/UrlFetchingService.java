@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;

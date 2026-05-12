@@ -27,8 +27,8 @@ import org.open4goods.services.prompt.config.RetrievalMode;
 import org.open4goods.services.prompt.config.VertexBatchConfig;
 import org.open4goods.services.prompt.model.BatchJob;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class BatchPromptServiceTest {
@@ -42,7 +42,7 @@ class BatchPromptServiceTest {
     @Mock private VertexGeminiBatchClient vertexGeminiBatchClient;
     @Mock private PromptService promptService;
 
-    private ObjectMapper objectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {

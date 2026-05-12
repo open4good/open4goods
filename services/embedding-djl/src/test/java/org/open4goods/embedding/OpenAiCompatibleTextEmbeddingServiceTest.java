@@ -14,7 +14,7 @@ import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.embedding.config.DjlEmbeddingProperties.Provider;
 import org.open4goods.embedding.service.OpenAiCompatibleTextEmbeddingService;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 
 class OpenAiCompatibleTextEmbeddingServiceTest

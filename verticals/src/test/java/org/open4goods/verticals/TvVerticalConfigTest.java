@@ -9,17 +9,17 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.springframework.core.io.ClassPathResource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 class TvVerticalConfigTest {
 
     @Test
     void testTvYmlContainsElectronicDisplays() throws Exception {
-        // Simple manual parsing to avoid complex dependency setup
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.findAndRegisterModules(); // Handle standard modules if needed
+        ObjectMapper mapper = YAMLMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
 
         ClassPathResource resource = new ClassPathResource("verticals/tv.yml");
         assertThat(resource.exists()).describedAs("tv.yml must exist").isTrue();

@@ -1,17 +1,16 @@
 package org.open4goods.model.ai;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -683,10 +682,10 @@ public class AiReview {
         public void setNumber(Integer number) { this.number = number; }
     }
 
-    public static class AiAttributeDeserializer extends JsonDeserializer<AiAttribute> {
+    public static class AiAttributeDeserializer extends ValueDeserializer<AiAttribute> {
         @Override
-        public AiAttribute deserialize(JsonParser p, DeserializationContext ctxt) throws java.io.IOException {
-            JsonNode node = p.getCodec().readTree(p);
+        public AiAttribute deserialize(JsonParser p, DeserializationContext ctxt) throws tools.jackson.core.JacksonException {
+            JsonNode node = ctxt.readTree(p);
             String name = node.has("name") ? node.get("name").asText() : null;
             String value = node.has("value") && !node.get("value").isNull() ? node.get("value").asText() : "";
             Integer number = node.has("number") && !node.get("number").isNull() ? node.get("number").asInt() : null;
@@ -694,36 +693,35 @@ public class AiReview {
         }
     }
 
-    public static class AiAttributesDeserializer extends JsonDeserializer<List<AiAttribute>> {
+    public static class AiAttributesDeserializer extends ValueDeserializer<List<AiAttribute>> {
         @Override
-        public List<AiAttribute> deserialize(JsonParser p, DeserializationContext ctxt) throws java.io.IOException {
-            JsonNode node = p.getCodec().readTree(p);
+        public List<AiAttribute> deserialize(JsonParser p, DeserializationContext ctxt) throws tools.jackson.core.JacksonException {
+            JsonNode node = ctxt.readTree(p);
             List<AiAttribute> attributes = new ArrayList<>();
             if (node.isArray()) {
                 for (JsonNode element : node) {
-                    attributes.add(p.getCodec().treeToValue(element, AiAttribute.class));
+                    attributes.add(ctxt.readTreeAsValue(element, AiAttribute.class));
                 }
             } else if (node.isObject()) {
-                Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
-                while (fields.hasNext()) {
-                    attributes.add(p.getCodec().treeToValue(fields.next().getValue(), AiAttribute.class));
+                for (Map.Entry<String, JsonNode> field : node.properties()) {
+                    attributes.add(ctxt.readTreeAsValue(field.getValue(), AiAttribute.class));
                 }
             }
             return attributes;
         }
     }
 
-    public static class AiSourcesDeserializer extends JsonDeserializer<List<AiSource>> {
+    public static class AiSourcesDeserializer extends ValueDeserializer<List<AiSource>> {
         @Override
-        public List<AiSource> deserialize(JsonParser p, DeserializationContext ctxt) throws java.io.IOException {
-            JsonNode node = p.getCodec().readTree(p);
+        public List<AiSource> deserialize(JsonParser p, DeserializationContext ctxt) throws tools.jackson.core.JacksonException {
+            JsonNode node = ctxt.readTree(p);
             List<AiSource> sources = new ArrayList<>();
             if (node.isArray()) {
                 for (JsonNode element : node) {
-                    sources.add(p.getCodec().treeToValue(element, AiSource.class));
+                    sources.add(ctxt.readTreeAsValue(element, AiSource.class));
                 }
             } else if (node.isObject()) {
-                sources.add(p.getCodec().treeToValue(node, AiSource.class));
+                sources.add(ctxt.readTreeAsValue(node, AiSource.class));
             }
             return sources;
         }

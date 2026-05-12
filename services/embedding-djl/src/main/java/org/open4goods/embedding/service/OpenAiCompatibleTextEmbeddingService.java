@@ -12,7 +12,7 @@ import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Text embedding service backed by an OpenAI-compatible /v1/embeddings endpoint.

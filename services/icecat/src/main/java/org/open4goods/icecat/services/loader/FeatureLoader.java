@@ -21,7 +21,7 @@ import org.open4goods.model.helper.IdHelper;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 /**
  * Loads Icecat reference data (features, feature groups, brands/suppliers) from

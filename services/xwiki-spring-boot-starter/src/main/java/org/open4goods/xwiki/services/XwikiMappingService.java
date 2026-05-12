@@ -27,10 +27,10 @@ import org.xwiki.rest.model.jaxb.Wiki;
 import org.xwiki.rest.model.jaxb.Wikis;
 import org.xwiki.rest.model.jaxb.Xwiki;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
 import io.micrometer.common.util.StringUtils;
 
@@ -402,7 +402,7 @@ public class XwikiMappingService {
 		Page page = null;
 		try {
 			// TODO(p1,perf) : Do not re instanciate
-			ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			ObjectMapper mapper = tools.jackson.databind.json.JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 			page = mapper.readValue(response.getBody(),new TypeReference<Page>(){});
 			logger.debug("Object 'Page' mapped correctly}");
 		}

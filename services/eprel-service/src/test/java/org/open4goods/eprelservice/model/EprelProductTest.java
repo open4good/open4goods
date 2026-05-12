@@ -2,7 +2,7 @@ package org.open4goods.eprelservice.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Map;

@@ -25,7 +25,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.verticals.VerticalsConfigService;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 public class IcecatServiceTest {
 

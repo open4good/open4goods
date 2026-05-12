@@ -62,7 +62,7 @@ import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import io.micrometer.core.instrument.MeterRegistry;
 

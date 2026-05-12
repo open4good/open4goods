@@ -12,7 +12,7 @@ import org.open4goods.services.prompt.model.BatchJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * File-based persistence for batch jobs in the batch folder.

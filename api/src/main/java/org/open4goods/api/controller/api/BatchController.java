@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
@@ -66,7 +64,7 @@ public class BatchController {
 	@PostMapping(path="/batch/tweak")
 	@Operation(summary="Launch the data cleanup routine, if implemented")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void batchCleanup( ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+	public void batchCleanup( ) throws InvalidParameterException, IOException, InterruptedException{
 		batchService.clean();
 	}
 	
@@ -75,14 +73,14 @@ public class BatchController {
 	@PostMapping(path="/batch/")
 	@Operation(summary="Launch the full batch (scoring, aggregation, completion batch), iso has @Scheduled")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void batch( ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+	public void batch( ) throws InvalidParameterException, IOException, InterruptedException{
 		batchService.batch();
 	}
 	
 	@PostMapping(path="/batch/{vertical}")
 	@Operation(summary="Batch a specific vertical")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void batchVertical( @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+	public void batchVertical( @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, IOException, InterruptedException{
 		batchService.batch(verticalConfigService.getConfigById(vertical));
 	}
 	
@@ -91,7 +89,7 @@ public class BatchController {
 	@PostMapping(path="/score/{vertical}")
 	@Operation(summary="Score a specific vertical")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void scoreFromName(  @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, InterruptedException{
+	public void scoreFromName(  @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, IOException, InterruptedException{
 		
 		aggregationFacadeService. score(verticalConfigService.getConfigById(vertical));
 	}

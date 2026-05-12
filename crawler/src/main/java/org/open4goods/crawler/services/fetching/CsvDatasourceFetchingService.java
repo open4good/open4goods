@@ -29,7 +29,7 @@ import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.Health.Builder;
 import org.springframework.boot.health.contributor.HealthIndicator;
 
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 import jakarta.annotation.PreDestroy;
 

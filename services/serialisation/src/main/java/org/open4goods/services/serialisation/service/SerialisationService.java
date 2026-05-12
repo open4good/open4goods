@@ -1,6 +1,5 @@
 package org.open4goods.services.serialisation.service;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,17 +13,17 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.type.CollectionType;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 /**
  * Service for serializing and deserializing objects to/from JSON and YAML formats.
@@ -47,22 +46,20 @@ public class SerialisationService {
      * Constructor initializing JSON and YAML ObjectMappers with desired configurations.
      */
     public SerialisationService() {
-        // Initialize JSON mapper with NON_EMPTY inclusion and disable failure on unknown properties.
-        this.jsonMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .setSerializationInclusion(Include.NON_EMPTY);
-        
-        // Create a pretty-print writer for JSON.
-        this.jsonMapperWithPrettyPrint = new ObjectMapper().writerWithDefaultPrettyPrinter();
-        
-        // Initialize YAML mapper with NON_EMPTY inclusion and pretty output.
-        YAMLFactory yamlFactory = new YAMLFactory()
-        	    .disable(YAMLGenerator.Feature.SPLIT_LINES);
-        this.yamlMapper =  new ObjectMapper(yamlFactory)
-        	    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        	    .setSerializationInclusion(Include.NON_EMPTY)
-        	    .enable(SerializationFeature.INDENT_OUTPUT)
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        this.jsonMapper = JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .changeDefaultPropertyInclusion(v -> JsonInclude.Value.construct(JsonInclude.Include.NON_EMPTY, JsonInclude.Include.NON_EMPTY))
+                .build();
+
+        this.jsonMapperWithPrettyPrint = JsonMapper.builder().build().writerWithDefaultPrettyPrinter();
+
+        this.yamlMapper = YAMLMapper.builder()
+                .disable(YAMLWriteFeature.SPLIT_LINES)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .changeDefaultPropertyInclusion(v -> JsonInclude.Value.construct(JsonInclude.Include.NON_EMPTY, JsonInclude.Include.NON_EMPTY))
+                .enable(SerializationFeature.INDENT_OUTPUT)
+                .changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.ANY))
+                .build();
         	
         	
         // Low level yaml for literals rendering
@@ -86,7 +83,7 @@ public class SerialisationService {
     public String toJson(final Object o) throws SerialisationException {
         try {
             return jsonMapper.writeValueAsString(o);
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             logger.error("Error serializing {} to JSON", o, e);
             throw new SerialisationException("Error serializing object to JSON", e);
         }
@@ -102,7 +99,7 @@ public class SerialisationService {
     public String toYaml(final Object o) throws SerialisationException {
         try {
             return yamlMapper.writeValueAsString(o);
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             logger.error("Error serializing {} to YAML", o, e);
             throw new SerialisationException("Error serializing object to YAML", e);
         }
@@ -130,7 +127,7 @@ public class SerialisationService {
         if (prettyPrint) {
             try {
                 return jsonMapperWithPrettyPrint.writeValueAsString(o);
-            } catch (final JsonProcessingException e) {
+            } catch (final JacksonException e) {
                 logger.error("Error serializing {} to JSON with pretty print", o, e);
                 throw new SerialisationException("Error serializing object to JSON with pretty print", e);
             }
@@ -153,7 +150,7 @@ public class SerialisationService {
             @SuppressWarnings("unchecked")
             T clonedObject = (T) jsonMapper.readValue(json, value.getClass());
             return clonedObject;
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error cloning object: {}", value, e);
             throw new SerialisationException("Error cloning object", e);
         }
@@ -171,7 +168,7 @@ public class SerialisationService {
     public <T> T fromJson(final String input, final Class<T> valueType) throws SerialisationException {
         try {
             return jsonMapper.readValue(input, valueType);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error deserializing JSON to {}", valueType, e);
             throw new SerialisationException("Error deserializing JSON", e);
         }
@@ -189,7 +186,7 @@ public class SerialisationService {
     public <T> T fromJson(final InputStream input, final Class<T> valueType) throws SerialisationException {
         try {
             return jsonMapper.readValue(input, valueType);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error deserializing JSON InputStream to {}", valueType, e);
             throw new SerialisationException("Error deserializing JSON InputStream", e);
         }
@@ -206,7 +203,7 @@ public class SerialisationService {
     public Map<String, String> fromJson(String value, TypeReference<HashMap<String, String>> typeRef) throws SerialisationException {
         try {
             return jsonMapper.readValue(value, typeRef);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error deserializing JSON to HashMap<String, String>", e);
             throw new SerialisationException("Error deserializing JSON to HashMap<String, String>", e);
         }
@@ -223,7 +220,7 @@ public class SerialisationService {
     public Map<String, Object> fromJsonTypeRef(String value, TypeReference<Map<String, Object>> typeRef) throws SerialisationException {
         try {
             return jsonMapper.readValue(value, typeRef);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error deserializing JSON to Map<String, Object>", e);
             throw new SerialisationException("Error deserializing JSON to Map<String, Object>", e);
         }
@@ -241,7 +238,7 @@ public class SerialisationService {
     public <T> T fromYaml(final String input, final Class<T> valueType) throws SerialisationException {
         try {
             return yamlMapper.readValue(input, valueType);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error deserializing YAML to {}", valueType, e);
             throw new SerialisationException("Error deserializing YAML", e);
         }
@@ -259,7 +256,7 @@ public class SerialisationService {
     public <T> T fromYaml(final String input, final CollectionType collectionType) throws SerialisationException {
         try {
             return yamlMapper.readValue(input, collectionType);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error deserializing YAML to collection type {}", collectionType, e);
             throw new SerialisationException("Error deserializing YAML to collection type", e);
         }
@@ -277,7 +274,7 @@ public class SerialisationService {
     public <T> T fromYaml(final InputStream input, final Class<T> valueType) throws SerialisationException {
         try {
             return yamlMapper.readValue(input, valueType);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error deserializing YAML InputStream to {}", valueType, e);
             throw new SerialisationException("Error deserializing YAML InputStream", e);
         }
@@ -295,7 +292,7 @@ public class SerialisationService {
     public <T> T fromBytes(final byte[] bytes, final Class<T> c) throws SerialisationException {
         try {
             return jsonMapper.readValue(bytes, c);
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             logger.error("Error deserializing bytes to {}", c, e);
             throw new SerialisationException("Error deserializing bytes", e);
         }

@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -128,7 +126,7 @@ public class ScraperOrchestrationController {
 	@PostMapping(path=UrlConstants.MASTER_API_CRAWLERS  + UrlConstants.MASTER_API_CRAWLER_SYNCH_FETCH_WITH_CONFIG)
 	@Operation(summary="Run an url direct fetching against the best availlable node, with a given DataSourceProperties")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public DataFragment fetchUrlWithConfig(  @RequestParam @NotBlank final String url, @RequestBody @NotBlank final String datasourceProperty ) throws InvalidParameterException, JsonParseException, JsonMappingException, IOException, SerialisationException{
+	public DataFragment fetchUrlWithConfig(  @RequestParam @NotBlank final String url, @RequestBody @NotBlank final String datasourceProperty ) throws InvalidParameterException, IOException, SerialisationException{
 		// Get the providerName corresponding to the url
 		return fetcherOrchestrationService.triggerHttpSynchFetching( serialisationService.fromYaml(datasourceProperty, DataSourceProperties.class), url);
 	}

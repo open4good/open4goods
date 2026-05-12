@@ -36,8 +36,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 
@@ -78,7 +78,7 @@ public class BatchPromptService implements HealthIndicator {
         this.openAiBatchClient = openAiBatchClient;
         this.vertexGeminiBatchClient = vertexGeminiBatchClient;
         this.promptService = promptService;
-        this.objectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        this.objectMapper = new ObjectMapper();
         File batchFolder = new File(config.getBatchFolder());
         if (!batchFolder.exists() && !batchFolder.mkdirs()) {
             logger.warn("Failed to create batch folder at {}", batchFolder.getAbsolutePath());

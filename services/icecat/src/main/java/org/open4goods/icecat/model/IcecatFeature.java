@@ -1,7 +1,7 @@
 package org.open4goods.icecat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
  * A product feature (specification) definition from the Icecat catalog.

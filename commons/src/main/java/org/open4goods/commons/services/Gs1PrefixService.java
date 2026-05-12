@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
+import tools.jackson.dataformat.csv.CsvSchema;
 import com.ibm.icu.util.ULocale;
 
 /**
@@ -64,7 +64,7 @@ public class Gs1PrefixService {
 		// Getting the resource
 
 		try {
-			CsvMapper mapper = new CsvMapper().enable(CsvParser.Feature.SKIP_EMPTY_LINES).enable(CsvParser.Feature.TRIM_SPACES);
+			CsvMapper mapper = CsvMapper.builder().enable(CsvReadFeature.SKIP_EMPTY_LINES, CsvReadFeature.TRIM_SPACES).build();
 
 			CsvSchema schema = CsvSchema.emptySchema().withHeader();
 

@@ -304,7 +304,7 @@ class ReviewGenerationServiceTest {
                 "verticalId", "tv",
                 "createdAt", Instant.now().toEpochMilli()
         );
-        Files.writeString(trackingFile, new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(trackingInfo));
+        Files.writeString(trackingFile, new tools.jackson.databind.ObjectMapper().writeValueAsString(trackingInfo));
 
         when(batchAiService.batchPromptResponse("job-123"))
                 .thenThrow(new BatchJobFailedException("provider failure"));

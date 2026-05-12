@@ -20,7 +20,7 @@ import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.Page;

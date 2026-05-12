@@ -1,9 +1,9 @@
 package org.open4goods.services.eprelservice.service;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.ObjectMapper;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +28,9 @@ public class JsonZipEprelCatalogueParser implements EprelCatalogueParser
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonZipEprelCatalogueParser.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final tools.jackson.databind.ObjectReader eprelProductReader = objectMapper
+            .readerFor(EprelProduct.class)
+            .without(tools.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     /**
      * Creates the parser.
@@ -73,14 +76,14 @@ public class JsonZipEprelCatalogueParser implements EprelCatalogueParser
 
     private void processJsonFile(Path jsonFile, Consumer<EprelProduct> consumer) throws IOException
     {
-        JsonFactory factory = objectMapper.getFactory();
+        TokenStreamFactory factory = objectMapper.tokenStreamFactory();
         try (JsonParser parser = factory.createParser(jsonFile.toFile()))
         {
             if (parser.nextToken() == JsonToken.START_ARRAY)
             {
                 while (parser.nextToken() != JsonToken.END_ARRAY)
                 {
-                    EprelProduct product = objectMapper.readValue(parser, EprelProduct.class);
+                    EprelProduct product = eprelProductReader.readValue(parser);
                     consumer.accept(product);
                 }
             }

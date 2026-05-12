@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 /**
  * Feed service implementation for Awin.
@@ -69,9 +69,7 @@ public class AwinFeedService extends AbstractFeedService {
                            String awinAccessToken
                            ) {
         super(feedConfig, remoteFileCachingService, dataSourceConfigService, serialisationService);
-        this.csvMapper = new CsvMapper();
-        // Optionally register modules or configure mapper settings.
-        csvMapper.findAndRegisterModules();
+        this.csvMapper = CsvMapper.builder().build();
         this.objectMapper = new ObjectMapper();
         // Placeholder values; these should be provided via external configuration.
         this.awinAccessToken = awinAccessToken;

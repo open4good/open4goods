@@ -43,11 +43,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 import com.google.common.collect.Sets;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -313,11 +313,7 @@ public class CsvIndexationWorker implements Runnable {
 
 	private void closeIterator(MappingIterator<Map<String, String>> mi, Logger logger) {
 		if (mi != null) {
-			try {
-				mi.close();
-			} catch (IOException e) {
-				logger.error("Error while closing CSV iterator", e);
-			}
+			mi.close();
 		}
 	}
 
