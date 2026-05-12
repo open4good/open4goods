@@ -41,8 +41,11 @@
       <optional>true</optional>
     </dependency>
     
-    <!-- Other dependencies remain unchanged -->
-    
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-restclient</artifactId>
+    </dependency>
+
   </dependencies>
   
   <build>

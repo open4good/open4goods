@@ -14,7 +14,7 @@ import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.services.geocode.service.geonames.GeoNamesDatasetProvider;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +32,7 @@ class GeocodeControllerIntegrationTest
     @Autowired
     private MockMvc mockMvc;
 
-    @org.springframework.boot.test.mock.mockito.MockBean
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
     private org.open4goods.services.geocode.service.MaxMindIpGeolocationService maxMindIpGeolocationService;
 
     @Test

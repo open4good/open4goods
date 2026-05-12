@@ -42,7 +42,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.mashape.unirest.request.GetRequest;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -176,20 +175,6 @@ public abstract class Extractor {
 
 		return null;
 	}
-
-	/**
-	 * Gets an external json
-	 * @param request
-	 * @return
-	 */
-	protected JsonNode getJsonRootNode(final GetRequest request) {
-		try {
-			return  serialisationService.jsonMapper().readTree(request.asJson().getBody().toString());
-		} catch (final Exception e) {
-			throw new EvaluationException(e.getMessage());
-		}
-	}
-
 
 	/**
 	 * Do the evaluation and log accordingly

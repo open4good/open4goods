@@ -14,9 +14,9 @@ import org.open4goods.services.contribution.repository.ContributionVoteRepositor
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.Health.Builder;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.Health.Builder;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;

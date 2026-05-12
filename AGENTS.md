@@ -14,7 +14,7 @@ Adhering to these rules keeps every sub-project consistent, maintainable, and pr
 | Area            | Standard                           |
 |-----------------|------------------------------------|
 | **JDK**         | Java 21                            |
-| **Framework**   | Spring Boot 3.x                    |
+| **Framework**   | Spring Boot 4.x                    |
 | **Build tool**  | Maven (reactor / multi-module)     |
 | **Testing**     | JUnit 5, AssertJ, Testcontainers   |
 

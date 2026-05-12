@@ -315,7 +315,7 @@ class ReviewGenerationServiceTest {
                 .isEqualTo(org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED);
         assertThat(reviewGenerationService.getProcessStatus(11L).getStatus())
                 .isEqualTo(org.open4goods.model.review.ReviewGenerationStatus.Status.FAILED);
-        assertThat(reviewGenerationService.health().getStatus()).isEqualTo(org.springframework.boot.actuate.health.Status.DOWN);
+        assertThat(reviewGenerationService.health().getStatus()).isEqualTo(org.springframework.boot.health.contributor.Status.DOWN);
         assertThat(Files.exists(trackingFile)).isFalse();
     }
 

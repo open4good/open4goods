@@ -10,7 +10,7 @@ import org.open4goods.embedding.service.DjlTextEmbeddingService;
 import org.open4goods.embedding.service.OpenAiCompatibleTextEmbeddingService;
 import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.AbstractImageModelFactory;
-import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.health.contributor.Status;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 

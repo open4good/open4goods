@@ -1046,7 +1046,7 @@ public class SearchService {
 			}));
 			if (tokens != null && !tokens.isEmpty()) {
 				fs.functions(func -> func.scriptScore(ss -> ss.script(Script.of(s -> s.lang("painless")
-						.source(OFFER_NAMES_DENSITY_SCRIPT).params(Map.of("tokens", JsonData.of(tokens)))))));
+						.source(src -> src.scriptString(OFFER_NAMES_DENSITY_SCRIPT)).params(Map.of("tokens", JsonData.of(tokens)))))));
 			}
 			return fs;
 		}));
@@ -1398,7 +1398,7 @@ public class SearchService {
 				fieldPath, countField, to
 		);
 		
-		return Query.of(q -> q.script(s -> s.script(Script.of(sc -> sc.source(scriptSource)))));
+		return Query.of(q -> q.script(s -> s.script(Script.of(sc -> sc.source(src -> src.scriptString(scriptSource))))));
 	}
 
 	private FilterValueType resolveValueType(String fieldPath, FilterOperator operator) {

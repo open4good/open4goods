@@ -1,8 +1,8 @@
 package org.open4goods.embedding.health;
 
 import org.open4goods.embedding.service.DjlTextEmbeddingService;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
 
 /**
  * Reports the availability of DJL text embedding models.

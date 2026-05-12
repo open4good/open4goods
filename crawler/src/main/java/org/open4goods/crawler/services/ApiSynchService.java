@@ -1,72 +1,64 @@
 package org.open4goods.crawler.services;
 
+import java.util.List;
+
 import org.open4goods.commons.model.constants.TimeConstants;
 import org.open4goods.commons.model.crawlers.ApiSynchConfig;
 import org.open4goods.commons.model.crawlers.FetcherGlobalStats;
 import org.open4goods.model.constants.UrlConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
- * This service is in charge of declaring the crawler instance on the master API, then it will periodically send status informations
- * @author goulven
- *
+ * Periodically reports crawler node status to the master API.
  */
 public class ApiSynchService {
 
-	private static final Logger logger = LoggerFactory.getLogger(ApiSynchService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ApiSynchService.class);
 
-	private final ApiSynchConfig apiSynchConfig;
+    private final ApiSynchConfig apiSynchConfig;
+    private final FetchersService fetchersService;
+    private final String masterEndPoint;
+    private final String apiKey;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-	private final FetchersService fetchersService;
+    public ApiSynchService(final ApiSynchConfig apiSynchConfig, final FetchersService fetchersService, final String masterEndPoint, final String apiKey) {
+        this.apiSynchConfig = apiSynchConfig;
+        this.fetchersService = fetchersService;
+        this.masterEndPoint = masterEndPoint;
+        this.apiKey = apiKey;
+    }
 
-	private final String masterEndPoint;
+    /** Sends node status to the master API on a fixed schedule. */
+    @Scheduled(initialDelay = 0L, fixedDelay = TimeConstants.CRAWLER_UPDATE_STATUS_TO_API_MS)
+    public void updateStatus() {
+        logger.debug("Updating status of {} against master API", apiSynchConfig.getNodeName());
 
-	private final String apiKey;
+        final FetcherGlobalStats statusObject = fetchersService.stats();
+        final String url = masterEndPoint + String.format(
+                UrlConstants.MASTER_API_CRAWLER_UPDATE + "?" + UrlConstants.APIKEY_PARAMETER + "=" + apiKey,
+                apiSynchConfig.getNodeName());
 
-	public ApiSynchService(final ApiSynchConfig apiSynchConfig, final FetchersService fetchersService, final String masterEndPoint, final String apiKey) {
-		super();
-		this.apiSynchConfig = apiSynchConfig;
-		this.fetchersService = fetchersService;
-		this.masterEndPoint = masterEndPoint;
-		this.apiKey = apiKey;
-	}
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-
-	/**
-	 * Declare
-	 */
-	@Scheduled(initialDelay = 0L, fixedDelay=TimeConstants.CRAWLER_UPDATE_STATUS_TO_API_MS )
-	public void updateStatus () {
-		logger.debug	("Updating status of {} against master API",apiSynchConfig.getNodeName());
-
-		// Getting the fetchersService stats
-
-		final FetcherGlobalStats statusObject = fetchersService.stats();
-		// Calling the remote API
-				try {
-					final HttpResponse<JsonNode> jsonResponse = Unirest.put(masterEndPoint + String.format(UrlConstants.MASTER_API_CRAWLER_UPDATE+"?"+UrlConstants.APIKEY_PARAMETER+"="+apiKey,apiSynchConfig.getNodeName()) )
-							.header("accept", MediaType.APPLICATION_JSON_VALUE)
-							.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-//							.header("accept", "application/json")
-							.body(statusObject)
-							.asJson();
-
-					if (200 == jsonResponse.getStatus() ) {
-						logger.debug("Update status of {} against master API is OK",apiSynchConfig.getNodeName());
-					} else {
-						logger.warn("Update status of {} against master API is KO. Satus code is {}",apiSynchConfig.getNodeName(),jsonResponse.getStatus() );
-					}
-				}
-				catch (final UnirestException e) {
-					logger.error("Error while updating crawl status of {} to master : {} ", apiSynchConfig.getNodeName(), e.getMessage());
-				}
-	}
+        try {
+            var response = restTemplate.exchange(url, HttpMethod.PUT, new HttpEntity<>(statusObject, headers), String.class);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.debug("Update status of {} against master API is OK", apiSynchConfig.getNodeName());
+            } else {
+                logger.warn("Update status of {} against master API is KO. Status code is {}", apiSynchConfig.getNodeName(), response.getStatusCode());
+            }
+        } catch (final RestClientException e) {
+            logger.error("Error while updating crawl status of {} to master: {}", apiSynchConfig.getNodeName(), e.getMessage());
+        }
+    }
 }

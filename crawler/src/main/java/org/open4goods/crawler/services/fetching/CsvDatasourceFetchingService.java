@@ -25,9 +25,9 @@ import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.Health.Builder;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.Health.Builder;
+import org.springframework.boot.health.contributor.HealthIndicator;
 
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 

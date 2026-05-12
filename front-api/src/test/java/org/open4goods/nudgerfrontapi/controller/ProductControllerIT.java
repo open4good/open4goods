@@ -48,11 +48,10 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.health.HealthEndpoint;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.health.actuate.endpoint.HealthEndpoint;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.mockito.ArgumentCaptor;
 
@@ -70,10 +69,10 @@ class ProductControllerIT {
     @Autowired
     private ProductController controller;
 
-    @MockBean
+    @MockitoBean
     private ProductMappingService service;
 
-    @MockBean
+    @MockitoBean
     private VerticalsConfigService verticalsConfigService;
 
     @Autowired

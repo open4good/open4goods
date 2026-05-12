@@ -15,12 +15,7 @@
     <dependencies>
 
 
-        <!-- servlet container -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
-            <!-- <scope>provided</scope> -->
-        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -54,7 +49,7 @@
         <dependency>
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-client</artifactId>
-            <version>3.5.1</version>
+            <version>4.0.4</version>
         </dependency>
 
         <dependency>
@@ -123,12 +118,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
 

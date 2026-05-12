@@ -1,5 +1,6 @@
 package org.open4goods.crawler.services;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,65 +10,54 @@ import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 public class IndexationService {
 
-	private final static Logger log = LoggerFactory.getLogger(IndexationService.class);
+    private static final Logger log = LoggerFactory.getLogger(IndexationService.class);
 
-	/**
-	 * The map that contains indexation attempt by datasource
-	 */
-	protected Map<String, Long> byProviderCounters = new ConcurrentHashMap<>();
+    protected Map<String, Long> byProviderCounters = new ConcurrentHashMap<>();
 
+    private String indexationEndpoint;
+    private String apiKey;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-	private String indexationEndpoint;
-	private String apiKey;
+    public IndexationService() {
+    }
 
-	public IndexationService() {
-		super();
-	}
+    public IndexationService(final String indexationEndpoint, final String apiKey) {
+        this.indexationEndpoint = indexationEndpoint;
+        this.apiKey = apiKey;
+    }
 
-	public IndexationService(final String indexationEndpoint, final String apiKey) {
-		super();
-		this.indexationEndpoint = indexationEndpoint;
-		this.apiKey = apiKey;
-	}
+    public void index(final DataFragment data, final String datasourceConfigName) throws ValidationException {
+        byProviderCounters.compute(datasourceConfigName, (k, v) -> v == null ? 1 : v + 1);
+        indexInternal(data);
+    }
 
-	public void index(final DataFragment data, final String datasourceConfigName) throws ValidationException {
-		// Incrementing the counters
-		byProviderCounters.compute(datasourceConfigName, (k, v) -> v == null ? 1 : v + 1);
+    protected void indexInternal(final DataFragment data) throws ValidationException {
+        log.error("REMOTE INDEXATION DISABLED FOR NOW — should not reach this code");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(UrlConstants.APIKEY_PARAMETER, apiKey);
+        try {
+            restTemplate.postForObject(indexationEndpoint, new HttpEntity<>(data, headers), IndexationResponse.class);
+        } catch (final RestClientException e) {
+            log.error("Cannot send {} to master API indexation endpoint: {}", data, e.getMessage());
+        }
+    }
 
-		// Effectiv indexation
-		indexInternal(data);
-	}
+    public Long getIndexed(final String dataSourceName) {
+        final Long ret = byProviderCounters.get(dataSourceName);
+        return ret == null ? 0L : ret;
+    }
 
-
-	protected void indexInternal(final DataFragment data) throws ValidationException {
-		
-		log.error("REMORTE INDEXATION DISABLED FOR NOW ! SHOULD NOT GET IN THIS CODE");
-		try {
-			Unirest.post(indexationEndpoint).header("accept", "application/json")
-					.header("Content-Type", "application/json").header(UrlConstants.APIKEY_PARAMETER, apiKey).body(data)
-					.asObject(IndexationResponse.class);
-		} catch (final UnirestException e) {
-			log.error("Cannot send {} to master API indexation endpoint : {}", data, e.getMessage());
-		}
-	}
-
-	public Long getIndexed(final String dataSourceName) {
-		final Long ret = byProviderCounters.get(dataSourceName);
-		return ret == null ? 0L : ret;
-	}
-
-	public void clearIndexedCounter(final String providerName) {
-		byProviderCounters.remove(providerName);
-	}
-
-	
-	
-	
-
+    public void clearIndexedCounter(final String providerName) {
+        byProviderCounters.remove(providerName);
+    }
 }

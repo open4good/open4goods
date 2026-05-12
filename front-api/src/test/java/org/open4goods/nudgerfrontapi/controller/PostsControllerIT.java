@@ -18,10 +18,9 @@ import org.open4goods.nudgerfrontapi.controller.api.PostsController;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 
@@ -38,7 +37,7 @@ class PostsControllerIT {
     @Autowired
     private PostsController controller;
 
-    @MockBean
+    @MockitoBean
     private BlogService blogService;
 
     private static final String SHARED_TOKEN = "test-token";

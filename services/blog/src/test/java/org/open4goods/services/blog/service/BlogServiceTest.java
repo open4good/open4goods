@@ -14,8 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.Localisable;
 import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.xwiki.services.XwikiFacadeService;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.Status;
 
 @ExtendWith(MockitoExtension.class)
 class BlogServiceTest {

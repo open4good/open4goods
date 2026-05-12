@@ -1,8 +1,8 @@
 package org.open4goods.services.geocode.health;
 
 import org.open4goods.services.geocode.service.GeoNamesIndexService;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.stereotype.Component;
 
 /**

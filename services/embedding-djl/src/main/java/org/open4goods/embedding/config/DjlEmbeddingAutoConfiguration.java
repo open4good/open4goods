@@ -9,7 +9,7 @@ import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.AbstractImageModelFactory;
 import org.open4goods.embedding.service.image.DefaultImageModelFactory;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

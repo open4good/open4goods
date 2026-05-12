@@ -702,7 +702,7 @@ public class ProductRepository {
         SortOptions sortOptions = new SortOptions.Builder()
                 .script(s -> s
                         .script(sc -> sc
-                                .source("Math.random()")
+                                .source(src -> src.scriptString("Math.random()"))
                         )
                         .type(ScriptSortType.Number)
                         .order(SortOrder.Asc)
@@ -742,7 +742,7 @@ public class ProductRepository {
         SortOptions sortOptions = new SortOptions.Builder()
                 .script(s -> s
                         .script(sc -> sc
-                                .source("Math.random()")
+                                .source(src -> src.scriptString("Math.random()"))
                         )
                         .type(ScriptSortType.Number)
                         .order(SortOrder.Asc)

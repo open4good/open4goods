@@ -5,17 +5,16 @@ import org.open4goods.brand.service.BrandService;
 import org.open4goods.services.geocode.service.IpGeolocationService;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
 
 class NudgerFrontApiApplicationTests {
 
-        @MockBean
+        @MockitoBean
         private BrandService brandService;
 
-        @MockBean
+        @MockitoBean
         private IpGeolocationService ipGeolocationService;
 
         @Test

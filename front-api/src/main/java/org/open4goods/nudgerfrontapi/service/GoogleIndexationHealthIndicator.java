@@ -2,9 +2,9 @@ package org.open4goods.nudgerfrontapi.service;
 
 import org.open4goods.nudgerfrontapi.config.properties.GoogleIndexationProperties;
 import org.open4goods.services.googleindexation.service.GoogleIndexationService;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.boot.health.contributor.Status;
 import org.springframework.stereotype.Component;
 
 /**
