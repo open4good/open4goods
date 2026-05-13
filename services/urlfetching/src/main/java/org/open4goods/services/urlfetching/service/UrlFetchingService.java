@@ -19,6 +19,7 @@ import org.open4goods.services.urlfetching.service.fetchers.HttpFetcher;
 import org.open4goods.services.urlfetching.service.fetchers.ProxifiedHttpFetcher;
 import org.open4goods.services.urlfetching.service.fetchers.PlaywrightHttpFetcher;
 import org.open4goods.services.urlfetching.service.Fetcher;
+import org.open4goods.services.urlfetching.util.StructuredMetadataExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,9 @@ public class UrlFetchingService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String FETCH_MODE_HEADER = "X-Open4goods-Fetch-Mode";
     private static final String FETCH_PROVIDER_HEADER = "X-Open4goods-Fetch-Provider";
+    private static final String PLAYWRIGHT_PROXY_HEADER = "X-Open4goods-Playwright-Proxy";
+    public static final String EXPECTED_GTIN_HEADER = "X-Open4goods-Expected-Gtin";
+    public static final String FORCE_FETCH_HEADER = "X-Open4goods-Force-Fetch";
 
     private final UrlFetcherConfig urlFetcherConfig;
     private final MeterRegistry meterRegistry;
@@ -94,23 +98,26 @@ public class UrlFetchingService {
             domainConfig.setStrategy(FetchStrategy.HTTP);
         }
         domainConfig = withRuntimeStrategyOverride(domainConfig, headers);
+        String expectedGtin = headers == null ? null : headers.get(EXPECTED_GTIN_HEADER); //TODO : Why expectedGtin is Empty ?
         Map<String, String> outboundHeaders = outboundHeaders(headers);
 
         logger.info("URL_FETCH domain={} phase=select strategy={} timeoutMs={} customHeaderNames={}",
                 domain, domainConfig.getStrategy(), domainConfig.getTimeout(),
                 domainConfig.getCustomHeaders() == null ? java.util.Set.of() : domainConfig.getCustomHeaders().keySet());
         Fetcher fetcher = getFetcherForStrategy(domainConfig);
+        // TODO : Here the strategy for reverse proxying http proxy seems to fail
         CompletableFuture<FetchResponse> future = fetcher.fetchUrlAsync(url, outboundHeaders);
         return future.thenApply(response -> {
+            FetchResponse effectiveResponse = rejectOnGtinMismatch(response, expectedGtin);
             // Recording mode: if enabled, record the fetch response to file.
             if (urlFetcherConfig.getRecord() != null && urlFetcherConfig.getRecord().isEnabled()) {
                 try {
-                    recordResponse(url, response);
+                    recordResponse(url, effectiveResponse);
                 } catch (Exception e) {
                     logger.error("Failed to record response for URL {}: {}", url, e.getMessage());
                 }
             }
-            return response;
+            return effectiveResponse;
         });
     }
     public FetchResponse fetchUrlSync(String url) throws IOException, InterruptedException {
@@ -160,18 +167,27 @@ public class UrlFetchingService {
 
     private DomainConfig withRuntimeStrategyOverride(DomainConfig original, Map<String, String> headers) {
         FetchStrategy override = requestedStrategy(headers);
-        if (override == null) {
+        boolean forcePlaywrightProxy = requestedPlaywrightProxy(headers);
+        if (override == null && !forcePlaywrightProxy) {
             return original;
         }
         DomainConfig overridden = new DomainConfig();
         overridden.setUserAgent(original.getUserAgent());
-        overridden.setStrategy(override);
+        overridden.setStrategy(override == null ? original.getStrategy() : override);
         overridden.setCustomHeaders(original.getCustomHeaders());
         overridden.setTimeout(original.getTimeout());
         overridden.setRetryPolicy(original.getRetryPolicy());
         overridden.setProxy(original.getProxy());
-        logger.info("URL_FETCH phase=select runtimeStrategyOverride={}", override);
+        overridden.setBrowserChannel(original.getBrowserChannel());
+        overridden.setPlaywrightProxyFallbackEnabled(original.isPlaywrightProxyFallbackEnabled());
+        overridden.setPlaywrightProxyRequired(original.isPlaywrightProxyRequired() || forcePlaywrightProxy);
+        logger.info("URL_FETCH phase=select runtimeStrategyOverride={} forcePlaywrightProxy={}", override,
+                forcePlaywrightProxy);
         return overridden;
+    }
+
+    private boolean requestedPlaywrightProxy(Map<String, String> headers) {
+        return headers != null && Boolean.parseBoolean(headers.get(PLAYWRIGHT_PROXY_HEADER));
     }
 
     private FetchStrategy requestedStrategy(Map<String, String> headers) {
@@ -201,7 +217,27 @@ public class UrlFetchingService {
         Map<String, String> outbound = new java.util.HashMap<>(headers);
         outbound.remove(FETCH_MODE_HEADER);
         outbound.remove(FETCH_PROVIDER_HEADER);
+        outbound.remove(PLAYWRIGHT_PROXY_HEADER);
+        outbound.remove(EXPECTED_GTIN_HEADER);
+        outbound.remove(FORCE_FETCH_HEADER);
         return outbound.isEmpty() ? null : outbound;
+    }
+
+    private FetchResponse rejectOnGtinMismatch(FetchResponse response, String expectedGtin) {
+        if (response == null || expectedGtin == null || expectedGtin.isBlank() || response.extractedGtins() == null
+                || response.extractedGtins().isEmpty()) {
+            return response;
+        }
+        String normalizedExpected = StructuredMetadataExtractor.normalizeGtin(expectedGtin);
+        boolean matched = response.extractedGtins().stream()
+                .map(StructuredMetadataExtractor::normalizeGtin)
+                .anyMatch(normalizedExpected::equals);
+        if (matched) {
+            return response;
+        }
+        logger.warn("URL_FETCH url={} phase=metadataValidation outcome=rejected expectedGtin={} extractedGtins={}",
+                response.url(), normalizedExpected, response.extractedGtins());
+        return response.withRejection(409, "Structured metadata GTIN does not match requested GTIN");
     }
 
     /**

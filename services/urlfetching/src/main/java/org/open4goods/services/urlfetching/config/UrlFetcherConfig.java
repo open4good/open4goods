@@ -97,6 +97,16 @@ public class UrlFetcherConfig {
         private ProxyConfig proxy;
 
         /**
+         * When true, a failed or empty Playwright fetch is replayed with the configured proxy.
+         */
+        private boolean playwrightProxyFallbackEnabled = false;
+
+        /**
+         * When true, Playwright starts the fetch through the configured proxy.
+         */
+        private boolean playwrightProxyRequired = false;
+
+        /**
          * Playwright browser channel (e.g. "chrome", "chrome-beta", "msedge").
          * <p>
          * Defaults to "chrome" so Playwright launches installed branded Chrome instead of
@@ -160,6 +170,22 @@ public class UrlFetcherConfig {
             this.proxy = proxy;
         }
 
+        public boolean isPlaywrightProxyFallbackEnabled() {
+            return playwrightProxyFallbackEnabled;
+        }
+
+        public void setPlaywrightProxyFallbackEnabled(boolean playwrightProxyFallbackEnabled) {
+            this.playwrightProxyFallbackEnabled = playwrightProxyFallbackEnabled;
+        }
+
+        public boolean isPlaywrightProxyRequired() {
+            return playwrightProxyRequired;
+        }
+
+        public void setPlaywrightProxyRequired(boolean playwrightProxyRequired) {
+            this.playwrightProxyRequired = playwrightProxyRequired;
+        }
+
         public String getBrowserChannel() {
             return browserChannel;
         }
@@ -204,6 +230,10 @@ public class UrlFetcherConfig {
      */
     public static class ProxyConfig {
         /**
+         * Proxy scheme.
+         */
+        private String scheme = "http";
+        /**
          * Proxy host.
          */
         private String host;
@@ -211,6 +241,22 @@ public class UrlFetcherConfig {
          * Proxy port.
          */
         private int port;
+        /**
+         * Optional proxy username.
+         */
+        private String username;
+        /**
+         * Optional proxy password.
+         */
+        private String password;
+
+        public String getScheme() {
+            return scheme;
+        }
+
+        public void setScheme(String scheme) {
+            this.scheme = scheme == null || scheme.isBlank() ? "http" : scheme;
+        }
 
         public String getHost() {
             return host;
@@ -226,6 +272,22 @@ public class UrlFetcherConfig {
 
         public void setPort(int port) {
             this.port = port;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
         }
     }
 

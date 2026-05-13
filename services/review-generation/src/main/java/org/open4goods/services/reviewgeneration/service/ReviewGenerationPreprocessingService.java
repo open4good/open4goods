@@ -417,11 +417,11 @@ public class ReviewGenerationPreprocessingService {
 		if (isValidFetch(response)) {
 			return response;
 		}
-		logger.info("PLAYWRIGHT_HEADLESS produced no usable content for {}; falling back to ZENROWS.", url);
+		logger.info("PLAYWRIGHT_HEADLESS produced no usable content for {}; replaying PLAYWRIGHT_HEADLESS with proxy.", url);
 
 		Map<String, String> antiBotHeaders = new HashMap<>(playwrightHeaders);
-		antiBotHeaders.put("X-Open4goods-Fetch-Provider", "zenrows");
-		response = fetchWithHeaders(url, antiBotHeaders, "ZENROWS");
+		antiBotHeaders.put("X-Open4goods-Playwright-Proxy", "true");
+		response = fetchWithHeaders(url, antiBotHeaders, "PLAYWRIGHT_PROXY");
 		if (!isValidFetch(response)) {
 			logger.warn("All fetch strategies failed for URL {}. Giving up on this source.", url);
 		}
