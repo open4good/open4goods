@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
@@ -39,12 +41,47 @@ public class PlaywrightHttpFetcher implements Fetcher {
     private static final List<String> CHROMIUM_ARGS = List.of(
             "--disable-dev-shm-usage",
             "--disable-gpu",
-            "--no-sandbox"
+            "--no-sandbox",
+            "--disable-blink-features=AutomationControlled"
     );
+
+    /**
+     * JS payload applied to every new document before page scripts run, masking the
+     * most common bot-detection signals (navigator.webdriver, plugin list, languages,
+     * window.chrome, permissions API, WebGL vendor/renderer).
+     */
+    private static final String STEALTH_INIT_SCRIPT = """
+            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+            Object.defineProperty(navigator, 'languages', { get: () => ['fr-FR', 'fr', 'en-US', 'en'] });
+            Object.defineProperty(navigator, 'plugins', { get: () => [
+              { name: 'Chrome PDF Plugin', filename: 'internal-pdf-viewer', description: 'Portable Document Format' },
+              { name: 'Chrome PDF Viewer', filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai', description: '' },
+              { name: 'Native Client', filename: 'internal-nacl-plugin', description: '' }
+            ]});
+            window.chrome = window.chrome || { runtime: {}, app: {}, csi: () => {}, loadTimes: () => {} };
+            const __origQuery = window.navigator.permissions && window.navigator.permissions.query;
+            if (__origQuery) {
+              window.navigator.permissions.query = (p) => (
+                p && p.name === 'notifications'
+                  ? Promise.resolve({ state: Notification.permission })
+                  : __origQuery(p)
+              );
+            }
+            const __getParam = WebGLRenderingContext.prototype.getParameter;
+            WebGLRenderingContext.prototype.getParameter = function(parameter) {
+              if (parameter === 37445) return 'Intel Inc.';
+              if (parameter === 37446) return 'Intel Iris OpenGL Engine';
+              return __getParam.apply(this, arguments);
+            };
+            """;
+
+    /** Channels that failed to launch in this JVM — skipped on subsequent fetches. */
+    private static final ConcurrentMap<String, Boolean> UNAVAILABLE_CHANNELS = new ConcurrentHashMap<>();
 
     private final String userAgent;
     private final Map<String, String> customHeaders;
     private final Duration timeout;
+    private final String browserChannel;
     private final MeterRegistry meterRegistry;
 
     /**
@@ -57,6 +94,7 @@ public class PlaywrightHttpFetcher implements Fetcher {
         this.userAgent = domainConfig.getUserAgent();
         this.customHeaders = domainConfig.getCustomHeaders();
         this.timeout = Duration.ofMillis(domainConfig.getTimeout());
+        this.browserChannel = domainConfig.getBrowserChannel();
         this.meterRegistry = meterRegistry;
     }
 
@@ -93,12 +131,10 @@ public class PlaywrightHttpFetcher implements Fetcher {
                 url, timeout.toMillis(), headers.keySet());
 
         try (Playwright playwright = Playwright.create();
-                Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                        .setHeadless(true)
-                        .setTimeout((double) timeout.toMillis())
-                        .setArgs(CHROMIUM_ARGS));
+                Browser browser = launchBrowser(playwright);
                 BrowserContext context = browser.newContext(contextOptions(headers))) {
 
+            context.addInitScript(STEALTH_INIT_SCRIPT);
             Page page = context.newPage();
             page.setDefaultNavigationTimeout(timeout.toMillis());
             page.setDefaultTimeout(timeout.toMillis());
@@ -121,6 +157,36 @@ public class PlaywrightHttpFetcher implements Fetcher {
                     markdownContent == null ? 0 : markdownContent.length());
             return new FetchResponse(url, statusCode, htmlContent, markdownContent, FetchStrategy.PLAYWRIGHT);
         }
+    }
+
+    /**
+     * Launches Chromium, preferring the configured branded channel for a more realistic
+     * fingerprint. If the channel is unavailable on the host (e.g. branded Chrome is not
+     * installed), falls back to bundled Chromium and remembers the failure for the rest
+     * of the JVM's lifetime to avoid repeated launch attempts.
+     */
+    private Browser launchBrowser(Playwright playwright) {
+        String channel = browserChannel;
+        boolean useChannel = channel != null && !channel.isBlank()
+                && !UNAVAILABLE_CHANNELS.containsKey(channel);
+        if (useChannel) {
+            try {
+                return playwright.chromium().launch(baseLaunchOptions().setChannel(channel));
+            } catch (RuntimeException e) {
+                if (UNAVAILABLE_CHANNELS.putIfAbsent(channel, Boolean.TRUE) == null) {
+                    logger.warn("URL_FETCH strategy=PLAYWRIGHT channel={} unavailable, falling back to bundled Chromium: {}",
+                            channel, e.getMessage());
+                }
+            }
+        }
+        return playwright.chromium().launch(baseLaunchOptions());
+    }
+
+    private BrowserType.LaunchOptions baseLaunchOptions() {
+        return new BrowserType.LaunchOptions()
+                .setHeadless(true)
+                .setTimeout((double) timeout.toMillis())
+                .setArgs(CHROMIUM_ARGS);
     }
 
     private Browser.NewContextOptions contextOptions(Map<String, String> headers) {

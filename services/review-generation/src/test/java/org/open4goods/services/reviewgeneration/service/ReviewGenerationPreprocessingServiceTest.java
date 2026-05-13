@@ -25,6 +25,8 @@ import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.urlfetching.config.FetchStrategy;
+import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -105,6 +107,55 @@ class ReviewGenerationPreprocessingServiceTest {
         assertThat(sanitized).doesNotContain("Header");
         assertThat(sanitized).doesNotContain("Abonnez-vous");
         assertThat(sanitized).doesNotContain("Copyright");
+    }
+
+    @Test
+    void isValidFetch_RejectsCloudflareChallengeContent() {
+        String challengeHtml = """
+                <!DOCTYPE html><html lang="en-US"><head><title>Just a moment...</title></head>
+                <body>
+                <noscript>Enable JavaScript and cookies to continue</noscript>
+                <script>window._cf_chl_opt = {}; var a = '/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1';</script>
+                </body></html>
+                """;
+        FetchResponse response = new FetchResponse("https://manuall.fr/edson-ielv49-lave-vaisselle/", 200,
+                challengeHtml, challengeHtml, FetchStrategy.HTTP);
+
+        Boolean valid = ReflectionTestUtils.invokeMethod(service, "isValidFetch", response);
+
+        assertThat(valid).isFalse();
+    }
+
+    @Test
+    void isValidFetch_RejectsMarkdownBelowConfiguredMinimumLength() {
+        properties.setMinMarkdownChars(100);
+        FetchResponse response = new FetchResponse("https://example.com/review", 200,
+                "<html><body>Short placeholder.</body></html>", "Short placeholder.", FetchStrategy.HTTP);
+
+        Boolean valid = ReflectionTestUtils.invokeMethod(service, "isValidFetch", response);
+
+        assertThat(valid).isFalse();
+    }
+
+    @Test
+    void isValidFetch_AcceptsProductReviewContent() {
+        String markdown = """
+                # Test du lave-vaisselle Edson IELV49
+
+                Ce contenu de test decrit les performances de lavage, le sechage, le bruit et la consommation.
+                Le verdict compare les points forts et les limites du produit avec des observations exploitables.
+                La partie lavage detaille les resultats sur les taches incrustees, les verres et les casseroles.
+                La partie sechage indique les limites sur les plastiques, les couverts et la vaisselle dense.
+                La partie ergonomie couvre le rangement interieur, le panier a couverts, les programmes et l'affichage.
+                La partie consommation donne des reperes sur l'eau, l'electricite, la duree des cycles et le mode eco.
+                La conclusion explique pour quels foyers ce modele est pertinent et dans quels cas il faut choisir un autre appareil.
+                """;
+        FetchResponse response = new FetchResponse("https://example.com/review", 200,
+                "<html><body>" + markdown + "</body></html>", markdown, FetchStrategy.HTTP);
+
+        Boolean valid = ReflectionTestUtils.invokeMethod(service, "isValidFetch", response);
+
+        assertThat(valid).isTrue();
     }
 
     private Product product(String brand, String model) {

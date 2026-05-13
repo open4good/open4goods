@@ -2173,18 +2173,60 @@ public class SearchService {
 			max = descriptor.request.max();
 		}
 		if ((min == null || max == null) && !buckets.isEmpty()) {
-			AggregationBucketDto firstBucket = buckets.get(0);
-			AggregationBucketDto lastBucket = buckets.get(buckets.size() - 1);
-			if (min == null && firstBucket.key() != null) {
-				min = Double.parseDouble(firstBucket.key());
+			if (min == null) {
+				min = firstNumericRangeBucketKey(buckets);
 			}
-			if (max == null && lastBucket.to() != null) {
-				max = lastBucket.to();
+			if (max == null) {
+				max = lastNumericRangeBucketTo(buckets);
 			}
 		}
 
 		return new AggregationResponseDto(descriptor.request.name(), descriptor.request.field(), descriptor.type,
 				buckets, min, max);
+	}
+
+	/**
+	 * Returns the first numeric lower bound from range buckets, ignoring the missing
+	 * bucket because its {@code ES-UNKNOWN} key is not numeric.
+	 *
+	 * @param buckets range aggregation buckets
+	 * @return first numeric lower bound, or {@code null} when none exists
+	 */
+	static Double firstNumericRangeBucketKey(List<AggregationBucketDto> buckets) {
+		if (buckets == null) {
+			return null;
+		}
+		for (AggregationBucketDto bucket : buckets) {
+			if (bucket == null || bucket.missing() || bucket.key() == null) {
+				continue;
+			}
+			try {
+				return Double.parseDouble(bucket.key());
+			} catch (NumberFormatException ignored) {
+				LOGGER.debug("Ignoring non-numeric range aggregation bucket key '{}'", bucket.key());
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the last numeric upper bound from range buckets, ignoring missing
+	 * buckets that do not represent a numeric interval.
+	 *
+	 * @param buckets range aggregation buckets
+	 * @return last numeric upper bound, or {@code null} when none exists
+	 */
+	static Double lastNumericRangeBucketTo(List<AggregationBucketDto> buckets) {
+		if (buckets == null) {
+			return null;
+		}
+		for (int i = buckets.size() - 1; i >= 0; i--) {
+			AggregationBucketDto bucket = buckets.get(i);
+			if (bucket != null && !bucket.missing() && bucket.to() != null) {
+				return bucket.to();
+			}
+		}
+		return null;
 	}
 
 	private List<Agg> extractExcludedAggregations(AggregationRequestDto aggregationQuery) {

@@ -96,6 +96,20 @@ public class UrlFetcherConfig {
          */
         private ProxyConfig proxy;
 
+        /**
+         * Playwright browser channel (e.g. "chrome", "chrome-beta", "msedge").
+         * <p>
+         * Defaults to "chrome" so Playwright launches installed branded Chrome instead of
+         * bundled Chromium — branded Chrome has a different TLS / JS fingerprint that is
+         * harder for anti-bot WAFs (Datadome, Akamai, PerimeterX) to flag. Requires the
+         * channel to be installed on the host (e.g. {@code npx playwright install chrome}).
+         * When the channel is missing at launch time, the fetcher falls back to bundled
+         * Chromium and logs a warning once per JVM.
+         * </p>
+         * <p>Set to an empty string or {@code null} to force bundled Chromium.</p>
+         */
+        private String browserChannel = "chrome";
+
         // Getters and setters
 
         public String getUserAgent() {
@@ -144,6 +158,14 @@ public class UrlFetcherConfig {
 
         public void setProxy(ProxyConfig proxy) {
             this.proxy = proxy;
+        }
+
+        public String getBrowserChannel() {
+            return browserChannel;
+        }
+
+        public void setBrowserChannel(String browserChannel) {
+            this.browserChannel = browserChannel;
         }
     }
 

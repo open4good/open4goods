@@ -110,6 +110,7 @@ embedding:
 
 review:
   generation:
+    min-markdown-chars: ${REVIEW_GENERATION_MIN_MARKDOWN_CHARS:500}
     preferred-domains:
       - leclaireur.fnac.com
       - quechoisir.org

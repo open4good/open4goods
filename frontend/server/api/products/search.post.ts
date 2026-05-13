@@ -1,3 +1,5 @@
+import { createError, defineEventHandler, getQuery, readBody } from 'h3'
+
 import type {
   AggregationRequestDto,
   FilterRequestDto,
@@ -5,8 +7,8 @@ import type {
   ProductSearchRequestDto,
   ProductSearchResponseDto,
   SortRequestDto,
-  ProductsIncludeEnum,
 } from '~~/shared/api-client'
+import { ProductsIncludeEnum } from '~~/shared/api-client'
 import { useProductService } from '~~/shared/api-client/services/products.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
@@ -43,6 +45,43 @@ interface GlobalSearchPayload {
 
 type SearchPayload = ProductsSearchPayload | GlobalSearchPayload
 
+const PRODUCT_INCLUDE_VALUES = Object.values(ProductsIncludeEnum)
+
+const toFirstString = (value: unknown): string | undefined => {
+  if (Array.isArray(value)) {
+    return toFirstString(value[0])
+  }
+
+  return typeof value === 'string' && value.length > 0 ? value : undefined
+}
+
+const toInteger = (value: unknown): number | undefined => {
+  const rawValue =
+    typeof value === 'number' ? String(value) : toFirstString(value)
+
+  if (!rawValue) {
+    return undefined
+  }
+
+  const parsed = Number.parseInt(rawValue, 10)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+const toIncludeValues = (value: unknown): ProductsIncludeEnum[] | undefined => {
+  const rawValues = Array.isArray(value) ? value : [value]
+  const includeValues = rawValues
+    .flatMap(rawValue =>
+      typeof rawValue === 'string'
+        ? rawValue.split(',').map(item => item.trim())
+        : []
+    )
+    .filter((item): item is ProductsIncludeEnum =>
+      PRODUCT_INCLUDE_VALUES.includes(item as ProductsIncludeEnum)
+    )
+
+  return includeValues.length > 0 ? [...new Set(includeValues)] : undefined
+}
+
 const isGlobalSearchPayload = (
   payload: SearchPayload
 ): payload is GlobalSearchPayload =>
@@ -54,6 +93,9 @@ const isGlobalSearchPayload = (
     'semanticSearch' in payload ||
     'include' in payload
   )
+
+const hasProductSearchRouteQuery = (routeQuery: Record<string, unknown>) =>
+  routeQuery.verticalId != null || routeQuery.include != null
 
 export default defineEventHandler(
   async (
@@ -70,13 +112,17 @@ export default defineEventHandler(
       })
     }
 
+    const routeQuery = getQuery(event)
     const rawHost =
       event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
     const { domainLanguage } = resolveDomainLanguage(rawHost)
 
     const productService = useProductService(domainLanguage)
 
-    if (isGlobalSearchPayload(payload)) {
+    if (
+      isGlobalSearchPayload(payload) &&
+      !hasProductSearchRouteQuery(routeQuery)
+    ) {
       try {
         return await productService.searchGlobalProducts({
           query: payload.query ?? '',
@@ -133,16 +179,28 @@ export default defineEventHandler(
 
     // After the type guard, we know this is a ProductsSearchPayload
     const productsPayload = payload as ProductsSearchPayload
+    const normalizedProductsPayload: ProductsSearchPayload = {
+      ...productsPayload,
+      verticalId:
+        productsPayload.verticalId ?? toFirstString(routeQuery.verticalId),
+      pageNumber:
+        productsPayload.pageNumber ?? toInteger(routeQuery.pageNumber),
+      pageSize: productsPayload.pageSize ?? toInteger(routeQuery.pageSize),
+      query: productsPayload.query ?? toFirstString(routeQuery.query),
+      include:
+        toIncludeValues(productsPayload.include) ??
+        toIncludeValues(routeQuery.include),
+    }
 
-    const searchBody = buildSearchBody(productsPayload)
+    const searchBody = buildSearchBody(normalizedProductsPayload)
 
     try {
       const response = await productService.searchProducts({
-        verticalId: productsPayload.verticalId,
-        pageNumber: productsPayload.pageNumber,
-        pageSize: productsPayload.pageSize,
-        query: productsPayload.query,
-        include: productsPayload.include,
+        verticalId: normalizedProductsPayload.verticalId,
+        pageNumber: normalizedProductsPayload.pageNumber,
+        pageSize: normalizedProductsPayload.pageSize,
+        query: normalizedProductsPayload.query,
+        include: normalizedProductsPayload.include,
         ...(searchBody ? { body: searchBody } : {}),
       })
       response.products?.data?.forEach(product => {

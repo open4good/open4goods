@@ -72,6 +72,11 @@ public class ReviewGenerationConfig {
 
     // Properties for token-based content aggregation.
     private int maxTotalTokens = 100000;
+    /**
+     * Minimum markdown characters required before a fetch is considered usable.
+     * This early gate rejects tiny placeholders before token estimation.
+     */
+    private int minMarkdownChars = 500;
     private int sourceMinTokens = 150;
     private int sourceMaxTokens = 10000;
 
@@ -271,6 +276,13 @@ public class ReviewGenerationConfig {
     }
     public void setMaxTotalTokens(int maxTotalTokens) {
         this.maxTotalTokens = maxTotalTokens;
+    }
+
+    public int getMinMarkdownChars() {
+        return minMarkdownChars;
+    }
+    public void setMinMarkdownChars(int minMarkdownChars) {
+        this.minMarkdownChars = minMarkdownChars;
     }
 
     public int getSourceMinTokens() {

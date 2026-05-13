@@ -80,6 +80,12 @@
       "defaultValue": 100000
     },
     {
+      "name": "review.generation.min-markdown-chars",
+      "type": "java.lang.Integer",
+      "description": "Minimum number of markdown characters required before a fetched page is considered usable.",
+      "defaultValue": 500
+    },
+    {
       "name": "review.generation.source-min-tokens",
       "type": "java.lang.Integer",
       "description": "Minimum number of tokens required for a source to be considered.",

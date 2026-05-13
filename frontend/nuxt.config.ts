@@ -51,6 +51,7 @@ const PRECACHE_EXTENSIONS = [
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
 const WORKBOX_GLOB_IGNORES = [
   'videos/**/*',
+  'reports/test-coverage/**/*',
   '**/_payload.json',
   '**/*.ts',
   '**/*.map',

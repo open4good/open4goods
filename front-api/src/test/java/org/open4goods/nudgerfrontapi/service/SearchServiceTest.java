@@ -27,6 +27,7 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
+import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -283,5 +284,26 @@ class SearchServiceTest {
         assertThat(technicalMappings).contains("attributes.indexed.DIAGONALE_POUCES.numericValue");
         assertThat(technicalMappings).contains("attributes.indexed.WEIGHT.numericValue");
         assertThat(technicalMappings).doesNotContain("attributes.indexed.CLASSE_ENERGY.value");
+    }
+
+    @Test
+    void rangeBoundsDerivation_shouldIgnoreMissingBucket() {
+        List<AggregationBucketDto> buckets = List.of(
+                new AggregationBucketDto("ES-UNKNOWN", null, 12L, true),
+                new AggregationBucketDto("10.0", 20.0, 3L, false),
+                new AggregationBucketDto("20.0", 30.0, 1L, false),
+                new AggregationBucketDto("ES-UNKNOWN", null, 5L, true));
+
+        assertThat(SearchService.firstNumericRangeBucketKey(buckets)).isEqualTo(10.0);
+        assertThat(SearchService.lastNumericRangeBucketTo(buckets)).isEqualTo(30.0);
+    }
+
+    @Test
+    void rangeBoundsDerivation_shouldReturnNullForOnlyMissingBuckets() {
+        List<AggregationBucketDto> buckets = List.of(
+                new AggregationBucketDto("ES-UNKNOWN", null, 12L, true));
+
+        assertThat(SearchService.firstNumericRangeBucketKey(buckets)).isNull();
+        assertThat(SearchService.lastNumericRangeBucketTo(buckets)).isNull();
     }
 }

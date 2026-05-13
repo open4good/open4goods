@@ -21,6 +21,8 @@ class ReviewGenerationApiConfigTest {
         Properties properties = yamlFactory.getObject();
 
         assertThat(properties).isNotNull();
+        assertThat(properties.getProperty("review.generation.min-markdown-chars"))
+                .isEqualTo("${REVIEW_GENERATION_MIN_MARKDOWN_CHARS:500}");
         assertThat(properties.getProperty("review.generation.preferred-domains[0]"))
                 .isEqualTo("leclaireur.fnac.com");
         assertThat(properties.getProperty("review.generation.preferred-domains[3]"))

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -46,16 +47,25 @@ import org.springframework.stereotype.Service;
 import io.micrometer.core.instrument.MeterRegistry;
 
 /**
- * Builds prompt variables by discovering and fetching web sources for a product.
+ * Builds prompt variables by discovering and fetching web sources for a
+ * product.
  * <p>
- * The fetch workflow applies a deterministic fallback chain:
- * HTTP simple, then Playwright local rendering, then ZenRows anti-bot provider.
+ * The fetch workflow applies a deterministic fallback chain: HTTP simple, then
+ * Playwright local rendering, then ZenRows anti-bot provider.
  * </p>
  */
 @Service
 public class ReviewGenerationPreprocessingService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationPreprocessingService.class);
+	private static final List<Pattern> BLOCKED_FETCH_CONTENT_PATTERNS = List.of(
+			Pattern.compile("<title>\\s*Just a moment\\.\\.\\.\\s*</title>", Pattern.CASE_INSENSITIVE),
+			Pattern.compile("Enable JavaScript and cookies to continue", Pattern.CASE_INSENSITIVE),
+			Pattern.compile("/cdn-cgi/challenge-platform/", Pattern.CASE_INSENSITIVE),
+			Pattern.compile("__cf_chl_(?:tk|rt_tk|f_tk)", Pattern.CASE_INSENSITIVE),
+			Pattern.compile("window\\._cf_chl_opt", Pattern.CASE_INSENSITIVE),
+			Pattern.compile("Checking if the site connection is secure", Pattern.CASE_INSENSITIVE),
+			Pattern.compile("Attention Required! \\| Cloudflare", Pattern.CASE_INSENSITIVE));
 
 	private final ReviewGenerationConfig properties;
 	private final GoogleSearchService googleSearchService;
@@ -84,29 +94,30 @@ public class ReviewGenerationPreprocessingService {
 				properties.getSearchGeoLocation(), properties.getSearchHostLanguage(), properties.getSearchSafe());
 	}
 
-    /**
-     * Validates configuration at startup and logs actionable warnings for common misconfigurations.
-     */
-    @PostConstruct
-    public void validateConfig() {
-        if (properties.getPreferredDomains() == null || properties.getPreferredDomains().isEmpty()) {
-            logger.warn("review.generation.preferred-domains is empty. No preferred-domain SERP boost will be applied. "
-                    + "Configure e.g. lesnumeriques.com, fnac.com to improve source quality.");
-        }
-        else {
-            boolean hasInvalidDomain = properties.getPreferredDomains().stream()
-                    .anyMatch(d -> d != null && (d.startsWith("http://") || d.startsWith("https://") || d.contains("/")));
-            if (hasInvalidDomain) {
-                logger.warn("review.generation.preferred-domains contains entries with scheme or path. "
-                        + "Use bare hostnames only (e.g. 'lesnumeriques.com'), not full URLs.");
-            }
-        }
-        if (properties.getMinUrlCount() > properties.getMaxUrlsPerProduct()) {
-            logger.warn("review.generation.min-url-count ({}) exceeds max-urls-per-product ({}). "
-                    + "Generation will always fail with NotEnoughDataException.",
-                    properties.getMinUrlCount(), properties.getMaxUrlsPerProduct());
-        }
-    }
+	/**
+	 * Validates configuration at startup and logs actionable warnings for common
+	 * misconfigurations.
+	 */
+	@PostConstruct
+	public void validateConfig() {
+		if (properties.getPreferredDomains() == null || properties.getPreferredDomains().isEmpty()) {
+			logger.warn("review.generation.preferred-domains is empty. No preferred-domain SERP boost will be applied. "
+					+ "Configure e.g. lesnumeriques.com, fnac.com to improve source quality.");
+		} else {
+			boolean hasInvalidDomain = properties.getPreferredDomains().stream().anyMatch(
+					d -> d != null && (d.startsWith("http://") || d.startsWith("https://") || d.contains("/")));
+			if (hasInvalidDomain) {
+				logger.warn("review.generation.preferred-domains contains entries with scheme or path. "
+						+ "Use bare hostnames only (e.g. 'lesnumeriques.com'), not full URLs.");
+			}
+		}
+		if (properties.getMinUrlCount() > properties.getMaxUrlsPerProduct()) {
+			logger.warn(
+					"review.generation.min-url-count ({}) exceeds max-urls-per-product ({}). "
+							+ "Generation will always fail with NotEnoughDataException.",
+					properties.getMinUrlCount(), properties.getMaxUrlsPerProduct());
+		}
+	}
 
 	/**
 	 * Prepares the prompt variables used for review generation.
@@ -135,8 +146,9 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	public Map<String, Object> preparePromptVariables(Product product, VerticalConfig verticalConfig,
-			ReviewGenerationStatus status, Map<String, String> customHeaders) throws IOException, InterruptedException, ExecutionException,
-			ResourceNotFoundException, SerialisationException, NotEnoughDataException, GoogleSearchException {
+			ReviewGenerationStatus status, Map<String, String> customHeaders)
+			throws IOException, InterruptedException, ExecutionException, ResourceNotFoundException,
+			SerialisationException, NotEnoughDataException, GoogleSearchException {
 		String brand = product.brand();
 		String primaryModel = product.model();
 		Set<String> alternateModels = product.getAkaModels();
@@ -144,7 +156,8 @@ public class ReviewGenerationPreprocessingService {
 
 		// Build search queries.
 		List<String> queries = buildSearchQueries(brand, primaryModel, alternateModels, verticalConfig);
-		logger.info("SERP validation for UPC {}: brand='{}', model='{}', akaModels={}, preferredDomains={}, plannedQueries={}",
+		logger.info(
+				"SERP validation for UPC {}: brand='{}', model='{}', akaModels={}, preferredDomains={}, plannedQueries={}",
 				product.getId(), brand, primaryModel, alternateModels == null ? 0 : alternateModels.size(),
 				properties.getPreferredDomains(), queries.size());
 
@@ -198,8 +211,8 @@ public class ReviewGenerationPreprocessingService {
 						return 1;
 					return 0;
 				}).toList();
-		long preferredResultCount = sortedResults.stream()
-				.filter(result -> properties.getPreferredDomains().stream().anyMatch(domain -> result.link().contains(domain)))
+		long preferredResultCount = sortedResults.stream().filter(
+				result -> properties.getPreferredDomains().stream().anyMatch(domain -> result.link().contains(domain)))
 				.count();
 		logger.info("SERP selection for UPC {}: eligibleResults={}, preferredResults={}, maxUrlsPerProduct={}",
 				product.getId(), sortedResults.size(), preferredResultCount, properties.getMaxUrlsPerProduct());
@@ -285,24 +298,24 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("TOTAL_TOKENS", accumulatedTokens);
 		promptVariables.put("SOURCE_TOKENS", finalTokensMap);
 
-			List<ProductFact> newFacts = new ArrayList<>();
-			for (Map.Entry<String, String> entry : finalSourcesMap.entrySet()) {
-				String content = entry.getValue();
-				String normalized = content.length() > properties.getFactMaxMarkdownChars()
-						? content.substring(0, properties.getFactMaxMarkdownChars())
-						: content;
-				newFacts.add(new ProductFact(entry.getKey(), normalized, detectLanguage(normalized),
-						System.currentTimeMillis(), resolveFetchStrategy(fetchFutures.get(entry.getKey())),
-						finalTokensMap.get(entry.getKey()), sha256(normalized)));
-			}
-			Map<String, ProductFact> merged = new LinkedHashMap<>();
-			for (ProductFact fact : product.getReviewFacts()) {
-				merged.put(fact.getUrl(), fact);
-			}
-			for (ProductFact fact : newFacts) {
-				merged.put(fact.getUrl(), fact);
-			}
-			product.setReviewFacts(merged.values().stream().limit(properties.getFactsMaxStored()).toList());
+		List<ProductFact> newFacts = new ArrayList<>();
+		for (Map.Entry<String, String> entry : finalSourcesMap.entrySet()) {
+			String content = entry.getValue();
+			String normalized = content.length() > properties.getFactMaxMarkdownChars()
+					? content.substring(0, properties.getFactMaxMarkdownChars())
+					: content;
+			newFacts.add(new ProductFact(entry.getKey(), normalized, detectLanguage(normalized),
+					System.currentTimeMillis(), resolveFetchStrategy(fetchFutures.get(entry.getKey())),
+					finalTokensMap.get(entry.getKey()), sha256(normalized)));
+		}
+		Map<String, ProductFact> merged = new LinkedHashMap<>();
+		for (ProductFact fact : product.getReviewFacts()) {
+			merged.put(fact.getUrl(), fact);
+		}
+		for (ProductFact fact : newFacts) {
+			merged.put(fact.getUrl(), fact);
+		}
+		product.setReviewFacts(merged.values().stream().limit(properties.getFactsMaxStored()).toList());
 
 		return promptVariables;
 	}
@@ -316,8 +329,8 @@ public class ReviewGenerationPreprocessingService {
 			missing.add("model");
 		}
 		if (!missing.isEmpty()) {
-			throw new IllegalStateException("Cannot build review SERP queries for UPC " + product.getId()
-					+ ": missing " + String.join(", ", missing));
+			throw new IllegalStateException("Cannot build review SERP queries for UPC " + product.getId() + ": missing "
+					+ String.join(", ", missing));
 		}
 	}
 
@@ -367,10 +380,8 @@ public class ReviewGenerationPreprocessingService {
 		if (domains == null || domains.isEmpty()) {
 			return "";
 		}
-		List<String> sites = domains.stream()
-				.filter(domain -> domain != null && !domain.isBlank())
-				.map(domain -> "site:" + domain.trim())
-				.toList();
+		List<String> sites = domains.stream().filter(domain -> domain != null && !domain.isBlank())
+				.map(domain -> "site:" + domain.trim()).toList();
 		if (sites.isEmpty()) {
 			return "";
 		}
@@ -423,14 +434,14 @@ public class ReviewGenerationPreprocessingService {
 			FetchResponse response = urlFetchingService.fetchUrlAsync(url, headers).get();
 			if (response != null) {
 				boolean valid = isValidFetch(response);
-				meterRegistry.counter("review.fetch.attempts",
-						"strategy", strategy,
-						"outcome", valid ? "success" : "empty").increment();
-				logger.info("Fetch completed for URL {}: requestedStrategy={}, actualStrategy={}, statusCode={}, markdownChars={}",
+				meterRegistry
+						.counter("review.fetch.attempts", "strategy", strategy, "outcome", valid ? "success" : "empty")
+						.increment();
+				logger.info(
+						"Fetch completed for URL {}: requestedStrategy={}, actualStrategy={}, statusCode={}, markdownChars={}",
 						url, strategy, response.fetchStrategy(), response.statusCode(),
 						response.markdownContent() == null ? 0 : response.markdownContent().length());
-			}
-			else {
+			} else {
 				meterRegistry.counter("review.fetch.attempts", "strategy", strategy, "outcome", "null").increment();
 			}
 			return response;
@@ -447,9 +458,7 @@ public class ReviewGenerationPreprocessingService {
 		}
 		List<Pattern> patterns = properties.getMarkdownLineRemovalPatterns() == null ? List.of()
 				: properties.getMarkdownLineRemovalPatterns().stream()
-						.filter(pattern -> pattern != null && !pattern.isBlank())
-						.map(Pattern::compile)
-						.toList();
+						.filter(pattern -> pattern != null && !pattern.isBlank()).map(Pattern::compile).toList();
 		if (patterns.isEmpty()) {
 			return markdown.trim();
 		}
@@ -473,7 +482,29 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private boolean isValidFetch(FetchResponse response) {
-		return response != null && response.markdownContent() != null && !response.markdownContent().isBlank();
+		if (response == null || response.markdownContent() == null || response.markdownContent().isBlank()) {
+			return false;
+		}
+		if (response.markdownContent().strip().length() < Math.max(0, properties.getMinMarkdownChars())) {
+			return false;
+		}
+		if (response.statusCode() < 200 || response.statusCode() >= 300) {
+			return false;
+		}
+		return !containsBlockedFetchContent(response.markdownContent())
+				&& !containsBlockedFetchContent(response.htmlContent());
+	}
+
+	/**
+	 * Detects anti-bot challenge pages that contain text but no usable product
+	 * review content.
+	 */
+	private boolean containsBlockedFetchContent(String content) {
+		if (content == null || content.isBlank()) {
+			return false;
+		}
+		String normalized = content.toLowerCase(Locale.ROOT);
+		return BLOCKED_FETCH_CONTENT_PATTERNS.stream().anyMatch(pattern -> pattern.matcher(normalized).find());
 	}
 
 	private String detectLanguage(String markdown) {
@@ -524,7 +555,6 @@ public class ReviewGenerationPreprocessingService {
 		}
 	}
 
-
 	public Map<String, Object> buildBasePromptVariables(Product product, VerticalConfig verticalConfig) {
 		Map<String, Object> promptVariables = new HashMap<>();
 		promptVariables.put("PRODUCT_NAME", product.shortestOfferName());
@@ -538,21 +568,24 @@ public class ReviewGenerationPreprocessingService {
 				.filter(attrConf -> !attrConf.getSynonyms().isEmpty())
 				.map(attrConf -> String.format("        - %s (%s)", attrConf.getKey(), attrConf.getName().get("fr")))
 				.collect(Collectors.joining("\n"));
-			// Initialize standard variables to avoid NPE in template and service.
-			promptVariables.put("sources", new HashMap<>());
-			promptVariables.put("tokens", new HashMap<>());
-			promptVariables.put("TOTAL_TOKENS", 0);
-			promptVariables.put("SOURCE_TOKENS", new HashMap<>());
+		// Initialize standard variables to avoid NPE in template and service.
+		promptVariables.put("sources", new HashMap<>());
+		promptVariables.put("tokens", new HashMap<>());
+		promptVariables.put("TOTAL_TOKENS", 0);
+		promptVariables.put("SOURCE_TOKENS", new HashMap<>());
 
 		promptVariables.put("ATTRIBUTES", attributesList);
-		// Default empty value so templates that reference EXTRACTED_ATTRIBUTES don't fail.
+		// Default empty value so templates that reference EXTRACTED_ATTRIBUTES don't
+		// fail.
 		promptVariables.put("EXTRACTED_ATTRIBUTES", "[]");
 
 		// Inject IMPACTSCORE_POSITION
 		String impactScorePosition = "Non classé";
-		if (product.getRanking() != null && product.getRanking().getGlobalPosition() > 0 && product.getRanking().getGlobalCount() > 0) {
+		if (product.getRanking() != null && product.getRanking().getGlobalPosition() > 0
+				&& product.getRanking().getGlobalCount() > 0) {
 			impactScorePosition = String.format("Ce produit se classe %dème sur %d produits de la catégorie %s",
-					product.getRanking().getGlobalPosition(), product.getRanking().getGlobalCount(), verticalConfig.i18n("fr").getH1Title().getPrefix());
+					product.getRanking().getGlobalPosition(), product.getRanking().getGlobalCount(),
+					verticalConfig.i18n("fr").getH1Title().getPrefix());
 		}
 		promptVariables.put("IMPACTSCORE_POSITION", impactScorePosition);
 
@@ -607,8 +640,8 @@ public class ReviewGenerationPreprocessingService {
 
 		if (product.getReviewFacts() != null) {
 			for (ProductFact fact : product.getReviewFacts()) {
-				if (fact == null || fact.getUrl() == null || fact.getUrl().isBlank()
-						|| fact.getMarkdown() == null || fact.getMarkdown().isBlank()) {
+				if (fact == null || fact.getUrl() == null || fact.getUrl().isBlank() || fact.getMarkdown() == null
+						|| fact.getMarkdown().isBlank()) {
 					continue;
 				}
 				sources.put(fact.getUrl(), fact.getMarkdown());
