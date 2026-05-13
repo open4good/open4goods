@@ -340,12 +340,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  defineAsyncComponent,
-  ref,
-  type PropType,
-} from 'vue'
+import { computed, defineAsyncComponent, ref, type PropType } from 'vue'
 import DOMPurify from 'isomorphic-dompurify'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'

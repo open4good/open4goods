@@ -11,7 +11,8 @@ export default defineVitestConfig({
   },
   resolve: {
     alias: {
-      '@plausible-analytics/tracker': '@plausible-analytics/tracker/plausible.js',
+      '@plausible-analytics/tracker':
+        '@plausible-analytics/tracker/plausible.js',
     },
   },
   server: {

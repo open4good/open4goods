@@ -1,9 +1,5 @@
 <template>
-  <article
-    ref="chartContainer"
-    class="impact-radar"
-    :aria-labelledby="titleId"
-  >
+  <article ref="chartContainer" class="impact-radar" :aria-labelledby="titleId">
     <h3 :id="titleId" class="impact-radar__title text-center mb-4">
       {{ $t('product.impact.positioning') }}
     </h3>

@@ -9,11 +9,7 @@ const logoSrc = useLogoAsset()
 </script>
 
 <template>
-  <NuxtLink
-    id="main-logo-link"
-    to="/"
-    class="logo-link"
-  >
+  <NuxtLink id="main-logo-link" to="/" class="logo-link">
     <img
       :src="logoSrc"
       alt=""

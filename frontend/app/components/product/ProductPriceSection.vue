@@ -236,7 +236,9 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.lowest') }}</span>
+                          <span class="product-price__metrics-stat-label">{{
+                            $t('product.price.metrics.lowest')
+                          }}</span>
                           <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
@@ -256,7 +258,9 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.average') }}</span>
+                          <span class="product-price__metrics-stat-label">{{
+                            $t('product.price.metrics.average')
+                          }}</span>
                           <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
@@ -276,7 +280,9 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.highest') }}</span>
+                          <span class="product-price__metrics-stat-label">{{
+                            $t('product.price.metrics.highest')
+                          }}</span>
                           <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
@@ -435,7 +441,9 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.lowest') }}</span>
+                          <span class="product-price__metrics-stat-label">{{
+                            $t('product.price.metrics.lowest')
+                          }}</span>
                           <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
@@ -455,7 +463,9 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.average') }}</span>
+                          <span class="product-price__metrics-stat-label">{{
+                            $t('product.price.metrics.average')
+                          }}</span>
                           <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(
@@ -475,7 +485,9 @@
                           aria-hidden="true"
                         />
                         <div class="product-price__metrics-stat-text">
-                          <span class="product-price__metrics-stat-label">{{ $t('product.price.metrics.highest') }}</span>
+                          <span class="product-price__metrics-stat-label">{{
+                            $t('product.price.metrics.highest')
+                          }}</span>
                           <span class="product-price__metrics-stat-value">
                             {{
                               formatStat(

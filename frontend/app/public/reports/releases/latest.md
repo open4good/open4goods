@@ -3,6 +3,7 @@
 This release covers **0 day(s)** of work, from **2026-05-12T15:09:29.000Z** to **2026-05-13T10:27:38.000Z**.
 
 ### 📦 Stats
+
 - Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.17...v1.0.18)
 - Changed files: **16**
 - Commits: **5**
@@ -10,15 +11,12 @@ This release covers **0 day(s)** of work, from **2026-05-12T15:09:29.000Z** to *
 
 ---
 
-
-
 <details>
 <summary>🙈 Other changes (2)</summary>
 
-| PR | Title | Author |
-|---:|---|---|
-| [PR 3119](https://github.com/open4good/open4goods/pull/3119) | Update capacitor monorepo to v8.3.4 | @renovate[bot] |
+|                                                           PR | Title                                     | Author         |
+| -----------------------------------------------------------: | ----------------------------------------- | -------------- |
+| [PR 3119](https://github.com/open4good/open4goods/pull/3119) | Update capacitor monorepo to v8.3.4       | @renovate[bot] |
 | [PR 3120](https://github.com/open4good/open4goods/pull/3120) | Update dependency @types/jsdom to v28.0.3 | @renovate[bot] |
-
 
 </details>
