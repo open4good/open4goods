@@ -597,10 +597,15 @@ if (categorySlug) {
   try {
     categoryDetail.value = await selectCategoryBySlug(categorySlug)
   } catch (categoryError) {
-    console.error(
-      'Failed to resolve category detail for product page.',
-      categoryError
-    )
+    if (
+      !(categoryError instanceof Error) ||
+      categoryError.name !== 'CategoryNotFoundError'
+    ) {
+      console.error(
+        'Failed to resolve category detail for product page.',
+        categoryError
+      )
+    }
   }
 }
 

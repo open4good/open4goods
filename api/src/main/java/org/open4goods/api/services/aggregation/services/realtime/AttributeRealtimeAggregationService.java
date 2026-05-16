@@ -125,8 +125,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					String cleanedValue = parseAttributeValue(attr, attrConfig, vConf);
 
 					if (StringUtils.isEmpty(cleanedValue)) {
-						dedicatedLogger.error("Empty indexed attribute value {}:{}", attrConfig.getKey(),
-								attr.getValue());
+						if (isKnownEmptyAttributeValue(attr.getValue())) {
+							dedicatedLogger.debug("Ignoring empty indexed attribute value {}:{}", attrConfig.getKey(),
+									attr.getValue());
+						} else {
+							dedicatedLogger.warn("Empty indexed attribute value {}:{}", attrConfig.getKey(),
+									attr.getValue());
+						}
 						continue;
 					}
 
@@ -137,7 +142,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 						if (!cleanedValue.equals(indexedAttr.getValue())) {
 							// TODO(p3,design) : Means we have multiple attributes matching for indexed .
 							// Have a merge strategy
-							dedicatedLogger.error("Value mismatch for attribute {} : {}<>{}", attr.getName(),
+							dedicatedLogger.warn("Value mismatch for attribute {} : {}<>{}", attr.getName(),
 									cleanedValue, indexedAttr.getValue());
 						}
 					} else {
@@ -151,8 +156,11 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					mergeSourcesAndRefreshValue(indexedAttr, attr, attrConfig, vConf);
 					indexed.put(attrConfig.getKey(), indexedAttr);
 
+				} catch (ValidationException e) {
+					dedicatedLogger.warn("Attribute parsing fail for matched attribute {}: {}", attrConfig.getKey(),
+							e.getMessage());
 				} catch (Exception e) {
-					dedicatedLogger.error("Attribute parsing fail for matched attribute {}", attrConfig.getKey(), e);
+					dedicatedLogger.error("Unexpected attribute parsing fail for matched attribute {}", attrConfig.getKey(), e);
 				}
 			}
 		}
@@ -216,6 +224,25 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		attr.setValue(bestValue);
+	}
+
+	/**
+	 * Identifies merchant placeholders that mean the attribute is absent rather
+	 * than invalid.
+	 *
+	 * @param value raw attribute value
+	 * @return {@code true} when the value is a known placeholder
+	 */
+	private boolean isKnownEmptyAttributeValue(String value) {
+		if (StringUtils.isBlank(value)) {
+			return true;
+		}
+		String normalized = StringUtils.stripAccents(value)
+				.toLowerCase(Locale.ROOT)
+				.replaceAll("[()_./-]+", " ");
+		normalized = StringUtils.normalizeSpace(normalized);
+		return Set.of("donnee non specifiee", "donnees non specifiees", "non specifie", "non specifiee", "n a",
+				"na", "nc", "null", "-").contains(normalized);
 	}
 
 	/**

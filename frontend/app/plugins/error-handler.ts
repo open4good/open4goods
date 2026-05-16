@@ -1,5 +1,11 @@
 export default defineNuxtPlugin(nuxtApp => {
+  const shouldLog = import.meta.dev || import.meta.env.MODE === 'test'
+
   nuxtApp.hook('vue:error', (error, instance, info) => {
+    if (!shouldLog) {
+      return
+    }
+
     // Log error to console with clear formatting
     console.group('Global Vue Error Handler')
     console.error('Error:', error)
@@ -16,6 +22,10 @@ export default defineNuxtPlugin(nuxtApp => {
 
   // Hook into Nuxt specific errors
   nuxtApp.hook('app:error', error => {
+    if (!shouldLog) {
+      return
+    }
+
     console.group('Global Nuxt App Error Handler')
     console.error('Error:', error)
     console.groupEnd()

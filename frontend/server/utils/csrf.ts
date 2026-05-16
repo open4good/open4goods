@@ -50,7 +50,6 @@ export const ensureCsrfCookie = (event: H3Event) => {
   const existingToken = getCookie(event, CSRF_COOKIE_NAME)
 
   if (existingToken) {
-    console.log('[CSRF] Existing token found:', existingToken)
     // Expose the token in the event context so the Nuxt plugin can read it during SSR
     // even on the first request when useCookie only sees incoming (request) cookies.
     event.context.csrfToken = existingToken
@@ -58,7 +57,6 @@ export const ensureCsrfCookie = (event: H3Event) => {
   }
 
   const token = randomUUID()
-  console.log('[CSRF] Generating new token:', token)
   setCookie(event, CSRF_COOKIE_NAME, token, {
     httpOnly: false,
     sameSite: 'lax',
@@ -111,13 +109,6 @@ export const assertSameOrigin = (event: H3Event) => {
 export const assertCsrfToken = (event: H3Event) => {
   const csrfToken = getCookie(event, CSRF_COOKIE_NAME)
   const headerToken = getRequestHeader(event, CSRF_HEADER_NAME)
-
-  console.log(
-    '[CSRF] Asserting token. Cookie:',
-    csrfToken,
-    'Header:',
-    headerToken
-  )
 
   if (!csrfToken || !headerToken || csrfToken !== headerToken) {
     throw createError({

@@ -26,7 +26,7 @@ eprelGroupNames:
   - ovens
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
-verticalImage: /images/verticals/ovens.png
+verticalImage: https://nudger.fr/images/verticals/ovens.png
 
 mdiIcon: mdi-stove
 

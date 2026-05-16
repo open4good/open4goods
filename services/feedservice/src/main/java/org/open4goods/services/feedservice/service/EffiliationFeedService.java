@@ -26,7 +26,6 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
@@ -53,7 +52,6 @@ import tools.jackson.databind.ObjectMapper;
  *   <li>programs: {@code id_affilieur}, {@code url_tracke}, {@code urllo}, {@code pays}</li>
  * </ul>
  */
-@Service
 public class EffiliationFeedService extends AbstractFeedService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EffiliationFeedService.class);

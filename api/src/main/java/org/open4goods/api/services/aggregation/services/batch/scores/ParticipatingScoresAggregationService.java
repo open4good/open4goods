@@ -2,7 +2,9 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
@@ -20,6 +22,8 @@ import org.slf4j.Logger;
 public class ParticipatingScoresAggregationService extends AbstractScoreAggregationService {
 
 	private final Map<String, Map<String, Map<String, Double>>> normalizedParticipations = new HashMap<>();
+	private final Set<String> loggedMissingParticipatingScores = new HashSet<>();
+	private final Set<String> loggedSkippedAggregates = new HashSet<>();
 
 	public ParticipatingScoresAggregationService(Logger logger) {
 		super(logger);
@@ -29,6 +33,8 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 	public void init(Collection<Product> datas) {
 		super.init(datas);
 		normalizedParticipations.clear();
+		loggedMissingParticipatingScores.clear();
+		loggedSkippedAggregates.clear();
 	}
 
 	@Override
@@ -46,8 +52,11 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 	private void handleAggregate(Product product, String aggregateName, Map<String, Double> participants, VerticalConfig vConf) {
 		Double aggregatedValue = computeAggregatedValue(product, participants);
 		if (aggregatedValue == null) {
-			dedicatedLogger.warn("Skipping aggregate {} for {} due to missing sub-scores", aggregateName,
-					product.getId());
+			String logKey = vConf.getId() + ":" + aggregateName;
+			if (loggedSkippedAggregates.add(logKey)) {
+				dedicatedLogger.warn("Skipping aggregate {} for vertical {} due to missing sub-scores", aggregateName,
+						vConf.getId());
+			}
 			return;
 		}
 
@@ -91,7 +100,12 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 			}
 
 			if (relativeValue == null) {
-				dedicatedLogger.warn("Missing participating score {} for product {}", scoreName, product.getId());
+				if (loggedMissingParticipatingScores.add(scoreName)) {
+					dedicatedLogger.warn("Missing participating score {}; subsequent products will be logged at DEBUG",
+							scoreName);
+				} else {
+					dedicatedLogger.debug("Missing participating score {} for product {}", scoreName, product.getId());
+				}
 				return null;
 			}
 

@@ -28,7 +28,7 @@ eprelGroupNames:
   - dishwashers
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
-verticalImage: /images/verticals/dishwasher.png
+verticalImage: https://nudger.fr/images/verticals/dishwasher.png
 
 mdiIcon: mdi-dishwasher
 

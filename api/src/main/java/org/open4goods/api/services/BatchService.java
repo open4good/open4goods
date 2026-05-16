@@ -194,7 +194,7 @@ public class BatchService {
      * Fetches all feeds by aggregating datasource properties from all feed services and orphan configurations,
      * then starting the fetching process for each datasource.
      */
-    @Scheduled(cron = "19 13 23 * * ?") // For example, schedule daily at 1 AM.
+    @Scheduled(cron = "${feed.indexation.cron:19 13 23 * * ?}")
     public void fetchFeeds() {
         logger.info("Initiating full feed fetching process.");
         Set<DataSourceProperties> datasources = feedService.getFeedsUrl();

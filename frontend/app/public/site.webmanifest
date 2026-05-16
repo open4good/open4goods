@@ -83,22 +83,6 @@
       "type": "image/png"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/pwa-assets/screenshots/desktop-dashboard.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Nudger desktop dashboard"
-    },
-    {
-      "src": "/pwa-assets/screenshots/mobile-search.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Nudger mobile search"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Search responsible products",

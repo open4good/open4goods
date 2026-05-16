@@ -248,6 +248,14 @@ brandsAlias:
   "LG ELECTRONICS": LG
   "LG Electronics Inc.": LG
   "LG ELECTRONICS INC.": LG
+  "AEG": Electrolux
+  "Balay": Bosch
+  "FAGOR": Brandt
+  "FRIGELUX": Frigelux
+  "Gaggenau": Bosch
+  "Miele": Miele
+  "Proline": Proline
+  "Rosieres": Candy
 
 ####################################################################################
 # 						ATTRIBUTES CONFIGURATION

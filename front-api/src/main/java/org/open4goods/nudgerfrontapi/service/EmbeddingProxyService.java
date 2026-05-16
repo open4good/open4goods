@@ -36,7 +36,9 @@ public class EmbeddingProxyService {
                     .retrieve()
                     .body(float[].class);
         } catch (Exception e) {
-            LOGGER.error("Error fetching embeddings from API for text: {}", text, e);
+            LOGGER.warn("Embedding backend unavailable for input length {}: {}", text == null ? 0 : text.length(),
+                    e.getMessage());
+            LOGGER.debug("Embedding backend failure", e);
             throw new RuntimeException("Error fetching embeddings", e);
         }
     }

@@ -6,6 +6,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,17 @@ public class WarrantyParser extends AttributeParser {
     // Matches explicit units
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(ans?|years?|yrs?|a|y)\\b");
     private static final Pattern MONTH_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(mois?|months?|m)\\b");
+    private static final Set<String> IGNORED_VALUES = Set.of(
+            "donnee non specifiee",
+            "donnees non specifiees",
+            "non specifie",
+            "non specifiee",
+            "n a",
+            "na",
+            "nc",
+            "eur",
+            "-"
+    );
 
     @Override
     public String parse(ProductAttribute attribute, AttributeConfig attributeConfig, VerticalConfig verticalConfig)
@@ -85,6 +97,10 @@ public class WarrantyParser extends AttributeParser {
     private Double parseInternal(String raw, VerticalConfig verticalConfig) {
         String normalized = normalize(raw);
         if (normalized.isBlank()) {
+            return null;
+        }
+        if (IGNORED_VALUES.contains(normalized)) {
+            LOGGER.debug("Ignoring non-warranty placeholder '{}'", raw);
             return null;
         }
 
@@ -180,6 +196,9 @@ public class WarrantyParser extends AttributeParser {
         s = s.trim();
         s = Normalizer.normalize(s, Normalizer.Form.NFKC);
         s = s.toLowerCase(Locale.ROOT);
+        s = Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
+        s = s.replaceAll("[()_./]+", " ");
+        s = s.replaceAll("\\s+", " ").trim();
         return s;
     }
 

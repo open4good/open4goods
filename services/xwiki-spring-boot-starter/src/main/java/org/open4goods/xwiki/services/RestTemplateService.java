@@ -89,7 +89,14 @@ public class RestTemplateService {
 				HttpHeaders headers = authenticatedHeaders();							
 				HttpEntity<String> request = new HttpEntity<String>(headers);
 				response = restTemplate.exchange(xwikiWebUrl, HttpMethod.GET, request, String.class);
-			} catch(Exception e) {
+			} catch (RestClientResponseException e) {
+				if (e.getStatusCode().is4xxClientError()) {
+					logger.warn("XWiki web resource unavailable: status={} url={}", e.getStatusCode(), xwikiWebUrl);
+				} else {
+					logger.error("Exception while trying to reach url:{} - status:{} - error:{}", xwikiWebUrl,
+							e.getStatusCode(), e.getMessage());
+				}
+			} catch (Exception e) {
 				logger.error("Exception while trying to reach url:{} - error:{}", xwikiWebUrl, e.getMessage());
 			}
 			// check response status code
@@ -115,8 +122,14 @@ public class RestTemplateService {
 				HttpHeaders headers = authenticatedHeaders();							
 				HttpEntity<String> request = new HttpEntity<String>(headers);
 				response = restTemplate.exchange(url, HttpMethod.GET, request, byte[].class);
-			
-			} catch(Exception e) {
+			} catch (RestClientResponseException e) {
+				if (e.getStatusCode().is4xxClientError()) {
+					logger.warn("XWiki attachment unavailable: status={} url={}", e.getStatusCode(), url);
+				} else {
+					logger.error("Exception while trying to reach url:{} - status:{} - error:{}", url,
+							e.getStatusCode(), e.getMessage());
+				}
+			} catch (Exception e) {
 				logger.error("Exception while trying to reach url:{} - error:{}", url, e.getMessage());
 			}
 			// check response status code

@@ -210,6 +210,8 @@ google-taxonomy:
 gen-ai-config:
 
 feed:
+  indexation:
+    cron: 19 13 23 * * ?
   awin:
     cron: 0 43 1 * * ?
     enabled: true

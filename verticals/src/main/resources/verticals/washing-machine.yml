@@ -29,7 +29,7 @@ eprelGroupNames:
   - "washingmachines2019"
   - "washingmachines"
 
-verticalImage: /images/verticals/washing-machines.png
+verticalImage: https://nudger.fr/images/verticals/washing-machines.png
 
 mdiIcon: mdi-washing-machine
 

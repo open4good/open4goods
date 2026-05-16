@@ -55,6 +55,14 @@ class WarrantyParserTest {
         // 100 months -> 8.33 years -> out
         assertThat(parser.parse("100 mois", null, vc)).isNull();
     }
+
+    @Test
+    void ignoresKnownNonWarrantyPlaceholders() throws ParseException {
+        VerticalConfig vc = createConfig(0, 10);
+
+        assertThat(parser.parse("(donnée non spécifiée)", null, vc)).isNull();
+        assertThat(parser.parse("EUR", null, vc)).isNull();
+    }
     
     private VerticalConfig createConfig(double min, double max) {
         VerticalConfig vc = new VerticalConfig();

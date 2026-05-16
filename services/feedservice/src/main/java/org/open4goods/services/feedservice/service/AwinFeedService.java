@@ -21,7 +21,6 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.MappingIterator;
@@ -38,7 +37,6 @@ import tools.jackson.dataformat.csv.CsvSchema;
  * (inherited from AbstractFeedService) to create or clone datasources with proper CSV parsing options.
  * </p>
  */
-@Service
 public class AwinFeedService extends AbstractFeedService {
 
     private final Logger logger = LoggerFactory.getLogger(AwinFeedService.class);

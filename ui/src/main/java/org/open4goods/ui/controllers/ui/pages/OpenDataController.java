@@ -62,11 +62,27 @@ public class OpenDataController {
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 			IOUtils.copy(str, response.getOutputStream());
 		} catch (IOException e) {
-			LOGGER.error("opendata file download error or interruption : {}", e.getMessage());
+			if (isClientAbort(e)) {
+				LOGGER.info("opendata file download interrupted by client: {}", e.getMessage());
+			} else {
+				LOGGER.error("opendata file download error : {}", e.getMessage(), e);
+			}
 			openDataService.decrementDownloadCounter();
 		}
 	}
 
+	/**
+	 * Detects common servlet container messages for clients closing the download
+	 * before the ZIP stream is fully written.
+	 *
+	 * @param exception download exception
+	 * @return {@code true} when the failure is a client abort
+	 */
+	private boolean isClientAbort(IOException exception) {
+		String message = exception.getMessage();
+		return message != null && (message.contains("Broken pipe") || message.contains("ClientAbortException")
+				|| message.contains("Connection reset by peer"));
+	}
 
 	@GetMapping(path = "/opendata/generate")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")

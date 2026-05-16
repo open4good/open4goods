@@ -28,7 +28,7 @@ eprelGroupNames:
   - professionalrefrigeratedstoragecabinets
 
 # Absolute path to the vertical image (should be hosted on nudger to avoid recaching failures).
-verticalImage: /images/verticals/fridge.png
+verticalImage: https://nudger.fr/images/verticals/fridge.png
 
 mdiIcon: mdi-fridge-outline
 

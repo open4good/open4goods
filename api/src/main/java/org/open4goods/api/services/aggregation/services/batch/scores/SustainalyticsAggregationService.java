@@ -64,7 +64,7 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 			
 			BrandScore brandResult = brandScoreService.getBrandScore(brand.getCompanyName(),"sustainalytics.com");
 			if (null == brandResult) {
-				dedicatedLogger.error("No score found for {} - {}",data.brand(), brand.getCompanyName());
+				dedicatedLogger.warn("No score found for {} - {}",data.brand(), brand.getCompanyName());
 				return;
 			}
 			Double score = brandResult.getNormalized();
