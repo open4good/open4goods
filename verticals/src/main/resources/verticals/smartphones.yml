@@ -1,0 +1,142 @@
+# Smartphones vertical — bootstrap (Phase A).
+# matchingCategories below is a SEED (top primary smartphone categories from the
+# raw products-moustik index). It will be replaced/extended by Phase B
+# (GET /update/smartphones/categories/) once aggregation has tagged products
+# with vertical=smartphones. Accessories are pruned automatically by the
+# inherited excludingTokensFromCategoriesMatching list in _default.yml
+# (ACCESSOIRE, CABLE, MEUBLE, QUINCAILLERIE).
+
+id: smartphones
+
+order: 3
+enabled: true
+popular: true
+
+mdiIcon: mdi-cellphone
+verticalImage: https://nudger.fr/images/verticals/smartphones.png
+
+# Google taxonomy: "Electronics > Communications > Telephony > Mobile Phones"
+# (no separate Smartphones leaf in FR taxonomy as of 2024-07).
+googleTaxonomyId: 267
+
+# Unknown — do not guess. Refine via /icecat/categories/search once the
+# Icecat index is loaded locally.
+icecatTaxonomyId: -1
+
+# EU EPREL: smartphones+tablets are covered by Reg. (EU) 2023/1669 since 2025-06-20.
+# Source: docs/eprel_codes.md (SMARTPHONE_TABLET_2023_1669).
+eprelGroupNames:
+  - smartphonestablets20231669
+
+# Realistic physical bounds for a smartphone (vs. 0.001–2000 kg in _default.yml).
+# Smallest ~100 g (Palm/Jelly), largest ~400 g (gaming/rugged phablet);
+# 0.08–0.6 kg leaves headroom for packaging-included weights.
+parsers:
+  weight:
+    minKg: 0.08
+    maxKg: 0.6
+
+# Daily active screen time per ARCEP/CREDOC "Baromètre du numérique 2024"
+# (smartphones, French adults). Drives kWh/year cost projection.
+averageHoursPerDay: 3.5
+
+i18n:
+  fr:
+    url:
+      prefix: "|| smartphone | telephone-mobile | telephone-portable ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - STORAGE_CAPACITY
+    h1Title:
+      prefix: "|| Smartphone | Téléphone mobile ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - STORAGE_CAPACITY
+    prettyName:
+      prefix: "|| Smartphone | Téléphone mobile ||"
+      attrs:
+        - BRAND
+        - MODEL
+    singular:
+      prefix: "|| smartphone | téléphone mobile | téléphone portable ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| du smartphone | de ce smartphone | du téléphone | de ce téléphone | de cet appareil ||"
+      attrs: []
+    designation:
+      - "du smartphone"
+      - "de ce smartphone"
+      - "du téléphone"
+      - "de ce téléphone mobile"
+      - "de cet appareil"
+    cardTitle: "{BRAND} {MODEL}"
+    shortName: "{BRAND} {MODEL}"
+    longName: "{BRAND} {MODEL} - {STORAGE_CAPACITY}"
+
+    verticalHomeUrl: "smartphones"
+    verticalHomeTitle: "Smartphones"
+    verticalHomeDescription: "Découvrez notre sélection de smartphones. Fabrication, métaux critiques, durée de vie et réparabilité font du smartphone l'un des appareils électroniques au plus fort impact environnemental. Nudger vous aide à choisir le modèle le plus responsable, sans renoncer à vos usages."
+
+  en:
+    url:
+      prefix: "|| smartphone | mobile-phone ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - STORAGE_CAPACITY
+    h1Title:
+      prefix: "|| Smartphone | Mobile phone ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - STORAGE_CAPACITY
+    prettyName:
+      prefix: "|| Smartphone | Mobile phone ||"
+      attrs:
+        - BRAND
+        - MODEL
+    singular:
+      prefix: "|| smartphone | mobile phone ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| of the smartphone | of this smartphone | of the phone | of this device ||"
+      attrs: []
+    designation:
+      - "of the smartphone"
+      - "of this smartphone"
+      - "of the mobile phone"
+      - "of this device"
+
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaOpenGraphType: "product"
+
+    verticalHomeUrl: "smartphones"
+    verticalHomeTitle: "Smartphones"
+    verticalHomeDescription: "Explore our selection of smartphones. Manufacturing, critical metals, lifespan and repairability make the smartphone one of the most environmentally impactful electronic devices. Nudger helps you pick the most responsible model without giving up the features you need."
+
+# SEED matchingCategories — primary smartphone listings only. Counts come from
+# products-moustik aggregation on datasourceCategories. Phase B will replace
+# this with /update/smartphones/categories/ output once the vertical is live.
+matchingCategories:
+  all:
+    - "TELEPHONIE - GPS | TELEPHONIE - GPS > SMARTPHONE - MOBILE > SMARTPHONE | SMARTPHONE - MOBILE | SMARTPHONE"
+    - "GPS & EBOOK & TELEPHONES TELEPHONE MOBILE | APPAREILS ELECTRONIQUES > COMMUNICATIONS > TELEPHONIE > TELEPHONES MOBILES > SMARTPHONES"
+    - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / SMARTPHONE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>SMARTPHONE | TELEPHONE MOBILE | SMARTPHONE"
+    - "SMARTPHONE ANDROID"
+    - "TELEPHONIE - GPS | TELEPHONIE - GPS > SMARTPHONE - MOBILE > TELEPHONE PORTABLE | SMARTPHONE - MOBILE | TELEPHONE PORTABLE"
+    - "ELECTRONICS > PHONES, SMARTPHONES & COMMUNICATION > SMARTPHONES"
+    - "TELEPHONIE ET MOBILITE | TELEPHONE MOBILE"
+    - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / IPHONE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>IPHONE | TELEPHONE MOBILE | IPHONE"
+    - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / TELEPHONE PORTABLE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>TELEPHONE PORTABLE | TELEPHONE MOBILE | TELEPHONE PORTABLE"
+    - "ELECTRO DEPOT | SMARTPHONE RECONDITIONNE | IPHONE RECONDITIONNE"
+    - "ELECTRO DEPOT | SMARTPHONE, TELEPHONE | SMARTPHONE"
+    - "HIGH-TECH | HIGH-TECH>SMARTPHONE - TELEPHONIE>SMARTPHONE>SMARTPHONE ANDROID | SMARTPHONE - TELEPHONIE | SMARTPHONE"
+    - "SMARTPHONE - TELEPHONIE | SMARTPHONE"
+    - "TELEPHONIE ET MOBILITE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>SMARTPHONE | TELEPHONE MOBILE | TELEPHONIE ET MOBILITE"
+    - "ELECTRONICS > REFURBISHED DEVICES > REFURBISHED SMARTPHONES > OTHER REFURBISHED SMARTPHONES"
+    - "ELECTRONICS > PHONES, SMARTPHONES & COMMUNICATION > BUTTON PHONES"

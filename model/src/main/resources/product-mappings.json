@@ -205,6 +205,12 @@
             "type": "object",
             "enabled": false
         },
+        "officialUrl": {
+            "type": "keyword",
+            "index": false,
+            "doc_values": false,
+            "ignore_above": 1024
+        },
         "reviews": {
             "type": "object",
             "enabled": false

@@ -111,10 +111,19 @@ embedding:
 review:
   generation:
     min-markdown-chars: ${REVIEW_GENERATION_MIN_MARKDOWN_CHARS:500}
+    max-search: ${REVIEW_GENERATION_MAX_SEARCH:7}
+    min-global-tokens: ${REVIEW_GENERATION_MIN_GLOBAL_TOKENS:6000}
+    min-url-count: ${REVIEW_GENERATION_MIN_URL_COUNT:3}
     preferred-domains:
       - leclaireur.fnac.com
       - quechoisir.org
       - test-achats.be
+      - quel-lave-linge.fr
+      - darty.com
+      - nettoyant.org
+      - galaxus.ch
+      - galaxus.de
+      - haier-europe.com
       - lcd-compare.com
       - lesnumeriques.com
       - 01net.com
@@ -123,6 +132,15 @@ review:
       - frandroid.com
       - cnetfrance.fr
       - rtings.com
+    official-domains-by-brand:
+      haier:
+        - haier-europe.com
+    source-url-templates-by-brand:
+      haier:
+        - https://www.darty.com/nav/achat/gros_electromenager/lavage_sechage/lave-linge_hublot/{BRAND_SLUG}_{MODEL_SLUG}.html
+        - https://www.nettoyant.org/test-du-lave-linge-frontal-{BRAND_SLUG}-{MODEL_SLUG}
+      candy:
+        - https://www.darty.com/nav/achat/gros_electromenager/lave-linge/lave_linge_hublot/{BRAND_SLUG}_{MODEL_SLUG}.html
 
 urlfetcher:
   domains:
@@ -221,5 +239,3 @@ feed:
     enabled: true
     cache-ttl-days: 1
     max-jitter-seconds: 30
-
-

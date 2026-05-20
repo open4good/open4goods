@@ -164,6 +164,11 @@ public class Product implements Standardisable {
 	 */
 	private Map<String, String> descriptionsByDatasource = new HashMap<String, String>();
 
+	/**
+	 * Manufacturer product page identified during review-source discovery.
+	 */
+	private String officialUrl;
+
 	private Map<String, Score> scores = new HashMap<>();
 
 
@@ -201,6 +206,24 @@ public class Product implements Standardisable {
 
 	public void setDescriptionsByDatasource(final Map<String, String> descriptionsByDatasource) {
 		this.descriptionsByDatasource = descriptionsByDatasource;
+	}
+
+	/**
+	 * Returns the manufacturer product page URL identified for this product.
+	 *
+	 * @return manufacturer product page URL, or {@code null} when unknown
+	 */
+	public String getOfficialUrl() {
+		return officialUrl;
+	}
+
+	/**
+	 * Sets the manufacturer product page URL identified for this product.
+	 *
+	 * @param officialUrl manufacturer product page URL
+	 */
+	public void setOfficialUrl(String officialUrl) {
+		this.officialUrl = officialUrl;
 	}
 
 	//////////////////// :

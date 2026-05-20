@@ -1,0 +1,6 @@
+{
+  "criteriasPonderation": {
+    "DATA_QUALITY": 0.5,
+    "BRAND_SUSTAINALYTICS_SCORING": 0.5
+  }
+}

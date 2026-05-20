@@ -3,12 +3,11 @@
 package org.open4goods.api.controller.api;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
+import org.open4goods.api.dto.AttributeSuggestionDto;
+import org.open4goods.api.dto.CategorySuggestionsDto;
 import org.open4goods.api.model.VerticalAttributesStats;
-import org.open4goods.api.model.VerticalCategoryMapping;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.constants.CacheConstants;
@@ -16,7 +15,6 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,211 +27,142 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 
 /**
- * This controller allows informations and communications about DatasourceConfigurations
- * @author goulven
- *
+ * Read-only vertical generation and suggestion endpoints.
+ * All write operations (YAML mutations) are performed by agents via their file tools,
+ * using the data returned by these endpoints.
  */
 @RestController
-@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 public class VerticalsGenerationController {
 
-	private  VerticalsGenerationService verticalsGenService;
-	private  VerticalsConfigService verticalsConfigService;
+    private final VerticalsGenerationService verticalsGenService;
+    private final VerticalsConfigService verticalsConfigService;
 
-	public VerticalsGenerationController(VerticalsGenerationService verticalsGenService, VerticalsConfigService verticalsConfigService) {
-		super();
-		this.verticalsGenService = verticalsGenService;
-		this.verticalsConfigService = verticalsConfigService;
-	}
+    public VerticalsGenerationController(VerticalsGenerationService verticalsGenService,
+            VerticalsConfigService verticalsConfigService) {
+        this.verticalsGenService = verticalsGenService;
+        this.verticalsConfigService = verticalsConfigService;
+    }
 
-//	@GetMapping(path="/fullFromDb")
-//	@Operation(summary="Loads the mappings from database, then clean and save to file")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public void full() throws ResourceNotFoundException, IOException {
-//		verticalsGenService.fullFromDb();
-//	}
-//
-//	@GetMapping(path="/mappings/load/database")
-//	@Operation(summary="Loads the mappings from database")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public void load() throws ResourceNotFoundException {
-//		verticalsGenService.loadCategoriesMappingFromDatabase();
-//	}
-//
-//	@GetMapping(path="/mappings/load/file")
-//	@Operation(summary="Import the mapping file from JSON")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public void importMapping() throws ResourceNotFoundException, IOException {
-//		verticalsGenService.importMappingFile();
-//	}
+    // -----------------------------------------------------------------------
+    // Legacy read-only fragments (YAML strings)
+    // -----------------------------------------------------------------------
 
+    @GetMapping(path = "/{vertical}/attributes/")
+    @Operation(summary = "Attribute coverage stats for a vertical (JSON)")
+    @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    public VerticalAttributesStats generateAttributesCoverage(@PathVariable String vertical)
+            throws ResourceNotFoundException, IOException {
+        return verticalsGenService.attributesStats(vertical);
+    }
 
-//	@GetMapping(path="/mappings/clean/threshold")
-//	@Operation(summary="Clean the mappings by configured threshold (percent of totalhits an associated category must have to be retained)")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public void cleanThreshold() throws ResourceNotFoundException, IOException {
-//		verticalsGenService.removeByAssociatedcategoryThreshold();
-//	}
-//
-//	@GetMapping(path="/mappings/clean/crosslinked")
-//	@Operation(summary="Clean the mappings by removing cross linked mappings)")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public void cleanCrossLinked() throws ResourceNotFoundException, IOException {
-//		verticalsGenService.removeCrossReferencedMappings();
-//	}
+    @GetMapping(path = "/{vertical}/categories/")
+    @Operation(summary = "Suggested matchingCategories YAML fragment for a vertical")
+    @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    public String generateCategoryMappingsFragment(@PathVariable String vertical,
+            @RequestParam(defaultValue = "5") Integer minOffersCount)
+            throws ResourceNotFoundException, IOException {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        return verticalsGenService.generateMapping(vc, minOffersCount);
+    }
 
+    @GetMapping(path = "/{vertical}/ecoscore/")
+    @Operation(summary = "Run the ecoscore LLM prompt and return YAML content for impactscores/{vertical}.yml")
+    @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    public String generateEcoscoreMappings(@PathVariable String vertical)
+            throws ResourceNotFoundException, IOException {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        return verticalsGenService.generateEcoscoreYamlConfig(vc);
+    }
 
+    @GetMapping(path = "/{vertical}/impactscore-criterias/")
+    @Operation(summary = "Available impact-score criterias YAML fragment for a vertical")
+    @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    public String generateImpactScoreCriterias(@PathVariable String vertical,
+            @RequestParam(defaultValue = "10") Integer minCoveragePercent)
+            throws ResourceNotFoundException, IOException {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        return verticalsGenService.generateAvailableImpactScoreCriteriasFragment(vc, minCoveragePercent);
+    }
 
-//	@GetMapping(path="/mappings")
-//	@Operation(summary="Show the mappings")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public Map<String, VerticalCategoryMapping> get() throws ResourceNotFoundException {
-//		return verticalsGenService.getMappings();
-//
-//	}
-//
-//	@GetMapping(path="/mappings/export")
-//	@Operation(summary="Export the mapping file to JSON")
-//	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-//	public void exportMapping() throws ResourceNotFoundException, IOException {
-//		 verticalsGenService.exportMappingFile();
-//
-//	}
+    @GetMapping(path = "/{vertical}/nudgetool/compute")
+    @Operation(summary = "Compute nudge tool score thresholds and impact subsets without writing to disk")
+    public VerticalConfig computeNudgeTool(@PathVariable String vertical)
+            throws ResourceNotFoundException, IOException {
+        return verticalsGenService.computeNudgeToolThresholds(vertical);
+    }
 
+    // -----------------------------------------------------------------------
+    // Structured suggestion endpoints (JSON, no disk writes)
+    // -----------------------------------------------------------------------
 
+    @GetMapping(path = "/verticals/{vertical}/suggestions/categories")
+    @Operation(
+        summary = "Category suggestions for a vertical",
+        description = "Returns per-datasource category lists derived from indexed products. "
+                + "Use this to assemble the matchingCategories block of a VerticalConfig YAML "
+                + "without server-side file mutations."
+    )
+    public CategorySuggestionsDto suggestCategories(@PathVariable String vertical,
+            @RequestParam(defaultValue = "5") int minOffersCount) throws ResourceNotFoundException {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        if (vc == null) {
+            throw new ResourceNotFoundException("Vertical not found: " + vertical);
+        }
+        return verticalsGenService.suggestCategories(vc, minOffersCount);
+    }
 
+    @GetMapping(path = "/verticals/{vertical}/suggestions/attributes")
+    @Operation(
+        summary = "Attribute suggestions for a vertical",
+        description = "Returns attribute candidates with coverage stats and a ymlExists flag. "
+                + "Use this to assemble attributesConfig.configs of a VerticalConfig YAML "
+                + "without server-side file mutations."
+    )
+    public List<AttributeSuggestionDto> suggestAttributes(@PathVariable String vertical,
+            @RequestParam(defaultValue = "10") int minCoverage,
+            @RequestParam(defaultValue = "") String containing) throws ResourceNotFoundException {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        if (vc == null) {
+            throw new ResourceNotFoundException("Vertical not found: " + vertical);
+        }
+        return verticalsGenService.suggestAttributes(vc, minCoverage, containing);
+    }
 
+    // -----------------------------------------------------------------------
+    // Impact score generation helpers (compose only, no disk writes)
+    // -----------------------------------------------------------------------
 
+    @GetMapping(path = "/verticals/{vertical}/suggestions/impact-prompt")
+    @Operation(
+        summary = "Resolved impact-score generation prompt (dry run)",
+        description = "Returns the fully resolved PromptConfig for the given vertical "
+                + "without executing the AI call. Feed the returned prompt to an LLM, "
+                + "then POST the JSON answer to /verticals/{vertical}/suggestions/impact-config."
+    )
+    public org.open4goods.services.prompt.config.PromptConfig getImpactScorePrompt(
+            @PathVariable String vertical) throws Exception {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        if (vc == null) {
+            throw new ResourceNotFoundException("Vertical not found: " + vertical);
+        }
+        return verticalsGenService.generateEcoscoreDryRun(vc);
+    }
 
-	@GetMapping(path="/{vertical}/attributes/")
-	@Operation(summary="Generate attributes coverage for a vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public VerticalAttributesStats generateAttributesCoverage(@PathVariable String vertical) throws ResourceNotFoundException, IOException {
-		 return verticalsGenService.attributesStats(vertical);
-	}
-
-
-	@GetMapping(path="/{vertical}/categories/")
-	@Operation(summary="Generate the categories yaml fragment for a given vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public String generateCategoryMappingsForExistinf(@PathVariable String vertical, @RequestParam(defaultValue = "5") Integer minOffersCount ) throws ResourceNotFoundException, IOException {
-
-		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
-		return verticalsGenService.generateMapping(vc,minOffersCount);
-
-	}
-
-
-	@GetMapping(path="/{vertical}/ecoscore/")
-	@Operation(summary="Generate the ecoscore yaml fragment for a given vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public String generateEcoscoreMappings(@PathVariable String vertical) throws ResourceNotFoundException, IOException {
-
-		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
-		return verticalsGenService.generateEcoscoreYamlConfig(vc);
-
-	}
-
-	@GetMapping(path="/{vertical}/impactscore-criterias/")
-	@Operation(summary="Generate the available impact score criterias yaml fragment for a given vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-	public String generateImpactScoreCriterias(
-			@PathVariable String vertical,
-			@RequestParam(defaultValue = "10") Integer minCoveragePercent) throws ResourceNotFoundException, IOException {
-
-		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
-		return verticalsGenService.generateAvailableImpactScoreCriteriasFragment(vc, minCoveragePercent);
-	}
-
-
-
-	@GetMapping(path="/update/{vertical}/impactscore/")
-	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String updateVerticalWithImpactScore(
-			@PathVariable															 String vertical) throws ResourceNotFoundException, IOException {
-
-		//TODO(p2,conf) : from conf
- 		  return verticalsGenService.updateVerticalFileWithImpactScore("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/impactscores/"+vertical+".yml");
-
-	}
-
-	@GetMapping(path="/update/{vertical}/impactscore/prompt")
-	@Operation(summary="Get impact score generation prompt", description="Return the fully resolved prompt configuration (dry run) for the requested vertical.")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public org.open4goods.services.prompt.config.PromptConfig getImpactScorePrompt(
-			@PathVariable String vertical) throws Exception {
-
-		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
-		if (vc == null) {
-			throw new ResourceNotFoundException("Vertical not found: " + vertical);
-		}
-		return verticalsGenService.generateEcoscoreDryRun(vc);
-	}
-
-	// TODO : Create a postcontroller updateImpactScore. We will paste result of getImpactScorePrompt, then it will act like updateVerticalFileWithImpactScore but in the json file, also updating other fields (criteriasPonderation, jsonprompt, ...) This is the major TODO
-
-	@PostMapping(path="/update/{vertical}/impactscore/generate")
-	@Operation(summary="Generate full ImpactScoreConfig", description="Generate the full ImpactScoreConfig in JSON form by providing the vertical id and the LLM JSON result.")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public ImpactScoreConfig generateImpactScoreConfig(
-			@PathVariable String vertical,
-			@RequestBody String aiJsonResponse) throws Exception {
-
-		VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
-		if (vc == null) {
-			throw new ResourceNotFoundException("Vertical not found: " + vertical);
-		}
-		return verticalsGenService.generateEcoscoreConfigFromJson(vc, aiJsonResponse);
-	}
-
-	@GetMapping(path="/update/{vertical}/categories/")
-	@Operation(summary="Update the categories mapping for a given vertical directly in the file !")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String updateVerticalWithMappings(
-			@PathVariable															 String vertical,
-			@RequestParam	(defaultValue = "3")									 Integer minOffers) throws ResourceNotFoundException, IOException {
-
-		//TODO(p2,conf) : from conf
- 		  return verticalsGenService.updateVerticalFileWithCategories(minOffers, "/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml");
-
-	}
-
-	@GetMapping(path="/update/{vertical}/attributes/")
-	@Operation(summary="Update the suggested attributes for a given vertical directly in the file !")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String updateVerticalWithAttributes(
-			@PathVariable										 String vertical,
-			@RequestParam	(defaultValue = "10")									 Integer minCoverage,
-			@RequestParam	(defaultValue = "")									 String containing
-			) throws ResourceNotFoundException, IOException {
-
-		//TODO(p2,conf) : from conf
- 		  return verticalsGenService.updateVerticalFileWithAttributes("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/"+vertical+".yml", minCoverage, containing);
-
-	}
-
-	@GetMapping(path="/update/{vertical}/nudgetool/")
-	@Operation(summary="Update the nudge tool score thresholds and impact score subsets for a given vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String updateVerticalWithNudgeTool(
-			@PathVariable String vertical) throws ResourceNotFoundException, IOException {
-
-		return verticalsGenService.updateVerticalFileWithNudgeToolConfig("/home/goulven/git/open4goods/verticals/src/main/resources/verticals/" + vertical + ".yml");
-	}
-
-	@GetMapping(path="/{vertical}/nudgetool/compute")
-	@Operation(summary="Compute the nudge tool score thresholds and impact score subsets for a given vertical without updating the file")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public VerticalConfig computeNudgeTool(
-			@PathVariable String vertical) throws ResourceNotFoundException, IOException {
-
-		return verticalsGenService.computeNudgeToolThresholds(vertical);
-	}
-
-
+    @PostMapping(path = "/verticals/{vertical}/suggestions/impact-config")
+    @Operation(
+        summary = "Compose ImpactScoreConfig from LLM JSON answer",
+        description = "Accepts the raw JSON answer produced by an LLM from the prompt returned "
+                + "by GET /verticals/{vertical}/suggestions/impact-prompt and returns a fully "
+                + "populated ImpactScoreConfig. The caller serialises the result to "
+                + "impactscores/{vertical}.yml (no server-side file write)."
+    )
+    public ImpactScoreConfig generateImpactScoreConfig(@PathVariable String vertical,
+            @RequestBody String aiJsonResponse) throws Exception {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        if (vc == null) {
+            throw new ResourceNotFoundException("Vertical not found: " + vertical);
+        }
+        return verticalsGenService.generateEcoscoreConfigFromJson(vc, aiJsonResponse);
+    }
 }

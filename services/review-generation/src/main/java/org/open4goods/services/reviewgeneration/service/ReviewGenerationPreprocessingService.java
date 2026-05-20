@@ -6,11 +6,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -188,8 +190,20 @@ public class ReviewGenerationPreprocessingService {
 		}
 		logger.info("SERP aggregation for UPC {}: searchesMade={}, rawResults={}", product.getId(), searchesMade,
 				allResults.size());
+		List<GoogleSearchResult> templatedSourceResults = sourceUrlTemplateResults(product, brand, primaryModel,
+				alternateModels);
+		if (!templatedSourceResults.isEmpty()) {
+			allResults.addAll(0, templatedSourceResults);
+			logger.info("Added {} templated source URL candidates for UPC {}.", templatedSourceResults.size(),
+					product.getId());
+		}
 
 		status.setStatus(ReviewGenerationStatus.Status.FETCHING);
+		identifyOfficialUrl(product, allResults).ifPresent(officialUrl -> {
+			product.setOfficialUrl(officialUrl);
+			status.addMessage("Official manufacturer page identified: " + officialUrl);
+			logger.info("Official manufacturer page identified for UPC {}: {}", product.getId(), officialUrl);
+		});
 
 		// Sort and deduplicate results.
 		List<GoogleSearchResult> sortedResults = allResults.stream()
@@ -205,6 +219,12 @@ public class ReviewGenerationPreprocessingService {
 							.anyMatch(domain -> r1.link().contains(domain));
 					boolean r2Preferred = properties.getPreferredDomains().stream()
 							.anyMatch(domain -> r2.link().contains(domain));
+					boolean r1Official = isOfficialUrl(product, r1);
+					boolean r2Official = isOfficialUrl(product, r2);
+					if (r1Official && !r2Official)
+						return -1;
+					if (!r1Official && r2Official)
+						return 1;
 					if (r1Preferred && !r2Preferred)
 						return -1;
 					if (!r1Preferred && r2Preferred)
@@ -308,14 +328,7 @@ public class ReviewGenerationPreprocessingService {
 					System.currentTimeMillis(), resolveFetchStrategy(fetchFutures.get(entry.getKey())),
 					finalTokensMap.get(entry.getKey()), sha256(normalized)));
 		}
-		Map<String, ProductFact> merged = new LinkedHashMap<>();
-		for (ProductFact fact : product.getReviewFacts()) {
-			merged.put(fact.getUrl(), fact);
-		}
-		for (ProductFact fact : newFacts) {
-			merged.put(fact.getUrl(), fact);
-		}
-		product.setReviewFacts(merged.values().stream().limit(properties.getFactsMaxStored()).toList());
+		product.setReviewFacts(newFacts.stream().limit(properties.getFactsMaxStored()).toList());
 
 		return promptVariables;
 	}
@@ -337,43 +350,128 @@ public class ReviewGenerationPreprocessingService {
 	private List<String> buildSearchQueries(String brand, String primaryModel, Set<String> alternateModels,
 			VerticalConfig verticalConfig) {
 		List<String> queries = new ArrayList<>();
-		String modelExpression = modelExpression(brand, primaryModel, alternateModels);
+		List<String> orderedModels = orderedModels(primaryModel, alternateModels);
+		String modelExpression = modelExpression(brand, orderedModels);
+		String officialDomainExpression = domainExpression(officialDomainsForBrand(brand));
+		if (!officialDomainExpression.isBlank()) {
+			queries.add(officialDomainExpression + " " + modelExpression);
+		}
+		queries.add(officialDiscoveryQuery(brand, orderedModels.getFirst()));
 		String preferredDomainExpression = domainExpression(properties.getPreferredDomains());
 		if (!preferredDomainExpression.isBlank()) {
 			queries.add(preferredDomainExpression + " " + modelExpression);
 		}
-
 		List<String> injectSites = verticalConfig.getInjectSitesResults();
 		if (injectSites != null && !injectSites.isEmpty()) {
 			for (String site : injectSites) {
 				if (site != null && !site.isBlank()) {
-					queries.add("site:" + site.trim() + " " + formatQuery(brand, primaryModel));
+					queries.add("site:" + site.trim() + " " + formatQuery(brand, orderedModels.getFirst()));
 				}
 			}
 		}
 
-		queries.add(formatQuery(brand, primaryModel));
-		if (alternateModels != null) {
-			for (String akaModel : alternateModels) {
-				if (akaModel != null && !akaModel.isBlank()) {
-					queries.add(formatQuery(brand, akaModel));
-				}
-			}
+		for (String model : orderedModels) {
+			queries.add(formatQuery(brand, model));
 		}
 		return queries.stream().distinct().toList();
 	}
 
-	private String modelExpression(String brand, String primaryModel, Set<String> alternateModels) {
-		List<String> modelQueries = new ArrayList<>();
-		modelQueries.add(quoted(brand + " " + primaryModel));
-		if (alternateModels != null) {
-			for (String akaModel : alternateModels) {
-				if (akaModel != null && !akaModel.isBlank()) {
-					modelQueries.add(quoted(brand + " " + akaModel));
-				}
-			}
+	private List<String> orderedModels(String primaryModel, Set<String> alternateModels) {
+		List<String> models = new ArrayList<>();
+		if (primaryModel != null && !primaryModel.isBlank()) {
+			models.add(primaryModel);
 		}
+		if (alternateModels != null) {
+			models.addAll(alternateModels.stream().filter(model -> model != null && !model.isBlank())
+					.sorted(Comparator.comparingInt(String::length).reversed()).toList());
+		}
+		return models.stream().distinct().sorted((left, right) -> {
+			boolean leftExtendsPrimary = primaryModel != null && left.length() > primaryModel.length()
+					&& normalizeForUrlMatching(left).contains(normalizeForUrlMatching(primaryModel));
+			boolean rightExtendsPrimary = primaryModel != null && right.length() > primaryModel.length()
+					&& normalizeForUrlMatching(right).contains(normalizeForUrlMatching(primaryModel));
+			if (leftExtendsPrimary && !rightExtendsPrimary)
+				return -1;
+			if (!leftExtendsPrimary && rightExtendsPrimary)
+				return 1;
+			return Integer.compare(right.length(), left.length());
+		}).toList();
+	}
+
+	private String modelExpression(String brand, List<String> orderedModels) {
+		List<String> modelQueries = orderedModels.stream().map(model -> quoted(brand + " " + model)).toList();
 		return "(" + String.join(" OR ", modelQueries) + ")";
+	}
+
+	private List<String> officialDomainsForBrand(String brand) {
+		if (brand == null || brand.isBlank() || properties.getOfficialDomainsByBrand() == null) {
+			return List.of();
+		}
+		String normalizedBrand = normalizeForUrlMatching(brand);
+		return properties.getOfficialDomainsByBrand().entrySet().stream()
+				.filter(entry -> normalizeForUrlMatching(entry.getKey()).equals(normalizedBrand))
+				.findFirst().map(Map.Entry::getValue).orElse(List.of());
+	}
+
+	private String officialDiscoveryQuery(String brand, String model) {
+		return brand + " " + quoted(model) + " (official OR officiel OR product OR produit)";
+	}
+
+	private List<GoogleSearchResult> sourceUrlTemplateResults(Product product, String brand, String primaryModel,
+			Set<String> alternateModels) {
+		if (brand == null || brand.isBlank() || properties.getSourceUrlTemplatesByBrand() == null) {
+			return List.of();
+		}
+		String normalizedBrand = normalizeForUrlMatching(brand);
+		List<String> templates = properties.getSourceUrlTemplatesByBrand().entrySet().stream()
+				.filter(entry -> normalizeForUrlMatching(entry.getKey()).equals(normalizedBrand))
+				.findFirst().map(Map.Entry::getValue).orElse(List.of());
+		if (templates.isEmpty()) {
+			return List.of();
+		}
+		String model = orderedModels(primaryModel, alternateModels).getFirst();
+		String productCode = productCode(product, alternateModels);
+		return templates.stream().filter(template -> template != null && !template.isBlank())
+				.map(template -> applyUrlTemplate(template, brand, model, productCode, product.gtin()))
+				.filter(url -> url != null && !url.isBlank())
+				.map(url -> new GoogleSearchResult("Templated product source " + brand + " " + model, url))
+				.toList();
+	}
+
+	private String applyUrlTemplate(String template, String brand, String model, String productCode, String gtin) {
+		if (template.contains("{PRODUCT_CODE}") && productCode.isBlank()) {
+			return null;
+		}
+		return template.replace("{BRAND}", slug(brand))
+				.replace("{BRAND_SLUG}", slug(brand))
+				.replace("{MODEL}", model)
+				.replace("{MODEL_SLUG}", slug(model))
+				.replace("{MODEL_SLUG_UNDERSCORE}", slug(model).replace("-", "_"))
+				.replace("{PRODUCT_CODE}", productCode)
+				.replace("{GTIN}", gtin == null ? "" : gtin);
+	}
+
+	private String productCode(Product product, Set<String> alternateModels) {
+		List<String> candidates = new ArrayList<>();
+		if (alternateModels != null) {
+			candidates.addAll(alternateModels);
+		}
+		if (product.gtin() != null) {
+			candidates.add(product.gtin());
+		}
+		return candidates.stream().filter(candidate -> candidate != null && candidate.matches("\\d{6,12}"))
+				.findFirst().orElse("");
+	}
+
+	private String slug(String value) {
+		if (value == null) {
+			return "";
+		}
+		return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
+				.replaceAll("\\p{M}", "")
+				.toLowerCase(Locale.ROOT)
+				.replaceAll("[^a-z0-9]+", "-")
+				.replaceAll("(^-+|-+$)", "");
 	}
 
 	private String domainExpression(List<String> domains) {
@@ -539,6 +637,73 @@ public class ReviewGenerationPreprocessingService {
 		} catch (Exception e) {
 			return "UNKNOWN";
 		}
+	}
+
+	private Optional<String> identifyOfficialUrl(Product product, List<GoogleSearchResult> results) {
+		if (results == null || results.isEmpty()) {
+			return Optional.empty();
+		}
+		return results.stream().filter(result -> isOfficialUrl(product, result))
+				.max(Comparator.comparingInt(result -> officialUrlScore(product, result))).map(GoogleSearchResult::link);
+	}
+
+	private boolean isOfficialUrl(Product product, GoogleSearchResult result) {
+		return officialUrlScore(product, result) >= 10;
+	}
+
+	private int officialUrlScore(Product product, GoogleSearchResult result) {
+		if (product == null || result == null || result.link() == null || result.link().isBlank()) {
+			return 0;
+		}
+		String brand = normalizeForUrlMatching(product.brand());
+		String model = normalizeForUrlMatching(product.model());
+		if (brand.isBlank() || model.isBlank()) {
+			return 0;
+		}
+		try {
+			URL url = URI.create(result.link()).toURL();
+			String host = normalizeForUrlMatching(url.getHost());
+			String path = normalizeForUrlMatching(url.getPath());
+			if (isExcludedOfficialHost(host)) {
+				return 0;
+			}
+			int score = 0;
+			if (host.contains(brand)) {
+				score += 8;
+			}
+			if (path.contains(model)) {
+				score += 5;
+			}
+			if (normalizeForUrlMatching(result.title()).contains(model)) {
+				score += 2;
+			}
+			if (path.contains("product") || path.contains("produit") || path.contains("lave") || path.contains("linge")) {
+				score += 1;
+			}
+			return score;
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	private boolean isExcludedOfficialHost(String host) {
+		if (host == null || host.isBlank()) {
+			return true;
+		}
+		List<String> excludedDomains = properties.getOfficialUrlExcludedDomains() == null ? List.of()
+				: properties.getOfficialUrlExcludedDomains();
+		return excludedDomains.stream().filter(domain -> domain != null && !domain.isBlank())
+				.map(this::normalizeForUrlMatching).anyMatch(host::contains);
+	}
+
+	private String normalizeForUrlMatching(String value) {
+		if (value == null) {
+			return "";
+		}
+		return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
+				.replaceAll("\\p{M}", "")
+				.toLowerCase(Locale.ROOT)
+				.replaceAll("[^a-z0-9]", "");
 	}
 
 	private String sha256(String content) {

@@ -23,10 +23,24 @@ class ReviewGenerationApiConfigTest {
         assertThat(properties).isNotNull();
         assertThat(properties.getProperty("review.generation.min-markdown-chars"))
                 .isEqualTo("${REVIEW_GENERATION_MIN_MARKDOWN_CHARS:500}");
+        assertThat(properties.getProperty("review.generation.max-search"))
+                .isEqualTo("${REVIEW_GENERATION_MAX_SEARCH:7}");
+        assertThat(properties.getProperty("review.generation.min-global-tokens"))
+                .isEqualTo("${REVIEW_GENERATION_MIN_GLOBAL_TOKENS:6000}");
+        assertThat(properties.getProperty("review.generation.min-url-count"))
+                .isEqualTo("${REVIEW_GENERATION_MIN_URL_COUNT:3}");
         assertThat(properties.getProperty("review.generation.preferred-domains[0]"))
                 .isEqualTo("leclaireur.fnac.com");
-        assertThat(properties.getProperty("review.generation.preferred-domains[4]"))
-                .isEqualTo("lesnumeriques.com");
+        assertThat(properties.getProperty("review.generation.preferred-domains[3]"))
+                .isEqualTo("quel-lave-linge.fr");
+        assertThat(properties.getProperty("review.generation.preferred-domains[8]"))
+                .isEqualTo("haier-europe.com");
+        assertThat(properties.getProperty("review.generation.official-domains-by-brand.haier[0]"))
+                .isEqualTo("haier-europe.com");
+        assertThat(properties.getProperty("review.generation.source-url-templates-by-brand.haier[0]"))
+                .isEqualTo("https://www.darty.com/nav/achat/gros_electromenager/lavage_sechage/lave-linge_hublot/{BRAND_SLUG}_{MODEL_SLUG}.html");
+        assertThat(properties.getProperty("review.generation.source-url-templates-by-brand.candy[0]"))
+                .isEqualTo("https://www.darty.com/nav/achat/gros_electromenager/lave-linge/lave_linge_hublot/{BRAND_SLUG}_{MODEL_SLUG}.html");
         assertThat(properties.getProperty("urlfetcher.domains.lesnumeriques.com.strategy"))
                 .isEqualTo("PLAYWRIGHT");
         assertThat(properties.getProperty("urlfetcher.domains.www.quechoisir.org.timeout"))

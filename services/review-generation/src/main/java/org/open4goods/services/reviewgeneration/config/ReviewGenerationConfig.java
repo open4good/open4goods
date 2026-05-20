@@ -2,7 +2,9 @@ package org.open4goods.services.reviewgeneration.config;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +26,27 @@ public class ReviewGenerationConfig {
     private int threadPoolSize = 10;
     private int maxQueueSize = 1000;  // Maximum size of the executor queue.
     private List<String> preferredDomains = new ArrayList<>();
+
+    /**
+     * Domains that must not be treated as manufacturer official pages even when
+     * their host contains a brand token.
+     */
+    private List<String> officialUrlExcludedDomains = new ArrayList<>(List.of(
+            "amazon.", "cdiscount.", "darty.", "fnac.", "galaxus.", "laredoute.", "rakuten.",
+            "boulanger.", "electromenager-compare.", "lesmenagers.", "quel-lave-linge.", "nettoyant."));
+
+    /**
+     * Optional manufacturer domains keyed by brand name. When configured, the
+     * retrieval pipeline searches these domains explicitly before generic review
+     * sources.
+     */
+    private Map<String, List<String>> officialDomainsByBrand = new HashMap<>();
+
+    /**
+     * Optional source URL templates keyed by brand name. These templates are
+     * fetched as review sources but are not treated as official manufacturer URLs.
+     */
+    private Map<String, List<String>> sourceUrlTemplatesByBrand = new HashMap<>();
 
     // Property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";
@@ -205,6 +228,27 @@ public class ReviewGenerationConfig {
     }
     public void setPreferredDomains(List<String> preferredDomains) {
         this.preferredDomains = preferredDomains;
+    }
+
+    public List<String> getOfficialUrlExcludedDomains() {
+        return officialUrlExcludedDomains;
+    }
+    public void setOfficialUrlExcludedDomains(List<String> officialUrlExcludedDomains) {
+        this.officialUrlExcludedDomains = officialUrlExcludedDomains;
+    }
+
+    public Map<String, List<String>> getOfficialDomainsByBrand() {
+        return officialDomainsByBrand;
+    }
+    public void setOfficialDomainsByBrand(Map<String, List<String>> officialDomainsByBrand) {
+        this.officialDomainsByBrand = officialDomainsByBrand;
+    }
+
+    public Map<String, List<String>> getSourceUrlTemplatesByBrand() {
+        return sourceUrlTemplatesByBrand;
+    }
+    public void setSourceUrlTemplatesByBrand(Map<String, List<String>> sourceUrlTemplatesByBrand) {
+        this.sourceUrlTemplatesByBrand = sourceUrlTemplatesByBrand;
     }
 
     public String getQueryTemplate() {
