@@ -25,7 +25,7 @@ class ReviewGenerationApiConfigTest {
                 .isEqualTo("${REVIEW_GENERATION_MIN_MARKDOWN_CHARS:500}");
         assertThat(properties.getProperty("review.generation.preferred-domains[0]"))
                 .isEqualTo("leclaireur.fnac.com");
-        assertThat(properties.getProperty("review.generation.preferred-domains[3]"))
+        assertThat(properties.getProperty("review.generation.preferred-domains[4]"))
                 .isEqualTo("lesnumeriques.com");
         assertThat(properties.getProperty("urlfetcher.domains.lesnumeriques.com.strategy"))
                 .isEqualTo("PLAYWRIGHT");

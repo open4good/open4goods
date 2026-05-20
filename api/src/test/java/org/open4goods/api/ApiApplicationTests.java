@@ -10,7 +10,9 @@ import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.services.eprelservice.repository.EprelProductRepository;
 import org.open4goods.services.productrepository.repository.ElasticProductRepository;
+import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.prompt.service.provider.GeminiProvider;
+import org.open4goods.services.prompt.service.provider.ProviderRegistry;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -72,7 +74,12 @@ class ApiApplicationTests {
     @MockitoBean
     private GeminiProvider geminiProvider;
 
-    // Mocked to satisfy openAiProvider dependency without triggering broken OpenAI auto-configurations
+    @MockitoBean
+    private PromptService promptService;
+
+    @MockitoBean
+    private ProviderRegistry providerRegistry;
+
     @MockitoBean
     private OpenAiChatModel openAiChatModel;
 
