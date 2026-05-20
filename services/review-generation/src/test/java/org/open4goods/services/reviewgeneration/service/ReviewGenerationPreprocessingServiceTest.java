@@ -114,9 +114,10 @@ class ReviewGenerationPreprocessingServiceTest {
                         "https://www.haier-europe.com/fr_CH/lave-linge/31019768/hw50-bp12307-s/"),
                 new GoogleSearchResult("Generic shop", "https://example.com/haier.html"))));
         when(promptService.estimateTokens(any(String.class))).thenReturn(300);
-        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation -> {
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
             String url = invocation.getArgument(0);
-            String markdown = "Useful product content for " + url + " with washing performance details.";
+            String markdown = "Useful product content for " + url + " with washing performance details for Haier model HW50-BP12307-S.";
             return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown, FetchStrategy.HTTP));
         });
 
@@ -217,6 +218,37 @@ class ReviewGenerationPreprocessingServiceTest {
         Boolean valid = ReflectionTestUtils.invokeMethod(service, "isValidFetch", response);
 
         assertThat(valid).isTrue();
+    }
+
+    @Test
+    void isRelevantContent_ValidatesBrandAndModelPresence()
+    {
+        String content = "Ce lave-linge Beko MWBM8147EB est d'une grande efficacite.";
+
+        // Brand and model matches exactly
+        Boolean match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",
+                content, "Beko", "MWBM8147EB", Set.of("MWBM8147EB"));
+        assertThat(match).isTrue();
+
+        // Alternate model matches
+        match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",
+                content, "Beko", "Alternative", Set.of("MWBM8147EB"));
+        assertThat(match).isTrue();
+
+        // Tokenized fallback matches
+        match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",
+                content, "Beko", "Lave-linge MWBM8147EB 7004840077", Set.of());
+        assertThat(match).isTrue();
+
+        // Irrelevant content - no model match
+        match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",
+                "Avis sur le lave-vaisselle Beko qui fuit.", "Beko", "MWBM8147EB", Set.of());
+        assertThat(match).isFalse();
+
+        // Irrelevant content - no brand match
+        match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",
+                "Ce lave-linge MWBM8147EB est d'une grande efficacite.", "Miele", "MWBM8147EB", Set.of());
+        assertThat(match).isFalse();
     }
 
     private Product product(String brand, String model) {

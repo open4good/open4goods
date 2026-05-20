@@ -268,13 +268,19 @@ public class ReviewGenerationPreprocessingService {
 			CompletableFuture<FetchResponse> future = fetchFutures.get(url);
 			if (future == null)
 				continue;
-			FetchResponse fetchResponse = future.get();
-			if (fetchResponse == null || fetchResponse.markdownContent() == null
-					|| fetchResponse.markdownContent().isEmpty()) {
-				continue;
-			}
-			String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
-			int tokenCount = genAiService.estimateTokens(content);
+            FetchResponse fetchResponse = future.get();
+            if (fetchResponse == null || fetchResponse.markdownContent() == null
+                    || fetchResponse.markdownContent().isEmpty())
+            {
+                continue;
+            }
+            String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
+            if (!isRelevantContent(content, brand, primaryModel, alternateModels))
+            {
+                logger.warn("Content from URL {} discarded due to irrelevance: does not contain model/akaModels for brand {}", url, brand);
+                continue;
+            }
+            int tokenCount = genAiService.estimateTokens(content);
 			if (tokenCount < minTokens) {
 				logger.warn("Content from URL {} discarded due to insufficient tokens: {}", url, tokenCount);
 				continue;
@@ -341,11 +347,94 @@ public class ReviewGenerationPreprocessingService {
 		if (primaryModel == null || primaryModel.isBlank()) {
 			missing.add("model");
 		}
-		if (!missing.isEmpty()) {
-			throw new IllegalStateException("Cannot build review SERP queries for UPC " + product.getId() + ": missing "
-					+ String.join(", ", missing));
-		}
-	}
+        if (!missing.isEmpty())
+        {
+            throw new IllegalStateException("Cannot build review SERP queries for UPC " + product.getId() + ": missing "
+                    + String.join(", ", missing));
+        }
+    }
+
+    /**
+     * Checks if the fetched content is relevant to the product by ensuring it contains
+     * the brand name and at least one model or akaModel identifier.
+     *
+     * @param content the fetched markdown content
+     * @param brand the product brand
+     * @param primaryModel the primary model name
+     * @param alternateModels the set of alternate model aliases
+     * @return true if the content is relevant, false otherwise
+     */
+    private boolean isRelevantContent(String content, String brand, String primaryModel, Set<String> alternateModels)
+    {
+        if (content == null || content.isBlank())
+        {
+            return false;
+        }
+        String lowerContent = content.toLowerCase();
+
+        // 1. Brand check: must contain the brand name
+        if (brand != null && !brand.isBlank())
+        {
+            if (!lowerContent.contains(brand.toLowerCase()))
+            {
+                return false;
+            }
+        }
+
+        // 2. Model check: must contain at least one model or akaModel identifier
+        List<String> modelsToCheck = orderedModels(primaryModel, alternateModels);
+        if (modelsToCheck.isEmpty())
+        {
+            return true;
+        }
+
+        for (String model : modelsToCheck)
+        {
+            if (model == null || model.isBlank())
+            {
+                continue;
+            }
+            if (lowerContent.contains(model.toLowerCase()))
+            {
+                return true;
+            }
+        }
+
+        // Fallback check on alphanumeric tokens of the primary model
+        if (primaryModel != null && !primaryModel.isBlank())
+        {
+            String[] tokens = primaryModel.split("[\\s_\\-\\./\\\\]+");
+            for (String token : tokens)
+            {
+                if (token.length() >= 4)
+                {
+                    boolean hasLetter = false;
+                    boolean hasDigit = false;
+                    for (int i = 0; i < token.length(); i++)
+                    {
+                        char c = token.charAt(i);
+                        if (Character.isLetter(c))
+                        {
+                            hasLetter = true;
+                        }
+                        if (Character.isDigit(c))
+                        {
+                            hasDigit = true;
+                        }
+                    }
+                    if ((hasLetter && hasDigit) || (hasDigit && token.length() >= 5))
+                    {
+                        if (lowerContent.contains(token.toLowerCase()))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 
 	private List<String> buildSearchQueries(String brand, String primaryModel, Set<String> alternateModels,
 			VerticalConfig verticalConfig) {
