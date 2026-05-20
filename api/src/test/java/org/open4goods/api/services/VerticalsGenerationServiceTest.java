@@ -4,15 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -21,8 +17,10 @@ import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.NudgeToolConfig;
 import org.open4goods.model.vertical.NudgeToolScore;
 import org.open4goods.model.vertical.ScoreRange;
+import org.open4goods.model.vertical.SubsetCriteria;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.service.PromptService;
@@ -147,16 +145,9 @@ class VerticalsGenerationServiceTest {
     }
 
     @Test
-    void updateVerticalFileWithCategoriesHandlesEndOfFile(@TempDir java.nio.file.Path tempDir) throws Exception {
-        // Setup
+    void generateMappingReturnsMatchingCategoriesFragment() throws Exception {
         String verticalId = "test-vertical";
-        File tempFile = tempDir.resolve(verticalId + ".yml").toFile();
-        String initialContent = "id: " + verticalId + "\nmatchingCategories:\n  all: []";
-        FileUtils.writeStringToFile(tempFile, initialContent, Charset.defaultCharset());
-
         VerticalConfig vConf = verticalConfig(verticalId);
-        VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
-        when(verticalsConfigService.getConfigById(verticalId)).thenReturn(vConf);
 
         ProductRepository repository = mock(ProductRepository.class);
         when(repository.exportVerticalWithOffersCountGreater(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyInt()))
@@ -170,77 +161,20 @@ class VerticalsGenerationServiceTest {
                 repository,
                 serialisationService,
                 mock(GoogleTaxonomyService.class),
-                verticalsConfigService,
+                mock(VerticalsConfigService.class),
                 mock(ResourcePatternResolver.class),
                 mock(EvaluationService.class),
                 mock(IcecatService.class),
                 mock(PromptService.class));
 
-        // Execute
-        String result = service.updateVerticalFileWithCategories(1, tempFile.getAbsolutePath());
+        String result = service.generateMapping(vConf, 1);
 
-        // Verify
-        assertThat(result).isEqualTo("id: test-vertical\nmatchingCategories:\n  all: [\"NEW_CAT\"]\n");
-        String fileContent = FileUtils.readFileToString(tempFile, Charset.defaultCharset());
-        assertThat(fileContent).isEqualTo(result);
+        assertThat(result).isEqualTo("matchingCategories:\n  all: [\"NEW_CAT\"]\n");
     }
 
     @Test
-    void updateVerticalFileWithNudgeToolConfigUpdatesThresholds(@TempDir java.nio.file.Path tempDir) throws Exception {
+    void computeNudgeToolThresholdsUpdatesThresholds() throws Exception {
         String verticalId = "tv";
-        File tempFile = tempDir.resolve(verticalId + ".yml").toFile();
-        String initialContent = ""
-                + "id: " + verticalId + "\n"
-                + "nudgeToolConfig:\n"
-                + "  scores:\n"
-                + "    - scoreName: \"ENERGY_CONSUMPTION\"\n"
-                + "      scoreMinValue: 2.5\n"
-                + "  subsets:\n"
-                + "    - id: \"impact_high\"\n"
-                + "      group: \"impactscore\"\n"
-                + "      criterias:\n"
-                + "        - field: \"scores.ECOSCORE.value\"\n"
-                + "          operator: \"LOWER_THAN\"\n"
-                + "          value: \"2\"\n"
-                + "    - id: \"impact_medium\"\n"
-                + "      group: \"impactscore\"\n"
-                + "      criterias:\n"
-                + "        - field: \"scores.ECOSCORE.value\"\n"
-                + "          operator: \"GREATER_THAN\"\n"
-                + "          value: \"2\"\n"
-                + "        - field: \"scores.ECOSCORE.value\"\n"
-                + "          operator: \"LOWER_THAN\"\n"
-                + "          value: \"4\"\n"
-                + "    - id: \"impact_low\"\n"
-                + "      group: \"impactscore\"\n"
-                + "      criterias:\n"
-                + "        - field: \"scores.ECOSCORE.value\"\n"
-                + "          operator: \"GREATER_THAN\"\n"
-                + "          value: \"4\"\n"
-                + "subsets:\n"
-                + "  - id: \"impact_high\"\n"
-                + "    group: \"impactscore\"\n"
-                + "    criterias:\n"
-                + "      - field: \"scores.ECOSCORE.value\"\n"
-                + "        operator: \"LOWER_THAN\"\n"
-                + "        value: \"2\"\n"
-                + "  - id: \"impact_medium\"\n"
-                + "    group: \"impactscore\"\n"
-                + "    criterias:\n"
-                + "      - field: \"scores.ECOSCORE.value\"\n"
-                + "        operator: \"GREATER_THAN\"\n"
-                + "        value: \"2\"\n"
-                + "      - field: \"scores.ECOSCORE.value\"\n"
-                + "        operator: \"LOWER_THAN\"\n"
-                + "        value: \"4\"\n"
-                + "  - id: \"impact_low\"\n"
-                + "    group: \"impactscore\"\n"
-                + "    criterias:\n"
-                + "      - field: \"scores.ECOSCORE.value\"\n"
-                + "        operator: \"GREATER_THAN\"\n"
-                + "        value: \"4\"\n";
-        FileUtils.writeStringToFile(tempFile, initialContent, Charset.defaultCharset());
-
         VerticalConfig vConf = verticalConfig(verticalId);
         NudgeToolScore score = new NudgeToolScore();
         score.setScoreName("ENERGY_CONSUMPTION");
@@ -281,11 +215,13 @@ class VerticalsGenerationServiceTest {
                 mock(IcecatService.class),
                 mock(PromptService.class));
 
-        String result = service.updateVerticalFileWithNudgeToolConfig(tempFile.getAbsolutePath());
+        VerticalConfig result = service.computeNudgeToolThresholds(verticalId);
 
-        assertThat(result).contains("scoreMinValue: 3.13");
-        assertThat(result).contains("value: \"1.88\"");
-        assertThat(result).contains("value: \"3.13\"");
+        assertThat(result.getNudgeToolConfig().getScores().get(0).getScoreMinValue()).isEqualTo(3.13);
+        assertThat(result.getNudgeToolConfig().getSubsets())
+                .flatExtracting(VerticalSubset::getCriterias)
+                .extracting(SubsetCriteria::getValue)
+                .contains("1.88", "3.13");
     }
 
     @Test
