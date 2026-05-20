@@ -1,6 +1,7 @@
 package org.open4goods.googlesearch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
@@ -49,6 +50,16 @@ public class GoogleSearchServiceTest {
     public void testHealth() {
         // Verify that the health indicator returns a status of UP
         assertEquals(Status.UP, googleSearchService.health().getStatus(), "Health check should be UP");
+    }
+
+    @Test
+    public void sanitizeUrlToFileName_BoundsLongQueryFileNames() {
+        String longQuery = "site:example.com ".repeat(40) + "\"LG 28MT47T\"";
+
+        String fileName = GoogleSearchService.sanitizeUrlToFileName(longQuery);
+
+        assertTrue(fileName.endsWith(".txt"));
+        assertTrue(fileName.length() <= 145, "Recorded search file name should remain filesystem-safe");
     }
 
     /**

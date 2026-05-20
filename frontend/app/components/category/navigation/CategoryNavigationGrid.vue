@@ -65,7 +65,6 @@
 
                 <div class="category-navigation-grid__card-body">
                   <div class="category-navigation-grid__chips">
-    
                     <v-chip
                       v-if="category.hasVertical"
                       color="accent-supporting"

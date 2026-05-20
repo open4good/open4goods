@@ -140,10 +140,7 @@
             <div v-else class="product-page__deferred-placeholder" />
           </section>
 
-          <section
-            :id="sectionIds.price"
-            class="product-page__section"
-          >
+          <section :id="sectionIds.price" class="product-page__section">
             <ProductPriceSection
               v-if="product.offers && shouldRenderSection(sectionIds.price)"
               :offers="product.offers"

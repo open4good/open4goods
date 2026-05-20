@@ -35,7 +35,11 @@
         :value="panel.condition"
       >
         <v-icon
-          :icon="panel.condition === 'new' ? 'mdi-tag-outline' : 'mdi-recycle-variant'"
+          :icon="
+            panel.condition === 'new'
+              ? 'mdi-tag-outline'
+              : 'mdi-recycle-variant'
+          "
           size="18"
           class="me-1"
         />
@@ -471,10 +475,7 @@ const conditionPanels = computed<ConditionPanel[]>(() => {
       offersListLabel: t('product.hero.alternativeOffers.label'),
       moreOffersLabel:
         count - offersList.length - 1 > 0
-          ? t(
-              'product.hero.moreOffersBadge',
-              count - offersList.length - 1
-            )
+          ? t('product.hero.moreOffersBadge', count - offersList.length - 1)
           : null,
       trendLabel,
       trendTooltip,

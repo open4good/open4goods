@@ -7,9 +7,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.security.MessageDigest;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 
 import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
@@ -159,8 +162,7 @@ public class GoogleSearchService implements HealthIndicator {
         if (properties.isRecordEnabled() && properties.getRecordFolder() != null && !properties.getRecordFolder().isBlank()) {
             try {
                 // Sanitize the query for a safe file name.
-                String sanitizedQuery = sanitizeUrlToFileName(request.query());
-                String fileName = sanitizedQuery + "-" + request.numResults() + ".json";
+                String fileName = sanitizeUrlToFileName(request.query()) + "-" + request.numResults() + ".json";
                 Path folderPath = Paths.get(properties.getRecordFolder());
                 if (!Files.exists(folderPath)) {
                     Files.createDirectories(folderPath);
@@ -237,13 +239,28 @@ public class GoogleSearchService implements HealthIndicator {
     }
 
     /**
-     * Sanitizes a URL into a safe file name by removing the protocol and replacing non-alphanumeric characters.
+     * Sanitizes a query into a safe, bounded file name by replacing non-alphanumeric characters
+     * and appending a stable hash when truncation is required.
      *
-     * @param url the URL to sanitize
+     * @param query the query to sanitize
      * @return a sanitized file name ending with .txt
      */
-    public static String sanitizeUrlToFileName(String url) {
-        String sanitized = url.replaceFirst("^(https?://)", "").replaceAll("[^a-zA-Z0-9]", "_");
+    public static String sanitizeUrlToFileName(String query) {
+        String sanitized = query.replaceFirst("^(https?://)", "").replaceAll("[^a-zA-Z0-9]", "_");
+        int maxBaseLength = 120;
+        if (sanitized.length() > maxBaseLength) {
+            sanitized = sanitized.substring(0, maxBaseLength) + "_" + sha256Prefix(query);
+        }
         return sanitized + ".txt";
+    }
+
+    private static String sha256Prefix(String value) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash, 0, 8);
+        } catch (Exception e) {
+            return Integer.toHexString(value.hashCode());
+        }
     }
 }

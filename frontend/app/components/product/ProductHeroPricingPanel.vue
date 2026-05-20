@@ -3,10 +3,7 @@
     class="product-hero__pricing-panel"
     :class="`product-hero__pricing-panel--${condition}`"
   >
-    <header
-      v-if="!hideHeader"
-      class="product-hero__pricing-panel-header"
-    >
+    <header v-if="!hideHeader" class="product-hero__pricing-panel-header">
       <div class="product-hero__pricing-panel-title">
         <v-icon
           :icon="conditionIcon"
@@ -204,11 +201,7 @@
           class="product-hero__pricing-panel-alternatives"
         >
           <p class="product-hero__pricing-panel-alternatives-title">
-            <v-icon
-              icon="mdi-shopping-search-outline"
-              size="16"
-              class="me-1"
-            />
+            <v-icon icon="mdi-shopping-search-outline" size="16" class="me-1" />
             {{ offersListLabel }}
           </p>
           <TransitionGroup
@@ -256,10 +249,7 @@
           </TransitionGroup>
         </div>
 
-        <p
-          v-if="moreOffersLabel"
-          class="product-hero__pricing-panel-more"
-        >
+        <p v-if="moreOffersLabel" class="product-hero__pricing-panel-more">
           <v-icon icon="mdi-information-outline" size="14" class="me-1" />
           {{ moreOffersLabel }}
         </p>
@@ -475,7 +465,6 @@ const onOfferSelected = (item: OfferOption) => {
     }
   }
 }
-
 </script>
 
 <style scoped>
