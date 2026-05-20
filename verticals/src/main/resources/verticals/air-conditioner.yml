@@ -1,0 +1,189 @@
+# Unique identifier for this vertical.
+# MUST be equal to the configuration file name, without the extension.
+id: air-conditioner
+
+parsers:
+  weight:
+    minKg: 5.0
+    maxKg: 120.0
+  warranty:
+    minYears: 0.0
+    maxYears: 10.0
+
+order: 9
+
+# DOE/FEMP room air conditioner test assumption: 750 operating hours/year, i.e. 2.05 h/day averaged over a full year.
+averageHoursPerDay: 2.05
+
+# Google taxonomy FR: Maison et jardin > Appareils électroménagers > Chauffage et climatisation > Climatiseurs.
+googleTaxonomyId: 605
+
+# Unknown Icecat category for this vertical.
+icecatTaxonomyId: -1
+
+# See docs/eprel_codes.md.
+eprelGroupNames:
+  - airconditioners
+
+verticalImage: https://nudger.fr/images/verticals/air-conditioner.png
+mdiIcon: mdi-air-conditioner
+
+enabled: true
+popular: false
+
+availableImpactScoreCriterias:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+  - POWER_CONSUMPTION_OFF
+  - REPAIRABILITY_INDEX
+  - WARRANTY
+  - WEIGHT
+  - DATA_QUALITY
+  - BRAND_SUSTAINALYTICS_SCORING
+
+popularAttributes:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+  - NOISE_LEVEL
+
+commonAttributes:
+  - CLASSE_ENERGY
+  - POWER_CONSUMPTION_TYPICAL
+  - POWER_CONSUMPTION_OFF
+  - NOISE_LEVEL
+  - WEIGHT
+  - WARRANTY
+
+i18n:
+  fr:
+    url:
+      prefix: "|| climatiseur | air-conditioner | climatisation ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "|| Climatiseur | Climatiseur mobile | Climatiseur réversible ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    prettyName:
+      prefix: "|| Climatiseur | Climatiseur mobile ||"
+      attrs:
+        - BRAND
+        - MODEL
+    singular:
+      prefix: "|| climatiseur | appareil de climatisation ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| du climatiseur | de ce climatiseur | de cet appareil de climatisation ||"
+      attrs: []
+    designation:
+      - "du climatiseur"
+      - "de ce climatiseur"
+      - "de cet appareil de climatisation"
+      - "de la climatisation"
+    cardTitle: "{BRAND} {MODEL}"
+    shortName: "{BRAND} {MODEL}"
+    longName: "{BRAND} {MODEL}"
+    verticalHomeUrl: "climatiseurs"
+    verticalHomeTitle: "Climatiseurs"
+    verticalHomeDescription: "Comparez les climatiseurs selon leur consommation électrique, leur efficacité et leur impact environnemental. Nudger vous aide à choisir un modèle adapté à votre logement sans négliger le coût d’usage ni la sobriété énergétique."
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, consommation électrique, compensation environnementale et meilleurs prix."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]"
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : comparez l’impact environnemental et les meilleurs prix de ce climatiseur."
+    productMetaOpenGraphType: "product"
+
+  en:
+    url:
+      prefix: "|| air conditioner | ac unit | cooling appliance ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    h1Title:
+      prefix: "|| Air conditioner | Portable air conditioner | Reversible air conditioner ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    prettyName:
+      prefix: "|| Air conditioner | AC unit ||"
+      attrs:
+        - BRAND
+        - MODEL
+    singular:
+      prefix: "|| air conditioner | cooling appliance ||"
+      attrs: []
+    singularDesignation:
+      prefix: "|| of the air conditioner | of this air conditioner | of this cooling appliance ||"
+      attrs: []
+    designation:
+      - "of the air conditioner"
+      - "of this air conditioner"
+      - "of this cooling appliance"
+      - "of the AC unit"
+    cardTitle: "{BRAND} {MODEL}"
+    shortName: "{BRAND} {MODEL}"
+    longName: "{BRAND} {MODEL}"
+    verticalHomeUrl: "air-conditioners"
+    verticalHomeTitle: "Air conditioners"
+    verticalHomeDescription: "Compare air conditioners by electricity use, efficiency, and environmental impact. Nudger helps you choose a model that fits your room while keeping running costs and energy sobriety in view."
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, electricity use, environmental offset and best prices."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]"
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : compare environmental impact and best prices for this air conditioner."
+    productMetaOpenGraphType: "product"
+
+matchingCategories:
+  Joom FR:
+    - "HOME APPLIANCES > CLIMATE ELECTRONICS > AIR CONDITIONERS"
+    - "HOME & GARDEN > HOUSEHOLD APPLIANCES > CLIMATE CONTROL APPLIANCES > AIR CONDITIONERS"
+  ManoMano FR:
+    - "428 | DIY | BRICOLAGE - OUTILLAGE - QUINCAILLERIE | BRICOLAGE - OUTILLAGE - QUINCAILLERIE > GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE > CLIMATISEUR MOBILE | GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE | CLIMATISEUR MOBILE"
+    - "428 | DIY | BRICOLAGE - OUTILLAGE - QUINCAILLERIE | BRICOLAGE - OUTILLAGE - QUINCAILLERIE > GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE > CLIMATISEUR FIXE | GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE | CLIMATISEUR FIXE"
+  Castorama FR:
+    - "CLIMATISEUR MOBILE | MAGASIN CASTORAMA > CHAUFFAGE, CLIMATISATION ET VENTILATION > CLIMATISATION ET RAFRAICHISSEMENT D'AIR > CLIMATISEUR MOBILE | CHAUFFAGE, CLIMATISATION ET VENTILATION | CLIMATISATION ET RAFRAICHISSEMENT D'AIR"
+  Cdiscount FR:
+    - "GROS ELECTROMENAGER / CLIMATISEUR / CLIMATISEUR MOBILE | GROS ELECTROMENAGER>CLIMATISEUR>CLIMATISEUR MOBILE | CLIMATISEUR | CLIMATISEUR MOBILE"
+    - "GROS ELECTROMENAGER / CLIMATISEUR / CLIMATISEUR FIXE | GROS ELECTROMENAGER>CLIMATISEUR>CLIMATISEUR FIXE | CLIMATISEUR | CLIMATISEUR FIXE"
+  RueDuCommerce FR:
+    - "CLIMATISEUR"
+
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 5
+    buckets: 20
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
+  "scores.POWER_CONSUMPTION_TYPICAL.value":
+    interval: 100
+    buckets: 12
+  "scores.WEIGHT.value":
+    interval: 5
+    buckets: 12
+  "price.minPrice.price":
+    interval: 100
+    buckets: 20
+
+ecoFilters:
+  - "CLASSE_ENERGY"
+  - "POWER_CONSUMPTION_TYPICAL"
+
+technicalFilters:
+  - "NOISE_LEVEL"
+
+attributesConfig:
+  configs:
+    - key: "CLASSE_ENERGY"
+    - key: "POWER_CONSUMPTION_TYPICAL"
+    - key: "POWER_CONSUMPTION_OFF"
+    - key: "NOISE_LEVEL"
+    - key: "WEIGHT"
+    - key: "REPAIRABILITY_INDEX"
+    - key: "WARRANTY"
+    - key: "BRAND_SUSTAINALYTICS_SCORING"
+    - key: "DATA_QUALITY"
