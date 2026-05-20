@@ -276,7 +276,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 				}
 			}
 		} catch (Exception ex) {
-			logger.error("Error computing embedding for product {}", data.getId(), ex);
+			logger.error("Error computing embedding for product {}", data.getId(), ex.getMessage());
 		}
 	}
 
