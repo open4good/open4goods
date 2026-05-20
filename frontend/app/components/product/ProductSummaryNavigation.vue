@@ -38,7 +38,7 @@
                 'product-summary-navigation__link--active':
                   isSectionActive(section),
               }"
-              :aria-current="isSectionActive(section) ? 'true' : undefined"
+              :aria-current="isSectionActive(section) ? 'location' : undefined"
               :aria-controls="section.id"
               @click="handleSectionClick(section)"
             >
@@ -97,7 +97,7 @@
                       subsection.id === activeSection,
                   }"
                   :aria-current="
-                    subsection.id === activeSection ? 'true' : undefined
+                    subsection.id === activeSection ? 'location' : undefined
                   "
                   :aria-controls="subsection.id"
                   @click="onNavigate(subsection.id)"

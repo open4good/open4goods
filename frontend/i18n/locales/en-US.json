@@ -2683,8 +2683,10 @@
         "new": "No new offers yet!",
         "occasion": "No second-hand offers yet!"
       },
+      "noOffersUnified": "No offers available right now",
+      "moreOffersBadge": "+{count} more offer below | +{count} more offers below",
       "alternativeOffers": {
-        "label": "Alternative offers",
+        "label": "Other offers",
         "placeholder": "Select another offer",
         "unknownMerchant": "Unknown merchant"
       },
@@ -2704,6 +2706,8 @@
       "thumbnailLabel": "Select {type} {index} of {total}: {label}",
       "videoBadge": "Video",
       "viewOffersCount": "View the {count} offers",
+      "viewOffersNew": "One new offer | View the {count} new offers",
+      "viewOffersOccasion": "View the second-hand offer | View the {count} second-hand offers",
       "viewSingleOffer": "View the offer"
     },
     "eprel": {

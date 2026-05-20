@@ -3,7 +3,10 @@
     class="product-hero__pricing-panel"
     :class="`product-hero__pricing-panel--${condition}`"
   >
-    <header class="product-hero__pricing-panel-header">
+    <header
+      v-if="!hideHeader"
+      class="product-hero__pricing-panel-header"
+    >
       <div class="product-hero__pricing-panel-title">
         <v-icon
           :icon="conditionIcon"
@@ -39,7 +42,7 @@
                       <img
                         v-if="merchant.favicon"
                         :src="merchant.favicon"
-                        :alt="merchant.name"
+                        alt=""
                         width="40"
                         height="40"
                         class="product-hero__pricing-panel-merchant-favicon"
@@ -76,7 +79,7 @@
                       <img
                         v-if="merchant?.favicon"
                         :src="merchant.favicon"
-                        :alt="merchant.name"
+                        alt=""
                         width="40"
                         height="40"
                         class="product-hero__pricing-panel-merchant-favicon"
@@ -122,7 +125,7 @@
                   <img
                     v-if="merchant.favicon"
                     :src="merchant.favicon"
-                    :alt="merchant.name"
+                    alt=""
                     width="40"
                     height="40"
                     class="product-hero__pricing-panel-merchant-favicon"
@@ -161,7 +164,7 @@
                   <img
                     v-if="merchant.favicon"
                     :src="merchant.favicon"
-                    :alt="merchant.name"
+                    alt=""
                     width="40"
                     height="40"
                     class="product-hero__pricing-panel-merchant-favicon"
@@ -196,83 +199,70 @@
         </v-tooltip>
         <!-- Replaced by the block above -->
 
-        <v-select
-          v-if="alternativeOffersToDisplay.length > 1"
-          v-model="selectedAlternative"
-          class="product-hero__pricing-panel-select"
-          :items="alternativeOffersToDisplay"
-          :label="alternativeOffersLabel"
-          :placeholder="alternativeOffersPlaceholder"
-          item-title="label"
-          item-value="id"
-          return-object
-          variant="outlined"
-          density="comfortable"
-          hide-details
-          menu-icon="mdi-chevron-down"
+        <div
+          v-if="offersListToDisplay.length > 0"
+          class="product-hero__pricing-panel-alternatives"
         >
-          <template #selection="{ item }">
-            <template v-if="item?.raw">
-              <div class="product-hero__pricing-panel-select-value">
-                <img
-                  v-if="item.raw.favicon"
-                  :src="item.raw.favicon"
-                  :alt="item.raw.label"
-                  width="20"
-                  height="20"
-                  class="product-hero__pricing-panel-select-avatar"
-                />
-                <span class="product-hero__pricing-panel-select-name ml-4">
-                  {{ item.raw.label }}
-                </span>
-                <span class="product-hero__pricing-panel-select-price">
-                  {{ item.raw.priceLabel }}
-                </span>
-              </div>
-            </template>
-          </template>
-          <template #item="{ item, props: itemProps }">
-            <v-list-item
-              v-if="item?.raw"
-              v-bind="itemProps"
-              :title="null"
-              @click="onAlternativeSelected(item.raw)"
+          <p class="product-hero__pricing-panel-alternatives-title">
+            <v-icon
+              icon="mdi-shopping-search-outline"
+              size="16"
+              class="me-1"
+            />
+            {{ offersListLabel }}
+          </p>
+          <TransitionGroup
+            tag="ul"
+            name="alt-list"
+            class="product-hero__pricing-panel-alternatives-list"
+          >
+            <li
+              v-for="offer in offersListToDisplay"
+              :key="offer.id"
+              class="product-hero__pricing-panel-alternative"
             >
-              <template #prepend>
+              <button
+                type="button"
+                class="product-hero__pricing-panel-alternative-row"
+                @click="onOfferSelected(offer)"
+              >
                 <img
-                  v-if="item.raw.favicon"
-                  :src="item.raw.favicon"
-                  :alt="item.raw.label"
+                  v-if="offer.favicon"
+                  :src="offer.favicon"
+                  alt=""
                   width="24"
                   height="24"
-                  class="product-hero__pricing-panel-select-avatar mr-3"
+                  class="product-hero__pricing-panel-alternative-favicon"
                 />
                 <v-icon
                   v-else
                   icon="mdi-storefront-outline"
                   size="20"
-                  class="mr-3"
+                  class="product-hero__pricing-panel-alternative-favicon-fallback"
                 />
-              </template>
-              <v-list-item-title>
-                {{ item.raw.label }}
-              </v-list-item-title>
-              <v-list-item-subtitle
-                v-if="
-                  item.raw.offerName &&
-                  item.raw.offerName.trim() !== item.raw.label.trim()
-                "
-              >
-                {{ truncateString(item.raw.offerName, 50) }}
-              </v-list-item-subtitle>
-              <template #append>
-                <span class="product-hero__pricing-panel-select-price">
-                  {{ item.raw.priceLabel }}
+                <span class="product-hero__pricing-panel-alternative-name">
+                  {{ offer.label }}
                 </span>
-              </template>
-            </v-list-item>
-          </template>
-        </v-select>
+                <span class="product-hero__pricing-panel-alternative-price">
+                  {{ offer.priceLabel }}
+                </span>
+                <v-icon
+                  icon="mdi-chevron-right"
+                  size="18"
+                  class="product-hero__pricing-panel-alternative-chevron"
+                />
+              </button>
+            </li>
+          </TransitionGroup>
+        </div>
+
+        <p
+          v-if="moreOffersLabel"
+          class="product-hero__pricing-panel-more"
+        >
+          <v-icon icon="mdi-information-outline" size="14" class="me-1" />
+          {{ moreOffersLabel }}
+        </p>
       </template>
 
       <div v-else class="product-hero__pricing-panel-empty">
@@ -334,7 +324,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from '#imports'
 
 type OfferCondition = 'occasion' | 'new'
@@ -347,7 +337,7 @@ type MerchantInfo = {
   clientOnly: boolean
 }
 
-type AlternativeOfferOption = {
+type OfferOption = {
   id: string
   label: string
   offerName: string | null
@@ -421,17 +411,21 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  alternativeOffers: {
-    type: Array as () => AlternativeOfferOption[] | null,
+  offersList: {
+    type: Array as () => OfferOption[] | null,
     default: null,
   },
-  alternativeOffersLabel: {
+  offersListLabel: {
     type: String,
     default: null,
   },
-  alternativeOffersPlaceholder: {
+  moreOffersLabel: {
     type: String,
     default: null,
+  },
+  hideHeader: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -445,12 +439,7 @@ const emit = defineEmits<{
 
 const router = useRouter()
 
-const truncateString = (str: string, length: number) => {
-  if (str.length <= length) return str
-  return str.slice(0, length) + '...'
-}
-
-const alternativeOffersToDisplay = computed(() => props.alternativeOffers ?? [])
+const offersListToDisplay = computed(() => props.offersList ?? [])
 
 const conditionIcon = computed(() =>
   props.condition === 'new' ? 'mdi-tag-outline' : 'mdi-recycle-variant'
@@ -471,7 +460,7 @@ const emitViewOffers = () => {
   emit('view-offers')
 }
 
-const onAlternativeSelected = (item: AlternativeOfferOption) => {
+const onOfferSelected = (item: OfferOption) => {
   if (item.url) {
     emit('merchant-click', {
       name: item.label,
@@ -487,17 +476,6 @@ const onAlternativeSelected = (item: AlternativeOfferOption) => {
   }
 }
 
-const selectedAlternative = ref<AlternativeOfferOption | null>(null)
-
-watch(
-  () => alternativeOffersToDisplay.value,
-  offers => {
-    if (offers?.length && !selectedAlternative.value) {
-      selectedAlternative.value = offers[0]
-    }
-  },
-  { immediate: true }
-)
 </script>
 
 <style scoped>
@@ -580,9 +558,10 @@ watch(
 }
 
 .product-hero__pricing-panel-main--link {
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
   padding: 0.75rem;
-  margin: -0.75rem;
   border-radius: 16px;
 }
 
@@ -591,6 +570,7 @@ watch(
   box-shadow: none;
   cursor: pointer;
   background: rgba(var(--v-theme-surface-primary-080), 0.4);
+  transform: translateY(-1px);
 }
 
 .product-hero__pricing-panel-merchant {
@@ -658,31 +638,133 @@ watch(
   border: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.2);
 }
 
-.product-hero__pricing-panel-select {
-  width: 100%;
-}
-
-.product-hero__pricing-panel-select-value {
+.product-hero__pricing-panel-more {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: rgb(var(--v-theme-text-neutral-soft));
+  text-align: center;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  align-self: center;
+}
+
+.product-hero__pricing-panel-alternatives {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.25);
+}
+
+.product-hero__pricing-panel-alternatives-title {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--v-theme-text-neutral-soft));
+}
+
+.product-hero__pricing-panel-alternatives-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-hero__pricing-panel-alternative {
   width: 100%;
 }
 
-.product-hero__pricing-panel-select-name {
-  font-weight: 600;
+.product-hero__pricing-panel-alternative-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18);
+  border-radius: 12px;
+  background: rgba(var(--v-theme-surface-glass), 0.7);
   color: rgb(var(--v-theme-text-neutral-strong));
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.product-hero__pricing-panel-select-price {
-  margin-left: auto;
-  font-weight: 700;
-  color: rgb(var(--v-theme-text-neutral-strong));
+.product-hero__pricing-panel-alternative-row:hover,
+.product-hero__pricing-panel-alternative-row:focus-visible {
+  background: rgba(var(--v-theme-surface-primary-080), 0.85);
+  border-color: rgba(var(--v-theme-border-primary-strong), 0.55);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  outline: none;
 }
 
-.product-hero__pricing-panel-select-avatar {
+.product-hero__pricing-panel-alternative-favicon {
   border-radius: 6px;
+  width: 24px;
+  height: 24px;
   object-fit: cover;
+  flex-shrink: 0;
+}
+
+.product-hero__pricing-panel-alternative-favicon-fallback {
+  color: rgb(var(--v-theme-text-neutral-soft));
+  flex-shrink: 0;
+}
+
+.product-hero__pricing-panel-alternative-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.product-hero__pricing-panel-alternative-price {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: rgb(var(--v-theme-text-neutral-strong));
+  flex-shrink: 0;
+}
+
+.product-hero__pricing-panel-alternative-chevron {
+  color: rgb(var(--v-theme-text-neutral-soft));
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.product-hero__pricing-panel-alternative-row:hover
+  .product-hero__pricing-panel-alternative-chevron,
+.product-hero__pricing-panel-alternative-row:focus-visible
+  .product-hero__pricing-panel-alternative-chevron {
+  transform: translateX(2px);
+  color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.alt-list-enter-active,
+.alt-list-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.alt-list-enter-from,
+.alt-list-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 .product-hero__pricing-panel-footer {

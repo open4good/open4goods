@@ -10,8 +10,8 @@
         :src="heroBackground"
         alt=""
         decoding="async"
-        loading="eager"
-        fetchpriority="high"
+        loading="lazy"
+        fetchpriority="low"
       />
       <div class="product-hero__background-overlay" />
     </div>
@@ -33,7 +33,10 @@
         />
       </header>
 
-      <div class="product-hero__grid">
+      <div
+        class="product-hero__grid"
+        :class="{ 'product-hero__grid--single': hidePricingPanel }"
+      >
         <div class="product-hero__panel product-hero__panel--main">
           <Transition name="fade">
             <ProductHeroInlineGallery
@@ -331,7 +334,10 @@
           </div>
         </div>
 
-        <aside class="product-hero__panel product-hero__panel--pricing">
+        <aside
+          v-if="!hidePricingPanel"
+          class="product-hero__panel product-hero__panel--pricing"
+        >
           <ProductHeroPricing :product="product" />
         </aside>
       </div>
@@ -413,6 +419,10 @@ const props = defineProps({
     default: null,
   },
   hasCategory: {
+    type: Boolean,
+    default: false,
+  },
+  hidePricingPanel: {
     type: Boolean,
     default: false,
   },
@@ -1052,6 +1062,10 @@ const heroBreadcrumbProps = computed(() => ({
   gap: clamp(1.5rem, 3vw, 2.75rem);
   grid-template-columns: 2fr 1fr;
   align-items: stretch;
+}
+
+.product-hero__grid--single {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 @media (max-width: 960px) {

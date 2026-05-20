@@ -12,9 +12,86 @@
     />
     <meta itemprop="priceCurrency" :content="defaultCurrencyCode" />
 
-    <div class="product-hero__pricing-stack">
+    <div v-if="visiblePanels.length === 0" class="product-hero__pricing-empty">
+      <v-icon icon="mdi-basket-off-outline" size="32" />
+      <p class="product-hero__pricing-empty-title">
+        {{ t('product.hero.noOffersUnified') }}
+      </p>
+    </div>
+
+    <v-tabs
+      v-else-if="useTabbedLayout"
+      v-model="activeTab"
+      density="comfortable"
+      color="primary"
+      align-tabs="center"
+      grow
+      class="product-hero__pricing-tabs"
+      :aria-label="t('product.hero.offerConditionsToggleAria')"
+    >
+      <v-tab
+        v-for="panel in visiblePanels"
+        :key="panel.condition"
+        :value="panel.condition"
+      >
+        <v-icon
+          :icon="panel.condition === 'new' ? 'mdi-tag-outline' : 'mdi-recycle-variant'"
+          size="18"
+          class="me-1"
+        />
+        {{ panel.conditionLabel }}
+        <v-chip
+          v-if="panel.offersCount > 0"
+          size="x-small"
+          variant="tonal"
+          class="ms-2"
+        >
+          {{ panel.offersCount }}
+        </v-chip>
+      </v-tab>
+    </v-tabs>
+
+    <v-window
+      v-if="useTabbedLayout && visiblePanels.length > 0"
+      v-model="activeTab"
+      class="product-hero__pricing-window"
+    >
+      <v-window-item
+        v-for="panel in visiblePanels"
+        :key="panel.condition"
+        :value="panel.condition"
+      >
+        <ProductHeroPricingPanel
+          :condition="panel.condition"
+          :condition-label="panel.conditionLabel"
+          :offers-count-label="panel.offersCountLabel"
+          :price-title="panel.priceTitle"
+          :price-label="panel.priceLabel"
+          :price-currency="panel.priceCurrency"
+          :empty-state-label="panel.emptyStateLabel"
+          :has-offer="panel.hasOffer"
+          :merchant="panel.merchant"
+          :offer-name="panel.offerName"
+          :show-merchant-name="true"
+          :offers-list="panel.offersList"
+          :offers-list-label="panel.offersListLabel"
+          :more-offers-label="panel.moreOffersLabel"
+          :trend-label="panel.trendLabel"
+          :trend-tooltip="panel.trendTooltip"
+          :trend-tone-class="panel.trendToneClass"
+          :trend-icon="panel.trendIcon"
+          :view-offers-label="panel.viewOffersLabel"
+          :hide-header="true"
+          @merchant-click="handleMerchantClick"
+          @trend-click="scrollToSelector('#price-history')"
+          @view-offers="handleViewOffers(panel)"
+        />
+      </v-window-item>
+    </v-window>
+
+    <div v-else class="product-hero__pricing-stack">
       <ProductHeroPricingPanel
-        v-for="panel in conditionPanels"
+        v-for="panel in visiblePanels"
         :key="panel.condition"
         :condition="panel.condition"
         :condition-label="panel.conditionLabel"
@@ -27,9 +104,9 @@
         :merchant="panel.merchant"
         :offer-name="panel.offerName"
         :show-merchant-name="true"
-        :alternative-offers="panel.alternativeOffers"
-        :alternative-offers-label="panel.alternativeOffersLabel"
-        :alternative-offers-placeholder="panel.alternativeOffersPlaceholder"
+        :offers-list="panel.offersList"
+        :offers-list-label="panel.offersListLabel"
+        :more-offers-label="panel.moreOffersLabel"
         :trend-label="panel.trendLabel"
         :trend-tooltip="panel.trendTooltip"
         :trend-tone-class="panel.trendToneClass"
@@ -44,9 +121,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
+import { computed, ref, watch, type PropType } from 'vue'
 import { useRouter } from '#imports'
 import { useI18n } from 'vue-i18n'
+import { useDisplay } from 'vuetify'
 import { useAnalytics } from '~/composables/useAnalytics'
 import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
 import type { ProductDto } from '~~/shared/api-client'
@@ -65,6 +143,7 @@ const props = defineProps({
 
 const { n, t, locale } = useI18n()
 const router = useRouter()
+const display = useDisplay()
 const {
   trackProductRedirect,
   trackAffiliateClick,
@@ -76,7 +155,7 @@ type AggregatedOffer = NonNullable<
   NonNullable<ProductDto['offers']>['bestPrice']
 >
 
-type AlternativeOfferOption = {
+type OfferOption = {
   id: string
   label: string
   offerName: string | null
@@ -153,44 +232,48 @@ const isSameOffer = (
     return false
   }
 
+  // Compare merchant + price only; URLs can differ across affiliation tokens
+  // for the same underlying offer.
   return (
-    offer.url === bestOffer.url &&
     offer.price === bestOffer.price &&
     offer.datasourceName === bestOffer.datasourceName
   )
 }
 
-const buildAlternativeOffers = (condition: OfferCondition) => {
+const buildOffersList = (condition: OfferCondition): OfferOption[] => {
   const bestOffer = bestOffersByCondition.value[condition]
-  return resolveOffersForCondition(condition)
-    .filter(offer => !isSameOffer(offer, bestOffer))
-    .map((offer, index) => {
-      const currency = offer.currency ?? defaultCurrencyCode.value
-      const priceLabel = n(offer.price ?? 0, {
-        style: 'currency',
-        currency,
-        maximumFractionDigits: 2,
-      })
+  const allOffers = resolveOffersForCondition(condition)
 
-      return {
-        id: `${condition}-${offer.datasourceName ?? 'offer'}-${offer.price ?? index}-${index}`,
-        label:
-          offer.datasourceName ??
-          t('product.hero.alternativeOffers.unknownMerchant'),
-        offerName: offer.offerName ?? null,
-        priceLabel,
-        favicon: offer.favicon ?? null,
-        url: offer.url ?? null,
-      }
+  // Alternatives only: the best offer is already promoted in the hero block.
+  const alternatives = allOffers.filter(offer => !isSameOffer(offer, bestOffer))
+
+  return alternatives.map((offer, index) => {
+    const currency = offer.currency ?? defaultCurrencyCode.value
+    const priceLabel = n(offer.price ?? 0, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 2,
     })
+
+    return {
+      id: `${condition}-${offer.datasourceName ?? 'offer'}-${offer.price ?? index}-${index}`,
+      label:
+        offer.datasourceName ??
+        t('product.hero.alternativeOffers.unknownMerchant'),
+      offerName: offer.offerName ?? null,
+      priceLabel,
+      favicon: offer.favicon ?? null,
+      url: offer.url ?? null,
+    }
+  })
 }
 
-const alternativeOffersByCondition = computed<
-  Record<OfferCondition, AlternativeOfferOption[]>
->(() => ({
-  new: buildAlternativeOffers('new'),
-  occasion: buildAlternativeOffers('occasion'),
-}))
+const offersListByCondition = computed<Record<OfferCondition, OfferOption[]>>(
+  () => ({
+    new: buildOffersList('new'),
+    occasion: buildOffersList('occasion'),
+  })
+)
 
 const offersCount = computed(() => props.product.offers?.offersCount ?? 0)
 
@@ -302,6 +385,7 @@ const scrollToSelector = (selector: string, offset = 120) => {
 type ConditionPanel = {
   condition: OfferCondition
   conditionLabel: string
+  offersCount: number
   offersCountLabel: string | null
   priceTitle: string
   priceLabel: string
@@ -316,9 +400,9 @@ type ConditionPanel = {
     clientOnly: boolean
   } | null
   offerName: string | null
-  alternativeOffers: AlternativeOfferOption[]
-  alternativeOffersLabel: string
-  alternativeOffersPlaceholder: string
+  offersList: OfferOption[]
+  offersListLabel: string
+  moreOffersLabel: string | null
   trendLabel: string | null
   trendTooltip: string | null
   trendToneClass: string
@@ -343,7 +427,7 @@ const handleViewOffers = (panel: ConditionPanel) => {
   }
 }
 
-const conditionPanels = computed(() => {
+const conditionPanels = computed<ConditionPanel[]>(() => {
   const offers = props.product.offers
   return conditionOrder.value.map(condition => {
     const offer = bestOffersByCondition.value[condition]
@@ -359,6 +443,7 @@ const conditionPanels = computed(() => {
     const trendTooltip = formatTrendTooltip(trend, currency)
 
     const count = offersCountByCondition.value[condition]
+    const offersList = offersListByCondition.value[condition]
 
     let viewOffersLabel = ''
     if (count <= 1) {
@@ -372,13 +457,9 @@ const conditionPanels = computed(() => {
     return {
       condition,
       conditionLabel: t(`product.hero.offerConditions.${condition}`),
+      offersCount: count,
       offersCountLabel:
-        offersCountByCondition.value[condition] > 0
-          ? t(
-              'product.hero.offersCountLabel',
-              offersCountByCondition.value[condition]
-            )
-          : null,
+        count > 0 ? t('product.hero.offersCountLabel', count) : null,
       priceTitle: t('product.hero.bestPriceTitle'),
       priceLabel,
       priceCurrency,
@@ -386,11 +467,15 @@ const conditionPanels = computed(() => {
       emptyStateLabel: t(`product.hero.noOffers.${condition}`),
       merchant: createMerchant(offer),
       offerName: offer?.offerName ?? null,
-      alternativeOffers: alternativeOffersByCondition.value[condition],
-      alternativeOffersLabel: t('product.hero.alternativeOffers.label'),
-      alternativeOffersPlaceholder: t(
-        'product.hero.alternativeOffers.placeholder'
-      ),
+      offersList,
+      offersListLabel: t('product.hero.alternativeOffers.label'),
+      moreOffersLabel:
+        count - offersList.length - 1 > 0
+          ? t(
+              'product.hero.moreOffersBadge',
+              count - offersList.length - 1
+            )
+          : null,
       trendLabel,
       trendTooltip,
       trendToneClass: `product-hero__price-trend--${trendTone}`,
@@ -398,6 +483,33 @@ const conditionPanels = computed(() => {
       viewOffersLabel,
     }
   })
+})
+
+const visiblePanels = computed<ConditionPanel[]>(() => {
+  // Filter out fully empty conditions when there's at least one with offers
+  const panels = conditionPanels.value
+  const anyHasOffer = panels.some(panel => panel.hasOffer)
+  if (!anyHasOffer) {
+    return []
+  }
+  return panels.filter(panel => panel.hasOffer)
+})
+
+const useTabbedLayout = computed(
+  () => display.mdAndDown.value && visiblePanels.value.length > 1
+)
+
+const activeTab = ref<OfferCondition>(
+  visiblePanels.value[0]?.condition ?? 'new'
+)
+
+watch(visiblePanels, panels => {
+  if (
+    panels.length > 0 &&
+    !panels.some(panel => panel.condition === activeTab.value)
+  ) {
+    activeTab.value = panels[0].condition
+  }
 })
 </script>
 
@@ -413,5 +525,38 @@ const conditionPanels = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.product-hero__pricing-tabs {
+  border-radius: 16px;
+  background: rgba(var(--v-theme-surface-glass-strong), 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.product-hero__pricing-window {
+  width: 100%;
+}
+
+.product-hero__pricing-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1.5rem;
+  border-radius: 24px;
+  background: rgba(var(--v-theme-surface-primary-050), 0.6);
+  border: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.25);
+  color: rgb(var(--v-theme-text-neutral-secondary));
+  text-align: center;
+}
+
+.product-hero__pricing-empty-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 </style>

@@ -2577,8 +2577,10 @@
         "new": "Pas d'offres neuves pour l'instant !",
         "occasion": "Pas d'offres d'occasion pour l'instant !"
       },
+      "noOffersUnified": "Aucune offre disponible pour le moment",
+      "moreOffersBadge": "+{count} autre offre en bas de page | +{count} autres offres en bas de page",
       "alternativeOffers": {
-        "label": "Toutes les offres",
+        "label": "Autres offres",
         "placeholder": "Choisir une autre offre",
         "unknownMerchant": "Marchand inconnu"
       },

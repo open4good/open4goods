@@ -90,7 +90,7 @@ remote-file-caching:
 
 embedding:
   enabled: true
-  provider: djl
+  #provider: djl
   text-model-url: djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small
   vision-model-url: djl://ai.djl.pytorch/resnet18_embedding/0.0.1
   async-loading: true
@@ -101,11 +101,11 @@ embedding:
   # Delegated OpenAI-compatible embedding computation sample.
   # Keep provider=djl for local inference. To delegate to LocalAI, switch provider
   # and configure the endpoint below.
-  # provider: openai-compatible
-  # openai:
-  #   base-url: ${EMBEDDING_OPENAI_BASE_URL:http://localhost:8080/v1}
-  #   api-key: ${EMBEDDING_OPENAI_API_KEY:localai}
-  #   model: ${EMBEDDING_OPENAI_MODEL:text-embedding-model}
+  provider: openai-compatible
+  openai:
+     base-url: ${EMBEDDING_OPENAI_BASE_URL:http://localhost:8080/v1}
+     api-key: ${EMBEDDING_OPENAI_API_KEY:localai}
+     model: ${EMBEDDING_OPENAI_MODEL:text-embedding-model}
   #   timeout: 60s
 
 review:
@@ -222,12 +222,4 @@ feed:
     cache-ttl-days: 1
     max-jitter-seconds: 30
 
----
-spring:
-  config:
-    activate:
-      on-profile: "default"
-  boot:
-    admin:
-      client:
-        enabled: false
+

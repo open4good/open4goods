@@ -77,10 +77,6 @@
           <section
             :id="sectionIds.hero"
             ref="heroSectionRef"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
             class="product-page__section"
           >
             <div class="product-page__hero">
@@ -92,6 +88,7 @@
                 :impact-score-max="impactScoreMax"
                 :popular-attributes="heroPopularAttributes"
                 :has-category="!!categoryDetail"
+                :hide-pricing-panel="hideHeroPricingPanel"
               />
             </div>
           </section>
@@ -100,11 +97,7 @@
             v-if="categoryDetail"
             :id="sectionIds.impact"
             ref="impactSectionRef"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <ProductImpactSection
               v-if="shouldRenderSection(sectionIds.impact)"
@@ -129,11 +122,7 @@
           <section
             v-if="showAiReviewSection"
             :id="sectionIds.ai"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <ProductAiReviewSection
               v-if="shouldRenderSection(sectionIds.ai)"
@@ -153,11 +142,7 @@
 
           <section
             :id="sectionIds.price"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <ProductPriceSection
               v-if="product.offers && shouldRenderSection(sectionIds.price)"
@@ -171,11 +156,7 @@
           <section
             v-if="product.timeline"
             :id="sectionIds.timeline"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <ProductLifeTimeline
               v-if="shouldRenderSection(sectionIds.timeline)"
@@ -187,11 +168,7 @@
           <section
             v-if="showAlternativesSection"
             :id="sectionIds.alternatives"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <ProductAlternatives
               v-if="shouldRenderSection(sectionIds.alternatives)"
@@ -207,11 +184,7 @@
           <section
             v-if="showVigilanceSection"
             :id="sectionIds.vigilance"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <ProductVigilanceSection
               v-if="shouldRenderSection(sectionIds.vigilance)"
@@ -228,11 +201,7 @@
           <section
             v-if="showAttributesSection"
             :id="sectionIds.attributes"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <ProductAttributesSection
               v-if="shouldRenderSection(sectionIds.attributes)"
@@ -248,11 +217,7 @@
           <section
             v-if="product.resources?.pdfs?.length"
             :id="sectionIds.docs"
-            v-intersect="{
-              handler: onSectionIntersect,
-              options: { threshold: 0.1 },
-            }"
-            class="product-page__section reveal-on-scroll"
+            class="product-page__section"
           >
             <ProductDocumentationSection
               v-if="shouldRenderSection(sectionIds.docs)"
@@ -283,7 +248,7 @@
 </template>
 
 <script setup lang="ts">
-import { useWindowScroll } from '@vueuse/core'
+import { useWindowScroll, useThrottleFn } from '@vueuse/core'
 import {
   computed,
   defineAsyncComponent,
@@ -371,26 +336,9 @@ const { y: scrollY } = useWindowScroll()
 const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
-const aiNavigationLabelVariant = useState<'ai' | 'neutral'>(
-  'product-ai-navigation-label-variant',
-  () => (Math.random() < 0.5 ? 'ai' : 'neutral')
-)
-const aiNavigationLabel = computed(() =>
-  aiNavigationLabelVariant.value === 'neutral'
-    ? t('product.navigation.aiShort')
-    : t('product.navigation.ai')
-)
+const aiNavigationLabel = computed(() => t('product.navigation.ai'))
 
 const heroSectionRef = ref<HTMLElement | null>(null)
-
-const onSectionIntersect = (
-  isIntersecting: boolean,
-  entries: IntersectionObserverEntry[]
-) => {
-  if (isIntersecting) {
-    entries[0].target.classList.add('revealed')
-  }
-}
 
 const PRODUCT_COMPONENTS = [
   'base',
@@ -413,23 +361,18 @@ const bannerOffersCountLabel = computed(() => {
   return t('product.banner.offersCount', { count })
 })
 
-// Update sticky banner visibility based on scroll position relative to hero section
-watch(
-  scrollY,
-  () => {
-    if (!heroSectionRef.value) {
-      isStickyBannerOpen.value = false
-      return
-    }
+// Show banner when we've scrolled past the hero section.
+// Throttled to ~60fps to avoid layout reads (getBoundingClientRect) every scroll tick.
+const updateStickyBannerVisibility = useThrottleFn(() => {
+  if (!heroSectionRef.value) {
+    isStickyBannerOpen.value = false
+    return
+  }
+  const rect = heroSectionRef.value.getBoundingClientRect()
+  isStickyBannerOpen.value = rect.bottom <= 80
+}, 16)
 
-    // Show banner when we've scrolled past the hero section
-    // The banner should appear when the bottom of the hero section is nearing the top of the viewport
-    // Adjust the offset (80px) as needed for the header height
-    const rect = heroSectionRef.value.getBoundingClientRect()
-    isStickyBannerOpen.value = rect.bottom <= 80
-  },
-  { immediate: true }
-)
+watch(scrollY, updateStickyBannerVisibility, { immediate: true })
 
 const props = defineProps<{
   productRoute: ProductRouteMatch
@@ -1722,9 +1665,26 @@ const showAttributesSection = computed(() => {
 const showAlternativesSection = computed(() =>
   Boolean(product.value && (categoryDetail.value?.id?.length ?? 0) > 0)
 )
+const hideHeroPricingPanel = computed(() => {
+  if (categoryDetail.value) return false
+  const offersCount = product.value?.offers?.offersCount ?? 0
+  return offersCount === 0
+})
 const alternativesHydrated = ref(false)
 const hasAlternatives = ref(true)
-const showAiReviewSection = computed(() => Boolean(categoryDetail.value))
+const showAiReviewSection = computed(() => {
+  if (!categoryDetail.value) {
+    return false
+  }
+  const aiReview = product.value?.aiReview
+  const hasReview = Boolean(aiReview?.review)
+  // Hide the section when backend says there isn't enough data and there's
+  // no existing review to display — avoids dead-end "Request" CTAs.
+  if (aiReview?.enoughData === false && !hasReview) {
+    return false
+  }
+  return true
+})
 
 const showVigilanceSection = computed(() => {
   if (!product.value) return false
@@ -2820,22 +2780,9 @@ useHead(() => {
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
 }
 
-.reveal-on-scroll {
-  transition:
-    opacity 0.8s cubic-bezier(0.2, 1, 0.2, 1),
-    transform 0.8s cubic-bezier(0.2, 1, 0.2, 1);
-}
-
-.reveal-on-scroll.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .reveal-on-scroll {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  .product-page__section--revealed {
+    animation: none;
   }
 }
 </style>

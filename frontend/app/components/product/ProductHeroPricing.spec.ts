@@ -11,6 +11,18 @@ interface MockPriceTrend {
   period?: number
 }
 
+vi.mock('vuetify', async () => {
+  const actual = await vi.importActual<typeof import('vuetify')>('vuetify')
+  return {
+    ...actual,
+    useDisplay: () => ({
+      mdAndDown: { value: false },
+      smAndDown: { value: false },
+      mobile: { value: false },
+    }),
+  }
+})
+
 vi.mock('~/composables/useProductPriceTrend', () => ({
   useProductPriceTrend: () => ({
     resolvePriceTrendLabel: (trend: MockPriceTrend | null) =>
@@ -58,8 +70,11 @@ describe('ProductHeroPricing', () => {
               new: 'No new offers yet!',
               occasion: 'No second-hand offers yet!',
             },
+            noOffersUnified: 'No offers available right now',
+            moreOffersBadge:
+              '+{count} more offer below | +{count} more offers below',
             alternativeOffers: {
-              label: 'Alternative offers',
+              label: 'All offers',
               placeholder: 'Select another offer',
               unknownMerchant: 'Unknown merchant',
             },
@@ -206,7 +221,7 @@ describe('ProductHeroPricing', () => {
     await wrapper.unmount()
   })
 
-  it('renders empty state when a condition has no offers', async () => {
+  it('collapses empty condition panels and renders only the one with offers', async () => {
     const wrapper = await createWrapper({
       offersCount: 1,
       bestPrice: {
@@ -234,9 +249,120 @@ describe('ProductHeroPricing', () => {
     })
 
     const panels = wrapper.findAll('.product-hero__pricing-panel')
-    expect(panels).toHaveLength(2)
+    expect(panels).toHaveLength(1)
     expect(panels[0]?.text()).toContain('649')
-    expect(panels[1]?.text()).toContain('No new offers yet!')
+    expect(panels[0]?.text()).toContain('Second-hand')
+
+    await wrapper.unmount()
+  })
+
+  it('excludes the best offer from the alternatives list and renders alternatives as clickable rows', async () => {
+    const wrapper = await createWrapper({
+      offersCount: 3,
+      bestPrice: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://shop.example',
+        favicon: 'https://shop.example/favicon.ico',
+        condition: 'NEW',
+        offerName: 'Shop offer',
+      },
+      bestNewOffer: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://shop.example',
+        favicon: 'https://shop.example/favicon.ico',
+        condition: 'NEW',
+        offerName: 'Shop offer',
+      },
+      offersByCondition: {
+        NEW: [
+          {
+            price: 799,
+            currency: 'EUR',
+            datasourceName: 'Shop',
+            url: 'https://shop.example',
+            favicon: 'https://shop.example/favicon.ico',
+            condition: 'NEW',
+            offerName: 'Shop offer',
+          },
+          {
+            price: 829,
+            currency: 'EUR',
+            datasourceName: 'MegaStore',
+            url: 'https://megastore.example',
+            favicon: 'https://megastore.example/favicon.ico',
+            condition: 'NEW',
+            offerName: 'MegaStore offer',
+          },
+        ],
+      },
+    })
+
+    const alternatives = wrapper.findAll(
+      '.product-hero__pricing-panel-alternative'
+    )
+
+    expect(alternatives).toHaveLength(1)
+    expect(alternatives[0]?.text()).toContain('MegaStore')
+    // Best merchant must not be duplicated inside the alternatives list
+    expect(alternatives[0]?.text()).not.toContain('Shop')
+
+    await wrapper.unmount()
+  })
+
+  it('hides the alternatives list entirely when only the best offer exists', async () => {
+    const wrapper = await createWrapper({
+      offersCount: 1,
+      bestPrice: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://shop.example',
+        favicon: 'https://shop.example/favicon.ico',
+        condition: 'NEW',
+        offerName: 'Shop offer',
+      },
+      bestNewOffer: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://shop.example',
+        favicon: 'https://shop.example/favicon.ico',
+        condition: 'NEW',
+        offerName: 'Shop offer',
+      },
+      offersByCondition: {
+        NEW: [
+          {
+            price: 799,
+            currency: 'EUR',
+            datasourceName: 'Shop',
+            url: 'https://shop.example',
+            favicon: 'https://shop.example/favicon.ico',
+            condition: 'NEW',
+            offerName: 'Shop offer',
+          },
+        ],
+      },
+    })
+
+    expect(
+      wrapper.find('.product-hero__pricing-panel-alternatives').exists()
+    ).toBe(false)
+
+    await wrapper.unmount()
+  })
+
+  it('renders unified empty state when no condition has offers', async () => {
+    const wrapper = await createWrapper({
+      offersCount: 0,
+    })
+
+    expect(wrapper.find('.product-hero__pricing-empty').exists()).toBe(true)
+    expect(wrapper.findAll('.product-hero__pricing-panel')).toHaveLength(0)
 
     await wrapper.unmount()
   })
