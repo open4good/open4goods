@@ -17,9 +17,18 @@
         <p class="text-h6 text-center mb-2">
           {{ t('categories.navigation.grid.emptyTitle') }}
         </p>
-        <p class="text-body-2 text-neutral-secondary text-center mb-0">
+        <p class="text-body-2 text-neutral-secondary text-center mb-5">
           {{ t('categories.navigation.grid.emptySubtitle') }}
         </p>
+        <v-btn
+          v-if="isFiltering"
+          color="primary"
+          variant="flat"
+          prepend-icon="mdi-close-circle-outline"
+          @click="emit('clear-search')"
+        >
+          {{ t('categories.navigation.grid.clearSearch') }}
+        </v-btn>
       </div>
 
       <v-row v-else :gap="24" align="stretch">
@@ -34,100 +43,106 @@
             class="category-navigation-grid__card"
             :aria-label="ariaLabel(category.title)"
           >
-            <v-card
-              class="h-100 d-flex flex-column"
-              elevation="0"
-              variant="tonal"
-            >
-              <v-img
-                v-if="category.vertical?.imageMedium"
-                :src="category.vertical.imageMedium"
-                :alt="
-                  category.vertical?.verticalHomeTitle ?? category.title ?? ''
-                "
-                class="category-navigation-grid__image"
-                cover
-              />
+            <v-hover v-slot="{ isHovering, props: hoverProps }">
+              <v-card
+                v-bind="hoverProps"
+                class="category-navigation-grid__surface h-100 d-flex flex-column"
+                :class="{
+                  'category-navigation-grid__surface--hover': isHovering,
+                }"
+                :elevation="isHovering ? 6 : 1"
+                variant="flat"
+              >
+                <v-img
+                  v-if="category.vertical?.imageMedium"
+                  :src="category.vertical.imageMedium"
+                  :alt="
+                    category.vertical?.verticalHomeTitle ?? category.title ?? ''
+                  "
+                  class="category-navigation-grid__image"
+                  cover
+                />
 
-              <div class="category-navigation-grid__card-body">
-                <div class="d-flex align-center justify-space-between mb-2">
-                  <v-chip
-                    v-if="category.hasVertical"
-                    color="accent-supporting"
-                    size="small"
-                    variant="flat"
-                    prepend-icon="mdi-star-outline"
+                <div class="category-navigation-grid__card-body">
+                  <div class="category-navigation-grid__chips">
+    
+                    <v-chip
+                      v-if="category.hasVertical"
+                      color="accent-supporting"
+                      size="small"
+                      variant="flat"
+                      prepend-icon="mdi-star-outline"
+                    >
+                      {{ t('categories.navigation.grid.verticalLabel') }}
+                    </v-chip>
+                    <v-chip
+                      v-if="category.leaf"
+                      color="surface-primary-120"
+                      size="small"
+                      variant="text"
+                    >
+                      {{ t('categories.navigation.grid.leafLabel') }}
+                    </v-chip>
+                  </div>
+
+                  <h3 class="text-h5 font-weight-semibold mb-2">
+                    {{ category.title }}
+                  </h3>
+
+                  <p
+                    v-if="category.vertical?.verticalHomeDescription"
+                    class="text-body-2 mb-4 text-neutral-secondary category-navigation-grid__description"
                   >
-                    {{ t('categories.navigation.grid.verticalLabel') }}
-                  </v-chip>
-                  <v-chip
-                    v-if="category.leaf"
-                    color="surface-primary-120"
-                    size="small"
-                    variant="text"
+                    {{ category.vertical.verticalHomeDescription }}
+                  </p>
+
+                  <ul
+                    v-if="childrenPreview(category).length"
+                    class="category-navigation-grid__children"
                   >
-                    {{ t('categories.navigation.grid.leafLabel') }}
-                  </v-chip>
+                    <li
+                      v-for="child in childrenPreview(category)"
+                      :key="child.slug ?? child.googleCategoryId"
+                    >
+                      <v-icon icon="mdi-chevron-right" size="14" />
+                      <span>{{ child.title }}</span>
+                    </li>
+                  </ul>
                 </div>
 
-                <h3 class="text-h5 font-weight-semibold mb-2">
-                  {{ category.title }}
-                </h3>
-
-                <p
-                  v-if="category.vertical?.verticalHomeDescription"
-                  class="text-body-2 mb-4 text-neutral-secondary"
-                >
-                  {{ category.vertical.verticalHomeDescription }}
-                </p>
-
-                <ul
-                  v-if="childrenPreview(category).length"
-                  class="category-navigation-grid__children"
-                >
-                  <li
-                    v-for="child in childrenPreview(category)"
-                    :key="child.slug ?? child.googleCategoryId"
+                <v-card-actions class="category-navigation-grid__actions">
+                  <v-btn
+                    v-if="normalizedCategoryPath(category.path)"
+                    :to="`/categories/${normalizedCategoryPath(category.path)}`"
+                    color="primary"
+                    variant="flat"
+                    append-icon="mdi-arrow-right"
+                    :aria-label="
+                      t('categories.navigation.grid.openSubcategory', {
+                        category: category.title,
+                      })
+                    "
                   >
-                    {{ child.title }}
-                  </li>
-                </ul>
-              </div>
+                    {{ t('categories.navigation.grid.openSubcategoryCta') }}
+                  </v-btn>
 
-              <div class="category-navigation-grid__actions">
-                <NuxtLink
-                  v-if="normalizedCategoryPath(category.path)"
-                  :to="`/categories/${normalizedCategoryPath(category.path)}`"
-                  class="category-navigation-grid__link"
-                  :aria-label="
-                    t('categories.navigation.grid.openSubcategory', {
-                      category: category.title,
-                    })
-                  "
-                >
-                  <span>{{
-                    t('categories.navigation.grid.openSubcategoryCta')
-                  }}</span>
-                  <v-icon icon="mdi-arrow-right" size="small" />
-                </NuxtLink>
-
-                <NuxtLink
-                  v-if="category.vertical?.verticalHomeUrl"
-                  :to="`/${category.vertical.verticalHomeUrl}`"
-                  class="category-navigation-grid__link"
-                  :aria-label="
-                    t('categories.navigation.grid.viewVertical', {
-                      category: category.title,
-                    })
-                  "
-                >
-                  <span>{{
-                    t('categories.navigation.grid.viewVerticalCta')
-                  }}</span>
-                  <v-icon icon="mdi-open-in-new" size="small" />
-                </NuxtLink>
-              </div>
-            </v-card>
+                  <v-btn
+                    v-if="category.vertical?.verticalHomeUrl"
+                    :to="`/${category.vertical.verticalHomeUrl}`"
+                    color="primary"
+                    variant="text"
+                    append-icon="mdi-open-in-new"
+                    :aria-label="
+                      t('categories.navigation.grid.viewVertical', {
+                        category: category.title,
+                      })
+                    "
+                  >
+                    {{ t('categories.navigation.grid.viewVerticalCta') }}
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-hover>
           </article>
         </v-col>
       </v-row>
@@ -140,8 +155,18 @@ import type { CategoryNavigationDtoChildCategoriesInner } from '~~/shared/api-cl
 import { useI18n } from 'vue-i18n'
 import { normalizeCategoryPath } from '~/utils/normalizeCategoryPath'
 
-const { categories } = defineProps<{
-  categories: CategoryNavigationDtoChildCategoriesInner[]
+withDefaults(
+  defineProps<{
+    categories: CategoryNavigationDtoChildCategoriesInner[]
+    isFiltering?: boolean
+  }>(),
+  {
+    isFiltering: false,
+  }
+)
+
+const emit = defineEmits<{
+  (event: 'clear-search'): void
 }>()
 
 const { t } = useI18n()
@@ -191,8 +216,39 @@ defineExpose({
   flex: 1;
 }
 
+.category-navigation-grid__surface {
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.22);
+  background: rgb(var(--v-theme-surface-default));
+  border-radius: 18px;
+  overflow: hidden;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.category-navigation-grid__surface--hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--v-theme-primary), 0.38);
+}
+
 .category-navigation-grid__image {
   height: 180px;
+}
+
+.category-navigation-grid__chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.category-navigation-grid__description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .category-navigation-grid__children {
@@ -205,26 +261,17 @@ defineExpose({
   font-size: 0.9rem;
 }
 
+.category-navigation-grid__children li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .category-navigation-grid__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  padding: 0 1.5rem 1.5rem;
-}
-
-.category-navigation-grid__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 600;
-  color: rgb(var(--v-theme-primary));
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.category-navigation-grid__link:hover,
-.category-navigation-grid__link:focus-visible {
-  color: rgb(var(--v-theme-accent-supporting));
+  padding: 0 1.5rem 1.5rem !important;
 }
 
 @media (min-width: 1280px) {

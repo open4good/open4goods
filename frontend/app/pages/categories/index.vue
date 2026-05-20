@@ -11,16 +11,29 @@
       :breadcrumb-aria-label="
         t('categories.navigation.hero.breadcrumbAriaLabel')
       "
+      :clear-label="t('common.actions.clear')"
+      @clear="clearSearch"
     />
 
-    <v-progress-linear
-      v-if="pending"
-      indeterminate
-      color="primary"
-      class="categories-page__loader"
-      :aria-label="t('categories.navigation.loading')"
-      role="status"
-    />
+    <v-fade-transition mode="out-in">
+      <v-container
+        v-if="pending"
+        class="categories-page__skeleton py-12 px-4"
+        max-width="xl"
+        :aria-label="t('categories.navigation.loading')"
+        role="status"
+      >
+        <v-row align="stretch">
+          <v-col v-for="index in 6" :key="index" cols="12" md="6" lg="4">
+            <v-skeleton-loader
+              type="image, article, actions"
+              elevation="1"
+              class="categories-page__skeleton-card"
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-fade-transition>
 
     <v-container v-if="error" class="py-10 px-4" max-width="xl">
       <v-alert
@@ -38,14 +51,16 @@
       </v-btn>
     </v-container>
 
-    <CategoryNavigationVerticalHighlights
-      v-if="navigationData"
-      :verticals="highlightedVerticals"
-    />
-
     <CategoryNavigationGrid
       v-if="navigationData"
       :categories="filteredCategories"
+      :is-filtering="hasSearch"
+      @clear-search="clearSearch"
+    />
+
+    <CategoryNavigationVerticalHighlights
+      v-if="navigationData"
+      :verticals="highlightedVerticals"
     />
   </div>
 </template>
@@ -53,7 +68,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { CategoryNavigationDto } from '~~/shared/api-client'
+import type {
+  CategoryNavigationDto,
+  CategoryNavigationDtoChildCategoriesInner,
+} from '~~/shared/api-client'
 
 import CategoryNavigationGrid from '~/components/category/navigation/CategoryNavigationGrid.vue'
 import CategoryNavigationHero from '~/components/category/navigation/CategoryNavigationHero.vue'
@@ -67,6 +85,10 @@ const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const searchTerm = ref('')
+const normalizedSearchTerm = computed(() =>
+  normalizeSearchValue(searchTerm.value)
+)
+const hasSearch = computed(() => normalizedSearchTerm.value.length > 0)
 
 const { data, pending, error, refresh } =
   await useAsyncData<CategoryNavigationDto>(
@@ -142,37 +164,67 @@ const breadcrumbs = computed(() => {
 
 const filteredCategories = computed(() => {
   const categories = navigationData.value?.childCategories ?? []
-  if (!searchTerm.value.trim()) {
+  if (!hasSearch.value) {
     return categories
   }
 
-  const query = searchTerm.value.trim().toLowerCase()
-  return categories.filter(
-    category => category.title?.toLowerCase().includes(query) ?? false
+  return categories.filter(category =>
+    [
+      category.title,
+      category.slug,
+      category.path,
+      category.vertical?.verticalHomeTitle,
+      category.vertical?.verticalHomeDescription,
+      ...childrenSearchLabels(category),
+    ].some(value =>
+      normalizeSearchValue(value).includes(normalizedSearchTerm.value)
+    )
   )
 })
 
 const highlightedVerticals = computed(() => {
   const verticals = navigationData.value?.descendantVerticals ?? []
-  if (!searchTerm.value.trim()) {
+  if (!hasSearch.value) {
     return verticals
   }
 
-  const query = searchTerm.value.trim().toLowerCase()
-  return verticals.filter(
-    vertical =>
-      (vertical.title?.toLowerCase().includes(query) ?? false) ||
-      (vertical.vertical?.verticalHomeTitle?.toLowerCase().includes(query) ??
-        false)
+  return verticals.filter(vertical =>
+    [
+      vertical.title,
+      vertical.slug,
+      vertical.path,
+      vertical.vertical?.verticalHomeTitle,
+      vertical.vertical?.verticalHomeDescription,
+    ].some(value =>
+      normalizeSearchValue(value).includes(normalizedSearchTerm.value)
+    )
   )
 })
 
 const resultSummary = computed(() =>
   translatePlural(
     'categories.navigation.hero.resultsSummary',
-    filteredCategories.value.length
+    filteredCategories.value.length + highlightedVerticals.value.length
   )
 )
+
+const clearSearch = () => {
+  searchTerm.value = ''
+}
+
+const normalizeSearchValue = (value?: string | number | null) =>
+  String(value ?? '')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .trim()
+
+const childrenSearchLabels = (
+  category: CategoryNavigationDtoChildCategoriesInner
+) =>
+  (category.children ?? [])
+    .map(child => child.title)
+    .filter((title): title is string => Boolean(title))
 
 const httpsOrigin = computed(() => {
   const url = new URL(requestURL.origin)
@@ -255,7 +307,12 @@ useHead(() => ({
 </script>
 
 <style scoped>
-.categories-page__loader {
-  margin: -0.5rem 0 0;
+.categories-page__skeleton {
+  background: rgb(var(--v-theme-surface-default));
+}
+
+.categories-page__skeleton-card {
+  border-radius: 16px;
+  overflow: hidden;
 }
 </style>

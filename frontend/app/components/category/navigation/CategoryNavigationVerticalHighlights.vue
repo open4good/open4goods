@@ -1,20 +1,21 @@
 <template>
-  <section v-if="verticals.length" class="category-navigation-verticals">
+  <section v-if="linkedVerticals.length" class="category-navigation-verticals">
     <v-container class="py-12 px-4" max-width="xl">
       <header class="category-navigation-verticals__header">
-        <div>
-          <h2 class="text-h4 text-md-h3 font-weight-bold mb-2 text-center">
-            {{ t('categories.navigation.verticals.title') }}
-          </h2>
-          <p class="text-body-2 text-neutral-secondary mb-0 text-center">
-            {{ t('categories.navigation.verticals.subtitle') }}
-          </p>
-        </div>
+        <p class="text-overline text-primary mb-2">
+          {{ t('categories.navigation.verticals.eyebrow') }}
+        </p>
+        <h2 class="text-h5 text-md-h4 font-weight-bold mb-2">
+          {{ t('categories.navigation.verticals.title') }}
+        </h2>
+        <p class="text-body-2 text-neutral-secondary mb-0">
+          {{ t('categories.navigation.verticals.subtitle') }}
+        </p>
       </header>
 
       <v-row :gap="24" align="stretch">
         <v-col
-          v-for="verticalCategory in limitedVerticals"
+          v-for="verticalCategory in linkedVerticals"
           :key="
             verticalCategory.path ??
             verticalCategory.slug ??
@@ -25,44 +26,52 @@
           lg="4"
         >
           <article class="category-navigation-verticals__card">
-            <v-sheet
-              v-if="verticalCategory.vertical?.verticalHomeUrl"
-              class="category-navigation-verticals__sheet cursor-pointer"
-              rounded="xl"
-              elevation="8"
-              role="link"
-              @click="
-                navigateToCategory(verticalCategory.vertical.verticalHomeUrl)
-              "
-            >
-              <div class="category-navigation-verticals__media">
-                <v-img
-                  v-if="verticalCategory.vertical?.imageLarge"
-                  :src="verticalCategory.vertical.imageLarge"
-                  :alt="
-                    verticalCategory.vertical?.verticalHomeTitle ??
-                    verticalCategory.title ??
-                    ''
-                  "
-                  cover
-                />
-                <div
-                  v-else
-                  class="category-navigation-verticals__media-placeholder"
-                >
-                  <v-icon icon="mdi-image-outline" size="36" />
+            <v-hover v-slot="{ isHovering, props: hoverProps }">
+              <v-card
+                v-bind="hoverProps"
+                :to="verticalRoute(verticalCategory)"
+                class="category-navigation-verticals__sheet"
+                :class="{
+                  'category-navigation-verticals__sheet--hover': isHovering,
+                }"
+                rounded="lg"
+                :elevation="isHovering ? 4 : 0"
+              >
+                <div class="category-navigation-verticals__media">
+                  <v-img
+                    v-if="verticalCategory.vertical?.imageLarge"
+                    :src="verticalCategory.vertical.imageLarge"
+                    :alt="
+                      verticalCategory.vertical?.verticalHomeTitle ??
+                      verticalCategory.title ??
+                      ''
+                    "
+                    cover
+                  />
+                  <div
+                    v-else
+                    class="category-navigation-verticals__media-placeholder"
+                  >
+                    <v-icon icon="mdi-image-outline" size="36" />
+                  </div>
                 </div>
-              </div>
 
-              <div class="category-navigation-verticals__content">
-                <h3 class="text-h5 font-weight-semibold mb-2">
-                  {{
-                    verticalCategory.vertical?.verticalHomeTitle ??
-                    verticalCategory.title
-                  }}
-                </h3>
-              </div>
-            </v-sheet>
+                <div class="category-navigation-verticals__content">
+                  <h3 class="text-h6 font-weight-semibold mb-0">
+                    {{
+                      verticalCategory.vertical?.verticalHomeTitle ??
+                      verticalCategory.title
+                    }}
+                  </h3>
+                  <v-icon
+                    icon="mdi-arrow-right"
+                    size="20"
+                    class="category-navigation-verticals__icon"
+                    aria-hidden="true"
+                  />
+                </div>
+              </v-card>
+            </v-hover>
           </article>
         </v-col>
       </v-row>
@@ -81,40 +90,60 @@ const { verticals } = defineProps<{
 
 const { t } = useI18n()
 
-const limitedVerticals = computed(() => verticals.slice(0, 6))
+const linkedVerticals = computed(() =>
+  verticals
+    .filter(verticalCategory =>
+      Boolean(verticalCategory.vertical?.verticalHomeUrl?.trim())
+    )
+    .slice(0, 6)
+)
 
-const router = useRouter()
-const navigateToCategory = (url: string) => {
-  router.push(`/${url}`)
+const verticalRoute = (
+  verticalCategory: CategoryNavigationDtoChildCategoriesInner
+) => {
+  const url = verticalCategory.vertical?.verticalHomeUrl?.trim()
+  if (!url) {
+    return '/'
+  }
+
+  return url.startsWith('/') ? url : `/${url}`
 }
 </script>
 
 <style scoped>
 .category-navigation-verticals {
-  background: linear-gradient(
-    180deg,
-    rgba(var(--v-theme-surface-ice-050), 0.9),
-    rgba(var(--v-theme-surface-default), 1)
-  );
+  background: rgba(var(--v-theme-surface-muted), 0.55);
 }
 
 .category-navigation-verticals__header {
-  max-width: 720px;
-  margin-bottom: 3rem;
+  max-width: 760px;
+  margin-bottom: 2rem;
 }
 
 .category-navigation-verticals__sheet {
   display: flex;
-  flex-direction: column;
   height: 100%;
-  background: rgba(var(--v-theme-surface-glass), 0.9);
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.2);
+  min-height: 132px;
+  background: rgb(var(--v-theme-surface-default));
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.18);
   overflow: hidden;
+  text-decoration: none;
+  color: rgb(var(--v-theme-text-neutral-strong));
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.category-navigation-verticals__sheet--hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--v-theme-primary), 0.35);
 }
 
 .category-navigation-verticals__media {
   position: relative;
-  aspect-ratio: 16 / 9;
+  width: 132px;
+  flex: 0 0 132px;
   overflow: hidden;
 }
 
@@ -128,40 +157,27 @@ const navigateToCategory = (url: string) => {
 }
 
 .category-navigation-verticals__content {
-  padding: 1.5rem;
+  padding: 1.1rem;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   flex: 1;
 }
 
-.category-navigation-verticals__actions {
-  margin-top: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.category-navigation-verticals__cta,
-.category-navigation-verticals__secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.category-navigation-verticals__cta {
+.category-navigation-verticals__icon {
   color: rgb(var(--v-theme-primary));
+  flex: 0 0 auto;
 }
 
-.category-navigation-verticals__secondary {
-  color: rgb(var(--v-theme-text-neutral-secondary));
-}
+@media (max-width: 599px) {
+  .category-navigation-verticals__sheet {
+    min-height: 112px;
+  }
 
-.category-navigation-verticals__cta:hover,
-.category-navigation-verticals__cta:focus-visible,
-.category-navigation-verticals__secondary:hover,
-.category-navigation-verticals__secondary:focus-visible {
-  color: rgb(var(--v-theme-accent-supporting));
+  .category-navigation-verticals__media {
+    width: 108px;
+    flex-basis: 108px;
+  }
 }
 </style>

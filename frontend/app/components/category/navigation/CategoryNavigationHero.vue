@@ -64,13 +64,17 @@
                 :model-value="modelValue"
                 :placeholder="searchPlaceholder"
                 prepend-inner-icon="mdi-magnify"
+                clearable
+                clear-icon="mdi-close-circle-outline"
                 variant="solo"
                 density="comfortable"
                 color="primary"
                 hide-details
                 class="category-navigation-hero__search-field"
                 :aria-label="searchLabel"
+                :clear-label="clearLabel"
                 @update:model-value="onUpdateModelValue"
+                @click:clear="emit('clear')"
               />
             </div>
           </v-card>
@@ -102,15 +106,17 @@ defineProps<{
   searchPlaceholder: string
   resultSummary?: string
   breadcrumbAriaLabel: string
+  clearLabel: string
 }>()
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string): void
+  (event: 'clear'): void
 }>()
 
-const onUpdateModelValue = (value: string) => emit('update:modelValue', value)
+const onUpdateModelValue = (value: string | null) =>
+  emit('update:modelValue', value ?? '')
 
-// Moved import to top-level
 const backgroundAsset = useThemeAsset('categoriesBackground')
 </script>
 
@@ -146,7 +152,7 @@ const backgroundAsset = useThemeAsset('categoriesBackground')
 
 .category-navigation-hero__title
   margin: 0
-  font-size: clamp(2.4rem, 5vw, 3.5rem)
+  font-size: clamp(2.35rem, 3.05rem, 3.5rem)
   line-height: 1.1
   color: rgba(var(--v-theme-text-neutral-strong), 1)
 
@@ -176,14 +182,9 @@ const backgroundAsset = useThemeAsset('categoriesBackground')
 .category-navigation-hero__search-label
   margin: 0
   font-size: 0.85rem
-  letter-spacing: 0.08em
+  letter-spacing: 0
   text-transform: uppercase
   color: rgba(var(--v-theme-text-neutral-strong), 0.9)
-
-/* --- Correctif contraste (light & dark) --- */
-/* On force le champ à utiliser des tokens "surface/text" neutres,
-   plutôt que des tokens "hero overlay" (souvent blancs). */
-
 
 .category-navigation-hero__search-field :deep(.v-field)
   border-radius: 16px
@@ -193,20 +194,16 @@ const backgroundAsset = useThemeAsset('categoriesBackground')
 .category-navigation-hero__search-field :deep(.v-field__overlay)
   opacity: 0
 
-/* Texte saisi */
 .category-navigation-hero__search-field :deep(.v-field__input input)
   color: rgba(var(--v-theme-text-neutral-strong), 1)
 
-/* Placeholder */
 .category-navigation-hero__search-field :deep(.v-field__input input::placeholder)
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
   opacity: 1
 
-/* Icône */
 .category-navigation-hero__search-field :deep(.v-field__prepend-inner)
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
-/* Focus */
 .category-navigation-hero__search-field :deep(.v-field--focused)
   border-color: rgba(var(--v-theme-primary), 0.55)
 </style>

@@ -482,12 +482,14 @@
       },
       "grid": {
         "cardAriaLabel": "Carte de catégorie {category}",
+        "clearSearch": "Effacer la recherche",
         "emptySubtitle": "Modifier la recherche pour afficher des catégories pertinentes.",
         "emptyTitle": "Aucune catégorie trouvée",
         "leafLabel": "Feuille",
         "openSubcategory": "Ouvrir les sous-catégories de {category}",
         "openSubcategoryCta": "Voir les sous-catégories",
-        "subtitle": "Choisissez une famille pour afficher ses sous-catégories ou découvrir nos guides.",
+        "subtitle": "Choisissez une famille de produits pour parcourir sa taxonomie et trouver plus vite le bon rayon.",
+        "taxonomyLabel": "Taxonomie",
         "title": "Parcourir les catégories",
         "verticalLabel": "Guide sélectionné",
         "viewVertical": "Ouvrir le guide {category}",
@@ -498,11 +500,11 @@
         "childDescription": "Explorez les sous-catégories et les sélections associées aux {category}.",
         "description": "Découvrez toutes les familles de produits analysées et accédez directement à la plus pertinente.",
         "resultsSummary": {
-          "one": "{count} catégorie affichée",
-          "other": "{count} catégories affichées"
+          "one": "{count} résultat affiché",
+          "other": "{count} résultats affichés"
         },
         "rootBreadcrumb": "Toutes les catégories",
-        "rootProductsTitle": "Les produits disponibles",
+        "rootProductsTitle": "Catégories de produits",
         "searchLabel": "Rechercher une catégorie",
         "searchPlaceholder": "Tapez le nom d'une catégorie",
         "title": "Toutes les catégories de produits"
@@ -512,8 +514,8 @@
         "eyebrow": "Guides mis en avant",
         "openVertical": "Ouvrir le guide {category}",
         "openVerticalCta": "Découvrir le guide",
-        "subtitle": "Les produits de ces catégories disposent d'une évaluation environnementale",
-        "title": "Catégories populaires",
+        "subtitle": "Une sélection courte de guides reste disponible après le parcours taxonomique.",
+        "title": "Guides mis en avant",
         "viewPath": "Ouvrir le chemin taxonomique {category}",
         "viewPathCta": "Parcourir la taxonomie"
       }
@@ -859,7 +861,8 @@
     "actions": {
       "goHome": "Retour à l'accueil",
       "retry": "Réessayer",
-      "close": "Fermer"
+      "close": "Fermer",
+      "clear": "Effacer"
     },
     "boolean": {
       "false": "Non",
