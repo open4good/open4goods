@@ -137,7 +137,8 @@ class EprelCompletionServiceTest {
     }
 
     @Test
-    void processProductRejectsSingleResultWithoutModelEvidence() {
+    void processProductRejectsSingleResultWithoutModelEvidence()
+    {
         product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Indesit");
 
         EprelProduct unrelated = new EprelProduct();
@@ -153,5 +154,47 @@ class EprelCompletionServiceTest {
 
         assertThat(product.getEprelDatas()).isNull();
         assertThat(product.getExternalIds().getEprel()).isNull();
+    }
+
+    @Test
+    void processProductMatchesSingleResultWithShorterCandidateModel()
+    {
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Indesit");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "IM 760");
+
+        EprelProduct matching = new EprelProduct();
+        matching.setEprelRegistrationNumber("matching-shorter");
+        matching.setModelIdentifier("IM 760 MY TIME IT");
+        matching.setLastVersion(true);
+        matching.setSupplierOrTrademark("INDESIT");
+
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection()))
+                .thenReturn(List.of(matching));
+
+        service.processProduct(vertical, product);
+
+        assertThat(product.getEprelDatas()).isEqualTo(matching);
+        assertThat(product.getExternalIds().getEprel()).isEqualTo("matching-shorter");
+    }
+
+    @Test
+    void processProductMatchesSingleResultWithCompactContainment()
+    {
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Mitsubishi Electric");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "PUZ-SM100YKA");
+
+        EprelProduct matching = new EprelProduct();
+        matching.setEprelRegistrationNumber("matching-compact");
+        matching.setModelIdentifier("PEAD-SM100JA / PUZ-SM100YKA");
+        matching.setLastVersion(true);
+        matching.setSupplierOrTrademark("Mitsubishi Electric");
+
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection()))
+                .thenReturn(List.of(matching));
+
+        service.processProduct(vertical, product);
+
+        assertThat(product.getEprelDatas()).isEqualTo(matching);
+        assertThat(product.getExternalIds().getEprel()).isEqualTo("matching-compact");
     }
 }

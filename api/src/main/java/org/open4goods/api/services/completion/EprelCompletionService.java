@@ -179,10 +179,29 @@ public class EprelCompletionService extends AbstractCompletionService {
         List<EprelProduct> modelMatches = narrowed.stream()
                 .filter(candidate -> hasModelEvidence(candidate, modelCandidates))
                 .toList();
-        if (modelMatches.size() == 1) {
+        if (modelMatches.size() == 1)
+        {
             logger.info("Model label filter reduced {} EPREL results to 1 for {}-{}", results.size(), product.brand(),
                     product.model());
             return Optional.of(modelMatches.getFirst());
+        }
+        if (modelMatches.size() > 1)
+        {
+            int highestScore = modelMatches.stream()
+                    .mapToInt(c -> getModelEvidenceScore(c, modelCandidates))
+                    .max()
+                    .orElse(0);
+
+            List<EprelProduct> bestMatches = modelMatches.stream()
+                    .filter(c -> getModelEvidenceScore(c, modelCandidates) == highestScore)
+                    .toList();
+
+            if (bestMatches.size() == 1)
+            {
+                logger.info("Model label filter (best score) reduced {} EPREL results to 1 for {}-{}",
+                        results.size(), product.brand(), product.model());
+                return Optional.of(bestMatches.getFirst());
+            }
         }
         return Optional.empty();
     }
@@ -193,16 +212,40 @@ public class EprelCompletionService extends AbstractCompletionService {
      * @param product source product
      * @return model candidates
      */
-    private List<String> modelCandidates(Product product) {
+    private List<String> modelCandidates(Product product)
+    {
         Set<String> candidates = new LinkedHashSet<>();
-        if (product.model() != null) {
+        if (product.model() != null)
+        {
             candidates.add(product.model());
         }
-        if (product.getAkaModels() != null) {
+        if (product.getAkaModels() != null)
+        {
             product.getAkaModels().stream()
                     .filter(Objects::nonNull)
                     .forEach(candidates::add);
         }
+
+        List<String> baseCandidates = new ArrayList<>(candidates);
+        for (String base : baseCandidates)
+        {
+            String hyphenated = base.replace(' ', '-').replaceAll("-+", "-");
+            if (!hyphenated.equalsIgnoreCase(base))
+            {
+                candidates.add(hyphenated);
+            }
+            String spaced = NON_ALNUM.matcher(base).replaceAll(" ").replaceAll(" +", " ").trim();
+            if (!spaced.equalsIgnoreCase(base) && !spaced.isEmpty())
+            {
+                candidates.add(spaced);
+            }
+            String compact = NON_ALNUM.matcher(base).replaceAll("");
+            if (!compact.equalsIgnoreCase(base) && !compact.isEmpty())
+            {
+                candidates.add(compact);
+            }
+        }
+
         return new ArrayList<>(candidates);
     }
 
@@ -251,29 +294,49 @@ public class EprelCompletionService extends AbstractCompletionService {
      * @param modelCandidates product model labels
      * @return true when model identifiers match exactly or by safe containment
      */
-    private boolean hasModelEvidence(EprelProduct candidate, List<String> modelCandidates) {
+    private boolean hasModelEvidence(EprelProduct candidate, List<String> modelCandidates)
+    {
+        return getModelEvidenceScore(candidate, modelCandidates) > 0;
+    }
+
+    private int getModelEvidenceScore(EprelProduct candidate, List<String> modelCandidates)
+    {
         String eprelModel = candidate == null ? null : candidate.getModelIdentifier();
         String normalizedEprelModel = normalizePhrase(eprelModel);
         String compactEprelModel = compactModel(eprelModel);
-        if (normalizedEprelModel == null || compactEprelModel == null) {
-            return false;
+        if (normalizedEprelModel == null || compactEprelModel == null)
+        {
+            return 0;
         }
 
-        for (String modelCandidate : modelCandidates) {
+        int maxScore = 0;
+        for (String modelCandidate : modelCandidates)
+        {
             String normalizedCandidate = normalizePhrase(modelCandidate);
             String compactCandidate = compactModel(modelCandidate);
-            if (normalizedCandidate == null || compactCandidate == null) {
+            if (normalizedCandidate == null || compactCandidate == null)
+            {
                 continue;
             }
             if (normalizedEprelModel.equals(normalizedCandidate)
-                    || compactEprelModel.equals(compactCandidate)
-                    || containsWholePhrase(normalizedCandidate, normalizedEprelModel)
+                    || compactEprelModel.equals(compactCandidate))
+            {
+                maxScore = Math.max(maxScore, 3);
+            }
+            else if (containsWholePhrase(normalizedCandidate, normalizedEprelModel)
                     || (compactEprelModel.length() >= MIN_COMPACT_MODEL_CONTAINMENT_LENGTH
-                            && compactCandidate.contains(compactEprelModel))) {
-                return true;
+                            && compactCandidate.contains(compactEprelModel)))
+            {
+                maxScore = Math.max(maxScore, 2);
+            }
+            else if (containsWholePhrase(normalizedEprelModel, normalizedCandidate)
+                    || (compactCandidate.length() >= MIN_COMPACT_MODEL_CONTAINMENT_LENGTH
+                            && compactEprelModel.contains(compactCandidate)))
+            {
+                maxScore = Math.max(maxScore, 1);
             }
         }
-        return false;
+        return maxScore;
     }
 
     private boolean containsWholePhrase(String container, String contained) {
