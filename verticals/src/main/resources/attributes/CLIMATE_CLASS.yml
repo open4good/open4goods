@@ -1,0 +1,28 @@
+key: "CLIMATE_CLASS"
+faIcon: "mdi-thermometer-lines"
+name:
+  default: "Climate class"
+  fr: "Classe climatique"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "CLASSE CLIMATIQUE"
+    - "CLIMATECLASS"
+    - "CLIMATE CLASS"
+    - "CLIMATECLASSN"
+    - "CLIMATECLASSSN"
+    - "CLIMATECLASSST"
+    - "CLIMATECLASST"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  tokenMatch:
+    - "SN"
+    - "N"
+    - "ST"
+    - "T"
+

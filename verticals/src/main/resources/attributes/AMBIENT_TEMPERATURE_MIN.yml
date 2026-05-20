@@ -1,0 +1,26 @@
+key: "AMBIENT_TEMPERATURE_MIN"
+faIcon: "mdi-thermometer-low"
+name:
+  default: "Minimum ambient temperature"
+  fr: "Température ambiante minimale"
+suffix:
+  default: "°C"
+  fr: "°C"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "MINAMBIENTTEMP"
+    - "MINIMUM AMBIENT TEMPERATURE"
+    - "TEMPÉRATURE AMBIANTE MINIMALE"
+    - "TEMPERATURE AMBIANTE MINIMALE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "°C"
+    - "C"
+

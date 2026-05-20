@@ -1,0 +1,27 @@
+key: "OPENING_TYPE"
+faIcon: "mdi-door-open"
+name:
+  default: "Opening type"
+  fr: "Type d'ouverture"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "OUVERTURE"
+    - "TYPE D'OUVERTURE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  tokenMatch:
+    - "1 PORTE"
+    - "2 PORTES"
+    - "AMERICAIN"
+    - "ARMOIRE"
+    - "CONGÉLATEUR BAS"
+    - "CONGÉLATEUR HAUT"
+    - "SIDE-BY-SIDE"
+    - "TIROIR"
+

@@ -1,0 +1,26 @@
+key: "AMBIENT_TEMPERATURE_MAX"
+faIcon: "mdi-thermometer-high"
+name:
+  default: "Maximum ambient temperature"
+  fr: "Température ambiante maximale"
+suffix:
+  default: "°C"
+  fr: "°C"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "MAXAMBIENTTEMP"
+    - "MAXIMUM AMBIENT TEMPERATURE"
+    - "TEMPÉRATURE AMBIANTE MAXIMALE"
+    - "TEMPERATURE AMBIANTE MAXIMALE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+    - "°C"
+    - "C"
+
