@@ -162,15 +162,12 @@ public class VerticalsConfigService {
 
 		for (VerticalConfig uc : loadFromClasspath(impactScores)) {
 			logger.info("Adding config {} from classpath", uc.getId());
-            System.out.println("DEBUG: Adding to vConfs: " + uc.getId());
 			vConfs.put(uc.getId(), uc);
 		}
 		// Switching confs
 		synchronized (configs) {
 			configs.clear();
 			configs.putAll(vConfs);
-            System.out.println("DEBUG: Configs map size: " + configs.size());
-            System.out.println("DEBUG: Configs keys: " + configs.keySet());
 		}
 
 		// Associating categoriesToVertical

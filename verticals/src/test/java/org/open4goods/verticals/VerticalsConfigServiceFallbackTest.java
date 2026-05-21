@@ -27,27 +27,6 @@ class VerticalsConfigServiceFallbackTest {
         verticalsConfigService.addConfigPath("classpath:/verticals_test/test_json_fallback.yml"); // Try specific
         verticalsConfigService.addImpactScorePath("classpath:/verticals_test/impactscores/*.yml");
         verticalsConfigService.addImpactScoreJsonPath("classpath:/verticals_test/impactscores/*.json");
-        
-        System.out.println("DEBUG PROBE: Resolving classpath:/verticals_test/*.yml");
-        try {
-            org.springframework.core.io.Resource[] res = resourceResolver.getResources("classpath:/verticals_test/*.yml");
-            System.out.println("Found: " + res.length);
-            for(org.springframework.core.io.Resource r : res) System.out.println(" - " + r.getFilename() + " (" + r.getURI() + ")");
-        } catch(Exception e) { e.printStackTrace(); }
-
-        System.out.println("DEBUG PROBE: Resolving classpath:/verticals/*.yml");
-        try {
-            org.springframework.core.io.Resource[] res = resourceResolver.getResources("classpath:/verticals/*.yml");
-            System.out.println("Found wildcards: " + res.length);
-            for(org.springframework.core.io.Resource r : res) System.out.println(" - " + r.getFilename() + " (" + r.getURI() + ")");
-        } catch(Exception e) { e.printStackTrace(); }
-
-        System.out.println("DEBUG PROBE: Resolving SPECIFIC FILE classpath:/verticals_test/test_json_fallback.yml");
-        try {
-            org.springframework.core.io.Resource[] res = resourceResolver.getResources("classpath:/verticals_test/test_json_fallback.yml");
-            System.out.println("Found specific: " + res.length);
-            if (res.length > 0) System.out.println(" - URI: " + res[0].getURI());
-        } catch(Exception e) { e.printStackTrace(); }
 
         verticalsConfigService.loadConfigs();
     }
