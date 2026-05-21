@@ -59,7 +59,6 @@ public class VerticalsConfigService {
 
 	private final List<String> configPaths = new ArrayList<>();
 	private final List<String> impactScorePaths = new ArrayList<>();
-	private final List<String> impactScoreJsonPaths = new ArrayList<>();
 
 	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:verticals/_default.yml";
 	private static final String CLASSPATH_ATTRIBUTES = "classpath*:attributes/*.yml";
@@ -105,7 +104,6 @@ public class VerticalsConfigService {
 		// Default paths
 		this.configPaths.add("classpath:/verticals/*.yml");
 		this.impactScorePaths.add("classpath:/verticals/impactscores/*.yml");
-		this.impactScoreJsonPaths.add("classpath:/verticals/impactscores/*.json");
 
 		// initial configs loads
 		loadConfigs();
@@ -123,10 +121,6 @@ public class VerticalsConfigService {
 
 	public void addImpactScorePath(String path) {
 		this.impactScorePaths.add(path);
-	}
-
-	public void addImpactScoreJsonPath(String path) {
-		this.impactScoreJsonPaths.add(path);
 	}
 
 	/**
@@ -327,7 +321,9 @@ public class VerticalsConfigService {
 			logger.error("Cannot load default impact score config from {}", CLASSPATH_IMPACT_SCORES_DEFAULT, e);
 		}
 
-		// 1. Load from YAML (Standard loading)
+		// Single source of truth: impactscores/{v}.yml. The legacy JSON overlay
+		// (injectAiResultsFromJson) was removed — every vertical now stores its
+		// criteriasPonderation, aiResult and audit fields in the same YAML file.
 		for (String path : impactScorePaths) {
 			try {
 				Resource[] resources = resourceResolver.getResources(path);
@@ -338,11 +334,28 @@ public class VerticalsConfigService {
 					try (InputStream inputStream = r.getInputStream()) {
 						ImpactScoreConfig config = serialisationService.fromYaml(inputStream, ImpactScoreConfig.class);
 
-						// Merging with default
-						if (defaultImpactScoreConfig != null && config != null) {
-							if (config.getMinDistinctValuesForSigma() == null) {
-								config.setMinDistinctValuesForSigma(defaultImpactScoreConfig.getMinDistinctValuesForSigma());
+						if (config == null) {
+							logger.warn("Empty impact score config in {}", r.getFilename());
+							continue;
+						}
+
+						// Merge with the default config for fields the vertical did not redeclare.
+						if (defaultImpactScoreConfig != null
+								&& config.getMinDistinctValuesForSigma() == null) {
+							config.setMinDistinctValuesForSigma(defaultImpactScoreConfig.getMinDistinctValuesForSigma());
+						}
+
+						// Backstop: if criteriasPonderation is missing but the aiResult carries
+						// criteria_weights, derive the ponderation map. Keeps older configs valid.
+						if ((config.getCriteriasPonderation() == null || config.getCriteriasPonderation().isEmpty())
+								&& config.getAiResult() != null
+								&& config.getAiResult().getCriteriaWeights() != null) {
+							Map<String, Double> weights = new HashMap<>();
+							for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : config.getAiResult().getCriteriaWeights()) {
+								weights.put(cw.criterion, cw.weight);
 							}
+							config.setCriteriasPonderation(weights);
+							logger.debug("Derived {} weights from aiResult for {}", weights.size(), r.getFilename());
 						}
 
 						String key = r.getFilename().replace(".yml", "");
@@ -356,75 +369,11 @@ public class VerticalsConfigService {
 			}
 		}
 
-		// 2. Inject AI Results from JSON
-		injectAiResultsFromJson(configs);
-
 		return configs;
 	}
 
 	private boolean expectedDefaultConfig(Resource r) {
 		return r.getFilename().equals(DEFAULT_CONFIG_FILENAME) || r.getFilename().equals("_default.yml");
-	}
-
-	private void injectAiResultsFromJson(Map<String, ImpactScoreConfig> configs) {
-		for (String path : impactScoreJsonPaths) {
-			try {
-				Resource[] resources = resourceResolver.getResources(path);
-				for (Resource r : resources) {
-					try (InputStream inputStream = r.getInputStream()) {
-						String filename = r.getFilename();
-						String jsonBasename = filename.substring(0, filename.lastIndexOf('.'));
-						String yamlKey = jsonBasename;
-
-						ImpactScoreConfig loadedJsonConfig = serialisationService.fromJson(inputStream, ImpactScoreConfig.class);
-
-						ImpactScoreConfig config = configs.get(yamlKey);
-						if (config == null) {
-							config = loadedJsonConfig;
-							configs.put(yamlKey, config);
-							logger.info("Created new ImpactScoreConfig for '{}' from JSON '{}' (no YAML found).", yamlKey, filename);
-						} else {
-							logger.info("Updating existing ImpactScoreConfig for '{}' from JSON '{}'.", yamlKey, filename);
-
-							if (config.getAiResult() != null && loadedJsonConfig.getAiResult() != null) {
-								logger.warn("ImpactScoreConfig for '{}' already has an aiResult loaded from YAML. It will be overwritten by the JSON file '{}'.", yamlKey, filename);
-							}
-
-							if (loadedJsonConfig.getAiResult() != null) {
-								config.setAiResult(loadedJsonConfig.getAiResult());
-							}
-							if (loadedJsonConfig.getCriteriasPonderation() != null && !loadedJsonConfig.getCriteriasPonderation().isEmpty()) {
-								config.setCriteriasPonderation(loadedJsonConfig.getCriteriasPonderation());
-							}
-							if (loadedJsonConfig.getYamlPrompt() != null) {
-								config.setYamlPrompt(loadedJsonConfig.getYamlPrompt());
-							}
-							if (loadedJsonConfig.getAiJsonResponse() != null) {
-								config.setAiJsonResponse(loadedJsonConfig.getAiJsonResponse());
-							}
-						}
-
-						// Fallback: If AI result has weights but not explicitly saved in criteriasPonderation, map them.
-						// This helps support older or simpler configurations if applicable.
-						if (config.getCriteriasPonderation() == null || config.getCriteriasPonderation().isEmpty()) {
-							if (config.getAiResult() != null && config.getAiResult().getCriteriaWeights() != null) {
-								Map<String, Double> weights = new HashMap<>();
-								for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : config.getAiResult().getCriteriaWeights()) {
-									weights.put(cw.criterion, cw.weight);
-								}
-								config.setCriteriasPonderation(weights);
-								logger.debug("Mapped {} weights from JSON for {}", weights.size(), yamlKey);
-							}
-						}
-
-					} catch (Exception e) {
-						logger.error("Error loading impact score JSON {}", r.getFilename(), e);
-					}
-				}
-			} catch (IOException e) {
-				logger.warn("Cannot load impact score JSONs from {}", path, e);
-			}
-		}
 	}
 
 	private Map<String, AttributeConfig> loadAttributeCatalog() {

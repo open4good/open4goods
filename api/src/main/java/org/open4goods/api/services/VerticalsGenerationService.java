@@ -674,11 +674,16 @@ public class VerticalsGenerationService {
 
     private Map<String, Object> buildEcoscoreContext(VerticalConfig vConf) {
         Map<String, Object> context = new HashMap<>();
-        String availableCriterias = getCriterias(vConf);
+
+        Map<String, Long> coverage = repository.scoresCoverage(vConf);
+        long totalProducts = repository.countMainIndexTotal(vConf.getId());
+
+        String availableCriterias = getCriterias(vConf, coverage, totalProducts);
         if (StringUtils.isBlank(availableCriterias)) {
             LOGGER.warn("AVAILABLE_CRITERIAS is empty for vertical {}", vConf.getId());
         }
         context.put("AVAILABLE_CRITERIAS", availableCriterias);
+
         String verticalName = null;
         if (vConf.getI18n() != null && vConf.getI18n().get("fr") != null) {
             verticalName = vConf.getI18n().get("fr").getVerticalHomeTitle();
@@ -687,22 +692,60 @@ public class VerticalsGenerationService {
             LOGGER.warn("VERTICAL_NAME is missing for vertical {}", vConf.getId());
         }
         context.put("VERTICAL_NAME", verticalName);
+
+        // Grounding stats: lets the LLM weight criteria by real data coverage rather
+        // than by a-priori assumptions. coverage > 0 also means the criterion is
+        // currently scored on prod ES (post-batch); see ProductRepository.scoresCoverage.
+        context.put("TOTAL_PRODUCTS", totalProducts);
+        context.put("CRITERIAS_STATS", formatCriteriasStats(vConf, coverage, totalProducts));
+
         return context;
     }
 
-    private String getCriterias(VerticalConfig vConf) {
-        Map<String, Long> criterias = repository.scoresCoverage(vConf);
+    private String getCriterias(VerticalConfig vConf, Map<String, Long> coverage, long totalProducts) {
         StringBuilder ret = new StringBuilder();
-        criterias.forEach((key, value) -> {
+        coverage.forEach((key, count) -> {
             ret.append("  ").append(key).append(" : ");
             Optional.ofNullable(vConf.getAttributesConfig())
                     .map(c -> c.getAttributeConfigByKey(key))
                     .map(AttributeConfig::getScoreDescription)
                     .map(d -> d.get("fr"))
                     .ifPresentOrElse(ret::append, () -> ret.append(key));
+            ret.append(" — coverage ").append(formatCoverage(count, totalProducts));
             ret.append("\n");
         });
         return ret.toString();
+    }
+
+    /**
+     * Markdown table of per-criterion coverage stats, ordered by coverage descending.
+     * Injected into the LLM prompt under the {@code CRITERIAS_STATS} variable so the
+     * model can ground its weights in actual data density rather than priors.
+     */
+    private String formatCriteriasStats(VerticalConfig vConf, Map<String, Long> coverage, long totalProducts) {
+        if (coverage == null || coverage.isEmpty() || totalProducts <= 0) {
+            return "Aucune statistique disponible (vertical non scoré ou index vide).";
+        }
+        StringBuilder ret = new StringBuilder();
+        ret.append("Total produits indexés pour la verticale : ").append(totalProducts).append("\n");
+        ret.append("| criterion | products_with_score | coverage |\n");
+        ret.append("|---|---|---|\n");
+        coverage.entrySet().stream()
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .forEach(entry -> ret.append("| ")
+                        .append(entry.getKey()).append(" | ")
+                        .append(entry.getValue()).append(" | ")
+                        .append(formatCoverage(entry.getValue(), totalProducts))
+                        .append(" |\n"));
+        return ret.toString();
+    }
+
+    private static String formatCoverage(long count, long total) {
+        if (total <= 0) {
+            return count + " / 0";
+        }
+        double pct = (count * 100.0) / total;
+        return String.format("%d / %d (%.1f%%)", count, total, pct);
     }
 
     // -----------------------------------------------------------------------

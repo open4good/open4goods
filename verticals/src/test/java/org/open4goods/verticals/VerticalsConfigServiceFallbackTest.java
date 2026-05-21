@@ -11,6 +11,12 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+/**
+ * Validates that an {@link ImpactScoreConfig} loaded from a single YAML file
+ * exposes both the manual fields (minDistinctValuesForSigma, criteriasPonderation)
+ * and the AI-result audit graph. The legacy JSON overlay was removed in favour
+ * of a single source of truth (impactscores/{v}.yml).
+ */
 class VerticalsConfigServiceFallbackTest {
 
     private static VerticalsConfigService verticalsConfigService;
@@ -21,41 +27,42 @@ class VerticalsConfigServiceFallbackTest {
         GoogleTaxonomyService googleTaxonomyService = mock(GoogleTaxonomyService.class);
         ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
         verticalsConfigService = new VerticalsConfigService(serialisationService, googleTaxonomyService, resourceResolver);
-        
-        // Add test specific paths
+
         verticalsConfigService.addConfigPath("classpath:/verticals_test/*.yml");
-        verticalsConfigService.addConfigPath("classpath:/verticals_test/test_json_fallback.yml"); // Try specific
+        verticalsConfigService.addConfigPath("classpath:/verticals_test/test_json_fallback.yml");
         verticalsConfigService.addImpactScorePath("classpath:/verticals_test/impactscores/*.yml");
-        verticalsConfigService.addImpactScoreJsonPath("classpath:/verticals_test/impactscores/*.json");
 
         verticalsConfigService.loadConfigs();
     }
 
     @Test
-    void shouldInjectAiResultFromJson() {
+    void shouldLoadFullImpactScoreConfigFromSingleYaml() {
         VerticalConfig verticalConfig = verticalsConfigService.getConfigById("test_json_fallback");
-        
+
         assertThat(verticalConfig).isNotNull();
         ImpactScoreConfig impactScoreConfig = verticalConfig.getImpactScoreConfig();
-        
+
         assertThat(impactScoreConfig).isNotNull();
-        
-        // Verify standard YAML properties are loaded
+
         assertThat(impactScoreConfig.getMinDistinctValuesForSigma())
-            .as("Min distinct values for sigma from YAML")
+            .as("minDistinctValuesForSigma carried by the YAML")
             .isEqualTo(5);
-            
-        // Verify AI Result is injected
+
+        assertThat(impactScoreConfig.getCriteriasPonderation())
+            .as("criteriasPonderation carried by the YAML")
+            .containsEntry("TEST_CRITERIA", 0.5)
+            .containsEntry("ANOTHER_CRITERIA", 0.5);
+
         assertThat(impactScoreConfig.getAiResult())
-            .as("AI Result should be injected from JSON")
+            .as("AI result carried by the YAML (formerly the JSON overlay)")
             .isNotNull();
-            
+
         assertThat(impactScoreConfig.getAiResult().getUseCase())
-            .as("UseCase from injected JSON")
+            .as("useCase from the YAML's aiResult")
             .isEqualTo("consumer_comparison");
-            
+
         assertThat(impactScoreConfig.getAiResult().getVertical())
-            .as("Vertical from injected JSON")
+            .as("vertical from the YAML's aiResult")
             .isEqualTo("test_vertical");
     }
 }

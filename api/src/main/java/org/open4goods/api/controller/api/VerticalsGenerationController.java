@@ -15,7 +15,9 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,9 +69,26 @@ public class VerticalsGenerationController {
     }
 
     @GetMapping(path = "/{vertical}/ecoscore/")
-    @Operation(summary = "Run the ecoscore LLM prompt and return YAML content for impactscores/{vertical}.yml")
-    @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-    public String generateEcoscoreMappings(@PathVariable String vertical)
+    @Operation(
+        summary = "Run the ecoscore LLM prompt and return YAML content for impactscores/{vertical}.yml",
+        description = "Cached for 1h per vertical. Pass force=true to evict the entry and re-run the LLM "
+                + "(useful when iterating during Phase E of the category playbook)."
+    )
+    @Caching(
+        cacheable = @Cacheable(
+            cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
+            key = "'ecoscore:' + #vertical",
+            condition = "!#force"
+        ),
+        evict = @CacheEvict(
+            cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
+            key = "'ecoscore:' + #vertical",
+            condition = "#force",
+            beforeInvocation = true
+        )
+    )
+    public String generateEcoscoreMappings(@PathVariable String vertical,
+            @RequestParam(name = "force", defaultValue = "false") boolean force)
             throws ResourceNotFoundException, IOException {
         VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
         return verticalsGenService.generateEcoscoreYamlConfig(vc);

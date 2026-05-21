@@ -247,10 +247,14 @@ public class ReviewGenerationPreprocessingService {
 		logger.info("SERP selection for UPC {}: eligibleResults={}, preferredResults={}, maxUrlsPerProduct={}",
 				product.getId(), sortedResults.size(), preferredResultCount, properties.getMaxUrlsPerProduct());
 
-		// Fetch URL contents concurrently.
+		// Fetch URL contents concurrently. PDFs are skipped: they will be persisted as
+		// resources for attributes extraction, not fed to the review prompt.
 		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = new HashMap<>();
 		for (GoogleSearchResult result : sortedResults.stream().limit(properties.getMaxUrlsPerProduct()).toList()) {
 			String url = result.link();
+			if (isPdfUrl(url)) {
+				continue;
+			}
 			CompletableFuture<FetchOutcome> future = CompletableFuture.supplyAsync(() -> {
 				try {
 					return fetchWithFallbacks(url, customHeaders);
@@ -276,17 +280,22 @@ public class ReviewGenerationPreprocessingService {
 
 		for (GoogleSearchResult result : sortedResults) {
 			String url = result.link();
+			if (isPdfUrl(url)) {
+				persistOfficialResources(product, result, null);
+				rejectedUrls.put(url, "pdf source excluded from review prompt; persisted for attributes extraction");
+				continue;
+			}
 			CompletableFuture<FetchOutcome> future = fetchFutures.get(url);
 			if (future == null)
 				continue;
 			FetchOutcome outcome = future.get();
 			FetchResponse fetchResponse = outcome == null ? null : outcome.response();
+			persistOfficialResources(product, result, fetchResponse);
 			if (fetchResponse == null || fetchResponse.markdownContent() == null
 					|| fetchResponse.markdownContent().isEmpty()) {
 				rejectedUrls.put(url, outcome == null ? "fetch returned no response" : outcome.rejectionReason());
 				continue;
 			}
-			persistOfficialResources(product, result, fetchResponse);
 			String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
 			if (!isRelevantContent(content, result, brand, primaryModel, alternateModels)) {
 				String reason = "irrelevant: missing brand/model match in title, h1/main content, or URL";
@@ -905,12 +914,15 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private void persistOfficialResources(Product product, GoogleSearchResult result, FetchResponse fetchResponse) {
-		if (!isOfficialUrl(product, result)) {
-			return;
-		}
 		String language = resolveOfficialUrlLanguage(result.link());
 		if (isPdfUrl(result.link())) {
 			addOfficialResource(product, result.link(), ResourceType.PDF, language, "serp", result.title());
+		}
+		if (fetchResponse == null) {
+			return;
+		}
+		if (!isOfficialUrl(product, result)) {
+			return;
 		}
 		if (fetchResponse.resources() == null || fetchResponse.resources().isEmpty()) {
 			return;

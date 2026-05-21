@@ -196,6 +196,37 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void preparePromptVariables_PersistsPdfResourcesEvenFromNonOfficialPages() throws Exception
+    {
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("Samsung", "SM-S921B/DS");
+        String nonOfficialPdfUrl = "https://example.com/samsung-s24-spec.pdf";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Samsung Galaxy S24 Spec Sheet PDF", nonOfficialPdfUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "Samsung SM-S921B/DS spec details from PDF.";
+            return CompletableFuture.completedFuture(new FetchResponse(nonOfficialPdfUrl, 200, markdown, markdown,
+                    FetchStrategy.HTTP, List.of(), Set.of(), List.of(), false, null));
+        });
+
+        service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
+
+        assertThat(product.getResources()).anySatisfy(resource ->
+        {
+            assertThat(resource.getUrl()).isEqualTo(nonOfficialPdfUrl);
+            assertThat(resource.getResourceType()).isEqualTo(org.open4goods.model.resource.ResourceType.PDF);
+            assertThat(resource.getDatasourceName()).isEqualTo("manufacturer");
+            assertThat(resource.getTags()).contains("official", "official:fr");
+        });
+    }
+
+    @Test
     void preparePromptVariables_SearchesBroadOfficialCandidatesBeforeGenericQueries() throws Exception {
         properties.setMaxSearch(3);
         properties.setPreferredDomains(List.of("darty.com"));

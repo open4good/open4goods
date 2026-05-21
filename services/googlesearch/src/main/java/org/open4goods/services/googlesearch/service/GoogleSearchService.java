@@ -107,22 +107,22 @@ public class GoogleSearchService implements HealthIndicator {
         String hl = (request.hl() != null && !request.hl().isBlank()) ? request.hl() : properties.getDefaults().hl();
 
         // Append additional parameters to the URL if non-empty.
-        if (lr != null && !lr.isBlank()) {
+        if (lr != null && !lr.isBlank() && !lr.equalsIgnoreCase("none")) {
             urlBuilder.append("&lr=").append(URLEncoder.encode(lr, Charset.defaultCharset()));
         }
-        if (cr != null && !cr.isBlank()) {
+        if (cr != null && !cr.isBlank() && !cr.equalsIgnoreCase("none")) {
             urlBuilder.append("&cr=").append(URLEncoder.encode(cr, Charset.defaultCharset()));
         }
-        if (safe != null && !safe.isBlank()) {
+        if (safe != null && !safe.isBlank() && !safe.equalsIgnoreCase("none")) {
             urlBuilder.append("&safe=").append(URLEncoder.encode(safe, Charset.defaultCharset()));
         }
-        if (sort != null && !sort.isBlank()) {
+        if (sort != null && !sort.isBlank() && !sort.equalsIgnoreCase("none")) {
             urlBuilder.append("&sort=").append(URLEncoder.encode(sort, Charset.defaultCharset()));
         }
-        if (gl != null && !gl.isBlank()) {
+        if (gl != null && !gl.isBlank() && !gl.equalsIgnoreCase("none")) {
             urlBuilder.append("&gl=").append(URLEncoder.encode(gl, Charset.defaultCharset()));
         }
-        if (hl != null && !hl.isBlank()) {
+        if (hl != null && !hl.isBlank() && !hl.equalsIgnoreCase("none")) {
             urlBuilder.append("&hl=").append(URLEncoder.encode(hl, Charset.defaultCharset()));
         }
 
