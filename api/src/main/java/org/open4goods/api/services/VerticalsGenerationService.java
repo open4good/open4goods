@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
@@ -874,7 +875,7 @@ public class VerticalsGenerationService {
             return count + " / 0";
         }
         double pct = (count * 100.0) / total;
-        return String.format("%d / %d (%.1f%%)", count, total, pct);
+        return String.format(Locale.ROOT, "%d / %d (%.1f%%)", count, total, pct);
     }
 
     // -----------------------------------------------------------------------

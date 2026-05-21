@@ -369,6 +369,17 @@ class ReviewGenerationPreprocessingServiceTest {
         match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",
                 "Ce lave-linge MWBM8147EB est d'une grande efficacite.", "Miele", "MWBM8147EB", Set.of());
         assertThat(match).isFalse();
+
+        // Compound brand with 2-char prefix (e.g. "LG Electronics") — "LG" must match via word fallback
+        String lgContent = "# LG 32LM6380PLC\nLG smart TV with Full HD resolution and webOS.";
+        match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",
+                lgContent, "LG Electronics", "32LM6380PLC", Set.of());
+        assertThat(match).isTrue();
+
+        // Compound brand — none of the words present should still return false
+        match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",
+                "# 32LM6380PLC\nSmart TV with Full HD resolution.", "LG Electronics", "32LM6380PLC", Set.of());
+        assertThat(match).isFalse();
     }
 
     private Product product(String brand, String model) {

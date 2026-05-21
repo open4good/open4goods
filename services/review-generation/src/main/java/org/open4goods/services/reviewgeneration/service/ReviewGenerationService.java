@@ -308,6 +308,11 @@ public class ReviewGenerationService implements HealthIndicator {
 			throw e;
 		}
 		productRepository.forceIndex(product);
+		try {
+			hooks.forEach(hook -> hook.onSourcesFetched(product));
+		} catch (Exception e) {
+			logger.error("Error executing onSourcesFetched hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
+		}
 		return stepResult(product, verticalConfig, "fetch", true, "Remote sources fetched and persisted.",
 				promptVariables, List.of(), null);
 	}

@@ -6,8 +6,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -199,6 +201,41 @@ public class ReviewGenerationPreprocessingService {
 		}
 		logger.info("SERP aggregation for UPC {}: searchesMade={}, rawResults={}", product.getId(), searchesMade,
 				allResults.size());
+
+		// GTIN fallback: when the primary brand+model queries returned no SERP results,
+		// try GTIN-based queries (pure GTIN, brand+GTIN, cleaned model) as a second pass.
+		if (allResults.isEmpty() && searchesMade < maxSearch) {
+			List<String> gtinFallbackQueries = buildGtinFallbackQueries(product, brand);
+			if (!gtinFallbackQueries.isEmpty()) {
+				status.addMessage("Primary SERP yielded no results — trying GTIN fallback queries...");
+				logger.info("GTIN fallback activated for UPC {} (0 primary results, {} fallback queries planned)",
+						product.getId(), gtinFallbackQueries.size());
+				for (String query : gtinFallbackQueries) {
+					if (searchesMade >= maxSearch) {
+						break;
+					}
+					logger.info("GTIN fallback query {}/{} for UPC {}: {}", searchesMade + 1, maxSearch,
+							product.getId(), query);
+					status.addMessage("GTIN fallback query: " + query);
+					searchedQueries.add(query);
+					GoogleSearchRequest searchRequest = new GoogleSearchRequest(query,
+							properties.getSearchResultsPerQuery(), properties.getSearchLanguageRestrict(),
+							properties.getSearchCountryRestrict(), properties.getSearchSafe(), null,
+							properties.getSearchGeoLocation(), properties.getSearchHostLanguage());
+					GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
+					searchesMade++;
+					if (searchResponse != null && searchResponse.results() != null) {
+						logger.info("GTIN fallback query returned {} results for UPC {}: {}",
+								searchResponse.results().size(), product.getId(), query);
+						allResults.addAll(searchResponse.results());
+					} else {
+						logger.warn("GTIN fallback query returned no response for UPC {}: {}", product.getId(), query);
+					}
+				}
+				logger.info("SERP after GTIN fallback for UPC {}: searchesMade={}, rawResults={}",
+						product.getId(), searchesMade, allResults.size());
+			}
+		}
 
 		status.setStatus(ReviewGenerationStatus.Status.FETCHING);
 		identifyOfficialProductUrl(product, allResults).ifPresent(officialUrl -> {
@@ -421,7 +458,15 @@ public class ReviewGenerationPreprocessingService {
 		String earlyContent = firstContentZone(content);
 		String searchableZone = normalizeForTextMatching(String.join("\n", title, url, earlyContent));
 		if (!searchableZone.contains(normalizedBrand)) {
-			return false;
+			// Compound brand names (e.g. "LG Electronics", "Samsung Electronics") often appear as
+			// individual words on product pages. Fall back to checking each word of the brand.
+			boolean anyBrandWordMatches = Arrays.stream(brand.split("\\s+"))
+					.map(this::normalizeForTextMatching)
+					.filter(w -> w.length() >= 2)
+					.anyMatch(searchableZone::contains);
+			if (!anyBrandWordMatches) {
+				return false;
+			}
 		}
 		return modelsToCheck.stream().anyMatch(model -> modelMatchesZone(model, searchableZone));
 	}
@@ -493,6 +538,64 @@ public class ReviewGenerationPreprocessingService {
 			queries.add(formatQuery(brand, model));
 		}
 		return queries.stream().distinct().toList();
+	}
+
+	/**
+	 * Builds GTIN-based fallback search queries for products where standard brand+model
+	 * queries produced no SERP results. The GTIN is a reliable universal product identifier
+	 * that surfaces distributor and manufacturer pages even when the model name is obscure
+	 * or contains non-standard characters.
+	 *
+	 * @param product the product
+	 * @param brand   the resolved brand name
+	 * @return ordered list of fallback queries, empty when GTIN is unavailable or non-numeric
+	 */
+	private List<String> buildGtinFallbackQueries(Product product, String brand) {
+		List<String> queries = new ArrayList<>();
+		String gtin = product.gtin();
+		if (gtin == null || !gtin.matches("\\d{8,14}")) {
+			return queries;
+		}
+		// Pure GTIN: finds any site that indexed this barcode
+		queries.add("\"" + gtin + "\"");
+		// Brand + GTIN: narrows to brand-related pages
+		if (brand != null && !brand.isBlank()) {
+			queries.add(brand + " \"" + gtin + "\"");
+		}
+		// Cleaned model (brand-name tokens stripped) + brand: helps when the model string
+		// contains the brand as a suffix (e.g. "MCF8604GR_ATOSA" → "MCF8604GR")
+		String primaryModel = product.model();
+		if (primaryModel != null && !primaryModel.isBlank() && brand != null && !brand.isBlank()) {
+			String cleaned = stripBrandTokensFromModel(primaryModel, brand);
+			if (!cleaned.equalsIgnoreCase(primaryModel) && !cleaned.isBlank()) {
+				queries.add(brand + " \"" + cleaned + "\"");
+			}
+		}
+		return queries.stream().distinct().toList();
+	}
+
+	/**
+	 * Removes tokens from a model name that exactly match any token of the brand name
+	 * (case-insensitive). Handles suffixes like "MCF8604GR_ATOSA" → "MCF8604GR" when
+	 * brand is "ATOSA".
+	 *
+	 * @param model the raw model string
+	 * @param brand the brand name
+	 * @return model with brand tokens stripped, or the original model when nothing changes
+	 */
+	private String stripBrandTokensFromModel(String model, String brand) {
+		if (model == null || brand == null || brand.isBlank()) {
+			return model == null ? "" : model;
+		}
+		Set<String> brandTokens = Arrays.stream(brand.split("\\s+"))
+				.map(t -> t.toLowerCase(Locale.ROOT))
+				.filter(t -> !t.isBlank())
+				.collect(Collectors.toCollection(HashSet::new));
+		String cleaned = Arrays.stream(model.split("[\\s_\\-\\./\\\\]+"))
+				.filter(t -> !brandTokens.contains(t.toLowerCase(Locale.ROOT)))
+				.collect(Collectors.joining(" "))
+				.trim();
+		return cleaned.isBlank() ? model : cleaned;
 	}
 
 	private List<String> orderedModels(String primaryModel, Set<String> alternateModels) {
