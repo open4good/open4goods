@@ -20,6 +20,7 @@ ignore: |
   ui/src/test/resources/
   verticals/src/main/resources/attributes/
   verticals/src/main/resources/verticals/
+  frontend/app/public/reports/
 
 rules:
   braces:

@@ -3,6 +3,7 @@
 This release covers **0 day(s)** of work, from **2026-05-20T20:28:21.000Z** to **2026-05-21T08:36:14.000Z**.
 
 ### 📦 Stats
+
 - Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.21...v1.0.22)
 - Changed files: **72**
 - Commits: **15**
@@ -10,16 +11,13 @@ This release covers **0 day(s)** of work, from **2026-05-20T20:28:21.000Z** to *
 
 ---
 
-
-
 <details>
 <summary>🙈 Other changes (3)</summary>
 
-| PR | Title | Author |
-|---:|---|---|
-| [PR 3127](https://github.com/open4good/open4goods/pull/3127) | Update dependency @typescript-eslint/parser to v8.59.4 | @renovate[bot] |
+|                                                           PR | Title                                                                      | Author         |
+| -----------------------------------------------------------: | -------------------------------------------------------------------------- | -------------- |
+| [PR 3127](https://github.com/open4good/open4goods/pull/3127) | Update dependency @typescript-eslint/parser to v8.59.4                     | @renovate[bot] |
 | [PR 3129](https://github.com/open4good/open4goods/pull/3129) | Update dependency org.apache.maven.plugins:maven-enforcer-plugin to v3.6.3 | @renovate[bot] |
-| [PR 3128](https://github.com/open4good/open4goods/pull/3128) | Update dependency nuxt to v4.4.6 | @renovate[bot] |
-
+| [PR 3128](https://github.com/open4good/open4goods/pull/3128) | Update dependency nuxt to v4.4.6                                           | @renovate[bot] |
 
 </details>

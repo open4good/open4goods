@@ -34,7 +34,7 @@ class ReviewGenerationApiConfigTest {
         assertThat(properties.getProperty("review.generation.preferred-domains[3]"))
                 .isEqualTo("quel-lave-linge.fr");
         assertThat(properties.getProperty("review.generation.preferred-domains[8]"))
-                .isEqualTo("lcd-compare.com");
+                .isEqualTo("lesnumeriques.com");
         assertThat(properties.stringPropertyNames())
                 .noneMatch(name -> name.contains("official-domains-by-brand")
                         || name.contains("source-url-templates-by-brand"));
