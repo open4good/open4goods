@@ -8,6 +8,7 @@ import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.model.CacheKeyGenerator;
 import org.open4goods.services.eprelservice.repository.EprelProductRepository;
 import org.open4goods.services.productrepository.repository.ElasticProductRepository;
+import org.open4goods.services.wikidataservice.repository.WikidataEntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -19,7 +20,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /** Main entry point for the open4goods API application. */
 @SpringBootApplication(scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class, EprelProductRepository.class, IcecatFeatureRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class, EprelProductRepository.class, IcecatFeatureRepository.class, WikidataEntityRepository.class})
 @EnableCaching
 public class Api {
 
