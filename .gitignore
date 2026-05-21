@@ -11,3 +11,11 @@ apache-maven-*-bin.tar.gz
 /logs/
 /jstack.log
 /.claude/
+/products_with_offers.json
+/random_dishwasher.json
+/random_fridge.json
+/random_products.json
+/random_tv.json
+/random_washing_machine.json
+/workspace-api.log
+/api.log
