@@ -1,7 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { describe, expect, it, vi, afterEach } from 'vitest'
-import { defineComponent, h, ref, nextTick } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import { useNuxtApp, useState } from '#app'
 import HomeHeroSection from './HomeHeroSection.vue'
 const messages: Record<string, unknown> = {

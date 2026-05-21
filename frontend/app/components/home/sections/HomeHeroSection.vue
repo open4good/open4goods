@@ -149,9 +149,10 @@ const heroBackgroundOverridePath = computed(() => {
   return value
 })
 const heroBackgroundOverrideAsset = useThemedAsset(heroBackgroundOverridePath)
-const heroBackgroundOverride = computed(() =>
-  resolveHeroBackgroundSource(heroBackgroundI18nValue.value) ??
-  heroBackgroundOverrideAsset.value
+const heroBackgroundOverride = computed(
+  () =>
+    resolveHeroBackgroundSource(heroBackgroundI18nValue.value) ??
+    heroBackgroundOverrideAsset.value
 )
 const heroBackgroundSrc = computed(() => {
   const themedAsset = heroBackgroundOverride.value?.trim()
@@ -181,8 +182,6 @@ const heroBackgroundSrc = computed(() => {
 const animatedSubtitle = computed(() =>
   resolveString('home.hero.animatedSubtitle')
 )
-
-
 
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
