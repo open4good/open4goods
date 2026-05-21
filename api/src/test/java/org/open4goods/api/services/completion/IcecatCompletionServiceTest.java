@@ -1,11 +1,17 @@
 package org.open4goods.api.services.completion;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.Category;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.GeneralInfo;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.IceDataItem;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.Name;
 import org.mockito.Mockito;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -38,5 +44,23 @@ class IcecatCompletionServiceTest {
 
                 assertThat(service.shouldProcess(vertical, product)).isTrue();
         }
-}
 
+        @Test
+        void convertToleratesMissingOptionalIcecatSections() throws Exception {
+                IceDataItem item = new IceDataItem();
+                item.generalInfo = new GeneralInfo();
+                item.generalInfo.icecatId = 123;
+                item.generalInfo.title = "Test title";
+                item.generalInfo.productName = "Test product";
+                item.generalInfo.brand = "Test brand";
+                item.generalInfo.brandPartCode = "ABC-123";
+                item.generalInfo.category = new Category();
+                item.generalInfo.category.name = new Name();
+                item.generalInfo.category.name.value = "Test category";
+
+                Method convert = IcecatCompletionService.class.getDeclaredMethod("convert", IceDataItem.class, Product.class);
+                convert.setAccessible(true);
+
+                assertThatCode(() -> convert.invoke(service, item, product)).doesNotThrowAnyException();
+        }
+}

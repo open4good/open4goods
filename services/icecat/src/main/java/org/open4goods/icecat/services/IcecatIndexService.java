@@ -39,8 +39,8 @@ import org.springframework.data.domain.Pageable;
  *   <li>Foundation for fuzzy vertical-to-category matching.</li>
  * </ul>
  *
- * <p>Hot-path lookups (per-product rendering) continue to use FeatureLoader's in-memory maps.
- * ES is queried only for admin and batch operations.
+ * <p>Attribute-name resolution is served from Elasticsearch through {@link IcecatFeatureResolver},
+ * with a small runtime cache to avoid repeated identical queries.
  */
 public class IcecatIndexService {
 
@@ -278,7 +278,7 @@ public class IcecatIndexService {
     }
 
     /**
-     * Finds features by normalised attribute name (for reverse featuresByNames lookup from ES).
+     * Finds features by normalised attribute name.
      *
      * @param normalizedName normalised name (see IdHelper.normalizeAttributeName)
      * @return matching feature documents

@@ -11,6 +11,11 @@ public class IcecatConfiguration {
 	private String brandsListFileUri;
 	private String categoriesListFileUri;
 	private String featureGroupsFileUri;
+	/**
+	 * If true, loads the huge CategoryFeaturesList export and mutates vertical feature
+	 * groups from Icecat category mappings at startup.
+	 */
+	private boolean loadCategoryFeatureList = true;
 
 	private String user;
 	private String password;
@@ -79,7 +84,12 @@ public class IcecatConfiguration {
 		this.featureGroupsFileUri = featureGroupsFileUri;
 	}
 
+	public boolean isLoadCategoryFeatureList() {
+		return loadCategoryFeatureList;
+	}
 
-
+	public void setLoadCategoryFeatureList(boolean loadCategoryFeatureList) {
+		this.loadCategoryFeatureList = loadCategoryFeatureList;
+	}
 
 }

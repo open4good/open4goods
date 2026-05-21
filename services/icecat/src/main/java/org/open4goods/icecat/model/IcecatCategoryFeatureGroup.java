@@ -25,10 +25,6 @@ public class IcecatCategoryFeatureGroup {
     @JacksonXmlProperty(isAttribute = true, localName = "ID")
     private Integer id;
 
-    /** The {@code FeatureGroup} XML attribute (a string label, distinct from the child elements). */
-    @JacksonXmlProperty(isAttribute = true, localName = "FeatureGroup")
-    private String featureGroupLabel;
-
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "FeatureGroup")
     private List<IcecatFeatureGroup> featureGroups;
@@ -38,9 +34,6 @@ public class IcecatCategoryFeatureGroup {
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-
-    public String getFeatureGroupLabel() { return featureGroupLabel; }
-    public void setFeatureGroupLabel(String featureGroupLabel) { this.featureGroupLabel = featureGroupLabel; }
 
     public List<IcecatFeatureGroup> getFeatureGroups() {
         return featureGroups != null ? featureGroups : Collections.emptyList();

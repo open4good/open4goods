@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
-import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
@@ -37,14 +37,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private final BrandService brandService;
 
 	private VerticalsConfigService verticalConfigService;
-	private IcecatService featureService;
+	private IcecatFeatureResolver featureResolver;
 
 	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,
-			BrandService brandService, final Logger logger, IcecatService featureService) {
+			BrandService brandService, final Logger logger, IcecatFeatureResolver featureResolver) {
 		super(logger);
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
-		this.featureService = featureService;
+		this.featureResolver = featureResolver;
 	}
 
 	@Override
@@ -97,8 +97,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		// Attributing taxomy to attributes
 		data.getAttributes().getAll().values().forEach(a -> {
-			Set<Integer> icecatTaxonomyIds = featureService.resolveFeatureName(a.getName());
-			if (null != icecatTaxonomyIds) {
+			Set<Integer> icecatTaxonomyIds = featureResolver.resolveFeatureName(a.getName());
+			if (!icecatTaxonomyIds.isEmpty()) {
 				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
 				a.setIcecatTaxonomyIds(icecatTaxonomyIds);
 			}

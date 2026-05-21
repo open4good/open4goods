@@ -3,10 +3,8 @@ package org.open4goods.icecat.services.loader;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.service.BrandService;
@@ -25,11 +23,10 @@ import tools.jackson.dataformat.xml.XmlMapper;
 
 /**
  * Loads Icecat reference data (features, feature groups, brands/suppliers) from
- * bulk XML export files into in-memory maps used by {@link org.open4goods.icecat.services.IcecatService}.
+ * bulk XML export files into structures used by {@link org.open4goods.icecat.services.IcecatService}.
  *
  * <p>File download and caching is delegated to {@link IcecatFileDownloadService}.
- * The in-memory maps are the hot-path data structure; Elasticsearch persistence is
- * handled by {@link org.open4goods.icecat.services.IcecatIndexService}.
+ * Elasticsearch persistence is handled by {@link org.open4goods.icecat.services.IcecatIndexService}.
  */
 public class FeatureLoader {
 
@@ -41,7 +38,6 @@ public class FeatureLoader {
     private final BrandService brandService;
 
     private final Map<Integer, IcecatFeature> featuresById = new HashMap<>();
-    private final Map<String, Set<Integer>> featuresByNames = new HashMap<>();
     private final Map<Integer, IcecatFeatureGroup> featureGroupsById = new HashMap<>();
     private final List<IcecatSupplier> icecatSuppliers = new ArrayList<>();
 
@@ -57,8 +53,7 @@ public class FeatureLoader {
     }
 
     /**
-     * Loads all features from FeaturesList.xml into {@link #featuresById} and
-     * {@link #featuresByNames}.
+     * Loads all features from FeaturesList.xml into {@link #featuresById}.
      *
      * @throws TechnicalException if the file cannot be downloaded or parsed
      */
@@ -75,10 +70,6 @@ public class FeatureLoader {
             features.forEach(feature -> {
                 Integer id = feature.getId();
                 featuresById.put(id, feature);
-                feature.getNames().getNames().forEach(name -> {
-                    String val = IdHelper.normalizeAttributeName(name.getEffectiveName());
-                    featuresByNames.computeIfAbsent(val, k -> new HashSet<>()).add(id);
-                });
             });
         } catch (Exception e) {
             LOGGER.error("Error while loading features", e);
@@ -142,10 +133,6 @@ public class FeatureLoader {
 
     public Map<Integer, IcecatFeature> getFeaturesById() {
         return featuresById;
-    }
-
-    public Map<String, Set<Integer>> getFeaturesByNames() {
-        return featuresByNames;
     }
 
     public Map<Integer, IcecatFeatureGroup> getFeatureGroupsById() {

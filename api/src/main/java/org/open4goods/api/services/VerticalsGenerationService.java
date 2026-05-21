@@ -26,7 +26,7 @@ import org.open4goods.api.dto.CategorySuggestionsDto;
 import org.open4goods.api.model.AttributesStats;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
-import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
@@ -64,7 +64,7 @@ public class VerticalsGenerationService {
     private final ProductRepository repository;
     private final SerialisationService serialisationService;
     private final ResourcePatternResolver resourceResolver;
-    private final IcecatService icecatService;
+    private final IcecatFeatureResolver icecatFeatureResolver;
 
     private Map<String, VerticalCategoryMapping> sortedMappings = new LinkedHashMap<>();
     private final GoogleTaxonomyService googleTaxonomyService;
@@ -74,7 +74,8 @@ public class VerticalsGenerationService {
     public VerticalsGenerationService(VerticalsGenerationConfig config, ProductRepository repository,
             SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService,
             VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
-            EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService) {
+            EvaluationService evaluationService, IcecatFeatureResolver icecatFeatureResolver,
+            PromptService genAiService) {
         this.config = config;
         this.repository = repository;
         this.serialisationService = serialisationService;
@@ -82,7 +83,7 @@ public class VerticalsGenerationService {
         this.verticalConfigservice = verticalsConfigService;
         this.resourceResolver = resourceResolver;
         this.evalService = evaluationService;
-        this.icecatService = icecatService;
+        this.icecatFeatureResolver = icecatFeatureResolver;
         this.genAiService = genAiService;
     }
 
@@ -726,19 +727,19 @@ public class VerticalsGenerationService {
             context.put("totalHits", totalItems);
             context.put("faicon", "");
 
-            Set<Integer> icecatIds = icecatService.resolveFeatureName(category.getKey());
+            Set<Integer> icecatIds = icecatFeatureResolver.resolveFeatureName(category.getKey());
             String defaultName = "!!COMPLETE_HERE!!";
             String frName = "!!COMPLETE_HERE!!";
 
             if (icecatIds != null && !icecatIds.isEmpty()) {
                 if (icecatIds.size() == 1) {
-                    defaultName = icecatService.getFeatureName(icecatIds.iterator().next(), "default");
-                    frName = icecatService.getFeatureName(icecatIds.iterator().next(), "fr");
+                    defaultName = icecatFeatureResolver.getFeatureName(icecatIds.iterator().next(), "default");
+                    frName = icecatFeatureResolver.getFeatureName(icecatIds.iterator().next(), "fr");
                     context.put("icecatIds", icecatIds.iterator().next());
                 } else {
                     LOGGER.warn("Multiple possibilities to name attribute {}: {}", category.getKey(), icecatIds);
-                    defaultName = icecatService.getFeatureName(icecatIds.iterator().next(), "default");
-                    frName = icecatService.getFeatureName(icecatIds.iterator().next(), "fr");
+                    defaultName = icecatFeatureResolver.getFeatureName(icecatIds.iterator().next(), "default");
+                    frName = icecatFeatureResolver.getFeatureName(icecatIds.iterator().next(), "fr");
                     context.put("icecatIds", "!!!!" + icecatIds);
                 }
             } else {

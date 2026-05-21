@@ -27,7 +27,7 @@ public interface IcecatFeatureRepository extends ElasticsearchRepository<IcecatF
 
     /**
      * Finds features whose normalizedNames set contains the given value.
-     * Used to rebuild the featuresByNames reverse-lookup from the index.
+     * Used by the ES-backed Icecat feature resolver.
      *
      * @param normalizedName normalized attribute name (see IdHelper.normalizeAttributeName)
      * @return matching feature documents
@@ -35,7 +35,7 @@ public interface IcecatFeatureRepository extends ElasticsearchRepository<IcecatF
     @Query("""
             {
               "term": {
-                "normalizedNames": "#{#normalizedName}"
+                "normalizedNames": "?0"
               }
             }
             """)

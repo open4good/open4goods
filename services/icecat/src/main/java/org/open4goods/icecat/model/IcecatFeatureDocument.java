@@ -13,8 +13,7 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
  * Elasticsearch document representing an Icecat feature (specification attribute).
  *
  * <p>Populated from {@link IcecatFeature} objects loaded via {@link org.open4goods.icecat.services.loader.FeatureLoader}.
- * Used as a persistent backing store and to power admin search endpoints.
- * Hot-path lookups (per product render) continue to use FeatureLoader's in-memory maps for performance.
+ * Used as a persistent backing store and to power admin search and attribute-resolution endpoints.
  */
 @Document(indexName = "icecat-features", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
 public class IcecatFeatureDocument {
@@ -32,15 +31,14 @@ public class IcecatFeatureDocument {
     private String englishName;
 
     /**
-     * Normalized attribute names (all languages) used to rebuild the
-     * featuresByNames reverse-lookup map from ES.
+     * Normalized attribute names (all languages) used for ES-backed attribute resolution.
      */
     @Field(type = FieldType.Keyword)
     private Set<String> normalizedNames;
 
     /**
      * All localized names encoded as {@code "langId:name"} strings.
-     * Stored for map rebuild; not indexed for search.
+     * Stored for localized display-name lookup; not indexed for search.
      */
     @Field(type = FieldType.Keyword, index = false)
     private List<String> langNames;

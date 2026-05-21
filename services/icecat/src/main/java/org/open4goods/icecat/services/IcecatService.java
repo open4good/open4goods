@@ -4,11 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
@@ -21,7 +18,6 @@ import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.icecat.util.IcecatConstants;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -35,13 +31,12 @@ import tools.jackson.dataformat.xml.XmlMapper;
 
 
 /**
- * Core Icecat service: provides feature resolution, multilingual name lookup,
- * category-to-vertical mapping, and product feature rendering.
+ * Core Icecat service: provides category-to-vertical mapping and product feature rendering.
  *
  * <p>Reference data (features, categories, feature groups) is loaded at startup via
- * {@link FeatureLoader} and {@link CategoryLoader}. Hot-path lookups (per-product rendering)
- * operate on the in-memory maps. Elasticsearch persistence and admin search are handled by
- * {@link IcecatIndexService}.
+ * {@link FeatureLoader} and {@link CategoryLoader}. Product feature rendering still uses
+ * loaded reference data by ID. Attribute-name resolution is handled by {@link IcecatFeatureResolver}
+ * through Elasticsearch.
  */
 public class IcecatService {
 
@@ -96,7 +91,11 @@ public class IcecatService {
         featureLoader.loadBrands();
         categoryLoader.loadCategories();
         featureLoader.loadFeatures();
-        categoryLoader.loadCategoryFeatureList();
+        if (iceCatConfig.isLoadCategoryFeatureList()) {
+            categoryLoader.loadCategoryFeatureList();
+        } else {
+            LOGGER.info("Icecat category-feature list loading is disabled");
+        }
         LOGGER.info("Icecat up and running");
     }
 
@@ -131,39 +130,6 @@ public class IcecatService {
             LOGGER.error("Error while loading languages", e);
         }
         LOGGER.info("End loading of languages from {}", iceCatConfig.getLanguageListFileUri());
-    }
-
-    /**
-     * Resolves a feature name to one or more Icecat feature IDs.
-     *
-     * @param featureName the attribute name to resolve
-     * @return set of matching feature IDs, or null if not found
-     */
-    public Set<Integer> resolveFeatureName(String featureName) {
-        String f = IdHelper.normalizeAttributeName(featureName);
-        return featureLoader.getFeaturesByNames().get(f);
-    }
-
-    /**
-     * Returns the localised display name for a given feature ID and language code.
-     * Falls back to English (langId=1) if not found.
-     *
-     * @param featureID  Icecat feature ID
-     * @param language   BCP-47 language code (e.g. "fr", "de")
-     * @return localised name or a diagnostic string if unresolved
-     */
-    public String getFeatureName(Integer featureID, String language) {
-        IcecatFeature feature = featureLoader.getFeaturesById().get(featureID);
-        Integer icecatLanguage = getIceCatLangId(language);
-        if (null != feature) {
-            List<IcecatName> names = feature.getNames().getNames();
-            for (IcecatName name : names) {
-                if (name.getLangId() == icecatLanguage.intValue()) {
-                    return name.getEffectiveName();
-                }
-            }
-        }
-        return "Unsolved : " + featureID + "," + icecatLanguage;
     }
 
     private Integer getIceCatLangId(String language) {
@@ -233,22 +199,6 @@ public class IcecatService {
     }
 
     /**
-     * Returns all feature IDs referenced by the given vertical's feature groups.
-     *
-     * @param vertical the vertical configuration
-     * @return set of feature IDs
-     */
-    public Set<Integer> featuresId(VerticalConfig vertical) {
-        Set<Integer> ret = new HashSet<>();
-        if (null != vertical) {
-            for (FeatureGroup fg : vertical.getFeatureGroups()) {
-                ret.addAll(fg.getFeaturesId());
-            }
-        }
-        return ret;
-    }
-
-    /**
      * Returns a map of English feature name to Icecat type string for the given vertical.
      * Used by admin tooling to understand attribute types.
      *
@@ -274,45 +224,6 @@ public class IcecatService {
             }
         }
         return ret;
-    }
-
-    /**
-     * Resolves an Icecat feature name to its canonical English name.
-     * If multiple features match the name, logs a conflict warning and returns the original name.
-     * If the vertical is set, only considers features in that vertical's feature groups.
-     *
-     * @param name     the attribute name to resolve
-     * @param vc       optional vertical (narrows resolution scope if set)
-     * @return resolved English name, or the original name if resolution is ambiguous
-     */
-    public String getOriginalEnglishName(String name, VerticalConfig vc) {
-        Set<Integer> featuresId = resolveFeatureName(name);
-
-        if (featuresId == null) {
-            LOGGER.warn("No icecat name found for {}", name);
-            return name;
-        }
-
-        if (vc != null && vc.getId() != null) {
-            featuresId = new HashSet<>(featuresId);
-            featuresId.retainAll(featuresId(vc));
-            if (featuresId.isEmpty()) {
-                LOGGER.warn("No icecat featureID for {}, after filtering on id's for vertical {}", name, vc);
-                return name;
-            }
-        }
-
-        if (featuresId.size() == 1) {
-            String ret = getFeatureName(featuresId.stream().findFirst().orElse(null), "en");
-            LOGGER.info("Resolved feature name : {}->{}", name, ret);
-            return ret;
-        } else {
-            Set<String> attrNames = featuresId.stream()
-                    .map(e -> e + ":" + getFeatureName(e, "en"))
-                    .collect(Collectors.toSet());
-            LOGGER.warn("Conflict! attr {} can be resolved to {}", name, attrNames);
-            return name;
-        }
     }
 
     public Map<Integer, IcecatFeature> getFeaturesById() {

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.brand.service.BrandService;
-import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
@@ -26,14 +26,15 @@ class AttributeRealtimeAggregationServiceTest {
 
         private AttributeRealtimeAggregationService service;
         private VerticalConfig verticalConfig;
+        private IcecatFeatureResolver icecatFeatureResolver;
 
         @BeforeEach
         void setUp() {
                 Logger logger = LoggerFactory.getLogger(AttributeRealtimeAggregationServiceTest.class);
                 BrandService brandService = Mockito.mock(BrandService.class);
                 VerticalsConfigService verticalConfigService = Mockito.mock(VerticalsConfigService.class);
-                IcecatService icecatService = Mockito.mock(IcecatService.class);
-                service = new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger, icecatService);
+                icecatFeatureResolver = Mockito.mock(IcecatFeatureResolver.class);
+                service = new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger, icecatFeatureResolver);
 
                 verticalConfig = new VerticalConfig();
                 verticalConfig.setRequiredAttributes(Set.of("required_attr"));
@@ -73,11 +74,26 @@ class AttributeRealtimeAggregationServiceTest {
                 assertThat(product.getGtinInfos().getGtinStrings()).containsExactly("0123456789012");
         }
 
+        @Test
+        void onProductAssignsIcecatTaxonomyIdsFromResolver() throws Exception {
+                Product product = buildBaseProduct();
+                addAttribute(product, "COULEUR");
+                Mockito.when(icecatFeatureResolver.resolveFeatureName("COULEUR")).thenReturn(Set.of(46, 46757));
+
+                service.onProduct(product, verticalConfig);
+
+                assertThat(product.getAttributes().getAll().get("COULEUR").getIcecatTaxonomyIds())
+                                .containsExactlyInAnyOrder(46, 46757);
+        }
+
         private Product buildBaseProduct() {
                 Product product = new Product(123L);
                 product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "Brand");
                 product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "ModelX");
-                product.setEprelDatas(new EprelProduct());
+                EprelProduct eprelProduct = new EprelProduct();
+                eprelProduct.setSupplierOrTrademark("Brand");
+                eprelProduct.setModelIdentifier("ModelX");
+                product.setEprelDatas(eprelProduct);
                 return product;
         }
 

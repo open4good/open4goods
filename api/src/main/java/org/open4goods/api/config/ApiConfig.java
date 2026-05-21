@@ -42,6 +42,7 @@ import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
+import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
@@ -144,8 +145,8 @@ public class ApiConfig {
 
 	@Bean
 	VerticalsGenerationService verticalsGenerationService(ProductRepository pRepo, SerialisationService serialisationService, GoogleTaxonomyService gTaxoService, VerticalsConfigService verticalsConfigService, ResourcePatternResolver resourceResolver,
-			EvaluationService evaluationService, IcecatService icecatService, PromptService genAiService) throws SAXException {
-		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService, icecatService, genAiService);
+			EvaluationService evaluationService, IcecatFeatureResolver icecatFeatureResolver, PromptService genAiService) throws SAXException {
+		return new VerticalsGenerationService(apiProperties.getVerticalsGenerationConfig(), pRepo, serialisationService, gTaxoService, verticalsConfigService, resourceResolver, evaluationService, icecatFeatureResolver, genAiService);
 	}
 
 	@Bean
@@ -181,6 +182,11 @@ public class ApiConfig {
 			IcecatFeatureGroupRepository featureGroupRepository, IcecatSupplierRepository supplierRepository) {
 		return new IcecatIndexService(featureLoader, categoryLoader, featureRepository, categoryRepository,
 				featureGroupRepository, supplierRepository);
+	}
+
+	@Bean
+	IcecatFeatureResolver icecatFeatureResolver(IcecatIndexService icecatIndexService) {
+		return new IcecatFeatureResolver(icecatIndexService);
 	}
 
 	@Bean
@@ -304,10 +310,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
-			IcecatService icecatFeatureService, SerialisationService serialisationService, BrandScoreService brandScoreService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
+			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService, BrandScoreService brandScoreService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
 			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
-				serialisationService, brandScoreService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable());
+				icecatFeatureResolver, serialisationService, brandScoreService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable());
 	}
 
 	//////////////////////////////////////////////////////////

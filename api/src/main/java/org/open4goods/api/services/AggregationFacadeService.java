@@ -32,6 +32,7 @@ import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.textgen.BlablaService;
+import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.datafragment.DataFragment;
@@ -87,6 +88,7 @@ public class AggregationFacadeService {
 	private StandardAggregator realtimeAggregator;
 
 	private IcecatService icecatFeatureService;
+	private IcecatFeatureResolver icecatFeatureResolver;
 	
 	private TextEmbeddingService embeddingService;
 	private DjlEmbeddingProperties embeddingProperties;
@@ -103,6 +105,7 @@ public class AggregationFacadeService {
 			GoogleTaxonomyService taxonomyService,
 			BlablaService blablaService,
 			IcecatService icecatFeatureService,
+			IcecatFeatureResolver icecatFeatureResolver,
 			SerialisationService serialisationService,
 			BrandScoreService brandScoreService,
 			TextEmbeddingService embeddingService,
@@ -122,6 +125,7 @@ public class AggregationFacadeService {
 		this.taxonomyService = taxonomyService;
 		this.blablaService = blablaService;
 		this.icecatFeatureService = icecatFeatureService;
+		this.icecatFeatureResolver = icecatFeatureResolver;
 		this.embeddingService = embeddingService;
 		this.embeddingProperties = embeddingProperties;
 		this.realtimeAggregator = getStandardAggregator("realtime");
@@ -357,7 +361,7 @@ public class AggregationFacadeService {
 
 		services.add(new IdentityAggregationService( logger, gs1prefixService,barcodeValidationService));
 		services.add(new TaxonomyRealTimeAggregationService(  logger, verticalConfigService, taxonomyService));
-		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger,icecatFeatureService));
+		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger, icecatFeatureResolver));
 		services.add(new UsageCostAggregationService(logger));
 		services.add(new NamesAggregationService( logger, verticalConfigService, evaluationService, blablaService, embeddingService,
 				embeddingProperties));

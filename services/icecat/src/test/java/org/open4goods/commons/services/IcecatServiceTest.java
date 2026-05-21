@@ -1,9 +1,7 @@
 package org.open4goods.commons.services;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -11,14 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.model.IcecatFeature;
-import org.open4goods.icecat.model.IcecatName;
 import org.open4goods.icecat.model.IcecatNames;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.model.Localisable;
-import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -49,37 +45,6 @@ public class IcecatServiceTest {
         CategoryLoader cl = new CategoryLoader(new XmlMapper(), cfg, downloader, vertical, fl);
 
         assertDoesNotThrow(() -> new IcecatService(new XmlMapper(), cfg, downloader, fl, cl));
-    }
-
-    @Test
-    public void testGetOriginalEnglishName() throws Exception {
-        IcecatConfiguration cfg = new IcecatConfiguration();
-        BrandService brand = Mockito.mock(BrandService.class);
-        VerticalsConfigService vertical = Mockito.mock(VerticalsConfigService.class);
-        IcecatFileDownloadService downloader = mockDownloader();
-
-        FeatureLoader fl = new FeatureLoader(new XmlMapper(), cfg, downloader, brand);
-        CategoryLoader cl = new CategoryLoader(new XmlMapper(), cfg, downloader, vertical, fl);
-
-        IcecatService service = new IcecatService(new XmlMapper(), cfg, downloader, fl, cl);
-
-        IcecatName nameEn = new IcecatName();
-        nameEn.setLangId(1);
-        nameEn.setTextValue("Color");
-        IcecatNames names = new IcecatNames();
-        names.setNames(Arrays.asList(nameEn));
-
-        IcecatFeature feature = new IcecatFeature();
-        feature.setId(1);
-        feature.setNames(names);
-
-        Map<Integer, IcecatFeature> map = fl.getFeaturesById();
-        map.put(1, feature);
-
-        fl.getFeaturesByNames().put(IdHelper.normalizeAttributeName("Color"), Collections.singleton(1));
-
-        String resolved = service.getOriginalEnglishName("Color", null);
-        assertEquals("Color", resolved);
     }
 
     @Test

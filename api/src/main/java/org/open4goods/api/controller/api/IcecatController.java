@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
 import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
+import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.RolesConstants;
@@ -36,19 +37,21 @@ public class IcecatController {
 	private final IcecatService icecatService;
 	private final VerticalsConfigService verticalsService;
 	private final IcecatIndexService icecatIndexService;
+	private final IcecatFeatureResolver icecatFeatureResolver;
 
 	public IcecatController(IcecatService icecatService, VerticalsConfigService verticalsService,
-			IcecatIndexService icecatIndexService) {
+			IcecatIndexService icecatIndexService, IcecatFeatureResolver icecatFeatureResolver) {
 		this.icecatService = icecatService;
 		this.verticalsService = verticalsService;
 		this.icecatIndexService = icecatIndexService;
+		this.icecatFeatureResolver = icecatFeatureResolver;
 	}
 
 	@GetMapping("/feature/resolve")
 	@Operation(summary = "Resolve the icecat feature id and return the English name if an unambiguous match is found")
 	public String getOriginalEnglishName(@RequestParam String name, @RequestParam String vertical) {
 		VerticalConfig vc = verticalsService.getConfigByIdOrDefault(vertical);
-		return icecatService.getOriginalEnglishName(name, vc);
+		return icecatFeatureResolver.getOriginalEnglishName(name, vc);
 	}
 
 	@GetMapping("/{vertical}/featuregroups/")

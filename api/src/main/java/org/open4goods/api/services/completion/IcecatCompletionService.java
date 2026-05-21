@@ -1,6 +1,7 @@
 package org.open4goods.api.services.completion;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,6 +56,17 @@ public class IcecatCompletionService extends AbstractCompletionService {
     private final IcecatCompletionConfig icecatConfig;
     private final StandardAggregator aggregator;
     private final RestClient restClient = RestClient.create();
+
+    /**
+     * Returns an empty list when an Icecat response omits an optional array.
+     *
+     * @param values the nullable Icecat response list
+     * @param <T> the list item type
+     * @return the original list or an empty immutable list
+     */
+    private static <T> List<T> nullToEmpty(List<T> values) {
+        return values == null ? Collections.emptyList() : values;
+    }
 
 
 
@@ -144,6 +156,10 @@ public class IcecatCompletionService extends AbstractCompletionService {
         try {
             String content = restClient.get().uri(url).retrieve().body(String.class);
             IceDataItem iceItem = objectMapper.readValue(content, IcecatLiveApiResponse.class).data;
+            if (iceItem == null || iceItem.generalInfo == null) {
+                logger.warn("Icecat response for gtin {} does not contain product data", data.gtin());
+                return ret;
+            }
             data.getExternalIds().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
             ret.add(convert(iceItem, data));
         } catch (UnrecognizedPropertyException e) {
@@ -172,22 +188,22 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 		completeGeneralInfos(iceItem.generalInfo, df,data);
 		completeImage(iceItem.image, df, data);
-		completeMultimedia(iceItem.multimedia,df,data);
-		completeGallery(iceItem.gallery,df,data);
-		completeFeaturesGroup(iceItem.featuresGroups,df);
+		completeMultimedia(nullToEmpty(iceItem.multimedia),df,data);
+		completeGallery(nullToEmpty(iceItem.gallery),df,data);
+		completeFeaturesGroup(nullToEmpty(iceItem.featuresGroups),df);
 
-		
-		iceItem.taxonomyDescriptions.forEach(e->{
-			
-			// TODO : Handle taxonomy
-		});
-		
-		
-		
-		iceItem.productRelated.forEach(e-> {
-			// TODO : HAndle related products
-			//System.out.println("RELATED : " + e.icecatID);
-		});
+
+        nullToEmpty(iceItem.taxonomyDescriptions).forEach(e->{
+            
+            // TODO : Handle taxonomy
+        });
+        
+        
+        
+        nullToEmpty(iceItem.productRelated).forEach(e-> {
+            // TODO : HAndle related products
+            //System.out.println("RELATED : " + e.icecatID);
+        });
 // TODO
 //TaxonomyDescriptions
 //ProductRelated
@@ -199,15 +215,21 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	
 	
 	private void completeFeaturesGroup(List<FeaturesGroups> featuresGroups, DataFragment df) {
-		for (FeaturesGroups g : featuresGroups) {
-			// TODO : Could handle the FeaturesGroups (!!!!)
-			g.features.forEach(f -> {
-				// TODO (i18n) --> Is Wrong
-				
-				if (!f.rawValue.equals(f.value)) {
-					logger.error("VALUE MISMATCH for {}", df.gtin());
-				}
-				df.addAttribute(f.featureDetail.name.value, f.rawValue,  f.featureDetail.name.language, f.featureDetail.id);
+        for (FeaturesGroups g : featuresGroups) {
+            if (g == null || g.features == null) {
+                continue;
+            }
+            // TODO : Could handle the FeaturesGroups (!!!!)
+            g.features.forEach(f -> {
+                // TODO (i18n) --> Is Wrong
+                if (f == null || f.featureDetail == null || f.featureDetail.name == null) {
+                    return;
+                }
+                
+                if (f.rawValue != null && !f.rawValue.equals(f.value)) {
+                    logger.error("VALUE MISMATCH for {}", df.gtin());
+                }
+                df.addAttribute(f.featureDetail.name.value, f.rawValue,  f.featureDetail.name.language, f.featureDetail.id);
 			});
 			
 			
@@ -218,10 +240,13 @@ public class IcecatCompletionService extends AbstractCompletionService {
 
 	private void completeGallery(List<Gallery> gallery, DataFragment df, Product p) {
 
-		for (Gallery g : gallery) {
-			try {
-				addResourceIfAbsent(df, p, g.pic, g.type);
-			} catch (ValidationException e) {
+        for (Gallery g : gallery) {
+            if (g == null || StringUtils.isBlank(g.pic)) {
+                continue;
+            }
+            try {
+                addResourceIfAbsent(df, p, g.pic, g.type);
+            } catch (ValidationException e) {
 				logger.warn("Error while adding resource {}",g.pic);
 			}
 		}
@@ -263,10 +288,13 @@ public class IcecatCompletionService extends AbstractCompletionService {
 
 	private void completeMultimedia(List<Multimedia> multimedia, DataFragment df, Product p) {
 
-		for (Multimedia m : multimedia) {
-			try {
-				// TODO : handle i18
-				addResourceIfAbsent(df, p, m.url, "fr");
+        for (Multimedia m : multimedia) {
+            if (m == null || StringUtils.isBlank(m.url)) {
+                continue;
+            }
+            try {
+                // TODO : handle i18
+                addResourceIfAbsent(df, p, m.url, "fr");
 			} catch (ValidationException e) {
 				logger.info("Cannot validate multimedia resource : {}",m.url);
 			}
@@ -275,10 +303,13 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 	}
 
-	private void completeImage(Image image, DataFragment df, Product p) {
-		try {
-			
-			// Tweak to exclude "brand" images sometimes used as logo
+    private void completeImage(Image image, DataFragment df, Product p) {
+        if (image == null || StringUtils.isBlank(image.highPic)) {
+            return;
+        }
+        try {
+            
+            // Tweak to exclude "brand" images sometimes used as logo
 			if (!image.highPic.contains("brand")) {
 				addResourceIfAbsent(df, p, image.highPic, ResourceTag.PRIMARY.toString());
 			}
@@ -289,7 +320,10 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 	}
 
-	private void completeGeneralInfos(GeneralInfo e, DataFragment df, Product p) {
+    private void completeGeneralInfos(GeneralInfo e, DataFragment df, Product p) {
+        if (e == null) {
+            return;
+        }
 		
 		// TODO(p3, feature) : HAndle end of year / end of year
 		if (null != e.releaseDate) {			
@@ -302,14 +336,20 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		}
 		
 		df.addName(e.title);
-		df.addName(e.titleInfo.generatedIntTitle);
-		df.addName(e.productName);
-		
-		df.addReferentielAttribute(ReferentielKey.BRAND, e.brand);
-		df.addReferentielAttribute(ReferentielKey.BRAND, e.brandInfo.brandName);
-		
-		df.addReferentielAttribute(ReferentielKey.MODEL, e.brandPartCode);
-		df.addProductTag(e.category.name.value);
+        if (e.titleInfo != null) {
+            df.addName(e.titleInfo.generatedIntTitle);
+        }
+        df.addName(e.productName);
+        
+        df.addReferentielAttribute(ReferentielKey.BRAND, e.brand);
+        if (e.brandInfo != null) {
+            df.addReferentielAttribute(ReferentielKey.BRAND, e.brandInfo.brandName);
+        }
+        
+        df.addReferentielAttribute(ReferentielKey.MODEL, e.brandPartCode);
+        if (e.category != null && e.category.name != null) {
+            df.addProductTag(e.category.name.value);
+        }
 		
 		
 		

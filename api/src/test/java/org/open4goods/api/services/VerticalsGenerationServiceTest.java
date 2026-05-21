@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
-import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
@@ -69,7 +69,7 @@ class VerticalsGenerationServiceTest {
                 verticalsConfigService,
                 mock(ResourcePatternResolver.class),
                 mock(EvaluationService.class),
-                mock(IcecatService.class),
+                mock(IcecatFeatureResolver.class),
                 mock(PromptService.class));
 
         String fragment = service.generateAvailableImpactScoreCriteriasFragment(target, 10);
@@ -133,7 +133,7 @@ class VerticalsGenerationServiceTest {
                 mock(VerticalsConfigService.class),
                 mock(ResourcePatternResolver.class),
                 mock(EvaluationService.class),
-                mock(IcecatService.class),
+                mock(IcecatFeatureResolver.class),
                 promptService);
 
         // Execute
@@ -164,7 +164,7 @@ class VerticalsGenerationServiceTest {
                 mock(VerticalsConfigService.class),
                 mock(ResourcePatternResolver.class),
                 mock(EvaluationService.class),
-                mock(IcecatService.class),
+                mock(IcecatFeatureResolver.class),
                 mock(PromptService.class));
 
         String result = service.generateMapping(vConf, 1);
@@ -212,7 +212,7 @@ class VerticalsGenerationServiceTest {
                 verticalsConfigService,
                 mock(ResourcePatternResolver.class),
                 mock(EvaluationService.class),
-                mock(IcecatService.class),
+                mock(IcecatFeatureResolver.class),
                 mock(PromptService.class));
 
         VerticalConfig result = service.computeNudgeToolThresholds(verticalId);
@@ -254,7 +254,7 @@ class VerticalsGenerationServiceTest {
                 verticalsConfigService,
                 mock(ResourcePatternResolver.class),
                 mock(EvaluationService.class),
-                mock(IcecatService.class),
+                mock(IcecatFeatureResolver.class),
                 mock(PromptService.class));
 
         VerticalConfig result = service.computeNudgeToolThresholds(verticalId);
