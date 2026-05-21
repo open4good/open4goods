@@ -16,6 +16,13 @@ queries, fetches selected URLs, converts HTML to markdown, removes configured
 noise lines, applies token gates, and persists accepted markdown in
 `Product.reviewFacts`.
 
+The first SERP queries target the official product page and official
+support/manual evidence. Manufacturer HTML that passes prompt-source gates is
+persisted in `Product.reviewFacts`; official/support URLs are also stored on the
+product, and official PDFs or extracted manuals are stored in
+`Product.resources` with manufacturer tags. PDF resources are not injected into
+the prompt as markdown.
+
 Review generation requests the fallback sequence `HTTP`, `PLAYWRIGHT`, then
 `PROXIFIED` by passing internal strategy override headers to
 `UrlFetchingService`. The fetch service consumes those headers before outbound
@@ -67,5 +74,7 @@ captured in the result payload and do not abort the rest of the vertical run.
 - Attribute extraction and text completion never trigger remote fetching.
 - Text completion fails if `reviewFacts` or product attributes are missing.
 - The persisted markdown facts remain the contract between fetch and LLM stages.
+- Fetch results include post-fetch enrichment status, including whether EPREL
+  data was already present, completed by hooks, or still missing.
 - Model-native web-search review generation remains a separate single-call mode
   and is not used by these decoupled external-source stage endpoints.

@@ -22,19 +22,21 @@ public record ReviewGenerationStepResult(
         ReviewGenerationFailureDetails failureDetails,
         List<String> searchedQueries,
         List<String> acceptedUrls,
-        Map<String, String> rejectedUrls) {
+        Map<String, String> rejectedUrls,
+        Map<String, String> enrichmentStatus) {
 
     public ReviewGenerationStepResult {
         attributes = attributes == null ? List.of() : List.copyOf(attributes);
         searchedQueries = searchedQueries == null ? List.of() : List.copyOf(searchedQueries);
         acceptedUrls = acceptedUrls == null ? List.of() : List.copyOf(acceptedUrls);
         rejectedUrls = rejectedUrls == null ? Map.of() : Map.copyOf(rejectedUrls);
+        enrichmentStatus = enrichmentStatus == null ? Map.of() : Map.copyOf(enrichmentStatus);
     }
 
     public ReviewGenerationStepResult(long upc, String gtin, String verticalId, String step, boolean success,
             String message, int sourceCount, int totalTokens, List<AiReview.AiAttribute> attributes, AiReview review) {
         this(upc, gtin, verticalId, step, success, message, sourceCount, totalTokens, attributes, review, null,
-                List.of(), List.of(), Map.of());
+                List.of(), List.of(), Map.of(), Map.of());
     }
 
     public ReviewGenerationStepResult(long upc, String gtin, String verticalId, String step, boolean success,
@@ -43,6 +45,6 @@ public record ReviewGenerationStepResult(
         this(upc, gtin, verticalId, step, success, message, sourceCount, totalTokens, attributes, review,
                 failureDetails, failureDetails == null ? List.of() : failureDetails.searchedQueries(),
                 failureDetails == null ? List.of() : failureDetails.acceptedUrls(),
-                failureDetails == null ? Map.of() : failureDetails.rejectedUrls());
+                failureDetails == null ? Map.of() : failureDetails.rejectedUrls(), Map.of());
     }
 }

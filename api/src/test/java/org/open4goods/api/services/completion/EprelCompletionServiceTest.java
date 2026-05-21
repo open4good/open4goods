@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -134,6 +135,44 @@ class EprelCompletionServiceTest {
 
         assertThat(product.getEprelDatas()).isEqualTo(italy);
         assertThat(product.getExternalIds().getEprel()).isEqualTo("it");
+    }
+
+    @Test
+    void processProductDeterministicallyResolvesEquivalentModelMatches() {
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Toshiba");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "32WA3B63DG");
+        vertical.setEprelGroupNames(List.of("televisions", "electronicdisplays"));
+
+        EprelProduct staleDisplay = new EprelProduct();
+        staleDisplay.setEprelRegistrationNumber("old");
+        staleDisplay.setModelIdentifier("32WA3B63DG");
+        staleDisplay.setSupplierOrTrademark("TOSHIBA");
+        staleDisplay.setProductGroup("televisions");
+        staleDisplay.setLastVersion(false);
+        staleDisplay.setProductModelCoreId(309853L);
+        staleDisplay.setVersionNumber(BigDecimal.ONE);
+        staleDisplay.setPublishedOnDateTs(1_700_000_000_000L);
+
+        EprelProduct newerDisplay = new EprelProduct();
+        newerDisplay.setEprelRegistrationNumber("new");
+        newerDisplay.setModelIdentifier("32WA3B63DG");
+        newerDisplay.setSupplierOrTrademark("TOSHIBA");
+        newerDisplay.setProductGroup("electronicdisplays");
+        newerDisplay.setLastVersion(false);
+        newerDisplay.setProductModelCoreId(366760L);
+        newerDisplay.setVersionNumber(BigDecimal.TEN);
+        newerDisplay.setPublishedOnDateTs(1_800_000_000_000L);
+
+        List<EprelProduct> multipleResults = List.of(staleDisplay, newerDisplay);
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection()))
+                .thenReturn(multipleResults);
+        when(eprelSearchService.filterByBrand(multipleResults, "Toshiba"))
+                .thenReturn(multipleResults);
+
+        service.processProduct(vertical, product);
+
+        assertThat(product.getEprelDatas()).isEqualTo(newerDisplay);
+        assertThat(product.getExternalIds().getEprel()).isEqualTo("new");
     }
 
     @Test

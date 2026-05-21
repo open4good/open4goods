@@ -1,9 +1,20 @@
 
 package org.open4goods.api.controller.api;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import org.open4goods.api.dto.IcecatCategoryAttributesDto;
+import org.open4goods.api.dto.IcecatCategoryCandidateDto;
+import org.open4goods.api.dto.IcecatCategoryAttributesDto.IcecatCategoryAttributeDto;
+import org.open4goods.api.dto.IcecatCategoryAttributesDto.IcecatCategoryFeatureGroupDto;
+import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
+import org.open4goods.icecat.model.IcecatCategoryFeatureGroupDocument;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
 import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
@@ -94,14 +105,52 @@ public class IcecatController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 
-	@GetMapping("/icecat/categories/{id}/features")
-	@Operation(summary = "Search Icecat features by English name (scoped to context of category)")
-	public Page<IcecatFeatureDocument> searchFeaturesByCategory(
-			@PathVariable Integer id,
-			@RequestParam(defaultValue = "") String q,
-			@RequestParam(defaultValue = "0") int page,
+	@GetMapping("/icecat/verticals/{verticalId}/candidate-categories")
+	@Operation(
+			summary = "Candidate Icecat categories for a vertical",
+			description = "Returns Icecat category candidates from the Elasticsearch category index. "
+					+ "The configured vertical Icecat category is returned first when present, "
+					+ "then candidates found from vertical names."
+	)
+	public ResponseEntity<List<IcecatCategoryCandidateDto>> candidateCategoriesForVertical(
+			@PathVariable String verticalId,
 			@RequestParam(defaultValue = "20") int size) {
-		return icecatIndexService.searchFeatures(q, PageRequest.of(page, size));
+		VerticalConfig vc = verticalsService.getConfigById(verticalId);
+		if (vc == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Map<Integer, IcecatCategoryCandidateDto> candidates = new LinkedHashMap<>();
+		if (vc.getIcecatTaxonomyId() != null) {
+			icecatIndexService.findCategory(vc.getIcecatTaxonomyId())
+					.map(category -> toCandidate(category, "configured"))
+					.ifPresent(candidate -> candidates.put(candidate.id(), candidate));
+		}
+
+		for (String term : verticalSearchTerms(vc)) {
+			icecatIndexService.searchCategories(term, PageRequest.of(0, Math.max(1, size))).forEach(category -> {
+				candidates.putIfAbsent(category.getId(), toCandidate(category, "search:" + term));
+			});
+			if (candidates.size() >= size) {
+				break;
+			}
+		}
+
+		return ResponseEntity.ok(candidates.values().stream().limit(size).toList());
+	}
+
+	@GetMapping("/icecat/categories/{id}/attributes")
+	@Operation(
+			summary = "List Icecat attributes available for a category",
+			description = "Returns category-scoped attribute metadata and global Icecat feature metadata "
+					+ "already stored in Elasticsearch. No live Icecat API call is made."
+	)
+	public ResponseEntity<IcecatCategoryAttributesDto> getCategoryAttributes(@PathVariable Integer id) {
+		Optional<IcecatCategoryDocument> category = icecatIndexService.findCategory(id);
+		if (category.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(toCategoryAttributes(category.get()));
 	}
 
 	@PostMapping("/icecat/vertical/{verticalId}/category/{catId}")
@@ -142,5 +191,94 @@ public class IcecatController {
 				"categories", counts[1],
 				"featureGroups", counts[2],
 				"suppliers", counts[3]);
+	}
+
+	private IcecatCategoryCandidateDto toCandidate(IcecatCategoryDocument category, String source) {
+		return new IcecatCategoryCandidateDto(
+				category.getId(),
+				category.getEnglishName(),
+				category.getParentId(),
+				category.getScore(),
+				category.getLangNames(),
+				source);
+	}
+
+	private Set<String> verticalSearchTerms(VerticalConfig vc) {
+		Set<String> terms = new LinkedHashSet<>();
+		addTerm(terms, vc.getId());
+		if (vc.getId() != null) {
+			addTerm(terms, vc.getId().replace('-', ' ').replace('_', ' '));
+		}
+		vc.getI18n().values().forEach(i18n -> {
+			addTerm(terms, i18n.getCardTitle());
+			addTerm(terms, i18n.getShortName());
+			addTerm(terms, i18n.getLongName());
+			addTerm(terms, i18n.getVerticalHomeTitle());
+			addTerm(terms, i18n.getVerticalMetaTitle());
+			addTerm(terms, i18n.getPrettyName().getPrefix());
+			addTerm(terms, i18n.getSingular().getPrefix());
+		});
+		return terms;
+	}
+
+	private void addTerm(Set<String> terms, String term) {
+		if (term != null && !term.isBlank()) {
+			terms.add(term.trim());
+		}
+	}
+
+	private IcecatCategoryAttributesDto toCategoryAttributes(IcecatCategoryDocument category) {
+		Map<Integer, IcecatFeatureDocument> featureDocuments = icecatIndexService.findCategoryFeatureDocuments(category);
+		List<IcecatCategoryAttributeDto> attributes = new ArrayList<>();
+		List<IcecatCategoryFeatureDocument> categoryFeatures = category.getFeatures() == null
+				? List.of()
+				: category.getFeatures();
+		for (IcecatCategoryFeatureDocument categoryFeature : categoryFeatures) {
+			IcecatFeatureDocument feature = featureDocuments.get(categoryFeature.getId());
+			Set<String> normalizedNames = feature == null || feature.getNormalizedNames() == null
+					? Set.of()
+					: feature.getNormalizedNames();
+			List<String> langNames = feature == null || feature.getLangNames() == null
+					? List.of()
+					: feature.getLangNames();
+			attributes.add(new IcecatCategoryAttributeDto(
+					categoryFeature.getId(),
+					feature == null ? null : feature.getEnglishName(),
+					feature == null ? null : feature.getType(),
+					categoryFeature.getType(),
+					categoryFeature.getCategoryFeatureGroupId(),
+					categoryFeature.getCategoryFeatureId(),
+					categoryFeature.getNo(),
+					categoryFeature.getClazz(),
+					categoryFeature.getDefaultDisplayUnit(),
+					categoryFeature.getLimitDirection(),
+					categoryFeature.getMandatory(),
+					categoryFeature.getSearchable(),
+					categoryFeature.getUseDropdownInput(),
+					categoryFeature.getValueSorting(),
+					normalizedNames,
+					langNames,
+					localizedNames(langNames)));
+		}
+		List<IcecatCategoryFeatureGroupDto> groups = (category.getFeatureGroups() == null
+				? List.<IcecatCategoryFeatureGroupDocument>of()
+				: category.getFeatureGroups()).stream()
+				.map(group -> new IcecatCategoryFeatureGroupDto(group.getId(), group.getFeatureGroupIds()))
+				.toList();
+		return new IcecatCategoryAttributesDto(category.getId(), category.getEnglishName(), groups, attributes);
+	}
+
+	private Map<String, String> localizedNames(List<String> langNames) {
+		if (langNames == null) {
+			return Map.of();
+		}
+		Map<String, String> result = new LinkedHashMap<>();
+		for (String langName : langNames) {
+			int separator = langName.indexOf(':');
+			if (separator > 0 && separator < langName.length() - 1) {
+				result.put(langName.substring(0, separator), langName.substring(separator + 1));
+			}
+		}
+		return result;
 	}
 }

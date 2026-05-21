@@ -309,13 +309,22 @@ public class ReviewGenerationService implements HealthIndicator {
 			throw e;
 		}
 		productRepository.forceIndex(product);
+		Map<String, String> enrichmentStatus = new LinkedHashMap<>();
+		enrichmentStatus.put("eprel.beforeFetch", Boolean.toString(hadEprelBeforeFetch));
 		try {
 			hooks.forEach(hook -> hook.onSourcesFetched(product, hadEprelBeforeFetch));
+			boolean hasEprelAfterFetchHooks = hasEprel(product);
+			enrichmentStatus.put("eprel.afterFetchHooks", Boolean.toString(hasEprelAfterFetchHooks));
+			enrichmentStatus.put("eprel.status", hadEprelBeforeFetch ? "already_present"
+					: hasEprelAfterFetchHooks ? "completed" : "not_completed");
 		} catch (Exception e) {
 			logger.error("Error executing onSourcesFetched hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
+			enrichmentStatus.put("eprel.afterFetchHooks", Boolean.toString(hasEprel(product)));
+			enrichmentStatus.put("eprel.status", "hook_error");
+			enrichmentStatus.put("eprel.error", e.getMessage());
 		}
 		return stepResult(product, verticalConfig, "fetch", true, "Remote sources fetched and persisted.",
-				promptVariables, List.of(), null);
+				promptVariables, List.of(), null, enrichmentStatus);
 	}
 
 	/**
@@ -1166,6 +1175,13 @@ public class ReviewGenerationService implements HealthIndicator {
 	private ReviewGenerationStepResult stepResult(Product product, VerticalConfig verticalConfig, String step,
 			boolean success, String message, Map<String, Object> promptVariables,
 			List<AiReview.AiAttribute> attributes, AiReview review) {
+		return stepResult(product, verticalConfig, step, success, message, promptVariables, attributes, review, Map.of());
+	}
+
+	@SuppressWarnings("unchecked")
+	private ReviewGenerationStepResult stepResult(Product product, VerticalConfig verticalConfig, String step,
+			boolean success, String message, Map<String, Object> promptVariables,
+			List<AiReview.AiAttribute> attributes, AiReview review, Map<String, String> enrichmentStatus) {
 		Map<String, Integer> sourceTokens = promptVariables == null ? Map.of()
 				: (Map<String, Integer>) promptVariables.getOrDefault("SOURCE_TOKENS", Map.of());
 		int totalTokens = promptVariables == null ? 0
@@ -1178,7 +1194,8 @@ public class ReviewGenerationService implements HealthIndicator {
 				: (Map<String, String>) promptVariables.getOrDefault("REJECTED_URLS", Map.of());
 		return new ReviewGenerationStepResult(product.getId(), product.gtin(),
 				verticalConfig == null ? product.getVertical() : verticalConfig.getId(), step, success, message,
-				sourceTokens.size(), totalTokens, attributes, review, null, searchedQueries, acceptedUrls, rejectedUrls);
+				sourceTokens.size(), totalTokens, attributes, review, null, searchedQueries, acceptedUrls, rejectedUrls,
+				enrichmentStatus);
 	}
 
 	private boolean hasEprel(Product product) {

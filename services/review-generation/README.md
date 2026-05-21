@@ -8,9 +8,9 @@ realtime generation and OpenAI batch generation.
 
 1. Eligibility: skip products with a fresh and structurally valid French AI
    review unless generation is forced.
-2. SERP validation: require product brand and model, build official-discovery
-   and preferred-domain queries first, then vertical-injected site queries, then
-   broad model queries.
+2. SERP validation: require product brand and model, build official product and
+   official support/manual queries first, then preferred-domain queries,
+   vertical-injected site queries, and broad model queries.
 3. Fetching: fetch selected URLs concurrently through `UrlFetchingService`.
    Review generation requests `HTTP`, then `PLAYWRIGHT`, then `PROXIFIED`
    through internal strategy override headers; without an override, the URL
@@ -66,11 +66,18 @@ For a product `SONY XR55A80L`, the first query is shaped like:
 Vertical configs may still add `injectSitesResults`; those are queried after
 the global preferred-domain query and before broad fallback queries.
 
+Official manufacturer pages are identified before prompt-source selection.
+Official support pages are stored in `Product.officialSupportUrls`; official
+PDFs and extracted manuals are stored in `Product.resources` with manufacturer
+metadata. HTML pages accepted as prompt evidence are also persisted as
+`Product.reviewFacts`.
+
 If the first fetch pass persists official manufacturer evidence but does not
 reach the source or token thresholds, the service can run up to
 `partial-retry-max-search` targeted manual, guide, review, and test searches.
 The successful fetch response includes `searchedQueries`, `acceptedUrls`, and
-`rejectedUrls` so back-office callers can inspect SERP quality without reading
+`rejectedUrls`, plus `enrichmentStatus` for post-fetch hooks such as EPREL
+completion, so back-office callers can inspect SERP quality without reading
 logs.
 
 ## Fetching Configuration

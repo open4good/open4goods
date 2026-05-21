@@ -61,8 +61,8 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
-    void preparePromptVariables_SearchesOfficialDiscoveryThenPreferredDomainsAndPreservesSearchKeys() throws Exception {
-        properties.setMaxSearch(2);
+    void preparePromptVariables_SearchesOfficialDiscoveryThenSupportAndPreferredDomains() throws Exception {
+        properties.setMaxSearch(4);
         Product product = product("Sony", "XR55A80L");
         product.setAkaModels(Set.of("XR-55A80L"));
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
@@ -71,12 +71,14 @@ class ReviewGenerationPreprocessingServiceTest {
                 .isInstanceOf(NotEnoughDataException.class);
 
         ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
-        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(2)).search(requestCaptor.capture());
+        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(4)).search(requestCaptor.capture());
         List<GoogleSearchRequest> requests = requestCaptor.getAllValues();
         GoogleSearchRequest officialRequest = requests.getFirst();
-        GoogleSearchRequest preferredRequest = requests.get(1);
+        GoogleSearchRequest supportRequest = requests.get(1);
+        GoogleSearchRequest preferredRequest = requests.get(2);
 
         assertThat(officialRequest.query()).isEqualTo("Sony \"XR55A80L\" (official OR officiel OR product OR produit)");
+        assertThat(supportRequest.query()).contains("support OR assistance OR manual OR notice");
         assertThat(preferredRequest.query()).startsWith("(site:lesnumeriques.com OR site:fnac.com)");
         assertThat(preferredRequest.query()).contains("\"Sony XR55A80L\"");
         assertThat(preferredRequest.query()).contains("\"Sony XR-55A80L\"");
@@ -90,7 +92,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_UsesVerticalPreferredDomainsWhenConfigured() throws Exception {
-        properties.setMaxSearch(2);
+        properties.setMaxSearch(4);
         properties.setPreferredDomains(List.of("global.example"));
         properties.setPreferredDomainsByVertical(Map.of("refrigerator",
                 List.of("electromenager-compare.com", "test-achats.be")));
@@ -103,8 +105,8 @@ class ReviewGenerationPreprocessingServiceTest {
                 .isInstanceOf(NotEnoughDataException.class);
 
         ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
-        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(2)).search(requestCaptor.capture());
-        String preferredQuery = requestCaptor.getAllValues().get(1).query();
+        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(4)).search(requestCaptor.capture());
+        String preferredQuery = requestCaptor.getAllValues().get(2).query();
         assertThat(preferredQuery).startsWith("(site:electromenager-compare.com OR site:test-achats.be)");
         assertThat(preferredQuery).doesNotContain("global.example");
     }
@@ -258,6 +260,48 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void preparePromptVariables_FetchesOfficialEvidenceWithProxyFallback() throws Exception {
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("Samsung", "SM-S921B/DS");
+        String officialUrl = "https://www.samsung.com/fr/smartphones/galaxy-s24/galaxy-s24-sm-s921b-ds/";
+        String pdfUrl = "https://images.samsung.com/is/content/samsung/assets/fr/galaxy-s24/notice-sm-s921b-ds.pdf";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Samsung Galaxy S24 SM-S921B/DS | Produit officiel", officialUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String url = invocation.getArgument(0);
+            @SuppressWarnings("unchecked")
+            Map<String, String> headers = invocation.getArgument(1);
+            boolean proxied = Boolean.parseBoolean(headers.get("X-Open4goods-Playwright-Proxy"));
+            if (!proxied) {
+                return CompletableFuture.completedFuture(new FetchResponse(url, 403, "Forbidden", "",
+                        FetchStrategy.HTTP));
+            }
+            String markdown = "Useful Samsung SM-S921B/DS official product content with display, camera, and battery details.";
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown,
+                    FetchStrategy.PLAYWRIGHT, List.of(), Set.of(), List.of(
+                            new org.open4goods.services.urlfetching.dto.ExtractedResource(pdfUrl,
+                                    org.open4goods.services.urlfetching.dto.ResourceType.PDF, "link", "Notice")),
+                    false, null));
+        });
+
+        service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
+
+        ArgumentCaptor<Map> headersCaptor = ArgumentCaptor.forClass(Map.class);
+        org.mockito.Mockito.verify(urlFetchingService, org.mockito.Mockito.atLeastOnce())
+                .fetchUrlAsync(org.mockito.ArgumentMatchers.eq(officialUrl), headersCaptor.capture());
+        assertThat(headersCaptor.getAllValues()).anySatisfy(headers ->
+                assertThat(headers.get("X-Open4goods-Playwright-Proxy")).isEqualTo("true"));
+        assertThat(product.getResources()).anySatisfy(resource ->
+                assertThat(resource.getUrl()).isEqualTo(pdfUrl));
+    }
+
+    @Test
     void preparePromptVariables_PersistsPdfResourcesButExcludesThemFromPromptSources() throws Exception
     {
         properties.setMinMarkdownChars(20);
@@ -338,7 +382,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_SearchesBroadOfficialCandidatesBeforeGenericQueries() throws Exception {
-        properties.setMaxSearch(3);
+        properties.setMaxSearch(4);
         properties.setPreferredDomains(List.of("darty.com"));
         Product product = product("Samsung", "SM-S921B/DS");
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
@@ -347,11 +391,12 @@ class ReviewGenerationPreprocessingServiceTest {
                 .isInstanceOf(NotEnoughDataException.class);
 
         ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
-        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(3)).search(requestCaptor.capture());
+        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(4)).search(requestCaptor.capture());
         assertThat(requestCaptor.getAllValues())
                 .extracting(GoogleSearchRequest::query)
                 .containsExactly(
                         "Samsung \"SM-S921B/DS\" (official OR officiel OR product OR produit)",
+                        "Samsung \"SM-S921B/DS\" (support OR assistance OR manual OR notice OR datasheet OR \"fiche produit\")",
                         "(site:darty.com) (\"Samsung SM-S921B/DS\")",
                         "test Samsung \"SM-S921B/DS\"");
     }

@@ -266,6 +266,7 @@ public class ReviewGenerationPreprocessingService {
 			logger.info("Official manufacturer support page identified for UPC {}: language={}, url={}", product.getId(),
 					language, supportUrl);
 		});
+		fetchOfficialEvidence(product, allResults, customHeaders);
 
 		// Sort and deduplicate results.
 		List<GoogleSearchResult> sortedResults = sortSearchResults(product, allResults, preferredDomains);
@@ -692,6 +693,7 @@ public class ReviewGenerationPreprocessingService {
 		List<String> searchModels = orderedModels.stream().limit(6).toList();
 		String modelExpression = modelExpression(brand, searchModels);
 		queries.add(officialDiscoveryQuery(brand, searchModels.getFirst()));
+		queries.add(officialSupportQuery(brand, searchModels.getFirst()));
 		String preferredDomainExpression = domainExpression(preferredDomains);
 		if (!preferredDomainExpression.isBlank()) {
 			queries.add(preferredDomainExpression + " " + modelExpression);
@@ -923,6 +925,11 @@ public class ReviewGenerationPreprocessingService {
 
 	private String officialDiscoveryQuery(String brand, String model) {
 		return brand + " " + quoted(model) + " (official OR officiel OR product OR produit)";
+	}
+
+	private String officialSupportQuery(String brand, String model) {
+		return brand + " " + quoted(model)
+				+ " (support OR assistance OR manual OR notice OR datasheet OR \"fiche produit\")";
 	}
 
 	private String domainExpression(List<String> domains) {
@@ -1215,6 +1222,38 @@ public class ReviewGenerationPreprocessingService {
 			}
 			addOfficialResource(product, extractedResource.url(), toProductResourceType(extractedResource.type()), language,
 					extractedResource.source(), extractedResource.label());
+		}
+	}
+
+	private void fetchOfficialEvidence(Product product, List<GoogleSearchResult> results, Map<String, String> customHeaders) {
+		if (product == null || results == null || results.isEmpty()) {
+			return;
+		}
+		List<GoogleSearchResult> officialResults = results.stream()
+				.filter(result -> result != null && result.link() != null && !result.link().isBlank())
+				.filter(result -> isOfficialUrl(product, result))
+				.filter(distinctByKey(GoogleSearchResult::link))
+				.limit(Math.max(3, properties.getMaxUrlsPerProduct()))
+				.toList();
+		for (GoogleSearchResult result : officialResults) {
+			String url = result.link();
+			if (isPdfUrl(url)) {
+				persistOfficialResources(product, result, null);
+				continue;
+			}
+			try {
+				FetchOutcome outcome = fetchWithFallbacks(url, customHeaders);
+				FetchResponse response = outcome == null ? null : outcome.response();
+				if (response == null) {
+					logger.info("Official evidence fetch produced no response for UPC {}: url={}, reason={}",
+							product.getId(), url, outcome == null ? "unknown" : outcome.rejectionReason());
+					continue;
+				}
+				persistOfficialResources(product, result, response);
+			} catch (Exception e) {
+				logger.warn("Official evidence fetch failed for UPC {}: url={}, reason={}", product.getId(), url,
+						e.getMessage());
+			}
 		}
 	}
 

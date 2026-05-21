@@ -1,5 +1,6 @@
 package org.open4goods.icecat.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -41,6 +42,19 @@ public class IcecatCategoryDocument {
     @Field(type = FieldType.Keyword, index = false)
     private List<String> langNames;
 
+    /**
+     * Feature groups available for this category, loaded from the Icecat
+     * {@code CategoryFeaturesList.xml} reference export.
+     */
+    @Field(type = FieldType.Object)
+    private List<IcecatCategoryFeatureGroupDocument> featureGroups = new ArrayList<>();
+
+    /**
+     * Features available for this category, with category-specific metadata.
+     */
+    @Field(type = FieldType.Object)
+    private List<IcecatCategoryFeatureDocument> features = new ArrayList<>();
+
     public IcecatCategoryDocument() {
     }
 
@@ -58,4 +72,12 @@ public class IcecatCategoryDocument {
 
     public List<String> getLangNames() { return langNames; }
     public void setLangNames(List<String> langNames) { this.langNames = langNames; }
+
+    public List<IcecatCategoryFeatureGroupDocument> getFeatureGroups() { return featureGroups; }
+    public void setFeatureGroups(List<IcecatCategoryFeatureGroupDocument> featureGroups) {
+        this.featureGroups = featureGroups;
+    }
+
+    public List<IcecatCategoryFeatureDocument> getFeatures() { return features; }
+    public void setFeatures(List<IcecatCategoryFeatureDocument> features) { this.features = features; }
 }

@@ -97,7 +97,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 			data.removeDatasourceData(getDatasourceName());
 			return;
 		}
-		Optional<EprelProduct> selected = selectUniqueResult(results, data, models);
+		Optional<EprelProduct> selected = selectUniqueResult(results, data, models, vertical);
 		if (selected.isEmpty()) {
 			logger.warn("No safe unique EPREL result ({} candidates) when completing {}", results.size(), data);
 			data.removeDatasourceData(getDatasourceName());
@@ -147,7 +147,7 @@ public class EprelCompletionService extends AbstractCompletionService {
      * @return selected candidate, or empty when selection is ambiguous
      */
     private Optional<EprelProduct> selectUniqueResult(List<EprelProduct> results, Product product,
-            List<String> modelCandidates) {
+            List<String> modelCandidates, VerticalConfig vertical) {
         List<EprelProduct> gtinMatches = results.stream()
                 .filter(candidate -> hasSameGtin(product.gtin(), candidate))
                 .toList();
@@ -156,7 +156,7 @@ public class EprelCompletionService extends AbstractCompletionService {
         }
         if (gtinMatches.size() > 1) {
             logger.info("EPREL GTIN matched {} candidates for {}", gtinMatches.size(), product);
-            return Optional.empty();
+            return selectDeterministicBest(gtinMatches, modelCandidates, vertical, product, "GTIN");
         }
 
         if (results.size() == 1) {
@@ -202,8 +202,111 @@ public class EprelCompletionService extends AbstractCompletionService {
                         results.size(), product.brand(), product.model());
                 return Optional.of(bestMatches.getFirst());
             }
+            return selectDeterministicBest(bestMatches, modelCandidates, vertical, product, "model label");
         }
-        return Optional.empty();
+        return selectDeterministicBest(narrowed.isEmpty() ? results : narrowed, modelCandidates, vertical, product,
+                "fallback");
+    }
+
+    private Optional<EprelProduct> selectDeterministicBest(List<EprelProduct> candidates,
+            List<String> modelCandidates, VerticalConfig vertical, Product product, String reason)
+    {
+        if (candidates == null || candidates.isEmpty())
+        {
+            return Optional.empty();
+        }
+        List<EprelProduct> eligible = candidates.stream()
+                .filter(candidate -> hasCompatibleBrand(product.brand(), candidate))
+                .filter(candidate -> hasModelEvidence(candidate, modelCandidates) || hasSameGtin(product.gtin(), candidate))
+                .sorted((left, right) -> compareDeterministicCandidate(right, left, modelCandidates, vertical))
+                .toList();
+        if (eligible.isEmpty())
+        {
+            return Optional.empty();
+        }
+        EprelProduct selected = eligible.getFirst();
+        logger.info("Deterministically selected EPREL result {} for {} from {} {} candidates",
+                selected.getEprelRegistrationNumber(), product, eligible.size(), reason);
+        return Optional.of(selected);
+    }
+
+    private int compareDeterministicCandidate(EprelProduct left, EprelProduct right,
+            List<String> modelCandidates, VerticalConfig vertical)
+    {
+        int comparison = Integer.compare(getModelEvidenceScore(left, modelCandidates),
+                getModelEvidenceScore(right, modelCandidates));
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+        comparison = Boolean.compare(Boolean.TRUE.equals(left.getLastVersion()), Boolean.TRUE.equals(right.getLastVersion()));
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+        comparison = nullSafeCompare(left.getVersionNumber(), right.getVersionNumber());
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+        comparison = nullSafeCompare(left.getVersionId(), right.getVersionId());
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+        comparison = nullSafeCompare(left.getProductModelCoreId(), right.getProductModelCoreId());
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+        comparison = Long.compare(candidateFreshness(left), candidateFreshness(right));
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+        return Integer.compare(categoryPreference(right, vertical), categoryPreference(left, vertical));
+    }
+
+    private int categoryPreference(EprelProduct candidate, VerticalConfig vertical)
+    {
+        if (candidate == null || vertical == null || vertical.getEprelGroupNames() == null)
+        {
+            return Integer.MAX_VALUE;
+        }
+        int index = vertical.getEprelGroupNames().indexOf(candidate.getProductGroup());
+        return index < 0 ? Integer.MAX_VALUE : index;
+    }
+
+    private long candidateFreshness(EprelProduct candidate)
+    {
+        if (candidate == null)
+        {
+            return Long.MIN_VALUE;
+        }
+        return java.util.stream.Stream.of(candidate.getImportedOn(), candidate.getPublishedOnDateTs(),
+                candidate.getPublishedOnDate(), candidate.getOnMarketStartDateTs(), candidate.getOnMarketStartDate(),
+                candidate.getFirstPublicationDateTs(), candidate.getFirstPublicationDate())
+                .filter(Objects::nonNull)
+                .mapToLong(Long::longValue)
+                .max()
+                .orElse(Long.MIN_VALUE);
+    }
+
+    private <T extends Comparable<T>> int nullSafeCompare(T left, T right)
+    {
+        if (left == null && right == null)
+        {
+            return 0;
+        }
+        if (left == null)
+        {
+            return -1;
+        }
+        if (right == null)
+        {
+            return 1;
+        }
+        return left.compareTo(right);
     }
 
     /**

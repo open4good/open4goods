@@ -1,13 +1,19 @@
 package org.open4goods.icecat.services;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
+import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
+import org.open4goods.icecat.model.IcecatCategoryFeatureGroupDocument;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
+import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
 import org.open4goods.icecat.model.IcecatFeatureGroup;
 import org.open4goods.icecat.model.IcecatFeatureGroupDocument;
@@ -130,6 +136,19 @@ public class IcecatIndexService {
                             .findFirst()
                             .orElse(null));
                     doc.setLangNames(toLangNameList(names));
+                    doc.setFeatureGroups(cat.getCategoryFeatureGroups().stream()
+                            .map(cfg -> {
+                                IcecatCategoryFeatureGroupDocument group = new IcecatCategoryFeatureGroupDocument();
+                                group.setId(cfg.getId());
+                                group.setFeatureGroupIds(cfg.getFeatureGroups().stream()
+                                        .map(IcecatFeatureGroup::getId)
+                                        .toList());
+                                return group;
+                            })
+                            .toList());
+                    doc.setFeatures(cat.getFeatures().stream()
+                            .map(this::toCategoryFeatureDocument)
+                            .toList());
                     return doc;
                 })
                 .toList();
@@ -170,6 +189,23 @@ public class IcecatIndexService {
                 .toList();
         supplierRepository.saveAll(docs);
         LOGGER.info("Indexed {} Icecat suppliers", docs.size());
+    }
+
+    private IcecatCategoryFeatureDocument toCategoryFeatureDocument(IcecatFeature feature) {
+        IcecatCategoryFeatureDocument doc = new IcecatCategoryFeatureDocument();
+        doc.setId(feature.getId());
+        doc.setType(feature.getType());
+        doc.setCategoryFeatureGroupId(feature.getCategoryFeatureGroupId());
+        doc.setCategoryFeatureId(feature.getCategoryFeatureId());
+        doc.setLimitDirection(feature.getLimitDirection());
+        doc.setMandatory(feature.getMandatory());
+        doc.setSearchable(feature.getSearchable());
+        doc.setNo(feature.getNo());
+        doc.setClazz(feature.getClazz());
+        doc.setDefaultDisplayUnit(feature.getDefaultDisplayUnit());
+        doc.setUseDropdownInput(feature.getUseDropdownInput());
+        doc.setValueSorting(feature.getValueSorting());
+        return doc;
     }
 
     private IcecatFeatureDocument toFeatureDocument(org.open4goods.icecat.model.IcecatFeature feature) {
@@ -275,6 +311,29 @@ public class IcecatIndexService {
      */
     public Optional<IcecatFeatureDocument> findFeature(Integer id) {
         return featureRepository.findById(id);
+    }
+
+    /**
+     * Returns all feature documents referenced by an indexed category, preserving the
+     * order declared by Icecat in the category-feature export.
+     *
+     * @param category the category document carrying category-feature metadata
+     * @return feature documents keyed by their Icecat feature ID
+     */
+    public Map<Integer, IcecatFeatureDocument> findCategoryFeatureDocuments(IcecatCategoryDocument category) {
+        List<IcecatCategoryFeatureDocument> categoryFeatures = category.getFeatures() == null
+                ? List.of()
+                : category.getFeatures();
+        List<Integer> ids = categoryFeatures.stream()
+                .map(IcecatCategoryFeatureDocument::getId)
+                .filter(id -> id != null)
+                .distinct()
+                .toList();
+        Map<Integer, IcecatFeatureDocument> result = new LinkedHashMap<>();
+        StreamSupport.stream(featureRepository.findAllById(ids).spliterator(), false)
+                .sorted(Comparator.comparingInt(doc -> ids.indexOf(doc.getId())))
+                .forEach(doc -> result.put(doc.getId(), doc));
+        return result;
     }
 
     /**

@@ -142,6 +142,7 @@ public class CategoryLoader {
                     .getResponse().getCategoryFeaturesList().getCategories();
             for (IcecatCategory category : categories) {
                 int catId = category.getId();
+                mergeCategoryFeatureMetadata(category);
                 VerticalConfig vertical = verticalsConfigService.getByIcecatCategoryId(catId);
                 if (vertical != null) {
                     updateVertical(category, vertical);
@@ -151,6 +152,16 @@ public class CategoryLoader {
             LOGGER.error("Error while loading category features list", e);
         }
         LOGGER.info("End loading of category features from {}", iceCatConfig.getCategoryFeatureListFileUri());
+    }
+
+    private void mergeCategoryFeatureMetadata(IcecatCategory category) {
+        IcecatCategory existing = categoriesById.get(category.getId());
+        if (existing == null) {
+            categoriesById.put(category.getId(), category);
+            return;
+        }
+        existing.setCategoryFeatureGroups(category.getCategoryFeatureGroups());
+        existing.setFeatures(category.getFeatures());
     }
 
     private void updateVertical(IcecatCategory category, VerticalConfig vertical) {

@@ -20,5 +20,6 @@ owned, and linked from this index when they become durable project knowledge.
 - [Documentation guidelines](conventions/documentation-guidelines.md)
 - [MCP server setup](operations/mcp-servers.md)
 - [ADR index](adr/README.md)
+- [Icecat reference data](architecture/icecat-reference-data.md)
 - [Review generation service](architecture/review-generation-service.md)
 - [ADR 0001: EPREL matching logic scoring](adr/0001-eprel-matching-logic-scoring.md)
