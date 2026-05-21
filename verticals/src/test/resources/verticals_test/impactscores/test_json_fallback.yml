@@ -7,7 +7,7 @@ aiResult:
   geo_scope: EU
   vertical: test_vertical
   available_criterias:
-  - TEST_CRITERIA
+    - TEST_CRITERIA
   positioning:
     claim: Test Claim
     not_an_absolute_footprint: true
@@ -28,16 +28,16 @@ aiResult:
     key_principles: []
     assumptions: []
   criteria_weights:
-  - criterion: TEST_CRITERIA
-    weight: 0.5
-    directionality: lower_is_better
-    impact_dimensions: []
-    rationale: Test rationale
-    overlap_notes: None
-    guardrails: None
-    evidence_strength:
-      level: high
-      why: Test evidence
+    - criterion: TEST_CRITERIA
+      weight: 0.5
+      directionality: lower_is_better
+      impact_dimensions: []
+      rationale: Test rationale
+      overlap_notes: None
+      guardrails: None
+      evidence_strength:
+        level: high
+        why: Test evidence
   normalization_notes:
     relative_ranking_0_100: Test normalization
     sigma_scoring_0_5: Test sigma
