@@ -12,16 +12,19 @@ parsers:
 
 order: 9
 
-# DOE/FEMP room air conditioner test assumption: 750 operating hours/year, i.e. 2.05 h/day averaged over a full year.
+# Source: DOE/FEMP room air conditioner test assumption, 750 operating hours/year.
+# https://www.energy.gov/femp/purchasing-energy-efficient-room-air-conditioners
 averageHoursPerDay: 2.05
 
-# Google taxonomy FR: Maison et jardin > Appareils électroménagers > Chauffage et climatisation > Climatiseurs.
+# Source: Google product taxonomy id 605, Air Conditioners.
+# https://productcategory.net/finder/home-and-garden/household-appliances/climate-control-appliances/air-conditioners
 googleTaxonomyId: 605
 
 # Unknown Icecat category for this vertical.
 icecatTaxonomyId: -1
 
-# See docs/eprel_codes.md.
+# Source: EPREL product group for air conditioners, Regulation (EU) 626/2011.
+# https://energy-efficient-products.ec.europa.eu/suppliers/eprel-suppliers_en
 eprelGroupNames:
   - airconditioners
 
@@ -138,10 +141,17 @@ i18n:
     productMetaOpenGraphType: "product"
 
 matchingCategories:
+  RueDuCommerce FR:
+    - "CLIMATISEUR"
   Joom FR:
     - "HOME APPLIANCES > CLIMATE ELECTRONICS > AIR CONDITIONERS"
     - "HOME & GARDEN > HOUSEHOLD APPLIANCES > CLIMATE CONTROL APPLIANCES > AIR CONDITIONERS"
+  Rakuten FR:
+    - "BRICOLAGE | CLIMATISATION-VENTILATION | CLIMATISEUR"
   ManoMano FR:
+    - "464 | HEATING & COOLING | PLOMBERIE CHAUFFAGE | PLOMBERIE CHAUFFAGE > CLIMATISEUR ET VENTILATEUR > CLIMATISEUR > CLIMATISEUR REVERSIBLE | CLIMATISEUR REVERSIBLE"
+    - "464 | HEATING & COOLING | PLOMBERIE CHAUFFAGE | PLOMBERIE CHAUFFAGE > CLIMATISEUR ET VENTILATEUR > CLIMATISEUR MOBILE > CLIMATISEUR MOBILE SILENCIEUX | CLIMATISEUR MOBILE SILENCIEUX"
+    - "464 | HEATING & COOLING | PLOMBERIE CHAUFFAGE | PLOMBERIE CHAUFFAGE > CLIMATISEUR ET VENTILATEUR > CLIMATISEUR MOBILE > CLIMATISEUR MOBILE REVERSIBLE | CLIMATISEUR MOBILE REVERSIBLE"
     - "428 | DIY | BRICOLAGE - OUTILLAGE - QUINCAILLERIE | BRICOLAGE - OUTILLAGE - QUINCAILLERIE > GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE > CLIMATISEUR MOBILE | GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE | CLIMATISEUR MOBILE"
     - "428 | DIY | BRICOLAGE - OUTILLAGE - QUINCAILLERIE | BRICOLAGE - OUTILLAGE - QUINCAILLERIE > GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE > CLIMATISEUR FIXE | GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE | CLIMATISEUR FIXE"
   Castorama FR:
@@ -149,8 +159,8 @@ matchingCategories:
   Cdiscount FR:
     - "GROS ELECTROMENAGER / CLIMATISEUR / CLIMATISEUR MOBILE | GROS ELECTROMENAGER>CLIMATISEUR>CLIMATISEUR MOBILE | CLIMATISEUR | CLIMATISEUR MOBILE"
     - "GROS ELECTROMENAGER / CLIMATISEUR / CLIMATISEUR FIXE | GROS ELECTROMENAGER>CLIMATISEUR>CLIMATISEUR FIXE | CLIMATISEUR | CLIMATISEUR FIXE"
-  RueDuCommerce FR:
-    - "CLIMATISEUR"
+  Fnac FR:
+    - "PETIT MENAGER & CUISINE - FROID"
 
 aggregationConfiguration:
   "scores.ECOSCORE.value":
@@ -165,6 +175,15 @@ aggregationConfiguration:
   "scores.WEIGHT.value":
     interval: 5
     buckets: 12
+  "attributes.indexed.NOISE_LEVEL":
+    interval: 1
+    buckets: 20
+  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
+    interval: 100
+    buckets: 15
+  "attributes.indexed.WEIGHT":
+    interval: 5
+    buckets: 12
   "price.minPrice.price":
     interval: 100
     buckets: 20
@@ -175,6 +194,417 @@ ecoFilters:
 
 technicalFilters:
   - "NOISE_LEVEL"
+
+nudgeToolConfig:
+  subsetGroups:
+    - id: "price"
+      mdiIcon: "mdi-currency-eur"
+      layout: "grid"
+      title:
+        en: "Budget"
+        fr: "Budget"
+      description:
+        en: "Pick a price range."
+        fr: "Choisissez une fourchette de prix."
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+    - id: "noise"
+      mdiIcon: "mdi-volume-high"
+      layout: "grid"
+      title:
+        en: "Noise level"
+        fr: "Niveau sonore"
+      description:
+        en: "Filter by declared sound power."
+        fr: "Filtrez selon le niveau sonore déclaré."
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+  subsets:
+    - id: "impact_high"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.ranking"
+          fromPercent: 0
+          toPercent: 33
+      image: "example-image.png"
+      url:
+        en: "high-impact"
+        fr: "fort-impact"
+      caption:
+        en: "High"
+        fr: "Eleve"
+      title:
+        en: "High impact"
+        fr: "Impact eleve"
+      description:
+        en: "Products with a high environmental impact"
+        fr: "Produits ayant un fort impact environnemental"
+    - id: "impact_medium"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.ranking"
+          fromPercent: 33
+          toPercent: 67
+      image: "example-image.png"
+      url:
+        en: "medium-impact"
+        fr: "impact-moyen"
+      caption:
+        en: "Medium"
+        fr: "Moyen"
+      title:
+        en: "Medium impact"
+        fr: "Impact moyen"
+      description:
+        en: "Products with a medium environmental impact"
+        fr: "Produits ayant un impact environnemental moyen"
+    - id: "impact_low"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.ranking"
+          fromPercent: 67
+          toPercent: 100
+      image: "example-image.png"
+      url:
+        en: "low-impact"
+        fr: "faible-impact"
+      caption:
+        en: "Low"
+        fr: "Faible"
+      title:
+        en: "Low impact"
+        fr: "Impact faible"
+      description:
+        en: "Products with a low environmental impact"
+        fr: "Produits ayant un faible impact environnemental"
+    - id: "price_lower_350"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "350"
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "0"
+      image: "example-image.png"
+      url:
+        en: "low-price"
+        fr: "petits-prix"
+      caption:
+        en: "Under 350 EUR"
+        fr: "Moins de 350 EUR"
+      title:
+        en: "< 350 EUR"
+        fr: "< 350 EUR"
+      description:
+        en: "Air conditioners priced below 350 EUR."
+        fr: "Climatiseurs dont le prix est inférieur à 350 EUR."
+    - id: "price_350_600"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "350"
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN"
+          value: "600"
+      image: "example-image.png"
+      url:
+        en: "air-conditioners-350-600-euros"
+        fr: "climatiseurs-350-600-euros"
+      caption:
+        en: "350 - 600 EUR"
+        fr: "350 - 600 EUR"
+      title:
+        en: "350 - 600 EUR"
+        fr: "350 - 600 EUR"
+      description:
+        en: "Air conditioners priced between 350 EUR and 600 EUR."
+        fr: "Climatiseurs dont le prix est compris entre 350 EUR et 600 EUR."
+    - id: "price_greater_600"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "600"
+      image: "example-image.png"
+      url:
+        en: "premium-price"
+        fr: "haut-de-gamme"
+      caption:
+        en: "Over 600 EUR"
+        fr: "Plus de 600 EUR"
+      title:
+        en: "> 600 EUR"
+        fr: "> 600 EUR"
+      description:
+        en: "Air conditioners priced above 600 EUR."
+        fr: "Climatiseurs dont le prix est supérieur à 600 EUR."
+    - id: "quiet_air_conditioners"
+      group: "noise"
+      criterias:
+        - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+          operator: "LOWER_THAN"
+          value: "60"
+      image: "example-image.png"
+      url:
+        en: "quiet-air-conditioners"
+        fr: "climatiseurs-silencieux"
+      caption:
+        en: "Under 60 dB"
+        fr: "Moins de 60 dB"
+      title:
+        en: "Quiet models"
+        fr: "Modèles silencieux"
+      description:
+        en: "Air conditioners with a declared noise level below 60 dB."
+        fr: "Climatiseurs dont le niveau sonore déclaré est inférieur à 60 dB."
+    - id: "standard_noise_air_conditioners"
+      group: "noise"
+      criterias:
+        - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+          operator: "GREATER_THAN"
+          value: "60"
+        - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+          operator: "LOWER_THAN"
+          value: "65"
+      image: "example-image.png"
+      url:
+        en: "standard-noise-air-conditioners"
+        fr: "climatiseurs-bruit-standard"
+      caption:
+        en: "60 - 65 dB"
+        fr: "60 - 65 dB"
+      title:
+        en: "Standard noise"
+        fr: "Bruit standard"
+      description:
+        en: "Air conditioners with a declared noise level between 60 dB and 65 dB."
+        fr: "Climatiseurs dont le niveau sonore déclaré se situe entre 60 dB et 65 dB."
+    - id: "loud_air_conditioners"
+      group: "noise"
+      criterias:
+        - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+          operator: "GREATER_THAN"
+          value: "65"
+      image: "example-image.png"
+      url:
+        en: "loud-air-conditioners"
+        fr: "climatiseurs-bruyants"
+      caption:
+        en: "Over 65 dB"
+        fr: "Plus de 65 dB"
+      title:
+        en: "Louder models"
+        fr: "Modèles plus bruyants"
+      description:
+        en: "Air conditioners with a declared noise level above 65 dB."
+        fr: "Climatiseurs dont le niveau sonore déclaré dépasse 65 dB."
+
+subsets:
+  - id: "impact_high"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 0
+        toPercent: 33
+    image: "example-image.png"
+    url:
+      en: "high-impact"
+      fr: "fort-impact"
+    caption:
+      en: "High"
+      fr: "Eleve"
+    title:
+      en: "High impact"
+      fr: "Impact eleve"
+    description:
+      en: "Products with a high environmental impact"
+      fr: "Produits ayant un fort impact environnemental"
+  - id: "impact_medium"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 33
+        toPercent: 67
+    image: "example-image.png"
+    url:
+      en: "medium-impact"
+      fr: "impact-moyen"
+    caption:
+      en: "Medium"
+      fr: "Moyen"
+    title:
+      en: "Medium impact"
+      fr: "Impact moyen"
+    description:
+      en: "Products with a medium environmental impact"
+      fr: "Produits ayant un impact environnemental moyen"
+  - id: "impact_low"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 67
+        toPercent: 100
+    image: "example-image.png"
+    url:
+      en: "low-impact"
+      fr: "faible-impact"
+    caption:
+      en: "Low"
+      fr: "Faible"
+    title:
+      en: "Low impact"
+      fr: "Impact faible"
+    description:
+      en: "Products with a low environmental impact"
+      fr: "Produits ayant un faible impact environnemental"
+  - id: "price_lower_350"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "LOWER_THAN"
+        value: "350"
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "0"
+    image: "example-image.png"
+    url:
+      en: "low-price"
+      fr: "petits-prix"
+    caption:
+      en: "< 350 EUR"
+      fr: "< 350 EUR"
+    title:
+      en: "Affordable air conditioners"
+      fr: "Climatiseurs accessibles"
+    description:
+      en: "Air conditioners priced below 350 EUR."
+      fr: "Climatiseurs dont le prix est inférieur à 350 EUR."
+  - id: "price_350_600"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "350"
+      - field: "price.minPrice.price"
+        operator: "LOWER_THAN"
+        value: "600"
+    image: "example-image.png"
+    url:
+      en: "air-conditioners-350-600-euros"
+      fr: "climatiseurs-350-600-euros"
+    caption:
+      en: "350 - 600 EUR"
+      fr: "350 - 600 EUR"
+    title:
+      en: "Mid-range air conditioners"
+      fr: "Climatiseurs milieu de gamme"
+    description:
+      en: "Air conditioners priced between 350 EUR and 600 EUR."
+      fr: "Climatiseurs dont le prix est compris entre 350 EUR et 600 EUR."
+  - id: "price_greater_600"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "600"
+    image: "example-image.png"
+    url:
+      en: "premium-price"
+      fr: "haut-de-gamme"
+    caption:
+      en: "> 600 EUR"
+      fr: "> 600 EUR"
+    title:
+      en: "Premium air conditioners"
+      fr: "Climatiseurs haut de gamme"
+    description:
+      en: "Air conditioners priced above 600 EUR."
+      fr: "Climatiseurs dont le prix est supérieur à 600 EUR."
+  - id: "quiet_air_conditioners"
+    group: "noise"
+    criterias:
+      - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+        operator: "LOWER_THAN"
+        value: "60"
+    image: "example-image.png"
+    url:
+      en: "quiet-air-conditioners"
+      fr: "climatiseurs-silencieux"
+    caption:
+      en: "< 60 dB"
+      fr: "< 60 dB"
+    title:
+      en: "Quiet air conditioners"
+      fr: "Climatiseurs silencieux"
+    description:
+      en: "Air conditioners with a declared noise level below 60 dB."
+      fr: "Climatiseurs dont le niveau sonore déclaré est inférieur à 60 dB."
+  - id: "standard_noise_air_conditioners"
+    group: "noise"
+    criterias:
+      - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+        operator: "GREATER_THAN"
+        value: "60"
+      - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+        operator: "LOWER_THAN"
+        value: "65"
+    image: "example-image.png"
+    url:
+      en: "standard-noise-air-conditioners"
+      fr: "climatiseurs-bruit-standard"
+    caption:
+      en: "60 - 65 dB"
+      fr: "60 - 65 dB"
+    title:
+      en: "Standard-noise air conditioners"
+      fr: "Climatiseurs au bruit standard"
+    description:
+      en: "Air conditioners with a declared noise level between 60 dB and 65 dB."
+      fr: "Climatiseurs dont le niveau sonore déclaré se situe entre 60 dB et 65 dB."
+  - id: "loud_air_conditioners"
+    group: "noise"
+    criterias:
+      - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+        operator: "GREATER_THAN"
+        value: "65"
+    image: "example-image.png"
+    url:
+      en: "loud-air-conditioners"
+      fr: "climatiseurs-bruyants"
+    caption:
+      en: "> 65 dB"
+      fr: "> 65 dB"
+    title:
+      en: "Louder air conditioners"
+      fr: "Climatiseurs plus bruyants"
+    description:
+      en: "Air conditioners with a declared noise level above 65 dB."
+      fr: "Climatiseurs dont le niveau sonore déclaré dépasse 65 dB."
+
+dataviz:
+  chartOverrides:
+    noise-level-distribution:
+      title: "Repartition des niveaux sonores"
+      description: "Comparez le bruit declare des climatiseurs"
+    energy-class-distribution:
+      title: "Repartition des classes energetiques"
+      description: "Visualisez l'efficacite energetique du marche"
+  heroKpis:
+    - field: "attributes.indexed.NOISE_LEVEL"
+      label: "Bruit moyen"
+      unit: "dB"
+      aggregation: "avg"
+    - field: "scores.ECOSCORE.value"
+      label: "Eco-score moyen"
+      aggregation: "avg"
+    - field: "price.minPrice.price"
+      label: "Prix moyen"
+      unit: "EUR"
+      aggregation: "avg"
 
 attributesConfig:
   configs:

@@ -36,6 +36,7 @@ synonyms:
   all:
   - "POIDS"
   - "WEIGHT"
+  - "TRANCHE DE POIDS"
   
 parser:
   clazz: org.open4goods.api.services.aggregation.services.realtime.parser.WeightParser  

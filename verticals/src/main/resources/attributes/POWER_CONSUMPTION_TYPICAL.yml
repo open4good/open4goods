@@ -37,6 +37,9 @@ synonyms:
     all:
       - "CONSOMMATION ELECTRIQUE TYPIQUE"
       - "CONSOMMATION (MAX)"
+      - "PUISSANCE (W)"
+      - "COOLINGCHARACTERISTICS-HOURLYELECTRICITYCONSUMPTION"
+      - "HOURLY ELECTRICITY CONSUMPTION"
       - "POWER_CONSUMPTION_TYPICAL"
       
          
@@ -46,4 +49,9 @@ parser:
     lowerCase: false
     upperCase: true
     removeParenthesis: false
+    deleteTokens:
+      - "W"
+      - "KW"
+      - "KWH/H"
+      - "KWH"
     
