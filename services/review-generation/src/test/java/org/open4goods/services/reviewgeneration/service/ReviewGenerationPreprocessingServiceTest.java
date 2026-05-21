@@ -204,7 +204,7 @@ class ReviewGenerationPreprocessingServiceTest {
         properties.setMinUrlCount(1);
         properties.setMaxUrlsPerProduct(2);
         Product product = product("Samsung", "SM-S921B/DS");
-        String nonOfficialPdfUrl = "https://example.com/samsung-s24-spec.pdf";
+        String nonOfficialPdfUrl = "https://example.com/samsung-sm-s921b-ds-spec.pdf";
         String htmlUrl = "https://www.darty.com/samsung-s24.html";
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
                 new GoogleSearchResult("Samsung Galaxy S24 Spec Sheet PDF", nonOfficialPdfUrl),
@@ -234,6 +234,43 @@ class ReviewGenerationPreprocessingServiceTest {
         assertThat(sources).containsKey(htmlUrl);
         org.mockito.Mockito.verify(urlFetchingService, org.mockito.Mockito.never())
                 .fetchUrlAsync(org.mockito.ArgumentMatchers.eq(nonOfficialPdfUrl),
+                        org.mockito.ArgumentMatchers.any(Map.class));
+    }
+
+    @Test
+    void preparePromptVariables_IgnoresUnrelatedPdfResources() throws Exception
+    {
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(2);
+        Product product = product("Samsung", "SM-S921B/DS");
+        String unrelatedPdfUrl = "https://images.samsung.com/assets/fr/legal/digital-services-act.pdf";
+        String htmlUrl = "https://www.darty.com/samsung-s24.html";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Digital Services Act", unrelatedPdfUrl),
+                new GoogleSearchResult("Samsung Galaxy S24 SM-S921B/DS review", htmlUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String url = invocation.getArgument(0);
+            String markdown = "Samsung SM-S921B/DS review content with display, camera, and battery details.";
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown,
+                    FetchStrategy.HTTP, List.of(), Set.of(), List.of(), false, null));
+        });
+
+        Map<String, Object> variables = service.preparePromptVariables(product, verticalConfig(),
+                new ReviewGenerationStatus());
+
+        assertThat(product.getResources()).noneSatisfy(resource ->
+                assertThat(resource.getUrl()).isEqualTo(unrelatedPdfUrl));
+        @SuppressWarnings("unchecked")
+        Map<String, String> sources = (Map<String, String>) variables.get("sources");
+        assertThat(sources).doesNotContainKey(unrelatedPdfUrl);
+        assertThat(sources).containsKey(htmlUrl);
+        org.mockito.Mockito.verify(urlFetchingService, org.mockito.Mockito.never())
+                .fetchUrlAsync(org.mockito.ArgumentMatchers.eq(unrelatedPdfUrl),
                         org.mockito.ArgumentMatchers.any(Map.class));
     }
 

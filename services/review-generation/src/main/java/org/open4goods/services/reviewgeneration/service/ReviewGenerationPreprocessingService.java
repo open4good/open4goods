@@ -328,8 +328,12 @@ public class ReviewGenerationPreprocessingService {
 		for (GoogleSearchResult result : sortedResults) {
 			String url = result.link();
 			if (isPdfUrl(url)) {
-				persistOfficialResources(product, result, null);
-				rejectedUrls.put(url, "pdf source excluded from review prompt; persisted for attributes extraction");
+				if (isProductRelevantResource(product, url, result.title())) {
+					persistOfficialResources(product, result, null);
+					rejectedUrls.put(url, "pdf source excluded from review prompt; persisted for attributes extraction");
+				} else {
+					rejectedUrls.put(url, "pdf source excluded: not specific enough to the product");
+				}
 				continue;
 			}
 			CompletableFuture<FetchOutcome> future = fetchFutures.get(url);
@@ -991,9 +995,11 @@ public class ReviewGenerationPreprocessingService {
 		String link = result.link().toLowerCase(Locale.ROOT);
 		String title = result.title() == null ? "" : result.title().toLowerCase(Locale.ROOT);
 		return link.contains("/support/") || link.contains("/assistance/") || link.contains("/help/")
-				|| link.contains("/manual/") || link.contains("/manuals/") || title.contains("support")
-				|| title.contains("assistance") || title.contains("mode d'emploi") || title.contains("manuel")
-				|| title.contains("manual");
+				|| link.contains("/manual/") || link.contains("/manuals/") || link.contains("/ondersteuning/")
+				|| link.contains("/product-ondersteuning/") || link.contains("/supporto/")
+				|| link.contains("/soporte/") || link.contains("/supportdetail/")
+				|| title.contains("support") || title.contains("assistance") || title.contains("ondersteuning")
+				|| title.contains("mode d'emploi") || title.contains("manuel") || title.contains("manual");
 	}
 
 	private boolean isPdfUrl(String url) {
@@ -1046,9 +1052,42 @@ public class ReviewGenerationPreprocessingService {
 			if (extractedResource == null || extractedResource.url() == null || extractedResource.url().isBlank()) {
 				continue;
 			}
+			if (toProductResourceType(extractedResource.type()) == ResourceType.PDF
+					&& !isProductRelevantResource(product, extractedResource.url(), extractedResource.label())) {
+				logger.debug("Skipping unrelated official PDF for UPC {}: url={}, label={}", product.getId(),
+						extractedResource.url(), extractedResource.label());
+				continue;
+			}
 			addOfficialResource(product, extractedResource.url(), toProductResourceType(extractedResource.type()), language,
 					extractedResource.source(), extractedResource.label());
 		}
+	}
+
+	private boolean isProductRelevantResource(Product product, String url, String label) {
+		if (product == null || url == null || url.isBlank()) {
+			return false;
+		}
+		String haystack = normalizeForTextMatching(url + " " + (label == null ? "" : label));
+		if (haystack.isBlank()) {
+			return false;
+		}
+		String gtin = product.gtin();
+		if (gtin != null && gtin.matches("\\d{8,14}") && haystack.contains(gtin)) {
+			return true;
+		}
+		String model = normalizeForTextMatching(product.model());
+		if (!model.isBlank() && haystack.contains(model)) {
+			return true;
+		}
+		if (product.getAkaModels() != null && product.getAkaModels().stream()
+				.filter(candidate -> candidate != null && !candidate.isBlank())
+				.map(this::normalizeForTextMatching)
+				.anyMatch(candidate -> candidate.length() >= 4 && haystack.contains(candidate))) {
+			return true;
+		}
+		String compactHaystack = normalizeForUrlMatching(url + " " + (label == null ? "" : label));
+		return List.of("energylabel", "productfiche", "ficheproduit", "ficheproduct", "manual", "notice",
+				"userguide", "installation").stream().anyMatch(compactHaystack::contains);
 	}
 
 	private ResourceType toProductResourceType(org.open4goods.services.urlfetching.dto.ResourceType resourceType) {

@@ -32,4 +32,15 @@ public interface ReviewGenerationHook {
      */
     default void onSourcesFetched(Product product) {
     }
+
+    /**
+     * Called after the remote-source fetching stage completes successfully, with
+     * explicit state captured before fetching mutated the product.
+     *
+     * @param product the product with newly persisted review facts
+     * @param hadEprelBeforeFetch whether the product already had EPREL data before fetching
+     */
+    default void onSourcesFetched(Product product, boolean hadEprelBeforeFetch) {
+        onSourcesFetched(product);
+    }
 }

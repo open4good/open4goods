@@ -26,8 +26,6 @@ public class PostFetchEnrichmentHook implements ReviewGenerationHook {
 
     private static final Logger logger = LoggerFactory.getLogger(PostFetchEnrichmentHook.class);
 
-    private static final String MISSING_EPREL_CAUSE = "missing_eprel";
-
     private final CompletionFacadeService completionFacadeService;
     private final VerticalsConfigService verticalsConfigService;
     private final ProductRepository productRepository;
@@ -57,8 +55,13 @@ public class PostFetchEnrichmentHook implements ReviewGenerationHook {
      */
     @Override
     public void onSourcesFetched(Product product) {
-        if (product == null || product.getExcludedCauses() == null
-                || !product.getExcludedCauses().contains(MISSING_EPREL_CAUSE)) {
+        onSourcesFetched(product, product != null && product.getExternalIds() != null
+                && product.getExternalIds().getEprel() != null);
+    }
+
+    @Override
+    public void onSourcesFetched(Product product, boolean hadEprelBeforeFetch) {
+        if (product == null || hadEprelBeforeFetch) {
             return;
         }
         VerticalConfig vertical = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
@@ -67,7 +70,12 @@ public class PostFetchEnrichmentHook implements ReviewGenerationHook {
                     product.getId(), product.getVertical());
             return;
         }
-        logger.info("Post-fetch enrichment triggered for UPC {} (had {})", product.getId(), MISSING_EPREL_CAUSE);
+        if (vertical.getEprelGroupNames() == null || vertical.getEprelGroupNames().isEmpty()) {
+            logger.debug("Skipping post-fetch enrichment for UPC {}: vertical '{}' has no EPREL groups",
+                    product.getId(), product.getVertical());
+            return;
+        }
+        logger.info("Post-fetch enrichment triggered for UPC {} (no EPREL before fetch)", product.getId());
         try {
             completionFacadeService.processAll(Set.of(product), vertical);
             productRepository.forceIndex(product);

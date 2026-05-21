@@ -3,6 +3,7 @@ package org.open4goods.services.reviewgeneration.config;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,13 @@ public class ReviewGenerationConfig {
     private int threadPoolSize = 10;
     private int maxQueueSize = 1000;  // Maximum size of the executor queue.
     private List<String> preferredDomains = new ArrayList<>();
+
+    /**
+     * Optional vertical-specific preferred domains. When a product vertical has a
+     * non-empty entry here, it replaces the global preferred-domain list for SERP
+     * boosting and result ordering.
+     */
+    private Map<String, List<String>> preferredDomainsByVertical = Map.of();
 
     /**
      * Domains that must not be treated as manufacturer official pages even when
@@ -70,6 +78,12 @@ public class ReviewGenerationConfig {
 
     // Limit the number of search queries.
     private int maxSearch = 5;
+
+    /**
+     * Extra targeted searches allowed when the first pass collected official
+     * product evidence but did not reach source/token thresholds.
+     */
+    private int partialRetryMaxSearch = 2;
 
 
     // Minimum global tokens and source count required for valid generation.
@@ -215,6 +229,13 @@ public class ReviewGenerationConfig {
         this.preferredDomains = preferredDomains;
     }
 
+    public Map<String, List<String>> getPreferredDomainsByVertical() {
+        return preferredDomainsByVertical;
+    }
+    public void setPreferredDomainsByVertical(Map<String, List<String>> preferredDomainsByVertical) {
+        this.preferredDomainsByVertical = preferredDomainsByVertical == null ? Map.of() : preferredDomainsByVertical;
+    }
+
     public List<String> getOfficialUrlExcludedDomains() {
         return officialUrlExcludedDomains;
     }
@@ -284,6 +305,13 @@ public class ReviewGenerationConfig {
     }
     public void setMaxSearch(int maxSearch) {
         this.maxSearch = maxSearch;
+    }
+
+    public int getPartialRetryMaxSearch() {
+        return partialRetryMaxSearch;
+    }
+    public void setPartialRetryMaxSearch(int partialRetryMaxSearch) {
+        this.partialRetryMaxSearch = partialRetryMaxSearch;
     }
 
     public int getMaxTotalTokens() {

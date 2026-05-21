@@ -1,6 +1,6 @@
 ####################################################################################################################################################################
 #
-# This is the configuration for the WASHING-MACHINES vertical.
+# This is the configuration for the WASHING-MACHINE vertical.
 # Generated on the vertical.yml template file, using the VerticalsGenerationService.verticalTemplate()
 # @See open4goods/commons/src/main/java/org/open4goods/config/yml/ui/VerticalConfig.java for commented POJO definition
 ###################################################################################################################################################################
@@ -9,10 +9,12 @@
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
 id: washing-machine
+order: 5
 # Average daily usage time for a washing machine in hours.
-# Based on typical household usage: 1 cycle of ~1h every 2 days = 0.5h/day average.
+# Source: European Commission product page reports 174 cycles/year; EEA reports 3.8 cycles/week.
+# Using about 2 hours per cycle gives a rounded active operation estimate near 1 hour/day.
 # Used for calculating annual energy costs and environmental impact.
-averageHoursPerDay: 0.5
+averageHoursPerDay: 1.0
 
 parsers:
   weight:
@@ -24,12 +26,16 @@ parsers:
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
+# Source: Google taxonomy-with-ids.fr-FR.txt maps 2549 to Maison et jardin > Appareils électroménagers > Appareils de blanchisserie > Lave-linge.
 googleTaxonomyId: 2549
+# icecat taxonomy id for washing machines — set to -1 (unknown; icecat category "MACHINES A LAVER")
+icecatTaxonomyId: -1
 eprelGroupNames:
+  # Source: EPREL fiches for Regulation (EU) 2019/2014 use the washingmachines2019 product-group path.
   - "washingmachines2019"
   - "washingmachines"
 
-verticalImage: https://nudger.fr/images/verticals/washing-machines.png
+verticalImage: https://nudger.fr/images/verticals/washing-machine.png
 
 mdiIcon: mdi-washing-machine
 
@@ -58,6 +64,24 @@ popularAttributes:
   - LOADING_TYPE
   - SPIN_SPEED
   - NOISE_LEVEL
+
+commonAttributes:
+  - WASHING_CAPACITY
+  - LOADING_TYPE
+  - SPIN_SPEED
+  - SPIN_CLASS
+  - NOISE_LEVEL
+  - NOISE_CLASS
+  - CLASSE_ENERGY
+  - ENERGY_CONSUMPTION_100_CYCLES
+  - ENERGY_CONSUMPTION_PER_CYCLE
+  - WATER_CONSUMPTION
+  - PROGRAM_COUNT
+  - REPAIRABILITY_INDEX
+  - WARRANTY
+  - HEIGHT
+  - WIDTH
+  - DEPTH
 
 # GenAiConfig for this vertical
 genAiConfig:
@@ -116,6 +140,12 @@ i18n:
     verticalHomeTitle: "Machines à laver"
     # Text displaid as jumbotron for the vertical
     verticalHomeDescription: "Découvrez notre sélection de machines à laver. Entre consommation d’eau, d’énergie et durabilité, ces appareils ont un vrai impact sur l’environnement. Nudger vous accompagne pour trouver le modèle le plus responsable, tout en répondant parfaitement à vos besoins du quotidien."
+
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Éco-score, empreinte écologique et meilleures offres"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Éco-score, || empreinte écologique | impact environnemental || et meilleures offres."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Eco-score [(${p.ecoscore()})]."
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Éco-score, || empreinte écologique | impact environnemental || et meilleures offres."
+    productMetaOpenGraphType: "product"
 
     # A mapping beetween custom page names behind this vertical and wiki pages
     # Copy and paste the wiki wiew url, without the "bin/view" prefix
@@ -230,26 +260,31 @@ matchingCategories:
     - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | GROS ELECTROMENAGER"
     - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"
     - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE TOP | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | LAVE-LINGE | LAVE-LINGE TOP"
+    - "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE SECHANT | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE SECHANT | LAVE-LINGE | LAVE-LINGE SECHANT"
   E.Leclerc FR:
     - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE TOP | GROS ELECTROMENAGER | LAVE-LINGE"
     - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | GROS ELECTROMENAGER | LAVE-LINGE"
     - "HIGH TECH | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE > LAVE-LINGE HUBLOT | GROS ELECTROMENAGER | LAVE-LINGE"
+    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE SECHANT | GROS ELECTROMENAGER | LAVE-LINGE"
   RueDuCommerce FR:
     - "ELECTROMENAGER > LAVAGE & SECHAGE > LAVE-LINGE"
     - "LAVE-LINGE"
   Cdiscount FR:
     - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > MINI LAVE-LINGE – MINI MACHINE A LAVER | LAVAGE-SECHAGE | MINI LAVE-LINGE – MINI MACHINE A LAVER"
     - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
+    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE SECHANT | LAVAGE-SECHAGE | LAVE-LINGE SECHANT"
   ManoMano FR:
     - "LAVE-LINGE | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE"
     - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
     - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
   cdiscount.com:
     - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE | LAVAGE-SECHAGE | LAVE-LINGE"
+    - "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-LINGE SECHANT | LAVAGE-SECHAGE | LAVE-LINGE SECHANT"
   Joom FR:
     - "HOME APPLIANCES > CLOTHING CARE APPLIANCES > WASHING MACHINES"
   icecat.biz.yml:
     - "MACHINES A LAVER"
+    - "MACHINES A LAVER AVEC SECHE LINGE"
   UNDERDOG FR:
     - "535 | WASHING MACHINES | LAVE-LINGE"
   Castorama FR:
@@ -264,6 +299,14 @@ matchingCategories:
     - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > LAVE-LINGE | LAVE-LINGE"
   e.leclerc:
     - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | GROS ELECTROMENAGER | LAVE-LINGE"
+  Boulanger - R&eacute;f&eacute;rentiel produits:
+    - "GROS ELECTROMENAGER | LAVE-LINGE | LAVE-LINGE HUBLOT | LAVE-LINGE HUBLOT"
+    - "GROS ELECTROMENAGER | LAVE-LINGE | LAVE-LINGE TOP | LAVE-LINGE TOP"
+    - "GROS ELECTROMENAGER | LAVE-LINGE | LAVE-LINGE SECHANT | LAVE-LINGE SECHANT"
+    - "GROS ELECTROMENAGER | LAVE-LINGE | LAVE-LINGE ENCASTRABLE | LAVE-LINGE ENCASTRABLE"
+  Fnac FR:
+    - "PETIT MENAGER & CUISINE - LAVAGE"
+    - "PETIT MENAGER & CUISINE LAVAGE"
 
 nudgeToolConfig:
   subsetGroups:
@@ -387,14 +430,14 @@ nudgeToolConfig:
           value: "400"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
-          value: "700"
+          value: "550"
       image: "example-image.png"
       url:
         en: "mid-range"
         fr: "milieu-de-gamme"
       caption:
-        en: "400 - 700 €"
-        fr: "400 - 700 €"
+        en: "400 - 550 €"
+        fr: "400 - 550 €"
       title:
         en: "Best Value"
         fr: "Moyen de gamme"
@@ -407,14 +450,14 @@ nudgeToolConfig:
       criterias:
         - field: "price.minPrice.price"
           operator: "GREATER_THAN"
-          value: "700"
+          value: "550"
       image: "example-image.png"
       url:
         en: "premium"
         fr: "premium"
       caption:
-        en: "> 700 €"
-        fr: "> 700 €"
+        en: "> 550 €"
+        fr: "> 550 €"
       title:
         en: "Premium"
         fr: "Haut de gamme"
@@ -489,7 +532,72 @@ nudgeToolConfig:
         fr: "Pour les grandes familles."
 
 # Fast filters; with classical attributes range values for the product category page
+# NOTE: declaring subsets: replaces the _default.yml list entirely (§5 overlay rule).
+# impact_low/medium/high must be repeated here to prevent them from disappearing.
 subsets:
+  ################
+  # Impact Score (repeated from _default.yml — required by list-replace semantics)
+  ################
+  - id: "impact_high"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 0
+        toPercent: 33
+    image: "example-image.png"
+    url:
+      en: "high-impact"
+      fr: "fort-impact"
+    caption:
+      en: "High"
+      fr: "Élevé"
+    title:
+      en: "High Impact"
+      fr: "Impact Élevé"
+    description:
+      en: "Products with a high environmental impact"
+      fr: "Produits ayant un fort impact environnemental"
+
+  - id: "impact_medium"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 33
+        toPercent: 67
+    image: "example-image.png"
+    url:
+      en: "medium-impact"
+      fr: "impact-moyen"
+    caption:
+      en: "Medium"
+      fr: "Moyen"
+    title:
+      en: "Medium Impact"
+      fr: "Impact Moyen"
+    description:
+      en: "Products with a medium environmental impact"
+      fr: "Produits ayant un impact environnemental moyen"
+
+  - id: "impact_low"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 67
+        toPercent: 100
+    image: "example-image.png"
+    url:
+      en: "low-impact"
+      fr: "faible-impact"
+    caption:
+      en: "Low"
+      fr: "Faible"
+    title:
+      en: "Low Impact"
+      fr: "Impact Faible"
+    description:
+      en: "Products with a low environmental impact"
+      fr: "Produits ayant un faible impact environnemental"
+
   ################
   # Price
   ################
@@ -521,14 +629,14 @@ subsets:
         value: "400"
       - field: "price.minPrice.price"
         operator: "LOWER_THAN"
-        value: "700"
+        value: "550"
     image: "example-image.png"
     url:
       en: "mid-range"
       fr: "milieu-de-gamme"
     caption:
-      en: "400 - 700 €"
-      fr: "400 - 700 €"
+      en: "400 - 550 €"
+      fr: "400 - 550 €"
     title:
       en: "Best Value"
       fr: "Meilleur rapport qualité/prix"
@@ -541,14 +649,14 @@ subsets:
     criterias:
       - field: "price.minPrice.price"
         operator: "GREATER_THAN"
-        value: "700"
+        value: "550"
     image: "example-image.png"
     url:
       en: "premium"
       fr: "premium"
     caption:
-      en: "> 700 €"
-      fr: "> 700 €"
+      en: "> 550 €"
+      fr: "> 550 €"
     title:
       en: "Premium"
       fr: "Haut de gamme"
@@ -652,6 +760,7 @@ attributesConfig:
     - key: CLASSE_ENERGY
     - key: INSTALLATION_TYPE
     - key: WASHING_CAPACITY
+    - key: LOADING_TYPE
     - key: SPIN_SPEED
     - key: SPIN_CLASS
     - key: ENERGY_CONSUMPTION_100_CYCLES
@@ -666,3 +775,6 @@ attributesConfig:
     - key: HEIGHT
     - key: WIDTH
     - key: DEPTH
+    - key: WEIGHT
+    - key: POWER_CONSUMPTION_OFF
+    - key: POWER_CONSUMPTION_TYPICAL
