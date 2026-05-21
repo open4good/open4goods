@@ -38,6 +38,7 @@ availableImpactScoreCriterias:
   - CLASSE_ENERGY
   - POWER_CONSUMPTION_TYPICAL
   - POWER_CONSUMPTION_OFF
+  - REFRIGERANT_GWP
   - REPAIRABILITY_INDEX
   - WARRANTY
   - WEIGHT
@@ -46,14 +47,20 @@ availableImpactScoreCriterias:
 
 popularAttributes:
   - CLASSE_ENERGY
+  - PRODUCT_TYPE
   - POWER_CONSUMPTION_TYPICAL
   - NOISE_LEVEL
 
 commonAttributes:
   - CLASSE_ENERGY
+  - PRODUCT_TYPE
+  - AIR_CONDITIONER_FUNCTION_TYPE
+  - COOLING_CAPACITY
   - POWER_CONSUMPTION_TYPICAL
   - POWER_CONSUMPTION_OFF
   - NOISE_LEVEL
+  - REFRIGERANT_NAME
+  - REFRIGERANT_GWP
   - WEIGHT
   - WARRANTY
 
@@ -150,17 +157,18 @@ matchingCategories:
     - "BRICOLAGE | CLIMATISATION-VENTILATION | CLIMATISEUR"
   ManoMano FR:
     - "464 | HEATING & COOLING | PLOMBERIE CHAUFFAGE | PLOMBERIE CHAUFFAGE > CLIMATISEUR ET VENTILATEUR > CLIMATISEUR > CLIMATISEUR REVERSIBLE | CLIMATISEUR REVERSIBLE"
+    - "464 | HEATING & COOLING | PLOMBERIE CHAUFFAGE | PLOMBERIE CHAUFFAGE > CLIMATISEUR ET VENTILATEUR > CLIMATISEUR > CLIMATISEUR GAINABLE | CLIMATISEUR GAINABLE"
+    - "464 | HEATING & COOLING | PLOMBERIE CHAUFFAGE | PLOMBERIE CHAUFFAGE > CLIMATISEUR ET VENTILATEUR > CLIMATISEUR > CLIMATISEUR MONOBLOC | CLIMATISEUR MONOBLOC"
     - "464 | HEATING & COOLING | PLOMBERIE CHAUFFAGE | PLOMBERIE CHAUFFAGE > CLIMATISEUR ET VENTILATEUR > CLIMATISEUR MOBILE > CLIMATISEUR MOBILE SILENCIEUX | CLIMATISEUR MOBILE SILENCIEUX"
     - "464 | HEATING & COOLING | PLOMBERIE CHAUFFAGE | PLOMBERIE CHAUFFAGE > CLIMATISEUR ET VENTILATEUR > CLIMATISEUR MOBILE > CLIMATISEUR MOBILE REVERSIBLE | CLIMATISEUR MOBILE REVERSIBLE"
     - "428 | DIY | BRICOLAGE - OUTILLAGE - QUINCAILLERIE | BRICOLAGE - OUTILLAGE - QUINCAILLERIE > GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE > CLIMATISEUR MOBILE | GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE | CLIMATISEUR MOBILE"
     - "428 | DIY | BRICOLAGE - OUTILLAGE - QUINCAILLERIE | BRICOLAGE - OUTILLAGE - QUINCAILLERIE > GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE > CLIMATISEUR FIXE | GENIE THERMIQUE - CLIMATIQUE - CHAUFFAGE | CLIMATISEUR FIXE"
   Castorama FR:
     - "CLIMATISEUR MOBILE | MAGASIN CASTORAMA > CHAUFFAGE, CLIMATISATION ET VENTILATION > CLIMATISATION ET RAFRAICHISSEMENT D'AIR > CLIMATISEUR MOBILE | CHAUFFAGE, CLIMATISATION ET VENTILATION | CLIMATISATION ET RAFRAICHISSEMENT D'AIR"
+    - "CLIMATISEUR MONOBLOC | MAGASIN CASTORAMA > CHAUFFAGE, CLIMATISATION ET VENTILATION > POMPE A CHALEUR > CLIMATISEUR MONOBLOC | CHAUFFAGE, CLIMATISATION ET VENTILATION | POMPE A CHALEUR"
   Cdiscount FR:
     - "GROS ELECTROMENAGER / CLIMATISEUR / CLIMATISEUR MOBILE | GROS ELECTROMENAGER>CLIMATISEUR>CLIMATISEUR MOBILE | CLIMATISEUR | CLIMATISEUR MOBILE"
     - "GROS ELECTROMENAGER / CLIMATISEUR / CLIMATISEUR FIXE | GROS ELECTROMENAGER>CLIMATISEUR>CLIMATISEUR FIXE | CLIMATISEUR | CLIMATISEUR FIXE"
-  Fnac FR:
-    - "PETIT MENAGER & CUISINE - FROID"
 
 aggregationConfiguration:
   "scores.ECOSCORE.value":
@@ -178,6 +186,12 @@ aggregationConfiguration:
   "attributes.indexed.NOISE_LEVEL":
     interval: 1
     buckets: 20
+  "attributes.indexed.COOLING_CAPACITY":
+    interval: 0.5
+    buckets: 12
+  "attributes.indexed.REFRIGERANT_GWP":
+    interval: 50
+    buckets: 15
   "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
     interval: 100
     buckets: 15
@@ -193,7 +207,10 @@ ecoFilters:
   - "POWER_CONSUMPTION_TYPICAL"
 
 technicalFilters:
+  - "PRODUCT_TYPE"
   - "NOISE_LEVEL"
+  - "COOLING_CAPACITY"
+  - "REFRIGERANT_NAME"
 
 nudgeToolConfig:
   subsetGroups:
@@ -279,12 +296,12 @@ nudgeToolConfig:
       description:
         en: "Products with a low environmental impact"
         fr: "Produits ayant un faible impact environnemental"
-    - id: "price_lower_350"
+    - id: "price_lower_450"
       group: "price"
       criterias:
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
-          value: "350"
+          value: "450"
         - field: "price.minPrice.price"
           operator: "GREATER_THAN"
           value: "0"
@@ -293,115 +310,115 @@ nudgeToolConfig:
         en: "low-price"
         fr: "petits-prix"
       caption:
-        en: "Under 350 EUR"
-        fr: "Moins de 350 EUR"
+        en: "Under 450 EUR"
+        fr: "Moins de 450 EUR"
       title:
-        en: "< 350 EUR"
-        fr: "< 350 EUR"
+        en: "< 450 EUR"
+        fr: "< 450 EUR"
       description:
-        en: "Air conditioners priced below 350 EUR."
-        fr: "Climatiseurs dont le prix est inférieur à 350 EUR."
-    - id: "price_350_600"
+        en: "Air conditioners priced below 450 EUR."
+        fr: "Climatiseurs dont le prix est inférieur à 450 EUR."
+    - id: "price_450_1000"
       group: "price"
       criterias:
         - field: "price.minPrice.price"
           operator: "GREATER_THAN"
-          value: "350"
+          value: "450"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
-          value: "600"
+          value: "1000"
       image: "example-image.png"
       url:
-        en: "air-conditioners-350-600-euros"
-        fr: "climatiseurs-350-600-euros"
+        en: "air-conditioners-450-1000-euros"
+        fr: "climatiseurs-450-1000-euros"
       caption:
-        en: "350 - 600 EUR"
-        fr: "350 - 600 EUR"
+        en: "450 - 1000 EUR"
+        fr: "450 - 1000 EUR"
       title:
-        en: "350 - 600 EUR"
-        fr: "350 - 600 EUR"
+        en: "450 - 1000 EUR"
+        fr: "450 - 1000 EUR"
       description:
-        en: "Air conditioners priced between 350 EUR and 600 EUR."
-        fr: "Climatiseurs dont le prix est compris entre 350 EUR et 600 EUR."
-    - id: "price_greater_600"
+        en: "Air conditioners priced between 450 EUR and 1000 EUR."
+        fr: "Climatiseurs dont le prix est compris entre 450 EUR et 1000 EUR."
+    - id: "price_greater_1000"
       group: "price"
       criterias:
         - field: "price.minPrice.price"
           operator: "GREATER_THAN"
-          value: "600"
+          value: "1000"
       image: "example-image.png"
       url:
         en: "premium-price"
         fr: "haut-de-gamme"
       caption:
-        en: "Over 600 EUR"
-        fr: "Plus de 600 EUR"
+        en: "Over 1000 EUR"
+        fr: "Plus de 1000 EUR"
       title:
-        en: "> 600 EUR"
-        fr: "> 600 EUR"
+        en: "> 1000 EUR"
+        fr: "> 1000 EUR"
       description:
-        en: "Air conditioners priced above 600 EUR."
-        fr: "Climatiseurs dont le prix est supérieur à 600 EUR."
+        en: "Air conditioners priced above 1000 EUR."
+        fr: "Climatiseurs dont le prix est supérieur à 1000 EUR."
     - id: "quiet_air_conditioners"
       group: "noise"
       criterias:
         - field: "attributes.indexed.NOISE_LEVEL.numericValue"
           operator: "LOWER_THAN"
-          value: "60"
+          value: "61"
       image: "example-image.png"
       url:
         en: "quiet-air-conditioners"
         fr: "climatiseurs-silencieux"
       caption:
-        en: "Under 60 dB"
-        fr: "Moins de 60 dB"
+        en: "Under 61 dB"
+        fr: "Moins de 61 dB"
       title:
         en: "Quiet models"
         fr: "Modèles silencieux"
       description:
-        en: "Air conditioners with a declared noise level below 60 dB."
-        fr: "Climatiseurs dont le niveau sonore déclaré est inférieur à 60 dB."
+        en: "Air conditioners with a declared noise level below 61 dB."
+        fr: "Climatiseurs dont le niveau sonore déclaré est inférieur à 61 dB."
     - id: "standard_noise_air_conditioners"
       group: "noise"
       criterias:
         - field: "attributes.indexed.NOISE_LEVEL.numericValue"
           operator: "GREATER_THAN"
-          value: "60"
+          value: "61"
         - field: "attributes.indexed.NOISE_LEVEL.numericValue"
           operator: "LOWER_THAN"
-          value: "65"
+          value: "64"
       image: "example-image.png"
       url:
         en: "standard-noise-air-conditioners"
         fr: "climatiseurs-bruit-standard"
       caption:
-        en: "60 - 65 dB"
-        fr: "60 - 65 dB"
+        en: "61 - 64 dB"
+        fr: "61 - 64 dB"
       title:
         en: "Standard noise"
         fr: "Bruit standard"
       description:
-        en: "Air conditioners with a declared noise level between 60 dB and 65 dB."
-        fr: "Climatiseurs dont le niveau sonore déclaré se situe entre 60 dB et 65 dB."
+        en: "Air conditioners with a declared noise level between 61 dB and 64 dB."
+        fr: "Climatiseurs dont le niveau sonore déclaré se situe entre 61 dB et 64 dB."
     - id: "loud_air_conditioners"
       group: "noise"
       criterias:
         - field: "attributes.indexed.NOISE_LEVEL.numericValue"
           operator: "GREATER_THAN"
-          value: "65"
+          value: "64"
       image: "example-image.png"
       url:
         en: "loud-air-conditioners"
         fr: "climatiseurs-bruyants"
       caption:
-        en: "Over 65 dB"
-        fr: "Plus de 65 dB"
+        en: "Over 64 dB"
+        fr: "Plus de 64 dB"
       title:
         en: "Louder models"
         fr: "Modèles plus bruyants"
       description:
-        en: "Air conditioners with a declared noise level above 65 dB."
-        fr: "Climatiseurs dont le niveau sonore déclaré dépasse 65 dB."
+        en: "Air conditioners with a declared noise level above 64 dB."
+        fr: "Climatiseurs dont le niveau sonore déclaré dépasse 64 dB."
 
 subsets:
   - id: "impact_high"
@@ -461,12 +478,12 @@ subsets:
     description:
       en: "Products with a low environmental impact"
       fr: "Produits ayant un faible impact environnemental"
-  - id: "price_lower_350"
+  - id: "price_lower_450"
     group: "price"
     criterias:
       - field: "price.minPrice.price"
         operator: "LOWER_THAN"
-        value: "350"
+        value: "450"
       - field: "price.minPrice.price"
         operator: "GREATER_THAN"
         value: "0"
@@ -475,115 +492,115 @@ subsets:
       en: "low-price"
       fr: "petits-prix"
     caption:
-      en: "< 350 EUR"
-      fr: "< 350 EUR"
+      en: "< 450 EUR"
+      fr: "< 450 EUR"
     title:
       en: "Affordable air conditioners"
       fr: "Climatiseurs accessibles"
     description:
-      en: "Air conditioners priced below 350 EUR."
-      fr: "Climatiseurs dont le prix est inférieur à 350 EUR."
-  - id: "price_350_600"
+      en: "Air conditioners priced below 450 EUR."
+      fr: "Climatiseurs dont le prix est inférieur à 450 EUR."
+  - id: "price_450_1000"
     group: "price"
     criterias:
       - field: "price.minPrice.price"
         operator: "GREATER_THAN"
-        value: "350"
+        value: "450"
       - field: "price.minPrice.price"
         operator: "LOWER_THAN"
-        value: "600"
+        value: "1000"
     image: "example-image.png"
     url:
-      en: "air-conditioners-350-600-euros"
-      fr: "climatiseurs-350-600-euros"
+      en: "air-conditioners-450-1000-euros"
+      fr: "climatiseurs-450-1000-euros"
     caption:
-      en: "350 - 600 EUR"
-      fr: "350 - 600 EUR"
+      en: "450 - 1000 EUR"
+      fr: "450 - 1000 EUR"
     title:
       en: "Mid-range air conditioners"
       fr: "Climatiseurs milieu de gamme"
     description:
-      en: "Air conditioners priced between 350 EUR and 600 EUR."
-      fr: "Climatiseurs dont le prix est compris entre 350 EUR et 600 EUR."
-  - id: "price_greater_600"
+      en: "Air conditioners priced between 450 EUR and 1000 EUR."
+      fr: "Climatiseurs dont le prix est compris entre 450 EUR et 1000 EUR."
+  - id: "price_greater_1000"
     group: "price"
     criterias:
       - field: "price.minPrice.price"
         operator: "GREATER_THAN"
-        value: "600"
+        value: "1000"
     image: "example-image.png"
     url:
       en: "premium-price"
       fr: "haut-de-gamme"
     caption:
-      en: "> 600 EUR"
-      fr: "> 600 EUR"
+      en: "> 1000 EUR"
+      fr: "> 1000 EUR"
     title:
       en: "Premium air conditioners"
       fr: "Climatiseurs haut de gamme"
     description:
-      en: "Air conditioners priced above 600 EUR."
-      fr: "Climatiseurs dont le prix est supérieur à 600 EUR."
+      en: "Air conditioners priced above 1000 EUR."
+      fr: "Climatiseurs dont le prix est supérieur à 1000 EUR."
   - id: "quiet_air_conditioners"
     group: "noise"
     criterias:
       - field: "attributes.indexed.NOISE_LEVEL.numericValue"
         operator: "LOWER_THAN"
-        value: "60"
+        value: "61"
     image: "example-image.png"
     url:
       en: "quiet-air-conditioners"
       fr: "climatiseurs-silencieux"
     caption:
-      en: "< 60 dB"
-      fr: "< 60 dB"
+      en: "< 61 dB"
+      fr: "< 61 dB"
     title:
       en: "Quiet air conditioners"
       fr: "Climatiseurs silencieux"
     description:
-      en: "Air conditioners with a declared noise level below 60 dB."
-      fr: "Climatiseurs dont le niveau sonore déclaré est inférieur à 60 dB."
+      en: "Air conditioners with a declared noise level below 61 dB."
+      fr: "Climatiseurs dont le niveau sonore déclaré est inférieur à 61 dB."
   - id: "standard_noise_air_conditioners"
     group: "noise"
     criterias:
       - field: "attributes.indexed.NOISE_LEVEL.numericValue"
         operator: "GREATER_THAN"
-        value: "60"
+        value: "61"
       - field: "attributes.indexed.NOISE_LEVEL.numericValue"
         operator: "LOWER_THAN"
-        value: "65"
+        value: "64"
     image: "example-image.png"
     url:
       en: "standard-noise-air-conditioners"
       fr: "climatiseurs-bruit-standard"
     caption:
-      en: "60 - 65 dB"
-      fr: "60 - 65 dB"
+      en: "61 - 64 dB"
+      fr: "61 - 64 dB"
     title:
       en: "Standard-noise air conditioners"
       fr: "Climatiseurs au bruit standard"
     description:
-      en: "Air conditioners with a declared noise level between 60 dB and 65 dB."
-      fr: "Climatiseurs dont le niveau sonore déclaré se situe entre 60 dB et 65 dB."
+      en: "Air conditioners with a declared noise level between 61 dB and 64 dB."
+      fr: "Climatiseurs dont le niveau sonore déclaré se situe entre 61 dB et 64 dB."
   - id: "loud_air_conditioners"
     group: "noise"
     criterias:
       - field: "attributes.indexed.NOISE_LEVEL.numericValue"
         operator: "GREATER_THAN"
-        value: "65"
+        value: "64"
     image: "example-image.png"
     url:
       en: "loud-air-conditioners"
       fr: "climatiseurs-bruyants"
     caption:
-      en: "> 65 dB"
-      fr: "> 65 dB"
+      en: "> 64 dB"
+      fr: "> 64 dB"
     title:
       en: "Louder air conditioners"
       fr: "Climatiseurs plus bruyants"
     description:
-      en: "Air conditioners with a declared noise level above 65 dB."
-      fr: "Climatiseurs dont le niveau sonore déclaré dépasse 65 dB."
+      en: "Air conditioners with a declared noise level above 64 dB."
+      fr: "Climatiseurs dont le niveau sonore déclaré dépasse 64 dB."
 
 dataviz:
   chartOverrides:
@@ -598,6 +615,10 @@ dataviz:
       label: "Bruit moyen"
       unit: "dB"
       aggregation: "avg"
+    - field: "attributes.indexed.COOLING_CAPACITY"
+      label: "Puissance frigorifique moyenne"
+      unit: "kW"
+      aggregation: "avg"
     - field: "scores.ECOSCORE.value"
       label: "Eco-score moyen"
       aggregation: "avg"
@@ -609,9 +630,14 @@ dataviz:
 attributesConfig:
   configs:
     - key: "CLASSE_ENERGY"
+    - key: "PRODUCT_TYPE"
+    - key: "AIR_CONDITIONER_FUNCTION_TYPE"
+    - key: "COOLING_CAPACITY"
     - key: "POWER_CONSUMPTION_TYPICAL"
     - key: "POWER_CONSUMPTION_OFF"
     - key: "NOISE_LEVEL"
+    - key: "REFRIGERANT_NAME"
+    - key: "REFRIGERANT_GWP"
     - key: "WEIGHT"
     - key: "REPAIRABILITY_INDEX"
     - key: "WARRANTY"

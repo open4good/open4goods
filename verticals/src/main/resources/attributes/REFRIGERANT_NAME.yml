@@ -1,0 +1,23 @@
+key: "REFRIGERANT_NAME"
+faIcon: "mdi-molecule"
+name:
+  default: "Refrigerant"
+  fr: "Fluide refrigerant"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "REFRIGERANTNAME"
+    - "REFRIGERANT NAME"
+    - "REFRIGERANT"
+    - "REFRIGERANT TYPE"
+    - "FLUIDE REFRIGERANT"
+    - "FLUIDE RÉFRIGÉRANT"
+    - "TYPE DE REFRIGERANT"
+    - "TYPE DE RÉFRIGÉRANT"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

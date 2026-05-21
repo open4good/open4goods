@@ -1,0 +1,44 @@
+key: "REFRIGERANT_GWP"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
+faIcon: "mdi-molecule"
+name:
+  default: "Refrigerant GWP"
+  fr: "PRG du refrigerant"
+filteringType: "NUMERIC"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "PRG du refrigerant"
+  en: "Refrigerant GWP"
+scoreDescription:
+  fr: "Potentiel de rechauffement global du fluide frigorigene utilise par l'appareil"
+  en: "Global warming potential of the refrigerant used by the appliance"
+scoreUtility:
+  fr: "Les fuites de fluide frigorigene peuvent fortement peser sur l'impact climatique; un PRG plus bas limite ce risque."
+  en: "Refrigerant leaks can materially increase climate impact; a lower GWP limits that risk."
+participateInScores:
+  - ECOSCORE
+participateInACV:
+  - USE
+synonyms:
+  all:
+    - "REFRIGERANTGWP"
+    - "REFRIGERANT GWP"
+    - "GWP"
+    - "PRG"
+    - "POTENTIEL DE RECHAUFFEMENT GLOBAL"
+    - "POTENTIEL DE RÉCHAUFFEMENT GLOBAL"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

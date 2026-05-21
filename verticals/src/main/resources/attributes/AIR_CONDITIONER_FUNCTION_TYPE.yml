@@ -1,0 +1,24 @@
+key: "AIR_CONDITIONER_FUNCTION_TYPE"
+faIcon: "mdi-swap-horizontal"
+name:
+  default: "Function type"
+  fr: "Type de fonction"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "FUNCTIONTYPE"
+    - "FUNCTION TYPE"
+    - "TYPE DE FONCTION"
+    - "TYPE DE CLIMATISEUR"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+mappings:
+  COOLING_ONLY: "Cooling only"
+  "COOLING ONLY": "Cooling only"
+  "FROID SEUL": "Cooling only"
+  REVERSIBLE: "Reversible"
