@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationHook;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -29,11 +30,13 @@ public class PostFetchEnrichmentHook implements ReviewGenerationHook {
 
     private final CompletionFacadeService completionFacadeService;
     private final VerticalsConfigService verticalsConfigService;
+    private final ProductRepository productRepository;
 
     public PostFetchEnrichmentHook(CompletionFacadeService completionFacadeService,
-            VerticalsConfigService verticalsConfigService) {
+            VerticalsConfigService verticalsConfigService, ProductRepository productRepository) {
         this.completionFacadeService = completionFacadeService;
         this.verticalsConfigService = verticalsConfigService;
+        this.productRepository = productRepository;
     }
 
     /**
@@ -67,6 +70,7 @@ public class PostFetchEnrichmentHook implements ReviewGenerationHook {
         logger.info("Post-fetch enrichment triggered for UPC {} (had {})", product.getId(), MISSING_EPREL_CAUSE);
         try {
             completionFacadeService.processAll(Set.of(product), vertical);
+            productRepository.forceIndex(product);
             logger.info("Post-fetch enrichment completed for UPC {}", product.getId());
         } catch (Exception e) {
             logger.error("Post-fetch enrichment failed for UPC {}: {}", product.getId(), e.getMessage(), e);

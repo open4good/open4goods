@@ -456,6 +456,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param data
 	 */
 	private void updateExcludeStatus(Product data, VerticalConfig vConf) {
+		data.getExcludedCauses().clear();
 		boolean ret = false;
 		// On brand
 		if (StringUtils.isEmpty(data.brand())) {

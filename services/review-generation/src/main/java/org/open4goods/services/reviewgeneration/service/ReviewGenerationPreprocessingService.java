@@ -252,8 +252,18 @@ public class ReviewGenerationPreprocessingService {
 		});
 
 		// Sort and deduplicate results.
+		List<String> fetchExcludedDomains = properties.getExcludedDomains() == null ? List.of()
+				: properties.getExcludedDomains();
 		List<GoogleSearchResult> sortedResults = allResults.stream()
 				.filter(r -> r.link() != null && !r.link().isEmpty())
+				.filter(r -> {
+					try {
+						String host = URI.create(r.link()).toURL().getHost();
+						return fetchExcludedDomains.stream().noneMatch(host::contains);
+					} catch (Exception e) {
+						return true;
+					}
+				})
 				.filter(distinctByKey(r -> {
 					try {
 						URL url = URI.create(r.link()).toURL();
@@ -387,6 +397,20 @@ public class ReviewGenerationPreprocessingService {
 		}
 		logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
+		// Persist fetched facts before threshold check so partial results survive
+		// failed runs and are available for future EPREL/Icecat enrichment.
+		List<ProductFact> newFacts = new ArrayList<>();
+		for (Map.Entry<String, String> entry : finalSourcesMap.entrySet()) {
+			String content = entry.getValue();
+			String normalized = content.length() > properties.getFactMaxMarkdownChars()
+					? content.substring(0, properties.getFactMaxMarkdownChars())
+					: content;
+			newFacts.add(new ProductFact(entry.getKey(), normalized, detectLanguage(normalized),
+					System.currentTimeMillis(), resolveFetchStrategy(fetchFutures.get(entry.getKey())),
+					finalTokensMap.get(entry.getKey()), sha256(normalized)));
+		}
+		product.setReviewFacts(newFacts.stream().limit(properties.getFactsMaxStored()).toList());
+
 		// Check for minimum required data.
 		if (accumulatedTokens < properties.getMinGlobalTokens()
 				|| finalSourcesMap.size() < properties.getMinUrlCount()) {
@@ -406,18 +430,6 @@ public class ReviewGenerationPreprocessingService {
 		// Store aggregated tokens for convenience.
 		promptVariables.put("TOTAL_TOKENS", accumulatedTokens);
 		promptVariables.put("SOURCE_TOKENS", finalTokensMap);
-
-		List<ProductFact> newFacts = new ArrayList<>();
-		for (Map.Entry<String, String> entry : finalSourcesMap.entrySet()) {
-			String content = entry.getValue();
-			String normalized = content.length() > properties.getFactMaxMarkdownChars()
-					? content.substring(0, properties.getFactMaxMarkdownChars())
-					: content;
-			newFacts.add(new ProductFact(entry.getKey(), normalized, detectLanguage(normalized),
-					System.currentTimeMillis(), resolveFetchStrategy(fetchFutures.get(entry.getKey())),
-					finalTokensMap.get(entry.getKey()), sha256(normalized)));
-		}
-		product.setReviewFacts(newFacts.stream().limit(properties.getFactsMaxStored()).toList());
 
 		return promptVariables;
 	}
@@ -1088,7 +1100,13 @@ public class ReviewGenerationPreprocessingService {
 				return 0;
 			}
 			int score = 0;
-			if (host.contains(brand)) {
+			// Split compound brands (e.g. "LG Electronics") and check each word
+			// individually so "lg.com" matches even though "lgelectronics" does not.
+			boolean brandInHost = java.util.Arrays.stream(product.brand().split("\\s+"))
+					.map(this::normalizeForUrlMatching)
+					.filter(w -> w.length() >= 2)
+					.anyMatch(host::contains);
+			if (brandInHost) {
 				score += 8;
 			}
 			if (path.contains(model)) {

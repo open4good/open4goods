@@ -123,7 +123,6 @@ review:
       - nettoyant.org
       - galaxus.ch
       - galaxus.de
-      - lcd-compare.com
       - lesnumeriques.com
       - 01net.com
       - materiel.net
@@ -131,6 +130,16 @@ review:
       - frandroid.com
       - cnetfrance.fr
       - rtings.com
+    excluded-domains:
+      - pngwing.com
+      - pngegg.com
+      - commons.wikimedia.org
+      - upload.wikimedia.org
+      - static.wikia.nocookie.net
+      - logopng.com
+      - seeklogo.com
+      - logoeps.com
+      - worldvectorlogo.com
 urlfetcher:
   domains:
     leclaireur.fnac.com:
