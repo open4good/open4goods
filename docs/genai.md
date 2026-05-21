@@ -34,13 +34,25 @@ spring:
       genai:
         api-key: ${GEMINI_API_KEY}
         chat:
-          options:
-            model: gemini-2.5-flash
+        options:
+            model: gemini-3.1-pro-preview
 ```
 
 Gemini grounded search is enabled only for interactive prompts when
 `retrievalMode: MODEL_WEB_SEARCH` and `allowWebSearch=true`. Grounding metadata
 is collected from the Spring AI response metadata.
+
+For Gemini 3 models, the provider keeps structured output enabled together with
+Google Search grounding. The Spring AI `BeanOutputConverter` JSON schema is
+converted to the Vertex schema shape before the request is sent, including
+uppercase Vertex type enums (`OBJECT`, `ARRAY`, `STRING`, etc.). For older Gemini
+models, grounded prompts still skip `responseSchema` and rely on prompt
+instructions plus application-side JSON validation/repair.
+
+Current references:
+- Gemini 3.1 Pro Preview model capabilities: https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview
+- Gemini structured outputs with tools: https://ai.google.dev/gemini-api/docs/structured-output#structured_outputs_with_tools
+- Vertex structured output schema limits: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output
 
 ## Batch (OpenAI + Vertex Gemini)
 

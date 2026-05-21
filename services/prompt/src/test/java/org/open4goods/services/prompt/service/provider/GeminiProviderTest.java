@@ -98,10 +98,43 @@ class GeminiProviderTest {
         if (options.getResponseMimeType() != null) {
             assertTrue(options.getResponseMimeType().contains("application/json"), "MimeType should be JSON");
         }
-        
-        // Note: getResponseSchema might not be directly exposed or might return null if not set, 
-        // but we are verifying the builder call flow. 
-        // In a real integration test we would check the request sent.
-        // For unit test, we trust the builder if the code path is covered.
+        assertTrue(options.getResponseSchema().contains("\"type\" : \"OBJECT\""),
+                "Schema type values should be converted to Vertex enum values");
+    }
+
+    @Test
+    void testGenerateTextWithGemini31WebSearchAndJsonSchema() {
+        VertexAiGeminiChatModel chatModel = mock(VertexAiGeminiChatModel.class);
+        ChatResponse mockResponse = new ChatResponse(Collections.singletonList(
+            new Generation(new org.springframework.ai.chat.messages.AssistantMessage("{\"name\":\"test\"}"))));
+        when(chatModel.call(any(Prompt.class))).thenReturn(mockResponse);
+
+        GeminiProvider provider = new GeminiProvider(chatModel);
+
+        PromptOptions options = new PromptOptions();
+        options.setModel("gemini-3.1-pro-preview");
+        String jsonSchema = "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}";
+        ProviderRequest request = new ProviderRequest(
+                "test-key",
+                "system",
+                "user",
+                options,
+                RetrievalMode.MODEL_WEB_SEARCH,
+                jsonSchema,
+                true,
+                Map.of()
+        );
+
+        provider.generateText(request);
+
+        org.mockito.ArgumentCaptor<Prompt> promptCaptor = org.mockito.ArgumentCaptor.forClass(Prompt.class);
+        verify(chatModel).call(promptCaptor.capture());
+
+        VertexAiGeminiChatOptions capturedOptions = (VertexAiGeminiChatOptions) promptCaptor.getValue().getOptions();
+
+        assertTrue(capturedOptions.getGoogleSearchRetrieval(), "Google Search retrieval should be enabled");
+        assertTrue(capturedOptions.getResponseMimeType().contains("application/json"), "MimeType should be JSON");
+        assertTrue(capturedOptions.getResponseSchema().contains("\"type\" : \"OBJECT\""),
+                "Gemini 3.1 should keep structured output enabled with grounding");
     }
 }

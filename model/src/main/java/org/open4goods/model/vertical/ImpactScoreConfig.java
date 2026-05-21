@@ -27,6 +27,15 @@ public class ImpactScoreConfig {
 
 	private String aiJsonResponse;
 
+	/**
+	 * Short SHA-256 fingerprint (16 hex chars) of {@link #yamlPrompt} captured at
+	 * generation time. Lets reviewers detect when the impactscore YAML was produced
+	 * by an outdated prompt template; a mismatch between this revision and the
+	 * hash of the current resolved prompt means the file should be regenerated.
+	 * Populated by VerticalsGenerationService; do not edit by hand.
+	 */
+	private String promptRevision;
+
 	private org.open4goods.model.ai.ImpactScoreAiResult aiResult;
 
 	public Map<String, Double> getCriteriasPonderation() {
@@ -52,6 +61,12 @@ public class ImpactScoreConfig {
 	}
 	public void setAiJsonResponse(String aiJsonResponse) {
 		this.aiJsonResponse = aiJsonResponse;
+	}
+	public String getPromptRevision() {
+		return promptRevision;
+	}
+	public void setPromptRevision(String promptRevision) {
+		this.promptRevision = promptRevision;
 	}
 	public org.open4goods.model.ai.ImpactScoreAiResult getAiResult() {
 		return aiResult;

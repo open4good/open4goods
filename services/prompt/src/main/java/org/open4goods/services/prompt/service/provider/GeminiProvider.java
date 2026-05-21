@@ -15,11 +15,14 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
+import org.springframework.ai.vertexai.gemini.schema.JsonSchemaConverter;
 import org.springframework.util.StringUtils;
 
 import reactor.core.publisher.Flux;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Gemini provider implementation using Spring AI Google GenAI with grounding.
@@ -94,48 +97,67 @@ public class GeminiProvider implements GenAiProvider {
 		}).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
 	}
 
-	private VertexAiGeminiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode, boolean allowWebSearch, String jsonSchema) {
+	private VertexAiGeminiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode,
+			boolean allowWebSearch, String jsonSchema) {
 		VertexAiGeminiChatOptions.Builder builder = VertexAiGeminiChatOptions.builder();
+		String model = options == null ? "gemini-2.5-pro" : resolveModel(options);
 
 		if (options != null) {
-			builder.model(resolveModel(options));
+			builder.model(model);
 			if (options.getTemperature() != null) {
 				builder.temperature(options.getTemperature());
 			} else {
-                builder.temperature(0.2);
-            }
+				builder.temperature(0.2);
+			}
 			if (options.getTopP() != null) {
 				builder.topP(options.getTopP());
 			} else {
-                builder.topP(0.9);
-            }
+				builder.topP(0.9);
+			}
 			if (options.getMaxTokens() != null) {
 				builder.maxOutputTokens(options.getMaxTokens());
 			}
 		} else {
-             builder.model("gemini-2.5-pro");
-             builder.temperature(0.2);
-             builder.topP(0.9);
-        }
-
-		// IMPORTANT: Gemini API limitation - controlled generation (responseSchema) is NOT compatible
-		// with Google Search grounding. They are mutually exclusive.
-		// When grounding is enabled, we skip the JSON schema and rely on prompt instructions instead.
-		boolean useGrounding = retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch;
-		
-		if (useGrounding) {
-			// Enable Google Search grounding - cannot use responseSchema with this
-            builder.googleSearchRetrieval(true);
-            builder.internalToolExecutionEnabled(true);
-			logger.info("Enabled Google Search grounding (JSON schema disabled due to API limitation)");
-		} else if (jsonSchema != null && !jsonSchema.isBlank()) {
-			// Enable JSON structured output only when NOT using grounding
-			logger.debug("Enabling JSON structured output with schema for Gemini");
-			builder.responseMimeType("application/json");
-			builder.responseSchema(jsonSchema);
+			builder.model(model);
+			builder.temperature(0.2);
+			builder.topP(0.9);
 		}
-		
+
+		// Gemini 3 supports structured output together with built-in tools. Older
+		// models still keep the safer legacy behavior and rely on prompt-only JSON.
+		boolean useGrounding = retrievalMode == RetrievalMode.MODEL_WEB_SEARCH && allowWebSearch;
+
+		if (useGrounding) {
+			builder.googleSearchRetrieval(true);
+			builder.internalToolExecutionEnabled(true);
+			logger.info("Enabled Google Search grounding for Gemini model {}", model);
+		}
+		if (jsonSchema != null && !jsonSchema.isBlank()
+				&& (!useGrounding || supportsStructuredOutputWithGrounding(model))) {
+			logger.debug("Enabling JSON structured output with Vertex-compatible schema for Gemini");
+			builder.responseMimeType("application/json");
+			builder.responseSchema(toVertexResponseSchema(jsonSchema));
+		} else if (jsonSchema != null && !jsonSchema.isBlank()) {
+			logger.info("Skipped Gemini response schema because model {} does not support structured output with "
+					+ "grounding in this provider path", model);
+		}
+
 		return builder.build();
+	}
+
+	private String toVertexResponseSchema(String jsonSchema) {
+		try {
+			ObjectNode openApiSchema = JsonSchemaConverter.convertToOpenApiSchema(JsonSchemaConverter.fromJson(jsonSchema));
+			JsonSchemaGenerator.convertTypeValuesToUpperCase(openApiSchema);
+			return openApiSchema.toPrettyString();
+		} catch (RuntimeException e) {
+			logger.warn("Could not convert JSON schema to Vertex schema format; using original schema", e);
+			return jsonSchema;
+		}
+	}
+
+	private boolean supportsStructuredOutputWithGrounding(String model) {
+		return model != null && model.toLowerCase().startsWith("gemini-3");
 	}
 
 	private String resolveModel(PromptOptions options) {

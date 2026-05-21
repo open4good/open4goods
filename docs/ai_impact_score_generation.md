@@ -17,6 +17,9 @@ It uses a structured prompt to guide the AI acting as an LCA expert.
 
 - `[[${VERTICAL_NAME}]]`: The localized name of the vertical (e.g., "Téléviseurs").
 - `[[${AVAILABLE_CRITERIAS}]]`: A list of available criteria (attributes and scores) that can be used for weighting, along with their descriptions.
+- `[(${AVAILABLE_CRITERIAS_JSON})]`: The same criteria as a JSON array, injected unescaped into the output example so `available_criterias` binds to `List<String>`.
+- `[[${TOTAL_PRODUCTS}]]` and `[[${CRITERIAS_STATS}]]`: Real index coverage used to temper literature-first weights with actual data density.
+- `[[${CURRENT_DATE}]]`: ISO date used for `sources.accessed_date` and `search_log.date`.
 
 ### 2. Data Model (`ImpactScoreAiResult`)
 
@@ -41,10 +44,11 @@ The `VerticalsGenerationService` orchestrates the process:
 2.  **Prompt Execution**: It calls `PromptService.objectPrompt` with the context.
     - `PromptService` evaluates the Thymeleaf template, injecting the variables.
     - It appends field-specific instructions (from `@AiGeneratedField`) to the system prompt.
-    - It enforces JSON schema compliance.
+    - It enforces JSON schema compliance. For Gemini/Vertex, the provider converts the generated JSON Schema to Vertex-compatible schema syntax before setting `responseSchema`.
 3.  **Result Processing**:
     - The structured result is saved into `ImpactScoreConfig`.
     - `criteriasPonderation` is derived from `criteria_weights` for backward compatibility.
+    - Missing configured criteria are retained with `0.0` weight, and non-exact sums are normalized to `1.0`.
     - The raw prompt and JSON response are stored for audit purposes.
 
 ## Variable Injection & Safety

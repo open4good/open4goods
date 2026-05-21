@@ -2,6 +2,7 @@ package org.open4goods.api.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -89,12 +91,18 @@ class VerticalsGenerationServiceTest {
     void generateEcoscoreYamlConfigWithAiResultTest() throws Exception {
         // Setup
         VerticalConfig vConf = verticalConfig("tv");
+        vConf.setAvailableImpactScoreCriterias(List.of("SCORE_1", "SCORE_2", "MISSING_SCORE"));
         org.open4goods.model.vertical.ProductI18nElements frI18n = new org.open4goods.model.vertical.ProductI18nElements();
         frI18n.setVerticalHomeTitle("TV");
         vConf.setI18n(Map.of("fr", frI18n));
 
         PromptService promptService = mock(PromptService.class);
         SerialisationService serialisationService = mock(SerialisationService.class);
+        ProductRepository repository = mock(ProductRepository.class);
+        when(repository.scoresCoverage(vConf)).thenReturn(Map.of("SCORE_1", 80L));
+        when(repository.countMainIndexHavingScore("SCORE_2", "tv")).thenReturn(20L);
+        when(repository.countMainIndexHavingScore("MISSING_SCORE", "tv")).thenReturn(0L);
+        when(repository.countMainIndexTotal("tv")).thenReturn(100L);
         
         org.open4goods.services.prompt.config.PromptConfig promptConfig = new org.open4goods.services.prompt.config.PromptConfig();
         
@@ -122,12 +130,14 @@ class VerticalsGenerationServiceTest {
             return "criteriasPonderation: " + config.getCriteriasPonderation();
         });
         
+        when(serialisationService.toJson(org.mockito.ArgumentMatchers.any()))
+                .thenReturn("[\"SCORE_1\",\"SCORE_2\",\"MISSING_SCORE\"]");
         when(serialisationService.toYaml(org.mockito.ArgumentMatchers.any(org.open4goods.services.prompt.config.PromptConfig.class))).thenReturn("PROMPT");
         when(serialisationService.toJson(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyBoolean())).thenReturn("JSON");
 
         VerticalsGenerationService service = new VerticalsGenerationService(
                 new VerticalsGenerationConfig(),
-                mock(ProductRepository.class),
+                repository,
                 serialisationService,
                 mock(GoogleTaxonomyService.class),
                 mock(VerticalsConfigService.class),
@@ -142,6 +152,20 @@ class VerticalsGenerationServiceTest {
         // Verify
         assertThat(result).contains("SCORE_1=0.3");
         assertThat(result).contains("SCORE_2=0.7");
+        assertThat(result).contains("MISSING_SCORE=0.0");
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> contextCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(promptService).objectPrompt(
+                org.mockito.ArgumentMatchers.eq("impactscore-generation"),
+                contextCaptor.capture(),
+                org.mockito.ArgumentMatchers.eq(org.open4goods.model.ai.ImpactScoreAiResult.class));
+        assertThat(contextCaptor.getValue().get("AVAILABLE_CRITERIAS_JSON"))
+                .isEqualTo("[\"SCORE_1\",\"SCORE_2\",\"MISSING_SCORE\"]");
+        assertThat(contextCaptor.getValue().get("AVAILABLE_CRITERIAS").toString())
+                .contains("MISSING_SCORE : MISSING_SCORE - coverage 0 / 100 (0.0%)");
+        assertThat(contextCaptor.getValue().get("CRITERIAS_STATS").toString())
+                .contains("| MISSING_SCORE | 0 | 0 / 100 (0.0%) |");
     }
 
     @Test

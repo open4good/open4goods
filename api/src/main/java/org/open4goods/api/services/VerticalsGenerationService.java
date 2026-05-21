@@ -3,7 +3,11 @@ package org.open4goods.api.services;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -620,7 +625,6 @@ public class VerticalsGenerationService {
      * writing the content to disk.
      */
     public String generateEcoscoreYamlConfig(VerticalConfig vConf) {
-        String ret = null;
         try {
             Map<String, Object> context = buildEcoscoreContext(vConf);
             PromptResponse<org.open4goods.model.ai.ImpactScoreAiResult> response =
@@ -630,21 +634,16 @@ public class VerticalsGenerationService {
             ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
             impactScoreConfig.setAiResult(response.getBody());
 
-            Map<String, Double> criteriasPonderation = new HashMap<>();
-            if (response.getBody() != null && response.getBody().getCriteriaWeights() != null) {
-                for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw :
-                        response.getBody().getCriteriaWeights()) {
-                    criteriasPonderation.put(cw.criterion, cw.weight);
-                }
-            }
-            impactScoreConfig.setCriteriasPonderation(criteriasPonderation);
-            impactScoreConfig.setYamlPrompt(serialisationService.toYaml(response.getPrompt()));
+            impactScoreConfig.setCriteriasPonderation(buildCriteriasPonderation(response.getBody(), vConf));
+            String yamlPrompt = serialisationService.toYaml(response.getPrompt());
+            impactScoreConfig.setYamlPrompt(yamlPrompt);
+            impactScoreConfig.setPromptRevision(shortSha256(yamlPrompt));
             impactScoreConfig.setAiJsonResponse(serialisationService.toJson(response.getBody(), true));
-            ret = serialisationService.toYaml(impactScoreConfig).replace("---", "");
+            return serialisationService.toYaml(impactScoreConfig).replaceFirst("^---\\s*", "");
         } catch (Exception e) {
             LOGGER.error("Ecoscore generation failed for {}", vConf, e);
+            throw new IllegalStateException("Ecoscore generation failed for vertical " + vConf.getId(), e);
         }
-        return ret;
     }
 
     /**
@@ -659,30 +658,55 @@ public class VerticalsGenerationService {
         ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
         impactScoreConfig.setAiResult(aiResult);
 
-        Map<String, Double> criteriasPonderation = new HashMap<>();
-        if (aiResult != null && aiResult.getCriteriaWeights() != null) {
-            for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : aiResult.getCriteriaWeights()) {
-                criteriasPonderation.put(cw.criterion, cw.weight);
-            }
-        }
-        impactScoreConfig.setCriteriasPonderation(criteriasPonderation);
+        impactScoreConfig.setCriteriasPonderation(buildCriteriasPonderation(aiResult, vConf));
         org.open4goods.services.prompt.config.PromptConfig prompt = generateEcoscoreDryRun(vConf);
-        impactScoreConfig.setYamlPrompt(serialisationService.toYaml(prompt));
+        String yamlPrompt = serialisationService.toYaml(prompt);
+        impactScoreConfig.setYamlPrompt(yamlPrompt);
+        impactScoreConfig.setPromptRevision(shortSha256(yamlPrompt));
         impactScoreConfig.setAiJsonResponse(serialisationService.toJson(aiResult, true));
         return impactScoreConfig;
     }
 
-    private Map<String, Object> buildEcoscoreContext(VerticalConfig vConf) {
+    /**
+     * Short (16 hex) SHA-256 fingerprint of the resolved prompt, used as a
+     * stable revision marker on {@link ImpactScoreConfig#getPromptRevision()}.
+     * A mismatch between this hash and the hash of the currently resolved
+     * prompt signals that the file was generated with an outdated template.
+     */
+    static String shortSha256(String content) {
+        if (content == null) {
+            return null;
+        }
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(content.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(16);
+            for (int i = 0; i < 8; i++) {
+                sb.append(String.format("%02x", digest[i]));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 unavailable", e);
+        }
+    }
+
+    private Map<String, Object> buildEcoscoreContext(VerticalConfig vConf) throws SerialisationException {
         Map<String, Object> context = new HashMap<>();
 
-        Map<String, Long> coverage = repository.scoresCoverage(vConf);
+        List<String> criteriaKeys = resolveImpactCriteriaKeys(vConf);
+        Map<String, Long> coverage = loadImpactCriteriaCoverage(vConf, criteriaKeys);
+        if (criteriaKeys.isEmpty() && !coverage.isEmpty()) {
+            criteriaKeys = new ArrayList<>(coverage.keySet());
+        }
         long totalProducts = repository.countMainIndexTotal(vConf.getId());
 
-        String availableCriterias = getCriterias(vConf, coverage, totalProducts);
+        String availableCriterias = formatAvailableCriterias(vConf, criteriaKeys, coverage, totalProducts);
         if (StringUtils.isBlank(availableCriterias)) {
             LOGGER.warn("AVAILABLE_CRITERIAS is empty for vertical {}", vConf.getId());
         }
         context.put("AVAILABLE_CRITERIAS", availableCriterias);
+        context.put("AVAILABLE_CRITERIAS_JSON", serialisationService.toJson(criteriaKeys));
+        context.put("CURRENT_DATE", LocalDate.now().toString());
 
         String verticalName = null;
         if (vConf.getI18n() != null && vConf.getI18n().get("fr") != null) {
@@ -697,23 +721,127 @@ public class VerticalsGenerationService {
         // than by a-priori assumptions. coverage > 0 also means the criterion is
         // currently scored on prod ES (post-batch); see ProductRepository.scoresCoverage.
         context.put("TOTAL_PRODUCTS", totalProducts);
-        context.put("CRITERIAS_STATS", formatCriteriasStats(vConf, coverage, totalProducts));
+        context.put("CRITERIAS_STATS", formatCriteriasStats(criteriaKeys, coverage, totalProducts));
 
         return context;
     }
 
-    private String getCriterias(VerticalConfig vConf, Map<String, Long> coverage, long totalProducts) {
+    private List<String> resolveImpactCriteriaKeys(VerticalConfig vConf) {
+        LinkedHashSet<String> keys = new LinkedHashSet<>();
+        if (vConf.getAvailableImpactScoreCriterias() != null) {
+            vConf.getAvailableImpactScoreCriterias().stream()
+                    .filter(StringUtils::isNotBlank)
+                    .map(String::trim)
+                    .forEach(keys::add);
+        }
+        return new ArrayList<>(keys);
+    }
+
+    private Map<String, Long> loadImpactCriteriaCoverage(VerticalConfig vConf, List<String> criteriaKeys) {
+        Map<String, Long> ret = new LinkedHashMap<>();
+        Map<String, Long> indexedCoverage = repository.scoresCoverage(vConf);
+        Map<String, Long> safeIndexedCoverage = indexedCoverage == null ? Map.of() : indexedCoverage;
+        for (String criteriaKey : criteriaKeys) {
+            Long count = safeIndexedCoverage.get(criteriaKey);
+            if (count == null) {
+                count = repository.countMainIndexHavingScore(criteriaKey, vConf.getId());
+            }
+            ret.put(criteriaKey, count == null ? 0L : count);
+        }
+        if (criteriaKeys.isEmpty()) {
+            safeIndexedCoverage.entrySet().stream()
+                    .filter(entry -> StringUtils.isNotBlank(entry.getKey()))
+                    .forEach(entry -> ret.put(entry.getKey(), entry.getValue() == null ? 0L : entry.getValue()));
+        }
+        return ret;
+    }
+
+    private Map<String, Double> buildCriteriasPonderation(org.open4goods.model.ai.ImpactScoreAiResult aiResult,
+            VerticalConfig vConf) {
+        if (aiResult == null) {
+            throw new IllegalArgumentException("Impact-score AI response is empty");
+        }
+
+        Map<String, Double> generatedWeights = new LinkedHashMap<>();
+        if (aiResult.getCriteriaWeights() != null) {
+            for (org.open4goods.model.ai.ImpactScoreAiResult.CriteriaWeight cw : aiResult.getCriteriaWeights()) {
+                if (cw == null || StringUtils.isBlank(cw.criterion)) {
+                    continue;
+                }
+                if (!Double.isFinite(cw.weight) || cw.weight < 0.0) {
+                    throw new IllegalArgumentException("Invalid impact-score weight for " + cw.criterion + ": "
+                            + cw.weight);
+                }
+                generatedWeights.put(cw.criterion.trim(), cw.weight);
+            }
+        }
+        if (generatedWeights.isEmpty()) {
+            throw new IllegalArgumentException("Impact-score AI response does not contain criteria_weights");
+        }
+
+        LinkedHashMap<String, Double> ret = new LinkedHashMap<>();
+        List<String> expectedCriteria = resolveImpactCriteriaKeys(vConf);
+        if (expectedCriteria.isEmpty()) {
+            ret.putAll(generatedWeights);
+        } else {
+            for (String criteria : expectedCriteria) {
+                ret.put(criteria, generatedWeights.getOrDefault(criteria, 0.0));
+            }
+            generatedWeights.forEach((criteria, weight) -> {
+                if (!ret.containsKey(criteria)) {
+                    LOGGER.warn("AI returned impact-score criterion {} that is not configured for vertical {}",
+                            criteria, vConf.getId());
+                    ret.put(criteria, weight);
+                }
+            });
+        }
+
+        return normalizeWeights(ret);
+    }
+
+    private Map<String, Double> normalizeWeights(Map<String, Double> weights) {
+        double sum = weights.values().stream().mapToDouble(Double::doubleValue).sum();
+        if (sum <= 0.0) {
+            throw new IllegalArgumentException("Impact-score criteria weights sum is zero");
+        }
+        if (Math.abs(sum - 1.0) <= 0.000001) {
+            return weights;
+        }
+
+        LOGGER.warn("Impact-score criteria weights sum to {}; normalizing to 1.0", sum);
+        LinkedHashMap<String, Double> normalized = new LinkedHashMap<>();
+        weights.forEach((criteria, weight) -> normalized.put(criteria, roundWeight(weight / sum)));
+
+        double normalizedSum = normalized.values().stream().mapToDouble(Double::doubleValue).sum();
+        double delta = roundWeight(1.0 - normalizedSum);
+        if (Math.abs(delta) > 0.0) {
+            String largestCriteria = normalized.entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElseThrow();
+            normalized.put(largestCriteria, roundWeight(normalized.get(largestCriteria) + delta));
+        }
+        return normalized;
+    }
+
+    private double roundWeight(double value) {
+        return BigDecimal.valueOf(value).setScale(6, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    private String formatAvailableCriterias(VerticalConfig vConf, List<String> criteriaKeys,
+            Map<String, Long> coverage, long totalProducts) {
         StringBuilder ret = new StringBuilder();
-        coverage.forEach((key, count) -> {
+        for (String key : criteriaKeys) {
+            long count = coverage.getOrDefault(key, 0L);
             ret.append("  ").append(key).append(" : ");
             Optional.ofNullable(vConf.getAttributesConfig())
                     .map(c -> c.getAttributeConfigByKey(key))
                     .map(AttributeConfig::getScoreDescription)
                     .map(d -> d.get("fr"))
                     .ifPresentOrElse(ret::append, () -> ret.append(key));
-            ret.append(" — coverage ").append(formatCoverage(count, totalProducts));
+            ret.append(" - coverage ").append(formatCoverage(count, totalProducts));
             ret.append("\n");
-        });
+        }
         return ret.toString();
     }
 
@@ -722,20 +850,21 @@ public class VerticalsGenerationService {
      * Injected into the LLM prompt under the {@code CRITERIAS_STATS} variable so the
      * model can ground its weights in actual data density rather than priors.
      */
-    private String formatCriteriasStats(VerticalConfig vConf, Map<String, Long> coverage, long totalProducts) {
-        if (coverage == null || coverage.isEmpty() || totalProducts <= 0) {
+    private String formatCriteriasStats(List<String> criteriaKeys, Map<String, Long> coverage, long totalProducts) {
+        if (criteriaKeys == null || criteriaKeys.isEmpty() || coverage == null || coverage.isEmpty()
+                || totalProducts <= 0) {
             return "Aucune statistique disponible (vertical non scoré ou index vide).";
         }
         StringBuilder ret = new StringBuilder();
         ret.append("Total produits indexés pour la verticale : ").append(totalProducts).append("\n");
         ret.append("| criterion | products_with_score | coverage |\n");
         ret.append("|---|---|---|\n");
-        coverage.entrySet().stream()
-                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
-                .forEach(entry -> ret.append("| ")
-                        .append(entry.getKey()).append(" | ")
-                        .append(entry.getValue()).append(" | ")
-                        .append(formatCoverage(entry.getValue(), totalProducts))
+        criteriaKeys.stream()
+                .sorted((a, b) -> Long.compare(coverage.getOrDefault(b, 0L), coverage.getOrDefault(a, 0L)))
+                .forEach(criteriaKey -> ret.append("| ")
+                        .append(criteriaKey).append(" | ")
+                        .append(coverage.getOrDefault(criteriaKey, 0L)).append(" | ")
+                        .append(formatCoverage(coverage.getOrDefault(criteriaKey, 0L), totalProducts))
                         .append(" |\n"));
         return ret.toString();
     }

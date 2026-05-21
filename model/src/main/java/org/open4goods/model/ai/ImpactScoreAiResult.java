@@ -1,14 +1,20 @@
 package org.open4goods.model.ai;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents the structured result of the AI generation for Impact Score configuration.
  * This class matches the JSON structure defined in the 'impactscore-generation.yml' prompt.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ImpactScoreAiResult {
+
+    private static final Pattern SOURCE_YEAR_PATTERN = Pattern.compile("(\\d{4})");
 
     @JsonProperty(value = "use_case", required = true)
     @AiGeneratedField(instruction = "Le cas d'usage (ex: consumer_comparison)")
@@ -113,6 +119,7 @@ public class ImpactScoreAiResult {
 
     // Nested Classes
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Positioning {
         @JsonProperty(value = "claim", required = true)
         public String claim;
@@ -122,6 +129,7 @@ public class ImpactScoreAiResult {
         public String whatItMeansForUsers;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ReferenceLifetime {
         @JsonProperty(value = "lifetime_years_reference", required = true)
         public double lifetimeYearsReference;
@@ -132,6 +140,7 @@ public class ImpactScoreAiResult {
         @JsonProperty(value = "citations", required = true)
         public List<String> citations;
 
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class LifetimeRange {
             @JsonProperty(value = "min", required = true)
             public double min;
@@ -140,6 +149,7 @@ public class ImpactScoreAiResult {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GapAnalysis {
         @JsonProperty(value = "what_is_missing_vs_full_lca", required = true)
         public String whatIsMissingVsFullLca;
@@ -149,6 +159,7 @@ public class ImpactScoreAiResult {
         public List<String> mitigations;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class WeightingMethod {
         @JsonProperty(value = "approach", required = true)
         public String approach;
@@ -157,6 +168,7 @@ public class ImpactScoreAiResult {
         @JsonProperty(value = "assumptions", required = true)
         public List<Assumption> assumptions;
         
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Assumption {
             @JsonProperty(value = "assumption", required = true)
             public String assumption;
@@ -167,6 +179,7 @@ public class ImpactScoreAiResult {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class CriteriaWeight {
         @JsonProperty(value = "criterion", required = true)
         public String criterion;
@@ -185,6 +198,7 @@ public class ImpactScoreAiResult {
         @JsonProperty(value = "evidence_strength", required = true)
         public EvidenceStrength evidenceStrength;
 
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class EvidenceStrength {
             @JsonProperty(value = "level", required = true)
             public String level;
@@ -193,6 +207,7 @@ public class ImpactScoreAiResult {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class NormalizationNotes {
         @JsonProperty(value = "relative_ranking_0_100", required = true)
         public String relativeRanking0100;
@@ -204,6 +219,7 @@ public class ImpactScoreAiResult {
         public String missingValueVirtualization;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class QualityChecks {
         @JsonProperty(value = "criteria_weights_complete", required = true)
         public boolean criteriaWeightsComplete;
@@ -217,6 +233,7 @@ public class ImpactScoreAiResult {
         public String renormalizationRuleIfNeeded;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MaterialitySummary {
         @JsonProperty(value = "dominant_lifecycle_stages_for_vertical", required = true)
         public List<String> dominantLifecycleStagesForVertical;
@@ -224,6 +241,7 @@ public class ImpactScoreAiResult {
         public String shortSummary;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Source {
         @JsonProperty(value = "id", required = true)
         public String id;
@@ -249,8 +267,37 @@ public class ImpactScoreAiResult {
         public List<String> usedFor;
         @JsonProperty(value = "notes", required = true)
         public String notes;
+
+        /**
+         * Accepts strict integer years and tolerates legacy free-text values emitted by
+         * older prompt runs. Unknown years are mapped to {@code 0}, matching the current
+         * prompt contract.
+         */
+        @JsonProperty("year")
+        public void setYear(Object year) {
+            this.year = parseSourceYear(year);
+        }
     }
 
+    private static Integer parseSourceYear(Object year) {
+        if (year == null) {
+            return 0;
+        }
+        if (year instanceof Number number) {
+            return number.intValue();
+        }
+        String value = year.toString().trim();
+        if (value.isEmpty()) {
+            return 0;
+        }
+        Matcher matcher = SOURCE_YEAR_PATTERN.matcher(value);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+        return 0;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SearchLog {
         @JsonProperty(value = "query", required = true)
         public String query;
