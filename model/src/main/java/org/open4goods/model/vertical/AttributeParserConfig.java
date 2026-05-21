@@ -45,11 +45,23 @@ public class AttributeParserConfig {
 	 */
 	private List<String> deleteTokens = new ArrayList<>();
 
-
 	/**
 	 * If one of the string is found in the text, then associate the one found
 	 */
 	private List<String> tokenMatch;
+
+	/**
+	 * Physical dimension name used by {@code UnitAwareNumericParser} to look up
+	 * conversion factors in the UUDC registry (e.g. "LENGTH", "MASS", "POWER").
+	 * Ignored by other parsers.
+	 */
+	private String dimension;
+
+	/**
+	 * Default unit symbol applied when the raw value carries no unit (e.g. "cm" for LENGTH,
+	 * "kg" for MASS). Used by {@code UnitAwareNumericParser} as a last-resort hint.
+	 */
+	private String defaultUnitHint;
 
 
 
@@ -123,8 +135,25 @@ public class AttributeParserConfig {
 		this.normalize = normalize;
 	}
 
+	public String getDimension()
+	{
+		return dimension;
+	}
 
+	public void setDimension(String dimension)
+	{
+		this.dimension = dimension;
+	}
 
+	public String getDefaultUnitHint()
+	{
+		return defaultUnitHint;
+	}
+
+	public void setDefaultUnitHint(String defaultUnitHint)
+	{
+		this.defaultUnitHint = defaultUnitHint;
+	}
 
 
 

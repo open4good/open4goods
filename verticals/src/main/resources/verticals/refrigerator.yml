@@ -3,6 +3,25 @@
 # SHOULD be equal to the configuration file name, without the extension
 id: refrigerator
 
+# Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
+referentials:
+  wikidata:
+    - qid: "Q3751369"
+      name: "Refrigerator"
+  googleTaxonomy:
+    - id: 686
+      name: "Home & Garden > Household Appliances > Refrigerators"
+  icecat: []
+  etim:
+    - classId: "EC000438"
+      className: "Refrigerator"
+    - classId: "EC000440"
+      className: "Refrigerator-freezer combination"
+  eprel:
+    - group: "refrigeratingappliances"
+    - group: "refrigeratingappliances2019"
+    - group: "professionalrefrigeratedstoragecabinets"
+
 parsers:
   weight:
     minKg: 20.0

@@ -2,6 +2,27 @@
 # MUST be equal to the configuration file name, without the extension.
 id: air-conditioner
 
+# Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
+referentials:
+  wikidata:
+    - qid: "Q174488"
+      name: "Air conditioner"
+  googleTaxonomy:
+    - id: 605
+      name: "Home & Garden > Household Appliances > Climate Control Appliances > Air Conditioners"
+  icecat:
+    - categoryId: 224
+      name: "Air Conditioners"
+  etim:
+    - classId: "EC011604"
+      className: "Portable air conditioner"
+    - classId: "EC011573"
+      className: "Air-conditioning split system - single split, complete"
+    - classId: "EC011579"
+      className: "Air-conditioning split system - multi-split, complete"
+  eprel:
+    - group: "airconditioners"
+
 parsers:
   weight:
     minKg: 5.0

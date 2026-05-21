@@ -23,3 +23,10 @@ synonyms:
     - "HAUTEUR"
   eprel:
     - "DIMENSIONHEIGHT"
+
+parser:
+  clazz: org.open4goods.api.services.aggregation.services.realtime.parser.UnitAwareNumericParser
+  dimension: "LENGTH"
+  defaultUnitHint: "cm"
+  normalize: true
+  trim: true

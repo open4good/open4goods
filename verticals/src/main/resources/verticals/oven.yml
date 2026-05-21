@@ -3,6 +3,23 @@
 # SHOULD be equal to the configuration file name, without the extension
 id: oven
 
+# Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
+referentials:
+  wikidata:
+    - qid: "Q192931"
+      name: "Oven"
+  googleTaxonomy:
+    - id: 683
+      name: "Home & Garden > Household Appliances > Ovens & Ranges > Ovens"
+  icecat:
+    - categoryId: 2286
+      name: "Ovens"
+  etim:
+    - classId: "EC001843"
+      className: "Oven, built-in"
+  eprel:
+    - group: "ovens"
+
 parsers:
   weight:
     minKg: 10.0

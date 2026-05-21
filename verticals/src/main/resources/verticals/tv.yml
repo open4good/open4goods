@@ -11,6 +11,22 @@
 # SHOULD be equal to the configuration file name, without the extension
 id: tv
 
+# Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
+referentials:
+  wikidata:
+    - qid: "Q26899"
+      name: "Television set"
+  googleTaxonomy:
+    - id: 404
+      name: "Electronics > Video > Televisions"
+  icecat:
+    - categoryId: 1584
+      name: "Televisions"
+  etim:
+    - classId: "EC001764"
+      className: "TV set"
+  eprel: []
+
 parsers:
   weight:
     minKg: 1.0

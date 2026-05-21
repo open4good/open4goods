@@ -1,0 +1,153 @@
+# Unified Unit Dimension & Conversion (UUDC) Registry
+#
+# Each dimension defines:
+#   - baseUnit: the canonical unit stored in Elasticsearch
+#   - units: list of known units with their conversion multipliers (to base) and synonyms
+#
+# multiplier: value_in_base = raw_value * multiplier + offset
+# offset: applied after multiplier (useful for temperature; 0 for all others)
+
+dimensions:
+  MASS:
+    baseUnit: "kg"
+    units:
+      - symbol: "kg"
+        multiplier: 1.0
+        offset: 0.0
+        isBase: true
+        synonyms: ["kilogramme", "kilogrammes", "kilogram", "kilograms", "kg", "kgs"]
+      - symbol: "g"
+        multiplier: 0.001
+        offset: 0.0
+        isBase: false
+        synonyms: ["gramme", "grammes", "gram", "grams", "g", "gr"]
+      - symbol: "mg"
+        multiplier: 0.000001
+        offset: 0.0
+        isBase: false
+        synonyms: ["milligramme", "milligrammes", "milligram", "milligrams", "mg"]
+      - symbol: "lb"
+        multiplier: 0.45359237
+        offset: 0.0
+        isBase: false
+        synonyms: ["pound", "pounds", "lb", "lbs"]
+      - symbol: "oz"
+        multiplier: 0.028349523
+        offset: 0.0
+        isBase: false
+        synonyms: ["ounce", "ounces", "oz"]
+
+  LENGTH:
+    baseUnit: "m"
+    units:
+      - symbol: "m"
+        multiplier: 1.0
+        offset: 0.0
+        isBase: true
+        synonyms: ["meter", "meters", "metre", "metres", "m"]
+      - symbol: "cm"
+        multiplier: 0.01
+        offset: 0.0
+        isBase: false
+        synonyms: ["centimetre", "centimetres", "centimeter", "centimeters", "cm"]
+      - symbol: "mm"
+        multiplier: 0.001
+        offset: 0.0
+        isBase: false
+        synonyms: ["millimetre", "millimetres", "millimeter", "millimeters", "mm"]
+      - symbol: "in"
+        multiplier: 0.0254
+        offset: 0.0
+        isBase: false
+        synonyms: ["inch", "inches", "in", "\"", "″"]
+      - symbol: "ft"
+        multiplier: 0.3048
+        offset: 0.0
+        isBase: false
+        synonyms: ["foot", "feet", "ft"]
+
+  POWER:
+    baseUnit: "W"
+    units:
+      - symbol: "W"
+        multiplier: 1.0
+        offset: 0.0
+        isBase: true
+        synonyms: ["watt", "watts", "w", "W"]
+      - symbol: "kW"
+        multiplier: 1000.0
+        offset: 0.0
+        isBase: false
+        synonyms: ["kilowatt", "kilowatts", "kw", "kW"]
+      - symbol: "mW"
+        multiplier: 0.001
+        offset: 0.0
+        isBase: false
+        synonyms: ["milliwatt", "milliwatts", "mw", "mW"]
+      - symbol: "BTU/h"
+        multiplier: 0.29307107
+        offset: 0.0
+        isBase: false
+        synonyms: ["btu/h", "btu/hr", "btu", "BTU"]
+
+  ENERGY:
+    baseUnit: "kWh"
+    units:
+      - symbol: "kWh"
+        multiplier: 1.0
+        offset: 0.0
+        isBase: true
+        synonyms: ["kilowatthour", "kilowatt-hour", "kwh", "kWh", "kw/h"]
+      - symbol: "Wh"
+        multiplier: 0.001
+        offset: 0.0
+        isBase: false
+        synonyms: ["watthour", "watt-hour", "wh", "Wh"]
+      - symbol: "MWh"
+        multiplier: 1000.0
+        offset: 0.0
+        isBase: false
+        synonyms: ["megawatthour", "megawatt-hour", "mwh", "MWh"]
+      - symbol: "J"
+        multiplier: 0.000000277778
+        offset: 0.0
+        isBase: false
+        synonyms: ["joule", "joules", "j", "J"]
+
+  VOLUME:
+    baseUnit: "l"
+    units:
+      - symbol: "l"
+        multiplier: 1.0
+        offset: 0.0
+        isBase: true
+        synonyms: ["litre", "litres", "liter", "liters", "l", "L"]
+      - symbol: "ml"
+        multiplier: 0.001
+        offset: 0.0
+        isBase: false
+        synonyms: ["millilitre", "millilitres", "milliliter", "milliliters", "ml", "mL"]
+      - symbol: "cl"
+        multiplier: 0.01
+        offset: 0.0
+        isBase: false
+        synonyms: ["centilitre", "centilitres", "centiliter", "centiliters", "cl", "cL"]
+      - symbol: "m3"
+        multiplier: 1000.0
+        offset: 0.0
+        isBase: false
+        synonyms: ["m3", "m³", "cubic meter", "cubic metres"]
+
+  SOUND_LEVEL:
+    baseUnit: "dB"
+    units:
+      - symbol: "dB"
+        multiplier: 1.0
+        offset: 0.0
+        isBase: true
+        synonyms: ["decibel", "decibels", "db", "dB", "dba", "dB(A)", "dB(a)"]
+      - symbol: "dBA"
+        multiplier: 1.0
+        offset: 0.0
+        isBase: false
+        synonyms: ["dBA", "dba", "db(a)", "db(A)", "decibel(a)"]

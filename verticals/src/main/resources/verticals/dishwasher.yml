@@ -4,6 +4,22 @@
 # SHOULD be equal to the configuration file name, without the extension
 id: dishwasher
 
+# Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
+referentials:
+  wikidata:
+    - qid: "Q58009"
+      name: "Dishwasher"
+  googleTaxonomy:
+    - id: 680
+      name: "Home & Garden > Household Appliances > Dishwashers"
+  icecat: []
+  etim:
+    - classId: "EC000780"
+      className: "Dishwasher"
+  eprel:
+    - group: "dishwashers"
+    - group: "dishwashers2019"
+
 order: 4
 averageHoursPerDay: 1.0
 

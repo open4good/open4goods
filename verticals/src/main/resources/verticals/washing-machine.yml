@@ -9,6 +9,23 @@
 # MUST contains only charracters
 # SHOULD be equal to the configuration file name, without the extension
 id: washing-machine
+
+# Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
+referentials:
+  wikidata:
+    - qid: "Q127917"
+      name: "Washing machine"
+  googleTaxonomy:
+    - id: 2549
+      name: "Home & Garden > Household Appliances > Laundry Appliances > Washing Machines"
+  icecat: []
+  etim:
+    - classId: "EC000021"
+      className: "Washing machine"
+  eprel:
+    - group: "washingmachines"
+    - group: "washingmachines2019"
+
 order: 5
 # Average daily usage time for a washing machine in hours.
 # Source: European Commission product page reports 174 cycles/year; EEA reports 3.8 cycles/week.

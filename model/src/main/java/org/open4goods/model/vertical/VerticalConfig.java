@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 
+import org.open4goods.model.vertical.referential.TaxonomyReferentials;
+
 import com.fasterxml.jackson.annotation.JsonMerge;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +48,14 @@ public class VerticalConfig {
 	 * Vertical ID
 	 */
 	private String id;
+
+	/**
+	 * Unified cross-referential taxonomy block supporting multiple entries per taxonomy
+	 * (Wikidata, ETIM, Icecat, Google, EPREL, GS1 GPC, eCl@ss).
+	 * This supplements the legacy scalar fields below, which are retained for backward compatibility.
+	 */
+	@JsonMerge
+	private TaxonomyReferentials referentials = new TaxonomyReferentials();
 
 	/**
 	 * The corresponding google taxonomy ID
@@ -1094,6 +1104,16 @@ public class VerticalConfig {
 
 	public void setCacheTokenNames(Set<String> cacheTokenNames) {
 		this.cacheTokenNames = cacheTokenNames;
+	}
+
+	public TaxonomyReferentials getReferentials()
+	{
+		return referentials;
+	}
+
+	public void setReferentials(TaxonomyReferentials referentials)
+	{
+		this.referentials = referentials == null ? new TaxonomyReferentials() : referentials;
 	}
 
 	public List<String> getEprelGroupNames() {

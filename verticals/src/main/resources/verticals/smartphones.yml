@@ -8,6 +8,20 @@
 
 id: smartphones
 
+# Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
+referentials:
+  wikidata:
+    - qid: "Q22645"
+      name: "Smartphone"
+  googleTaxonomy:
+    - id: 267
+      name: "Electronics > Communications > Telephony > Mobile Phones"
+  icecat: []
+  etim:
+    - classId: "EC002268"
+      className: "Smartphone"
+  eprel: []
+
 order: 3
 enabled: true
 popular: true
