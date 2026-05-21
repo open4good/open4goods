@@ -111,6 +111,7 @@
         <module>services/eprel-service</module>
         <module>services/exposed-docs</module>
         <module>services/geocode</module>
+        <module>services/wikidata-service</module>
 
 
 

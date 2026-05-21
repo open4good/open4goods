@@ -26,35 +26,36 @@ public class CompletionFacadeService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(CompletionFacadeService.class);
 
-	private ResourceCompletionService resourceCompletionService;
-//	private AmazonCompletionService amazonCompletionService;
-	private IcecatCompletionService icecatCompletionService;
-
-	private EprelCompletionService eprelCompletionService;
+	private final ResourceCompletionService resourceCompletionService;
+	private final IcecatCompletionService icecatCompletionService;
+	private final EprelCompletionService eprelCompletionService;
+	private final WikidataCompletionService wikidataCompletionService;
 
 	public CompletionFacadeService(
-			ResourceCompletionService resourceCompletionService,  IcecatCompletionService icecatCompletionService, EprelCompletionService eprelCompletionService) {
+			ResourceCompletionService resourceCompletionService,
+			IcecatCompletionService icecatCompletionService,
+			EprelCompletionService eprelCompletionService,
+			WikidataCompletionService wikidataCompletionService) {
 		this.resourceCompletionService = resourceCompletionService;
 		this.icecatCompletionService = icecatCompletionService;
 		this.eprelCompletionService = eprelCompletionService;
+		this.wikidataCompletionService = wikidataCompletionService;
 	}
 
-
 	/**
-	 * Complete the provided products with all completors
-	 * @param products
-	 * @param vertical
+	 * Complete the provided products with all completors.
+	 *
+	 * @param products the products to enrich
+	 * @param vertical the vertical context
 	 */
 	public void processAll(Set<Product> products, VerticalConfig vertical) {
-		logger.info("Completing {] products",products.size());
+		logger.info("Completing {} products", products.size());
 		products.forEach(product -> {
-			// TODO(p2, perf) : should paralellize (on verticals, at upper level)
 			resourceCompletionService.process(vertical, product);
 			icecatCompletionService.process(vertical, product);
 			eprelCompletionService.process(vertical, product);
-//			amazonCompletionService.process(vertical, product);
+			wikidataCompletionService.process(vertical, product);
 		});
-
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -435,6 +435,37 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ---
 
+### wikidata-service
+
+**Purpose**: Fetches and caches Wikidata entities to enrich products with multilingual names,
+images, numerical attributes, and Wikipedia sitelinks.
+
+**Key Responsibilities**:
+- Search Wikidata by GTIN-13 (P3962) via SPARQL
+- Brand + model SPARQL fallback when no GTIN is found
+- Cache fetched entities in Elasticsearch (`wikidata-entities` index) with configurable refresh
+- Parse: labels/aliases (multilingual), images (P18), videos (P10), official website (P856),
+  release date (P577), numeric claims (width P2049, height P2048, mass P2067, depth P2660),
+  and Wikipedia sitelinks
+- Feed enriched data as `DataFragment` through the standard aggregator pipeline
+
+**Configuration**:
+```yaml
+wikidata:
+  user-agent: "myapp/1.0 (https://myapp.example; contact@myapp.example) Spring-RestClient"
+  politeness-delay-ms: 300
+  refresh-in-days: 30
+  brand-model-fallback-enabled: true
+  languages: [en, fr, de, es, it]
+```
+
+**Security Guidelines**:
+- Always set a contact-bearing User-Agent; clients without one can be blocked by Wikimedia
+- Respect HTTP 429 / Retry-After; do not hammer the SPARQL endpoint (60 s/min quota)
+- No API key required; Wikidata is openly accessible
+
+---
+
 ## 6. Common Service Patterns
 
 ### 6.1 Configuration
