@@ -76,7 +76,7 @@ class ReviewGenerationPreprocessingServiceTest {
         GoogleSearchRequest officialRequest = requests.getFirst();
         GoogleSearchRequest preferredRequest = requests.get(1);
 
-        assertThat(officialRequest.query()).isEqualTo("Sony \"XR-55A80L\" (official OR officiel OR product OR produit)");
+        assertThat(officialRequest.query()).isEqualTo("Sony \"XR55A80L\" (official OR officiel OR product OR produit)");
         assertThat(preferredRequest.query()).startsWith("(site:lesnumeriques.com OR site:fnac.com)");
         assertThat(preferredRequest.query()).contains("\"Sony XR55A80L\"");
         assertThat(preferredRequest.query()).contains("\"Sony XR-55A80L\"");
@@ -105,19 +105,20 @@ class ReviewGenerationPreprocessingServiceTest {
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
         properties.setMinUrlCount(1);
-        properties.setMaxUrlsPerProduct(2);
-        properties.setOfficialDomainsByBrand(Map.of("haier", List.of("haier-europe.com")));
-        Product product = product("Haier", "HW50-BP12307-S");
+        properties.setMaxUrlsPerProduct(3);
+        Product product = product("Samsung", "SM-S921B/DS");
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
-                new GoogleSearchResult("Avis clients Haier HW50-BP12307-S", "https://www.darty.com/haier.html"),
-                new GoogleSearchResult("HW50-BP12307 | Lave-linge | Mini Drum | Haier",
-                        "https://www.haier-europe.com/fr_CH/lave-linge/31019768/hw50-bp12307-s/"),
-                new GoogleSearchResult("Generic shop", "https://example.com/haier.html"))));
+                new GoogleSearchResult("Avis clients Samsung SM-S921B/DS", "https://www.darty.com/samsung.html"),
+                new GoogleSearchResult("Samsung Galaxy S24 SM-S921B/DS | Produit officiel",
+                        "https://www.samsung.com/fr/smartphones/galaxy-s24/galaxy-s24-sm-s921b-ds/"),
+                new GoogleSearchResult("SM-S921B/DS | Assistance Samsung FR",
+                        "https://www.samsung.com/fr/support/model/SM-S921BZVDEUC/"),
+                new GoogleSearchResult("Generic shop", "https://example.com/samsung.html"))));
         when(promptService.estimateTokens(any(String.class))).thenReturn(300);
         when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
         {
             String url = invocation.getArgument(0);
-            String markdown = "Useful product content for " + url + " with washing performance details for Haier model HW50-BP12307-S.";
+            String markdown = "Useful product content for " + url + " with display, camera, and battery details for Samsung model SM-S921B/DS.";
             return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown, FetchStrategy.HTTP));
         });
 
@@ -125,18 +126,80 @@ class ReviewGenerationPreprocessingServiceTest {
                 new ReviewGenerationStatus());
 
         assertThat(product.getOfficialUrl())
-                .isEqualTo("https://www.haier-europe.com/fr_CH/lave-linge/31019768/hw50-bp12307-s/");
+                .isEqualTo("https://www.samsung.com/fr/smartphones/galaxy-s24/galaxy-s24-sm-s921b-ds/");
+        assertThat(product.getOfficialSupportUrls().get("fr"))
+                .contains("https://www.samsung.com/fr/support/model/SM-S921BZVDEUC/");
         assertThat(product.getReviewFacts()).extracting("url").contains(product.getOfficialUrl());
         @SuppressWarnings("unchecked")
         Map<String, String> sources = (Map<String, String>) variables.get("sources");
-        assertThat(sources.keySet()).contains(product.getOfficialUrl(), "https://www.darty.com/haier.html");
+        assertThat(sources.keySet()).contains(product.getOfficialUrl(),
+                "https://www.samsung.com/fr/support/model/SM-S921BZVDEUC/",
+                "https://www.darty.com/samsung.html");
+    }
+
+    @Test
+    void preparePromptVariables_StoresOfficialSupportUrlWithoutReplacingOfficialProductUrl() throws Exception {
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("Samsung", "SM-S921B/DS");
+        String supportUrl = "https://www.samsung.com/fr/support/model/SM-S921BZVDEUC/";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("SM-S921B/DS | Assistance Samsung FR", supportUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String url = invocation.getArgument(0);
+            String markdown = "Samsung SM-S921B/DS support page with useful display, camera, and battery details.";
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown, FetchStrategy.HTTP));
+        });
+
+        service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
+
+        assertThat(product.getOfficialUrl()).isNull();
+        assertThat(product.getOfficialSupportUrls().get("fr")).containsExactly(supportUrl);
+    }
+
+    @Test
+    void preparePromptVariables_PersistsPdfResourcesExtractedFromOfficialPages() throws Exception {
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("Samsung", "SM-S921B/DS");
+        String officialUrl = "https://www.samsung.com/fr/smartphones/galaxy-s24/galaxy-s24-sm-s921b-ds/";
+        String pdfUrl = "https://images.samsung.com/is/content/samsung/assets/fr/galaxy-s24/notice-sm-s921b-ds.pdf";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Samsung Galaxy S24 SM-S921B/DS | Produit officiel", officialUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "Useful Samsung SM-S921B/DS official product content with display, camera, and battery details.";
+            return CompletableFuture.completedFuture(new FetchResponse(officialUrl, 200, markdown, markdown,
+                    FetchStrategy.HTTP, List.of(), Set.of(), List.of(new org.open4goods.services.urlfetching.dto.ExtractedResource(
+                            pdfUrl, org.open4goods.services.urlfetching.dto.ResourceType.PDF, "link", "Notice")),
+                    false, null));
+        });
+
+        service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
+
+        assertThat(product.getResources()).anySatisfy(resource ->
+        {
+            assertThat(resource.getUrl()).isEqualTo(pdfUrl);
+            assertThat(resource.getResourceType()).isEqualTo(org.open4goods.model.resource.ResourceType.PDF);
+            assertThat(resource.getDatasourceName()).isEqualTo("manufacturer");
+            assertThat(resource.getTags()).contains("official", "official:fr");
+        });
     }
 
     @Test
     void preparePromptVariables_SearchesBroadOfficialCandidatesBeforeGenericQueries() throws Exception {
         properties.setMaxSearch(3);
         properties.setPreferredDomains(List.of("darty.com"));
-        Product product = product("Haier", "HW50-BP12307");
+        Product product = product("Samsung", "SM-S921B/DS");
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
 
         assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
@@ -147,9 +210,9 @@ class ReviewGenerationPreprocessingServiceTest {
         assertThat(requestCaptor.getAllValues())
                 .extracting(GoogleSearchRequest::query)
                 .containsExactly(
-                        "Haier \"HW50-BP12307\" (official OR officiel OR product OR produit)",
-                        "(site:darty.com) (\"Haier HW50-BP12307\")",
-                        "test Haier \"HW50-BP12307\"");
+                        "Samsung \"SM-S921B/DS\" (official OR officiel OR product OR produit)",
+                        "(site:darty.com) (\"Samsung SM-S921B/DS\")",
+                        "test Samsung \"SM-S921B/DS\"");
     }
 
     @Test
@@ -221,9 +284,24 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void fetchWithFallbacks_ReturnsNoResponseWhenEveryStrategyIsInvalid() throws Exception {
+        properties.setMinMarkdownChars(100);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenReturn(
+                CompletableFuture.completedFuture(new FetchResponse("https://example.com/blocked", 403,
+                        "Forbidden", "", FetchStrategy.HTTP)));
+
+        Object outcome = ReflectionTestUtils.invokeMethod(service, "fetchWithFallbacks",
+                "https://example.com/blocked", Map.of());
+
+        assertThat(ReflectionTestUtils.getField(outcome, "response")).isNull();
+        assertThat(ReflectionTestUtils.getField(outcome, "rejectionReason")).asString()
+                .contains("HTTP 403");
+    }
+
+    @Test
     void isRelevantContent_ValidatesBrandAndModelPresence()
     {
-        String content = "Ce lave-linge Beko MWBM8147EB est d'une grande efficacite.";
+        String content = "# Beko MWBM8147EB\nCe lave-linge Beko MWBM8147EB est d'une grande efficacite.";
 
         // Brand and model matches exactly
         Boolean match = ReflectionTestUtils.invokeMethod(service, "isRelevantContent",

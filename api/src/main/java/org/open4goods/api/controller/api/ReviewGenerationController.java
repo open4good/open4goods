@@ -18,8 +18,10 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationVerticalResult;
+import org.open4goods.services.reviewgeneration.service.NotEnoughDataException;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -178,8 +180,13 @@ public class ReviewGenerationController {
             HttpServletRequest request) throws Exception {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
-        return ResponseEntity.ok(reviewGenerationService.fetchReviewSources(product, verticalConfig,
-                requestHeaders(request)));
+        try {
+            return ResponseEntity.ok(reviewGenerationService.fetchReviewSources(product, verticalConfig,
+                    requestHeaders(request)));
+        } catch (NotEnoughDataException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(failureResult(product, verticalConfig, "fetch", e));
+        }
     }
 
     /**
@@ -231,8 +238,13 @@ public class ReviewGenerationController {
             HttpServletRequest request) throws Exception {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
-        return ResponseEntity.ok(reviewGenerationService.generateReviewWorkflow(product, verticalConfig,
-                requestHeaders(request)));
+        try {
+            return ResponseEntity.ok(reviewGenerationService.generateReviewWorkflow(product, verticalConfig,
+                    requestHeaders(request)));
+        } catch (NotEnoughDataException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(failureResult(product, verticalConfig, "workflow", e));
+        }
     }
 
     /**
@@ -393,6 +405,10 @@ public class ReviewGenerationController {
             try {
                 results.add(runner.run(product, verticalConfig));
             } catch (Exception e) {
+                if (e instanceof NotEnoughDataException notEnoughDataException) {
+                    results.add(failureResult(product, verticalConfig, step, notEnoughDataException));
+                    continue;
+                }
                 results.add(new ReviewGenerationStepResult(product.getId(), product.gtin(), verticalId, step,
                         false, e.getMessage(), product.getReviewFacts() == null ? 0 : product.getReviewFacts().size(),
                         product.getReviewFacts() == null ? 0 : product.getReviewFacts().stream()
@@ -405,6 +421,15 @@ public class ReviewGenerationController {
         int succeeded = (int) results.stream().filter(ReviewGenerationStepResult::success).count();
         return new ReviewGenerationVerticalResult(verticalId, step, effectiveLimit, results.size(), succeeded,
                 results.size() - succeeded, results);
+    }
+
+    private ReviewGenerationStepResult failureResult(Product product, VerticalConfig verticalConfig, String step,
+            NotEnoughDataException exception) {
+        int sourceCount = exception.getDetails() == null ? 0 : exception.getDetails().sourceCount();
+        int totalTokens = exception.getDetails() == null ? 0 : exception.getDetails().totalTokens();
+        return new ReviewGenerationStepResult(product.getId(), product.gtin(),
+                verticalConfig == null ? product.getVertical() : verticalConfig.getId(), step, false,
+                exception.getMessage(), sourceCount, totalTokens, List.of(), null, exception.getDetails());
     }
 
     private Map<String, String> requestHeaders(HttpServletRequest request) {

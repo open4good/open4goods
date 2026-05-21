@@ -1,0 +1,31 @@
+key: "OPERATING_SYSTEM"
+faIcon: "mdi-cellphone-cog"
+name:
+  default: "Operating system"
+  fr: "Système d'exploitation"
+suffix:
+  default: ""
+  fr: ""
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "OPERATING_SYSTEM"
+    - "SYSTEME D'EXPLOITATION"
+    - "SYSTÈME D'EXPLOITATION"
+    - "SYST?ME D'EXPLOITATION"
+    - "FAMILLE DE SYSTEME D'EXPLOITATION"
+    - "FAMILLE DE SYSTÈME D'EXPLOITATION"
+    - "FAMILLE DE SYST?ME D'EXPLOITATION"
+    - "OS"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: true
+mappings:
+  ANDROID: "ANDROID"
+  IOS: "IOS"
+  IPHONE OS: "IOS"
+

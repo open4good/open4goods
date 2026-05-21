@@ -1,0 +1,30 @@
+key: "RAM_CAPACITY"
+faIcon: "mdi-memory"
+name:
+  default: "RAM capacity"
+  fr: "Mémoire vive"
+suffix:
+  default: "GB"
+  fr: "Go"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "RAM_CAPACITY"
+    - "RAM CAPACITE"
+    - "RAM CAPACITÉ"
+    - "RAM CAPACIT?"
+    - "MEMOIRE VIVE"
+    - "MÉMOIRE VIVE"
+    - "RAM"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: true
+  deleteTokens:
+    - "GO"
+    - "GB"
+    - "G"
+

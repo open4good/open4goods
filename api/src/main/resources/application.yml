@@ -123,7 +123,6 @@ review:
       - nettoyant.org
       - galaxus.ch
       - galaxus.de
-      - haier-europe.com
       - lcd-compare.com
       - lesnumeriques.com
       - 01net.com
@@ -132,16 +131,6 @@ review:
       - frandroid.com
       - cnetfrance.fr
       - rtings.com
-    official-domains-by-brand:
-      haier:
-        - haier-europe.com
-    source-url-templates-by-brand:
-      haier:
-        - https://www.darty.com/nav/achat/gros_electromenager/lavage_sechage/lave-linge_hublot/{BRAND_SLUG}_{MODEL_SLUG}.html
-        - https://www.nettoyant.org/test-du-lave-linge-frontal-{BRAND_SLUG}-{MODEL_SLUG}
-      candy:
-        - https://www.darty.com/nav/achat/gros_electromenager/lave-linge/lave_linge_hublot/{BRAND_SLUG}_{MODEL_SLUG}.html
-
 urlfetcher:
   domains:
     leclaireur.fnac.com:

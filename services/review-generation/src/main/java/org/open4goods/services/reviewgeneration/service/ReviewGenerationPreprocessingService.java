@@ -29,6 +29,8 @@ import jakarta.annotation.PostConstruct;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductFact;
+import org.open4goods.model.resource.Resource;
+import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
@@ -38,8 +40,10 @@ import org.open4goods.services.googlesearch.exception.GoogleSearchException;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationFailureDetails;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.urlfetching.dto.ExtractedResource;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.slf4j.Logger;
@@ -76,6 +80,9 @@ public class ReviewGenerationPreprocessingService {
 	private final SerialisationService serialisationService;
 	private final MeterRegistry meterRegistry;
 	private final ThreadPoolExecutor fetchExecutor;
+
+	private record FetchOutcome(FetchResponse response, String rejectionReason) {
+	}
 
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
 			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
@@ -157,7 +164,7 @@ public class ReviewGenerationPreprocessingService {
 		validateSearchKeys(product, brand, primaryModel);
 
 		// Build search queries.
-		List<String> queries = buildSearchQueries(brand, primaryModel, alternateModels, verticalConfig);
+		List<String> queries = buildSearchQueries(product, brand, primaryModel, alternateModels, verticalConfig);
 		logger.info(
 				"SERP validation for UPC {}: brand='{}', model='{}', akaModels={}, preferredDomains={}, plannedQueries={}",
 				product.getId(), brand, primaryModel, alternateModels == null ? 0 : alternateModels.size(),
@@ -165,6 +172,7 @@ public class ReviewGenerationPreprocessingService {
 
 		status.addMessage("Searching the web...");
 		int searchesMade = 0;
+		List<String> searchedQueries = new ArrayList<>();
 		List<GoogleSearchResult> allResults = new ArrayList<>();
 		int maxSearch = properties.getMaxSearch();
 		for (String query : queries) {
@@ -174,6 +182,7 @@ public class ReviewGenerationPreprocessingService {
 
 			logger.info("SERP query {}/{} for UPC {}: {}", searchesMade + 1, maxSearch, product.getId(), query);
 			status.addMessage("Executing search query: " + query);
+			searchedQueries.add(query);
 			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getSearchResultsPerQuery(),
 					properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
 					properties.getSearchSafe(), null, properties.getSearchGeoLocation(),
@@ -190,27 +199,28 @@ public class ReviewGenerationPreprocessingService {
 		}
 		logger.info("SERP aggregation for UPC {}: searchesMade={}, rawResults={}", product.getId(), searchesMade,
 				allResults.size());
-		List<GoogleSearchResult> templatedSourceResults = sourceUrlTemplateResults(product, brand, primaryModel,
-				alternateModels);
-		if (!templatedSourceResults.isEmpty()) {
-			allResults.addAll(0, templatedSourceResults);
-			logger.info("Added {} templated source URL candidates for UPC {}.", templatedSourceResults.size(),
-					product.getId());
-		}
 
 		status.setStatus(ReviewGenerationStatus.Status.FETCHING);
-		identifyOfficialUrl(product, allResults).ifPresent(officialUrl -> {
+		identifyOfficialProductUrl(product, allResults).ifPresent(officialUrl -> {
 			product.setOfficialUrl(officialUrl);
 			status.addMessage("Official manufacturer page identified: " + officialUrl);
 			logger.info("Official manufacturer page identified for UPC {}: {}", product.getId(), officialUrl);
 		});
+		identifyOfficialSupportUrls(product, allResults).forEach(supportUrl -> {
+			String language = resolveOfficialUrlLanguage(supportUrl);
+			product.addOfficialSupportUrl(language, supportUrl);
+			status.addMessage("Official manufacturer support page identified: " + supportUrl);
+			logger.info("Official manufacturer support page identified for UPC {}: language={}, url={}", product.getId(),
+					language, supportUrl);
+		});
 
 		// Sort and deduplicate results.
 		List<GoogleSearchResult> sortedResults = allResults.stream()
-				.filter(r -> r.link() != null && !r.link().isEmpty()).filter(r -> !r.link().endsWith(".pdf"))
+				.filter(r -> r.link() != null && !r.link().isEmpty())
 				.filter(distinctByKey(r -> {
 					try {
-						return URI.create(r.link()).toURL().getHost();
+						URL url = URI.create(r.link()).toURL();
+						return url.getHost() + url.getPath();
 					} catch (Exception e) {
 						return r.link();
 					}
@@ -238,15 +248,15 @@ public class ReviewGenerationPreprocessingService {
 				product.getId(), sortedResults.size(), preferredResultCount, properties.getMaxUrlsPerProduct());
 
 		// Fetch URL contents concurrently.
-		Map<String, CompletableFuture<FetchResponse>> fetchFutures = new HashMap<>();
+		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = new HashMap<>();
 		for (GoogleSearchResult result : sortedResults.stream().limit(properties.getMaxUrlsPerProduct()).toList()) {
 			String url = result.link();
-			CompletableFuture<FetchResponse> future = CompletableFuture.supplyAsync(() -> {
+			CompletableFuture<FetchOutcome> future = CompletableFuture.supplyAsync(() -> {
 				try {
 					return fetchWithFallbacks(url, customHeaders);
 				} catch (Exception e) {
 					logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
-					return null;
+					return new FetchOutcome(null, "fetch exception: " + e.getMessage());
 				}
 			}, fetchExecutor);
 			fetchFutures.put(url, future);
@@ -262,32 +272,55 @@ public class ReviewGenerationPreprocessingService {
 		int accumulatedTokens = 0;
 		Map<String, String> finalSourcesMap = new LinkedHashMap<>();
 		Map<String, Integer> finalTokensMap = new LinkedHashMap<>();
+		Map<String, String> rejectedUrls = new LinkedHashMap<>();
 
 		for (GoogleSearchResult result : sortedResults) {
 			String url = result.link();
-			CompletableFuture<FetchResponse> future = fetchFutures.get(url);
+			CompletableFuture<FetchOutcome> future = fetchFutures.get(url);
 			if (future == null)
 				continue;
-            FetchResponse fetchResponse = future.get();
-            if (fetchResponse == null || fetchResponse.markdownContent() == null
-                    || fetchResponse.markdownContent().isEmpty())
-            {
-                continue;
-            }
-            String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
-            if (!isRelevantContent(content, brand, primaryModel, alternateModels))
-            {
-                logger.warn("Content from URL {} discarded due to irrelevance: does not contain model/akaModels for brand {}", url, brand);
-                continue;
-            }
-            int tokenCount = genAiService.estimateTokens(content);
+			FetchOutcome outcome = future.get();
+			FetchResponse fetchResponse = outcome == null ? null : outcome.response();
+			if (fetchResponse == null || fetchResponse.markdownContent() == null
+					|| fetchResponse.markdownContent().isEmpty()) {
+				rejectedUrls.put(url, outcome == null ? "fetch returned no response" : outcome.rejectionReason());
+				continue;
+			}
+			persistOfficialResources(product, result, fetchResponse);
+			String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
+			if (!isRelevantContent(content, result, brand, primaryModel, alternateModels)) {
+				String reason = "irrelevant: missing brand/model match in title, h1/main content, or URL";
+				rejectedUrls.put(url, reason);
+				logger.warn("Content from URL {} discarded due to irrelevance for brand {} and model {}", url, brand,
+						primaryModel);
+				continue;
+			}
+			int tokenCount = genAiService.estimateTokens(content);
 			if (tokenCount < minTokens) {
+				rejectedUrls.put(url, "insufficient tokens: " + tokenCount);
 				logger.warn("Content from URL {} discarded due to insufficient tokens: {}", url, tokenCount);
 				continue;
 			}
 			if (tokenCount > maxTokens) {
-				logger.warn("Content from URL {} discarded, exceed tokens limit: {}", url, tokenCount);
-				continue;
+				if (isOfficialUrl(product, result)) {
+					String trimmedContent = trimToTokenLimit(content, tokenCount, maxTokens, minTokens);
+					int trimmedTokenCount = genAiService.estimateTokens(trimmedContent);
+					if (trimmedTokenCount >= minTokens && trimmedTokenCount <= maxTokens) {
+						logger.info("Official source for UPC {} trimmed from {} to {} tokens: {}", product.getId(),
+								tokenCount, trimmedTokenCount, url);
+						content = trimmedContent;
+						tokenCount = trimmedTokenCount;
+					} else {
+						rejectedUrls.put(url, "too many tokens after official-page trimming: " + trimmedTokenCount);
+						logger.warn("Content from official URL {} discarded after trimming, token count: {}", url,
+								trimmedTokenCount);
+						continue;
+					}
+				} else {
+					rejectedUrls.put(url, "too many tokens: " + tokenCount);
+					logger.warn("Content from URL {} discarded, exceed tokens limit: {}", url, tokenCount);
+					continue;
+				}
 			}
 			if (accumulatedTokens + tokenCount > maxTotalTokens) {
 				logger.warn("Reached max tokens threshold. Current tokens: {}, URL tokens: {}, threshold: {}",
@@ -311,13 +344,17 @@ public class ReviewGenerationPreprocessingService {
 		// Check for minimum required data.
 		if (accumulatedTokens < properties.getMinGlobalTokens()
 				|| finalSourcesMap.size() < properties.getMinUrlCount()) {
+			ReviewGenerationFailureDetails details = new ReviewGenerationFailureDetails(finalSourcesMap.size(),
+					accumulatedTokens, searchedQueries, new ArrayList<>(finalSourcesMap.keySet()), rejectedUrls);
 			throw new NotEnoughDataException("Insufficient data for review generation: accumulatedTokens="
-					+ accumulatedTokens + ", sources=" + finalSourcesMap.size());
+					+ accumulatedTokens + ", sources=" + finalSourcesMap.size(), details);
 		}
 
 		Map<String, Object> promptVariables = buildBasePromptVariables(product, verticalConfig);
 		promptVariables.put("sources", finalSourcesMap);
 		promptVariables.put("tokens", finalTokensMap);
+		promptVariables.put("SEARCHED_QUERIES", searchedQueries);
+		promptVariables.put("REJECTED_URLS", rejectedUrls);
 		status.addMessage("AI generation");
 
 		// Store aggregated tokens for convenience.
@@ -354,98 +391,82 @@ public class ReviewGenerationPreprocessingService {
         }
     }
 
-    /**
-     * Checks if the fetched content is relevant to the product by ensuring it contains
-     * the brand name and at least one model or akaModel identifier.
-     *
-     * @param content the fetched markdown content
-     * @param brand the product brand
-     * @param primaryModel the primary model name
-     * @param alternateModels the set of alternate model aliases
-     * @return true if the content is relevant, false otherwise
-     */
-    private boolean isRelevantContent(String content, String brand, String primaryModel, Set<String> alternateModels)
-    {
-        if (content == null || content.isBlank())
-        {
-            return false;
-        }
-        String lowerContent = content.toLowerCase();
+	/**
+	 * Checks if fetched content is relevant to a product. A model mention buried in
+	 * recommendations or seller boilerplate is not sufficient; the model must match
+	 * in the SERP title, URL, H1/early page body, or concise primary content zone.
+	 */
+	private boolean isRelevantContent(String content, GoogleSearchResult result, String brand, String primaryModel,
+			Set<String> alternateModels) {
+		if (content == null || content.isBlank() || brand == null || brand.isBlank()) {
+			return false;
+		}
+		String normalizedBrand = normalizeForTextMatching(brand);
+		List<String> modelsToCheck = orderedModels(primaryModel, alternateModels);
+		if (modelsToCheck.isEmpty()) {
+			return normalizeForTextMatching(content).contains(normalizedBrand);
+		}
 
-        // 1. Brand check: must contain the brand name
-        if (brand != null && !brand.isBlank())
-        {
-            if (!lowerContent.contains(brand.toLowerCase()))
-            {
-                return false;
-            }
-        }
+		String title = result == null ? "" : result.title();
+		String url = result == null ? "" : result.link();
+		String earlyContent = firstContentZone(content);
+		String searchableZone = normalizeForTextMatching(String.join("\n", title, url, earlyContent));
+		if (!searchableZone.contains(normalizedBrand)) {
+			return false;
+		}
+		return modelsToCheck.stream().anyMatch(model -> modelMatchesZone(model, searchableZone));
+	}
 
-        // 2. Model check: must contain at least one model or akaModel identifier
-        List<String> modelsToCheck = orderedModels(primaryModel, alternateModels);
-        if (modelsToCheck.isEmpty())
-        {
-            return true;
-        }
+	private boolean isRelevantContent(String content, String brand, String primaryModel, Set<String> alternateModels) {
+		return isRelevantContent(content, new GoogleSearchResult("", ""), brand, primaryModel, alternateModels);
+	}
 
-        for (String model : modelsToCheck)
-        {
-            if (model == null || model.isBlank())
-            {
-                continue;
-            }
-            if (lowerContent.contains(model.toLowerCase()))
-            {
-                return true;
-            }
-        }
+	private String firstContentZone(String content) {
+		if (content == null) {
+			return "";
+		}
+		String[] lines = content.split("\\R");
+		List<String> selected = new ArrayList<>();
+		int chars = 0;
+		for (String line : lines) {
+			String trimmed = line == null ? "" : line.trim();
+			if (trimmed.isBlank()) {
+				continue;
+			}
+			if (trimmed.startsWith("#") || selected.size() < 80) {
+				selected.add(trimmed);
+				chars += trimmed.length();
+			}
+			if (chars >= 4000) {
+				break;
+			}
+		}
+		return String.join("\n", selected);
+	}
 
-        // Fallback check on alphanumeric tokens of the primary model
-        if (primaryModel != null && !primaryModel.isBlank())
-        {
-            String[] tokens = primaryModel.split("[\\s_\\-\\./\\\\]+");
-            for (String token : tokens)
-            {
-                if (token.length() >= 4)
-                {
-                    boolean hasLetter = false;
-                    boolean hasDigit = false;
-                    for (int i = 0; i < token.length(); i++)
-                    {
-                        char c = token.charAt(i);
-                        if (Character.isLetter(c))
-                        {
-                            hasLetter = true;
-                        }
-                        if (Character.isDigit(c))
-                        {
-                            hasDigit = true;
-                        }
-                    }
-                    if ((hasLetter && hasDigit) || (hasDigit && token.length() >= 5))
-                    {
-                        if (lowerContent.contains(token.toLowerCase()))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
+	private boolean modelMatchesZone(String model, String normalizedZone) {
+		if (model == null || model.isBlank()) {
+			return false;
+		}
+		String normalizedModel = normalizeForTextMatching(model);
+		if (normalizedModel.length() >= 4 && normalizedZone.contains(normalizedModel)) {
+			return true;
+		}
+		for (String token : model.split("[\\s_\\-\\./\\\\]+")) {
+			if (isStrongModelToken(token) && normalizedZone.contains(normalizeForTextMatching(token))) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-        return false;
-    }
-
-	private List<String> buildSearchQueries(String brand, String primaryModel, Set<String> alternateModels,
+	private List<String> buildSearchQueries(Product product, String brand, String primaryModel, Set<String> alternateModels,
 			VerticalConfig verticalConfig) {
 		List<String> queries = new ArrayList<>();
-		List<String> orderedModels = orderedModels(primaryModel, alternateModels);
-		String modelExpression = modelExpression(brand, orderedModels);
-		String officialDomainExpression = domainExpression(officialDomainsForBrand(brand));
-		if (!officialDomainExpression.isBlank()) {
-			queries.add(officialDomainExpression + " " + modelExpression);
-		}
-		queries.add(officialDiscoveryQuery(brand, orderedModels.getFirst()));
+		List<String> orderedModels = rankedModelCandidates(product, primaryModel, alternateModels);
+		List<String> searchModels = orderedModels.stream().limit(6).toList();
+		String modelExpression = modelExpression(brand, searchModels);
+		queries.add(officialDiscoveryQuery(brand, searchModels.getFirst()));
 		String preferredDomainExpression = domainExpression(properties.getPreferredDomains());
 		if (!preferredDomainExpression.isBlank()) {
 			queries.add(preferredDomainExpression + " " + modelExpression);
@@ -459,7 +480,7 @@ public class ReviewGenerationPreprocessingService {
 			}
 		}
 
-		for (String model : orderedModels) {
+		for (String model : searchModels) {
 			queries.add(formatQuery(brand, model));
 		}
 		return queries.stream().distinct().toList();
@@ -471,20 +492,145 @@ public class ReviewGenerationPreprocessingService {
 			models.add(primaryModel);
 		}
 		if (alternateModels != null) {
-			models.addAll(alternateModels.stream().filter(model -> model != null && !model.isBlank())
-					.sorted(Comparator.comparingInt(String::length).reversed()).toList());
+			models.addAll(alternateModels);
 		}
-		return models.stream().distinct().sorted((left, right) -> {
-			boolean leftExtendsPrimary = primaryModel != null && left.length() > primaryModel.length()
-					&& normalizeForUrlMatching(left).contains(normalizeForUrlMatching(primaryModel));
-			boolean rightExtendsPrimary = primaryModel != null && right.length() > primaryModel.length()
-					&& normalizeForUrlMatching(right).contains(normalizeForUrlMatching(primaryModel));
-			if (leftExtendsPrimary && !rightExtendsPrimary)
-				return -1;
-			if (!leftExtendsPrimary && rightExtendsPrimary)
-				return 1;
-			return Integer.compare(right.length(), left.length());
-		}).toList();
+		return models.stream()
+				.filter(model -> model != null && !model.isBlank())
+				.collect(Collectors.toMap(model -> model.trim().toLowerCase(Locale.ROOT), Function.identity(), (left, right) -> left,
+						LinkedHashMap::new))
+				.values().stream()
+				.sorted(Comparator.comparingInt((String model) -> modelCandidateScore(null, primaryModel, model))
+							.reversed().thenComparingInt(String::length))
+				.toList();
+	}
+
+	private String trimToTokenLimit(String content, int tokenCount, int maxTokens, int minTokens) {
+		if (content == null || content.isBlank() || tokenCount <= maxTokens) {
+			return content;
+		}
+		double ratio = Math.max(0.1, (double) maxTokens / tokenCount);
+		int targetLength = Math.max(properties.getMinMarkdownChars(), (int) (content.length() * ratio * 0.9));
+		targetLength = Math.min(targetLength, content.length());
+		String trimmed = content.substring(0, targetLength).trim();
+		int lastParagraph = trimmed.lastIndexOf("\n\n");
+		if (lastParagraph > properties.getMinMarkdownChars()) {
+			trimmed = trimmed.substring(0, lastParagraph).trim();
+		}
+		if (trimmed.length() < properties.getMinMarkdownChars() && content.length() >= properties.getMinMarkdownChars()) {
+			trimmed = content.substring(0, properties.getMinMarkdownChars()).trim();
+		}
+		return trimmed + "\n\n[Official source truncated to stay within the per-source token budget.]";
+	}
+
+	private List<String> rankedModelCandidates(Product product, String primaryModel, Set<String> alternateModels) {
+		List<String> models = new ArrayList<>();
+		if (primaryModel != null && !primaryModel.isBlank()) {
+			models.add(primaryModel);
+		}
+		if (product != null && product.getExternalIds() != null) {
+			if (product.getExternalIds().getMpn() != null) {
+				models.addAll(product.getExternalIds().getMpn());
+			}
+			if (product.gtin() != null && product.gtin().matches("\\d{8,14}")) {
+				models.add(product.gtin());
+			}
+		}
+		if (alternateModels != null) {
+			models.addAll(alternateModels);
+		}
+		return models.stream().filter(model -> model != null && !model.isBlank())
+				.collect(Collectors.toMap(model -> model.trim().toLowerCase(Locale.ROOT), Function.identity(), (left, right) -> left,
+						LinkedHashMap::new))
+				.values().stream()
+				.filter(model -> isSearchableModelCandidate(product, primaryModel, model))
+				.sorted(Comparator.comparingInt((String model) -> modelCandidateScore(product, primaryModel, model))
+						.reversed().thenComparingInt(String::length))
+				.toList();
+	}
+
+	private boolean isSearchableModelCandidate(Product product, String primaryModel, String candidate) {
+		String normalizedCandidate = normalizeForUrlMatching(candidate);
+		if (normalizedCandidate.isBlank()) {
+			return false;
+		}
+		String normalizedPrimary = normalizeForUrlMatching(primaryModel);
+		if (!normalizedPrimary.isBlank() && normalizedCandidate.equals(normalizedPrimary)) {
+			return true;
+		}
+		if (product != null && product.getExternalIds() != null && product.getExternalIds().getMpn() != null
+				&& product.getExternalIds().getMpn().stream()
+						.anyMatch(mpn -> normalizeForUrlMatching(mpn).equals(normalizedCandidate))) {
+			return true;
+		}
+		if (product != null && product.gtin() != null && normalizeForUrlMatching(product.gtin()).equals(normalizedCandidate)
+				&& candidate.matches("\\d{8,14}")) {
+			return true;
+		}
+		if (looksLikeStorageVariant(candidate) || looksLikeMerchantTitle(candidate)) {
+			return false;
+		}
+		if (normalizedPrimary.isBlank()) {
+			return isConciseModelCode(candidate);
+		}
+		return normalizedPrimary.contains(normalizedCandidate) || normalizedCandidate.contains(normalizedPrimary);
+	}
+
+	private int modelCandidateScore(Product product, String primaryModel, String candidate) {
+		String normalizedCandidate = normalizeForUrlMatching(candidate);
+		String normalizedPrimary = normalizeForUrlMatching(primaryModel);
+		int score = 0;
+		if (!normalizedPrimary.isBlank() && normalizedCandidate.equals(normalizedPrimary)) {
+			score += 100;
+		}
+		if (product != null && product.getExternalIds() != null && product.getExternalIds().getMpn() != null
+				&& product.getExternalIds().getMpn().stream()
+						.anyMatch(mpn -> normalizeForUrlMatching(mpn).equals(normalizedCandidate))) {
+			score += 80;
+		}
+		if (product != null && product.gtin() != null && normalizeForUrlMatching(product.gtin()).equals(normalizedCandidate)) {
+			score += 70;
+		}
+		if (isConciseModelCode(candidate)) {
+			score += 40;
+		}
+		if (!normalizedPrimary.isBlank() && normalizedCandidate.contains(normalizedPrimary)
+				&& normalizedCandidate.length() > normalizedPrimary.length()) {
+			score += 25;
+		}
+		if (looksLikeStorageVariant(candidate)) {
+			score -= 35;
+		}
+		if (looksLikeMerchantTitle(candidate)) {
+			score -= 60;
+		}
+		score -= Math.max(0, candidate.length() - 32);
+		return score;
+	}
+
+	private boolean isConciseModelCode(String value) {
+		if (value == null) {
+			return false;
+		}
+		String trimmed = value.trim();
+		return trimmed.length() >= 4 && trimmed.length() <= 24 && trimmed.matches("(?=.*[A-Za-z])(?=.*\\d)[A-Za-z0-9/_\\-.]+");
+	}
+
+	private boolean looksLikeStorageVariant(String value) {
+		if (value == null) {
+			return false;
+		}
+		return value.toUpperCase(Locale.ROOT).matches(".*\\b\\d+\\s*(GO|GB|TO|TB)(/\\d+\\s*(GO|GB|TO|TB))?\\b.*");
+	}
+
+	private boolean looksLikeMerchantTitle(String value) {
+		if (value == null) {
+			return false;
+		}
+		String lower = value.toLowerCase(Locale.ROOT);
+		return value.length() > 48 || lower.contains("smartphone ") || lower.contains("refrigerateur ")
+				|| lower.contains("réfrigérateur ") || lower.contains("lave-linge ") || lower.contains("congelateur ")
+				|| lower.contains("congélateur ") || lower.contains(" reconditionne")
+				|| lower.contains(" reconditionné");
 	}
 
 	private String modelExpression(String brand, List<String> orderedModels) {
@@ -492,75 +638,8 @@ public class ReviewGenerationPreprocessingService {
 		return "(" + String.join(" OR ", modelQueries) + ")";
 	}
 
-	private List<String> officialDomainsForBrand(String brand) {
-		if (brand == null || brand.isBlank() || properties.getOfficialDomainsByBrand() == null) {
-			return List.of();
-		}
-		String normalizedBrand = normalizeForUrlMatching(brand);
-		return properties.getOfficialDomainsByBrand().entrySet().stream()
-				.filter(entry -> normalizeForUrlMatching(entry.getKey()).equals(normalizedBrand))
-				.findFirst().map(Map.Entry::getValue).orElse(List.of());
-	}
-
 	private String officialDiscoveryQuery(String brand, String model) {
 		return brand + " " + quoted(model) + " (official OR officiel OR product OR produit)";
-	}
-
-	private List<GoogleSearchResult> sourceUrlTemplateResults(Product product, String brand, String primaryModel,
-			Set<String> alternateModels) {
-		if (brand == null || brand.isBlank() || properties.getSourceUrlTemplatesByBrand() == null) {
-			return List.of();
-		}
-		String normalizedBrand = normalizeForUrlMatching(brand);
-		List<String> templates = properties.getSourceUrlTemplatesByBrand().entrySet().stream()
-				.filter(entry -> normalizeForUrlMatching(entry.getKey()).equals(normalizedBrand))
-				.findFirst().map(Map.Entry::getValue).orElse(List.of());
-		if (templates.isEmpty()) {
-			return List.of();
-		}
-		String model = orderedModels(primaryModel, alternateModels).getFirst();
-		String productCode = productCode(product, alternateModels);
-		return templates.stream().filter(template -> template != null && !template.isBlank())
-				.map(template -> applyUrlTemplate(template, brand, model, productCode, product.gtin()))
-				.filter(url -> url != null && !url.isBlank())
-				.map(url -> new GoogleSearchResult("Templated product source " + brand + " " + model, url))
-				.toList();
-	}
-
-	private String applyUrlTemplate(String template, String brand, String model, String productCode, String gtin) {
-		if (template.contains("{PRODUCT_CODE}") && productCode.isBlank()) {
-			return null;
-		}
-		return template.replace("{BRAND}", slug(brand))
-				.replace("{BRAND_SLUG}", slug(brand))
-				.replace("{MODEL}", model)
-				.replace("{MODEL_SLUG}", slug(model))
-				.replace("{MODEL_SLUG_UNDERSCORE}", slug(model).replace("-", "_"))
-				.replace("{PRODUCT_CODE}", productCode)
-				.replace("{GTIN}", gtin == null ? "" : gtin);
-	}
-
-	private String productCode(Product product, Set<String> alternateModels) {
-		List<String> candidates = new ArrayList<>();
-		if (alternateModels != null) {
-			candidates.addAll(alternateModels);
-		}
-		if (product.gtin() != null) {
-			candidates.add(product.gtin());
-		}
-		return candidates.stream().filter(candidate -> candidate != null && candidate.matches("\\d{6,12}"))
-				.findFirst().orElse("");
-	}
-
-	private String slug(String value) {
-		if (value == null) {
-			return "";
-		}
-		return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
-				.replaceAll("\\p{M}", "")
-				.toLowerCase(Locale.ROOT)
-				.replaceAll("[^a-z0-9]+", "-")
-				.replaceAll("(^-+|-+$)", "");
 	}
 
 	private String domainExpression(List<String> domains) {
@@ -583,7 +662,7 @@ public class ReviewGenerationPreprocessingService {
 		return "\"" + value.replace("\"", "") + "\"";
 	}
 
-	private FetchResponse fetchWithFallbacks(String url, Map<String, String> customHeaders) {
+	private FetchOutcome fetchWithFallbacks(String url, Map<String, String> customHeaders) {
 		Map<String, String> httpHeaders = new HashMap<>();
 		if (customHeaders != null) {
 			httpHeaders.putAll(customHeaders);
@@ -591,8 +670,9 @@ public class ReviewGenerationPreprocessingService {
 		httpHeaders.put("X-Open4goods-Fetch-Mode", "http");
 		FetchResponse response = fetchWithHeaders(url, httpHeaders, "HTTP_SIMPLE");
 		if (isValidFetch(response)) {
-			return response;
+			return new FetchOutcome(response, null);
 		}
+		String rejectionReason = invalidFetchReason(response);
 		logger.info("HTTP_SIMPLE produced no usable content for {}; falling back to PLAYWRIGHT_HEADLESS.", url);
 
 		Map<String, String> playwrightHeaders = new HashMap<>();
@@ -602,17 +682,20 @@ public class ReviewGenerationPreprocessingService {
 		playwrightHeaders.put("X-Open4goods-Fetch-Mode", "playwright");
 		response = fetchWithHeaders(url, playwrightHeaders, "PLAYWRIGHT_HEADLESS");
 		if (isValidFetch(response)) {
-			return response;
+			return new FetchOutcome(response, null);
 		}
+		rejectionReason = invalidFetchReason(response);
 		logger.info("PLAYWRIGHT_HEADLESS produced no usable content for {}; replaying PLAYWRIGHT_HEADLESS with proxy.", url);
 
 		Map<String, String> antiBotHeaders = new HashMap<>(playwrightHeaders);
 		antiBotHeaders.put("X-Open4goods-Playwright-Proxy", "true");
 		response = fetchWithHeaders(url, antiBotHeaders, "PLAYWRIGHT_PROXY");
 		if (!isValidFetch(response)) {
+			rejectionReason = invalidFetchReason(response);
 			logger.warn("All fetch strategies failed for URL {}. Giving up on this source.", url);
+			return new FetchOutcome(null, rejectionReason);
 		}
-		return response;
+		return new FetchOutcome(response, null);
 	}
 
 	private FetchResponse fetchWithHeaders(String url, Map<String, String> headers, String strategy) {
@@ -682,6 +765,25 @@ public class ReviewGenerationPreprocessingService {
 				&& !containsBlockedFetchContent(response.htmlContent());
 	}
 
+	private String invalidFetchReason(FetchResponse response) {
+		if (response == null) {
+			return "fetch returned no response";
+		}
+		if (response.statusCode() < 200 || response.statusCode() >= 300) {
+			return "fetch returned HTTP " + response.statusCode();
+		}
+		if (response.markdownContent() == null || response.markdownContent().isBlank()) {
+			return "fetch returned empty markdown";
+		}
+		if (response.markdownContent().strip().length() < Math.max(0, properties.getMinMarkdownChars())) {
+			return "fetch returned short markdown: " + response.markdownContent().strip().length() + " chars";
+		}
+		if (containsBlockedFetchContent(response.markdownContent()) || containsBlockedFetchContent(response.htmlContent())) {
+			return "fetch returned anti-bot challenge content";
+		}
+		return "fetch rejected";
+	}
+
 	/**
 	 * Detects anti-bot challenge pages that contain text but no usable product
 	 * review content.
@@ -713,12 +815,13 @@ public class ReviewGenerationPreprocessingService {
 	 * {@code getNow(null)} is safe here because this method is only called after
 	 * {@code future.get()} has already been awaited in the aggregation loop.
 	 */
-	private String resolveFetchStrategy(CompletableFuture<FetchResponse> future) {
+	private String resolveFetchStrategy(CompletableFuture<FetchOutcome> future) {
 		if (future == null) {
 			return "UNKNOWN";
 		}
 		try {
-			FetchResponse response = future.getNow(null);
+			FetchOutcome outcome = future.getNow(null);
+			FetchResponse response = outcome == null ? null : outcome.response();
 			if (response == null || response.fetchStrategy() == null) {
 				return "UNKNOWN";
 			}
@@ -728,16 +831,129 @@ public class ReviewGenerationPreprocessingService {
 		}
 	}
 
-	private Optional<String> identifyOfficialUrl(Product product, List<GoogleSearchResult> results) {
+	private Optional<String> identifyOfficialProductUrl(Product product, List<GoogleSearchResult> results) {
 		if (results == null || results.isEmpty()) {
 			return Optional.empty();
 		}
-		return results.stream().filter(result -> isOfficialUrl(product, result))
+		return results.stream()
+				.filter(result -> isOfficialUrl(product, result))
+				.filter(result -> !isOfficialSupportUrl(result))
+				.filter(result -> !isPdfUrl(result.link()))
 				.max(Comparator.comparingInt(result -> officialUrlScore(product, result))).map(GoogleSearchResult::link);
+	}
+
+	private List<String> identifyOfficialSupportUrls(Product product, List<GoogleSearchResult> results) {
+		if (results == null || results.isEmpty()) {
+			return List.of();
+		}
+		return results.stream()
+				.filter(result -> isOfficialUrl(product, result))
+				.filter(this::isOfficialSupportUrl)
+				.sorted(Comparator.comparingInt((GoogleSearchResult result) -> officialUrlScore(product, result)).reversed())
+				.map(GoogleSearchResult::link)
+				.filter(link -> link != null && !link.isBlank())
+				.distinct()
+				.toList();
 	}
 
 	private boolean isOfficialUrl(Product product, GoogleSearchResult result) {
 		return officialUrlScore(product, result) >= 10;
+	}
+
+	private boolean isOfficialSupportUrl(GoogleSearchResult result) {
+		if (result == null || result.link() == null || result.link().isBlank()) {
+			return false;
+		}
+		String link = result.link().toLowerCase(Locale.ROOT);
+		String title = result.title() == null ? "" : result.title().toLowerCase(Locale.ROOT);
+		return link.contains("/support/") || link.contains("/assistance/") || link.contains("/help/")
+				|| link.contains("/manual/") || link.contains("/manuals/") || title.contains("support")
+				|| title.contains("assistance") || title.contains("mode d'emploi") || title.contains("manuel")
+				|| title.contains("manual");
+	}
+
+	private boolean isPdfUrl(String url) {
+		if (url == null || url.isBlank()) {
+			return false;
+		}
+		try {
+			String path = URI.create(url).getPath();
+			return path != null && path.toLowerCase(Locale.ROOT).endsWith(".pdf");
+		} catch (Exception e) {
+			return url.toLowerCase(Locale.ROOT).contains(".pdf");
+		}
+	}
+
+	private String resolveOfficialUrlLanguage(String url) {
+		try {
+			String path = URI.create(url).getPath();
+			if (path != null) {
+				for (String segment : path.split("/")) {
+					if (segment.matches("[a-zA-Z]{2}([_-][a-zA-Z]{2})?")) {
+						return segment.substring(0, 2).toLowerCase(Locale.ROOT);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.debug("Cannot resolve official URL language from {}: {}", url, e.getMessage());
+		}
+		String configuredLanguage = properties.getSearchHostLanguage();
+		if (configuredLanguage != null && configuredLanguage.matches("[a-zA-Z]{2}([_-][a-zA-Z]{2})?")) {
+			return configuredLanguage.substring(0, 2).toLowerCase(Locale.ROOT);
+		}
+		return "default";
+	}
+
+	private void persistOfficialResources(Product product, GoogleSearchResult result, FetchResponse fetchResponse) {
+		if (!isOfficialUrl(product, result)) {
+			return;
+		}
+		String language = resolveOfficialUrlLanguage(result.link());
+		if (isPdfUrl(result.link())) {
+			addOfficialResource(product, result.link(), ResourceType.PDF, language, "serp", result.title());
+		}
+		if (fetchResponse.resources() == null || fetchResponse.resources().isEmpty()) {
+			return;
+		}
+		for (ExtractedResource extractedResource : fetchResponse.resources()) {
+			if (extractedResource == null || extractedResource.url() == null || extractedResource.url().isBlank()) {
+				continue;
+			}
+			addOfficialResource(product, extractedResource.url(), toProductResourceType(extractedResource.type()), language,
+					extractedResource.source(), extractedResource.label());
+		}
+	}
+
+	private ResourceType toProductResourceType(org.open4goods.services.urlfetching.dto.ResourceType resourceType) {
+		if (resourceType == null) {
+			return ResourceType.UNKNOWN;
+		}
+		return switch (resourceType) {
+		case PDF -> ResourceType.PDF;
+		case VIDEO -> ResourceType.VIDEO;
+		case IMAGE -> ResourceType.IMAGE;
+		};
+	}
+
+	private void addOfficialResource(Product product, String url, ResourceType resourceType, String language, String source,
+			String label) {
+		try {
+			Resource resource = new Resource(url);
+			resource.setResourceType(resourceType == null ? ResourceType.UNKNOWN : resourceType);
+			resource.setDatasourceName("manufacturer");
+			resource.getTags().add("official");
+			resource.getTags().add("official:" + language);
+			if (source != null && !source.isBlank()) {
+				resource.getTags().add("source:" + source);
+			}
+			if (label != null && !label.isBlank()) {
+				resource.getTags().add("label:" + label);
+			}
+			product.addResource(resource);
+		} catch (Exception e) {
+			logger.warn("Cannot persist official resource for UPC {}: url={}, reason={}", product.getId(), url,
+					e.getMessage());
+		}
 	}
 
 	private int officialUrlScore(Product product, GoogleSearchResult result) {
@@ -793,6 +1009,35 @@ public class ReviewGenerationPreprocessingService {
 				.replaceAll("\\p{M}", "")
 				.toLowerCase(Locale.ROOT)
 				.replaceAll("[^a-z0-9]", "");
+	}
+
+	private String normalizeForTextMatching(String value) {
+		if (value == null) {
+			return "";
+		}
+		return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
+				.replaceAll("\\p{M}", "")
+				.toLowerCase(Locale.ROOT)
+				.replaceAll("[^a-z0-9]+", " ")
+				.trim();
+	}
+
+	private boolean isStrongModelToken(String token) {
+		if (token == null || token.isBlank() || token.length() < 4) {
+			return false;
+		}
+		boolean hasLetter = false;
+		boolean hasDigit = false;
+		for (int i = 0; i < token.length(); i++) {
+			char c = token.charAt(i);
+			if (Character.isLetter(c)) {
+				hasLetter = true;
+			}
+			if (Character.isDigit(c)) {
+				hasDigit = true;
+			}
+		}
+		return (hasLetter && hasDigit) || (hasDigit && token.length() >= 5);
 	}
 
 	private String sha256(String content) {

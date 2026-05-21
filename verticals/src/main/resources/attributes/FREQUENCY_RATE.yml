@@ -16,6 +16,10 @@ asScore: false
 synonyms:
   all:
     - "FREQUENCYRATE"
+    - "FREQUENCE"
+    - "FRÉQUENCE"
+    - "TAUX DE RAFRAICHISSEMENT"
+    - "TAUX DE RAFRAÎCHISSEMENT"
 parser:
   normalize: true
   trim: true

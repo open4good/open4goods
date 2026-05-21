@@ -1,0 +1,34 @@
+key: "SIM_SLOTS"
+faIcon: "mdi-sim"
+name:
+  default: "SIM slots"
+  fr: "Nombre de SIM"
+suffix:
+  default: ""
+  fr: ""
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  all:
+    - "SIM_SLOTS"
+    - "QTE DE FENTES DE CARTE SIM"
+    - "QT? DE FENTES DE CARTE SIM"
+    - "QTI¿½ DE FENTES DE CARTE SIM"
+    - "CAPACITE DE LA CARTE SIM"
+    - "CAPACITÉ DE LA CARTE SIM"
+    - "QUANTITE DE SIM"
+    - "QUANTITÉ DE SIM"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: true
+mappings:
+  DOUBLE SIM: "DOUBLE SIM"
+  DOUBLE SIM HYBRIDE: "DOUBLE SIM HYBRIDE"
+  DOUBLE ESIM: "DOUBLE ESIM"
+  SINGLE-SIM: "SIMPLE SIM"
+  SINGLE-SIM (SIM UNIQUE): "SIMPLE SIM"
+  SIMPLE SIM: "SIMPLE SIM"
+

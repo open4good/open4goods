@@ -1,0 +1,35 @@
+key: "STORAGE_CAPACITY"
+faIcon: "mdi-harddisk"
+name:
+  default: "Storage capacity"
+  fr: "Capacité de stockage"
+suffix:
+  default: "GB"
+  fr: "Go"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  all:
+    - "STORAGE_CAPACITY"
+    - "DISQUE DUR / CAPACITE"
+    - "MEMOIRE DE SMARTPHONE"
+    - "MÉMOIRE DE SMARTPHONE"
+    - "M?MOIRE DE SMARTPHONE"
+    - "CAPACITE DE STOCKAGE"
+    - "CAPACITÉ DE STOCKAGE"
+    - "ROM"
+    - "MEMOIRE INTERNE"
+    - "MÉMOIRE INTERNE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: true
+  deleteTokens:
+    - "GO"
+    - "GB"
+    - "G"
+    - "TO"
+    - "TB"
+

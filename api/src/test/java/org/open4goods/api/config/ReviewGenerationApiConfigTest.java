@@ -34,13 +34,15 @@ class ReviewGenerationApiConfigTest {
         assertThat(properties.getProperty("review.generation.preferred-domains[3]"))
                 .isEqualTo("quel-lave-linge.fr");
         assertThat(properties.getProperty("review.generation.preferred-domains[8]"))
-                .isEqualTo("haier-europe.com");
-        assertThat(properties.getProperty("review.generation.official-domains-by-brand.haier[0]"))
-                .isEqualTo("haier-europe.com");
-        assertThat(properties.getProperty("review.generation.source-url-templates-by-brand.haier[0]"))
-                .isEqualTo("https://www.darty.com/nav/achat/gros_electromenager/lavage_sechage/lave-linge_hublot/{BRAND_SLUG}_{MODEL_SLUG}.html");
-        assertThat(properties.getProperty("review.generation.source-url-templates-by-brand.candy[0]"))
-                .isEqualTo("https://www.darty.com/nav/achat/gros_electromenager/lave-linge/lave_linge_hublot/{BRAND_SLUG}_{MODEL_SLUG}.html");
+                .isEqualTo("lcd-compare.com");
+        assertThat(properties.stringPropertyNames())
+                .noneMatch(name -> name.contains("official-domains-by-brand")
+                        || name.contains("source-url-templates-by-brand"));
+        assertThat(properties.stringPropertyNames())
+                .noneMatch(name -> {
+                    String value = properties.getProperty(name);
+                    return value != null && value.toLowerCase().contains("haier");
+                });
         assertThat(properties.getProperty("urlfetcher.domains.lesnumeriques.com.strategy"))
                 .isEqualTo("PLAYWRIGHT");
         assertThat(properties.getProperty("urlfetcher.domains.www.quechoisir.org.timeout"))

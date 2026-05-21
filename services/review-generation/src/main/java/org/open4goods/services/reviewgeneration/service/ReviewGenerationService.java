@@ -299,8 +299,14 @@ public class ReviewGenerationService implements HealthIndicator {
 		status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
 		status.setStartTime(Instant.now().toEpochMilli());
 
-		Map<String, Object> promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig,
-				status, customHeaders == null ? Map.of() : customHeaders);
+		Map<String, Object> promptVariables;
+		try {
+			promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig,
+					status, customHeaders == null ? Map.of() : customHeaders);
+		} catch (NotEnoughDataException e) {
+			productRepository.forceIndex(product);
+			throw e;
+		}
 		productRepository.forceIndex(product);
 		return stepResult(product, verticalConfig, "fetch", true, "Remote sources fetched and persisted.",
 				promptVariables, List.of(), null);

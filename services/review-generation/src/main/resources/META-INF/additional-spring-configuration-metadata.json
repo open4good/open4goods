@@ -32,18 +32,6 @@
       "defaultValue": []
     },
     {
-      "name": "review.generation.official-domains-by-brand",
-      "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
-      "description": "Manufacturer domains keyed by brand name for explicit official product page discovery.",
-      "defaultValue": {}
-    },
-    {
-      "name": "review.generation.source-url-templates-by-brand",
-      "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
-      "description": "Review source URL templates keyed by brand name. Supported placeholders: {BRAND}, {BRAND_SLUG}, {MODEL}, {MODEL_SLUG}, {MODEL_SLUG_UNDERSCORE}, {PRODUCT_CODE}, {GTIN}.",
-      "defaultValue": {}
-    },
-    {
       "name": "review.generation.query-template",
       "type": "java.lang.String",
       "description": "Template for constructing search queries.",

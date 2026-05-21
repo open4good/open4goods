@@ -211,6 +211,10 @@
             "doc_values": false,
             "ignore_above": 1024
         },
+        "officialSupportUrls": {
+            "type": "object",
+            "enabled": false
+        },
         "reviews": {
             "type": "object",
             "enabled": false

@@ -169,6 +169,12 @@ public class Product implements Standardisable {
 	 */
 	private String officialUrl;
 
+	/**
+	 * Manufacturer support pages identified during review-source discovery, grouped by
+	 * language.
+	 */
+	private Localisable<String, Set<String>> officialSupportUrls = new Localisable<String, Set<String>>();
+
 	private Map<String, Score> scores = new HashMap<>();
 
 
@@ -224,6 +230,39 @@ public class Product implements Standardisable {
 	 */
 	public void setOfficialUrl(String officialUrl) {
 		this.officialUrl = officialUrl;
+	}
+
+	/**
+	 * Returns official manufacturer support pages grouped by language.
+	 *
+	 * @return localised manufacturer support page URLs
+	 */
+	public Localisable<String, Set<String>> getOfficialSupportUrls() {
+		return officialSupportUrls;
+	}
+
+	/**
+	 * Sets official manufacturer support pages grouped by language.
+	 *
+	 * @param officialSupportUrls localised manufacturer support page URLs
+	 */
+	public void setOfficialSupportUrls(Localisable<String, Set<String>> officialSupportUrls) {
+		this.officialSupportUrls = officialSupportUrls == null ? new Localisable<String, Set<String>>()
+				: officialSupportUrls;
+	}
+
+	/**
+	 * Adds an official manufacturer support page for a language.
+	 *
+	 * @param language   ISO language code, or {@code default} when unknown
+	 * @param supportUrl official support page URL
+	 */
+	public void addOfficialSupportUrl(String language, String supportUrl) {
+		if (StringUtils.isBlank(supportUrl)) {
+			return;
+		}
+		String key = StringUtils.isBlank(language) ? "default" : language.trim().toLowerCase(Locale.ROOT);
+		officialSupportUrls.computeIfAbsent(key, ignored -> new HashSet<String>()).add(supportUrl);
 	}
 
 	//////////////////// :

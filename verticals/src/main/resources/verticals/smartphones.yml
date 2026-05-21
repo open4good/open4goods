@@ -75,6 +75,12 @@ i18n:
     shortName: "{BRAND} {MODEL}"
     longName: "{BRAND} {MODEL} - {STORAGE_CAPACITY}"
 
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : eco-score, réparabilité et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : comparez l'eco-score, la réparabilité, l'impact environnemental et les meilleurs prix de ce smartphone."
+    productMetaOpenGraphTitle: "[(${p.brand()})] [(${p.model()})] : eco-score [(${p.ecoscore()})]"
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : réparabilité, durée de vie, impact environnemental et meilleurs prix."
+    productMetaOpenGraphType: "product"
+
     verticalHomeUrl: "smartphones"
     verticalHomeTitle: "Smartphones"
     verticalHomeDescription: "Découvrez notre sélection de smartphones. Fabrication, métaux critiques, durée de vie et réparabilité font du smartphone l'un des appareils électroniques au plus fort impact environnemental. Nudger vous aide à choisir le modèle le plus responsable, sans renoncer à vos usages."
@@ -108,6 +114,9 @@ i18n:
       - "of this smartphone"
       - "of the mobile phone"
       - "of this device"
+    cardTitle: "{BRAND} {MODEL}"
+    shortName: "{BRAND} {MODEL}"
+    longName: "{BRAND} {MODEL} - {STORAGE_CAPACITY}"
 
     productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
     productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
@@ -119,24 +128,564 @@ i18n:
     verticalHomeTitle: "Smartphones"
     verticalHomeDescription: "Explore our selection of smartphones. Manufacturing, critical metals, lifespan and repairability make the smartphone one of the most environmentally impactful electronic devices. Nudger helps you pick the most responsible model without giving up the features you need."
 
-# SEED matchingCategories — primary smartphone listings only. Counts come from
-# products-moustik aggregation on datasourceCategories. Phase B will replace
-# this with /update/smartphones/categories/ output once the vertical is live.
+availableImpactScoreCriterias:
+  - REPAIRABILITY_INDEX
+  - WARRANTY
+  - WEIGHT
+  - DIAGONALE_POUCES
+
+nudgeToolConfig:
+  subsetGroups:
+    - id: "price"
+      mdiIcon: "mdi-currency-eur"
+      layout: "grid"
+      title:
+        en: "Budget"
+        fr: "Budget"
+      description:
+        en: "Choose the price range that fits your budget."
+        fr: "Choisissez la tranche de prix adaptée à votre budget."
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+    - id: "storage"
+      mdiIcon: "mdi-harddisk"
+      layout: "grid"
+      title:
+        en: "Storage"
+        fr: "Stockage"
+      description:
+        en: "Pick the internal storage capacity you need."
+        fr: "Choisissez la capacité de stockage dont vous avez besoin."
+      ctaLabel:
+        en: "Continue"
+        fr: "Continuer"
+  scores:
+    - scoreName: ENERGY_CONSUMPTION
+      fromPercent: 50
+      mdiIcon: "mdi-lightning-bolt"
+      title:
+        en: "Energy consumption"
+        fr: "Consommation d'énergie"
+      description:
+        en: "Products with low energy consumption"
+        fr: "Produits avec faible consommation énergétique"
+    - scoreName: DURABILITY
+      fromPercent: 50
+      mdiIcon: "mdi-archive-outline"
+      title:
+        en: "Durability"
+        fr: "Durabilité"
+      description:
+        en: "Products with good durability"
+        fr: "Produits durables"
+    - scoreName: REPARABILITY
+      fromPercent: 50
+      mdiIcon: "mdi-tools"
+      title:
+        en: "Repairability"
+        fr: "Réparabilité"
+      description:
+        en: "Products that are easier to repair"
+        fr: "Produits plus faciles à réparer"
+    - scoreName: ESG
+      fromPercent: 50
+      mdiIcon: "mdi-scale-balance"
+      disabled: true
+      title:
+        en: "ESG criteria"
+        fr: "Critères ESG"
+      description:
+        en: "Models from brands with stronger ESG ratings"
+        fr: "Modèles dont la marque dispose d'un meilleur indice ESG"
+  subsets:
+    - id: "impact_high"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "LOWER_THAN_OR_EQUAL"
+          value: "6.37"
+      image: "example-image.png"
+      url:
+        en: "high-impact"
+        fr: "fort-impact"
+      caption:
+        en: "High"
+        fr: "Élevé"
+      title:
+        en: "High impact"
+        fr: "Impact élevé"
+      description:
+        en: "Smartphones with a high environmental impact."
+        fr: "Smartphones ayant un fort impact environnemental."
+    - id: "impact_medium"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "GREATER_THAN"
+          value: "6.37"
+        - field: "scores.ECOSCORE.value"
+          operator: "LOWER_THAN_OR_EQUAL"
+          value: "10.68"
+      image: "example-image.png"
+      url:
+        en: "medium-impact"
+        fr: "impact-moyen"
+      caption:
+        en: "Medium"
+        fr: "Moyen"
+      title:
+        en: "Medium impact"
+        fr: "Impact moyen"
+      description:
+        en: "Smartphones with a medium environmental impact."
+        fr: "Smartphones ayant un impact environnemental moyen."
+    - id: "impact_low"
+      group: "impactscore"
+      criterias:
+        - field: "scores.ECOSCORE.value"
+          operator: "GREATER_THAN"
+          value: "10.68"
+      image: "example-image.png"
+      url:
+        en: "low-impact"
+        fr: "faible-impact"
+      caption:
+        en: "Low"
+        fr: "Faible"
+      title:
+        en: "Low impact"
+        fr: "Impact faible"
+      description:
+        en: "Smartphones with a lower environmental impact."
+        fr: "Smartphones ayant un impact environnemental plus faible."
+    - id: "price_entry"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN_OR_EQUAL"
+          value: "150"
+      image: "example-image.png"
+      url:
+        en: "smartphones-under-150-euros"
+        fr: "smartphones-moins-150-euros"
+      caption:
+        en: "<= 150 EUR"
+        fr: "<= 150 EUR"
+      title:
+        en: "Entry smartphones"
+        fr: "Smartphones accessibles"
+      description:
+        en: "Smartphones priced at 150 EUR or less."
+        fr: "Smartphones dont le prix est inférieur ou égal à 150 EUR."
+    - id: "price_mid"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "150"
+        - field: "price.minPrice.price"
+          operator: "LOWER_THAN_OR_EQUAL"
+          value: "300"
+      image: "example-image.png"
+      url:
+        en: "smartphones-150-300-euros"
+        fr: "smartphones-150-300-euros"
+      caption:
+        en: "150 - 300 EUR"
+        fr: "150 - 300 EUR"
+      title:
+        en: "Mid-range smartphones"
+        fr: "Smartphones milieu de gamme"
+      description:
+        en: "Smartphones priced between 150 EUR and 300 EUR."
+        fr: "Smartphones dont le prix est compris entre 150 EUR et 300 EUR."
+    - id: "price_premium"
+      group: "price"
+      criterias:
+        - field: "price.minPrice.price"
+          operator: "GREATER_THAN"
+          value: "300"
+      image: "example-image.png"
+      url:
+        en: "premium-smartphones"
+        fr: "smartphones-premium"
+      caption:
+        en: "> 300 EUR"
+        fr: "> 300 EUR"
+      title:
+        en: "Premium smartphones"
+        fr: "Smartphones premium"
+      description:
+        en: "Smartphones priced above 300 EUR."
+        fr: "Smartphones dont le prix est supérieur à 300 EUR."
+    - id: "storage_basic"
+      group: "storage"
+      criterias:
+        - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+          operator: "LOWER_THAN_OR_EQUAL"
+          value: "128"
+      image: "example-image.png"
+      url:
+        en: "smartphones-up-to-128gb"
+        fr: "smartphones-jusqu-a-128go"
+      caption:
+        en: "<= 128 GB"
+        fr: "<= 128 Go"
+      title:
+        en: "Essential storage"
+        fr: "Stockage essentiel"
+      description:
+        en: "Smartphones with up to 128 GB of internal storage."
+        fr: "Smartphones avec une capacité de stockage jusqu'à 128 Go."
+    - id: "storage_large"
+      group: "storage"
+      criterias:
+        - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+          operator: "GREATER_THAN"
+          value: "128"
+        - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+          operator: "LOWER_THAN_OR_EQUAL"
+          value: "256"
+      image: "example-image.png"
+      url:
+        en: "smartphones-128-256gb"
+        fr: "smartphones-128-256go"
+      caption:
+        en: "128 - 256 GB"
+        fr: "128 - 256 Go"
+      title:
+        en: "Large storage"
+        fr: "Stockage confortable"
+      description:
+        en: "Smartphones with more than 128 GB and up to 256 GB of internal storage."
+        fr: "Smartphones avec plus de 128 Go et jusqu'à 256 Go de stockage."
+    - id: "storage_xl"
+      group: "storage"
+      criterias:
+        - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+          operator: "GREATER_THAN"
+          value: "256"
+      image: "example-image.png"
+      url:
+        en: "smartphones-over-256gb"
+        fr: "smartphones-plus-256go"
+      caption:
+        en: "> 256 GB"
+        fr: "> 256 Go"
+      title:
+        en: "Very large storage"
+        fr: "Très grand stockage"
+      description:
+        en: "Smartphones with more than 256 GB of internal storage."
+        fr: "Smartphones avec plus de 256 Go de stockage."
+
+subsets:
+  - id: "impact_high"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.value"
+        operator: "LOWER_THAN_OR_EQUAL"
+        value: "6.37"
+    image: "example-image.png"
+    url:
+      en: "high-impact"
+      fr: "fort-impact"
+    caption:
+      en: "High"
+      fr: "Élevé"
+    title:
+      en: "High impact"
+      fr: "Impact élevé"
+    description:
+      en: "Smartphones with a high environmental impact."
+      fr: "Smartphones ayant un fort impact environnemental."
+  - id: "impact_medium"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.value"
+        operator: "GREATER_THAN"
+        value: "6.37"
+      - field: "scores.ECOSCORE.value"
+        operator: "LOWER_THAN_OR_EQUAL"
+        value: "10.68"
+    image: "example-image.png"
+    url:
+      en: "medium-impact"
+      fr: "impact-moyen"
+    caption:
+      en: "Medium"
+      fr: "Moyen"
+    title:
+      en: "Medium impact"
+      fr: "Impact moyen"
+    description:
+      en: "Smartphones with a medium environmental impact."
+      fr: "Smartphones ayant un impact environnemental moyen."
+  - id: "impact_low"
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.value"
+        operator: "GREATER_THAN"
+        value: "10.68"
+    image: "example-image.png"
+    url:
+      en: "low-impact"
+      fr: "faible-impact"
+    caption:
+      en: "Low"
+      fr: "Faible"
+    title:
+      en: "Low impact"
+      fr: "Impact faible"
+    description:
+      en: "Smartphones with a lower environmental impact."
+      fr: "Smartphones ayant un impact environnemental plus faible."
+  - id: "price_entry"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "LOWER_THAN_OR_EQUAL"
+        value: "150"
+    image: "example-image.png"
+    url:
+      en: "smartphones-under-150-euros"
+      fr: "smartphones-moins-150-euros"
+    caption:
+      en: "<= 150 EUR"
+      fr: "<= 150 EUR"
+    title:
+      en: "Entry smartphones"
+      fr: "Smartphones accessibles"
+    description:
+      en: "Smartphones priced at 150 EUR or less."
+      fr: "Smartphones dont le prix est inférieur ou égal à 150 EUR."
+  - id: "price_mid"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "150"
+      - field: "price.minPrice.price"
+        operator: "LOWER_THAN_OR_EQUAL"
+        value: "300"
+    image: "example-image.png"
+    url:
+      en: "smartphones-150-300-euros"
+      fr: "smartphones-150-300-euros"
+    caption:
+      en: "150 - 300 EUR"
+      fr: "150 - 300 EUR"
+    title:
+      en: "Mid-range smartphones"
+      fr: "Smartphones milieu de gamme"
+    description:
+      en: "Smartphones priced between 150 EUR and 300 EUR."
+      fr: "Smartphones dont le prix est compris entre 150 EUR et 300 EUR."
+  - id: "price_premium"
+    group: "price"
+    criterias:
+      - field: "price.minPrice.price"
+        operator: "GREATER_THAN"
+        value: "300"
+    image: "example-image.png"
+    url:
+      en: "premium-smartphones"
+      fr: "smartphones-premium"
+    caption:
+      en: "> 300 EUR"
+      fr: "> 300 EUR"
+    title:
+      en: "Premium smartphones"
+      fr: "Smartphones premium"
+    description:
+      en: "Smartphones priced above 300 EUR."
+      fr: "Smartphones dont le prix est supérieur à 300 EUR."
+  - id: "storage_basic"
+    group: "storage"
+    criterias:
+      - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+        operator: "LOWER_THAN_OR_EQUAL"
+        value: "128"
+    image: "example-image.png"
+    url:
+      en: "smartphones-up-to-128gb"
+      fr: "smartphones-jusqu-a-128go"
+    caption:
+      en: "<= 128 GB"
+      fr: "<= 128 Go"
+    title:
+      en: "Essential storage"
+      fr: "Stockage essentiel"
+    description:
+      en: "Smartphones with up to 128 GB of internal storage."
+      fr: "Smartphones avec une capacité de stockage jusqu'à 128 Go."
+  - id: "storage_large"
+    group: "storage"
+    criterias:
+      - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+        operator: "GREATER_THAN"
+        value: "128"
+      - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+        operator: "LOWER_THAN_OR_EQUAL"
+        value: "256"
+    image: "example-image.png"
+    url:
+      en: "smartphones-128-256gb"
+      fr: "smartphones-128-256go"
+    caption:
+      en: "128 - 256 GB"
+      fr: "128 - 256 Go"
+    title:
+      en: "Large storage"
+      fr: "Stockage confortable"
+    description:
+      en: "Smartphones with more than 128 GB and up to 256 GB of internal storage."
+      fr: "Smartphones avec plus de 128 Go et jusqu'à 256 Go de stockage."
+  - id: "storage_xl"
+    group: "storage"
+    criterias:
+      - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+        operator: "GREATER_THAN"
+        value: "256"
+    image: "example-image.png"
+    url:
+      en: "smartphones-over-256gb"
+      fr: "smartphones-plus-256go"
+    caption:
+      en: "> 256 GB"
+      fr: "> 256 Go"
+    title:
+      en: "Very large storage"
+      fr: "Très grand stockage"
+    description:
+      en: "Smartphones with more than 256 GB of internal storage."
+      fr: "Smartphones avec plus de 256 Go de stockage."
+
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 1
+    buckets: 12
+  "scores.REPAIRABILITY_INDEX.value":
+    interval: 1
+    buckets: 10
+  "attributes.indexed.STORAGE_CAPACITY":
+    interval: 128
+    buckets: 8
+  "attributes.indexed.RAM_CAPACITY":
+    interval: 4
+    buckets: 8
+  "attributes.indexed.DIAGONALE_POUCES":
+    interval: 0.5
+    buckets: 8
+  "price.minPrice.price":
+    interval: 50
+    buckets: 20
+
+ecoFilters:
+  - REPAIRABILITY_INDEX
+  - WARRANTY
+
+technicalFilters:
+  - STORAGE_CAPACITY
+  - RAM_CAPACITY
+  - MOBILE_NETWORK_GENERATION
+  - DIAGONALE_POUCES
+
+dataviz:
+  chartOverrides:
+    storage-capacity-distribution:
+      title: "Répartition des capacités de stockage"
+      description: "Comparez les capacités internes les plus courantes"
+    repairability-distribution:
+      title: "Répartition des indices de réparabilité"
+      description: "Visualisez les niveaux de réparabilité disponibles"
+  heroKpis:
+    - field: "attributes.indexed.STORAGE_CAPACITY"
+      label: "Stockage moyen"
+      unit: "Go"
+      aggregation: "avg"
+    - field: "scores.ECOSCORE.value"
+      label: "Eco-score moyen"
+      aggregation: "avg"
+    - field: "price.minPrice.price"
+      label: "Prix moyen"
+      unit: "EUR"
+      aggregation: "avg"
+
+popularAttributes:
+  - STORAGE_CAPACITY
+  - RAM_CAPACITY
+  - MOBILE_NETWORK_GENERATION
+  - REPAIRABILITY_INDEX
+
+commonAttributes:
+  - COLOR
+  - TYPE_DE_PRODUIT
+  - STORAGE_CAPACITY
+  - SIM_SLOTS
+  - OPERATING_SYSTEM
+  - MOBILE_NETWORK_GENERATION
+  - WARRANTY
+  - RAM_CAPACITY
+  - DIAGONALE_POUCES
+  - FREQUENCY_RATE
+  - REPAIRABILITY_INDEX
+  - WEIGHT
+  - WIDTH
+  - HEIGHT
+  - DEPTH
+
+attributesConfig:
+  configs:
+    - key: COLOR
+    - key: TYPE_DE_PRODUIT
+    - key: STORAGE_CAPACITY
+    - key: SIM_SLOTS
+    - key: OPERATING_SYSTEM
+    - key: MOBILE_NETWORK_GENERATION
+    - key: WARRANTY
+    - key: RAM_CAPACITY
+    - key: DIAGONALE_POUCES
+    - key: FREQUENCY_RATE
+    - key: REPAIRABILITY_INDEX
+    - key: WEIGHT
+    - key: WIDTH
+    - key: HEIGHT
+    - key: DEPTH
+    - key: BRAND_SUSTAINALYTICS_SCORING
+    - key: DATA_QUALITY
+
 matchingCategories:
   all:
     - "TELEPHONIE - GPS | TELEPHONIE - GPS > SMARTPHONE - MOBILE > SMARTPHONE | SMARTPHONE - MOBILE | SMARTPHONE"
     - "GPS & EBOOK & TELEPHONES TELEPHONE MOBILE | APPAREILS ELECTRONIQUES > COMMUNICATIONS > TELEPHONIE > TELEPHONES MOBILES > SMARTPHONES"
     - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / SMARTPHONE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>SMARTPHONE | TELEPHONE MOBILE | SMARTPHONE"
     - "SMARTPHONE ANDROID"
+    - "TEL-PDA | TELEPHONES-MOBILES"
     - "TELEPHONIE - GPS | TELEPHONIE - GPS > SMARTPHONE - MOBILE > TELEPHONE PORTABLE | SMARTPHONE - MOBILE | TELEPHONE PORTABLE"
     - "ELECTRONICS > PHONES, SMARTPHONES & COMMUNICATION > SMARTPHONES"
-    - "TELEPHONIE ET MOBILITE | TELEPHONE MOBILE"
     - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / IPHONE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>IPHONE | TELEPHONE MOBILE | IPHONE"
-    - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / TELEPHONE PORTABLE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>TELEPHONE PORTABLE | TELEPHONE MOBILE | TELEPHONE PORTABLE"
-    - "ELECTRO DEPOT | SMARTPHONE RECONDITIONNE | IPHONE RECONDITIONNE"
-    - "ELECTRO DEPOT | SMARTPHONE, TELEPHONE | SMARTPHONE"
-    - "HIGH-TECH | HIGH-TECH>SMARTPHONE - TELEPHONIE>SMARTPHONE>SMARTPHONE ANDROID | SMARTPHONE - TELEPHONIE | SMARTPHONE"
-    - "SMARTPHONE - TELEPHONIE | SMARTPHONE"
-    - "TELEPHONIE ET MOBILITE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>SMARTPHONE | TELEPHONE MOBILE | TELEPHONIE ET MOBILITE"
+    - "TELEPHONIE ET MOBILITE | TELEPHONE MOBILE"
     - "ELECTRONICS > REFURBISHED DEVICES > REFURBISHED SMARTPHONES > OTHER REFURBISHED SMARTPHONES"
+    - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / TELEPHONE PORTABLE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>TELEPHONE PORTABLE | TELEPHONE MOBILE | TELEPHONE PORTABLE"
+    - "TELEPHONE PORTABLE"
+    - "ELECTRO DEPOT | SMARTPHONE RECONDITIONNE | IPHONE RECONDITIONNE"
+    - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / TELEPHONE PORTABLE BASIQUE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>TELEPHONE PORTABLE BASIQUE | TELEPHONE MOBILE | TELEPHONE PORTABLE BASIQUE"
+    - "SMARTPHONE - TELEPHONIE | SMARTPHONE"
+    - "IPHONE"
+    - "348 | MOBILE PHONES | SYSTEME PC & APPAREIL PORTABLE > APPAREIL MOBILE > TELEPHONE MOBILE"
+    - "HIGH-TECH | HIGH-TECH>SMARTPHONE - TELEPHONIE>SMARTPHONE>SMARTPHONE ANDROID | SMARTPHONE - TELEPHONIE | SMARTPHONE"
+    - "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / SMARTPHONE | TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / SMARTPHONE"
     - "ELECTRONICS > PHONES, SMARTPHONES & COMMUNICATION > BUTTON PHONES"
+    - "ELECTRO DEPOT | SMARTPHONE, TELEPHONE | SMARTPHONE"
+    - "ELECTRONICS > COMMUNICATIONS > TELEPHONY > MOBILE PHONES"
+    - "TELEPHONIE - GPS | TELEPHONIE - GPS > SMARTPHONE - MOBILE > SMARTPHONE SENIOR - TELEPHONE PORTABLE SENIOR | SMARTPHONE - MOBILE | SMARTPHONE SENIOR - TELEPHONE PORTABLE SENIOR"
+    - "HIGH TECH | HIGH-TECH > SMARTPHONE - TELEPHONIE > SMARTPHONE > SMARTPHONE ANDROID | SMARTPHONE - TELEPHONIE | SMARTPHONE"
+    - "TELEPHONIE ET MOBILITE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>SMARTPHONE | TELEPHONE MOBILE | TELEPHONIE ET MOBILITE"
+    - "RESEAUX | TELEPHONIE | SMARTPHONE"
+    - "SMARTPHONE & OBJETS CONNECTES > TELEPHONIE MOBILE > SMARTPHONE ANDROID"
+    - "HIGH-TECH | SECONDE VIE>TELEPHONIE ET OBJETS CONNECTES RECONDITIONNES>SMARTPHONES RECONDITIONNES>AUTRES SMARTPHONES RECONDITIONNES | TELEPHONIE ET OBJETS CONNECTES RECONDITIONNES | SMARTPHONES RECONDITIONNES"
+    - "ELECTRONICS > REFURBISHED DEVICES > REFURBISHED SMARTPHONES > REFURBISHED SAMSUNG PHONES"
+    - "ELECTRONICS > PHONES, SMARTPHONES & COMMUNICATION > IPHONES"
+    - "ELECTRO DEPOT | SMARTPHONE, TELEPHONE | TELEPHONE MOBILE"
