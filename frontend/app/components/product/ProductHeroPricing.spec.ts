@@ -92,11 +92,53 @@ describe('ProductHeroPricing', () => {
           },
         },
       },
+      'fr-FR': {
+        product: {
+          hero: {
+            bestPriceTitle: 'Meilleur prix',
+            viewSingleOffer: "Voir l'offre",
+            viewOffersCount: 'Voir les {count} offres',
+            offersCountLabel: '{count} offres',
+            offerConditions: {
+              occasion: 'Occasion',
+              new: 'Neuf',
+            },
+            noOffers: {
+              new: 'Aucune offre neuve',
+              occasion: 'Aucune offre occasion',
+            },
+            noOffersUnified: 'Aucune offre disponible',
+            moreOffersBadge:
+              '+{count} autre offre ci-dessous | +{count} autres offres ci-dessous',
+            alternativeOffers: {
+              label: 'Toutes les offres',
+              placeholder: 'Choisir une autre offre',
+              unknownMerchant: 'Marchand inconnu',
+            },
+            trendTooltip: 'Ecart de {deviation} sur {period}',
+            trendPeriodDays: '{count} jour | {count} jours',
+            trendPeriodHours: '{count} heure | {count} heures',
+            trendPeriodMinutes: '{count} minute | {count} minutes',
+          },
+          price: {
+            trend: {
+              decrease: 'Baisse de prix de {amount}',
+              increase: 'Hausse de prix de {amount}',
+              stable: 'Prix stable',
+            },
+          },
+        },
+      },
     },
   })
 
-  const createWrapper = async (offers: NonNullable<ProductDto['offers']>) =>
-    mountSuspended(ProductHeroPricing, {
+  const createWrapper = async (
+    offers: NonNullable<ProductDto['offers']>,
+    locale: 'en-US' | 'fr-FR' = 'en-US'
+  ) => {
+    i18n.global.locale.value = locale
+
+    return mountSuspended(ProductHeroPricing, {
       props: {
         product: {
           offers,
@@ -168,6 +210,7 @@ describe('ProductHeroPricing', () => {
         },
       },
     })
+  }
 
   it('renders both condition panels with price and merchant', async () => {
     const wrapper = await createWrapper({
@@ -363,6 +406,37 @@ describe('ProductHeroPricing', () => {
 
     expect(wrapper.find('.product-hero__pricing-empty').exists()).toBe(true)
     expect(wrapper.findAll('.product-hero__pricing-panel')).toHaveLength(0)
+
+    await wrapper.unmount()
+  })
+
+  it('formats prices with the active Nuxt locale during hydration', async () => {
+    const wrapper = await createWrapper(
+      {
+        offersCount: 1,
+        bestPrice: {
+          price: 1234.5,
+          currency: 'EUR',
+          datasourceName: 'Shop',
+          url: 'https://shop.example',
+          favicon: 'https://shop.example/favicon.ico',
+          condition: 'NEW',
+          offerName: 'Shop offer',
+        },
+        bestNewOffer: {
+          price: 1234.5,
+          currency: 'EUR',
+          datasourceName: 'Shop',
+          url: 'https://shop.example',
+          favicon: 'https://shop.example/favicon.ico',
+          condition: 'NEW',
+          offerName: 'Shop offer',
+        },
+      },
+      'fr-FR'
+    )
+
+    expect(wrapper.text()).toContain('1\u202f234,5')
 
     await wrapper.unmount()
   })

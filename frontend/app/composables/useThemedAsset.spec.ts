@@ -1,7 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'
-import { resolveThemedAssetUrlFromIndex } from './useThemedAsset'
+import {
+  resolveThemedAssetLoaderFromIndex,
+  resolveThemedAssetUrlFromIndex,
+} from './useThemedAsset'
 
 describe('useThemedAsset utilities', () => {
   const assetIndex = {
@@ -41,5 +44,24 @@ describe('useThemedAsset utilities', () => {
     )
 
     expect(resolved).toBe('/_nuxt/light-logo-new.png')
+  })
+
+  it('resolves a lazy asset loader without loading unrelated candidates', async () => {
+    const commonLoader = vi.fn(async () => '/_nuxt/common-hero.svg')
+    const lightLoader = vi.fn(async () => '/_nuxt/light-hero.svg')
+    const loader = resolveThemedAssetLoaderFromIndex(
+      'hero-background.svg',
+      'dark',
+      {
+        'common/hero-background.svg': commonLoader,
+        'light/hero-background.svg': lightLoader,
+      },
+      THEME_ASSETS_FALLBACK
+    )
+
+    expect(loader).toBe(commonLoader)
+    expect(lightLoader).not.toHaveBeenCalled()
+    expect(await loader?.()).toBe('/_nuxt/common-hero.svg')
+    expect(commonLoader).toHaveBeenCalledTimes(1)
   })
 })

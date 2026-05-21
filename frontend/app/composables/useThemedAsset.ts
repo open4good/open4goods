@@ -1,4 +1,4 @@
-import { computed, toValue, type MaybeRef } from 'vue'
+import { computed, shallowRef, toValue, watchEffect, type MaybeRef } from 'vue'
 import { useTheme } from 'vuetify'
 
 import {
@@ -9,14 +9,14 @@ import {
 import { resolveThemeName, type ThemeName } from '~~/shared/constants/theme'
 
 export type ThemedAssetIndex = Record<string, string>
+export type ThemedAssetLoaderIndex = Record<string, () => Promise<string>>
 
-const rawAssetIndex = import.meta.glob(
+const rawAssetLoaders = import.meta.glob(
   '../assets/themes/**/*.{png,jpg,jpeg,svg,webp,avif,ico}',
   {
-    eager: true,
     import: 'default',
   }
-) as Record<string, string>
+) as Record<string, () => Promise<string>>
 
 const normalizePath = (filePath: string): string =>
   filePath
@@ -24,10 +24,12 @@ const normalizePath = (filePath: string): string =>
     .replace(/^.*assets\/themes\//, '')
     .replace(/^\//, '')
 
-const themedAssetIndex: ThemedAssetIndex = Object.entries(rawAssetIndex).reduce(
-  (acc, [filePath, url]) => ({
+const themedAssetLoaders: ThemedAssetLoaderIndex = Object.entries(
+  rawAssetLoaders
+).reduce(
+  (acc, [filePath, loader]) => ({
     ...acc,
-    [normalizePath(filePath)]: url as string,
+    [normalizePath(filePath)]: loader,
   }),
   {}
 )
@@ -61,6 +63,33 @@ export const resolveThemedAssetUrlFromIndex = (
   return result
 }
 
+export const resolveThemedAssetLoaderFromIndex = (
+  relativePath: string | string[],
+  themeName: ThemeName,
+  index: ThemedAssetLoaderIndex,
+  fallbackTheme: ThemeName = THEME_ASSETS_FALLBACK
+): (() => Promise<string>) | undefined => {
+  const sanitizedPaths = (
+    Array.isArray(relativePath) ? relativePath : [relativePath]
+  ).map(path => path.replace(/^\//, ''))
+
+  const candidates = sanitizedPaths.flatMap(path => [
+    `${themeName}/${path}`,
+    `common/${path}`,
+    `${fallbackTheme}/${path}`,
+  ])
+
+  return candidates.reduce<(() => Promise<string>) | undefined>(
+    (resolved, candidate) => {
+      if (resolved) {
+        return resolved
+      }
+      return index[candidate]
+    },
+    undefined
+  )
+}
+
 const useCurrentThemeName = () => {
   const vuetifyTheme = useTheme()
 
@@ -69,31 +98,62 @@ const useCurrentThemeName = () => {
   )
 }
 
-export const resolveThemedAssetUrl = (
+export const loadThemedAssetUrl = async (
   relativePath: string | string[],
   themeName: ThemeName
-): string | undefined =>
-  resolveThemedAssetUrlFromIndex(
+): Promise<string | undefined> => {
+  const loader = resolveThemedAssetLoaderFromIndex(
     relativePath,
     themeName,
-    themedAssetIndex,
+    themedAssetLoaders,
     THEME_ASSETS_FALLBACK
   )
 
-export const useThemedAsset = (relativePath: string) => {
-  const themeName = useCurrentThemeName()
+  return loader ? await loader() : undefined
+}
 
-  return computed(
-    () => resolveThemedAssetUrl(relativePath, themeName.value) ?? ''
-  )
+export const useThemedAsset = (
+  relativePath: MaybeRef<string | string[] | undefined>
+) => {
+  const themeName = useCurrentThemeName()
+  const assetUrl = shallowRef('')
+  let requestId = 0
+
+  watchEffect(async () => {
+    const currentRequestId = ++requestId
+    const path = toValue(relativePath)
+
+    if (
+      !path ||
+      (Array.isArray(path) && path.every(entry => !entry.trim().length)) ||
+      (typeof path === 'string' && !path.trim().length)
+    ) {
+      assetUrl.value = ''
+      return
+    }
+
+    const resolved = await loadThemedAssetUrl(path, themeName.value)
+
+    if (currentRequestId === requestId) {
+      assetUrl.value = resolved ?? ''
+    }
+  })
+
+  return assetUrl
 }
 
 export const useThemeAsset = (assetKey: MaybeRef<ThemeAssetKey>) => {
   const themeName = useCurrentThemeName()
+  const assetUrl = shallowRef('')
+  let requestId = 0
 
-  return computed(() => {
+  watchEffect(async () => {
+    const currentRequestId = ++requestId
     const key = toValue(assetKey)
-    if (!key) return ''
+    if (!key) {
+      assetUrl.value = ''
+      return
+    }
 
     const candidates: string[] = []
 
@@ -108,11 +168,18 @@ export const useThemeAsset = (assetKey: MaybeRef<ThemeAssetKey>) => {
     const uniqueCandidates = Array.from(new Set(candidates))
 
     if (!uniqueCandidates.length) {
-      return ''
+      assetUrl.value = ''
+      return
     }
 
-    return resolveThemedAssetUrl(uniqueCandidates, themeName.value) ?? ''
+    const resolved = await loadThemedAssetUrl(uniqueCandidates, themeName.value)
+
+    if (currentRequestId === requestId) {
+      assetUrl.value = resolved ?? ''
+    }
   })
+
+  return assetUrl
 }
 
 export const useLogoAsset = () => useThemeAsset('logo')

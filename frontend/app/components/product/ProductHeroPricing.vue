@@ -343,10 +343,9 @@ const formatPriceLabel = (price: number | null, currency: string) => {
     return '—'
   }
 
-  const loc = import.meta.client ? undefined : locale.value
   const isEuro = currency === 'EUR'
 
-  return new Intl.NumberFormat(loc, {
+  return new Intl.NumberFormat(locale.value, {
     style: isEuro ? 'decimal' : 'currency',
     currency: isEuro ? undefined : currency,
     minimumFractionDigits: 0,

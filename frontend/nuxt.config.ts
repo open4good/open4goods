@@ -292,7 +292,7 @@ export default defineNuxtConfig({
   routeRules: {
     '/_nuxt/**': {
       headers: {
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Cache-Control': 'public, max-age=0, must-revalidate',
       },
     },
     '/fonts/**': {

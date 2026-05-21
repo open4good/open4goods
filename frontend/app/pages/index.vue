@@ -2,7 +2,7 @@
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { useDisplay, useTheme } from 'vuetify'
+import { useDisplay } from 'vuetify'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type {
   AffiliationPartnerDto,
@@ -24,19 +24,13 @@ import type {
 import { useCategories } from '~/composables/categories/useCategories'
 import { useBlog } from '~/composables/blog/useBlog'
 import { useParallaxConfig } from '~/composables/useParallaxConfig'
-import {
-  resolveThemedAssetUrl,
-  useThemeAsset,
-} from '~/composables/useThemedAsset'
+import { useThemedAsset } from '~/composables/useThemedAsset'
 import {
   PARALLAX_SECTION_KEYS,
-  THEME_ASSETS_FALLBACK,
   type ParallaxLayerConfig,
   type ParallaxSectionKey,
 } from '~~/config/theme/assets'
 import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
-
-import { resolveThemeName } from '~~/shared/constants/theme'
 
 const HomeHeroSection = defineAsyncComponent(
   () => import('~/components/home/sections/HomeHeroSection.vue')
@@ -255,9 +249,6 @@ const aiSummaryRemainingCredits = computed(() => {
   return remaining
 })
 
-const theme = useTheme()
-const parallaxAplatFallback = useThemeAsset('parallaxAplat')
-
 const parallaxConfig = useParallaxConfig()
 const resolveParallaxAssets = () =>
   PARALLAX_SECTION_KEYS.reduce<
@@ -301,10 +292,6 @@ const parallaxBackgrounds = computed<
   )
 )
 
-const themeName = computed(() =>
-  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
-)
-
 const aplatSuffixes = ['left', 'center', 'right']
 
 const getRandomSuffix = () =>
@@ -313,18 +300,16 @@ const getRandomSuffix = () =>
 const essentialsAplatSuffix = useState('home-aplat-essentials', getRandomSuffix)
 const blogAplatSuffix = useState('home-aplat-blog', getRandomSuffix)
 
-const resolveAplatVariant = (suffix: string) => {
-  const name = `parallax/parallax-aplats-${suffix}.svg`
-  return (
-    resolveThemedAssetUrl(name, themeName.value) ?? parallaxAplatFallback.value
-  )
-}
+const resolveAplatCandidates = (suffix: string) => [
+  `parallax/parallax-aplats-${suffix}.svg`,
+  'parallax/parallax-aplats.svg',
+]
 
-const parallaxAplatEssentials = computed(() =>
-  resolveAplatVariant(essentialsAplatSuffix.value)
+const parallaxAplatEssentials = useThemedAsset(
+  computed(() => resolveAplatCandidates(essentialsAplatSuffix.value))
 )
-const parallaxAplatBlog = computed(() =>
-  resolveAplatVariant(blogAplatSuffix.value)
+const parallaxAplatBlog = useThemedAsset(
+  computed(() => resolveAplatCandidates(blogAplatSuffix.value))
 )
 
 const prefersReducedMotion = usePreferredReducedMotion()

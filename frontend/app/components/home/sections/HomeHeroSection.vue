@@ -11,11 +11,9 @@ import type { VerticalConfigDto } from '~~/shared/api-client'
 import HomeHeroHighlights from '~/components/home/sections/HomeHeroHighlights.vue'
 
 import {
-  resolveThemedAssetUrl,
   useHeroBackgroundAsset,
+  useThemedAsset,
 } from '~~/app/composables/useThemedAsset'
-import { THEME_ASSETS_FALLBACK } from '~~/config/theme/assets'
-import { resolveThemeName } from '~~/shared/constants/theme'
 
 const isHeroImageLoaded = ref(false)
 const hasMounted = ref(false)
@@ -49,9 +47,6 @@ const emit = defineEmits<{
 
 const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
-const themeName = computed(() =>
-  resolveThemeName(theme.global.name.value, THEME_ASSETS_FALLBACK)
-)
 const { te, tm } = useI18n()
 
 const searchQueryValue = computed(() => props.searchQuery)
@@ -92,11 +87,22 @@ const resolveHeroBackgroundSource = (value?: string): string | undefined => {
     return trimmed
   }
 
-  return resolveThemedAssetUrl(trimmed, themeName.value)
+  return undefined
 }
 
+const heroBackgroundOverridePath = computed(() => {
+  const value = heroBackgroundI18nValue.value?.trim()
+
+  if (!value || value.startsWith('/') || value.startsWith('http')) {
+    return undefined
+  }
+
+  return value
+})
+const heroBackgroundOverrideAsset = useThemedAsset(heroBackgroundOverridePath)
 const heroBackgroundOverride = computed(() =>
-  resolveHeroBackgroundSource(heroBackgroundI18nValue.value)
+  resolveHeroBackgroundSource(heroBackgroundI18nValue.value) ??
+  heroBackgroundOverrideAsset.value
 )
 const heroBackgroundSrc = computed(() => {
   const themedAsset = heroBackgroundOverride.value?.trim()
