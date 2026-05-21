@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { flushPromises } from '@vue/test-utils'
 import { describe, expect, it, vi, afterEach } from 'vitest'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import TheMainLogo from './The-main-logo.vue'
 
 // Mock dependencies
@@ -27,6 +28,8 @@ describe('TheMainLogo', () => {
 
   it('renders the logo image with a valid src', async () => {
     const wrapper = await mountSuspended(TheMainLogo)
+    await flushPromises()
+    await new Promise(resolve => setTimeout(resolve, 50))
 
     const img = wrapper.find('img.main-logo')
     expect(img.exists()).toBe(true)

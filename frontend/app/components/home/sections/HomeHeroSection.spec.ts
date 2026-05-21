@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { flushPromises } from '@vue/test-utils'
 import { describe, expect, it, vi, afterEach } from 'vitest'
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent, h, ref, nextTick } from 'vue'
 import { useNuxtApp, useState } from '#app'
 import HomeHeroSection from './HomeHeroSection.vue'
 const messages: Record<string, unknown> = {
@@ -94,6 +95,8 @@ afterEach(() => {
 describe('HomeHeroSection', () => {
   it('renders the title and subtitle from the home hero copy', async () => {
     const wrapper = await mountComponent()
+    await flushPromises()
+    await new Promise(resolve => setTimeout(resolve, 50))
 
     expect(wrapper.find('.home-hero__title').text()).toBe(
       messages['home.hero.title']
@@ -107,6 +110,8 @@ describe('HomeHeroSection', () => {
 
   it('uses the background image from the home hero background', async () => {
     const wrapper = await mountComponent()
+    await flushPromises()
+    await new Promise(resolve => setTimeout(resolve, 50))
     const background = wrapper.find('.home-hero__background-media')
 
     expect(background.attributes('src')).toContain(

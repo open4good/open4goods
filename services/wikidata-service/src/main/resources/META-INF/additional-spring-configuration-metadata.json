@@ -1,0 +1,60 @@
+{
+  "properties": [
+    {
+      "name": "wikidata.user-agent",
+      "type": "java.lang.String",
+      "description": "User-Agent header for Wikidata requests. Must include contact info per Wikidata data-access policy."
+    },
+    {
+      "name": "wikidata.sparql-endpoint",
+      "type": "java.lang.String",
+      "description": "SPARQL endpoint URL for Wikidata queries."
+    },
+    {
+      "name": "wikidata.rest-api-base",
+      "type": "java.lang.String",
+      "description": "Wikidata MediaWiki API base URL used for wbgetentities."
+    },
+    {
+      "name": "wikidata.politeness-delay-ms",
+      "type": "java.lang.Integer",
+      "description": "Minimum delay in milliseconds between consecutive Wikidata API calls.",
+      "defaultValue": 300
+    },
+    {
+      "name": "wikidata.refresh-in-days",
+      "type": "java.lang.Integer",
+      "description": "Number of days before a cached Wikidata entity is re-fetched.",
+      "defaultValue": 30
+    },
+    {
+      "name": "wikidata.brand-model-fallback-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to attempt brand+model SPARQL search when GTIN lookup finds nothing.",
+      "defaultValue": true
+    },
+    {
+      "name": "wikidata.max-model-candidates",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of model candidates tried in the brand+model fallback.",
+      "defaultValue": 5
+    },
+    {
+      "name": "wikidata.languages",
+      "type": "java.util.List<java.lang.String>",
+      "description": "BCP-47 language codes for which labels and descriptions are fetched from Wikidata."
+    },
+    {
+      "name": "wikidata.connect-timeout-ms",
+      "type": "java.lang.Integer",
+      "description": "HTTP connection timeout for Wikidata API calls, in milliseconds.",
+      "defaultValue": 5000
+    },
+    {
+      "name": "wikidata.read-timeout-ms",
+      "type": "java.lang.Integer",
+      "description": "HTTP read timeout for Wikidata API calls, in milliseconds.",
+      "defaultValue": 15000
+    }
+  ]
+}

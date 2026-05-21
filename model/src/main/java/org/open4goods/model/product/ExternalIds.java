@@ -23,6 +23,11 @@ public class ExternalIds {
 
 
 	/**
+	 * The Wikidata Q-identifier (e.g. "Q12345")
+	 */
+	private String wikidata;
+
+	/**
 	 * Known mpn's
 	 */
 	private Set<String> mpn = new HashSet<>();
@@ -77,6 +82,12 @@ public class ExternalIds {
 		this.eprel = eprel;
 	}
 
+	public String getWikidata() {
+		return wikidata;
+	}
 
+	public void setWikidata(String wikidata) {
+		this.wikidata = wikidata;
+	}
 
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
+import org.open4goods.api.services.completion.WikidataCompletionService;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;

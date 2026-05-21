@@ -13,6 +13,7 @@ import org.open4goods.commons.config.yml.DevModeConfiguration;
 import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.icecat.config.yml.IcecatCompletionConfig;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
+import org.open4goods.services.wikidataservice.config.WikidataServiceProperties;
 import org.open4goods.model.vertical.DescriptionsAggregationConfig;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
@@ -172,6 +173,11 @@ public class ApiProperties {
 	 *
 	 */
 	private IcecatConfiguration icecatFeatureConfig = new IcecatConfiguration();
+
+	/**
+	 * Configuration for the Wikidata completion service.
+	 */
+	private WikidataServiceProperties wikidataConfig = new WikidataServiceProperties();
 
 	/**
 	 * The list of hosts allowed for CORS
@@ -455,6 +461,14 @@ public class ApiProperties {
 
 	public void setIcecatFeatureConfig(IcecatConfiguration icecatFeatureConfig) {
 		this.icecatFeatureConfig = icecatFeatureConfig;
+	}
+
+	public WikidataServiceProperties getWikidataConfig() {
+		return wikidataConfig;
+	}
+
+	public void setWikidataConfig(WikidataServiceProperties wikidataConfig) {
+		this.wikidataConfig = wikidataConfig;
 	}
 
 	public String getGeneratedImagesFolder() {

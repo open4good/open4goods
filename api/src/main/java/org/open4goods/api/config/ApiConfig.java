@@ -14,6 +14,7 @@ import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
+import org.open4goods.api.services.completion.WikidataCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.brand.service.BrandScoreService;
@@ -57,6 +58,14 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.model.vertical.LegacyPromptConfig;
 import org.open4goods.services.eprelservice.client.EprelApiClient;
+import org.open4goods.services.wikidataservice.client.RestWikidataApiClient;
+import org.open4goods.services.wikidataservice.client.WikidataApiClient;
+import org.open4goods.services.wikidataservice.config.WikidataServiceProperties;
+import org.open4goods.services.wikidataservice.model.WikidataEntity;
+import org.open4goods.services.wikidataservice.repository.WikidataEntityRepository;
+import org.open4goods.services.wikidataservice.service.WikidataLookupService;
+import org.open4goods.services.wikidataservice.service.WikidataParser;
+import org.open4goods.services.wikidataservice.service.WikidataSearchService;
 import org.open4goods.services.eprelservice.client.RestEprelApiClient;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.open4goods.services.eprelservice.service.EprelCatalogueService;
@@ -211,8 +220,45 @@ public class ApiConfig {
 	}
 
 	@Bean
-	CompletionFacadeService completionFacadeService(ResourceCompletionService resourceCompletionService,  IcecatCompletionService icecatCompletionService, EprelCompletionService eprelCompletionService) {
-		return new CompletionFacadeService(resourceCompletionService, icecatCompletionService, eprelCompletionService);
+	WikidataApiClient wikidataApiClient() {
+		return new RestWikidataApiClient(apiProperties.getWikidataConfig());
+	}
+
+	@Bean
+	WikidataParser wikidataParser() {
+		return new WikidataParser(apiProperties.getWikidataConfig().getLanguages());
+	}
+
+	@Bean
+	WikidataLookupService wikidataLookupService(WikidataApiClient wikidataApiClient,
+			WikidataEntityRepository wikidataEntityRepository, WikidataParser wikidataParser) {
+		return new WikidataLookupService(wikidataApiClient, wikidataEntityRepository, wikidataParser,
+				apiProperties.getWikidataConfig());
+	}
+
+	@Bean
+	WikidataSearchService wikidataSearchService(WikidataApiClient wikidataApiClient,
+			WikidataEntityRepository wikidataEntityRepository, WikidataLookupService wikidataLookupService) {
+		return new WikidataSearchService(wikidataApiClient, wikidataEntityRepository, wikidataLookupService,
+				apiProperties.getWikidataConfig());
+	}
+
+	@Bean
+	WikidataCompletionService wikidataCompletionService(ProductRepository productRepository,
+			VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService,
+			AggregationFacadeService aggregationFacade, WikidataSearchService wikidataSearchService,
+			WikidataLookupService wikidataLookupService) {
+		return new WikidataCompletionService(productRepository, verticalConfigService, apiProperties,
+				dataSourceConfigService, aggregationFacade, wikidataSearchService, wikidataLookupService,
+				apiProperties.getWikidataConfig());
+	}
+
+	@Bean
+	CompletionFacadeService completionFacadeService(ResourceCompletionService resourceCompletionService,
+			IcecatCompletionService icecatCompletionService, EprelCompletionService eprelCompletionService,
+			WikidataCompletionService wikidataCompletionService) {
+		return new CompletionFacadeService(resourceCompletionService, icecatCompletionService, eprelCompletionService,
+				wikidataCompletionService);
 	}
 
 	@Bean

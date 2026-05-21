@@ -49,6 +49,55 @@ const theme = useTheme()
 const heroBackgroundAsset = useHeroBackgroundAsset()
 const { te, tm } = useI18n()
 
+const resolveString = (key: string): string => {
+  if (!key) {
+    return ''
+  }
+
+  if (!te(key)) {
+    return ''
+  }
+
+  const raw = tm(key)
+
+  if (typeof raw === 'string') {
+    return raw
+  }
+
+  if (typeof raw === 'number') {
+    return String(raw)
+  }
+
+  return ''
+}
+
+const resolveList = (key: string): string[] => {
+  if (!key) {
+    return []
+  }
+
+  const raw = tm(key)
+
+  if (Array.isArray(raw)) {
+    return raw.filter(item => typeof item === 'string') as string[]
+  }
+
+  return []
+}
+
+const resolveHeroKey = (path: string) =>
+  path.startsWith('home.') ? path : `home.${path}`
+
+const resolveSearchPlaceholder = () => {
+  const placeholders = resolveList('home.hero.search.placeholders')
+  if (placeholders.length) {
+    return placeholders
+  }
+
+  const placeholder = resolveString('home.hero.search.placeholder')
+  return placeholder ? [placeholder] : []
+}
+
 const searchQueryValue = computed(() => props.searchQuery)
 
 const { minSuggestionQueryLength } = toRefs(props)
@@ -133,54 +182,7 @@ const animatedSubtitle = computed(() =>
   resolveString('home.hero.animatedSubtitle')
 )
 
-const resolveString = (key: string): string => {
-  if (!key) {
-    return ''
-  }
 
-  if (!te(key)) {
-    return ''
-  }
-
-  const raw = tm(key)
-
-  if (typeof raw === 'string') {
-    return raw
-  }
-
-  if (typeof raw === 'number') {
-    return String(raw)
-  }
-
-  return ''
-}
-
-const resolveList = (key: string): string[] => {
-  if (!key) {
-    return []
-  }
-
-  const raw = tm(key)
-
-  if (Array.isArray(raw)) {
-    return raw.filter(item => typeof item === 'string') as string[]
-  }
-
-  return []
-}
-
-const resolveHeroKey = (path: string) =>
-  path.startsWith('home.') ? path : `home.${path}`
-
-const resolveSearchPlaceholder = () => {
-  const placeholders = resolveList('home.hero.search.placeholders')
-  if (placeholders.length) {
-    return placeholders
-  }
-
-  const placeholder = resolveString('home.hero.search.placeholder')
-  return placeholder ? [placeholder] : []
-}
 
 const handleHeroImageLoad = () => {
   isHeroImageLoaded.value = true
