@@ -298,6 +298,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		status.setGtin(product.gtin());
 		status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
 		status.setStartTime(Instant.now().toEpochMilli());
+		boolean hadEprelBeforeFetch = hasEprel(product);
 
 		Map<String, Object> promptVariables;
 		try {
@@ -309,7 +310,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		}
 		productRepository.forceIndex(product);
 		try {
-			hooks.forEach(hook -> hook.onSourcesFetched(product));
+			hooks.forEach(hook -> hook.onSourcesFetched(product, hadEprelBeforeFetch));
 		} catch (Exception e) {
 			logger.error("Error executing onSourcesFetched hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
 		}
@@ -1169,9 +1170,19 @@ public class ReviewGenerationService implements HealthIndicator {
 				: (Map<String, Integer>) promptVariables.getOrDefault("SOURCE_TOKENS", Map.of());
 		int totalTokens = promptVariables == null ? 0
 				: (Integer) promptVariables.getOrDefault("TOTAL_TOKENS", 0);
+		List<String> searchedQueries = promptVariables == null ? List.of()
+				: (List<String>) promptVariables.getOrDefault("SEARCHED_QUERIES", List.of());
+		List<String> acceptedUrls = promptVariables == null ? new ArrayList<>(sourceTokens.keySet())
+				: (List<String>) promptVariables.getOrDefault("ACCEPTED_URLS", new ArrayList<>(sourceTokens.keySet()));
+		Map<String, String> rejectedUrls = promptVariables == null ? Map.of()
+				: (Map<String, String>) promptVariables.getOrDefault("REJECTED_URLS", Map.of());
 		return new ReviewGenerationStepResult(product.getId(), product.gtin(),
 				verticalConfig == null ? product.getVertical() : verticalConfig.getId(), step, success, message,
-				sourceTokens.size(), totalTokens, attributes, review);
+				sourceTokens.size(), totalTokens, attributes, review, null, searchedQueries, acceptedUrls, rejectedUrls);
+	}
+
+	private boolean hasEprel(Product product) {
+		return product != null && product.getExternalIds() != null && product.getExternalIds().getEprel() != null;
 	}
 
 	private String determineProviderName(Map<String, Object> metadata) {

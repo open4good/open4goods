@@ -99,8 +99,9 @@ public class ReviewGenerationPreprocessingService {
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize() * 10),
 				new ThreadPoolExecutor.AbortPolicy());
 		logger.info(
-				"Review generation retrieval configured: maxSearch={}, resultsPerQuery={}, preferredDomains={}, lr={}, cr={}, gl={}, hl={}, safe={}",
+				"Review generation retrieval configured: maxSearch={}, resultsPerQuery={}, preferredDomains={}, preferredDomainsByVertical={}, lr={}, cr={}, gl={}, hl={}, safe={}",
 				properties.getMaxSearch(), properties.getSearchResultsPerQuery(), properties.getPreferredDomains(),
+				properties.getPreferredDomainsByVertical().keySet(),
 				properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
 				properties.getSearchGeoLocation(), properties.getSearchHostLanguage(), properties.getSearchSafe());
 	}
@@ -121,6 +122,19 @@ public class ReviewGenerationPreprocessingService {
 				logger.warn("review.generation.preferred-domains contains entries with scheme or path. "
 						+ "Use bare hostnames only (e.g. 'lesnumeriques.com'), not full URLs.");
 			}
+		}
+		if (properties.getPreferredDomainsByVertical() != null) {
+			properties.getPreferredDomainsByVertical().forEach((vertical, domains) -> {
+				if (domains == null) {
+					return;
+				}
+				boolean hasInvalidDomain = domains.stream().anyMatch(
+						d -> d != null && (d.startsWith("http://") || d.startsWith("https://") || d.contains("/")));
+				if (hasInvalidDomain) {
+					logger.warn("review.generation.preferred-domains-by-vertical[{}] contains entries with scheme or path. "
+							+ "Use bare hostnames only.", vertical);
+				}
+			});
 		}
 		if (properties.getMinUrlCount() > properties.getMaxUrlsPerProduct()) {
 			logger.warn(
@@ -164,13 +178,15 @@ public class ReviewGenerationPreprocessingService {
 		String primaryModel = product.model();
 		Set<String> alternateModels = product.getAkaModels();
 		validateSearchKeys(product, brand, primaryModel);
+		List<String> preferredDomains = effectivePreferredDomains(verticalConfig);
 
 		// Build search queries.
-		List<String> queries = buildSearchQueries(product, brand, primaryModel, alternateModels, verticalConfig);
+		List<String> queries = buildSearchQueries(product, brand, primaryModel, alternateModels, verticalConfig,
+				preferredDomains);
 		logger.info(
 				"SERP validation for UPC {}: brand='{}', model='{}', akaModels={}, preferredDomains={}, plannedQueries={}",
 				product.getId(), brand, primaryModel, alternateModels == null ? 0 : alternateModels.size(),
-				properties.getPreferredDomains(), queries.size());
+				preferredDomains, queries.size());
 
 		status.addMessage("Searching the web...");
 		int searchesMade = 0;
@@ -252,152 +268,31 @@ public class ReviewGenerationPreprocessingService {
 		});
 
 		// Sort and deduplicate results.
-		List<String> fetchExcludedDomains = properties.getExcludedDomains() == null ? List.of()
-				: properties.getExcludedDomains();
-		List<GoogleSearchResult> sortedResults = allResults.stream()
-				.filter(r -> r.link() != null && !r.link().isEmpty())
-				.filter(r -> {
-					try {
-						String host = URI.create(r.link()).toURL().getHost();
-						return fetchExcludedDomains.stream().noneMatch(host::contains);
-					} catch (Exception e) {
-						return true;
-					}
-				})
-				.filter(distinctByKey(r -> {
-					try {
-						URL url = URI.create(r.link()).toURL();
-						return url.getHost() + url.getPath();
-					} catch (Exception e) {
-						return r.link();
-					}
-				})).sorted((r1, r2) -> {
-					boolean r1Preferred = properties.getPreferredDomains().stream()
-							.anyMatch(domain -> r1.link().contains(domain));
-					boolean r2Preferred = properties.getPreferredDomains().stream()
-							.anyMatch(domain -> r2.link().contains(domain));
-					boolean r1Official = isOfficialUrl(product, r1);
-					boolean r2Official = isOfficialUrl(product, r2);
-					if (r1Official && !r2Official)
-						return -1;
-					if (!r1Official && r2Official)
-						return 1;
-					if (r1Preferred && !r2Preferred)
-						return -1;
-					if (!r1Preferred && r2Preferred)
-						return 1;
-					return 0;
-				}).toList();
+		List<GoogleSearchResult> sortedResults = sortSearchResults(product, allResults, preferredDomains);
 		long preferredResultCount = sortedResults.stream().filter(
-				result -> properties.getPreferredDomains().stream().anyMatch(domain -> result.link().contains(domain)))
+				result -> preferredDomains.stream().anyMatch(domain -> result.link().contains(domain)))
 				.count();
 		logger.info("SERP selection for UPC {}: eligibleResults={}, preferredResults={}, maxUrlsPerProduct={}",
 				product.getId(), sortedResults.size(), preferredResultCount, properties.getMaxUrlsPerProduct());
 
 		// Fetch URL contents concurrently. PDFs are skipped: they will be persisted as
 		// resources for attributes extraction, not fed to the review prompt.
-		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = new HashMap<>();
-		for (GoogleSearchResult result : sortedResults.stream().limit(properties.getMaxUrlsPerProduct()).toList()) {
-			String url = result.link();
-			if (isPdfUrl(url)) {
-				continue;
-			}
-			CompletableFuture<FetchOutcome> future = CompletableFuture.supplyAsync(() -> {
-				try {
-					return fetchWithFallbacks(url, customHeaders);
-				} catch (Exception e) {
-					logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
-					return new FetchOutcome(null, "fetch exception: " + e.getMessage());
-				}
-			}, fetchExecutor);
-			fetchFutures.put(url, future);
-		}
+		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = scheduleFetches(sortedResults, customHeaders);
 
 		status.setStatus(ReviewGenerationStatus.Status.ANALYSING);
 		status.addMessage("Fetching URL content concurrently...");
-
-		int maxTotalTokens = properties.getMaxTotalTokens();
-		int minTokens = properties.getSourceMinTokens();
-		int maxTokens = properties.getSourceMaxTokens();
 
 		int accumulatedTokens = 0;
 		Map<String, String> finalSourcesMap = new LinkedHashMap<>();
 		Map<String, Integer> finalTokensMap = new LinkedHashMap<>();
 		Map<String, String> rejectedUrls = new LinkedHashMap<>();
 
-		for (GoogleSearchResult result : sortedResults) {
-			String url = result.link();
-			if (isPdfUrl(url)) {
-				if (isProductRelevantResource(product, url, result.title())) {
-					persistOfficialResources(product, result, null);
-					rejectedUrls.put(url, "pdf source excluded from review prompt; persisted for attributes extraction");
-				} else {
-					rejectedUrls.put(url, "pdf source excluded: not specific enough to the product");
-				}
-				continue;
-			}
-			CompletableFuture<FetchOutcome> future = fetchFutures.get(url);
-			if (future == null)
-				continue;
-			FetchOutcome outcome = future.get();
-			FetchResponse fetchResponse = outcome == null ? null : outcome.response();
-			persistOfficialResources(product, result, fetchResponse);
-			if (fetchResponse == null || fetchResponse.markdownContent() == null
-					|| fetchResponse.markdownContent().isEmpty()) {
-				rejectedUrls.put(url, outcome == null ? "fetch returned no response" : outcome.rejectionReason());
-				continue;
-			}
-			String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
-			if (!isRelevantContent(content, result, brand, primaryModel, alternateModels)) {
-				String reason = "irrelevant: missing brand/model match in title, h1/main content, or URL";
-				rejectedUrls.put(url, reason);
-				logger.warn("Content from URL {} discarded due to irrelevance for brand {} and model {}", url, brand,
-						primaryModel);
-				continue;
-			}
-			int tokenCount = genAiService.estimateTokens(content);
-			if (tokenCount < minTokens) {
-				rejectedUrls.put(url, "insufficient tokens: " + tokenCount);
-				logger.warn("Content from URL {} discarded due to insufficient tokens: {}", url, tokenCount);
-				continue;
-			}
-			if (tokenCount > maxTokens) {
-				if (isOfficialUrl(product, result)) {
-					String trimmedContent = trimToTokenLimit(content, tokenCount, maxTokens, minTokens);
-					int trimmedTokenCount = genAiService.estimateTokens(trimmedContent);
-					if (trimmedTokenCount >= minTokens && trimmedTokenCount <= maxTokens) {
-						logger.info("Official source for UPC {} trimmed from {} to {} tokens: {}", product.getId(),
-								tokenCount, trimmedTokenCount, url);
-						content = trimmedContent;
-						tokenCount = trimmedTokenCount;
-					} else {
-						rejectedUrls.put(url, "too many tokens after official-page trimming: " + trimmedTokenCount);
-						logger.warn("Content from official URL {} discarded after trimming, token count: {}", url,
-								trimmedTokenCount);
-						continue;
-					}
-				} else {
-					rejectedUrls.put(url, "too many tokens: " + tokenCount);
-					logger.warn("Content from URL {} discarded, exceed tokens limit: {}", url, tokenCount);
-					continue;
-				}
-			}
-			if (accumulatedTokens + tokenCount > maxTotalTokens) {
-				logger.warn("Reached max tokens threshold. Current tokens: {}, URL tokens: {}, threshold: {}",
-						accumulatedTokens, tokenCount, maxTotalTokens);
-				break;
-			}
-			finalSourcesMap.put(url, content);
-			finalTokensMap.put(url, tokenCount);
-			accumulatedTokens += tokenCount;
-			logger.info("Accepted source for UPC {}: url={}, strategy={}, tokens={}, accumulatedTokens={}",
-					product.getId(), url, resolveFetchStrategy(fetchFutures.get(url)), tokenCount, accumulatedTokens);
-			try {
-				String domain = URI.create(url).toURL().getHost();
-				status.addMessage("Analysing " + domain);
-			} catch (Exception e) {
-				status.addMessage("Analysing " + url);
-			}
+		accumulatedTokens = collectFetchedSources(product, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap,
+				rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
+		if (isBelowThreshold(accumulatedTokens, finalSourcesMap) && hasOfficialFetchEvidence(product, finalSourcesMap)) {
+			accumulatedTokens = runPartialRetry(product, brand, primaryModel, alternateModels, preferredDomains,
+					searchedQueries, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, rejectedUrls,
+					accumulatedTokens, customHeaders, status);
 		}
 		logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
@@ -428,6 +323,7 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("sources", finalSourcesMap);
 		promptVariables.put("tokens", finalTokensMap);
 		promptVariables.put("SEARCHED_QUERIES", searchedQueries);
+		promptVariables.put("ACCEPTED_URLS", new ArrayList<>(finalSourcesMap.keySet()));
 		promptVariables.put("REJECTED_URLS", rejectedUrls);
 		status.addMessage("AI generation");
 
@@ -530,18 +426,277 @@ public class ReviewGenerationPreprocessingService {
 		return false;
 	}
 
+	private List<String> effectivePreferredDomains(VerticalConfig verticalConfig) {
+		Map<String, List<String>> domainsByVertical = properties.getPreferredDomainsByVertical() == null ? Map.of()
+				: properties.getPreferredDomainsByVertical();
+		if (verticalConfig != null && verticalConfig.getId() != null) {
+			List<String> verticalDomains = sanitizeDomains(domainsByVertical.get(verticalConfig.getId()));
+			if (!verticalDomains.isEmpty()) {
+				return verticalDomains;
+			}
+		}
+		return sanitizeDomains(properties.getPreferredDomains());
+	}
+
+	private List<String> sanitizeDomains(List<String> domains) {
+		if (domains == null) {
+			return List.of();
+		}
+		return domains.stream()
+				.filter(domain -> domain != null && !domain.isBlank())
+				.map(String::trim)
+				.distinct()
+				.toList();
+	}
+
+	private List<GoogleSearchResult> sortSearchResults(Product product, List<GoogleSearchResult> results,
+			List<String> preferredDomains) {
+		List<String> fetchExcludedDomains = properties.getExcludedDomains() == null ? List.of()
+				: properties.getExcludedDomains();
+		List<String> domains = preferredDomains == null ? List.of() : preferredDomains;
+		return results.stream()
+				.filter(r -> r.link() != null && !r.link().isEmpty())
+				.filter(r -> {
+					try {
+						String host = URI.create(r.link()).toURL().getHost();
+						return fetchExcludedDomains.stream().noneMatch(host::contains);
+					} catch (Exception e) {
+						return true;
+					}
+				})
+				.filter(distinctByKey(r -> {
+					try {
+						URL url = URI.create(r.link()).toURL();
+						return url.getHost() + url.getPath();
+					} catch (Exception e) {
+						return r.link();
+					}
+				})).sorted((r1, r2) -> {
+					boolean r1Preferred = domains.stream().anyMatch(domain -> r1.link().contains(domain));
+					boolean r2Preferred = domains.stream().anyMatch(domain -> r2.link().contains(domain));
+					boolean r1Official = isOfficialUrl(product, r1);
+					boolean r2Official = isOfficialUrl(product, r2);
+					if (r1Official && !r2Official) {
+						return -1;
+					}
+					if (!r1Official && r2Official) {
+						return 1;
+					}
+					if (r1Preferred && !r2Preferred) {
+						return -1;
+					}
+					if (!r1Preferred && r2Preferred) {
+						return 1;
+					}
+					return 0;
+				}).toList();
+	}
+
+	private Map<String, CompletableFuture<FetchOutcome>> scheduleFetches(List<GoogleSearchResult> sortedResults,
+			Map<String, String> customHeaders) {
+		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = new HashMap<>();
+		for (GoogleSearchResult result : sortedResults.stream().limit(properties.getMaxUrlsPerProduct()).toList()) {
+			String url = result.link();
+			if (isPdfUrl(url)) {
+				continue;
+			}
+			CompletableFuture<FetchOutcome> future = CompletableFuture.supplyAsync(() -> {
+				try {
+					return fetchWithFallbacks(url, customHeaders);
+				} catch (Exception e) {
+					logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
+					return new FetchOutcome(null, "fetch exception: " + e.getMessage());
+				}
+			}, fetchExecutor);
+			fetchFutures.put(url, future);
+		}
+		return fetchFutures;
+	}
+
+	private int collectFetchedSources(Product product, List<GoogleSearchResult> sortedResults,
+			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
+			Map<String, Integer> finalTokensMap, Map<String, String> rejectedUrls, int accumulatedTokens,
+			String brand, String primaryModel, Set<String> alternateModels, ReviewGenerationStatus status)
+			throws InterruptedException, ExecutionException {
+		int maxTotalTokens = properties.getMaxTotalTokens();
+		int minTokens = properties.getSourceMinTokens();
+		int maxTokens = properties.getSourceMaxTokens();
+		for (GoogleSearchResult result : sortedResults) {
+			String url = result.link();
+			if (finalSourcesMap.containsKey(url) || rejectedUrls.containsKey(url)) {
+				continue;
+			}
+			if (isPdfUrl(url)) {
+				if (isProductRelevantResource(product, url, result.title())) {
+					persistOfficialResources(product, result, null);
+					rejectedUrls.put(url, "pdf source excluded from review prompt; persisted for attributes extraction");
+				} else {
+					rejectedUrls.put(url, "pdf source excluded: not specific enough to the product");
+				}
+				continue;
+			}
+			CompletableFuture<FetchOutcome> future = fetchFutures.get(url);
+			if (future == null) {
+				continue;
+			}
+			FetchOutcome outcome = future.get();
+			FetchResponse fetchResponse = outcome == null ? null : outcome.response();
+			persistOfficialResources(product, result, fetchResponse);
+			if (fetchResponse == null || fetchResponse.markdownContent() == null
+					|| fetchResponse.markdownContent().isEmpty()) {
+				rejectedUrls.put(url, outcome == null ? "fetch returned no response" : outcome.rejectionReason());
+				continue;
+			}
+			String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
+			if (!isRelevantContent(content, result, brand, primaryModel, alternateModels)) {
+				String reason = "irrelevant: missing brand/model match in title, h1/main content, or URL";
+				rejectedUrls.put(url, reason);
+				logger.warn("Content from URL {} discarded due to irrelevance for brand {} and model {}", url, brand,
+						primaryModel);
+				continue;
+			}
+			int tokenCount = genAiService.estimateTokens(content);
+			if (tokenCount < minTokens) {
+				rejectedUrls.put(url, "insufficient tokens: " + tokenCount);
+				logger.warn("Content from URL {} discarded due to insufficient tokens: {}", url, tokenCount);
+				continue;
+			}
+			if (tokenCount > maxTokens) {
+				if (isOfficialUrl(product, result)) {
+					String trimmedContent = trimToTokenLimit(content, tokenCount, maxTokens, minTokens);
+					int trimmedTokenCount = genAiService.estimateTokens(trimmedContent);
+					if (trimmedTokenCount >= minTokens && trimmedTokenCount <= maxTokens) {
+						logger.info("Official source for UPC {} trimmed from {} to {} tokens: {}", product.getId(),
+								tokenCount, trimmedTokenCount, url);
+						content = trimmedContent;
+						tokenCount = trimmedTokenCount;
+					} else {
+						rejectedUrls.put(url, "too many tokens after official-page trimming: " + trimmedTokenCount);
+						logger.warn("Content from official URL {} discarded after trimming, token count: {}", url,
+								trimmedTokenCount);
+						continue;
+					}
+				} else {
+					rejectedUrls.put(url, "too many tokens: " + tokenCount);
+					logger.warn("Content from URL {} discarded, exceed tokens limit: {}", url, tokenCount);
+					continue;
+				}
+			}
+			if (accumulatedTokens + tokenCount > maxTotalTokens) {
+				logger.warn("Reached max tokens threshold. Current tokens: {}, URL tokens: {}, threshold: {}",
+						accumulatedTokens, tokenCount, maxTotalTokens);
+				break;
+			}
+			finalSourcesMap.put(url, content);
+			finalTokensMap.put(url, tokenCount);
+			accumulatedTokens += tokenCount;
+			logger.info("Accepted source for UPC {}: url={}, strategy={}, tokens={}, accumulatedTokens={}",
+					product.getId(), url, resolveFetchStrategy(fetchFutures.get(url)), tokenCount, accumulatedTokens);
+			try {
+				String domain = URI.create(url).toURL().getHost();
+				status.addMessage("Analysing " + domain);
+			} catch (Exception e) {
+				status.addMessage("Analysing " + url);
+			}
+		}
+		return accumulatedTokens;
+	}
+
+	private boolean isBelowThreshold(int accumulatedTokens, Map<String, String> finalSourcesMap) {
+		return accumulatedTokens < properties.getMinGlobalTokens()
+				|| finalSourcesMap.size() < properties.getMinUrlCount();
+	}
+
+	private boolean hasOfficialFetchEvidence(Product product, Map<String, String> finalSourcesMap) {
+		if (product == null || finalSourcesMap == null || finalSourcesMap.isEmpty()) {
+			return false;
+		}
+		if (product.getOfficialUrl() != null && finalSourcesMap.containsKey(product.getOfficialUrl())) {
+			return true;
+		}
+		if (product.getOfficialSupportUrls() != null
+				&& product.getOfficialSupportUrls().values().stream().flatMap(Set::stream)
+						.anyMatch(finalSourcesMap::containsKey)) {
+			return true;
+		}
+		return product.getResources() != null && product.getResources().stream()
+				.anyMatch(resource -> resource != null && "manufacturer".equals(resource.getDatasourceName())
+						&& resource.getTags() != null && resource.getTags().contains("official"));
+	}
+
+	private int runPartialRetry(Product product, String brand, String primaryModel, Set<String> alternateModels,
+			List<String> preferredDomains, List<String> searchedQueries, List<GoogleSearchResult> alreadySortedResults,
+			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
+			Map<String, Integer> finalTokensMap, Map<String, String> rejectedUrls, int accumulatedTokens,
+			Map<String, String> customHeaders, ReviewGenerationStatus status)
+			throws IOException, GoogleSearchException, InterruptedException, ExecutionException {
+		int retryMaxSearch = Math.max(0, properties.getPartialRetryMaxSearch());
+		if (retryMaxSearch == 0) {
+			return accumulatedTokens;
+		}
+		List<String> retryQueries = buildPartialRetryQueries(product, brand, primaryModel).stream()
+				.filter(query -> !searchedQueries.contains(query))
+				.limit(retryMaxSearch)
+				.toList();
+		if (retryQueries.isEmpty()) {
+			return accumulatedTokens;
+		}
+		status.addMessage("Official data found, searching targeted review and guide sources...");
+		List<GoogleSearchResult> retryResults = new ArrayList<>();
+		for (String query : retryQueries) {
+			logger.info("Partial source retry query for UPC {}: {}", product.getId(), query);
+			searchedQueries.add(query);
+			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getSearchResultsPerQuery(),
+					properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
+					properties.getSearchSafe(), null, properties.getSearchGeoLocation(),
+					properties.getSearchHostLanguage());
+			GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
+			if (searchResponse != null && searchResponse.results() != null) {
+				retryResults.addAll(searchResponse.results());
+			}
+		}
+		if (retryResults.isEmpty()) {
+			return accumulatedTokens;
+		}
+		identifyOfficialProductUrl(product, retryResults).ifPresent(product::setOfficialUrl);
+		identifyOfficialSupportUrls(product, retryResults).forEach(supportUrl ->
+				product.addOfficialSupportUrl(resolveOfficialUrlLanguage(supportUrl), supportUrl));
+		Set<String> knownUrls = new HashSet<>();
+		alreadySortedResults.stream().map(GoogleSearchResult::link).forEach(knownUrls::add);
+		List<GoogleSearchResult> sortedRetryResults = sortSearchResults(product, retryResults, preferredDomains).stream()
+				.filter(result -> !knownUrls.contains(result.link()))
+				.toList();
+		Map<String, CompletableFuture<FetchOutcome>> retryFutures = scheduleFetches(sortedRetryResults, customHeaders);
+		fetchFutures.putAll(retryFutures);
+		return collectFetchedSources(product, sortedRetryResults, fetchFutures, finalSourcesMap, finalTokensMap,
+				rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
+	}
+
+	private List<String> buildPartialRetryQueries(Product product, String brand, String primaryModel) {
+		List<String> queries = new ArrayList<>();
+		String model = primaryModel == null ? "" : primaryModel;
+		if (brand != null && !brand.isBlank() && !model.isBlank()) {
+			queries.add(brand + " " + quoted(model) + " (manual OR notice OR \"fiche produit\" OR datasheet OR \"energy label\")");
+			queries.add(brand + " " + quoted(model) + " (avis OR review OR test OR guide)");
+		}
+		if (product != null && product.gtin() != null && product.gtin().matches("\\d{8,14}")) {
+			queries.add(brand + " " + quoted(product.gtin()) + " (manual OR notice OR review OR test)");
+		}
+		return queries.stream().distinct().toList();
+	}
+
 	private List<String> buildSearchQueries(Product product, String brand, String primaryModel, Set<String> alternateModels,
-			VerticalConfig verticalConfig) {
+			VerticalConfig verticalConfig, List<String> preferredDomains) {
 		List<String> queries = new ArrayList<>();
 		List<String> orderedModels = rankedModelCandidates(product, primaryModel, alternateModels);
 		List<String> searchModels = orderedModels.stream().limit(6).toList();
 		String modelExpression = modelExpression(brand, searchModels);
 		queries.add(officialDiscoveryQuery(brand, searchModels.getFirst()));
-		String preferredDomainExpression = domainExpression(properties.getPreferredDomains());
+		String preferredDomainExpression = domainExpression(preferredDomains);
 		if (!preferredDomainExpression.isBlank()) {
 			queries.add(preferredDomainExpression + " " + modelExpression);
 		}
-		List<String> injectSites = verticalConfig.getInjectSitesResults();
+		List<String> injectSites = verticalConfig == null ? List.of() : verticalConfig.getInjectSitesResults();
 		if (injectSites != null && !injectSites.isEmpty()) {
 			for (String site : injectSites) {
 				if (site != null && !site.isBlank()) {

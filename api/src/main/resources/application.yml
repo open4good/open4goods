@@ -130,6 +130,56 @@ review:
       - frandroid.com
       - cnetfrance.fr
       - rtings.com
+    preferred-domains-by-vertical:
+      tv:
+        - lcd-compare.com
+        - lesnumeriques.com
+        - rtings.com
+        - darty.com
+        - test-achats.be
+      smartphone:
+        - frandroid.com
+        - 01net.com
+        - lesnumeriques.com
+        - cnetfrance.fr
+        - darty.com
+      smartphones:
+        - frandroid.com
+        - 01net.com
+        - lesnumeriques.com
+        - cnetfrance.fr
+        - darty.com
+      dishwasher:
+        - quechoisir.org
+        - test-achats.be
+        - darty.com
+        - electromenager-compare.com
+        - galaxus.ch
+      refrigerator:
+        - quechoisir.org
+        - test-achats.be
+        - darty.com
+        - electromenager-compare.com
+        - galaxus.ch
+      washing-machine:
+        - quel-lave-linge.fr
+        - quechoisir.org
+        - test-achats.be
+        - darty.com
+      washing-machines:
+        - quel-lave-linge.fr
+        - quechoisir.org
+        - test-achats.be
+        - darty.com
+      oven:
+        - materiel.net
+        - darty.com
+        - test-achats.be
+      air-conditioner:
+        - quechoisir.org
+        - test-achats.be
+        - darty.com
+        - galaxus.ch
     excluded-domains:
       - pngwing.com
       - pngegg.com

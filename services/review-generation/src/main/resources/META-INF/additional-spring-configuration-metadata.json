@@ -26,6 +26,12 @@
       "defaultValue": []
     },
     {
+      "name": "review.generation.preferred-domains-by-vertical",
+      "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
+      "description": "Optional vertical-specific preferred domains. When a vertical has a non-empty entry, it replaces the global preferred-domain list for SERP boosting and result ordering.",
+      "defaultValue": {}
+    },
+    {
       "name": "review.generation.official-url-excluded-domains",
       "type": "java.util.List<java.lang.String>",
       "description": "Domain substrings excluded from manufacturer official URL detection.",
@@ -77,6 +83,12 @@
       "name": "review.generation.max-search",
       "type": "java.lang.Integer",
       "description": "Maximum number of search queries allowed.",
+      "defaultValue": 2
+    },
+    {
+      "name": "review.generation.partial-retry-max-search",
+      "type": "java.lang.Integer",
+      "description": "Extra targeted searches allowed when the first fetch pass collected official product evidence but did not reach source or token thresholds.",
       "defaultValue": 2
     },
     {

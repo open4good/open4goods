@@ -89,6 +89,27 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void preparePromptVariables_UsesVerticalPreferredDomainsWhenConfigured() throws Exception {
+        properties.setMaxSearch(2);
+        properties.setPreferredDomains(List.of("global.example"));
+        properties.setPreferredDomainsByVertical(Map.of("refrigerator",
+                List.of("electromenager-compare.com", "test-achats.be")));
+        Product product = product("Liebherr", "CBNc5723-22");
+        VerticalConfig verticalConfig = verticalConfig();
+        verticalConfig.setId("refrigerator");
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig, new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(2)).search(requestCaptor.capture());
+        String preferredQuery = requestCaptor.getAllValues().get(1).query();
+        assertThat(preferredQuery).startsWith("(site:electromenager-compare.com OR site:test-achats.be)");
+        assertThat(preferredQuery).doesNotContain("global.example");
+    }
+
+    @Test
     void preparePromptVariables_FailsBeforeSearchWhenRequiredSerpKeysAreMissing() {
         Product product = new Product();
         product.setId(42L);
@@ -135,6 +156,47 @@ class ReviewGenerationPreprocessingServiceTest {
         assertThat(sources.keySet()).contains(product.getOfficialUrl(),
                 "https://www.samsung.com/fr/support/model/SM-S921BZVDEUC/",
                 "https://www.darty.com/samsung.html");
+        assertThat((List<String>) variables.get("ACCEPTED_URLS")).contains(product.getOfficialUrl(),
+                "https://www.samsung.com/fr/support/model/SM-S921BZVDEUC/",
+                "https://www.darty.com/samsung.html");
+        assertThat((List<String>) variables.get("SEARCHED_QUERIES")).isNotEmpty();
+        assertThat((Map<String, String>) variables.get("REJECTED_URLS")).isEmpty();
+    }
+
+    @Test
+    void preparePromptVariables_RetriesPartialOfficialFetchWithTargetedQueries() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setPartialRetryMaxSearch(1);
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(600);
+        properties.setMinUrlCount(2);
+        properties.setMaxUrlsPerProduct(3);
+        Product product = product("Bosch", "SRS2IKW04E");
+        String officialUrl = "https://www.bosch-home.fr/fr/product/SRS2IKW04E";
+        String reviewUrl = "https://www.quechoisir.org/test-lave-vaisselle-bosch-srs2ikw04e-n123/";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(
+                new GoogleSearchResponse(List.of(new GoogleSearchResult("Bosch SRS2IKW04E officiel", officialUrl))),
+                new GoogleSearchResponse(List.of(new GoogleSearchResult("Test Bosch SRS2IKW04E", reviewUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String url = invocation.getArgument(0);
+            String markdown = "Bosch SRS2IKW04E content with useful washing, drying, noise, water and energy details from " + url;
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown,
+                    FetchStrategy.HTTP, List.of(), Set.of(), List.of(), false, null));
+        });
+
+        Map<String, Object> variables = service.preparePromptVariables(product, verticalConfig(),
+                new ReviewGenerationStatus());
+
+        @SuppressWarnings("unchecked")
+        Map<String, String> sources = (Map<String, String>) variables.get("sources");
+        assertThat(sources.keySet()).containsExactly(officialUrl, reviewUrl);
+        @SuppressWarnings("unchecked")
+        List<String> searchedQueries = (List<String>) variables.get("SEARCHED_QUERIES");
+        assertThat(searchedQueries).hasSize(2);
+        assertThat(searchedQueries.get(1)).contains("manual OR notice").contains("SRS2IKW04E");
     }
 
     @Test

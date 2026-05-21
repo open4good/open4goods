@@ -8,8 +8,9 @@ realtime generation and OpenAI batch generation.
 
 1. Eligibility: skip products with a fresh and structurally valid French AI
    review unless generation is forced.
-2. SERP validation: require product brand and model, build preferred-domain
-   queries first, then vertical-injected site queries, then broad model queries.
+2. SERP validation: require product brand and model, build official-discovery
+   and preferred-domain queries first, then vertical-injected site queries, then
+   broad model queries.
 3. Fetching: fetch selected URLs concurrently through `UrlFetchingService`.
    Review generation requests `HTTP`, then `PLAYWRIGHT`, then `PROXIFIED`
    through internal strategy override headers; without an override, the URL
@@ -29,15 +30,25 @@ realtime generation and OpenAI batch generation.
 
 Preferred domains are configured by the consuming application, not by this
 service module. In the API application they live in
-`api/src/main/resources/application.yml`. They are used in the first query so
-they are never starved by `maxSearch` when alternate models exist.
+`api/src/main/resources/application.yml`. They are used in the first preferred
+query and in result ordering so they are never starved by `maxSearch` when
+alternate models exist. `preferred-domains-by-vertical` may override the global
+list for a vertical when appliance and electronics review sources differ.
 
 ```yaml
 review:
   generation:
     preferred-domains: ${API_DEFINED_PRODUCT_REVIEW_DOMAINS}
+    preferred-domains-by-vertical:
+      tv:
+        - lcd-compare.com
+        - lesnumeriques.com
+      refrigerator:
+        - quechoisir.org
+        - electromenager-compare.com
     query-template: "test %s \"%s\""
     max-search: 5
+    partial-retry-max-search: 2
     search-results-per-query: 10
     search-language-restrict: "lang_fr"
     search-country-restrict: "countryFR"
@@ -54,6 +65,13 @@ For a product `SONY XR55A80L`, the first query is shaped like:
 
 Vertical configs may still add `injectSitesResults`; those are queried after
 the global preferred-domain query and before broad fallback queries.
+
+If the first fetch pass persists official manufacturer evidence but does not
+reach the source or token thresholds, the service can run up to
+`partial-retry-max-search` targeted manual, guide, review, and test searches.
+The successful fetch response includes `searchedQueries`, `acceptedUrls`, and
+`rejectedUrls` so back-office callers can inspect SERP quality without reading
+logs.
 
 ## Fetching Configuration
 
