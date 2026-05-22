@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.eprel.EprelProduct;
 
@@ -102,4 +105,60 @@ class ProductTest
 
 		assertEquals("LG", product.brand(), "LG Electronics Inc. should be aliased to LG");
 	}
+
+        @Test
+        void addModelIgnoresNoisyMerchantTitles()
+        {
+                Product product = new Product(1L);
+
+                product.addModel("SMARTPHONE GT7 PRO 6,78 5G DOUBLE NANO SIM 512 GO GRIS");
+
+                assertNull(product.model());
+                assertTrue(product.getAkaModels().isEmpty());
+        }
+
+        @Test
+        void promoteModelSetsCanonicalAndPrunesNoisyAlternateModels()
+        {
+                Product product = new Product(1L);
+                product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "NV7B4550VAS/U1");
+                product.setAkaModels(Set.of("SM-S921B/DS", "12GO/512GO",
+                                "SMARTPHONE GT7 PRO 6,78 5G DOUBLE NANO SIM 512 GO GRIS"));
+
+                boolean promoted = product.promoteModel(" sm-s921b/ds ");
+
+                assertTrue(promoted);
+                assertEquals("SM-S921B/DS", product.model());
+                assertTrue(product.getAkaModels().contains("NV7B4550VAS/U1"));
+                assertFalse(product.getAkaModels().contains("SM-S921B/DS"));
+                assertFalse(product.getAkaModels().contains("12GO/512GO"));
+        }
+
+        @Test
+        void forceModelUsesPromotionCleanup()
+        {
+                Product product = new Product(1L);
+                product.forceModel("56X55X59");
+
+                assertNull(product.model());
+                assertTrue(product.getAkaModels().isEmpty());
+
+                product.forceModel("fs1600h");
+
+                assertEquals("FS1600H", product.model());
+                assertTrue(product.getAkaModels().isEmpty());
+        }
+
+        @Test
+        void addModelReplacesInvalidExistingCanonicalModel()
+        {
+                Product product = new Product(1L);
+                product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL,
+                                "SMARTPHONE GT7 PRO 6,78 5G DOUBLE NANO SIM 512 GO GRIS");
+
+                product.addModel("FS1600H");
+
+                assertEquals("FS1600H", product.model());
+                assertTrue(product.getAkaModels().isEmpty());
+        }
 }

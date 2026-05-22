@@ -24,7 +24,7 @@ public final class ProductModelCandidateHelper {
     private static final Pattern STORAGE_VARIANT_PATTERN = Pattern.compile(
             "(?i).*\\b\\d+\\s*(?:GO|GB|TO|TB)(?:\\s*/\\s*\\d+\\s*(?:GO|GB|TO|TB))*\\b.*");
     private static final Pattern CATEGORY_TITLE_PATTERN = Pattern.compile(
-            "(?i).*(?:SMARTPHONE|TELEVISEUR|T[ÉE]L[ÉE]VISEUR|TV|REFRIGERATEUR|R[ÉE]FRIG[ÉE]RATEUR|CONG[ÉE]LATEUR|LAVE\\s*-?\\s*LINGE|LAVE\\s*-?\\s*VAISSELLE|CLIMATISEUR|FOUR|CUISINI[ÈE]RE)\\b.*");
+            "(?i).*(?:SMARTPHONE|TELEVISEUR|TV|REFRIGERATEUR|CONGELATEUR|LAVE\\s*-?\\s*LINGE|LAVE\\s*-?\\s*VAISSELLE|CLIMATISEUR|FOUR|CUISINIERE)\\b.*");
     private static final Pattern DEGENERATE_MODEL_PATTERN = Pattern.compile(
             "^\\d+$|^\\d+(?:[xX]\\d+){1,3}(?:[a-zA-Z]{0,3})?$|^[lL]?\\d+[xX][pP]?\\d+(?:[xX][hH]?\\d+)?(?:[a-zA-Z]{0,3})?$");
 
@@ -132,9 +132,10 @@ public final class ProductModelCandidateHelper {
         if (alnum < 4) {
             return false;
         }
+        String ascii = DIACRITICS.matcher(Normalizer.normalize(trimmed, Normalizer.Form.NFD)).replaceAll("");
         if (DEGENERATE_MODEL_PATTERN.matcher(trimmed).matches()
                 || STORAGE_VARIANT_PATTERN.matcher(trimmed).matches()
-                || CATEGORY_TITLE_PATTERN.matcher(trimmed).matches()) {
+                || CATEGORY_TITLE_PATTERN.matcher(ascii).matches()) {
             return false;
         }
         String compact = compactModel(trimmed);

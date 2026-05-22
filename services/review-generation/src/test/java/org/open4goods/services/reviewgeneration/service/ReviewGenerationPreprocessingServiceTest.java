@@ -30,6 +30,7 @@ import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.services.urlfetching.config.FetchStrategy;
+import org.open4goods.services.urlfetching.dto.ExtractedMetadataAttribute;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -250,6 +251,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
         service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
 
+        assertThat(product.model()).isEqualTo("SM-S921B/DS");
         assertThat(product.getResources()).anySatisfy(resource ->
         {
             assertThat(resource.getUrl()).isEqualTo(pdfUrl);
@@ -299,6 +301,46 @@ class ReviewGenerationPreprocessingServiceTest {
                 assertThat(headers.get("X-Open4goods-Playwright-Proxy")).isEqualTo("true"));
         assertThat(product.getResources()).anySatisfy(resource ->
                 assertThat(resource.getUrl()).isEqualTo(pdfUrl));
+    }
+
+    @Test
+    void preparePromptVariables_PromotesHighConfidenceOfficialModelBeforeResourceFiltering() throws Exception
+    {
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("Tefcold", "Refrigerateur vitre professionnel FS1600H blanc");
+        product.setAkaModels(Set.of("FS1600H", "12GO/512GO"));
+        String officialUrl = "https://www.tefcold.com/fr/product/fs1600h";
+        String pdfUrl = "https://assets.tefcold.com/manual-fs1600h.pdf";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Tefcold FS1600H product page", officialUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = """
+                    # Tefcold FS1600H
+                    Model: FS1600H
+                    Refrigerated display cabinet official product content with dimensions, cooling, energy and warranty details.
+                    """;
+            return CompletableFuture.completedFuture(new FetchResponse(officialUrl, 200, markdown, markdown,
+                    FetchStrategy.HTTP, List.of(new ExtractedMetadataAttribute("mpn", "FS1600H", "jsonld", "fr")),
+                    Set.of(), List.of(new org.open4goods.services.urlfetching.dto.ExtractedResource(pdfUrl,
+                            org.open4goods.services.urlfetching.dto.ResourceType.PDF, "link", "Manual")),
+                    false, null));
+        });
+
+        Map<String, Object> variables = service.preparePromptVariables(product, verticalConfig(),
+                new ReviewGenerationStatus());
+
+        assertThat(product.model()).isEqualTo("FS1600H");
+        assertThat(product.getAkaModels()).doesNotContain("12GO/512GO");
+        assertThat(product.getResources()).anySatisfy(resource -> assertThat(resource.getUrl()).isEqualTo(pdfUrl));
+        @SuppressWarnings("unchecked")
+        Map<String, String> sources = (Map<String, String>) variables.get("sources");
+        assertThat(sources).containsKey(officialUrl);
     }
 
     @Test
@@ -424,7 +466,7 @@ class ReviewGenerationPreprocessingServiceTest {
                         "Samsung \"SM-S921B/DS\" (official OR officiel OR product OR produit)",
                         "Samsung \"SM-S921B/DS\" (support OR assistance OR manual OR notice OR datasheet OR \"fiche produit\")",
                         "(site:darty.com) (\"Samsung SM-S921B/DS\")",
-                        "test Samsung \"SM-S921B/DS\"");
+                        "Samsung \"SM-S921B/DS\" (avis OR review OR test OR guide)");
     }
 
     @Test

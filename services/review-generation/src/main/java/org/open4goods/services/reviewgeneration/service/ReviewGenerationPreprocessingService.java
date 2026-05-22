@@ -46,6 +46,7 @@ import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationFailureDetails;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.urlfetching.dto.ExtractedMetadataAttribute;
 import org.open4goods.services.urlfetching.dto.ExtractedResource;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
@@ -75,6 +76,11 @@ public class ReviewGenerationPreprocessingService {
 			Pattern.compile("window\\._cf_chl_opt", Pattern.CASE_INSENSITIVE),
 			Pattern.compile("Checking if the site connection is secure", Pattern.CASE_INSENSITIVE),
 			Pattern.compile("Attention Required! \\| Cloudflare", Pattern.CASE_INSENSITIVE));
+	private static final Pattern OFFICIAL_MODEL_LINE_PATTERN = Pattern.compile(
+			"(?i)\\b(?:model|modele|reference|mpn|sku|code produit|product code)\\b\\s*[:#\\-]?\\s*([A-Za-z0-9][A-Za-z0-9._/\\- ]{2,48})");
+	private static final Pattern URL_MODEL_TOKEN_PATTERN = Pattern.compile(
+			"[A-Za-z]{1,10}\\d[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}|\\d[A-Za-z]{1,10}[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}");
+	private static final int OFFICIAL_MODEL_PROMOTION_THRESHOLD = 7;
 
 	private final ReviewGenerationConfig properties;
 	private final GoogleSearchService googleSearchService;
@@ -85,6 +91,9 @@ public class ReviewGenerationPreprocessingService {
 	private final ThreadPoolExecutor fetchExecutor;
 
 	private record FetchOutcome(FetchResponse response, String rejectionReason) {
+	}
+
+	private record ModelEvidence(String candidate, int score, List<String> reasons) {
 	}
 
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
@@ -267,7 +276,11 @@ public class ReviewGenerationPreprocessingService {
 			logger.info("Official manufacturer support page identified for UPC {}: language={}, url={}", product.getId(),
 					language, supportUrl);
 		});
-		fetchOfficialEvidence(product, allResults, customHeaders);
+		if (fetchOfficialEvidence(product, allResults, customHeaders)) {
+			primaryModel = product.model();
+			alternateModels = product.getAkaModels();
+			status.addMessage("Product model refined from official manufacturer evidence: " + primaryModel);
+		}
 
 		// Sort and deduplicate results.
 		List<GoogleSearchResult> sortedResults = sortSearchResults(product, allResults, preferredDomains);
@@ -1274,10 +1287,11 @@ public class ReviewGenerationPreprocessingService {
 		}
 	}
 
-	private void fetchOfficialEvidence(Product product, List<GoogleSearchResult> results, Map<String, String> customHeaders) {
+	private boolean fetchOfficialEvidence(Product product, List<GoogleSearchResult> results, Map<String, String> customHeaders) {
 		if (product == null || results == null || results.isEmpty()) {
-			return;
+			return false;
 		}
+		boolean modelPromoted = false;
 		List<GoogleSearchResult> officialResults = results.stream()
 				.filter(result -> result != null && result.link() != null && !result.link().isBlank())
 				.filter(result -> isOfficialUrl(product, result))
@@ -1298,12 +1312,143 @@ public class ReviewGenerationPreprocessingService {
 							product.getId(), url, outcome == null ? "unknown" : outcome.rejectionReason());
 					continue;
 				}
+				modelPromoted = promoteModelFromOfficialEvidence(product, result, response) || modelPromoted;
 				persistOfficialResources(product, result, response);
 			} catch (Exception e) {
 				logger.warn("Official evidence fetch failed for UPC {}: url={}, reason={}", product.getId(), url,
 						e.getMessage());
 			}
 		}
+		return modelPromoted;
+	}
+
+	private boolean promoteModelFromOfficialEvidence(Product product, GoogleSearchResult result, FetchResponse response) {
+		if (product == null || result == null || response == null || !isOfficialUrl(product, result)) {
+			return false;
+		}
+		Map<String, Integer> scores = new LinkedHashMap<>();
+		Map<String, List<String>> reasons = new LinkedHashMap<>();
+		if (response.metadataAttributes() != null) {
+			for (ExtractedMetadataAttribute attribute : response.metadataAttributes()) {
+				if (!isModelMetadataAttribute(attribute)) {
+					continue;
+				}
+				addModelEvidence(scores, reasons, attribute.value(), metadataModelScore(attribute),
+						"metadata:" + attribute.name());
+			}
+		}
+
+		String markdownZone = firstContentZone(response.markdownContent());
+		if (!markdownZone.isBlank()) {
+			OFFICIAL_MODEL_LINE_PATTERN.matcher(markdownZone).results()
+					.map(match -> match.group(1))
+					.forEach(candidate -> addModelEvidence(scores, reasons, candidate, 4, "official-text"));
+		}
+
+		String urlAndTitle = String.join(" ", safeString(response.url()), safeString(result.link()),
+				safeString(result.title()));
+		URL_MODEL_TOKEN_PATTERN.matcher(urlAndTitle).results()
+				.map(match -> match.group())
+				.forEach(candidate -> addModelEvidence(scores, reasons, candidate, 2, "official-url"));
+
+		if (response.resources() != null) {
+			for (ExtractedResource resource : response.resources()) {
+				if (resource != null && resource.url() != null) {
+					URL_MODEL_TOKEN_PATTERN.matcher(resource.url()).results()
+							.map(match -> match.group())
+							.forEach(candidate -> addModelEvidence(scores, reasons, candidate, 2, "official-resource"));
+				}
+			}
+		}
+
+		String combinedEvidence = String.join(" ", safeString(response.url()), safeString(result.link()),
+				safeString(result.title()), markdownZone,
+				response.resources() == null ? "" : response.resources().stream()
+						.map(ExtractedResource::url)
+						.filter(url -> url != null)
+						.collect(Collectors.joining(" ")));
+		for (String candidate : new ArrayList<>(scores.keySet())) {
+			if (containsModelCandidate(combinedEvidence, candidate)) {
+				addModelEvidence(scores, reasons, candidate, 2, "confirmed-in-page");
+			}
+		}
+		if (response.extractedGtins() != null && product.gtin() != null
+				&& response.extractedGtins().stream().anyMatch(gtin -> product.gtin().equals(gtin))) {
+			for (String candidate : new ArrayList<>(scores.keySet())) {
+				addModelEvidence(scores, reasons, candidate, 1, "matching-gtin");
+			}
+		}
+
+		Optional<ModelEvidence> bestEvidence = scores.entrySet().stream()
+				.map(entry -> new ModelEvidence(entry.getKey(), entry.getValue(),
+						reasons.getOrDefault(entry.getKey(), List.of())))
+				.filter(evidence -> evidence.score() >= OFFICIAL_MODEL_PROMOTION_THRESHOLD)
+				.filter(evidence -> hasAuthoritativeOfficialModelEvidence(evidence.reasons()))
+				.max(Comparator.comparingInt(ModelEvidence::score)
+						.thenComparingInt(evidence -> evidence.candidate().length()));
+		if (bestEvidence.isEmpty()) {
+			return false;
+		}
+		boolean promoted = product.promoteModel(bestEvidence.get().candidate());
+		if (promoted) {
+			logger.info("Promoted official model for UPC {}: model={}, score={}, reasons={}", product.getId(),
+					bestEvidence.get().candidate(), bestEvidence.get().score(), bestEvidence.get().reasons());
+		}
+		return promoted;
+	}
+
+	private boolean isModelMetadataAttribute(ExtractedMetadataAttribute attribute) {
+		if (attribute == null || attribute.name() == null || attribute.value() == null || attribute.value().isBlank()) {
+			return false;
+		}
+		String name = attribute.name().toLowerCase(Locale.ROOT);
+		return name.equals("model") || name.equals("mpn") || name.equals("sku") || name.endsWith(":model")
+				|| name.endsWith(":mpn") || name.endsWith(":sku") || name.contains("product:model")
+				|| name.contains("product:mpn") || name.contains("product:sku");
+	}
+
+	private int metadataModelScore(ExtractedMetadataAttribute attribute) {
+		String source = attribute.source() == null ? "" : attribute.source().toLowerCase(Locale.ROOT);
+		String name = attribute.name() == null ? "" : attribute.name().toLowerCase(Locale.ROOT);
+		int score = source.contains("jsonld") || source.contains("itemprop") ? 5 : 4;
+		if (name.contains("model") || name.contains("mpn")) {
+			score += 1;
+		}
+		return score;
+	}
+
+	private void addModelEvidence(Map<String, Integer> scores, Map<String, List<String>> reasons, String rawCandidate,
+			int score, String reason) {
+		String candidate = ProductModelCandidateHelper.cleanForStorage(rawCandidate);
+		if (candidate == null) {
+			return;
+		}
+		List<String> candidateReasons = reasons.computeIfAbsent(candidate, ignored -> new ArrayList<>());
+		if (candidateReasons.contains(reason)) {
+			return;
+		}
+		scores.merge(candidate, score, Integer::sum);
+		candidateReasons.add(reason);
+	}
+
+	private boolean hasAuthoritativeOfficialModelEvidence(List<String> reasons) {
+		if (reasons == null || reasons.isEmpty()) {
+			return false;
+		}
+		return reasons.stream().anyMatch(reason -> reason != null
+				&& (reason.startsWith("metadata:") || "official-text".equals(reason)));
+	}
+
+	private boolean containsModelCandidate(String haystack, String candidate) {
+		if (haystack == null || haystack.isBlank() || candidate == null || candidate.isBlank()) {
+			return false;
+		}
+		return normalizeForUrlMatching(haystack).contains(normalizeForUrlMatching(candidate))
+				|| modelMatchesZone(candidate, normalizeForTextMatching(haystack));
+	}
+
+	private String safeString(String value) {
+		return value == null ? "" : value;
 	}
 
 	private boolean isProductRelevantResource(Product product, String url, String label) {
@@ -1365,14 +1510,16 @@ public class ReviewGenerationPreprocessingService {
 			return 0;
 		}
 		String brand = normalizeForUrlMatching(product.brand());
-		String model = normalizeForUrlMatching(product.model());
-		if (brand.isBlank() || model.isBlank()) {
+		List<String> modelCandidates = rankedModelCandidates(product, product.model(), product.getAkaModels());
+		if (brand.isBlank() || modelCandidates.isEmpty()) {
 			return 0;
 		}
 		try {
 			URL url = URI.create(result.link()).toURL();
 			String host = normalizeForUrlMatching(url.getHost());
 			String path = normalizeForUrlMatching(url.getPath());
+			String title = normalizeForUrlMatching(result.title());
+			String pathAndTitleText = normalizeForTextMatching(url.getPath() + " " + safeString(result.title()));
 			if (isExcludedOfficialHost(host)) {
 				return 0;
 			}
@@ -1386,11 +1533,27 @@ public class ReviewGenerationPreprocessingService {
 			if (brandInHost) {
 				score += 8;
 			}
-			if (path.contains(model)) {
-				score += 5;
+			for (String modelCandidate : modelCandidates) {
+				String model = normalizeForUrlMatching(modelCandidate);
+				if (!model.isBlank() && path.contains(model)) {
+					score += 5;
+					break;
+				}
+				if (modelMatchesZone(modelCandidate, pathAndTitleText)) {
+					score += 5;
+					break;
+				}
 			}
-			if (normalizeForUrlMatching(result.title()).contains(model)) {
-				score += 2;
+			for (String modelCandidate : modelCandidates) {
+				String model = normalizeForUrlMatching(modelCandidate);
+				if (!model.isBlank() && title.contains(model)) {
+					score += 2;
+					break;
+				}
+				if (modelMatchesZone(modelCandidate, normalizeForTextMatching(result.title()))) {
+					score += 2;
+					break;
+				}
 			}
 			if (path.contains("product") || path.contains("produit") || path.contains("lave") || path.contains("linge")) {
 				score += 1;

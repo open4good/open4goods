@@ -60,4 +60,24 @@ class ProductModelCandidateHelperTest
         assertFalse(ProductModelCandidateHelper.isHumanSearchCandidate("568X500X430MM"));
         assertTrue(ProductModelCandidateHelper.isHumanSearchCandidate("IPHONE15PRO-256-BLUE"));
     }
+
+    @Test
+    void cleanForStorageKeepsConciseManufacturerModelCodes()
+    {
+        assertEquals("SM-S921B/DS", ProductModelCandidateHelper.cleanForStorage(" sm-s921b/ds "));
+        assertEquals("NV7B4550VAS/U1", ProductModelCandidateHelper.cleanForStorage("NV7B4550VAS/U1"));
+        assertEquals("FS1600H", ProductModelCandidateHelper.cleanForStorage("FS1600H"));
+    }
+
+    @Test
+    void cleanForStorageRejectsNoisyMerchantTitlesAndWeakVariants()
+    {
+        assertNull(ProductModelCandidateHelper.cleanForStorage(
+                "SMARTPHONE GT7 PRO 6,78 5G DOUBLE NANO SIM 512 GO GRIS"));
+        assertNull(ProductModelCandidateHelper.cleanForStorage("12GO/512GO"));
+        assertNull(ProductModelCandidateHelper.cleanForStorage("56X55X59"));
+        assertNull(ProductModelCandidateHelper.cleanForStorage("6941764449275"));
+        assertNull(ProductModelCandidateHelper.cleanForStorage(
+                "Refrigerateur vitre professionnel grande capacite blanc"));
+    }
 }

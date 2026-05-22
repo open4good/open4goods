@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,6 +33,7 @@ import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
+import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.model.util.TimeAgoFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -855,24 +857,46 @@ public class Product implements Standardisable {
 	}
 
 	public void forceModel(String extractedModel) {
-		String oldModel = model();
-		getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, extractedModel);
-		akaModels.add(oldModel);
-		akaModels.remove(extractedModel);
+		promoteModel(extractedModel);
+	}
 
+	/**
+	 * Promotes a high-confidence model candidate as the canonical model and keeps
+	 * clean previous values as alternate models.
+	 *
+	 * @param value high-confidence model candidate
+	 * @return {@code true} when the canonical model changed
+	 */
+	public boolean promoteModel(String value) {
+		String promoted = ProductModelCandidateHelper.cleanForStorage(value);
+		if (StringUtils.isEmpty(promoted) || promoted.length() < MODEL_MIN_LENGTH) {
+			pruneAkaModels();
+			return false;
+		}
+
+		String existing = ProductModelCandidateHelper.cleanForStorage(model());
+		boolean changed = !promoted.equals(existing);
+		if (StringUtils.isNotEmpty(existing) && changed) {
+			akaModels.add(existing);
+		}
+		attributes.getReferentielAttributes().put(ReferentielKey.MODEL, promoted);
+		pruneAkaModels();
+		akaModels.remove(promoted);
+		return changed;
 	}
 
 	/**
 	 * Add the model referentiel attribute, applying some spliting mechanism and
-	 * cleaning pass
+	 * cleaning pass.
 	 *
-	 * @param value
+	 * @param value model candidate
 	 */
 	public void addModel(String value) {
 
-		String model = StringUtils.normalizeSpace(value).toUpperCase();
+		String model = ProductModelCandidateHelper.cleanForStorage(value);
 
 		if (StringUtils.isEmpty(model) || model.length() < MODEL_MIN_LENGTH) {
+			pruneAkaModels();
 			return;
 		}
 		// Splitting on conventionnal suffixes (/ - .)
@@ -884,12 +908,18 @@ public class Product implements Standardisable {
 
 		if (frags.length > 3) {
 			logger.info("Found an alternative model : " + frags[0]);
-			akaModels.add(frags[0]);
+			String fragmentModel = ProductModelCandidateHelper.cleanForStorage(frags[0]);
+			if (StringUtils.isNotEmpty(fragmentModel)) {
+				akaModels.add(fragmentModel);
+			}
 		}
 
 		// Case ref attribute is already set, we keep as it and we remove the elected
 		// one from alternativeModels
-		String existing = model();
+		String existing = ProductModelCandidateHelper.cleanForStorage(model());
+		if (StringUtils.isEmpty(existing) && StringUtils.isNotEmpty(model())) {
+			attributes.getReferentielAttributes().remove(ReferentielKey.MODEL);
+		}
 
 		if (StringUtils.isEmpty(existing) || FORCE) {
 			String shortest = shortestModel();
@@ -900,6 +930,18 @@ public class Product implements Standardisable {
 		} else {
 			akaModels.remove(existing);
 		}
+		pruneAkaModels();
+	}
+
+	/**
+	 * Removes weak or duplicate alternate model candidates from this product.
+	 */
+	public void pruneAkaModels() {
+		String canonicalModel = ProductModelCandidateHelper.cleanForStorage(model());
+		Set<String> cleanedModels = ProductModelCandidateHelper.cleanForStorage(akaModels).stream()
+				.filter(candidate -> !candidate.equals(canonicalModel))
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+		akaModels = new HashSet<>(cleanedModels);
 	}
 
 	/**
@@ -1161,7 +1203,8 @@ public class Product implements Standardisable {
 	}
 
 	public void setAkaModels(Set<String> akaModels) {
-		this.akaModels = akaModels;
+		this.akaModels = new HashSet<>(ProductModelCandidateHelper.cleanForStorage(akaModels));
+		pruneAkaModels();
 	}
 
 	public Set<String> getExcludedCauses() {
