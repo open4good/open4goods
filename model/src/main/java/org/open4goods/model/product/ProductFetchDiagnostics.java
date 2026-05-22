@@ -13,6 +13,7 @@ public class ProductFetchDiagnostics {
     private long fetchedAt;
     private int sourceCount;
     private int totalTokens;
+    private String resultQuality;
     private List<String> searchedQueries = new ArrayList<>();
     private List<String> acceptedUrls = new ArrayList<>();
     private Map<String, String> rejectedUrls = new LinkedHashMap<>();
@@ -40,6 +41,14 @@ public class ProductFetchDiagnostics {
 
     public void setTotalTokens(int totalTokens) {
         this.totalTokens = totalTokens;
+    }
+
+    public String getResultQuality() {
+        return resultQuality;
+    }
+
+    public void setResultQuality(String resultQuality) {
+        this.resultQuality = resultQuality;
     }
 
     public List<String> getSearchedQueries() {

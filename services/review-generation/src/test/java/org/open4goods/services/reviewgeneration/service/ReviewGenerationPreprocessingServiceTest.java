@@ -470,6 +470,50 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void preparePromptVariables_PrefersPreciseAkaModelOverWrongPrimaryModel() throws Exception {
+        properties.setMaxSearch(1);
+        Product product = product("Samsung", "SM-F956BZAEEUB");
+        product.setAkaModels(Set.of("SM-F966BZKBEUB", "Galaxy Z Fold7 256Go noir"));
+        product.getExternalIds().setMpn(Set.of("SM-F966BZKBEUB"));
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService).search(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().query())
+                .isEqualTo("Samsung \"SM-F966BZKBEUB\" (official OR officiel OR product OR produit)");
+    }
+
+    @Test
+    void preparePromptVariables_ClassifiesApplianceEvidenceAsPartialUsable() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("ASKO", "OCS8478G");
+        VerticalConfig verticalConfig = verticalConfig();
+        verticalConfig.setId("oven");
+        String officialUrl = "https://www.asko.hk/en/cooking/ovens/combi-steam-ovens/ocs8478g";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("ASKO OCS8478G official oven", officialUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(2000);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "ASKO OCS8478G official oven content with steam, dimensions, cleaning and energy details.";
+            return CompletableFuture.completedFuture(new FetchResponse(officialUrl, 200, markdown, markdown,
+                    FetchStrategy.HTTP));
+        });
+
+        Map<String, Object> variables = service.preparePromptVariables(product, verticalConfig, new ReviewGenerationStatus());
+
+        assertThat(variables.get("RESULT_QUALITY")).isEqualTo("PARTIAL_USABLE");
+        assertThat(product.getOfficialUrl()).isEqualTo(officialUrl);
+        assertThat(product.getReviewFacts()).extracting("url").containsExactly(officialUrl);
+    }
+
+    @Test
     void sanitizeMarkdown_RemovesConfiguredHeaderFooterNoiseLines() {
         String markdown = """
                 Header

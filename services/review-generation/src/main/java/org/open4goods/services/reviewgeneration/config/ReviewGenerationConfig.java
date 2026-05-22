@@ -90,6 +90,21 @@ public class ReviewGenerationConfig {
     private int minGlobalTokens = 7500;
     private int minUrlCount = 4;
 
+    /**
+     * Optional vertical-specific fetch thresholds. These thresholds classify
+     * fetched review evidence as complete, partial but usable, or failed.
+     */
+    private Map<String, FetchQualityThreshold> fetchThresholdsByVertical = Map.of(
+            "tv", new FetchQualityThreshold(6000, 3, 3000, 2),
+            "smartphone", new FetchQualityThreshold(6000, 3, 3000, 2),
+            "smartphones", new FetchQualityThreshold(6000, 3, 3000, 2),
+            "dishwasher", new FetchQualityThreshold(3000, 2, 1500, 1),
+            "refrigerator", new FetchQualityThreshold(3000, 2, 1500, 1),
+            "washing-machine", new FetchQualityThreshold(3000, 2, 1500, 1),
+            "washing-machines", new FetchQualityThreshold(3000, 2, 1500, 1),
+            "oven", new FetchQualityThreshold(3000, 2, 1500, 1),
+            "air-conditioner", new FetchQualityThreshold(2000, 2, 1200, 1));
+
 
 
     // Properties for token-based content aggregation.
@@ -425,6 +440,13 @@ public class ReviewGenerationConfig {
 		this.minUrlCount = minUrlCount;
 	}
 
+    public Map<String, FetchQualityThreshold> getFetchThresholdsByVertical() {
+        return fetchThresholdsByVertical;
+    }
+    public void setFetchThresholdsByVertical(Map<String, FetchQualityThreshold> fetchThresholdsByVertical) {
+        this.fetchThresholdsByVertical = fetchThresholdsByVertical == null ? Map.of() : fetchThresholdsByVertical;
+    }
+
 	public int getMaxUrlsPerProduct() {
 		return maxUrlsPerProduct;
 	}
@@ -490,5 +512,55 @@ public class ReviewGenerationConfig {
     }
     public void setUrlCacheMaxSize(int urlCacheMaxSize) {
         this.urlCacheMaxSize = urlCacheMaxSize;
+    }
+
+    /**
+     * Token and source-count thresholds for one vertical.
+     */
+    public static class FetchQualityThreshold {
+
+        private int minGlobalTokens;
+        private int minUrlCount;
+        private int partialMinGlobalTokens;
+        private int partialMinUrlCount;
+
+        public FetchQualityThreshold() {
+        }
+
+        public FetchQualityThreshold(int minGlobalTokens, int minUrlCount, int partialMinGlobalTokens,
+                int partialMinUrlCount) {
+            this.minGlobalTokens = minGlobalTokens;
+            this.minUrlCount = minUrlCount;
+            this.partialMinGlobalTokens = partialMinGlobalTokens;
+            this.partialMinUrlCount = partialMinUrlCount;
+        }
+
+        public int getMinGlobalTokens() {
+            return minGlobalTokens;
+        }
+        public void setMinGlobalTokens(int minGlobalTokens) {
+            this.minGlobalTokens = minGlobalTokens;
+        }
+
+        public int getMinUrlCount() {
+            return minUrlCount;
+        }
+        public void setMinUrlCount(int minUrlCount) {
+            this.minUrlCount = minUrlCount;
+        }
+
+        public int getPartialMinGlobalTokens() {
+            return partialMinGlobalTokens;
+        }
+        public void setPartialMinGlobalTokens(int partialMinGlobalTokens) {
+            this.partialMinGlobalTokens = partialMinGlobalTokens;
+        }
+
+        public int getPartialMinUrlCount() {
+            return partialMinUrlCount;
+        }
+        public void setPartialMinUrlCount(int partialMinUrlCount) {
+            this.partialMinUrlCount = partialMinUrlCount;
+        }
     }
 }

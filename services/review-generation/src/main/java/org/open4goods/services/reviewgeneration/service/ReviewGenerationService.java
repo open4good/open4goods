@@ -1185,10 +1185,12 @@ public class ReviewGenerationService implements HealthIndicator {
 				: (List<String>) promptVariables.getOrDefault("ACCEPTED_URLS", new ArrayList<>(sourceTokens.keySet()));
 		Map<String, String> rejectedUrls = promptVariables == null ? Map.of()
 				: (Map<String, String>) promptVariables.getOrDefault("REJECTED_URLS", Map.of());
+		String resultQuality = promptVariables == null ? "UNKNOWN"
+				: (String) promptVariables.getOrDefault("RESULT_QUALITY", "UNKNOWN");
 		return new ReviewGenerationStepResult(product.getId(), product.gtin(),
 				verticalConfig == null ? product.getVertical() : verticalConfig.getId(), step, success, message,
-				sourceTokens.size(), totalTokens, attributes, review, null, searchedQueries, acceptedUrls, rejectedUrls,
-				enrichmentStatus);
+				sourceTokens.size(), totalTokens, resultQuality, attributes, review, null, searchedQueries, acceptedUrls,
+				rejectedUrls, enrichmentStatus);
 	}
 
 	private boolean hasEprel(Product product) {
@@ -1225,8 +1227,9 @@ public class ReviewGenerationService implements HealthIndicator {
 		List<String> acceptedUrls = (List<String>) promptVariables.getOrDefault("ACCEPTED_URLS",
 				new ArrayList<>(sourceTokens.keySet()));
 		Map<String, String> rejectedUrls = (Map<String, String>) promptVariables.getOrDefault("REJECTED_URLS", Map.of());
+		String resultQuality = (String) promptVariables.getOrDefault("RESULT_QUALITY", "UNKNOWN");
 		persistFetchDiagnostics(product, sourceTokens.size(), totalTokens, searchedQueries, acceptedUrls, rejectedUrls,
-				enrichmentStatus);
+				enrichmentStatus, resultQuality);
 	}
 
 	private void persistFetchDiagnostics(Product product, ReviewGenerationFailureDetails details,
@@ -1235,15 +1238,17 @@ public class ReviewGenerationService implements HealthIndicator {
 			return;
 		}
 		persistFetchDiagnostics(product, details.sourceCount(), details.totalTokens(), details.searchedQueries(),
-				details.acceptedUrls(), details.rejectedUrls(), enrichmentStatus);
+				details.acceptedUrls(), details.rejectedUrls(), enrichmentStatus, "FAILED");
 	}
 
 	private void persistFetchDiagnostics(Product product, int sourceCount, int totalTokens, List<String> searchedQueries,
-			List<String> acceptedUrls, Map<String, String> rejectedUrls, Map<String, String> enrichmentStatus) {
+			List<String> acceptedUrls, Map<String, String> rejectedUrls, Map<String, String> enrichmentStatus,
+			String resultQuality) {
 		ProductFetchDiagnostics diagnostics = new ProductFetchDiagnostics();
 		diagnostics.setFetchedAt(Instant.now().toEpochMilli());
 		diagnostics.setSourceCount(sourceCount);
 		diagnostics.setTotalTokens(totalTokens);
+		diagnostics.setResultQuality(resultQuality);
 		diagnostics.setSearchedQueries(searchedQueries);
 		diagnostics.setAcceptedUrls(acceptedUrls);
 		diagnostics.setRejectedUrls(rejectedUrls);

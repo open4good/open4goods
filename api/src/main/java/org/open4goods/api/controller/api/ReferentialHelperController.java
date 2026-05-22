@@ -2,12 +2,14 @@ package org.open4goods.api.controller.api;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.dto.AttributeEtimCandidateDto;
 import org.open4goods.api.dto.AttributeIcecatCandidateDto;
 import org.open4goods.api.dto.AttributeReferentialCoverageDto;
@@ -36,6 +38,8 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -256,8 +260,12 @@ public class ReferentialHelperController
     @Operation(
             summary = "Candidate Icecat feature IDs for a Nudger attribute key",
             description = "Iterates Icecat features bound to the vertical's Icecat "
-                    + "categories and scores them by name overlap with the attribute's "
-                    + "synonyms and localized names.")
+                    + "categories and scores them by token overlap against the attribute's "
+                    + "key, localized names and synonyms (all Icecat languages). "
+                    + "If no candidates can be found within the declared categories - for "
+                    + "instance because the category-feature mapping has not been "
+                    + "synchronised - falls back to a global Icecat-features index search "
+                    + "with matchSource=global-fallback.")
     public ResponseEntity<List<AttributeIcecatCandidateDto>> attributeIcecatCandidates(
             @RequestParam String vertical,
             @RequestParam String attribute,
@@ -279,6 +287,7 @@ public class ReferentialHelperController
         Set<String> attributeTerms = attributeSearchTerms(attrConfig);
         Set<Integer> existingFeatureIds = attrConfig.icecatFeatureIds();
         List<AttributeIcecatCandidateDto> candidates = new ArrayList<>();
+        Set<Integer> seenFeatureIds = new HashSet<>();
 
         for (Integer categoryId : icecatCategoryIds(vc))
         {
@@ -295,7 +304,7 @@ public class ReferentialHelperController
             for (IcecatCategoryFeatureDocument catFeature : categoryFeatures)
             {
                 Integer featureId = catFeature.getId();
-                if (featureId == null)
+                if (featureId == null || !seenFeatureIds.add(featureId))
                 {
                     continue;
                 }
@@ -306,17 +315,14 @@ public class ReferentialHelperController
                 {
                     continue;
                 }
-                if (existingFeatureIds.contains(featureId))
+                boolean alreadyBound = existingFeatureIds.contains(featureId);
+                if (alreadyBound)
                 {
                     score = Math.min(1.0, score + 0.10);
                 }
-                String matchSource = (existingFeatureIds.contains(featureId))
+                String matchSource = alreadyBound
                         ? "already-bound"
-                        : (englishName != null && attributeTerms.stream()
-                                .map(t -> IdHelper.azCharAndDigits(t).toLowerCase())
-                                .anyMatch(t -> IdHelper.azCharAndDigits(englishName).toLowerCase().equals(t))
-                                ? "exact-name"
-                                : "name-overlap");
+                        : (score >= 1.0 ? "exact-name" : "token-overlap");
                 candidates.add(new AttributeIcecatCandidateDto(
                         featureId,
                         englishName,
@@ -326,6 +332,12 @@ public class ReferentialHelperController
                         score,
                         matchSource));
             }
+        }
+
+        if (candidates.isEmpty())
+        {
+            candidates.addAll(globalIcecatFeatureFallback(
+                    attributeTerms, existingFeatureIds, seenFeatureIds, maxResults));
         }
 
         candidates.sort((a, b) -> Double.compare(b.confidence(), a.confidence()));
@@ -740,7 +752,9 @@ public class ReferentialHelperController
 
     /**
      * Token-overlap score between an Icecat feature and an attribute. Returns
-     * a value in [0, 1]. Uses English feature name and normalized variants.
+     * a value in [0, 1]. Scores against the English name plus every localized name
+     * carried in {@link IcecatFeatureDocument#getLangNames()} (encoded as
+     * {@code "langId:name"}), so French attribute keys can match French Icecat names.
      */
     private double scoreFeatureAgainstAttribute(IcecatFeatureDocument doc, Set<String> attributeTerms)
     {
@@ -752,13 +766,18 @@ public class ReferentialHelperController
         String englishName = doc.getEnglishName();
         if (englishName != null && !englishName.isBlank())
         {
-            best = keywordOverlapScore(englishName, attributeTerms);
+            best = tokenOverlapScore(englishName, attributeTerms);
         }
-        if (doc.getNormalizedNames() != null)
+        if (doc.getLangNames() != null)
         {
-            for (String normalized : doc.getNormalizedNames())
+            for (String entry : doc.getLangNames())
             {
-                double score = keywordOverlapScore(normalized, attributeTerms);
+                String localized = parseLangNameValue(entry);
+                if (localized == null || localized.isBlank())
+                {
+                    continue;
+                }
+                double score = tokenOverlapScore(localized, attributeTerms);
                 if (score > best)
                 {
                     best = score;
@@ -766,6 +785,199 @@ public class ReferentialHelperController
             }
         }
         return best;
+    }
+
+    /**
+     * Token-level overlap score between a candidate name and a set of attribute search terms.
+     * <p>
+     * Each input string is tokenized on any non-alphanumeric character (after accent
+     * stripping and lowercasing). Tokens shorter than 3 characters are dropped. For each
+     * attribute term, computes a Jaccard-like similarity where two tokens match either
+     * exactly or when one is a {@code >=4}-character prefix of the other (so
+     * {@code "diagonale"} matches {@code "diagonal"}, but unrelated short tokens don't
+     * spuriously match). Returns the best similarity across all attribute terms in
+     * {@code [0, 1]}; 1.0 means every candidate token is matched and the candidate has
+     * at least as many tokens as the term (treated as an exact-name match).
+     */
+    private double tokenOverlapScore(String candidate, Set<String> attributeTerms)
+    {
+        List<String> candidateTokens = tokenize(candidate);
+        if (candidateTokens.isEmpty())
+        {
+            return 0.0;
+        }
+        double best = 0.0;
+        for (String term : attributeTerms)
+        {
+            List<String> termTokens = tokenize(term);
+            if (termTokens.isEmpty())
+            {
+                continue;
+            }
+            int matches = 0;
+            Set<Integer> consumed = new HashSet<>();
+            for (String tt : termTokens)
+            {
+                for (int i = 0; i < candidateTokens.size(); i++)
+                {
+                    if (consumed.contains(i))
+                    {
+                        continue;
+                    }
+                    if (tokensMatch(tt, candidateTokens.get(i)))
+                    {
+                        matches++;
+                        consumed.add(i);
+                        break;
+                    }
+                }
+            }
+            if (matches == 0)
+            {
+                continue;
+            }
+            int union = candidateTokens.size() + termTokens.size() - matches;
+            double jaccard = union == 0 ? 0.0 : (double) matches / union;
+            if (matches == termTokens.size() && matches == candidateTokens.size())
+            {
+                jaccard = 1.0;
+            }
+            if (jaccard > best)
+            {
+                best = jaccard;
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Splits a string on every non-alphanumeric boundary after accent stripping and
+     * lowercasing, dropping tokens shorter than 3 characters.
+     */
+    private List<String> tokenize(String value)
+    {
+        if (value == null || value.isBlank())
+        {
+            return List.of();
+        }
+        String stripped = StringUtils.stripAccents(value).toLowerCase();
+        String[] parts = stripped.split("[^a-z0-9]+");
+        List<String> tokens = new ArrayList<>(parts.length);
+        for (String p : parts)
+        {
+            if (p.length() >= 3)
+            {
+                tokens.add(p);
+            }
+        }
+        return tokens;
+    }
+
+    /**
+     * Two tokens match if they are equal or if one is a prefix of the other and the
+     * shorter token has at least 4 characters. Catches Fr/En near-cognates like
+     * {@code "diagonale"}/{@code "diagonal"} without producing spurious matches on
+     * short prefixes.
+     */
+    private boolean tokensMatch(String a, String b)
+    {
+        if (a.equals(b))
+        {
+            return true;
+        }
+        String shorter = a.length() <= b.length() ? a : b;
+        String longer = a.length() <= b.length() ? b : a;
+        return shorter.length() >= 4 && longer.startsWith(shorter);
+    }
+
+    /**
+     * Parses a {@code "langId:name"} entry as encoded by
+     * {@link org.open4goods.icecat.services.IcecatIndexService}. Returns the name part,
+     * or {@code null} when the encoding is invalid.
+     */
+    private String parseLangNameValue(String entry)
+    {
+        if (entry == null)
+        {
+            return null;
+        }
+        int colon = entry.indexOf(':');
+        return colon < 0 ? null : entry.substring(colon + 1);
+    }
+
+    /**
+     * Global fallback that searches the Icecat features index directly when the
+     * vertical's category-feature mapping is empty (e.g. not synced) or when no
+     * scoped candidate scored above zero.
+     * <p>
+     * Issues an Elasticsearch {@code englishName} full-text query for every attribute
+     * search term, deduplicates against {@code seenFeatureIds}, then re-scores each hit
+     * with {@link #tokenOverlapScore(String, Set)}. Returned candidates carry
+     * {@code categoryId=null} and {@code matchSource=global-fallback}.
+     */
+    private List<AttributeIcecatCandidateDto> globalIcecatFeatureFallback(
+            Set<String> attributeTerms,
+            Set<Integer> existingFeatureIds,
+            Set<Integer> seenFeatureIds,
+            int maxResults)
+    {
+        if (attributeTerms.isEmpty())
+        {
+            return List.of();
+        }
+        Set<String> queryTokens = new LinkedHashSet<>();
+        for (String term : attributeTerms)
+        {
+            queryTokens.addAll(tokenize(term));
+        }
+        if (queryTokens.isEmpty())
+        {
+            return List.of();
+        }
+        List<AttributeIcecatCandidateDto> result = new ArrayList<>();
+        int perQueryLimit = Math.max(maxResults, DEFAULT_MAX_CANDIDATES);
+        for (String token : queryTokens)
+        {
+            Page<IcecatFeatureDocument> page;
+            try
+            {
+                page = icecatIndexService.searchFeatures(token, PageRequest.of(0, perQueryLimit));
+            }
+            catch (Exception e)
+            {
+                LOGGER.warn("Icecat global feature search failed for token='{}': {}", token, e.getMessage());
+                continue;
+            }
+            for (IcecatFeatureDocument doc : page.getContent())
+            {
+                Integer featureId = doc.getId();
+                if (featureId == null || !seenFeatureIds.add(featureId))
+                {
+                    continue;
+                }
+                double score = scoreFeatureAgainstAttribute(doc, attributeTerms);
+                if (score <= 0)
+                {
+                    continue;
+                }
+                if (existingFeatureIds.contains(featureId))
+                {
+                    score = Math.min(1.0, score + 0.10);
+                }
+                String matchSource = existingFeatureIds.contains(featureId)
+                        ? "already-bound"
+                        : "global-fallback";
+                result.add(new AttributeIcecatCandidateDto(
+                        featureId,
+                        doc.getEnglishName(),
+                        doc.getType(),
+                        null,
+                        null,
+                        score * 0.85,
+                        matchSource));
+            }
+        }
+        return result;
     }
 
     /**

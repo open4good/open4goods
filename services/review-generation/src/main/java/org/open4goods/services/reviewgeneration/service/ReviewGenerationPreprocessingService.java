@@ -43,6 +43,7 @@ import org.open4goods.services.googlesearch.exception.GoogleSearchException;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
+import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig.FetchQualityThreshold;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationFailureDetails;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -94,6 +95,12 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private record ModelEvidence(String candidate, int score, List<String> reasons) {
+	}
+
+	private enum FetchResultQuality {
+		COMPLETE,
+		PARTIAL_USABLE,
+		FAILED
 	}
 
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
@@ -304,7 +311,8 @@ public class ReviewGenerationPreprocessingService {
 
 		accumulatedTokens = collectFetchedSources(product, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap,
 				rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
-		if (isBelowThreshold(accumulatedTokens, finalSourcesMap) && hasOfficialFetchEvidence(product, finalSourcesMap)) {
+		if (isBelowCompleteThreshold(verticalConfig, accumulatedTokens, finalSourcesMap)
+				&& hasOfficialFetchEvidence(product, finalSourcesMap)) {
 			accumulatedTokens = runPartialRetry(product, brand, primaryModel, alternateModels, preferredDomains,
 					searchedQueries, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, rejectedUrls,
 					accumulatedTokens, customHeaders, status);
@@ -325,9 +333,8 @@ public class ReviewGenerationPreprocessingService {
 		}
 		product.setReviewFacts(newFacts.stream().limit(properties.getFactsMaxStored()).toList());
 
-		// Check for minimum required data.
-		if (accumulatedTokens < properties.getMinGlobalTokens()
-				|| finalSourcesMap.size() < properties.getMinUrlCount()) {
+		FetchResultQuality resultQuality = classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap);
+		if (resultQuality == FetchResultQuality.FAILED) {
 			ReviewGenerationFailureDetails details = new ReviewGenerationFailureDetails(finalSourcesMap.size(),
 					accumulatedTokens, searchedQueries, new ArrayList<>(finalSourcesMap.keySet()), rejectedUrls);
 			throw new NotEnoughDataException("Insufficient data for review generation: accumulatedTokens="
@@ -340,6 +347,7 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("SEARCHED_QUERIES", searchedQueries);
 		promptVariables.put("ACCEPTED_URLS", new ArrayList<>(finalSourcesMap.keySet()));
 		promptVariables.put("REJECTED_URLS", rejectedUrls);
+		promptVariables.put("RESULT_QUALITY", resultQuality.name());
 		status.addMessage("AI generation");
 
 		// Store aggregated tokens for convenience.
@@ -602,6 +610,7 @@ public class ReviewGenerationPreprocessingService {
 						accumulatedTokens, tokenCount, maxTotalTokens);
 				break;
 			}
+			persistAcceptedOfficialUrl(product, result);
 			finalSourcesMap.put(url, content);
 			finalTokensMap.put(url, tokenCount);
 			accumulatedTokens += tokenCount;
@@ -617,9 +626,67 @@ public class ReviewGenerationPreprocessingService {
 		return accumulatedTokens;
 	}
 
-	private boolean isBelowThreshold(int accumulatedTokens, Map<String, String> finalSourcesMap) {
-		return accumulatedTokens < properties.getMinGlobalTokens()
-				|| finalSourcesMap.size() < properties.getMinUrlCount();
+	private void persistAcceptedOfficialUrl(Product product, GoogleSearchResult result) {
+		if (product == null || result == null || result.link() == null || result.link().isBlank()) {
+			return;
+		}
+		if (product.getOfficialUrl() != null || isOfficialSupportUrl(result) || !isOfficialUrl(product, result)) {
+			return;
+		}
+		product.setOfficialUrl(result.link());
+		logger.info("Official manufacturer page persisted from accepted source for UPC {}: {}",
+				product.getId(), result.link());
+	}
+
+	private boolean isBelowCompleteThreshold(VerticalConfig verticalConfig, int accumulatedTokens,
+			Map<String, String> finalSourcesMap) {
+		return classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap) != FetchResultQuality.COMPLETE;
+	}
+
+	private FetchResultQuality classifyFetchResult(VerticalConfig verticalConfig, int accumulatedTokens,
+			Map<String, String> finalSourcesMap) {
+		int sourceCount = finalSourcesMap == null ? 0 : finalSourcesMap.size();
+		FetchQualityThreshold threshold = fetchThreshold(verticalConfig);
+		if (accumulatedTokens >= threshold.getMinGlobalTokens() && sourceCount >= threshold.getMinUrlCount()) {
+			return FetchResultQuality.COMPLETE;
+		}
+		if (accumulatedTokens >= threshold.getPartialMinGlobalTokens()
+				&& sourceCount >= threshold.getPartialMinUrlCount()) {
+			return FetchResultQuality.PARTIAL_USABLE;
+		}
+		return FetchResultQuality.FAILED;
+	}
+
+	private FetchQualityThreshold fetchThreshold(VerticalConfig verticalConfig) {
+		String verticalId = verticalConfig == null ? null : verticalConfig.getId();
+		Map<String, FetchQualityThreshold> thresholdsByVertical = properties.getFetchThresholdsByVertical();
+		FetchQualityThreshold configured = verticalId == null || thresholdsByVertical == null
+				? null
+				: thresholdsByVertical.get(verticalId);
+		if (configured != null) {
+			return normalizeThreshold(configured);
+		}
+		int completeTokens = properties.getMinGlobalTokens();
+		int completeSources = properties.getMinUrlCount();
+		int partialTokens = Math.max(properties.getSourceMinTokens(), completeTokens / 2);
+		int partialSources = Math.max(1, Math.min(2, completeSources));
+		return new FetchQualityThreshold(completeTokens, completeSources, partialTokens, partialSources);
+	}
+
+	private FetchQualityThreshold normalizeThreshold(FetchQualityThreshold threshold) {
+		int completeTokens = threshold.getMinGlobalTokens() > 0
+				? threshold.getMinGlobalTokens()
+				: properties.getMinGlobalTokens();
+		int completeSources = threshold.getMinUrlCount() > 0
+				? threshold.getMinUrlCount()
+				: properties.getMinUrlCount();
+		int partialTokens = threshold.getPartialMinGlobalTokens() > 0
+				? threshold.getPartialMinGlobalTokens()
+				: Math.max(properties.getSourceMinTokens(), completeTokens / 2);
+		int partialSources = threshold.getPartialMinUrlCount() > 0
+				? threshold.getPartialMinUrlCount()
+				: Math.max(1, Math.min(2, completeSources));
+		return new FetchQualityThreshold(completeTokens, completeSources, partialTokens, partialSources);
 	}
 
 	private boolean hasOfficialFetchEvidence(Product product, Map<String, String> finalSourcesMap) {
@@ -874,6 +941,9 @@ public class ReviewGenerationPreprocessingService {
 		if (alternateModels != null) {
 			models.addAll(alternateModels);
 		}
+		if (product != null && product.shortestOfferName() != null) {
+			models.addAll(extractModelCodeCandidates(product.shortestOfferName()));
+		}
 		return models.stream().filter(model -> model != null && !model.isBlank())
 				.collect(Collectors.toMap(model -> model.trim().toLowerCase(Locale.ROOT), Function.identity(), (left, right) -> left,
 						LinkedHashMap::new))
@@ -882,6 +952,22 @@ public class ReviewGenerationPreprocessingService {
 				.sorted(Comparator.comparingInt((String model) -> modelCandidateScore(product, primaryModel, model))
 						.reversed().thenComparingInt(String::length))
 				.toList();
+	}
+
+	private List<String> extractModelCodeCandidates(String value) {
+		if (value == null || value.isBlank()) {
+			return List.of();
+		}
+		List<String> candidates = URL_MODEL_TOKEN_PATTERN.matcher(value).results()
+				.map(match -> match.group())
+				.filter(candidate -> candidate != null && !candidate.isBlank())
+				.toList();
+		List<String> adjacentCandidates = Pattern.compile("(?i)\\b[A-Z]{2,8}\\s+\\d{3,5}\\b").matcher(value).results()
+				.map(match -> match.group().trim())
+				.toList();
+		List<String> allCandidates = new ArrayList<>(candidates);
+		allCandidates.addAll(adjacentCandidates);
+		return allCandidates;
 	}
 
 	private boolean isSearchableModelCandidate(Product product, String primaryModel, String candidate) {
@@ -919,7 +1005,7 @@ public class ReviewGenerationPreprocessingService {
 		String normalizedPrimary = normalizeForUrlMatching(primaryModel);
 		int score = 0;
 		if (!normalizedPrimary.isBlank() && normalizedCandidate.equals(normalizedPrimary)) {
-			score += 100;
+			score += 25;
 		}
 		if (product != null && product.getExternalIds() != null && product.getExternalIds().getMpn() != null
 				&& product.getExternalIds().getMpn().stream()
@@ -927,14 +1013,17 @@ public class ReviewGenerationPreprocessingService {
 			score += 80;
 		}
 		if (product != null && product.gtin() != null && normalizeForUrlMatching(product.gtin()).equals(normalizedCandidate)) {
-			score += 70;
+			score += 20;
 		}
 		if (isConciseModelCode(candidate)) {
-			score += 40;
+			score += 60;
+		}
+		if (ProductModelCandidateHelper.isPersistableModelCandidate(candidate)) {
+			score += 30;
 		}
 		if (!normalizedPrimary.isBlank() && normalizedCandidate.contains(normalizedPrimary)
 				&& normalizedCandidate.length() > normalizedPrimary.length()) {
-			score += 25;
+			score += 10;
 		}
 		if (looksLikeStorageVariant(candidate)) {
 			score -= 35;
