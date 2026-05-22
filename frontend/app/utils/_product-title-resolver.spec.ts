@@ -1,8 +1,28 @@
 import { describe, expect, it } from 'vitest'
-import { resolveProductShortName } from './_product-title-resolver'
+import {
+  resolveProductLongName,
+  resolveProductShortName,
+} from './_product-title-resolver'
 import type { ProductDto } from '~~/shared/api-client'
 
 describe('resolveProductTitle', () => {
+  it('prefers the H1 title over category-like long names for page titles', () => {
+    const product: ProductDto = {
+      names: {
+        h1Title: 'TV samsung 32 led gu32t5379cd',
+        longName: 'Téléviseurs et écrans TV',
+      },
+      identity: {
+        brand: 'Samsung',
+        model: 'GU32T5379CD',
+      },
+    }
+
+    const result = resolveProductLongName(product, 'fr-FR')
+
+    expect(result).toBe('TV SAMSUNG 32 led gu32t5379cd')
+  })
+
   it('should use longest offer name when no category is associated', () => {
     const product: ProductDto = {
       base: {

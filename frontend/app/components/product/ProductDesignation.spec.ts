@@ -47,7 +47,7 @@ describe('ProductDesignation', () => {
     expect(wrapper.find('p').exists()).toBe(false)
   })
 
-  it('renders the long name on page variant', () => {
+  it('renders the H1 title on page variant', () => {
     const wrapper = mount(ProductDesignation, {
       props: {
         product: buildProduct({
@@ -64,7 +64,7 @@ describe('ProductDesignation', () => {
       },
     })
 
-    expect(wrapper.find('.title').text()).toBe('Long name')
+    expect(wrapper.find('.title').text()).toBe('H1 title')
     expect(wrapper.find('.description').exists()).toBe(false)
   })
 

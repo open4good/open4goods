@@ -7,6 +7,8 @@
     </header>
 
     <div class="product-price__content">
+      <ProductPriceVerdict :product="computedProduct" />
+
       <!-- Best Offers Section -->
       <div id="offers-list" class="product-price__section">
         <h3 v-if="allOffers.length > 1" class="product-price__subtitle-h3">
@@ -576,6 +578,7 @@ import type {
 } from '~~/shared/api-client'
 import { ensureECharts } from '~/utils/echarts-loader'
 import ProductPriceEmptyCard from '~/components/product/ProductPriceEmptyCard.vue'
+import ProductPriceVerdict from '~/components/product/ProductPriceVerdict.vue'
 
 let echartsRegistered = false
 
@@ -621,7 +624,15 @@ const props = defineProps({
     type: Object as PropType<Record<string, string> | undefined>,
     default: undefined,
   },
+  product: {
+    type: Object as PropType<ProductDto>,
+    default: undefined,
+  },
 })
+
+const computedProduct = computed<ProductDto>(
+  () => props.product || ({ offers: props.offers } as ProductDto)
+)
 
 const { locale, n, t } = useI18n()
 const {

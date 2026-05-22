@@ -71,6 +71,7 @@ describe('ProductHeroPricing', () => {
               occasion: 'No second-hand offers yet!',
             },
             noOffersUnified: 'No offers available right now',
+            responsibleChoice: 'Responsible choice',
             moreOffersBadge:
               '+{count} more offer below | +{count} more offers below',
             alternativeOffers: {
@@ -108,6 +109,7 @@ describe('ProductHeroPricing', () => {
               occasion: 'Aucune offre occasion',
             },
             noOffersUnified: 'Aucune offre disponible',
+            responsibleChoice: 'Meilleur choix responsable',
             moreOffersBadge:
               '+{count} autre offre ci-dessous | +{count} autres offres ci-dessous',
             alternativeOffers: {
@@ -437,6 +439,34 @@ describe('ProductHeroPricing', () => {
     )
 
     expect(wrapper.text()).toContain('1\u202f234,5')
+
+    await wrapper.unmount()
+  })
+
+  it('renders responsible choice badge for second-hand offers', async () => {
+    const wrapper = await createWrapper({
+      offersCount: 1,
+      bestPrice: {
+        price: 649,
+        currency: 'EUR',
+        datasourceName: 'Merchant U',
+        url: 'https://merchant-u.example',
+        favicon: 'https://merchant-u.example/favicon.ico',
+        condition: 'OCCASION',
+        offerName: 'Used offer',
+      },
+      bestOccasionOffer: {
+        price: 649,
+        currency: 'EUR',
+        datasourceName: 'Merchant U',
+        url: 'https://merchant-u.example',
+        favicon: 'https://merchant-u.example/favicon.ico',
+        condition: 'OCCASION',
+        offerName: 'Used offer',
+      },
+    })
+
+    expect(wrapper.text()).toContain('Responsible choice')
 
     await wrapper.unmount()
   })

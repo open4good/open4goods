@@ -76,7 +76,7 @@ export const resolveProductTitle = (
     if (shortName) return finalizeTitle(shortName)
   }
 
-  if (preferLongName) {
+  if (preferLongName && !preferH1Title) {
     const longName = normalizeString(product.names?.longName)
     if (longName) return finalizeTitle(longName)
   }
@@ -101,12 +101,11 @@ export const resolveProductTitle = (
 
   // 2. H1 Title / Long Name equivalent
   if (preferH1Title) {
-    // Prefer longName if available as it captures the "full" title intent
-    const longName = normalizeString(product.names?.longName)
-    if (longName) return finalizeTitle(longName)
-
     const h1Title = normalizeString(product.names?.h1Title)
     if (h1Title) return finalizeTitle(h1Title)
+
+    const longName = normalizeString(product.names?.longName)
+    if (longName) return finalizeTitle(longName)
   }
 
   // 3. Pretty Name / Short Name equivalent (Default fallback for many cases)

@@ -91,6 +91,12 @@
                 :hide-pricing-panel="hideHeroPricingPanel"
               />
             </div>
+            <ProductVigilanceTeaser
+              v-if="product"
+              :product="product"
+              class="mt-4"
+              @click:alerts="scrollToSection(sectionIds.vigilance)"
+            />
           </section>
 
           <section
@@ -144,6 +150,7 @@
             <ProductPriceSection
               v-if="product.offers && shouldRenderSection(sectionIds.price)"
               :offers="product.offers"
+              :product="product"
               :commercial-events="commercialEvents"
               :title-params="priceTitleParams"
             />
@@ -279,6 +286,7 @@ import { buildProductMeta } from '~/utils/seo/product-meta'
 
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
+import ProductVigilanceTeaser from '~/components/product/ProductVigilanceTeaser.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'

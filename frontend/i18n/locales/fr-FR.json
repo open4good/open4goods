@@ -2193,11 +2193,58 @@
     }
   },
   "product": {
+    "verdict": {
+      "title": "Verdict Nudger",
+      "summary": "Notre évaluation en trois dimensions.",
+      "vsMedian": "vs médian",
+      "dimensions": {
+        "impact": "Impact écologique",
+        "price": "Position prix",
+        "reliability": "Fiabilité données"
+      },
+      "levels": {
+        "excellent": "Excellent",
+        "good": "Bon",
+        "fair": "Correct",
+        "poor": "Moyen",
+        "insufficient": "Faible"
+      },
+      "priceLevels": {
+        "good": "Bon prix",
+        "fair": "Prix moyen",
+        "poor": "Prix élevé",
+        "insufficient": "Données insuffisantes"
+      },
+      "reliabilityLevels": {
+        "excellent": "Très fiable",
+        "good": "Fiable",
+        "fair": "Assez fiable",
+        "poor": "Faible fiabilité",
+        "insufficient": "Données insuffisantes"
+      },
+      "percentileLabel": "Classement",
+      "percentileValue": "Mieux que {percentile}%",
+      "percentileTooltip": "Ce produit est mieux classé que {percentile}% des produits de la catégorie {category}.",
+      "itsCategory": "sa catégorie",
+      "priceVerdictTitle": "Verdict prix",
+      "currentPriceLabel": "Prix actuel",
+      "medianPriceLabel": "Médian historique",
+      "priceDescriptions": {
+        "good": "Le prix actuel est inférieur de {percent}% au prix médian historique de ce produit.",
+        "poor": "Le prix actuel est supérieur de {percent}% au prix médian historique de ce produit.",
+        "fair": "Le prix actuel est proche (écart de {percent}%) du prix médian historique de ce produit.",
+        "insufficient": "Nous ne disposons pas de suffisamment de données historiques pour évaluer ce prix."
+      }
+    },
     "offers": {
       "bestPrice": "Meilleur prix"
     },
     "vigilance": {
       "title": "Points de vigilance",
+      "teaser": {
+        "alertCount": "{count} point de vigilance identifié | {count} points de vigilance identifiés",
+        "cta": "Consulter les points de vigilance"
+      },
       "obsolescence": {
         "title": "Obsolescence"
       },
@@ -2545,6 +2592,7 @@
         "technical": "Techniquement"
       },
       "bestPriceTitle": "Meilleur prix",
+      "responsibleChoice": "Meilleur choix responsable",
       "breadcrumbAriaLabel": "Fil d'Ariane du produit",
       "compare": {
         "add": "Comparaison",

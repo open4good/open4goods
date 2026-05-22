@@ -10,6 +10,16 @@ const i18n = createI18n({
     en: {
       'components.impactScore.tooltip': 'Score: {value} / {max}',
       'components.impactScore.svgAriaLabel': 'Score {score} out of 20',
+      'product.verdict.levels.excellent': 'Excellent',
+      'product.verdict.levels.good': 'Good',
+      'product.verdict.levels.fair': 'Fair',
+      'product.verdict.levels.poor': 'Poor',
+      'product.verdict.levels.insufficient': 'Weak',
+      'product.verdict.percentileLabel': 'Ranking',
+      'product.verdict.percentileValue': 'Better than {percentile}%',
+      'product.verdict.percentileTooltip':
+        'Better than {percentile}% of {category}',
+      'product.verdict.itsCategory': 'its category',
     },
   },
   datetimeFormats: {
@@ -31,6 +41,7 @@ describe('ImpactScore', () => {
       'v-icon': true,
       CtaCard: true,
       NuxtLink: true,
+      'v-tooltip': true,
     },
   }
 
@@ -138,5 +149,32 @@ describe('ImpactScore', () => {
     })
 
     expect(wrapper.find('.impact-score-panel__col-right').exists()).toBe(false)
+  })
+
+  it('renders qualitative label based on score value', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 18,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.find('.impact-score-panel__qualitative').exists()).toBe(true)
+    expect(
+      wrapper.find('.impact-score-panel__qualitative').text().toLowerCase()
+    ).toBe('excellent')
+  })
+
+  it('renders percentile ranking when ranking and count are provided', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 15,
+        ranking: 10,
+        count: 100,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).toContain('Better than 90%')
   })
 })

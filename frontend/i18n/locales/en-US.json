@@ -2318,11 +2318,58 @@
     }
   },
   "product": {
+    "verdict": {
+      "title": "Nudger Verdict",
+      "summary": "Our evaluation across three dimensions.",
+      "vsMedian": "vs median",
+      "dimensions": {
+        "impact": "Eco Impact",
+        "price": "Price Position",
+        "reliability": "Data Reliability"
+      },
+      "levels": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor",
+        "insufficient": "Weak"
+      },
+      "priceLevels": {
+        "good": "Good Price",
+        "fair": "Average Price",
+        "poor": "High Price",
+        "insufficient": "Insufficient data"
+      },
+      "reliabilityLevels": {
+        "excellent": "Highly Reliable",
+        "good": "Reliable",
+        "fair": "Fairly Reliable",
+        "poor": "Low Reliability",
+        "insufficient": "Insufficient data"
+      },
+      "percentileLabel": "Ranking",
+      "percentileValue": "Better than {percentile}%",
+      "percentileTooltip": "This product is ranked better than {percentile}% of products in the {category} category.",
+      "itsCategory": "its category",
+      "priceVerdictTitle": "Price Verdict",
+      "currentPriceLabel": "Current price",
+      "medianPriceLabel": "Historical median",
+      "priceDescriptions": {
+        "good": "The current price is {percent}% lower than the historical median price of this product.",
+        "poor": "The current price is {percent}% higher than the historical median price of this product.",
+        "fair": "The current price is close (deviation of {percent}%) to the historical median price of this product.",
+        "insufficient": "We do not have enough historical data to evaluate this price."
+      }
+    },
     "offers": {
       "bestPrice": "Best price"
     },
     "vigilance": {
       "title": "Vigilance Points",
+      "teaser": {
+        "alertCount": "{count} vigilance point identified | {count} vigilance points identified",
+        "cta": "View vigilance points"
+      },
       "subtitle": "These indicators require your attention before purchase.",
       "quality": {
         "title": "Low Data Quality",
@@ -2651,6 +2698,7 @@
         "technical": "Technically"
       },
       "bestPriceTitle": "Best price",
+      "responsibleChoice": "Responsible choice",
       "breadcrumbAriaLabel": "Product breadcrumb",
       "compare": {
         "add": "Add to compare",

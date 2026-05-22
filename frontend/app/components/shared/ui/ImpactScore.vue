@@ -13,6 +13,14 @@
     role="img"
     :aria-label="ariaLabel"
   >
+    <v-tooltip v-if="percentile !== null" activator="parent" location="top">
+      {{
+        t('product.verdict.percentileTooltip', {
+          percentile,
+          category: category || t('product.verdict.itsCategory'),
+        })
+      }}
+    </v-tooltip>
     <!-- Main Content -->
     <div class="impact-score-panel__top">
       <div v-if="!banner && !flat" class="impact-score-panel__col-cta">
@@ -36,6 +44,22 @@
             formattedScoreValue
           }}</span>
           <span class="impact-score-panel__score-out">/ 20</span>
+        </div>
+        <div
+          v-if="
+            qualitativeLabel &&
+            normalizedSize !== 'xxs' &&
+            normalizedSize !== 'xs'
+          "
+          class="impact-score-panel__qualitative text-center font-weight-bold mt-1"
+          style="
+            color: var(--impact-accent);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+          "
+        >
+          {{ qualitativeLabel }}
         </div>
       </div>
 
@@ -66,6 +90,17 @@
               })
             }}
           </span>
+
+          <template v-if="percentile !== null">
+            <span class="impact-score-panel__label"
+              >{{ t('product.verdict.percentileLabel') }} :</span
+            >
+            <span
+              class="impact-score-panel__value font-weight-bold text-success"
+            >
+              {{ t('product.verdict.percentileValue', { percentile }) }}
+            </span>
+          </template>
         </div>
         <v-btn
           v-if="showMethodology"
@@ -138,6 +173,7 @@ import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CtaCard from '~/components/shared/CtaCard.vue'
+import { getImpactLevel } from '~/utils/_product-verdict'
 
 const props = defineProps({
   score: {
@@ -198,6 +234,31 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  ranking: {
+    type: Number,
+    default: null,
+  },
+  count: {
+    type: Number,
+    default: null,
+  },
+})
+
+const qualitativeLevel = computed(() => {
+  if (props.score === null) return 'insufficient'
+  return getImpactLevel(props.score)
+})
+
+const qualitativeLabel = computed(() => {
+  return t(`product.verdict.levels.${qualitativeLevel.value}`)
+})
+
+const percentile = computed(() => {
+  if (props.ranking === null || props.count === null || props.count <= 1) {
+    return null
+  }
+  const pct = Math.round(((props.count - props.ranking) / props.count) * 100)
+  return Math.max(0, Math.min(pct, 100))
 })
 
 const { t, n, d } = useI18n()
