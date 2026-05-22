@@ -9,6 +9,9 @@ referentials:
     - featureId: 944
   eprel:
     - featureName: "diagonalInch"
+  wikidata:
+    - pid: "P13749"
+      name: "display size (diagonal)"
 faIcon: "mdi-arrow-top-right-bottom-left"
 name:
   default: "Screen size"

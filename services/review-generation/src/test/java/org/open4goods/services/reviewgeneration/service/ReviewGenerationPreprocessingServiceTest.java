@@ -381,6 +381,32 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void isProductRelevantResource_RequiresProductIdentifierInPdfUrl()
+    {
+        Product product = product("Samsung", "SM-S921B/DS");
+        product.setId(8806094337471L);
+        product.setAkaModels(Set.of("NV7B4550VAS/U1"));
+
+        Boolean gtinMatch = ReflectionTestUtils.invokeMethod(service, "isProductRelevantResource", product,
+                "https://example.com/manual-8806094337471.pdf", "Privacy policy");
+        Boolean modelMatch = ReflectionTestUtils.invokeMethod(service, "isProductRelevantResource", product,
+                "https://images.samsung.com/notice-sm-s921b-ds.pdf", "Notice");
+        Boolean akaModelMatch = ReflectionTestUtils.invokeMethod(service, "isProductRelevantResource", product,
+                "https://images.samsung.com/common-energylabel-nv7b4550vas-u1-productfiche.pdf", "A+");
+        Boolean labelOnlyMatch = ReflectionTestUtils.invokeMethod(service, "isProductRelevantResource", product,
+                "https://static-content.optimus.device.bolttech.eu/pdf/Samsung/SamsungPrivacyNotice/FR_PPOL.pdf",
+                "Samsung SM-S921B/DS notice");
+        Boolean genericNameOnlyMatch = ReflectionTestUtils.invokeMethod(service, "isProductRelevantResource", product,
+                "https://images.samsung.com/common-energylabel-productfiche.pdf", "Classe energetique");
+
+        assertThat(gtinMatch).isTrue();
+        assertThat(modelMatch).isTrue();
+        assertThat(akaModelMatch).isTrue();
+        assertThat(labelOnlyMatch).isFalse();
+        assertThat(genericNameOnlyMatch).isFalse();
+    }
+
+    @Test
     void preparePromptVariables_SearchesBroadOfficialCandidatesBeforeGenericQueries() throws Exception {
         properties.setMaxSearch(4);
         properties.setPreferredDomains(List.of("darty.com"));

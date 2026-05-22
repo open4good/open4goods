@@ -19,6 +19,12 @@ public final class ProductModelCandidateHelper {
 
     private static final Pattern DIACRITICS = Pattern.compile("\\p{M}+");
     private static final Pattern NON_ALNUM = Pattern.compile("[^\\p{Alnum}]+");
+    private static final int MAX_PERSISTED_MODEL_LENGTH = 48;
+    private static final int MAX_PERSISTED_MODEL_SPACES = 4;
+    private static final Pattern STORAGE_VARIANT_PATTERN = Pattern.compile(
+            "(?i).*\\b\\d+\\s*(?:GO|GB|TO|TB)(?:\\s*/\\s*\\d+\\s*(?:GO|GB|TO|TB))*\\b.*");
+    private static final Pattern CATEGORY_TITLE_PATTERN = Pattern.compile(
+            "(?i).*(?:SMARTPHONE|TELEVISEUR|T[ÉE]L[ÉE]VISEUR|TV|REFRIGERATEUR|R[ÉE]FRIG[ÉE]RATEUR|CONG[ÉE]LATEUR|LAVE\\s*-?\\s*LINGE|LAVE\\s*-?\\s*VAISSELLE|CLIMATISEUR|FOUR|CUISINI[ÈE]RE)\\b.*");
     private static final Pattern DEGENERATE_MODEL_PATTERN = Pattern.compile(
             "^\\d+$|^\\d+(?:[xX]\\d+){1,3}(?:[a-zA-Z]{0,3})?$|^[lL]?\\d+[xX][pP]?\\d+(?:[xX][hH]?\\d+)?(?:[a-zA-Z]{0,3})?$");
 
@@ -79,6 +85,81 @@ public final class ProductModelCandidateHelper {
                 .filter(candidate -> !shouldExcludeCandidate(candidate, maxSpaces, minAlnum))
                 .distinct()
                 .sorted(Comparator.comparingInt(String::length).reversed())
+                .toList();
+    }
+
+    /**
+     * Sanitises a model candidate for persistent storage as a canonical model or
+     * alternate model.
+     *
+     * @param candidate raw model candidate
+     * @return normalised storage form, or {@code null} when the candidate is too
+     *         noisy or too weak
+     */
+    public static String cleanForStorage(String candidate) {
+        if (candidate == null || candidate.isBlank()) {
+            return null;
+        }
+        String cleaned = candidate.trim()
+                .replace('\u00a0', ' ')
+                .replaceAll("\\s+", " ")
+                .replaceAll("^[\\p{Punct}\\s]+|[\\p{Punct}\\s]+$", "");
+        if (cleaned.isBlank()) {
+            return null;
+        }
+        cleaned = cleaned.toUpperCase();
+        return isPersistableModelCandidate(cleaned) ? cleaned : null;
+    }
+
+    /**
+     * Returns whether a candidate is precise enough to persist on a product.
+     *
+     * @param candidate normalised or raw candidate
+     * @return {@code true} when the candidate looks like a manufacturer model code
+     */
+    public static boolean isPersistableModelCandidate(String candidate) {
+        if (candidate == null || candidate.isBlank()) {
+            return false;
+        }
+        String trimmed = candidate.trim();
+        if (trimmed.length() > MAX_PERSISTED_MODEL_LENGTH) {
+            return false;
+        }
+        if (trimmed.chars().filter(Character::isWhitespace).count() > MAX_PERSISTED_MODEL_SPACES) {
+            return false;
+        }
+        long alnum = trimmed.chars().filter(Character::isLetterOrDigit).count();
+        if (alnum < 4) {
+            return false;
+        }
+        if (DEGENERATE_MODEL_PATTERN.matcher(trimmed).matches()
+                || STORAGE_VARIANT_PATTERN.matcher(trimmed).matches()
+                || CATEGORY_TITLE_PATTERN.matcher(trimmed).matches()) {
+            return false;
+        }
+        String compact = compactModel(trimmed);
+        if (compact == null || compact.length() < 4) {
+            return false;
+        }
+        boolean hasLetter = compact.chars().anyMatch(Character::isLetter);
+        boolean hasDigit = compact.chars().anyMatch(Character::isDigit);
+        return hasLetter && hasDigit;
+    }
+
+    /**
+     * Cleans and deduplicates model candidates for storage.
+     *
+     * @param models raw candidates
+     * @return ordered clean candidates
+     */
+    public static List<String> cleanForStorage(Collection<String> models) {
+        if (models == null) {
+            return List.of();
+        }
+        return models.stream()
+                .map(ProductModelCandidateHelper::cleanForStorage)
+                .filter(Objects::nonNull)
+                .distinct()
                 .toList();
     }
 

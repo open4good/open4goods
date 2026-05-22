@@ -1310,39 +1310,22 @@ public class ReviewGenerationPreprocessingService {
 		if (product == null || url == null || url.isBlank()) {
 			return false;
 		}
-		String compactHaystack = normalizeForUrlMatching(url + " " + (label == null ? "" : label));
-		if (isGenericOfficialResource(compactHaystack)) {
-			return false;
-		}
-		String haystack = normalizeForTextMatching(url + " " + (label == null ? "" : label));
+		String haystack = normalizeForUrlMatching(url);
 		if (haystack.isBlank()) {
 			return false;
 		}
 		String gtin = product.gtin();
-		if (gtin != null && gtin.matches("\\d{8,14}") && haystack.contains(gtin)) {
+		if (gtin != null && gtin.matches("\\d{8,14}") && haystack.contains(normalizeForUrlMatching(gtin))) {
 			return true;
 		}
-		String model = normalizeForTextMatching(product.model());
+		String model = normalizeForUrlMatching(product.model());
 		if (!model.isBlank() && haystack.contains(model)) {
 			return true;
 		}
-		if (product.getAkaModels() != null && product.getAkaModels().stream()
+		return product.getAkaModels() != null && product.getAkaModels().stream()
 				.filter(candidate -> candidate != null && !candidate.isBlank())
-				.map(this::normalizeForTextMatching)
-				.anyMatch(candidate -> candidate.length() >= 4 && haystack.contains(candidate))) {
-			return true;
-		}
-		return List.of("energylabel", "productfiche", "ficheproduit", "ficheproduct", "manual", "notice",
-				"userguide").stream().anyMatch(compactHaystack::contains);
-	}
-
-	private boolean isGenericOfficialResource(String compactHaystack) {
-		if (compactHaystack == null || compactHaystack.isBlank()) {
-			return false;
-		}
-		return List.of("digitalservicesact", "termsandconditions", "conditiongenerale", "conditionsgenerales",
-				"tradein", "inbytet", "brightstar", "installationservice", "deliveryservice", "privacypolicy",
-				"cookiepolicy").stream().anyMatch(compactHaystack::contains);
+				.map(this::normalizeForUrlMatching)
+				.anyMatch(candidate -> candidate.length() >= 4 && haystack.contains(candidate));
 	}
 
 	private ResourceType toProductResourceType(org.open4goods.services.urlfetching.dto.ResourceType resourceType) {

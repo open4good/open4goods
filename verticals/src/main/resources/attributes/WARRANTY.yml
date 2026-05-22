@@ -7,6 +7,9 @@ impactBetterIs: "GREATER"
 referentials:
   eprel:
     - featureName: "minGuaranteedGuarantee"
+  wikidata:
+    - pid: "P13635"
+      name: "warranty period"
 faIcon: "mdi-shield-check"
 name:
   default: "Warranty duration"
